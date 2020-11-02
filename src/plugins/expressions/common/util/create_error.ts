@@ -19,7 +19,15 @@
 
 import { ExpressionValueError } from '../../common';
 
-type ErrorLike = Partial<Pick<Error, 'name' | 'message' | 'stack'>>;
+export type SerializedError = {
+  name: string;
+  message: string;
+  stack?: string;
+};
+
+export type ErrorLike = SerializedError & {
+  original?: SerializedError;
+};
 
 export const createError = (err: string | ErrorLike): ExpressionValueError => ({
   type: 'error',
@@ -32,5 +40,11 @@ export const createError = (err: string | ErrorLike): ExpressionValueError => ({
         : undefined,
     message: typeof err === 'string' ? err : String(err.message),
     name: typeof err === 'object' ? err.name || 'Error' : 'Error',
+    original:
+      err instanceof Error
+        ? err
+        : typeof err === 'object' && 'original' in err && err.original instanceof Error
+        ? err.original
+        : undefined,
   },
 });

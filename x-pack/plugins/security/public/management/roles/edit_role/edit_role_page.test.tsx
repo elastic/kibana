@@ -30,8 +30,8 @@ const buildFeatures = () => {
     new KibanaFeature({
       id: 'feature1',
       name: 'Feature 1',
-      icon: 'addDataApp',
       app: ['feature1App'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['feature1App'],
@@ -54,8 +54,8 @@ const buildFeatures = () => {
     new KibanaFeature({
       id: 'feature2',
       name: 'Feature 2',
-      icon: 'addDataApp',
       app: ['feature2App'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['feature2App'],

@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Server } from 'hapi';
-import HapiStaticFiles from 'inert';
+import { Server } from '@hapi/hapi';
+import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
+import uuid from 'uuid';
 
 import { Logger, LoggerFactory } from '../logging';
 import { HttpConfig } from './http_config';
@@ -270,7 +271,7 @@ export class HttpServer {
     }
 
     this.registerOnPreRouting((request, response, toolkit) => {
-      const oldUrl = request.url.href!;
+      const oldUrl = request.url.pathname + request.url.search;
       const newURL = basePathService.remove(oldUrl);
       const shouldRedirect = newURL !== oldUrl;
       if (shouldRedirect) {
@@ -315,6 +316,7 @@ export class HttpServer {
       request.app = {
         ...(request.app ?? {}),
         requestId: getRequestId(request, config.requestId),
+        requestUuid: uuid.v4(),
       } as KibanaRequestState;
       return responseToolkit.continue;
     });

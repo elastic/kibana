@@ -18,11 +18,7 @@
  */
 
 import { format as formatUrl, parse as parseUrl, UrlObject } from 'url';
-
-// duplicate type from 'query-string' to avoid adding the d.ts file to all packages depending on kbn-std
-export interface ParsedQuery<T = string> {
-  [key: string]: T | T[] | null | undefined;
-}
+import type { ParsedQuery } from 'query-string';
 
 /**
  * We define our own typings because the current version of @types/node
@@ -128,4 +124,15 @@ export function isRelativeUrl(candidatePath: string) {
     return false;
   }
   return true;
+}
+
+/**
+ * Returns the origin (protocol + host + port) from given `url` if `url` is a valid absolute url, or null otherwise
+ */
+export function getUrlOrigin(url: string): string | null {
+  const obj = parseUrl(url);
+  if (!obj.protocol && !obj.hostname) {
+    return null;
+  }
+  return `${obj.protocol}//${obj.hostname}${obj.port ? `:${obj.port}` : ''}`;
 }

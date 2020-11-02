@@ -11,84 +11,69 @@ import {
   EuiGlobalToastListToast as Toast,
 } from '@elastic/eui';
 import { getOr } from 'lodash/fp';
-import React from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import React, { useCallback, useMemo } from 'react';
+import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 
-import { State } from '../../../../common/store';
-import { setTimelineRangeDatePicker as dispatchSetTimelineRangeDatePicker } from '../../../../common/store/inputs/actions';
+import { setTimelineRangeDatePicker } from '../../../../common/store/inputs/actions';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { AutoSavedWarningMsg } from '../../../store/timeline/types';
 import { useStateToaster } from '../../../../common/components/toasters';
 import * as i18n from './translations';
 
-const AutoSaveWarningMsgComponent = React.memo<PropsFromRedux>(
-  ({
-    newTimelineModel,
-    setTimelineRangeDatePicker,
-    timelineId,
-    updateAutoSaveMsg,
-    updateTimeline,
-  }) => {
-    const dispatchToaster = useStateToaster()[1];
-    if (timelineId != null && newTimelineModel != null) {
-      const toast: Toast = {
-        id: 'AutoSaveWarningMsg',
-        title: i18n.TITLE,
-        color: 'warning',
-        iconType: 'alert',
-        toastLifeTimeMs: 10000,
-        text: (
-          <>
-            <p>{i18n.DESCRIPTION}</p>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  onClick={() => {
-                    updateTimeline({ id: timelineId, timeline: newTimelineModel });
-                    updateAutoSaveMsg({ timelineId: null, newTimelineModel: null });
-                    setTimelineRangeDatePicker({
-                      from: getOr(0, 'dateRange.start', newTimelineModel),
-                      to: getOr(0, 'dateRange.end', newTimelineModel),
-                    });
-                  }}
-                >
-                  {i18n.REFRESH_TIMELINE}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        ),
-      };
-      dispatchToaster({
-        type: 'addToaster',
-        toast,
-      });
-    }
+const AutoSaveWarningMsgComponent = () => {
+  const dispatch = useDispatch();
+  const dispatchToaster = useStateToaster()[1];
+  const { timelineId, newTimelineModel } = useSelector(
+    timelineSelectors.autoSaveMsgSelector,
+    shallowEqual
+  );
 
-    return null;
+  const handleClick = useCallback(() => {
+    if (timelineId != null && newTimelineModel != null) {
+      dispatch(timelineActions.updateTimeline({ id: timelineId, timeline: newTimelineModel }));
+      dispatch(timelineActions.updateAutoSaveMsg({ timelineId: null, newTimelineModel: null }));
+      dispatch(
+        setTimelineRangeDatePicker({
+          from: getOr(0, 'dateRange.start', newTimelineModel),
+          to: getOr(0, 'dateRange.end', newTimelineModel),
+        })
+      );
+    }
+  }, [dispatch, newTimelineModel, timelineId]);
+
+  const TextComponent = useMemo(
+    () => (
+      <>
+        <p>{i18n.DESCRIPTION}</p>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton size="s" onClick={handleClick}>
+              {i18n.REFRESH_TIMELINE}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </>
+    ),
+    [handleClick]
+  );
+
+  if (timelineId != null && newTimelineModel != null) {
+    const toast: Toast = {
+      id: 'AutoSaveWarningMsg',
+      title: i18n.TITLE,
+      color: 'warning',
+      iconType: 'alert',
+      toastLifeTimeMs: 10000,
+      text: TextComponent,
+    };
+    dispatchToaster({
+      type: 'addToaster',
+      toast,
+    });
   }
-);
+
+  return null;
+};
 
 AutoSaveWarningMsgComponent.displayName = 'AutoSaveWarningMsgComponent';
 
-const mapStateToProps = (state: State) => {
-  const autoSaveMessage: AutoSavedWarningMsg = timelineSelectors.autoSaveMsgSelector(state);
-
-  return {
-    timelineId: autoSaveMessage.timelineId,
-    newTimelineModel: autoSaveMessage.newTimelineModel,
-  };
-};
-
-const mapDispatchToProps = {
-  setTimelineRangeDatePicker: dispatchSetTimelineRangeDatePicker,
-  updateAutoSaveMsg: timelineActions.updateAutoSaveMsg,
-  updateTimeline: timelineActions.updateTimeline,
-};
-
-const connector = connect(mapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const AutoSaveWarningMsg = connector(AutoSaveWarningMsgComponent);
+export const AutoSaveWarningMsg = React.memo(AutoSaveWarningMsgComponent);

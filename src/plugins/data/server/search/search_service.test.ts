@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { CoreSetup, CoreStart } from '../../../../core/server';
 import { coreMock } from '../../../../core/server/mocks';
 
 import { DataPluginStart } from '../plugin';
 import { createFieldFormatsStartMock } from '../field_formats/mocks';
+import { createIndexPatternsStartMock } from '../index_patterns/mocks';
 
 import { SearchService, SearchServiceSetupDependencies } from './search_service';
 
@@ -54,6 +55,7 @@ describe('Search service', () => {
     it('exposes proper contract', async () => {
       const start = plugin.start(mockCoreStart, {
         fieldFormats: createFieldFormatsStartMock(),
+        indexPatterns: createIndexPatternsStartMock(),
       });
       expect(start).toHaveProperty('aggs');
       expect(start).toHaveProperty('getSearchStrategy');

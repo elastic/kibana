@@ -6,7 +6,7 @@
 
 import { Index as IndexInterface } from '../../../index_management/common/types';
 
-export type PhaseWithAllocation = 'warm' | 'cold' | 'frozen';
+export type PhaseWithAllocation = 'warm' | 'cold';
 
 export interface SerializedPolicy {
   name: string;
@@ -17,7 +17,6 @@ export interface Phases {
   hot?: SerializedHotPhase;
   warm?: SerializedWarmPhase;
   cold?: SerializedColdPhase;
-  frozen?: SerializedFrozenPhase;
   delete?: SerializedDeletePhase;
 }
 
@@ -36,6 +35,19 @@ export interface SerializedPhase {
   };
 }
 
+export interface MigrateAction {
+  /**
+   * If enabled is ever set it will probably only be set to `false` because the default value
+   * for this is `true`. Rather leave unspecified for true when serialising.
+   */
+  enabled: boolean;
+}
+
+export interface SerializedActionWithAllocation {
+  allocate?: AllocateAction;
+  migrate?: MigrateAction;
+}
+
 export interface SerializedHotPhase extends SerializedPhase {
   actions: {
     rollover?: {
@@ -43,9 +55,7 @@ export interface SerializedHotPhase extends SerializedPhase {
       max_age?: string;
       max_docs?: number;
     };
-    forcemerge?: {
-      max_num_segments: number;
-    };
+    forcemerge?: ForcemergeAction;
     set_priority?: {
       priority: number | null;
     };
@@ -58,13 +68,11 @@ export interface SerializedWarmPhase extends SerializedPhase {
     shrink?: {
       number_of_shards: number;
     };
-    forcemerge?: {
-      max_num_segments: number;
-    };
+    forcemerge?: ForcemergeAction;
     set_priority?: {
       priority: number | null;
     };
-    migrate?: { enabled: boolean };
+    migrate?: MigrateAction;
   };
 }
 
@@ -75,18 +83,7 @@ export interface SerializedColdPhase extends SerializedPhase {
     set_priority?: {
       priority: number | null;
     };
-    migrate?: { enabled: boolean };
-  };
-}
-
-export interface SerializedFrozenPhase extends SerializedPhase {
-  actions: {
-    freeze?: {};
-    allocate?: AllocateAction;
-    set_priority?: {
-      priority: number | null;
-    };
-    migrate?: { enabled: boolean };
+    migrate?: MigrateAction;
   };
 }
 
@@ -103,27 +100,22 @@ export interface SerializedDeletePhase extends SerializedPhase {
 
 export interface AllocateAction {
   number_of_replicas?: number;
-  include: {};
-  exclude: {};
+  include?: {};
+  exclude?: {};
   require?: {
     [attribute: string]: string;
   };
-  migrate?: {
-    /**
-     * If enabled is ever set it will only be set to `false` because the default value
-     * for this is `true`. Rather leave unspecified for true.
-     */
-    enabled: false;
-  };
 }
 
-export interface Policy {
+export interface ForcemergeAction {
+  max_num_segments: number;
+  // only accepted value for index_codec
+  index_codec?: 'best_compression';
+}
+
+export interface LegacyPolicy {
   name: string;
   phases: {
-    hot: HotPhase;
-    warm: WarmPhase;
-    cold: ColdPhase;
-    frozen: FrozenPhase;
     delete: DeletePhase;
   };
 }
@@ -163,45 +155,7 @@ export interface PhaseWithIndexPriority {
 export interface PhaseWithForcemergeAction {
   forceMergeEnabled: boolean;
   selectedForceMergeSegments: string;
-}
-
-export interface HotPhase
-  extends CommonPhaseSettings,
-    PhaseWithIndexPriority,
-    PhaseWithForcemergeAction {
-  rolloverEnabled: boolean;
-  selectedMaxSizeStored: string;
-  selectedMaxSizeStoredUnits: string;
-  selectedMaxDocuments: string;
-  selectedMaxAge: string;
-  selectedMaxAgeUnits: string;
-}
-
-export interface WarmPhase
-  extends CommonPhaseSettings,
-    PhaseWithMinAge,
-    PhaseWithAllocationAction,
-    PhaseWithIndexPriority,
-    PhaseWithForcemergeAction {
-  warmPhaseOnRollover: boolean;
-  shrinkEnabled: boolean;
-  selectedPrimaryShardCount: string;
-}
-
-export interface ColdPhase
-  extends CommonPhaseSettings,
-    PhaseWithMinAge,
-    PhaseWithAllocationAction,
-    PhaseWithIndexPriority {
-  freezeEnabled: boolean;
-}
-
-export interface FrozenPhase
-  extends CommonPhaseSettings,
-    PhaseWithMinAge,
-    PhaseWithAllocationAction,
-    PhaseWithIndexPriority {
-  freezeEnabled: boolean;
+  bestCompressionEnabled: boolean;
 }
 
 export interface DeletePhase extends CommonPhaseSettings, PhaseWithMinAge {

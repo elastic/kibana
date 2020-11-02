@@ -109,20 +109,19 @@ export class ExceptionListClient {
    * being there and existing before the item is inserted into the agnostic endpoint list.
    */
   public createEndpointListItem = async ({
-    _tags,
     comments,
     description,
     entries,
     itemId,
     meta,
     name,
+    osTypes,
     tags,
     type,
   }: CreateEndpointListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
     await this.createEndpointList();
     return createExceptionListItem({
-      _tags,
       comments,
       description,
       entries,
@@ -131,6 +130,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType: 'agnostic',
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -145,7 +145,6 @@ export class ExceptionListClient {
    * return of null but at least the list exists again.
    */
   public updateEndpointListItem = async ({
-    _tags,
     _version,
     comments,
     description,
@@ -154,13 +153,13 @@ export class ExceptionListClient {
     itemId,
     meta,
     name,
+    osTypes,
     tags,
     type,
   }: UpdateEndpointListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
     await this.createEndpointList();
     return updateExceptionListItem({
-      _tags,
       _version,
       comments,
       description,
@@ -170,6 +169,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType: 'agnostic',
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -189,7 +189,6 @@ export class ExceptionListClient {
   };
 
   public createExceptionList = async ({
-    _tags,
     description,
     immutable,
     listId,
@@ -202,7 +201,6 @@ export class ExceptionListClient {
   }: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
     const { savedObjectsClient, user } = this;
     return createExceptionList({
-      _tags,
       description,
       immutable,
       listId,
@@ -218,7 +216,6 @@ export class ExceptionListClient {
   };
 
   public updateExceptionList = async ({
-    _tags,
     _version,
     id,
     description,
@@ -226,13 +223,13 @@ export class ExceptionListClient {
     meta,
     name,
     namespaceType,
+    osTypes,
     tags,
     type,
     version,
   }: UpdateExceptionListOptions): Promise<ExceptionListSchema | null> => {
     const { savedObjectsClient, user } = this;
     return updateExceptionList({
-      _tags,
       _version,
       description,
       id,
@@ -240,6 +237,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -263,7 +261,6 @@ export class ExceptionListClient {
   };
 
   public createExceptionListItem = async ({
-    _tags,
     comments,
     description,
     entries,
@@ -272,12 +269,12 @@ export class ExceptionListClient {
     meta,
     name,
     namespaceType,
+    osTypes,
     tags,
     type,
   }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
     const { savedObjectsClient, user } = this;
     return createExceptionListItem({
-      _tags,
       comments,
       description,
       entries,
@@ -286,6 +283,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,
@@ -294,7 +292,6 @@ export class ExceptionListClient {
   };
 
   public updateExceptionListItem = async ({
-    _tags,
     _version,
     comments,
     description,
@@ -304,12 +301,12 @@ export class ExceptionListClient {
     meta,
     name,
     namespaceType,
+    osTypes,
     tags,
     type,
   }: UpdateExceptionListItemOptions): Promise<ExceptionListItemSchema | null> => {
     const { savedObjectsClient, user } = this;
     return updateExceptionListItem({
-      _tags,
       _version,
       comments,
       description,
@@ -319,6 +316,7 @@ export class ExceptionListClient {
       meta,
       name,
       namespaceType,
+      osTypes,
       savedObjectsClient,
       tags,
       type,

@@ -75,7 +75,11 @@ describe('transformServiceMapResponses', () => {
       (element) => 'source' in element.data && 'target' in element.data
     );
 
-    expect(connection?.data.target).toBe('opbeans-node');
+    expect(connection).toHaveProperty('data');
+    expect(connection?.data).toHaveProperty('target');
+    if (connection?.data && 'target' in connection.data) {
+      expect(connection.data.target).toBe('opbeans-node');
+    }
 
     expect(
       elements.find((element) => element.data.id === '>opbeans-node')

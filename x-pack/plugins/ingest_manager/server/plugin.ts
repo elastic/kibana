@@ -14,8 +14,11 @@ import {
   SavedObjectsServiceStart,
   HttpServiceSetup,
   SavedObjectsClientContract,
+  RequestHandlerContext,
+  KibanaRequest,
 } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { LicensingPluginSetup, ILicense } from '../../licensing/server';
 import {
   EncryptedSavedObjectsPluginStart,
@@ -111,7 +114,11 @@ const allSavedObjectTypes = [
  */
 export type ExternalCallback = [
   'packagePolicyCreate',
-  (newPackagePolicy: NewPackagePolicy) => Promise<NewPackagePolicy>
+  (
+    newPackagePolicy: NewPackagePolicy,
+    context: RequestHandlerContext,
+    request: KibanaRequest
+  ) => Promise<NewPackagePolicy>
 ];
 
 export type ExternalCallbacksStorage = Map<ExternalCallback[0], Set<ExternalCallback[1]>>;
@@ -171,7 +178,7 @@ export class IngestManagerPlugin
     this.encryptedSavedObjectsSetup = deps.encryptedSavedObjects;
     this.cloud = deps.cloud;
 
-    registerSavedObjects(core.savedObjects);
+    registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
@@ -180,8 +187,7 @@ export class IngestManagerPlugin
       deps.features.registerKibanaFeature({
         id: PLUGIN_ID,
         name: 'Ingest Manager',
-        icon: 'savedObjectsApp',
-        navLinkId: PLUGIN_ID,
+        category: DEFAULT_APP_CATEGORIES.management,
         app: [PLUGIN_ID, 'kibana'],
         catalogue: ['ingestManager'],
         privileges: {
@@ -229,7 +235,7 @@ export class IngestManagerPlugin
       registerEPMRoutes(router);
 
       // Conditional config routes
-      if (config.fleet.enabled) {
+      if (config.agents.enabled) {
         const isESOUsingEphemeralEncryptionKey =
           deps.encryptedSavedObjects.usingEphemeralEncryptionKey;
         if (isESOUsingEphemeralEncryptionKey) {

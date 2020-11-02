@@ -4,18 +4,22 @@
   ],
   "description": "Windows contains accessibility features that may be launched with a key combination before a user has logged in. An adversary can modify the way these programs are launched to get a command prompt or backdoor without logging in to the system.",
   "index": [
-    "winlogbeat-*"
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Potential Modification of Accessibility Binaries",
-  "query": "event.code:1 and process.parent.name:winlogon.exe and process.name:(atbroker.exe or displayswitch.exe or magnify.exe or narrator.exe or osk.exe or sethc.exe or utilman.exe)",
+  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:winlogon.exe and not process.name:(atbroker.exe or displayswitch.exe or magnify.exe or narrator.exe or osk.exe or sethc.exe or utilman.exe)",
   "risk_score": 21,
   "rule_id": "7405ddf1-6c8e-41ce-818f-48bea6bcaed8",
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Persistence"
   ],
   "threat": [
     {
@@ -50,5 +54,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

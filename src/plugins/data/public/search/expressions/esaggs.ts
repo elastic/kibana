@@ -19,8 +19,7 @@
 
 import { get, hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { KibanaDatatable, KibanaDatatableColumn } from 'src/plugins/expressions/public';
-import { calculateObjectHash } from '../../../../../plugins/kibana_utils/public';
+import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
 import { PersistedState } from '../../../../../plugins/visualizations/public';
 import { Adapters } from '../../../../../plugins/inspector/public';
 
@@ -38,6 +37,7 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   IAggConfigs,
+  ISearchSource,
   tabifyAggResponse,
 } from '../../../common/search';
 
@@ -48,9 +48,7 @@ import {
   getQueryService,
   getSearchService,
 } from '../../services';
-import { ISearchSource } from '../search_source';
 import { buildTabularInspectorData } from './build_tabular_inspector_data';
-import { serializeAggConfig } from './utils';
 
 export interface RequestHandlerParams {
   searchSource: ISearchSource;
@@ -60,7 +58,6 @@ export interface RequestHandlerParams {
   indexPattern?: IIndexPattern;
   query?: Query;
   filters?: Filter[];
-  forceFetch: boolean;
   filterManager: FilterManager;
   uiState?: PersistedState;
   partialRows?: boolean;
@@ -68,6 +65,7 @@ export interface RequestHandlerParams {
   metricsAtAllLevels?: boolean;
   visParams?: any;
   abortSignal?: AbortSignal;
+  searchSessionId?: string;
 }
 
 const name = 'esaggs';
@@ -80,12 +78,12 @@ const handleCourierRequest = async ({
   indexPattern,
   query,
   filters,
-  forceFetch,
   partialRows,
   metricsAtAllLevels,
   inspectorAdapters,
   filterManager,
   abortSignal,
+  searchSessionId,
 }: RequestHandlerParams) => {
   // Create a new search source that inherits the original search source
   // but has the appropriate timeRange applied via a filter.
@@ -137,46 +135,39 @@ const handleCourierRequest = async ({
   requestSearchSource.setField('filter', filters);
   requestSearchSource.setField('query', query);
 
-  const reqBody = await requestSearchSource.getSearchRequestBody();
-
-  const queryHash = calculateObjectHash(reqBody);
-  // We only need to reexecute the query, if forceFetch was true or the hash of the request body has changed
-  // since the last request
-  const shouldQuery = forceFetch || (searchSource as any).lastQuery !== queryHash;
-
-  if (shouldQuery) {
-    inspectorAdapters.requests.reset();
-    const request = inspectorAdapters.requests.start(
-      i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-        defaultMessage: 'Data',
+  inspectorAdapters.requests.reset();
+  const request = inspectorAdapters.requests.start(
+    i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+      defaultMessage: 'Data',
+    }),
+    {
+      description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+        defaultMessage:
+          'This request queries Elasticsearch to fetch the data for the visualization.',
       }),
-      {
-        description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
-          defaultMessage:
-            'This request queries Elasticsearch to fetch the data for the visualization.',
-        }),
-      }
-    );
-    request.stats(getRequestInspectorStats(requestSearchSource));
-
-    try {
-      const response = await requestSearchSource.fetch({ abortSignal });
-
-      (searchSource as any).lastQuery = queryHash;
-
-      request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
-
-      (searchSource as any).rawResponse = response;
-    } catch (e) {
-      // Log any error during request to the inspector
-      request.error({ json: e });
-      throw e;
-    } finally {
-      // Add the request body no matter if things went fine or not
-      requestSearchSource.getSearchRequestBody().then((req: unknown) => {
-        request.json(req);
-      });
+      searchSessionId,
     }
+  );
+  request.stats(getRequestInspectorStats(requestSearchSource));
+
+  try {
+    const response = await requestSearchSource.fetch({
+      abortSignal,
+      sessionId: searchSessionId,
+    });
+
+    request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
+
+    (searchSource as any).rawResponse = response;
+  } catch (e) {
+    // Log any error during request to the inspector
+    request.error({ json: e });
+    throw e;
+  } finally {
+    // Add the request body no matter if things went fine or not
+    requestSearchSource.getSearchRequestBody().then((req: unknown) => {
+      request.json(req);
+    });
   }
 
   // Note that rawResponse is not deeply cloned here, so downstream applications using courier
@@ -207,19 +198,9 @@ const handleCourierRequest = async ({
       : undefined,
   };
 
-  const tabifyCacheHash = calculateObjectHash({ tabifyAggs: aggs, ...tabifyParams });
-  // We only need to reexecute tabify, if either we did a new request or some input params to tabify changed
-  const shouldCalculateNewTabify =
-    shouldQuery || (searchSource as any).lastTabifyHash !== tabifyCacheHash;
+  const response = tabifyAggResponse(aggs, (searchSource as any).finalResponse, tabifyParams);
 
-  if (shouldCalculateNewTabify) {
-    (searchSource as any).lastTabifyHash = tabifyCacheHash;
-    (searchSource as any).tabifiedResponse = tabifyAggResponse(
-      aggs,
-      (searchSource as any).finalResponse,
-      tabifyParams
-    );
-  }
+  (searchSource as any).tabifiedResponse = response;
 
   inspectorAdapters.data.setTabularLoader(
     () =>
@@ -230,12 +211,12 @@ const handleCourierRequest = async ({
     { returnsFormattedValues: true }
   );
 
-  return (searchSource as any).tabifiedResponse;
+  return response;
 };
 
 export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
   name,
-  type: 'kibana_datatable',
+  type: 'datatable',
   inputTypes: ['kibana_context', 'null'],
   help: i18n.translate('data.functions.esaggs.help', {
     defaultMessage: 'Run AggConfig aggregation',
@@ -271,7 +252,7 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       multi: true,
     },
   },
-  async fn(input, args, { inspectorAdapters, abortSignal }) {
+  async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
     const indexPatterns = getIndexPatterns();
     const { filterManager } = getQueryService();
     const searchService = getSearchService();
@@ -294,26 +275,40 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       query: get(input, 'query', undefined) as any,
       filters: get(input, 'filters', undefined),
       timeFields: args.timeFields,
-      forceFetch: true,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
       inspectorAdapters: inspectorAdapters as Adapters,
       filterManager,
       abortSignal: (abortSignal as unknown) as AbortSignal,
+      searchSessionId: getSearchSessionId(),
     });
 
-    const table: KibanaDatatable = {
-      type: 'kibana_datatable',
+    const table: Datatable = {
+      type: 'datatable',
       rows: response.rows,
-      columns: response.columns.map((column: any) => {
-        const cleanedColumn: KibanaDatatableColumn = {
+      columns: response.columns.map((column) => {
+        const cleanedColumn: DatatableColumn = {
           id: column.id,
           name: column.name,
-          meta: serializeAggConfig(column.aggConfig),
+          meta: {
+            type: column.aggConfig.params.field?.type || 'number',
+            field: column.aggConfig.params.field?.name,
+            index: indexPattern.title,
+            params: column.aggConfig.toSerializedFieldFormat(),
+            source: 'esaggs',
+            sourceParams: {
+              indexPatternId: indexPattern.id,
+              appliedTimeRange:
+                column.aggConfig.params.field?.name &&
+                input?.timeRange &&
+                args.timeFields &&
+                args.timeFields.includes(column.aggConfig.params.field?.name)
+                  ? { from: input.timeRange.from, to: input.timeRange.to }
+                  : undefined,
+              ...column.aggConfig.serialize(),
+            },
+          },
         };
-        if (args.includeFormatHints) {
-          cleanedColumn.formatHint = column.aggConfig.toSerializedFieldFormat();
-        }
         return cleanedColumn;
       }),
     };

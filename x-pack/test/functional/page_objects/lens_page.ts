@@ -13,7 +13,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const retry = getService('retry');
   const find = getService('find');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects(['header', 'header', 'timePicker']);
+  const PageObjects = getPageObjects(['header', 'header', 'timePicker', 'common']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -85,19 +85,49 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param layerIndex - the index of the layer
      */
     async configureDimension(
-      opts: { dimension: string; operation: string; field: string },
+      opts: {
+        dimension: string;
+        operation: string;
+        field?: string;
+        isPreviousIncompatible?: boolean;
+        keepOpen?: boolean;
+      },
       layerIndex = 0
     ) {
       await retry.try(async () => {
         await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
         await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
       });
+      const operationSelector = opts.isPreviousIncompatible
+        ? `lns-indexPatternDimension-${opts.operation} incompatible`
+        : `lns-indexPatternDimension-${opts.operation}`;
+      await testSubjects.click(operationSelector);
 
-      await testSubjects.click(`lns-indexPatternDimension-${opts.operation}`);
+      if (opts.field) {
+        const target = await testSubjects.find('indexPattern-dimension-field');
+        await comboBox.openOptionsList(target);
+        await comboBox.setElement(target, opts.field);
+      }
 
-      const target = await testSubjects.find('indexPattern-dimension-field');
-      await comboBox.openOptionsList(target);
-      await comboBox.setElement(target, opts.field);
+      if (!opts.keepOpen) {
+        this.closeDimensionEditor();
+      }
+    },
+
+    /**
+     * Open the specified dimension.
+     *
+     * @param dimension - the selector of the dimension panel to open
+     * @param layerIndex - the index of the layer
+     */
+    async openDimensionEditor(dimension: string, layerIndex = 0) {
+      await retry.try(async () => {
+        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${dimension}`);
+      });
+    },
+
+    // closes the dimension editor flyout
+    async closeDimensionEditor() {
       await testSubjects.click('lns-indexPattern-dimensionContainerTitle');
     },
 
@@ -107,7 +137,26 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async removeDimension(dimensionTestSubj: string) {
       await testSubjects.click(`${dimensionTestSubj} > indexPattern-dimension-remove`);
     },
-
+    /**
+     * adds new filter to filters agg
+     */
+    async addFilterToAgg(queryString: string) {
+      await testSubjects.click('lns-newBucket-add');
+      const queryInput = await testSubjects.find('indexPattern-filters-queryStringInput');
+      await queryInput.type(queryString);
+      // Problem here is that after typing in the queryInput a dropdown will fetch the server
+      // with suggestions and show up. Depending on the cursor position and some other factors
+      // pressing Enter at this point may lead to auto-complete the queryInput with random stuff from the
+      // dropdown which was not intended originally.
+      // To close the Filter popover we need to move to the label input and then press Enter:
+      // solution is to press Tab 2 twice (first Tab will close the dropdown) instead of Enter to avoid
+      // race condition with the dropdown
+      await PageObjects.common.pressTabKey();
+      await PageObjects.common.pressTabKey();
+      // Now it is safe to press Enter as we're in the label input
+      await PageObjects.common.pressEnterKey();
+      await PageObjects.common.sleep(1000); // give time for debounced components to rerender
+    },
     /**
      * Save the current Lens visualization.
      */
@@ -141,8 +190,41 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsApp_saveAndReturnButton');
     },
 
+    async editDimensionLabel(label: string) {
+      await testSubjects.setValue('indexPattern-label-edit', label);
+    },
+    async editDimensionFormat(format: string) {
+      const formatInput = await testSubjects.find('indexPattern-dimension-format');
+      await comboBox.openOptionsList(formatInput);
+      await comboBox.setElement(formatInput, format);
+    },
+    async editDimensionColor(color: string) {
+      const colorPickerInput = await testSubjects.find('colorPickerAnchor');
+      await colorPickerInput.type(color);
+      await PageObjects.common.sleep(1000); // give time for debounced components to rerender
+    },
+    async editMissingValues(option: string) {
+      await retry.try(async () => {
+        await testSubjects.click('lnsMissingValuesButton');
+        await testSubjects.exists('lnsMissingValuesSelect');
+      });
+      await testSubjects.click('lnsMissingValuesSelect');
+      const optionSelector = await find.byCssSelector(`#${option}`);
+      await optionSelector.click();
+    },
+
     getTitle() {
       return testSubjects.getVisibleText('lns_ChartTitle');
+    },
+
+    async getFiltersAggLabels() {
+      const labels = [];
+      const filters = await testSubjects.findAll('indexPattern-filters-existingFilterContainer');
+      for (let i = 0; i < filters.length; i++) {
+        labels.push(await filters[i].getVisibleText());
+      }
+      log.debug(`Found ${labels.length} filters on current page`);
+      return labels;
     },
 
     /**
@@ -211,6 +293,38 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsLayerAddButton');
     },
 
+    /**
+     * Changes the index pattern in the data panel
+     */
+    async switchDataPanelIndexPattern(name: string) {
+      await testSubjects.click('indexPattern-switch-link');
+      await find.clickByCssSelector(`[title="${name}"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Changes the index pattern for the first layer
+     */
+    async switchFirstLayerIndexPattern(name: string) {
+      await testSubjects.click('lns_layerIndexPatternLabel');
+      await find.clickByCssSelector(`[title="${name}"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Returns the current index pattern of the data panel
+     */
+    async getDataPanelIndexPattern() {
+      return await (await testSubjects.find('indexPattern-switch-link')).getAttribute('title');
+    },
+
+    /**
+     * Returns the current index pattern of the first layer
+     */
+    async getFirstLayerIndexPattern() {
+      return await (await testSubjects.find('lns_layerIndexPatternLabel')).getAttribute('title');
+    },
+
     async linkedToOriginatingApp() {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('lnsApp_saveAndReturnButton');
@@ -232,6 +346,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         dimensionElements[index]
       );
       return await trigger.getVisibleText();
+    },
+
+    async isShowingNoResults() {
+      return (
+        (await (await testSubjects.find('lnsWorkspace')).getVisibleText()) === 'No results found'
+      );
     },
 
     /**
@@ -274,6 +394,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="lns_metric_title"]', title);
       await this.assertExactText('[data-test-subj="lns_metric_value"]', count);
+    },
+
+    async assertMissingValues(option: string) {
+      await this.assertExactText('[data-test-subj="lnsMissingValuesSelect"]', option);
+    },
+    async assertColor(color: string) {
+      // TODO: target dimensionTrigger color element after merging https://github.com/elastic/kibana/pull/76871
+      await testSubjects.getAttribute('colorPickerAnchor', color);
     },
   });
 }

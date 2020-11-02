@@ -126,6 +126,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         })}
         type="values"
         groupPosition="left"
+        buttonDataTestSubj="lnsLabelsButton"
       >
         <EuiFormRow
           label={i18n.translate('xpack.lens.pieChart.labelPositionLabel', {

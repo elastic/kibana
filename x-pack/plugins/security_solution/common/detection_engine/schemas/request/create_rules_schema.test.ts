@@ -16,6 +16,8 @@ import { left } from 'fp-ts/lib/Either';
 import {
   getCreateRulesSchemaMock,
   getCreateRulesSchemaDecodedMock,
+  getCreateThreatMatchRulesSchemaMock,
+  getCreateThreatMatchRulesSchemaDecodedMock,
 } from './create_rules_schema.mock';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
@@ -1658,6 +1660,18 @@ describe('create rules schema', () => {
         exceptions_list: [],
         filters: [],
       };
+      expect(message.schema).toEqual(expected);
+    });
+  });
+
+  describe('threat_mapping', () => {
+    test('You can set a threat query, index, mapping, filters when creating a rule', () => {
+      const payload = getCreateThreatMatchRulesSchemaMock();
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getCreateThreatMatchRulesSchemaDecodedMock();
+      expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
     });
   });

@@ -31,7 +31,7 @@ import {
   txtTriggerPickerHelpTooltip,
 } from './i18n';
 import './action_wizard.scss';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
 import { Trigger, TriggerId } from '../../../../../../src/plugins/ui_actions/public';
 
 export interface ActionWizardProps<
@@ -57,12 +57,12 @@ export interface ActionWizardProps<
   /**
    * current config for currently selected action factory
    */
-  config?: object;
+  config?: BaseActionConfig;
 
   /**
    * config changed
    */
-  onConfigChange: (config: object) => void;
+  onConfigChange: (config: BaseActionConfig) => void;
 
   /**
    * Context will be passed into ActionFactory's methods
@@ -80,7 +80,7 @@ export interface ActionWizardProps<
   /**
    * List of possible triggers in current context
    */
-  supportedTriggers: TriggerId[];
+  triggers: TriggerId[];
 
   triggerPickerDocsLink?: string;
 }
@@ -94,7 +94,7 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
   context,
   onSelectedTriggersChange,
   getTriggerInfo,
-  supportedTriggers,
+  triggers,
   triggerPickerDocsLink,
 }) => {
   // auto pick action factory if there is only 1 available
@@ -108,14 +108,14 @@ export const ActionWizard: React.FC<ActionWizardProps> = ({
 
   // auto pick selected trigger if none is picked
   if (currentActionFactory && !((context.triggers?.length ?? 0) > 0)) {
-    const triggers = getTriggersForActionFactory(currentActionFactory, supportedTriggers);
-    if (triggers.length > 0) {
-      onSelectedTriggersChange([triggers[0]]);
+    const actionTriggers = getTriggersForActionFactory(currentActionFactory, triggers);
+    if (actionTriggers.length > 0) {
+      onSelectedTriggersChange([actionTriggers[0]]);
     }
   }
 
   if (currentActionFactory && config) {
-    const allTriggers = getTriggersForActionFactory(currentActionFactory, supportedTriggers);
+    const allTriggers = getTriggersForActionFactory(currentActionFactory, triggers);
     return (
       <SelectedActionFactory
         actionFactory={currentActionFactory}
@@ -219,9 +219,9 @@ interface SelectedActionFactoryProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
 > {
   actionFactory: ActionFactory;
-  config: object;
+  config: BaseActionConfig;
   context: ActionFactoryContext;
-  onConfigChange: (config: object) => void;
+  onConfigChange: (config: BaseActionConfig) => void;
   showDeselect: boolean;
   onDeselect: () => void;
   allTriggers: TriggerId[];
@@ -250,7 +250,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
       data-test-subj={`${TEST_SUBJ_SELECTED_ACTION_FACTORY}-${actionFactory.id}`}
     >
       <header>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           {actionFactory.getIconType(context) && (
             <EuiFlexItem grow={false}>
               <EuiIcon type={actionFactory.getIconType(context)!} size="m" />
@@ -342,7 +342,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
   };
 
   return (
-    <EuiFlexGroup gutterSize="m" wrap={true} style={firefoxBugFix}>
+    <EuiFlexGroup gutterSize="m" responsive={false} wrap={true} style={firefoxBugFix}>
       {ensureOrder(actionFactories).map((actionFactory) => (
         <EuiFlexItem grow={false} key={actionFactory.id}>
           <EuiToolTip

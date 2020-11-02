@@ -4,7 +4,6 @@ exports[`Storyshots components/Color/ColorPickerPopover interactive 1`] = `
 <div>
   <div
     className="euiPopover euiPopover--anchorDownCenter"
-    container={null}
     id="color-picker-popover"
     onKeyDown={[Function]}
     onMouseDown={[Function]}
@@ -66,7 +65,6 @@ exports[`Storyshots components/Color/ColorPickerPopover interactive 1`] = `
 exports[`Storyshots components/Color/ColorPickerPopover six colors 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
-  container={null}
   id="color-picker-popover"
   onKeyDown={[Function]}
   onMouseDown={[Function]}
@@ -111,7 +109,6 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors 1`] = `
 exports[`Storyshots components/Color/ColorPickerPopover six colors, value missing 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
-  container={null}
   id="color-picker-popover"
   onKeyDown={[Function]}
   onMouseDown={[Function]}
@@ -156,7 +153,6 @@ exports[`Storyshots components/Color/ColorPickerPopover six colors, value missin
 exports[`Storyshots components/Color/ColorPickerPopover three colors 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownCenter"
-  container={null}
   id="color-picker-popover"
   onKeyDown={[Function]}
   onMouseDown={[Function]}

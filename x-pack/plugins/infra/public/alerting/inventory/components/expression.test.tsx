@@ -69,6 +69,7 @@ describe('Expression', () => {
       <Expressions
         alertsContext={context}
         alertInterval="1m"
+        alertThrottle="1m"
         alertParams={alertParams as any}
         errors={[]}
         setAlertParams={(key, value) => Reflect.set(alertParams, key, value)}

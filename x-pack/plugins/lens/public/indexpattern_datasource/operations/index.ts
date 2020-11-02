@@ -5,4 +5,4 @@
  */
 
 export * from './operations';
-export { OperationType, IndexPatternColumn } from './definitions';
+export { OperationType, IndexPatternColumn, FieldBasedIndexPatternColumn } from './definitions';

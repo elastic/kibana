@@ -28,7 +28,7 @@ configure a refresh interval to periodically resubmit your searches to
 retrieve the latest results.
 
 [role="screenshot"]
-image::images/autorefresh-interval.png[]
+image::images/autorefresh-interval.png[Image showing what refresh interval option looks like. The configurable time interval is located in the dropdown]
 
 You can also manually refresh the search results by
 clicking the *Refresh* button.
@@ -104,9 +104,7 @@ To save the current search:
 . Click *Save* in the Kibana toolbar.
 . Enter a name for the search and click *Save*.
 
-To import, export and delete saved searches:
-. Open the menu, then click *Stack Management.
-. From the {kib} menu, click *Saved Ojbects*.
+To import, export, and delete saved searches, open the main menu, then click *Stack Management > Saved Ojbects*.
 
 ==== Open a saved search
 To load a saved search into Discover:

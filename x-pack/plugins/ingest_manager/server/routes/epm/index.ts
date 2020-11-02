@@ -14,6 +14,7 @@ import {
   installPackageFromRegistryHandler,
   installPackageByUploadHandler,
   deletePackageHandler,
+  bulkInstallPackagesFromRegistryHandler,
 } from './handlers';
 import {
   GetCategoriesRequestSchema,
@@ -23,6 +24,7 @@ import {
   InstallPackageFromRegistryRequestSchema,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
+  BulkUpgradePackagesFromRegistryRequestSchema,
 } from '../../types';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
@@ -80,6 +82,15 @@ export const registerRoutes = (router: IRouter) => {
       options: { tags: [`access:${PLUGIN_ID}-all`] },
     },
     installPackageFromRegistryHandler
+  );
+
+  router.post(
+    {
+      path: EPM_API_ROUTES.BULK_INSTALL_PATTERN,
+      validate: BulkUpgradePackagesFromRegistryRequestSchema,
+      options: { tags: [`access:${PLUGIN_ID}-all`] },
+    },
+    bulkInstallPackagesFromRegistryHandler
   );
 
   router.post(

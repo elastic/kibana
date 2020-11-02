@@ -14,7 +14,7 @@ import {
   FlowTargetSourceDest,
   NetworkTopNFlowEdges,
   TopNetworkTablesEcsField,
-} from '../../../graphql/types';
+} from '../../../../common/search_strategy';
 import { networkModel } from '../../store';
 import {
   DragEffects,

@@ -4,7 +4,7 @@ Unenroll an agent
 
 ## Request
 
-`POST /api/ingest_manager/fleet/agents/unenroll`
+`POST /api/fleet/agents/unenroll`
 
 ## Request body
 
@@ -20,7 +20,7 @@ Unenroll an agent
 ## Example
 
 ```js
-POST /api/ingest_manager/fleet/agents/enroll
+POST /api/fleet/agents/enroll
 {
   "ids": ['agent1'],
 }

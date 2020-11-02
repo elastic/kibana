@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './suggestion_panel.scss';
+
 import _, { camelCase } from 'lodash';
 import React, { useState, useEffect, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -30,15 +32,10 @@ import {
   ReactExpressionRendererType,
 } from '../../../../../../src/plugins/expressions/public';
 import { prependDatasourceExpression } from './expression_helpers';
-import { debouncedComponent } from '../../debounced_component';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
-
-// TODO: Remove this <any> when upstream fix is merged https://github.com/elastic/eui/issues/2329
-// eslint-disable-next-line
-const EuiPanelFixed = EuiPanel as React.ComponentType<any>;
 
 export interface SuggestionPanelProps {
   activeDatasourceId: string | null;
@@ -80,6 +77,7 @@ const PreviewRenderer = ({
         className="lnsSuggestionPanel__expressionRenderer"
         padding="s"
         expression={expression}
+        debounce={2000}
         renderError={() => {
           return (
             <div className="lnsSuggestionPanel__suggestionIcon">
@@ -102,8 +100,6 @@ const PreviewRenderer = ({
   );
 };
 
-const DebouncedPreviewRenderer = debouncedComponent(PreviewRenderer, 2000);
-
 const SuggestionPreview = ({
   preview,
   ExpressionRenderer: ExpressionRendererComponent,
@@ -124,7 +120,7 @@ const SuggestionPreview = ({
   return (
     <EuiToolTip content={preview.title}>
       <div data-test-subj={`lnsSuggestion-${camelCase(preview.title)}`}>
-        <EuiPanelFixed
+        <EuiPanel
           className={classNames('lnsSuggestionPanel__button', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
             'lnsSuggestionPanel__button-isSelected': selected,
@@ -134,7 +130,7 @@ const SuggestionPreview = ({
           onClick={onSelect}
         >
           {preview.expression ? (
-            <DebouncedPreviewRenderer
+            <PreviewRenderer
               ExpressionRendererComponent={ExpressionRendererComponent}
               expression={toExpression(preview.expression)}
               withLabel={Boolean(showTitleAsLabel)}
@@ -147,7 +143,7 @@ const SuggestionPreview = ({
           {showTitleAsLabel && (
             <span className="lnsSuggestionPanel__buttonLabel">{preview.title}</span>
           )}
-        </EuiPanelFixed>
+        </EuiPanel>
       </div>
     </EuiToolTip>
   );

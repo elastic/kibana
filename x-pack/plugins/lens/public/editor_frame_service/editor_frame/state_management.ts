@@ -156,7 +156,7 @@ export const reducer = (state: EditorFrameState, action: Action): EditorFrameSta
     case 'VISUALIZATION_LOADED':
       return {
         ...state,
-        persistedId: action.doc.id,
+        persistedId: action.doc.savedObjectId,
         title: action.doc.title,
         description: action.doc.description,
         datasourceStates: Object.entries(action.doc.state.datasourceStates).reduce(

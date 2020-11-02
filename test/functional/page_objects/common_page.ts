@@ -117,10 +117,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         } else {
           log.debug(`navigateToUrl ${appUrl}`);
           await browser.get(appUrl, insertTimestamp);
-          // accept alert if it pops up
-          const alert = await browser.getAlert();
-          await alert?.accept();
         }
+
+        // accept alert if it pops up
+        const alert = await browser.getAlert();
+        await alert?.accept();
 
         const currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp)
@@ -434,7 +435,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       }
     }
 
-    async getBodyText() {
+    async getJsonBodyText() {
       if (await find.existsByCssSelector('a[id=rawdata-tab]', defaultFindTimeout)) {
         // Firefox has 3 tabs and requires navigation to see Raw output
         await find.clickByCssSelector('a[id=rawdata-tab]');
@@ -447,6 +448,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         const jsonElement = await find.byCssSelector('body div#json');
         return await jsonElement.getVisibleText();
       }
+    }
+
+    async getBodyText() {
+      const body = await find.byCssSelector('body');
+      return await body.getVisibleText();
     }
 
     /**
@@ -499,6 +505,16 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
 
     async scrollKibanaBodyTop() {
       await browser.setScrollToById('kibana-body', 0, 0);
+    }
+
+    /**
+     * Dismiss Banner if available.
+     */
+    async dismissBanner() {
+      if (await testSubjects.exists('global-banner-item')) {
+        const button = await find.byButtonText('Dismiss');
+        await button.click();
+      }
     }
   }
 

@@ -11,6 +11,7 @@ import { KibanaRequest, CoreStart, IBasePath } from 'src/core/server';
 import { GlobalSearchProviderResult, GlobalSearchBatchedResults } from '../../common/types';
 import { GlobalSearchFindError } from '../../common/errors';
 import { takeInArray } from '../../common/operators';
+import { defaultMaxProviderResults } from '../../common/constants';
 import { ILicenseChecker } from '../../common/license_checker';
 
 import { processProviderResult } from '../../common/process_result';
@@ -80,7 +81,6 @@ interface StartDeps {
   licenseChecker: ILicenseChecker;
 }
 
-const defaultMaxProviderResults = 20;
 const mapToUndefined = () => undefined;
 
 /** @internal */

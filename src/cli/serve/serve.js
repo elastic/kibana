@@ -48,11 +48,6 @@ const CAN_CLUSTER = canRequire(CLUSTER_MANAGER_PATH);
 const REPL_PATH = resolve(__dirname, '../repl');
 const CAN_REPL = canRequire(REPL_PATH);
 
-// xpack is installed in both dev and the distributable, it's optional if
-// install is a link to the source, not an actual install
-const XPACK_DIR = resolve(__dirname, '../../../x-pack');
-const XPACK_INSTALLED = canRequire(XPACK_DIR);
-
 const pathCollector = function () {
   const paths = [];
   return function (path) {
@@ -137,16 +132,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.logFile) set('logging.dest', opts.logFile);
 
   set('plugins.scanDirs', _.compact([].concat(get('plugins.scanDirs'), opts.pluginDir)));
-  set(
-    'plugins.paths',
-    _.compact(
-      [].concat(
-        get('plugins.paths'),
-        opts.pluginPath,
-        XPACK_INSTALLED && !opts.oss ? [XPACK_DIR] : []
-      )
-    )
-  );
+  set('plugins.paths', _.compact([].concat(get('plugins.paths'), opts.pluginPath)));
 
   merge(extraCliOptions);
   merge(readKeystore());

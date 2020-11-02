@@ -95,6 +95,7 @@ export const persistTimelineMutation = gql`
             serializedQuery
           }
         }
+        indexNames
         title
         dateRange {
           start

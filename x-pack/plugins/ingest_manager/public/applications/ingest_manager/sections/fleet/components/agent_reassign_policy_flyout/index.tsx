@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlyout,
@@ -22,46 +22,61 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
-import { sendPutAgentReassign, useCore, useGetAgentPolicies } from '../../../../hooks';
+import {
+  sendPutAgentReassign,
+  sendPostBulkAgentReassign,
+  useCore,
+  useGetAgentPolicies,
+} from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
 interface Props {
   onClose: () => void;
-  agent: Agent;
+  agents: Agent[] | string;
 }
 
 export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
   onClose,
-  agent,
+  agents,
 }) => {
   const { notifications } = useCore();
-  const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
-    agent.policy_id
-  );
+  const isSingleAgent = Array.isArray(agents) && agents.length === 1;
 
+  const [selectedAgentPolicyId, setSelectedAgentPolicyId] = useState<string | undefined>(
+    isSingleAgent ? (agents[0] as Agent).policy_id : undefined
+  );
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
   });
   const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
+  useEffect(() => {
+    if (!selectedAgentPolicyId && agentPolicies[0]) {
+      setSelectedAgentPolicyId(agentPolicies[0].id);
+    }
+  }, [agentPolicies, selectedAgentPolicyId]);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   async function onSubmit() {
     try {
       setIsSubmitting(true);
       if (!selectedAgentPolicyId) {
         throw new Error('No selected agent policy id');
       }
-      const res = await sendPutAgentReassign(agent.id, {
-        policy_id: selectedAgentPolicyId,
-      });
+      const res = isSingleAgent
+        ? await sendPutAgentReassign((agents[0] as Agent).id, {
+            policy_id: selectedAgentPolicyId,
+          })
+        : await sendPostBulkAgentReassign({
+            policy_id: selectedAgentPolicyId,
+            agents: Array.isArray(agents) ? agents.map((agent) => agent.id) : agents,
+          });
       if (res.error) {
         throw res.error;
       }
       setIsSubmitting(false);
       const successMessage = i18n.translate(
-        'xpack.ingestManager.agentReassignPolicy.successSingleNotificationTitle',
+        'xpack.fleet.agentReassignPolicy.successSingleNotificationTitle',
         {
           defaultMessage: 'Agent policy reassigned',
         }
@@ -82,7 +97,7 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
         <EuiTitle size="m">
           <h2 id="FleetAgentReassigmentFlyoutTitle">
             <FormattedMessage
-              id="xpack.ingestManager.agentReassignPolicy.flyoutTitle"
+              id="xpack.fleet.agentReassignPolicy.flyoutTitle"
               defaultMessage="Assign new agent policy"
             />
           </h2>
@@ -90,8 +105,11 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.ingestManager.agentReassignPolicy.flyoutDescription"
-            defaultMessage="Choose a new agent policy to assign the selected agent to."
+            id="xpack.fleet.agentReassignPolicy.flyoutDescription"
+            defaultMessage="Choose a new agent policy to assign the selected {count, plural, one {agent} other {agents}} to."
+            values={{
+              count: isSingleAgent ? 1 : 0,
+            }}
           />
         </EuiText>
       </EuiFlyoutHeader>
@@ -100,12 +118,13 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
           <EuiFlexItem>
             <EuiFormRow
               fullWidth
-              label={i18n.translate('xpack.ingestManager.agentReassignPolicy.selectPolicyLabel', {
+              label={i18n.translate('xpack.fleet.agentReassignPolicy.selectPolicyLabel', {
                 defaultMessage: 'Agent policy',
               })}
             >
               <EuiSelect
                 fullWidth
+                isLoading={agentPoliciesRequest.isLoading}
                 options={agentPolicies.map((agentPolicy) => ({
                   value: agentPolicy.id,
                   text: agentPolicy.name,
@@ -127,20 +146,20 @@ export const AgentReassignAgentPolicyFlyout: React.FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.ingestManager.agentReassignPolicy.cancelButtonLabel"
+                id="xpack.fleet.agentReassignPolicy.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              disabled={selectedAgentPolicyId === agent.policy_id}
+              disabled={isSingleAgent && selectedAgentPolicyId === (agents[0] as Agent).policy_id}
               fill
               onClick={onSubmit}
               isLoading={isSubmitting}
             >
               <FormattedMessage
-                id="xpack.ingestManager.agentReassignPolicy.continueButtonLabel"
+                id="xpack.fleet.agentReassignPolicy.continueButtonLabel"
                 defaultMessage="Assign policy"
               />
             </EuiButton>

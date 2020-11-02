@@ -39,6 +39,7 @@ import { dataPluginMock } from '../../data/public/mocks';
 import { inspectorPluginMock } from '../../inspector/public/mocks';
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 
+export { mockAttributeService } from './lib/attribute_service/attribute_service.mock';
 export type Setup = jest.Mocked<EmbeddableSetup>;
 export type Start = jest.Mocked<EmbeddableStart>;
 
@@ -109,6 +110,7 @@ export const mockRefOrValEmbeddable = <
 const createSetupContract = (): Setup => {
   const setupContract: Setup = {
     registerEmbeddableFactory: jest.fn(),
+    registerEnhancement: jest.fn(),
     setCustomEmbeddableFactoryProvider: jest.fn(),
   };
   return setupContract;
@@ -118,9 +120,13 @@ const createStartContract = (): Start => {
   const startContract: Start = {
     getEmbeddableFactories: jest.fn(),
     getEmbeddableFactory: jest.fn(),
+    telemetry: jest.fn(),
+    extract: jest.fn(),
+    inject: jest.fn(),
     EmbeddablePanel: jest.fn(),
     getEmbeddablePanel: jest.fn(),
     getStateTransfer: jest.fn(() => createEmbeddableStateTransferMock() as EmbeddableStateTransfer),
+    getAttributeService: jest.fn(),
   };
   return startContract;
 };

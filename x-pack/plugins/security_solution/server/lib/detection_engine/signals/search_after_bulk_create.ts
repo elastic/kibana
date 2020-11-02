@@ -3,55 +3,19 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import moment from 'moment';
 
-import { AlertServices } from '../../../../../alerts/server';
-import { ListClient } from '../../../../../lists/server';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
-import { RuleTypeParams, RefreshTypes } from '../types';
-import { Logger } from '../../../../../../../src/core/server';
 import { singleSearchAfter } from './single_search_after';
 import { singleBulkCreate } from './single_bulk_create';
-import { BuildRuleMessage } from './rule_messages';
-import { SignalSearchResponse } from './types';
 import { filterEventsAgainstList } from './filter_events_with_list';
-import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
-import { getSignalTimeTuples } from './utils';
-
-interface SearchAfterAndBulkCreateParams {
-  gap: moment.Duration | null;
-  previousStartedAt: Date | null | undefined;
-  ruleParams: RuleTypeParams;
-  services: AlertServices;
-  listClient: ListClient;
-  exceptionsList: ExceptionListItemSchema[];
-  logger: Logger;
-  id: string;
-  inputIndexPattern: string[];
-  signalsIndex: string;
-  name: string;
-  actions: RuleAlertAction[];
-  createdAt: string;
-  createdBy: string;
-  updatedBy: string;
-  updatedAt: string;
-  interval: string;
-  enabled: boolean;
-  pageSize: number;
-  filter: unknown;
-  refresh: RefreshTypes;
-  tags: string[];
-  throttle: string;
-  buildRuleMessage: BuildRuleMessage;
-}
-
-export interface SearchAfterAndBulkCreateReturnType {
-  success: boolean;
-  searchAfterTimes: string[];
-  bulkCreateTimes: string[];
-  lastLookBackDate: Date | null | undefined;
-  createdSignalsCount: number;
-}
+import { sendAlertTelemetryEvents } from './send_telemetry_events';
+import {
+  createSearchAfterReturnType,
+  createSearchAfterReturnTypeFromResponse,
+  createTotalHitsFromSearchResult,
+  getSignalTimeTuples,
+  mergeReturns,
+} from './utils';
+import { SearchAfterAndBulkCreateParams, SearchAfterAndBulkCreateReturnType } from './types';
 
 // search_after through documents and re-index using bulk endpoint.
 export const searchAfterAndBulkCreate = async ({
@@ -62,6 +26,7 @@ export const searchAfterAndBulkCreate = async ({
   services,
   listClient,
   logger,
+  eventsTelemetry,
   id,
   inputIndexPattern,
   signalsIndex,
@@ -80,13 +45,7 @@ export const searchAfterAndBulkCreate = async ({
   throttle,
   buildRuleMessage,
 }: SearchAfterAndBulkCreateParams): Promise<SearchAfterAndBulkCreateReturnType> => {
-  const toReturn: SearchAfterAndBulkCreateReturnType = {
-    success: false,
-    searchAfterTimes: [],
-    bulkCreateTimes: [],
-    lastLookBackDate: null,
-    createdSignalsCount: 0,
-  };
+  let toReturn = createSearchAfterReturnType();
 
   // sortId tells us where to start our next consecutive search_after query
   let sortId: string | undefined;
@@ -106,12 +65,15 @@ export const searchAfterAndBulkCreate = async ({
     buildRuleMessage,
   });
   logger.debug(buildRuleMessage(`totalToFromTuples: ${totalToFromTuples.length}`));
+
   while (totalToFromTuples.length > 0) {
     const tuple = totalToFromTuples.pop();
     if (tuple == null || tuple.to == null || tuple.from == null) {
       logger.error(buildRuleMessage(`[-] malformed date tuple`));
-      toReturn.success = false;
-      return toReturn;
+      return createSearchAfterReturnType({
+        success: false,
+        errors: ['malformed date tuple'],
+      });
     }
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
@@ -119,29 +81,31 @@ export const searchAfterAndBulkCreate = async ({
         logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
 
         // perform search_after with optionally undefined sortId
-        const {
-          searchResult,
-          searchDuration,
-        }: { searchResult: SignalSearchResponse; searchDuration: string } = await singleSearchAfter(
-          {
-            searchAfterSortId: sortId,
-            index: inputIndexPattern,
-            from: tuple.from.toISOString(),
-            to: tuple.to.toISOString(),
-            services,
-            logger,
-            filter,
-            pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
+        const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+          buildRuleMessage,
+          searchAfterSortId: sortId,
+          index: inputIndexPattern,
+          from: tuple.from.toISOString(),
+          to: tuple.to.toISOString(),
+          services,
+          logger,
+          filter,
+          pageSize: tuple.maxSignals < pageSize ? Math.ceil(tuple.maxSignals) : pageSize, // maximum number of docs to receive per search result.
+          timestampOverride: ruleParams.timestampOverride,
+        });
+        toReturn = mergeReturns([
+          toReturn,
+          createSearchAfterReturnTypeFromResponse({
+            searchResult,
             timestampOverride: ruleParams.timestampOverride,
-          }
-        );
-        toReturn.searchAfterTimes.push(searchDuration);
-
+          }),
+          createSearchAfterReturnType({
+            searchAfterTimes: [searchDuration],
+            errors: searchErrors,
+          }),
+        ]);
         // determine if there are any candidate signals to be processed
-        const totalHits =
-          typeof searchResult.hits.total === 'number'
-            ? searchResult.hits.total
-            : searchResult.hits.total.value;
+        const totalHits = createTotalHitsFromSearchResult({ searchResult });
         logger.debug(buildRuleMessage(`totalHits: ${totalHits}`));
         logger.debug(
           buildRuleMessage(`searchResult.hit.hits.length: ${searchResult.hits.hits.length}`)
@@ -163,20 +127,13 @@ export const searchAfterAndBulkCreate = async ({
               } was 0, exiting and moving on to next tuple`
             )
           );
-          toReturn.success = true;
           break;
         }
-        toReturn.lastLookBackDate =
-          searchResult.hits.hits.length > 0
-            ? new Date(
-                searchResult.hits.hits[searchResult.hits.hits.length - 1]?._source['@timestamp']
-              )
-            : null;
 
         // filter out the search results that match with the values found in the list.
         // the resulting set are signals to be indexed, given they are not duplicates
         // of signals already present in the signals index.
-        const filteredEvents: SignalSearchResponse = await filterEventsAgainstList({
+        const filteredEvents = await filterEventsAgainstList({
           listClient,
           exceptionsList,
           logger,
@@ -199,7 +156,10 @@ export const searchAfterAndBulkCreate = async ({
           const {
             bulkCreateDuration: bulkDuration,
             createdItemsCount: createdCount,
+            success: bulkSuccess,
+            errors: bulkErrors,
           } = await singleBulkCreate({
+            buildRuleMessage,
             filteredEvents,
             ruleParams,
             services,
@@ -218,16 +178,28 @@ export const searchAfterAndBulkCreate = async ({
             tags,
             throttle,
           });
-          logger.debug(buildRuleMessage(`created ${createdCount} signals`));
-          toReturn.createdSignalsCount += createdCount;
+          toReturn = mergeReturns([
+            toReturn,
+            createSearchAfterReturnType({
+              success: bulkSuccess,
+              createdSignalsCount: createdCount,
+              bulkCreateTimes: bulkDuration ? [bulkDuration] : undefined,
+              errors: bulkErrors,
+            }),
+          ]);
           signalsCreatedCount += createdCount;
+          logger.debug(buildRuleMessage(`created ${createdCount} signals`));
           logger.debug(buildRuleMessage(`signalsCreatedCount: ${signalsCreatedCount}`));
-          if (bulkDuration) {
-            toReturn.bulkCreateTimes.push(bulkDuration);
-          }
-
           logger.debug(
             buildRuleMessage(`filteredEvents.hits.hits: ${filteredEvents.hits.hits.length}`)
+          );
+
+          sendAlertTelemetryEvents(
+            logger,
+            eventsTelemetry,
+            filteredEvents,
+            ruleParams,
+            buildRuleMessage
           );
         }
 
@@ -239,17 +211,20 @@ export const searchAfterAndBulkCreate = async ({
           sortId = lastSortId[0];
         } else {
           logger.debug(buildRuleMessage('sortIds was empty on searchResult'));
-          toReturn.success = true;
           break;
         }
-      } catch (exc) {
+      } catch (exc: unknown) {
         logger.error(buildRuleMessage(`[-] search_after and bulk threw an error ${exc}`));
-        toReturn.success = false;
-        return toReturn;
+        return mergeReturns([
+          toReturn,
+          createSearchAfterReturnType({
+            success: false,
+            errors: [`${exc}`],
+          }),
+        ]);
       }
     }
   }
   logger.debug(buildRuleMessage(`[+] completed bulk index of ${toReturn.createdSignalsCount}`));
-  toReturn.success = true;
   return toReturn;
 };

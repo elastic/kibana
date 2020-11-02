@@ -55,7 +55,7 @@ export type MlGenericUrlState = MLPageState<
 >;
 
 export interface AnomalyDetectionQueryState {
-  jobId?: JobId;
+  jobId?: JobId | string[];
   groupIds?: string[];
   globalState?: MlCommonGlobalState;
 }
@@ -167,6 +167,7 @@ export interface DataFrameAnalyticsExplorationQueryState {
   ml: {
     jobId: JobId;
     analysisType: DataFrameAnalysisConfigType;
+    defaultIsTraining?: boolean;
   };
 }
 
@@ -176,6 +177,7 @@ export type DataFrameAnalyticsExplorationUrlState = MLPageState<
     jobId: JobId;
     analysisType: DataFrameAnalysisConfigType;
     globalState?: MlCommonGlobalState;
+    defaultIsTraining?: boolean;
   }
 >;
 

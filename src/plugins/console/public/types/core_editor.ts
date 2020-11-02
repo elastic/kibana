@@ -268,4 +268,9 @@ export interface CoreEditor {
    * detects a change
    */
   registerAutocompleter(autocompleter: AutoCompleterFunction): void;
+
+  /**
+   * Release any resources in use by the editor.
+   */
+  destroy(): void;
 }

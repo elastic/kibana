@@ -14,6 +14,7 @@ describe('featurePrivilegeIterator', () => {
       name: 'foo',
       privileges: null,
       app: [],
+      category: { id: 'foo', label: 'foo' },
     });
 
     const actualPrivileges = Array.from(
@@ -29,6 +30,7 @@ describe('featurePrivilegeIterator', () => {
     const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -120,6 +122,7 @@ describe('featurePrivilegeIterator', () => {
     const feature = new KibanaFeature({
       id: 'foo',
       name: 'foo',
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -194,6 +197,7 @@ describe('featurePrivilegeIterator', () => {
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -317,6 +321,7 @@ describe('featurePrivilegeIterator', () => {
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -440,6 +445,7 @@ describe('featurePrivilegeIterator', () => {
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -567,6 +573,7 @@ describe('featurePrivilegeIterator', () => {
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -690,6 +697,7 @@ describe('featurePrivilegeIterator', () => {
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],
@@ -815,6 +823,7 @@ describe('featurePrivilegeIterator', () => {
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           savedObject: {
@@ -923,6 +932,7 @@ describe('featurePrivilegeIterator', () => {
       id: 'foo',
       name: 'foo',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           api: ['all-api', 'read-api'],

@@ -60,20 +60,22 @@ export class AbstractSearchStrategy {
     const requests: any[] = [];
     bodies.forEach((body) => {
       requests.push(
-        deps.data.search.search(
-          req.requestContext,
-          {
-            params: {
-              ...body,
-              ...this.additionalParams,
+        deps.data.search
+          .search(
+            {
+              params: {
+                ...body,
+                ...this.additionalParams,
+              },
+              indexType: this.indexType,
             },
-            indexType: this.indexType,
-          },
-          {
-            ...options,
-            strategy: this.searchStrategyName,
-          }
-        )
+            {
+              ...options,
+              strategy: this.searchStrategyName,
+            },
+            req.requestContext
+          )
+          .toPromise()
       );
     });
     return Promise.all(requests);
@@ -84,6 +86,7 @@ export class AbstractSearchStrategy {
 
     return await indexPatternsService!.getFieldsForWildcard({
       pattern: indexPattern,
+      fieldCapsOptions: { allow_no_indices: true },
     });
   }
 

@@ -7,7 +7,8 @@
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import { EndpointList } from './index';
-import '../../../../common/mock/match_media.ts';
+import '../../../../common/mock/match_media';
+
 import {
   mockEndpointDetailsApiResult,
   mockEndpointResultList,
@@ -26,8 +27,25 @@ import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_da
 import { POLICY_STATUS_TO_HEALTH_COLOR, POLICY_STATUS_TO_TEXT } from './host_constants';
 import { mockPolicyResultList } from '../../policy/store/policy_list/test_mock_utils';
 
-jest.mock('../../../../common/components/link_to');
+// not sure why this can't be imported from '../../../../common/mock/formatted_relative';
+// but sure enough it needs to be inline in this one file
+jest.mock('@kbn/i18n/react', () => {
+  const originalModule = jest.requireActual('@kbn/i18n/react');
+  const FormattedRelative = jest.fn().mockImplementation(() => '20 hours ago');
 
+  return {
+    ...originalModule,
+    FormattedRelative,
+  };
+});
+jest.mock('../../../../common/components/link_to');
+jest.mock('../../policy/store/policy_list/services/ingest', () => {
+  const originalModule = jest.requireActual('../../policy/store/policy_list/services/ingest');
+  return {
+    ...originalModule,
+    sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+  };
+});
 describe('when on the list page', () => {
   const docGenerator = new EndpointDocGenerator();
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -35,7 +53,6 @@ describe('when on the list page', () => {
   let store: AppContextTestRender['store'];
   let coreStart: AppContextTestRender['coreStart'];
   let middlewareSpy: AppContextTestRender['middlewareSpy'];
-
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
     ({ history, store, coreStart, middlewareSpy } = mockedContext);
@@ -108,6 +125,88 @@ describe('when on the list page', () => {
     });
   });
 
+  describe('when loading data with the query_strategy_version is `v1`', () => {
+    beforeEach(() => {
+      reactTestingLibrary.act(() => {
+        const mockedEndpointListData = mockEndpointResultList({
+          total: 4,
+          query_strategy_version: MetadataQueryStrategyVersions.VERSION_1,
+        });
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockedEndpointListData.hosts,
+          queryStrategyVersion: mockedEndpointListData.query_strategy_version,
+        });
+      });
+    });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+    it('should not display the KQL bar', async () => {
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedEndpointList');
+      });
+      expect(renderResult.queryByTestId('adminSearchBar')).toBeNull();
+    });
+  });
+
+  describe('when determining when to show the enrolling message', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should display the enrolling message when there are less Endpoints than Agents', async () => {
+      reactTestingLibrary.act(() => {
+        const mockedEndpointListData = mockEndpointResultList({
+          total: 4,
+        });
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockedEndpointListData.hosts,
+          totalAgentsUsingEndpoint: 5,
+        });
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
+      });
+      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).not.toBeNull();
+    });
+
+    it('should NOT display the enrolling message when there are equal Endpoints than Agents', async () => {
+      reactTestingLibrary.act(() => {
+        const mockedEndpointListData = mockEndpointResultList({
+          total: 5,
+        });
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockedEndpointListData.hosts,
+          totalAgentsUsingEndpoint: 5,
+        });
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
+      });
+      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
+    });
+
+    it('should NOT display the enrolling message when there are more Endpoints than Agents', async () => {
+      reactTestingLibrary.act(() => {
+        const mockedEndpointListData = mockEndpointResultList({
+          total: 6,
+        });
+        setEndpointListApiMockImplementation(coreStart.http, {
+          endpointsResults: mockedEndpointListData.hosts,
+          totalAgentsUsingEndpoint: 5,
+        });
+      });
+      const renderResult = render();
+      await reactTestingLibrary.act(async () => {
+        await middlewareSpy.waitForAction('serverReturnedAgenstWithEndpointsTotal');
+      });
+      expect(renderResult.queryByTestId('endpointsEnrollingNotification')).toBeNull();
+    });
+  });
+
   describe('when there is no selected host in the url', () => {
     it('should not show the flyout', () => {
       const renderResult = render();
@@ -123,7 +222,9 @@ describe('when on the list page', () => {
       let firstPolicyID: string;
       beforeEach(() => {
         reactTestingLibrary.act(() => {
-          const hostListData = mockEndpointResultList({ total: 4 }).hosts;
+          const mockedEndpointData = mockEndpointResultList({ total: 4 });
+          const hostListData = mockedEndpointData.hosts;
+          const queryStrategyVersion = mockedEndpointData.query_strategy_version;
 
           firstPolicyID = hostListData[0].metadata.Endpoint.policy.applied.id;
 
@@ -132,7 +233,7 @@ describe('when on the list page', () => {
               hostListData[index] = {
                 metadata: hostListData[index].metadata,
                 host_status: status,
-                query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
+                query_strategy_version: queryStrategyVersion,
               };
             }
           );
@@ -296,13 +397,13 @@ describe('when on the list page', () => {
 
   describe('when there is a selected host in the url', () => {
     let hostDetails: HostInfo;
-    let agentId: string;
+    let elasticAgentId: string;
     let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
     const mockEndpointListApi = (mockedPolicyResponse?: HostPolicyResponse) => {
       const {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         host_status,
-        metadata: { host, ...details },
+        metadata: { agent, ...details },
         // eslint-disable-next-line @typescript-eslint/naming-convention
         query_strategy_version,
       } = mockEndpointDetailsApiResult();
@@ -311,15 +412,15 @@ describe('when on the list page', () => {
         host_status,
         metadata: {
           ...details,
-          host: {
-            ...host,
+          agent: {
+            ...agent,
             id: '1',
           },
         },
         query_strategy_version,
       };
 
-      agentId = hostDetails.metadata.elastic.agent.id;
+      elasticAgentId = hostDetails.metadata.elastic.agent.id;
 
       const policy = docGenerator.generatePolicyPackagePolicy();
       policy.id = hostDetails.metadata.Endpoint.policy.applied.id;
@@ -517,7 +618,7 @@ describe('when on the list page', () => {
       expect(linkToReassign).not.toBeNull();
       expect(linkToReassign.textContent).toEqual('Reassign Policy');
       expect(linkToReassign.getAttribute('href')).toEqual(
-        `/app/ingestManager#/fleet/agents/${agentId}/activity?openReassignFlyout=true`
+        `/app/ingestManager#/fleet/agents/${elasticAgentId}/activity?openReassignFlyout=true`
       );
     });
 
@@ -601,10 +702,10 @@ describe('when on the list page', () => {
       });
 
       it('should not show any numbered badges if all actions are successful', () => {
-        const policyResponse = docGenerator.generatePolicyResponse(
-          new Date().getTime(),
-          HostPolicyResponseActionStatus.success
-        );
+        const policyResponse = docGenerator.generatePolicyResponse({
+          ts: new Date().getTime(),
+          allStatus: HostPolicyResponseActionStatus.success,
+        });
         reactTestingLibrary.act(() => {
           store.dispatch({
             type: 'serverReturnedEndpointPolicyResponse',
@@ -682,11 +783,11 @@ describe('when on the list page', () => {
     let renderAndWaitForData: () => Promise<ReturnType<AppContextTestRender['render']>>;
 
     const mockEndpointListApi = () => {
-      const { hosts } = mockEndpointResultList();
+      const { hosts, query_strategy_version: queryStrategyVersion } = mockEndpointResultList();
       hostInfo = {
         host_status: hosts[0].host_status,
         metadata: hosts[0].metadata,
-        query_strategy_version: MetadataQueryStrategyVersions.VERSION_2,
+        query_strategy_version: queryStrategyVersion,
       };
       const packagePolicy = docGenerator.generatePolicyPackagePolicy();
       packagePolicy.id = hosts[0].metadata.Endpoint.policy.applied.id;

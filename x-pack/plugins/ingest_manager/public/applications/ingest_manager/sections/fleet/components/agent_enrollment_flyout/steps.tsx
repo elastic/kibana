@@ -13,14 +13,14 @@ import { AgentPolicy } from '../../../../types';
 
 export const DownloadStep = () => {
   return {
-    title: i18n.translate('xpack.ingestManager.agentEnrollment.stepDownloadAgentTitle', {
+    title: i18n.translate('xpack.fleet.agentEnrollment.stepDownloadAgentTitle', {
       defaultMessage: 'Download the Elastic Agent to your host',
     }),
     children: (
       <>
         <EuiText>
           <FormattedMessage
-            id="xpack.ingestManager.agentEnrollment.downloadDescription"
+            id="xpack.fleet.agentEnrollment.downloadDescription"
             defaultMessage="You can download the agent binaries and their verification signatures from the Elastic Agent download page."
           />
         </EuiText>
@@ -32,7 +32,7 @@ export const DownloadStep = () => {
           iconType="popout"
         >
           <FormattedMessage
-            id="xpack.ingestManager.agentEnrollment.downloadLink"
+            id="xpack.fleet.agentEnrollment.downloadLink"
             defaultMessage="Go to download page"
           />
         </EuiButton>
@@ -51,7 +51,7 @@ export const AgentPolicySelectionStep = ({
   setSelectedPolicyId?: (policyId: string) => void;
 }) => {
   return {
-    title: i18n.translate('xpack.ingestManager.agentEnrollment.stepChooseAgentPolicyTitle', {
+    title: i18n.translate('xpack.fleet.agentEnrollment.stepChooseAgentPolicyTitle', {
       defaultMessage: 'Choose an agent policy',
     }),
     children: (

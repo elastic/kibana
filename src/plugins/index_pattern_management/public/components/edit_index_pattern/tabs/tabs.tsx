@@ -49,7 +49,7 @@ import { getTabs, getPath, convertToEuiSelectOption } from './utils';
 interface TabsProps extends Pick<RouteComponentProps, 'history' | 'location'> {
   indexPattern: IndexPattern;
   fields: IndexPatternField[];
-  saveIndexPattern: DataPublicPluginStart['indexPatterns']['save'];
+  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
 }
 
 const searchAriaLabel = i18n.translate(

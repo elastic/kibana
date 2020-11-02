@@ -19,7 +19,6 @@ const startDate = new Date(2001).toISOString();
 const endDate = new Date(3000).toISOString();
 const interval = 'days';
 const narrowDateRange = jest.fn();
-
 describe('get_anomalies_host_table_columns', () => {
   const mount = useMountAppended();
 

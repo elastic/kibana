@@ -72,6 +72,7 @@ it(`#setup returns exposed services`, () => {
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
+    buildNumber: 42,
     features: mockFeaturesSetup,
     getSpacesService: mockGetSpacesService,
     getCurrentUser: jest.fn(),
@@ -130,6 +131,7 @@ describe('#start', () => {
       loggers: loggingSystemMock.create(),
       kibanaIndexName,
       packageVersion: 'some-version',
+      buildNumber: 42,
       features: featuresPluginMock.createSetup(),
       getSpacesService: jest
         .fn()
@@ -201,6 +203,7 @@ it('#stop unsubscribes from license and ES updates.', async () => {
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
+    buildNumber: 42,
     features: featuresPluginMock.createSetup(),
     getSpacesService: jest
       .fn()

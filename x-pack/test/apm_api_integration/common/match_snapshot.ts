@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotState, toMatchSnapshot, toMatchInlineSnapshot } from 'jest-snapshot';
+import {
+  SnapshotState,
+  toMatchSnapshot,
+  toMatchInlineSnapshot,
+  addSerializer,
+} from 'jest-snapshot';
 import path from 'path';
 import expect from '@kbn/expect';
 // @ts-expect-error
@@ -61,6 +66,15 @@ export function registerMochaHooksForSnapshots() {
     string,
     { snapshotState: ISnapshotState; testsInFile: Test[] }
   > = {};
+
+  addSerializer({
+    serialize: (num: number) => {
+      return String(parseFloat(num.toPrecision(15)));
+    },
+    test: (value: any) => {
+      return typeof value === 'number';
+    },
+  });
 
   registered = true;
 

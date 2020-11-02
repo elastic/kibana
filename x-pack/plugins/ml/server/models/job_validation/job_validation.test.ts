@@ -22,7 +22,7 @@ const callAs = {
         },
       }),
   },
-  search: () => Promise.resolve({ body: {} }),
+  search: () => Promise.resolve({ body: { hits: { total: { value: 0, relation: 'eq' } } } }),
 };
 
 const mlClusterClient = ({

@@ -37,7 +37,6 @@ export type MatrixHistogramComponentProps = MatrixHistogramProps &
     hideHistogramIfEmpty?: boolean;
     histogramType: MatrixHistogramType;
     id: string;
-    indexToAdd?: string[] | null;
     legendPosition?: Position;
     mapping?: MatrixHistogramMappingTypes;
     showSpacer?: boolean;
@@ -72,7 +71,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
   histogramType,
   hideHistogramIfEmpty = false,
   id,
-  indexToAdd,
+  indexNames,
   legendPosition,
   mapping,
   panelHeight = DEFAULT_PANEL_HEIGHT,
@@ -136,7 +135,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
     errorMessage,
     filterQuery,
     histogramType,
-    indexToAdd,
+    indexNames,
     startDate,
     stackByField: selectedStackByOption.value,
   });

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*	
-  One test relies on react-dom at a version of 16.9... it can be enabled	
-  once renovate completes the upgrade.  Relevant code has been commented out	
-  in the meantime.	
+/*
+  One test relies on react-dom at a version of 16.9... it can be enabled
+  once renovate completes the upgrade.  Relevant code has been commented out
+  in the meantime.
 */
 
 import { mount, ReactWrapper } from 'enzyme';
@@ -40,7 +40,7 @@ jest.mock('@elastic/eui/lib/components/portal/portal', () => {
   // Local constants are not supported in Jest mocks-- they must be
   // imported within the mock.
   // eslint-disable-next-line no-shadow
-  const React = require.requireActual('react');
+  const React = jest.requireActual('react');
   return {
     EuiPortal: (props: any) => <div>{props.children}</div>,
   };

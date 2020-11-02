@@ -71,14 +71,12 @@ const NoPermissions = memo(() => {
           />
         }
         body={
-          <p>
-            <EuiText color="subdued">
-              <FormattedMessage
-                id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
-                defaultMessage="It looks like Ingest Manager is disabled. Ingest Manager must be enabled to use this feature. If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
-              />
-            </EuiText>
-          </p>
+          <EuiText color="subdued">
+            <FormattedMessage
+              id="xpack.securitySolution.endpointManagement.noPermissionsSubText"
+              defaultMessage="It looks like Ingest Manager is disabled. Ingest Manager must be enabled to use this feature. If you do not have permissions to enable Ingest Manager, contact your Kibana administrator."
+            />
+          </EuiText>
         }
       />
       <SpyRoute pageName={SecurityPageName.administration} />

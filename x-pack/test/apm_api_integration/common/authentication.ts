@@ -14,6 +14,7 @@ export enum ApmUser {
   apmReadUser = 'apm_read_user',
   apmWriteUser = 'apm_write_user',
   apmAnnotationsWriteUser = 'apm_annotations_write_user',
+  apmReadUserWithoutMlAccess = 'apm_read_user_without_ml_access',
 }
 
 const roles = {
@@ -23,6 +24,24 @@ const roles = {
       {
         base: [],
         feature: { apm: ['read'], ml: ['read'] },
+        spaces: ['*'],
+      },
+    ],
+  },
+  [ApmUser.apmReadUserWithoutMlAccess]: {
+    elasticsearch: {
+      cluster: [],
+      indices: [
+        {
+          names: ['apm-*'],
+          privileges: ['read', 'view_index_metadata'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        base: [],
+        feature: { apm: ['read'] },
         spaces: ['*'],
       },
     ],
@@ -62,6 +81,9 @@ const users = {
   },
   [ApmUser.apmReadUser]: {
     roles: ['apm_user', ApmUser.apmReadUser],
+  },
+  [ApmUser.apmReadUserWithoutMlAccess]: {
+    roles: [ApmUser.apmReadUserWithoutMlAccess],
   },
   [ApmUser.apmWriteUser]: {
     roles: ['apm_user', ApmUser.apmWriteUser],

@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { from, combineLatest, of } from 'rxjs';
+import { map, takeUntil, first } from 'rxjs/operators';
 import { GlobalSearchResultProvider } from '../../../../global_search/server';
 import { mapToResults } from './map_object_to_result';
 
@@ -13,7 +13,14 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
   return {
     id: 'savedObjects',
     find: (term, { aborted$, maxResults, preference }, { core }) => {
-      const { typeRegistry, client } = core.savedObjects;
+      if (!term) {
+        return of([]);
+      }
+
+      const {
+        capabilities,
+        savedObjects: { client, typeRegistry },
+      } = core;
 
       const searchableTypes = typeRegistry
         .getVisibleTypes()
@@ -31,9 +38,9 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
         type: searchableTypes.map((type) => type.name),
       });
 
-      return from(responsePromise).pipe(
+      return combineLatest([from(responsePromise), capabilities.pipe(first())]).pipe(
         takeUntil(aborted$),
-        map((res) => mapToResults(res.saved_objects, typeRegistry))
+        map(([res, cap]) => mapToResults(res.saved_objects, typeRegistry, cap))
       );
     },
   };

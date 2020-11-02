@@ -23,7 +23,7 @@ const { isJsonField } = fieldValidators;
  * We use it to store custom defined parameters in a field called "otherTypeJson".
  */
 
-const fieldConfig: FieldConfig = {
+const fieldConfig: FieldConfig<any> = {
   label: i18n.translate('xpack.idxMgmt.mappingsEditor.otherTypeJsonFieldLabel', {
     defaultMessage: 'Type Parameters JSON',
   }),

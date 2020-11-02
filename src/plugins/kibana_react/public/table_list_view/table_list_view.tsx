@@ -427,6 +427,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         ),
         icon: 'pencil',
         type: 'icon',
+        enabled: ({ error }: { error: string }) => !error,
         onClick: this.props.editItem,
       },
     ];
@@ -556,3 +557,6 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 }
 
 export { TableListView };
+
+// eslint-disable-next-line import/no-default-export
+export default TableListView;

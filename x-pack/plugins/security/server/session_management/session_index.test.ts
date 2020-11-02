@@ -155,6 +155,17 @@ describe('Session index', () => {
 
       await sessionIndex.initialize();
     });
+
+    it('works properly after failure', async () => {
+      const unexpectedError = new Error('Uh! Oh!');
+      mockClusterClient.callAsInternalUser.mockImplementationOnce(() =>
+        Promise.reject(unexpectedError)
+      );
+      mockClusterClient.callAsInternalUser.mockImplementationOnce(() => Promise.resolve(true));
+
+      await expect(sessionIndex.initialize()).rejects.toBe(unexpectedError);
+      await expect(sessionIndex.initialize()).resolves.toBe(undefined);
+    });
   });
 
   describe('cleanUp', () => {

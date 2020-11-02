@@ -17,10 +17,14 @@
  * under the License.
  */
 
+import { CoreStart } from 'kibana/public';
 import { NotificationsStart } from 'kibana/public';
 import { createGetterSetter } from '../../kibana_utils/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
+import { SharePluginStart } from '../../share/public';
+
+export const [getCoreService, setCoreService] = createGetterSetter<CoreStart>('Core');
 
 export const [getFormatService, setFormatService] = createGetterSetter<
   DataPublicPluginStart['fieldFormats']
@@ -29,6 +33,12 @@ export const [getFormatService, setFormatService] = createGetterSetter<
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
+
+export const [getQueryService, setQueryService] = createGetterSetter<
+  DataPublicPluginStart['query']
+>('Query');
+
+export const [getShareService, setShareService] = createGetterSetter<SharePluginStart>('Share');
 
 export const [getKibanaLegacy, setKibanaLegacy] = createGetterSetter<KibanaLegacyStart>(
   'KibanaLegacy'

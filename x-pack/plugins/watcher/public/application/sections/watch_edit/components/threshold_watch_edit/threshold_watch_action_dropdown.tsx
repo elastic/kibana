@@ -103,7 +103,7 @@ export const WatchActionsDropdown: React.FunctionComponent<Props> = ({ settings,
                 setIsPopOverOpen(false);
               }}
             >
-              <EuiFlexGroup>
+              <EuiFlexGroup responsive={false}>
                 <EuiFlexItem grow={false} className="watcherThresholdWatchActionContextMenuItem">
                   <EuiIcon type={action.iconClass} />
                 </EuiFlexItem>

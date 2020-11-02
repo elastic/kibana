@@ -18,7 +18,9 @@
  */
 
 import _ from 'lodash';
-import { expandLiteralStrings, collapseLiteralStrings } from '../../../../es_ui_shared/public';
+import { XJson } from '../../../../es_ui_shared/public';
+
+const { collapseLiteralStrings, expandLiteralStrings } = XJson;
 
 export function textFromRequest(request: any) {
   let data = request.data;

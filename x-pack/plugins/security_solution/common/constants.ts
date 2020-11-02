@@ -11,7 +11,6 @@ export const APP_ICON = 'securityAnalyticsApp';
 export const APP_ICON_SOLUTION = 'logoSecurity';
 export const APP_PATH = `/app/security`;
 export const ADD_DATA_PATH = `/app/home#/tutorial_directory/security`;
-export const ADD_INDEX_PATH = `/app/management/kibana/indexPatterns/create`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';
 export const DEFAULT_DATE_FORMAT = 'dateFormat';
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz';
@@ -35,6 +34,7 @@ export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
+export const GLOBAL_HEADER_HEIGHT = 98; // px
 export const FILTERS_GLOBAL_HEIGHT = 109; // px
 export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
@@ -57,6 +57,8 @@ export const APP_NETWORK_PATH = `${APP_PATH}/network`;
 export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
 export const APP_CASES_PATH = `${APP_PATH}/cases`;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
+
+export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.detections}`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -177,3 +179,5 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+export const ENABLE_NEW_TIMELINE = false;

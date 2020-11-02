@@ -42,11 +42,8 @@ import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
 import { VisType, TypesStart } from '../../vis_types';
 
-export interface VisTypeListEntry extends VisType {
-  highlighted: boolean;
-}
-
-export interface VisTypeAliasListEntry extends VisTypeAlias {
+interface VisTypeListEntry {
+  type: VisType | VisTypeAlias;
   highlighted: boolean;
 }
 
@@ -67,6 +64,10 @@ interface HighlightedType {
 interface TypeSelectionState {
   highlightedType: HighlightedType | null;
   query: string;
+}
+
+function isVisTypeAlias(type: VisType | VisTypeAlias): type is VisTypeAlias {
+  return 'aliasPath' in type;
 }
 
 class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionState> {
@@ -155,7 +156,9 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                   </EuiTitle>
                   <EuiSpacer size="m" />
                   <NewVisHelp
-                    promotedTypes={(visTypes as VisTypeAliasListEntry[]).filter((t) => t.promotion)}
+                    promotedTypes={visTypes
+                      .map((t) => t.type)
+                      .filter((t): t is VisTypeAlias => isVisTypeAlias(t) && Boolean(t.promotion))}
                     onPromotionClicked={this.props.onVisTypeSelected}
                   />
                 </React.Fragment>
@@ -167,10 +170,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     );
   }
 
-  private filteredVisTypes(
-    visTypes: TypesStart,
-    query: string
-  ): Array<VisTypeListEntry | VisTypeAliasListEntry> {
+  private filteredVisTypes(visTypes: TypesStart, query: string): VisTypeListEntry[] {
     const types = visTypes.all().filter((type) => {
       // Filter out all lab visualizations if lab mode is not enabled
       if (!this.props.showExperimental && type.stage === 'experimental') {
@@ -187,9 +187,9 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
 
     const allTypes = [...types, ...visTypes.getAliases()];
 
-    let entries: Array<VisTypeListEntry | VisTypeAliasListEntry>;
+    let entries: VisTypeListEntry[];
     if (!query) {
-      entries = allTypes.map((type) => ({ ...type, highlighted: false }));
+      entries = allTypes.map((type) => ({ type, highlighted: false }));
     } else {
       const q = query.toLowerCase();
       entries = allTypes.map((type) => {
@@ -197,17 +197,21 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
           type.name.toLowerCase().includes(q) ||
           type.title.toLowerCase().includes(q) ||
           (typeof type.description === 'string' && type.description.toLowerCase().includes(q));
-        return { ...type, highlighted: matchesQuery };
+        return { type, highlighted: matchesQuery };
       });
     }
 
-    return orderBy(entries, ['highlighted', 'promotion', 'title'], ['desc', 'asc', 'asc']);
+    return orderBy(
+      entries,
+      ['highlighted', 'type.promotion', 'type.title'],
+      ['desc', 'asc', 'asc']
+    );
   }
 
-  private renderVisType = (visType: VisTypeListEntry | VisTypeAliasListEntry) => {
+  private renderVisType = (visType: VisTypeListEntry) => {
     let stage = {};
     let highlightMsg;
-    if (!('aliasPath' in visType) && visType.stage === 'experimental') {
+    if (!isVisTypeAlias(visType.type) && visType.type.stage === 'experimental') {
       stage = {
         betaBadgeLabel: i18n.translate('visualizations.newVisWizard.experimentalTitle', {
           defaultMessage: 'Experimental',
@@ -221,7 +225,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
         defaultMessage:
           'This visualization is experimental. The design and implementation are less mature than stable visualizations and might be subject to change.',
       });
-    } else if ('aliasPath' in visType && visType.stage === 'beta') {
+    } else if (isVisTypeAlias(visType.type) && visType.type.stage === 'beta') {
       const aliasDescription = i18n.translate('visualizations.newVisWizard.betaDescription', {
         defaultMessage:
           'This visualization is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
@@ -236,35 +240,34 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     }
 
     const isDisabled = this.state.query !== '' && !visType.highlighted;
-    const onClick = () => this.props.onVisTypeSelected(visType);
+    const onClick = () => this.props.onVisTypeSelected(visType.type);
 
     const highlightedType: HighlightedType = {
-      title: visType.title,
-      name: visType.name,
-      description: visType.description,
+      title: visType.type.title,
+      name: visType.type.name,
+      description: visType.type.description,
       highlightMsg,
     };
 
     return (
       <EuiKeyPadMenuItem
-        key={visType.name}
-        label={<span data-test-subj="visTypeTitle">{visType.title}</span>}
+        key={visType.type.name}
+        label={<span data-test-subj="visTypeTitle">{visType.type.title}</span>}
         onClick={onClick}
         onFocus={() => this.setHighlightType(highlightedType)}
         onMouseEnter={() => this.setHighlightType(highlightedType)}
         onMouseLeave={() => this.setHighlightType(null)}
         onBlur={() => this.setHighlightType(null)}
         className="visNewVisDialog__type"
-        data-test-subj={`visType-${visType.name}`}
-        data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
+        data-test-subj={`visType-${visType.type.name}`}
+        data-vis-stage={!isVisTypeAlias(visType.type) ? visType.type.stage : 'alias'}
         disabled={isDisabled}
-        aria-describedby={`visTypeDescription-${visType.name}`}
-        role="menuitem"
+        aria-describedby={`visTypeDescription-${visType.type.name}`}
         {...stage}
       >
         <VisTypeIcon
-          icon={visType.icon}
-          image={!('aliasPath' in visType) ? visType.image : undefined}
+          icon={visType.type.icon}
+          image={'image' in visType.type ? visType.type.image : undefined}
         />
       </EuiKeyPadMenuItem>
     );

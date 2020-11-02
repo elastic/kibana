@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { LegacyPluginSpec, LegacyConfig, LegacyVars } from '../types';
+import { LegacyConfig, LegacyVars } from '../types';
 import { getUnusedConfigKeys } from './get_unused_config_keys';
 
 describe('getUnusedConfigKeys', () => {
@@ -35,8 +35,6 @@ describe('getUnusedConfigKeys', () => {
       expect(
         await getUnusedConfigKeys({
           coreHandledConfigPaths: [],
-          pluginSpecs: [],
-          disabledPluginSpecs: [],
           settings: {},
           legacyConfig: getConfig(),
         })
@@ -47,8 +45,6 @@ describe('getUnusedConfigKeys', () => {
       expect(
         await getUnusedConfigKeys({
           coreHandledConfigPaths: [],
-          pluginSpecs: [],
-          disabledPluginSpecs: [],
           settings: {
             presentInBoth: true,
             alsoInBoth: 'someValue',
@@ -65,8 +61,6 @@ describe('getUnusedConfigKeys', () => {
       expect(
         await getUnusedConfigKeys({
           coreHandledConfigPaths: [],
-          pluginSpecs: [],
-          disabledPluginSpecs: [],
           settings: {
             presentInBoth: true,
           },
@@ -82,8 +76,6 @@ describe('getUnusedConfigKeys', () => {
       expect(
         await getUnusedConfigKeys({
           coreHandledConfigPaths: [],
-          pluginSpecs: [],
-          disabledPluginSpecs: [],
           settings: {
             presentInBoth: true,
             onlyInSetting: 'value',
@@ -99,8 +91,6 @@ describe('getUnusedConfigKeys', () => {
       expect(
         await getUnusedConfigKeys({
           coreHandledConfigPaths: [],
-          pluginSpecs: [],
-          disabledPluginSpecs: [],
           settings: {
             elasticsearch: {
               username: 'foo',
@@ -121,8 +111,6 @@ describe('getUnusedConfigKeys', () => {
       expect(
         await getUnusedConfigKeys({
           coreHandledConfigPaths: [],
-          pluginSpecs: [],
-          disabledPluginSpecs: [],
           settings: {
             env: 'development',
           },
@@ -139,8 +127,6 @@ describe('getUnusedConfigKeys', () => {
       expect(
         await getUnusedConfigKeys({
           coreHandledConfigPaths: [],
-          pluginSpecs: [],
-          disabledPluginSpecs: [],
           settings: {
             prop: ['a', 'b', 'c'],
           },
@@ -152,40 +138,10 @@ describe('getUnusedConfigKeys', () => {
     });
   });
 
-  it('ignores config for plugins that are disabled', async () => {
-    expect(
-      await getUnusedConfigKeys({
-        coreHandledConfigPaths: [],
-        pluginSpecs: [],
-        disabledPluginSpecs: [
-          ({
-            id: 'foo',
-            getConfigPrefix: () => 'foo.bar',
-          } as unknown) as LegacyPluginSpec,
-        ],
-        settings: {
-          foo: {
-            bar: {
-              unused: true,
-            },
-          },
-          plugin: {
-            missingProp: false,
-          },
-        },
-        legacyConfig: getConfig({
-          prop: 'a',
-        }),
-      })
-    ).toEqual(['plugin.missingProp']);
-  });
-
   it('ignores properties managed by the new platform', async () => {
     expect(
       await getUnusedConfigKeys({
         coreHandledConfigPaths: ['core', 'foo.bar'],
-        pluginSpecs: [],
-        disabledPluginSpecs: [],
         settings: {
           core: {
             prop: 'value',
@@ -204,8 +160,6 @@ describe('getUnusedConfigKeys', () => {
     expect(
       await getUnusedConfigKeys({
         coreHandledConfigPaths: ['core', 'array'],
-        pluginSpecs: [],
-        disabledPluginSpecs: [],
         settings: {
           core: {
             prop: 'value',

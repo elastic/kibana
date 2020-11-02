@@ -1,0 +1,149 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FeedItem render 1`] = `
+<section
+  aria-labelledby="kbnOverviewNews__title"
+  className="kbnOverviewNews"
+>
+  <EuiTitle
+    size="s"
+  >
+    <h2
+      id="kbnOverviewNews__title"
+    >
+      <FormattedMessage
+        defaultMessage="What's new"
+        id="kibanaOverview.news.title"
+        values={Object {}}
+      />
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <div
+    className="kbnOverviewNews__content"
+  >
+    <article
+      aria-labelledby="kbnOverviewNews__title0"
+      key="Blog Post 1"
+    >
+      <header>
+        <EuiTitle
+          size="xxs"
+        >
+          <h3
+            id="kbnOverviewNews__title0"
+          >
+            <EuiLink
+              href="link-blog-post-1"
+              target="_blank"
+            >
+              Blog Post 1
+            </EuiLink>
+          </h3>
+        </EuiTitle>
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          <p>
+            <time
+              dateTime="2020-08-31"
+            >
+              31 August 2020
+            </time>
+          </p>
+        </EuiText>
+      </header>
+      <EuiText
+        size="xs"
+      >
+        <p>
+          Content of blog post 1
+        </p>
+      </EuiText>
+    </article>
+    <article
+      aria-labelledby="kbnOverviewNews__title1"
+      key="Alerting and anomaly detection for uptime and reliability"
+    >
+      <header>
+        <EuiTitle
+          size="xxs"
+        >
+          <h3
+            id="kbnOverviewNews__title1"
+          >
+            <EuiLink
+              href="link-blog-post-2"
+              target="_blank"
+            >
+              Alerting and anomaly detection for uptime and reliability
+            </EuiLink>
+          </h3>
+        </EuiTitle>
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          <p>
+            <time
+              dateTime="2020-08-14"
+            >
+              14 August 2020
+            </time>
+          </p>
+        </EuiText>
+      </header>
+      <EuiText
+        size="xs"
+      >
+        <p>
+          Content of blog post 2
+        </p>
+      </EuiText>
+    </article>
+    <article
+      aria-labelledby="kbnOverviewNews__title2"
+      key="Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management"
+    >
+      <header>
+        <EuiTitle
+          size="xxs"
+        >
+          <h3
+            id="kbnOverviewNews__title2"
+          >
+            <EuiLink
+              href="link-blog-post-3"
+              target="_blank"
+            >
+              Optimizing costs in Elastic Cloud: Hot-warm + index lifecycle management
+            </EuiLink>
+          </h3>
+        </EuiTitle>
+        <EuiText
+          color="subdued"
+          size="xs"
+        >
+          <p>
+            <time
+              dateTime="2020-08-01"
+            >
+              01 August 2020
+            </time>
+          </p>
+        </EuiText>
+      </header>
+      <EuiText
+        size="xs"
+      >
+        <p>
+          Content of blog post 1
+        </p>
+      </EuiText>
+    </article>
+  </div>
+</section>
+`;

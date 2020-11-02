@@ -17,9 +17,9 @@ import {
   MetaOrUndefined,
   NameOrUndefined,
   NamespaceType,
+  OsTypeArray,
   TagsOrUndefined,
   UpdateCommentsArrayOrUndefined,
-  _TagsOrUndefined,
   _VersionOrUndefined,
 } from '../../../common/schemas';
 
@@ -33,13 +33,13 @@ import { getExceptionListItem } from './get_exception_list_item';
 interface UpdateExceptionListItemOptions {
   id: IdOrUndefined;
   comments: UpdateCommentsArrayOrUndefined;
-  _tags: _TagsOrUndefined;
   _version: _VersionOrUndefined;
   name: NameOrUndefined;
   description: DescriptionOrUndefined;
   entries: EntriesArray;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
+  osTypes: OsTypeArray;
   itemId: ItemIdOrUndefined;
   meta: MetaOrUndefined;
   user: string;
@@ -49,7 +49,6 @@ interface UpdateExceptionListItemOptions {
 }
 
 export const updateExceptionListItem = async ({
-  _tags,
   _version,
   comments,
   entries,
@@ -57,6 +56,7 @@ export const updateExceptionListItem = async ({
   savedObjectsClient,
   namespaceType,
   name,
+  osTypes,
   description,
   itemId,
   meta,
@@ -83,12 +83,12 @@ export const updateExceptionListItem = async ({
       savedObjectType,
       exceptionListItem.id,
       {
-        _tags,
         comments: transformedComments,
         description,
         entries,
         meta,
         name,
+        os_types: osTypes,
         tags,
         type,
         updated_by: user,

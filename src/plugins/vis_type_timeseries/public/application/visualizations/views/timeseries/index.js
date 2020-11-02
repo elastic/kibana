@@ -20,6 +20,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
 
 import {
   Axis,
@@ -70,19 +71,20 @@ export const TimeSeries = ({
   annotations,
 }) => {
   const chartRef = useRef();
-  const updateCursor = (_, cursor) => {
-    if (chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(cursor);
-    }
-  };
 
   useEffect(() => {
+    const updateCursor = (_, cursor) => {
+      if (chartRef.current) {
+        chartRef.current.dispatchExternalPointerEvent(cursor);
+      }
+    };
+
     eventBus.on(ACTIVE_CURSOR, updateCursor);
 
     return () => {
       eventBus.off(ACTIVE_CURSOR, undefined, updateCursor);
     };
-  }, []); // eslint-disable-line
+  }, []);
 
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = getUISettings();
@@ -139,6 +141,7 @@ export const TimeSeries = ({
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
         }}
+        externalPointerEvents={{ tooltip: { visible: false } }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {
@@ -163,6 +166,7 @@ export const TimeSeries = ({
           {
             id,
             label,
+            labelFormatted,
             bars,
             lines,
             data,
@@ -176,6 +180,7 @@ export const TimeSeries = ({
             useDefaultGroupDomain,
             y1AccessorFormat,
             y0AccessorFormat,
+            tickFormat,
           },
           sortIndex
         ) => {
@@ -185,14 +190,17 @@ export const TimeSeries = ({
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
           const finalColor = color ?? colors.mappedColors.mapping[label];
-
+          let seriesName = label.toString();
+          if (labelFormatted) {
+            seriesName = labelDateFormatter(labelFormatted);
+          }
           if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={label.toString()}
+                name={seriesName}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -207,6 +215,7 @@ export const TimeSeries = ({
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
+                tickFormat={tickFormat}
               />
             );
           }
@@ -217,7 +226,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={label.toString()}
+                name={seriesName}
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}
@@ -233,6 +242,7 @@ export const TimeSeries = ({
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
+                tickFormat={tickFormat}
               />
             );
           }

@@ -8,19 +8,20 @@ import { lazy } from 'react';
 import { ValidationResult, ActionTypeModel } from '../../../../types';
 import { connectorConfiguration } from './config';
 import logo from './logo.svg';
-import { JiraActionConnector, JiraActionParams } from './types';
+import { JiraActionConnector, JiraConfig, JiraSecrets, JiraActionParams } from './types';
 import * as i18n from './translations';
 import { isValidUrl } from '../../../lib/value_validators';
 
 const validateConnector = (action: JiraActionConnector): ValidationResult => {
-  const validationResult = { errors: {} };
-  const errors = {
-    apiUrl: new Array<string>(),
-    projectKey: new Array<string>(),
-    email: new Array<string>(),
-    apiToken: new Array<string>(),
+  const validationResult = {
+    errors: {
+      apiUrl: new Array<string>(),
+      projectKey: new Array<string>(),
+      email: new Array<string>(),
+      apiToken: new Array<string>(),
+    },
   };
-  validationResult.errors = errors;
+  const { errors } = validationResult;
 
   if (!action.config.apiUrl) {
     errors.apiUrl = [...errors.apiUrl, i18n.API_URL_REQUIRED];
@@ -45,7 +46,7 @@ const validateConnector = (action: JiraActionConnector): ValidationResult => {
   return validationResult;
 };
 
-export function getActionType(): ActionTypeModel<JiraActionConnector, JiraActionParams> {
+export function getActionType(): ActionTypeModel<JiraConfig, JiraSecrets, JiraActionParams> {
   return {
     id: connectorConfiguration.id,
     iconClass: logo,

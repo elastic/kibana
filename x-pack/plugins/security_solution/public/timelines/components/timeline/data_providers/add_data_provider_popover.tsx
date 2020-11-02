@@ -15,10 +15,11 @@ import {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import uuid from 'uuid';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { BrowserFields } from '../../../../common/containers/source';
 import { TimelineType } from '../../../../../common/types/timeline';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { StatefulEditDataProvider } from '../../edit_data_provider';
 import { addContentToTimeline } from './helpers';
 import { DataProviderType } from './data_provider';
@@ -36,7 +37,7 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
 }) => {
   const dispatch = useDispatch();
   const [isAddFilterPopoverOpen, setIsAddFilterPopoverOpen] = useState(false);
-  const timelineById = useSelector(timelineSelectors.timelineByIdSelector);
+  const timelineById = useShallowEqualSelector(timelineSelectors.timelineByIdSelector);
   const { dataProviders, timelineType } = timelineById[timelineId] ?? {};
 
   const handleOpenPopover = useCallback(() => setIsAddFilterPopoverOpen(true), [
@@ -195,9 +196,9 @@ const AddDataProviderPopoverComponent: React.FC<AddDataProviderPopoverProps> = (
       isOpen={isAddFilterPopoverOpen}
       closePopover={handleClosePopover}
       anchorPosition="downLeft"
-      withTitle
       panelPaddingSize="none"
       ownFocus={true}
+      repositionOnScroll
     >
       {content}
     </EuiPopover>

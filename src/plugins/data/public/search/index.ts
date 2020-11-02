@@ -19,34 +19,32 @@
 
 export * from './expressions';
 
+export { ISearchSetup, ISearchStart, ISearchStartSearchSource, SearchEnhancements } from './types';
+
 export {
+  ES_SEARCH_STRATEGY,
+  EsQuerySortValue,
+  extractReferences as extractSearchSourceReferences,
+  getSearchParamsFromRequest,
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  injectReferences as injectSearchSourceReferences,
   ISearch,
   ISearchGeneric,
-  ISearchSetup,
-  ISearchStart,
-  ISearchStartSearchSource,
-  SearchEnhancements,
-} from './types';
-
-export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
-
-export { getEsPreference } from './es_search';
-
-export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
-
-export { SearchError, getSearchParamsFromRequest, SearchRequest } from './fetch';
-
-export {
   ISearchSource,
+  parseSearchSourceJSON,
+  SearchError,
+  SearchRequest,
   SearchSource,
   SearchSourceDependencies,
   SearchSourceFields,
-  EsQuerySortValue,
   SortDirection,
-  extractReferences as extractSearchSourceReferences,
-  injectReferences as injectSearchSourceReferences,
-  parseSearchSourceJSON,
-} from './search_source';
+  ISessionService,
+} from '../../common/search';
+
+export { getEsPreference } from './es_search';
 
 export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
-export { RequestTimeoutError } from './request_timeout_error';
+export * from './errors';

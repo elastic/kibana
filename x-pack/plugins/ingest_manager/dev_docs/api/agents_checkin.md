@@ -5,7 +5,7 @@ Report current state of a Fleet agent.
 
 ## Request
 
-`POST /api/ingest_manager/fleet/agents/{agentId}/checkin`
+`POST /api/fleet/agents/{agentId}/checkin`
 
 ## Headers
 
@@ -24,7 +24,7 @@ Report current state of a Fleet agent.
 ## Example
 
 ```js
-POST /api/ingest_manager/fleet/agents/a4937110-e53e-11e9-934f-47a8e38a522c/checkin
+POST /api/fleet/agents/a4937110-e53e-11e9-934f-47a8e38a522c/checkin
 Authorization: ApiKey VALID_ACCESS_API_KEY
 {
   "events": [{

@@ -1,0 +1,69 @@
+{
+  "name": "EQL query rule",
+  "description": "Rule with an eql query",
+  "false_positives": [
+    "https://www.example.com/some-article-about-a-false-positive",
+    "some text string about why another condition could be a false positive"
+  ],
+  "rule_id": "rule-id-eql",
+  "enabled": false,
+  "index": [".ds-logs-endpoint.events.process-default-000001"],
+  "interval": "30s",
+  "query": "sequence [process where process.name = \"mimikatz.exe\"] [process where process.name = \"explorer.exe\"]",
+  "output_index": ".siem-signals-default",
+  "meta": {
+    "anything_you_want_ui_related_or_otherwise": {
+      "as_deep_structured_as_you_need": {
+        "any_data_type": {}
+      }
+    }
+  },
+  "risk_score": 1,
+  "max_signals": 100,
+  "tags": ["tag 1", "tag 2", "any tag you want"],
+  "to": "now",
+  "from": "now-300m",
+  "severity": "high",
+  "type": "eql",
+  "language": "eql",
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0040",
+        "name": "impact",
+        "reference": "https://attack.mitre.org/tactics/TA0040/"
+      },
+      "technique": [
+        {
+          "id": "T1499",
+          "name": "endpoint denial of service",
+          "reference": "https://attack.mitre.org/techniques/T1499/"
+        }
+      ]
+    },
+    {
+      "framework": "Some other Framework you want",
+      "tactic": {
+        "id": "some-other-id",
+        "name": "Some other name",
+        "reference": "https://example.com"
+      },
+      "technique": [
+        {
+          "id": "some-other-id",
+          "name": "some other technique name",
+          "reference": "https://example.com"
+        }
+      ]
+    }
+  ],
+  "references": [
+    "http://www.example.com/some-article-about-attack",
+    "Some plain text string here explaining why this is a valid thing to look out for"
+  ],
+  "timeline_id": "timeline_id",
+  "timeline_title": "timeline_title",
+  "note": "# note markdown",
+  "version": 1
+}

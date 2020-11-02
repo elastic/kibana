@@ -1,0 +1,44 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies User Account Control (UAC) bypass via hijacking DiskCleanup Scheduled Task. Attackers bypass UAC to stealthily execute code with elevated permissions.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "UAC Bypass via DiskCleanup Scheduled Task Hijack",
+  "query": "event.category:process and event.type:(start or process_started) and process.args:(/autoclean or /AUTOCLEAN) and process.parent.name:svchost.exe and not process.executable:(\"C:\\Windows\\System32\\cleanmgr.exe\" or \"C:\\Windows\\SysWOW64\\cleanmgr.exe\")",
+  "risk_score": 47,
+  "rule_id": "1dcc51f6-ba26-49e7-9ef4-2655abb2361e",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Privilege Escalation"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0004",
+        "name": "Privilege Escalation",
+        "reference": "https://attack.mitre.org/tactics/TA0004/"
+      },
+      "technique": [
+        {
+          "id": "T1088",
+          "name": "Bypass User Account Control",
+          "reference": "https://attack.mitre.org/techniques/T1088/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

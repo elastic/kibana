@@ -59,6 +59,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
             building_block_type: buildingBlockType,
             description,
             enabled,
+            event_category_override: eventCategoryOverride,
             false_positives: falsePositives,
             from,
             query,
@@ -86,6 +87,11 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
             type,
             threat,
             threshold,
+            threat_filters: threatFilters,
+            threat_index: threatIndex,
+            threat_query: threatQuery,
+            threat_mapping: threatMapping,
+            threat_language: threatLanguage,
             timestamp_override: timestampOverride,
             throttle,
             references,
@@ -119,6 +125,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               buildingBlockType,
               description,
               enabled,
+              eventCategoryOverride,
               falsePositives,
               from,
               query,
@@ -145,6 +152,11 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
               type,
               threat,
               threshold,
+              threatFilters,
+              threatIndex,
+              threatQuery,
+              threatMapping,
+              threatLanguage,
               timestampOverride,
               references,
               note,
@@ -171,12 +183,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformValidateBulkError(
-                rule.id,
-                rule,
-                ruleActions,
-                ruleStatuses.saved_objects[0]
-              );
+              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }

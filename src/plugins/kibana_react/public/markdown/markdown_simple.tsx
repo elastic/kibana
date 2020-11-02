@@ -24,7 +24,7 @@ const markdownRenderers = {
   root: Fragment,
 };
 
-interface MarkdownSimpleProps {
+export interface MarkdownSimpleProps {
   children: string;
 }
 
@@ -32,3 +32,7 @@ interface MarkdownSimpleProps {
 export const MarkdownSimple = ({ children }: MarkdownSimpleProps) => (
   <ReactMarkdown renderers={markdownRenderers}>{children}</ReactMarkdown>
 );
+
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default MarkdownSimple;

@@ -10,7 +10,7 @@ import lightTheme from '@elastic/eui/dist/eui_theme_light.json';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 
-import { HostItem } from '../../../../common/search_strategy';
+import { DocValueFields, HostItem } from '../../../../common/search_strategy';
 import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
@@ -37,9 +37,11 @@ import { EndpointOverview } from './endpoint_overview';
 
 interface HostSummaryProps {
   data: HostItem;
+  docValueFields: DocValueFields[];
   id: string;
   loading: boolean;
   isLoadingAnomaliesData: boolean;
+  indexNames: string[];
   anomaliesData: Anomalies | null;
   startDate: string;
   endDate: string;
@@ -56,9 +58,11 @@ export const HostOverview = React.memo<HostSummaryProps>(
   ({
     anomaliesData,
     data,
+    docValueFields,
     endDate,
     id,
     isLoadingAnomaliesData,
+    indexNames,
     loading,
     narrowDateRange,
     startDate,
@@ -91,7 +95,9 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description:
             data.host != null && data.host.name && data.host.name.length ? (
               <FirstLastSeenHost
+                docValueFields={docValueFields}
                 hostName={data.host.name[0]}
+                indexNames={indexNames}
                 type={FirstLastSeenHostType.FIRST_SEEN}
               />
             ) : (
@@ -103,7 +109,9 @@ export const HostOverview = React.memo<HostSummaryProps>(
           description:
             data.host != null && data.host.name && data.host.name.length ? (
               <FirstLastSeenHost
+                docValueFields={docValueFields}
                 hostName={data.host.name[0]}
+                indexNames={indexNames}
                 type={FirstLastSeenHostType.LAST_SEEN}
               />
             ) : (
@@ -111,7 +119,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
             ),
         },
       ],
-      [data]
+      [data, docValueFields, indexNames]
     );
     const firstColumn = useMemo(
       () =>

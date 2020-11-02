@@ -178,13 +178,11 @@ export function sourceHasUsageCollector(sourceFile: ts.SourceFile) {
   }
 
   const identifiers = (sourceFile as any).identifiers;
-  if (
-    (!identifiers.get('makeUsageCollector') && !identifiers.get('type')) ||
-    !identifiers.get('fetch')
-  ) {
-    return false;
+  if (identifiers.get('makeUsageCollector')) {
+    return true;
   }
 
+  return false;
   return true;
 }
 

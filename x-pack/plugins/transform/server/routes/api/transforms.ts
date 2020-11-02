@@ -12,7 +12,6 @@ import {
   SavedObjectsClientContract,
   LegacyAPICaller,
 } from 'kibana/server';
-import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
 import { TRANSFORM_STATE } from '../../../common/constants';
 import { TransformId } from '../../../common/types/transform';
@@ -54,7 +53,7 @@ import { RouteDependencies } from '../../types';
 
 import { addBasePath } from '../index';
 
-import { isRequestTimeout, fillResultsWithTimeouts, wrapError } from './error_utils';
+import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 

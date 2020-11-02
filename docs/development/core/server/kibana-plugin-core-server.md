@@ -50,12 +50,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Interface | Description |
 |  --- | --- |
+|  [AppCategory](./kibana-plugin-core-server.appcategory.md) | A category definition for nav links to know where to sort them in the left hand nav |
 |  [AssistanceAPIResponse](./kibana-plugin-core-server.assistanceapiresponse.md) |  |
 |  [AssistantAPIClientParams](./kibana-plugin-core-server.assistantapiclientparams.md) |  |
-|  [AuditableEvent](./kibana-plugin-core-server.auditableevent.md) | Event to audit. |
-|  [Auditor](./kibana-plugin-core-server.auditor.md) | Provides methods to log user actions and access events. |
-|  [AuditorFactory](./kibana-plugin-core-server.auditorfactory.md) | Creates [Auditor](./kibana-plugin-core-server.auditor.md) instance bound to the current user credentials. |
-|  [AuditTrailSetup](./kibana-plugin-core-server.audittrailsetup.md) |  |
 |  [Authenticated](./kibana-plugin-core-server.authenticated.md) |  |
 |  [AuthNotHandled](./kibana-plugin-core-server.authnothandled.md) |  |
 |  [AuthRedirected](./kibana-plugin-core-server.authredirected.md) |  |
@@ -120,6 +117,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OnPreAuthToolkit](./kibana-plugin-core-server.onpreauthtoolkit.md) | A tool set defining an outcome of OnPreAuth interceptor for incoming request. |
 |  [OnPreResponseExtensions](./kibana-plugin-core-server.onpreresponseextensions.md) | Additional data to extend a response. |
 |  [OnPreResponseInfo](./kibana-plugin-core-server.onpreresponseinfo.md) | Response status code. |
+|  [OnPreResponseRender](./kibana-plugin-core-server.onpreresponserender.md) | Additional data to extend a response when rendering a new body |
 |  [OnPreResponseToolkit](./kibana-plugin-core-server.onpreresponsetoolkit.md) | A tool set defining an outcome of OnPreResponse interceptor for incoming request. |
 |  [OnPreRoutingToolkit](./kibana-plugin-core-server.onpreroutingtoolkit.md) | A tool set defining an outcome of OnPreRouting interceptor for incoming request. |
 |  [OpsMetrics](./kibana-plugin-core-server.opsmetrics.md) | Regroups metrics gathered by all the collectors. This contains metrics about the os/runtime, the kibana process and the http server. |
@@ -130,7 +128,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PluginConfigDescriptor](./kibana-plugin-core-server.pluginconfigdescriptor.md) | Describes a plugin configuration properties. |
 |  [PluginInitializerContext](./kibana-plugin-core-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginManifest](./kibana-plugin-core-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
-|  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [elasticsearch.legacy.client](./kibana-plugin-core-server.legacyscopedclusterclient.md) - The legacy Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request - [uiSettings.auditor](./kibana-plugin-core-server.auditor.md) - AuditTrail client scoped to the incoming request |
+|  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [elasticsearch.legacy.client](./kibana-plugin-core-server.legacyscopedclusterclient.md) - The legacy Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
 |  [RouteConfig](./kibana-plugin-core-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-core-server.routeconfigoptions.md) | Additional route options. |
 |  [RouteConfigOptionsBody](./kibana-plugin-core-server.routeconfigoptionsbody.md) | Additional body options for a route |
@@ -221,7 +219,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  Type Alias | Description |
 |  --- | --- |
 |  [AppenderConfigType](./kibana-plugin-core-server.appenderconfigtype.md) |  |
-|  [AuditTrailStart](./kibana-plugin-core-server.audittrailstart.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-core-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-core-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-core-server.authheaders.md) | Auth Headers map |
 |  [AuthResult](./kibana-plugin-core-server.authresult.md) |  |

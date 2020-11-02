@@ -5,7 +5,7 @@
  */
 
 import { SavedObjectsClientContract } from 'src/core/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import {
   AssetReference,
@@ -18,7 +18,7 @@ import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { packagePolicyService, appContextService } from '../..';
-import { splitPkgKey, deletePackageCache, getArchiveInfo } from '../registry';
+import { splitPkgKey, deletePackageCache } from '../registry';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -44,9 +44,6 @@ export async function removeInstallation(options: {
       `unable to remove package with existing package policy(s) in use by agent(s)`
     );
 
-  // recreate or delete index patterns when a package is uninstalled
-  await installIndexPatterns(savedObjectsClient);
-
   // Delete the installed assets
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
   await deleteAssets(installedAssets, savedObjectsClient, callCluster);
@@ -55,10 +52,14 @@ export async function removeInstallation(options: {
   // could also update with [] or some other state
   await savedObjectsClient.delete(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
 
+  // recreate or delete index patterns when a package is uninstalled
+  // this must be done after deleting the saved object for the current package otherwise it will retrieve the package
+  // from the registry again and reinstall the index patterns
+  await installIndexPatterns(savedObjectsClient);
+
   // remove the package archive and its contents from the cache so that a reinstall fetches
   // a fresh copy from the registry
-  const paths = await getArchiveInfo(pkgName, pkgVersion);
-  deletePackageCache(pkgName, pkgVersion, paths);
+  deletePackageCache(pkgName, pkgVersion);
 
   // successful delete's in SO client return {}. return something more useful
   return installedAssets;

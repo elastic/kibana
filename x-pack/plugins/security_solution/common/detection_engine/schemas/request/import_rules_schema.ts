@@ -51,7 +51,15 @@ import {
   Author,
   RiskScoreMapping,
   SeverityMapping,
+  event_category_override,
 } from '../common/schemas';
+import {
+  threat_index,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+} from '../types/threat_mapping';
 
 import {
   DefaultStringArray,
@@ -101,6 +109,7 @@ export const importRulesSchema = t.intersection([
       author: DefaultStringArray, // defaults to empty array of strings if not set during decode
       building_block_type, // defaults to undefined if not set during decode
       enabled: DefaultBooleanTrue, // defaults to true if not set during decode
+      event_category_override, // defaults to "undefined" if not set during decode
       false_positives: DefaultStringArray, // defaults to empty string array if not set during decode
       filters, // defaults to undefined if not set during decode
       from: DefaultFromString, // defaults to "now-6m" if not set during decode
@@ -135,6 +144,11 @@ export const importRulesSchema = t.intersection([
       updated_at, // defaults "undefined" if not set during decode
       created_by, // defaults "undefined" if not set during decode
       updated_by, // defaults "undefined" if not set during decode
+      threat_filters, // defaults to "undefined" if not set during decode
+      threat_mapping, // defaults to "undefined" if not set during decode
+      threat_query, // defaults to "undefined" if not set during decode
+      threat_index, // defaults to "undefined" if not set during decode
+      threat_language, // defaults "undefined" if not set during decode
     })
   ),
 ]);

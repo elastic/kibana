@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { PersistedState } from 'src/plugins/visualizations/public';
+
 export interface ExpressionRenderDefinition<Config = unknown> {
   /**
    * Technical name of the renderer, used as ID to identify renderer in
@@ -28,7 +30,7 @@ export interface ExpressionRenderDefinition<Config = unknown> {
   /**
    * A user friendly name of the renderer as will be displayed to user in UI.
    */
-  displayName: string;
+  displayName?: string;
 
   /**
    * Help text as will be displayed to user. A sentence or few about what this
@@ -68,4 +70,5 @@ export interface IInterpreterRenderHandlers {
   reload: () => void;
   update: (params: any) => void;
   event: (event: any) => void;
+  uiState?: PersistedState;
 }

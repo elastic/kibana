@@ -56,6 +56,8 @@ import { OpenTimelineResult, UpdateTimeline, DispatchUpdateTimeline } from './ty
 import { createNote } from '../notes/helpers';
 import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
+import { sourcererActions } from '../../../common/store/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -375,6 +377,13 @@ export const dispatchUpdateTimeline = (dispatch: Dispatch): DispatchUpdateTimeli
   to,
   ruleNote,
 }: UpdateTimeline): (() => void) => () => {
+  dispatch(
+    sourcererActions.initTimelineIndexPatterns({
+      id: SourcererScopeName.timeline,
+      selectedPatterns: timeline.indexNames,
+      eventType: timeline.eventType,
+    })
+  );
   dispatch(dispatchSetTimelineRangeDatePicker({ from, to }));
   dispatch(dispatchAddTimeline({ id, timeline, savedTimeline: duplicate }));
   if (

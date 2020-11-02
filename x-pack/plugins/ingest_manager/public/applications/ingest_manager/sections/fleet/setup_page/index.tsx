@@ -73,7 +73,7 @@ export const SetupPage: React.FunctionComponent<{
   ) {
     return (
       <WithoutHeaderLayout>
-        <EuiPageBody restrictWidth={548}>
+        <EuiPageBody restrictWidth={648}>
           <EuiPageContent
             verticalPosition="center"
             horizontalPosition="center"
@@ -86,25 +86,24 @@ export const SetupPage: React.FunctionComponent<{
             <EuiTitle size="l">
               <h2>
                 <FormattedMessage
-                  id="xpack.ingestManager.setupPage.enableTitle"
-                  defaultMessage="Enable Fleet"
+                  id="xpack.fleet.setupPage.enableTitle"
+                  defaultMessage="Enable central management for Elastic Agents"
                 />
               </h2>
             </EuiTitle>
             <EuiSpacer size="xl" />
             <EuiText color="subdued">
               <FormattedMessage
-                id="xpack.ingestManager.setupPage.enableText"
-                defaultMessage="In order to use Fleet, you must create an Elastic user. This user can create API keys
-        and write to logs-* and metrics-*."
+                id="xpack.fleet.setupPage.enableText"
+                defaultMessage="Central management requires an Elastic user who can create API keys and write to logs-* and metrics-*."
               />
             </EuiText>
             <EuiSpacer size="l" />
             <EuiForm>
               <EuiButton onClick={onSubmit} fill isLoading={isFormLoading} type="submit">
                 <FormattedMessage
-                  id="xpack.ingestManager.setupPage.enableFleet"
-                  defaultMessage="Create user and enable Fleet"
+                  id="xpack.fleet.setupPage.enableCentralManagement"
+                  defaultMessage="Create user and enable central management"
                 />
               </EuiButton>
             </EuiForm>
@@ -120,26 +119,26 @@ export const SetupPage: React.FunctionComponent<{
       <EuiPageBody restrictWidth={820}>
         <EuiPageContent>
           <EuiCallOut
-            title={i18n.translate('xpack.ingestManager.setupPage.missingRequirementsCalloutTitle', {
+            title={i18n.translate('xpack.fleet.setupPage.missingRequirementsCalloutTitle', {
               defaultMessage: 'Missing security requirements',
             })}
             color="warning"
             iconType="alert"
           >
             <FormattedMessage
-              id="xpack.ingestManager.setupPage.missingRequirementsCalloutDescription"
-              defaultMessage="In order to use Fleet, you must enable the following Elasticsearch and Kibana security features."
+              id="xpack.fleet.setupPage.missingRequirementsCalloutDescription"
+              defaultMessage="To use central management for Elastic Agents, enable the following Elasticsearch and Kibana security features."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />
           <FormattedMessage
-            id="xpack.ingestManager.setupPage.missingRequirementsElasticsearchTitle"
+            id="xpack.fleet.setupPage.missingRequirementsElasticsearchTitle"
             defaultMessage="In your Elasticsearch policy, enable:"
           />
           <EuiSpacer size="l" />
           <RequirementItem isMissing={false}>
             <FormattedMessage
-              id="xpack.ingestManager.setupPage.elasticsearchSecurityFlagText"
+              id="xpack.fleet.setupPage.elasticsearchSecurityFlagText"
               defaultMessage="{esSecurityLink}. Set {securityFlag} to {true} ."
               values={{
                 esSecurityLink: (
@@ -149,7 +148,7 @@ export const SetupPage: React.FunctionComponent<{
                     external
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.setupPage.elasticsearchSecurityLink"
+                      id="xpack.fleet.setupPage.elasticsearchSecurityLink"
                       defaultMessage="Elasticsearch security"
                     />
                   </EuiLink>
@@ -162,7 +161,7 @@ export const SetupPage: React.FunctionComponent<{
           <EuiSpacer size="s" />
           <RequirementItem isMissing={missingRequirements.includes('api_keys')}>
             <FormattedMessage
-              id="xpack.ingestManager.setupPage.elasticsearchApiKeyFlagText"
+              id="xpack.fleet.setupPage.elasticsearchApiKeyFlagText"
               defaultMessage="{apiKeyLink}. Set {apiKeyFlag} to {true} ."
               values={{
                 apiKeyFlag: <EuiCode>xpack.security.authc.api_key.enabled</EuiCode>,
@@ -174,7 +173,7 @@ export const SetupPage: React.FunctionComponent<{
                     external
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.setupPage.apiKeyServiceLink"
+                      id="xpack.fleet.setupPage.apiKeyServiceLink"
                       defaultMessage="API key service"
                     />
                   </EuiLink>
@@ -189,13 +188,13 @@ xpack.security.authc.api_key.enabled: true`}
           </EuiCodeBlock>
           <EuiSpacer size="l" />
           <FormattedMessage
-            id="xpack.ingestManager.setupPage.missingRequirementsKibanaTitle"
+            id="xpack.fleet.setupPage.missingRequirementsKibanaTitle"
             defaultMessage="In your Kibana policy, enable:"
           />
           <EuiSpacer size="l" />
           <RequirementItem isMissing={missingRequirements.includes('tls_required')}>
             <FormattedMessage
-              id="xpack.ingestManager.setupPage.tlsFlagText"
+              id="xpack.fleet.setupPage.tlsFlagText"
               defaultMessage="{kibanaSecurityLink}. Set {securityFlag} to {true}. For development purposes, you can disable {tlsLink} by setting {tlsFlag} to {true} as an unsafe alternative."
               values={{
                 kibanaSecurityLink: (
@@ -205,7 +204,7 @@ xpack.security.authc.api_key.enabled: true`}
                     external
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.setupPage.kibanaSecurityLink"
+                      id="xpack.fleet.setupPage.kibanaSecurityLink"
                       defaultMessage="Kibana security"
                     />
                   </EuiLink>
@@ -217,13 +216,10 @@ xpack.security.authc.api_key.enabled: true`}
                     target="_blank"
                     external
                   >
-                    <FormattedMessage
-                      id="xpack.ingestManager.setupPage.tlsLink"
-                      defaultMessage="TLS"
-                    />
+                    <FormattedMessage id="xpack.fleet.setupPage.tlsLink" defaultMessage="TLS" />
                   </EuiLink>
                 ),
-                tlsFlag: <EuiCode>xpack.ingestManager.fleet.tlsCheckDisabled</EuiCode>,
+                tlsFlag: <EuiCode>xpack.fleet.agents.tlsCheckDisabled</EuiCode>,
                 true: <EuiCode>true</EuiCode>,
               }}
             />
@@ -235,7 +231,7 @@ xpack.security.authc.api_key.enabled: true`}
             )}
           >
             <FormattedMessage
-              id="xpack.ingestManager.setupPage.encryptionKeyFlagText"
+              id="xpack.fleet.setupPage.encryptionKeyFlagText"
               defaultMessage="{encryptionKeyLink}. Set {keyFlag} to any alphanumeric value of at least 32 characters."
               values={{
                 encryptionKeyLink: (
@@ -245,7 +241,7 @@ xpack.security.authc.api_key.enabled: true`}
                     external
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.setupPage.kibanaEncryptionLink"
+                      id="xpack.fleet.setupPage.kibanaEncryptionLink"
                       defaultMessage="Kibana encryption key"
                     />
                   </EuiLink>
@@ -261,7 +257,7 @@ xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"`}
           </EuiCodeBlock>
           <EuiSpacer size="l" />
           <FormattedMessage
-            id="xpack.ingestManager.setupPage.gettingStartedText"
+            id="xpack.fleet.setupPage.gettingStartedText"
             defaultMessage="For more information, read our {link} guide."
             values={{
               link: (
@@ -271,7 +267,7 @@ xpack.encryptedSavedObjects.encryptionKey: "something_at_least_32_characters"`}
                   external
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.setupPage.gettingStartedLink"
+                    id="xpack.fleet.setupPage.gettingStartedLink"
                     defaultMessage="Getting Started"
                   />
                 </EuiLink>

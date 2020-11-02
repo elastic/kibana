@@ -12,6 +12,7 @@ it('allows features to be defined without privileges', () => {
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
   });
 
@@ -23,6 +24,7 @@ it('allows features with reserved privileges to be defined', () => {
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
     reserved: {
       description: 'foo',
@@ -49,6 +51,7 @@ it('allows features with sub-features to be defined', () => {
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         savedObject: {
@@ -112,6 +115,7 @@ it('does not allow features with sub-features which have id conflicts with the m
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         savedObject: {
@@ -162,6 +166,7 @@ it('does not allow features with sub-features which have id conflicts with the p
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         savedObject: {
@@ -212,6 +217,7 @@ it('does not allow features with sub-features which have id conflicts each other
     id: 'foo',
     name: 'foo',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: {
       all: {
         savedObject: {

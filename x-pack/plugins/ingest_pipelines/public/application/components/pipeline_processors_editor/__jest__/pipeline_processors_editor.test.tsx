@@ -55,6 +55,23 @@ describe('Pipeline Editor', () => {
     expect(arg.getData()).toEqual(testProcessors);
   });
 
+  describe('no processors', () => {
+    beforeEach(async () => {
+      testBed = await setup({
+        value: {
+          processors: [],
+        },
+        onFlyoutOpen: jest.fn(),
+        onUpdate,
+      });
+    });
+
+    it('displays an empty prompt if no processors are defined', () => {
+      const { exists } = testBed;
+      expect(exists('processorsEmptyPrompt')).toBe(true);
+    });
+  });
+
   describe('processors', () => {
     it('adds a new processor', async () => {
       const { actions } = testBed;

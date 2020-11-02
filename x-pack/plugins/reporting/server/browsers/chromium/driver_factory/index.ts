@@ -64,7 +64,7 @@ export class HeadlessChromiumDriverFactory {
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone: string },
+    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone?: string },
     pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {

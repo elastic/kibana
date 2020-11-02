@@ -28,6 +28,7 @@ describe('GET /api/features', () => {
       id: 'feature_1',
       name: 'Feature 1',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: null,
     });
 
@@ -36,6 +37,7 @@ describe('GET /api/features', () => {
       name: 'Feature 2',
       order: 2,
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: null,
     });
 
@@ -44,6 +46,7 @@ describe('GET /api/features', () => {
       name: 'Feature 2',
       order: 1,
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: null,
     });
 
@@ -51,7 +54,8 @@ describe('GET /api/features', () => {
       id: 'licensed_feature',
       name: 'Licensed Feature',
       app: ['bar-app'],
-      validLicenses: ['gold'],
+      category: { id: 'foo', label: 'foo' },
+      minimumLicense: 'gold',
       privileges: null,
     });
 

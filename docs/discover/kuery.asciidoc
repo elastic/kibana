@@ -1,90 +1,170 @@
 [[kuery-query]]
 === Kibana Query Language
 
-In Kibana 6.3, we introduced a number of exciting experimental query language enhancements. These
-features are now available by default in 7.0. Out of the box, Kibana's query language now includes scripted field support and a
-simplified, easier to use syntax. If you have a Basic license or above, autocomplete functionality will also be enabled.
+The Kibana Query Language (KQL) makes it easy to find
+the fields and syntax for your {es} query. If you have the
+https://www.elastic.co/subscriptions[Basic tier] or above,
+simply place your cursor in the *Search* field. As you type, you’ll get suggestions for fields,
+values, and operators.
 
-==== Language syntax
+[role="screenshot"]
+image::images/kql-autocomplete.png[Autocomplete in Search bar]
 
-If you're familiar with Kibana's old Lucene query syntax, you should feel right at home with the new syntax. The basics
-stay the same, we've simply refined things to make the query language easier to use.
+If you prefer to use Kibana’s legacy query language, based on the
+<<lucene-query, Lucene query syntax>>, click *KQL* next to the *Search* field, and then turn off KQL.
 
-`response:200` will match documents where the response field matches the value 200.
+[discrete]
+=== Terms query
 
-Quotes around a search term will initiate a phrase search. For example, `message:"Quick brown fox"` will search
-for the phrase "quick brown fox" in the message field. Without the quotes, your query will get broken down into tokens via
-the message field's configured analyzer and will match documents that contain those tokens, regardless of the order in which
-they appear. This means documents with "quick brown fox" will match, but so will "quick fox brown". Remember to use quotes if you want
-to search for a phrase.
+A terms query matches documents that contain one or more *exact* terms in a field.
 
-The query parser will no longer split on whitespace. Multiple search terms must be separated by explicit
-boolean operators. Lucene will combine search terms with an `or` by default, so `response:200 extension:php` would
-become `response:200 or extension:php` in KQL. This will match documents where response matches 200, extension matches php, or both.
-Note that boolean operators are not case sensitive.
+To match documents where the response field is `200`:
 
-We can make terms required by using `and`.
+[source,yaml]
+-------------------
+response:200
+-------------------
 
-`response:200 and extension:php` will match documents where response matches 200 and extension matches php.
+To match documents with the phrase "quick brown fox" in the `message` field.
 
-By default, `and` has a higher precedence than `or`.
+[source,yaml]
+-------------------
+message:"quick brown fox"
+-------------------
 
-`response:200 and extension:php or extension:css` will match documents where response is 200 and extension is php OR documents where extension is css and response is anything.
+Without the quotes,
+the query matches documents regardless of the order in which
+they appear. Documents with "quick brown fox" match,
+and so does "quick fox brown".
 
-We can override the default precedence with grouping.
-
-`response:200 and (extension:php or extension:css)` will match documents where response is 200 and extension is either php or css.
-
-A shorthand exists that allows us to easily search a single field for multiple values.
-
-`response:(200 or 404)` searches for docs where the `response` field matches 200 or 404. We can also search for docs
-with multi-value fields that contain a list of terms, for example: `tags:(success and info and security)`
-
-Terms can be inverted by prefixing them with `not`.
-
-`not response:200` will match all documents where response is not 200.
-
-Entire groups can also be inverted.
-
-`response:200 and not (extension:php or extension:css)`
-
-Ranges are similar to lucene with a small syntactical difference.
-
-Instead of `bytes:>1000`, we omit the colon: `bytes > 1000`.
-
-`>, >=, <, <=` are all valid range operators.
-
-Exist queries are simple and do not require a special operator. `response:*` will find all docs where the response
-field exists.
-
-Wildcard queries are available. `machine.os:win*` would match docs where the machine.os field starts with "win", which
-would match values like "windows 7" and "windows 10".
-
-Wildcards also allow us to search multiple fields at once. This can come in handy when you have both `text` and `keyword`
-versions of a field. Let's say we have `machine.os` and `machine.os.keyword` fields and we want to check both for the term
-"windows 10". We can do it like this: `machine.os*:windows 10".
+NOTE: Terms without fields are matched against the default field in your index settings.
+If a default field is not
+set, terms are matched against all fields. For example, a query
+for `response:200` searches for the value 200
+in the response field, but a query for just `200` searches for 200
+across all fields in your index.
 
 
-[NOTE]
-============
-Terms without fields will be matched against the default field in your index settings. If a default field is not
-set these terms will be matched against all fields. For example, a query for `response:200` will search for the value 200
-in the response field, but a query for just `200` will search for 200 across all fields in your index.
-============
+[discrete]
+=== Boolean queries
 
-==== Nested field support
+KQL supports `or`, `and`, and `not`. By default, `and` has a higher precedence than `or`.
+To override the default precedence, group operators in parentheses.
 
-KQL supports querying on {ref}/nested.html[nested fields] through a special syntax. You can query nested fields in subtly different
-ways, depending on the results you want, so crafting nested queries requires extra thought.
+To match documents where response is `200`, extension is `php`, or both:
 
-One main consideration is how to match parts of the nested query to the individual nested documents.
-There are two main approaches to take:
+[source,yaml]
+-------------------
+response:200 or extension:php
+-------------------
 
-* *Parts of the query may only match a single nested document.* This is what most users want when querying on a nested field.
-* *Parts of the query can match different nested documents.* This is how a regular object field works.
- Although generally less useful, there might be occasions where you want to query a nested field in this way.
+To match documents where response is `200` and extension is `php`:
 
-Let's take a look at the first approach. In the following document, `items` is a nested field. Each document in the nested
+[source,yaml]
+-------------------
+response:200 and extension:php
+-------------------
+
+To match documents where response is `200` or `404`.
+
+[source,yaml]
+-------------------
+response:(200 or 404)
+-------------------
+
+To match documents where response is `200` and extension is either `php` or `css`:
+
+[source,yaml]
+-------------------
+response:200 and (extension:php or extension:css)
+-------------------
+
+To match documents where `response` is 200 and `extension` is
+`php` or extension is `css`, and response is anything:
+
+[source,yaml]
+-------------------
+response:200 and extension:php or extension:css
+-------------------
+
+To match documents where response is not `200`:
+
+[source,yaml]
+-------------------
+not response:200
+-------------------
+
+To match documents where response is `200` but extension is not `php` or `css`.
+
+[source,yaml]
+-------------------
+response:200 and not (extension:php or extension:css)
+-------------------
+
+To match multi-value fields that contain a list of terms:
+
+[source,yaml]
+-------------------
+tags:(success and info and security)
+-------------------
+
+[discrete]
+=== Range queries
+
+KQL supports `>`, `>=`, `<`, and `<=`. For example:
+
+[source,yaml]
+-------------------
+account_number >= 100 and items_sold <= 200
+-------------------
+
+[discrete]
+=== Exist queries
+
+An exist query matches documents that contain a value for a field, in this case,
+response:
+
+[source,yaml]
+-------------------
+response:*
+-------------------
+
+[discrete]
+=== Wildcard queries
+
+To match documents where machine.os starts with `win`, such
+as "windows 7" and "windows 10":
+
+[source,yaml]
+-------------------
+machine.os:win*
+-------------------
+
+To match multiple fields:
+
+[source,yaml]
+-------------------
+machine.os*:windows 10
+-------------------
+
+This sytax is handy when you have text and keyword
+versions of a field. The query checks machine.os and machine.os.keyword
+for the term
+`windows 10`.
+
+
+[discrete]
+=== Nested field queries
+
+A main consideration for querying {ref}/nested.html[nested fields] is how to
+match parts of the nested query to the individual nested documents.
+You can:
+
+* *Match parts of the query to a single nested document only.* This is what most users want when querying on a nested field.
+* *Match parts of the query to different nested documents.* This is how a regular object field works.
+ This query is generally less useful than matching to a single document.
+
+In the following document, `items` is a nested field. Each document in the nested
 field contains a name, stock, and category.
 
 [source,json]
@@ -116,40 +196,61 @@ field contains a name, stock, and category.
 }
 ----------------------------------
 
-===== Match a single nested document
+[discrete]
+==== Match a single document
 
-To find stores that have more than 10 bananas in stock, you would write a query like this:
+To match stores that have more than 10 bananas in stock:
 
-`items:{ name:banana and stock > 10 }`
+[source,yaml]
+-------------------
+items:{ name:banana and stock > 10 }
+-------------------
 
-`items` is the "nested path". Everything inside the curly braces (the "nested group") must match a single nested document.
+`items` is the nested path. Everything inside the curly braces (the nested group)
+must match a single nested document.
 
-The following example returns no matches because no single nested document has bananas with a stock of 9.
+The following query does not return any matches because no single nested
+document has bananas with a stock of 9.
 
-`items:{ name:banana and stock:9 }`
+[source,yaml]
+-------------------
+items:{ name:banana and stock:9 }
+-------------------
 
-==== Match different nested documents
+[discrete]
+==== Match different documents
 
-The subqueries in this example are in separate nested groups and can match different nested documents.
+The following subqueries are in separate nested groups
+and can match different nested documents:
 
-`items:{ name:banana } and items:{ stock:9 }`
+[source,yaml]
+-------------------
+items:{ name:banana } and items:{ stock:9 }
+-------------------
 
-`name:banana` matches the first document in the array and `stock:9` matches the third document in the array.
+`name:banana` matches the first document in the array and `stock:9`
+matches the third document in the array.
 
-==== Combine approaches
+[discrete]
+==== Match single and different documents
 
-You can combine these two approaches to create complex queries. What if you wanted to find a store with more than 10
-bananas that *also* stocks vegetables? You could do this:
+To find a store with more than 10
+bananas that *also* stocks vegetables:
 
-`items:{ name:banana and stock > 10 } and items:{ category:vegetable }`
+[source,yaml]
+-------------------
+items:{ name:banana and stock > 10 } and items:{ category:vegetable }
+-------------------
 
-The first nested group (`name:banana and stock > 10`) must still match a single document, but the `category:vegetables`
+The first nested group (`name:banana and stock > 10`) must match a single document, but the `category:vegetables`
 subquery can match a different nested document because it is in a separate group.
 
+[discrete]
 ==== Nested fields inside other nested fields
 
-KQL's syntax also supports nested fields inside of other nested fields&mdash;you simply have to specify the full path. Suppose you
-have a document where `level1` and `level2` are both nested fields:
+KQL supports nested fields inside other nested fields&mdash;you have to
+specify the full path. In this document,
+`level1` and `level2` are nested fields:
 
 [source,json]
 ----------------------------------
@@ -171,6 +272,9 @@ have a document where `level1` and `level2` are both nested fields:
 }
 ----------------------------------
 
-You can match on a single nested document by specifying the full path:
+To match on a single nested document:
 
-`level1.level2:{ prop1:foo and prop2:bar }`
+[source,yaml]
+-------------------
+level1.level2:{ prop1:foo and prop2:bar }
+-------------------

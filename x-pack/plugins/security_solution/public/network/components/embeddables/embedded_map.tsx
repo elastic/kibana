@@ -5,27 +5,31 @@
  */
 
 import { EuiLink, EuiText } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
+import deepEqual from 'fast-deep-equal';
+import React, { useEffect, useState, useMemo } from 'react';
 import { createPortalNode, InPortal } from 'react-reverse-portal';
 import styled, { css } from 'styled-components';
 
-import { ErrorEmbeddable } from '../../../../../../../src/plugins/embeddable/public';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
-import { getIndexPatternTitleIdMapping } from '../../../common/hooks/api/helpers';
-import { useIndexPatterns } from '../../../common/hooks/use_index_patterns';
+import { useSelector } from 'react-redux';
+import {
+  ErrorEmbeddable,
+  isErrorEmbeddable,
+} from '../../../../../../../src/plugins/embeddable/public';
 import { Loader } from '../../../common/components/loader';
 import { displayErrorToast, useStateToaster } from '../../../common/components/toasters';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { Embeddable } from './embeddable';
 import { EmbeddableHeader } from './embeddable_header';
-import { createEmbeddable, findMatchingIndexPatterns } from './embedded_map_helpers';
+import { createEmbeddable } from './embedded_map_helpers';
 import { IndexPatternsMissingPrompt } from './index_patterns_missing_prompt';
 import { MapToolTip } from './map_tool_tip/map_tool_tip';
 import * as i18n from './translations';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { MapEmbeddable } from '../../../../../../plugins/maps/public/embeddable';
 import { Query, Filter } from '../../../../../../../src/plugins/data/public';
-import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
+import { useKibana } from '../../../common/lib/kibana';
+import { getDefaultSourcererSelector } from './selector';
+import { getLayerList } from './map_config';
 
 interface EmbeddableMapProps {
   maintainRatio?: boolean;
@@ -86,13 +90,19 @@ export const EmbeddedMapComponent = ({
   const [embeddable, setEmbeddable] = React.useState<MapEmbeddable | undefined | ErrorEmbeddable>(
     undefined
   );
-  const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [isIndexError, setIsIndexError] = useState(false);
 
   const [, dispatchToaster] = useStateToaster();
-  const [loadingKibanaIndexPatterns, kibanaIndexPatterns] = useIndexPatterns();
-  const [siemDefaultIndices] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const defaultSourcererScopeSelector = useMemo(getDefaultSourcererSelector, []);
+  const { kibanaIndexPatterns, sourcererScope } = useSelector(
+    defaultSourcererScopeSelector,
+    deepEqual
+  );
+
+  const [mapIndexPatterns, setMapIndexPatterns] = useState(
+    kibanaIndexPatterns.filter((kip) => sourcererScope.selectedPatterns.includes(kip.title))
+  );
 
   // This portalNode provided by react-reverse-portal allows us re-parent the MapToolTip within our
   // own component tree instead of the embeddables (default). This is necessary to have access to
@@ -102,27 +112,30 @@ export const EmbeddedMapComponent = ({
 
   const { services } = useKibana();
 
+  useEffect(() => {
+    setMapIndexPatterns((prevMapIndexPatterns) => {
+      const newIndexPatterns = kibanaIndexPatterns.filter((kip) =>
+        sourcererScope.selectedPatterns.includes(kip.title)
+      );
+      if (!deepEqual(newIndexPatterns, prevMapIndexPatterns)) {
+        if (newIndexPatterns.length === 0) {
+          setIsError(true);
+        }
+        return newIndexPatterns;
+      }
+      return prevMapIndexPatterns;
+    });
+  }, [kibanaIndexPatterns, sourcererScope.selectedPatterns]);
+
   // Initial Load useEffect
   useEffect(() => {
     let isSubscribed = true;
     async function setupEmbeddable() {
-      // Ensure at least one `securitySolution:defaultIndex` kibana index pattern exists before creating embeddable
-      const matchingIndexPatterns = findMatchingIndexPatterns({
-        kibanaIndexPatterns,
-        siemDefaultIndices,
-      });
-
-      if (matchingIndexPatterns.length === 0 && isSubscribed) {
-        setIsLoading(false);
-        setIsIndexError(true);
-        return;
-      }
-
       // Create & set Embeddable
       try {
         const embeddableObject = await createEmbeddable(
           filters,
-          getIndexPatternTitleIdMapping(matchingIndexPatterns),
+          mapIndexPatterns,
           query,
           startDate,
           endDate,
@@ -131,7 +144,12 @@ export const EmbeddedMapComponent = ({
           services.embeddable
         );
         if (isSubscribed) {
-          setEmbeddable(embeddableObject);
+          if (mapIndexPatterns.length === 0) {
+            setIsIndexError(true);
+          } else {
+            setEmbeddable(embeddableObject);
+            setIsIndexError(false);
+          }
         }
       } catch (e) {
         if (isSubscribed) {
@@ -139,34 +157,54 @@ export const EmbeddedMapComponent = ({
           setIsError(true);
         }
       }
-      if (isSubscribed) {
-        setIsLoading(false);
-      }
     }
-
-    if (!loadingKibanaIndexPatterns) {
+    if (embeddable == null && sourcererScope.selectedPatterns.length > 0) {
       setupEmbeddable();
     }
+
     return () => {
       isSubscribed = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadingKibanaIndexPatterns, kibanaIndexPatterns]);
+  }, [
+    dispatchToaster,
+    endDate,
+    embeddable,
+    filters,
+    mapIndexPatterns,
+    query,
+    portalNode,
+    services.embeddable,
+    sourcererScope.selectedPatterns,
+    setQuery,
+    startDate,
+  ]);
+
+  // update layer with new index patterns
+  useEffect(() => {
+    const setLayerList = async () => {
+      if (embeddable != null) {
+        // @ts-expect-error
+        await embeddable.setLayerList(getLayerList(mapIndexPatterns));
+        embeddable.reload();
+      }
+    };
+    if (embeddable != null && !isErrorEmbeddable(embeddable)) {
+      setLayerList();
+    }
+  }, [embeddable, mapIndexPatterns]);
 
   // queryExpression updated useEffect
   useEffect(() => {
     if (embeddable != null) {
       embeddable.updateInput({ query });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query]);
+  }, [embeddable, query]);
 
   useEffect(() => {
     if (embeddable != null) {
       embeddable.updateInput({ filters });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [embeddable, filters]);
 
   // DateRange updated useEffect
   useEffect(() => {
@@ -177,8 +215,7 @@ export const EmbeddedMapComponent = ({
       };
       embeddable.updateInput({ timeRange });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startDate, endDate]);
+  }, [embeddable, startDate, endDate]);
 
   return isError ? null : (
     <Embeddable>
@@ -198,10 +235,10 @@ export const EmbeddedMapComponent = ({
       </InPortal>
 
       <EmbeddableMap maintainRatio={!isIndexError}>
-        {embeddable != null ? (
-          <services.embeddable.EmbeddablePanel embeddable={embeddable} />
-        ) : !isLoading && isIndexError ? (
+        {isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
+        ) : embeddable != null ? (
+          <services.embeddable.EmbeddablePanel embeddable={embeddable} />
         ) : (
           <Loader data-test-subj="loading-panel" overlay size="xl" />
         )}

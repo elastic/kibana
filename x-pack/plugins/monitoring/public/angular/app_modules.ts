@@ -41,10 +41,6 @@ import { licenseProvider } from '../services/license';
 // @ts-ignore
 import { titleProvider } from '../services/title';
 // @ts-ignore
-import { monitoringBeatsBeatProvider } from '../directives/beats/beat';
-// @ts-ignore
-import { monitoringBeatsOverviewProvider } from '../directives/beats/overview';
-// @ts-ignore
 import { monitoringMlListingProvider } from '../directives/elasticsearch/ml_job_listing';
 // @ts-ignore
 import { monitoringMainProvider } from '../directives/main';
@@ -153,8 +149,6 @@ function createMonitoringAppServices() {
 function createMonitoringAppDirectives() {
   angular
     .module('monitoring/directives', [])
-    .directive('monitoringBeatsBeat', monitoringBeatsBeatProvider)
-    .directive('monitoringBeatsOverview', monitoringBeatsOverviewProvider)
     .directive('monitoringMlListing', monitoringMlListingProvider)
     .directive('monitoringMain', monitoringMainProvider);
 }

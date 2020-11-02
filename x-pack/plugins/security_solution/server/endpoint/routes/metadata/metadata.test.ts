@@ -42,6 +42,7 @@ import {
 } from '../../../../../ingest_manager/common/types/models';
 import { createV1SearchResponse, createV2SearchResponse } from './support/test_support';
 import { PackageService } from '../../../../../ingest_manager/server/services';
+import { metadataTransformPrefix } from '../../../../common/endpoint/constants';
 
 describe('test endpoint route', () => {
   let routerMock: jest.Mocked<IRouter>;
@@ -175,7 +176,7 @@ describe('test endpoint route', () => {
             type: ElasticsearchAssetType.indexTemplate,
           },
           {
-            id: 'metrics-endpoint.metadata-current-default-0.16.0-dev.0',
+            id: `${metadataTransformPrefix}-0.16.0-dev.0`,
             type: ElasticsearchAssetType.transform,
           },
         ])

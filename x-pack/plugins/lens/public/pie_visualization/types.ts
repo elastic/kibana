@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaDatatableColumn } from 'src/plugins/expressions/public';
 import { LensMultiTable } from '../types';
 
 export interface SharedLayerState {
@@ -28,6 +27,8 @@ export interface PieVisualizationState {
 }
 
 export type PieExpressionArgs = SharedLayerState & {
+  title?: string;
+  description?: string;
   shape: 'pie' | 'donut' | 'treemap';
   hideLabels: boolean;
 };
@@ -36,8 +37,3 @@ export interface PieExpressionProps {
   data: LensMultiTable;
   args: PieExpressionArgs;
 }
-
-export type ColumnGroups = Array<{
-  col: KibanaDatatableColumn;
-  metrics: KibanaDatatableColumn[];
-}>;

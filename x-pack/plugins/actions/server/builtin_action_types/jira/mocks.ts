@@ -61,6 +61,18 @@ const createMock = (): jest.Mocked<ExternalService> => {
         defaultValue: { name: 'Medium', id: '3' },
       },
     })),
+    getIssues: jest.fn().mockImplementation(() => [
+      {
+        id: '10267',
+        key: 'RJ-107',
+        title: 'Test title',
+      },
+    ]),
+    getIssue: jest.fn().mockImplementation(() => ({
+      id: '10267',
+      key: 'RJ-107',
+      title: 'Test title',
+    })),
   };
 
   service.createComment.mockImplementationOnce(() =>
@@ -120,6 +132,7 @@ const executorParams: ExecutorSubActionPushParams = {
   labels: ['kibana', 'elastic'],
   priority: 'High',
   issueType: '10006',
+  parent: null,
   comments: [
     {
       commentId: 'case-comment-1',

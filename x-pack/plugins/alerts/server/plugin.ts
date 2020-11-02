@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { SecurityPluginSetup } from '../../security/server';
@@ -117,7 +117,7 @@ export class AlertingPlugin {
     this.logger = initializerContext.logger.get('plugins', 'alerting');
     this.taskRunnerFactory = new TaskRunnerFactory();
     this.alertsClientFactory = new AlertsClientFactory();
-    this.telemetryLogger = initializerContext.logger.get('telemetry');
+    this.telemetryLogger = initializerContext.logger.get('usage');
     this.kibanaIndex = initializerContext.config.legacy.globalConfig$
       .pipe(
         first(),
@@ -264,6 +264,7 @@ export class AlertingPlugin {
       encryptedSavedObjectsClient,
       getBasePath: this.getBasePath,
       eventLogger: this.eventLogger!,
+      internalSavedObjectsRepository: core.savedObjects.createInternalRepository(['alert']),
     });
 
     this.eventLogService!.registerSavedObjectProvider('alert', (request) => {
@@ -301,6 +302,7 @@ export class AlertingPlugin {
     return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
+      scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
       getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
         return clusterClient.asScoped(request);
       },

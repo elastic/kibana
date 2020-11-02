@@ -25,6 +25,7 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import euiVars from '@elastic/eui/dist/eui_theme_light.json';
 import { DecisionPathPlotData } from './use_classification_path_data';
+import { formatSingleValue } from '../../../formatters/format_value';
 
 const { euiColorFullShade, euiColorMediumShade } = euiVars;
 const axisColor = euiColorMediumShade;
@@ -74,11 +75,11 @@ interface DecisionPathChartProps {
   baseline?: number;
   minDomain: number | undefined;
   maxDomain: number | undefined;
+  showValues?: boolean;
 }
 
 const DECISION_PATH_MARGIN = 125;
 const DECISION_PATH_ROW_HEIGHT = 10;
-const NUM_PRECISION = 3;
 const AnnotationBaselineMarker = <EuiIcon type="dot" size="m" />;
 
 export const DecisionPathChart = ({
@@ -87,13 +88,14 @@ export const DecisionPathChart = ({
   minDomain,
   maxDomain,
   baseline,
+  showValues,
 }: DecisionPathChartProps) => {
   // adjust the height so it's compact for items with more features
   const baselineData: LineAnnotationDatum[] = useMemo(
     () => [
       {
         dataValue: baseline,
-        header: baseline ? baseline.toPrecision(NUM_PRECISION) : '',
+        header: baseline ? formatSingleValue(baseline).toString() : '',
         details: i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.decisionPathBaselineText',
           {
@@ -105,9 +107,12 @@ export const DecisionPathChart = ({
     ],
     [baseline]
   );
-  // guarantee up to num_precision significant digits
-  // without having it in scientific notation
-  const tickFormatter = useCallback((d) => Number(d.toPrecision(NUM_PRECISION)).toString(), []);
+  // if regression, guarantee up to num_precision significant digits without having it in scientific notation
+  // if classification, hide the numeric values since we only want to show the path
+  const tickFormatter = useCallback(
+    (d) => (showValues === false ? '' : formatSingleValue(d).toString()),
+    []
+  );
 
   return (
     <Chart
@@ -127,6 +132,7 @@ export const DecisionPathChart = ({
       <Axis
         id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxis'}
         tickFormat={tickFormatter}
+        ticks={showValues === false ? 0 : undefined}
         title={i18n.translate(
           'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxisTitle',
           {

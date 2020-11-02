@@ -45,20 +45,17 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l">
                   <h1>
-                    <FormattedMessage
-                      id="xpack.ingestManager.overviewPageTitle"
-                      defaultMessage="Ingest Manager"
-                    />
+                    <FormattedMessage id="xpack.fleet.overviewPageTitle" defaultMessage="Fleet" />
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
-                  label={i18n.translate('xpack.ingestManager.betaBadge.labelText', {
+                  label={i18n.translate('xpack.fleet.betaBadge.labelText', {
                     defaultMessage: 'Beta',
                   })}
-                  tooltipContent={i18n.translate('xpack.ingestManager.betaBadge.tooltipText', {
+                  tooltipContent={i18n.translate('xpack.fleet.betaBadge.tooltipText', {
                     defaultMessage:
                       'This plugin is not recommended for production environments. Please report bugs in our Discuss forum.',
                   })}
@@ -70,7 +67,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
             <EuiText color="subdued">
               <p>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewPageSubtitle"
+                  id="xpack.fleet.overviewPageSubtitle"
                   defaultMessage="Manage Elastic Agents and their policies in a central location."
                 />
               </p>
@@ -83,7 +80,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
           <EuiFlexItem grow={false}>
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
-                id="xpack.ingestManager.overviewPageEnrollAgentButton"
+                id="xpack.fleet.overviewPageEnrollAgentButton"
                 defaultMessage="Add agent"
               />
             </EuiButton>

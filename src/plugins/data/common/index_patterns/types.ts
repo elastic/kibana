@@ -22,29 +22,23 @@ import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notificatio
 import type { SavedObject } from 'src/core/server';
 import { IFieldType } from './fields';
 import { SerializedFieldFormat } from '../../../expressions/common';
-import { KBN_FIELD_TYPES } from '..';
+import { KBN_FIELD_TYPES, IndexPatternField, FieldFormat } from '..';
+
+export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export interface IIndexPattern {
-  [key: string]: any;
   fields: IFieldType[];
   title: string;
   id?: string;
   type?: string;
   timeFieldName?: string;
   getTimeField?(): IFieldType | undefined;
-  fieldFormatMap?: Record<
-    string,
-    {
-      id: string;
-      params: unknown;
-    }
-  >;
+  fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
+  getFormatterForField?: (
+    field: IndexPatternField | IndexPatternField['spec'] | IFieldType
+  ) => FieldFormat;
 }
 
-/**
- * Use data plugin interface instead
- * @deprecated
- */
 export interface IndexPatternAttributes {
   type: string;
   fields: string;
@@ -166,15 +160,19 @@ export interface FieldSpec {
   indexed?: boolean;
 }
 
+export type IndexPatternFieldMap = Record<string, FieldSpec>;
+
 export interface IndexPatternSpec {
   id?: string;
   version?: string;
-
-  title: string;
+  title?: string;
+  intervalName?: string;
   timeFieldName?: string;
   sourceFilters?: SourceFilter[];
-  fields?: FieldSpec[];
+  fields?: IndexPatternFieldMap;
   typeMeta?: TypeMeta;
+  type?: string;
+  fieldFormats?: Record<string, SerializedFieldFormat>;
 }
 
 export interface SourceFilter {

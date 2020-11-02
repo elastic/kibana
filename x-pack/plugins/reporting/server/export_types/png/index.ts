@@ -19,9 +19,7 @@ import { metadata } from './metadata';
 import { JobParamsPNG, TaskPayloadPNG } from './types';
 
 export const getExportType = (): ExportTypeDefinition<
-  JobParamsPNG,
   CreateJobFn<JobParamsPNG>,
-  TaskPayloadPNG,
   RunTaskFn<TaskPayloadPNG>
 > => ({
   ...metadata,

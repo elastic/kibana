@@ -2,96 +2,9 @@
 
 exports[`IndexPattern toSpec should match snapshot 1`] = `
 Object {
-  "fields": Array [
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 10,
-      "esTypes": Array [
-        "long",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": undefined,
-      "name": "bytes",
-      "readFromDocValues": true,
-      "script": undefined,
-      "scripted": false,
-      "searchable": true,
-      "subType": undefined,
-      "type": "number",
-    },
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 20,
-      "esTypes": Array [
-        "boolean",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": undefined,
-      "name": "ssl",
-      "readFromDocValues": true,
-      "script": undefined,
-      "scripted": false,
-      "searchable": true,
-      "subType": undefined,
-      "type": "boolean",
-    },
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 30,
-      "esTypes": Array [
-        "date",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": undefined,
-      "name": "@timestamp",
-      "readFromDocValues": true,
-      "script": undefined,
-      "scripted": false,
-      "searchable": true,
-      "subType": undefined,
-      "type": "date",
-    },
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 30,
-      "esTypes": Array [
-        "date",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": undefined,
-      "name": "time",
-      "readFromDocValues": true,
-      "script": undefined,
-      "scripted": false,
-      "searchable": true,
-      "subType": undefined,
-      "type": "date",
-    },
-    Object {
+  "fieldFormats": Object {},
+  "fields": Object {
+    "@tags": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
@@ -113,10 +26,10 @@ Object {
       "subType": undefined,
       "type": "string",
     },
-    Object {
+    "@timestamp": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
-      "count": 0,
+      "count": 30,
       "esTypes": Array [
         "date",
       ],
@@ -127,7 +40,7 @@ Object {
         },
       },
       "lang": undefined,
-      "name": "utc_time",
+      "name": "@timestamp",
       "readFromDocValues": true,
       "script": undefined,
       "scripted": false,
@@ -135,12 +48,12 @@ Object {
       "subType": undefined,
       "type": "date",
     },
-    Object {
+    "_id": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
       "esTypes": Array [
-        "integer",
+        "_id",
       ],
       "format": Object {
         "id": "number",
@@ -149,20 +62,20 @@ Object {
         },
       },
       "lang": undefined,
-      "name": "phpmemory",
-      "readFromDocValues": true,
+      "name": "_id",
+      "readFromDocValues": false,
       "script": undefined,
       "scripted": false,
       "searchable": true,
       "subType": undefined,
-      "type": "number",
+      "type": "string",
     },
-    Object {
+    "_source": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
       "esTypes": Array [
-        "ip",
+        "_source",
       ],
       "format": Object {
         "id": "number",
@@ -171,20 +84,20 @@ Object {
         },
       },
       "lang": undefined,
-      "name": "ip",
-      "readFromDocValues": true,
+      "name": "_source",
+      "readFromDocValues": false,
       "script": undefined,
       "scripted": false,
       "searchable": true,
       "subType": undefined,
-      "type": "ip",
+      "type": "_source",
     },
-    Object {
+    "_type": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
       "esTypes": Array [
-        "attachment",
+        "_type",
       ],
       "format": Object {
         "id": "number",
@@ -193,37 +106,15 @@ Object {
         },
       },
       "lang": undefined,
-      "name": "request_body",
-      "readFromDocValues": true,
+      "name": "_type",
+      "readFromDocValues": false,
       "script": undefined,
       "scripted": false,
       "searchable": true,
       "subType": undefined,
-      "type": "attachment",
+      "type": "string",
     },
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 0,
-      "esTypes": Array [
-        "geo_point",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": undefined,
-      "name": "point",
-      "readFromDocValues": true,
-      "script": undefined,
-      "scripted": false,
-      "searchable": true,
-      "subType": undefined,
-      "type": "geo_point",
-    },
-    Object {
+    "area": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
@@ -245,34 +136,12 @@ Object {
       "subType": undefined,
       "type": "geo_shape",
     },
-    Object {
-      "aggregatable": false,
-      "conflictDescriptions": undefined,
-      "count": 0,
-      "esTypes": Array [
-        "murmur3",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": undefined,
-      "name": "hashed",
-      "readFromDocValues": false,
-      "script": undefined,
-      "scripted": false,
-      "searchable": true,
-      "subType": undefined,
-      "type": "murmur3",
-    },
-    Object {
+    "bytes": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
-      "count": 0,
+      "count": 10,
       "esTypes": Array [
-        "geo_point",
+        "long",
       ],
       "format": Object {
         "id": "number",
@@ -281,15 +150,37 @@ Object {
         },
       },
       "lang": undefined,
-      "name": "geo.coordinates",
+      "name": "bytes",
       "readFromDocValues": true,
       "script": undefined,
       "scripted": false,
       "searchable": true,
       "subType": undefined,
-      "type": "geo_point",
+      "type": "number",
     },
-    Object {
+    "custom_user_field": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 0,
+      "esTypes": Array [
+        "conflict",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": undefined,
+      "name": "custom_user_field",
+      "readFromDocValues": true,
+      "script": undefined,
+      "scripted": false,
+      "searchable": true,
+      "subType": undefined,
+      "type": "conflict",
+    },
+    "extension": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
@@ -311,7 +202,7 @@ Object {
       "subType": undefined,
       "type": "string",
     },
-    Object {
+    "extension.keyword": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
@@ -337,7 +228,95 @@ Object {
       },
       "type": "string",
     },
-    Object {
+    "geo.coordinates": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 0,
+      "esTypes": Array [
+        "geo_point",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": undefined,
+      "name": "geo.coordinates",
+      "readFromDocValues": true,
+      "script": undefined,
+      "scripted": false,
+      "searchable": true,
+      "subType": undefined,
+      "type": "geo_point",
+    },
+    "geo.src": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 0,
+      "esTypes": Array [
+        "keyword",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": undefined,
+      "name": "geo.src",
+      "readFromDocValues": true,
+      "script": undefined,
+      "scripted": false,
+      "searchable": true,
+      "subType": undefined,
+      "type": "string",
+    },
+    "hashed": Object {
+      "aggregatable": false,
+      "conflictDescriptions": undefined,
+      "count": 0,
+      "esTypes": Array [
+        "murmur3",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": undefined,
+      "name": "hashed",
+      "readFromDocValues": false,
+      "script": undefined,
+      "scripted": false,
+      "searchable": true,
+      "subType": undefined,
+      "type": "murmur3",
+    },
+    "ip": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 0,
+      "esTypes": Array [
+        "ip",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": undefined,
+      "name": "ip",
+      "readFromDocValues": true,
+      "script": undefined,
+      "scripted": false,
+      "searchable": true,
+      "subType": undefined,
+      "type": "ip",
+    },
+    "machine.os": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
@@ -359,7 +338,7 @@ Object {
       "subType": undefined,
       "type": "string",
     },
-    Object {
+    "machine.os.raw": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
@@ -385,95 +364,7 @@ Object {
       },
       "type": "string",
     },
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 0,
-      "esTypes": Array [
-        "keyword",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": undefined,
-      "name": "geo.src",
-      "readFromDocValues": true,
-      "script": undefined,
-      "scripted": false,
-      "searchable": true,
-      "subType": undefined,
-      "type": "string",
-    },
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 0,
-      "esTypes": Array [
-        "_id",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": undefined,
-      "name": "_id",
-      "readFromDocValues": false,
-      "script": undefined,
-      "scripted": false,
-      "searchable": true,
-      "subType": undefined,
-      "type": "string",
-    },
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 0,
-      "esTypes": Array [
-        "_type",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": undefined,
-      "name": "_type",
-      "readFromDocValues": false,
-      "script": undefined,
-      "scripted": false,
-      "searchable": true,
-      "subType": undefined,
-      "type": "string",
-    },
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 0,
-      "esTypes": Array [
-        "_source",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": undefined,
-      "name": "_source",
-      "readFromDocValues": false,
-      "script": undefined,
-      "scripted": false,
-      "searchable": true,
-      "subType": undefined,
-      "type": "_source",
-    },
-    Object {
+    "non-filterable": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
@@ -495,7 +386,7 @@ Object {
       "subType": undefined,
       "type": "string",
     },
-    Object {
+    "non-sortable": Object {
       "aggregatable": false,
       "conflictDescriptions": undefined,
       "count": 0,
@@ -517,12 +408,12 @@ Object {
       "subType": undefined,
       "type": "string",
     },
-    Object {
+    "phpmemory": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
       "esTypes": Array [
-        "conflict",
+        "integer",
       ],
       "format": Object {
         "id": "number",
@@ -531,59 +422,59 @@ Object {
         },
       },
       "lang": undefined,
-      "name": "custom_user_field",
+      "name": "phpmemory",
       "readFromDocValues": true,
       "script": undefined,
       "scripted": false,
       "searchable": true,
       "subType": undefined,
-      "type": "conflict",
-    },
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 0,
-      "esTypes": Array [
-        "text",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": "expression",
-      "name": "script string",
-      "readFromDocValues": false,
-      "script": "'i am a string'",
-      "scripted": true,
-      "searchable": true,
-      "subType": undefined,
-      "type": "string",
-    },
-    Object {
-      "aggregatable": true,
-      "conflictDescriptions": undefined,
-      "count": 0,
-      "esTypes": Array [
-        "long",
-      ],
-      "format": Object {
-        "id": "number",
-        "params": Object {
-          "pattern": "$0,0.[00]",
-        },
-      },
-      "lang": "expression",
-      "name": "script number",
-      "readFromDocValues": false,
-      "script": "1234",
-      "scripted": true,
-      "searchable": true,
-      "subType": undefined,
       "type": "number",
     },
-    Object {
+    "point": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 0,
+      "esTypes": Array [
+        "geo_point",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": undefined,
+      "name": "point",
+      "readFromDocValues": true,
+      "script": undefined,
+      "scripted": false,
+      "searchable": true,
+      "subType": undefined,
+      "type": "geo_point",
+    },
+    "request_body": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 0,
+      "esTypes": Array [
+        "attachment",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": undefined,
+      "name": "request_body",
+      "readFromDocValues": true,
+      "script": undefined,
+      "scripted": false,
+      "searchable": true,
+      "subType": undefined,
+      "type": "attachment",
+    },
+    "script date": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
@@ -605,7 +496,7 @@ Object {
       "subType": undefined,
       "type": "date",
     },
-    Object {
+    "script murmur3": Object {
       "aggregatable": true,
       "conflictDescriptions": undefined,
       "count": 0,
@@ -627,12 +518,123 @@ Object {
       "subType": undefined,
       "type": "murmur3",
     },
-  ],
+    "script number": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 0,
+      "esTypes": Array [
+        "long",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": "expression",
+      "name": "script number",
+      "readFromDocValues": false,
+      "script": "1234",
+      "scripted": true,
+      "searchable": true,
+      "subType": undefined,
+      "type": "number",
+    },
+    "script string": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 0,
+      "esTypes": Array [
+        "text",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": "expression",
+      "name": "script string",
+      "readFromDocValues": false,
+      "script": "'i am a string'",
+      "scripted": true,
+      "searchable": true,
+      "subType": undefined,
+      "type": "string",
+    },
+    "ssl": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 20,
+      "esTypes": Array [
+        "boolean",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": undefined,
+      "name": "ssl",
+      "readFromDocValues": true,
+      "script": undefined,
+      "scripted": false,
+      "searchable": true,
+      "subType": undefined,
+      "type": "boolean",
+    },
+    "time": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 30,
+      "esTypes": Array [
+        "date",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": undefined,
+      "name": "time",
+      "readFromDocValues": true,
+      "script": undefined,
+      "scripted": false,
+      "searchable": true,
+      "subType": undefined,
+      "type": "date",
+    },
+    "utc_time": Object {
+      "aggregatable": true,
+      "conflictDescriptions": undefined,
+      "count": 0,
+      "esTypes": Array [
+        "date",
+      ],
+      "format": Object {
+        "id": "number",
+        "params": Object {
+          "pattern": "$0,0.[00]",
+        },
+      },
+      "lang": undefined,
+      "name": "utc_time",
+      "readFromDocValues": true,
+      "script": undefined,
+      "scripted": false,
+      "searchable": true,
+      "subType": undefined,
+      "type": "date",
+    },
+  },
   "id": "test-pattern",
   "sourceFilters": undefined,
   "timeFieldName": "timestamp",
   "title": "title",
+  "type": "index-pattern",
   "typeMeta": undefined,
-  "version": 2,
+  "version": "2",
 }
 `;

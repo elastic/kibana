@@ -8,10 +8,13 @@ export interface ClassFeatureImportance {
   class_name: string | boolean;
   importance: number;
 }
+
+// TODO We should separate the interface because classes/importance
+// isn't both optional but either/or.
 export interface FeatureImportance {
   feature_name: string;
-  importance?: number;
   classes?: ClassFeatureImportance[];
+  importance?: number;
 }
 
 export interface TopClass {
@@ -21,3 +24,42 @@ export interface TopClass {
 }
 
 export type TopClasses = TopClass[];
+
+export interface ClassFeatureImportanceSummary {
+  class_name: string;
+  importance: {
+    max: number;
+    min: number;
+    mean_magnitude: number;
+  };
+}
+export interface ClassificationTotalFeatureImportance {
+  feature_name: string;
+  classes: ClassFeatureImportanceSummary[];
+}
+
+export interface RegressionFeatureImportanceSummary {
+  max: number;
+  min: number;
+  mean_magnitude: number;
+}
+
+export interface RegressionTotalFeatureImportance {
+  feature_name: string;
+  importance: RegressionFeatureImportanceSummary;
+}
+export type TotalFeatureImportance =
+  | ClassificationTotalFeatureImportance
+  | RegressionTotalFeatureImportance;
+
+export function isClassificationTotalFeatureImportance(
+  summary: ClassificationTotalFeatureImportance | RegressionTotalFeatureImportance
+): summary is ClassificationTotalFeatureImportance {
+  return (summary as ClassificationTotalFeatureImportance).classes !== undefined;
+}
+
+export function isRegressionTotalFeatureImportance(
+  summary: ClassificationTotalFeatureImportance | RegressionTotalFeatureImportance
+): summary is RegressionTotalFeatureImportance {
+  return (summary as RegressionTotalFeatureImportance).importance !== undefined;
+}

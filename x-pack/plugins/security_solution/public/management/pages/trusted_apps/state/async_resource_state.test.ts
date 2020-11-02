@@ -13,6 +13,7 @@ import {
   isLoadingResourceState,
   isLoadedResourceState,
   isFailedResourceState,
+  isStaleResourceState,
   getLastLoadedResourceState,
   getCurrentResourceError,
   isOutdatedResourceState,
@@ -135,6 +136,24 @@ describe('AsyncResourceState', () => {
 
       it('returns true for FailedResourceState', () => {
         expect(isFailedResourceState(failedResourceStateInitially)).toBe(true);
+      });
+    });
+
+    describe('isStaleResourceState()', () => {
+      it('returns true for UninitialisedResourceState', () => {
+        expect(isStaleResourceState(uninitialisedResourceState)).toBe(true);
+      });
+
+      it('returns false for LoadingResourceState', () => {
+        expect(isStaleResourceState(loadingResourceStateInitially)).toBe(false);
+      });
+
+      it('returns true for LoadedResourceState', () => {
+        expect(isStaleResourceState(loadedResourceState)).toBe(true);
+      });
+
+      it('returns true for FailedResourceState', () => {
+        expect(isStaleResourceState(failedResourceStateInitially)).toBe(true);
       });
     });
   });

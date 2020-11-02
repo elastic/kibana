@@ -31,6 +31,7 @@ export interface ToolbarPopoverProps {
    * Button group position
    */
   groupPosition?: ToolbarButtonProps['groupPosition'];
+  buttonDataTestSubj?: string;
 }
 
 export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
@@ -39,6 +40,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   type,
   isDisabled = false,
   groupPosition,
+  buttonDataTestSubj,
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -60,6 +62,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
             hasArrow={false}
             isDisabled={isDisabled}
             groupPosition={groupPosition}
+            dataTestSubj={buttonDataTestSubj}
           >
             <EuiIcon type={iconType} />
           </ToolbarButton>

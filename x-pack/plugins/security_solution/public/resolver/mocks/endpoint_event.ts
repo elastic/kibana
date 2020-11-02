@@ -4,31 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EndpointEvent } from '../../../common/endpoint/types';
+import { SafeResolverEvent } from '../../../common/endpoint/types';
 
 /**
  * Simple mock endpoint event that works for tree layouts.
  */
 export function mockEndpointEvent({
   entityID,
-  name,
-  parentEntityId,
-  timestamp,
-  lifecycleType,
+  processName = 'process name',
+  parentEntityID,
+  timestamp = 0,
+  eventType = 'start',
+  eventCategory = 'process',
   pid = 0,
+  eventID = 'event id',
 }: {
   entityID: string;
-  name: string;
-  parentEntityId?: string;
-  timestamp: number;
-  lifecycleType?: string;
+  processName?: string;
+  parentEntityID?: string;
+  timestamp?: number;
+  eventType?: string;
+  eventCategory?: string;
   pid?: number;
-}): EndpointEvent {
+  eventID?: string;
+}): SafeResolverEvent {
   return {
     '@timestamp': timestamp,
     event: {
-      type: lifecycleType ? lifecycleType : 'start',
-      category: 'process',
+      type: eventType,
+      category: eventCategory,
+      id: eventID,
     },
     agent: {
       id: 'agent.id',
@@ -46,15 +51,15 @@ export function mockEndpointEvent({
       entity_id: entityID,
       executable: 'executable',
       args: 'args',
-      name,
+      name: processName,
       pid,
       hash: {
         md5: 'hash.md5',
       },
       parent: {
         pid: 0,
-        entity_id: parentEntityId,
+        entity_id: parentEntityID,
       },
     },
-  } as EndpointEvent;
+  };
 }

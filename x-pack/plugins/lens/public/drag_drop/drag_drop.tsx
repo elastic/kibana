@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './drag_drop.scss';
+
 import React, { useState, useContext } from 'react';
 import classNames from 'classnames';
 import { DragContext } from './providers';
@@ -39,9 +41,14 @@ interface BaseProps {
   value?: unknown;
 
   /**
-   * The React children.
+   * Optional comparison function to check whether a value is the dragged one
    */
-  children: React.ReactNode;
+  isValueEqual?: (value1: unknown, value2: unknown) => boolean;
+
+  /**
+   * The React element which will be passed the draggable handlers
+   */
+  children: React.ReactElement;
 
   /**
    * Indicates whether or not the currently dragged item
@@ -58,6 +65,18 @@ interface BaseProps {
    * The optional test subject associated with this DOM element.
    */
   'data-test-subj'?: string;
+
+  /**
+   * Indicates to the user whether the currently dragged item
+   * will be moved or copied
+   */
+  dragType?: 'copy' | 'move';
+
+  /**
+   * Indicates to the user whether the drop action will
+   * replace something that is existing or add a new one
+   */
+  dropType?: 'add' | 'replace';
 }
 
 /**
@@ -96,12 +115,14 @@ type Props = DraggableProps | NonDraggableProps;
 
 export const DragDrop = (props: Props) => {
   const { dragging, setDragging } = useContext(DragContext);
-  const { value, draggable, droppable } = props;
+  const { value, draggable, droppable, isValueEqual } = props;
   return (
     <DragDropInner
       {...props}
       dragging={droppable ? dragging : undefined}
-      isDragging={!!(draggable && value === dragging)}
+      isDragging={
+        !!(draggable && ((isValueEqual && isValueEqual(value, dragging)) || value === dragging))
+      }
       isNotDroppable={
         // If the configuration has provided a droppable flag, but this particular item is not
         // droppable, then it should be less prominent. Ignores items that are both
@@ -136,17 +157,25 @@ const DragDropInner = React.memo(function DragDropInner(
     setDragging,
     isDragging,
     isNotDroppable,
+    dragType = 'copy',
+    dropType = 'add',
   } = props;
+
+  const isMoveDragging = isDragging && dragType === 'move';
 
   const classes = classNames(
     'lnsDragDrop',
-    className,
     {
+      'lnsDragDrop-isDraggable': draggable,
+      'lnsDragDrop-isDragging': isDragging,
+      'lnsDragDrop-isHidden': isMoveDragging,
+      'lnsDragDrop-isDroppable': !draggable,
       'lnsDragDrop-isDropTarget': droppable,
       'lnsDragDrop-isActiveDropTarget': droppable && state.isActive,
-      'lnsDragDrop-isDragging': isDragging,
-      'lnsDragDrop-isNotDroppable': isNotDroppable,
+      'lnsDragDrop-isNotDroppable': !isMoveDragging && isNotDroppable,
+      'lnsDragDrop-isReplacing': droppable && state.isActive && dropType === 'replace',
     },
+    className,
     state.dragEnterClassNames
   );
 
@@ -208,18 +237,14 @@ const DragDropInner = React.memo(function DragDropInner(
     }
   };
 
-  return (
-    <div
-      data-test-subj={props['data-test-subj'] || 'lnsDragDrop'}
-      className={classes}
-      onDragOver={dragOver}
-      onDragLeave={dragLeave}
-      onDrop={drop}
-      draggable={draggable}
-      onDragEnd={dragEnd}
-      onDragStart={dragStart}
-    >
-      {children}
-    </div>
-  );
+  return React.cloneElement(children, {
+    'data-test-subj': props['data-test-subj'] || 'lnsDragDrop',
+    className: classNames(children.props.className, classes),
+    onDragOver: dragOver,
+    onDragLeave: dragLeave,
+    onDrop: drop,
+    draggable,
+    onDragEnd: dragEnd,
+    onDragStart: dragStart,
+  });
 });

@@ -22,18 +22,17 @@ import classNames from 'classnames';
 
 import 'brace/theme/textmate';
 import 'brace/mode/markdown';
+import 'brace/mode/json';
 
 import {
   EuiBadge,
   EuiCode,
   EuiCodeBlock,
   EuiScreenReaderOnly,
-  // @ts-ignore
   EuiCodeEditor,
   EuiDescribedFormGroup,
   EuiFieldNumber,
   EuiFieldText,
-  // @ts-ignore
   EuiFilePicker,
   EuiFormRow,
   EuiIconTip,
@@ -289,7 +288,7 @@ export class Field extends PureComponent<FieldProps> {
     }
   };
 
-  renderField(id: string, setting: FieldSetting) {
+  renderField(setting: FieldSetting, ariaDescribedBy?: string) {
     const { enableSaving, unsavedChanges, loading } = this.props;
     const {
       name,
@@ -301,10 +300,10 @@ export class Field extends PureComponent<FieldProps> {
       defVal,
       ariaName,
     } = setting;
-    const a11yProps: { [key: string]: string } = unsavedChanges
+    const a11yProps: { [key: string]: string } = ariaDescribedBy
       ? {
           'aria-label': ariaName,
-          'aria-describedby': id,
+          'aria-describedby': ariaDescribedBy,
         }
       : {
           'aria-label': ariaName,
@@ -370,6 +369,7 @@ export class Field extends PureComponent<FieldProps> {
               ref={this.changeImageForm}
               fullWidth
               data-test-subj={`advancedSetting-editField-${name}`}
+              aria-label={name}
             />
           );
         }
@@ -669,11 +669,12 @@ export class Field extends PureComponent<FieldProps> {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       'mgtAdvancedSettings__field--invalid': isInvalid,
     });
-    const id = setting.name;
+    const groupId = `${setting.name}-group`;
+    const unsavedId = `${setting.name}-unsaved`;
 
     return (
       <EuiDescribedFormGroup
-        id={id}
+        id={groupId}
         className={className}
         title={this.renderTitle(setting)}
         description={this.renderDescription(setting)}
@@ -689,10 +690,10 @@ export class Field extends PureComponent<FieldProps> {
           fullWidth
         >
           <>
-            {this.renderField(id, setting)}
+            {this.renderField(setting, unsavedChanges ? `${groupId} ${unsavedId}` : undefined)}
             {unsavedChanges && (
               <EuiScreenReaderOnly>
-                <p id={id}>
+                <p id={`${unsavedId}`}>
                   {unsavedChanges.error
                     ? unsavedChanges.error
                     : i18n.translate('advancedSettings.field.settingIsUnsaved', {

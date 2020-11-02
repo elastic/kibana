@@ -9,7 +9,8 @@ import { Projection } from '../../../projections/typings';
 import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { getLocalFilterQuery } from './get_local_filter_query';
 import { Setup } from '../../helpers/setup_request';
-import { localUIFilters, LocalUIFilterName } from './config';
+import { localUIFilters } from './config';
+import { LocalUIFilterName } from '../../../../common/ui_filter';
 
 export type LocalUIFiltersAPIResponse = PromiseReturnType<
   typeof getLocalUIFilters

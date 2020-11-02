@@ -6,7 +6,7 @@
 
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 import React, {
   createContext,
   CSSProperties,
@@ -17,7 +17,7 @@ import React, {
   useState,
 } from 'react';
 import { useTheme } from '../../../hooks/useTheme';
-import { getCytoscapeOptions } from './cytoscapeOptions';
+import { getCytoscapeOptions } from './cytoscape_options';
 import { useCytoscapeEventHandlers } from './use_cytoscape_event_handlers';
 
 cytoscape.use(dagre);
@@ -84,6 +84,11 @@ function CytoscapeComponent({
       cy.elements().forEach((element) => {
         if (!elementIds.includes(element.data('id'))) {
           cy.remove(element);
+        } else {
+          // Doing an "add" with an element with the same id will keep the original
+          // element. Set the data with the new element data.
+          const newElement = elements.find((el) => el.data.id === element.id());
+          element.data(newElement?.data ?? element.data());
         }
       });
       cy.trigger('custom:data', [fit]);

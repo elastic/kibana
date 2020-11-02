@@ -53,7 +53,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
           titleSize="xs"
           textAlign="right"
           title={<EuiI18nNumber value={agentStatus?.total ?? 0} />}
-          description={i18n.translate('xpack.ingestManager.agentListStatus.totalLabel', {
+          description={i18n.translate('xpack.fleet.agentListStatus.totalLabel', {
             defaultMessage: 'Agents',
           })}
         />
@@ -79,7 +79,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
               <EuiI18nNumber value={agentStatus?.online ?? 0} />
             </EuiHealth>
           }
-          description={i18n.translate('xpack.ingestManager.agentListStatus.onlineLabel', {
+          description={i18n.translate('xpack.fleet.agentListStatus.onlineLabel', {
             defaultMessage: 'Online',
           })}
         />
@@ -89,7 +89,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
           textAlign="right"
           titleSize="xs"
           title={<EuiI18nNumber value={agentStatus?.offline ?? 0} />}
-          description={i18n.translate('xpack.ingestManager.agentListStatus.offlineLabel', {
+          description={i18n.translate('xpack.fleet.agentListStatus.offlineLabel', {
             defaultMessage: 'Offline',
           })}
         />
@@ -99,7 +99,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
           textAlign="right"
           titleSize="xs"
           title={<EuiI18nNumber value={agentStatus?.error ?? 0} />}
-          description={i18n.translate('xpack.ingestManager.agentListStatus.errorLabel', {
+          description={i18n.translate('xpack.fleet.agentListStatus.errorLabel', {
             defaultMessage: 'Error',
           })}
         />
@@ -112,7 +112,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
           <EuiFlexItem grow={false}>
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
-                id="xpack.ingestManager.agentList.enrollButton"
+                id="xpack.fleet.agentList.enrollButton"
                 defaultMessage="Add agent"
               />
             </EuiButton>
@@ -126,7 +126,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
       <EuiFlexItem>
         <EuiText>
           <h1>
-            <FormattedMessage id="xpack.ingestManager.fleet.pageTitle" defaultMessage="Fleet" />
+            <FormattedMessage id="xpack.fleet.agents.pageTitle" defaultMessage="Agents" />
           </h1>
         </EuiText>
       </EuiFlexItem>
@@ -134,7 +134,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
         <EuiText color="subdued">
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.fleet.pageSubtitle"
+              id="xpack.fleet.agents.pageSubtitle"
               defaultMessage="Manage and deploy policy updates to a group of agents of any size."
             />
           </p>
@@ -159,19 +159,14 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
       tabs={
         ([
           {
-            name: (
-              <FormattedMessage
-                id="xpack.ingestManager.listTabs.agentTitle"
-                defaultMessage="Agents"
-              />
-            ),
+            name: <FormattedMessage id="xpack.fleet.listTabs.agentTitle" defaultMessage="Agents" />,
             isSelected: routeMatch.path === PAGE_ROUTING_PATHS.fleet_agent_list,
             href: getHref('fleet_agent_list'),
           },
           {
             name: (
               <FormattedMessage
-                id="xpack.ingestManager.listTabs.enrollmentTokensTitle"
+                id="xpack.fleet.listTabs.enrollmentTokensTitle"
                 defaultMessage="Enrollment tokens"
               />
             ),

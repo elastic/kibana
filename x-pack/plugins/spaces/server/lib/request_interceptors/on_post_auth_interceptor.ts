@@ -28,7 +28,7 @@ export function initSpacesOnPostAuthRequestInterceptor({
   http.registerOnPostAuth(async (request, response, toolkit) => {
     const serverBasePath = http.basePath.serverBasePath;
 
-    const path = request.url.pathname!;
+    const path = request.url.pathname;
 
     const spaceId = spacesService.getSpaceId(request);
 
@@ -83,22 +83,20 @@ export function initSpacesOnPostAuthRequestInterceptor({
 
         const statusCode = wrappedError.statusCode;
 
-        // If user is not authorized, or the space cannot be found, allow them to select another space
-        // by redirecting to the space selector.
-        const shouldRedirectToSpaceSelector = statusCode === 403 || statusCode === 404;
-
-        if (shouldRedirectToSpaceSelector) {
-          log.debug(
-            `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
-          );
-          return response.redirected({
-            headers: {
-              location: getSpaceSelectorUrl(serverBasePath),
-            },
-          });
-        } else {
-          log.error(`Unable to navigate to space "${spaceId}". ${error}`);
-          return response.customError(wrappedError);
+        switch (statusCode) {
+          case 403:
+            log.debug(`User unauthorized for space "${spaceId}". ${error}`);
+            return response.forbidden();
+          case 404:
+            log.debug(
+              `Unable to navigate to space "${spaceId}", redirecting to Space Selector. ${error}`
+            );
+            return response.redirected({
+              headers: { location: getSpaceSelectorUrl(serverBasePath) },
+            });
+          default:
+            log.error(`Unable to navigate to space "${spaceId}". ${error}`);
+            return response.customError(wrappedError);
         }
       }
 

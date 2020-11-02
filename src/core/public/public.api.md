@@ -6,7 +6,7 @@
 
 import { Action } from 'history';
 import { ApiResponse } from '@elastic/elasticsearch/lib/Transport';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { ConfigPath } from '@kbn/config';
 import { EnvironmentMode } from '@kbn/config';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -42,7 +42,7 @@ import { UnregisterCallback } from 'history';
 import { UserProvidedValues as UserProvidedValues_2 } from 'src/core/server/types';
 
 // @internal (undocumented)
-export function __kbnBootstrap__(): void;
+export function __kbnBootstrap__(): Promise<void>;
 
 // @public (undocumented)
 export interface App<HistoryLocationState = unknown> {
@@ -343,6 +343,8 @@ export interface ChromeStart {
     getBadge$(): Observable<ChromeBadge | undefined>;
     getBrand$(): Observable<ChromeBrand>;
     getBreadcrumbs$(): Observable<ChromeBreadcrumb[]>;
+    // Warning: (ae-forgotten-export) The symbol "ChromeBreadcrumbsAppendExtension" needs to be exported by the entry point index.d.ts
+    getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
     getCustomNavLink$(): Observable<Partial<ChromeNavLink> | undefined>;
     getHelpExtension$(): Observable<ChromeHelpExtension | undefined>;
     getIsNavDrawerLocked$(): Observable<boolean>;
@@ -355,6 +357,7 @@ export interface ChromeStart {
     setBadge(badge?: ChromeBadge): void;
     setBrand(brand: ChromeBrand): void;
     setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+    setBreadcrumbsAppendExtension(breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension): void;
     setCustomNavLink(newCustomNavLink?: Partial<ChromeNavLink>): void;
     setHelpExtension(helpExtension?: ChromeHelpExtension): void;
     setHelpSupportUrl(url: string): void;
@@ -446,37 +449,7 @@ export class CoreSystem {
     }
 
 // @internal (undocumented)
-export const DEFAULT_APP_CATEGORIES: Readonly<{
-    kibana: {
-        id: string;
-        label: string;
-        euiIconType: string;
-        order: number;
-    };
-    enterpriseSearch: {
-        id: string;
-        label: string;
-        order: number;
-        euiIconType: string;
-    };
-    observability: {
-        id: string;
-        label: string;
-        euiIconType: string;
-        order: number;
-    };
-    security: {
-        id: string;
-        label: string;
-        order: number;
-        euiIconType: string;
-    };
-    management: {
-        id: string;
-        label: string;
-        order: number;
-    };
-}>;
+export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
 // @public (undocumented)
 export interface DocLinksStart {
@@ -569,6 +542,7 @@ export interface DocLinksStart {
             readonly gettingStarted: string;
         };
         readonly query: {
+            readonly eql: string;
             readonly luceneQuerySyntax: string;
             readonly queryDsl: string;
             readonly kueryQuerySyntax: string;
@@ -1059,8 +1033,9 @@ export class SavedObjectsClient {
     }>) => Promise<SavedObjectsBatchResponse<unknown>>;
     bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<unknown>>;
     create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
+    // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
-    delete: (type: string, id: string) => ReturnType<SavedObjectsClientContract_2['delete']>;
+    delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => ReturnType<SavedObjectsClientContract_2['delete']>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
     find: <T = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T>>;
     get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
@@ -1109,6 +1084,7 @@ export interface SavedObjectsFindOptions {
     sortOrder?: string;
     // (undocumented)
     type: string | string[];
+    typeToNamespacesMap?: Map<string, string[] | undefined>;
 }
 
 // @public

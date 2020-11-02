@@ -162,6 +162,7 @@ export const TextStylePicker: FC<Props> = ({
             type="multi"
             isIconOnly
             className="canvasSidebar__buttonGroup"
+            legend={strings.getStyleOptionsControlLegend()}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -172,6 +173,7 @@ export const TextStylePicker: FC<Props> = ({
             idSelected={align}
             onChange={(optionId: string) => doChange('align', optionId)}
             className="canvasSidebar__buttonGroup"
+            legend={strings.getAlignmentOptionsControlLegend()}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

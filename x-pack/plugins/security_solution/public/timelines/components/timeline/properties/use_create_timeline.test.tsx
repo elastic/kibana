@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { act as actDom } from 'react-dom/test-utils';
+import { waitFor } from '@testing-library/react';
 
 import { renderHook, act } from '@testing-library/react-hooks';
 import { mount, shallow } from 'enzyme';
@@ -63,6 +63,46 @@ describe('useCreateTimelineButton', () => {
     });
   });
 
+  test('getButton renders correct iconType - EuiButton', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(
+        () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
+        { wrapper: wrapperContainer }
+      );
+      await waitForNextUpdate();
+
+      const button = result.current.getButton({
+        outline: true,
+        title: 'mock title',
+        iconType: 'pencil',
+      });
+      const wrapper = shallow(button);
+      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('iconType')).toEqual(
+        'pencil'
+      );
+    });
+  });
+
+  test('getButton renders correct filling - EuiButton', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(
+        () => useCreateTimelineButton({ timelineId: mockId, timelineType }),
+        { wrapper: wrapperContainer }
+      );
+      await waitForNextUpdate();
+
+      const button = result.current.getButton({
+        outline: true,
+        title: 'mock title',
+        fill: false,
+      });
+      const wrapper = shallow(button);
+      expect(wrapper.find('[data-test-subj="timeline-new-with-border"]').prop('fill')).toEqual(
+        false
+      );
+    });
+  });
+
   test('getButton renders correct outline - EuiButtonEmpty', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(
@@ -86,22 +126,25 @@ describe('useCreateTimelineButton', () => {
 
       await waitForNextUpdate();
       const button = result.current.getButton({ outline: false, title: 'mock title' });
-      actDom(() => {
+      await waitFor(() => {
         const wrapper = mount(button);
         wrapper.update();
 
         wrapper.find('[data-test-subj="timeline-new"]').first().simulate('click');
 
         expect(mockDispatch.mock.calls[0][0].type).toEqual(
-          'x-pack/security_solution/local/timeline/CREATE_TIMELINE'
+          'x-pack/security_solution/local/sourcerer/SET_SELECTED_INDEX_PATTERNS'
         );
         expect(mockDispatch.mock.calls[1][0].type).toEqual(
-          'x-pack/security_solution/local/inputs/ADD_GLOBAL_LINK_TO'
+          'x-pack/security_solution/local/timeline/CREATE_TIMELINE'
         );
         expect(mockDispatch.mock.calls[2][0].type).toEqual(
-          'x-pack/security_solution/local/inputs/ADD_TIMELINE_LINK_TO'
+          'x-pack/security_solution/local/inputs/ADD_GLOBAL_LINK_TO'
         );
         expect(mockDispatch.mock.calls[3][0].type).toEqual(
+          'x-pack/security_solution/local/inputs/ADD_TIMELINE_LINK_TO'
+        );
+        expect(mockDispatch.mock.calls[4][0].type).toEqual(
           'x-pack/security_solution/local/inputs/SET_RELATIVE_RANGE_DATE_PICKER'
         );
       });

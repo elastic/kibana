@@ -9,4 +9,13 @@ export type TestSubjects =
   | 'savePolicyButton'
   | 'customPolicyCallout'
   | 'noPoliciesCallout'
-  | 'policiesErrorCallout';
+  | 'policiesErrorCallout'
+  | 'rolloverSwitch'
+  | 'rolloverSettingsRequired'
+  | 'hot-selectedMaxSizeStored'
+  | 'hot-selectedMaxSizeStoredUnits'
+  | 'hot-selectedMaxDocuments'
+  | 'hot-selectedMaxAge'
+  | 'hot-selectedMaxAgeUnits'
+  | 'freezeSwitch'
+  | string;

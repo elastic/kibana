@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DetailItem } from '../../graphql/types';
+import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 
 export const mockDetailItemDataId = 'Y-6TfmcB0WOhS6qyMv3s';
 
-export const mockDetailItemData: DetailItem[] = [
+export const mockDetailItemData: TimelineEventsDetailsItem[] = [
   {
     field: '_id',
     originalValue: 'pEMaMmkBUV60JmNWmWVi',

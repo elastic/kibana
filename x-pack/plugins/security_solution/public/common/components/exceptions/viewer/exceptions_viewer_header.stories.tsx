@@ -16,7 +16,7 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Components|ExceptionsViewerHeader', module)
+storiesOf('Components/ExceptionsViewerHeader', module)
   .add('loading', () => {
     return (
       <ExceptionsViewerHeader

@@ -20,7 +20,7 @@ import { EuiHighlight } from '@elastic/eui';
 import { OperationType } from '../indexpattern';
 import { LensFieldIcon } from '../lens_field_icon';
 import { DataType } from '../../types';
-import { OperationFieldSupportMatrix } from './dimension_panel';
+import { OperationSupportMatrix } from './operation_support';
 import { IndexPattern, IndexPatternField, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { fieldExists } from '../pure_helpers';
@@ -37,10 +37,11 @@ export interface FieldSelectProps extends EuiComboBoxProps<{}> {
   incompatibleSelectedOperationType: OperationType | null;
   selectedColumnOperationType?: OperationType;
   selectedColumnSourceField?: string;
-  operationFieldSupportMatrix: OperationFieldSupportMatrix;
+  operationSupportMatrix: OperationSupportMatrix;
   onChoose: (choice: FieldChoice) => void;
   onDeleteColumn: () => void;
   existingFields: IndexPatternPrivateState['existingFields'];
+  fieldIsInvalid: boolean;
 }
 
 export function FieldSelect({
@@ -49,13 +50,14 @@ export function FieldSelect({
   incompatibleSelectedOperationType,
   selectedColumnOperationType,
   selectedColumnSourceField,
-  operationFieldSupportMatrix,
+  operationSupportMatrix,
   onChoose,
   onDeleteColumn,
   existingFields,
+  fieldIsInvalid,
   ...rest
 }: FieldSelectProps) {
-  const { operationByField } = operationFieldSupportMatrix;
+  const { operationByField } = operationSupportMatrix;
   const memoizedFieldOptions = useMemo(() => {
     const fields = Object.keys(operationByField).sort();
 
@@ -116,7 +118,8 @@ export function FieldSelect({
         }));
     }
 
-    const [availableFields, emptyFields] = _.partition(normalFields, containsData);
+    const [metaFields, nonMetaFields] = _.partition(normalFields, (field) => fieldMap[field].meta);
+    const [availableFields, emptyFields] = _.partition(nonMetaFields, containsData);
 
     const constructFieldsOptions = (fieldsArr: string[], label: string) =>
       fieldsArr.length > 0 && {
@@ -138,10 +141,18 @@ export function FieldSelect({
       })
     );
 
+    const metaFieldsOptions = constructFieldsOptions(
+      metaFields,
+      i18n.translate('xpack.lens.indexPattern.metaFieldsLabel', {
+        defaultMessage: 'Meta fields',
+      })
+    );
+
     return [
       ...fieldNamesToOptions(specialFields),
       availableFieldsOptions,
       emptyFieldsOptions,
+      metaFieldsOptions,
     ].filter(Boolean);
   }, [
     incompatibleSelectedOperationType,
@@ -162,17 +173,17 @@ export function FieldSelect({
         defaultMessage: 'Field',
       })}
       options={(memoizedFieldOptions as unknown) as EuiComboBoxOptionOption[]}
-      isInvalid={Boolean(incompatibleSelectedOperationType)}
+      isInvalid={Boolean(incompatibleSelectedOperationType || fieldIsInvalid)}
       selectedOptions={
-        ((selectedColumnOperationType
-          ? selectedColumnSourceField
-            ? [
-                {
-                  label: fieldMap[selectedColumnSourceField].displayName,
-                  value: { type: 'field', field: selectedColumnSourceField },
-                },
-              ]
-            : [memoizedFieldOptions[0]]
+        ((selectedColumnOperationType && selectedColumnSourceField
+          ? [
+              {
+                label: fieldIsInvalid
+                  ? selectedColumnSourceField
+                  : fieldMap[selectedColumnSourceField]?.displayName,
+                value: { type: 'field', field: selectedColumnSourceField },
+              },
+            ]
           : []) as unknown) as EuiComboBoxOptionOption[]
       }
       singleSelection={{ asPlainText: true }}

@@ -49,7 +49,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 };
 
 export interface UsePostCase extends NewCaseState {
-  postCase: (data: CasePostRequest) => void;
+  postCase: (data: CasePostRequest) => Promise<() => void>;
 }
 export const usePostCase = (): UsePostCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {

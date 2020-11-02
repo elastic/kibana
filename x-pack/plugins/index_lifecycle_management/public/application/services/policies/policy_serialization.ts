@@ -4,21 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Policy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
+import { LegacyPolicy, PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
-import {
-  defaultNewColdPhase,
-  defaultNewDeletePhase,
-  defaultNewHotPhase,
-  defaultNewWarmPhase,
-  defaultNewFrozenPhase,
-  serializedPhaseInitialization,
-} from '../../constants';
+import { defaultNewDeletePhase, serializedPhaseInitialization } from '../../constants';
 
-import { hotPhaseFromES, hotPhaseToES } from './hot_phase';
-import { warmPhaseFromES, warmPhaseToES } from './warm_phase';
-import { coldPhaseFromES, coldPhaseToES } from './cold_phase';
-import { frozenPhaseFromES, frozenPhaseToES } from './frozen_phase';
 import { deletePhaseFromES, deletePhaseToES } from './delete_phase';
 
 export const splitSizeAndUnits = (field: string): { size: string; units: string } => {
@@ -48,20 +37,16 @@ export const getPolicyByName = (
   }
 };
 
-export const initializeNewPolicy = (newPolicyName: string = ''): Policy => {
+export const initializeNewPolicy = (newPolicyName: string = ''): LegacyPolicy => {
   return {
     name: newPolicyName,
     phases: {
-      hot: { ...defaultNewHotPhase },
-      warm: { ...defaultNewWarmPhase },
-      cold: { ...defaultNewColdPhase },
-      frozen: { ...defaultNewFrozenPhase },
       delete: { ...defaultNewDeletePhase },
     },
   };
 };
 
-export const deserializePolicy = (policy: PolicyFromES): Policy => {
+export const deserializePolicy = (policy: PolicyFromES): LegacyPolicy => {
   const {
     name,
     policy: { phases },
@@ -70,17 +55,13 @@ export const deserializePolicy = (policy: PolicyFromES): Policy => {
   return {
     name,
     phases: {
-      hot: hotPhaseFromES(phases.hot),
-      warm: warmPhaseFromES(phases.warm),
-      cold: coldPhaseFromES(phases.cold),
-      frozen: frozenPhaseFromES(phases.frozen),
       delete: deletePhaseFromES(phases.delete),
     },
   };
 };
 
-export const serializePolicy = (
-  policy: Policy,
+export const legacySerializePolicy = (
+  policy: LegacyPolicy,
   originalEsPolicy: SerializedPolicy = {
     name: policy.name,
     phases: { hot: { ...serializedPhaseInitialization } },
@@ -88,22 +69,8 @@ export const serializePolicy = (
 ): SerializedPolicy => {
   const serializedPolicy = {
     name: policy.name,
-    phases: { hot: hotPhaseToES(policy.phases.hot, originalEsPolicy.phases.hot) },
+    phases: {},
   } as SerializedPolicy;
-  if (policy.phases.warm.phaseEnabled) {
-    serializedPolicy.phases.warm = warmPhaseToES(policy.phases.warm, originalEsPolicy.phases.warm);
-  }
-
-  if (policy.phases.cold.phaseEnabled) {
-    serializedPolicy.phases.cold = coldPhaseToES(policy.phases.cold, originalEsPolicy.phases.cold);
-  }
-
-  if (policy.phases.frozen.phaseEnabled) {
-    serializedPolicy.phases.frozen = frozenPhaseToES(
-      policy.phases.frozen,
-      originalEsPolicy.phases.frozen
-    );
-  }
 
   if (policy.phases.delete.phaseEnabled) {
     serializedPolicy.phases.delete = deletePhaseToES(

@@ -83,7 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('only shows the dashboard navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Dashboard']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Overview', 'Dashboard']);
       });
 
       it(`landing page shows "Create new Dashboard" button`, async () => {
@@ -287,7 +287,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dashboard']);
+        expect(navLinks).to.eql(['Overview', 'Dashboard']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -415,7 +415,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows dashboard navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Dashboard']);
+        expect(navLinks).to.eql(['Overview', 'Dashboard']);
       });
 
       it(`landing page doesn't show "Create new Dashboard" button`, async () => {
@@ -532,7 +532,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks.map((navLink: any) => navLink.text)).to.not.contain(['Dashboard']);
       });
 
-      it(`landing page shows 404`, async () => {
+      it(`landing page shows 403`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           DashboardConstants.LANDING_PAGE_PATH,
@@ -541,10 +541,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`create new dashboard shows 404`, async () => {
+      it(`create new dashboard shows 403`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           DashboardConstants.CREATE_NEW_DASHBOARD_URL,
@@ -553,10 +553,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`edit dashboard for object which doesn't exist shows 404`, async () => {
+      it(`edit dashboard for object which doesn't exist shows 403`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           createDashboardEditUrl('i-dont-exist'),
@@ -565,10 +565,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
 
-      it(`edit dashboard for object which exists shows 404`, async () => {
+      it(`edit dashboard for object which exists shows 403`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'dashboard',
           createDashboardEditUrl('i-exist'),
@@ -577,7 +577,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

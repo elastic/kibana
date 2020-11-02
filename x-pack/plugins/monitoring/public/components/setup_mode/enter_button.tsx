@@ -8,6 +8,8 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import './enter_button.scss';
+import { METRIC_TYPE, useUiTracker } from '../../../../observability/public';
+import { TELEMETRY_METRIC_BUTTON_CLICK } from '../../../common/constants';
 
 export interface SetupModeEnterButtonProps {
   enabled: boolean;
@@ -18,6 +20,7 @@ export const SetupModeEnterButton: React.FC<SetupModeEnterButtonProps> = (
   props: SetupModeEnterButtonProps
 ) => {
   const [isLoading, setIsLoading] = React.useState(false);
+  const trackStat = useUiTracker({ app: 'stack_monitoring' });
 
   if (!props.enabled) {
     return null;
@@ -26,6 +29,10 @@ export const SetupModeEnterButton: React.FC<SetupModeEnterButtonProps> = (
   async function enterSetupMode() {
     setIsLoading(true);
     await props.toggleSetupMode(true);
+    trackStat({
+      metric: `${TELEMETRY_METRIC_BUTTON_CLICK}setupmode_enter`,
+      metricType: METRIC_TYPE.CLICK,
+    });
     setIsLoading(false);
   }
 
