@@ -178,7 +178,7 @@ describe('action_form', () => {
           },
         },
         setHasActionsWithBrokenConnector: jest.fn(),
-        actionTypeRegistry: actionTypeRegistry as any,
+        actionTypeRegistry,
         docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       };
       actionTypeRegistry.list.mockReturnValue([

@@ -6,12 +6,11 @@
 
 import React, { createContext, useContext } from 'react';
 import { HttpSetup, ApplicationStart, DocLinksStart, ToastsSetup } from 'kibana/public';
-import { ActionTypeModel, ActionConnector } from '../../types';
-import { TypeRegistry } from '../type_registry';
+import { ActionTypeRegistryContract, ActionConnector } from '../../types';
 
 export interface ActionsConnectorsContextValue {
   http: HttpSetup;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  actionTypeRegistry: ActionTypeRegistryContract;
   toastNotifications: ToastsSetup;
   capabilities: ApplicationStart['capabilities'];
   reloadConnectors?: () => Promise<ActionConnector[] | void>;
