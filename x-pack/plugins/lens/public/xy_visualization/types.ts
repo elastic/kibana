@@ -409,7 +409,7 @@ export interface XYArgs {
 export interface XYState {
   preferredSeriesType: SeriesType;
   legend: LegendConfig;
-  valueLabels: ValueLabelConfig;
+  valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
   layers: LayerConfig[];
   xTitle?: string;
