@@ -15,7 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
-  const retry = getService('retry');
 
   describe('infrastructure security', () => {
     describe('global infrastructure all privileges', () => {
