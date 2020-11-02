@@ -49,7 +49,7 @@ export const getIndexData = async (
 
       const { pageIndex, pageSize } = pagination;
       // TODO: remove results_field from `fields` when possible
-      const resp: SearcheResponse7 = await ml.esSearch({
+      const resp: SearchResponse7 = await ml.esSearch({
         index: jobConfig.dest.index,
         body: {
           fields: ['*'],
