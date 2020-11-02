@@ -18,12 +18,12 @@
  */
 
 import { take } from 'rxjs/operators';
-import { i18n, i18nLoader } from '@kbn/i18n';
 import { Logger } from '../logging';
 import { IConfigService } from '../config';
 import { CoreContext } from '../core_context';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
 import { getKibanaTranslationFiles } from './get_kibana_translation_files';
+import { initTranslations } from './init_translations';
 
 interface SetupDeps {
   pluginPaths: string[];
@@ -54,16 +54,8 @@ export class I18nService {
 
     const translationFiles = await getKibanaTranslationFiles(locale, pluginPaths);
 
-    this.log.debug(`Registering translation files: [${translationFiles.join(', ')}]`);
-    i18nLoader.registerTranslationFiles(translationFiles);
-
-    const translations = await i18nLoader.getTranslationsByLocale(locale);
-    i18n.init(
-      Object.freeze({
-        locale,
-        ...translations,
-      })
-    );
+    this.log.debug(`Using translation files: [${translationFiles.join(', ')}]`);
+    await initTranslations(locale, translationFiles);
 
     return {
       getLocale: () => locale,
