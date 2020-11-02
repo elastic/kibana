@@ -5,18 +5,37 @@
  */
 
 import _ from 'lodash';
-import React, { Component } from 'react';
+import React, { ChangeEvent, Component } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption, EuiFieldText } from '@elastic/eui';
+import { IField } from '../../../fields/field';
 
-import { EuiComboBox, EuiFieldText } from '@elastic/eui';
+interface Props {
+  dataTestSubj: string;
+  field: IField;
+  getValueSuggestions: (query: string) => Promise<string[]>;
+  onChange: (value: string) => void;
+  value: string;
+}
 
-export class StopInput extends Component {
-  constructor(props) {
+interface State {
+  suggestions: string[];
+  isLoadingSuggestions: boolean;
+  hasPrevFocus: boolean;
+  fieldDataType: string | null;
+  localFieldTextValue: string;
+  searchValue?: string;
+}
+
+export class StopInput extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
+  constructor(props: Props) {
     super(props);
     this.state = {
       suggestions: [],
       isLoadingSuggestions: false,
       hasPrevFocus: false,
-      fieldDataType: undefined,
+      fieldDataType: null,
       localFieldTextValue: props.value,
     };
   }
@@ -45,15 +64,15 @@ export class StopInput extends Component {
     }
   };
 
-  _onChange = (selectedOptions) => {
+  _onChange = (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => {
     this.props.onChange(_.get(selectedOptions, '[0].label', ''));
   };
 
-  _onCreateOption = (newValue) => {
+  _onCreateOption = (newValue: string) => {
     this.props.onChange(newValue);
   };
 
-  _onSearchChange = async (searchValue) => {
+  _onSearchChange = async (searchValue: string) => {
     this.setState(
       {
         isLoadingSuggestions: true,
@@ -65,8 +84,8 @@ export class StopInput extends Component {
     );
   };
 
-  _loadSuggestions = _.debounce(async (searchValue) => {
-    let suggestions = [];
+  _loadSuggestions = _.debounce(async (searchValue: string) => {
+    let suggestions: string[] = [];
     try {
       suggestions = await this.props.getValueSuggestions(searchValue);
     } catch (error) {
@@ -81,7 +100,7 @@ export class StopInput extends Component {
     }
   }, 300);
 
-  _onFieldTextChange = (event) => {
+  _onFieldTextChange = (event: ChangeEvent<HTMLInputElement>) => {
     this.setState({ localFieldTextValue: event.target.value });
     // onChange can cause UI lag, ensure smooth input typing by debouncing onChange
     this._debouncedOnFieldTextChange();

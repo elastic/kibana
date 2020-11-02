@@ -36,7 +36,6 @@ import {
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { FleetStatusProvider, useBreadcrumbs } from './hooks';
 import { IntraAppStateProvider } from './hooks/use_intra_app_state';
-import './index.scss';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
