@@ -59,11 +59,11 @@ Changing these settings may disable features of the APM App.
   | Maximum number of child items displayed when viewing trace details. Defaults to `1000`.
 
 | `xpack.observability.annotations.index`
+  | Index name where Observability annotations are stored. Defaults to `observability-annotations`.
+
+| `xpack.apm.searchAggregatedTransactions`
   | experimental[] Enables Transaction histogram metrics. Requires additional configuration in APM Server.
     See {apm-server-ref-v}/transaction-metrics.html[Configure transaction metrics] for more information.
-  
-| `xpack.apm.searchAggregatedTransactions`
-  | Index name where Observability annotations are stored. Defaults to `observability-annotations`.
 
 | `apm_oss.indexPattern` {ess-icon}
   | The index pattern used for integrations with Machine Learning and Query Bar.
