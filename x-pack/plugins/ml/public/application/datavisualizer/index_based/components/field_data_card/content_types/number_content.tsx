@@ -146,7 +146,7 @@ export const NumberContent: FC<FieldDataCardProps> = ({ config }) => {
         options={detailsOptions}
         idSelected={detailsMode}
         onChange={(optionId) => setDetailsMode(optionId as DETAILS_MODE)}
-        aria-label={i18n.translate(
+        legend={i18n.translate(
           'xpack.ml.fieldDataCard.cardNumber.selectMetricDetailsDisplayAriaLabel',
           {
             defaultMessage: 'Select display option for metric details',
