@@ -88,9 +88,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getId(): string {
-    if (!this._descriptor.id) {
-      throw new Error('should not get id when undefined');
-    }
     return this._descriptor.id;
   }
 

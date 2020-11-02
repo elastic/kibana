@@ -13,7 +13,7 @@ import {
 import { getHttp, getToasts } from '../../../kibana_services';
 
 let toastDisplayed = false;
-const indexSettings = new Map<string, INDEX_SETTINGS | Promise<INDEX_SETTINGS>>();
+const indexSettings = new Map<string, Promise<INDEX_SETTINGS>>();
 
 export interface INDEX_SETTINGS {
   maxResultWindow: number;

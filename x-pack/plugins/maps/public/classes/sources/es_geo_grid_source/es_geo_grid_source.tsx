@@ -103,15 +103,15 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
 
   getSyncMeta(): VectorSourceSyncMeta {
     return {
-      requestType: this._descriptor.requestType || RENDER_AS.POINT,
+      requestType: this._descriptor.requestType,
     };
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
-    let indexPatternTitle = this.getIndexPatternId();
+    let indexPatternName = this.getIndexPatternId();
     try {
       const indexPattern = await this.getIndexPattern();
-      indexPatternTitle = indexPattern.title;
+      indexPatternName = indexPattern.title;
     } catch (error) {
       // ignore error, title will just default to id
     }
@@ -125,13 +125,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         label: i18n.translate('xpack.maps.source.esGrid.indexPatternLabel', {
           defaultMessage: 'Index pattern',
         }),
-        value: indexPatternTitle || '',
+        value: indexPatternName,
       },
       {
         label: i18n.translate('xpack.maps.source.esGrid.geospatialFieldLabel', {
           defaultMessage: 'Geospatial field',
         }),
-        value: this._descriptor.geoField || '',
+        value: this._descriptor.geoField,
       },
     ];
   }
@@ -281,12 +281,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
         ),
       });
 
-      features.push(
-        ...convertCompositeRespToGeoJson(
-          esResponse,
-          this._descriptor.requestType || RENDER_AS.POINT
-        )
-      );
+      features.push(...convertCompositeRespToGeoJson(esResponse, this._descriptor.requestType));
 
       afterKey = esResponse.aggregations.compositeSplit.after_key;
       if (esResponse.aggregations.compositeSplit.buckets.length < gridsPerRequest) {
@@ -354,7 +349,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
       }),
     });
 
-    return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType || RENDER_AS.POINT);
+    return convertRegularRespToGeoJson(esResponse, this._descriptor.requestType);
   }
 
   async getGeoJsonWithMeta(

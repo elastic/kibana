@@ -40,9 +40,9 @@ export type EMSFileSourceDescriptor = AbstractSourceDescriptor & {
 
 export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   // id: UUID
+  id: string;
   indexPatternId: string;
   geoField?: string;
-  id: string;
 };
 
 export type AggDescriptor = {
@@ -58,7 +58,7 @@ export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
 export type ESGeoGridSourceDescriptor = AbstractESAggSourceDescriptor & {
   geoField: string;
   requestType: RENDER_AS;
-  resolution?: GRID_RESOLUTION;
+  resolution: GRID_RESOLUTION;
 };
 
 export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {

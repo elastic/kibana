@@ -173,9 +173,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         return field.aggregatable;
       });
 
-      return (fields.map((field) => {
-        return this.createField({ fieldName: field.name }) as IField;
-      }) as unknown) as IField[];
+      return fields.map(
+        (field): IField => {
+          return this.createField({ fieldName: field.name });
+        }
+      );
     } catch (error) {
       // failed index-pattern retrieval will show up as error-message in the layer-toc-entry
       return [];
@@ -183,15 +185,15 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   }
 
   getFieldNames(): string[] {
-    return typeof this._descriptor.geoField === 'string' ? [this._descriptor.geoField] : [];
+    return [this._descriptor.geoField];
   }
 
   async getImmutableProperties(): Promise<ImmutableSourceProperty[]> {
-    let indexPatternTitle = this.getIndexPatternId();
+    let indexPatternName = this.getIndexPatternId();
     let geoFieldType = '';
     try {
       const indexPattern = await this.getIndexPattern();
-      indexPatternTitle = indexPattern.title;
+      indexPatternName = indexPattern.title;
       const geoField = await this._getGeoField();
       geoFieldType = geoField.type;
     } catch (error) {
@@ -207,13 +209,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         label: i18n.translate('xpack.maps.source.esSearch.indexPatternLabel', {
           defaultMessage: `Index pattern`,
         }),
-        value: indexPatternTitle,
+        value: indexPatternName,
       },
       {
         label: i18n.translate('xpack.maps.source.esSearch.geoFieldLabel', {
           defaultMessage: 'Geospatial field',
         }),
-        value: typeof this._descriptor.geoField === 'string' ? this._descriptor.geoField : '',
+        value: this._descriptor.geoField,
       },
       {
         label: i18n.translate('xpack.maps.source.esSearch.geoFieldTypeLabel', {
@@ -540,9 +542,11 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   async getLeftJoinFields(): Promise<IField[]> {
     const indexPattern = await this.getIndexPattern();
     // Left fields are retrieved from _source.
-    return getSourceFields(indexPattern.fields).map((field) => {
-      return this.createField({ fieldName: field.name }) as IField;
-    });
+    return getSourceFields(indexPattern.fields).map(
+      (field): IField => {
+        return this.createField({ fieldName: field.name });
+      }
+    );
   }
 
   async getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]> {
