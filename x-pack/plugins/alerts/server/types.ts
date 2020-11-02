@@ -173,7 +173,7 @@ export interface AlertingPlugin {
 }
 
 export interface AlertsConfigType {
-  healthCheck: {
+  invalidateApiKeysTask: {
     interval: string;
   };
 }

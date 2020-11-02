@@ -5,7 +5,7 @@
  */
 
 import { Logger, ISavedObjectsRepository } from 'kibana/server';
-import { InvalidateAPIKeyParams } from '../../../security/server';
+import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../security/server';
 import {
   RunContext,
   TaskManagerSetupContract,
@@ -18,19 +18,39 @@ import { InvalidatePendingApiKey } from '../types';
 const TASK_TYPE = 'alerts_invalidate_api_keys';
 export const TASK_ID = `Alerts-${TASK_TYPE}`;
 
+const invalidateAPIKey = async (
+  params: InvalidateAPIKeyParams,
+  securityPluginSetup?: SecurityPluginSetup
+): Promise<InvalidateAPIKeyResult> => {
+  if (!securityPluginSetup) {
+    return { apiKeysEnabled: false };
+  }
+  const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKeyAsInternalUser(
+    params
+  );
+  // Null when Elasticsearch security is disabled
+  if (!invalidateAPIKeyResult) {
+    return { apiKeysEnabled: false };
+  }
+  return {
+    apiKeysEnabled: true,
+    result: invalidateAPIKeyResult,
+  };
+};
+
 export function initializeAlertsInvalidateApiKeys(
   logger: Logger,
   internalSavedObjectsRepository: Promise<{
     createInternalRepository: () => ISavedObjectsRepository;
   }>,
   taskManager: TaskManagerSetupContract,
-  invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>
+  securityPluginSetup?: SecurityPluginSetup
 ) {
   registerAlertsInvalidateApiKeysTask(
     logger,
     internalSavedObjectsRepository,
     taskManager,
-    invalidateAPIKey
+    securityPluginSetup
   );
 }
 
@@ -50,12 +70,12 @@ function registerAlertsInvalidateApiKeysTask(
     createInternalRepository: () => ISavedObjectsRepository;
   }>,
   taskManager: TaskManagerSetupContract,
-  invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>
+  securityPluginSetup?: SecurityPluginSetup
 ) {
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Invalidate Alerts API Keys',
-      createTaskRunner: taskRunner(logger, internalSavedObjectsRepository, invalidateAPIKey),
+      createTaskRunner: taskRunner(logger, internalSavedObjectsRepository, securityPluginSetup),
     },
   });
 }
@@ -86,7 +106,7 @@ function taskRunner(
   internalSavedObjectsRepository: Promise<{
     createInternalRepository: () => ISavedObjectsRepository;
   }>,
-  invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>
+  securityPluginSetup?: SecurityPluginSetup
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
@@ -98,7 +118,10 @@ function taskRunner(
             type: 'invalidatePendingApiKey',
           });
           res.saved_objects.forEach(async (obj) => {
-            const response = await invalidateAPIKey({ id: obj.attributes.apiKeyId });
+            const response = await invalidateAPIKey(
+              { id: obj.attributes.apiKeyId },
+              securityPluginSetup
+            );
             if (response.apiKeysEnabled === true && response.result.error_count > 0) {
               logger.error(`Failed to invalidate API Key [id="${obj.attributes.apiKeyId}"]`);
             } else {

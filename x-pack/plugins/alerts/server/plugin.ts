@@ -192,30 +192,11 @@ export class AlertingPlugin {
       });
     }
 
-    const invalidateAPIKey = async (
-      params: InvalidateAPIKeyParams
-    ): Promise<InvalidateAPIKeyResult> => {
-      if (!this.security) {
-        return { apiKeysEnabled: false };
-      }
-      const invalidateAPIKeyResult = await this.security.authc.invalidateAPIKeyAsInternalUser(
-        params
-      );
-      // Null when Elasticsearch security is disabled
-      if (!invalidateAPIKeyResult) {
-        return { apiKeysEnabled: false };
-      }
-      return {
-        apiKeysEnabled: true,
-        result: invalidateAPIKeyResult,
-      };
-    };
-
     initializeAlertsInvalidateApiKeys(
       this.logger,
       this.createSOInternalRepositoryContext(core),
       plugins.taskManager,
-      invalidateAPIKey
+      this.security
     );
 
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));

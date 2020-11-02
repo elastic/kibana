@@ -30,7 +30,6 @@ import {
 } from '../types';
 import { validateAlertTypeParams, alertExecutionStatusFromRaw } from '../lib';
 import {
-  InvalidateAPIKeyParams,
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
   InvalidateAPIKeyResult as SecurityPluginInvalidateAPIKeyResult,
 } from '../../../security/server';
