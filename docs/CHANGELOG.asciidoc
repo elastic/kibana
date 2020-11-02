@@ -15,23 +15,25 @@ Review important information about {kib} releases.
 --
 
 [[release-notes-prototype]]
-== {kib} 7.0.0
+== {kib} 7.0.0 release notes
 
 coming[7.0.0]
 
-To learn about the {kib} 7.0.0 release, review the following:
+This is a summary of a cool, or a group of cool, new features in this release. For the features introduced in 7.0.0, refer to link:https://www.elastic.co/blog/kibana-7-0-0-released[Kibana 7.0.0 released].
 
-* <<breaking-changes-7.0.0>>
-
-* <<security-updates-7.0.0>>
-
-* <<release-highlights-7.0.0>>
+To learn more about the {kib} 7.0.0 release, review the following:
 
 * <<enhancements-7.0.0>>
 
-* <<bug-fixes-7.0.0>>
+* <<breaking-changes-7.0.0>>
 
 * <<deprecations-7.0.0>>
+
+* <<bug-fixes-7.0.0>>
+
+* <<security-updates-7.0.0>>
+
+* <<known-issues-7.0.0>>
 
 [[breaking-changes-7.0.0]]
 === Breaking changes
@@ -76,8 +78,6 @@ Visualizations::
 * Removes Timelion from the app switcher by default {pull}30131[#30131]
 * Removes nested table splits from table visualization {pull}26057[#26057]
 
-For more details about the breaking changes, refer to link:https://www.elastic.co/guide/en/kibana/7.0/breaking-changes-7.0.html[Breaking changes in 7.0].
-
 [[security-updates-7.0.0]]
 === Security updates
 
@@ -90,11 +90,6 @@ You must upgrade to 7.8.1. If you are unable to upgrade, set timelion.enabled to
 * In all {kib} versions, region map visualizations contain a stored XSS flaw. Attackers that can edit or create region map visualizations can obtain sensitive information or perform destructive actions on behalf of {kib} users who view the region map visualization, CVE-2020-7017.
 +
 You must upgrade to 7.8.1. If you are unable to upgrade, set xpack.maps.enabled, region_map.enabled, and tile_map.enabled to false in kibana.yml to disable map visualizations.
-
-[[release-highlights-7.0.0]]
-=== Release highlights
-
-For the features introduced in 7.0.0, refer to link:https://www.elastic.co/blog/kibana-7-0-0-released[Kibana 7.0.0 released].
 
 [[enhancements-7.0.0]]
 === Enhancements
