@@ -312,8 +312,9 @@ const getKeyboardReorderMessageMoved = (
   prevPosition: number
 ) =>
   i18n.translate('xpack.lens.dragDrop.elementMoved', {
-    defaultMessage: `You have moved the item ${itemLabel} from position {prevPosition} to position {position}`,
+    defaultMessage: `You have moved the item {itemLabel} from position {prevPosition} to position {position}`,
     values: {
+      itemLabel,
       position,
       prevPosition,
     },
@@ -321,8 +322,9 @@ const getKeyboardReorderMessageMoved = (
 
 const getKeyboardReorderMessageLifted = (itemLabel: string, position: number) =>
   i18n.translate('xpack.lens.dragDrop.elementLifted', {
-    defaultMessage: `You have lifted an item ${itemLabel} in position {position}`,
+    defaultMessage: `You have lifted an item {itemLabel} in position {position}`,
     values: {
+      itemLabel,
       position,
     },
   });

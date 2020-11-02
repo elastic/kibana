@@ -198,7 +198,8 @@ describe('LayerPanel', () => {
 
       const group = component
         .find(EuiFormRow)
-        .findWhere((e) => e.prop('error') === 'Required dimension');
+        .findWhere((e) => e.prop('error')?.props?.children === 'Required dimension');
+
       expect(group).toHaveLength(1);
     });
 

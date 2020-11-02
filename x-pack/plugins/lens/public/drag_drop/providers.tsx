@@ -171,7 +171,7 @@ export function ReorderProvider({
       <EuiPortal>
         <EuiScreenReaderOnly>
           <div>
-            <p id="lnsDragDrop-reorderAnnouncement" aria-live="assertive">
+            <p id="lnsDragDrop-reorderAnnouncement" aria-live="assertive" aria-atomic={true}>
               {state.keyboardReorderMessage}
             </p>
             <p id={`lnsDragDrop-reorderInstructions-${id}`}>

@@ -302,10 +302,10 @@ describe('DragDrop', () => {
       component.find('[data-test-subj="lnsDragDrop-reorderableDrop"]').at(2).simulate('dragover');
       expect(component.find('[data-test-subj="lnsDragDrop"]').at(0).prop('style')).toEqual({});
       expect(component.find('[data-test-subj="lnsDragDrop"]').at(1).prop('style')).toEqual({
-        transform: 'translateY(-4px)',
+        transform: 'translateY(-8px)',
       });
       expect(component.find('[data-test-subj="lnsDragDrop"]').at(2).prop('style')).toEqual({
-        transform: 'translateY(-4px)',
+        transform: 'translateY(-8px)',
       });
 
       component.find('[data-test-subj="lnsDragDrop-reorderableDrop"]').at(2).simulate('dragleave');
