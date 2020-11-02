@@ -262,7 +262,6 @@ export const TemplateDetailsContent = ({
                 isOpen={isPopoverOpen}
                 closePopover={() => setIsPopOverOpen(false)}
                 panelPaddingSize="none"
-                withTitle
                 anchorPosition="rightUp"
                 repositionOnScroll
               >
