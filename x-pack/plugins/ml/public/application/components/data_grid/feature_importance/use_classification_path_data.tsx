@@ -165,6 +165,30 @@ export const buildRegressionDecisionPathData = ({
   return finalResult;
 };
 
+export const addAdjustedProbability = ({
+  predictedProbability,
+  decisionPlotData,
+}: {
+  predictedProbability: number | undefined;
+  decisionPlotData: DecisionPathPlotData;
+}): DecisionPathPlotData | undefined => {
+  if (predictedProbability && decisionPlotData.length > 0) {
+    const adjustedResidualImportance = predictedProbability - decisionPlotData[0][2];
+    // in the case where the final prediction_probability is less than the actual predicted probability
+    // which happens when number of features > top_num
+    // adjust the path to account for the residual feature importance as well
+    if (Math.abs(adjustedResidualImportance) > RESIDUAL_IMPORTANCE_ERROR_MARGIN) {
+      decisionPlotData.forEach((row) => (row[2] = row[2] + adjustedResidualImportance));
+      decisionPlotData.push([
+        decisionPathFeatureOtherTitle,
+        adjustedResidualImportance,
+        decisionPlotData[decisionPlotData.length - 1][2] - adjustedResidualImportance,
+      ]);
+    }
+  }
+  return decisionPlotData;
+};
+
 export const processBinaryClassificationDecisionPathData = ({
   decisionPlotData,
   startingBaseline,
@@ -186,21 +210,7 @@ export const processBinaryClassificationDecisionPathData = ({
     finalResult[i][2] = predictionProbabilitySoFar;
   }
 
-  if (predictedProbability && finalResult.length > 0) {
-    const adjustedResidualImportance = predictedProbability - finalResult[0][2];
-    // in the case where the final prediction_probability is less than the actual predicted probability
-    // which happens when number of features > top_num
-    // adjust the path to account for the residual feature importance as well
-    if (Math.abs(adjustedResidualImportance) > RESIDUAL_IMPORTANCE_ERROR_MARGIN) {
-      finalResult.forEach((row) => (row[2] = row[2] + adjustedResidualImportance));
-      finalResult.push([
-        decisionPathFeatureOtherTitle,
-        adjustedResidualImportance,
-        finalResult[finalResult.length - 1][2] - adjustedResidualImportance,
-      ]);
-    }
-  }
-  return finalResult;
+  return addAdjustedProbability({ predictedProbability, decisionPlotData: finalResult });
 };
 
 export const processMultiClassClassificationDecisionPathData = ({
@@ -208,11 +218,13 @@ export const processMultiClassClassificationDecisionPathData = ({
   decisionPlotData,
   startingBaseline,
   featureImportance,
+  predictedProbability,
 }: {
   baselines: ClassificationFeatureImportanceBaseline['classes'];
   decisionPlotData: DecisionPathPlotData;
   startingBaseline: number;
   featureImportance: FeatureImportance[];
+  predictedProbability: number | undefined;
 }): DecisionPathPlotData | undefined => {
   const denominator = computeMultiClassImportanceDenominator({ baselines, featureImportance });
 
@@ -226,7 +238,7 @@ export const processMultiClassClassificationDecisionPathData = ({
     decisionPlotData[i][2] = numerator / denominator;
   }
 
-  return decisionPlotData;
+  return addAdjustedProbability({ predictedProbability, decisionPlotData });
 };
 
 /**
@@ -332,5 +344,6 @@ export const buildClassificationDecisionPathData = ({
     decisionPlotData,
     startingBaseline,
     featureImportance,
+    predictedProbability,
   });
 };
