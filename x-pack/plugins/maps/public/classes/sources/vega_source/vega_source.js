@@ -29,7 +29,7 @@ export class VegaSource extends AbstractSource {
   }
 
   async getDisplayName() {
-    return 'Vega test layer';
+    return 'Vega flights';
   }
 }
 

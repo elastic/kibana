@@ -4,17 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-// import * as deck from '@deck.gl/core';
-// import * as layers from '@deck.gl/layers';
-// import * as luma from 'luma.gl';
 import * as vega from 'vega';
-// import * as VegaDeckGl from '@msrvida/vega-deck.gl';
-import { MapboxLayer } from '@deck.gl/mapbox';
 import Vsi from 'vega-spec-injector';
-// import sample from './sample.json';
 import sample from './flights_sample.json';
-
-// VegaDeckGl.use(vega, deck, layers, luma);
 
 const DEFAULT_PROJECTION = {
   name: 'projection',
@@ -34,17 +26,6 @@ const augmentSpec = (spec) => {
   vsi.addToList(spec, 'signals', ['zoom', 'latitude', 'longitude']);
   vsi.addToList(spec, 'projections', [DEFAULT_PROJECTION]);
   return spec;
-};
-
-const signalChangeFactory = (mbMap) => () => {
-  try {
-    const center = mbMap.getCenter();
-    const zoom = mbMap.getZoom();
-
-    mbMap.flyTo({ center, zoom });
-  } catch (err) {
-    console.error(err);
-  }
 };
 
 export const getCanvas = (width, height) => {

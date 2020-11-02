@@ -10,7 +10,7 @@ import { LayerWizard, RenderWizardArguments } from '../../layers/layer_wizard_re
 // @ts-ignore
 import { VegaSource } from './vega_source';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
-import {VegaLayer} from "../../layers/vega_layer/vega_layer";
+import { VegaLayer } from "../../layers/vega_layer/vega_layer";
 
 let called = false;
 export const vegaLayerWizardConfig: LayerWizard = {

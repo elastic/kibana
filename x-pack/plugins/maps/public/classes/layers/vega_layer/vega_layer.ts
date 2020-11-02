@@ -5,26 +5,41 @@
  */
 
 import { AbstractLayer } from '../layer';
-import { SOURCE_TYPES } from '../../../../common/constants';
+import { LAYER_STYLE_TYPE, SOURCE_TYPES } from '../../../../common/constants';
 import { VegaSourceDescriptor } from '../../../../common/descriptor_types';
 import {
   getVegaCanvas,
 } from './vega_mapbox_layer';
+import { TileStyle } from '../../styles/tile/tile_style';
 
 export class VegaLayer extends AbstractLayer {
   static type = SOURCE_TYPES.VEGA;
 
-  static createDescriptor(options): VegaSourceDescriptor {
-    return {
-      ...options,
-      type: VegaLayer.type,
-      name: 'vega-ish',
-      id: 'test vega',
-    };
+  static createDescriptor(options, mapColors): VegaSourceDescriptor {
+    const vegaLayerDescriptor = super.createDescriptor(options, mapColors);
+    vegaLayerDescriptor.type = VegaLayer.type;
+    vegaLayerDescriptor.alpha = _.get(options, 'alpha', 1);
+    // Placeholder
+    vegaLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
+    return vegaLayerDescriptor;
   }
 
   constructor({ source, layerDescriptor }) {
     super({ source, layerDescriptor });
+    // Placeholder style
+    this._style = new TileStyle();
+  }
+
+  getStyleForEditing() {
+    return this._style;
+  }
+
+  getStyle() {
+    return this._style;
+  }
+
+  getCurrentStyle() {
+    return this._style;
   }
 
   async syncData({ startLoading, stopLoading, onLoadError, dataFilters }) {
