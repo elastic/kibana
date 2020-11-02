@@ -16,13 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { DataViewComponent } from './components/data_view';
 import { InspectorViewDescription, InspectorViewProps } from '../../types';
 import { Adapters } from '../../../common';
 import { IUiSettingsClient } from '../../../../../core/public';
+
+const DataViewComponent = lazy(() => import('./components/data_view'));
 
 export const getDataViewDescription = (
   uiSettings: IUiSettingsClient

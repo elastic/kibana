@@ -60,7 +60,7 @@ export class DataViewComponent extends Component<DataViewComponentProps, DataVie
   state = {} as DataViewComponentState;
   _isMounted = false;
 
-  static getDerivedStateFromProps(nextProps: InspectorViewProps, state: DataViewComponentState) {
+  public static getDerivedStateFromProps(nextProps: any, state: DataViewComponentState) {
     if (state && nextProps.adapters === state.adapters) {
       return null;
     }
@@ -177,3 +177,7 @@ export class DataViewComponent extends Component<DataViewComponentProps, DataVie
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { DataViewComponent as default };
