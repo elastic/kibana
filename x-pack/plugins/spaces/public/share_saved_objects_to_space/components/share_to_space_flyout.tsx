@@ -65,7 +65,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
         const createSpaceTarget = (space: GetSpaceResult): SpaceTarget => ({
           ...space,
           isActiveSpace: space.id === activeSpace.id,
-          isPartiallyAuthorized: space?.authorizedPurposes?.shareSavedObjectsIntoSpace === false,
+          isPartiallyAuthorized: space.authorizedPurposes?.shareSavedObjectsIntoSpace === false,
         });
         setSpacesState({
           isLoading: false,
