@@ -52,40 +52,89 @@ export const getCanvas = (width, height) => {
   Object.assign(deckCanvas.style, { width, height });
   return deckCanvas;
 };
+const onChangeFactory = (mbMap, sourceId, view) => {
+  return () => {
+    const center = mbMap.getCenter();
+    const zoom = mbMap.getZoom();
+    const width = mbMap.getCanvas().clientWidth;
+    const height = mbMap.getCanvas().clientHeight;
+    mbMap
+      .getSource(sourceId)
+      .setCoordinates([
+        mbMap.getBounds().getNorthWest().toArray(),
+        mbMap.getBounds().getNorthEast().toArray(),
+        mbMap.getBounds().getSouthEast().toArray(),
+        mbMap.getBounds().getSouthWest().toArray(),
+      ]);
 
-export const createMapboxLayer = async function (mbMap, mbLayerId) {
-  const width = mbMap.getCanvas().clientWidth;
-  const height = mbMap.getCanvas().clientHeight;
+    view
+      .signal('latitude', center.lat)
+      .signal('longitude', center.lng)
+      .signal('zoom', zoom + 1)
+      .width(width)
+      .height(height)
+      .run();
+  };
+};
+
+const buildView = async (mbMap, augmentedSpec) => {
   const center = mbMap.getCenter();
   const zoom = mbMap.getZoom();
+  const width = mbMap.getCanvas().clientWidth;
+  const height = mbMap.getCanvas().clientHeight;
 
-  const deckCanvas = getCanvas(width, height);
-  const augmentedSpec = augmentSpec(sample);
-  const onSignal = signalChangeFactory(mbMap);
+  const divWrappedCanvas = getCanvas(width, height);
 
   // Parse spec and generate
   const parsedVega = vega.parse(augmentedSpec); // Std
-  const view = new vega.View(parsedVega)
-    // .logLevel(vega.Debug)
-    // .addSignalListener('latitude', onSignal)
-    // .addSignalListener('longitude', onSignal)
-    // .addSignalListener('zoom', onSignal)
-    .renderer('canvas') // renderer (canvas or svg)
+  const view = await new vega.View(parsedVega)
+    .renderer('canvas')
     .signal('latitude', center.lat)
     .signal('longitude', center.lng)
     .signal('zoom', zoom + 1)
     .width(width)
     .height(height)
-    .initialize(deckCanvas) // parent DOM container
-    .hover(true); // enable hover processing
-
-  await view.runAsync();
-  vegaDebug(view, augmentedSpec);
+    .initialize(divWrappedCanvas) // parent DOM container
+    .hover(true)
+    .runAsync();
   return {
     view,
-    canvas: deckCanvas.childNodes[0]
+    canvas: divWrappedCanvas.childNodes[0], // Just return canvas
   };
-  // return new MapboxLayer({ id: mbLayerId, deck: deckGlLayer });
+};
+
+export const getVegaCanvas = async function (mbMap, mbSourceId) {
+  const augmentedSpec = augmentSpec(sample);
+  const { view, canvas } = await buildView(mbMap, augmentedSpec);
+  vegaDebug(view, augmentedSpec);
+
+  return {
+    canvas,
+    bindEvents: () => bindEvents(mbMap, canvas, mbSourceId, view),
+  };
+};
+
+const getEvent = function (name, x, y) {
+  const evt = new MouseEvent(name, { clientX: x, clientY: y });
+  evt.changedTouches = [
+    {
+      clientX: x || 0,
+      clientY: y || 0,
+    },
+  ];
+  return evt;
+};
+
+const bindEvents = (mbMap, canvas, mbSourceId, view) => {
+  // Update view on map move and resize
+  mbMap.on('moveend', onChangeFactory(mbMap, mbSourceId, view));
+  mbMap.on('resize', onChangeFactory(mbMap, mbSourceId, view));
+
+  // Pass mb mouse movement to canvas element
+  mbMap.on('mousemove', (e) => {
+    const { x, y } = e.point;
+    canvas.dispatchEvent(getEvent('mousemove', x, y));
+  });
 };
 
 function vegaDebug(view, spec) {

@@ -7,7 +7,9 @@
 import { AbstractLayer } from '../layer';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { VegaSourceDescriptor } from '../../../../common/descriptor_types';
-import { createMapboxLayer, getCanvas } from './vega_mapbox_layer';
+import {
+  getVegaCanvas,
+} from './vega_mapbox_layer';
 
 export class VegaLayer extends AbstractLayer {
   static type = SOURCE_TYPES.VEGA;
@@ -37,46 +39,12 @@ export class VegaLayer extends AbstractLayer {
     const source = mbMap.getSource(this.getId());
     const mbLayerId = this._getVegaLayerId();
 
-    if (!mbMap.getSource('canvas-source')) {
-      const getEvent = function (name, x, y) {
-        const evt = new MouseEvent(name, { clientX: x, clientY: y });
-        evt.changedTouches = [
-          {
-            clientX: x || 0,
-            clientY: y || 0,
-          },
-        ];
-        return evt;
-      };
-
-      const { canvas: newVegaLayer, view } = await createMapboxLayer(mbMap, mbLayerId);
-      const onChange = () => {
-        const center = mbMap.getCenter();
-        const zoom = mbMap.getZoom();
-        const width = mbMap.getCanvas().clientWidth;
-        const height = mbMap.getCanvas().clientHeight;
-        mbMap
-          .getSource('canvas-source')
-          .setCoordinates([
-            mbMap.getBounds().getNorthWest().toArray(),
-            mbMap.getBounds().getNorthEast().toArray(),
-            mbMap.getBounds().getSouthEast().toArray(),
-            mbMap.getBounds().getSouthWest().toArray(),
-          ]);
-
-        view
-          .signal('latitude', center.lat)
-          .signal('longitude', center.lng)
-          .signal('zoom', zoom + 1)
-          .width(width)
-          .height(height)
-          .run();
-      };
-      mbMap.on('moveend', onChange);
-      mbMap.on('resize', onChange);
-      mbMap.addSource('canvas-source', {
+    if (!source) {
+      const mbSourceId = this._getMbSourceId();
+      const { canvas: vegaCanvas, bindEvents } = await getVegaCanvas(mbMap, mbSourceId);
+      mbMap.addSource(mbSourceId, {
         type: 'canvas',
-        canvas: newVegaLayer,
+        canvas: vegaCanvas,
         coordinates: [
           mbMap.getBounds().getNorthWest().toArray(),
           mbMap.getBounds().getNorthEast().toArray(),
@@ -87,14 +55,11 @@ export class VegaLayer extends AbstractLayer {
       });
 
       mbMap.addLayer({
-        id: 'canvas-layer',
+        id: mbLayerId,
         type: 'raster',
-        source: 'canvas-source',
+        source: mbSourceId,
       });
-      mbMap.on('mousemove', (e) => {
-        const { x, y } = e.point;
-        newVegaLayer.dispatchEvent(getEvent('mousemove', x, y));
-      });
+      bindEvents();
     }
   }
 
