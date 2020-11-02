@@ -9,7 +9,7 @@ import React, { ReactElement } from 'react';
 import rison from 'rison-node';
 
 import { i18n } from '@kbn/i18n';
-import { IFieldType, IndexPattern, SortDirection } from 'src/plugins/data/public';
+import { IFieldType, IndexPattern } from 'src/plugins/data/public';
 import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import { AbstractESSource } from '../es_source';
 import { getHttp, getSearchService } from '../../../kibana_services';
@@ -25,7 +25,6 @@ import {
   MVT_GETTILE_API_PATH,
   MVT_SOURCE_LAYER_NAME,
   SCALING_TYPES,
-  SORT_ORDER,
   SOURCE_TYPES,
   VECTOR_SHAPE_TYPE,
 } from '../../../../common/constants';
@@ -52,7 +51,10 @@ import {
 } from '../vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
-import { SortDirectionNumeric } from '../../../../../../../src/plugins/data/common/search/search_source';
+import {
+  SortDirectionNumeric,
+  SortDirection,
+} from '../../../../../../../src/plugins/data/common/search';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -116,7 +118,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       filterByMapBounds: _.get(descriptor, 'filterByMapBounds', DEFAULT_FILTER_BY_MAP_BOUNDS),
       tooltipProperties: _.get(descriptor, 'tooltipProperties', []),
       sortField: _.get(descriptor, 'sortField', ''),
-      sortOrder: _.get(descriptor, 'sortOrder', SORT_ORDER.DESC),
+      sortOrder: _.get(descriptor, 'sortOrder', SortDirection.desc),
       scalingType: _.get(descriptor, 'scalingType', SCALING_TYPES.LIMIT),
       topHitsSplitField: descriptor.topHitsSplitField,
       topHitsSize: _.get(descriptor, 'topHitsSize', 1),
@@ -626,7 +628,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   getSyncMeta(): VectorSourceSyncMeta | null {
     return {
       sortField: typeof this._descriptor.sortField === 'string' ? this._descriptor.sortField : '',
-      sortOrder: this._descriptor.sortOrder ? this._descriptor.sortOrder : SORT_ORDER.ASC,
+      sortOrder: this._descriptor.sortOrder ? this._descriptor.sortOrder : SortDirection.asc,
       scalingType: this._descriptor.scalingType,
       topHitsSplitField:
         typeof this._descriptor.topHitsSplitField === 'string'

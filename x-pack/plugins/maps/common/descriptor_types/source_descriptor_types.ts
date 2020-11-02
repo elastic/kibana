@@ -7,14 +7,8 @@
 
 import { FeatureCollection } from 'geojson';
 import { Query } from 'src/plugins/data/public';
-import {
-  AGG_TYPE,
-  GRID_RESOLUTION,
-  RENDER_AS,
-  SORT_ORDER,
-  SCALING_TYPES,
-  MVT_FIELD_TYPE,
-} from '../constants';
+import { SortDirection } from 'src/plugins/data/common/search';
+import { AGG_TYPE, GRID_RESOLUTION, RENDER_AS, SCALING_TYPES, MVT_FIELD_TYPE } from '../constants';
 
 export type AttributionDescriptor = {
   attributionText?: string;
@@ -66,7 +60,7 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   filterByMapBounds?: boolean;
   tooltipProperties?: string[];
   sortField?: string;
-  sortOrder?: SORT_ORDER;
+  sortOrder?: SortDirection;
   scalingType: SCALING_TYPES;
   topHitsSplitField?: string;
   topHitsSize?: number;

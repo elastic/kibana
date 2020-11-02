@@ -6,7 +6,8 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import { Query } from 'src/plugins/data/public';
-import { RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
+import { SortDirection } from 'src/plugins/data/common/search';
+import { RENDER_AS, SCALING_TYPES } from '../constants';
 import { MapExtent, MapQuery } from './map_descriptor';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
 
@@ -23,7 +24,7 @@ export type MapFilters = {
 
 type ESSearchSourceSyncMeta = {
   sortField: string;
-  sortOrder: SORT_ORDER;
+  sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
   topHitsSplitField: string;
   topHitsSize: number;

@@ -18,7 +18,7 @@ import {
   getSourceFields,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
-import { SORT_ORDER } from '../../../../common/constants';
+import { SortDirection } from '../../../../../../../src/plugins/data/common/search';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { indexPatterns } from '../../../../../../../src/plugins/data/public';
@@ -183,13 +183,13 @@ export class UpdateSourceEditor extends Component {
                 text: i18n.translate('xpack.maps.source.esSearch.ascendingLabel', {
                   defaultMessage: 'ascending',
                 }),
-                value: SORT_ORDER.ASC,
+                value: SortDirection.ASC,
               },
               {
                 text: i18n.translate('xpack.maps.source.esSearch.descendingLabel', {
                   defaultMessage: 'descending',
                 }),
-                value: SORT_ORDER.DESC,
+                value: SortDirection.desc,
               },
             ]}
             value={this.props.sortOrder}
