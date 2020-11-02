@@ -15,6 +15,7 @@ import { SavedSearchQuery } from '../../contexts/ml';
 
 import { INDEX_STATUS } from './analytics';
 import { DataFrameAnalyticsConfig } from '../../../../common/types/data_frame_analytics';
+
 export const getIndexData = async (
   jobConfig: DataFrameAnalyticsConfig | undefined,
   dataGrid: UseDataGridReturnType,
@@ -48,11 +49,11 @@ export const getIndexData = async (
 
       const { pageIndex, pageSize } = pagination;
       // TODO: remove results_field from `fields` when possible
-      const resp: SearchResponse7 = await ml.esSearch({
+      const resp: SearcheResponse7 = await ml.esSearch({
         index: jobConfig.dest.index,
         body: {
           fields: ['*'],
-          _source: jobConfig.dest.results_field,
+          _source: false,
           query: searchQuery,
           from: pageIndex * pageSize,
           size: pageSize,
@@ -62,12 +63,7 @@ export const getIndexData = async (
 
       if (!options.didCancel) {
         setRowCount(resp.hits.total.value);
-        const docs = resp.hits.hits.map((d) => ({
-          ...getProcessedFields(d.fields),
-          [jobConfig.dest.results_field]: d._source[jobConfig.dest.results_field],
-        }));
-
-        setTableItems(docs);
+        setTableItems(resp.hits.hits.map((d) => getProcessedFields(d.fields)));
         setStatus(INDEX_STATUS.LOADED);
       }
     } catch (e) {
