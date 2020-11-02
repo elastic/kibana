@@ -622,7 +622,7 @@ export class AlertsClient {
 
     try {
       const apiKeyId = Buffer.from(apiKey, 'base64').toString().split(':')[0];
-      await this.unsecuredSavedObjectsClient.create('invalidatePendingApiKey', {
+      await this.unsecuredSavedObjectsClient.create('invalidate_pending_api_key', {
         apiKeyId,
       });
     } catch (e) {

@@ -1,9 +1,0 @@
-{
-  "invalidatePendingApiKey": {
-    "properties": {
-      "apiKeyId": {
-        "type": "keyword"
-      }
-    }
-  }
-}

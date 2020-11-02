@@ -109,7 +109,7 @@ describe('disable()', () => {
   test('disables an alert', async () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidatePendingApiKey',
+      type: 'invalidate_pending_api_key',
       attributes: {
         apiKeyId: '123',
       },
@@ -152,7 +152,7 @@ describe('disable()', () => {
       }
     );
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith('invalidatePendingApiKey', {
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith('invalidate_pending_api_key', {
       apiKeyId: '123',
     });
   });
@@ -161,7 +161,7 @@ describe('disable()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidatePendingApiKey',
+      type: 'invalidate_pending_api_key',
       attributes: {
         apiKeyId: 'test',
       },
@@ -220,7 +220,7 @@ describe('disable()', () => {
 
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidatePendingApiKey',
+      type: 'invalidate_pending_api_key',
       attributes: {
         apiKeyId: 'test',
       },
@@ -236,7 +236,7 @@ describe('disable()', () => {
   test(`doesn't invalidate when no API key is used`, async () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidatePendingApiKey',
+      type: 'invalidate_pending_api_key',
       attributes: {
         apiKeyId: 'test',
       },
@@ -251,7 +251,7 @@ describe('disable()', () => {
   test('swallows error when failing to load decrypted saved object', async () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidatePendingApiKey',
+      type: 'invalidate_pending_api_key',
       attributes: {
         apiKeyId: 'test',
       },

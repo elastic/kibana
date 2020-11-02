@@ -729,7 +729,7 @@ describe('create()', () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidatePendingApiKey',
+      type: 'invalidate_pending_api_key',
       attributes: {
         apiKeyId: 'test',
       },

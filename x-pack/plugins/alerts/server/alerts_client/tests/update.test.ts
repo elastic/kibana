@@ -162,7 +162,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidatePendingApiKey',
+      type: 'invalidate_pending_api_key',
       attributes: {
         apiKeyId: '234',
       },
@@ -385,7 +385,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidatePendingApiKey',
+      type: 'invalidate_pending_api_key',
       attributes: {
         apiKeyId: '234',
       },
@@ -393,7 +393,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidatePendingApiKey',
+      type: 'invalidate_pending_api_key',
       attributes: {
         apiKeyId: '234',
       },
@@ -555,7 +555,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidatePendingApiKey',
+      type: 'invalidate_pending_api_key',
       attributes: {
         apiKeyId: '234',
       },

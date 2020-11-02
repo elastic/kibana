@@ -6,7 +6,6 @@
 
 import { SavedObjectsServiceSetup } from 'kibana/server';
 import mappings from './mappings.json';
-import mappingsInvalidateApiKey from './mappings_invalidate_api_key.json';
 import { getMigrations } from './migrations';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 
@@ -44,10 +43,16 @@ export function setupSavedObjects(
   });
 
   savedObjects.registerType({
-    name: 'invalidatePendingApiKey',
-    hidden: true,
+    name: 'invalidate_pending_api_key',
+    hidden: false,
     namespaceType: 'single',
-    mappings: mappingsInvalidateApiKey.invalidatePendingApiKey,
+    mappings: {
+      properties: {
+        apiKeyId: {
+          type: 'keyword',
+        },
+      },
+    },
   });
 
   // Encrypted attributes

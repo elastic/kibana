@@ -115,7 +115,7 @@ function taskRunner(
         try {
           const repository = (await internalSavedObjectsRepository).createInternalRepository();
           const res = await repository.find<InvalidatePendingApiKey>({
-            type: 'invalidatePendingApiKey',
+            type: 'invalidate_pending_api_key',
           });
           res.saved_objects.forEach(async (obj) => {
             const response = await invalidateAPIKey(
@@ -126,7 +126,7 @@ function taskRunner(
               logger.error(`Failed to invalidate API Key [id="${obj.attributes.apiKeyId}"]`);
             } else {
               try {
-                await repository.delete('invalidatePendingApiKey', obj.id);
+                await repository.delete('invalidate_pending_api_key', obj.id);
               } catch (err) {
                 // Skip the cleanup error
                 logger.error(
