@@ -112,10 +112,12 @@ export function WorkspacePanelWrapper({
               'lnsWorkspacePanelWrapper__pageContentHeader--unsaved': !title,
             })}
           >
-            <h1 data-test-subj="lns_ChartTitle">
-              {title ||
-                i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
-            </h1>
+            <EuiScreenReaderOnly>
+              <h1 data-test-subj="lns_ChartTitle">
+                {title ||
+                  i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
+              </h1>
+            </EuiScreenReaderOnly>
           </EuiPageContentHeader>
         ) : (
           <EuiScreenReaderOnly>

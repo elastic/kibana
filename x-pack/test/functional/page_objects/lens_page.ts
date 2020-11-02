@@ -214,7 +214,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     getTitle() {
-      return testSubjects.getVisibleText('lns_ChartTitle');
+      return testSubjects.getAttribute('lns_ChartTitle', 'innerText');
     },
 
     async getFiltersAggLabels() {
