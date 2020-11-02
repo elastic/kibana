@@ -63,7 +63,7 @@ describe('TSVB AggSelect', () => {
           "value": "count",
         },
         Object {
-          "label": "Positive Rate",
+          "label": "Counter Rate",
           "value": "positive_rate",
         },
         Object {
@@ -131,7 +131,7 @@ describe('TSVB AggSelect', () => {
           "value": "filter_ratio",
         },
         Object {
-          "label": "Positive Rate",
+          "label": "Counter Rate",
           "value": "positive_rate",
         },
         Object {

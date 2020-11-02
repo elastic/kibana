@@ -179,3 +179,5 @@ export const showAllOthersBucket: string[] = [
   'destination.ip',
   'user.name',
 ];
+
+export const ENABLE_NEW_TIMELINE = false;
