@@ -21,7 +21,7 @@ import {
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import { VectorStyle } from '../../styles/vector/vector_style';
 import { VectorLayer } from '../../layers/vector_layer/vector_layer';
-import { getIsGoldPlus } from '../../../kibana_services';
+import { getIsGoldPlus } from '../../../licensed_features';
 
 export const geoLineLayerWizardConfig: LayerWizard = {
   categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

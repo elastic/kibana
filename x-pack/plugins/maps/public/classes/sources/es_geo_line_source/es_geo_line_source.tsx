@@ -9,12 +9,11 @@ import uuid from 'uuid/v4';
 
 import { i18n } from '@kbn/i18n';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { getField, addFieldToDSL, makeESBbox } from '../../../../common/elasticsearch_util';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
 import { DataRequestAbortError } from '../../util/data_request';
 import { registerSource } from '../source_registry';
-import { makeESBbox } from '../../../../common/elasticsearch_geo_utils';
-import { getField, addFieldToDSL } from '../../util/es_agg_utils';
 import { convertToGeoJson } from './convert_to_geojson';
 import { ESDocField } from '../../fields/es_doc_field';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -141,7 +140,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         aggs: {
           path: {
             geo_line: {
-              geo_point: {
+              point: {
                 field: this._descriptor.geoField,
               },
               sort: {
