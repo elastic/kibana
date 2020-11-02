@@ -287,7 +287,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
           ...actionRegistry.getAll().map((action) => {
-            action.setUiCapabilities(capabilities);
+            action.setActionContext({ capabilities });
             return {
               ...action.euiAction,
               'data-test-subj': `savedObjectsTableAction-${action.id}`,

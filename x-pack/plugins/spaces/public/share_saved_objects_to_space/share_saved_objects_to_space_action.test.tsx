@@ -32,14 +32,14 @@ describe('ShareToSpaceSavedObjectsManagementAction', () => {
       it(`is available when UI capabilities are set and shareIntoSpace is enabled`, () => {
         const action = createAction();
         const capabilities: any = { savedObjectsManagement: { shareIntoSpace: true } };
-        action.setUiCapabilities(capabilities);
+        action.setActionContext({ capabilities });
         expect(action.euiAction.available(object)).toBe(true);
       });
 
       it(`is not available when UI capabilities are set and shareIntoSpace is disabled`, () => {
         const action = createAction();
         const capabilities: any = { savedObjectsManagement: { shareIntoSpace: false } };
-        action.setUiCapabilities(capabilities);
+        action.setActionContext({ capabilities });
         expect(action.euiAction.available(object)).toBe(false);
       });
     });
@@ -55,14 +55,14 @@ describe('ShareToSpaceSavedObjectsManagementAction', () => {
       it(`is not available when UI capabilities are set and shareIntoSpace is enabled`, () => {
         const action = createAction();
         const capabilities: any = { savedObjectsManagement: { shareIntoSpace: true } };
-        action.setUiCapabilities(capabilities);
+        action.setActionContext({ capabilities });
         expect(action.euiAction.available(object)).toBe(false);
       });
 
       it(`is not available when UI capabilities are set and shareIntoSpace is disabled`, () => {
         const action = createAction();
         const capabilities: any = { savedObjectsManagement: { shareIntoSpace: false } };
-        action.setUiCapabilities(capabilities);
+        action.setActionContext({ capabilities });
         expect(action.euiAction.available(object)).toBe(false);
       });
     });

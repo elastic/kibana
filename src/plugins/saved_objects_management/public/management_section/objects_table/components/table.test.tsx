@@ -140,7 +140,7 @@ describe('Table', () => {
         refreshOnFinish: () => true,
         euiAction: { name: 'foo', description: 'bar', icon: 'beaker', type: 'icon' },
         registerOnFinishCallback: (callback: Function) => callback(), // call the callback immediately for this test
-        setUiCapabilities: () => null,
+        setActionContext: () => null,
       } as any,
     ]);
     const onActionRefresh = jest.fn();
