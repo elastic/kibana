@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type FeatureImportClassName = string | number | boolean;
+export type FeatureImportanceClassName = string | number | boolean;
 
 export interface ClassFeatureImportance {
-  class_name: FeatureImportClassName;
+  class_name: FeatureImportanceClassName;
   importance: number;
 }
 
@@ -20,7 +20,7 @@ export interface FeatureImportance {
 }
 
 export interface TopClass {
-  class_name: FeatureImportClassName;
+  class_name: FeatureImportanceClassName;
   class_probability: number;
   class_score: number;
 }
@@ -28,7 +28,7 @@ export interface TopClass {
 export type TopClasses = TopClass[];
 
 export interface ClassFeatureImportanceSummary {
-  class_name: FeatureImportClassName;
+  class_name: FeatureImportanceClassName;
   importance: {
     max: number;
     min: number;
@@ -55,7 +55,7 @@ export type TotalFeatureImportance =
   | RegressionTotalFeatureImportance;
 
 export interface FeatureImportanceClassBaseline {
-  class_name: FeatureImportClassName;
+  class_name: FeatureImportanceClassName;
   baseline: number;
 }
 export interface ClassificationFeatureImportanceBaseline {
