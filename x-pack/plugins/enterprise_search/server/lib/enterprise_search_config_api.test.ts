@@ -21,7 +21,6 @@ describe('callEnterpriseSearchConfigAPI', () => {
     accessCheckTimeoutWarning: 100,
   };
   const mockRequest = {
-    url: { path: '/app/kibana' },
     headers: { authorization: '==someAuth' },
   };
   const mockDependencies = {

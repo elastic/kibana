@@ -42,7 +42,7 @@ describe('useUserInfo', () => {
           isSignalIndexExists: null,
           loading: true,
           signalIndexName: null,
-          signalIndexTemplateOutdated: null,
+          signalIndexMappingOutdated: null,
         },
         error: undefined,
       });
@@ -53,7 +53,7 @@ describe('useUserInfo', () => {
     const spyOnCreateSignalIndex = jest.spyOn(api, 'createSignalIndex');
     const spyOnGetSignalIndex = jest.spyOn(api, 'getSignalIndex').mockResolvedValueOnce({
       name: 'mock-signal-index',
-      template_outdated: true,
+      index_mapping_outdated: true,
     });
     await act(async () => {
       const { waitForNextUpdate } = renderHook(() => useUserInfo(), { wrapper: ManageUserInfo });
