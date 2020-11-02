@@ -75,7 +75,6 @@ export const MetricExpression = ({ metric, metrics, errors, onChange, popupPosit
       closePopover={() => {
         setAggFieldPopoverOpen(false);
       }}
-      withTitle
       anchorPosition={popupPosition ?? 'downRight'}
       zIndex={8000}
     >
