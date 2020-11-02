@@ -125,12 +125,6 @@ export function getAlertType(service: Service): AlertType<Params, {}, {}, Action
     if (compareFn == null) {
       throw new Error(getInvalidComparatorMessage(params.thresholdComparator));
     }
-    async function sleep(ms: number) {
-      return new Promise((resolve) => {
-        setTimeout(resolve, ms);
-      });
-    }
-    await sleep(5000);
 
     const callCluster = services.callCluster;
     const date = new Date().toISOString();
