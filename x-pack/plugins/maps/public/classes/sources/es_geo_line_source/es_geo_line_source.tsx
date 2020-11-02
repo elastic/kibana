@@ -19,7 +19,7 @@ import { ESDocField } from '../../fields/es_doc_field';
 import { UpdateSourceEditor } from './update_source_editor';
 import { SourceEditorArgs } from '../source';
 
-const MAX_TRACKS = 100;
+const MAX_TRACKS = 1000;
 
 export const geoLineTitle = i18n.translate('xpack.maps.source.esGeoLineTitle', {
   defaultMessage: 'Tracks',
