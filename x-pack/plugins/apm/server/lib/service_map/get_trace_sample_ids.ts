@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { uniq, take, sortBy } from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { rangeFilter } from '../../../common/utils/range_filter';
