@@ -7,8 +7,8 @@
 
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
-check out the {kibana-ref-all}/7.10/release-notes-7.10.0.html[release notes] and
-{kibana-ref-all}/7.10/breaking-changes-7.10.html[breaking changes].
+check out the {kibana-ref-all}/7.10/release-notes.html[release notes] and
+{kibana-ref-all}/7.10/breaking-changes.html[breaking changes].
 
 Other versions: {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/whats-new.html[7.8] | {kibana-ref-all}/7.7/release-highlights-7.7.0.html[7.7] |
 {kibana-ref-all}/7.6/release-highlights-7.6.0.html[7.6] | {kibana-ref-all}/7.5/release-highlights-7.5.0.html[7.5] |
@@ -28,7 +28,7 @@ Other versions: {kibana-ref-all}/7.9/whats-new.html[7.9] | {kibana-ref-all}/7.8/
 With so many exciting additions to {kib}, it can be challenging to choose a
 path forward. As a result, we have a renewed focus on the initial user experience,
 beginning with a new home page.
-This new version focuses on core solutions and use cases.
+The new version focuses on core solutions and use cases.
 
 [role="screenshot"]
 image::user/images/new-home-page.png[New home and landing page]
@@ -43,13 +43,13 @@ image::user/images/landing-page.png[Solution-focused landing page]
 
 [float]
 [[stack-header-and-navigational-search]]
-=== Stack header and navigational search
+=== Global header with navigational search
 
 In 7.8, we introduced a new and improved main menu as part of our
 quest for the optimal navigation design.
 In 7.10, we’ve revealed more of the picture, with the
 addition of a global header that includes a
-navigational search feature.
+navigational search.
 Using a keyboard shortcut (Ctrl+/ on Windows and Linux; Command+/ on MacOS),
 you can now jump between applications and saved objects,
 including dashboards, visualizations, workpads, saved searches, and more.
@@ -68,7 +68,7 @@ beta software or services in production can leverage the visualization and analy
 capabilities that Lens provides.
 
 [float]
-==== New chart types
+==== New percentage chart types
 
 Let *Lens* build visualizations of your data with new chart types.
 Depending on the type of data you are visualizing, *Lens* can now build
@@ -82,13 +82,13 @@ image::user/images/lens-whats-new.png[Percentage bar chart in Lens]
 
 [float]
 [[drilldowns-to-urls]]
-=== Drilldowns to URLs (beta)
+=== Drilldown to URL
 
-In 7.8, we introduced a dashboard-to-dashboard drilldown that lets you quickly create
+beta[] In 7.8, we introduced a dashboard-to-dashboard drilldown that lets you quickly create
 custom navigation paths between dashboards, carrying over the filter and
 time context. Now you can create a navigation path from a dashboard to an internal or external
 URL.
-This functionality is in beta and is available with a https://www.elastic.co/subscriptions[Gold subscription] and higher.
+This functionality is available with a https://www.elastic.co/subscriptions[Gold subscription] or higher.
 For more information, refer to the {kibana-ref}/url-drilldown.html[URL drilldown documentation].
 
 [role="screenshot"]
@@ -100,7 +100,7 @@ image::user/images/drilldown-to-url.png[Drilldown to Url on dashboard panel]
 
 *Vega*, an advanced editor you use to create custom panels in dashboards, is production ready.
 Now users whose companies limit the use of beta software or services in production can leverage the full visualization customization capabilities that Vega provides.
-For information about Vega, refer to the {kibana-ref}/dashboard.html#vega[*Vega* documentation].
+For information about Vega, refer to the {kibana-ref}/dashboard.html#vega[documentation].
 
 [role="screenshot"]
 image::user/images/vega-new.png[Percentage bar chart in Lens]
@@ -108,55 +108,76 @@ image::user/images/vega-new.png[Percentage bar chart in Lens]
 
 [float]
 [[maps-enhancements]]
-=== Maps
+=== New ways to act on geospatial data
 
-Sometimes the little things make the biggest impact. In 7.10, you can now use
-*Maps* with drilldowns. When authoring a dashboard, you can create a map,
-save, and return to a dashboard in the flow, and while using maps,
-automatically fitting “data to bounds” is the new default&mdash;keeping your
-data at the center of attention.
+Maps and dashboards now work better together.
+You can now use maps with {kibana-ref}/dashboard-drilldown.html[dashboard drilldowns].
+Also, when authoring a dashboard, you can create a map, save the map,
+and then return to the dashboard in your workflow.
 
-Speaking of your data, it’s now easier to work with if it’s coming from a CSV.
-Using the file upload in *Machine Learning*, when importing latitude and longitude fields
-from CSV, you now get a geo_point field automatically.
+*Maps* also has new ways to work with your data.  You can now automatically
+fit “data to bounds,” keeping your data at the center of attention.
+It’s also easier to work with your data if it’s coming from a CSV file. Using the
+*File Data Visualizer* in *Machine Learning*, you can import a CSV file with latitude and longitude fields,
+and they are automatically converted to a `geo_point` field.
 
-We’re also adding a new tracking alert (experimental) for monitoring the location of
-entities in relation to area of interest boundaries. And try the new vector
-tile rendering, allowing you to work with more data at faster speeds.
+[role="screenshot"]
+image::user/images/maps-new.png[File upload of a CSV file with latitude and longitude fields]
 
+**Maps** also has a new tracking alert (experimental[]) for monitoring the location of
+entities in relation to area of interest boundaries. Also the new vector
+tile rendering enables you to work with more data at faster speeds.
 
 [float]
 [[alerts-new]]
-=== Alerting
+=== More connectors and role-based access control in Alerting
 
-In 7.10 we are extending the array of connectors that we are offering for
-use with all alert types, by adding the Jira and IBM Resilient connectors
-in the incident management category. And speaking of connectors,
-you will now be able to test whether they work before you actually use
-them with your alerts. This will help you avoid losing notifications due to setup errors.
+In 7.10, we extended our {kibana-ref}/action-types.html[offering of connectors]
+by adding the {kibana-ref}/jira-action-type.html[Jira] and
+{kibana-ref}/resilient-action-type.html[IBM Resilient connectors] for
+use with all alert types. Also,
+you can now test if a connector works before using
+it with your alerts, so you won't lose notifications due to setup errors.
 
-We also added role-based access control to alerts and actions. This means that
-you can now secure them, based on your organization’s access model.
-Elastic solution alerts will only be accessible by users that have access to
-Elastic solutions. In addition, we added a feature control for stack-level alerts,
-currently including the index threshold alert type, with more stack alert types
-to follow in the future. Similarly, we added a feature control for actions and
-connectors, which controls which roles can create connectors and attach actions to your alerts.
+[role="screenshot"]
+image::user/images/edit-connector.png[Connector test3]
+
+
+**Alerts and Actions** now has role-based access control, so
+you can secure alerts based on your organization’s access model. Each
+Elastic solution determines access to its own alert types, and users
+without access to a solution, will not be able to access its alerts.
+
+A feature control for stack alerts is now included in the
+*Role* definition page. This currently
+includes the index threshold alert type, with more stack alerts to follow in future releases.
+The `all` privilege to stack alerts gives users the
+ability to create and edit alerts, while the
+`read` privilege allows users to view the alerts.
+
+The new feature control for actions and connectors
+controls which roles can create connectors and attach actions to alerts.
+The `all` privilege to *Actions and Connectors* enables users to
+create and edit connectors, while the
+the `read` privileges allows users to view connectors and attach actions to alerts.
+
+NOTE: If you upgrade from a previous version,
+any alerts created by a user who does not have access to the
+alert types in applied in the 7.10 RBAC model, will stop working.
+For example, if a user created a metrics-specific alert
+without having access to the Observability Metrics application, the alert will stop.
+To resume the alert, a user with the correct access must access and save them.
 
 [role="screenshot"]
 image::user/images/kibana-privileges.png[Kibana privileges]
 
-The alert management views now include alert statuses that provide you with
-immediate feedback on whether an alert is active (i.e. the alerting condition is met),
-inactive, or there is an error (in which case, you will also see information about
-the error, to help you troubleshoot).
+The *Alerts and Actions*  management views now includes alert statuses that provide
+immediate feedback on whether an alert is active (the alerting condition is met),
+inactive, or there is an error. The information about
+the errors can help you troubleshoot.
 
 [role="screenshot"]
 image::user/images/alerts-and-actions.png[Alerts and Actions UI]
-
-Finally, we have enhanced the Alert Details view to include alert instances
-that were active recently but have recovered since, so that you have a fuller
-picture of the behavior of your alerts.
 
 [float]
 [[hiding-management]]
@@ -165,7 +186,7 @@ picture of the behavior of your alerts.
 *Stack Management* is home to an ever-growing suite of administrative
 tools to help manage your stack. These tools have historically been visible to
 all users, even if they weren’t authorized to take advantage of them. Now,
-*Stack Management* only shows the features that end users are authorized to use,
+*Stack Management* only shows the features that users are authorized to use,
 based on their assigned {ref}/security-privileges.html[cluster and index privileges].
 If a user isn’t authorized
 to see any of the *Stack Management* features, then the entire
@@ -180,13 +201,12 @@ for each *Stack Management* feature.
 
 [float]
 [[copy-and-import-objects]]
-=== Copy and import saved objects
+=== Copy and import of saved objects
 
 While laying the groundwork for sharing saved objects in multiple spaces,
 we overhauled the UI for copying and importing saved objects.
-When copying saved objects, you now have the option to create new objects,
-can more easily resolve conflicts, and use the flyout for more helpful information,
-including subtotals, object icons, and object titles.
+When copying saved objects, you can now create objects, easily resolve conflicts,
+and get information, such as subtotals, object icons, and object titles, from the flyout.
 After importing saved objects, you’ll see a summary of what objects were created.
 
 [role="screenshot"]
@@ -195,7 +215,7 @@ image::user/images/copy-import-objects.png[Copy to space UI]
 
 [float]
 [[machine-learning-enhancements]]
-=== Enhancements to Machine learning
+=== Machine learning enhancements
 
 [float]
 ==== Data frame analytics model management
@@ -203,8 +223,8 @@ image::user/images/copy-import-objects.png[Copy to space UI]
 Enhancing the functionality for data frame analytics supervised learning,
 you can manage the trained models under **Machine Learning**. The new tab lists
 basic information on each model, with more detailed information displayed on
-row expansion including the inference and job configuration and stats. It also
-contains a list of which ingest pipelines are making use of each model.
+row expansion, including the inference and job configuration and stats. It also
+contains a list of which ingest pipelines make use of each model.
 Additional controls allow you to search and delete models, and to view the training
 data used to create each model.
 
@@ -215,10 +235,10 @@ image::user/images/data-frame-analytics.png[Data frame analytics]
 ==== Per-partition categorization
 
 Categorization tokenizes a text field, clusters similar data together,
-classifies it into categories, then detects anomalous categories in the data.
-From 7.9, per-partition categorization enables you to do categorization separately
-for every value of a partition field. Now it is possible to configure per-partition
-categorization in **Machine Learning**.
+classifies it into categories, and then detects anomalous categories in the data.
+Starting in 7.9, per-partition categorization enabled you to do categorization separately
+for every value of a partition field. With 7.10, it's now possible to configure per-partition
+categorization.
 
 [float]
 ==== Feature importance
@@ -226,13 +246,13 @@ categorization in **Machine Learning**.
 When you examine the results from your {classification} or {regression} {ml} jobs,
 you can use {feat-imp} to understand which fields had the biggest impact
 on each prediction. In 7.10, you can see the average magnitude of the {feat-imp}
-values for each field across all the training data.
+values for each field across all the training data. You can also examine the feature importance values for each individual
+prediction in the format of JSON objects or decision plots.
+
+
 
 [role="screenshot"]
 image::user/images/feature-importance.png[Feature importance]
-
-You can also examine the feature importance values for each individual
-prediction in the format of JSON objects or decision plots.
 
 
 // end::notable-highlights[]
