@@ -17,14 +17,15 @@ import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
-  toMountPoint,
   useUiSetting$,
 } from '../../../../../src/plugins/kibana_react/public';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { HeaderLinks } from '../components/shared/header_links';
-import { ApmPluginContext } from '../context/ApmPluginContext';
+import {
+  ApmPluginContext,
+  ApmPluginContextValue,
+} from '../context/ApmPluginContext';
 import { LicenseProvider } from '../context/LicenseContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
@@ -34,6 +35,7 @@ import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
 import { px, units } from '../style/variables';
 import { setReadonlyBadge } from '../updateBadge';
+import { getActionMenuMountPoint } from './action_menu';
 
 const MainContainer = styled.div`
   padding: ${px(units.plus)};
@@ -66,23 +68,14 @@ function App() {
 }
 
 export function ApmAppRoot({
-  core,
-  deps,
-  history,
-  config,
+  apmPluginContextValue,
 }: {
-  core: CoreStart;
-  deps: ApmPluginSetupDeps;
-  history: AppMountParameters['history'];
-  config: ConfigSchema;
+  apmPluginContextValue: ApmPluginContextValue;
 }) {
+  const { appMountParameters, core, plugins } = apmPluginContextValue;
+  const { history } = appMountParameters;
   const i18nCore = core.i18n;
-  const plugins = deps;
-  const apmPluginContextValue = {
-    config,
-    core,
-    plugins,
-  };
+
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
@@ -117,18 +110,27 @@ export function ApmAppRoot({
  * This module is rendered asynchronously in the Kibana platform.
  */
 
-export const renderApp = (
+export const renderApp = async (
   core: CoreStart,
-  deps: ApmPluginSetupDeps,
-  { element, history, setHeaderActionMenu }: AppMountParameters,
+  setupDeps: ApmPluginSetupDeps,
+  appMountParameters: AppMountParameters,
   config: ConfigSchema
 ) => {
+  const { element, setHeaderActionMenu } = appMountParameters;
+  const apmPluginContextValue = {
+    appMountParameters,
+    config,
+    core,
+    plugins: setupDeps,
+  };
+
   // render APM feedback link in global help menu
   setHelpExtension(core);
   setReadonlyBadge(core);
   createCallApmApi(core.http);
-
-  setHeaderActionMenu(toMountPoint(<HeaderLinks core={core} plugins={deps} />));
+  setHeaderActionMenu((el) =>
+    getActionMenuMountPoint(apmPluginContextValue)(el)
+  );
 
   // Automatically creates static index pattern and stores as saved object
   createStaticIndexPattern().catch((e) => {
@@ -137,7 +139,7 @@ export const renderApp = (
   });
 
   ReactDOM.render(
-    <ApmAppRoot core={core} deps={deps} history={history} config={config} />,
+    <ApmAppRoot apmPluginContextValue={apmPluginContextValue} />,
     element
   );
   return () => {

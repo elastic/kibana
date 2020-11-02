@@ -5,17 +5,16 @@
  */
 
 import {
-  EuiButtonEmpty,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
+  EuiHeaderLink,
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { IBasePath } from '../../../../../../../../src/core/public';
-import { AlertType } from '../../../../../common/alert_types';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { AlertingFlyout } from '../../../alerting/AlertingFlyout';
+import { IBasePath } from '../../../../../../src/core/public';
+import { AlertType } from '../../../common/alert_types';
+import { AlertingFlyout } from '../../components/alerting/AlertingFlyout';
 
 const alertLabel = i18n.translate('xpack.apm.home.alertsMenu.alerts', {
   defaultMessage: 'Alerts',
@@ -53,21 +52,24 @@ interface Props {
   canReadAnomalies: boolean;
 }
 
-export function AlertingPopoverAndFlyout(props: Props) {
-  const { basePath, canSaveAlerts, canReadAlerts, canReadAnomalies } = props;
-
+export function AlertingPopoverAndFlyout({
+  basePath,
+  canSaveAlerts,
+  canReadAlerts,
+  canReadAnomalies,
+}: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
-
   const [alertType, setAlertType] = useState<AlertType | null>(null);
 
   const button = (
-    <EuiButtonEmpty
+    <EuiHeaderLink
+      color="primary"
       iconType="arrowDown"
       iconSide="right"
-      onClick={() => setPopoverOpen(true)}
+      onClick={() => setPopoverOpen((prevState) => !prevState)}
     >
       {alertLabel}
-    </EuiButtonEmpty>
+    </EuiHeaderLink>
   );
 
   const panels: EuiContextMenuPanelDescriptor[] = [
@@ -113,6 +115,15 @@ export function AlertingPopoverAndFlyout(props: Props) {
       id: CREATE_TRANSACTION_DURATION_ALERT_PANEL_ID,
       title: transactionDurationLabel,
       items: [
+        // threshold alerts
+        {
+          name: createThresholdAlertLabel,
+          onClick: () => {
+            setAlertType(AlertType.TransactionDuration);
+            setPopoverOpen(false);
+          },
+        },
+
         // anomaly alerts
         ...(canReadAnomalies
           ? [

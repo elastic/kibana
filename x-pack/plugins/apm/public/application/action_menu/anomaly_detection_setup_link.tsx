@@ -3,19 +3,20 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { EuiButtonEmpty, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiHeaderLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useApmPluginContext } from '../../../../hooks/useApmPluginContext';
-import { APIReturnType } from '../../../../services/rest/createCallApmApi';
-import { APMLink } from './APMLink';
+import React from 'react';
 import {
   ENVIRONMENT_ALL,
   getEnvironmentLabel,
-} from '../../../../../common/environment_filter_values';
-import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useFetcher, FETCH_STATUS } from '../../../../hooks/useFetcher';
-import { useLicense } from '../../../../hooks/useLicense';
+} from '../../../common/environment_filter_values';
+import { getAPMHref } from '../../components/shared/Links/apm/APMLink';
+import { useApmPluginContext } from '../../hooks/useApmPluginContext';
+import { FETCH_STATUS, useFetcher } from '../../hooks/useFetcher';
+import { useLicense } from '../../hooks/useLicense';
+import { useUrlParams } from '../../hooks/useUrlParams';
+import { APIReturnType } from '../../services/rest/createCallApmApi';
+import { units } from '../../style/variables';
 
 export type AnomalyDetectionApiResponse = APIReturnType<
   '/api/apm/settings/anomaly-detection',
@@ -27,24 +28,26 @@ const DEFAULT_DATA = { jobs: [], hasLegacyJobs: false };
 export function AnomalyDetectionSetupLink() {
   const { uiFilters } = useUrlParams();
   const environment = uiFilters.environment;
-  const plugin = useApmPluginContext();
-  const canGetJobs = !!plugin.core.application.capabilities.ml?.canGetJobs;
+  const { core } = useApmPluginContext();
+  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('platinum');
+  const { basePath } = core.http;
 
   return (
-    <APMLink
-      path="/settings/anomaly-detection"
+    <EuiHeaderLink
+      color="primary"
+      iconType="inspect"
+      href={getAPMHref({ basePath, path: '/settings/anomaly-detection' })}
       style={{ whiteSpace: 'nowrap' }}
     >
-      <EuiButtonEmpty size="s" color="primary" iconType="inspect">
-        {ANOMALY_DETECTION_LINK_LABEL}
-      </EuiButtonEmpty>
-
-      {canGetJobs && hasValidLicense ? (
-        <MissingJobsAlert environment={environment} />
-      ) : null}
-    </APMLink>
+      {ANOMALY_DETECTION_LINK_LABEL}
+      <span style={{ marginLeft: units.half }}>
+        {canGetJobs && hasValidLicense && (
+          <MissingJobsAlert environment={environment} />
+        )}
+      </span>
+    </EuiHeaderLink>
   );
 }
 
