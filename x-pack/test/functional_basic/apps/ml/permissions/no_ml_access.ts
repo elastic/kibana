@@ -6,7 +6,7 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-import { USER } from '../../../services/ml/security_common';
+import { USER } from '../../../../functional/services/ml/security_common';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'error']);
@@ -15,8 +15,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testUsers = [USER.ML_UNAUTHORIZED, USER.ML_UNAUTHORIZED_SPACES];
 
   describe('for user with no ML access', function () {
-    this.tags(['skipFirefox', 'mlqa']);
-
     for (const user of testUsers) {
       describe(`(${user})`, function () {
         before(async () => {
