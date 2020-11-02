@@ -11,13 +11,15 @@ import { AppMountParameters, CoreStart } from '../../../../../src/core/public';
 import {
   KibanaContextProvider,
   RedirectAppLinks,
+  toMountPoint,
 } from '../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../xpack_legacy/common';
 import { PluginContext } from '../context/plugin_context';
 import { usePluginContext } from '../hooks/use_plugin_context';
 import { useRouteParams } from '../hooks/use_route_params';
-import { Breadcrumbs, routes } from '../routes';
 import { ObservabilityPluginSetupDeps } from '../plugin';
+import { Breadcrumbs, routes } from '../routes';
+import { ActionMenu } from './action_menu';
 
 const observabilityLabelBreadcrumb = {
   text: i18n.translate('xpack.observability.observability.breadcrumb.', {
@@ -58,10 +60,22 @@ function App() {
 export const renderApp = (
   core: CoreStart,
   plugins: ObservabilityPluginSetupDeps,
-  { element, history }: AppMountParameters
+  { element, history, setHeaderActionMenu }: AppMountParameters
 ) => {
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
+
+  setHeaderActionMenu((el) =>
+    toMountPoint(
+      <ActionMenu application={core.application} prepend={core.http.basePath.prepend} />
+    )(el)
+  );
+  core.chrome.setHelpExtension({
+    appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
+      defaultMessage: 'Observability',
+    }),
+    links: [{ linkType: 'discuss', href: 'https://ela.st/observability-discuss' }],
+  });
 
   ReactDOM.render(
     <KibanaContextProvider services={{ ...core, ...plugins }}>

@@ -4,18 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ReactNode } from 'react';
 import styled from 'styled-components';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 
 const Container = styled.div<{ color: string }>`
   background: ${(props) => props.color};
@@ -32,54 +24,33 @@ const Wrapper = styled.div<{ restrictWidth?: number }>`
 
 interface Props {
   color: string;
-  showAddData?: boolean;
+  datePicker?: ReactNode;
   restrictWidth?: number;
-  showGiveFeedback?: boolean;
 }
 
-export function Header({
-  color,
-  restrictWidth,
-  showAddData = false,
-  showGiveFeedback = false,
-}: Props) {
-  const { core } = usePluginContext();
+export function Header({ color, datePicker = null, restrictWidth }: Props) {
   return (
     <Container color={color}>
       <Wrapper restrictWidth={restrictWidth}>
         <EuiSpacer size="l" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="logoObservability" size="xxl" data-test-subj="observability-logo" />
-          </EuiFlexItem>
+        <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <EuiTitle size="m">
-              <h1>
-                {i18n.translate('xpack.observability.home.title', {
-                  defaultMessage: 'Observability',
-                })}
-              </h1>
-            </EuiTitle>
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="logoObservability" size="xxl" data-test-subj="observability-logo" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiTitle size="m">
+                  <h1>
+                    {i18n.translate('xpack.observability.home.title', {
+                      defaultMessage: 'Observability',
+                    })}
+                  </h1>
+                </EuiTitle>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
-          {showGiveFeedback && (
-            <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
-              <EuiButtonEmpty href={'https://ela.st/observability-discuss'} iconType="popout">
-                {i18n.translate('xpack.observability.home.feedback', {
-                  defaultMessage: 'Give us feedback',
-                })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
-          {showAddData && (
-            <EuiFlexItem style={{ alignItems: 'flex-end' }} grow={false}>
-              <EuiButtonEmpty
-                href={core.http.basePath.prepend('/app/home#/tutorial_directory/logging')}
-                iconType="plusInCircle"
-              >
-                {i18n.translate('xpack.observability.home.addData', { defaultMessage: 'Add data' })}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>{datePicker}</EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="l" />
       </Wrapper>

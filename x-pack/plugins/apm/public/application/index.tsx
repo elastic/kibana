@@ -46,7 +46,6 @@ function App() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   useBreadcrumbs(routes);
-
   return (
     <ThemeProvider
       theme={(outerTheme?: DefaultTheme) => ({
@@ -129,7 +128,7 @@ export const renderApp = async (
   setReadonlyBadge(core);
   createCallApmApi(core.http);
   setHeaderActionMenu((el) =>
-    getActionMenuMountPoint(apmPluginContextValue)(el)
+    getActionMenuMountPoint(apmPluginContextValue, routes)(el)
   );
 
   // Automatically creates static index pattern and stores as saved object
