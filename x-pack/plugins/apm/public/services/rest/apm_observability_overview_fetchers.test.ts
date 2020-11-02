@@ -5,7 +5,10 @@
  */
 
 import moment from 'moment';
-import { fetchOverviewPageData, hasData } from './apm_overview_fetchers';
+import {
+  fetchObservabilityOverviewPageData,
+  hasData,
+} from './apm_observability_overview_fetchers';
 import * as createCallApmApi from './createCallApmApi';
 
 describe('Observability dashboard data', () => {
@@ -37,7 +40,7 @@ describe('Observability dashboard data', () => {
     });
   });
 
-  describe('fetchOverviewPageData', () => {
+  describe('fetchObservabilityOverviewPageData', () => {
     it('returns APM data with series and stats', async () => {
       callApmApiMock.mockImplementation(() =>
         Promise.resolve({
@@ -49,7 +52,7 @@ describe('Observability dashboard data', () => {
           ],
         })
       );
-      const response = await fetchOverviewPageData(params);
+      const response = await fetchObservabilityOverviewPageData(params);
       expect(response).toEqual({
         appLink: '/app/apm/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
@@ -80,7 +83,7 @@ describe('Observability dashboard data', () => {
           transactionCoordinates: [],
         })
       );
-      const response = await fetchOverviewPageData(params);
+      const response = await fetchObservabilityOverviewPageData(params);
       expect(response).toEqual({
         appLink: '/app/apm/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
@@ -107,7 +110,7 @@ describe('Observability dashboard data', () => {
           transactionCoordinates: [{ x: 1 }, { x: 2 }, { x: 3 }],
         })
       );
-      const response = await fetchOverviewPageData(params);
+      const response = await fetchObservabilityOverviewPageData(params);
       expect(response).toEqual({
         appLink: '/app/apm/services?rangeFrom=now-15m&rangeTo=now',
         stats: {
