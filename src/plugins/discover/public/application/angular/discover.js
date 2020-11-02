@@ -82,6 +82,8 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
+import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
+import { removeQueryParam } from '../../../../kibana_utils/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -191,7 +193,16 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
+function discoverController(
+  $element,
+  $route,
+  $scope,
+  $timeout,
+  $window,
+  Promise,
+  uiCapabilities,
+  $routeParams
+) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -207,6 +218,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   };
 
   const history = getHistory();
+
+  let initialSearchSessionId = $routeParams[SEARCH_SESSION_ID_QUERY_PARAM];
+  if (initialSearchSessionId) {
+    removeQueryParam(history, SEARCH_SESSION_ID_QUERY_PARAM);
+  }
 
   const {
     appStateContainer,
@@ -797,17 +813,26 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     if (abortController) abortController.abort();
     abortController = new AbortController();
 
-    const sessionId = data.search.session.start();
+    const searchSessionId = (() => {
+      if (initialSearchSessionId) {
+        const searchSessionId = initialSearchSessionId;
+        data.search.session.restore(searchSessionId);
+        initialSearchSessionId = null; // reset to make further searches create new session
+        return searchSessionId;
+      } else {
+        return data.search.session.start();
+      }
+    })();
 
     $scope
       .updateDataSource()
       .then(setupVisualization)
       .then(function () {
         $scope.fetchStatus = fetchStatuses.LOADING;
-        logInspectorRequest();
+        logInspectorRequest({ searchSessionId });
         return $scope.searchSource.fetch({
           abortSignal: abortController.signal,
-          sessionId,
+          sessionId: searchSessionId,
         });
       })
       .then(onResults)
@@ -899,7 +924,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
 
-  function logInspectorRequest() {
+  function logInspectorRequest({ searchSessionId = null } = { searchSessionId: null }) {
     inspectorAdapters.requests.reset();
     const title = i18n.translate('discover.inspectorRequestDataTitle', {
       defaultMessage: 'data',
@@ -907,7 +932,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     const description = i18n.translate('discover.inspectorRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
-    inspectorRequest = inspectorAdapters.requests.start(title, { description });
+    inspectorRequest = inspectorAdapters.requests.start(title, { description, searchSessionId });
     inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
     $scope.searchSource.getSearchRequestBody().then((body) => {
       inspectorRequest.json(body);
