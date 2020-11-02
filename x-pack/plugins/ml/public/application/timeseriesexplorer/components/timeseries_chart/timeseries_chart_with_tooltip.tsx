@@ -43,9 +43,12 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
 
   const showAnnotationErrorToastNotification = useCallback((error?: string) => {
     toastNotifications.addDanger({
-      title: i18n.translate('xpack.ml.timeSeriesExplorer.annotationsErrorTitle', {
-        defaultMessage: 'An error occurred fetching annotations',
-      }),
+      title: i18n.translate(
+        'xpack.ml.timeSeriesExplorer.mlSingleMetricViewerChart.annotationsErrorTitle',
+        {
+          defaultMessage: 'An error occurred fetching annotations',
+        }
+      ),
       ...(error ? { text: extractErrorMessage(error) } : {}),
     });
   }, []);
