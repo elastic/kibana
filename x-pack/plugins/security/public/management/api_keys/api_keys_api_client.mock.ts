@@ -8,7 +8,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { APIKeysAPIClient } from './api_keys_api_client';
 
 export const apiKeysAPIClientMock = {
-  create: (): PublicMethodsOf<APIKeysAPIClient> => ({
+  create: (): jest.Mocked<PublicMethodsOf<APIKeysAPIClient>> => ({
     checkPrivileges: jest.fn(),
     getApiKeys: jest.fn(),
     invalidateApiKeys: jest.fn(),

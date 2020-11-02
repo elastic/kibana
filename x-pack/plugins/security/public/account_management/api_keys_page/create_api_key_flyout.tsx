@@ -146,7 +146,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
                   doc="security-api-create-api-key.html#security-api-create-api-key-request-body"
                 >
                   <FormattedMessage
-                    id="xpack.security.accountManagement.createApiKey.nameHelpText"
+                    id="xpack.security.accountManagement.createApiKey.roleDescriptorsHelpText"
                     defaultMessage="Learn about role descriptors."
                   />
                 </DocLink>
