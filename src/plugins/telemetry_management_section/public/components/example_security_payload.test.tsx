@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ContextErrorMessage } from './context_error_message';
+import React from 'react';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
+import ExampleSecurityPayload from './example_security_payload';
 
-export function createContextErrorMessageDirective(reactDirective: any) {
-  return reactDirective(ContextErrorMessage, [
-    ['status', { watchDepth: 'reference' }],
-    ['reason', { watchDepth: 'reference' }],
-  ]);
-}
+describe('example security payload', () => {
+  it('renders as expected', () => {
+    expect(shallowWithIntl(<ExampleSecurityPayload />)).toMatchSnapshot();
+  });
+});
