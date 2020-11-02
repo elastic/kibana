@@ -7,6 +7,7 @@
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
+import { requiredPackages } from '../../constants';
 
 export enum InstallationStatus {
   installed = 'installed',
@@ -277,8 +278,7 @@ export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
 };
 
-export const requiredPackages = ['system', 'endpoint'] as const;
-export type RequiredPackage = typeof requiredPackages[number];
+export type RequiredPackage = typeof requiredPackages;
 
 export enum DefaultPackages {
   system = 'system',
