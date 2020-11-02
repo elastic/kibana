@@ -7,22 +7,22 @@
 import { render, waitFor } from '@testing-library/react';
 import { CoreStart } from 'kibana/public';
 import { merge } from 'lodash';
-import React, { FunctionComponent, ReactChild } from 'react';
+import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import { ServiceHealthStatus } from '../../../../../common/service_health_status';
-import { ServiceOverview } from '..';
-import { EuiThemeProvider } from '../../../../../../observability/public';
-import { ApmPluginContextValue } from '../../../../context/ApmPluginContext';
+import { ServiceHealthStatus } from '../../../../common/service_health_status';
+import { ServiceInventory } from '.';
+import { EuiThemeProvider } from '../../../../../observability/public';
+import { ApmPluginContextValue } from '../../../context/ApmPluginContext';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-} from '../../../../context/ApmPluginContext/MockApmPluginContext';
-import * as useAnomalyDetectionJobs from '../../../../hooks/useAnomalyDetectionJobs';
-import { FETCH_STATUS } from '../../../../hooks/useFetcher';
-import * as useLocalUIFilters from '../../../../hooks/useLocalUIFilters';
-import * as urlParamsHooks from '../../../../hooks/useUrlParams';
-import { SessionStorageMock } from '../../../../services/__test__/SessionStorageMock';
+} from '../../../context/ApmPluginContext/MockApmPluginContext';
+import * as useAnomalyDetectionJobs from '../../../hooks/useAnomalyDetectionJobs';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
+import * as useLocalUIFilters from '../../../hooks/useLocalUIFilters';
+import * as urlParamsHooks from '../../../hooks/useUrlParams';
+import { SessionStorageMock } from '../../../services/__test__/SessionStorageMock';
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiStats: () => {} },
@@ -31,7 +31,7 @@ const KibanaReactContext = createKibanaReactContext({
 const addWarning = jest.fn();
 const httpGet = jest.fn();
 
-function wrapper({ children }: { children: ReactChild }) {
+function wrapper({ children }: { children?: ReactNode }) {
   const mockPluginContext = (merge({}, mockApmPluginContextValue, {
     core: {
       http: {
@@ -58,13 +58,7 @@ function wrapper({ children }: { children: ReactChild }) {
   );
 }
 
-function renderServiceOverview() {
-  return render(<ServiceOverview />, { wrapper } as {
-    wrapper: FunctionComponent<{}>;
-  });
-}
-
-describe('Service Overview -> View', () => {
+describe('ServiceInventory', () => {
   beforeEach(() => {
     // @ts-expect-error
     global.sessionStorage = new SessionStorageMock();
@@ -129,13 +123,13 @@ describe('Service Overview -> View', () => {
       ],
     });
 
-    const { container, findByText } = renderServiceOverview();
+    const { container, findByText } = render(<ServiceInventory />, { wrapper });
 
     // wait for requests to be made
     await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
     await findByText('My Python Service');
 
-    expect(container.querySelectorAll('.euiTableRow')).toMatchSnapshot();
+    expect(container.querySelectorAll('.euiTableRow')).toHaveLength(2);
   });
 
   it('should render getting started message, when list is empty and no historical data is found', async () => {
@@ -145,17 +139,17 @@ describe('Service Overview -> View', () => {
       items: [],
     });
 
-    const { container, findByText } = renderServiceOverview();
+    const { findByText } = render(<ServiceInventory />, { wrapper });
 
     // wait for requests to be made
     await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
 
     // wait for elements to be rendered
-    await findByText(
+    const gettingStartedMessage = await findByText(
       "Looks like you don't have any APM services installed. Let's add some!"
     );
 
-    expect(container.querySelectorAll('.euiTableRow')).toMatchSnapshot();
+    expect(gettingStartedMessage).not.toBeEmpty();
   });
 
   it('should render empty message, when list is empty and historical data is found', async () => {
@@ -165,13 +159,13 @@ describe('Service Overview -> View', () => {
       items: [],
     });
 
-    const { container, findByText } = renderServiceOverview();
+    const { findByText } = render(<ServiceInventory />, { wrapper });
 
     // wait for requests to be made
     await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
-    await findByText('No services found');
+    const noServicesText = await findByText('No services found');
 
-    expect(container.querySelectorAll('.euiTableRow')).toMatchSnapshot();
+    expect(noServicesText).not.toBeEmpty();
   });
 
   describe('when legacy data is found', () => {
@@ -182,7 +176,7 @@ describe('Service Overview -> View', () => {
         items: [],
       });
 
-      renderServiceOverview();
+      render(<ServiceInventory />, { wrapper });
 
       // wait for requests to be made
       await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
@@ -203,7 +197,7 @@ describe('Service Overview -> View', () => {
         items: [],
       });
 
-      renderServiceOverview();
+      render(<ServiceInventory />, { wrapper });
 
       // wait for requests to be made
       await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
@@ -229,7 +223,7 @@ describe('Service Overview -> View', () => {
         ],
       });
 
-      const { queryByText } = renderServiceOverview();
+      const { queryByText } = render(<ServiceInventory />, { wrapper });
 
       // wait for requests to be made
       await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
@@ -256,7 +250,7 @@ describe('Service Overview -> View', () => {
         ],
       });
 
-      const { queryAllByText } = renderServiceOverview();
+      const { queryAllByText } = render(<ServiceInventory />, { wrapper });
 
       // wait for requests to be made
       await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));

@@ -12,7 +12,7 @@ import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch';
 import { ApplicationStart as ApplicationStart_2 } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { CoreSetup as CoreSetup_2 } from 'src/core/public';
 import { CoreSetup as CoreSetup_3 } from 'kibana/public';
 import { CoreStart as CoreStart_2 } from 'kibana/public';
