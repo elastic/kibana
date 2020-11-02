@@ -209,6 +209,7 @@ export const MetricExpression = ({
         <EuiButtonGroup
           isFullWidth
           buttonSize="compressed"
+          legend="Metric type"
           options={[
             {
               id: 'metric-popover-default',
