@@ -156,7 +156,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
   }
 
   getGridResolution(): GRID_RESOLUTION {
-    return this._descriptor.resolution || GRID_RESOLUTION.COARSE;
+    return this._descriptor.resolution;
   }
 
   getGeoGridPrecision(zoom: number): number {
@@ -389,7 +389,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
               bufferedExtent: searchFilters.buffer,
             });
     } else {
-      features = [];
+      throw new Error('Cannot get GeoJson without searchFilter.buffer');
     }
 
     return {

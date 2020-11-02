@@ -59,7 +59,7 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
   }
 
   async getVectorFileMeta(): Promise<LayerConfig> {
-    const regionList: LayerConfig[] = getKibanaRegionList() as LayerConfig[];
+    const regionList: LayerConfig[] = getKibanaRegionList();
     const layerConfig: LayerConfig | undefined = regionList.find(
       (regionConfig: LayerConfig) => regionConfig.name === this._descriptor.name
     );

@@ -35,7 +35,10 @@ import { IVectorStyle } from '../../styles/vector/vector_style';
 import { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 import { IField } from '../../fields/field';
 import { ES_GEO_FIELD_TYPE, FieldFormatter } from '../../../../common/constants';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import {
+  Adapters,
+  RequestResponder,
+} from '../../../../../../../src/plugins/inspector/common/adapters';
 
 export interface IESSource extends IVectorSource {
   isESSource(): true;
@@ -149,7 +152,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     registerCancelCallback(() => abortController.abort());
 
     const inspectorAdapters = this.getInspectorAdapters();
-    let inspectorRequest: any;
+    let inspectorRequest: RequestResponder | undefined;
     if (inspectorAdapters) {
       inspectorRequest = inspectorAdapters.requests.start(requestName, {
         id: requestId,
@@ -163,7 +166,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         const requestStats = search.getRequestInspectorStats(searchSource);
         inspectorRequest.stats(requestStats);
         searchSource.getSearchRequestBody().then((body) => {
-          inspectorRequest.json(body);
+          if (inspectorRequest) {
+            inspectorRequest.json(body);
+          }
         });
       }
       resp = await searchSource.fetch({ abortSignal: abortController.signal });
@@ -173,7 +178,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       }
     } catch (error) {
       if (inspectorRequest) {
-        inspectorRequest.error({ error });
+        inspectorRequest.error(error);
       }
       if (error.name === 'AbortError') {
         throw new DataRequestAbortError();
@@ -445,9 +450,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {
     try {
       const indexPattern = await this.getIndexPattern();
+      const fieldType = indexPattern.fields.getByName(field.getRootName())!;
       return await getAutocompleteService().getValueSuggestions({
         indexPattern,
-        field: indexPattern.fields.getByName(field.getRootName()) as IFieldType,
+        field: fieldType,
         query,
       });
     } catch (error) {

@@ -107,7 +107,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
   static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
     const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor);
     if (typeof normalizedDescriptor.geoField !== 'string') {
-      throw new Error('Cannot create an ESGeoGridSourceDescriptor without a geoField');
+      throw new Error('Cannot create an ESSearchSourceDescriptor without a geoField');
     }
     return {
       ...normalizedDescriptor,
