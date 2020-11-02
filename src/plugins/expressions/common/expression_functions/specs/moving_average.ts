@@ -50,7 +50,8 @@ export type ExpressionFunctionMovingAverage = ExpressionFunctionDefinition<
  * * Will write the movingAverage of `inputColumnId` into `outputColumnId`
  * * If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`
  * * MovingAverage always starts with an undefined value for the first row of a series. Each next cell will contain sum of the last
- * * [window] of values divided by [window], not including the value of the row.
+ * * [window] of values divided by [window] excluding the current bucket.
+ * If either of window edges moves outside the borders of data series, the window shrinks to include available values only.
  *
  * Edge cases:
  * * Will return the input table if `inputColumnId` does not exist
