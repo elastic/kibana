@@ -156,6 +156,7 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition={'leftCenter'}
+      panelPaddingSize={'s'}
       button={
         <EuiToolTip content={button.tooltipText}>
           <EuiButtonIcon
