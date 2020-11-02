@@ -138,10 +138,10 @@ export const createExternalService = (
         method: 'get',
       });
 
-      return res.data.result.length > 0 ? { ...res.data.result } : undefined;
+      return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to find incidents by query. Error: ${error.message}`)
+        getErrorMessage(i18n.NAME, `Unable to get incident fields. Error: ${error.message}`)
       );
     }
   };
