@@ -30,6 +30,7 @@ import {
   TimeRange,
 } from '../../../common';
 import { FieldFormatsStart } from '../../field_formats';
+import { IndexPatternsServiceStart } from '../../index_patterns';
 import { AggsSetup, AggsStart } from './types';
 
 /** @internal */
@@ -41,6 +42,7 @@ export interface AggsSetupDependencies {
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
   uiSettings: UiSettingsServiceStart;
+  indexPatterns: IndexPatternsServiceStart;
 }
 
 /**
@@ -61,7 +63,7 @@ export class AggsService {
     return this.aggsCommonService.setup({ registerFunction });
   }
 
-  public start({ fieldFormats, uiSettings }: AggsStartDependencies): AggsStart {
+  public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
     return {
       asScopedToClient: async (savedObjectsClient: SavedObjectsClientContract) => {
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
@@ -72,8 +74,18 @@ export class AggsService {
         const getConfig = <T = any>(key: string): T => {
           return uiSettingsCache[key];
         };
+        const isDefaultTimezone = () => getConfig('dateFormat:tz') === 'Browser';
 
-        const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({ getConfig });
+        const {
+          calculateAutoTimeExpression,
+          getDateMetaByDatatableColumn,
+          types,
+        } = this.aggsCommonService.start({
+          getConfig,
+          getIndexPattern: (await indexPatterns.indexPatternsServiceFactory(savedObjectsClient))
+            .get,
+          isDefaultTimezone,
+        });
 
         const aggTypesDependencies: AggTypesDependencies = {
           calculateBounds: this.calculateBounds,
@@ -87,7 +99,7 @@ export class AggsService {
            * default timezone, but `isDefault` is not currently offered on the
            * server, so we need to manually check for the default value.
            */
-          isDefaultTimezone: () => getConfig('dateFormat:tz') === 'Browser',
+          isDefaultTimezone,
         };
 
         const typesRegistry = {
@@ -109,6 +121,7 @@ export class AggsService {
 
         return {
           calculateAutoTimeExpression,
+          getDateMetaByDatatableColumn,
           createAggConfigs: (indexPattern, configStates = [], schemas) => {
             return new AggConfigs(indexPattern, configStates, { typesRegistry });
           },
