@@ -129,7 +129,6 @@ export default new Datasource('es', {
     const esShardTimeout = tlConfig.esShardTimeout;
 
     const body = buildRequest(config, tlConfig, scriptedFields, esShardTimeout);
-
     const deps = (await tlConfig.getStartServices())[1];
 
     const resp = await deps.data.search
@@ -137,6 +136,7 @@ export default new Datasource('es', {
         body,
         {
           strategy: ES_SEARCH_STRATEGY,
+          sessionId: tlConfig.request?.body.sessionId,
         },
         tlConfig.context
       )
