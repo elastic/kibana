@@ -91,7 +91,11 @@ export const useIndexData = (
     try {
       const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
 
-      const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
+      const docs = resp.hits.hits.map((d) =>
+        getProcessedFields(d.fields, (key: string) =>
+          key.startsWith(`${jobConfig.dest.results_field}.feature_importance`)
+        )
+      );
       setRowCount(resp.hits.total.value);
       setTableItems(docs);
       setStatus(INDEX_STATUS.LOADED);
