@@ -31,52 +31,51 @@ export interface MovingAverageArgs {
 }
 
 export type ExpressionFunctionMovingAverage = ExpressionFunctionDefinition<
-  'movingAverage',
+  'moving_average',
   Datatable,
   MovingAverageArgs,
   Datatable
 >;
 
 /**
- * Calculates the movingAverage of a specified column in the data table.
+ * Calculates the moving average of a specified column in the data table.
  *
  * Also supports multiple series in a single data table - use the `by` argument
  * to specify the columns to split the calculation by.
- * For each unique combination of all `by` columns a separate movingAverage will be calculated.
+ * For each unique combination of all `by` columns a separate moving average will be calculated.
  * The order of rows won't be changed - this function is not modifying any existing columns, it's only
  * adding the specified `outputColumnId` column to every row of the table without adding or removing rows.
  *
  * Behavior:
- * * Will write the movingAverage of `inputColumnId` into `outputColumnId`
+ * * Will write the moving average of `inputColumnId` into `outputColumnId`
  * * If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`
- * * MovingAverage always starts with an undefined value for the first row of a series. Each next cell will contain sum of the last
+ * * Moving average always starts with an undefined value for the first row of a series. Each next cell will contain sum of the last
  * * [window] of values divided by [window] excluding the current bucket.
  * If either of window edges moves outside the borders of data series, the window shrinks to include available values only.
  *
  * Edge cases:
  * * Will return the input table if `inputColumnId` does not exist
  * * Will throw an error if `outputColumnId` exists already in provided data table
- * * If any value of the previous [window] values of the same series equals to `null` or `undefined`, it will be skipped in calculation.
- * * If all of the last [window] values are equal to `null` or `undefined`, moving average will be set to undefined too.
+ * * If null or undefined value is encountered, skip the current row and do not change the window
  * * For all values besides `null` and `undefined`, the value will be cast to a number before it's used in the
  *   calculation of the current series even if this results in `NaN` (like in case of objects).
  * * To determine separate series defined by the `by` columns, the values of these columns will be cast to strings
  *   before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.
  */
 export const movingAverage: ExpressionFunctionMovingAverage = {
-  name: 'movingAverage',
+  name: 'moving_average',
   type: 'datatable',
 
   inputTypes: ['datatable'],
 
   help: i18n.translate('expressions.functions.movingAverage.help', {
-    defaultMessage: 'Calculates the movingAverage of a column in a data table',
+    defaultMessage: 'Calculates the moving average of a column in a data table',
   }),
 
   args: {
     by: {
       help: i18n.translate('expressions.functions.movingAverage.args.byHelpText', {
-        defaultMessage: 'Column to split the movingAverage calculation by',
+        defaultMessage: 'Column to split the moving average calculation by',
       }),
       multi: true,
       types: ['string'],
@@ -84,21 +83,21 @@ export const movingAverage: ExpressionFunctionMovingAverage = {
     },
     inputColumnId: {
       help: i18n.translate('expressions.functions.movingAverage.args.inputColumnIdHelpText', {
-        defaultMessage: 'Column to calculate the movingAverage of',
+        defaultMessage: 'Column to calculate the moving average of',
       }),
       types: ['string'],
       required: true,
     },
     outputColumnId: {
       help: i18n.translate('expressions.functions.movingAverage.args.outputColumnIdHelpText', {
-        defaultMessage: 'Column to store the resulting movingAverage in',
+        defaultMessage: 'Column to store the resulting moving average in',
       }),
       types: ['string'],
       required: true,
     },
     outputColumnName: {
       help: i18n.translate('expressions.functions.movingAverage.args.outputColumnNameHelpText', {
-        defaultMessage: 'Name of the column to store the resulting movingAverage in',
+        defaultMessage: 'Name of the column to store the resulting moving average in',
       }),
       types: ['string'],
       required: false,
@@ -126,7 +125,7 @@ export const movingAverage: ExpressionFunctionMovingAverage = {
     }
 
     const lastNValuesByBucket: Partial<Record<string, Array<number | undefined>>> = {};
-    const a = {
+    return {
       ...input,
       columns: resultColumns,
       rows: input.rows.map((row) => {
@@ -136,8 +135,7 @@ export const movingAverage: ExpressionFunctionMovingAverage = {
         const lastNValues = lastNValuesByBucket[bucketIdentifier];
         const currentValue = newRow[inputColumnId];
         const sanitizedLastNValues = lastNValues?.filter((v) => v != null) as number[];
-
-        if (sanitizedLastNValues != null && sanitizedLastNValues.length) {
+        if (sanitizedLastNValues != null && sanitizedLastNValues.length && currentValue != null) {
           const sanitizedSum = sanitizedLastNValues.reduce(
             (acc: number, current: number) => acc + current,
             0
@@ -153,15 +151,11 @@ export const movingAverage: ExpressionFunctionMovingAverage = {
           );
         } else if (currentValue != null) {
           lastNValuesByBucket[bucketIdentifier] = [Number(currentValue)];
-        } else if (lastNValues != null) {
-          lastNValuesByBucket[bucketIdentifier] = [...lastNValues, undefined].slice(-window);
-        } else {
+        } else if (currentValue == null && lastNValues == null) {
           lastNValuesByBucket[bucketIdentifier] = undefined;
         }
         return newRow;
       }),
     };
-    // console.log(a);
-    return a;
   },
 };

@@ -79,8 +79,8 @@ describe('interpreter/functions#movingAverage', () => {
       undefined,
       undefined,
       1,
-      (1 + 2) / 2,
-      (1 + 2) / 2,
+      undefined,
+      undefined,
       (1 + 2) / 2,
       (1 + 2 + 4) / 3,
     ]);
@@ -115,12 +115,12 @@ describe('interpreter/functions#movingAverage', () => {
       undefined,
       1,
       (1 + 2) / 2,
+      undefined,
       (1 + 2 + 0) / 3,
-      (1 + 2 + 0) / 3,
-      0,
-      0,
-      0,
-      8 / 2,
+      undefined,
+      (2 + 0 + 0) / 3,
+      (0 + 0 + 0) / 3,
+      (8 + 0 + 0) / 3,
     ]);
   });
 
@@ -442,9 +442,9 @@ describe('interpreter/functions#movingAverage', () => {
       3,
       -10,
       2,
+      undefined,
+      undefined,
       8,
-      undefined,
-      undefined,
     ]);
   });
 
