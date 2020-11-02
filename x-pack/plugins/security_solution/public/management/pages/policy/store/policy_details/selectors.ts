@@ -124,8 +124,7 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
 );
 
 export const isAntivirusRegistrationEnabled = createSelector(policyConfig, (uiPolicyConfig) => {
-  // TODO: the guard should be removed when this is present on endpoint side
-  return uiPolicyConfig.windows.antivirus_registration?.enabled || false;
+  return uiPolicyConfig.windows.antivirus_registration.enabled;
 });
 
 /** Returns the total number of possible windows eventing configurations */
