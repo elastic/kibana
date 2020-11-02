@@ -241,7 +241,7 @@ export class DiscoverPlugin
       id: 'discover',
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
-      order: -1004,
+      order: 1000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
