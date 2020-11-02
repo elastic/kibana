@@ -4,24 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { labelField } from './helpers';
+import { LogMessageFormattingRule } from '../rule_types';
+import { labelFieldsPrefix } from './helpers';
 
 const commonActionField = [{ constant: '[AuditD][' }, { field: 'event.action' }, { constant: ']' }];
 const commonOutcomeField = [{ constant: ' ' }, { field: 'event.outcome' }];
 
-export const filebeatAuditdRules = [
+export const filebeatAuditdRules: LogMessageFormattingRule[] = [
   {
     // ECS format with outcome
     when: {
-      exists: ['ecs.version', 'event.action', 'event.outcome', 'auditd.log'],
+      all: [
+        { exists: ['ecs.version', 'event.action', 'event.outcome'] },
+        { existsPrefix: ['auditd.log'] },
+      ],
     },
     format: [
       ...commonActionField,
       ...commonOutcomeField,
-      ...labelField('user', 'user'),
-      ...labelField('process', 'process'),
+      ...labelFieldsPrefix('user', 'user'),
+      ...labelFieldsPrefix('process', 'process'),
       { constant: ' ' },
-      { field: 'auditd.log' },
+      { fieldsPrefix: 'auditd.log' },
       { constant: ' ' },
       { field: 'message' },
     ],
@@ -29,14 +33,14 @@ export const filebeatAuditdRules = [
   {
     // ECS format without outcome
     when: {
-      exists: ['ecs.version', 'event.action', 'auditd.log'],
+      all: [{ exists: ['ecs.version', 'event.action'] }, { existsPrefix: ['auditd.log'] }],
     },
     format: [
       ...commonActionField,
-      ...labelField('user', 'user'),
-      ...labelField('process', 'process'),
+      ...labelFieldsPrefix('user', 'user'),
+      ...labelFieldsPrefix('process', 'process'),
       { constant: ' ' },
-      { field: 'auditd.log' },
+      { fieldsPrefix: 'auditd.log' },
       { constant: ' ' },
       { field: 'message' },
     ],
@@ -44,10 +48,10 @@ export const filebeatAuditdRules = [
   {
     // pre-ECS IPSEC_EVENT Rule
     when: {
-      exists: ['auditd.log.record_type', 'auditd.log.src', 'auditd.log.dst', 'auditd.log.op'],
-      values: {
-        'auditd.log.record_type': 'MAC_IPSEC_EVENT',
-      },
+      all: [
+        { exists: ['auditd.log.record_type', 'auditd.log.src', 'auditd.log.dst', 'auditd.log.op'] },
+        { values: { 'auditd.log.record_type': 'MAC_IPSEC_EVENT' } },
+      ],
     },
     format: [
       { constant: '[AuditD][' },
@@ -63,18 +67,20 @@ export const filebeatAuditdRules = [
   {
     // pre-ECS SYSCALL Rule
     when: {
-      exists: [
-        'auditd.log.record_type',
-        'auditd.log.exe',
-        'auditd.log.gid',
-        'auditd.log.uid',
-        'auditd.log.tty',
-        'auditd.log.pid',
-        'auditd.log.ppid',
+      all: [
+        {
+          exists: [
+            'auditd.log.record_type',
+            'auditd.log.exe',
+            'auditd.log.gid',
+            'auditd.log.uid',
+            'auditd.log.tty',
+            'auditd.log.pid',
+            'auditd.log.ppid',
+          ],
+        },
+        { values: { 'auditd.log.record_type': 'SYSCALL' } },
       ],
-      values: {
-        'auditd.log.record_type': 'SYSCALL',
-      },
     },
     format: [
       { constant: '[AuditD][' },

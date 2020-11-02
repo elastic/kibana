@@ -33,6 +33,31 @@ export const DEFAULT_POLICY: PolicyFromES = {
   name: 'my_policy',
 };
 
+export const POLICY_WITH_MIGRATE_OFF: PolicyFromES = {
+  version: 1,
+  modified_date: Date.now().toString(),
+  policy: {
+    name: 'my_policy',
+    phases: {
+      hot: {
+        min_age: '0ms',
+        actions: {
+          rollover: {
+            max_age: '30d',
+            max_size: '50gb',
+          },
+        },
+      },
+      warm: {
+        actions: {
+          migrate: { enabled: false },
+        },
+      },
+    },
+  },
+  name: 'my_policy',
+};
+
 export const POLICY_WITH_INCLUDE_EXCLUDE: PolicyFromES = {
   version: 1,
   modified_date: Date.now().toString(),

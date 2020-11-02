@@ -53,26 +53,26 @@ const REFRESH_INTERVAL_MS = 5000;
 const statusFilters = [
   {
     status: 'online',
-    label: i18n.translate('xpack.ingestManager.agentList.statusOnlineFilterText', {
+    label: i18n.translate('xpack.fleet.agentList.statusOnlineFilterText', {
       defaultMessage: 'Online',
     }),
   },
   {
     status: 'offline',
-    label: i18n.translate('xpack.ingestManager.agentList.statusOfflineFilterText', {
+    label: i18n.translate('xpack.fleet.agentList.statusOfflineFilterText', {
       defaultMessage: 'Offline',
     }),
   },
   ,
   {
     status: 'error',
-    label: i18n.translate('xpack.ingestManager.agentList.statusErrorFilterText', {
+    label: i18n.translate('xpack.fleet.agentList.statusErrorFilterText', {
       defaultMessage: 'Error',
     }),
   },
   {
     status: 'updating',
-    label: i18n.translate('xpack.ingestManager.agentList.statusUpdatingFilterText', {
+    label: i18n.translate('xpack.fleet.agentList.statusUpdatingFilterText', {
       defaultMessage: 'Updating',
     }),
   },
@@ -101,10 +101,7 @@ const RowActions = React.memo<{
           href={getHref('fleet_agent_details', { agentId: agent.id })}
           key="viewAgent"
         >
-          <FormattedMessage
-            id="xpack.ingestManager.agentList.viewActionText"
-            defaultMessage="View agent"
-          />
+          <FormattedMessage id="xpack.fleet.agentList.viewActionText" defaultMessage="View agent" />
         </EuiContextMenuItem>,
         <EuiContextMenuItem
           icon="pencil"
@@ -115,7 +112,7 @@ const RowActions = React.memo<{
           key="reassignPolicy"
         >
           <FormattedMessage
-            id="xpack.ingestManager.agentList.reassignActionText"
+            id="xpack.fleet.agentList.reassignActionText"
             defaultMessage="Assign to new policy"
           />
         </EuiContextMenuItem>,
@@ -128,12 +125,12 @@ const RowActions = React.memo<{
         >
           {isUnenrolling ? (
             <FormattedMessage
-              id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+              id="xpack.fleet.agentList.forceUnenrollOneButton"
               defaultMessage="Force unenroll"
             />
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.agentList.unenrollOneButton"
+              id="xpack.fleet.agentList.unenrollOneButton"
               defaultMessage="Unenroll agent"
             />
           )}
@@ -146,7 +143,7 @@ const RowActions = React.memo<{
           }}
         >
           <FormattedMessage
-            id="xpack.ingestManager.agentList.upgradeOneButton"
+            id="xpack.fleet.agentList.upgradeOneButton"
             defaultMessage="Upgrade agent"
           />
         </EuiContextMenuItem>,
@@ -294,7 +291,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const columns = [
     {
       field: 'local_metadata.host.hostname',
-      name: i18n.translate('xpack.ingestManager.agentList.hostColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
       render: (host: string, agent: Agent) => (
@@ -306,14 +303,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     {
       field: 'active',
       width: '120px',
-      name: i18n.translate('xpack.ingestManager.agentList.statusColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
       render: (active: boolean, agent: any) => <AgentHealth agent={agent} />,
     },
     {
       field: 'policy_id',
-      name: i18n.translate('xpack.ingestManager.agentList.policyColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
       render: (policyId: string, agent: Agent) => {
@@ -333,7 +330,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               <EuiFlexItem grow={false}>
                 <EuiText color="default" size="xs" className="eui-textNoWrap">
                   <FormattedMessage
-                    id="xpack.ingestManager.agentList.revisionNumber"
+                    id="xpack.fleet.agentList.revisionNumber"
                     defaultMessage="rev. {revNumber}"
                     values={{ revNumber: agent.policy_revision }}
                   />
@@ -351,7 +348,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                     {true && (
                       <>
                         <FormattedMessage
-                          id="xpack.ingestManager.agentList.outOfDateLabel"
+                          id="xpack.fleet.agentList.outOfDateLabel"
                           defaultMessage="Out-of-date"
                         />
                       </>
@@ -366,7 +363,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     {
       field: 'local_metadata.elastic.agent.version',
       width: '200px',
-      name: i18n.translate('xpack.ingestManager.agentList.versionTitle', {
+      name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
@@ -380,7 +377,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                 <EuiIcon size="m" type="alert" color="warning" />
                 &nbsp;
                 <FormattedMessage
-                  id="xpack.ingestManager.agentList.agentUpgradeLabel"
+                  id="xpack.fleet.agentList.agentUpgradeLabel"
                   defaultMessage="Upgrade available"
                 />
               </EuiText>
@@ -391,14 +388,14 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'last_checkin',
-      name: i18n.translate('xpack.ingestManager.agentList.lastCheckinTitle', {
+      name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
         defaultMessage: 'Last activity',
       }),
       render: (lastCheckin: string, agent: any) =>
         lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
     },
     {
-      name: i18n.translate('xpack.ingestManager.agentList.actionsColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentList.actionsColumnTitle', {
         defaultMessage: 'Actions',
       }),
       actions: [
@@ -425,7 +422,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       title={
         <h2>
           <FormattedMessage
-            id="xpack.ingestManager.agentList.noAgentsPrompt"
+            id="xpack.fleet.agentList.noAgentsPrompt"
             defaultMessage="No agents enrolled"
           />
         </h2>
@@ -433,10 +430,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       actions={
         hasWriteCapabilites ? (
           <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
-            <FormattedMessage
-              id="xpack.ingestManager.agentList.addButton"
-              defaultMessage="Add agent"
-            />
+            <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
           </EuiButton>
         ) : null
       }
@@ -521,7 +515,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                       disabled={isAgentPoliciesLoading}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.agentList.statusFilterText"
+                        id="xpack.fleet.agentList.statusFilterText"
                         defaultMessage="Status"
                       />
                     </EuiFilterButton>
@@ -561,7 +555,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                       disabled={isAgentPoliciesLoading}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.agentList.policyFilterText"
+                        id="xpack.fleet.agentList.policyFilterText"
                         defaultMessage="Agent policy"
                       />
                     </EuiFilterButton>
@@ -595,7 +589,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   }}
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.agentList.showUpgradeableFilterLabel"
+                    id="xpack.fleet.agentList.showUpgradeableFilterLabel"
                     defaultMessage="Upgrade available"
                   />
                 </EuiFilterButton>
@@ -604,7 +598,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
                   onClick={() => setShowInactive(!showInactive)}
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.agentList.showInactiveSwitchLabel"
+                    id="xpack.fleet.agentList.showInactiveSwitchLabel"
                     defaultMessage="Inactive"
                   />
                 </EuiFilterButton>
@@ -645,18 +639,18 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         noItemsMessage={
           isLoading && agentsRequest.isInitialRequest ? (
             <FormattedMessage
-              id="xpack.ingestManager.agentList.loadingAgentsMessage"
+              id="xpack.fleet.agentList.loadingAgentsMessage"
               defaultMessage="Loading agents…"
             />
           ) : isUsingFilter ? (
             <FormattedMessage
-              id="xpack.ingestManager.agentList.noFilteredAgentsPrompt"
+              id="xpack.fleet.agentList.noFilteredAgentsPrompt"
               defaultMessage="No agents found. {clearFiltersLink}"
               values={{
                 clearFiltersLink: (
                   <EuiLink onClick={() => clearFilters()}>
                     <FormattedMessage
-                      id="xpack.ingestManager.agentList.clearFiltersLinkText"
+                      id="xpack.fleet.agentList.clearFiltersLinkText"
                       defaultMessage="Clear filters"
                     />
                   </EuiLink>
