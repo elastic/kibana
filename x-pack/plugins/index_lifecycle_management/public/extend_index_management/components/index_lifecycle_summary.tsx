@@ -158,7 +158,6 @@ export class IndexLifecycleSummary extends Component<Props, State> {
             button={button}
             isOpen={this.state.showPhaseExecutionPopover}
             closePopover={this.closePhaseExecutionPopover}
-            withTitle
           >
             <EuiPopoverTitle>
               <FormattedMessage
