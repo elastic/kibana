@@ -20,6 +20,7 @@ import angular from 'angular';
 import _ from 'lodash';
 import 'angular-sanitize';
 import 'angular-route';
+import 'angular-mocks';
 import { createBrowserHistory } from 'history';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import hits from 'fixtures/real_hits';
@@ -28,7 +29,6 @@ import { dataPluginMock } from '../../../../../data/public/mocks';
 import { navigationPluginMock } from '../../../../../navigation/public/mocks';
 import { setScopedHistory, setServices } from '../../../kibana_services';
 import { getInnerAngularModule } from '../../../get_inner_angular';
-import 'angular-mocks';
 
 let $parentScope;
 

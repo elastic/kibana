@@ -439,7 +439,6 @@ describe('ClusterClient', () => {
         clusterClientClosed = true;
         expect(internalClientClosed).toBe(true);
         expect(scopedClientClosed).toBe(true);
-        done();
       });
 
       closeInternalClient!();
