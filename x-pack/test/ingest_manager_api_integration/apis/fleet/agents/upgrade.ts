@@ -402,8 +402,6 @@ export default function (providerContext: FtrProviderContext) {
       expect(typeof agent3data.body.item.upgrade_started_at).to.be('string');
     });
     it('should respond 400 if trying to bulk upgrade to a version that does not match installed kibana version', async () => {
-      const kibanaVersion = await kibanaServer.version.get();
-      const higherVersion = semver.inc(kibanaVersion, 'patch');
       await kibanaServer.savedObjects.update({
         id: 'agent1',
         type: AGENT_SAVED_OBJECT_TYPE,
@@ -423,7 +421,7 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxx')
         .send({
           agents: ['agent1', 'agent2'],
-          version: higherVersion,
+          version: '1.0.0',
           force: true,
         })
         .expect(400);
