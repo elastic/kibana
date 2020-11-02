@@ -42,4 +42,6 @@ export {
   IndexPatternListConfig,
 } from './service';
 
+export { DefaultFormatEditor } from './components';
+
 export { MlCardState } from './types';
