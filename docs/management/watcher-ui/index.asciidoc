@@ -46,7 +46,7 @@ To manage roles, open then main menu, then click *Stack Management > Roles*, or 
 all users with the same role.
 
 NOTE: If you are creating a threshold watch, you must also have the `view_index_metadata` index privilege. See
-<<managing-indices, Managing Indices>> for detailed information.
+{ref}/index-mgmt.html[Index management] for detailed information.
 
 [float]
 [[watcher-create-threshold-alert]]
