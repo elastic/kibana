@@ -6,14 +6,14 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../security/server';
+import { SecurityPluginSetup } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
 import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
-import { AlertsClient, InvalidateAPIKeyResult } from './alerts_client';
+import { AlertsClient } from './alerts_client';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { TaskRunnerFactory } from './task_runner';
 import { AlertsClientFactory } from './alerts_client_factory';
