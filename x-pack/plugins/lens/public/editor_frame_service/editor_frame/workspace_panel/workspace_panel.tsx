@@ -75,7 +75,6 @@ export interface WorkspacePanelProps {
 }
 
 interface WorkspaceState {
-  configurationValidationError?: Array<{ shortMessage: string; longMessage: string }>;
   expressionBuildError?: Array<{ shortMessage: string; longMessage: string }>;
   expandError: boolean;
 }
@@ -343,7 +342,9 @@ export const InnerVisualizationWrapper = ({
   timefilter: TimefilterContract;
   onEvent: (event: ExpressionRendererEvent) => void;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
-  localState: WorkspaceState;
+  localState: WorkspaceState & {
+    configurationValidationError?: Array<{ shortMessage: string; longMessage: string }>;
+  };
   ExpressionRendererComponent: ReactExpressionRendererType;
 }) => {
   const autoRefreshFetch$ = useMemo(() => timefilter.getAutoRefreshFetch$(), [timefilter]);
