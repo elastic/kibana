@@ -9,7 +9,7 @@ import { LicenseCheck } from '../../../../licensing/server';
 
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../index.mock';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { defineEnabledApiKeysRoutes } from './enabled';
 import { APIKeys } from '../../authentication/api_keys';
 

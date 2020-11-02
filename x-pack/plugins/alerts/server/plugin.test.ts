@@ -149,12 +149,6 @@ describe('Alerting Plugin', () => {
               url: '/',
             },
           },
-          // TODO: Remove once we upgrade to hapi v18
-          _core: {
-            info: {
-              uri: 'http://localhost',
-            },
-          },
           getSavedObjectsClient: jest.fn(),
         } as unknown) as KibanaRequest;
         await startContract.getAlertsClientWithRequest(fakeRequest);

@@ -48,7 +48,6 @@ export class WhereExpression extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         ownFocus
-        withTitle
         anchorPosition="leftCenter"
         button={
           <EuiExpression
