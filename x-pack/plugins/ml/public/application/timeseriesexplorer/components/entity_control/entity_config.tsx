@@ -100,6 +100,52 @@ export const EntityConfig: FC<EntityConfigProps> = ({
       }}
     >
       <div data-test-subj={`mlSingleMetricViewerEntitySelectionConfigPopover_${entity.fieldName}`}>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.ml.timeSeriesExplorer.sortByLabel"
+              defaultMessage="Sort by"
+            />
+          }
+        >
+          <EuiRadioGroup
+            options={sortOptions}
+            idSelected={forceSortByName ? 'name' : config?.sort?.by}
+            onChange={(id) => {
+              onConfigChange(entity.fieldType, {
+                sort: {
+                  order: config.sort.order,
+                  by: id,
+                },
+              });
+            }}
+            compressed
+            data-test-subj={`mlSingleMetricViewerEntitySelectionConfigSortBy_${entity.fieldName}`}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={
+            <FormattedMessage id="xpack.ml.timeSeriesExplorer.orderLabel" defaultMessage="Order" />
+          }
+        >
+          <EuiRadioGroup
+            options={orderOptions}
+            idSelected={config?.sort?.order}
+            onChange={(id) => {
+              onConfigChange(entity.fieldType, {
+                sort: {
+                  by: config.sort.by,
+                  order: id,
+                },
+              });
+            }}
+            compressed
+            data-test-subj={`mlSingleMetricViewerEntitySelectionConfigOrder_${entity.fieldName}`}
+          />
+        </EuiFormRow>
+
+        <EuiHorizontalRule margin="s" />
+
         <EuiFlexGroup gutterSize={'xs'} alignItems={'center'}>
           <EuiFlexItem grow={false}>
             {isModelPlotEnabled ? (
@@ -175,51 +221,6 @@ export const EntityConfig: FC<EntityConfigProps> = ({
             ) : null}
           </EuiFlexItem>
         </EuiFlexGroup>
-
-        <EuiHorizontalRule margin="s" />
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="xpack.ml.timeSeriesExplorer.sortByLabel"
-              defaultMessage="Sort by"
-            />
-          }
-        >
-          <EuiRadioGroup
-            options={sortOptions}
-            idSelected={forceSortByName ? 'name' : config?.sort?.by}
-            onChange={(id) => {
-              onConfigChange(entity.fieldType, {
-                sort: {
-                  order: config.sort.order,
-                  by: id,
-                },
-              });
-            }}
-            compressed
-            data-test-subj={`mlSingleMetricViewerEntitySelectionConfigSortBy_${entity.fieldName}`}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={
-            <FormattedMessage id="xpack.ml.timeSeriesExplorer.orderLabel" defaultMessage="Order" />
-          }
-        >
-          <EuiRadioGroup
-            options={orderOptions}
-            idSelected={config?.sort?.order}
-            onChange={(id) => {
-              onConfigChange(entity.fieldType, {
-                sort: {
-                  by: config.sort.by,
-                  order: id,
-                },
-              });
-            }}
-            compressed
-            data-test-subj={`mlSingleMetricViewerEntitySelectionConfigOrder_${entity.fieldName}`}
-          />
-        </EuiFormRow>
       </div>
     </EuiPopover>
   );
