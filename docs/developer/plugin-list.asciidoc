@@ -143,8 +143,9 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 It also provides a stateful version of it on the start contract.
 
 
-|{kib-repo}blob/{branch}/src/plugins/newsfeed[newsfeed]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/newsfeed/README.md[newsfeed]
+|The newsfeed plugin adds a NewsfeedNavButton to the top navigation bar and renders the content in the flyout.
+Content is fetched from the remote (https://feeds.elastic.co and https://feeds-staging.elastic.co in dev mode) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.
 
 
 |{kib-repo}blob/{branch}/src/plugins/region_map/README.md[regionMap]
@@ -504,8 +505,9 @@ routes, etc.
 |This plugin provides access to the transforms features provided by Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/translations[translations]
-|WARNING: Missing README.
+|<<translations-plugin>>
+|Contains Elastic-supported translations. Owned by the Localizations team.
+For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/master/packages/kbn-i18n
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
@@ -547,3 +549,4 @@ include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/plugins/ui_actions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/x-pack/plugins/translations/README.asciidoc[leveloffset=+1]

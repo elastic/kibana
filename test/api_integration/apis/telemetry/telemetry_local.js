@@ -53,15 +53,12 @@ export default function ({ getService }) {
     });
 
     it('should pull local stats and validate data types', async () => {
-      const timeRange = {
-        min: '2018-07-23T22:07:00Z',
-        max: '2018-07-23T22:13:00Z',
-      };
+      const timestamp = '2018-07-23T22:13:00Z';
 
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange, unencrypted: true })
+        .send({ timestamp, unencrypted: true })
         .expect(200);
 
       expect(body.length).to.be(1);
@@ -98,15 +95,12 @@ export default function ({ getService }) {
     });
 
     it('should pull local stats and validate fields', async () => {
-      const timeRange = {
-        min: '2018-07-23T22:07:00Z',
-        max: '2018-07-23T22:13:00Z',
-      };
+      const timestamp = '2018-07-23T22:13:00Z';
 
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange, unencrypted: true })
+        .send({ timestamp, unencrypted: true })
         .expect(200);
 
       const stats = body[0];
@@ -156,10 +150,7 @@ export default function ({ getService }) {
     });
 
     describe('application usage limits', () => {
-      const timeRange = {
-        min: '2018-07-23T22:07:00Z',
-        max: '2018-07-23T22:13:00Z',
-      };
+      const timestamp = '2018-07-23T22:13:00Z';
 
       function createSavedObject() {
         return supertest
@@ -191,7 +182,7 @@ export default function ({ getService }) {
           const { body } = await supertest
             .post('/api/telemetry/v2/clusters/_stats')
             .set('kbn-xsrf', 'xxx')
-            .send({ timeRange, unencrypted: true })
+            .send({ timestamp, unencrypted: true })
             .expect(200);
 
           expect(body.length).to.be(1);
@@ -242,7 +233,7 @@ export default function ({ getService }) {
           const { body } = await supertest
             .post('/api/telemetry/v2/clusters/_stats')
             .set('kbn-xsrf', 'xxx')
-            .send({ timeRange, unencrypted: true })
+            .send({ timestamp, unencrypted: true })
             .expect(200);
 
           expect(body.length).to.be(1);
