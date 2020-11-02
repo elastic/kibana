@@ -18,8 +18,6 @@ export interface GetLatestMonitorParams {
   monitorId?: string | null;
 
   observerLocation?: string;
-
-  status?: string;
 }
 
 // Get The monitor latest state sorted by timestamp with date range
@@ -30,7 +28,6 @@ export const getLatestMonitor: UMElasticsearchQueryFn<GetLatestMonitorParams, Pi
   dateEnd,
   monitorId,
   observerLocation,
-  status,
 }) => {
   const params = {
     index: dynamicSettings.heartbeatIndices,
