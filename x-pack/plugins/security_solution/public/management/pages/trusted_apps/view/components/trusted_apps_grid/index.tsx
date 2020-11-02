@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { memo, useCallback, useEffect } from 'react';
+import React, { FC, memo, useCallback, useEffect } from 'react';
 import {
   EuiTablePagination,
   EuiFlexGroup,
@@ -12,6 +12,7 @@ import {
   EuiProgress,
   EuiIcon,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { Pagination } from '../../../state';
@@ -64,6 +65,14 @@ const PaginationBar = ({ pagination, onChange }: PaginationBarProps) => {
   );
 };
 
+const GridMessage: FC = ({ children }) => (
+  <div className="euiTextAlign--center">
+    <EuiSpacer size="m" />
+    {children}
+    <EuiSpacer size="m" />
+  </div>
+);
+
 export const TrustedAppsGrid = memo(() => {
   const pagination = useTrustedAppsSelector(getListPagination);
   const listItems = useTrustedAppsSelector(getListItems);
@@ -80,7 +89,7 @@ export const TrustedAppsGrid = memo(() => {
   }));
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {isLoading && (
         <EuiFlexItem grow={false}>
           <EuiProgress size="xs" color="primary" />
@@ -88,27 +97,33 @@ export const TrustedAppsGrid = memo(() => {
       )}
       <EuiFlexItem>
         {error && (
-          <div className="euiTextAlign--center">
+          <GridMessage>
             <EuiIcon type="minusInCircle" color="danger" /> {error}
-          </div>
+          </GridMessage>
         )}
-        {!error && (
-          <EuiFlexGroup direction="column">
-            {listItems.map((item) => (
-              <EuiFlexItem grow={false} key={item.id}>
-                <TrustedAppCard trustedApp={item} onDelete={handleTrustedAppDelete} />
-              </EuiFlexItem>
-            ))}
-            {listItems.length === 0 && (
-              <EuiText size="s" className="euiTextAlign--center">
-                {NO_RESULTS_MESSAGE}
-              </EuiText>
-            )}
-          </EuiFlexGroup>
+        {!error && listItems.length === 0 && (
+          <GridMessage>
+            <EuiText size="s">{NO_RESULTS_MESSAGE}</EuiText>
+          </GridMessage>
+        )}
+        {!error && listItems.length > 0 && (
+          <>
+            <EuiSpacer size="l" />
+
+            <EuiFlexGroup direction="column">
+              {listItems.map((item) => (
+                <EuiFlexItem grow={false} key={item.id}>
+                  <TrustedAppCard trustedApp={item} onDelete={handleTrustedAppDelete} />
+                </EuiFlexItem>
+              ))}
+            </EuiFlexGroup>
+          </>
         )}
       </EuiFlexItem>
       {!error && pagination.totalItemCount > 0 && (
         <EuiFlexItem grow={false}>
+          <EuiSpacer size="l" />
+
           <PaginationBar pagination={pagination} onChange={handlePaginationChange} />
         </EuiFlexItem>
       )}

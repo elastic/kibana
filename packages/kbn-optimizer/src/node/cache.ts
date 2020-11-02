@@ -64,6 +64,7 @@ export class Cache {
     this.codes = LmdbStore.open({
       name: 'codes',
       path: CACHE_DIR,
+      maxReaders: 500,
     });
 
     this.atimes = this.codes.openDB({

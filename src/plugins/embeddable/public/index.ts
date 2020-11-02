@@ -70,12 +70,15 @@ export {
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isContextMenuTriggerContext,
   EmbeddableStateTransfer,
   EmbeddableEditorState,
   EmbeddablePackageState,
   EmbeddableRenderer,
   EmbeddableRendererProps,
 } from './lib';
+
+export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';
 
 export { EnhancementRegistryDefinition } from './types';
 

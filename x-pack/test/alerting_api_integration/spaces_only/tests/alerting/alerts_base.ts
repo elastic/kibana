@@ -343,5 +343,30 @@ instanceStateValue: true
         },
       });
     });
+
+    it('should notify feature usage when using a gold action type', async () => {
+      const testStart = new Date();
+      const reference = alertUtils.generateReference();
+      const response = await alertUtils.createAlwaysFiringAction({ reference });
+      expect(response.statusCode).to.eql(200);
+
+      // Wait for alert to run
+      await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+
+      const {
+        body: { features },
+      } = await supertestWithoutAuth.get(`${getUrlPrefix(space.id)}/api/licensing/feature_usage`);
+      expect(features).to.be.an(Array);
+      const indexRecordFeature = features.find(
+        (feature: { name: string }) => feature.name === 'Connector: Test: Index Record'
+      );
+      expect(indexRecordFeature).to.be.ok();
+      expect(indexRecordFeature.last_used).to.be.a('string');
+      expect(new Date(indexRecordFeature.last_used).getTime()).to.be.greaterThan(
+        testStart.getTime()
+      );
+
+      await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
+    });
   });
 }

@@ -2,18 +2,13 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-expressions-server](./kibana-plugin-plugins-expressions-server.md) &gt; [ExpressionAstExpression](./kibana-plugin-plugins-expressions-server.expressionastexpression.md)
 
-## ExpressionAstExpression interface
+## ExpressionAstExpression type
 
 <b>Signature:</b>
 
 ```typescript
-export interface ExpressionAstExpression 
+export declare type ExpressionAstExpression = {
+    type: 'expression';
+    chain: ExpressionAstFunction[];
+};
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [chain](./kibana-plugin-plugins-expressions-server.expressionastexpression.chain.md) | <code>ExpressionAstFunction[]</code> |  |
-|  [type](./kibana-plugin-plugins-expressions-server.expressionastexpression.type.md) | <code>'expression'</code> |  |
-

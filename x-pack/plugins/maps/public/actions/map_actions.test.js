@@ -27,6 +27,10 @@ describe('map_actions', () => {
         require('../selectors/map_selectors').getDataFilters = () => {
           return {};
         };
+
+        require('../selectors/map_selectors').getLayerList = () => {
+          return [];
+        };
       });
 
       it('should add newMapConstants to dispatch action mapState', async () => {
@@ -289,7 +293,7 @@ describe('map_actions', () => {
             type: 'SET_QUERY',
           },
         ],
-        [undefined], // dispatch<any>(syncDataForAllLayers());
+        [undefined], // dispatch(syncDataForAllLayers());
       ]);
     });
 

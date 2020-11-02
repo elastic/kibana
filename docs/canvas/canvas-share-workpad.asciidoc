@@ -10,7 +10,7 @@ When you've finished your workpad, you can share it outside of {kib}.
 
 Create a JSON file of your workpad that you can export outside of {kib}.
 
-Click *Share > Download as JSON*.
+To begin, click *Share > Download as JSON*.
 
 [role="screenshot"]
 image::images/canvas-export-workpad.png[Export single workpad through JSON, from Share dropdown]
@@ -23,7 +23,7 @@ Want to export multiple workpads? Go to the *Canvas* home page, select the workp
 
 If you have a subscription that supports the {report-features}, you can create a PDF copy of your workpad that you can save and share outside {kib}.
 
-Click *Share > PDF reports > Generate PDF*.
+To begin, click *Share > PDF reports > Generate PDF*.
 
 [role="screenshot"]
 image::images/canvas-generate-pdf.gif[Image showing how to generate a PDF]
@@ -36,7 +36,7 @@ For more information, refer to <<reporting-getting-started, Reporting from Kiban
 
 If you have a subscription that supports the {report-features}, you can create a POST URL that you can use to automatically generate PDF reports using <<watcher-ui,Watcher>> or a script.
 
-Click *Share > PDF reports > Copy POST URL*.
+To begin, click *Share > PDF reports > Copy POST URL*.
 
 [role="screenshot"]
 image::images/canvas-create-URL.gif[Image showing how to create POST URL]

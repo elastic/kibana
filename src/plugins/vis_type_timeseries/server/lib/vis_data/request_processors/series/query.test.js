@@ -318,4 +318,60 @@ describe('query(req, panel, series)', () => {
       },
     });
   });
+
+  test('returns doc with panel filter (ignoring globals from series)', () => {
+    req.payload.filters = [
+      {
+        bool: {
+          must: [
+            {
+              term: {
+                host: 'example',
+              },
+            },
+          ],
+        },
+      },
+    ];
+    panel.filter = { query: 'host:web-server', language: 'lucene' };
+    series.ignore_global_filter = true;
+    const next = (doc) => doc;
+    const doc = query(req, panel, series, config)(next)({});
+    expect(doc).toEqual({
+      size: 0,
+      query: {
+        bool: {
+          filter: [],
+          must: [
+            {
+              range: {
+                timestamp: {
+                  gte: '2017-01-01T00:00:00.000Z',
+                  lte: '2017-01-01T01:00:00.000Z',
+                  format: 'strict_date_optional_time',
+                },
+              },
+            },
+            {
+              bool: {
+                filter: [],
+                must: [
+                  {
+                    query_string: {
+                      query: panel.filter.query,
+                      analyze_wildcard: true,
+                    },
+                  },
+                ],
+                must_not: [],
+                should: [],
+              },
+            },
+          ],
+          must_not: [],
+          should: [],
+        },
+      },
+    });
+  });
 });

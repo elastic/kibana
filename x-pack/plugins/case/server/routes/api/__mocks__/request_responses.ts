@@ -62,6 +62,45 @@ export const getActions = (): FindActionResult[] => [
     isPreconfigured: false,
     referencedByCount: 0,
   },
+  {
+    id: '456',
+    actionTypeId: '.jira',
+    name: 'Connector without isCaseOwned',
+    config: {
+      incidentConfiguration: {
+        mapping: [
+          {
+            source: 'title',
+            target: 'short_description',
+            actionType: 'overwrite',
+          },
+          {
+            source: 'description',
+            target: 'description',
+            actionType: 'overwrite',
+          },
+          {
+            source: 'comments',
+            target: 'comments',
+            actionType: 'append',
+          },
+        ],
+      },
+      apiUrl: 'https://elastic.jira.com',
+    },
+    isPreconfigured: false,
+    referencedByCount: 0,
+  },
+  {
+    id: '789',
+    actionTypeId: '.resilient',
+    name: 'Connector without mapping',
+    config: {
+      apiUrl: 'https://elastic.resilient.com',
+    },
+    isPreconfigured: false,
+    referencedByCount: 0,
+  },
 ];
 
 export const newConfiguration: CasesConfigureRequest = {

@@ -45,9 +45,7 @@ export const TrustedAppsPage = memo(() => {
       return <BackToExternalAppButton {...routeState} />;
     }
     return null;
-    // FIXME: Route state is being deleted by some parent component
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [routeState]);
 
   const addButton = (
     <EuiButton
@@ -67,7 +65,7 @@ export const TrustedAppsPage = memo(() => {
   return (
     <AdministrationListPage
       data-test-subj="trustedAppsListPage"
-      beta={true}
+      beta={false}
       title={
         <FormattedMessage
           id="xpack.securitySolution.trustedapps.list.pageTitle"

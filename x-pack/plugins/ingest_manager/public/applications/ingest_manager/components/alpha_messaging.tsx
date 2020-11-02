@@ -26,20 +26,17 @@ export const AlphaMessaging: React.FC<{}> = () => {
       <Message>
         <p>
           <strong>
-            <FormattedMessage
-              id="xpack.ingestManager.alphaMessageTitle"
-              defaultMessage="Beta release"
-            />
+            <FormattedMessage id="xpack.fleet.alphaMessageTitle" defaultMessage="Beta release" />
           </strong>
           {' – '}
           <FormattedMessage
-            id="xpack.ingestManager.alphaMessageDescription"
-            defaultMessage="Ingest Manager is not
+            id="xpack.fleet.alphaMessageDescription"
+            defaultMessage="Fleet is not
             recommended for production environments."
           />{' '}
           <EuiLink color="subdued" onClick={() => setIsAlphaFlyoutOpen(true)}>
             <FormattedMessage
-              id="xpack.ingestManager.alphaMessageLinkText"
+              id="xpack.fleet.alphaMessageLinkText"
               defaultMessage="See more details."
             />
           </EuiLink>

@@ -26,7 +26,6 @@ import {
   DatatableVisualizationPluginSetupPlugins,
 } from './datatable_visualization';
 import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
-import { stopReportManager } from './lens_ui_telemetry';
 import { AppNavLinkStatus } from '../../../../src/core/public';
 
 import {
@@ -40,7 +39,7 @@ import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
 import { getSearchProvider } from './search_provider';
 
-import { getLensAttributeService, LensAttributeService } from './lens_attribute_service';
+import { LensAttributeService } from './lens_attribute_service';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -58,17 +57,19 @@ export interface LensPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
   dashboard: DashboardStart;
-  embeddable?: EmbeddableStart;
+  embeddable: EmbeddableStart;
 }
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;
   private createEditorFrame: EditorFrameStart['createInstance'] | null = null;
-  private attributeService: LensAttributeService | null = null;
+  private attributeService: (() => Promise<LensAttributeService>) | null = null;
   private indexpatternDatasource: IndexPatternDatasource;
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
   private pieVisualization: PieVisualization;
+
+  private stopReportManager?: () => void;
 
   constructor() {
     this.datatableVisualization = new DatatableVisualization();
@@ -91,6 +92,11 @@ export class LensPlugin {
       globalSearch,
     }: LensPluginSetupDependencies
   ) {
+    this.attributeService = async () => {
+      const { getLensAttributeService } = await import('./async_services');
+      const [coreStart, startDependencies] = await core.getStartServices();
+      return getLensAttributeService(coreStart, startDependencies);
+    };
     const editorFrameSetupInterface = this.editorFrameService.setup(
       core,
       {
@@ -98,7 +104,7 @@ export class LensPlugin {
         embeddable,
         expressions,
       },
-      () => this.attributeService!
+      this.attributeService
     );
     const dependencies: IndexPatternDatasourceSetupPlugins &
       XyVisualizationPluginSetupPlugins &
@@ -131,7 +137,8 @@ export class LensPlugin {
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const { mountApp } = await import('./async_services');
+        const { mountApp, stopReportManager } = await import('./async_services');
+        this.stopReportManager = stopReportManager;
         return mountApp(core, params, {
           createEditorFrame: this.createEditorFrame!,
           attributeService: this.attributeService!,
@@ -158,7 +165,6 @@ export class LensPlugin {
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
-    this.attributeService = getLensAttributeService(core, startDependencies);
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
@@ -171,6 +177,8 @@ export class LensPlugin {
   }
 
   stop() {
-    stopReportManager();
+    if (this.stopReportManager) {
+      this.stopReportManager();
+    }
   }
 }

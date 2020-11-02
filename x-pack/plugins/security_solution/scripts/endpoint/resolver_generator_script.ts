@@ -10,7 +10,7 @@ import { ResponseError } from '@elastic/elasticsearch/lib/errors';
 import { KbnClient, ToolingLog } from '@kbn/dev-utils';
 import { AxiosResponse } from 'axios';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
-import { ANCESTRY_LIMIT } from '../../common/endpoint/generate_data';
+import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { AGENTS_SETUP_API_ROUTES, SETUP_API_ROUTE } from '../../../ingest_manager/common/constants';
 import {
   CreateFleetSetupResponse,
@@ -250,6 +250,8 @@ async function main() {
       percentTerminated: argv.percentTerminated,
       alwaysGenMaxChildrenPerNode: argv.maxChildrenPerNode,
       ancestryArraySize: argv.ancestryArraySize,
+      eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.eventIndex),
+      alertsDataStream: EndpointDocGenerator.createDataStreamFromIndex(argv.alertIndex),
     }
   );
   console.log(`Creating and indexing documents took: ${new Date().getTime() - startTime}ms`);

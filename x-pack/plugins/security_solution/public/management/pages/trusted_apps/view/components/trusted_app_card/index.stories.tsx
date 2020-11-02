@@ -53,11 +53,10 @@ storiesOf('TrustedApps/TrustedAppCard', module)
 
     return <TrustedAppCard trustedApp={trustedApp} onDelete={action('onClick')} />;
   })
-  .add('trim description', () => {
-    const trustedApp: TrustedApp = createSampleTrustedApp(5);
+  .add('longs texts', () => {
+    const trustedApp: TrustedApp = createSampleTrustedApp(5, true);
     trustedApp.created_at = '2020-09-17T14:52:33.899Z';
     trustedApp.entries = [PATH_CONDITION, SIGNER_CONDITION];
-    trustedApp.description = [...new Array(40).keys()].map((index) => `item${index}`).join(' ');
 
     return <TrustedAppCard trustedApp={trustedApp} onDelete={action('onClick')} />;
   });

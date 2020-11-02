@@ -27,6 +27,13 @@ import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
 import * as i18n from './translations';
 
+export type Buckets = Array<{
+  key: string;
+  doc_count: number;
+}>;
+
+const bucketEmpty: Buckets = [];
+
 export interface UseMatrixHistogramArgs {
   data: MatrixHistogramData[];
   inspect: InspectResponse;
@@ -49,7 +56,12 @@ export const useMatrixHistogram = ({
   stackByField,
   startDate,
   threshold,
-}: MatrixHistogramQueryProps): [boolean, UseMatrixHistogramArgs] => {
+  skip = false,
+}: MatrixHistogramQueryProps): [
+  boolean,
+  UseMatrixHistogramArgs,
+  (to: string, from: string) => void
+] => {
   const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
@@ -98,10 +110,11 @@ export const useMatrixHistogram = ({
             next: (response) => {
               if (isCompleteResponse(response)) {
                 if (!didCancel) {
-                  const histogramBuckets: Array<{
-                    key: string;
-                    doc_count: number;
-                  }> = getOr([], 'rawResponse.aggregations.eventActionGroup.buckets', response);
+                  const histogramBuckets: Buckets = getOr(
+                    bucketEmpty,
+                    'rawResponse.aggregations.eventActionGroup.buckets',
+                    response
+                  );
                   setLoading(false);
                   setMatrixHistogramResponse((prevResponse) => ({
                     ...prevResponse,
@@ -123,10 +136,12 @@ export const useMatrixHistogram = ({
               }
             },
             error: (msg) => {
+              if (!didCancel) {
+                setLoading(false);
+              }
               if (!(msg instanceof AbortError)) {
-                notifications.toasts.addDanger({
+                notifications.toasts.addError(msg, {
                   title: errorMessage ?? i18n.FAIL_MATRIX_HISTOGRAM,
-                  text: msg.message,
                 });
               }
             },
@@ -166,8 +181,24 @@ export const useMatrixHistogram = ({
   }, [indexNames, endDate, filterQuery, startDate, stackByField, histogramType, threshold]);
 
   useEffect(() => {
-    hostsSearch(matrixHistogramRequest);
-  }, [matrixHistogramRequest, hostsSearch]);
+    if (!skip) {
+      hostsSearch(matrixHistogramRequest);
+    }
+  }, [matrixHistogramRequest, hostsSearch, skip]);
 
-  return [loading, matrixHistogramResponse];
+  const runMatrixHistogramSearch = useCallback(
+    (to: string, from: string) => {
+      hostsSearch({
+        ...matrixHistogramRequest,
+        timerange: {
+          interval: '12h',
+          from,
+          to,
+        },
+      });
+    },
+    [matrixHistogramRequest, hostsSearch]
+  );
+
+  return [loading, matrixHistogramResponse, runMatrixHistogramSearch];
 };

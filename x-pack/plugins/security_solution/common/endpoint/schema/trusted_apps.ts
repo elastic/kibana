@@ -35,7 +35,7 @@ export const GetTrustedAppsRequestSchema = {
 
 export const PostTrustedAppCreateRequestSchema = {
   body: schema.object({
-    name: schema.string({ minLength: 1 }),
+    name: schema.string({ minLength: 1, maxLength: 256 }),
     description: schema.maybe(schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })),
     os: schema.oneOf([schema.literal('linux'), schema.literal('macos'), schema.literal('windows')]),
     entries: schema.arrayOf(

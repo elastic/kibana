@@ -45,6 +45,7 @@ import { SharePluginStart } from 'src/plugins/share/public';
 import { SavedObjectsStart, SavedObject } from 'src/plugins/saved_objects/public';
 import { EmbeddableStart } from 'src/plugins/embeddable/public';
 import { UrlForwardingStart } from 'src/plugins/url_forwarding/public';
+import { EventEmitter } from 'events';
 import { DashboardStart } from '../../../dashboard/public';
 
 export type PureVisState = SavedVisState;
@@ -131,7 +132,14 @@ export interface ByValueVisInstance {
 
 export type VisualizeEditorVisInstance = SavedVisInstance | ByValueVisInstance;
 
+export type VisEditorConstructor = new (
+  element: HTMLElement,
+  vis: Vis,
+  eventEmitter: EventEmitter,
+  embeddableHandler: VisualizeEmbeddableContract
+) => IEditorController;
+
 export interface IEditorController {
-  render(props: EditorRenderProps): void;
+  render(props: EditorRenderProps): Promise<void> | void;
   destroy(): void;
 }

@@ -26,8 +26,10 @@ import { first } from 'rxjs/operators';
 import {
   ElasticsearchClient,
   IRouter,
+  ISavedObjectsRepository,
   LegacyAPICaller,
   MetricsServiceSetup,
+  SavedObjectsClientContract,
   ServiceStatus,
   ServiceStatusLevels,
 } from '../../../../../core/server';
@@ -64,9 +66,10 @@ export function registerStatsRoute({
 }) {
   const getUsage = async (
     callCluster: LegacyAPICaller,
-    esClient: ElasticsearchClient
+    esClient: ElasticsearchClient,
+    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository
   ): Promise<any> => {
-    const usage = await collectorSet.bulkFetchUsage(callCluster, esClient);
+    const usage = await collectorSet.bulkFetchUsage(callCluster, esClient, savedObjectsClient);
     return collectorSet.toObject(usage);
   };
 
@@ -101,6 +104,7 @@ export function registerStatsRoute({
       if (isExtended) {
         const callCluster = context.core.elasticsearch.legacy.client.callAsCurrentUser;
         const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const savedObjectsClient = context.core.savedObjects.client;
 
         if (shouldGetUsage) {
           const collectorsReady = await collectorSet.areAllCollectorsReady();
@@ -109,7 +113,9 @@ export function registerStatsRoute({
           }
         }
 
-        const usagePromise = shouldGetUsage ? getUsage(callCluster, esClient) : Promise.resolve({});
+        const usagePromise = shouldGetUsage
+          ? getUsage(callCluster, esClient, savedObjectsClient)
+          : Promise.resolve({});
         const [usage, clusterUuid] = await Promise.all([usagePromise, getClusterUuid(callCluster)]);
 
         let modifiedUsage = usage;

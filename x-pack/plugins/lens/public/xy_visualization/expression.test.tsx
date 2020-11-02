@@ -19,7 +19,7 @@ import {
 } from '@elastic/charts';
 import { xyChart, XYChart } from './expression';
 import { LensMultiTable } from '../types';
-import { KibanaDatatable, KibanaDatatableRow } from '../../../../../src/plugins/expressions/public';
+import { Datatable, DatatableRow } from '../../../../../src/plugins/expressions/public';
 import React from 'react';
 import { shallow } from 'enzyme';
 import {
@@ -46,7 +46,7 @@ const dateHistogramData: LensMultiTable = {
   type: 'lens_multitable',
   tables: {
     timeLayer: {
-      type: 'kibana_datatable',
+      type: 'datatable',
       rows: [
         {
           xAccessorId: 1585758120000,
@@ -104,48 +104,60 @@ const dateHistogramData: LensMultiTable = {
           id: 'xAccessorId',
           name: 'order_date per minute',
           meta: {
-            type: 'date_histogram',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {
-              field: 'order_date',
-              timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
-              useNormalizedEsInterval: true,
-              scaleMetricValues: false,
-              interval: '1m',
-              drop_partials: false,
-              min_doc_count: 0,
-              extended_bounds: {},
+            type: 'date',
+            field: 'order_date',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'date_histogram',
+              params: {
+                field: 'order_date',
+                timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
+                useNormalizedEsInterval: true,
+                scaleMetricValues: false,
+                interval: '1m',
+                drop_partials: false,
+                min_doc_count: 0,
+                extended_bounds: {},
+              },
             },
+            params: { id: 'date', params: { pattern: 'HH:mm' } },
           },
-          formatHint: { id: 'date', params: { pattern: 'HH:mm' } },
         },
         {
           id: 'splitAccessorId',
           name: 'Top values of category.keyword',
           meta: {
-            type: 'terms',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {
-              field: 'category.keyword',
-              orderBy: 'yAccessorId',
-              order: 'desc',
-              size: 3,
-              otherBucket: false,
-              otherBucketLabel: 'Other',
-              missingBucket: false,
-              missingBucketLabel: 'Missing',
+            type: 'string',
+            field: 'category.keyword',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'terms',
+              params: {
+                field: 'category.keyword',
+                orderBy: 'yAccessorId',
+                order: 'desc',
+                size: 3,
+                otherBucket: false,
+                otherBucketLabel: 'Other',
+                missingBucket: false,
+                missingBucketLabel: 'Missing',
+              },
             },
-          },
-          formatHint: {
-            id: 'terms',
             params: {
-              id: 'string',
-              otherBucketLabel: 'Other',
-              missingBucketLabel: 'Missing',
-              parsedUrl: {
-                origin: 'http://localhost:5601',
-                pathname: '/jiy/app/kibana',
-                basePath: '/jiy',
+              id: 'terms',
+              params: {
+                id: 'string',
+                otherBucketLabel: 'Other',
+                missingBucketLabel: 'Missing',
+                parsedUrl: {
+                  origin: 'http://localhost:5601',
+                  pathname: '/jiy/app/kibana',
+                  basePath: '/jiy',
+                },
               },
             },
           },
@@ -154,11 +166,15 @@ const dateHistogramData: LensMultiTable = {
           id: 'yAccessorId',
           name: 'Count of records',
           meta: {
-            type: 'count',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: 'number',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              params: {},
+            },
+            params: { id: 'number' },
           },
-          formatHint: { id: 'number' },
         },
       ],
     },
@@ -181,22 +197,30 @@ const dateHistogramLayer: LayerArgs = {
   accessors: ['yAccessorId'],
 };
 
-const createSampleDatatableWithRows = (rows: KibanaDatatableRow[]): KibanaDatatable => ({
-  type: 'kibana_datatable',
+const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable => ({
+  type: 'datatable',
   columns: [
     {
       id: 'a',
       name: 'a',
-      formatHint: { id: 'number', params: { pattern: '0,0.000' } },
+      meta: { type: 'number', params: { id: 'number', params: { pattern: '0,0.000' } } },
     },
-    { id: 'b', name: 'b', formatHint: { id: 'number', params: { pattern: '000,0' } } },
+    {
+      id: 'b',
+      name: 'b',
+      meta: { type: 'number', params: { id: 'number', params: { pattern: '000,0' } } },
+    },
     {
       id: 'c',
       name: 'c',
-      formatHint: { id: 'string' },
-      meta: { type: 'date-histogram', aggConfigParams: { interval: 'auto' } },
+      meta: {
+        type: 'date',
+        field: 'order_date',
+        sourceParams: { type: 'date-histogram', params: { interval: 'auto' } },
+        params: { id: 'string' },
+      },
     },
-    { id: 'd', name: 'ColD', formatHint: { id: 'string' } },
+    { id: 'd', name: 'ColD', meta: { type: 'string' } },
   ],
   rows,
 });
@@ -347,12 +371,12 @@ describe('xy_expression', () => {
       type: 'lens_multitable',
       tables: {
         first: {
-          type: 'kibana_datatable',
+          type: 'datatable',
           columns: [
-            { id: 'a', name: 'a' },
-            { id: 'b', name: 'b' },
-            { id: 'c', name: 'c' },
-            { id: 'd', name: 'd' },
+            { id: 'a', name: 'a', meta: { type: 'number' } },
+            { id: 'b', name: 'b', meta: { type: 'number' } },
+            { id: 'c', name: 'c', meta: { type: 'string' } },
+            { id: 'd', name: 'd', meta: { type: 'string' } },
           ],
           rows: [
             { a: 1, b: 2, c: 'I', d: 'Row 1' },
@@ -365,12 +389,12 @@ describe('xy_expression', () => {
       type: 'lens_multitable',
       tables: {
         first: {
-          type: 'kibana_datatable',
+          type: 'datatable',
           columns: [
-            { id: 'a', name: 'a' },
-            { id: 'b', name: 'b' },
-            { id: 'c', name: 'c' },
-            { id: 'd', name: 'd', formatHint: { id: 'custom' } },
+            { id: 'a', name: 'a', meta: { type: 'number' } },
+            { id: 'b', name: 'b', meta: { type: 'number' } },
+            { id: 'c', name: 'c', meta: { type: 'string' } },
+            { id: 'd', name: 'd', meta: { type: 'string', params: { id: 'custom' } } },
           ],
           rows: [
             { a: 1, b: 2, c: 'I', d: 'Row 1' },
@@ -542,12 +566,12 @@ describe('xy_expression', () => {
         );
 
         expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
-        Object {
-          "max": 1546491600000,
-          "min": 1546405200000,
-          "minInterval": undefined,
-        }
-      `);
+                  Object {
+                    "max": 1546491600000,
+                    "min": 1546405200000,
+                    "minInterval": undefined,
+                  }
+              `);
       });
       test('it generates correct xDomain for a layer with single value and layer with multiple value data (1-n)', () => {
         const data: LensMultiTable = {
@@ -625,12 +649,12 @@ describe('xy_expression', () => {
         );
 
         expect(component.find(Settings).prop('xDomain')).toMatchInlineSnapshot(`
-        Object {
-          "max": 1546491600000,
-          "min": 1546405200000,
-          "minInterval": undefined,
-        }
-      `);
+                  Object {
+                    "max": 1546491600000,
+                    "min": 1546405200000,
+                    "minInterval": undefined,
+                  }
+              `);
       });
     });
 
@@ -792,7 +816,7 @@ describe('xy_expression', () => {
         type: 'lens_multitable',
         tables: {
           numberLayer: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             rows: [
               {
                 xAccessorId: 5,
@@ -815,10 +839,12 @@ describe('xy_expression', () => {
               {
                 id: 'xAccessorId',
                 name: 'bytes',
+                meta: { type: 'number' },
               },
               {
                 id: 'yAccessorId',
                 name: 'Count of records',
+                meta: { type: 'number' },
               },
             ],
           },
@@ -1737,11 +1763,11 @@ describe('xy_expression', () => {
         type: 'lens_multitable',
         tables: {
           first: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'string' } },
             ],
             rows: [
               { a: undefined, b: 2, c: 'I', d: 'Row 1' },
@@ -1749,11 +1775,11 @@ describe('xy_expression', () => {
             ],
           },
           second: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'string' } },
             ],
             rows: [
               { a: undefined, b: undefined, c: undefined },
@@ -1831,11 +1857,11 @@ describe('xy_expression', () => {
         type: 'lens_multitable',
         tables: {
           first: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'number' } },
             ],
             rows: [
               { a: 0, b: 2, c: 5 },
@@ -1903,11 +1929,11 @@ describe('xy_expression', () => {
         type: 'lens_multitable',
         tables: {
           first: {
-            type: 'kibana_datatable',
+            type: 'datatable',
             columns: [
-              { id: 'a', name: 'a' },
-              { id: 'b', name: 'b' },
-              { id: 'c', name: 'c' },
+              { id: 'a', name: 'a', meta: { type: 'number' } },
+              { id: 'b', name: 'b', meta: { type: 'number' } },
+              { id: 'c', name: 'c', meta: { type: 'string' } },
             ],
             rows: [{ a: 1, b: 5, c: 'J' }],
           },

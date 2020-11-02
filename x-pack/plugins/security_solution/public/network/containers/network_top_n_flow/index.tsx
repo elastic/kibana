@@ -61,6 +61,7 @@ export const useNetworkTopNFlow = ({
   filterQuery,
   flowTarget,
   indexNames,
+  ip,
   skip,
   startDate,
   type,
@@ -84,7 +85,8 @@ export const useNetworkTopNFlow = ({
           factoryQueryType: NetworkQueries.topNFlow,
           filterQuery: createFilter(filterQuery),
           flowTarget,
-          id: ID,
+          id: `${ID}-${flowTarget}`,
+          ip,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
           timerange: {
@@ -199,7 +201,8 @@ export const useNetworkTopNFlow = ({
         factoryQueryType: NetworkQueries.topNFlow,
         filterQuery: createFilter(filterQuery),
         flowTarget,
-        id: ID,
+        id: `${ID}-${flowTarget}`,
+        ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',
@@ -213,7 +216,7 @@ export const useNetworkTopNFlow = ({
       }
       return prevRequest;
     });
-  }, [activePage, indexNames, endDate, filterQuery, limit, startDate, sort, skip, flowTarget]);
+  }, [activePage, endDate, filterQuery, indexNames, ip, limit, startDate, sort, skip, flowTarget]);
 
   useEffect(() => {
     networkTopNFlowSearch(networkTopNFlowRequest);

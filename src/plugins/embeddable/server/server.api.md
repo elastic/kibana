@@ -24,6 +24,8 @@ export interface EmbeddableRegistryDefinition<P extends EmbeddableInput = Embedd
 // @public (undocumented)
 export interface EmbeddableSetup {
     // (undocumented)
+    getAttributeService: any;
+    // (undocumented)
     registerEmbeddableFactory: (factory: EmbeddableRegistryDefinition) => void;
     // (undocumented)
     registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;

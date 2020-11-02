@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { EsErrorBody } from '../util/errors';
 import { ANALYSIS_CONFIG_TYPE } from '../constants/data_frame_analytics';
 
@@ -19,7 +19,9 @@ export type DataFrameAnalyticsId = string;
 export interface OutlierAnalysis {
   [key: string]: {};
 
-  outlier_detection: {};
+  outlier_detection: {
+    compute_feature_influence?: boolean;
+  };
 }
 
 interface Regression {

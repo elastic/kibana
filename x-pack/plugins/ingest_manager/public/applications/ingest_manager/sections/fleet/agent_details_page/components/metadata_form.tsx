@@ -106,10 +106,7 @@ export const MetadataForm: React.FunctionComponent<{ agent: Agent }> = ({ agent 
 
   const button = (
     <EuiButtonEmpty onClick={() => setOpen(true)} color={'text'}>
-      <FormattedMessage
-        id="xpack.ingestManager.metadataForm.addButton"
-        defaultMessage="+ Add metadata"
-      />
+      <FormattedMessage id="xpack.fleet.metadataForm.addButton" defaultMessage="+ Add metadata" />
     </EuiButtonEmpty>
   );
   return (
@@ -128,7 +125,7 @@ export const MetadataForm: React.FunctionComponent<{ agent: Agent }> = ({ agent 
               <EuiFlexItem>
                 <EuiFormRow
                   id="fleet-details-metadata-form"
-                  label={i18n.translate('xpack.ingestManager.metadataForm.keyLabel', {
+                  label={i18n.translate('xpack.fleet.metadataForm.keyLabel', {
                     defaultMessage: 'Key',
                   })}
                 >
@@ -137,7 +134,7 @@ export const MetadataForm: React.FunctionComponent<{ agent: Agent }> = ({ agent 
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFormRow
-                  label={i18n.translate('xpack.ingestManager.metadataForm.valueLabel', {
+                  label={i18n.translate('xpack.fleet.metadataForm.valueLabel', {
                     defaultMessage: 'Value',
                   })}
                 >
@@ -148,7 +145,7 @@ export const MetadataForm: React.FunctionComponent<{ agent: Agent }> = ({ agent 
                 <EuiFormRow hasEmptyLabelSpace>
                   <EuiButton isLoading={form.state.isLoading} type={'submit'}>
                     <FormattedMessage
-                      id="xpack.ingestManager.metadataForm.submitButtonText"
+                      id="xpack.fleet.metadataForm.submitButtonText"
                       defaultMessage="Add"
                     />
                   </EuiButton>

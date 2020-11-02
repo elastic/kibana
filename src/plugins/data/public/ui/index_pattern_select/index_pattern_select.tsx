@@ -27,12 +27,19 @@ import { SavedObjectsClientContract, SimpleSavedObject } from 'src/core/public';
 import { getTitle } from '../../../common/index_patterns/lib';
 
 export type IndexPatternSelectProps = Required<
-  Omit<EuiComboBoxProps<any>, 'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions'>,
-  'onChange' | 'placeholder'
+  Omit<
+    EuiComboBoxProps<any>,
+    'isLoading' | 'onSearchChange' | 'options' | 'selectedOptions' | 'onChange'
+  >,
+  'placeholder'
 > & {
+  onChange: (indexPatternId?: string) => void;
   indexPatternId: string;
   fieldTypes?: string[];
   onNoIndexPatterns?: () => void;
+};
+
+export type IndexPatternSelectInternalProps = IndexPatternSelectProps & {
   savedObjectsClient: SavedObjectsClientContract;
 };
 
@@ -60,11 +67,11 @@ const getIndexPatterns = async (
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default class IndexPatternSelect extends Component<IndexPatternSelectProps> {
+export default class IndexPatternSelect extends Component<IndexPatternSelectInternalProps> {
   private isMounted: boolean = false;
   state: IndexPatternSelectState;
 
-  constructor(props: IndexPatternSelectProps) {
+  constructor(props: IndexPatternSelectInternalProps) {
     super(props);
 
     this.state = {
@@ -86,7 +93,7 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
     this.fetchSelectedIndexPattern(this.props.indexPatternId);
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps: IndexPatternSelectProps) {
+  UNSAFE_componentWillReceiveProps(nextProps: IndexPatternSelectInternalProps) {
     if (nextProps.indexPatternId !== this.props.indexPatternId) {
       this.fetchSelectedIndexPattern(nextProps.indexPatternId);
     }
