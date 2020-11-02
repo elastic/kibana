@@ -7,7 +7,6 @@
 import Boom from '@hapi/boom';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import { PartitionFieldsType } from '../../../common/types/anomalies';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { CriteriaField } from './results_service';
 import { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
@@ -220,10 +219,13 @@ export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
       },
     };
 
-    const { body } = await mlClient.anomalySearch({
-      size: 0,
-      body: requestBody,
-    }, [jobId]);
+    const { body } = await mlClient.anomalySearch(
+      {
+        size: 0,
+        body: requestBody,
+      },
+      [jobId]
+    );
 
     return PARTITION_FIELDS.reduce((acc, key) => {
       return {
