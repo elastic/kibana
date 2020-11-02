@@ -1,9 +1,9 @@
 $badgeSize: $euiSize * 5.5;
 
-@import 'highlight_details_flyout/index';
-@import 'license_warning_notice/index';
-@import 'percentage_badge/index';
-@import 'profile_query_editor/index';
+@import 'highlight_details_flyout/highlight_details_flyout';
+@import 'license_warning_notice/license_warning_notice';
+@import 'percentage_badge/percentage_badge';
+@import 'profile_query_editor/profile_query_editor';
 @import 'profile_tree/index';
 
 .prfDevTool__main__emptyTreePlaceholder {
