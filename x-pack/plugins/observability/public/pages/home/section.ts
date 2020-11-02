@@ -24,7 +24,7 @@ export const appsSection: ISection[] = [
     title: i18n.translate('xpack.observability.section.apps.apm.title', {
       defaultMessage: 'APM',
     }),
-    icon: 'logoAPM',
+    icon: 'logoObservability',
     description: i18n.translate('xpack.observability.section.apps.apm.description', {
       defaultMessage:
         'Trace transactions through a distributed architecture and map your services’ interactions to easily spot performance bottlenecks.',
