@@ -99,6 +99,7 @@ export function CalculationAgg(props) {
             onChange={handleChange}
             name="variables"
             model={model}
+            exclude={['top_hit']}
           />
         </EuiFlexItem>
 
