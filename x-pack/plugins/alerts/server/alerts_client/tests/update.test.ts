@@ -38,7 +38,6 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   namespace: 'default',
   getUserName: jest.fn(),
   createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: encryptedSavedObjects,
   getActionsClient: jest.fn(),
@@ -732,7 +731,6 @@ describe('update()', () => {
   });
 
   it('swallows error when invalidate API key throws', async () => {
-    alertsClientParams.invalidateAPIKey.mockRejectedValueOnce(new Error('Fail'));
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
         {
@@ -965,8 +963,6 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-    expect(alertsClientParams.invalidateAPIKey).not.toHaveBeenCalledWith({ id: '123' });
-    expect(alertsClientParams.invalidateAPIKey).toHaveBeenCalledWith({ id: '234' });
   });
 
   describe('updating an alert schedule', () => {

@@ -47,6 +47,7 @@ import { IEvent } from '../../../event_log/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
+import { scheduleAlertsInvalidateApiKeysTask } from '../invalidate_pending_api_keys/task';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -71,7 +72,6 @@ export interface ConstructorOptions {
   namespace?: string;
   getUserName: () => Promise<string | null>;
   createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
-  invalidateAPIKey: (params: InvalidateAPIKeyParams) => Promise<InvalidateAPIKeyResult>;
   getActionsClient: () => Promise<ActionsClient>;
   getEventLogClient: () => Promise<IEventLogClient>;
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -156,9 +156,6 @@ export class AlertsClient {
   private readonly authorization: AlertsAuthorization;
   private readonly alertTypeRegistry: AlertTypeRegistry;
   private readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
-  private readonly invalidateAPIKey: (
-    params: InvalidateAPIKeyParams
-  ) => Promise<InvalidateAPIKeyResult>;
   private readonly getActionsClient: () => Promise<ActionsClient>;
   private readonly actionsAuthorization: ActionsAuthorization;
   private readonly getEventLogClient: () => Promise<IEventLogClient>;
@@ -175,7 +172,6 @@ export class AlertsClient {
     namespace,
     getUserName,
     createAPIKey,
-    invalidateAPIKey,
     encryptedSavedObjectsClient,
     getActionsClient,
     actionsAuthorization,
@@ -191,7 +187,6 @@ export class AlertsClient {
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.authorization = authorization;
     this.createAPIKey = createAPIKey;
-    this.invalidateAPIKey = invalidateAPIKey;
     this.encryptedSavedObjectsClient = encryptedSavedObjectsClient;
     this.getActionsClient = getActionsClient;
     this.actionsAuthorization = actionsAuthorization;
@@ -622,19 +617,16 @@ export class AlertsClient {
     }
   }
 
-  private async invalidateApiKey({ apiKey }: { apiKey: string | null }): Promise<void> {
+  public async invalidateApiKey({ apiKey }: { apiKey: string | null }): Promise<void> {
     if (!apiKey) {
       return;
     }
 
     try {
       const apiKeyId = Buffer.from(apiKey, 'base64').toString().split(':')[0];
-      const response = await this.invalidateAPIKey({ id: apiKeyId });
-      if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-        this.logger.error(`Failed to invalidate API Key [id="${apiKeyId}"]`);
-      }
+      await scheduleAlertsInvalidateApiKeysTask(this.logger, this.taskManager, apiKeyId);
     } catch (e) {
-      this.logger.error(`Failed to invalidate API Key: ${e.message}`);
+      this.logger.error(`Failed to schedule invalidate API Key: ${e.message}`);
     }
   }
 

@@ -61,6 +61,7 @@ import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
+import { initializeAlertsInvalidateApiKeys } from './invalidate_pending_api_keys/task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -184,6 +185,8 @@ export class AlertingPlugin {
         registerAlertsUsageCollector(usageCollection, startPlugins.taskManager);
       });
     }
+
+    initializeAlertsInvalidateApiKeys(this.logger, plugins.taskManager, this.security);
 
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
 

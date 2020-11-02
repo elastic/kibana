@@ -129,22 +129,6 @@ export class AlertsClientFactory {
           result: createAPIKeyResult,
         };
       },
-      async invalidateAPIKey(params: InvalidateAPIKeyParams) {
-        if (!securityPluginSetup) {
-          return { apiKeysEnabled: false };
-        }
-        const invalidateAPIKeyResult = await securityPluginSetup.authc.invalidateAPIKeyAsInternalUser(
-          params
-        );
-        // Null when Elasticsearch security is disabled
-        if (!invalidateAPIKeyResult) {
-          return { apiKeysEnabled: false };
-        }
-        return {
-          apiKeysEnabled: true,
-          result: invalidateAPIKeyResult,
-        };
-      },
       async getActionsClient() {
         return actions.getActionsClientWithRequest(request);
       },
