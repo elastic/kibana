@@ -7,9 +7,13 @@ import { NewOutput } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
+export const outputType = {
+  Elasticsearch: 'elasticsearch',
+} as const;
+
 export const DEFAULT_OUTPUT: NewOutput = {
   name: 'default',
   is_default: true,
-  type: 'elasticsearch',
+  type: outputType.Elasticsearch,
   hosts: [''],
 };

@@ -11,6 +11,7 @@ import {
 } from './state_new_actions';
 import { getNewActionsSince } from '../actions';
 import { Agent, AgentAction, AgentPolicyAction } from '../../../types';
+import { outputType } from '../../../../common/constants';
 
 jest.mock('../../app_context', () => ({
   appContextService: {
@@ -128,7 +129,7 @@ describe('test agent checkin new action services', () => {
           id: 'policy1',
           outputs: {
             default: {
-              type: 'elasticsearch',
+              type: outputType.Elasticsearch,
               hosts: [],
               ca_sha256: undefined,
               api_key: undefined,

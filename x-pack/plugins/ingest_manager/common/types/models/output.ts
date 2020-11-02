@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const outputTypes = ['elasticsearch'] as const;
-export type OutputType = typeof outputTypes[number];
+import { outputType } from '../../constants';
+import type { ValueOf } from '../index';
+
+export type OutputType = typeof outputType;
 
 export interface NewOutput {
   is_default: boolean;
   name: string;
-  type: OutputType;
+  type: ValueOf<OutputType>;
   hosts?: string[];
   ca_sha256?: string;
   api_key?: string;
