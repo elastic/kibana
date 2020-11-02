@@ -17,16 +17,25 @@
  * under the License.
  */
 
-export const DashboardConstants = {
-  LANDING_PAGE_PATH: '/list',
-  CREATE_NEW_DASHBOARD_URL: '/create',
-  ADD_EMBEDDABLE_ID: 'addEmbeddableId',
-  ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
-  DASHBOARDS_ID: 'dashboards',
-  DASHBOARD_ID: 'dashboard',
-  SEARCH_SESSION_ID: 'searchSessionId',
-};
+import { getQueryParams } from './get_query_params';
+import { Location } from 'history';
 
-export function createDashboardEditUrl(id: string) {
-  return `/view/${id}`;
-}
+describe('getQueryParams', () => {
+  it('should getQueryParams', () => {
+    const location: Location<any> = {
+      pathname: '/dashboard/c3a76790-3134-11ea-b024-83a7b4783735',
+      search: "?_a=(description:'')&_b=3",
+      state: null,
+      hash: '',
+    };
+
+    const query = getQueryParams(location);
+
+    expect(query).toMatchInlineSnapshot(`
+      Object {
+        "_a": "(description:'')",
+        "_b": "3",
+      }
+    `);
+  });
+});
