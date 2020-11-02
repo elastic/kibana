@@ -17,6 +17,8 @@ import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
 import { AggregationResultOf } from '../../../apm/typings/elasticsearch/aggregations';
 import { times } from 'lodash';
 import { taskStoreMock } from '../task_store.mock';
+import { of, Subject } from 'rxjs';
+import { sleep } from '../test_utils';
 
 type MockESResult = ESSearchResponse<
   ConcreteTaskInstance,
@@ -75,6 +77,7 @@ describe('Workload Statistics Aggregator', () => {
 
     const workloadAggregator = createWorkloadAggregator(
       taskStore,
+      of(true),
       10,
       3000,
       loggingSystemMock.create().get()
@@ -231,6 +234,7 @@ describe('Workload Statistics Aggregator', () => {
 
     const workloadAggregator = createWorkloadAggregator(
       taskStore,
+      of(true),
       10,
       3000,
       loggingSystemMock.create().get()
@@ -252,12 +256,51 @@ describe('Workload Statistics Aggregator', () => {
     });
   });
 
+  test('skips summary of the workload when services are unavailable', async () => {
+    const taskStore = taskStoreMock.create({});
+    taskStore.aggregate.mockResolvedValue(mockAggregatedResult());
+
+    const availability$ = new Subject<boolean>();
+
+    const workloadAggregator = createWorkloadAggregator(
+      taskStore,
+      availability$,
+      10,
+      3000,
+      loggingSystemMock.create().get()
+    );
+
+    return new Promise(async (resolve) => {
+      workloadAggregator.pipe(first()).subscribe((result) => {
+        expect(result.key).toEqual('workload');
+        expect(result.value).toMatchObject({
+          count: 4,
+          task_types: {
+            actions_telemetry: { count: 2, status: { idle: 2 } },
+            alerting_telemetry: { count: 1, status: { idle: 1 } },
+            session_cleanup: { count: 1, status: { idle: 1 } },
+          },
+        });
+        resolve();
+      });
+
+      availability$.next(false);
+
+      await sleep(10);
+      expect(taskStore.aggregate).not.toHaveBeenCalled();
+      await sleep(10);
+      expect(taskStore.aggregate).not.toHaveBeenCalled();
+      availability$.next(true);
+    });
+  });
+
   test('returns a count of the overdue workload', async () => {
     const taskStore = taskStoreMock.create({});
     taskStore.aggregate.mockResolvedValue(mockAggregatedResult());
 
     const workloadAggregator = createWorkloadAggregator(
       taskStore,
+      of(true),
       10,
       3000,
       loggingSystemMock.create().get()
@@ -280,6 +323,7 @@ describe('Workload Statistics Aggregator', () => {
 
     const workloadAggregator = createWorkloadAggregator(
       taskStore,
+      of(true),
       10,
       3000,
       loggingSystemMock.create().get()
@@ -307,6 +351,7 @@ describe('Workload Statistics Aggregator', () => {
 
     const workloadAggregator = createWorkloadAggregator(
       taskStore,
+      of(true),
       60 * 1000,
       3000,
       loggingSystemMock.create().get()
@@ -344,6 +389,7 @@ describe('Workload Statistics Aggregator', () => {
 
     const workloadAggregator = createWorkloadAggregator(
       taskStore,
+      of(true),
       15 * 60 * 1000,
       3000,
       loggingSystemMock.create().get()
@@ -392,7 +438,7 @@ describe('Workload Statistics Aggregator', () => {
         })
       );
     const logger = loggingSystemMock.create().get();
-    const workloadAggregator = createWorkloadAggregator(taskStore, 10, 3000, logger);
+    const workloadAggregator = createWorkloadAggregator(taskStore, of(true), 10, 3000, logger);
 
     return new Promise((resolve, reject) => {
       workloadAggregator.pipe(take(2), bufferCount(2)).subscribe((results) => {
