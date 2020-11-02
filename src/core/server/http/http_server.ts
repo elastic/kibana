@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { Server } from 'hapi';
-import HapiStaticFiles from 'inert';
+import { Server } from '@hapi/hapi';
+import HapiStaticFiles from '@hapi/inert';
 import url from 'url';
 import uuid from 'uuid';
 

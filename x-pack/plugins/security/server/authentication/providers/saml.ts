@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../common/model';
 import { isInternalURL } from '../../../common/is_internal_url';
