@@ -103,7 +103,7 @@ describe('GET /spaces/space', () => {
           } else {
             expect(response.status).toEqual(400);
             expect(response.payload).toEqual(
-              new Error(`'purpose' cannot be supplied with 'include_authorized_purposes'`)
+              new Error(`'purpose' cannot be supplied with 'includeAuthorizedPurposes'`)
             );
           }
         });
