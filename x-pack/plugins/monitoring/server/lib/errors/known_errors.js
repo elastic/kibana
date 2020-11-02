@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify } from 'boom';
+import { boomify } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { MonitoringLicenseError } from './custom_errors';
 
