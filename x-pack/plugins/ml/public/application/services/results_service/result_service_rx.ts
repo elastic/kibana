@@ -30,13 +30,13 @@ export interface MetricData extends ResultResponse {
 
 export interface FieldDefinition {
   /**
-   * Partition field name.
+   * Field name.
    */
   name: string | number;
   /**
-   * Partitions field distinct values.
+   * Field distinct values.
    */
-  values: any[];
+  values: Array<{ value: any; maxRecordScore?: number }>;
 }
 
 type FieldTypes = 'partition_field' | 'over_field' | 'by_field';

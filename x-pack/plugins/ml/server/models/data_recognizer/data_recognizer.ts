@@ -5,7 +5,7 @@
  */
 
 import fs from 'fs';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import numeral from '@elastic/numeral';
 import { KibanaRequest, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';

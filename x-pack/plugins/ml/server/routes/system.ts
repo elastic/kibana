@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';

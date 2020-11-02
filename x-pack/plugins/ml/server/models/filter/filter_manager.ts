@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import type { MlClient } from '../../lib/ml_client';
 
 import { DetectorRule, DetectorRuleScope } from '../../../common/types/detector_rules';

@@ -71,8 +71,15 @@ function getMaxAnomalyScore(mlClient: MlClient, payload: any) {
 
 function getPartitionFieldsValues(mlClient: MlClient, payload: any) {
   const rs = resultsServiceProvider(mlClient);
-  const { jobId, searchTerm, criteriaFields, earliestMs, latestMs } = payload;
-  return rs.getPartitionFieldsValues(jobId, searchTerm, criteriaFields, earliestMs, latestMs);
+  const { jobId, searchTerm, criteriaFields, earliestMs, latestMs, fieldsConfig } = payload;
+  return rs.getPartitionFieldsValues(
+    jobId,
+    searchTerm,
+    criteriaFields,
+    earliestMs,
+    latestMs,
+    fieldsConfig
+  );
 }
 
 function getCategorizerStats(mlClient: MlClient, params: any, query: any) {
