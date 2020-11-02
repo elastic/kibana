@@ -40,6 +40,7 @@ interface Props {
    * Formatter for legend and tooltip values
    */
   yTickFormat?: (y: number) => string;
+  showAnnotations?: boolean;
 }
 
 const XY_HEIGHT = unit * 16;
@@ -51,6 +52,7 @@ export function LineChart({
   timeseries,
   yLabelFormat,
   yTickFormat,
+  showAnnotations = true,
 }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
@@ -121,7 +123,7 @@ export function LineChart({
           showGridLines
         />
 
-        <Annotations />
+        {showAnnotations && <Annotations />}
 
         {timeseries.map((serie) => {
           return (

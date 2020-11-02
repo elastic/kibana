@@ -22,7 +22,6 @@ import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
-import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
@@ -139,17 +138,15 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
               <EuiSpacer size="s" />
             </>
           )}
-          <ChartsSyncContextProvider>
-            <TransactionCharts
-              isLoading={
-                (transactionChartsStatus === FETCH_STATUS.LOADING ||
-                  transactionChartsStatus === FETCH_STATUS.PENDING) &&
-                !transactionListData.items
-              }
-              charts={transactionCharts}
-              urlParams={urlParams}
-            />
-          </ChartsSyncContextProvider>
+          <TransactionCharts
+            isLoading={
+              (transactionChartsStatus === FETCH_STATUS.LOADING ||
+                transactionChartsStatus === FETCH_STATUS.PENDING) &&
+              !transactionListData.items
+            }
+            charts={transactionCharts}
+            urlParams={urlParams}
+          />
 
           <EuiSpacer size="s" />
 

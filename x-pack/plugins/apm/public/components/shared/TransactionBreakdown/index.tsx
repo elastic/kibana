@@ -6,11 +6,12 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FETCH_STATUS } from '../../../hooks/useFetcher';
 import { useTransactionBreakdown } from '../../../hooks/useTransactionBreakdown';
 import { TransactionBreakdownGraph } from './TransactionBreakdownGraph';
 
 function TransactionBreakdown() {
-  const { data } = useTransactionBreakdown();
+  const { data, status } = useTransactionBreakdown();
   const { timeseries } = data;
 
   return (
@@ -26,7 +27,14 @@ function TransactionBreakdown() {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <TransactionBreakdownGraph timeseries={timeseries} />
+          <TransactionBreakdownGraph
+            timeseries={timeseries}
+            isLoading={
+              (status === FETCH_STATUS.LOADING ||
+                status === FETCH_STATUS.PENDING) &&
+              !data.timeseries
+            }
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

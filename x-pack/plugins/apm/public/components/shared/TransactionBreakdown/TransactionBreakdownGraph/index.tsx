@@ -23,15 +23,20 @@ import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useChartsSync as useChartsSync2 } from '../../../../hooks/use_charts_sync';
 import { unit } from '../../../../style/variables';
 import { Annotations } from '../../charts/annotations';
+import { ChartContainer } from '../../charts/chart_container';
 import { onBrushEnd } from '../../charts/helper/helper';
 
 const XY_HEIGHT = unit * 16;
 
 interface Props {
-  timeseries: TimeSeries[];
+  isLoading: boolean;
+  timeseries?: TimeSeries[];
 }
 
-export function TransactionBreakdownGraph({ timeseries }: Props) {
+export function TransactionBreakdownGraph({
+  isLoading,
+  timeseries = [],
+}: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
   const { event, setEvent } = useChartsSync2();
@@ -50,7 +55,7 @@ export function TransactionBreakdownGraph({ timeseries }: Props) {
   const xFormatter = niceTimeFormatter([min, max]);
 
   return (
-    <div style={{ height: XY_HEIGHT }}>
+    <ChartContainer height={XY_HEIGHT} isLoading={isLoading}>
       <Chart ref={chartRef} id="timeSpentBySpan">
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
@@ -99,6 +104,6 @@ export function TransactionBreakdownGraph({ timeseries }: Props) {
           );
         })}
       </Chart>
-    </div>
+    </ChartContainer>
   );
 }

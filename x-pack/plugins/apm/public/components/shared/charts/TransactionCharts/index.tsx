@@ -27,7 +27,7 @@ import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { ErroneousTransactionsRateChart } from '../erroneous_transactions_rate_chart/legacy';
+import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
 import { LineChart } from '../line_chart';
 import { getResponseTimeTickFormatter } from './helper';
@@ -113,7 +113,7 @@ export function TransactionCharts({
 
         <EuiFlexGrid columns={2} gutterSize="s">
           <EuiFlexItem>
-            <ErroneousTransactionsRateChart />
+            <TransactionErrorRateChart />
           </EuiFlexItem>
           <EuiFlexItem>
             <TransactionBreakdown />
