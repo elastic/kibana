@@ -1,7 +1,5 @@
 include::introduction.asciidoc[]
 
-include::whats-new.asciidoc[]
-
 include::{kib-repo-dir}/getting-started/quick-start-guide.asciidoc[]
 
 include::setup.asciidoc[]
