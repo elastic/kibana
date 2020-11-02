@@ -379,20 +379,25 @@ export function getIndexPatternDatasource({
 
             if (originalLayersList.length === 1) {
               return {
-                shortMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureShort', {
-                  defaultMessage: 'Invalid {fields, plural, one {reference} other {references}}',
-                  values: {
-                    layer: layerIndex,
-                    fields: fieldsWithBrokenReferences.length,
-                  },
-                }),
-                longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureLong', {
-                  defaultMessage: `{fieldsLength, plural, one {Field} other {Fields}} "{fields}" {fieldsLength, plural, one {has} other {have}} invalid reference`,
-                  values: {
-                    fields: fieldsWithBrokenReferences.join('", "'),
-                    fieldsLength: fieldsWithBrokenReferences.length,
-                  },
-                }),
+                shortMessage: i18n.translate(
+                  'xpack.lens.indexPattern.dataReferenceFailureShortSingleLayer',
+                  {
+                    defaultMessage: 'Invalid {fields, plural, one {reference} other {references}}',
+                    values: {
+                      fields: fieldsWithBrokenReferences.length,
+                    },
+                  }
+                ),
+                longMessage: i18n.translate(
+                  'xpack.lens.indexPattern.dataReferenceFailureLongSingleLayer',
+                  {
+                    defaultMessage: `{fieldsLength, plural, one {Field} other {Fields}} "{fields}" {fieldsLength, plural, one {has} other {have}} invalid reference`,
+                    values: {
+                      fields: fieldsWithBrokenReferences.join('", "'),
+                      fieldsLength: fieldsWithBrokenReferences.length,
+                    },
+                  }
+                ),
               };
             }
             return {
@@ -402,7 +407,6 @@ export function getIndexPatternDatasource({
                 values: {
                   layer: layerIndex,
                   fieldsLength: fieldsWithBrokenReferences.length,
-                  hasMultipleLayers: originalLayersList.length,
                 },
               }),
               longMessage: i18n.translate('xpack.lens.indexPattern.dataReferenceFailureLong', {
