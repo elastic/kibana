@@ -31,7 +31,7 @@ export function ServiceAlertTrigger(props: Props) {
     ...defaults,
     serviceName,
   };
-  params.serviceName = 'wat';
+
   useEffect(() => {
     // we only want to run this on mount to set default values
 
