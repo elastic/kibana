@@ -3,14 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('data visualizer', function () {
-    this.tags(['skipFirefox']);
-
-    loadTestFile(require.resolve('./index_data_visualizer'));
-    loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));
-    loadTestFile(require.resolve('./file_data_visualizer'));
+    // The data visualizer APIs should work the same as with a trial license
+    loadTestFile(require.resolve('../../../../api_integration/apis/ml/data_visualizer'));
   });
 }
