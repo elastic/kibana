@@ -791,7 +791,7 @@ const migrateVislibAreaLineBarTypes: SavedObjectMigrationFn<any, any> = (doc) =>
       visState &&
       [ChartType.Area, ChartType.Line, ChartType.Histogram].includes(visState?.params?.type)
     ) {
-      const isHorizontalBar = visState.type !== 'horizontal_bar';
+      const isHorizontalBar = visState.type === 'horizontal_bar';
       return {
         ...doc,
         attributes: {
