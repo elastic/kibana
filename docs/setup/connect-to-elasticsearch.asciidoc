@@ -1,108 +1,73 @@
 [[connect-to-elasticsearch]]
-== Add data to {kib}
+== Add data
+++++
+<titleabbrev>Add data</titleabbrev>
+++++
 
-To start working with your data in {kib}, you can:
-
-* Upload a CSV, JSON, or log file with the File Data Visualizer.
-
-* Upload geospatial data with the GeoJSON Upload feature.
-
-* Index logs, metrics, events, or application data by setting up a Beats module.
-
-* Connect {kib} with existing {es} indices.
-
-If you're not ready to use your own data, you can add a <<get-started, sample data set>>
-to see all that you can do in {kib}.
-
-[float]
-[[upload-data-kibana]]
-=== Upload a CSV, JSON, or log file
-
-experimental[]
-
-To visualize data in a CSV, JSON, or log file, you can upload it using the File 
-Data Visualizer. On the home page, click *Upload a file*, and 
-then drag your file onto the *File Data Visualizer*. Alternatively, you can open 
-it by navigating to *Machine Learning* from the side navigation and selecting 
-
-*Data Visualizer*.
+To start working with your data in {kib}, use one of the many ingest options,
+available from the home page.
+You can collect data from an app or service
+or upload a file that contains your data.  If you're not ready to use your own data,
+add a sample data set and give {kib} a test drive.
 
 [role="screenshot"]
-image::images/ingest-data.png[File Data Visualizer on the home page]
-
-You can upload a file up to 100 MB. This value is configurable up to 1 GB in
-<<kibana-ml-settings, Advanced Settings>>.
-
-[role="screenshot"]
-image::images/add-data-fv.png[File Data Visualizer]
-
-The File Data Visualizer uses the {ref}/ml-find-file-structure.html[find_file_structure API] to analyze
-the uploaded file and to suggest ingest pipelines and mappings for your data.
-
-NOTE: This feature is not intended for use as part of a
-repeated production process, but rather for the initial exploration of your data.
-
-[float]
-[[upload-geoipdata-kibana]]
-=== Upload geospatial data
-
-To visualize geospatial data in a point or shape file, you can upload it using the <<import-geospatial-data, GeoJSON Upload>>
-feature in Maps, and then use that data as a layer in a map.
-The data is also available for use in the broader Kibana ecosystem, for example,
-in visualizations and Canvas workpads.
-With GeoJSON Upload, you can upload a file up to 50 MB.
+image::images/add-data-home.png[Built-in options for adding data to Kibana:  Add data, Add Elastic Agent, Upload a file]
 
 [float]
 [[add-data-tutorial-kibana]]
-===  Index metrics, log, security, and application data
+===  Add data
 
-The built-in data tutorials can help you quickly get up and running with
-metrics data, log analytics, security events, and application data.
-These tutorials walk you through installing and configuring a
-Beats data shipper to periodically collect and send data to {es}.
-You can then use the pre-built dashboards to explore and analyze the data.
-
-You access the tutorials from the home page.
-If a tutorial doesn’t exist for your data, go to the {beats-ref}/beats-reference.html[Beats overview]
-to learn about other data shippers in the Beats family.
+Want to ingest logs, metrics, security, or application data?
+Install and configure a Beats data shipper or other module to periodically collect the data
+and send it to {es}. You can then use the pre-built dashboards to explore and analyze the data.
 
 [role="screenshot"]
 image::images/add-data-tutorials.png[Add Data tutorials]
 
+[discrete]
+=== Add Elastic Agent
 
-[float]
-[[connect-to-es]]
-=== Connect with {es} indices
+beta[] *Elastic Agent* is a sneak peek at the next generation of
+data integration modules, offering
+a centralized way to set up your integrations.
+With *Fleet*, you can add
+and manage integrations for popular services and platforms, providing
+an easy way to collect your data. The integrations
+ship with dashboards and visualizations,
+so you can quickly get insights into your data.
 
-To visualize data in existing {es} indices, you must
-create an index pattern that matches the names of the indices that you want to explore.
-When you add data with the File Data Visualizer, GeoJSON Upload feature,
-or built-in tutorial, an index pattern is created for you.
+To get started, refer to
+{ingest-guide}/ingest-management-getting-started.html[Quick start: Get logs and metrics into the Elastic Stack].
 
-. Open the main menu, then click *Stack Management > Index Patterns*.
+[role="screenshot"]
+image::images/add-data-fleet.png[Add data using Fleet]
 
-. Click *Create index pattern*.
+[discrete]
+[[upload-data-kibana]]
+=== Upload a file
 
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices.
-+
-For example, an index pattern can point to your Apache data from yesterday,
-`filebeat-apache-4-3-2022`, or any index that matches the pattern, `filebeat-*`.
-Using a wildcard is the more popular approach.
+experimental[] If your data is in a CSV, JSON, or log file, you can upload it using the File
+Data Visualizer. You can upload a file up to 100 MB. This value is configurable up to 1 GB in
+<<kibana-ml-settings, Advanced Settings>>. To upload a file with geospatial data,
+refer to <<import-geospatial-data, Import geospatial data>>.
+
+[role="screenshot"]
+image::images/add-data-fv.png[File Data Visualizer]
 
 
-. Click *Next Step*, and then select the index field that contains the timestamp you want to use to perform time-based
-comparisons.
-+
-Kibana reads the index mapping and lists all fields that contain a timestamp. If your
-index doesn't have time-based data, choose *I don't want to use the time filter*.
-+
-You must select a time field to use global time filters on your dashboards.
 
-. Click *Create index pattern*.
-+
-{kib} is now configured to access your {es} indices.
-You’ll see a list of fields configured for the matching index.
-You can designate your index pattern as the default by clicking the star icon on this page.
-+
-When searching in *Discover* and creating visualizations, you choose a pattern
-from the index pattern menu to specify the {es} indices that contain the data you want to explore.
+NOTE: This feature is not intended for use as part of a
+repeated production process, but rather for the initial exploration of your data.
+
+
+[discrete]
+=== Additional options for loading your data
+
+If the {kib} ingest options don't work for you, you can index your
+data into Elasticsearch with {ref}/getting-started-index.html[REST APIs]
+or https://www.elastic.co/guide/en/elasticsearch/client/index.html[client libraries].
+After you add your data, you're required to create an <<index-patterns,index pattern>> to tell
+{kib} where to find the data.
+
+* To add data for Elastic Observability, refer to {observability-guide}/add-observability-data.html[Send data to Elasticsearch].
+* To add data for Elastic Security, refer to https://www.elastic.co/guide/en/security/current/ingest-data.html[Ingest data to Elastic Security].
