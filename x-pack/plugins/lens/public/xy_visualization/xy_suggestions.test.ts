@@ -518,6 +518,22 @@ describe('xy_suggestions', () => {
     expect(suggestion.hide).toBeTruthy();
   });
 
+  test('respects requested sub visualization type if set', () => {
+    const [suggestion, ...rest] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+        layerId: 'first',
+        changeType: 'reduced',
+      },
+      keptLayerIds: [],
+      subVisualizationId: 'area',
+    });
+
+    expect(rest).toHaveLength(0);
+    expect(suggestion.state.preferredSeriesType).toBe('area');
+  });
+
   test('keeps existing seriesType for initial tables', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },

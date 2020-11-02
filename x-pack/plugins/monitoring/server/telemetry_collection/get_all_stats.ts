@@ -28,7 +28,7 @@ export interface CustomContext {
  */
 export const getAllStats: StatsGetter<CustomContext> = async (
   clustersDetails,
-  { callCluster, start, end, esClient },
+  { callCluster, start, end, esClient, soClient },
   { maxBucketSize }
 ) => {
   const clusterUuids = clustersDetails.map((clusterDetails) => clusterDetails.clusterUuid);

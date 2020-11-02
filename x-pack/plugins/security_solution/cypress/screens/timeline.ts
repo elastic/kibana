@@ -58,6 +58,9 @@ export const NOTES_COUNT = '[data-test-subj="timeline-notes-count"]';
 
 export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
 
+export const OPEN_TIMELINE_TEMPLATE_ICON =
+  '[data-test-subj="open-timeline-modal-body-filter-template"]';
+
 export const PIN_EVENT = '[data-test-subj="pin"]';
 
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
@@ -97,6 +100,8 @@ export const TIMELINE_FILTER = (filter: TimelineFilter) => {
 };
 
 export const TIMELINE_FILTER_FIELD = '[data-test-subj="filterFieldSuggestionList"]';
+
+export const TIMELINE_TITLE_BY_ID = (id: string) => `[data-test-subj="title-${id}"]`;
 
 export const TIMELINE_FILTER_OPERATOR = '[data-test-subj="filterOperatorList"]';
 

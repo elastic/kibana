@@ -20,6 +20,7 @@ import {
   AutonomousSystemItem,
 } from '../../../../../../common/search_strategy';
 import { getOppositeField } from '../helpers';
+import { formatResponseObjectValues } from '../../../../helpers/format_response_object_values';
 
 export const getTopNFlowEdges = (
   response: IEsSearchResponse<unknown>,
@@ -66,12 +67,14 @@ const getFlowTargetFromString = (flowAsString: string) =>
 const getGeoItem = (result: NetworkTopNFlowBuckets): GeoItem | null =>
   result.location.top_geo.hits.hits.length > 0 && result.location.top_geo.hits.hits[0]._source
     ? {
-        geo: getOr(
-          '',
-          `location.top_geo.hits.hits[0]._source.${
-            Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
-          }.geo`,
-          result
+        geo: formatResponseObjectValues(
+          getOr(
+            '',
+            `location.top_geo.hits.hits[0]._source.${
+              Object.keys(result.location.top_geo.hits.hits[0]._source)[0]
+            }.geo`,
+            result
+          )
         ),
         flowTarget: getFlowTargetFromString(
           Object.keys(result.location.top_geo.hits.hits[0]._source)[0]

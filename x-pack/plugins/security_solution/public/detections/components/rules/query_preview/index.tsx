@@ -3,9 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { Fragment, useCallback, useEffect, useReducer, useRef } from 'react';
 import { Unit } from '@elastic/datemath';
-import { getOr } from 'lodash/fp';
 import styled from 'styled-components';
 import {
   EuiFlexGroup,
@@ -14,25 +13,23 @@ import {
   EuiFormRow,
   EuiButton,
   EuiCallOut,
-  EuiSelectOption,
   EuiText,
   EuiSpacer,
 } from '@elastic/eui';
+import { debounce } from 'lodash/fp';
 
 import * as i18n from './translations';
-import { useKibana } from '../../../../common/lib/kibana';
-import { ESQueryStringQuery } from '../../../../../common/typed_json';
-import { getQueryFilter } from '../../../../../common/detection_engine/get_query_filter';
+import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
+import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
 import { FieldValueQueryBar } from '../query_bar';
-import { Filter } from '../../../../../../../../src/plugins/data/common/es_query';
-import { Language, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { PreviewEqlQueryHistogram } from './eql_histogram';
-import { useEqlPreview } from '../../../../common/hooks/eql';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import { PreviewNonEqlQueryHistogram } from './non_eql_histogram';
-import { getTimeframeOptions } from './helpers';
+import { useEqlPreview } from '../../../../common/hooks/eql/';
 import { PreviewThresholdQueryHistogram } from './threshold_histogram';
 import { formatDate } from '../../../../common/components/super_date_picker';
+import { State, queryPreviewReducer } from './reducer';
+import { isNoisy } from './helpers';
+import { PreviewCustomQueryHistogram } from './custom_histogram';
 
 const Select = styled(EuiSelect)`
   width: ${({ theme }) => theme.eui.euiSuperDatePickerWidth};
@@ -42,13 +39,30 @@ const PreviewButton = styled(EuiButton)`
   margin-left: 0;
 `;
 
+export const initialState: State = {
+  timeframeOptions: [],
+  showHistogram: false,
+  timeframe: 'h',
+  warnings: [],
+  queryFilter: undefined,
+  toTime: '',
+  fromTime: '',
+  queryString: '',
+  language: 'kuery',
+  filters: [],
+  thresholdFieldExists: false,
+  showNonEqlHistogram: false,
+};
+
+export type Threshold = { field: string | undefined; value: number } | undefined;
+
 interface PreviewQueryProps {
   dataTestSubj: string;
   idAria: string;
   query: FieldValueQueryBar | undefined;
   index: string[];
   ruleType: Type;
-  threshold: { field: string | undefined; value: number } | undefined;
+  threshold: Threshold;
   isDisabled: boolean;
 }
 
@@ -61,131 +75,196 @@ export const PreviewQuery = ({
   threshold,
   isDisabled,
 }: PreviewQueryProps) => {
-  const { data } = useKibana().services;
-  const { addError } = useAppToasts();
+  const [
+    eqlQueryLoading,
+    startEql,
+    {
+      totalCount: eqlQueryTotal,
+      data: eqlQueryData,
+      refetch: eqlQueryRefetch,
+      inspect: eqlQueryInspect,
+    },
+  ] = useEqlPreview();
 
-  const [timeframeOptions, setTimeframeOptions] = useState<EuiSelectOption[]>([]);
-  const [showHistogram, setShowHistogram] = useState(false);
-  const [timeframe, setTimeframe] = useState<Unit>('h');
-  const [warnings, setWarnings] = useState<string[]>([]);
-  const [queryFilter, setQueryFilter] = useState<ESQueryStringQuery | undefined>(undefined);
-  const [toTime, setTo] = useState('');
-  const [fromTime, setFrom] = useState('');
-  const {
-    error: eqlError,
-    start: startEql,
-    result: eqlQueryResult,
-    loading: eqlQueryLoading,
-  } = useEqlPreview();
-
-  const queryString = useMemo((): string => getOr('', 'query.query', query), [query]);
-  const language = useMemo((): Language => getOr('kuery', 'query.language', query), [query]);
-  const filters = useMemo((): Filter[] => (query != null ? query.filters : []), [query]);
-
-  const handleCalculateTimeRange = useCallback((): void => {
-    const from = formatDate('now');
-    const to = formatDate(`now-1${timeframe}`);
-
-    setTo(to);
-    setFrom(from);
-  }, [timeframe]);
-
-  const handlePreviewEqlQuery = useCallback((): void => {
-    startEql({
-      data,
-      index,
-      query: queryString,
-      fromTime,
+  const [
+    {
+      thresholdFieldExists,
+      showNonEqlHistogram,
+      timeframeOptions,
+      showHistogram,
+      timeframe,
+      warnings,
+      queryFilter,
       toTime,
-      interval: timeframe,
-    });
-  }, [startEql, data, index, queryString, fromTime, toTime, timeframe]);
+      fromTime,
+      queryString,
+    },
+    dispatch,
+  ] = useReducer(queryPreviewReducer(), {
+    ...initialState,
+    toTime: formatDate('now-1h'),
+    fromTime: formatDate('now'),
+  });
+  const [
+    isMatrixHistogramLoading,
+    { inspect, totalCount: matrixHistTotal, refetch, data: matrixHistoData, buckets },
+    startNonEql,
+  ] = useMatrixHistogram({
+    errorMessage: i18n.QUERY_PREVIEW_ERROR,
+    endDate: fromTime,
+    startDate: toTime,
+    filterQuery: queryFilter,
+    indexNames: index,
+    histogramType: MatrixHistogramType.events,
+    stackByField: 'event.category',
+    threshold: ruleType === 'threshold' ? threshold : undefined,
+    skip: true,
+  });
 
-  const handleSelectPreviewTimeframe = ({
-    target: { value },
-  }: React.ChangeEvent<HTMLSelectElement>): void => {
-    setTimeframe(value as Unit);
-    setShowHistogram(false);
-  };
-
-  const handlePreviewClicked = useCallback((): void => {
-    handleCalculateTimeRange();
-
-    if (ruleType === 'eql') {
-      setShowHistogram(true);
-      handlePreviewEqlQuery();
-    } else {
-      const builtFilterQuery = {
-        ...((getQueryFilter(
-          queryString,
-          language,
-          filters,
-          index,
-          [],
-          true
-        ) as unknown) as ESQueryStringQuery),
-      };
-      if (builtFilterQuery != null) {
-        setShowHistogram(true);
-      }
-      setQueryFilter(builtFilterQuery);
-    }
-  }, [
-    filters,
-    handleCalculateTimeRange,
-    handlePreviewEqlQuery,
-    index,
-    language,
-    queryString,
-    ruleType,
-  ]);
-
-  useEffect((): void => {
-    if (eqlError != null) {
-      addError(eqlError, { title: i18n.PREVIEW_QUERY_ERROR });
-    }
-  }, [eqlError, addError]);
-
-  // reset when rule type changes
-  useEffect((): void => {
-    const options = getTimeframeOptions(ruleType);
-
-    setShowHistogram(false);
-    setTimeframe('h');
-    setTimeframeOptions(options);
-    setWarnings([]);
-  }, [ruleType]);
-
-  // reset when timeframe or query changes
-  useEffect((): void => {
-    setShowHistogram(false);
-    setWarnings([]);
-  }, [timeframe, queryString]);
-
-  useEffect((): void => {
-    if (eqlQueryResult != null) {
-      setWarnings((prevWarnings) => {
-        if (eqlQueryResult.warnings.join() !== prevWarnings.join()) {
-          return eqlQueryResult.warnings;
-        }
-
-        return prevWarnings;
+  const setQueryInfo = useCallback(
+    (queryBar: FieldValueQueryBar | undefined, indices: string[], type: Type): void => {
+      dispatch({
+        type: 'setQueryInfo',
+        queryBar,
+        index: indices,
+        ruleType: type,
       });
-    }
-  }, [eqlQueryResult]);
-
-  const thresholdFieldExists = useMemo(
-    (): boolean => threshold != null && threshold.field != null && threshold.field.trim() !== '',
-    [threshold]
+    },
+    [dispatch]
   );
 
-  const showNonEqlHistogram = useMemo((): boolean => {
-    return (
-      ruleType === 'query' ||
-      ruleType === 'saved_query' ||
-      (ruleType === 'threshold' && !thresholdFieldExists)
-    );
-  }, [ruleType, thresholdFieldExists]);
+  const debouncedSetQueryInfo = useRef(debounce(500, setQueryInfo));
+
+  const setTimeframeSelect = useCallback(
+    (selection: Unit): void => {
+      dispatch({
+        type: 'setTimeframeSelect',
+        timeframe: selection,
+      });
+    },
+    [dispatch]
+  );
+
+  const setRuleTypeChange = useCallback(
+    (type: Type): void => {
+      dispatch({
+        type: 'setResetRuleTypeChange',
+        ruleType: type,
+      });
+    },
+    [dispatch]
+  );
+
+  const setWarnings = useCallback(
+    (yikes: string[]): void => {
+      dispatch({
+        type: 'setWarnings',
+        warnings: yikes,
+      });
+    },
+    [dispatch]
+  );
+
+  const setNoiseWarning = useCallback((): void => {
+    dispatch({
+      type: 'setNoiseWarning',
+    });
+  }, [dispatch]);
+
+  const setShowHistogram = useCallback(
+    (show: boolean): void => {
+      dispatch({
+        type: 'setShowHistogram',
+        show,
+      });
+    },
+    [dispatch]
+  );
+
+  const setThresholdValues = useCallback(
+    (thresh: Threshold, type: Type): void => {
+      dispatch({
+        type: 'setThresholdQueryVals',
+        threshold: thresh,
+        ruleType: type,
+      });
+    },
+    [dispatch]
+  );
+
+  useEffect(() => {
+    debouncedSetQueryInfo.current(query, index, ruleType);
+  }, [index, query, ruleType]);
+
+  useEffect((): void => {
+    setThresholdValues(threshold, ruleType);
+  }, [setThresholdValues, threshold, ruleType]);
+
+  useEffect((): void => {
+    setRuleTypeChange(ruleType);
+  }, [ruleType, setRuleTypeChange]);
+
+  useEffect((): void => {
+    switch (ruleType) {
+      case 'eql':
+        if (isNoisy(eqlQueryTotal, timeframe)) {
+          setNoiseWarning();
+        }
+        break;
+      case 'threshold':
+        const totalHits = thresholdFieldExists ? buckets.length : matrixHistTotal;
+        if (isNoisy(totalHits, timeframe)) {
+          setNoiseWarning();
+        }
+        break;
+      default:
+        if (isNoisy(matrixHistTotal, timeframe)) {
+          setNoiseWarning();
+        }
+    }
+  }, [
+    timeframe,
+    matrixHistTotal,
+    eqlQueryTotal,
+    ruleType,
+    setNoiseWarning,
+    thresholdFieldExists,
+    buckets.length,
+  ]);
+
+  const handlePreviewEqlQuery = useCallback(
+    (to: string, from: string): void => {
+      startEql({
+        index,
+        query: queryString,
+        from,
+        to,
+        interval: timeframe,
+      });
+    },
+    [startEql, index, queryString, timeframe]
+  );
+
+  const handleSelectPreviewTimeframe = useCallback(
+    ({ target: { value } }: React.ChangeEvent<HTMLSelectElement>): void => {
+      setTimeframeSelect(value as Unit);
+    },
+    [setTimeframeSelect]
+  );
+
+  const handlePreviewClicked = useCallback((): void => {
+    const to = formatDate('now');
+    const from = formatDate(`now-1${timeframe}`);
+
+    setWarnings([]);
+    setShowHistogram(true);
+
+    if (ruleType === 'eql') {
+      handlePreviewEqlQuery(to, from);
+    } else {
+      startNonEql(to, from);
+    }
+  }, [setWarnings, setShowHistogram, ruleType, handlePreviewEqlQuery, startNonEql, timeframe]);
 
   return (
     <>
@@ -204,54 +283,70 @@ export const PreviewQuery = ({
               options={timeframeOptions}
               value={timeframe}
               onChange={handleSelectPreviewTimeframe}
-              aria-label={i18n.PREVIEW_SELECT_ARIA}
+              aria-label={i18n.QUERY_PREVIEW_SELECT_ARIA}
               disabled={isDisabled}
+              data-test-subj="queryPreviewTimeframeSelect"
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <PreviewButton fill isDisabled={isDisabled} onClick={handlePreviewClicked}>
-              {i18n.PREVIEW_LABEL}
+            <PreviewButton
+              fill
+              isDisabled={
+                isMatrixHistogramLoading || eqlQueryLoading || isDisabled || query == null
+              }
+              onClick={handlePreviewClicked}
+              data-test-subj="queryPreviewButton"
+            >
+              {i18n.QUERY_PREVIEW_BUTTON}
             </PreviewButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
       <EuiSpacer size="s" />
       {showNonEqlHistogram && showHistogram && (
-        <PreviewNonEqlQueryHistogram
-          filterQuery={queryFilter}
-          index={index}
-          from={fromTime}
+        <PreviewCustomQueryHistogram
           to={toTime}
+          from={fromTime}
+          data={matrixHistoData}
+          totalCount={matrixHistTotal}
+          inspect={inspect}
+          refetch={refetch}
+          isLoading={isMatrixHistogramLoading}
+          data-test-subj="previewNonEqlQueryHistogram"
         />
       )}
       {ruleType === 'threshold' && thresholdFieldExists && showHistogram && (
         <PreviewThresholdQueryHistogram
-          filterQuery={queryFilter}
-          index={index}
-          from={fromTime}
-          to={toTime}
-          threshold={threshold}
+          isLoading={isMatrixHistogramLoading}
+          buckets={buckets}
+          inspect={inspect}
+          refetch={refetch}
+          data-test-subj="previewThresholdQueryHistogram"
         />
       )}
-      {ruleType === 'eql' && eqlQueryResult != null && showHistogram && !eqlQueryLoading && (
+      {ruleType === 'eql' && showHistogram && (
         <PreviewEqlQueryHistogram
           to={toTime}
           from={fromTime}
-          totalHits={eqlQueryResult.totalCount}
-          data={eqlQueryResult.data}
-          inspect={eqlQueryResult.inspect}
+          totalCount={eqlQueryTotal}
+          data={eqlQueryData}
+          inspect={eqlQueryInspect}
+          refetch={eqlQueryRefetch}
+          isLoading={eqlQueryLoading}
+          data-test-subj="previewEqlQueryHistogram"
         />
       )}
-      {warnings.length > 0 &&
-        warnings.map((warning) => (
-          <>
+      {showHistogram &&
+        warnings.length > 0 &&
+        warnings.map((warning, i) => (
+          <Fragment key={`${warning}-${i}`}>
             <EuiSpacer size="s" />
-            <EuiCallOut color="warning" iconType="help">
+            <EuiCallOut color="warning" iconType="help" data-test-subj="previewQueryWarning">
               <EuiText>
                 <p>{warning}</p>
               </EuiText>
             </EuiCallOut>
-          </>
+          </Fragment>
         ))}
     </>
   );

@@ -7,6 +7,8 @@ import React, { useCallback } from 'react';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
+import { isEqlRule } from '../../../../../common/detection_engine/utils';
+import { Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/data/common';
 import { FieldComponent } from '../../autocomplete/field';
 import { OperatorComponent } from '../../autocomplete/operator';
@@ -42,6 +44,7 @@ interface EntryItemProps {
   onChange: (arg: BuilderEntry, i: number) => void;
   setErrorsExist: (arg: boolean) => void;
   onlyShowListOperators?: boolean;
+  ruleType?: Type;
 }
 
 export const BuilderEntryItem: React.FC<EntryItemProps> = ({
@@ -52,6 +55,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   onChange,
   setErrorsExist,
   onlyShowListOperators = false,
+  ruleType,
 }): JSX.Element => {
   const handleError = useCallback(
     (err: boolean): void => {
@@ -145,7 +149,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           entry,
           listType,
           entry.field != null && entry.field.type === 'boolean',
-          isFirst
+          isFirst && !isEqlRule(ruleType)
         );
     const comboBox = (
       <OperatorComponent

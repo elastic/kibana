@@ -103,6 +103,11 @@ export interface CreateThreatSignalOptions {
   currentResult: SearchAfterAndBulkCreateReturnType;
 }
 
+export interface ThreatSignalResults {
+  threatList: SearchResponse<ThreatListItem>;
+  results: SearchAfterAndBulkCreateReturnType;
+}
+
 export interface BuildThreatMappingFilterOptions {
   threatMapping: ThreatMapping;
   threatList: SearchResponse<ThreatListItem>;
@@ -150,11 +155,14 @@ export interface GetThreatListOptions {
   sortOrder: 'asc' | 'desc' | undefined;
   threatFilters: PartialFilter[];
   exceptionItems: ExceptionListItemSchema[];
+  listClient: ListClient;
 }
 
 export interface GetSortWithTieBreakerOptions {
   sortField: string | undefined;
   sortOrder: 'asc' | 'desc' | undefined;
+  index: string[];
+  listItemIndex: string;
 }
 
 /**
@@ -166,6 +174,5 @@ export interface ThreatListItem {
 }
 
 export interface SortWithTieBreaker {
-  '@timestamp': 'asc';
   [key: string]: string;
 }

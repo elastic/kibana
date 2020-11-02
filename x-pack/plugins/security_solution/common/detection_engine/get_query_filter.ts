@@ -16,6 +16,7 @@ import {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
 } from '../../../lists/common/schemas';
+import { ESBoolQuery } from '../typed_json';
 import { buildExceptionListQueries } from './build_exceptions_query';
 import {
   Query as QueryString,
@@ -31,7 +32,7 @@ export const getQueryFilter = (
   index: Index,
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
   excludeExceptions: boolean = true
-) => {
+): ESBoolQuery => {
   const indexPattern: IIndexPattern = {
     fields: [],
     title: index.join(),
@@ -116,6 +117,7 @@ export const buildEqlSearchRequest = (
         [timestamp]: {
           gte: from,
           lte: to,
+          format: 'strict_date_optional_time',
         },
       },
     },

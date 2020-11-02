@@ -18,10 +18,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/dom';
-import { render } from '@testing-library/react';
-
-import { SearchBar } from './';
+import SearchBar from './search_bar';
 
 import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
@@ -29,6 +26,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { coreMock } from '../../../../../core/public/mocks';
 const startMock = coreMock.createStart();
 
+import { mount } from 'enzyme';
 import { IIndexPattern } from '../..';
 
 const mockTimeHistory = {
@@ -37,16 +35,14 @@ const mockTimeHistory = {
   },
 };
 
-jest.mock('..', () => {
+jest.mock('../filter_bar/filter_bar', () => {
   return {
     FilterBar: () => <div className="filterBar" />,
   };
 });
 
-jest.mock('../query_string_input', () => {
-  return {
-    QueryBarTopRow: () => <div className="queryBar" />,
-  };
+jest.mock('../query_string_input/query_bar_top_row', () => {
+  return () => <div className="queryBar" />;
 });
 
 const noop = jest.fn();
@@ -118,46 +114,41 @@ function wrapSearchBarInContext(testProps: any) {
 }
 
 describe('SearchBar', () => {
-  const SEARCH_BAR_TEST_ID = 'globalQueryBar';
   const SEARCH_BAR_ROOT = '.globalQueryBar';
-  const FILTER_BAR = '.globalFilterBar';
+  const FILTER_BAR = '.filterBar';
   const QUERY_BAR = '.queryBar';
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('Should render query bar when no options provided (in reality - timepicker)', async () => {
-    const { container, getByTestId } = render(
+  it('Should render query bar when no options provided (in reality - timepicker)', () => {
+    const component = mount(
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
       })
     );
 
-    await waitFor(() => getByTestId(SEARCH_BAR_TEST_ID));
-
-    expect(container.querySelectorAll(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(container.querySelectorAll(FILTER_BAR).length).toBe(0);
-    expect(container.querySelectorAll(QUERY_BAR).length).toBe(1);
+    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+    expect(component.find(FILTER_BAR).length).toBe(0);
+    expect(component.find(QUERY_BAR).length).toBe(1);
   });
 
-  it('Should render empty when timepicker is off and no options provided', async () => {
-    const { container, getByTestId } = render(
+  it('Should render empty when timepicker is off and no options provided', () => {
+    const component = mount(
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         showDatePicker: false,
       })
     );
 
-    await waitFor(() => getByTestId(SEARCH_BAR_TEST_ID));
-
-    expect(container.querySelectorAll(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(container.querySelectorAll(FILTER_BAR).length).toBe(0);
-    expect(container.querySelectorAll(QUERY_BAR).length).toBe(0);
+    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+    expect(component.find(FILTER_BAR).length).toBe(0);
+    expect(component.find(QUERY_BAR).length).toBe(0);
   });
 
-  it('Should render filter bar, when required fields are provided', async () => {
-    const { container, getByTestId } = render(
+  it('Should render filter bar, when required fields are provided', () => {
+    const component = mount(
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         showDatePicker: false,
@@ -166,15 +157,13 @@ describe('SearchBar', () => {
       })
     );
 
-    await waitFor(() => getByTestId(SEARCH_BAR_TEST_ID));
-
-    expect(container.querySelectorAll(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(container.querySelectorAll(FILTER_BAR).length).toBe(1);
-    expect(container.querySelectorAll(QUERY_BAR).length).toBe(0);
+    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+    expect(component.find(FILTER_BAR).length).toBe(1);
+    expect(component.find(QUERY_BAR).length).toBe(0);
   });
 
-  it('Should NOT render filter bar, if disabled', async () => {
-    const { container, getByTestId } = render(
+  it('Should NOT render filter bar, if disabled', () => {
+    const component = mount(
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         showFilterBar: false,
@@ -184,15 +173,13 @@ describe('SearchBar', () => {
       })
     );
 
-    await waitFor(() => getByTestId(SEARCH_BAR_TEST_ID));
-
-    expect(container.querySelectorAll(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(container.querySelectorAll(FILTER_BAR).length).toBe(0);
-    expect(container.querySelectorAll(QUERY_BAR).length).toBe(0);
+    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+    expect(component.find(FILTER_BAR).length).toBe(0);
+    expect(component.find(QUERY_BAR).length).toBe(0);
   });
 
-  it('Should render query bar, when required fields are provided', async () => {
-    const { container, getByTestId } = render(
+  it('Should render query bar, when required fields are provided', () => {
+    const component = mount(
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         screenTitle: 'test screen',
@@ -201,15 +188,13 @@ describe('SearchBar', () => {
       })
     );
 
-    await waitFor(() => getByTestId(SEARCH_BAR_TEST_ID));
-
-    expect(container.querySelectorAll(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(container.querySelectorAll(FILTER_BAR).length).toBe(0);
-    expect(container.querySelectorAll(QUERY_BAR).length).toBe(1);
+    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+    expect(component.find(FILTER_BAR).length).toBe(0);
+    expect(component.find(QUERY_BAR).length).toBe(1);
   });
 
-  it('Should NOT render query bar, if disabled', async () => {
-    const { container, getByTestId } = render(
+  it('Should NOT render query bar, if disabled', () => {
+    const component = mount(
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         screenTitle: 'test screen',
@@ -219,15 +204,13 @@ describe('SearchBar', () => {
       })
     );
 
-    await waitFor(() => getByTestId(SEARCH_BAR_TEST_ID));
-
-    expect(container.querySelectorAll(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(container.querySelectorAll(FILTER_BAR).length).toBe(0);
-    expect(container.querySelectorAll(QUERY_BAR).length).toBe(0);
+    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+    expect(component.find(FILTER_BAR).length).toBe(0);
+    expect(component.find(QUERY_BAR).length).toBe(0);
   });
 
-  it('Should render query bar and filter bar', async () => {
-    const { container, getByTestId } = render(
+  it('Should render query bar and filter bar', () => {
+    const component = mount(
       wrapSearchBarInContext({
         indexPatterns: [mockIndexPattern],
         screenTitle: 'test screen',
@@ -238,10 +221,8 @@ describe('SearchBar', () => {
       })
     );
 
-    await waitFor(() => getByTestId(SEARCH_BAR_TEST_ID));
-
-    expect(container.querySelectorAll(SEARCH_BAR_ROOT).length).toBe(1);
-    expect(container.querySelectorAll(FILTER_BAR).length).toBe(1);
-    expect(container.querySelectorAll(QUERY_BAR).length).toBe(1);
+    expect(component.find(SEARCH_BAR_ROOT).length).toBe(1);
+    expect(component.find(FILTER_BAR).length).toBe(1);
+    expect(component.find(QUERY_BAR).length).toBe(1);
   });
 });

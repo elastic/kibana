@@ -5,22 +5,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LegacyAPICaller } from 'src/core/server';
+import { ElasticsearchClient } from 'kibana/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
-async function removeLifecycle(callAsCurrentUser: LegacyAPICaller, indexNames: string[]) {
+async function removeLifecycle(client: ElasticsearchClient, indexNames: string[]) {
+  const options = {
+    ignore: [404],
+  };
   const responses = [];
   for (let i = 0; i < indexNames.length; i++) {
     const indexName = indexNames[i];
-    const params = {
-      method: 'POST',
-      path: `/${encodeURIComponent(indexName)}/_ilm/remove`,
-      ignore: [404],
-    };
-
-    responses.push(callAsCurrentUser('transport.request', params));
+    responses.push(client.ilm.removePolicy({ index: indexName }, options));
   }
   return Promise.all(responses);
 }
@@ -29,7 +26,11 @@ const bodySchema = schema.object({
   indexNames: schema.arrayOf(schema.string()),
 });
 
-export function registerRemoveRoute({ router, license, lib }: RouteDependencies) {
+export function registerRemoveRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.post(
     { path: addBasePath('/index/remove'), validate: { body: bodySchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -37,20 +38,10 @@ export function registerRemoveRoute({ router, license, lib }: RouteDependencies)
       const { indexNames } = body;
 
       try {
-        await removeLifecycle(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser,
-          indexNames
-        );
+        await removeLifecycle(context.core.elasticsearch.client.asCurrentUser, indexNames);
         return response.ok();
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

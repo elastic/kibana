@@ -2,20 +2,15 @@
 
 [Home](./index.md) &gt; [kibana-plugin-plugins-expressions-public](./kibana-plugin-plugins-expressions-public.md) &gt; [ExpressionAstFunction](./kibana-plugin-plugins-expressions-public.expressionastfunction.md)
 
-## ExpressionAstFunction interface
+## ExpressionAstFunction type
 
 <b>Signature:</b>
 
 ```typescript
-export interface ExpressionAstFunction 
+export declare type ExpressionAstFunction = {
+    type: 'function';
+    function: string;
+    arguments: Record<string, ExpressionAstArgument[]>;
+    debug?: ExpressionAstFunctionDebug;
+};
 ```
-
-## Properties
-
-|  Property | Type | Description |
-|  --- | --- | --- |
-|  [arguments](./kibana-plugin-plugins-expressions-public.expressionastfunction.arguments.md) | <code>Record&lt;string, ExpressionAstArgument[]&gt;</code> |  |
-|  [debug](./kibana-plugin-plugins-expressions-public.expressionastfunction.debug.md) | <code>ExpressionAstFunctionDebug</code> | Debug information added to each function when expression is executed in \*debug mode\*. |
-|  [function](./kibana-plugin-plugins-expressions-public.expressionastfunction.function.md) | <code>string</code> |  |
-|  [type](./kibana-plugin-plugins-expressions-public.expressionastfunction.type.md) | <code>'function'</code> |  |
-

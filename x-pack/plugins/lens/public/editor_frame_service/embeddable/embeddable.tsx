@@ -33,13 +33,13 @@ import {
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
-import { DOC_TYPE, Document, injectFilterReferences } from '../../persistence';
+import { Document, injectFilterReferences } from '../../persistence';
 import { ExpressionWrapper } from './expression_wrapper';
 import { UiActionsStart } from '../../../../../../src/plugins/ui_actions/public';
 import { isLensBrushEvent, isLensFilterEvent } from '../../types';
 
 import { IndexPatternsContract } from '../../../../../../src/plugins/data/public';
-import { getEditPath } from '../../../common';
+import { getEditPath, DOC_TYPE } from '../../../common';
 import { IBasePath } from '../../../../../../src/core/public';
 import { LensAttributeService } from '../../lens_attribute_service';
 
@@ -177,6 +177,7 @@ export class Embeddable
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
+        searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
       />,
       domNode

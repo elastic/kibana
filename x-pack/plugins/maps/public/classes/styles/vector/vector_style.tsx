@@ -77,6 +77,7 @@ import { IField } from '../../fields/field';
 import { IVectorLayer } from '../../layers/vector_layer/vector_layer';
 import { IVectorSource } from '../../sources/vector_source';
 import { ILayer } from '../../layers/layer';
+import { createStyleFieldsHelper } from './style_fields_helper';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];
@@ -90,7 +91,7 @@ export interface IVectorStyle extends IStyle {
   getDescriptorWithMissingStylePropsRemoved(
     nextFields: IField[],
     mapColors: string[]
-  ): { hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor };
+  ): Promise<{ hasChanges: boolean; nextStyleDescriptor?: VectorStyleDescriptor }>;
   pluckStyleMetaFromSourceDataRequest(sourceDataRequest: DataRequest): Promise<StyleMetaDescriptor>;
   isTimeAware: () => boolean;
   getIcon: () => ReactElement<any>;
@@ -324,7 +325,8 @@ export class VectorStyle implements IVectorStyle {
    * This method does not update its descriptor. It just returns a new descriptor that the caller
    * can then use to update store state via dispatch.
    */
-  getDescriptorWithMissingStylePropsRemoved(nextFields: IField[], mapColors: string[]) {
+  async getDescriptorWithMissingStylePropsRemoved(nextFields: IField[], mapColors: string[]) {
+    const styleFieldsHelper = await createStyleFieldsHelper(nextFields);
     const originalProperties = this.getRawProperties();
     const updatedProperties = {} as VectorStylePropertiesDescriptor;
 
@@ -346,8 +348,9 @@ export class VectorStyle implements IVectorStyle {
     });
 
     dynamicProperties.forEach((key: VECTOR_STYLES) => {
-      // Convert dynamic styling to static stying when there are no nextFields
-      if (nextFields.length === 0) {
+      // Convert dynamic styling to static stying when there are no style fields
+      const styleFields = styleFieldsHelper.getFieldsForStyle(key);
+      if (styleFields.length === 0) {
         const staticProperties = getDefaultStaticProperties(mapColors);
         updatedProperties[key] = staticProperties[key] as any;
         return;

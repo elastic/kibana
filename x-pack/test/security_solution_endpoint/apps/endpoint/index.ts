@@ -32,5 +32,6 @@ export default function (providerContext: FtrProviderContext) {
     loadTestFile(require.resolve('./policy_details'));
     loadTestFile(require.resolve('./resolver'));
     loadTestFile(require.resolve('./endpoint_telemetry'));
+    loadTestFile(require.resolve('./trusted_apps_list'));
   });
 }

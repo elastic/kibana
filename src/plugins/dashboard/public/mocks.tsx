@@ -20,13 +20,10 @@
 import { DashboardStart } from './plugin';
 
 export type Start = jest.Mocked<DashboardStart>;
-export { mockAttributeService } from './attribute_service/attribute_service.mock';
 
 const createStartContract = (): DashboardStart => {
   // @ts-ignore
-  const startContract: DashboardStart = {
-    getAttributeService: jest.fn(),
-  };
+  const startContract: DashboardStart = {};
 
   return startContract;
 };

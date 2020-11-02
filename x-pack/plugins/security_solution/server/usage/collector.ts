@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, CoreSetup } from '../../../../../src/core/server';
+import { CoreSetup } from '../../../../../src/core/server';
+import { CollectorFetchContext } from '../../../../../src/plugins/usage_collection/server';
 import { CollectorDependencies } from './types';
 import { DetectionsUsage, fetchDetectionsUsage, defaultDetectionsUsage } from './detections';
 import { EndpointUsage, getEndpointTelemetryFromFleet } from './endpoints';
@@ -77,7 +78,7 @@ export const registerCollector: RegisterCollector = ({
       },
     },
     isReady: () => kibanaIndex.length > 0,
-    fetch: async (callCluster: LegacyAPICaller): Promise<UsageData> => {
+    fetch: async ({ callCluster }: CollectorFetchContext): Promise<UsageData> => {
       const savedObjectsClient = await getInternalSavedObjectsClient(core);
       const [detections, endpoints] = await Promise.allSettled([
         fetchDetectionsUsage(kibanaIndex, callCluster, ml),

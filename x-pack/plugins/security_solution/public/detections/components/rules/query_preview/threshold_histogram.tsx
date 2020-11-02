@@ -5,48 +5,34 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiSpacer } from '@elastic/eui';
 
 import * as i18n from './translations';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { BarChart } from '../../../../common/components/charts/barchart';
 import { getThresholdHistogramConfig } from './helpers';
-import { useMatrixHistogram } from '../../../../common/containers/matrix_histogram';
-import { MatrixHistogramType } from '../../../../../common/search_strategy/security_solution/matrix_histogram';
-import { ESQueryStringQuery } from '../../../../../common/typed_json';
-import { Panel } from '../../../../common/components/panel';
-import { HeaderSection } from '../../../../common/components/header_section';
-import { ChartSeriesConfigs } from '../../../../common/components/charts/common';
+import { ChartSeriesConfigs, ChartSeriesData } from '../../../../common/components/charts/common';
+import { InspectResponse } from '../../../../../public/types';
+import { inputsModel } from '../../../../common/store';
+import { PreviewHistogram } from './histogram';
 
 export const ID = 'queryPreviewThresholdHistogramQuery';
 
 interface PreviewThresholdQueryHistogramProps {
-  to: string;
-  from: string;
-  filterQuery: ESQueryStringQuery | undefined;
-  threshold: { field: string | undefined; value: number } | undefined;
-  index: string[];
+  isLoading: boolean;
+  buckets: Array<{
+    key: string;
+    doc_count: number;
+  }>;
+  inspect: InspectResponse;
+  refetch: inputsModel.Refetch;
 }
 
 export const PreviewThresholdQueryHistogram = ({
-  from,
-  to,
-  filterQuery,
-  threshold,
-  index,
+  buckets,
+  inspect,
+  refetch,
+  isLoading,
 }: PreviewThresholdQueryHistogramProps) => {
   const { setQuery, isInitializing } = useGlobalTime();
-
-  const [isLoading, { inspect, refetch, buckets }] = useMatrixHistogram({
-    errorMessage: i18n.PREVIEW_QUERY_ERROR,
-    endDate: from,
-    startDate: to,
-    filterQuery,
-    indexNames: index,
-    histogramType: MatrixHistogramType.events,
-    stackByField: 'event.category',
-    threshold,
-  });
 
   useEffect((): void => {
     if (!isLoading && !isInitializing) {
@@ -54,49 +40,42 @@ export const PreviewThresholdQueryHistogram = ({
     }
   }, [setQuery, inspect, isLoading, isInitializing, refetch]);
 
-  const { data, totalCount } = useMemo(() => {
-    return {
-      data: buckets.map<{ x: string; y: number; g: string }>(({ key, doc_count: docCount }) => ({
+  const { data, totalCount } = useMemo((): { data: ChartSeriesData[]; totalCount: number } => {
+    const total = buckets.length;
+
+    const dataBuckets = buckets.map<{ x: string; y: number; g: string }>(
+      ({ key, doc_count: docCount }) => ({
         x: key,
         y: docCount,
         g: key,
-      })),
-      totalCount: buckets.length,
+      })
+    );
+    return {
+      data: [{ key: 'hits', value: dataBuckets }],
+      totalCount: total,
     };
   }, [buckets]);
 
-  const barConfig = useMemo((): ChartSeriesConfigs => getThresholdHistogramConfig(200), []);
+  const barConfig = useMemo((): ChartSeriesConfigs => getThresholdHistogramConfig(), []);
+
+  const subtitle = useMemo(
+    (): string =>
+      isLoading
+        ? i18n.QUERY_PREVIEW_SUBTITLE_LOADING
+        : i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalCount),
+    [isLoading, totalCount]
+  );
 
   return (
-    <>
-      <Panel height={300}>
-        <EuiFlexGroup gutterSize="none" direction="column">
-          <EuiFlexItem grow={1}>
-            <HeaderSection
-              id={ID}
-              title={i18n.QUERY_GRAPH_HITS_TITLE}
-              titleSize="xs"
-              subtitle={i18n.QUERY_PREVIEW_THRESHOLD_WITH_FIELD_TITLE(totalCount)}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            <BarChart
-              configs={barConfig}
-              barChart={[{ key: 'hits', value: data }]}
-              stackByField={undefined}
-              timelineId={undefined}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <>
-              <EuiSpacer />
-              <EuiText size="s" color="subdued">
-                <p>{i18n.PREVIEW_QUERY_DISCLAIMER}</p>
-              </EuiText>
-            </>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </Panel>
-    </>
+    <PreviewHistogram
+      id={ID}
+      data={data}
+      barConfig={barConfig}
+      title={i18n.QUERY_GRAPH_HITS_TITLE}
+      subtitle={subtitle}
+      disclaimer={i18n.QUERY_PREVIEW_DISCLAIMER}
+      isLoading={isLoading}
+      data-test-subj="thresholdQueryPreviewHistogram"
+    />
   );
 };

@@ -16,6 +16,7 @@ describe('get_all_stats', () => {
   const end = 1;
   const callCluster = sinon.stub();
   const esClient = sinon.stub();
+  const soClient = sinon.stub();
 
   const esClusters = [
     { cluster_uuid: 'a' },
@@ -178,6 +179,7 @@ describe('get_all_stats', () => {
           {
             callCluster: callCluster as any,
             esClient: esClient as any,
+            soClient: soClient as any,
             usageCollection: {} as any,
             start,
             end,
@@ -204,6 +206,7 @@ describe('get_all_stats', () => {
           {
             callCluster: callCluster as any,
             esClient: esClient as any,
+            soClient: soClient as any,
             usageCollection: {} as any,
             start,
             end,

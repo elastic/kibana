@@ -15,7 +15,6 @@ export const BUILT_IN_ALERTS_FEATURE = {
   name: i18n.translate('xpack.stackAlerts.featureRegistry.actionsFeatureName', {
     defaultMessage: 'Stack Alerts',
   }),
-  icon: 'bell',
   app: [],
   category: DEFAULT_APP_CATEGORIES.management,
   management: {
