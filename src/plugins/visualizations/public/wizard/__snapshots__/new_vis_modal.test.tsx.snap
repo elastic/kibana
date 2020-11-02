@@ -1032,6 +1032,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                     size="s"
                                   >
                                     <EuiButtonDisplay
+                                      baseClassName="euiButton"
                                       element="button"
                                       fill={true}
                                       iconSide="right"
@@ -1043,6 +1044,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                       <button
                                         className="euiButton euiButton--primary euiButton--small euiButton--fill"
                                         onClick={[Function]}
+                                        style={
+                                          Object {
+                                            "minWidth": undefined,
+                                          }
+                                        }
                                         type="button"
                                       >
                                         <EuiButtonContent
@@ -2062,6 +2068,7 @@ exports[`NewVisModal should render as expected 1`] = `
                                     size="s"
                                   >
                                     <EuiButtonDisplay
+                                      baseClassName="euiButton"
                                       element="button"
                                       fill={true}
                                       iconSide="right"
@@ -2073,6 +2080,11 @@ exports[`NewVisModal should render as expected 1`] = `
                                       <button
                                         className="euiButton euiButton--primary euiButton--small euiButton--fill"
                                         onClick={[Function]}
+                                        style={
+                                          Object {
+                                            "minWidth": undefined,
+                                          }
+                                        }
                                         type="button"
                                       >
                                         <EuiButtonContent
