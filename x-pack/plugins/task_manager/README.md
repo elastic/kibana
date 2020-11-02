@@ -179,10 +179,10 @@ The task runner's `run` method is expected to return a promise that resolves to 
 Other return values will result in a warning, but the system should continue to work.
 
 ### Task retries when the Task Runner fails
-If a task runner throws an error, task manager will try to rerun the task shortly after (up to the task definition's `maxAttampts`).
+If a task runner throws an error, task manager will try to rerun the task shortly after (up to the task definition's `maxAttempts`).
 Normal tasks will wait a default amount of 5m before trying again and every subsequent attempt will add an additonal 5m cool off period to avoid a stampeding herd of failed tasks from storming Elasticsearch.
 
-Recurring tasks will also get retried, but instead of using the 5m interval for the retry, they will be retried on their nex tscheduled run.
+Recurring tasks will also get retried, but instead of using the 5m interval for the retry, they will be retried on their next scheduled run.
 
 ### Force failing a task
 If you wish to purposfully fail a task, you can throw an error of any kind and the retry logic will apply.
