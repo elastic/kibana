@@ -358,7 +358,6 @@ export function FilterItem(props: Props) {
       }}
       button={badge}
       anchorPosition="downLeft"
-      withTitle={true}
       panelPaddingSize="none"
     >
       <EuiContextMenu initialPanelId={0} panels={getPanels()} />
