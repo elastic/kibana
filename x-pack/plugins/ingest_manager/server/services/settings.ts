@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { SavedObjectsClientContract } from 'kibana/server';
 import url from 'url';
 import {

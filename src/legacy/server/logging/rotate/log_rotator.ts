@@ -20,7 +20,7 @@
 import * as chokidar from 'chokidar';
 import { isMaster } from 'cluster';
 import fs from 'fs';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { throttle } from 'lodash';
 import { tmpdir } from 'os';
 import { basename, dirname, join, sep } from 'path';
