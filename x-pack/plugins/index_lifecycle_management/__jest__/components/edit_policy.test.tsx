@@ -119,9 +119,6 @@ const noRollover = async (rendered: ReactWrapper) => {
   });
   rendered.update();
 };
-const getNodeAttributeSelectLegacy = (rendered: ReactWrapper, phase: string) => {
-  return rendered.find(`select#${phase}-selectedNodeAttrs`);
-};
 const getNodeAttributeSelect = (rendered: ReactWrapper, phase: string) => {
   return findTestSubject(rendered, `${phase}-selectedNodeAttrs`);
 };
@@ -140,15 +137,6 @@ const setPhaseAfter = async (rendered: ReactWrapper, phase: string, after: strin
   await act(async () => {
     afterInput.simulate('change', { target: { value: after } });
   });
-  rendered.update();
-};
-const setPhaseIndexPriorityLegacy = (
-  rendered: ReactWrapper,
-  phase: string,
-  priority: string | number
-) => {
-  const priorityInput = rendered.find(`input#${phase}-phaseIndexPriority`);
-  priorityInput.simulate('change', { target: { value: priority } });
   rendered.update();
 };
 const setPhaseIndexPriority = async (
@@ -184,7 +172,7 @@ describe('edit policy', () => {
    */
   const waitForFormLibValidation = (rendered: ReactWrapper) => {
     act(() => {
-      jest.advanceTimersByTime(1000);
+      jest.runAllTimers();
     });
     rendered.update();
   };
@@ -394,7 +382,7 @@ describe('edit policy', () => {
       setPolicyName(rendered, 'mypolicy');
       await setPhaseIndexPriority(rendered, 'hot', '-1');
       waitForFormLibValidation(rendered);
-      expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.numberGreatThan0Required]);
+      expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
   });
   describe('warm phase', () => {
@@ -519,7 +507,7 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'warm');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
-      expect(getNodeAttributeSelectLegacy(rendered, 'warm').exists()).toBeFalsy();
+      expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
     test('should show warning instead of node attributes input when none exist', async () => {
       http.setupNodeListResponse({
@@ -534,7 +522,7 @@ describe('edit policy', () => {
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       await openNodeAttributesSection(rendered, 'warm');
       expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeTruthy();
-      expect(getNodeAttributeSelectLegacy(rendered, 'warm').exists()).toBeFalsy();
+      expect(getNodeAttributeSelect(rendered, 'warm').exists()).toBeFalsy();
     });
     test('should show node attributes input when attributes exist', async () => {
       const rendered = mountWithIntl(component);
@@ -625,8 +613,9 @@ describe('edit policy', () => {
       await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
-      setPhaseAfterLegacy(rendered, 'cold', '0');
-      await save(rendered);
+      await setPhaseAfter(rendered, 'cold', '0');
+      waitForFormLibValidation(rendered);
+      rendered.update();
       expectedErrorMessages(rendered, []);
     });
     test('should show positive number required error when trying to save cold phase with -1 for after', async () => {
@@ -634,9 +623,9 @@ describe('edit policy', () => {
       await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
-      setPhaseAfterLegacy(rendered, 'cold', '-1');
-      await save(rendered);
-      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+      await setPhaseAfter(rendered, 'cold', '-1');
+      waitForFormLibValidation(rendered);
+      expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
     test('should show spinner for node attributes input when loading', async () => {
       server.respondImmediately = false;
@@ -646,7 +635,7 @@ describe('edit policy', () => {
       await activatePhase(rendered, 'cold');
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeTruthy();
       expect(rendered.find('.euiCallOut--warning').exists()).toBeFalsy();
-      expect(getNodeAttributeSelectLegacy(rendered, 'cold').exists()).toBeFalsy();
+      expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
     test('should show warning instead of node attributes input when none exist', async () => {
       http.setupNodeListResponse({
@@ -661,7 +650,7 @@ describe('edit policy', () => {
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       await openNodeAttributesSection(rendered, 'cold');
       expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeTruthy();
-      expect(getNodeAttributeSelectLegacy(rendered, 'cold').exists()).toBeFalsy();
+      expect(getNodeAttributeSelect(rendered, 'cold').exists()).toBeFalsy();
     });
     test('should show node attributes input when attributes exist', async () => {
       const rendered = mountWithIntl(component);
@@ -671,7 +660,7 @@ describe('edit policy', () => {
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       await openNodeAttributesSection(rendered, 'cold');
       expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
-      const nodeAttributesSelect = getNodeAttributeSelectLegacy(rendered, 'cold');
+      const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'cold');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
       expect(nodeAttributesSelect.find('option').length).toBe(2);
     });
@@ -683,7 +672,7 @@ describe('edit policy', () => {
       expect(rendered.find('.euiLoadingSpinner').exists()).toBeFalsy();
       await openNodeAttributesSection(rendered, 'cold');
       expect(findTestSubject(rendered, 'noNodeAttributesWarning').exists()).toBeFalsy();
-      const nodeAttributesSelect = getNodeAttributeSelectLegacy(rendered, 'cold');
+      const nodeAttributesSelect = getNodeAttributeSelect(rendered, 'cold');
       expect(nodeAttributesSelect.exists()).toBeTruthy();
       expect(findTestSubject(rendered, 'cold-viewNodeDetailsFlyoutButton').exists()).toBeFalsy();
       expect(nodeAttributesSelect.find('option').length).toBe(2);
@@ -702,10 +691,10 @@ describe('edit policy', () => {
       await noRollover(rendered);
       setPolicyName(rendered, 'mypolicy');
       await activatePhase(rendered, 'cold');
-      setPhaseAfterLegacy(rendered, 'cold', '1');
-      setPhaseIndexPriorityLegacy(rendered, 'cold', '-1');
-      await save(rendered);
-      expectedErrorMessages(rendered, [positiveNumberRequiredMessage]);
+      await setPhaseAfter(rendered, 'cold', '1');
+      await setPhaseIndexPriority(rendered, 'cold', '-1');
+      waitForFormLibValidation(rendered);
+      expectedErrorMessages(rendered, [i18nTexts.editPolicy.errors.nonNegativeNumberRequired]);
     });
     test('should show default allocation warning when no node roles are found', async () => {
       http.setupNodeListResponse({

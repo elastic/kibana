@@ -1,27 +1,29 @@
-.visLib {
+.vislib {
   flex: 1 1 0;
   display: flex;
   flex-direction: row;
   overflow: auto;
 
-  &.visLib--legend-left {
+  &.vislib--legend-left {
     flex-direction: row-reverse;
   }
 
-  &.visLib--legend-right {
+  &.vislib--legend-right {
     flex-direction: row;
   }
 
-  &.visLib--legend-top {
+  &.vislib--legend-top {
     flex-direction: column-reverse;
   }
 
-  &.visLib--legend-bottom {
+  &.vislib--legend-bottom {
     flex-direction: column;
   }
 }
 
-.visLib__chart {
+.vislib__chart,
+.vislib__wrapper,
+.vislib__container {
   display: flex;
   flex: 1 1 auto;
   min-height: 0;

@@ -88,6 +88,7 @@ export interface FlyoutState {
   conflictedSavedObjectsLinkedToSavedSearches?: any[];
   conflictedSearchDocs?: any[];
   unmatchedReferences?: ProcessedImportResponse['unmatchedReferences'];
+  unmatchedReferencesTablePagination: { pageIndex: number; pageSize: number };
   failedImports?: ProcessedImportResponse['failedImports'];
   successfulImports?: ProcessedImportResponse['successfulImports'];
   conflictingRecord?: ConflictingRecord;
@@ -115,6 +116,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       conflictedSavedObjectsLinkedToSavedSearches: undefined,
       conflictedSearchDocs: undefined,
       unmatchedReferences: undefined,
+      unmatchedReferencesTablePagination: {
+        pageIndex: 0,
+        pageSize: 5,
+      },
       conflictingRecord: undefined,
       error: undefined,
       file: undefined,
@@ -467,7 +472,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   };
 
   renderUnmatchedReferences() {
-    const { unmatchedReferences } = this.state;
+    const { unmatchedReferences, unmatchedReferencesTablePagination: tablePagination } = this.state;
 
     if (!unmatchedReferences) {
       return null;
@@ -527,22 +532,28 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           { defaultMessage: 'New index pattern' }
         ),
         render: (id: string) => {
-          const options = this.state.indexPatterns!.map(
-            (indexPattern) =>
-              ({
-                text: indexPattern.title,
-                value: indexPattern.id,
-                'data-test-subj': `indexPatternOption-${indexPattern.title}`,
-              } as { text: string; value: string; 'data-test-subj'?: string })
-          );
+          const options = [
+            {
+              text: '-- Skip Import --',
+              value: '',
+            },
+            ...this.state.indexPatterns!.map(
+              (indexPattern) =>
+                ({
+                  text: indexPattern.title,
+                  value: indexPattern.id,
+                  'data-test-subj': `indexPatternOption-${indexPattern.title}`,
+                } as { text: string; value: string; 'data-test-subj'?: string })
+            ),
+          ];
 
-          options.unshift({
-            text: '-- Skip Import --',
-            value: '',
-          });
+          const selectedValue =
+            unmatchedReferences?.find((unmatchedRef) => unmatchedRef.existingIndexPatternId === id)
+              ?.newIndexPatternId ?? '';
 
           return (
             <EuiSelect
+              value={selectedValue}
               data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={(e) => this.onIndexChanged(id, e)}
               options={options}
@@ -553,6 +564,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     ];
 
     const pagination = {
+      ...tablePagination,
       pageSizeOptions: [5, 10, 25],
     };
 
@@ -561,6 +573,16 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
         items={unmatchedReferences as any[]}
         columns={columns}
         pagination={pagination}
+        onTableChange={({ page }) => {
+          if (page) {
+            this.setState({
+              unmatchedReferencesTablePagination: {
+                pageSize: page.size,
+                pageIndex: page.index,
+              },
+            });
+          }
+        }}
       />
     );
   }
