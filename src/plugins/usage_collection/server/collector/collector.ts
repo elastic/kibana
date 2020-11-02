@@ -27,14 +27,9 @@ import {
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
-export type AllowedSchemaTypes =
-  | 'keyword'
-  | 'text'
-  | 'number'
-  | 'boolean'
-  | 'long'
-  | 'date'
-  | 'float';
+export type AllowedSchemaNumberTypes = 'long' | 'integer' | 'short' | 'byte' | 'double' | 'float';
+
+export type AllowedSchemaTypes = AllowedSchemaNumberTypes | 'keyword' | 'text' | 'boolean' | 'date';
 
 export interface SchemaField {
   type: string;

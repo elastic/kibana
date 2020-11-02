@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { getMoment } from '../../../common/lib/get_moment';
 import { get, cloneDeep } from 'lodash';
 import { WatchStatus } from '../watch_status';

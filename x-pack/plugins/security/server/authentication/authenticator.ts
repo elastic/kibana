@@ -333,7 +333,7 @@ export class Authenticator {
       this.logger.debug('Redirecting request to Login Selector.');
       return AuthenticationResult.redirectTo(
         `${this.options.basePath.serverBasePath}/login?next=${encodeURIComponent(
-          `${this.options.basePath.get(request)}${request.url.path}`
+          `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
         )}`
       );
     }
@@ -728,7 +728,7 @@ export class Authenticator {
       preAccessRedirectURL = `${preAccessRedirectURL}?next=${encodeURIComponent(
         authenticationResult.redirectURL ||
           redirectURL ||
-          `${this.options.basePath.get(request)}${request.url.path}`
+          `${this.options.basePath.get(request)}${request.url.pathname}${request.url.search}`
       )}`;
     } else if (redirectURL && !authenticationResult.redirectURL) {
       preAccessRedirectURL = redirectURL;
