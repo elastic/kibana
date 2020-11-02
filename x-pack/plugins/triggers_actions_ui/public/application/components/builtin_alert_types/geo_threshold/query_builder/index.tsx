@@ -83,19 +83,6 @@ function validateQuery(query: Query) {
   return true;
 }
 
-const getEsFormattedQuery = (query: Query, indexPattern: IIndexPattern) => {
-  let esFormattedQuery;
-
-  const queryLanguage = query.language;
-  if (queryLanguage === 'kuery') {
-    const ast = esKuery.fromKueryExpression(query.query);
-    esFormattedQuery = esKuery.toElasticsearchQuery(ast, indexPattern);
-  } else {
-    esFormattedQuery = esQuery.luceneStringToDsl(query.query);
-  }
-  return esFormattedQuery;
-};
-
 export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeParamsExpressionProps<
   GeoThresholdAlertParams,
   AlertsContextValue
@@ -296,8 +283,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
           query={tempIndexQuery}
           onChange={(query) => {
             if (validateQuery(query)) {
-              const esFormattedQuery = getEsFormattedQuery(query, indexPattern);
-              setAlertParams('indexQuery', esFormattedQuery);
+              setAlertParams('indexQuery', query);
             }
             setTempIndexQuery(query);
           }}
@@ -380,8 +366,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
           query={tempBoundaryIndexQuery}
           onChange={(query) => {
             if (validateQuery(query)) {
-              const esFormattedQuery = getEsFormattedQuery(query, boundaryIndexPattern);
-              setAlertParams('boundaryIndexQuery', esFormattedQuery);
+              setAlertParams('boundaryIndexQuery', query);
             }
             setTempBoundaryIndexQuery(query);
           }}
