@@ -13,6 +13,7 @@ import { CoreSetup } from 'src/core/server';
 import { CoreSetup as CoreSetup_2 } from 'kibana/server';
 import { CoreStart } from 'src/core/server';
 import { CoreStart as CoreStart_2 } from 'kibana/server';
+import { DatatableColumn } from 'src/plugins/expressions';
 import { Duration } from 'moment';
 import { ElasticsearchClient } from 'kibana/server';
 import { Ensure } from '@kbn/utility-types';
@@ -26,6 +27,7 @@ import { ISearchSource } from 'src/plugins/data/public';
 import { KibanaRequest } from 'src/core/server';
 import { LegacyAPICaller } from 'kibana/server';
 import { Logger } from 'kibana/server';
+import { Logger as Logger_2 } from 'src/core/server';
 import { LoggerFactory } from '@kbn/logging';
 import { Moment } from 'moment';
 import moment from 'moment';
@@ -36,6 +38,7 @@ import { PathConfigType } from '@kbn/utils';
 import { Plugin as Plugin_2 } from 'src/core/server';
 import { Plugin as Plugin_3 } from 'kibana/server';
 import { PluginInitializerContext as PluginInitializerContext_2 } from 'src/core/server';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { RequestAdapter } from 'src/plugins/inspector/common';
 import { RequestHandlerContext } from 'src/core/server';
@@ -658,7 +661,7 @@ export const indexPatterns: {
 //
 // @public (undocumented)
 export class IndexPatternsFetcher {
-    constructor(callDataCluster: LegacyAPICaller);
+    constructor(elasticsearchClient: ElasticsearchClient, allowNoIndices?: boolean);
     getFieldsForTimePattern(options: {
         pattern: string;
         metaFields: string[];
@@ -669,7 +672,7 @@ export class IndexPatternsFetcher {
         pattern: string | string[];
         metaFields?: string[];
         fieldCapsOptions?: {
-            allowNoIndices: boolean;
+            allow_no_indices: boolean;
         };
     }): Promise<FieldDescriptor[]>;
 }
@@ -1113,8 +1116,8 @@ export function usageProvider(core: CoreSetup_2): SearchUsage;
 //
 // src/plugins/data/common/es_query/filters/meta_filter.ts:53:3 - (ae-forgotten-export) The symbol "FilterState" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/meta_filter.ts:54:3 - (ae-forgotten-export) The symbol "FilterMeta" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:58:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:56:45 - (ae-forgotten-export) The symbol "IndexPatternFieldMap" needs to be exported by the entry point index.d.ts
+// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:62:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildCustomFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:40:23 - (ae-forgotten-export) The symbol "buildFilter" needs to be exported by the entry point index.d.ts
 // src/plugins/data/server/index.ts:71:21 - (ae-forgotten-export) The symbol "getEsQueryConfig" needs to be exported by the entry point index.d.ts

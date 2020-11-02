@@ -28,5 +28,7 @@ export const boot = (bootDeps: BootDeps) => {
     </I18nContext>,
     element
   );
-  return () => unmountComponentAtNode(element);
+  return () => {
+    unmountComponentAtNode(element);
+  };
 };

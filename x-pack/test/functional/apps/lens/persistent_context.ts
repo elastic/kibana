@@ -66,5 +66,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(timeRange.end).to.equal('Sep 19, 2025 @ 06:31:44.000');
       await filterBar.hasFilter('ip', '97.220.3.248', false, true);
     });
+
+    it('keeps selected index pattern after refresh', async () => {
+      await PageObjects.lens.switchDataPanelIndexPattern('otherpattern');
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('otherpattern');
+    });
+
+    it('keeps time range and pinned filters after refreshing directly after saving', async () => {
+      // restore defaults so visualization becomes saveable
+      await security.testUser.restoreDefaults();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+      await PageObjects.lens.save('persistentcontext');
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const timeRange = await PageObjects.timePicker.getTimeConfig();
+      expect(timeRange.start).to.equal('Sep 7, 2015 @ 06:31:44.000');
+      expect(timeRange.end).to.equal('Sep 19, 2025 @ 06:31:44.000');
+      await filterBar.hasFilter('ip', '97.220.3.248', false, true);
+    });
   });
 }

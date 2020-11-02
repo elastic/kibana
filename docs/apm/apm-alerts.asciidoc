@@ -18,12 +18,22 @@ image::apm/images/apm-alert.png[Create an alert in the APM app]
 For a walkthrough of the alert flyout panel, including detailed information on each configurable property,
 see Kibana's <<defining-alerts,defining alerts>>.
 
-The APM app supports two different types of threshold alerts: transaction duration, and error rate.
-Below, we'll create one of each.
+The APM app supports four different types of alerts:
+
+* Transaction duration anomaly:
+alerts when the service's transaction duration reaches a certain anomaly score
+* Transaction duration threshold:
+alerts when the service's transaction duration exceeds a given time limit over a given time frame
+* Transaction error rate threshold:
+alerts when the service's transaction error rate is above the selected rate over a given time frame
+* Error count threshold:
+alerts when service exceeds a selected number of errors over a given time frame
+
+Below, we'll walk through the creation of two of these alerts.
 
 [float]
 [[apm-create-transaction-alert]]
-=== Create a transaction duration alert
+=== Example: create a transaction duration alert
 
 Transaction duration alerts trigger when the duration of a specific transaction type in a service exceeds a defined threshold.
 This guide will create an alert for the `opbeans-java` service based on the following criteria:
@@ -57,9 +67,9 @@ Enter a name for the connector,
 and paste the webhook URL.
 See Slack's webhook documentation if you need to create one.
 
-Add a message body in markdown format.
+A default message is provided as a starting point for your alert.
 You can use the https://mustache.github.io/[Mustache] template syntax, i.e., `{{variable}}`
-to pass alert values at the time a condition is detected to an action.
+to pass additional alert values at the time a condition is detected to an action.
 A list of available variables can be accessed by selecting the
 **add variable** button image:apm/images/add-variable.png[add variable button].
 
@@ -67,7 +77,7 @@ Select **Save**. The alert has been created and is now active!
 
 [float]
 [[apm-create-error-alert]]
-=== Create an error rate alert
+=== Example: create an error rate alert
 
 Error rate alerts trigger when the number of errors in a service exceeds a defined threshold.
 This guide creates an alert for the `opbeans-python` service based on the following criteria:
@@ -94,9 +104,9 @@ Based on the alert criteria, define the following alert details:
 Select the **Email** action type and click **Create a connector**.
 Fill out the required details: sender, host, port, etc., and click **save**.
 
-Add a message body in markdown format.
+A default message is provided as a starting point for your alert.
 You can use the https://mustache.github.io/[Mustache] template syntax, i.e., `{{variable}}`
-to pass alert values at the time a condition is detected to an action.
+to pass additional alert values at the time a condition is detected to an action.
 A list of available variables can be accessed by selecting the
 **add variable** button image:apm/images/add-variable.png[add variable button].
 

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject } from 'kibana/server';
+import { SavedObject, SavedObjectsFindResponse } from 'kibana/server';
 import {
   ESCasesConfigureAttributes,
   CommentAttributes,
@@ -323,5 +323,14 @@ export const mockCaseConfigure: Array<SavedObject<ESCasesConfigureAttributes>> =
     references: [],
     updated_at: '2020-04-09T09:43:51.778Z',
     version: 'WzYsMV0=',
+  },
+];
+
+export const mockCaseConfigureFind: Array<SavedObjectsFindResponse<ESCasesConfigureAttributes>> = [
+  {
+    page: 1,
+    per_page: 5,
+    total: mockCaseConfigure.length,
+    saved_objects: [{ ...mockCaseConfigure[0], score: 0 }],
   },
 ];
