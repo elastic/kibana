@@ -146,6 +146,7 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
               aria-labelledby="CanvasAssetManagerLabel"
               className="euiProgress euiProgress--native euiProgress--s euiProgress--secondary"
               max={25000}
+              style={null}
               value={0}
             />
           </div>
@@ -163,6 +164,11 @@ exports[`Storyshots components/Assets/AssetManager no assets 1`] = `
         <button
           className="euiButton euiButton--primary euiButton--small"
           onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
           type="button"
         >
           <span
@@ -637,6 +643,7 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
               aria-labelledby="CanvasAssetManagerLabel"
               className="euiProgress euiProgress--native euiProgress--s euiProgress--secondary"
               max={25000}
+              style={null}
               value={2}
             />
           </div>
@@ -654,6 +661,11 @@ exports[`Storyshots components/Assets/AssetManager two assets 1`] = `
         <button
           className="euiButton euiButton--primary euiButton--small"
           onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
           type="button"
         >
           <span

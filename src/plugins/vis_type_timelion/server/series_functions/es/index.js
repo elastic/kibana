@@ -133,6 +133,7 @@ export default new Datasource('es', {
     const resp = await tlConfig.context.search
       .search(body, {
         strategy: ES_SEARCH_STRATEGY,
+        sessionId: tlConfig.request?.body.sessionId,
       })
       .toPromise();
 

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import url from 'url';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
 
@@ -20,10 +19,7 @@ export function setHelpExtension({ chrome, http }: CoreStart) {
       },
       {
         linkType: 'custom',
-        href: url.format({
-          pathname: http.basePath.prepend('/app/kibana'),
-          hash: '/management/stack/upgrade_assistant',
-        }),
+        href: http.basePath.prepend('/app/management/stack/upgrade_assistant'),
         content: i18n.translate('xpack.apm.helpMenu.upgradeAssistantLink', {
           defaultMessage: 'Upgrade assistant',
         }),

@@ -18,14 +18,16 @@
  */
 
 import uuid from 'uuid';
-import { Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { HttpStart, PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
-import { ISessionService } from '../../common/search';
 import { ConfigSchema } from '../../config';
+import { ISessionService } from '../../common';
 
 export class SessionService implements ISessionService {
-  private sessionId?: string;
-  private session$: Subject<string | undefined> = new Subject();
+  private session$ = new BehaviorSubject<string | undefined>(undefined);
+  private get sessionId() {
+    return this.session$.getValue();
+  }
   private appChangeSubscription$?: Subscription;
   private curApp?: string;
   private http: HttpStart;
@@ -77,15 +79,17 @@ export class SessionService implements ISessionService {
 
   public start() {
     this._isStored = false;
-    this.sessionId = uuid.v4();
-    this.session$.next(this.sessionId);
-    return this.sessionId;
+    this.session$.next(uuid.v4());
+    return this.sessionId!;
+  }
+
+  public restore(sessionId: string) {
+    this.session$.next(sessionId);
   }
 
   public clear() {
     this._isStored = false;
-    this.sessionId = undefined;
-    this.session$.next(this.sessionId);
+    this.session$.next(undefined);
   }
 
   public async save() {

@@ -64,7 +64,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
-    const aborted$ = from(toPromise(combinedSignal));
+    const abortedPromise = toPromise(combinedSignal);
     const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
@@ -93,7 +93,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
           })
         );
       }),
-      takeUntil(aborted$),
+      takeUntil(from(abortedPromise.promise)),
       catchError((e: any) => {
         // If we haven't received the response to the initial request, including the ID, then
         // we don't need to send a follow-up request to delete this search. Otherwise, we
@@ -106,6 +106,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
+        abortedPromise.cleanup();
       })
     );
   }
