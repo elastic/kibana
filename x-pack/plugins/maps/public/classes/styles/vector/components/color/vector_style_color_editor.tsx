@@ -6,12 +6,15 @@
 
 import React from 'react';
 
-import { StylePropEditor } from '../style_prop_editor';
-import { DynamicColorForm } from './dynamic_color_form';
-import { StaticColorForm } from './static_color_form';
 import { i18n } from '@kbn/i18n';
+import { Props, StylePropEditor } from '../style_prop_editor';
+// @ts-expect-error
+import { DynamicColorForm } from './dynamic_color_form';
+// @ts-expect-error
+import { StaticColorForm } from './static_color_form';
+import { ColorDynamicOptions, ColorStaticOptions } from '../../../../../../common/descriptor_types';
 
-export function VectorStyleColorEditor(props) {
+export function VectorStyleColorEditor(props: Props<ColorStaticOptions, ColorDynamicOptions>) {
   const colorForm = props.styleProperty.isDynamic() ? (
     <DynamicColorForm {...props} />
   ) : (
@@ -19,7 +22,7 @@ export function VectorStyleColorEditor(props) {
   );
 
   return (
-    <StylePropEditor
+    <StylePropEditor<ColorStaticOptions, ColorDynamicOptions>
       {...props}
       customStaticOptionLabel={i18n.translate(
         'xpack.maps.styles.color.staticDynamicSelect.staticLabel',
