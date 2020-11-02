@@ -45,13 +45,12 @@ export function getActionType({
 }
 
 // action executor
-
 async function executor(
   { logger, caseService, caseConfigureService, userActionService }: GetActionTypeParams,
   execOptions: CaseActionTypeExecutorOptions
 ): Promise<ActionTypeExecutorResult<CaseExecutorResponse | {}>> {
   const { actionId, params, services } = execOptions;
-  const { subAction, subActionParams } = params as CaseExecutorParams;
+  const { subAction, subActionParams } = params;
   let data: CaseExecutorResponse | null = null;
 
   const { savedObjectsClient } = services;
@@ -70,14 +69,11 @@ async function executor(
   }
 
   if (subAction === 'create') {
-    const createParams = subActionParams as ExecutorSubActionCreateParams;
-
-    data = await caseClient.create({ theCase: createParams as CasePostRequest });
+    data = await caseClient.create({ theCase: subActionParams as CasePostRequest });
   }
 
   if (subAction === 'update') {
-    const updateParams = subActionParams as ExecutorSubActionUpdateParams;
-    const updateParamsWithoutNullValues = Object.entries(updateParams).reduce(
+    const updateParamsWithoutNullValues = Object.entries(subActionParams).reduce(
       (acc, [key, value]) => ({
         ...acc,
         ...(value != null ? { [key]: value } : {}),
@@ -89,9 +85,7 @@ async function executor(
   }
 
   if (subAction === 'addComment') {
-    const addCommentParams = subActionParams as ExecutorSubActionAddCommentParams;
-    const { caseId, comment } = addCommentParams;
-
+    const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
     data = await caseClient.addComment({ caseId, comment });
   }
 
