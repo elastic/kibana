@@ -49,6 +49,11 @@ export const CommentsResponseRt = rt.type({
   total: rt.number,
 });
 
+export enum CommentType {
+  user = 'user',
+  alert = 'alert',
+}
+
 export const AllCommentsResponseRt = rt.array(CommentResponseRt);
 
 export type CommentAttributes = rt.TypeOf<typeof CommentAttributesRt>;

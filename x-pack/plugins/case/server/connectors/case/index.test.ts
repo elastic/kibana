@@ -8,7 +8,7 @@ import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
 import { actionsMock } from '../../../../actions/server/mocks';
 import { validateParams } from '../../../../actions/server/lib';
-import { ConnectorTypes } from '../../../common/api';
+import { ConnectorTypes, CommentType } from '../../../common/api';
 import {
   createCaseServiceMock,
   createConfigureServiceMock,
@@ -619,7 +619,7 @@ describe('case connector', () => {
           subAction: 'addComment',
           subActionParams: {
             caseId: 'case-id',
-            comment: { comment: 'a comment', type: 'user' },
+            comment: { comment: 'a comment', type: CommentType.user },
           },
         };
 
@@ -842,7 +842,7 @@ describe('case connector', () => {
           comments: [
             {
               comment: 'a comment',
-              type: 'user' as const,
+              type: CommentType.user as const,
               created_at: '2020-10-23T21:54:48.952Z',
               created_by: {
                 email: 'd00d@awesome.com',
@@ -866,7 +866,7 @@ describe('case connector', () => {
           subAction: 'addComment',
           subActionParams: {
             caseId: 'case-id',
-            comment: { comment: 'a comment', type: 'user' },
+            comment: { comment: 'a comment', type: CommentType.user },
           },
         };
 
@@ -883,7 +883,7 @@ describe('case connector', () => {
         expect(result).toEqual({ actionId, status: 'ok', data: commentReturn });
         expect(mockCaseClient.addComment).toHaveBeenCalledWith({
           caseId: 'case-id',
-          comment: { comment: 'a comment', type: 'user' },
+          comment: { comment: 'a comment', type: CommentType.user },
         });
       });
     });

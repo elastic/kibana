@@ -22,6 +22,7 @@ import {
   CommentAttributes,
   ESCaseConnector,
   ESCaseAttributes,
+  CommentType,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -57,7 +58,7 @@ export const transformNewCase = ({
 
 interface NewCommentArgs {
   comment: string;
-  type: 'user' | 'alert';
+  type: CommentType;
   createdDate: string;
   email?: string | null;
   full_name?: string | null;

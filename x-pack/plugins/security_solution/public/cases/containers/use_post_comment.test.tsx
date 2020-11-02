@@ -5,6 +5,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+
+import { CommentType } from '../../../../case/common/api';
 import { usePostComment, UsePostComment } from './use_post_comment';
 import { basicCaseId } from './mock';
 import * as api from './api';
@@ -15,7 +17,7 @@ describe('usePostComment', () => {
   const abortCtrl = new AbortController();
   const samplePost = {
     comment: 'a comment',
-    type: 'user' as const,
+    type: CommentType.user,
   };
   const updateCaseCallback = jest.fn();
   beforeEach(() => {
