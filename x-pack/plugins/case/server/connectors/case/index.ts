@@ -12,14 +12,12 @@ import { CasePatchRequest, CasePostRequest } from '../../../common/api';
 import { createCaseClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
 import {
-  CaseExecutorParams,
   CaseExecutorResponse,
-  ExecutorSubActionCreateParams,
-  ExecutorSubActionUpdateParams,
   ExecutorSubActionAddCommentParams,
   CaseActionType,
   CaseActionTypeExecutorOptions,
 } from './types';
+import * as i18n from './translations';
 
 import { GetActionTypeParams } from '..';
 
@@ -35,7 +33,7 @@ export function getActionType({
   return {
     id: '.case',
     minimumLicenseRequired: 'gold',
-    name: 'Case',
+    name: i18n.NAME,
     validate: {
       config: CaseConfigurationSchema,
       params: CaseExecutorParamsSchema,
