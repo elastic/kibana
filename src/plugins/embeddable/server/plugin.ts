@@ -27,12 +27,13 @@ import {
   EmbeddableRegistryDefinition,
 } from './types';
 import {
+  baseEmbeddableMigrations,
   extractBaseEmbeddableInput,
   injectBaseEmbeddableInput,
   telemetryBaseEmbeddableInput,
 } from '../common/lib/migrate_base_input';
 import { SerializableState } from '../../kibana_utils/common';
-import { EmbeddableInput } from '../common/types';
+import { EmbeddableStateWithType } from '../common/types';
 
 export interface EmbeddableSetup {
   getAttributeService: any;
@@ -56,14 +57,15 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
       telemetry: this.telemetry,
       extract: this.extract,
       inject: this.inject,
+      migrate: this.migrate,
     };
   }
 
   public stop() {}
 
-  private telemetry = (state: EmbeddableInput, telemetryData: Record<string, any> = {}) => {
+  private telemetry = (state: EmbeddableStateWithType, telemetryData: Record<string, any> = {}) => {
     const enhancements: Record<string, any> = state.enhancements || {};
-    const factory = this.getEmbeddableFactory(state.id);
+    const factory = this.getEmbeddableFactory(state.type);
 
     let telemetry = telemetryBaseEmbeddableInput(state, telemetryData);
     if (factory) {
@@ -77,9 +79,9 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
     return telemetry;
   };
 
-  private extract = (state: EmbeddableInput) => {
+  private extract = (state: EmbeddableStateWithType) => {
     const enhancements = state.enhancements || {};
-    const factory = this.getEmbeddableFactory(state.id);
+    const factory = this.getEmbeddableFactory(state.type);
 
     const baseResponse = extractBaseEmbeddableInput(state);
     let updatedInput = baseResponse.state;
@@ -107,9 +109,9 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
     };
   };
 
-  private inject = (state: EmbeddableInput, references: SavedObjectReference[]) => {
+  private inject = (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const enhancements = state.enhancements || {};
-    const factory = this.getEmbeddableFactory(state.id);
+    const factory = this.getEmbeddableFactory(state.type);
 
     let updatedInput = injectBaseEmbeddableInput(state, references);
 
@@ -129,6 +131,27 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
     return updatedInput;
   };
 
+  private migrate = (state: EmbeddableStateWithType, version: string) => {
+    const enhancements = state.enhancements || {};
+    const factory = this.getEmbeddableFactory(state.id);
+
+    let updatedInput = baseEmbeddableMigrations[version](state);
+
+    if (factory && factory.migrations[version]) {
+      updatedInput = factory.migrations[version](updatedInput);
+    }
+
+    updatedInput.enhancements = {};
+    Object.keys(enhancements).forEach((key) => {
+      if (!enhancements[key]) return;
+      (updatedInput.enhancements! as Record<string, any>)[key] = this.getEnhancement(
+        key
+      ).migrations[version](enhancements[key] as SerializableState);
+    });
+
+    return updatedInput;
+  };
+
   private registerEnhancement = (enhancement: EnhancementRegistryDefinition) => {
     if (this.enhancements.has(enhancement.id)) {
       throw new Error(`enhancement with id ${enhancement.id} already exists in the registry`);
@@ -142,6 +165,7 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
         ((state: SerializableState) => {
           return { state, references: [] };
         }),
+      migrations: enhancement.migrations || {},
     });
   };
 
@@ -154,6 +178,7 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
         extract: (state: SerializableState) => {
           return { state, references: [] };
         },
+        migrations: {},
       }
     );
   };
@@ -168,7 +193,8 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
       id: factory.id,
       telemetry: factory.telemetry || (() => ({})),
       inject: factory.inject || identity,
-      extract: factory.extract || ((state: EmbeddableInput) => ({ state, references: [] })),
+      extract: factory.extract || ((state: EmbeddableStateWithType) => ({ state, references: [] })),
+      migrations: factory.migrations || {},
     });
   };
 
@@ -177,10 +203,11 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
       this.embeddableFactories.get(embeddableFactoryId) || {
         id: 'unknown',
         telemetry: () => ({}),
-        inject: (state: EmbeddableInput) => state,
-        extract: (state: EmbeddableInput) => {
+        inject: (state: EmbeddableStateWithType) => state,
+        extract: (state: EmbeddableStateWithType) => {
           return { state, references: [] };
         },
+        migrations: {},
       }
     );
   };

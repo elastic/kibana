@@ -52,13 +52,15 @@ import {
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
 import {
+  baseEmbeddableMigrations,
   extractBaseEmbeddableInput,
   injectBaseEmbeddableInput,
   telemetryBaseEmbeddableInput,
 } from '../common/lib/migrate_base_input';
-import { PersistableState, SerializableState } from '../../kibana_utils/common';
+import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
 import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
 import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
+import { EmbeddableStateWithType } from '../common/types';
 
 export interface EmbeddableSetupDependencies {
   data: DataPublicPluginSetup;
@@ -84,7 +86,7 @@ export interface EmbeddableSetup {
   setCustomEmbeddableFactoryProvider: (customProvider: EmbeddableFactoryProvider) => void;
 }
 
-export interface EmbeddableStart extends PersistableState<EmbeddableInput> {
+export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
@@ -210,6 +212,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       telemetry: this.telemetry,
       extract: this.extract,
       inject: this.inject,
+      migrate: this.migrate,
     };
   }
 
@@ -219,7 +222,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
   }
 
-  private telemetry = (state: EmbeddableInput, telemetryData: Record<string, any> = {}) => {
+  private telemetry = (state: EmbeddableStateWithType, telemetryData: Record<string, any> = {}) => {
     const enhancements: Record<string, any> = state.enhancements || {};
     const factory = this.getEmbeddableFactory(state.id);
 
@@ -235,7 +238,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return telemetry;
   };
 
-  private extract = (state: EmbeddableInput) => {
+  private extract = (state: EmbeddableStateWithType) => {
     const enhancements = state.enhancements || {};
     const factory = this.getEmbeddableFactory(state.id);
 
@@ -265,7 +268,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     };
   };
 
-  private inject = (state: EmbeddableInput, references: SavedObjectReference[]) => {
+  private inject = (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const enhancements = state.enhancements || {};
     const factory = this.getEmbeddableFactory(state.id);
 
@@ -287,6 +290,29 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return updatedInput;
   };
 
+  private migrate = (state: SerializableState, version: string) => {
+    const enhancements: SerializableState = (state.enhancements as SerializableState) || {};
+    const factory = this.getEmbeddableFactory(state.type as string);
+
+    let updatedInput = baseEmbeddableMigrations[version](state);
+
+    if (factory && factory.migrations[version]) {
+      updatedInput = factory.migrations[version](updatedInput);
+    }
+
+    updatedInput.enhancements = {};
+    Object.keys(enhancements).forEach((key) => {
+      if (!enhancements[key]) return;
+      const migrations = this.getEnhancement(key).migrations;
+      if (!migrations[version]) return;
+      (updatedInput.enhancements as SerializableState)[key] = migrations[version](
+        enhancements[key] as SerializableState
+      );
+    });
+
+    return updatedInput;
+  };
+
   private registerEnhancement = (enhancement: EnhancementRegistryDefinition) => {
     if (this.enhancements.has(enhancement.id)) {
       throw new Error(`enhancement with id ${enhancement.id} already exists in the registry`);
@@ -300,6 +326,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         ((state: SerializableState) => {
           return { state, references: [] };
         }),
+      migrations: enhancement.migrations || {},
     });
   };
 
@@ -312,6 +339,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
         extract: (state: SerializableState) => {
           return { state, references: [] };
         },
+        migrations: {},
       }
     );
   };

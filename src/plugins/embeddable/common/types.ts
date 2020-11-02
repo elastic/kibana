@@ -73,3 +73,5 @@ export type EmbeddableInput = {
    */
   searchSessionId?: string;
 };
+
+export type EmbeddableStateWithType = EmbeddableInput & { type: string };

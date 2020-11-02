@@ -17,17 +17,16 @@
  * under the License.
  */
 
-export * from './defer';
-export * from './field_wildcard';
-export * from './of';
-export * from './ui';
-export * from './state_containers';
-export * from './typed_json';
-export * from './errors';
-export { createGetterSetter, Get, Set } from './create_getter_setter';
-export { distinctUntilChangedWithInitialValue } from './distinct_until_changed_with_initial_value';
-export { url } from './url';
-export { now } from './now';
-export { calculateObjectHash } from './calculate_object_hash';
-export * from './persistable_state';
-export * from './semver_gte';
+export const semverGte = (semver1: string, semver2: string) => {
+  const regex = /^([0-9]+)\.([0-9]+)\.([0-9]+)$/;
+  const matches1 = regex.exec(semver1) as RegExpMatchArray;
+  const matches2 = regex.exec(semver2) as RegExpMatchArray;
+
+  const [, major1, minor1, patch1] = matches1;
+  const [, major2, minor2, patch2] = matches2;
+
+  return (
+    major1 > major2 ||
+    (major1 === major2 && (minor1 > minor2 || (minor1 === minor2 && patch1 >= patch2)))
+  );
+};

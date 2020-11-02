@@ -108,6 +108,7 @@ describe('embeddable factory', () => {
     extract: jest.fn().mockImplementation((state) => ({ state, references: [] })),
     inject: jest.fn().mockImplementation((state) => state),
     telemetry: jest.fn().mockResolvedValue({}),
+    migrations: { '7.11.0': jest.fn().mockImplementation((state) => state) },
   } as any;
   const embeddableState = {
     id: embeddableFactoryId,
@@ -137,6 +138,11 @@ describe('embeddable factory', () => {
     start.telemetry(embeddableState, {});
     expect(embeddableFactory.telemetry).toBeCalledWith(embeddableState, {});
   });
+
+  test('embeddableFactory migrate function gets called when calling embeddable migrate', () => {
+    start.migrate(embeddableState, '7.11.0');
+    expect(embeddableFactory.migrations['7.11.0']).toBeCalledWith(embeddableState);
+  });
 });
 
 describe('embeddable enhancements', () => {
@@ -149,6 +155,7 @@ describe('embeddable enhancements', () => {
     extract: jest.fn().mockImplementation((state) => ({ state, references: [] })),
     inject: jest.fn().mockImplementation((state) => state),
     telemetry: jest.fn().mockResolvedValue({}),
+    migrations: { '7.11.0': jest.fn().mockImplementation((state) => state) },
   } as any;
   const embeddableState = {
     enhancements: {
@@ -178,5 +185,12 @@ describe('embeddable enhancements', () => {
   test('enhancement telemetry function gets called when calling embeddable telemetry', () => {
     start.telemetry(embeddableState, {});
     expect(embeddableEnhancement.telemetry).toBeCalledWith(embeddableState.enhancements.test, {});
+  });
+
+  test('enhancement migrate function gets called when calling embeddable migrate', () => {
+    start.migrate(embeddableState, '7.11.0');
+    expect(embeddableEnhancement.migrations['7.11.0']).toBeCalledWith(
+      embeddableState.enhancements.test
+    );
   });
 });
