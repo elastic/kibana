@@ -8,10 +8,13 @@ export interface ClassFeatureImportance {
   class_name: string | boolean;
   importance: number;
 }
+
+// TODO We should separate the interface because classes/importance
+// isn't both optional but either/or.
 export interface FeatureImportance {
   feature_name: string;
-  importance?: number;
   classes?: ClassFeatureImportance[];
+  importance?: number;
 }
 
 export interface TopClass {

@@ -183,12 +183,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformValidateBulkError(
-                rule.id,
-                rule,
-                ruleActions,
-                ruleStatuses.saved_objects[0]
-              );
+              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }
