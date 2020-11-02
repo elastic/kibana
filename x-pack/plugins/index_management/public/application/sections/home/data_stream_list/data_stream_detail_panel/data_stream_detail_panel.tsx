@@ -224,7 +224,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
             data-test-subj={'ilmPolicyLink'}
             {...reactRouterNavigate(history, ilmPolicyLink)}
           >
-            {ilmPolicyLink}
+            {ilmPolicyName}
           </EuiLink>
         ) : (
           ilmPolicyName || (
