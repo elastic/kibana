@@ -33,7 +33,11 @@ import {
 } from 'rxjs/operators';
 import { merge, Observable, pipe, Subscription } from 'rxjs';
 import { DashboardStateManager } from './dashboard_state_manager';
-import { SavedObjectNotFound } from '../../../kibana_utils/public';
+import {
+  createKbnUrlStateStorage,
+  SavedObjectNotFound,
+  withNotifyOnErrors,
+} from '../../../kibana_utils/public';
 import {
   DashboardAppComponentActiveState,
   DashboardAppComponentState,
@@ -99,7 +103,6 @@ const getChangesFromAppStateForContainerState = ({
   if (!dashboardContainer || isErrorEmbeddable(dashboardContainer)) {
     return appStateDashboardInput;
   }
-
   const containerInput = dashboardContainer.getInput();
   const differences: Partial<DashboardContainerInput> = {};
 
@@ -114,7 +117,7 @@ const getChangesFromAppStateForContainerState = ({
     differences.filters = appStateDashboardInput.filters;
   }
 
-  Object.keys(_.omit(containerInput, ['filters'])).forEach((key) => {
+  Object.keys(_.omit(containerInput, ['filters', 'searchSessionId'])).forEach((key) => {
     const containerValue = (containerInput as { [key: string]: unknown })[key];
     const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[key];
     if (!_.isEqual(containerValue, appStateValue)) {
@@ -303,10 +306,20 @@ const getFiltersSubscription = (props: {
     });
 };
 
+const isActiveState = (
+  testState: DashboardAppComponentState
+): testState is DashboardAppComponentActiveState => {
+  return Boolean(
+    testState.dashboardContainer &&
+      testState.dashboardStateManager &&
+      testState.indexPatterns &&
+      testState.savedDashboard
+  );
+};
+
 export function DashboardApp({
   savedDashboardId,
   history,
-  kbnUrlStateStorage,
   redirectToDashboard,
   embedSettings,
 }: DashboardAppProps) {
@@ -316,7 +329,7 @@ export function DashboardApp({
     // localStorage,
     embeddable,
     data,
-    // uiSettings,
+    uiSettings,
     // savedObjects,
     savedDashboards,
     initializerContext,
@@ -339,126 +352,25 @@ export function DashboardApp({
 
   const [state, setState] = useState<DashboardAppComponentState>({});
 
-  const isActiveState = (
-    testState: DashboardAppComponentState
-  ): testState is DashboardAppComponentActiveState => {
-    return Boolean(
-      testState.initialized &&
-        testState.dashboardContainer &&
-        testState.dashboardStateManager &&
-        testState.indexPatterns &&
-        testState.savedDashboard
-    );
-  };
-
   const refreshDashboardContainer = useCallback(() => {
-    if (!isActiveState(state)) {
+    if (!state.dashboardContainer || !state.dashboardStateManager) {
       return;
     }
-    const { dashboardStateManager, dashboardContainer } = state;
     const changes = getChangesFromAppStateForContainerState({
+      dashboardContainer: state.dashboardContainer,
       appStateDashboardInput: getDashboardContainerInput({
-        dashboardStateManager,
+        dashboardStateManager: state.dashboardStateManager,
         query: data.query,
         searchSessionId: data.search.session.start(),
       }),
-      dashboardContainer,
     });
-    if (changes && dashboardContainer) {
-      dashboardContainer.updateInput(changes);
+    if (changes) {
+      state.dashboardContainer.updateInput(changes);
     }
-  }, [state, data.query, data.search.session]);
+  }, [data.query, data.search.session, state.dashboardContainer, state.dashboardStateManager]);
 
-  const initializeStateSyncing = useCallback(
-    ({ savedDashboard }: { savedDashboard: DashboardSavedObject }) => {
-      const filterManager = data.query.filterManager;
-      const timefilter = data.query.timefilter.timefilter;
-      const queryStringManager = data.query.queryString;
-
-      const dashboardStateManager = new DashboardStateManager({
-        savedDashboard,
-        hideWriteControls: dashboardConfig.getHideWriteControls(),
-        kibanaVersion: initializerContext.env.packageInfo.version,
-        kbnUrlStateStorage,
-        history,
-        usageCollection,
-      });
-
-      // sync initial app filters from state to filterManager
-      // if there is an existing similar global filter, then leave it as global
-      filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
-      queryStringManager.setQuery(migrateLegacyQuery(dashboardStateManager.appState.query));
-
-      // setup syncing of app filters between appState and filterManager
-      const stopSyncingAppFilters = connectToQueryState(
-        data.query,
-        {
-          set: ({ filters, query }) => {
-            dashboardStateManager.setFilters(filters || []);
-            dashboardStateManager.setQuery(query || queryStringManager.getDefaultQuery());
-          },
-          get: () => ({
-            filters: dashboardStateManager.appState.filters,
-            query: dashboardStateManager.getQuery(),
-          }),
-          state$: dashboardStateManager.appState$.pipe(
-            map((appState) => ({
-              filters: appState.filters,
-              query: queryStringManager.formatQuery(appState.query),
-            }))
-          ),
-        },
-        {
-          filters: esFilters.FilterStateStore.APP_STATE,
-          query: true,
-        }
-      );
-
-      // The hash check is so we only update the time filter on dashboard open, not during
-      // normal cross app navigation.
-      if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-        const initialGlobalStateInUrl = kbnUrlStateStorage.get<QueryState>('_g');
-        if (!initialGlobalStateInUrl?.time) {
-          dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
-        }
-        if (!initialGlobalStateInUrl?.refreshInterval) {
-          dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
-        }
-      }
-
-      // starts syncing `_g` portion of url with query services
-      // it is important to start this syncing after `dashboardStateManager.syncTimefilterWithDashboard(timefilter);` above is run,
-      // otherwise it will case redundant browser history records
-      const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
-        data.query,
-        kbnUrlStateStorage
-      );
-
-      // starts syncing `_a` portion of url
-      dashboardStateManager.startStateSyncing();
-
-      return {
-        dashboardStateManager,
-        stopSyncingQueryServiceStateWithUrl,
-        stopSyncingAppFilters,
-      };
-    },
-    [
-      kbnUrlStateStorage,
-      dashboardConfig,
-      history,
-      usageCollection,
-      initializerContext.env,
-      data.query,
-    ]
-  );
-
-  // Dashboard loading useEffect
+  // Load Saved Dashboard
   useEffect(() => {
-    if (state.savedDashboard?.id === savedDashboardId && state.initialized) {
-      return;
-    }
-
     data.indexPatterns
       .ensureDefaultIndexPattern()
       ?.then(() => savedDashboards.get(savedDashboardId) as Promise<DashboardSavedObject>)
@@ -471,142 +383,228 @@ export function DashboardApp({
             savedDashboardId
           );
         }
-        const {
-          dashboardStateManager,
-          stopSyncingQueryServiceStateWithUrl,
-          stopSyncingAppFilters,
-        } = initializeStateSyncing({ savedDashboard });
-        chrome.setBreadcrumbs([
-          {
-            text: i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-              defaultMessage: 'Dashboard',
-            }),
-            href: DashboardConstants.LANDING_PAGE_PATH,
-          },
-          {
-            text: getDashboardTitle(
-              dashboardStateManager.getTitle(),
-              dashboardStateManager.getViewMode(),
-              dashboardStateManager.getIsDirty(data.query.timefilter.timefilter),
-              dashboardStateManager.isNew()
-            ),
-          },
-        ]);
-        const dashboardFactory = embeddable.getEmbeddableFactory<
-          DashboardContainerInput,
-          ContainerOutput,
-          DashboardContainer
-        >(DASHBOARD_CONTAINER_TYPE);
-        if (!dashboardFactory) {
-          throw new EmbeddableFactoryNotFoundError(
-            'dashboard app requires dashboard embeddable factory'
-          );
-        }
-        const subscriptions = new Subscription();
-        // const searchSessionId = data.search.session.start();
-        dashboardFactory
-          .create(
-            getDashboardContainerInput({
-              dashboardStateManager,
-              query: data.query,
-              searchSessionId: data.search.session.start(),
-            })
-          )
-          .then((dashboardContainer: DashboardContainer | ErrorEmbeddable | undefined) => {
-            if (!dashboardContainer || isErrorEmbeddable(dashboardContainer)) {
-              return;
-            }
-            subscriptions.add(
-              getInputSubscription({
-                dashboardContainer,
-                dashboardStateManager,
-                filterManager: data.query.filterManager,
-              })
-            );
-            subscriptions.add(
-              getOutputSubscription({
-                dashboardContainer,
-                indexPatterns,
-                onUpdateIndexPatterns: (newIndexPatterns) => {
-                  setState((s) => ({
-                    ...s,
-                    indexPatterns: newIndexPatterns,
-                  }));
-                },
-              })
-            );
-            subscriptions.add(
-              getFiltersSubscription({
-                query: data.query,
-                dashboardContainer,
-                dashboardStateManager,
-              })
-            );
-            dashboardStateManager.registerChangeListener(() => {
-              // we aren't checking dirty state because there are changes the container needs to know about
-              // that won't make the dashboard "dirty" - like a view mode change.
-              refreshDashboardContainer();
-            });
-            setState({
-              dashboardContainer,
-              dashboardStateManager,
-              savedDashboard,
-              initialized: true,
-            });
-            dashboardContainer.render(document.getElementById('dashboardViewport')!);
-          });
-        return () => {
-          dashboardStateManager.destroy();
-          state.dashboardContainer?.destroy();
-          subscriptions.unsubscribe();
-          stopSyncingQueryServiceStateWithUrl();
-          stopSyncingAppFilters();
-          data.search.session.clear();
-        };
-      })
-      .catch((error) => {
-        // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
-        // See https://github.com/elastic/kibana/issues/10951 for more context.
-        if (error instanceof SavedObjectNotFound && savedDashboardId === 'create') {
-          // Note preserve querystring part is necessary so the state is preserved through the redirect.
-          // I am not sure that I need to do this anymore
-          history.replace({
-            ...history.location, // preserve query,
-            pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
-          });
-          core.notifications.toasts.addWarning(
-            i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
-              defaultMessage:
-                'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
-            })
-          );
-          return new Promise(() => {});
-        } else {
-          // E.g. a corrupt or deleted dashboard
-          core.notifications.toasts.addDanger(error.message);
-          history.push(DashboardConstants.LANDING_PAGE_PATH);
-          return new Promise(() => {});
-        }
+        setState((s) => ({ ...s, savedDashboard }));
       });
+  }, [savedDashboardId, savedDashboards, chrome.recentlyAccessed, data.indexPatterns]);
+
+  // Build Dashboard State Manager when Saved Dashboard changes
+  useEffect(() => {
+    if (!state.savedDashboard) {
+      return;
+    }
+
+    const filterManager = data.query.filterManager;
+    const timefilter = data.query.timefilter.timefilter;
+    const queryStringManager = data.query.queryString;
+
+    const kbnUrlStateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: uiSettings.get('state:storeInSessionStorage'),
+      ...withNotifyOnErrors(core.notifications.toasts),
+    });
+
+    const dashboardStateManager = new DashboardStateManager({
+      savedDashboard: state.savedDashboard,
+      hideWriteControls: dashboardConfig.getHideWriteControls(),
+      kibanaVersion: initializerContext.env.packageInfo.version,
+      kbnUrlStateStorage,
+      history,
+      usageCollection,
+    });
+
+    // sync initial app filters from state to filterManager
+    // if there is an existing similar global filter, then leave it as global
+    filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
+    queryStringManager.setQuery(migrateLegacyQuery(dashboardStateManager.appState.query));
+
+    // setup syncing of app filters between appState and filterManager
+    const stopSyncingAppFilters = connectToQueryState(
+      data.query,
+      {
+        set: ({ filters, query }) => {
+          dashboardStateManager.setFilters(filters || []);
+          dashboardStateManager.setQuery(query || queryStringManager.getDefaultQuery());
+        },
+        get: () => ({
+          filters: dashboardStateManager.appState.filters,
+          query: dashboardStateManager.getQuery(),
+        }),
+        state$: dashboardStateManager.appState$.pipe(
+          map((appState) => ({
+            filters: appState.filters,
+            query: queryStringManager.formatQuery(appState.query),
+          }))
+        ),
+      },
+      {
+        filters: esFilters.FilterStateStore.APP_STATE,
+        query: true,
+      }
+    );
+
+    // The hash check is so we only update the time filter on dashboard open, not during
+    // normal cross app navigation.
+    if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
+      const initialGlobalStateInUrl = kbnUrlStateStorage.get<QueryState>('_g');
+      if (!initialGlobalStateInUrl?.time) {
+        dashboardStateManager.syncTimefilterWithDashboardTime(timefilter);
+      }
+      if (!initialGlobalStateInUrl?.refreshInterval) {
+        dashboardStateManager.syncTimefilterWithDashboardRefreshInterval(timefilter);
+      }
+    }
+
+    // starts syncing `_g` portion of url with query services
+    // it is important to start this syncing after `dashboardStateManager.syncTimefilterWithDashboard(timefilter);` above is run,
+    // otherwise it will case redundant browser history records
+    const { stop: stopSyncingQueryServiceStateWithUrl } = syncQueryStateWithUrl(
+      data.query,
+      kbnUrlStateStorage
+    );
+
+    // starts syncing `_a` portion of url
+    dashboardStateManager.startStateSyncing();
+
+    setState((s) => ({ ...s, dashboardStateManager }));
+
+    return () => {
+      dashboardStateManager.destroy();
+      stopSyncingAppFilters();
+      stopSyncingQueryServiceStateWithUrl();
+    };
   }, [
-    savedDashboardId,
-    state.savedDashboard?.id,
-    state.initialized,
-    chrome,
-    data.search.session,
-    refreshDashboardContainer,
-    embeddable,
-    data.query,
+    state.savedDashboard,
     history,
-    savedDashboards,
-    data.indexPatterns,
-    chrome.recentlyAccessed,
-    indexPatterns,
+    uiSettings,
+    data.query,
+    usageCollection,
+    dashboardConfig,
     core.notifications.toasts,
-    data.query.filterManager,
-    state.dashboardContainer?.destroy,
-    initializeStateSyncing,
+    initializerContext.env.packageInfo.version,
   ]);
+
+  // Build Dashboard Container when Dashboard State Manager changes
+  useEffect(() => {
+    if (!state.dashboardStateManager) {
+      return;
+    }
+
+    const dashboardStateManager = state.dashboardStateManager;
+
+    const dashboardFactory = embeddable.getEmbeddableFactory<
+      DashboardContainerInput,
+      ContainerOutput,
+      DashboardContainer
+    >(DASHBOARD_CONTAINER_TYPE);
+    if (!dashboardFactory) {
+      throw new EmbeddableFactoryNotFoundError(
+        'dashboard app requires dashboard embeddable factory'
+      );
+    }
+    dashboardFactory
+      .create(
+        getDashboardContainerInput({
+          dashboardStateManager,
+          query: data.query,
+          searchSessionId: data.search.session.start(),
+        })
+      )
+      .then((dashboardContainer: DashboardContainer | ErrorEmbeddable | undefined) => {
+        if (
+          !dashboardContainer ||
+          isErrorEmbeddable(dashboardContainer) ||
+          !dashboardStateManager
+        ) {
+          return;
+        }
+        setState((s) => ({ ...s, dashboardContainer }));
+      });
+  }, [state.dashboardStateManager, data.query, data.search.session, embeddable, indexPatterns]);
+
+  // Render Dashboard Container and manage subscriptions
+  useEffect(() => {
+    if (!state.dashboardStateManager || !state.dashboardContainer) {
+      return;
+    }
+
+    const dashboardStateManager = state.dashboardStateManager;
+    const dashboardContainer = state.dashboardContainer;
+    const subscriptions = new Subscription();
+
+    subscriptions.add(
+      getInputSubscription({
+        dashboardContainer,
+        dashboardStateManager,
+        filterManager: data.query.filterManager,
+      })
+    );
+    subscriptions.add(
+      getOutputSubscription({
+        dashboardContainer,
+        indexPatterns,
+        onUpdateIndexPatterns: (newIndexPatterns) => {
+          setState((s) => {
+            return {
+              ...s,
+              indexPatterns: newIndexPatterns,
+            };
+          });
+        },
+      })
+    );
+    subscriptions.add(
+      getFiltersSubscription({
+        query: data.query,
+        dashboardContainer,
+        dashboardStateManager,
+      })
+    );
+    dashboardStateManager.registerChangeListener(() => {
+      // we aren't checking dirty state because there are changes the container needs to know about
+      // that won't make the dashboard "dirty" - like a view mode change.
+      refreshDashboardContainer();
+    });
+
+    dashboardContainer.render(document.getElementById('dashboardViewport')!);
+
+    return () => {
+      dashboardContainer?.destroy();
+      subscriptions.unsubscribe();
+      data.search.session.clear();
+    };
+  }, [
+    data.query,
+    indexPatterns,
+    data.search.session,
+    state.dashboardContainer,
+    refreshDashboardContainer,
+    state.dashboardStateManager,
+  ]);
+
+  // Sync breadcrumbs when Dashboard State Manager changes
+  useEffect(() => {
+    if (!state.dashboardStateManager) {
+      return;
+    }
+    chrome.setBreadcrumbs([
+      {
+        text: i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
+          defaultMessage: 'Dashboard',
+        }),
+        onClick: () => {
+          redirectToDashboard({ listingFilter: '' });
+        },
+      },
+      {
+        text: getDashboardTitle(
+          state.dashboardStateManager.getTitle(),
+          state.dashboardStateManager.getViewMode(),
+          state.dashboardStateManager.getIsDirty(data.query.timefilter.timefilter),
+          state.dashboardStateManager.isNew()
+        ),
+      },
+    ]);
+  }, [state.dashboardStateManager, chrome, data.query.timefilter.timefilter, redirectToDashboard]);
 
   return (
     <>

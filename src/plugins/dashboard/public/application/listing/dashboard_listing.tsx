@@ -84,7 +84,7 @@ export const DashboardListing = ({
           if (matchingDashboards.length === 1) {
             redirectToDashboard({ id: matchingDashboards[0].id, useReplace: true });
           } else {
-            redirectToDashboard({ filter: title, useReplace: true });
+            redirectToDashboard({ listingFilter: title, useReplace: true });
           }
         });
     }

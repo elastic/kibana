@@ -49,14 +49,13 @@ export type RedirectToDashboard = (props: RedirectToDashboardProps) => void;
 
 export interface RedirectToDashboardProps {
   id?: string;
-  filter?: string;
+  listingFilter?: string;
   useReplace?: boolean;
 }
 export interface DashboardAppProps {
   savedDashboardId?: string;
   history: History; // TODO: Remove history after state deangularize?
   embedSettings?: DashboardEmbedSettings;
-  kbnUrlStateStorage: IKbnUrlStateStorage;
   redirectToDashboard: RedirectToDashboard;
 }
 
@@ -77,7 +76,6 @@ export interface DashboardSaveOptions {
 }
 
 export interface DashboardAppComponentState {
-  initialized?: boolean;
   savedDashboard?: SavedObjectDashboard;
   dashboardStateManager?: DashboardStateManager;
   dashboardContainer?: DashboardContainer;

@@ -23,6 +23,7 @@ import { I18nProvider } from '@kbn/i18n/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
 import { parse, ParsedQuery } from 'query-string';
+import { isNil } from 'lodash';
 import {
   createKbnUrlStateStorage,
   Storage,
@@ -109,12 +110,12 @@ export async function mountApp({
 
   const redirect = (
     routeProps: RouteComponentProps,
-    { id, useReplace, filter }: RedirectToDashboardProps
+    { id, useReplace, listingFilter: filter }: RedirectToDashboardProps
   ) => {
     const historyFunction = useReplace ? routeProps.history.replace : routeProps.history.push;
     const destination = id
       ? createDashboardEditUrl(id)
-      : filter
+      : !isNil(filter)
       ? createDashboardListingFilterUrl(filter)
       : DashboardConstants.CREATE_NEW_DASHBOARD_URL;
     historyFunction(destination);
@@ -139,7 +140,6 @@ export async function mountApp({
       <DashboardApp
         history={routeProps.history}
         embedSettings={embedSettings}
-        kbnUrlStateStorage={getUrlStateStorage(routeProps.history)}
         savedDashboardId={routeProps.match.params.id}
         redirectToDashboard={(props: RedirectToDashboardProps) => redirect(routeProps, props)}
       />
