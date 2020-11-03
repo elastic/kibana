@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { PackagePolicyInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
+import { NewPackagePolicyInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
 import {
   isAdvancedVar,
   PackagePolicyConfigValidationResults,
@@ -30,8 +30,8 @@ const FlexItemWithMaxWidth = styled(EuiFlexItem)`
 
 export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
   packageInputStream: RegistryStream;
-  packagePolicyInputStream: PackagePolicyInputStream;
-  updatePackagePolicyInputStream: (updatedStream: Partial<PackagePolicyInputStream>) => void;
+  packagePolicyInputStream: NewPackagePolicyInputStream;
+  updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
 }> = memo(

@@ -158,7 +158,6 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         },
         streams: [
           {
-            id: 'foo-foo',
             data_stream: { dataset: 'foo', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
@@ -174,13 +173,11 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         },
         streams: [
           {
-            id: 'bar-bar',
             data_stream: { dataset: 'bar', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: 'test_yaml: value', type: 'yaml' } },
           },
           {
-            id: 'bar-bar2',
             data_stream: { dataset: 'bar2', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: undefined, type: 'text' } },
@@ -197,13 +194,11 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         enabled: true,
         streams: [
           {
-            id: 'with-disabled-streams-disabled',
             data_stream: { dataset: 'disabled', type: 'logs' },
             enabled: false,
             vars: { 'var-name': { value: undefined, type: 'text' } },
           },
           {
-            id: 'with-disabled-streams-disabled-without-vars',
             data_stream: { dataset: 'disabled2', type: 'logs' },
             enabled: false,
           },
@@ -217,8 +212,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         },
         streams: [
           {
-            id: 'with-no-stream-vars-bar',
-            data_stream: { dataset: 'bar', type: 'logs' },
+            data_stream: { dataset: 'with-no-stream-vars-bar', type: 'logs' },
             enabled: true,
           },
         ],
@@ -240,7 +234,6 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         },
         streams: [
           {
-            id: 'foo-foo',
             data_stream: { dataset: 'foo', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: 'invalidyaml: test\n foo bar:', type: 'yaml' } },
@@ -256,13 +249,11 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         },
         streams: [
           {
-            id: 'bar-bar',
             data_stream: { dataset: 'bar', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: '    \n\n', type: 'yaml' } },
           },
           {
-            id: 'bar-bar2',
             data_stream: { dataset: 'bar2', type: 'logs' },
             enabled: true,
             vars: { 'var-name': { value: undefined, type: 'text' } },
@@ -279,7 +270,6 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         enabled: true,
         streams: [
           {
-            id: 'with-disabled-streams-disabled',
             data_stream: { dataset: 'disabled', type: 'logs' },
             enabled: false,
             vars: {
@@ -290,7 +280,6 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
             },
           },
           {
-            id: 'with-disabled-streams-disabled-without-vars',
             data_stream: { dataset: 'disabled2', type: 'logs' },
             enabled: false,
           },
@@ -304,8 +293,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         },
         streams: [
           {
-            id: 'with-no-stream-vars-bar',
-            data_stream: { dataset: 'bar', type: 'logs' },
+            data_stream: { dataset: 'with-no-stream-vars-bar', type: 'logs' },
             enabled: true,
           },
         ],
@@ -324,21 +312,21 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
           'foo-input2-var-name': null,
           'foo-input3-var-name': null,
         },
-        streams: { 'foo-foo': { vars: { 'var-name': null } } },
+        streams: { foo: { vars: { 'var-name': null } } },
       },
       bar: {
         vars: { 'bar-input-var-name': null, 'bar-input2-var-name': null },
         streams: {
-          'bar-bar': { vars: { 'var-name': null } },
-          'bar-bar2': { vars: { 'var-name': null } },
+          bar: { vars: { 'var-name': null } },
+          bar2: { vars: { 'var-name': null } },
         },
       },
       'with-disabled-streams': {
         streams: {
-          'with-disabled-streams-disabled': {
+          disabled: {
             vars: { 'var-name': null },
           },
-          'with-disabled-streams-disabled-without-vars': {},
+          disabled2: {},
         },
       },
       'with-no-stream-vars': {
@@ -368,7 +356,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
             'foo-input2-var-name': ['foo-input2-var-name is required'],
             'foo-input3-var-name': ['foo-input3-var-name is required'],
           },
-          streams: { 'foo-foo': { vars: { 'var-name': ['Invalid YAML format'] } } },
+          streams: { foo: { vars: { 'var-name': ['Invalid YAML format'] } } },
         },
         bar: {
           vars: {
@@ -376,14 +364,14 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
             'bar-input2-var-name': ['bar-input2-var-name is required'],
           },
           streams: {
-            'bar-bar': { vars: { 'var-name': ['var-name is required'] } },
-            'bar-bar2': { vars: { 'var-name': null } },
+            bar: { vars: { 'var-name': ['var-name is required'] } },
+            bar2: { vars: { 'var-name': null } },
           },
         },
         'with-disabled-streams': {
           streams: {
-            'with-disabled-streams-disabled': { vars: { 'var-name': null } },
-            'with-disabled-streams-disabled-without-vars': {},
+            disabled: { vars: { 'var-name': null } },
+            disabled2: {},
           },
         },
         'with-no-stream-vars': {
@@ -431,7 +419,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
             'foo-input2-var-name': ['foo-input2-var-name is required'],
             'foo-input3-var-name': ['foo-input3-var-name is required'],
           },
-          streams: { 'foo-foo': { vars: { 'var-name': null } } },
+          streams: { foo: { vars: { 'var-name': null } } },
         },
         bar: {
           vars: {
@@ -439,16 +427,16 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
             'bar-input2-var-name': ['bar-input2-var-name is required'],
           },
           streams: {
-            'bar-bar': { vars: { 'var-name': null } },
-            'bar-bar2': { vars: { 'var-name': null } },
+            bar: { vars: { 'var-name': null } },
+            bar2: { vars: { 'var-name': null } },
           },
         },
         'with-disabled-streams': {
           streams: {
-            'with-disabled-streams-disabled': {
+            disabled: {
               vars: { 'var-name': null },
             },
-            'with-disabled-streams-disabled-without-vars': {},
+            disabled2: {},
           },
         },
         'with-no-stream-vars': {

@@ -54,7 +54,6 @@ const PackagePolicyBaseSchema = {
       ),
       streams: schema.arrayOf(
         schema.object({
-          id: schema.string(),
           enabled: schema.boolean(),
           data_stream: schema.object({ dataset: schema.string(), type: schema.string() }),
           vars: schema.maybe(ConfigRecordSchema),
