@@ -37,35 +37,47 @@ export interface RunContext {
 /**
  * The return value of a task's run function should be a promise of RunResult.
  */
-export interface RunResult {
-  /**
-   * Specifies the next run date / time for this task. If unspecified, this is
-   * treated as a single-run task, and will not be rescheduled after
-   * completion.
-   */
-  runAt?: Date;
 
-  /**
-   * If specified, indicates that the task failed to accomplish its work. This is
-   * logged out as a warning, and the task will be reattempted after a delay.
-   */
-  error?: object;
-
+export type SuccessfulRunResult = {
   /**
    * The state which will be passed to the next run of this task (if this is a
    * recurring task). See the RunContext type definition for more details.
    */
   state: Record<string, unknown>;
-}
+} & (
+  | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
+  {
+      /**
+       * Specifies the next run date / time for this task. If unspecified, this is
+       * treated as a single-run task, and will not be rescheduled after
+       * completion.
+       */
+      runAt?: Date;
+      schedule?: never;
+    }
+  | {
+      /**
+       * Specifies a new schedule for this tasks. If unspecified, the task will
+       * continue to use which ever schedule it already has, and if no there is
+       * no previous schedule then it will be treated as a single-run task.
+       */
+      schedule?: IntervalSchedule;
+      runAt?: never;
+    }
+);
 
-export interface SuccessfulRunResult {
-  runAt?: Date;
-  state?: Record<string, unknown>;
-}
-
-export interface FailedRunResult extends SuccessfulRunResult {
+export type FailedRunResult = SuccessfulRunResult & {
+  /**
+   * If specified, indicates that the task failed to accomplish its work. This is
+   * logged out as a warning, and the task will be reattempted after a delay.
+   */
   error: Error;
-}
+};
+
+export type RunResult = FailedRunResult | SuccessfulRunResult;
+
+export const isFailedRunResult = (result: unknown): result is FailedRunResult =>
+  !!((result as FailedRunResult)?.error ?? false);
 
 export interface FailedTaskResult {
   status: TaskStatus.Failed;
@@ -73,6 +85,7 @@ export interface FailedTaskResult {
 
 export const validateRunResult = Joi.object({
   runAt: Joi.date().optional(),
+  schedule: Joi.object().optional(),
   error: Joi.object().optional(),
   state: Joi.object().optional(),
 }).optional();

@@ -35,7 +35,7 @@ describe('connector_edit_flyout', () => {
           show: true,
         },
       },
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       alertTypeRegistry: {} as any,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
@@ -84,11 +84,7 @@ describe('connector_edit_flyout', () => {
             docLinks: deps.docLinks,
           }}
         >
-          <ConnectorEditFlyout
-            initialConnector={connector}
-            editFlyoutVisible={true}
-            setEditFlyoutVisibility={(state) => {}}
-          />
+          <ConnectorEditFlyout initialConnector={connector} onClose={() => {}} />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );
@@ -141,11 +137,7 @@ describe('connector_edit_flyout', () => {
             docLinks: deps.docLinks,
           }}
         >
-          <ConnectorEditFlyout
-            initialConnector={connector}
-            editFlyoutVisible={true}
-            setEditFlyoutVisibility={(state) => {}}
-          />
+          <ConnectorEditFlyout initialConnector={connector} onClose={() => {}} />
         </ActionsConnectorsContextProvider>
       </AppContextProvider>
     );

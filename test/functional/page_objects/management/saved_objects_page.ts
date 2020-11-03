@@ -126,6 +126,12 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       }
     }
 
+    async setOverriddenIndexPatternValue(oldName: string, newName: string) {
+      const select = await testSubjects.find(`managementChangeIndexSelection-${oldName}`);
+      const option = await testSubjects.findDescendant(`indexPatternOption-${newName}`, select);
+      await option.click();
+    }
+
     async clickCopyToSpaceByTitle(title: string) {
       const table = keyBy(await this.getElementsInTable(), 'title');
       // should we check if table size > 0 and log error if not?
