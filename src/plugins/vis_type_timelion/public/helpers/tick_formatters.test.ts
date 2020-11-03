@@ -143,7 +143,9 @@ describe('Tick Formatters', function () {
           units: {},
         },
       };
-      expect(currencyFormatter(10.2, axis)).toEqual('$10.20');
+      formatters = tickFormatters(axis as Axis);
+      currencyFormatter = formatters.currency;
+      expect(currencyFormatter(10.2)).toEqual('$10.20');
     });
 
     it('accepts currency in ISO 4217', function () {
@@ -154,8 +156,9 @@ describe('Tick Formatters', function () {
           },
         },
       };
-
-      expect(currencyFormatter(10.2, axis)).toEqual('CN¥10.20');
+      formatters = tickFormatters(axis as Axis);
+      currencyFormatter = formatters.currency;
+      expect(currencyFormatter(10.2)).toEqual('CN¥10.20');
     });
   });
 
@@ -175,7 +178,9 @@ describe('Tick Formatters', function () {
           units: {},
         },
       };
-      expect(percentFormatter(0.1234, axis)).toEqual('12%');
+      formatters = tickFormatters(axis as Axis);
+      percentFormatter = formatters.percent;
+      expect(percentFormatter(0.1234)).toEqual('12%');
     });
 
     it('formats with % with decimal precision', function () {
@@ -188,8 +193,10 @@ describe('Tick Formatters', function () {
             tickDecimalsShift: tickDecimalShift,
           },
         },
-      };
-      expect(percentFormatter(0.12345, axis)).toEqual('12.345%');
+      } as unknown;
+      formatters = tickFormatters(axis as Axis);
+      percentFormatter = formatters.percent;
+      expect(percentFormatter(0.12345)).toEqual('12.345%');
     });
   });
 
@@ -213,8 +220,9 @@ describe('Tick Formatters', function () {
         },
         tickDecimals: 1,
       };
-
-      expect(customFormatter(10.2, axis)).toEqual('prefix10.2suffix');
+      formatters = tickFormatters(axis as Axis);
+      customFormatter = formatters.custom;
+      expect(customFormatter(10.2)).toEqual('prefix10.2suffix');
     });
 
     it('correctly renders small values', function () {
@@ -227,8 +235,9 @@ describe('Tick Formatters', function () {
         },
         tickDecimals: 3,
       };
-
-      expect(customFormatter(0.00499999999999999, axis)).toEqual('prefix0.005suffix');
+      formatters = tickFormatters(axis as Axis);
+      customFormatter = formatters.custom;
+      expect(customFormatter(0.00499999999999999)).toEqual('prefix0.005suffix');
     });
   });
 });
