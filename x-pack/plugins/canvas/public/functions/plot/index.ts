@@ -7,7 +7,7 @@
 import { set } from '@elastic/safer-lodash-set';
 import { groupBy, get, keyBy, map, sortBy } from 'lodash';
 import { ExpressionFunctionDefinition, Style } from 'src/plugins/expressions';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 // @ts-expect-error untyped local
 import { getLegendConfig } from '../../../common/lib/get_legend_config';
 import { getFlotAxisConfig } from './get_flot_axis_config';
@@ -16,7 +16,6 @@ import { seriesStyleToFlot } from './series_style_to_flot';
 import { getTickHash } from './get_tick_hash';
 import { getFunctionHelp } from '../../../i18n';
 import { AxisConfig, PointSeries, Render, SeriesStyle, Legend } from '../../../types';
-import { InitializeArguments } from '..';
 
 interface Arguments {
   seriesStyle: SeriesStyle[];
@@ -29,7 +28,7 @@ interface Arguments {
 }
 
 export function plotFunctionFactory(
-  initialize: InitializeArguments
+  paletteService: PaletteRegistry
 ): () => ExpressionFunctionDefinition<'plot', PointSeries, Arguments, Render<any>> {
   return () => {
     const { help, args: argHelp } = getFunctionHelp().plot;
@@ -144,7 +143,7 @@ export function plotFunctionFactory(
             data: sortBy(data, 'label'),
             options: {
               canvas: false,
-              colors: initialize.paletteService
+              colors: paletteService
                 .get(args.palette.name || 'custom')
                 .getColors(data.length, args.palette.params),
               legend: getLegendConfig(args.legend, data.length),

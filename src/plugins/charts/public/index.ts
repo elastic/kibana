@@ -30,4 +30,5 @@ export {
   CustomPaletteArguments,
   CustomPaletteState,
   SystemPaletteArguments,
+  paletteIds,
 } from '../common';

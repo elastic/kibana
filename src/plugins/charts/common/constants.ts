@@ -17,6 +17,17 @@
  * under the License.
  */
 
-export const COLOR_MAPPING_SETTING = 'visualization:colorMapping';
-export * from './palette';
-export * from './constants';
+// Currently supported palettes. This list might be extended dynamically in a later release
+export const paletteIds = [
+  'default',
+  'kibana_palette',
+  'custom',
+  'status',
+  'temperature',
+  'complimentary',
+  'negative',
+  'positive',
+  'cool',
+  'warm',
+  'gray',
+];

@@ -5,8 +5,7 @@
  */
 
 import { get, keyBy, map, groupBy } from 'lodash';
-import { PaletteOutput } from 'src/plugins/charts/public';
-import { InitializeArguments } from './';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 // @ts-expect-error untyped local
 import { getLegendConfig } from '../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../i18n';
@@ -75,7 +74,7 @@ interface Arguments {
 }
 
 export function pieFunctionFactory(
-  initialize: InitializeArguments
+  paletteService: PaletteRegistry
 ): () => ExpressionFunctionDefinition<'pie', PointSeries, Arguments, Render<Pie>> {
   return () => {
     const { help, args: argHelp } = getFunctionHelp().pie;
@@ -172,7 +171,7 @@ export function pieFunctionFactory(
             data,
             options: {
               canvas: false,
-              colors: initialize.paletteService
+              colors: paletteService
                 .get(palette.name || 'custom')
                 .getColors(data.length, palette.params),
               legend: getLegendConfig(legend, data.length),

@@ -19,11 +19,9 @@ import { plotFunctionFactory } from './plot';
 describe('plot', () => {
   const fn = functionWrapper(
     plotFunctionFactory({
-      paletteService: {
-        get: () => ({
-          getColors: () => ['red', 'black'],
-        }),
-      },
+      get: () => ({
+        getColors: () => ['red', 'black'],
+      }),
     })
   );
 
@@ -121,11 +119,9 @@ describe('plot', () => {
         const mockedColors = jest.fn(() => ['#FFFFFF', '#888888', '#000000']);
         const mockedFn = functionWrapper(
           plotFunctionFactory({
-            paletteService: {
-              get: () => ({
-                getColors: mockedColors,
-              }),
-            },
+            get: () => ({
+              getColors: mockedColors,
+            }),
           })
         );
         const result = mockedFn(testPlot, { palette: grayscalePalette }).value.options;

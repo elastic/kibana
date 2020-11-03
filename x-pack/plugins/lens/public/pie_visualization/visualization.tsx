@@ -129,6 +129,7 @@ export const getPieVisualization = ({
             filterOperations: bucketedOperations,
             required: true,
             dataTestSubj: 'lnsPie_groupByDimensionPanel',
+            enableDimensionEditor: true,
           },
           {
             groupId: 'metric',

@@ -6,12 +6,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { pieFunctionFactory } from '../../../public/functions/pie';
-import { FunctionHelp } from '../function_help';
-import { FunctionFactory } from '../../../types';
+import { FunctionFactoryHelp } from '../function_help';
 import { Legend } from '../../../types';
 import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_FALSE } from '../../constants';
 
-export const help: FunctionHelp<FunctionFactory<ReturnType<typeof pieFunctionFactory>>> = {
+export const help: FunctionFactoryHelp<typeof pieFunctionFactory> = {
   help: i18n.translate('xpack.canvas.functions.pieHelpText', {
     defaultMessage: 'Configures a pie chart element.',
   }),

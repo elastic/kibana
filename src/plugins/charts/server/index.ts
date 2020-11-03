@@ -23,6 +23,7 @@ export {
   CustomPaletteArguments,
   CustomPaletteState,
   SystemPaletteArguments,
+  paletteIds,
 } from '../common';
 
 export const plugin = () => new ChartsServerPlugin();

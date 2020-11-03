@@ -26,7 +26,7 @@ export function initFunctions(initialize: InitializeArguments) {
     filtersFunctionFactory(initialize),
     timelionFunctionFactory(initialize),
     toFunctionFactory(initialize),
-    pieFunctionFactory(initialize),
-    plotFunctionFactory(initialize),
+    pieFunctionFactory(initialize.paletteService),
+    plotFunctionFactory(initialize.paletteService),
   ];
 }

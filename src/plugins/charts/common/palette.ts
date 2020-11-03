@@ -19,6 +19,7 @@
 
 import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { i18n } from '@kbn/i18n';
+import { paletteIds } from './constants';
 
 export interface CustomPaletteArguments {
   color?: string[];
@@ -41,6 +42,9 @@ export interface PaletteOutput<T = unknown> {
   params?: T;
 }
 export const defaultCustomColors = [
+  // This set of defaults originated in Canvas, which, at present, is the primary
+  // consumer of this function.  Changing this default requires a change in Canvas
+  // logic, which would likely be a breaking change in 7.x.
   '#882E72',
   '#B178A6',
   '#D6C1DE',
@@ -143,19 +147,7 @@ export function systemPalette(): ExpressionFunctionDefinition<
         help: i18n.translate('charts.functions.systemPalette.args.nameHelpText', {
           defaultMessage: 'Name of the palette in the palette list',
         }),
-        options: [
-          'default',
-          'kibana_palette',
-          'custom',
-          'status',
-          'temperature',
-          'complimentary',
-          'negative',
-          'positive',
-          'cool',
-          'warm',
-          'gray',
-        ],
+        options: paletteIds,
       },
     },
     fn: (input, args) => {
