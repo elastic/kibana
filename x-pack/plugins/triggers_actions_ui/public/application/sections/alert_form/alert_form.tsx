@@ -6,28 +6,34 @@
 import React, { Fragment, useState, useEffect, Suspense } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { capitalize, sortBy } from 'lodash';
 import {
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiTitle,
-  EuiText,
   EuiForm,
   EuiSpacer,
   EuiFieldText,
   EuiFlexGrid,
   EuiFormRow,
   EuiComboBox,
+  EuiTextColor,
   EuiFieldNumber,
   EuiSelect,
   EuiIconTip,
+  EuiButtonIcon,
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
-  EuiComboBoxOptionOption,
+  EuiBadge,
+  EuiDescriptionList,
+  EuiDescriptionListDescription,
+  EuiDescriptionListTitle,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { EuiText } from '@elastic/eui';
+import { capitalize } from 'lodash';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -41,6 +47,9 @@ import { useAlertsContext } from '../../context/alerts_context';
 import { ActionForm } from '../action_connector_form';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
+import { SolutionFilter } from './solution_filter';
+
+const ENTER_KEY = 13;
 
 export function validateBaseProperties(alertObject: Alert) {
   const validationResult = { errors: {} };
@@ -122,9 +131,9 @@ export const AlertForm = ({
     alert.throttle ? getDurationUnitValue(alert.throttle) : 'm'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
-  const [selectedAlertTypeOptions, setSelectedAlertTypeOptions] = useState<
-    EuiComboBoxOptionOption[] | undefined
-  >(undefined);
+  const [searchText, setSearchText] = useState<string | undefined>();
+  const [inputText, setInputText] = useState<string | undefined>();
+  const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
 
   // load alert types
   useEffect(() => {
@@ -196,6 +205,74 @@ export const AlertForm = ({
         )
     : [];
 
+  const getProducerFeatureName = (producer: string) => {
+    return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
+  };
+
+  const alertTypesByProducer = alertTypeRegistryList.reduce(
+    (
+      result: Record<string, Array<{ id: string; name: string; alertTypeItem: AlertTypeModel }>>,
+      currentValue
+    ) => {
+      const producer = alertTypesIndex?.get(currentValue.id)?.producer;
+      if (producer) {
+        (result[producer] = result[producer] || []).push({
+          name: typeof currentValue.name === 'string' ? currentValue.name : currentValue.id,
+          id: currentValue.id,
+          alertTypeItem: currentValue,
+        });
+      }
+      return result;
+    },
+    {}
+  );
+
+  const solutions = Object.entries(alertTypesByProducer).map(([solution, items]) => {
+    return { id: solution, title: getProducerFeatureName(solution) ?? capitalize(solution) };
+  });
+
+  const alertTypeNodes = Object.entries(alertTypesByProducer).map(
+    ([solution, items], groupIndex) => (
+      <Fragment key={`group${groupIndex}`}>
+        <EuiTitle data-test-subj={`alertType${groupIndex}Group`} size="xxs">
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiTextColor color="subdued">
+                {getProducerFeatureName(solution) ?? capitalize(solution)}
+              </EuiTextColor>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="default">{items.length}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTitle>
+        <EuiHorizontalRule size="full" margin="xs" />
+        {items.map((item, index) => (
+          <>
+            <EuiDescriptionListTitle
+              onClick={() => {
+                setAlertProperty('alertTypeId', item.id);
+                setAlertTypeModel(item.alertTypeItem);
+                setAlertProperty('params', {});
+                if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+                  setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+                }
+              }}
+            >
+              {item.name}
+            </EuiDescriptionListTitle>
+            {item.alertTypeItem.description ? (
+              <EuiDescriptionListDescription>
+                {item.alertTypeItem.description}
+              </EuiDescriptionListDescription>
+            ) : null}
+            <EuiHorizontalRule size="full" margin="xs" />
+          </>
+        ))}
+      </Fragment>
+    )
+  );
+
   const alertTypeDetails = (
     <Fragment>
       <EuiHorizontalRule />
@@ -211,6 +288,25 @@ export const AlertForm = ({
             </h5>
           </EuiTitle>
         </EuiFlexItem>
+        {canChangeTrigger ? (
+          <EuiFlexItem grow={false}>
+            <EuiButtonIcon
+              iconType="cross"
+              color="danger"
+              aria-label={i18n.translate(
+                'xpack.triggersActionsUI.sections.alertForm.changeAlertTypeAriaLabel',
+                {
+                  defaultMessage: 'Delete',
+                }
+              )}
+              onClick={() => {
+                setAlertProperty('alertTypeId', null);
+                setAlertTypeModel(null);
+                setAlertProperty('params', {});
+              }}
+            />
+          </EuiFlexItem>
+        ) : null}
       </EuiFlexGroup>
       {AlertParamsExpressionComponent ? (
         <Suspense fallback={<CenterJustifiedSpinner />}>
@@ -288,74 +384,6 @@ export const AlertForm = ({
     </>
   );
 
-  const groupAlertTypesByProducer = () => {
-    return alertTypeRegistryList.reduce(
-      (result: Record<string, EuiComboBoxOptionOption[]>, currentValue) => {
-        const producer = alertTypesIndex?.get(currentValue.id)?.producer;
-        if (producer) {
-          (result[producer] = result[producer] || []).push({
-            label: typeof currentValue.name === 'string' ? currentValue.name : currentValue.id,
-            id: currentValue.id,
-          });
-        }
-        return result;
-      },
-      {}
-    );
-  };
-
-  const getProducerName = (producer: string) => {
-    return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
-  };
-
-  const alertTypeOptions = sortBy(Object.entries(groupAlertTypesByProducer())).map((item) => ({
-    label: getProducerName(item[0]) ?? capitalize(item[0]),
-    options: item[1],
-  }));
-
-  const resetAlertTypeToEmpty = () => {
-    setAlertProperty('alertTypeId', null);
-    setAlertTypeModel(null);
-  };
-
-  const alertTypeOnChange = (alertTypeSelectedOption: Array<{ label: string; id?: string }>) => {
-    setSelectedAlertTypeOptions(alertTypeSelectedOption);
-    setAlertProperty('params', {});
-
-    if (alertTypeSelectedOption.length === 0) {
-      resetAlertTypeToEmpty();
-      return;
-    }
-    setAlertProperty('alertTypeId', alertTypeSelectedOption[0].id);
-    setAlertTypeModel(
-      alertTypeRegistry
-        .list()
-        .filter(
-          (alertTypeRegistryItem: AlertTypeModel) =>
-            alertTypeRegistryItem.id === alertTypeSelectedOption[0].id
-        )[0]
-    );
-    if (
-      alertTypesIndex &&
-      alertTypeSelectedOption[0].id &&
-      alertTypesIndex.has(alertTypeSelectedOption[0].id)
-    ) {
-      setDefaultActionGroupId(
-        alertTypesIndex.get(alertTypeSelectedOption[0].id)!.defaultActionGroupId
-      );
-    }
-  };
-
-  const alertTypeRenderOption = (option: { label: string; id?: string }) => {
-    return (
-      <div>
-        <EuiText size="s" color="default">
-          <p>{option.label}</p>
-        </EuiText>
-      </div>
-    );
-  };
-
   return (
     <EuiForm>
       <EuiFlexGrid columns={2}>
@@ -376,6 +404,7 @@ export const AlertForm = ({
               fullWidth
               autoFocus={true}
               isInvalid={errors.name.length > 0 && alert.name !== undefined}
+              compressed
               name="name"
               data-test-subj="alertNameInput"
               value={alert.name || ''}
@@ -393,16 +422,14 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            label={i18n.translate(
-              'xpack.triggersActionsUI.sections.actionAdd.indexAction.indexTextFieldLabel',
-              {
-                defaultMessage: 'Tags (optional)',
-              }
-            )}
+            label={i18n.translate('xpack.triggersActionsUI.sections.alertForm.tagsFieldLabel', {
+              defaultMessage: 'Tags (optional)',
+            })}
           >
             <EuiComboBox
               noSuggestions
               fullWidth
+              compressed
               data-test-subj="tagsComboBox"
               selectedOptions={tagsOptions}
               onCreateOption={(searchValue: string) => {
@@ -520,38 +547,45 @@ export const AlertForm = ({
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
-      {alertTypeOptions.length ? (
-        canChangeTrigger ? (
-          <Fragment>
-            <EuiHorizontalRule />
-            <EuiFormRow
-              fullWidth
-              label={i18n.translate(
-                'xpack.triggersActionsUI.sections.alertForm.selectAlertTypeTitle',
-                {
-                  defaultMessage: 'Select alert type',
-                }
-              )}
-            >
-              <EuiComboBox
+      {alertTypeModel ? (
+        <Fragment>{alertTypeDetails}</Fragment>
+      ) : alertTypeNodes.length ? (
+        <Fragment>
+          <EuiHorizontalRule />
+          <EuiFlexGroup gutterSize="s">
+            <EuiFlexItem>
+              <EuiFieldText
                 fullWidth
-                selectedOptions={selectedAlertTypeOptions}
-                data-test-subj="alertTypesComboBox"
-                singleSelection={{ asPlainText: true }}
-                onChange={alertTypeOnChange}
-                options={alertTypeOptions}
-                renderOption={alertTypeRenderOption}
+                data-test-subj="alertSearchField"
+                prepend={<EuiIcon type="search" />}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyUp={(e) => {
+                  if (e.keyCode === ENTER_KEY) {
+                    setSearchText(inputText);
+                  }
+                }}
+                placeholder={i18n.translate(
+                  'xpack.triggersActionsUI.sections.alertForm.searchPlaceholderTitle',
+                  { defaultMessage: 'Search' }
+                )}
               />
-            </EuiFormRow>
-            <EuiSpacer size="l" />
-          </Fragment>
-        ) : null
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SolutionFilter
+                key="solution-filter"
+                solutions={solutions}
+                onChange={(selectedSolutions: string[]) => setSolutionFilter(selectedSolutions)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiDescriptionList>{alertTypeNodes}</EuiDescriptionList>
+        </Fragment>
       ) : alertTypesIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
       ) : (
         <CenterJustifiedSpinner />
       )}
-      {alertTypeModel ? <Fragment>{alertTypeDetails}</Fragment> : null}
     </EuiForm>
   );
 };

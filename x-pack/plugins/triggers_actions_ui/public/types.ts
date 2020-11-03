@@ -172,6 +172,7 @@ export interface AlertTypeParamsExpressionProps<
 export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
   id: string;
   name: string | JSX.Element;
+  description?: string;
   iconClass: string;
   validate: (alertParams: AlertParamsType) => ValidationResult;
   alertParamsExpression:

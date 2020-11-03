@@ -5,6 +5,7 @@
  */
 import { lazy } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import { AlertTypeModel } from '../../../../types';
 import { validateExpression } from './validation';
 import { IndexThresholdAlertParams } from './types';
@@ -14,6 +15,9 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, Alerts
   return {
     id: '.index-threshold',
     name: 'Index threshold',
+    description: i18n.translate('xpack.triggersActionsUI.indexThresholdAlert.descriptionText', {
+      defaultMessage: 'Alert when an aggregated query meets the threshold.',
+    }),
     iconClass: 'alert',
     alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
