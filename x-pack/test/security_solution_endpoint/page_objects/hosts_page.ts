@@ -130,7 +130,6 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
         log.debug(i);
         log.debug(EventName);
         log.debug(expectedData[i]);
-        log.deb
         expect(EventName).to.equal(linkText);
         expect(EventName).to.equal(expectedData[i]);
       }
