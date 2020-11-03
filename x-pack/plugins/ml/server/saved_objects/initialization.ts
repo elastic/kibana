@@ -89,7 +89,7 @@ export function jobInitializationFactory(core: CoreStart) {
     const { body: dfaJobs } = await client.asInternalUser.ml.getDataFrameAnalytics<{
       count: number;
     }>();
-    return adJobs.count > 0 && dfaJobs.count > 0;
+    return adJobs.count > 0 || dfaJobs.count > 0;
   }
 
   return { initializeJobs };
