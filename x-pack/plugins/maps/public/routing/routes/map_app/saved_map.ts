@@ -19,9 +19,16 @@ import {
   getQuery,
   getFilters,
   getMapSettings,
+  getLayerListConfigOnly,
 } from '../../../selectors/map_selectors';
+import {
+  setGotoWithCenter,
+  setMapSettings,
+  replaceLayerList,
+  setIsLayerTOCOpen,
+  setOpenTOCDetails,
+} from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
-import { copyPersistentState } from '../../../reducers/util';
 import { getMapAttributeService } from '../../../map_attribute_service';
 import {
   checkForDuplicateTitle,
@@ -35,17 +42,36 @@ import {
   getToasts,
 } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../render_app';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
+import { getInitialLayers, getInitialLayersFromUrlParam } from '../../bootstrap/get_initial_layers';
+import { copyPersistentState } from '../../../reducers/util';
+import { getBreadcrumbs } from './get_breadcrumbs';
+import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
   private readonly _embeddableId?: string;
+  private _initialLayerListConfig: LayerDescriptor[] = [];
   private readonly _mapEmbeddableInput?: MapEmbeddableInput;
   private _originatingApp?: string;
+  private readonly _stateTransfer: EmbeddableStateTransfer;
   private readonly _store: MapStore;
 
-  constructor(mapEmbeddableInput?: MapEmbeddableInput, embeddableId?: string) {
+  constructor({
+    mapEmbeddableInput,
+    embeddableId,
+    originatingApp,
+    stateTransfer,
+  }: {
+    mapEmbeddableInput?: MapEmbeddableInput;
+    embeddableId?: string;
+    originatingApp?: string;
+    stateTransfer: EmbeddableStateTransfer;
+  }) {
     this._mapEmbeddableInput = mapEmbeddableInput;
     this._embeddableId = embeddableId;
+    this._originatingApp = originatingApp;
+    this._stateTransfer = stateTransfer;
     this._store = createMapStore();
   }
 
@@ -57,18 +83,93 @@ export class SavedMap {
     if (!this._mapEmbeddableInput) {
       this._attributes = {
         title: i18n.translate('xpack.maps.newMapTitle', {
-          defaultMessage: 'New Map',
+          defaultMessage: 'New map',
         }),
         description: '',
       };
     } else {
       this._attributes = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
     }
+
+    const layerList = getInitialLayers(
+      this._attributes.layerListJSON,
+      getInitialLayersFromUrlParam()
+    );
+    this._store.dispatch(replaceLayerList(layerList));
+    this._initialLayerListConfig = copyPersistentState(layerList);
+
+    if (this._attributes.mapStateJSON) {
+      const mapState = JSON.parse(this._attributes.mapStateJSON);
+      this._store.dispatch(
+        setGotoWithCenter({
+          lat: mapState.center.lat,
+          lon: mapState.center.lon,
+          zoom: mapState.zoom,
+        })
+      );
+      if (mapState.settings) {
+        this._store.dispatch(setMapSettings(mapState.settings));
+      }
+    }
+
+    if (this._attributes.uiStateJSON) {
+      const uiState = JSON.parse(this._attributes.uiStateJSON);
+      this._store.dispatch(
+        setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN))
+      );
+      this._store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
+    }
+
     return this._attributes;
+  }
+
+  hasUnsavedChanges = () => {
+    if (!this._attributes) {
+      throw new Error('Invalid usage, must await loadAttributes before calling hasUnsavedChanges');
+    }
+
+    const savedLayerList = this._attributes.layerListJSON
+      ? JSON.parse(this._attributes.layerListJSON)
+      : null;
+    const layerListConfigOnly = getLayerListConfigOnly(this._store.getState());
+    return !savedLayerList
+      ? !_.isEqual(layerListConfigOnly, this._initialLayerListConfig)
+      : // savedMap stores layerList as a JSON string using JSON.stringify.
+        // JSON.stringify removes undefined properties from objects.
+        // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
+        // Need to perform the same process for layerListConfigOnly to compare apples to apples
+        // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
+        !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
+  };
+
+  setBreadcrumbs() {
+    if (!this._attributes) {
+      throw new Error('Invalid usage, must await loadAttributes before calling hasUnsavedChanges');
+    }
+
+    const breadcrumbs = getBreadcrumbs({
+      title: this._attributes.title,
+      getHasUnsavedChanges: this.hasUnsavedChanges,
+      originatingApp: this._originatingApp,
+      getAppNameFromId: this._stateTransfer.getAppNameFromId,
+    });
+    getCoreChrome().setBreadcrumbs(breadcrumbs);
   }
 
   public getSavedObjectId(): string | undefined {
     return this._mapEmbeddableInput?.savedObjectId;
+  }
+
+  public getOriginatingApp(): string | undefined {
+    return this._originatingApp;
+  }
+
+  public getAppNameFromId = (appId: string): string | undefined => {
+    return this._stateTransfer.getAppNameFromId(appId);
+  };
+
+  public hasSaveAndReturnConfig() {
+    return !!this._originatingApp;
   }
 
   public getAttributes(): MapSavedObjectAttributes {
@@ -87,15 +188,9 @@ export class SavedMap {
     onTitleDuplicate,
     returnToOrigin,
     saveByReference,
-    originatingApp,
-    stateTransfer,
-    setBreadcrumbs,
   }: OnSaveProps & {
     returnToOrigin: boolean;
     saveByReference: boolean;
-    originatingApp?: string;
-    stateTransfer: EmbeddableStateTransfer;
-    setBreadcrumbs: (title: string) => void;
   }) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await loadAttributes before calling save');
@@ -146,7 +241,7 @@ export class SavedMap {
     }
 
     if (returnToOrigin) {
-      if (!originatingApp) {
+      if (!this._originatingApp) {
         getToasts().addDanger({
           title: i18n.translate('xpack.maps.topNav.saveErrorMessage', {
             defaultMessage: `Error saving '{title}'`,
@@ -158,7 +253,7 @@ export class SavedMap {
         });
         return;
       }
-      stateTransfer.navigateToWithEmbeddablePackage(originatingApp, {
+      this._stateTransfer.navigateToWithEmbeddablePackage(this._originatingApp, {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
@@ -168,6 +263,8 @@ export class SavedMap {
       return;
     }
 
+    // break connection to originating application
+    this._originatingApp = undefined;
     getToasts().addSuccess({
       title: i18n.translate('xpack.maps.topNav.saveSuccessMessage', {
         defaultMessage: `Saved '{title}'`,
@@ -176,9 +273,9 @@ export class SavedMap {
     });
 
     getCoreChrome().docTitle.change(newTitle);
-    setBreadcrumbs(newTitle);
+    this.setBreadcrumbs();
     goToSpecifiedPath(`/map/${updatedMapEmbeddableInput.savedObjectId}${window.location.hash}`);
-    return { id: updatedMapEmbeddableInput.savedObjectId };
+    return;
   }
 
   private _syncAttributesWithStore() {

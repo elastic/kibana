@@ -29,7 +29,7 @@ import { EmbeddableStateTransfer } from '../../../../../../../src/plugins/embedd
 function getSaveAndReturnButtonLabel() {
   return getIsAllowByValueEmbeddables()
     ? i18n.translate('xpack.maps.topNav.saveToMaps', {
-        defaultMessage: 'Save to Maps',
+        defaultMessage: 'Save to maps',
       })
     : i18n.translate('xpack.maps.topNav.saveAsButtonLabel', {
         defaultMessage: 'Save as',
@@ -43,9 +43,7 @@ export function getTopNavConfig({
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
-  setBreadcrumbs,
-  stateTransfer,
-  originatingApp,
+  getAppNameFromId,
 }: {
   savedMap: SavedMap;
   isOpenSettingsDisabled: boolean;
@@ -53,8 +51,6 @@ export function getTopNavConfig({
   enableFullScreen: () => void;
   openMapSettings: () => void;
   inspectorAdapters: Adapters;
-  setBreadcrumbs: (title: string) => void;
-  stateTransfer?: EmbeddableStateTransfer;
 }) {
   const topNavConfigs = [];
 
@@ -105,7 +101,7 @@ export function getTopNavConfig({
   );
 
   if (getMapsCapabilities().save) {
-    const hasSaveAndReturnConfig = originatingApp;
+    const hasSaveAndReturnConfig = savedMap.hasSaveAndReturnConfig();
     const mapSavedObjectAttributes = savedMap.getAttributes();
 
     topNavConfigs.push({
@@ -134,16 +130,15 @@ export function getTopNavConfig({
       run: () => {
         const saveModal = (
           <SavedObjectSaveModalOrigin
-            originatingApp={originatingApp}
-            getAppNameFromId={stateTransfer?.getAppNameFromId}
-            onSave={(props: OnSaveProps & { returnToOrigin: boolean }) => {
-              return savedMap.save({
+            originatingApp={savedMap.getOriginatingApp()}
+            getAppNameFromId={savedMap.getAppNameFromId}
+            onSave={async (props: OnSaveProps & { returnToOrigin: boolean }) => {
+              await savedMap.save({
                 ...props,
                 saveByReference: true,
-                originatingApp,
-                stateTransfer,
-                setBreadcrumbs,
               });
+              // showSaveModal wrapper requires onSave to return an object with an id to close the modal after save
+              return { id: 'id' };
             }}
             onClose={() => {}}
             documentInfo={{
@@ -169,7 +164,7 @@ export function getTopNavConfig({
         emphasize: true,
         iconType: 'checkInCircleFilled',
         run: () => {
-          return savedMap.save({
+          savedMap.save({
             newTitle: mapSavedObjectAttributes.title ? mapSavedObjectAttributes.title : '',
             newDescription: mapSavedObjectAttributes.description
               ? mapSavedObjectAttributes.description
@@ -179,9 +174,6 @@ export function getTopNavConfig({
             returnToOrigin: true,
             onTitleDuplicate: () => {},
             saveByReference: false,
-            originatingApp,
-            stateTransfer,
-            setBreadcrumbs,
           });
         },
         testId: 'mapSaveAndReturnButton',

@@ -7,7 +7,7 @@
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
 import { AppMountParameters } from 'kibana/public';
-import { EmbeddableStateTransfer, Adapters } from 'src/plugins/embeddable/public';
+import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapApp } from './map_app_connector';
 import { SavedMap } from './saved_map';
 import { MapEmbeddableInput } from '../../../embeddable/types';
@@ -29,7 +29,12 @@ export class MapAppContainer extends Component {
   constructor(props: Props) {
     super(props);
     this.state = {
-      savedMap: new SavedMap(props.mapEmbeddableInput, this.props.embeddableId),
+      savedMap: new SavedMap({
+        mapEmbeddableInput: props.mapEmbeddableInput,
+        embeddableId: this.props.embeddableId,
+        originatingApp: this.props.originatingApp,
+        stateTransfer: this.props.stateTransfer,
+      }),
     };
   }
 
@@ -40,8 +45,7 @@ export class MapAppContainer extends Component {
           savedMap={this.state.savedMap}
           onAppLeave={this.props.onAppLeave}
           setHeaderActionMenu={this.props.setHeaderActionMenu}
-          stateTransfer={this.props.stateTransfer}
-          originatingApp={this.props.originatingApp}
+          getAppNameFromId={this.props.stateTransfer.getAppNameFromId}
         />
       </Provider>
     );

@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
 import { EmbeddableStateTransfer, Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
-import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import {
   getData,
   getCoreChrome,
@@ -19,8 +18,6 @@ import {
   getNavigation,
   getToasts,
 } from '../../../kibana_services';
-import { copyPersistentState } from '../../../reducers/util';
-import { getInitialLayers, getInitialLayersFromUrlParam } from '../../bootstrap/get_initial_layers';
 import { getInitialTimeFilters } from '../../bootstrap/get_initial_time_filters';
 import { getInitialRefreshConfig } from '../../bootstrap/get_initial_refresh_config';
 import { getInitialQuery } from '../../bootstrap/get_initial_query';
@@ -61,10 +58,7 @@ import { SavedMap } from './saved_map';
 interface Props {
   savedMap: SavedMap;
   onAppLeave: AppMountParameters['onAppLeave'];
-  stateTransfer: EmbeddableStateTransfer;
-  originatingApp?: string;
   layerListConfigOnly: LayerDescriptor[];
-  replaceLayerList: (layerList: LayerDescriptor[]) => void;
   filters: Filter[];
   isFullScreen: boolean;
   isOpenSettingsDisabled: boolean;
@@ -87,20 +81,14 @@ interface Props {
   refreshConfig: MapRefreshConfig;
   setRefreshConfig: (refreshConfig: MapRefreshConfig) => void;
   isSaveDisabled: boolean;
-  setGotoWithCenter: (latLonZoom: MapCenterAndZoom) => void;
-  setMapSettings: (mapSettings: MapSettings) => void;
-  setIsLayerTOCOpen: (isLayerTOCOpen: boolean) => void;
-  setOpenTOCDetails: (openTOCDetails: string[]) => void;
   query: MapQuery | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 interface State {
   initialized: boolean;
-  initialLayerListConfig?: LayerDescriptor[];
   indexPatterns: IndexPattern[];
   savedQuery?: SavedQuery;
-  originatingApp?: string;
 }
 
 export class MapApp extends React.Component<Props, State> {
@@ -116,8 +104,6 @@ export class MapApp extends React.Component<Props, State> {
     this.state = {
       indexPatterns: [],
       initialized: false,
-      // tracking originatingApp in state so the connection can be broken by users
-      originatingApp: props.originatingApp,
     };
   }
 
@@ -139,7 +125,7 @@ export class MapApp extends React.Component<Props, State> {
     this._initMap();
 
     this.props.onAppLeave((actions) => {
-      if (this._hasUnsavedChanges()) {
+      if (this.props.savedMap.hasUnsavedChanges()) {
         return actions.confirm(unsavedChangesWarning, unsavedChangesTitle);
       }
       return actions.default() as AppLeaveAction;
@@ -163,31 +149,10 @@ export class MapApp extends React.Component<Props, State> {
       this._globalSyncChangeMonitorSubscription.unsubscribe();
     }
 
-    getCoreChrome().setBreadcrumbs([]);
-  }
-
-  _hasUnsavedChanges = () => {
-    const attributes = this.props.savedMap.getAttributes();
-    const savedLayerList = attributes.layerListJSON ? JSON.parse(attributes.layerListJSON) : null;
-    return !savedLayerList
-      ? !_.isEqual(this.props.layerListConfigOnly, this.state.initialLayerListConfig)
-      : // savedMap stores layerList as a JSON string using JSON.stringify.
-        // JSON.stringify removes undefined properties from objects.
-        // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
-        // Need to perform the same process for layerListConfigOnly to compare apples to apples
-        // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
-        !_.isEqual(JSON.parse(JSON.stringify(this.props.layerListConfigOnly)), savedLayerList);
-  };
-
-  _setBreadcrumbs = (title: string) => {
-    const breadcrumbs = getBreadcrumbs({
-      title,
-      getHasUnsavedChanges: this._hasUnsavedChanges,
-      originatingApp: this.state.originatingApp,
-      getAppNameFromId: this.props.stateTransfer.getAppNameFromId,
+    this.props.onAppLeave((actions) => {
+      return actions.default();
     });
-    getCoreChrome().setBreadcrumbs(breadcrumbs);
-  };
+  }
 
   _updateFromGlobalState = ({
     changes,
@@ -293,15 +258,6 @@ export class MapApp extends React.Component<Props, State> {
         globalState,
       })
     );
-
-    const layerList = getInitialLayers(
-      mapSavedObjectAttributes.layerListJSON,
-      getInitialLayersFromUrlParam()
-    );
-    this.props.replaceLayerList(layerList);
-    this.setState({
-      initialLayerListConfig: copyPersistentState(layerList),
-    });
   }
 
   _onFiltersChange = (filters: Filter[]) => {
@@ -368,7 +324,7 @@ export class MapApp extends React.Component<Props, State> {
       return;
     }
 
-    this._setBreadcrumbs(mapSavedObjectAttributes.title);
+    this.props.savedMap.setBreadcrumbs();
     getCoreChrome().docTitle.change(mapSavedObjectAttributes.title);
     const savedObjectId = this.props.savedMap.getSavedObjectId();
     if (savedObjectId) {
@@ -380,24 +336,6 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     this._initMapAndLayerSettings(mapSavedObjectAttributes);
-
-    if (mapSavedObjectAttributes.mapStateJSON) {
-      const mapState = JSON.parse(mapSavedObjectAttributes.mapStateJSON);
-      this.props.setGotoWithCenter({
-        lat: mapState.center.lat,
-        lon: mapState.center.lon,
-        zoom: mapState.zoom,
-      });
-      if (mapState.settings) {
-        this.props.setMapSettings(mapState.settings);
-      }
-    }
-
-    if (mapSavedObjectAttributes.uiStateJSON) {
-      const uiState = JSON.parse(mapSavedObjectAttributes.uiStateJSON);
-      this.props.setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN));
-      this.props.setOpenTOCDetails(_.get(uiState, 'openTOCDetails', []));
-    }
 
     this.setState({ initialized: true });
   }
@@ -414,12 +352,6 @@ export class MapApp extends React.Component<Props, State> {
       enableFullScreen: this.props.enableFullScreen,
       openMapSettings: this.props.openMapSettings,
       inspectorAdapters: this.props.inspectorAdapters,
-      setBreadcrumbs: this._setBreadcrumbs,
-      stateTransfer: this.props.stateTransfer,
-      originatingApp: this.state.originatingApp,
-      cutOriginatingAppConnection: () => {
-        this.setState({ originatingApp: undefined });
-      },
     });
 
     const { TopNavMenu } = getNavigation().ui;
