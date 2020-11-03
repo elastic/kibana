@@ -27,12 +27,16 @@ export const configSchema = schema.object({
   tilemap: tilemapSchema,
   regionmap: regionmapSchema,
   manifestServiceUrl: schema.string({ defaultValue: '' }),
+
+  emsUrl: schema.string({ defaultValue: '' }),
+
   emsFileApiUrl: schema.string({ defaultValue: 'https://vector.maps.elastic.co' }),
   emsTileApiUrl: schema.string({ defaultValue: 'https://tiles.maps.elastic.co' }),
   emsLandingPageUrl: schema.string({ defaultValue: 'https://maps.elastic.co/v7.10' }),
   emsFontLibraryUrl: schema.string({
     defaultValue: 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf',
   }),
+
   emsTileLayerId: schema.object({
     bright: schema.string({ defaultValue: 'road_map' }),
     desaturated: schema.string({ defaultValue: 'road_map_desaturated' }),

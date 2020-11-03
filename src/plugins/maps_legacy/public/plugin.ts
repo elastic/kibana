@@ -28,6 +28,7 @@ import { MapsLegacyConfig } from '../config';
 // @ts-ignore
 import { BaseMapsVisualizationProvider } from './map/base_maps_visualization';
 import { getServiceSettings } from './get_service_settings';
+import { EMSSettings } from './ems_settings';
 
 /**
  * These are the interfaces with your public contracts. You should export these
@@ -66,12 +67,15 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
 
     const getBaseMapsVis = () => new BaseMapsVisualizationProvider();
 
+    const emsSettings = new EMSSettings(config);
+
     return {
       getServiceSettings,
       getZoomPrecision,
       getPrecision,
       config,
       getBaseMapsVis,
+      emsSettings,
     };
   }
 
