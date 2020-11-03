@@ -76,7 +76,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
               <EuiText>
                 <h4>
                   <FormattedMessage
-                    id="xpack.ingestManager.createPackagePolicy.stepConfigure.inputSettingsTitle"
+                    id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsTitle"
                     defaultMessage="Settings"
                   />
                 </h4>
@@ -85,7 +85,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
               <EuiText color="subdued" size="s">
                 <p>
                   <FormattedMessage
-                    id="xpack.ingestManager.createPackagePolicy.stepConfigure.inputSettingsDescription"
+                    id="xpack.fleet.createPackagePolicy.stepConfigure.inputSettingsDescription"
                     defaultMessage="The following settings are applicable to all inputs below."
                   />
                 </p>
@@ -133,7 +133,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                         flush="left"
                       >
                         <FormattedMessage
-                          id="xpack.ingestManager.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
                           defaultMessage="Advanced options"
                         />
                       </EuiButtonEmpty>
@@ -142,7 +142,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                       <EuiFlexItem grow={false}>
                         <EuiText color="danger" size="s">
                           <FormattedMessage
-                            id="xpack.ingestManager.createPackagePolicy.stepConfigure.errorCountText"
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
                             defaultMessage="{count, plural, one {# error} other {# errors}}"
                             values={{ count: advancedVarsWithErrorsCount }}
                           />

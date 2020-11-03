@@ -7,6 +7,16 @@ assignees: ''
 
 ---
 
+<!-- 
+****************************************
+******* LABEL CHANGES NECESSARY ********
+****************************************
+ 
+Please add a "NeededFor:${TeamName}" label to denote the team that is
+requesting the breaking change is surfaced in the Upgrade Assistant.
+ 
+-->
+
 ## Change description
 
 **Which release will ship the breaking change?**

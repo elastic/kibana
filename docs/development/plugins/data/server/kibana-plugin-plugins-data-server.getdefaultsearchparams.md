@@ -9,7 +9,6 @@
 ```typescript
 export declare function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient): Promise<{
     maxConcurrentShardRequests: number | undefined;
-    ignoreThrottled: boolean;
     ignoreUnavailable: boolean;
     trackTotalHits: boolean;
 }>;
@@ -25,7 +24,6 @@ export declare function getDefaultSearchParams(uiSettingsClient: IUiSettingsClie
 
 `Promise<{
     maxConcurrentShardRequests: number | undefined;
-    ignoreThrottled: boolean;
     ignoreUnavailable: boolean;
     trackTotalHits: boolean;
 }>`

@@ -133,7 +133,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <EuiText color="danger" size="s">
                     <FormattedMessage
-                      id="xpack.ingestManager.createPackagePolicy.stepConfigure.errorCountText"
+                      id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
                       defaultMessage="{count, plural, one {# error} other {# errors}}"
                       values={{ count: errorCount }}
                     />
@@ -148,7 +148,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   aria-label={
                     isShowingStreams
                       ? i18n.translate(
-                          'xpack.ingestManager.createPackagePolicy.stepConfigure.hideStreamsAriaLabel',
+                          'xpack.fleet.createPackagePolicy.stepConfigure.hideStreamsAriaLabel',
                           {
                             defaultMessage: 'Hide {type} inputs',
                             values: {
@@ -157,7 +157,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                           }
                         )
                       : i18n.translate(
-                          'xpack.ingestManager.createPackagePolicy.stepConfigure.showStreamsAriaLabel',
+                          'xpack.fleet.createPackagePolicy.stepConfigure.showStreamsAriaLabel',
                           {
                             defaultMessage: 'Show {type} inputs',
                             values: {
