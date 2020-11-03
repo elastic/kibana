@@ -14,6 +14,7 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
+import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -86,23 +87,28 @@ export function TransactionBreakdownGraph({
 
         <Annotations />
 
-        {timeseries.map((serie) => {
-          return (
-            <AreaSeries
-              key={serie.title}
-              id={serie.title}
-              name={serie.title}
-              xScaleType={ScaleType.Linear}
-              yScaleType={ScaleType.Linear}
-              xAccessor="x"
-              yAccessors={['y']}
-              data={serie.data}
-              stackAccessors={['x']}
-              stackMode={'percentage'}
-              color={serie.areaColor}
-            />
-          );
-        })}
+        {isEmpty(timeseries) ? (
+          // When timeseries is empty, loads an AreaSeries chart to show the default empty message.
+          <AreaSeries id="empty_chart" data={[]} />
+        ) : (
+          timeseries.map((serie) => {
+            return (
+              <AreaSeries
+                key={serie.title}
+                id={serie.title}
+                name={serie.title}
+                xScaleType={ScaleType.Linear}
+                yScaleType={ScaleType.Linear}
+                xAccessor="x"
+                yAccessors={['y']}
+                data={serie.data}
+                stackAccessors={['x']}
+                stackMode={'percentage'}
+                color={serie.areaColor}
+              />
+            );
+          })
+        )}
       </Chart>
     </ChartContainer>
   );

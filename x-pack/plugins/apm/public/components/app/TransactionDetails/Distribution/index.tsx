@@ -32,8 +32,8 @@ import { TransactionDistributionAPIResponse } from '../../../../../server/lib/tr
 import { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { unit } from '../../../../style/variables';
+import { ChartContainer } from '../../../shared/charts/chart_container';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
-import { LoadingStatePrompt } from '../../../shared/LoadingStatePrompt';
 
 interface IChartPoint {
   x0: number;
@@ -45,10 +45,10 @@ interface IChartPoint {
 }
 
 export function getFormattedBuckets(
-  buckets: DistributionBucket[],
-  bucketSize: number
+  buckets?: DistributionBucket[],
+  bucketSize?: number
 ) {
-  if (!buckets) {
+  if (!buckets || !bucketSize) {
     return [];
   }
 
@@ -135,14 +135,8 @@ export function TransactionDistribution(props: Props) {
   const formatYLong = useCallback(getFormatYLong(transactionType), [
     transactionType,
   ]);
-
   // no data in response
-  if (!distribution || distribution.noHits) {
-    // only show loading state if there is no data - else show stale data until new data has loaded
-    if (isLoading) {
-      return <LoadingStatePrompt />;
-    }
-
+  if ((!distribution || distribution.noHits) && !isLoading) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.transactionDetails.notFoundLabel', {
@@ -153,8 +147,8 @@ export function TransactionDistribution(props: Props) {
   }
 
   const buckets = getFormattedBuckets(
-    distribution.buckets,
-    distribution.bucketSize
+    distribution?.buckets,
+    distribution?.bucketSize
   );
 
   const xMin = d3.min(buckets, (d) => d.x0) || 0;
@@ -213,7 +207,10 @@ export function TransactionDistribution(props: Props) {
           />
         </h5>
       </EuiTitle>
-      <div style={{ height: unit * 10 }}>
+      <ChartContainer
+        height={unit * 10}
+        isLoading={isLoading && (!distribution || distribution.noHits)}
+      >
         <Chart>
           <Settings
             xDomain={{ min: xMin, max: xMax }}
@@ -270,7 +267,7 @@ export function TransactionDistribution(props: Props) {
             color={theme.eui.euiColorVis1}
           />
         </Chart>
-      </div>
+      </ChartContainer>
     </div>
   );
 }

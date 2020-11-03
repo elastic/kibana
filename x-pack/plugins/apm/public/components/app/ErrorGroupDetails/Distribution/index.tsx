@@ -16,14 +16,12 @@ import {
   TooltipValue,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import React from 'react';
 import { asRelativeDateTimeRange } from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { ErrorDistributionAPIResponse } from '../../../../../server/lib/errors/distribution/get_distribution';
 import { useTheme } from '../../../../hooks/useTheme';
-import { EmptyMessage } from '../../../shared/EmptyMessage';
 
 interface FormattedBucket {
   x0: number;
@@ -34,11 +32,7 @@ interface FormattedBucket {
 export function getFormattedBuckets(
   buckets: ErrorDistributionAPIResponse['buckets'],
   bucketSize: number
-): FormattedBucket[] | null {
-  if (!buckets) {
-    return null;
-  }
-
+): FormattedBucket[] {
   return buckets.map(({ count, key }) => {
     return {
       x0: key,
@@ -60,18 +54,6 @@ export function ErrorDistribution({ distribution, title }: Props) {
     distribution.bucketSize
   );
 
-  if (!buckets) {
-    return (
-      <EmptyMessage
-        heading={i18n.translate('xpack.apm.errorGroupDetails.noErrorsLabel', {
-          defaultMessage: 'No errors were found',
-        })}
-      />
-    );
-  }
-
-  // TODO: caue check it
-  // const averageValue = mean(buckets.map((bucket) => bucket.y)) || 0;
   const xMin = d3.min(buckets, (d) => d.x0);
   const xMax = d3.max(buckets, (d) => d.x0);
 
@@ -122,7 +104,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
             yScaleType={ScaleType.Linear}
             xAccessor="x0"
             yAccessors={['y']}
-            data={buckets}
+            data={distribution.noHits ? [] : buckets}
             color={theme.eui.euiColorVis1}
           />
         </Chart>
