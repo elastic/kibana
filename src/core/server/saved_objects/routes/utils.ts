@@ -25,6 +25,7 @@ import {
   createFilterStream,
   createPromiseFromStreams,
   createListStream,
+  createConcatStream,
 } from '../../utils/streams';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
@@ -39,6 +40,7 @@ export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable)
     createFilterStream<SavedObject | SavedObjectsExportResultDetails>(
       (obj) => !!obj && !(obj as SavedObjectsExportResultDetails).exportedCount
     ),
+    createConcatStream([]),
   ]);
   return createListStream(savedObjects);
 }
