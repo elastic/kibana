@@ -127,6 +127,9 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
         const LinkText = await testSubjects.find('resolver:breadcrumbs:last');
         const linkText = await LinkText._webElement.getText();
         expect(EventName).to.equal(linkText);
+        console.log(i);
+        console.log(expectedData[i]);
+        console.log(EventName);
         expect(EventName).to.equal(expectedData[i]);
       }
       await testSubjects.click('full-screen');
