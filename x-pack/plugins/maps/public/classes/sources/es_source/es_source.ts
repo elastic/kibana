@@ -220,6 +220,8 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         geoField.name,
         geoField.type as ES_GEO_FIELD_TYPE
       );
+
+      // @ts-expect-error
       allFilters.push(extentFilter);
     }
     if (isTimeAware) {
