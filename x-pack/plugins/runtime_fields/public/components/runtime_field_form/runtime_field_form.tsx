@@ -21,8 +21,6 @@ import { RuntimeField } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { schema } from './schema';
 
-import './runtime_field_form.scss';
-
 export interface FormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
