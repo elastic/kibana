@@ -34,9 +34,11 @@ import {
   EuiText,
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
+  QueryType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { SavedObjectsTaggingApi } from '../../../../../saved_objects_tagging_oss/public';
 import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 import { SavedObjectWithMetadata } from '../../../types';
 import {
@@ -46,6 +48,7 @@ import {
 } from '../../../services';
 
 export interface TableProps {
+  taggingApi?: SavedObjectsTaggingApi;
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
@@ -69,6 +72,7 @@ export interface TableProps {
   isSearching: boolean;
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
+  initialQuery?: QueryType;
 }
 
 interface TableState {
@@ -162,6 +166,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
+      taggingApi,
     } = this.props;
 
     const pagination = {
@@ -181,14 +186,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         multiSelect: 'or',
         options: filterOptions,
       },
-      // Add this back in once we have tag support
-      // {
-      //   type: 'field_value_selection',
-      //   field: 'tag',
-      //   name: 'Tags',
-      //   multiSelect: 'or',
-      //   options: [],
-      // },
+      ...(taggingApi ? [taggingApi.ui.getSearchBarFilter({ useName: true })] : []),
     ];
 
     const columns = [
@@ -241,6 +239,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
+      ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
       ...columnRegistry.getAll().map((column) => {
         return {
           ...column.euiColumn,
@@ -350,6 +349,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           filters={filters as any}
           onChange={this.onChange}
+          defaultQuery={this.props.initialQuery}
           toolsRight={[
             <EuiButton
               key="deleteSO"
