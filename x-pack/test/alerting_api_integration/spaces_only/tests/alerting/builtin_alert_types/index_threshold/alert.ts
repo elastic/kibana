@@ -15,9 +15,7 @@ import {
   ObjectRemover,
 } from '../../../../../common/lib';
 import { createEsDocuments } from './create_test_data';
-// import { getAlertType } from '../../../../../../../plugins/triggers_actions_ui/public/application/components/builtin_alert_types/threshold/alert';
 import { getAlertType } from '../../../../../../../plugins/triggers_actions_ui/public/application/components/builtin_alert_types/threshold/';
-// ../../../../../../../plugins/triggers_actions_ui/public/application/components/builtin_alert_types/threshold/alert.ts
 
 const ALERT_TYPE_ID = '.index-threshold';
 const ACTION_TYPE_ID = '.index';
