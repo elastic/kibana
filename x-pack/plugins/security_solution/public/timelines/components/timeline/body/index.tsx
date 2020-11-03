@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -40,6 +40,7 @@ import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { TimelineEventsType, TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { ExpandableEvent } from '../expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
+import * as i18n from './translations';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -181,64 +182,62 @@ export const Body = React.memo<BodyProps>(
         )}
         <FullWidthFlexGroup>
           <ScrollableFlexItem grow={2}>
-            <div>
-              <TimelineBody
-                data-test-subj="timeline-body"
-                data-timeline-id={timelineId}
-                visible={show && !graphEventId}
-              >
-                <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
-                  <ColumnHeaders
-                    actionsColumnWidth={actionsColumnWidth}
-                    browserFields={browserFields}
-                    columnHeaders={columnHeaders}
-                    isEventViewer={isEventViewer}
-                    isSelectAllChecked={isSelectAllChecked}
-                    onColumnRemoved={onColumnRemoved}
-                    onColumnResized={onColumnResized}
-                    onColumnSorted={onColumnSorted}
-                    onSelectAll={onSelectAll}
-                    onUpdateColumns={onUpdateColumns}
-                    showEventsSelect={false}
-                    showSelectAllCheckbox={showCheckboxes}
-                    sort={sort}
-                    timelineId={timelineId}
-                    toggleColumn={toggleColumn}
-                  />
+            <TimelineBody
+              data-test-subj="timeline-body"
+              data-timeline-id={timelineId}
+              visible={show && !graphEventId}
+            >
+              <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
+                <ColumnHeaders
+                  actionsColumnWidth={actionsColumnWidth}
+                  browserFields={browserFields}
+                  columnHeaders={columnHeaders}
+                  isEventViewer={isEventViewer}
+                  isSelectAllChecked={isSelectAllChecked}
+                  onColumnRemoved={onColumnRemoved}
+                  onColumnResized={onColumnResized}
+                  onColumnSorted={onColumnSorted}
+                  onSelectAll={onSelectAll}
+                  onUpdateColumns={onUpdateColumns}
+                  showEventsSelect={false}
+                  showSelectAllCheckbox={showCheckboxes}
+                  sort={sort}
+                  timelineId={timelineId}
+                  toggleColumn={toggleColumn}
+                />
 
-                  <Events
-                    actionsColumnWidth={actionsColumnWidth}
-                    addNoteToEvent={addNoteToEvent}
-                    browserFields={browserFields}
-                    columnHeaders={columnHeaders}
-                    columnRenderers={columnRenderers}
-                    data={data}
-                    expanded={expanded}
-                    eventIdToNoteIds={eventIdToNoteIds}
-                    getNotesByIds={getNotesByIds}
-                    id={timelineId}
-                    isEventViewer={isEventViewer}
-                    loadingEventIds={loadingEventIds}
-                    onColumnResized={onColumnResized}
-                    onPinEvent={onPinEvent}
-                    onRowSelected={onRowSelected}
-                    onUnPinEvent={onUnPinEvent}
-                    onEventToggled={onEventToggled}
-                    pinnedEventIds={pinnedEventIds}
-                    refetch={refetch}
-                    rowRenderers={rowRenderers}
-                    onRuleChange={onRuleChange}
-                    selectedEventIds={selectedEventIds}
-                    showCheckboxes={showCheckboxes}
-                    toggleColumn={toggleColumn}
-                    updateNote={updateNote}
-                  />
-                </EventsTable>
-              </TimelineBody>
-            </div>
+                <Events
+                  actionsColumnWidth={actionsColumnWidth}
+                  addNoteToEvent={addNoteToEvent}
+                  browserFields={browserFields}
+                  columnHeaders={columnHeaders}
+                  columnRenderers={columnRenderers}
+                  data={data}
+                  expanded={expanded}
+                  eventIdToNoteIds={eventIdToNoteIds}
+                  getNotesByIds={getNotesByIds}
+                  id={timelineId}
+                  isEventViewer={isEventViewer}
+                  loadingEventIds={loadingEventIds}
+                  onColumnResized={onColumnResized}
+                  onPinEvent={onPinEvent}
+                  onRowSelected={onRowSelected}
+                  onUnPinEvent={onUnPinEvent}
+                  onEventToggled={onEventToggled}
+                  pinnedEventIds={pinnedEventIds}
+                  refetch={refetch}
+                  rowRenderers={rowRenderers}
+                  onRuleChange={onRuleChange}
+                  selectedEventIds={selectedEventIds}
+                  showCheckboxes={showCheckboxes}
+                  toggleColumn={toggleColumn}
+                  updateNote={updateNote}
+                />
+              </EventsTable>
+            </TimelineBody>
           </ScrollableFlexItem>
           <ScrollableFlexItem grow={1}>
-            {expanded.eventId && (
+            {expanded.eventId ? (
               <ExpandableEvent
                 browserFields={browserFields}
                 columnHeaders={columnHeaders}
@@ -249,6 +248,8 @@ export const Body = React.memo<BodyProps>(
                 timelineId={timelineId}
                 toggleColumn={toggleColumn}
               />
+            ) : (
+              <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>
             )}
           </ScrollableFlexItem>
         </FullWidthFlexGroup>
