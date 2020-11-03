@@ -169,27 +169,40 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     previousPanelState: DashboardPanelState<EmbeddableInput>,
     newPanelState: Partial<PanelState>
   ) {
-    // TODO: In the current infrastructure, embeddables in a container do not react properly to
-    // changes. Removing the existing embeddable, and adding a new one is a temporary workaround
-    // until the container logic is fixed.
+    // // TODO: In the current infrastructure, embeddables in a container do not react properly to
+    // // changes. Removing the existing embeddable, and adding a new one is a temporary workaround
+    // // until the container logic is fixed.
 
-    const finalPanels = { ...this.input.panels };
-    delete finalPanels[previousPanelState.explicitInput.id];
-    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
-    finalPanels[newPanelId] = {
-      ...previousPanelState,
-      ...newPanelState,
-      gridData: {
-        ...previousPanelState.gridData,
-        i: newPanelId,
-      },
-      explicitInput: {
-        ...newPanelState.explicitInput,
-        id: newPanelId,
-      },
-    };
+    // const finalPanels = { ...this.input.panels };
+    // delete finalPanels[previousPanelState.explicitInput.id];
+    // const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
+    // finalPanels[newPanelId] = {
+    //   ...previousPanelState,
+    //   ...newPanelState,
+    //   gridData: {
+    //     ...previousPanelState.gridData,
+    //     i: newPanelId,
+    //   },
+    //   explicitInput: {
+    //     ...newPanelState.explicitInput,
+    //     id: newPanelId,
+    //   },
+    // };
     this.updateInput({
-      panels: finalPanels,
+      panels: {
+        ...this.input.panels,
+        [previousPanelState.explicitInput.id]: {
+          ...previousPanelState,
+          ...newPanelState,
+          gridData: {
+            ...previousPanelState.gridData,
+          },
+          explicitInput: {
+            ...newPanelState.explicitInput,
+            id: previousPanelState.explicitInput.id,
+          },
+        },
+      },
       lastReloadRequestTime: new Date().getTime(),
     });
   }
@@ -201,15 +214,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
     const idToReplace = embeddableId || explicitInput.id;
     if (idToReplace && this.input.panels[idToReplace]) {
-      this.replacePanel(this.input.panels[idToReplace], {
+      return this.replacePanel(this.input.panels[idToReplace], {
         type,
         explicitInput: {
           ...explicitInput,
-          id: uuid.v4(),
+          id: idToReplace,
         },
       });
     } else {
-      this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
+      return this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
     }
   }
 
