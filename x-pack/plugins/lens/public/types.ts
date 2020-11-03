@@ -180,6 +180,10 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+  /**
+   * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
+   */
+  uniqueLabels: (state: T) => Record<string, string>;
 }
 
 /**
@@ -267,6 +271,7 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   state: T;
   setState: StateSetter<T>;
   dragDropContext: DragContextState;
+  isReorder?: boolean;
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
