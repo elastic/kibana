@@ -211,11 +211,8 @@ const expectObjectsNamespaceFiltering = async (fn: Function, args: Record<string
   );
 
   // the 'find' operation has options.namespaces, the others have options.namespace
-  const authorizedNamespaces = args.options.namespaces
-    ? args.options.namespaces
-    : args.options.namespace
-    ? [args.options.namespace]
-    : ['default'];
+  const authorizedNamespaces =
+    args.options.namespaces ?? (args.options.namespace ? [args.options.namespace] : ['default']);
   const returnValue = {
     saved_objects: [
       { namespaces: ['*'] },

@@ -614,39 +614,43 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     return uniq(objects.map((o) => o.type));
   }
 
-  private async getNamespacesPrivilegeMap(namespaces: string[]) {
-    const action = this.actions.login;
-    const checkPrivilegesResult = await this.checkPrivileges(action, namespaces);
-    // check if the user can log into each namespace
-    const map = checkPrivilegesResult.privileges.kibana.reduce(
-      (acc: Record<string, boolean>, { resource, authorized }) => {
-        // there should never be a case where more than one privilege is returned for a given space
-        // if there is, fail-safe (authorized + unauthorized = unauthorized)
-        if (resource && (!authorized || !acc.hasOwnProperty(resource))) {
-          acc[resource] = authorized;
-        }
-        return acc;
-      },
-      {}
+  private async getNamespacesPrivilegeMap(
+    namespaces: string[],
+    previouslypreviouslyAuthorizedSpaceIds: string[]
+  ) {
+    const namespacesToCheck = namespaces.filter(
+      (namespace) => !previouslypreviouslyAuthorizedSpaceIds.includes(namespace)
     );
+    const initialPrivilegeMap = previouslypreviouslyAuthorizedSpaceIds.reduce(
+      (acc, spaceId) => acc.set(spaceId, true),
+      new Map<string, boolean>()
+    );
+    if (namespacesToCheck.length === 0) {
+      return initialPrivilegeMap;
+    }
+    const action = this.actions.login;
+    const checkPrivilegesResult = await this.checkPrivileges(action, namespacesToCheck);
+    // check if the user can log into each namespace
+    const map = checkPrivilegesResult.privileges.kibana.reduce((acc, { resource, authorized }) => {
+      // there should never be a case where more than one privilege is returned for a given space
+      // if there is, fail-safe (authorized + unauthorized = unauthorized)
+      if (resource && (!authorized || !acc.hasOwnProperty(resource))) {
+        acc.set(resource, authorized);
+      }
+      return acc;
+    }, initialPrivilegeMap);
     return map;
   }
 
-  private redactAndSortNamespaces(
-    spaceIds: string[],
-    privilegeMap: Record<string, boolean>,
-    authorizedSpaceIds: string[]
-  ) {
+  private redactAndSortNamespaces(spaceIds: string[], privilegeMap: Map<string, boolean>) {
     return spaceIds
-      .map((x) =>
-        x === ALL_SPACES_ID || privilegeMap[x] || authorizedSpaceIds.includes(x) ? x : UNKNOWN_SPACE
-      )
+      .map((x) => (x === ALL_SPACES_ID || privilegeMap.get(x) ? x : UNKNOWN_SPACE))
       .sort(namespaceComparator);
   }
 
   private async redactSavedObjectNamespaces<T extends SavedObjectNamespaces>(
     savedObject: T,
-    authorizedNamespaces: Array<string | undefined>
+    previouslyAuthorizedNamespaces: Array<string | undefined>
   ): Promise<T> {
     if (
       this.getSpacesService() === undefined ||
@@ -656,50 +660,52 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       return savedObject;
     }
 
-    const authorizedSpaceIds = authorizedNamespaces.map((x) =>
+    const previouslyAuthorizedSpaceIds = previouslyAuthorizedNamespaces.map((x) =>
       this.getSpacesService()!.namespaceToSpaceId(x)
     );
     // all users can see the "all spaces" ID, and we don't need to recheck authorization for any namespaces that we just checked earlier
     const namespaces = savedObject.namespaces.filter(
-      (x) => x !== ALL_SPACES_ID && !authorizedSpaceIds.includes(x)
+      (x) => x !== ALL_SPACES_ID && !previouslyAuthorizedSpaceIds.includes(x)
     );
     if (namespaces.length === 0) {
       return savedObject;
     }
 
-    const privilegeMap = await this.getNamespacesPrivilegeMap(namespaces);
+    const privilegeMap = await this.getNamespacesPrivilegeMap(
+      namespaces,
+      previouslyAuthorizedSpaceIds
+    );
 
     return {
       ...savedObject,
-      namespaces: this.redactAndSortNamespaces(
-        savedObject.namespaces,
-        privilegeMap,
-        authorizedSpaceIds
-      ),
+      namespaces: this.redactAndSortNamespaces(savedObject.namespaces, privilegeMap),
     };
   }
 
   private async redactSavedObjectsNamespaces<T extends SavedObjectsNamespaces>(
     response: T,
-    authorizedNamespaces: Array<string | undefined>
+    previouslyAuthorizedNamespaces: Array<string | undefined>
   ): Promise<T> {
     if (this.getSpacesService() === undefined) {
       return response;
     }
 
-    const authorizedSpaceIds = authorizedNamespaces.map((x) =>
+    const previouslypreviouslyAuthorizedSpaceIds = previouslyAuthorizedNamespaces.map((x) =>
       this.getSpacesService()!.namespaceToSpaceId(x)
     );
     const { saved_objects: savedObjects } = response;
     // all users can see the "all spaces" ID, and we don't need to recheck authorization for any namespaces that we just checked earlier
     const namespaces = uniq(
       savedObjects.flatMap((savedObject) => savedObject.namespaces || [])
-    ).filter((x) => x !== ALL_SPACES_ID && !authorizedSpaceIds.includes(x));
+    ).filter((x) => x !== ALL_SPACES_ID && !previouslypreviouslyAuthorizedSpaceIds.includes(x));
     if (namespaces.length === 0) {
       return response;
     }
 
-    const privilegeMap = await this.getNamespacesPrivilegeMap(namespaces);
+    const privilegeMap = await this.getNamespacesPrivilegeMap(
+      namespaces,
+      previouslypreviouslyAuthorizedSpaceIds
+    );
 
     return {
       ...response,
@@ -707,7 +713,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
         ...savedObject,
         namespaces:
           savedObject.namespaces &&
-          this.redactAndSortNamespaces(savedObject.namespaces, privilegeMap, authorizedSpaceIds),
+          this.redactAndSortNamespaces(savedObject.namespaces, privilegeMap),
       })),
     };
   }
