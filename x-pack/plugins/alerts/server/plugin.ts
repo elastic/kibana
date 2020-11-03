@@ -33,6 +33,7 @@ import {
 } from '../../../../src/core/server';
 
 import {
+  aggregateAlertRoute,
   createAlertRoute,
   deleteAlertRoute,
   findAlertRoute,
@@ -190,6 +191,7 @@ export class AlertingPlugin {
     // Routes
     const router = core.http.createRouter();
     // Register routes
+    aggregateAlertRoute(router, this.licenseState);
     createAlertRoute(router, this.licenseState);
     deleteAlertRoute(router, this.licenseState);
     findAlertRoute(router, this.licenseState);
@@ -301,7 +303,6 @@ export class AlertingPlugin {
   ): (request: KibanaRequest) => Services {
     return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
-      esClient: elasticsearch.client.asScoped(request).asCurrentUser,
       savedObjectsClient: this.getScopedClientWithAlertSavedObjectType(savedObjects, request),
       scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
       getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {

@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { parseTimeIntervalForJob } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';

@@ -63,6 +63,11 @@ export class DashboardListing extends React.Component {
           })}
           toastNotifications={this.props.core.notifications.toasts}
           uiSettings={this.props.core.uiSettings}
+          searchFilters={
+            this.props.taggingApi
+              ? [this.props.taggingApi.ui.getSearchBarFilter({ useName: true })]
+              : []
+          }
         />
       </I18nProvider>
     );
@@ -150,6 +155,8 @@ export class DashboardListing extends React.Component {
   }
 
   getTableColumns() {
+    const { taggingApi } = this.props;
+
     const tableColumns = [
       {
         field: 'title',
@@ -174,6 +181,7 @@ export class DashboardListing extends React.Component {
         dataType: 'string',
         sortable: true,
       },
+      ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
     ];
     return tableColumns;
   }
@@ -189,6 +197,7 @@ DashboardListing.propTypes = {
   hideWriteControls: PropTypes.bool.isRequired,
   initialFilter: PropTypes.string,
   initialPageSize: PropTypes.number.isRequired,
+  taggingApi: PropTypes.object,
 };
 
 DashboardListing.defaultProps = {
