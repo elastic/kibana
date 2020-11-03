@@ -52,6 +52,11 @@ export class SavedObjectTaggingOssPlugin
             this.api = api;
           },
           (error) => {
+            // eslint-disable-next-line no-console
+            console.log(
+              'Error during tagging API promise resolution. SO tagging has been disabled',
+              error
+            );
             this.apiRegistered = false;
           }
         );

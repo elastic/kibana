@@ -1502,7 +1502,11 @@ export class SavedObjectsRepository {
     );
 
     if (body.failures?.length) {
-      throw SavedObjectsErrorHelpers.createConflictError(type, id);
+      throw SavedObjectsErrorHelpers.createConflictError(
+        type,
+        id,
+        `${body.failures.length} references could not be removed`
+      );
     }
 
     return {

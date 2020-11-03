@@ -57,13 +57,36 @@ export interface SavedObjectsExportOptions {
   namespace?: string;
 }
 
-type SavedObjectsFetchByTypeOptions = Pick<Required<SavedObjectsExportOptions>, 'types'> &
-  Pick<
-    SavedObjectsExportOptions,
-    'hasReference' | 'search' | 'exportSizeLimit' | 'savedObjectsClient' | 'namespace'
-  >;
-type SavedObjectsFetchByObjectOptions = Pick<Required<SavedObjectsExportOptions>, 'objects'> &
-  Pick<SavedObjectsExportOptions, 'exportSizeLimit' | 'savedObjectsClient' | 'namespace'>;
+interface SavedObjectsFetchByTypeOptions {
+  /** array of saved object types. */
+  types: string[];
+  /** optional array of references to search object for when exporting by types */
+  hasReference?: SavedObjectsFindOptionsReference[];
+  /** optional query string to filter exported objects. */
+  search?: string;
+  /** an instance of the SavedObjectsClient. */
+  savedObjectsClient: SavedObjectsClientContract;
+  /** the maximum number of objects to export. */
+  exportSizeLimit: number;
+  /** optional namespace to override the namespace used by the savedObjectsClient. */
+  namespace?: string;
+}
+
+interface SavedObjectsFetchByObjectOptions {
+  /** optional array of objects to export. */
+  objects: Array<{
+    /** the saved object id. */
+    id: string;
+    /** the saved object type. */
+    type: string;
+  }>;
+  /** an instance of the SavedObjectsClient. */
+  savedObjectsClient: SavedObjectsClientContract;
+  /** the maximum number of objects to export. */
+  exportSizeLimit: number;
+  /** optional namespace to override the namespace used by the savedObjectsClient. */
+  namespace?: string;
+}
 
 const isFetchByTypeOptions = (
   options: SavedObjectsFetchByTypeOptions | SavedObjectsFetchByObjectOptions
@@ -170,7 +193,7 @@ const validateOptions = ({
       exportSizeLimit,
       savedObjectsClient,
       namespace,
-    };
+    } as SavedObjectsFetchByObjectOptions;
   } else if (types && types.length > 0) {
     return {
       types,
@@ -179,7 +202,7 @@ const validateOptions = ({
       exportSizeLimit,
       savedObjectsClient,
       namespace,
-    };
+    } as SavedObjectsFetchByTypeOptions;
   } else {
     throw Boom.badRequest('Either `type` or `objects` are required.');
   }
