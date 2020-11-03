@@ -9,35 +9,46 @@ import { i18n } from '@kbn/i18n';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
 import { TimeseriesChart } from './timeseries_chart';
 import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
-import { ml } from '../../../services/ml_api_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
 import { extractErrorMessage } from '../../../../../common/util/errors';
 import { Annotation } from '../../../../../common/types/annotations';
-import { useNotifications } from '../../../contexts/kibana';
+import { useMlKibana, useNotifications } from '../../../contexts/kibana';
+import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
+import { ANNOTATION_EVENT_USER } from '../../../../../common/constants/annotations';
+import { getControlsForDetector } from '../../get_controls_for_detector';
 
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
-  selectedDetectorIndex: number;
+  detectorIndex: number;
   renderFocusChartOnly: boolean;
   selectedJob: CombinedJob;
+  selectedEntities: Record<string, any>;
   showAnnotations: boolean;
   showForecast: boolean;
   showModelBounds: boolean;
   chartProps: any;
   lastRefresh: number;
+  contextAggregationInterval: any;
 }
 export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
   bounds,
-  selectedDetectorIndex,
+  detectorIndex,
   renderFocusChartOnly,
   selectedJob,
+  selectedEntities,
   showAnnotations,
   showForecast,
   showModelBounds,
   chartProps,
   lastRefresh,
+  contextAggregationInterval,
 }) => {
   const { toasts: toastNotifications } = useNotifications();
+  const {
+    services: {
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
 
   const [annotationData, setAnnotationData] = useState<Annotation[]>([]);
 
@@ -55,6 +66,12 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
 
   useEffect(() => {
     let unmounted = false;
+    const entities = getControlsForDetector(detectorIndex, selectedEntities, selectedJob.job_id);
+    const nonBlankEntities = Array.isArray(entities)
+      ? entities.filter((entity) => entity.fieldValue !== null)
+      : undefined;
+    const searchBounds = getBoundsRoundedToInterval(bounds, contextAggregationInterval, false);
+
     /**
      * Loads the full list of annotations for job without any aggs or time boundaries
      * used to indicate existence of annotations that are beyond the selected time
@@ -62,17 +79,23 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
      */
     const loadAnnotations = async (jobId: string) => {
       try {
-        const resp = await ml.annotations.getAnnotations({
+        const resp = await mlApiServices.annotations.getAnnotations({
           jobIds: [jobId],
-          earliestMs: null,
-          latestMs: null,
+          earliestMs: searchBounds.min.valueOf(),
+          latestMs: searchBounds.max.valueOf(),
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+          fields: [
+            {
+              field: 'event',
+              missing: ANNOTATION_EVENT_USER,
+            },
+          ],
+          detectorIndex,
+          entities: nonBlankEntities,
         });
         if (!unmounted) {
           if (Array.isArray(resp.annotations[jobId])) {
             setAnnotationData(resp.annotations[jobId]);
-          } else {
-            showAnnotationErrorToastNotification();
           }
         }
       } catch (error) {
@@ -83,9 +106,16 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     loadAnnotations(selectedJob.job_id);
 
     return () => {
-      unmounted = false;
+      unmounted = true;
     };
-  }, [selectedJob.job_id, selectedDetectorIndex, lastRefresh]);
+  }, [
+    selectedJob.job_id,
+    detectorIndex,
+    lastRefresh,
+    selectedEntities,
+    bounds,
+    contextAggregationInterval,
+  ]);
 
   return (
     <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
@@ -95,7 +125,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             {...chartProps}
             annotationData={annotationData}
             bounds={bounds}
-            detectorIndex={selectedDetectorIndex}
+            detectorIndex={detectorIndex}
             renderFocusChartOnly={renderFocusChartOnly}
             selectedJob={selectedJob}
             showAnnotations={showAnnotations}
