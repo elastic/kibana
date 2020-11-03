@@ -19,7 +19,6 @@ import {
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
 import {
-  setEMSSettings,
   setKibanaCommonConfig,
   setKibanaVersion,
   setMapAppConfig,
@@ -53,7 +52,6 @@ import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/publ
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
-import { MapsLegacyPluginStart } from '../../../../src/plugins/maps_legacy/public';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -75,7 +73,6 @@ export interface MapsPluginStartDependencies {
   uiActions: UiActionsStart;
   share: SharePluginStart;
   savedObjects: SavedObjectsStart;
-  mapsLegacy: MapsLegacyPluginStart;
 }
 
 /**
@@ -108,8 +105,6 @@ export class MapsPlugin
     setKibanaCommonConfig(plugins.mapsLegacy.config);
     setMapAppConfig(config);
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
-
-    setEMSSettings(plugins.mapsLegacy.emsSettings);
 
     // register url generators
     const getStartServices = async () => {

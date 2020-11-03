@@ -65,7 +65,7 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
 
     const config: MapsLegacyConfig = {
       ...rawConfig,
-      emsFileApiUrl: emsSettings.getEMSTileApiUrl(),
+      emsFileApiUrl: emsSettings.getEMSFileApiUrl(),
       emsTileApiUrl: emsSettings.getEMSTileApiUrl(),
       emsLandingPageUrl: emsSettings.getEMSLandingPageUrl(),
       emsFontLibraryUrl: emsSettings.getEMSFontLibraryUrl(),
