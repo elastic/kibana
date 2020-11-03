@@ -9,6 +9,28 @@ import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks_
 import { registerSettingsRoutes } from './settings';
 
 describe('log settings routes', () => {
+  describe('GET /api/app_search/log_settings', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({ method: 'get' });
+
+      registerSettingsRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({});
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/log_settings',
+      });
+    });
+  });
+
   describe('PUT /api/app_search/log_settings', () => {
     let mockRouter: MockRouter;
 
@@ -46,28 +68,6 @@ describe('log settings routes', () => {
           },
         };
         mockRouter.shouldThrow(request);
-      });
-    });
-  });
-
-  describe('GET /api/app_search/log_settings', () => {
-    let mockRouter: MockRouter;
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'get' });
-
-      registerSettingsRoutes({
-        ...mockDependencies,
-        router: mockRouter.router,
-      });
-    });
-
-    it('creates a request to enterprise search', () => {
-      mockRouter.callRoute({});
-
-      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/as/log_settings',
       });
     });
   });
