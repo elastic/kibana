@@ -8,7 +8,7 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { parseInterval } from 'src/plugins/data/common';
+import { search } from '../../../../../src/plugins/data/public';
 
 type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
 
@@ -115,7 +115,7 @@ export function getTimeScaleFunction(data: DataPublicPluginStart) {
 
       const targetUnitInMs = unitInMs[targetUnit];
       const timeInfo = await data.search.aggs.getDateMetaByDatatableColumn(dateColumnDefinition);
-      const intervalDuration = timeInfo && parseInterval(timeInfo.interval);
+      const intervalDuration = timeInfo && search.aggs.parseInterval(timeInfo.interval);
 
       if (!timeInfo || !intervalDuration) {
         throw new Error(
