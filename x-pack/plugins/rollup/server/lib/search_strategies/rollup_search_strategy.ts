@@ -6,7 +6,6 @@
 import { keyBy, isString } from 'lodash';
 import { ILegacyScopedClusterClient } from 'src/core/server';
 import { ReqFacade } from '../../../../../../src/plugins/vis_type_timeseries/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/server';
 import { mergeCapabilitiesWithFields } from '../merge_capabilities_with_fields';
 import { getCapabilitiesForRollupIndices } from '../map_capabilities';
 
@@ -25,7 +24,7 @@ export const getRollupSearchStrategy = (
     name = 'rollup';
 
     constructor() {
-      super(ENHANCED_ES_SEARCH_STRATEGY, 'rollup', { rest_total_hits_as_int: true });
+      super('rollup', { rest_total_hits_as_int: true });
     }
 
     async search(req: ReqFacade, bodies: any[], options = {}) {
