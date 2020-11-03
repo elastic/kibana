@@ -14,7 +14,7 @@ import { AlertServices } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
-import { SignalSearchResponse } from './types';
+import { SignalSearchResponse, SignalSourceHit } from './types';
 import { BuildRuleMessage } from './rule_messages';
 
 // used to generate constant Threshold Signals ID when run with the same params
@@ -51,11 +51,25 @@ interface FilterObject {
   };
 }
 
-const getNestedQueryFilters = (filtersObj: FilterObject): Record<string, string> => {
+const injectFirstMatch = (
+  hit: SignalSourceHit,
+  match: object | Record<string, string>
+): Record<string, string> | undefined => {
+  if (match != null) {
+    for (const key of Object.keys(match)) {
+      return { [key]: get(key, hit._source) } as Record<string, string>;
+    }
+  }
+};
+
+const getNestedQueryFilters = (
+  hit: SignalSourceHit,
+  filtersObj: FilterObject
+): Record<string, string> => {
   if (Array.isArray(filtersObj.bool?.filter)) {
     return reduce(
       (acc, filterItem) => {
-        const nestedFilter = getNestedQueryFilters(filterItem);
+        const nestedFilter = getNestedQueryFilters(hit, filterItem);
 
         if (nestedFilter) {
           return { ...acc, ...nestedFilter };
@@ -70,27 +84,32 @@ const getNestedQueryFilters = (filtersObj: FilterObject): Record<string, string>
     return (
       (filtersObj.bool?.should &&
         filtersObj.bool?.should[0] &&
-        (filtersObj.bool.should[0].match || filtersObj.bool.should[0].match_phrase)) ??
+        (injectFirstMatch(hit, filtersObj.bool.should[0].match) ||
+          injectFirstMatch(hit, filtersObj.bool.should[0].match_phrase))) ??
       {}
     );
   }
 };
 
-export const getThresholdSignalQueryFields = (filter: unknown) => {
+export const getThresholdSignalQueryFields = (hit: SignalSourceHit, filter: unknown) => {
   const filters = get('bool.filter', filter);
 
   return reduce(
     (acc, item) => {
       if (item.match_phrase) {
-        return { ...acc, ...item.match_phrase };
+        return { ...acc, ...injectFirstMatch(hit, item.match_phrase) };
       }
 
       if (item.bool?.should && (item.bool.should[0].match || item.bool.should[0].match_phrase)) {
-        return { ...acc, ...(item.bool.should[0].match || item.bool.should[0].match_phrase) };
+        return {
+          ...acc,
+          ...(injectFirstMatch(hit, item.bool.should[0].match) ||
+            injectFirstMatch(hit, item.bool.should[0].match_phrase)),
+        };
       }
 
       if (item.bool?.filter) {
-        return { ...acc, ...getNestedQueryFilters(item) };
+        return { ...acc, ...getNestedQueryFilters(hit, item) };
       }
 
       return acc;
@@ -163,7 +182,7 @@ export const transformThresholdResultsToEcs = (
   threshold: Threshold,
   ruleId: string
 ): SignalSearchResponse => {
-  const signalQueryFields = getThresholdSignalQueryFields(filter);
+  const signalQueryFields = getThresholdSignalQueryFields(results.hits.hits[0], filter);
   const transformedHits = getTransformedHits(
     results,
     inputIndex,

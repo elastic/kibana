@@ -4,10 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { sampleDocNoSortIdNoVersion } from './__mocks__/es_results';
 import { getThresholdSignalQueryFields } from './bulk_create_threshold_signals';
 
 describe('getThresholdSignalQueryFields', () => {
   it('should return proper fields for match_phrase filters', () => {
+    const mockHit = {
+      ...sampleDocNoSortIdNoVersion(),
+      _source: {
+        '@timestamp': '2020-11-03T02:31:47.431Z',
+        event: {
+          dataset: 'traefik.access',
+          module: 'traefik',
+        },
+        traefik: {
+          access: {
+            entryPointName: 'web-secure',
+          },
+        },
+        url: {
+          domain: 'kibana.siem.estc.dev',
+        },
+      },
+    };
     const mockFilters = {
       bool: {
         must: [],
@@ -71,15 +90,28 @@ describe('getThresholdSignalQueryFields', () => {
       },
     };
 
-    expect(getThresholdSignalQueryFields(mockFilters)).toEqual({
-      'event.module': 'traefik',
+    expect(getThresholdSignalQueryFields(mockHit, mockFilters)).toEqual({
       'event.dataset': 'traefik.access',
+      'event.module': 'traefik',
       'traefik.access.entryPointName': 'web-secure',
       'url.domain': 'kibana.siem.estc.dev',
     });
   });
 
   it('should return proper fields object for nested match filters', () => {
+    const mockHit = {
+      ...sampleDocNoSortIdNoVersion(),
+      _source: {
+        '@timestamp': '2020-11-03T02:31:47.431Z',
+        event: {
+          dataset: 'traefik.access',
+          module: 'traefik',
+        },
+        url: {
+          domain: 'kibana.siem.estc.dev',
+        },
+      },
+    };
     const filters = {
       bool: {
         must: [],
@@ -104,7 +136,7 @@ describe('getThresholdSignalQueryFields', () => {
                     should: [
                       {
                         match: {
-                          'event.dataset': 'traefik.access',
+                          'event.dataset': 'traefik.*',
                         },
                       },
                     ],
@@ -120,13 +152,23 @@ describe('getThresholdSignalQueryFields', () => {
       },
     };
 
-    expect(getThresholdSignalQueryFields(filters)).toEqual({
-      'event.module': 'traefik',
+    expect(getThresholdSignalQueryFields(mockHit, filters)).toEqual({
       'event.dataset': 'traefik.access',
+      'event.module': 'traefik',
     });
   });
 
   it('should return proper object for simple match filters', () => {
+    const mockHit = {
+      ...sampleDocNoSortIdNoVersion(),
+      _source: {
+        '@timestamp': '2020-11-03T02:31:47.431Z',
+        event: {
+          dataset: 'traefik.access',
+          module: 'traefik',
+        },
+      },
+    };
     const filters = {
       bool: {
         must: [],
@@ -154,13 +196,23 @@ describe('getThresholdSignalQueryFields', () => {
       },
     };
 
-    expect(getThresholdSignalQueryFields(filters)).toEqual({
-      'event.module': 'traefik',
+    expect(getThresholdSignalQueryFields(mockHit, filters)).toEqual({
       'event.dataset': 'traefik.access',
+      'event.module': 'traefik',
     });
   });
 
   it('should return proper object for simple match_phrase filters', () => {
+    const mockHit = {
+      ...sampleDocNoSortIdNoVersion(),
+      _source: {
+        '@timestamp': '2020-11-03T02:31:47.431Z',
+        event: {
+          dataset: 'traefik.access',
+          module: 'traefik',
+        },
+      },
+    };
     const filters = {
       bool: {
         must: [],
@@ -188,13 +240,22 @@ describe('getThresholdSignalQueryFields', () => {
       },
     };
 
-    expect(getThresholdSignalQueryFields(filters)).toEqual({
+    expect(getThresholdSignalQueryFields(mockHit, filters)).toEqual({
       'event.module': 'traefik',
       'event.dataset': 'traefik.access',
     });
   });
 
   it('should return proper object for exists filters', () => {
+    const mockHit = {
+      ...sampleDocNoSortIdNoVersion(),
+      _source: {
+        '@timestamp': '2020-11-03T02:31:47.431Z',
+        event: {
+          module: 'traefik',
+        },
+      },
+    };
     const filters = {
       bool: {
         should: [
@@ -226,6 +287,46 @@ describe('getThresholdSignalQueryFields', () => {
         minimum_should_match: 1,
       },
     };
-    expect(getThresholdSignalQueryFields(filters)).toEqual({});
+    expect(getThresholdSignalQueryFields(mockHit, filters)).toEqual({});
+  });
+
+  it('should NOT add invalid characters from CIDR such as the "/" proper object for simple match_phrase filters', () => {
+    const mockHit = {
+      ...sampleDocNoSortIdNoVersion(),
+      _source: {
+        '@timestamp': '2020-11-03T02:31:47.431Z',
+        destination: {
+          ip: '192.168.0.16',
+        },
+        event: {
+          module: 'traefik',
+        },
+      },
+    };
+    const filters = {
+      bool: {
+        must: [],
+        filter: [
+          {
+            bool: {
+              should: [
+                {
+                  match: {
+                    'destination.ip': '192.168.0.0/16',
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          },
+        ],
+        should: [],
+        must_not: [],
+      },
+    };
+
+    expect(getThresholdSignalQueryFields(mockHit, filters)).toEqual({
+      'destination.ip': '192.168.0.16',
+    });
   });
 });
