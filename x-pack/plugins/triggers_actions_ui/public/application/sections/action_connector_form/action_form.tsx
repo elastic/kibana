@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, Suspense, useState, useEffect } from 'react';
+import React, { Fragment, Suspense, useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -25,9 +25,12 @@ import {
   EuiIconTip,
   EuiLink,
   EuiCallOut,
-  EuiHorizontalRule,
   EuiText,
+  EuiFormLabel,
+  EuiFormControlLayout,
+  EuiSuperSelect,
   EuiLoadingSpinner,
+  EuiBadge,
 } from '@elastic/eui';
 import { HttpSetup, ToastsSetup, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
@@ -47,11 +50,14 @@ import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
+import { ActionGroup } from '../../../../../alerts/common';
 
 interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
+  actionGroups: ActionGroup[];
   setActionIdByIndex: (id: string, index: number) => void;
+  setActionGroupIdByIndex: (group: string, index: number) => void;
   setAlertProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
@@ -74,7 +80,9 @@ interface ActiveActionConnectorState {
 export const ActionForm = ({
   actions,
   defaultActionGroupId,
+  actionGroups,
   setActionIdByIndex,
+  setActionGroupIdByIndex,
   setAlertProperty,
   setActionParamsProperty,
   http,
@@ -94,12 +102,16 @@ export const ActionForm = ({
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
-  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
+  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(actions.length === 0);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [isLoadingConnectors, setIsLoadingConnectors] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
   const [emptyActionsIds, setEmptyActionsIds] = useState<string[]>([]);
+
+  const closeAddConnectorModal = useCallback(() => setAddModalVisibility(false), [
+    setAddModalVisibility,
+  ]);
 
   // load action types
   useEffect(() => {
@@ -242,15 +254,53 @@ export const ActionForm = ({
         id,
       }));
     const actionTypeRegistered = actionTypeRegistry.get(actionConnector.actionTypeId);
-    if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
+    if (!actionTypeRegistered) return null;
+
     const ParamsFieldsComponent = actionTypeRegistered.actionParamsFields;
     const checkEnabledResult = checkActionFormActionTypeEnabled(
       actionTypesIndex[actionConnector.actionTypeId],
       connectors.filter((connector) => connector.isPreconfigured)
     );
 
+    const defaultActionGroup = actionGroups.find(({ id }) => id === defaultActionGroupId)!;
+    const selectedActionGroup =
+      actionGroups.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
+
     const accordionContent = checkEnabledResult.isEnabled ? (
       <Fragment>
+        <EuiFlexGroup component="div">
+          <EuiFlexItem grow={true}>
+            <EuiFormControlLayout
+              fullWidth
+              prepend={
+                <EuiFormLabel
+                  htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertForm.actionRunWhenInActionGroup"
+                    defaultMessage="Run When"
+                  />
+                </EuiFormLabel>
+              }
+            >
+              <EuiSuperSelect
+                fullWidth
+                id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+                data-test-subj={`addNewActionConnectorActionGroup-${index}`}
+                options={actionGroups.map(({ id: value, name }) => ({
+                  value,
+                  inputDisplay: name,
+                  'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
+                }))}
+                valueOfSelected={selectedActionGroup.id}
+                onChange={(group) => {
+                  setActionGroupIdByIndex(group, index);
+                }}
+              />
+            </EuiFormControlLayout>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="l" />
         <EuiFlexGroup component="div">
           <EuiFlexItem>
             <EuiFormRow
@@ -291,7 +341,7 @@ export const ActionForm = ({
                 singleSelection={{ asPlainText: true }}
                 options={optionsList}
                 id={`selectActionConnector-${actionItem.id}`}
-                data-test-subj={`selectActionConnector-${actionItem.actionTypeId}`}
+                data-test-subj={`selectActionConnector-${index}`}
                 selectedOptions={getSelectedOptions(actionItem.id)}
                 onChange={(selectedOptions) => {
                   setActionIdByIndex(selectedOptions[0].id ?? '', index);
@@ -336,11 +386,12 @@ export const ActionForm = ({
         <EuiAccordion
           initialIsOpen={true}
           id={index.toString()}
+          paddingSize="l"
           className="actAccordionActionForm"
           buttonContentClassName="actAccordionActionForm__button"
-          data-test-subj={`alertActionAccordion-${defaultActionGroupId}`}
+          data-test-subj={`alertActionAccordion-${index}`}
           buttonContent={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
+            <EuiFlexGroup gutterSize="l" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
               </EuiFlexItem>
@@ -358,6 +409,9 @@ export const ActionForm = ({
                             }`,
                           }}
                         />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge>{selectedActionGroup.name}</EuiBadge>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         {checkEnabledResult.isEnabled === false && (
@@ -384,7 +438,7 @@ export const ActionForm = ({
           }
           extraAction={
             <EuiButtonIcon
-              iconType="cross"
+              iconType="minusInCircle"
               color="danger"
               className="actAccordionActionForm__extraAction"
               aria-label={i18n.translate(
@@ -406,11 +460,10 @@ export const ActionForm = ({
               }}
             />
           }
-          paddingSize="l"
         >
           {accordionContent}
         </EuiAccordion>
-        <EuiSpacer size="xs" />
+        <EuiSpacer size="m" />
       </Fragment>
     );
   };
@@ -438,7 +491,7 @@ export const ActionForm = ({
           id={index.toString()}
           className="actAccordionActionForm"
           buttonContentClassName="actAccordionActionForm__button"
-          data-test-subj={`alertActionAccordion-${defaultActionGroupId}`}
+          data-test-subj={`alertActionAccordion-${index}`}
           buttonContent={
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -658,25 +711,7 @@ export const ActionForm = ({
           </EuiTitle>
           <EuiSpacer size="m" />
           {alertActionsList}
-          {isAddActionPanelOpen === false ? (
-            <div>
-              <EuiHorizontalRule />
-              <EuiFlexGroup>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    data-test-subj="addAlertActionButton"
-                    onClick={() => setIsAddActionPanelOpen(true)}
-                  >
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
-                      defaultMessage="Add action"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </div>
-          ) : null}
+          <EuiSpacer size="m" />
           {isAddActionPanelOpen ? (
             <Fragment>
               <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
@@ -724,15 +759,29 @@ export const ActionForm = ({
                 )}
               </EuiFlexGroup>
             </Fragment>
-          ) : null}
+          ) : (
+            <EuiFlexGroup>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  data-test-subj="addAlertActionButton"
+                  onClick={() => setIsAddActionPanelOpen(true)}
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
+                    defaultMessage="Add action"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          )}
         </Fragment>
       )}
-      {actionTypesIndex && activeActionItem ? (
+      {actionTypesIndex && activeActionItem && addModalVisible ? (
         <ConnectorAddModal
           key={activeActionItem.index}
           actionType={actionTypesIndex[activeActionItem.actionTypeId]}
-          addModalVisible={addModalVisible}
-          setAddModalVisibility={setAddModalVisibility}
+          onClose={closeAddConnectorModal}
           postSaveEventHandler={(savedAction: ActionConnector) => {
             connectors.push(savedAction);
             setActionIdByIndex(savedAction.id, activeActionItem.index);
