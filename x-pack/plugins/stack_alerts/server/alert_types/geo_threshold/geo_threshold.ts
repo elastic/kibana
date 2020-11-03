@@ -145,7 +145,7 @@ export function getMovedEntities(
       )
       // Do not track entries to or exits from 'other'
       .filter((entityMovementDescriptor: EntityMovementDescriptor) => {
-        if (trackingEvent !== 'crossing') {
+        if (trackingEvent !== 'crossed') {
           return trackingEvent === 'entered'
             ? entityMovementDescriptor.currLocation.shapeId !== OTHER_CATEGORY
             : entityMovementDescriptor.prevLocation.shapeId !== OTHER_CATEGORY;
