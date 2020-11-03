@@ -22,6 +22,7 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
+  const log = getService('log');
 
   /**
    * @function parseStyles
@@ -126,6 +127,9 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
         const EventName = await Events[i]._webElement.getText();
         const LinkText = await testSubjects.find('resolver:breadcrumbs:last');
         const linkText = await LinkText._webElement.getText();
+        log.info(i);
+        log.info(EventName);
+        log.info(expectedData[i]);
         expect(EventName).to.equal(linkText);
         expect(EventName).to.equal(expectedData[i]);
       }
