@@ -120,10 +120,12 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       }
     }
   };
-  const [tempIndexQuery, setTempIndexQuery] = useState<Query>({
-    query: indexQuery || '',
-    language: 'kuery',
-  });
+  const [tempIndexQuery, setTempIndexQuery] = useState<Query>(
+    indexQuery || {
+      query: '',
+      language: 'kuery',
+    }
+  );
   const [boundaryIndexPattern, _setBoundaryIndexPattern] = useState<IIndexPattern>({
     id: '',
     fields: [],
@@ -140,10 +142,12 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       }
     }
   };
-  const [tempBoundaryIndexQuery, setTempBoundaryIndexQuery] = useState<Query>({
-    query: boundaryIndexQuery || '',
-    language: 'kuery',
-  });
+  const [tempBoundaryIndexQuery, setTempBoundaryIndexQuery] = useState<Query>(
+    boundaryIndexQuery || {
+      query: '',
+      language: 'kuery',
+    }
+  );
   const [delayOffset, _setDelayOffset] = useState<number>(0);
   function setDelayOffset(_delayOffset: number) {
     setAlertParams('delayOffsetWithUnits', `${_delayOffset}${delayOffsetUnit}`);
@@ -282,10 +286,12 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
           indexPatterns={indexPattern ? [indexPattern] : []}
           query={tempIndexQuery}
           onChange={(query) => {
-            if (validateQuery(query)) {
-              setAlertParams('indexQuery', query);
+            if (query.language) {
+              if (validateQuery(query)) {
+                setAlertParams('indexQuery', query);
+              }
+              setTempIndexQuery(query);
             }
-            setTempIndexQuery(query);
           }}
         />
       </EuiFlexItem>
@@ -365,10 +371,12 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
           indexPatterns={boundaryIndexPattern ? [boundaryIndexPattern] : []}
           query={tempBoundaryIndexQuery}
           onChange={(query) => {
-            if (validateQuery(query)) {
-              setAlertParams('boundaryIndexQuery', query);
+            if (query.language) {
+              if (validateQuery(query)) {
+                setAlertParams('boundaryIndexQuery', query);
+              }
+              setTempBoundaryIndexQuery(query);
             }
-            setTempBoundaryIndexQuery(query);
           }}
         />
       </EuiFlexItem>
