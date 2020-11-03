@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { isEqual } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -34,7 +35,6 @@ import { NodeAvailableWarning } from '../../../../components/node_available_warn
 import { DatePickerWrapper } from '../../../../components/navigation_menu/date_picker_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
-import { isEqual } from 'lodash';
 
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
@@ -246,6 +246,12 @@ export class JobsListView extends Component {
 
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       try {
+        let spaces = {};
+        if (this.props.isManagementTable) {
+          const allSpaces = await ml.savedObjects.jobsSpaces();
+          spaces = allSpaces['anomaly-detector'];
+        }
+
         const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
         const fullJobsList = {};
         const jobsSummaryList = jobs.map((job) => {
@@ -254,6 +260,10 @@ export class JobsListView extends Component {
             delete job.fullJob;
           }
           job.latestTimestampSortValue = job.latestTimestampMs || 0;
+          job.spaces =
+            this.props.isManagementTable && spaces && spaces[job.id] !== undefined
+              ? spaces[job.id]
+              : [];
           return job;
         });
         const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);

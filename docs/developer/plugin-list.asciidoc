@@ -164,6 +164,11 @@ Content is fetched from the remote (https://feeds.elastic.co and https://feeds-s
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/saved_objects_tagging_oss/README.md[savedObjectsTaggingOss]
+|Bridge plugin for consumption of the saved object tagging feature from
+oss plugins.
+
+
 |{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
 |securityOss is responsible for educating users about Elastic's free security features,
 so they can properly protect the data within their clusters.
@@ -466,6 +471,10 @@ Elastic.
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/saved_objects_tagging/README.md[savedObjectsTagging]
+|Add tagging capability to saved objects
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler/README.md[searchprofiler]
 |The search profiler consumes the Profile API
 by sending a search API with profile: true enabled in the request body. The response contains
@@ -509,8 +518,9 @@ routes, etc.
 |This plugin provides access to the transforms features provided by Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/translations[translations]
-|WARNING: Missing README.
+|<<translations-plugin>>
+|Contains Elastic-supported translations. Owned by the Localizations team.
+For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/master/packages/kbn-i18n
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
@@ -552,3 +562,4 @@ include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/plugins/ui_actions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/x-pack/plugins/translations/README.asciidoc[leveloffset=+1]
