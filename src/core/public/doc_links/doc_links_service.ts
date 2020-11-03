@@ -135,6 +135,8 @@ export class DocLinksService {
         visualize: {
           guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/visualize.html`,
           timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
+          lens: `${ELASTIC_WEBSITE_URL}what-is/kibana-lens`,
+          maps: `${ELASTIC_WEBSITE_URL}maps`,
         },
       },
     });

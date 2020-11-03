@@ -17,17 +17,26 @@
  * under the License.
  */
 
-import { CoreSetup } from 'kibana/public';
-import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { DocLinksStart, CoreSetup } from 'src/core/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 import { getMapsAliasConfig } from './vis_type_alias';
 
 export interface MapsPluginSetupDependencies {
   visualizations: VisualizationsSetup;
 }
 
+export interface MapsPluginStartDependencies {
+  docLinks: DocLinksStart;
+}
+
 export class MapsOSSPlugin {
-  setup(core: CoreSetup, { visualizations }: MapsPluginSetupDependencies) {
-    visualizations.registerAlias(getMapsAliasConfig());
+  setup(
+    core: CoreSetup<MapsPluginStartDependencies>,
+    { visualizations }: MapsPluginSetupDependencies
+  ) {
+    core.getStartServices().then(([coreStart]) => {
+      visualizations.registerAlias(getMapsAliasConfig(coreStart.docLinks));
+    });
   }
 
   start() {}

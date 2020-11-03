@@ -16,18 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { CoreSetup } from 'kibana/public';
-import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { DocLinksStart, CoreSetup } from 'src/core/public';
+import { VisualizationsSetup } from '../../visualizations/public';
 import { getLensAliasConfig } from './vis_type_alias';
 
 export interface LensPluginSetupDependencies {
   visualizations: VisualizationsSetup;
 }
 
+export interface LensPluginStartDependencies {
+  docLinks: DocLinksStart;
+}
+
 export class LensOSSPlugin {
-  setup(core: CoreSetup, { visualizations }: LensPluginSetupDependencies) {
-    visualizations.registerAlias(getLensAliasConfig());
+  setup(
+    core: CoreSetup<LensPluginStartDependencies>,
+    { visualizations }: LensPluginSetupDependencies
+  ) {
+    core.getStartServices().then(([coreStart]) => {
+      visualizations.registerAlias(getLensAliasConfig(coreStart.docLinks));
+    });
   }
 
   start() {}

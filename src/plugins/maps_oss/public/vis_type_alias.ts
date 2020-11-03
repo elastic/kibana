@@ -19,9 +19,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { VisTypeAlias } from 'src/plugins/visualizations/public';
+import { DocLinksStart } from 'src/core/public';
 import { APP_NAME, PLUGIN_ID_OSS, APP_PATH, APP_ICON } from '../common';
 
-export const getMapsAliasConfig = (): VisTypeAlias => ({
+export const getMapsAliasConfig = ({ links }: DocLinksStart): VisTypeAlias => ({
   aliasPath: APP_PATH,
   aliasApp: APP_NAME,
   name: PLUGIN_ID_OSS,
@@ -38,6 +39,6 @@ export const getMapsAliasConfig = (): VisTypeAlias => ({
     description: i18n.translate('mapsOss.visTypeAlias.promoTooltip.description', {
       defaultMessage: 'Try maps for free with Elastic. Learn more.',
     }),
-    link: 'https://www.elastic.co/maps',
+    link: `${links.visualize.maps}?blade=kibanaossvizwizard`,
   },
 });
