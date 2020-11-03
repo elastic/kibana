@@ -7,9 +7,6 @@
 import { PolicyFromES } from '../../../common/types';
 
 export const POLICY_NAME = 'my_policy';
-// navigation doesn't work for % with other special chars or sequence %25
-// https://github.com/elastic/kibana/pull/81664
-export const SPECIAL_CHARS_NAME = 'test?#';
 export const SNAPSHOT_POLICY_NAME = 'my_snapshot_policy';
 export const NEW_SNAPSHOT_POLICY_NAME = 'my_new_snapshot_policy';
 

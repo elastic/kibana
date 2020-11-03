@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useLoadPoliciesList } from '../../services/api';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
+import { attemptToURIDecode } from '../../../shared_imports';
 
 interface RouterProps {
   policyName: string;
@@ -76,22 +77,12 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
     );
   }
 
-  let decodedPolicyName = policyName;
-  if (policyName) {
-    try {
-      decodedPolicyName = decodeURIComponent(policyName);
-    } catch (e) {
-      // %25 is automatically decoded to %, so decoding it again will throw an error
-      // that have to be ignored (https://github.com/elastic/kibana/pull/81664)
-    }
-  }
-
   return (
     <PresentationComponent
       policies={policies}
       history={history}
       getUrlForApp={getUrlForApp}
-      policyName={decodedPolicyName}
+      policyName={attemptToURIDecode(policyName)}
     />
   );
 };

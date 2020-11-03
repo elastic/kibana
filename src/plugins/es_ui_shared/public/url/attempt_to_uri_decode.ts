@@ -19,7 +19,9 @@
 
 /*
  * Use this function with any match params coming from react router to safely decode values.
- * https://github.com/elastic/kibana/pull/81664
+ * After an update to react router v6, this functions should be deprecated.
+ * Known issue for navigation with special characters in paths
+ * https://github.com/elastic/kibana/issues/82440
  */
 export const attemptToURIDecode = (value: string) => {
   let result = value;
