@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { boomify, isBoom } from 'boom';
+import { boomify, isBoom } from '@hapi/boom';
 import {
   CustomHttpResponseOptions,
   ResponseError,
@@ -121,7 +121,7 @@ export const flattenCaseSavedObjects = (
 export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
-  totalComment = 0,
+  totalComment = comments.length,
 }: {
   savedObject: SavedObject<ESCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;

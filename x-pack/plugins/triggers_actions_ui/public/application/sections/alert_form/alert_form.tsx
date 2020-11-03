@@ -105,9 +105,7 @@ export const AlertForm = ({
   } = alertsContext;
   const canShowActions = hasShowActionsCapability(capabilities);
 
-  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
-    alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
-  );
+  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
 
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
@@ -148,6 +146,10 @@ export const AlertForm = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
+  }, [alert, alertTypeRegistry]);
 
   const setAlertProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -399,7 +401,7 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            compressed
+            display="rowCompressed"
             label={labelForAlertChecked}
             isInvalid={errors.interval.length > 0}
             error={errors.interval}

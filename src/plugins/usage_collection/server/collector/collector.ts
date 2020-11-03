@@ -27,14 +27,9 @@ import {
 
 export type CollectorFormatForBulkUpload<T, U> = (result: T) => { type: string; payload: U };
 
-export type AllowedSchemaTypes =
-  | 'keyword'
-  | 'text'
-  | 'number'
-  | 'boolean'
-  | 'long'
-  | 'date'
-  | 'float';
+export type AllowedSchemaNumberTypes = 'long' | 'integer' | 'short' | 'byte' | 'double' | 'float';
+
+export type AllowedSchemaTypes = AllowedSchemaNumberTypes | 'keyword' | 'text' | 'boolean' | 'date';
 
 export interface SchemaField {
   type: string;
@@ -71,17 +66,27 @@ export interface CollectorFetchContext {
 }
 
 export interface CollectorOptions<T = unknown, U = T> {
+  /**
+   * Unique string identifier for the collector
+   */
   type: string;
   init?: Function;
+  /**
+   * Method to return `true`/`false` to confirm if the collector is ready for the `fetch` method to be called.
+   */
+  isReady: () => Promise<boolean> | boolean;
+  /**
+   * Schema definition of the output of the `fetch` method.
+   */
   schema?: MakeSchemaFrom<T>;
   fetch: (collectorFetchContext: CollectorFetchContext) => Promise<T> | T;
   /*
    * A hook for allowing the fetched data payload to be organized into a typed
    * data model for internal bulk upload. See defaultFormatterForBulkUpload for
    * a generic example.
+   * @deprecated Used only by the Legacy Monitoring collection (to be removed in 8.0)
    */
   formatForBulkUpload?: CollectorFormatForBulkUpload<T, U>;
-  isReady: () => Promise<boolean> | boolean;
 }
 
 export class Collector<T = unknown, U = T> {
