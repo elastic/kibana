@@ -7,15 +7,29 @@
 import { i18n } from '@kbn/i18n';
 
 export const CASE_CONNECTOR_DESC = i18n.translate(
-  'xpack.securitySolution.case.components.case.selectMessageText',
+  'xpack.securitySolution.case.components.connectors.case.selectMessageText',
   {
     defaultMessage: 'Create or update a case.',
   }
 );
 
 export const CASE_CONNECTOR_TITLE = i18n.translate(
-  'xpack.securitySolution.case.components.case.actionTypeTitle',
+  'xpack.securitySolution.case.components.connectors.case.actionTypeTitle',
   {
     defaultMessage: 'Cases',
+  }
+);
+
+export const CASE_CONNECTOR_COMMENT_LABEL = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.commentLabel',
+  {
+    defaultMessage: 'Comment',
+  }
+);
+
+export const CASE_CONNECTOR_COMMENT_REQUIRED = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.commentRequired',
+  {
+    defaultMessage: 'Comment is required.',
   }
 );
