@@ -133,22 +133,20 @@ export const movingAverage: ExpressionFunctionMovingAverage = {
         const bucketIdentifier = getBucketIdentifier(row, by);
         const lastNValues = lastNValuesByBucket[bucketIdentifier];
         const currentValue = newRow[inputColumnId];
-        if (lastNValues != null && lastNValues.length && currentValue != null) {
+        if (lastNValues != null && currentValue != null) {
           const sum = lastNValues.reduce((acc, current) => acc + current, 0);
           newRow[outputColumnId] = sum / lastNValues.length;
         } else {
           newRow[outputColumnId] = undefined;
         }
 
-        if (currentValue != null && lastNValues != null) {
-          lastNValuesByBucket[bucketIdentifier] = [...lastNValues, Number(currentValue)].slice(
-            -window
-          );
-        } else if (currentValue != null) {
-          lastNValuesByBucket[bucketIdentifier] = [Number(currentValue)];
-        } else if (currentValue == null && lastNValues == null) {
-          lastNValuesByBucket[bucketIdentifier] = undefined;
+        if (currentValue != null) {
+          lastNValuesByBucket[bucketIdentifier] = [
+            ...(lastNValues || []),
+            Number(currentValue),
+          ].slice(-window);
         }
+
         return newRow;
       }),
     };
