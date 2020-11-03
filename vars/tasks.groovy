@@ -11,7 +11,6 @@ def check() {
     kibanaPipeline.scriptTask('Check Bundle Limits', 'test/scripts/checks/bundle_limits.sh'),
     kibanaPipeline.scriptTask('Check i18n', 'test/scripts/checks/i18n.sh'),
     kibanaPipeline.scriptTask('Check File Casing', 'test/scripts/checks/file_casing.sh'),
-    kibanaPipeline.scriptTask('Check Lockfile Symlinks', 'test/scripts/checks/lock_file_symlinks.sh'),
     kibanaPipeline.scriptTask('Check Licenses', 'test/scripts/checks/licenses.sh'),
     kibanaPipeline.scriptTask('Verify NOTICE', 'test/scripts/checks/verify_notice.sh'),
     kibanaPipeline.scriptTask('Test Projects', 'test/scripts/checks/test_projects.sh'),

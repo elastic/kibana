@@ -42,7 +42,7 @@ export async function mountApp(
 ) {
   const { createEditorFrame, getByValueFeatureFlag, attributeService } = mountProps;
   const [coreStart, startDependencies] = await core.getStartServices();
-  const { data, navigation, embeddable } = startDependencies;
+  const { data, navigation, embeddable, savedObjectsTagging } = startDependencies;
 
   const instance = await createEditorFrame();
   const storage = new Storage(localStorage);
@@ -54,6 +54,7 @@ export async function mountApp(
     data,
     storage,
     navigation,
+    savedObjectsTagging,
     attributeService: await attributeService(),
     http: coreStart.http,
     chrome: coreStart.chrome,

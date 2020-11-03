@@ -39,10 +39,6 @@
 #CC# /src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
 #CC# /src/legacy/server/url_shortening/ @elastic/kibana-app
 #CC# /src/legacy/ui/public/state_management @elastic/kibana-app
-#CC# /src/plugins/advanced_settings/ @elastic/kibana-app
-#CC# /src/plugins/charts/ @elastic/kibana-app
-#CC# /src/plugins/index_pattern_management/public @elastic/kibana-app
-#CC# /src/plugins/vis_default_editor @elastic/kibana-app
 
 # App Architecture
 /examples/bfetch_explorer/ @elastic/kibana-app-arch
@@ -74,7 +70,7 @@
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-arch
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-arch
 #CC# /src/plugins/bfetch/ @elastic/kibana-app-arch
-#CC# /src/plugins/index_pattern_management/public/service @elastic/kibana-app-arch
+#CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-arch
 #CC# /src/plugins/inspector/ @elastic/kibana-app-arch
 #CC# /src/plugins/share/ @elastic/kibana-app-arch
 #CC# /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
@@ -200,12 +196,15 @@
 
 # Platform
 /src/core/  @elastic/kibana-platform
+/src/plugins/saved_objects_tagging_oss  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 /x-pack/plugins/licensing/  @elastic/kibana-platform
 /x-pack/plugins/global_search/  @elastic/kibana-platform
 /x-pack/plugins/cloud/ @elastic/kibana-platform
+/x-pack/plugins/saved_objects_tagging/ @elastic/kibana-platform
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-platform
+/x-pack/test/saved_object_tagging/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /packages/kbn-std/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
