@@ -47,7 +47,7 @@ image:management/index-patterns/images/create-index-pattern.png["Create index pa
 ** Use a wildcard (*) to match multiple indices.
 For example, suppose your system creates indices for Apache data
 using the naming scheme `filebeat-apache-a`, `filebeat-apache-b`, and so on.
-An index pattern named filebeat-a matches a single source, and `filebeat-*` matches multiple data sources.
+An index pattern named `filebeat-a` matches a single source, and `filebeat-*` matches multiple data sources.
 Using a wildcard is the most popular approach.
 
 ** Select multiple indices by entering multiple strings,
@@ -160,7 +160,8 @@ and <<field-formatters-numeric, numbers>>.
 A popularity counter keeps track of the fields you use most often.
 The top five most popular fields and their values are displayed in <<discover,*Discover*>>.
 
-To edit the field format and popularity counter, use the *Edit* modal.
+To edit the field format and popularity counter, click the edit icon
+(image:management/index-patterns/images/edit_icon.png[]) in the index pattern detail view.
 
 [role="screenshot"]
 image:management/index-patterns/images/edit-field-format.png["Edit field format"]
