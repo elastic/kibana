@@ -155,21 +155,23 @@ describe('Autocomplete utils', () => {
     test('returns formatted autocomplete definitions', () => {
       expect(createAutocompleteDefinitions(testContext)).toEqual([
         {
-          children: undefined,
+          properties: undefined,
+          constructorDefinition: undefined,
           documentation: 'Primitive: boolean',
           insertText: 'boolean',
           kind: 'type',
           label: 'boolean',
         },
         {
-          children: undefined,
+          properties: undefined,
+          constructorDefinition: undefined,
           documentation: 'Primitive: int',
           insertText: 'int',
           kind: 'type',
           label: 'int',
         },
         {
-          children: [
+          properties: [
             {
               documentation: 'PI: double',
               insertText: 'PI',
@@ -195,10 +197,64 @@ describe('Autocomplete utils', () => {
               label: 'toString',
             },
           ],
+          constructorDefinition: undefined,
           documentation: 'Class: Math',
           insertText: 'Math',
           kind: 'class',
           label: 'Math',
+        },
+      ]);
+    });
+
+    test('returns a constructor definition', () => {
+      const contextWithConstructors = [
+        {
+          name: 'java.lang.ArithmeticException',
+          imported: true,
+          constructors: [
+            {
+              declaring: 'java.lang.ArithmeticException',
+              parameters: [],
+            },
+            {
+              declaring: 'java.lang.ArithmeticException',
+              parameters: ['java.lang.String'],
+            },
+          ],
+          static_methods: [],
+          methods: [
+            {
+              declaring: 'java.lang.Object',
+              name: 'equals',
+              return: 'boolean',
+              parameters: ['java.lang.Object'],
+            },
+          ],
+          static_fields: [],
+          fields: [],
+        },
+      ];
+
+      expect(createAutocompleteDefinitions(contextWithConstructors)).toEqual([
+        {
+          constructorDefinition: {
+            documentation: 'Constructor: ArithmeticException',
+            insertText: 'ArithmeticException',
+            kind: 'constructor',
+            label: 'ArithmeticException',
+          },
+          documentation: 'Class: ArithmeticException',
+          insertText: 'ArithmeticException',
+          kind: 'class',
+          label: 'ArithmeticException',
+          properties: [
+            {
+              documentation: 'equals(java.lang.Object a): boolean',
+              insertText: 'equals',
+              kind: 'method',
+              label: 'equals',
+            },
+          ],
         },
       ]);
     });
