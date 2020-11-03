@@ -7,7 +7,7 @@ import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { Nodes, sourceFilter, Schema, Timerange } from '../utils/index';
+import { NodeID, sourceFilter, Schema, Timerange } from '../utils/index';
 
 interface LifecycleParams {
   schema: Schema;
@@ -30,7 +30,7 @@ export class LifecycleQuery {
     this.timerange = timerange;
   }
 
-  private query(nodes: Nodes): JsonObject {
+  private query(nodes: NodeID[]): JsonObject {
     return {
       // TODO look into switching this to doc_values
       _source: this.sourceFields,
@@ -72,10 +72,7 @@ export class LifecycleQuery {
     };
   }
 
-  /**
-   * TODO get rid of the unknowns
-   */
-  async search(client: IScopedClusterClient, nodes: Nodes): Promise<unknown> {
+  async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<unknown[]> {
     const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
       body: this.query(nodes),
       index: this.indexPatterns,

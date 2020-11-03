@@ -5,10 +5,16 @@
  */
 import _ from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
+import { EventStats } from '../../../../../../common/endpoint/types';
 import { DescendantsQuery } from '../queries/descendants';
-import { Schema } from './index';
+import { Schema, NodeID } from './index';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { StatsQuery } from '../queries/stats';
+
+interface StatsNode {
+  node: unknown;
+  stats: EventStats;
+}
 
 /**
  * The query parameters passed in from the request. These define the limits for the ES requests for retrieving the
@@ -23,7 +29,7 @@ export interface TreeOptions {
     to: string;
   };
   schema: Schema;
-  nodes: Array<string | number>;
+  nodes: NodeID[];
   indexPatterns: string[];
 }
 
@@ -52,8 +58,15 @@ export class Fetcher {
     return this.applyStatsToTree(tree, options);
   }
 
-  private async applyStatsToTree(treeNodes: any[], options: TreeOptions) {
-    const statsIDs = treeNodes.map((node) => _.get(node, options.schema.id));
+  private async applyStatsToTree(treeNodes: unknown[], options: TreeOptions): Promise<StatsNode[]> {
+    const statsIDs: NodeID[] = [];
+    for (const node of treeNodes) {
+      const id = getIDField(node, options.schema);
+      if (id) {
+        statsIDs.push(id);
+      }
+    }
+
     const query = new StatsQuery({
       indexPatterns: options.indexPatterns,
       schema: options.schema,
@@ -61,23 +74,19 @@ export class Fetcher {
     });
 
     const eventStats = await query.search(this.client, statsIDs);
-    return treeNodes.map((node) => {
-      return {
+    const statsNodes: StatsNode[] = [];
+    for (const node of treeNodes) {
+      const id = getIDField(node, options.schema);
+      const stats = id !== undefined ? eventStats[id] : undefined;
+      statsNodes.push({
         node,
-        stats: eventStats[_.get(node, options.schema.id)] ?? { total: 0, byCategory: {} },
-      };
-    });
+        stats: stats ?? { total: 0, byCategory: {} },
+      });
+    }
+    return statsNodes;
   }
 
   private async retrieveAncestors(options: TreeOptions) {
-    const getNextAncestors = (event, levelsLeft: number) => {
-      if (options.schema.ancestry) {
-        return _.get(event, options.schema.ancestry).slice(0, levelsLeft);
-      }
-
-      return [_.get(event, options.schema.parent)];
-    };
-
     const ancestors = [];
     const query = new LifecycleQuery({
       schema: options.schema,
@@ -89,7 +98,7 @@ export class Fetcher {
     let numLevelsLeft = options.ancestors;
 
     while (numLevelsLeft > 0) {
-      const results = await query.search(this.client, nodes);
+      const results: unknown[] = await query.search(this.client, nodes);
       if (results.length <= 0) {
         return ancestors;
       }
@@ -120,40 +129,43 @@ export class Fetcher {
       numLevelsLeft -= results.length;
       // the results come back in ascending order on timestamp so the first entry in the
       // results should be the furthest ancestor (most distant grandparent)
-      nodes = getNextAncestors(results[0], numLevelsLeft);
+      nodes = getAncestryAsArray(results[0], options.schema).slice(0, numLevelsLeft);
     }
     return ancestors;
   }
 
-  private async retrieveDescendants(options: TreeOptions) {
-    const descendants = [];
+  private async retrieveDescendants(options: TreeOptions): Promise<unknown[]> {
+    const descendants: unknown[] = [];
     const query = new DescendantsQuery({
       schema: options.schema,
       indexPatterns: options.indexPatterns,
       timerange: options.timerange,
     });
 
-    let nodes = options.nodes;
-    let numNodesLeftToRequest = options.descendants;
-    let levelsLeftToRequest = options.descendantLevels;
+    let nodes: NodeID[] = options.nodes;
+    let numNodesLeftToRequest: number = options.descendants;
+    let levelsLeftToRequest: number = options.descendantLevels;
     while (
       numNodesLeftToRequest > 0 &&
       (options.schema.ancestry !== undefined || levelsLeftToRequest > 0)
     ) {
-      const results = await query.search(this.client, nodes, numNodesLeftToRequest);
+      const results: unknown[] = await query.search(this.client, nodes, numNodesLeftToRequest);
       if (results.length <= 0) {
         return descendants;
       }
 
-      const parents = results.reduce((totalParents, result) => {
-        totalParents.add(_.get(result, options.schema.parent));
+      const parents: Set<NodeID> = results.reduce((totalParents: Set<NodeID>, result) => {
+        const parentID = getParentField(result, options.schema);
+        if (parentID) {
+          totalParents.add(parentID);
+        }
         return totalParents;
-      }, new Set<string>()).size;
+      }, new Set<NodeID>());
 
       nodes = getLeafNodes(results, nodes, options.schema);
 
       numNodesLeftToRequest -= results.length;
-      levelsLeftToRequest -= parents;
+      levelsLeftToRequest -= parents.size;
       descendants.push(...results);
     }
 
@@ -161,8 +173,6 @@ export class Fetcher {
   }
 }
 
-// TODO need to test specifically with multiple nodes from different levels in the tree
-// exporting so it can be tested
 /**
  * This functions finds the leaf nodes for a given response from an Elasticsearch query.
  *
@@ -170,24 +180,21 @@ export class Fetcher {
  * @param nodes an array of unique IDs that were used to find the returned documents
  * @param schema the field definitions for how nodes are represented in the resolver graph
  */
-export function getLeafNodes(results: any, nodes: Array<string | number>, schema: Schema) {
-  // if the ancestry array wasn't defined then we can only query a single level at a time anyway
-  // so just return the results we got
-  if (!schema.ancestry) {
-    return results.map((result) => _.get(result, schema.id));
-  }
-
+export function getLeafNodes(
+  results: unknown[],
+  nodes: Array<string | number>,
+  schema: Schema
+): NodeID[] {
   let largestAncestryArray = 0;
-  const nodesToQueryNext: Map<number, Set<string>> = new Map();
-  const ancestrySchema = schema.ancestry;
-  const queriedNodes = new Set<string | number>(nodes);
-  const isDistantGrandchild = (event: any) => {
-    const ancestry = _.get(event, ancestrySchema);
+  const nodesToQueryNext: Map<number, Set<NodeID>> = new Map();
+  const queriedNodes = new Set<NodeID>(nodes);
+  const isDistantGrandchild = (event: unknown) => {
+    const ancestry = getAncestryAsArray(event, schema);
     return ancestry.length > 0 && queriedNodes.has(ancestry[ancestry.length - 1]);
   };
 
   for (const result of results) {
-    const ancestry = _.get(result, ancestrySchema);
+    const ancestry = getAncestryAsArray(result, schema);
     // This is to handle the following unlikely but possible scenario:
     // if an alert was generated by the kernel process (parent process of all other processes) then
     // the direct children of that process would only have an ancestry array of [parent_kernel], a single value in the array.
@@ -208,13 +215,40 @@ export function getLeafNodes(results: any, nodes: Array<string | number>, schema
     if (isDistantGrandchild(result)) {
       let levelOfNodes = nodesToQueryNext.get(ancestry.length);
       if (!levelOfNodes) {
-        levelOfNodes = new Set<string>();
+        levelOfNodes = new Set<NodeID>();
         nodesToQueryNext.set(ancestry.length, levelOfNodes);
       }
-      levelOfNodes.add(_.get(result, schema.id));
+      const nodeID = getIDField(result, schema);
+      if (nodeID) {
+        levelOfNodes.add(nodeID);
+      }
     }
   }
   const nextNodes = nodesToQueryNext.get(largestAncestryArray);
 
   return nextNodes !== undefined ? Array.from(nextNodes) : [];
+}
+
+function getIDField(obj: unknown, schema: Schema): NodeID | undefined {
+  return _.get(obj, schema.id);
+}
+
+function getParentField(obj: unknown, schema: Schema): NodeID | undefined {
+  return _.get(obj, schema.parent);
+}
+
+function getAncestryField(obj: unknown, schema: Schema): NodeID[] | undefined {
+  if (!schema.ancestry) {
+    return undefined;
+  }
+  return _.get(obj, schema.ancestry);
+}
+
+function getAncestryAsArray(obj: unknown, schema: Schema): NodeID[] {
+  const ancestry = getAncestryField(obj, schema);
+  if (!ancestry) {
+    const parentField = getParentField(obj, schema);
+    return parentField !== undefined ? [parentField] : [];
+  }
+  return ancestry;
 }

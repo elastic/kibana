@@ -15,7 +15,7 @@ export interface Timerange {
 /**
  * An array of unique IDs to identify nodes within the resolver tree.
  */
-export type Nodes = Array<string | number>;
+export type NodeID = string | number;
 
 /**
  * The fields to use to identify nodes within a resolver tree.

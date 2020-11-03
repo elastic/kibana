@@ -29,16 +29,125 @@ function addEmptyStats(results: object[]) {
 
 describe('fetcher test', () => {
   let client: jest.Mocked<IScopedClusterClient>;
+  beforeAll(() => {
+    StatsQuery.prototype.search = jest.fn().mockImplementation(async () => {
+      return {};
+    });
+  });
   beforeEach(() => {
     client = elasticsearchServiceMock.createScopedClusterClient();
   });
 
-  describe('ancestors', () => {
-    beforeAll(() => {
-      StatsQuery.prototype.search = jest.fn().mockImplementation(async () => {
-        return {};
+  describe('descendants', () => {
+    it('correctly exists loop when the search returns no results', async () => {
+      DescendantsQuery.prototype.search = jest.fn().mockImplementationOnce(async () => {
+        return [];
       });
+      const options: TreeOptions = {
+        descendantLevels: 1,
+        descendants: 5,
+        ancestors: 0,
+        timerange: {
+          from: '',
+          to: '',
+        },
+        schema: {
+          id: '',
+          parent: '',
+        },
+        indexPatterns: [''],
+        nodes: ['a'],
+      };
+      const fetcher = new Fetcher(client);
+      expect(await fetcher.tree(options)).toEqual([]);
     });
+
+    it('exists the loop when the options specify no descendants', async () => {
+      const options: TreeOptions = {
+        descendantLevels: 0,
+        descendants: 0,
+        ancestors: 0,
+        timerange: {
+          from: '',
+          to: '',
+        },
+        schema: {
+          id: '',
+          parent: '',
+        },
+        indexPatterns: [''],
+        nodes: ['a'],
+      };
+
+      const fetcher = new Fetcher(client);
+      expect(await fetcher.tree(options)).toEqual([]);
+    });
+
+    it('returns the correct results without the ancestry defined', async () => {
+      /**
+        .
+        └── 0
+            ├── 1
+            │   └── 2
+            └── 3
+                ├── 4
+                └── 5
+        */
+      const level1 = [
+        {
+          id: '1',
+          parent: '0',
+        },
+        {
+          id: '3',
+          parent: '0',
+        },
+      ];
+      const level2 = [
+        {
+          id: '2',
+          parent: '1',
+        },
+
+        {
+          id: '4',
+          parent: '3',
+        },
+        {
+          id: '5',
+          parent: '3',
+        },
+      ];
+      DescendantsQuery.prototype.search = jest
+        .fn()
+        .mockImplementationOnce(async () => {
+          return level1;
+        })
+        .mockImplementationOnce(async () => {
+          return level2;
+        });
+      const options: TreeOptions = {
+        descendantLevels: 2,
+        descendants: 5,
+        ancestors: 0,
+        timerange: {
+          from: '',
+          to: '',
+        },
+        schema: {
+          id: 'id',
+          parent: 'parent',
+        },
+        indexPatterns: [''],
+        nodes: ['0'],
+      };
+
+      const fetcher = new Fetcher(client);
+      expect(await fetcher.tree(options)).toEqual(addEmptyStats([...level1, ...level2]));
+    });
+  });
+
+  describe('ancestors', () => {
     it('correctly exits loop when the search returns no results', async () => {
       LifecycleQuery.prototype.search = jest.fn().mockImplementationOnce(async () => {
         return [];
@@ -202,6 +311,50 @@ describe('fetcher test', () => {
       expect(leaves).toStrictEqual(['1', '2', '3']);
     });
 
+    it('correctly ignores nodes without the proper fields', () => {
+      /**
+        .
+        └── 0
+            ├── 1
+            ├── 2
+       */
+      const results = [
+        {
+          id: '1',
+          parent: '0',
+        },
+        {
+          id: '2',
+          parent: '0',
+        },
+        {
+          idNotReal: '3',
+          parentNotReal: '0',
+        },
+      ];
+      const leaves = getLeafNodes(results, ['0'], { id: 'id', parent: 'parent' });
+      expect(leaves).toStrictEqual(['1', '2']);
+    });
+
+    it('returns an empty response when the proper fields are not defined', () => {
+      const results = [
+        {
+          id: '1',
+          parentNotReal: '0',
+        },
+        {
+          id: '2',
+          parentNotReal: '0',
+        },
+        {
+          idNotReal: '3',
+          parent: '0',
+        },
+      ];
+      const leaves = getLeafNodes(results, ['0'], { id: 'id', parent: 'parent' });
+      expect(leaves).toStrictEqual([]);
+    });
+
     describe('with the ancestry field defined', () => {
       it('correctly identifies the leaf nodes in a response with the ancestry field', () => {
         /**
@@ -233,6 +386,36 @@ describe('fetcher test', () => {
           ancestry: 'ancestry',
         });
         expect(leaves).toStrictEqual(['2']);
+      });
+
+      it('falls back to using parent field if it cannot find the ancestry field', () => {
+        /**
+          .
+          ├── 1
+          │   └── 2
+          └── 3
+         */
+        const results = [
+          {
+            id: '1',
+            parent: '0',
+            ancestryNotValid: ['0', 'a'],
+          },
+          {
+            id: '2',
+            parent: '1',
+          },
+          {
+            id: '3',
+            parent: '0',
+          },
+        ];
+        const leaves = getLeafNodes(results, ['0'], {
+          id: 'id',
+          parent: 'parent',
+          ancestry: 'ancestry',
+        });
+        expect(leaves).toStrictEqual(['1', '3']);
       });
 
       it('correctly identifies the leaf nodes with a tree with multiple leaves', () => {

@@ -7,7 +7,7 @@ import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { Nodes, sourceFilter, Schema, Timerange } from '../utils/index';
+import { NodeID, sourceFilter, Schema, Timerange } from '../utils/index';
 
 interface DescendantsParams {
   schema: Schema;
@@ -30,7 +30,7 @@ export class DescendantsQuery {
     this.timerange = timerange;
   }
 
-  private query(nodes: Nodes, size: number): JsonObject {
+  private query(nodes: NodeID[], size: number): JsonObject {
     return {
       // TODO look into switching this to doc_values
       _source: this.sourceFields,
@@ -77,7 +77,7 @@ export class DescendantsQuery {
     };
   }
 
-  private queryWithAncestryArray(nodes: Nodes, ancestryField: string, size: number): JsonObject {
+  private queryWithAncestryArray(nodes: NodeID[], ancestryField: string, size: number): JsonObject {
     return {
       // TODO look into switching this to doc_values
       _source: this.sourceFields,
@@ -158,10 +158,7 @@ export class DescendantsQuery {
     };
   }
 
-  /**
-   * TODO get rid of the unknowns
-   */
-  async search(client: IScopedClusterClient, nodes: Nodes, limit: number): Promise<unknown> {
+  async search(client: IScopedClusterClient, nodes: NodeID[], limit: number): Promise<unknown[]> {
     let response: ApiResponse<SearchResponse<unknown>>;
     if (this.schema.ancestry) {
       response = await client.asCurrentUser.search({

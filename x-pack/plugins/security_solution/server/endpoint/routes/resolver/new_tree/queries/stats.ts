@@ -8,7 +8,7 @@ import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
 import { EventStats } from '../../../../../../common/endpoint/types';
-import { Nodes, Schema, Timerange } from '../utils/index';
+import { NodeID, Schema, Timerange } from '../utils/index';
 
 interface AggBucket {
   key: string;
@@ -44,7 +44,7 @@ export class StatsQuery {
     this.timerange = timerange;
   }
 
-  private query(nodes: Nodes): JsonObject {
+  private query(nodes: NodeID[]): JsonObject {
     return {
       size: 0,
       query: {
@@ -113,7 +113,7 @@ export class StatsQuery {
     };
   }
 
-  async search(client: IScopedClusterClient, nodes: Nodes): Promise<Record<string, EventStats>> {
+  async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<Record<string, EventStats>> {
     // leaving unknown here because we don't actually need the hits part of the body
     const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
       body: this.query(nodes),
