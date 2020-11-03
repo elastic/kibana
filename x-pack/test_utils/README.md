@@ -100,6 +100,8 @@ export const setup = registerTestBed<TestSubjects>(MyComponent);
 
 ## Best practices
 
+In order to prevent flakiness in component integration tests, please consider the following best practices: 
+
 - **Use** `jest.useFakeTimers()`.
   
   The code under a test might be using `setTimeout()` calls. This is bad for deterministic tests. In order to avoid it, we need to use mocked timers from jest. For that we declare at the top of each component integration test the following:
