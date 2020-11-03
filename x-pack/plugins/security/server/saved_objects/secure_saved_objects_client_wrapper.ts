@@ -667,9 +667,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const namespaces = savedObject.namespaces.filter(
       (x) => x !== ALL_SPACES_ID && !previouslyAuthorizedSpaceIds.includes(x)
     );
-    if (namespaces.length === 0) {
-      return savedObject;
-    }
 
     const privilegeMap = await this.getNamespacesPrivilegeMap(
       namespaces,
@@ -698,9 +695,6 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const namespaces = uniq(
       savedObjects.flatMap((savedObject) => savedObject.namespaces || [])
     ).filter((x) => x !== ALL_SPACES_ID && !previouslypreviouslyAuthorizedSpaceIds.includes(x));
-    if (namespaces.length === 0) {
-      return response;
-    }
 
     const privilegeMap = await this.getNamespacesPrivilegeMap(
       namespaces,
