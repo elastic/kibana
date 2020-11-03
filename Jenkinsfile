@@ -10,7 +10,7 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true)
         workers.base(ramDisk: false, bootstrapped: false, size: 'flyweight') {
 
           kibanaPipeline.notifyOnError {
-            error "Error"
+            kibanaPipeline.ossCiGroupProcess('xyz')()
           }
 
           sleep 15
