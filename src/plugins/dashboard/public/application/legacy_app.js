@@ -51,6 +51,7 @@ export function initDashboardApp(app, deps) {
       ['hideWriteControls', { watchDepth: 'reference' }],
       ['initialFilter', { watchDepth: 'reference' }],
       ['initialPageSize', { watchDepth: 'reference' }],
+      ['taggingApi', { watchDepth: 'reference' }],
     ]);
   });
 
@@ -113,11 +114,26 @@ export function initDashboardApp(app, deps) {
 
           $scope.listingLimit = deps.savedObjects.settings.getListingLimit();
           $scope.initialPageSize = deps.savedObjects.settings.getPerPage();
+          $scope.taggingApi = deps.savedObjectsTagging;
           $scope.create = () => {
             history.push(DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           };
-          $scope.find = (search) => {
-            return service.find(search, $scope.listingLimit);
+          $scope.find = async (search) => {
+            let searchTerm = search;
+            let references = undefined;
+
+            if (deps.savedObjectsTagging) {
+              const parsed = deps.savedObjectsTagging.ui.parseSearchQuery(search, {
+                useName: true,
+              });
+              searchTerm = parsed.searchTerm;
+              references = parsed.tagReferences;
+            }
+
+            return service.find(searchTerm, {
+              size: $scope.listingLimit,
+              hasReference: references,
+            });
           };
           $scope.editItem = ({ id }) => {
             history.push(`${createDashboardEditUrl(id)}?_a=(viewMode:edit)`);

@@ -63,9 +63,11 @@ pageLoadAssetSize:
   remoteClusters: 51327
   reporting: 183418
   rollup: 97204
-  savedObjects: 108662
-  savedObjectsManagement: 100503
-  searchprofiler: 67224
+  savedObjects: 108518
+  savedObjectsManagement: 101836
+  savedObjectsTagging: 59482
+  savedObjectsTaggingOss: 20590
+  searchprofiler: 67080
   security: 189428
   securityOss: 30806
   securitySolution: 283440
