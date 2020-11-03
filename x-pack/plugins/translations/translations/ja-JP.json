@@ -3008,7 +3008,6 @@
     "savedObjectsManagement.objectsTable.flyout.importFailedMissingReference": "{type} [id={id}]は{refType} [id={refId}]を見つけられませんでした",
     "savedObjectsManagement.objectsTable.flyout.importFailedTitle": "インポート失敗",
     "savedObjectsManagement.objectsTable.flyout.importFailedUnsupportedType": "{type} [id={id}]サポートされていないタイプ",
-    "savedObjectsManagement.objectsTable.flyout.importFileErrorMessage": "ファイルを処理できませんでした。",
     "savedObjectsManagement.objectsTable.flyout.importLegacyFileErrorMessage": "ファイルを処理できませんでした。",
     "savedObjectsManagement.objectsTable.flyout.importPromptText": "インポート",
     "savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle": "保存されたオブジェクトのインポート",

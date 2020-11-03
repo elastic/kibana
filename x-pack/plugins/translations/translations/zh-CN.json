@@ -3009,7 +3009,6 @@
     "savedObjectsManagement.objectsTable.flyout.importFailedMissingReference": "{type} [id={id}] 无法找到 {refType} [id={refId}]",
     "savedObjectsManagement.objectsTable.flyout.importFailedTitle": "导入失败",
     "savedObjectsManagement.objectsTable.flyout.importFailedUnsupportedType": "{type} [id={id}] 不受支持的类型",
-    "savedObjectsManagement.objectsTable.flyout.importFileErrorMessage": "无法处理该文件。",
     "savedObjectsManagement.objectsTable.flyout.importLegacyFileErrorMessage": "无法处理该文件。",
     "savedObjectsManagement.objectsTable.flyout.importPromptText": "导入",
     "savedObjectsManagement.objectsTable.flyout.importSavedObjectTitle": "导入已保存对象",
