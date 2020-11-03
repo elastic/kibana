@@ -1390,7 +1390,7 @@ export type InputTimeRange = TimeRange | {
 // Warning: (ae-missing-release-tag) "isCompleteResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const isCompleteResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined;
+export const isCompleteResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean;
 
 // Warning: (ae-missing-release-tag) "ISearch" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1478,7 +1478,7 @@ export const isFilters: (x: unknown) => x is Filter[];
 // Warning: (ae-missing-release-tag) "isPartialResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const isPartialResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined;
+export const isPartialResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean;
 
 // Warning: (ae-missing-release-tag) "isQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -2023,7 +2023,7 @@ export class SearchInterceptor {
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
-    protected runSearch(request: IKibanaSearchRequest, signal: AbortSignal, strategy?: string): Observable<IKibanaSearchResponse>;
+    protected runSearch(request: IKibanaSearchRequest, signal: AbortSignal, strategy?: string): Promise<IKibanaSearchResponse>;
     search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
     // @internal (undocumented)
     protected setupAbortSignal({ abortSignal, timeout, }: {

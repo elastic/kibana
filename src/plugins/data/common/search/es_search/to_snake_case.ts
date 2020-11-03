@@ -17,14 +17,8 @@
  * under the License.
  */
 
-import { ShardsResponse } from 'elasticsearch';
+import { mapKeys, snakeCase } from 'lodash';
 
-/**
- * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
- * not included as it is already included in `successful`.
- * @internal
- */
-export function getTotalLoaded({ total, failed, successful }: ShardsResponse) {
-  const loaded = failed + successful;
-  return { total, loaded };
+export function toSnakeCase(obj: Record<string, any>): Record<string, any> {
+  return mapKeys(obj, (value, key) => snakeCase(key));
 }

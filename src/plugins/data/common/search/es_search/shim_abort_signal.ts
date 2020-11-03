@@ -17,8 +17,32 @@
  * under the License.
  */
 
-import { mapKeys, snakeCase } from 'lodash';
-
-export function toSnakeCase(obj: Record<string, any>) {
-  return mapKeys(obj, (value, key) => snakeCase(key));
+/**
+ * @internal
+ * TransportRequestPromise extends base Promise with an "abort" method
+ */
+export interface TransportRequestPromise<T> extends Promise<T> {
+  abort?: () => void;
 }
+
+/**
+ *
+ * @internal
+ * NOTE: Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
+ * is resolved
+ *
+ * @param promise a TransportRequestPromise
+ * @param signal optional AbortSignal
+ *
+ * @returns a TransportRequestPromise that will be aborted if the signal is aborted
+ */
+
+export const shimAbortSignal = <T extends TransportRequestPromise<unknown>>(
+  promise: T,
+  signal: AbortSignal | undefined
+): T => {
+  if (signal) {
+    signal.addEventListener('abort', () => promise.abort && promise.abort());
+  }
+  return promise;
+};
