@@ -77,7 +77,7 @@ export interface IndexPatternField {
   readFromDocValues: boolean;
 }
 
-export const indexPatternTypes = [DataType.logs, DataType.metrics];
+const indexPatternTypes = Object.values(dataTypes);
 
 // TODO: use a function overload and make pkgName and pkgVersion required for install/update
 // and not for an update removal.  or separate out the functions
