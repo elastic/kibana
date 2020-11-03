@@ -176,23 +176,30 @@ describe('FieldEditor', () => {
   });
 
   it('should display and update a customName correctly', async () => {
-    const testField = {
+    let testField = ({
       name: 'test',
       format: new Format(),
       lang: undefined,
       type: 'string',
       customName: 'Test',
-    };
-    fieldList.push((testField as unknown) as IndexPatternField);
+    } as unknown) as IndexPatternField;
+    fieldList.push(testField);
     indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
-      return (flds[name] as unknown) as IndexPatternField;
+      return flds[name];
     };
-    indexPattern.fields = { ...indexPattern.fields, ...{ update: jest.fn(), add: jest.fn() } };
+    indexPattern.fields = {
+      ...indexPattern.fields,
+      ...{
+        update: (fld) => {
+          testField = (fld as unknown) as IndexPatternField;
+        },
+        add: jest.fn(),
+      },
+    };
     indexPattern.fieldFormatMap = { test: field };
-    indexPattern.attributes = { fields: { test: { customName: 'Test' } } };
     indexPattern.deleteFieldFormat = jest.fn();
 
     const component = createComponentWithContext<FieldEdiorProps>(
@@ -219,15 +226,7 @@ describe('FieldEditor', () => {
 
     await saveBtn.simulate('click');
     await new Promise((resolve) => process.nextTick(resolve));
-    expect(indexPattern.attributes).toMatchInlineSnapshot(`
-      Object {
-        "fields": Object {
-          "test": Object {
-            "customName": "new Test",
-          },
-        },
-      }
-    `);
+    expect(testField.customName).toEqual('new Test');
   });
 
   it('should show deprecated lang warning', async () => {

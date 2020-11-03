@@ -844,10 +844,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     }
 
     if (field.customName !== customName) {
-      const fields = indexPattern.attributes?.fields || {};
-      fields[field.name] = { customName };
       field.customName = customName;
-      indexPattern.attributes = { fields };
       indexPattern.fields.update(field);
     }
 

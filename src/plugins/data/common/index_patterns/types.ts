@@ -56,7 +56,11 @@ export interface IndexPatternAttributes {
  */
 
 export interface IndexPatternAttrs {
-  fields: { [key: string]: { customName: string } };
+  fields: IndexPatternAttrsFields;
+}
+
+export interface IndexPatternAttrsFields {
+  [key: string]: { customName: string };
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;

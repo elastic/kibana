@@ -56,7 +56,6 @@ export class IndexPattern implements IIndexPattern {
   public fieldFormatMap: Record<string, any>;
   public typeMeta?: TypeMeta;
   public fields: IIndexPatternFieldList & { toSpec: () => IndexPatternFieldMap };
-  public attributes?: IndexPatternAttrs;
   public timeFieldName: string | undefined;
   public intervalName: string | undefined;
   public type: string | undefined;
@@ -104,8 +103,7 @@ export class IndexPattern implements IIndexPattern {
     this.title = spec.title || '';
     this.timeFieldName = spec.timeFieldName;
     this.sourceFilters = spec.sourceFilters;
-    this.attributes = spec.attributes;
-    this.fields.replaceAll(Object.values(this.getFieldSpecs(spec.fields)));
+    this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
   }
@@ -276,7 +274,7 @@ export class IndexPattern implements IIndexPattern {
       : JSON.stringify(this.fieldFormatMap);
 
     return {
-      attributes: this.attributes,
+      attributes: this.getSavedObjectAttrsField(),
       title: this.title,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
@@ -316,9 +314,26 @@ export class IndexPattern implements IIndexPattern {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
   }
+
+  /**
+   * Creates saved object attributes field.
+   */
+  private getSavedObjectAttrsField() {
+    const fieldAttrs = this.fields.reduce((collector, { name, customName }) => {
+      if (customName) {
+        collector[name] = {
+          customName,
+        };
+      }
+      return collector;
+    }, {} as IndexPatternAttrs['fields']);
+    return Object.keys(fieldAttrs).length ? { fields: fieldAttrs } : undefined;
+  }
   /**
    * Helper function to extend field specs with e.g. customName
    */
+  /*
+  I think this is the attribute builder
   private getFieldSpecs(specs: IndexPatternFieldMap | undefined) {
     if (!specs) {
       return {};
@@ -334,4 +349,5 @@ export class IndexPattern implements IIndexPattern {
     }
     return specs;
   }
+  */
 }
