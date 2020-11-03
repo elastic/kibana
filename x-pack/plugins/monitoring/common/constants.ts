@@ -271,7 +271,7 @@ export const LEGACY_ALERT_DETAILS = {
     description: i18n.translate(
       'xpack.monitoring.alerts.elasticsearchVersionMismatch.description',
       {
-        defaultMessage: 'Alert when the cluster has mutliple versions of Elasticsearch.',
+        defaultMessage: 'Alert when the cluster has multiple versions of Elasticsearch.',
       }
     ),
   },
@@ -296,7 +296,7 @@ export const LEGACY_ALERT_DETAILS = {
       defaultMessage: 'Logstash version mismatch',
     }),
     description: i18n.translate('xpack.monitoring.alerts.logstashVersionMismatch.description', {
-      defaultMessage: 'Alert when the cluster has mutliple versions of Logstash.',
+      defaultMessage: 'Alert when the cluster has multiple versions of Logstash.',
     }),
   },
   [ALERT_NODES_CHANGED]: {
