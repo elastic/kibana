@@ -229,7 +229,7 @@ data used to create each model.
 image::user/images/data-frame-analytics.png[Data frame analytics]
 
 [float]
-==== Per-partition categorization
+=== Per-partition categorization in {anomaly-detect}
 
 Categorization tokenizes a text field, clusters similar data together,
 classifies it into categories, and then detects anomalous categories in the data.
