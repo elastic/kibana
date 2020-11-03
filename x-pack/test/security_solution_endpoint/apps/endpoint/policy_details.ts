@@ -61,6 +61,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           policyInfo.packagePolicy.name
         );
       });
+
+      it('and the show advanced settings button is clicked', async () => {
+        await testSubjects.missingOrFail('advancedPolicyPanel');
+
+        const advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
+        await advancedPolicyButton.click();
+
+        await testSubjects.existOrFail('advancedPolicyPanel');
+
+        await advancedPolicyButton.click();
+        await testSubjects.missingOrFail('advancedPolicyPanel');
+      });
     });
 
     describe('and the save button is clicked', () => {

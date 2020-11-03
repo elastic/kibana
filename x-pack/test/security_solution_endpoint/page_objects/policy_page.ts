@@ -78,6 +78,14 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
     },
 
     /**
+     * Finds and returns the Advanced Policy Show/Hide Button
+     */
+    async findAdvancedPolicyButton() {
+      await this.ensureIsOnDetailsPage();
+      return await testSubjects.find('advancedPolicyButton');
+    },
+
+    /**
      * ensures that the Details Page is the currently display view
      */
     async ensureIsOnDetailsPage() {
