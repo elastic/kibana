@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { hasVisibleChild } from '../utils';
 import { useHighlightTreeNode } from '../use_highlight_tree_node';
-import { msToPretty } from '../../../utils';
+import { msToPretty } from '../../../lib';
 
 import { PercentageBadge } from '../../percentage_badge';
 
