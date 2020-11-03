@@ -10,7 +10,7 @@ kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true)
         retryable.enable()
 
         def counter = 0
-        notifyOnError {
+        kibanaPipeline.notifyOnError {
           retryable('test') {
             if (counter < 1) {
               counter++
