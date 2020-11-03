@@ -7,6 +7,7 @@
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import uuid from 'uuid';
+import moment from 'moment';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
@@ -26,6 +27,7 @@ import {
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
+  TimelineStatus,
 } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
@@ -126,6 +128,13 @@ export const addTimelineToStore = ({
   [id]: {
     ...timeline,
     isLoading: timelineById[id].isLoading,
+    dateRange:
+      timeline.status === TimelineStatus.immutable
+        ? {
+            start: moment().subtract(1, 'hours').toISOString(),
+            end: moment().toISOString(),
+          }
+        : timeline.dateRange,
   },
 });
 

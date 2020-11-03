@@ -6,6 +6,8 @@
 
 import { get } from 'lodash/fp';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
+import { TimelineStatus } from '../../../../common/types/timeline';
+import { addTimeline } from '../../../timelines/store/timeline/actions';
 
 import { getIntervalSettings, getTimeRangeSettings } from '../../utils/default_date_settings';
 import {
@@ -243,6 +245,21 @@ export const inputsReducer = reducerWithInitialState(initialInputsState)
     [id]: {
       ...get(id, state),
       filters,
+    },
+  }))
+  .case(addTimeline, (state, { timeline }) => ({
+    ...state,
+    timeline: {
+      ...get('timeline', state),
+      timerange:
+        timeline.status === TimelineStatus.immutable
+          ? {
+              ...get(['timeline', 'timerange'], state),
+              kind: 'relative',
+              fromStr: 'now-24h',
+              toStr: 'now',
+            }
+          : get(['timeline', 'timerange'], state),
     },
   }))
   .build();
