@@ -275,7 +275,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             >
               <EuiButtonGroup
                 isFullWidth
-                legend={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
+                legend={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
                   defaultMessage: 'Labels',
                 })}
                 isDisabled={isValueLabelsDisabled}
