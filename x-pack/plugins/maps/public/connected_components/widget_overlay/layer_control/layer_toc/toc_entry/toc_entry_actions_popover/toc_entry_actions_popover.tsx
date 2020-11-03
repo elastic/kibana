@@ -226,7 +226,6 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         panelPaddingSize="none"
-        withTitle
         anchorPosition="leftUp"
         anchorClassName="mapLayTocActions__popoverAnchor"
       >

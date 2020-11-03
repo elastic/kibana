@@ -72,7 +72,6 @@ export const AddRuleButton = (props: Props) => {
       isOpen={isMenuOpen}
       closePopover={() => setIsMenuOpen(false)}
       panelPaddingSize="none"
-      withTitle
       anchorPosition="downLeft"
     >
       <EuiContextMenuPanel title="Add rule" items={options} />

@@ -28,7 +28,7 @@ import { Column, Table } from '../../types';
 
 export interface DateHistogramParams {
   date: boolean;
-  interval: string;
+  interval: number | string;
   intervalESValue: number;
   intervalESUnit: string;
   format: string;
@@ -57,6 +57,9 @@ export interface Dimensions {
   y: Dimension[];
   z?: Dimension[];
   series?: Dimension | Dimension[];
+  width?: Dimension[];
+  splitRow?: Dimension[];
+  splitColumn?: Dimension[];
 }
 export interface Aspect {
   accessor: Column['id'];

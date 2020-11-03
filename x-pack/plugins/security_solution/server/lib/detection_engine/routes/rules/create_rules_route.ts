@@ -111,7 +111,12 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           throttle: null,
         };
 
-        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
         throwHttpError(await mlAuthz.validateRuleType(internalRule.params.type));
 
         const indexExists = await getIndexExists(

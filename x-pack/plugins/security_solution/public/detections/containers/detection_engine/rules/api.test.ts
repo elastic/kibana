@@ -411,7 +411,12 @@ describe('Detections Rules API', () => {
   describe('createPrepackagedRules', () => {
     beforeEach(() => {
       fetchMock.mockClear();
-      fetchMock.mockResolvedValue('unknown');
+      fetchMock.mockResolvedValue({
+        rules_installed: 0,
+        rules_updated: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
+      });
     });
 
     test('check parameter url when creating pre-packaged rules', async () => {
@@ -423,7 +428,12 @@ describe('Detections Rules API', () => {
     });
     test('happy path', async () => {
       const resp = await createPrepackagedRules({ signal: abortCtrl.signal });
-      expect(resp).toEqual(true);
+      expect(resp).toEqual({
+        rules_installed: 0,
+        rules_updated: 0,
+        timelines_installed: 0,
+        timelines_updated: 0,
+      });
     });
   });
 
