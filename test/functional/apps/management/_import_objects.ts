@@ -482,6 +482,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(errorText).to.contain(`Payload content length greater than maximum allowed`);
       });
+
+      it('should display an explicit error message when importing an invalid file', async () => {
+        await PageObjects.savedObjects.importFile(
+          path.join(__dirname, 'exports', '_import_invalid_format.ndjson')
+        );
+
+        await PageObjects.savedObjects.checkImportError();
+
+        const errorText = await PageObjects.savedObjects.getImportErrorText();
+
+        expect(errorText).to.contain(`Unexpected token T in JSON at position 0`);
+      });
     });
   });
 }
