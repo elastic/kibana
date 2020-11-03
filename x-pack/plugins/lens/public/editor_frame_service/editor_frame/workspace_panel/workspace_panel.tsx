@@ -135,6 +135,9 @@ export function WorkspacePanel({
     ? visualizationMap[activeVisualizationId]
     : null;
 
+  // Note: mind to all these eslint disable lines: the frameAPI will change too frequently
+  // and to prevent race conditions it is ok to leave them there.
+
   const configurationValidationError = useMemo(
     () =>
       validateDatasourceAndVisualization(
