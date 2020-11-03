@@ -6,8 +6,7 @@
 
 import RE2 from 're2';
 import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'kibana/server';
-import { ML_SAVED_OBJECT_TYPE } from './saved_objects';
-import { JobType } from '../../common/types/saved_objects';
+import { JobType, ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 import { MLJobNotFound } from '../lib/ml_client';
 
 export interface JobObject {

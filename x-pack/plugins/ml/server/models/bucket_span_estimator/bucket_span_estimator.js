@@ -6,7 +6,7 @@
 
 import { cloneDeep, each, remove, sortBy, get } from 'lodash';
 
-import { mlLog } from '../../client/log';
+import { mlLog } from '../../lib/log';
 
 import { INTERVALS } from './intervals';
 import { singleSeriesCheckerFactory } from './single_series_checker';
