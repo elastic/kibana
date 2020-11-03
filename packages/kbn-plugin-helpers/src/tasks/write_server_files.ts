@@ -17,7 +17,6 @@
  * under the License.
  */
 
-import Path from 'path';
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
