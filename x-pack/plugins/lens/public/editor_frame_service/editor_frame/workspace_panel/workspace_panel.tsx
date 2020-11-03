@@ -51,6 +51,7 @@ import {
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
 import { getOriginalRequestErrorMessage } from '../../error_helper';
+import { validateDatasourceAndVisualization } from '../state_helpers';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -134,25 +135,18 @@ export function WorkspacePanel({
     ? visualizationMap[activeVisualizationId]
     : null;
 
-  const configurationValidationError = useMemo(() => {
-    const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
-    const dataMessages = activeDatasourceId
-      ? activeDatasource?.getErrorMessages(datasourceStates[activeDatasourceId]?.state)
-      : undefined;
-    const vizMessages = activeVisualization?.getErrorMessages(visualizationState, framePublicAPI);
-
-    if (vizMessages || dataMessages) {
-      // Data first, visualization next
-      return [...(dataMessages || []), ...(vizMessages || [])];
-    }
-  }, [
-    activeVisualization?.getErrorMessages,
-    visualizationState,
-    activeDatasourceId,
-    datasourceMap,
-    datasourceStates,
-    framePublicAPI,
-  ]);
+  const configurationValidationError = useMemo(
+    () =>
+      validateDatasourceAndVisualization(
+        activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+        activeDatasourceId && datasourceStates[activeDatasourceId]?.state,
+        activeVisualization,
+        visualizationState,
+        framePublicAPI
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeVisualization, visualizationState, activeDatasourceId, datasourceMap, datasourceStates]
+  );
 
   const expression = useMemo(
     () => {

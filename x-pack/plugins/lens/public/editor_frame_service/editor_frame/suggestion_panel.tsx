@@ -34,6 +34,7 @@ import {
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { validateDatasourceAndVisualization } from './state_helpers';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -188,13 +189,26 @@ export function SuggestionPanel({
         activeVisualizationId: currentVisualizationId,
         visualizationState: currentVisualizationState,
       })
-        .filter(({ visualizationId, visualizationState: suggestionVisualizationState }) => {
-          const suggestionVisualization = visualizationMap[visualizationId];
-          // filter out visualizations with errors
-          return (
-            suggestionVisualization.getErrorMessages(suggestionVisualizationState, frame) == null
-          );
-        })
+        .filter((suggestion) => !suggestion.hide)
+        .filter(
+          ({
+            visualizationId,
+            visualizationState: suggestionVisualizationState,
+            datasourceState: suggestionDatasourceState,
+            datasourceId: suggetionDatasourceId,
+          }) => {
+            return (
+              validateDatasourceAndVisualization(
+                suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
+                suggestionDatasourceState,
+                visualizationMap[visualizationId],
+                suggestionVisualizationState,
+                frame
+              ) == null
+            );
+          }
+        )
+        .slice(0, MAX_SUGGESTIONS_DISPLAYED)
         .map((suggestion) => ({
           ...suggestion,
           previewExpression: preparePreviewExpression(
@@ -204,26 +218,15 @@ export function SuggestionPanel({
             currentDatasourceStates,
             frame
           ),
-        }))
-        .filter((suggestion) => !suggestion.hide)
-        .slice(0, MAX_SUGGESTIONS_DISPLAYED);
+        }));
 
-      const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
-      const datasourceValidationErrors = activeDatasourceId
-        ? activeDatasource?.getErrorMessages(currentDatasourceStates[activeDatasourceId]?.state)
-        : undefined;
-
-      const visualizationValidationErrors = currentVisualizationId
-        ? visualizationMap[currentVisualizationId]?.getErrorMessages(
-            currentVisualizationState,
-            frame
-          )
-        : undefined;
-
-      const validationErrors =
-        datasourceValidationErrors || visualizationValidationErrors
-          ? [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])]
-          : undefined;
+      const validationErrors = validateDatasourceAndVisualization(
+        activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+        activeDatasourceId && currentDatasourceStates[activeDatasourceId]?.state,
+        currentVisualizationId ? visualizationMap[currentVisualizationId] : null,
+        currentVisualizationState,
+        frame
+      );
 
       const newStateExpression =
         currentVisualizationState && currentVisualizationId && !validationErrors
