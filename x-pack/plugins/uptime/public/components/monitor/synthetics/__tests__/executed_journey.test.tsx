@@ -253,6 +253,9 @@ describe('ExecutedJourney component', () => {
             }
           }
         />
+        <EuiSpacer
+          size="s"
+        />
       </EuiFlexGroup>
     `);
   });

@@ -8,6 +8,8 @@ import {
   CpuUsageAlert,
   MissingMonitoringDataAlert,
   DiskUsageAlert,
+  ThreadPoolSearchRejectionsAlert,
+  ThreadPoolWriteRejectionsAlert,
   MemoryUsageAlert,
   NodesChangedAlert,
   ClusterHealthAlert,
@@ -23,6 +25,8 @@ import {
   ALERT_CPU_USAGE,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_MEMORY_USAGE,
   ALERT_NODES_CHANGED,
   ALERT_LOGSTASH_VERSION_MISMATCH,
@@ -31,12 +35,14 @@ import {
 } from '../../common/constants';
 import { AlertsClient } from '../../../alerts/server';
 
-export const BY_TYPE = {
+const BY_TYPE = {
   [ALERT_CLUSTER_HEALTH]: ClusterHealthAlert,
   [ALERT_LICENSE_EXPIRATION]: LicenseExpirationAlert,
   [ALERT_CPU_USAGE]: CpuUsageAlert,
   [ALERT_MISSING_MONITORING_DATA]: MissingMonitoringDataAlert,
   [ALERT_DISK_USAGE]: DiskUsageAlert,
+  [ALERT_THREAD_POOL_SEARCH_REJECTIONS]: ThreadPoolSearchRejectionsAlert,
+  [ALERT_THREAD_POOL_WRITE_REJECTIONS]: ThreadPoolWriteRejectionsAlert,
   [ALERT_MEMORY_USAGE]: MemoryUsageAlert,
   [ALERT_NODES_CHANGED]: NodesChangedAlert,
   [ALERT_LOGSTASH_VERSION_MISMATCH]: LogstashVersionMismatchAlert,

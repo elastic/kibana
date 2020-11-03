@@ -5,15 +5,18 @@
  */
 
 import { get } from 'lodash';
+import moment from 'moment';
 import {
   ClusterDetailsGetter,
   StatsCollectionConfig,
   ClusterDetails,
 } from 'src/plugins/telemetry_collection_manager/server';
 import { createQuery } from './create_query';
-import { INDEX_PATTERN_ELASTICSEARCH } from '../../common/constants';
+import {
+  INDEX_PATTERN_ELASTICSEARCH,
+  CLUSTER_DETAILS_FETCH_INTERVAL,
+} from '../../common/constants';
 import { CustomContext } from './get_all_stats';
-
 /**
  * Get a list of Cluster UUIDs that exist within the specified timespan.
  */
@@ -28,10 +31,14 @@ export const getClusterUuids: ClusterDetailsGetter<CustomContext> = async (
 /**
  * Fetch the aggregated Cluster UUIDs from the monitoring cluster.
  */
-export function fetchClusterUuids(
-  { callCluster, start, end }: StatsCollectionConfig,
+export async function fetchClusterUuids(
+  { callCluster, timestamp }: StatsCollectionConfig,
   maxBucketSize: number
 ) {
+  const start = moment(timestamp).subtract(CLUSTER_DETAILS_FETCH_INTERVAL, 'ms').toISOString();
+
+  const end = moment(timestamp).toISOString();
+
   const params = {
     index: INDEX_PATTERN_ELASTICSEARCH,
     size: 0,
@@ -50,7 +57,7 @@ export function fetchClusterUuids(
     },
   };
 
-  return callCluster('search', params);
+  return await callCluster('search', params);
 }
 
 /**

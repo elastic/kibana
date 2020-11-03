@@ -23,7 +23,6 @@ import {
 } from '../types';
 import { Document } from '../persistence/saved_object_store';
 import { mergeTables } from './merge_tables';
-import { formatColumn } from './format_column';
 import { EmbeddableFactory, LensEmbeddableStartServices } from './embeddable/embeddable_factory';
 import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
@@ -86,7 +85,6 @@ export class EditorFrameService {
     getAttributeService: () => Promise<LensAttributeService>
   ): EditorFrameSetup {
     plugins.expressions.registerFunction(() => mergeTables);
-    plugins.expressions.registerFunction(() => formatColumn);
 
     const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
       const [coreStart, deps] = await core.getStartServices();
@@ -156,6 +154,7 @@ export class EditorFrameService {
                 initialVisualizationId={
                   (doc && doc.visualizationType) || firstVisualizationId || null
                 }
+                key={doc?.savedObjectId} // ensures rerendering when switching to another visualization inside of lens (eg global search)
                 core={core}
                 plugins={plugins}
                 ExpressionRenderer={plugins.expressions.ReactExpressionRenderer}
