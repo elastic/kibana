@@ -54,7 +54,7 @@ export const validatePackagePolicy = (
 
   if (!packagePolicy.name.trim()) {
     validationResults.name = [
-      i18n.translate('xpack.ingestManager.packagePolicyValidation.nameRequiredErrorMessage', {
+      i18n.translate('xpack.fleet.packagePolicyValidation.nameRequiredErrorMessage', {
         defaultMessage: 'Name is required',
       }),
     ];
@@ -183,7 +183,7 @@ export const validatePackagePolicyConfig = (
   if (varDef.required) {
     if (parsedValue === undefined || (typeof parsedValue === 'string' && !parsedValue)) {
       errors.push(
-        i18n.translate('xpack.ingestManager.packagePolicyValidation.requiredErrorMessage', {
+        i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
           values: {
             fieldName: varDef.title || varDef.name,
@@ -198,12 +198,9 @@ export const validatePackagePolicyConfig = (
       parsedValue = safeLoad(value);
     } catch (e) {
       errors.push(
-        i18n.translate(
-          'xpack.ingestManager.packagePolicyValidation.invalidYamlFormatErrorMessage',
-          {
-            defaultMessage: 'Invalid YAML format',
-          }
-        )
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidYamlFormatErrorMessage', {
+          defaultMessage: 'Invalid YAML format',
+        })
       );
     }
   }
@@ -211,7 +208,7 @@ export const validatePackagePolicyConfig = (
   if (varDef.multi) {
     if (parsedValue && !Array.isArray(parsedValue)) {
       errors.push(
-        i18n.translate('xpack.ingestManager.packagePolicyValidation.invalidArrayErrorMessage', {
+        i18n.translate('xpack.fleet.packagePolicyValidation.invalidArrayErrorMessage', {
           defaultMessage: 'Invalid format',
         })
       );
@@ -221,7 +218,7 @@ export const validatePackagePolicyConfig = (
       (!parsedValue || (Array.isArray(parsedValue) && parsedValue.length === 0))
     ) {
       errors.push(
-        i18n.translate('xpack.ingestManager.packagePolicyValidation.requiredErrorMessage', {
+        i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
           defaultMessage: '{fieldName} is required',
           values: {
             fieldName: varDef.title || varDef.name,

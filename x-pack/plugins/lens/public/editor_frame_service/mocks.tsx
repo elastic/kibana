@@ -81,7 +81,7 @@ export function createMockDatasource(id: string): DatasourceMock {
     removeLayer: jest.fn((_state, _layerId) => {}),
     removeColumn: jest.fn((props) => {}),
     getLayers: jest.fn((_state) => []),
-
+    uniqueLabels: jest.fn((_state) => ({})),
     renderDimensionTrigger: jest.fn(),
     renderDimensionEditor: jest.fn(),
     canHandleDrop: jest.fn(),
