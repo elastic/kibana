@@ -172,7 +172,7 @@ export function LayerPanel(
           )}
         </EuiFlexGroup>
 
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
 
         {groups.map((group, index) => {
           const newId = generateId();
@@ -488,7 +488,7 @@ export function LayerPanel(
           }
         />
 
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
 
         <EuiFlexGroup justifyContent="center">
           <EuiFlexItem grow={false}>
