@@ -16,6 +16,7 @@ export function createDiskUsageAlertType(): AlertTypeModel {
   return {
     id: ALERT_DISK_USAGE,
     name: ALERT_DETAILS[ALERT_DISK_USAGE].label,
+    description: ALERT_DETAILS[ALERT_DISK_USAGE].description,
     iconClass: 'bell',
     alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_DISK_USAGE].paramDetails} />
