@@ -112,7 +112,7 @@ export class AttributeService<
       return { ...originalInput } as RefType;
     } catch (error) {
       this.toasts.addDanger({
-        title: i18n.translate('embeddableApi.attributeService.saveToLibraryError', {
+        title: i18n.translate('dashboard.attributeService.saveToLibraryError', {
           defaultMessage: `An error occurred while saving. Error: {errorMessage}`,
           values: {
             errorMessage: error.message,
