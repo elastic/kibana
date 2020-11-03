@@ -6,7 +6,7 @@
 
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
-import { checksFactory } from '../saved_objects';
+import { checksFactory, repairFactory } from '../saved_objects';
 import { jobsAndSpaces, repairJobObjects } from './schemas/saved_objects';
 
 /**
@@ -67,7 +67,7 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
       try {
         const { simulate } = request.query;
-        const { repairJobs } = checksFactory(client, jobSavedObjectService);
+        const { repairJobs } = repairFactory(client, jobSavedObjectService);
         const savedObjects = await repairJobs(simulate);
 
         return response.ok({
@@ -100,7 +100,7 @@ export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) 
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
       try {
         const { simulate } = request.query;
-        const { initSavedObjects } = checksFactory(client, jobSavedObjectService);
+        const { initSavedObjects } = repairFactory(client, jobSavedObjectService);
         const savedObjects = await initSavedObjects(simulate);
 
         return response.ok({

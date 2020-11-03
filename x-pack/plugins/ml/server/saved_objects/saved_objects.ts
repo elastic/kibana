@@ -8,8 +8,7 @@ import { SavedObjectsServiceSetup } from 'kibana/server';
 import mappings from './mappings.json';
 
 import { migrations } from './migrations';
-
-export const ML_SAVED_OBJECT_TYPE = 'ml-job';
+import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
 export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup) {
   savedObjects.registerType({
