@@ -11,7 +11,13 @@ import { RemoteClusterEdit } from '../../../public/application/sections/remote_c
 import { createRemoteClustersStore } from '../../../public/application/store';
 import { registerRouter } from '../../../public/application/services/routing';
 
-import { REMOTE_CLUSTER_EDIT_NAME } from './constants';
+export const REMOTE_CLUSTER_EDIT_NAME = 'new-york';
+
+export const REMOTE_CLUSTER_EDIT = {
+  name: REMOTE_CLUSTER_EDIT_NAME,
+  seeds: ['localhost:9400'],
+  skipUnavailable: true,
+};
 
 const testBedConfig = {
   store: createRemoteClustersStore,
