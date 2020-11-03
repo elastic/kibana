@@ -65,12 +65,9 @@ To further our commitment to the ongoing journey of making {kib} an incredible
 visual data analytics experience for everyone, regardless of technical background,
 *Lens* is generally available. Now users whose companies limit the use of
 beta software or services in production can leverage the visualization and analytics
-capabilities that Lens provides.
+capabilities that *Lens* provides.
 
-[float]
-==== New percentage chart types
-
-Let *Lens* build visualizations of your data with new chart types.
+*Lens* also introduces two new chart types.
 Depending on the type of data you are visualizing, *Lens* can now build
 percentage bar charts and percentage area charts.
 For more information, refer to the {kibana-ref}/dashboard.html#lens[documentation].
@@ -86,13 +83,35 @@ image::user/images/lens-whats-new.png[Percentage bar chart in Lens]
 
 beta[] In 7.8, we introduced a dashboard-to-dashboard drilldown that lets you quickly create
 custom navigation paths between dashboards, carrying over the filter and
-time context. Now you can create a navigation path from a dashboard to an internal or external
+time context. Now you can also create a navigation path from a dashboard to an internal or external
 URL.
 This functionality is available with a https://www.elastic.co/subscriptions[Gold subscription] or higher.
 For more information, refer to the {kibana-ref}/url-drilldown.html[URL drilldown documentation].
 
 [role="screenshot"]
 image::user/images/drilldown-to-url.png[Drilldown to Url on dashboard panel]
+
+[float]
+[[maps-enhancements]]
+=== New ways to act on geospatial data
+
+Maps and dashboards now work better together.
+First, you can use maps with {kibana-ref}/dashboard-drilldown.html[dashboard drilldowns].
+Second, when authoring a dashboard, you can create a map, save the map,
+and then return to the dashboard in your workflow.
+
+*Maps* also has new ways to work with your data.  You can now automatically
+fit “data to bounds,” keeping your data at the center of attention.
+It’s also easier to work with your data if it’s coming from a CSV file. Using the
+*File Data Visualizer* in *Machine Learning*, if you import a CSV file with latitude and longitude fields,
+the fields are automatically converted to a `geo_point` field.
+
+[role="screenshot"]
+image::user/images/maps-new.png[File upload of a CSV file with latitude and longitude fields]
+
+**Maps** also has a new tracking alert experimental[] for monitoring the location of
+entities in relation to area of interest boundaries. Also the new vector
+tile rendering enables you to work with more data at faster speeds.
 
 [float]
 [[vega-generally-available]]
@@ -107,32 +126,10 @@ image::user/images/vega-new.png[Percentage bar chart in Lens]
 
 
 [float]
-[[maps-enhancements]]
-=== New ways to act on geospatial data
+[[alerts-new-connectors]]
+=== New connectors for alerts
 
-Maps and dashboards now work better together.
-You can now use maps with {kibana-ref}/dashboard-drilldown.html[dashboard drilldowns].
-Also, when authoring a dashboard, you can create a map, save the map,
-and then return to the dashboard in your workflow.
-
-*Maps* also has new ways to work with your data.  You can now automatically
-fit “data to bounds,” keeping your data at the center of attention.
-It’s also easier to work with your data if it’s coming from a CSV file. Using the
-*File Data Visualizer* in *Machine Learning*, you can import a CSV file with latitude and longitude fields,
-and they are automatically converted to a `geo_point` field.
-
-[role="screenshot"]
-image::user/images/maps-new.png[File upload of a CSV file with latitude and longitude fields]
-
-**Maps** also has a new tracking alert (experimental[]) for monitoring the location of
-entities in relation to area of interest boundaries. Also the new vector
-tile rendering enables you to work with more data at faster speeds.
-
-[float]
-[[alerts-new]]
-=== More connectors and role-based access control in Alerting
-
-In 7.10, we extended our {kibana-ref}/action-types.html[offering of connectors]
+In 7.10, we extended our offering of connectors
 by adding the {kibana-ref}/jira-action-type.html[Jira] and
 {kibana-ref}/resilient-action-type.html[IBM Resilient connectors] for
 use with all alert types. Also,
@@ -142,6 +139,9 @@ it with your alerts, so you won't lose notifications due to setup errors.
 [role="screenshot"]
 image::user/images/edit-connector.png[Connector test3]
 
+[float]
+[[alerts-rbac]]
+=== Role-based access control in Alerts and Actions
 
 **Alerts and Actions** now has role-based access control, so
 you can secure alerts based on your organization’s access model. Each
@@ -152,13 +152,13 @@ A feature control for stack alerts is now included in the
 *Role* definition page. This currently
 includes the index threshold alert type, with more stack alerts to follow in future releases.
 The `all` privilege to stack alerts gives users the
-ability to create and edit alerts, while the
+ability to create and edit alerts, and the
 `read` privilege allows users to view the alerts.
 
 The new feature control for actions and connectors
 controls which roles can create connectors and attach actions to alerts.
 The `all` privilege to *Actions and Connectors* enables users to
-create and edit connectors, while the
+create and edit connectors, and the
 the `read` privileges allows users to view connectors and attach actions to alerts.
 
 NOTE: If you upgrade from a previous version,
@@ -206,7 +206,7 @@ for each *Stack Management* feature.
 While laying the groundwork for sharing saved objects in multiple spaces,
 we overhauled the UI for copying and importing saved objects.
 When copying saved objects, you can now create objects, easily resolve conflicts,
-and get information, such as subtotals, object icons, and object titles, from the flyout.
+and get information on subtotals, object icons, and object titles.
 After importing saved objects, you’ll see a summary of what objects were created.
 
 [role="screenshot"]
