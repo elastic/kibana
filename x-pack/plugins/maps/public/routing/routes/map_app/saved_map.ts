@@ -59,6 +59,7 @@ export class SavedMap {
         title: i18n.translate('xpack.maps.newMapTitle', {
           defaultMessage: 'New Map',
         }),
+        description: '',
       };
     } else {
       this._attributes = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
