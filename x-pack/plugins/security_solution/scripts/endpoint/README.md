@@ -11,7 +11,7 @@ Example command sequence to get ES and kibana running with sample data after ins
 
 `npx yarn start --no-base-path` -> starts kibana. Note: you may need other configurations steps to start the security solution with endpoint support.
 
-`cd x-pack/plugins/security_solution/scripts/endpoint`
+`cd x-pack/plugins/security_solution`
 
 `yarn test:generate` -> run the resolver_generator.ts script
 
