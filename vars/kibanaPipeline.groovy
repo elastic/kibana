@@ -71,8 +71,8 @@ def notifyOnError(Closure closure) {
       try {
         print "Sending comment..."
         githubPr.sendComment(false)
-      } catch (ex) {
-        buildUtils.printStacktrace(ex)
+      } catch (innerEx) {
+        buildUtils.printStacktrace(innerEx)
       }
     }
     catchErrors {
