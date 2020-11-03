@@ -18,10 +18,10 @@ import {
   getSourceFields,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
-import { SortDirection } from '../../../../../../../src/plugins/data/common/search';
+import { SortDirection, indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
+
 import { ScalingForm } from './scaling_form';
 
 export class UpdateSourceEditor extends Component {
