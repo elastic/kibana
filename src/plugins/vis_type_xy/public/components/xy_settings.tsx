@@ -57,8 +57,8 @@ type XYSettingsProps = Pick<
   | 'xAxis'
   | 'orderBucketsBySum'
 > & {
-  xDomain: DomainRange;
-  adjustedXDomain: DomainRange;
+  xDomain?: DomainRange;
+  adjustedXDomain?: DomainRange;
   showLegend: boolean;
   onElementClick: ElementClickListener;
   onBrushEnd?: BrushEndListener;
@@ -107,15 +107,16 @@ export const XYSettings: FC<XYSettingsProps> = ({
             right: 10,
           },
   };
-  const headerFormatter = isTimeChart
-    ? renderEndzoneTooltip(
-        adjustedXDomain.minInterval,
-        'min' in xDomain ? xDomain.min : undefined,
-        'max' in xDomain ? xDomain.max : undefined,
-        xAxis.ticks?.formatter,
-        !tooltip.detailedTooltip
-      )
-    : undefined;
+  const headerFormatter =
+    isTimeChart && xDomain && adjustedXDomain
+      ? renderEndzoneTooltip(
+          adjustedXDomain.minInterval,
+          'min' in xDomain ? xDomain.min : undefined,
+          'max' in xDomain ? xDomain.max : undefined,
+          xAxis.ticks?.formatter,
+          !tooltip.detailedTooltip
+        )
+      : undefined;
   const tooltipProps: TooltipProps = tooltip.detailedTooltip
     ? {
         ...tooltip,

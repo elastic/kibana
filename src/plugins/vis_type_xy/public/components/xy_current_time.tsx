@@ -24,7 +24,7 @@ import { CurrentTime } from '../../../charts/public';
 interface XYCurrentTime {
   enabled: boolean;
   isDarkMode: boolean;
-  domain: DomainRange;
+  domain?: DomainRange;
 }
 
 export const XYCurrentTime: FC<XYCurrentTime> = ({ enabled, isDarkMode, domain }) => {
@@ -32,6 +32,6 @@ export const XYCurrentTime: FC<XYCurrentTime> = ({ enabled, isDarkMode, domain }
     return null;
   }
 
-  const domainEnd = 'max' in domain ? domain.max : undefined;
+  const domainEnd = domain && 'max' in domain ? domain.max : undefined;
   return <CurrentTime isDarkMode={isDarkMode} domainEnd={domainEnd} />;
 };

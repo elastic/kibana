@@ -29,8 +29,8 @@ interface XYEndzones {
   isDarkMode: boolean;
   hideTooltips?: boolean;
   groupId?: string;
-  domain: DomainRange;
-  adjustedDomain: DomainRange;
+  domain?: DomainRange;
+  adjustedDomain?: DomainRange;
 }
 
 export const XYEndzones: FC<XYEndzones> = ({
@@ -43,6 +43,8 @@ export const XYEndzones: FC<XYEndzones> = ({
 }) => {
   if (
     enabled &&
+    domain &&
+    adjustedDomain &&
     'min' in domain &&
     'max' in domain &&
     !isUndefined(domain.minInterval) &&

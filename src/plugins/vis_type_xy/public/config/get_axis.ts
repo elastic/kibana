@@ -39,7 +39,7 @@ import { LabelRotation } from '../../../charts/public';
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
   { categoryLines, valueAxis }: Grid,
-  { params, formatter, title: fallbackTitle = '', aggType }: Aspect,
+  { params, format, formatter, title: fallbackTitle = '', aggType }: Aspect,
   isDateHistogram = false
 ): AxisConfig<S> {
   const isCategoryAxis = type === AxisType.Category;
@@ -61,7 +61,7 @@ export function getAxis<S extends XScaleType | YScaleType>(
     showOverlappingLabels: !labels.filter,
     showDuplicates: !labels.filter,
   };
-  const scale = getScale<S>(axisScale, params, isCategoryAxis);
+  const scale = getScale<S>(axisScale, params, format, isCategoryAxis);
   const title = axisTitle.text || fallbackTitle;
   const fallbackRotation =
     isCategoryAxis && isDateHistogram ? LabelRotation.Horizontal : LabelRotation.Vertical;
@@ -97,9 +97,18 @@ function getLabelFormatter(
   };
 }
 
-function getScaleType(scale?: Scale, isTime = false, isHistogram = false): ECScaleType | undefined {
-  if (isTime) return 'time';
-  if (isHistogram) return 'linear';
+function getScaleType(
+  scale?: Scale,
+  isNumber?: boolean,
+  isTime = false,
+  isHistogram = false
+): ECScaleType | undefined {
+  if (isTime) return ECScaleType.Time;
+  if (isHistogram) return ECScaleType.Linear;
+
+  if (!isNumber) {
+    return ECScaleType.Ordinal;
+  }
 
   const type = scale?.type;
   if (type === ScaleType.SquareRoot) {
@@ -112,11 +121,17 @@ function getScaleType(scale?: Scale, isTime = false, isHistogram = false): ECSca
 function getScale<S extends XScaleType | YScaleType>(
   scale: Scale,
   params: Aspect['params'],
+  format: Aspect['format'],
   isCategoryAxis: boolean
 ): ScaleConfig<S> {
   const type = (isCategoryAxis
-    ? getScaleType(scale, 'date' in params, 'interval' in params)
-    : getScaleType(scale)) as S;
+    ? getScaleType(
+        scale,
+        format?.id === 'number' || format?.params?.id === 'number',
+        'date' in params,
+        'interval' in params
+      )
+    : getScaleType(scale, true)) as S;
 
   return {
     ...scale,

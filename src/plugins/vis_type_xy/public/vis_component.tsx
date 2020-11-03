@@ -28,6 +28,7 @@ import {
   XYChartSeriesIdentifier,
   BrushEndListener,
   RenderChangeListener,
+  ScaleType,
 } from '@elastic/charts';
 
 import {
@@ -179,18 +180,16 @@ const VisComponent = (props: VisComponentProps) => {
   const { visData, visParams } = props;
   const config = getConfig(visData, visParams);
   const timeZone = getTimeZone();
-  const xDomain = getXDomain(config.aspects.x.params);
+  const xDomain =
+    config.xAxis.scale.type === ScaleType.Ordinal ? undefined : getXDomain(config.aspects.x.params);
   const hasBars = visParams.seriesParams.some(
     ({ type, data: { id: paramId } }) =>
       type === ChartType.Histogram && config.aspects.y.find(({ aggId }) => aggId === paramId)
   );
-  const adjustedXDomain = getAdjustedDomain(
-    visData.rows,
-    config.aspects.x,
-    timeZone,
-    xDomain,
-    hasBars
-  );
+  const adjustedXDomain =
+    config.xAxis.scale.type === ScaleType.Ordinal
+      ? undefined
+      : getAdjustedDomain(visData.rows, config.aspects.x, timeZone, xDomain, hasBars);
   const legendPosition = useMemo(() => config.legend.position ?? Position.Right, [
     config.legend.position,
   ]);
