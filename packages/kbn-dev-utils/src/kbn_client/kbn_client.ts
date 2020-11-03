@@ -56,6 +56,8 @@ export class KbnClient {
     }
 
     this.log = options.log;
+    this.uiSettingDefaults = options.uiSettingDefaults;
+
     this.requester = new KbnClientRequester(this.log, {
       url: options.url,
       certificateAuthorities: options.certificateAuthorities,
