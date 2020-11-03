@@ -27,6 +27,7 @@ import {
 } from './datatable_visualization';
 import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
 import { AppNavLinkStatus } from '../../../../src/core/public';
+import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
 import {
   UiActionsStart,
@@ -59,6 +60,7 @@ export interface LensPluginStartDependencies {
   dashboard: DashboardStart;
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;

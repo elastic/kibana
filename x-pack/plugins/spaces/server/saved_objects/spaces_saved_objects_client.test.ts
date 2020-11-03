@@ -11,7 +11,7 @@ import { savedObjectsClientMock } from '../../../../../src/core/server/mocks';
 import { SavedObjectTypeRegistry } from 'src/core/server';
 import { SpacesClient } from '../lib/spaces_client';
 import { spacesClientMock } from '../lib/spaces_client/spaces_client.mock';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 const typeRegistry = new SavedObjectTypeRegistry();
 typeRegistry.registerType({
@@ -523,6 +523,35 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
 
         expect(actualReturnValue).toBe(expectedReturnValue);
         expect(baseClient.deleteFromNamespaces).toHaveBeenCalledWith(type, id, namespaces, {
+          foo: 'bar',
+          namespace: currentSpace.expectedNamespace,
+        });
+      });
+    });
+
+    describe('#removeReferencesTo', () => {
+      test(`throws error if options.namespace is specified`, async () => {
+        const { client } = await createSpacesSavedObjectsClient();
+
+        await expect(
+          // @ts-expect-error
+          client.removeReferencesTo(null, null, { namespace: 'bar' })
+        ).rejects.toThrow(ERROR_NAMESPACE_SPECIFIED);
+      });
+
+      test(`supplements options with the current namespace`, async () => {
+        const { client, baseClient } = await createSpacesSavedObjectsClient();
+        const expectedReturnValue = { updated: 12 };
+        baseClient.removeReferencesTo.mockReturnValue(Promise.resolve(expectedReturnValue));
+
+        const type = Symbol();
+        const id = Symbol();
+        const options = Object.freeze({ foo: 'bar' });
+        // @ts-expect-error
+        const actualReturnValue = await client.removeReferencesTo(type, id, options);
+
+        expect(actualReturnValue).toBe(expectedReturnValue);
+        expect(baseClient.removeReferencesTo).toHaveBeenCalledWith(type, id, {
           foo: 'bar',
           namespace: currentSpace.expectedNamespace,
         });
