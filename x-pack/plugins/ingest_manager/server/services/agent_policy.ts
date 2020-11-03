@@ -18,12 +18,12 @@ import {
   AgentPolicy,
   AgentPolicySOAttributes,
   FullAgentPolicy,
-  AgentPolicyStatus,
   ListWithKuery,
 } from '../types';
 import {
   DeleteAgentPolicyResponse,
   Settings,
+  agentPolicyStatuses,
   storedPackagePoliciesToAgentInputs,
   dataTypes,
 } from '../../common';
@@ -62,8 +62,8 @@ class AgentPolicyService {
     }
 
     if (
-      oldAgentPolicy.status === AgentPolicyStatus.Inactive &&
-      agentPolicy.status !== AgentPolicyStatus.Active
+      oldAgentPolicy.status === agentPolicyStatuses.Inactive &&
+      agentPolicy.status !== agentPolicyStatuses.Active
     ) {
       throw new Error(
         `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`

@@ -5,7 +5,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { PackagePolicySchema, NamespaceSchema } from './package_policy';
-import { AgentPolicyStatus, dataTypes } from '../../../common';
+import { AgentPolicyStatus, agentPolicyStatuses, dataTypes } from '../../../common';
 
 const AgentPolicyBaseSchema = {
   name: schema.string({ minLength: 1 }),
@@ -26,8 +26,8 @@ export const AgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
   id: schema.string(),
   status: schema.oneOf([
-    schema.literal(AgentPolicyStatus.Active),
-    schema.literal(AgentPolicyStatus.Inactive),
+    schema.literal(agentPolicyStatuses.Active),
+    schema.literal(agentPolicyStatuses.Inactive),
   ]),
   package_policies: schema.oneOf([
     schema.arrayOf(schema.string()),
