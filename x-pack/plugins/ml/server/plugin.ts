@@ -181,7 +181,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     };
   }
 
-  public start(coreStart: CoreStart): MlPluginStart {
+  public async start(coreStart: CoreStart): Promise<MlPluginStart> {
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
     this.savedObjectsStart = coreStart.savedObjects;
@@ -189,7 +189,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     // check whether the job saved objects exist
     // and create them if needed.
     const { initializeJobs } = jobInitializationFactory(coreStart);
-    initializeJobs();
+    await initializeJobs();
   }
 
   public stop() {
