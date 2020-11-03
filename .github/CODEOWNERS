@@ -196,12 +196,15 @@
 
 # Platform
 /src/core/  @elastic/kibana-platform
+/src/plugins/saved_objects_tagging_oss  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 /x-pack/plugins/licensing/  @elastic/kibana-platform
 /x-pack/plugins/global_search/  @elastic/kibana-platform
 /x-pack/plugins/cloud/ @elastic/kibana-platform
+/x-pack/plugins/saved_objects_tagging/ @elastic/kibana-platform
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-platform
+/x-pack/test/saved_object_tagging/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /packages/kbn-std/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
