@@ -7,18 +7,18 @@
 import { IRouter } from 'kibana/server';
 import { EndpointAppContext } from '../types';
 import {
-  validateTree,
+  validateTreeEntityID,
   validateEvents,
   validateChildren,
   validateAncestry,
   validateAlerts,
   validateEntities,
-  validateTree2,
+  validateTree,
 } from '../../../common/endpoint/schema/resolver';
 import { handleChildren } from './resolver/children';
 import { handleAncestry } from './resolver/ancestry';
-import { handleTree } from './resolver/tree';
-import { handleTree as handleTree2 } from './resolver/new_tree/tree_route';
+import { handleTree as handleTreeEntityID } from './resolver/tree';
+import { handleTree } from './resolver/new_tree/tree_route';
 import { handleAlerts } from './resolver/alerts';
 import { handleEntities } from './resolver/entity';
 import { handleEvents } from './resolver/events';
@@ -29,10 +29,10 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
   router.post(
     {
       path: '/api/endpoint/resolver/tree',
-      validate: validateTree2,
+      validate: validateTree,
       options: { authRequired: true },
     },
-    handleTree2(log)
+    handleTree(log)
   );
 
   router.post(
@@ -53,6 +53,9 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     handleAlerts(log, endpointAppContext)
   );
 
+  /**
+   * @deprecated use the /resolver/tree api instead
+   */
   router.get(
     {
       path: '/api/endpoint/resolver/{id}/children',
@@ -62,6 +65,9 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     handleChildren(log, endpointAppContext)
   );
 
+  /**
+   * @deprecated use the /resolver/tree api instead
+   */
   router.get(
     {
       path: '/api/endpoint/resolver/{id}/ancestry',
@@ -71,13 +77,16 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     handleAncestry(log, endpointAppContext)
   );
 
+  /**
+   * @deprecated use the /resolver/tree api instead
+   */
   router.get(
     {
       path: '/api/endpoint/resolver/{id}',
-      validate: validateTree,
+      validate: validateTreeEntityID,
       options: { authRequired: true },
     },
-    handleTree(log, endpointAppContext)
+    handleTreeEntityID(log, endpointAppContext)
   );
 
   /**

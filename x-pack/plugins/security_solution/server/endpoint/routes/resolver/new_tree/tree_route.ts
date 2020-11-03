@@ -6,12 +6,12 @@
 
 import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { validateTree2 } from '../../../../../common/endpoint/schema/resolver';
+import { validateTree } from '../../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
 
 export function handleTree(
   log: Logger
-): RequestHandler<unknown, unknown, TypeOf<typeof validateTree2.body>> {
+): RequestHandler<unknown, unknown, TypeOf<typeof validateTree.body>> {
   return async (context, req, res) => {
     try {
       const client = context.core.elasticsearch.client;

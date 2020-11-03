@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 /**
  * Used to validate GET requests for a complete resolver tree.
  */
-export const validateTree = {
+export const validateTreeEntityID = {
   params: schema.object({ id: schema.string({ minLength: 1 }) }),
   query: schema.object({
     children: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
@@ -58,7 +58,7 @@ export const validateTree = {
 /**
  * Used to validate GET requests for a complete resolver tree.
  */
-export const validateTree2 = {
+export const validateTree = {
   body: schema.object({
     // if the ancestry field is specified this field will be ignored
     descendantLevels: schema.number({ defaultValue: 20, min: 0, max: 1000 }),

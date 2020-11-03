@@ -25,7 +25,7 @@ interface CategoriesAgg extends AggBucket {
   };
 }
 
-interface LifecycleParams {
+interface StatsParams {
   schema: Schema;
   indexPatterns: string | string[];
   timerange: Timerange;
@@ -38,7 +38,7 @@ export class StatsQuery {
   private readonly schema: Schema;
   private readonly indexPatterns: string | string[];
   private readonly timerange: Timerange;
-  constructor({ schema, indexPatterns, timerange }: LifecycleParams) {
+  constructor({ schema, indexPatterns, timerange }: StatsParams) {
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timerange = timerange;
