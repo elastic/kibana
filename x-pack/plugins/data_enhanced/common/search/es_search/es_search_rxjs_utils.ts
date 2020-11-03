@@ -5,7 +5,7 @@
  */
 
 import { of, merge, timer, throwError } from 'rxjs';
-import { takeWhile, switchMap, expand, mergeMap } from 'rxjs/operators';
+import { takeWhile, switchMap, expand, mergeMap, tap } from 'rxjs/operators';
 
 import {
   AbortError,
@@ -21,27 +21,19 @@ const DEFAULT_POLLING_INTERVAL = 1000;
 export const doPartialSearch = <SearchResponse = any>(
   searchMethod: () => Promise<SearchResponse>,
   partialSearchMethod: (id: IKibanaSearchRequest['id']) => Promise<SearchResponse>,
-  isPartialResponse: (response: SearchResponse) => boolean,
+  isCompleteResponse: (response: SearchResponse) => boolean,
   getId: (response: SearchResponse) => IKibanaSearchRequest['id'],
   requestId: IKibanaSearchRequest['id'],
   { abortSignal, pollInterval = DEFAULT_POLLING_INTERVAL }: IAsyncSearchOptions
-) => {
-  const partialSearch = (id: IKibanaSearchRequest['id']) =>
-    doSearch<SearchResponse>(() => partialSearchMethod(id), abortSignal).pipe(
-      expand(() => timer(pollInterval).pipe(switchMap(() => partialSearchMethod(id)))),
-      takeWhile((response) => !isPartialResponse(response), true)
-    );
-
-  return requestId
-    ? partialSearch(requestId)
-    : doSearch<SearchResponse>(searchMethod, abortSignal).pipe(
-        mergeMap((response) =>
-          !isPartialResponse(response)
-            ? merge(of(response), partialSearch(getId(response)))
-            : of(response)
-        )
-      );
-};
+) =>
+  doSearch<SearchResponse>(
+    requestId ? () => partialSearchMethod(requestId) : searchMethod,
+    abortSignal
+  ).pipe(
+    tap((response) => (requestId = getId(response))),
+    expand(() => timer(pollInterval).pipe(switchMap(() => partialSearchMethod(requestId)))),
+    takeWhile((response) => !isCompleteResponse(response), true)
+  );
 
 export const throwOnEsError = () =>
   mergeMap((r: IKibanaSearchResponse) =>
