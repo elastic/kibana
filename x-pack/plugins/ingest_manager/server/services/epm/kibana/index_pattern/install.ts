@@ -77,6 +77,7 @@ export interface IndexPatternField {
   readFromDocValues: boolean;
 }
 
+const indexPatternTypes = Object.values(dataTypes);
 // TODO: use a function overload and make pkgName and pkgVersion required for install/update
 // and not for an update removal.  or separate out the functions
 export async function installIndexPatterns(
