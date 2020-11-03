@@ -1307,18 +1307,13 @@ export function resultsServiceProvider(mlApiServices) {
             },
           });
         });
-        console.log('actualPlotFunctionIfMetric', actualPlotFunctionIfMetric);
-
-        if (actualPlotFunctionIfMetric !== undefined && actualPlotFunctionIfMetric !== 'unknown') {
+        if (actualPlotFunctionIfMetric !== undefined) {
           mustCriteria.push({
             term: {
-              function_description:
-                actualPlotFunctionIfMetric === 'avg' ? 'mean' : actualPlotFunctionIfMetric,
+              function_description: actualPlotFunctionIfMetric,
             },
           });
         }
-        console.log('mustCriteria', mustCriteria);
-
         mlApiServices.results
           .anomalySearch({
             size: 0,

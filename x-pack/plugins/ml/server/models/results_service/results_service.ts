@@ -109,7 +109,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     if (functionDescription !== undefined) {
       boolCriteria.push({
         term: {
-          function_description: functionDescription === 'avg' ? 'mean' : functionDescription,
+          function_description: functionDescription,
         },
       });
     }

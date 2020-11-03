@@ -26,6 +26,7 @@ import { mlForecastService } from '../../services/forecast_service';
 import { mlFunctionToESAggregation } from '../../../../common/util/job_utils';
 import { GetAnnotationsResponse } from '../../../../common/types/annotations';
 import { ANNOTATION_EVENT_USER } from '../../../../common/constants/annotations';
+import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 export interface Interval {
   asMilliseconds: () => number;
@@ -54,6 +55,8 @@ export function getFocusData(
   selectedJob: Job,
   functionDescription: string | undefined
 ): Observable<FocusData> {
+  const esFunctionToPlotIfMetric = aggregationTypeTransform.toES(functionDescription);
+
   return forkJoin([
     // Query 1 - load metric data across selected time range.
     mlTimeSeriesSearchService.getMetricData(
@@ -63,7 +66,7 @@ export function getFocusData(
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
       focusAggregationInterval.asMilliseconds(),
-      functionDescription
+      esFunctionToPlotIfMetric
     ),
     // Query 2 - load all the records across selected time range for the chart anomaly markers.
     mlResultsService.getRecordsForCriteria(

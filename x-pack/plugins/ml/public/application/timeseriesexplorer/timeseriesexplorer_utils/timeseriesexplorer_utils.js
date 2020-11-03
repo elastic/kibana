@@ -136,7 +136,6 @@ export function processDataForFocusAnomalies(
     }
     chartData.push(pointToAdd);
   });
-  const mlFunctionDescription = functionDescription === 'avg' ? 'mean' : functionDescription;
 
   // Iterate through the anomaly records adding the
   // various properties required for display.
@@ -144,8 +143,7 @@ export function processDataForFocusAnomalies(
     // Look for a chart point with the same time as the record.
     // If none found, find closest time in chartData set.
     const recordTime = record[TIME_FIELD_NAME];
-    if (record.function === 'metric' && record.function_description !== mlFunctionDescription)
-      return;
+    if (record.function === 'metric' && record.function_description !== functionDescription) return;
 
     const chartPoint = findChartPointForAnomalyTime(chartData, recordTime, aggregationInterval);
     if (chartPoint !== undefined) {

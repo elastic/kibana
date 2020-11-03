@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 
 const plotByFunctionOptions = [
   {
-    value: 'avg',
+    value: 'mean',
     text: i18n.translate('xpack.ml.timeSeriesExplorer.plotByAvgOptionLabel', {
-      defaultMessage: 'average',
+      defaultMessage: 'mean',
     }),
   },
   {
@@ -34,7 +34,7 @@ export const PlotByFunctionControls = ({
   functionDescription: undefined | string;
   setFunctionDescription: (func: string) => void;
 }) => {
-  if (functionDescription === 'unknown' || !functionDescription) return null;
+  if (functionDescription === undefined) return null;
   return (
     <EuiFlexItem style={{ textAlign: 'right' }} grow={false}>
       <EuiFormRow
@@ -44,7 +44,7 @@ export const PlotByFunctionControls = ({
       >
         <EuiSelect
           options={plotByFunctionOptions}
-          value={functionDescription ?? 'avg'}
+          value={functionDescription}
           onChange={(e) => setFunctionDescription(e.target.value)}
           aria-label="Pick function to plot by (min, max, or average) if metric function"
         />

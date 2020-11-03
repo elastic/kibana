@@ -403,7 +403,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       if (functionDescription !== undefined) {
         boolCriteria.push({
           term: {
-            function_description: functionDescription === 'avg' ? 'mean' : functionDescription,
+            function_description: functionDescription,
           },
         });
       }

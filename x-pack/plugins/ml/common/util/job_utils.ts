@@ -277,20 +277,6 @@ export function mlFunctionToESAggregation(
   return null;
 }
 
-export function esFunctionToMlFunction(
-  functionName: ES_AGGREGATION | string
-): ML_JOB_AGGREGATION | null {
-  if (functionName === ES_AGGREGATION.AVG) {
-    return ML_JOB_AGGREGATION.MEAN;
-  }
-
-  // Return null if ML function does not map to an ES aggregation.
-  // i.e. median, low_median, high_median, freq_rare,
-  // varp, low_varp, high_varp, time_of_day, time_of_week, lat_long,
-  // info_content, low_info_content, high_info_content
-  return null;
-}
-
 // Job name must contain lowercase alphanumeric (a-z and 0-9), hyphens or underscores;
 // it must also start and end with an alphanumeric character'
 export function isJobIdValid(jobId: JobId): boolean {
