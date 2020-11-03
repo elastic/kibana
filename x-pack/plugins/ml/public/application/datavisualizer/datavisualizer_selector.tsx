@@ -189,6 +189,7 @@ export const DatavisualizerSelector: FC = () => {
                       <EuiButton
                         target="_blank"
                         href={`${basePath.get()}/app/management/stack/license_management/home`}
+                        data-test-subj="mlDataVisualizerStartTrialButton"
                       >
                         <FormattedMessage
                           id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
@@ -196,6 +197,7 @@ export const DatavisualizerSelector: FC = () => {
                         />
                       </EuiButton>
                     }
+                    data-test-subj="mlDataVisualizerCardStartTrial"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

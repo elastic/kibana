@@ -20,10 +20,18 @@
 import { CoreStart, Plugin } from 'src/core/public';
 
 import './index.scss';
-import { createSavedObjectClass } from './saved_object';
+import {
+  createSavedObjectClass,
+  SavedObjectDecoratorRegistry,
+  SavedObjectDecoratorConfig,
+} from './saved_object';
 import { DataPublicPluginStart } from '../../data/public';
 import { PER_PAGE_SETTING, LISTING_LIMIT_SETTING } from '../common';
 import { SavedObject } from './types';
+
+export interface SavedObjectSetup {
+  registerDecorator: (config: SavedObjectDecoratorConfig<any>) => void;
+}
 
 export interface SavedObjectsStart {
   SavedObjectClass: new (raw: Record<string, any>) => SavedObject;
@@ -38,17 +46,26 @@ export interface SavedObjectsStartDeps {
 }
 
 export class SavedObjectsPublicPlugin
-  implements Plugin<void, SavedObjectsStart, object, SavedObjectsStartDeps> {
-  public setup() {}
+  implements Plugin<SavedObjectSetup, SavedObjectsStart, object, SavedObjectsStartDeps> {
+  private decoratorRegistry = new SavedObjectDecoratorRegistry();
+
+  public setup(): SavedObjectSetup {
+    return {
+      registerDecorator: (config) => this.decoratorRegistry.register(config),
+    };
+  }
   public start(core: CoreStart, { data }: SavedObjectsStartDeps) {
     return {
-      SavedObjectClass: createSavedObjectClass({
-        indexPatterns: data.indexPatterns,
-        savedObjectsClient: core.savedObjects.client,
-        search: data.search,
-        chrome: core.chrome,
-        overlays: core.overlays,
-      }),
+      SavedObjectClass: createSavedObjectClass(
+        {
+          indexPatterns: data.indexPatterns,
+          savedObjectsClient: core.savedObjects.client,
+          search: data.search,
+          chrome: core.chrome,
+          overlays: core.overlays,
+        },
+        this.decoratorRegistry
+      ),
       settings: {
         getPerPage: () => core.uiSettings.get(PER_PAGE_SETTING),
         getListingLimit: () => core.uiSettings.get(LISTING_LIMIT_SETTING),

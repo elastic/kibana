@@ -1,0 +1,280 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CSM page views when there is data returns page views 1`] = `
+Object {
+  "items": Array [
+    Object {
+      "x": 1600149947000,
+      "y": 1,
+    },
+    Object {
+      "x": 1600149957000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600149967000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600149977000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600149987000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600149997000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150007000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150017000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150027000,
+      "y": 1,
+    },
+    Object {
+      "x": 1600150037000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150047000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150057000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150067000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150077000,
+      "y": 1,
+    },
+    Object {
+      "x": 1600150087000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150097000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150107000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150117000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150127000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150137000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150147000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150157000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150167000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150177000,
+      "y": 1,
+    },
+    Object {
+      "x": 1600150187000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150197000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150207000,
+      "y": 1,
+    },
+    Object {
+      "x": 1600150217000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150227000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150237000,
+      "y": 1,
+    },
+  ],
+  "topItems": Array [],
+}
+`;
+
+exports[`CSM page views when there is data returns page views with breakdown 1`] = `
+Object {
+  "items": Array [
+    Object {
+      "Chrome": 1,
+      "x": 1600149947000,
+      "y": 1,
+    },
+    Object {
+      "x": 1600149957000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600149967000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600149977000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600149987000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600149997000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150007000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150017000,
+      "y": 0,
+    },
+    Object {
+      "Chrome": 1,
+      "x": 1600150027000,
+      "y": 1,
+    },
+    Object {
+      "x": 1600150037000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150047000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150057000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150067000,
+      "y": 0,
+    },
+    Object {
+      "Chrome": 1,
+      "x": 1600150077000,
+      "y": 1,
+    },
+    Object {
+      "x": 1600150087000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150097000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150107000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150117000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150127000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150137000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150147000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150157000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150167000,
+      "y": 0,
+    },
+    Object {
+      "Chrome": 1,
+      "x": 1600150177000,
+      "y": 1,
+    },
+    Object {
+      "x": 1600150187000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150197000,
+      "y": 0,
+    },
+    Object {
+      "Chrome Mobile": 1,
+      "x": 1600150207000,
+      "y": 1,
+    },
+    Object {
+      "x": 1600150217000,
+      "y": 0,
+    },
+    Object {
+      "x": 1600150227000,
+      "y": 0,
+    },
+    Object {
+      "Chrome Mobile": 1,
+      "x": 1600150237000,
+      "y": 1,
+    },
+  ],
+  "topItems": Array [
+    "Chrome",
+    "Chrome Mobile",
+  ],
+}
+`;
+
+exports[`CSM page views when there is no data returns empty list 1`] = `
+Object {
+  "items": Array [],
+  "topItems": Array [],
+}
+`;
+
+exports[`CSM page views when there is no data returns empty list with breakdowns 1`] = `
+Object {
+  "items": Array [],
+  "topItems": Array [],
+}
+`;

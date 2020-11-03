@@ -36,15 +36,12 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiBasicTableColumn,
+  EuiTableActionsColumnType,
+  SearchFilterConfig,
 } from '@elastic/eui';
+
 import { HttpFetchError, ToastsStart } from 'kibana/public';
 import { toMountPoint } from '../util';
-
-interface Column {
-  name: string;
-  width?: string;
-  actions?: object[];
-}
 
 interface Item {
   id?: string;
@@ -61,8 +58,7 @@ export interface TableListViewProps {
   initialFilter: string;
   initialPageSize: number;
   noItemsFragment: JSX.Element;
-  // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
-  tableColumns: Column[];
+  tableColumns: Array<EuiBasicTableColumn<any>>;
   tableListTitle: string;
   toastNotifications: ToastsStart;
   /**
@@ -78,6 +74,7 @@ export interface TableListViewProps {
    * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
    */
   tableCaption?: string;
+  searchFilters?: SearchFilterConfig[];
 }
 
 export interface TableListViewState {
@@ -410,6 +407,8 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
   }
 
   renderTable() {
+    const { searchFilters } = this.props;
+
     const selection = this.props.deleteItems
       ? {
           onSelectionChange: (obj: Item[]) => {
@@ -422,7 +421,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         }
       : undefined;
 
-    const actions = [
+    const actions: EuiTableActionsColumnType<any>['actions'] = [
       {
         name: i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
           defaultMessage: 'Edit',
@@ -435,6 +434,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         ),
         icon: 'pencil',
         type: 'icon',
+        enabled: ({ error }: { error: string }) => !error,
         onClick: this.props.editItem,
       },
     ];
@@ -446,6 +446,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       box: {
         incremental: true,
       },
+      filters: searchFilters ?? [],
     };
 
     const columns = this.props.tableColumns.slice();
@@ -470,7 +471,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       <EuiInMemoryTable
         itemId="id"
         items={this.state.items}
-        columns={(columns as unknown) as Array<EuiBasicTableColumn<object>>} // EuiBasicTableColumn is stricter than Column
+        columns={columns}
         pagination={this.pagination}
         loading={this.state.isFetchingItems}
         message={noItemsMessage}
