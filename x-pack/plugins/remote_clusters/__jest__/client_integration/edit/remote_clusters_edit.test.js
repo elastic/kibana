@@ -6,12 +6,14 @@
 
 import { act } from 'react-dom/test-utils';
 
-import { RemoteClusterForm } from '../../public/application/sections/components/remote_cluster_form';
-import { pageHelpers, setupEnvironment } from './helpers';
-import { REMOTE_CLUSTER_EDIT, REMOTE_CLUSTER_EDIT_NAME } from './helpers/constants';
-
-const { setup } = pageHelpers.remoteClustersEdit;
-const { setup: setupRemoteClustersAdd } = pageHelpers.remoteClustersAdd;
+import { RemoteClusterForm } from '../../../public/application/sections/components/remote_cluster_form';
+import { setupEnvironment } from '../helpers';
+import { setup as setupRemoteClustersAdd } from '../add/remote_clusters_add.helpers';
+import {
+  setup,
+  REMOTE_CLUSTER_EDIT,
+  REMOTE_CLUSTER_EDIT_NAME,
+} from './remote_clusters_edit.helpers';
 
 describe('Edit Remote cluster', () => {
   let server;

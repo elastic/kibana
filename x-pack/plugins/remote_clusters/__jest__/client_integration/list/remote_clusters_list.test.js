@@ -5,20 +5,14 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import {
-  pageHelpers,
-  setupEnvironment,
-  nextTick,
-  getRandomString,
-  findTestSubject,
-} from './helpers';
+import { getRouter } from '../../../public/application/services';
+import { getRemoteClusterMock } from '../../../fixtures/remote_cluster';
 
-import { getRouter } from '../../public/application/services';
-import { getRemoteClusterMock } from '../../fixtures/remote_cluster';
+import { PROXY_MODE } from '../../../common/constants';
 
-import { PROXY_MODE } from '../../common/constants';
+import { setupEnvironment, nextTick, getRandomString, findTestSubject } from '../helpers';
 
-const { setup } = pageHelpers.remoteClustersList;
+import { setup } from './remote_clusters_list.helpers';
 
 // FLAKY: https://github.com/elastic/kibana/issues/58681
 describe.skip('<RemoteClusterList />', () => {
@@ -34,8 +28,7 @@ describe.skip('<RemoteClusterList />', () => {
   });
 
   beforeEach(() => {
-    // Set "default" mock responses by not providing any arguments
-    httpRequestsMockHelpers.setLoadRemoteClustersResponse();
+    httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
   });
 
   describe('on component mount', () => {
