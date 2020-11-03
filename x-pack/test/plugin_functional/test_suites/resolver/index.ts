@@ -29,7 +29,7 @@ export default function ({
     before(async function () {
       await pageObjects.common.navigateToApp('resolverTest');
       // make the window big enough that all nodes are fully in view (for screenshots)
-      await browser.setWindowSize(1920, 1200);
+      await browser.setScreenshotSize(3840, 2400);
     });
 
     it('renders at least one node', async () => {
