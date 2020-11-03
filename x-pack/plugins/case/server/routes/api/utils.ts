@@ -22,7 +22,7 @@ import {
   CommentAttributes,
   ESCaseConnector,
   ESCaseAttributes,
-  CommentType,
+  CommentRequest,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -56,14 +56,13 @@ export const transformNewCase = ({
   updated_by: null,
 });
 
-interface NewCommentArgs {
-  comment: string;
-  type: CommentType;
+interface NewCommentArgs extends CommentRequest {
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
   username?: string | null;
 }
+
 export const transformNewComment = ({
   comment,
   type,
