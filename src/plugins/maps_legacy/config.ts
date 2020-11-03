@@ -21,6 +21,13 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import { configSchema as tilemapSchema } from '../tile_map/config';
 import { configSchema as regionmapSchema } from '../region_map/config';
 
+// Default config for the elastic hosted EMS endpoints
+export const DEFAULT_EMS_FILE_API_URL = 'https://vector.maps.elastic.co';
+export const DEFAULT_EMS_TILE_API_URL = 'https://tiles.maps.elastic.co';
+export const DEFAULT_EMS_LANDING_PAGE_URL = 'https://maps.elastic.co/v7.10';
+export const DEFAULT_EMS_FONT_LIBRARY_URL =
+  'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf';
+
 export const configSchema = schema.object({
   includeElasticMapsService: schema.boolean({ defaultValue: true }),
   proxyElasticMapsServiceInMaps: schema.boolean({ defaultValue: false }),
@@ -30,11 +37,11 @@ export const configSchema = schema.object({
 
   emsUrl: schema.string({ defaultValue: '' }),
 
-  emsFileApiUrl: schema.string({ defaultValue: 'https://vector.maps.elastic.co' }),
-  emsTileApiUrl: schema.string({ defaultValue: 'https://tiles.maps.elastic.co' }),
-  emsLandingPageUrl: schema.string({ defaultValue: 'https://maps.elastic.co/v7.10' }),
+  emsFileApiUrl: schema.string({ defaultValue: DEFAULT_EMS_FILE_API_URL }),
+  emsTileApiUrl: schema.string({ defaultValue: DEFAULT_EMS_TILE_API_URL }),
+  emsLandingPageUrl: schema.string({ defaultValue: DEFAULT_EMS_LANDING_PAGE_URL }),
   emsFontLibraryUrl: schema.string({
-    defaultValue: 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf',
+    defaultValue: DEFAULT_EMS_FONT_LIBRARY_URL,
   }),
 
   emsTileLayerId: schema.object({

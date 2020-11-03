@@ -26,22 +26,49 @@ export class EMSSettings {
     this._config = config;
   }
 
+  _isEMSUrlSet() {
+    return this._config.emsUrl.length > 0;
+  }
+
+  _getEMSRoot() {
+    return this._config.emsUrl.replace(/\/$/, '');
+  }
+
   isConfigValid(): boolean {
-    return true;
+    const badConfig =
+      this._isEMSUrlSet() &&
+      (!this._config.includeElasticMapsService || this._config.proxyElasticMapsServiceInMaps);
+    return !badConfig;
   }
 
   getEMSFileApiUrl(): string {
-    return this._config.emsFileApiUrl;
+    if (this._isEMSUrlSet()) {
+      return `${this._getEMSRoot()}/file`;
+    } else {
+      return this._config.emsFileApiUrl;
+    }
   }
 
   getEMSTileApiUrl(): string {
-    return this._config.emsTileApiUrl;
+    if (this._isEMSUrlSet()) {
+      return `${this._getEMSRoot()}/tile`;
+    } else {
+      return this._config.emsTileApiUrl;
+    }
   }
   getEMSLandingPageUrl(): string {
-    return this._config.emsLandingPageUrl;
+    if (this._isEMSUrlSet()) {
+      return `${this._getEMSRoot()}/maps`;
+    } else {
+      return this._config.emsLandingPageUrl;
+    }
   }
 
   getEMSFontLibraryUrl(): string {
-    return this._config.emsFontLibraryUrl;
+    if (this._isEMSUrlSet()) {
+      return `${this._getEMSRoot()}/tile/fonts/{fontstack}/{range}.pbf`;
+    } else {
+      return this._config.emsFontLibraryUrl;
+    }
   }
 }

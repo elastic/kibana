@@ -37,11 +37,9 @@ export class ServiceSettings {
       language: i18n.getLocale(),
       appVersion: getKibanaVersion(),
       appName: 'kibana',
-
       fileApiUrl: this._mapConfig.emsFileApiUrl,
       tileApiUrl: this._mapConfig.emsTileApiUrl,
       landingPageUrl: this._mapConfig.emsLandingPageUrl,
-
       // Wrap to avoid errors passing window fetch
       fetchFunction: function (...args) {
         return fetch(...args);

@@ -63,6 +63,12 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
     const rawConfig = this._initializerContext.config.get<MapsLegacyConfig>();
     const emsSettings = new EMSSettings(rawConfig);
 
+    if (!emsSettings.isConfigValid()) {
+      throw new Error(
+        'Should not set emsUrl when `includeElasticMapsService` or `proxyElasticMapsServiceInMaps` are overridden'
+      );
+    }
+
     const config: MapsLegacyConfig = {
       ...rawConfig,
       emsFileApiUrl: emsSettings.getEMSFileApiUrl(),
