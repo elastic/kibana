@@ -4923,7 +4923,6 @@
     "xpack.apm.header.badge.readOnly.text": "読み込み専用",
     "xpack.apm.header.badge.readOnly.tooltip": "を保存できませんでした",
     "xpack.apm.helpMenu.upgradeAssistantLink": "アップグレードアシスタント",
-    "xpack.apm.histogram.plot.noDataLabel": "この時間範囲のデータがありません。",
     "xpack.apm.home.alertsMenu.alerts": "アラート",
     "xpack.apm.home.alertsMenu.createAnomalyAlert": "異常アラートを作成",
     "xpack.apm.home.alertsMenu.createThresholdAlert": "しきい値アラートを作成",

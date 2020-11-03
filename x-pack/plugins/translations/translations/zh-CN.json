@@ -4925,7 +4925,6 @@
     "xpack.apm.header.badge.readOnly.text": "只读",
     "xpack.apm.header.badge.readOnly.tooltip": "无法保存",
     "xpack.apm.helpMenu.upgradeAssistantLink": "升级助手",
-    "xpack.apm.histogram.plot.noDataLabel": "此时间范围内没有数据。",
     "xpack.apm.home.alertsMenu.alerts": "告警",
     "xpack.apm.home.alertsMenu.createAnomalyAlert": "创建异常告警",
     "xpack.apm.home.alertsMenu.createThresholdAlert": "创建阈值告警",
