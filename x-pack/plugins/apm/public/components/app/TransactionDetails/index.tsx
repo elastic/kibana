@@ -56,6 +56,7 @@ export function TransactionDetails({
     data: transactionChartsData,
     status: transactionChartsStatus,
   } = useTransactionCharts();
+
   const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
     urlParams
   );
@@ -125,9 +126,8 @@ export function TransactionDetails({
           <ChartsSyncContextProvider>
             <TransactionCharts
               isLoading={
-                (transactionChartsStatus === FETCH_STATUS.LOADING ||
-                  transactionChartsStatus === FETCH_STATUS.PENDING) &&
-                !transactionChartsData
+                transactionChartsStatus === FETCH_STATUS.LOADING ||
+                transactionChartsStatus === FETCH_STATUS.PENDING
               }
               charts={transactionChartsData}
               urlParams={urlParams}

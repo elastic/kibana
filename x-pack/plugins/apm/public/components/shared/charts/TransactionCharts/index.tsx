@@ -81,9 +81,9 @@ export function TransactionCharts({
                 </LicenseContext.Consumer>
               </EuiFlexGroup>
               <LineChart
-                isLoading={isLoading}
+                isLoading={isLoading && !responseTimeSeries}
                 id="transactionDuration"
-                timeseries={responseTimeSeries}
+                timeseries={responseTimeSeries || []}
                 yLabelFormat={getResponseTimeTickFormatter(formatter)}
                 onToggleLegend={(serie) => {
                   if (serie) {
@@ -100,9 +100,9 @@ export function TransactionCharts({
                 <span>{tpmLabel(transactionType)}</span>
               </EuiTitle>
               <LineChart
-                isLoading={isLoading}
+                isLoading={isLoading && !tpmSeries}
                 id="requestPerMinutes"
-                timeseries={tpmSeries}
+                timeseries={tpmSeries || []}
                 yLabelFormat={getTPMTooltipFormatter}
               />
             </EuiPanel>

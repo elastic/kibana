@@ -140,9 +140,8 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
           )}
           <TransactionCharts
             isLoading={
-              (transactionChartsStatus === FETCH_STATUS.LOADING ||
-                transactionChartsStatus === FETCH_STATUS.PENDING) &&
-              !transactionListData.items
+              transactionChartsStatus === FETCH_STATUS.LOADING ||
+              transactionChartsStatus === FETCH_STATUS.PENDING
             }
             charts={transactionCharts}
             urlParams={urlParams}

@@ -5,7 +5,7 @@
  */
 
 import { SeriesIdentifier } from '@elastic/charts';
-import { isEmpty, omit } from 'lodash';
+import { omit } from 'lodash';
 import { useState } from 'react';
 import {
   getDurationFormatter,
@@ -15,7 +15,7 @@ import { TimeSeries } from '../../../../../typings/timeseries';
 import { getMaxY } from './helper';
 
 export const useFormatter = (
-  series: TimeSeries[]
+  series?: TimeSeries[]
 ): {
   formatter: TimeFormatter;
   toggleSerie: (disabledSerie: SeriesIdentifier) => void;
@@ -24,11 +24,11 @@ export const useFormatter = (
     Record<SeriesIdentifier['specId'], 0>
   >({});
 
-  const visibleSeries = series.filter(
+  const visibleSeries = series?.filter(
     (serie) => disabledSeries[serie.title] === undefined
   );
 
-  const maxY = getMaxY(isEmpty(visibleSeries) ? series : visibleSeries);
+  const maxY = getMaxY(visibleSeries || series || []);
   const formatter = getDurationFormatter(maxY);
 
   const toggleSerie = ({ specId }: SeriesIdentifier) => {
