@@ -73,6 +73,7 @@ const projectsByName = new Map([
     ),
   ],
 ]);
+(projectsByName.get('bar') as Project).isSinglePackageJsonProject = true;
 
 const projectGraph = buildProjectGraph(projectsByName);
 
@@ -96,9 +97,10 @@ afterEach(() => {
 });
 
 describe('bin script points nowhere', () => {
-  test('does not try to create symlink or node_modules/.bin directory', async () => {
+  test('does not try to create symlink on node_modules/.bin for that bin script', async () => {
     const fs = require('./fs');
     fs.isFile.mockReturnValue(false);
+    fs.isDirectory.mockReturnValue(true);
 
     await linkProjectExecutables(projectsByName, projectGraph);
     expect(getFsMockCalls()).toMatchSnapshot('fs module calls');
@@ -106,9 +108,10 @@ describe('bin script points nowhere', () => {
 });
 
 describe('bin script points to a file', () => {
-  test('creates a symlink in the project node_modules/.bin directory', async () => {
+  test('creates a symlink for the project bin into the roots project node_modules/.bin directory as well as node_modules/.bin directory symlink into the roots one', async () => {
     const fs = require('./fs');
     fs.isFile.mockReturnValue(true);
+    fs.isDirectory.mockReturnValue(false);
 
     await linkProjectExecutables(projectsByName, projectGraph);
 
@@ -116,8 +119,6 @@ describe('bin script points to a file', () => {
     expect(logWriter.messages).toMatchInlineSnapshot(`
       Array [
          debg Linking package executables,
-         debg [foo] bar -> ../bar/bin/bar.js,
-         debg [baz] bar -> ../bar/bin/bar.js,
       ]
     `);
   });
