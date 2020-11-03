@@ -84,8 +84,8 @@ import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/
 import { getControlsForDetector } from './get_controls_for_detector';
 import { SeriesControls } from './components/series_controls';
 import { PlotByFunctionControls } from './components/plot_function_controls';
-import { getToastNotificationService } from '../services/toast_notification_service';
 import { aggregationTypeTransform } from '../../../common/util/anomaly_utils';
+import { getFunctionDescription } from './get_function_description';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -395,44 +395,19 @@ export class TimeSeriesExplorer extends React.Component {
       );
   };
 
-  getPlotByOptions = () => {
-    const { selectedJobId, selectedDetectorIndex } = this.props;
+  getFunctionDescription = async () => {
+    const { selectedDetectorIndex, selectedEntities, selectedJobId } = this.props;
     const selectedJob = mlJobService.getJob(selectedJobId);
 
-    // if the detector's function is metric, fetch the highest scoring anomaly record
-    // and set to plot the function_description (avg/min/max) of that record by default
-    if (selectedJob?.analysis_config?.detectors[selectedDetectorIndex]?.function === 'metric') {
-      const entityControls = this.getControlsForDetector();
-
-      mlResultsService
-        .getRecordsForCriteria(
-          [selectedJob.job_id],
-          this.getCriteriaFields(selectedDetectorIndex, entityControls),
-          0,
-          null,
-          null,
-          1
-        )
-        .toPromise()
-        .then((resp) => {
-          if (Array.isArray(resp?.records) && resp.records.length === 1) {
-            const highestScoringAnomaly = resp.records[0];
-            const defaultFunctionToPlotIfMetric = highestScoringAnomaly?.function_description;
-            this.setFunctionDescription(defaultFunctionToPlotIfMetric);
-          }
-        })
-        .catch((error) => {
-          getToastNotificationService().displayErrorToast(
-            error,
-            i18n.translate('xpack.ml.timeSeriesExplorer.highestAnomalyScoreErrorToastTitle', {
-              defaultMessage: 'An error occurred getting record with the highest anomaly score',
-            })
-          );
-        });
-    } else {
-      this.setState({ functionDescription: undefined });
-    }
+    const functionDescriptionToPlot = await getFunctionDescription({
+      selectedDetectorIndex,
+      selectedEntities,
+      selectedJobId,
+      selectedJob,
+    });
+    this.setFunctionDescription(functionDescriptionToPlot);
   };
+
   setForecastId = (forecastId) => {
     this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
   };
@@ -878,7 +853,7 @@ export class TimeSeriesExplorer extends React.Component {
       previousProps.selectedDetectorIndex !== this.props.selectedDetectorIndex ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities)
     ) {
-      this.getPlotByOptions();
+      this.getFunctionDescription();
     }
 
     if (

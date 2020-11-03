@@ -346,8 +346,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       jobIds: string[] | undefined,
       criteriaFields: CriteriaField[],
       threshold: any,
-      earliestMs: number,
-      latestMs: number,
+      earliestMs: number | null,
+      latestMs: number | null,
       maxResults: number | undefined,
       functionDescription?: string | undefined
     ): Observable<RecordsForCriteria> {
