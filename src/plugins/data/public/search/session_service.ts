@@ -85,6 +85,7 @@ export class SessionService implements ISessionService {
 
   public restore(sessionId: string) {
     this.session$.next(sessionId);
+    return this.http.get(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
 
   public clear() {
@@ -93,11 +94,12 @@ export class SessionService implements ISessionService {
   }
 
   public async save() {
-    await this.http.post(`/internal/session`, {
+    const response = await this.http.post(`/internal/session`, {
       body: JSON.stringify({
         sessionId: this.sessionId,
       }),
     });
     this._isStored = true;
+    return response;
   }
 }

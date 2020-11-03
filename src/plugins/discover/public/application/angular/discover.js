@@ -827,6 +827,10 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     await data.search.session.save();
   };
 
+  $scope.restoreSession = async (id) => {
+    return data.search.session.restore(id);
+  };
+
   $scope.handleRefresh = function (_payload, isUpdate) {
     if (isUpdate === false) {
       refetch$.next();
