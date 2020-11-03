@@ -61,6 +61,10 @@ Changing these settings may disable features of the APM App.
 | `xpack.observability.annotations.index`
   | Index name where Observability annotations are stored. Defaults to `observability-annotations`.
 
+| `xpack.apm.searchAggregatedTransactions`
+  | experimental[] Enables Transaction histogram metrics. Defaults to `false`. When `true`, additional configuration in APM Server is required.
+    See {apm-server-ref-v}/transaction-metrics.html[Configure transaction metrics] for more information.
+
 | `apm_oss.indexPattern` {ess-icon}
   | The index pattern used for integrations with Machine Learning and Query Bar.
   It must match all apm indices. Defaults to `apm-*`.

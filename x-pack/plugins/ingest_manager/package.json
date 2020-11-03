@@ -3,9 +3,5 @@
   "name": "ingest-manager",
   "version": "8.0.0",
   "private": true,
-  "license": "Elastic-License",
-  "dependencies": {
-    "abort-controller": "^3.0.0",
-    "ajv": "^6.12.4"
-  }
+  "license": "Elastic-License"
 }

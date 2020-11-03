@@ -46,11 +46,13 @@ export function visWithSplits(WrappedComponent) {
         };
       }
 
+      const labelHasKeyPlaceholder = /{{\s*key\s*}}/.test(seriesModel.label);
+
       acc[splitId].series.push({
         ...series,
         id: seriesId,
         color: series.color || seriesModel.color,
-        label: seriesModel.label || label,
+        label: seriesModel.label && !labelHasKeyPlaceholder ? seriesModel.label : label,
       });
       return acc;
     }, {});
