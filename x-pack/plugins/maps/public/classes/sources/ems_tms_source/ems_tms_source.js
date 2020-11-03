@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import React from 'react';
 import { AbstractTMSSource } from '../tms_source';
 import { getEmsTmsServices } from '../../../meta';
@@ -24,7 +23,7 @@ export class EMSTMSSource extends AbstractTMSSource {
     return {
       type: SOURCE_TYPES.EMS_TMS,
       id: sourceConfig.id,
-      isAutoSelect: sourceConfig.isAutoSelect,
+      isAutoSelect: !!sourceConfig.isAutoSelect,
     };
   }
 
@@ -33,7 +32,7 @@ export class EMSTMSSource extends AbstractTMSSource {
       {
         id: descriptor.id,
         type: EMSTMSSource.type,
-        isAutoSelect: _.get(descriptor, 'isAutoSelect', false),
+        isAutoSelect: !!descriptor.isAutoSelect ? !!descriptor.isAutoSelect : false,
       },
       inspectorAdapters
     );

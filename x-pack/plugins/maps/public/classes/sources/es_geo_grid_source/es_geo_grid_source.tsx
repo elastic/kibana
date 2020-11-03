@@ -48,6 +48,7 @@ import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { ISearchSource } from '../../../../../../../src/plugins/data/common/search/search_source';
 import { IndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns/index_patterns';
 import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { isValidStringConfig } from '../../util/valid_string_config';
 
 export const MAX_GEOTILE_LEVEL = 29;
 
@@ -64,13 +65,13 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     descriptor: Partial<ESGeoGridSourceDescriptor>
   ): ESGeoGridSourceDescriptor {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
-    if (typeof normalizedDescriptor.geoField !== 'string') {
+    if (!isValidStringConfig(normalizedDescriptor.geoField)) {
       throw new Error('Cannot create an ESGeoGridSourceDescriptor without a geoField');
     }
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_GRID,
-      geoField: normalizedDescriptor.geoField,
+      geoField: normalizedDescriptor.geoField as string,
       requestType: descriptor.requestType || RENDER_AS.POINT,
       resolution: descriptor.resolution ? descriptor.resolution : GRID_RESOLUTION.COARSE,
     };

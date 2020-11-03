@@ -55,6 +55,7 @@ import {
   SortDirection,
   SortDirectionNumeric,
 } from '../../../../../../../src/plugins/data/common/search';
+import { isValidStringConfig } from '../../util/valid_string_config';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
   defaultMessage: 'Documents',
@@ -108,13 +109,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
 
   static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
     const normalizedDescriptor = AbstractESSource.createDescriptor(descriptor);
-    if (typeof normalizedDescriptor.geoField !== 'string') {
+    if (!isValidStringConfig(normalizedDescriptor.geoField)) {
       throw new Error('Cannot create an ESSearchSourceDescriptor without a geoField');
     }
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_SEARCH,
-      geoField: normalizedDescriptor.geoField,
+      geoField: normalizedDescriptor.geoField as string,
       filterByMapBounds:
         typeof descriptor.filterByMapBounds === 'boolean'
           ? descriptor.filterByMapBounds
@@ -122,13 +123,16 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
       tooltipProperties: Array.isArray(descriptor.tooltipProperties)
         ? descriptor.tooltipProperties
         : [],
-      sortField: typeof descriptor.sortField === 'string' ? descriptor.sortField : '',
-      sortOrder:
-        typeof descriptor.sortOrder === 'string' ? descriptor.sortOrder : SortDirection.desc,
-      scalingType:
-        typeof descriptor.scalingType === 'string' ? descriptor.scalingType : SCALING_TYPES.LIMIT,
-      topHitsSplitField:
-        typeof descriptor.topHitsSplitField === 'string' ? descriptor.topHitsSplitField : '',
+      sortField: isValidStringConfig(descriptor.sortField) ? (descriptor.sortField as string) : '',
+      sortOrder: isValidStringConfig(descriptor.sortOrder)
+        ? (descriptor.sortOrder as SortDirection)
+        : SortDirection.desc,
+      scalingType: isValidStringConfig(descriptor.scalingType)
+        ? (descriptor.scalingType as SCALING_TYPES)
+        : SCALING_TYPES.LIMIT,
+      topHitsSplitField: isValidStringConfig(descriptor.topHitsSplitField)
+        ? (descriptor.topHitsSplitField as string)
+        : '',
       topHitsSize:
         typeof descriptor.topHitsSize === 'number' && descriptor.topHitsSize > 0
           ? descriptor.topHitsSize

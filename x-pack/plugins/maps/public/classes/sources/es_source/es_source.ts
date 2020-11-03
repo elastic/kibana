@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid/v4';
 import { Filter, IFieldType, IndexPattern, ISearchSource } from 'src/plugins/data/public';
@@ -39,6 +38,7 @@ import {
   Adapters,
   RequestResponder,
 } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { isValidStringConfig } from '../../util/valid_string_config';
 
 export interface IESSource extends IVectorSource {
   isESSource(): true;
@@ -71,17 +71,17 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   static createDescriptor(
     descriptor: Partial<AbstractESSourceDescriptor>
   ): AbstractESSourceDescriptor {
-    if (typeof descriptor.indexPatternId !== 'string') {
+    if (!isValidStringConfig(descriptor.indexPatternId)) {
       throw new Error(
         'Cannot create AbstractESSourceDescriptor when indexPatternId is not provided'
       );
     }
     return {
       ...descriptor,
-      id: typeof descriptor.id === 'string' ? descriptor.id : uuid(),
-      type: descriptor.type ? descriptor.type : '',
-      indexPatternId: descriptor.indexPatternId,
-      applyGlobalQuery: _.get(descriptor, 'applyGlobalQuery', true),
+      id: isValidStringConfig(descriptor.id) ? (descriptor.id as string) : uuid(),
+      type: isValidStringConfig(descriptor.type) ? (descriptor.type as string) : '',
+      indexPatternId: descriptor.indexPatternId as string,
+      applyGlobalQuery: !!descriptor.applyGlobalQuery ? !!descriptor.applyGlobalQuery : true,
     };
   }
 
