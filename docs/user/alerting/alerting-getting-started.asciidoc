@@ -177,7 +177,7 @@ To access alerting in a space, a user must have access to one of the following f
 * <<uptime-app,*Uptime*>>
 
 See <<kibana-feature-privileges, feature privileges>> for more information on configuring roles that provide access to these features.
-Also note that a user will need privileges for the Actions & Connectors feature to attach actions to an alert.
+Also note that a user will need privileges for the *Actions and Connectors* feature to attach actions to an alert.
 
 [float]
 [[alerting-spaces]]
