@@ -16,8 +16,8 @@ import React, { useCallback, useRef, useState, useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import styled, { StyledComponent } from 'styled-components';
 
+import { FullCreateSchema } from '../../../../../../common/detection_engine/schemas/request/rule_schemas';
 import { useCreateRule } from '../../../../containers/detection_engine/rules';
-import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 
 import {
@@ -207,7 +207,7 @@ const CreateRulePageComponent: React.FC = () => {
             stepIsValid(actionsStep)
           ) {
             setRule(
-              formatRule<CreateRulesSchema>(
+              formatRule<FullCreateSchema>(
                 defineStep.data,
                 aboutStep.data,
                 scheduleStep.data,

@@ -9,6 +9,11 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
+import {
+  SavedObjectAttributes,
+  SavedObjectAttribute,
+  SavedObjectAttributeSingle,
+} from 'src/core/types';
 import { RiskScore } from '../types/risk_score';
 import { UUID } from '../types/uuid';
 import { IsoDateString } from '../types/iso_date_string';
@@ -65,6 +70,22 @@ export type ExcludeExportDetails = t.TypeOf<typeof exclude_export_details>;
 export const filters = t.array(t.unknown); // Filters are not easily type-able yet
 export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-able yet
 
+export const filtersOrUndefined = t.union([filters, t.undefined]);
+export type FiltersOrUndefined = t.TypeOf<typeof filtersOrUndefined>;
+
+export const saved_object_attribute_single: t.Type<SavedObjectAttributeSingle> = t.recursion(
+  'saved_object_attribute_single',
+  () => t.union([t.string, t.number, t.boolean, t.null, t.undefined, saved_object_attributes])
+);
+export const saved_object_attribute: t.Type<SavedObjectAttribute> = t.recursion(
+  'saved_object_attribute',
+  () => t.union([saved_object_attribute_single, t.array(saved_object_attribute_single)])
+);
+export const saved_object_attributes: t.Type<SavedObjectAttributes> = t.recursion(
+  'saved_object_attributes',
+  () => t.record(t.string, saved_object_attribute)
+);
+
 /**
  * Params is an "object", since it is a type of AlertActionParams which is action templates.
  * @see x-pack/plugins/alerts/common/alert.ts
@@ -72,7 +93,7 @@ export type Filters = t.TypeOf<typeof filters>; // Filters are not easily type-a
 export const action_group = t.string;
 export const action_id = t.string;
 export const action_action_type_id = t.string;
-export const action_params = t.object;
+export const action_params = saved_object_attributes;
 export const action = t.exact(
   t.type({
     group: action_group,
@@ -84,6 +105,18 @@ export const action = t.exact(
 
 export const actions = t.array(action);
 export type Actions = t.TypeOf<typeof actions>;
+
+export const actionsCamel = t.array(
+  t.exact(
+    t.type({
+      group: action_group,
+      id: action_id,
+      actionTypeId: action_action_type_id,
+      params: action_params,
+    })
+  )
+);
+export type ActionsCamel = t.TypeOf<typeof actions>;
 
 const stringValidator = (input: unknown): input is string => typeof input === 'string';
 export const from = new t.Type<string, string, unknown>(

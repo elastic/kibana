@@ -6,6 +6,7 @@
 
 import * as t from 'io-ts';
 
+import { FullCreateSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
 import {
   SortOrder,
   author,
@@ -27,7 +28,6 @@ import {
   threat_filters,
 } from '../../../../../common/detection_engine/schemas/types';
 import {
-  CreateRulesSchema,
   PatchRulesSchema,
   UpdateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';
@@ -46,7 +46,7 @@ export const action = t.exact(
 );
 
 export interface CreateRulesProps {
-  rule: CreateRulesSchema;
+  rule: FullCreateSchema;
   signal: AbortSignal;
 }
 

@@ -6,8 +6,8 @@
 
 import { useEffect, useState, Dispatch } from 'react';
 
+import { FullCreateSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
-import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 
 import { createRule } from './api';
 import * as i18n from './translations';
@@ -17,10 +17,10 @@ interface CreateRuleReturn {
   isSaved: boolean;
 }
 
-export type ReturnCreateRule = [CreateRuleReturn, Dispatch<CreateRulesSchema | null>];
+export type ReturnCreateRule = [CreateRuleReturn, Dispatch<FullCreateSchema | null>];
 
 export const useCreateRule = (): ReturnCreateRule => {
-  const [rule, setRule] = useState<CreateRulesSchema | null>(null);
+  const [rule, setRule] = useState<FullCreateSchema | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [, dispatchToaster] = useStateToaster();
