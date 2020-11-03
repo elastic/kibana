@@ -212,6 +212,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   };
 
   const history = getHistory();
+  // used for restoring background session
   let isInitialSearch = true;
 
   const {
