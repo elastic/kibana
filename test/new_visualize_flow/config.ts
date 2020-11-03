@@ -17,18 +17,16 @@
  * under the License.
  */
 
-import { pageObjects } from '../functional/page_objects';
-import { services } from '../functional/services';
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
-export default async function ({ readConfigFile }) {
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const commonConfig = await readConfigFile(require.resolve('../functional/config.js'));
 
   return {
-    testFiles: [require.resolve('./dashboard_embedding')],
-    pageObjects,
-    services,
+    testFiles: [require.resolve('./index.ts')],
+    pageObjects: commonConfig.get('pageObjects'),
+    services: commonConfig.get('services'),
     servers: commonConfig.get('servers'),
-
     esTestCluster: commonConfig.get('esTestCluster'),
 
     kbnTestServer: {
@@ -37,6 +35,7 @@ export default async function ({ readConfigFile }) {
         ...commonConfig.get('kbnTestServer.serverArgs'),
         '--oss',
         '--telemetry.optIn=false',
+        '--dashboard.allowByValueEmbeddables=true',
       ],
     },
 
@@ -105,7 +104,7 @@ export default async function ({ readConfigFile }) {
           },
           kibana: [],
         },
-        //for sample data - can remove but not add sample data
+        // for sample data - can remove but not add sample data
         kibana_sample_admin: {
           elasticsearch: {
             cluster: [],
