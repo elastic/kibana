@@ -18,12 +18,11 @@
  */
 
 import expect from '@kbn/expect';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker']);
 
   describe('errors', function describeIndexTests() {
@@ -40,8 +39,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
-        const isFetchErrorVisible = await testSubjects.exists('discoverFetchError');
-        expect(isFetchErrorVisible).to.be(true);
+        const toast = await toasts.getToastElement(1);
+        const painlessStackTrace = await toast.findByTestSubject('painlessStackTrace');
+        expect(painlessStackTrace).not.to.be(undefined);
       });
     });
   });
