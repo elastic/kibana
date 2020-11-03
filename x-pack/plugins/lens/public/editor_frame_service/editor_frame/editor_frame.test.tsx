@@ -1303,8 +1303,8 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
-                  if (dragging !== 'draggedField') {
-                    setDragging('draggedField');
+                  if (!dragging || dragging.id !== 'draggedField') {
+                    setDragging({ id: 'draggedField' });
                   }
                 },
               },
@@ -1400,8 +1400,8 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
-                  if (dragging !== 'draggedField') {
-                    setDragging('draggedField');
+                  if (!dragging || dragging.id !== 'draggedField') {
+                    setDragging({ id: 'draggedField' });
                   }
                 },
               },

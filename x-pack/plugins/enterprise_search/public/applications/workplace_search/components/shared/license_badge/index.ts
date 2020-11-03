@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MlServerLicense } from './ml_server_license';
+export { LicenseBadge } from './license_badge';
