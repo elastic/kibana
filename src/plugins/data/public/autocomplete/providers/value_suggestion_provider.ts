@@ -18,6 +18,7 @@
  */
 
 import { memoize } from 'lodash';
+import moment from 'moment';
 import { CoreSetup } from 'src/core/public';
 import { IIndexPattern, IFieldType, UI_SETTINGS, buildQueryFromFilters } from '../../../common';
 import { getQueryService } from '../../services';
@@ -38,6 +39,19 @@ interface ValueSuggestionsGetFnArgs {
   signal?: AbortSignal;
   ignoreTimeRange?: boolean;
 }
+
+const getAutocompleteTimefilter = (indexPattern: IIndexPattern) => {
+  const { timefilter } = getQueryService().timefilter;
+  const timeRange = timefilter.getTime();
+
+  // Use a rounded timerange so that memoizing works properly
+  const roundedTimerange = {
+    from: moment(timeRange.from).startOf('minute').toISOString(),
+    to: moment(timeRange.to).endOf('minute').toISOString(),
+  };
+
+  return timefilter.createFilter(indexPattern, roundedTimerange);
+};
 
 export const getEmptyValueSuggestions = (() => Promise.resolve([])) as ValueSuggestionsGetFn;
 
@@ -73,9 +87,7 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
       return [];
     }
 
-    const { timefilter } = getQueryService().timefilter;
-
-    const timeFilter = ignoreTimeRange ? undefined : timefilter.createFilter(indexPattern);
+    const timeFilter = ignoreTimeRange ? undefined : getAutocompleteTimefilter(indexPattern);
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     return await requestSuggestions(title, field, query, filters, signal);
