@@ -6,14 +6,23 @@
 
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { waitFor, act } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 
 import '../../../../../common/mock/match_media';
 import '../../../../../common/mock/formatted_relative';
-import { TestProviders } from '../../../../../common/mock';
 import { AllRules } from './index';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useRules, useRulesStatuses } from '../../../../containers/detection_engine/rules';
+import {
+  TestProviders,
+  mockGlobalState,
+  apolloClientObservable,
+  SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  createSecuritySolutionStorageMock,
+} from '../../../../../common/mock';
+import { createStore, State } from '../../../../../common/store';
+import { APP_ID } from '../../../../../../common/constants';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -32,62 +41,17 @@ jest.mock('../../../../containers/detection_engine/rules');
 
 const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-// jest.mock('./reducer', () => {
-//   return {
-//     allRulesReducer: jest.fn().mockReturnValue(() => ({
-//       exportRuleIds: [],
-//       filterOptions: {
-//         filter: 'some filter',
-//         sortField: 'some sort field',
-//         sortOrder: 'desc',
-//       },
-//       loadingRuleIds: [],
-//       loadingRulesAction: null,
-//       pagination: {
-//         page: 1,
-//         perPage: 20,
-//         total: 1,
-//       },
-//       rules: [
-//         {
-//           actions: [],
-//           created_at: '2020-02-14T19:49:28.178Z',
-//           created_by: 'elastic',
-//           description: 'jibber jabber',
-//           enabled: false,
-//           false_positives: [],
-//           filters: [],
-//           from: 'now-660s',
-//           id: 'rule-id-1',
-//           immutable: true,
-//           index: ['endgame-*'],
-//           interval: '10m',
-//           language: 'kuery',
-//           max_signals: 100,
-//           name: 'Credential Dumping - Detected - Elastic Endpoint',
-//           output_index: '.siem-signals-default',
-//           query: 'host.name:*',
-//           references: [],
-//           risk_score: 73,
-//           rule_id: '571afc56-5ed9-465d-a2a9-045f099f6e7e',
-//           severity: 'high',
-//           tags: ['Elastic', 'Endpoint'],
-//           threat: [],
-//           throttle: null,
-//           to: 'now',
-//           type: 'query',
-//           updated_at: '2020-02-14T19:49:28.320Z',
-//           updated_by: 'elastic',
-//           version: 1,
-//         },
-//       ],
-//       selectedRuleIds: [],
-//     })),
-//   };
-// });
-
 describe('AllRules', () => {
   const mockRefetchRulesData = jest.fn();
+  const state: State = mockGlobalState;
+  const { storage } = createSecuritySolutionStorageMock();
+  const store = createStore(
+    state,
+    SUB_PLUGINS_REDUCER,
+    apolloClientObservable,
+    kibanaObservable,
+    storage
+  );
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -170,6 +134,7 @@ describe('AllRules', () => {
 
   afterEach(() => {
     jest.clearAllTimers();
+    jest.clearAllMocks();
   });
 
   it('renders correctly', () => {
@@ -192,40 +157,157 @@ describe('AllRules', () => {
   });
 
   describe('rules tab', () => {
-    xit('it refreshes rule data every minute', async () => {
-      await act(async () => {
-        mount(
-          <TestProviders>
-            <AllRules
-              createPrePackagedRules={jest.fn()}
-              hasNoPermissions={false}
-              loading={false}
-              loadingCreatePrePackagedRules={false}
-              refetchPrePackagedRulesStatus={jest.fn()}
-              rulesCustomInstalled={1}
-              rulesInstalled={0}
-              rulesNotInstalled={0}
-              rulesNotUpdated={0}
-              setRefreshRulesData={jest.fn()}
-            />
-          </TestProviders>
-        );
+    it('it pulls from storage to determine if an auto refresh interval is set', async () => {
+      useKibanaMock().services.storage.set(`${APP_ID}.detections.allRules.timeRefresh`, [
+        false,
+        1800000,
+      ]);
 
-        await waitFor(() => {
-          jest.advanceTimersByTime(60000);
+      mount(
+        <TestProviders store={store}>
+          <AllRules
+            createPrePackagedRules={jest.fn()}
+            hasNoPermissions={false}
+            loading={false}
+            loadingCreatePrePackagedRules={false}
+            refetchPrePackagedRulesStatus={jest.fn()}
+            rulesCustomInstalled={1}
+            rulesInstalled={0}
+            rulesNotInstalled={0}
+            rulesNotUpdated={0}
+            setRefreshRulesData={jest.fn()}
+          />
+        </TestProviders>
+      );
 
-          expect(mockRefetchRulesData).toHaveBeenCalledTimes(1);
-          jest.advanceTimersByTime(30000);
-          expect(mockRefetchRulesData).toHaveBeenCalledTimes(1);
-          jest.advanceTimersByTime(30000);
-          expect(mockRefetchRulesData).toHaveBeenCalledTimes(2);
-        });
+      await waitFor(() => {
+        expect(mockRefetchRulesData).not.toHaveBeenCalled();
+
+        jest.advanceTimersByTime(1800000);
+        expect(mockRefetchRulesData).toHaveBeenCalledTimes(1);
       });
     });
 
-    it('renders correctly', async () => {
+    it('it pulls from storage and does not set an auto refresh interval if storage indicates refresh is paused', async () => {
+      useKibanaMock().services.storage.set(`${APP_ID}.detections.allRules.timeRefresh`, [
+        true,
+        1800000,
+      ]);
+
+      mount(
+        <TestProviders store={store}>
+          <AllRules
+            createPrePackagedRules={jest.fn()}
+            hasNoPermissions={false}
+            loading={false}
+            loadingCreatePrePackagedRules={false}
+            refetchPrePackagedRulesStatus={jest.fn()}
+            rulesCustomInstalled={1}
+            rulesInstalled={0}
+            rulesNotInstalled={0}
+            rulesNotUpdated={0}
+            setRefreshRulesData={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        expect(mockRefetchRulesData).not.toHaveBeenCalled();
+        jest.advanceTimersByTime(1800000);
+        expect(mockRefetchRulesData).not.toHaveBeenCalled();
+      });
+    });
+
+    it('it updates storage with auto refresh selection on component unmount', async () => {
+      useKibanaMock().services.storage.set(`${APP_ID}.detections.allRules.timeRefresh`, [
+        false,
+        1800000,
+      ]);
+
       const wrapper = mount(
-        <TestProviders>
+        <TestProviders store={store}>
+          <AllRules
+            createPrePackagedRules={jest.fn()}
+            hasNoPermissions={false}
+            loading={false}
+            loadingCreatePrePackagedRules={false}
+            refetchPrePackagedRulesStatus={jest.fn()}
+            rulesCustomInstalled={1}
+            rulesInstalled={0}
+            rulesNotInstalled={0}
+            rulesNotUpdated={0}
+            setRefreshRulesData={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"] button')
+          .first()
+          .simulate('click');
+
+        wrapper
+          .find('input[data-test-subj="superDatePickerRefreshIntervalInput"]')
+          .simulate('change', { target: { value: '2' } });
+
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
+          .first()
+          .simulate('click');
+
+        wrapper.unmount();
+        wrapper.mount();
+
+        expect(
+          useKibanaMock().services.storage.get(`${APP_ID}.detections.allRules.timeRefresh`)
+        ).toEqual([false, 1800000]);
+      });
+    });
+
+    it('it stops auto refreshing when user hits "Stop"', async () => {
+      useKibanaMock().services.storage.set(`${APP_ID}.detections.allRules.timeRefresh`, [
+        false,
+        1800000,
+      ]);
+
+      const wrapper = mount(
+        <TestProviders store={store}>
+          <AllRules
+            createPrePackagedRules={jest.fn()}
+            hasNoPermissions={false}
+            loading={false}
+            loadingCreatePrePackagedRules={false}
+            refetchPrePackagedRulesStatus={jest.fn()}
+            rulesCustomInstalled={1}
+            rulesInstalled={0}
+            rulesNotInstalled={0}
+            rulesNotUpdated={0}
+            setRefreshRulesData={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      await waitFor(() => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"] button')
+          .first()
+          .simulate('click');
+
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleRefreshButton"]')
+          .first()
+          .simulate('click');
+
+        expect(mockRefetchRulesData).not.toHaveBeenCalled();
+        jest.advanceTimersByTime(1800000);
+        expect(mockRefetchRulesData).not.toHaveBeenCalled();
+      });
+    });
+
+    it('renders all rules tab by default', async () => {
+      const wrapper = mount(
+        <TestProviders store={store}>
           <AllRules
             createPrePackagedRules={jest.fn()}
             hasNoPermissions={false}
@@ -250,7 +332,7 @@ describe('AllRules', () => {
 
   it('renders monitoring tab when monitoring tab clicked', async () => {
     const wrapper = mount(
-      <TestProviders>
+      <TestProviders store={store}>
         <AllRules
           createPrePackagedRules={jest.fn()}
           hasNoPermissions={false}

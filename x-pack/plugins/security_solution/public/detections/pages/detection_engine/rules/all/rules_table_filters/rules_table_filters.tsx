@@ -108,6 +108,7 @@ const RulesTableFiltersComponent = ({
             onSelectedTagsChanged={handleSelectedTags}
             selectedTags={selectedTags}
             tags={tags}
+            data-test-subj="allRulesTagPopover"
           />
         </EuiFilterGroup>
       </EuiFlexItem>
@@ -117,7 +118,7 @@ const RulesTableFiltersComponent = ({
           <EuiFilterButton
             hasActiveFilters={showElasticRules}
             onClick={handleElasticRulesClick}
-            data-test-subj="show-elastic-rules-filter-button"
+            data-test-subj="showElasticRulesFilterButton"
             withNext
           >
             {i18n.ELASTIC_RULES}
@@ -126,7 +127,7 @@ const RulesTableFiltersComponent = ({
           <EuiFilterButton
             hasActiveFilters={showCustomRules}
             onClick={handleCustomRulesClick}
-            data-test-subj="show-custom-rules-filter-button"
+            data-test-subj="showCustomRulesFilterButton"
           >
             <>
               {i18n.CUSTOM_RULES}
@@ -139,11 +140,13 @@ const RulesTableFiltersComponent = ({
         <EuiSuperDatePicker
           isLoading={isLoading}
           isPaused={isRefreshPaused}
+          isDisabled={isLoading}
           onTimeChange={NOOP}
           onRefresh={onRefresh}
           onRefreshChange={onIntervalChange}
           refreshInterval={refreshInterval}
           isAutoRefreshOnly
+          data-test-subj="allRulesFilterAutoRefresh"
         />
       </EuiFlexItem>
     </EuiFlexGroup>

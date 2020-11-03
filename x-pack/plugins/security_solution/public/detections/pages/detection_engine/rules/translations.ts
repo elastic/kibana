@@ -575,3 +575,31 @@ export const REFRESH_PROMPT_BODY = i18n.translate(
     defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
   }
 );
+
+export const REFRESH_RULE_POPOVER_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverTitle',
+  {
+    defaultMessage: 'Auto refresh',
+  }
+);
+
+export const REFRESH_RULE_POPOVER_LEGEND = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLegend',
+  {
+    defaultMessage: 'Refresh rules every',
+  }
+);
+
+export const REFRESH_ON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRuleOn',
+  {
+    defaultMessage: 'on',
+  }
+);
+
+export const REFRESH_OFF = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRuleOff',
+  {
+    defaultMessage: 'off',
+  }
+);

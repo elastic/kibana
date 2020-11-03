@@ -18,6 +18,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
+import { debounce } from 'lodash/fp';
 
 import {
   useRules,
@@ -376,7 +377,7 @@ export const AllRules = React.memo<AllRulesProps>(
       if (!isRefreshPaused) {
         idleTimeoutId.current = setTimeout(() => {
           setShowIdleModal(true);
-        }, 1800000);
+        }, 2700000);
       }
     }, [setShowIdleModal, handleClearIdleTimeout, isRefreshPaused]);
 
@@ -398,43 +399,53 @@ export const AllRules = React.memo<AllRulesProps>(
       [reFetchRulesData, isLoadingAnActionOnRule, isRefreshPaused, setLastRefreshDate]
     );
 
+    const setLocalStorage = useCallback(
+      (paused: boolean, newInterval: number) => {
+        storage.set(`${APP_ID}.detections.allRules.timeRefresh`, [paused, newInterval]);
+      },
+      [storage]
+    );
+
+    const debounceSetLocalStorage = useMemo(() => debounce(500, setLocalStorage), [
+      setLocalStorage,
+    ]);
+
     const handleRefreshDataInterval = useCallback(
       ({ isPaused, refreshInterval: interval }: OnRefreshChangeProps) => {
         setAutoRefreshPaused(isPaused);
         setAutoRefreshInterval(interval);
 
         // refresh data when refresh interval is activated
-        if (isRefreshPaused && !isPaused && interval > 0) {
-          handleRefreshData(true);
-          storage.set(`${APP_ID}-rulesRefreshInterval`, [false, interval]);
-        }
-
-        if (isPaused) {
-          storage.set(`${APP_ID}-rulesRefreshInterval`, [true, 0]);
+        if (interval > 0) {
+          debounceSetLocalStorage(isPaused, interval);
         }
       },
-      [handleRefreshData, isRefreshPaused, setAutoRefreshInterval, setAutoRefreshPaused, storage]
+      [debounceSetLocalStorage, setAutoRefreshInterval, setAutoRefreshPaused]
     );
 
     // on initial render, want to check if user has any interval info
-    useEffect(() => {
-      const [isStoredRefreshPaused, storedRefreshInterval] = storage.get(
-        `${APP_ID}-rulesRefreshInterval`
-      );
-      setAutoRefreshPaused(storedRefreshInterval <= 0 ? true : isStoredRefreshPaused);
-      setAutoRefreshInterval(storedRefreshInterval);
-      window.addEventListener('mousemove', handleResetIdleTimer, { passive: true });
-      window.addEventListener('keydown', handleResetIdleTimer);
-    }, [storage, handleResetIdleTimer, setAutoRefreshPaused, setAutoRefreshInterval]);
+    useEffect((): void => {
+      if (initLoading) {
+        const [isStoredRefreshPaused, storedRefreshInterval] = storage.get(
+          `${APP_ID}.detections.allRules.timeRefresh`
+        ) ?? [true, 0];
+        setAutoRefreshPaused(isStoredRefreshPaused);
+        setAutoRefreshInterval(storedRefreshInterval);
+      }
+    }, [initLoading, setAutoRefreshInterval, setAutoRefreshPaused, storage]);
 
-    // want to update local storage on cleanup, as opposed to
-    // updating every time interval is changed
     useEffect(() => {
+      handleResetIdleTimer();
+
+      const fetchSuggestions = debounce(500, handleResetIdleTimer);
+
+      window.addEventListener('mousemove', fetchSuggestions, { passive: true });
+      window.addEventListener('keydown', fetchSuggestions);
+
       return () => {
         handleClearIdleTimeout();
-
-        window.removeEventListener('mousemove', handleResetIdleTimer);
-        window.removeEventListener('keydown', handleResetIdleTimer);
+        window.removeEventListener('mousemove', fetchSuggestions);
+        window.removeEventListener('keydown', fetchSuggestions);
       };
     }, [handleClearIdleTimeout, handleResetIdleTimer]);
 
@@ -450,6 +461,22 @@ export const AllRules = React.memo<AllRulesProps>(
         prePackagedRuleStatus === 'ruleNotInstalled' &&
         !initLoading,
       [initLoading, prePackagedRuleStatus, rulesCustomInstalled]
+    );
+
+    const handleGenericDownloaderSuccess = useCallback(
+      (exportCount) => {
+        dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
+        dispatchToaster({
+          type: 'addToaster',
+          toast: {
+            id: uuid.v4(),
+            title: i18n.SUCCESSFULLY_EXPORTED_RULES(exportCount),
+            color: 'success',
+            iconType: 'check',
+          },
+        });
+      },
+      [dispatchToaster]
     );
 
     const tabs = useMemo(
@@ -477,18 +504,7 @@ export const AllRules = React.memo<AllRulesProps>(
         <GenericDownloader
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
           ids={exportRuleIds}
-          onExportSuccess={(exportCount) => {
-            dispatch({ type: 'loadingRuleIds', ids: [], actionType: null });
-            dispatchToaster({
-              type: 'addToaster',
-              toast: {
-                id: uuid.v4(),
-                title: i18n.SUCCESSFULLY_EXPORTED_RULES(exportCount),
-                color: 'success',
-                iconType: 'check',
-              },
-            });
-          }}
+          onExportSuccess={handleGenericDownloaderSuccess}
           exportSelectedData={exportRules}
         />
         <EuiSpacer />

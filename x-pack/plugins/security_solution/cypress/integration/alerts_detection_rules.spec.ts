@@ -10,6 +10,7 @@ import {
   RULE_SWITCH,
   SECOND_RULE,
   SEVENTH_RULE,
+  RULE_AUTO_REFRESH_IDLE_MODAL,
 } from '../screens/alerts_detection_rules';
 
 import {
@@ -19,6 +20,11 @@ import {
 } from '../tasks/alerts';
 import {
   activateRule,
+  checkAllRulesIdleModal,
+  checkAutoRefresh,
+  dismissAllRulesIdleModal,
+  resetAllRulesIdleModalTimeout,
+  setAllRulesAutoRefreshIntervalInSeconds,
   sortByActivatedRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
   waitForRuleToBeActivated,
@@ -35,6 +41,7 @@ describe('Alerts detection rules', () => {
 
   after(() => {
     esArchiverUnload('prebuilt_rules_loaded');
+    cy.clock().invoke('restore');
   });
 
   it('Sorts by activated rules', () => {
@@ -74,5 +81,40 @@ describe('Alerts detection rules', () => {
             cy.get(RULE_SWITCH).eq(SECOND_RULE).should('have.attr', 'role', 'switch');
           });
       });
+  });
+
+  it('Displays idle modal if auto refresh is on', () => {
+    cy.clock(Date.now(), ['setTimeout']);
+
+    loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
+    waitForAlertsPanelToBeLoaded();
+    waitForAlertsIndexToBeCreated();
+    goToManageAlertsDetectionRules();
+    waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded();
+
+    // idle modal should not show if refresh interval is not set
+    checkAllRulesIdleModal('not.be.visible');
+
+    // idle modal should show if refresh interval is set
+    setAllRulesAutoRefreshIntervalInSeconds(30);
+
+    // mock 30 seconds passing to make sure refresh
+    // is conducted
+    checkAutoRefresh(30000, 'be.visible');
+
+    // mock 45 minutes passing to check that idle modal shows
+    // and refreshing is paused
+    checkAllRulesIdleModal('be.visible');
+    checkAutoRefresh(30000, 'not.be.visible');
+
+    // clicking on modal to continue, should resume refreshing
+    dismissAllRulesIdleModal();
+    checkAutoRefresh(30000, 'be.visible');
+
+    // if mouse movement detected, idle modal should not
+    // show after 45 min
+    cy.clock().invoke('restore');
+    resetAllRulesIdleModalTimeout();
+    cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.exist');
   });
 });
