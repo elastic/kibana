@@ -46,6 +46,11 @@ export const categoryExamplesSchema = schema.object({
   maxExamples: schema.number(),
 });
 
+export const anomalySearchSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  query: schema.any(),
+});
+
 const fieldConfig = schema.maybe(
   schema.object({
     applyTimeRange: schema.maybe(schema.boolean()),

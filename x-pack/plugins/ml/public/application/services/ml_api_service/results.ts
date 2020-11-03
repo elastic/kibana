@@ -108,8 +108,8 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  anomalySearch(obj: any) {
-    const body = JSON.stringify(obj);
+  anomalySearch(query: any, jobIds: string[]) {
+    const body = JSON.stringify({ query, jobIds });
     return httpService.http<any>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',
@@ -117,8 +117,8 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  anomalySearch$(obj: any) {
-    const body = JSON.stringify(obj);
+  anomalySearch$(query: any, jobIds: string[]) {
+    const body = JSON.stringify({ query, jobIds });
     return httpService.http$<any>({
       path: `${basePath()}/results/anomaly_search`,
       method: 'POST',
