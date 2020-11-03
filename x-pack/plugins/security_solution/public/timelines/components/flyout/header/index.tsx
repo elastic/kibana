@@ -125,13 +125,27 @@ const makeMapStateToProps = () => {
 
 const mapDispatchToProps = (dispatch: Dispatch, { timelineId }: OwnProps) => ({
   associateNote: (noteId: string) => dispatch(timelineActions.addNote({ id: timelineId, noteId })),
-  updateDescription: ({ id, description }: { id: string; description: string }) =>
-    dispatch(timelineActions.updateDescription({ id, description })),
+  updateDescription: ({
+    id,
+    description,
+    disableAutoSave,
+  }: {
+    id: string;
+    description: string;
+    disableAutoSave?: boolean;
+  }) => dispatch(timelineActions.updateDescription({ id, description, disableAutoSave })),
   updateIsFavorite: ({ id, isFavorite }: { id: string; isFavorite: boolean }) =>
     dispatch(timelineActions.updateIsFavorite({ id, isFavorite })),
   updateNote: (note: Note) => dispatch(appActions.updateNote({ note })),
-  updateTitle: ({ id, title }: { id: string; title: string }) =>
-    dispatch(timelineActions.updateTitle({ id, title })),
+  updateTitle: ({
+    id,
+    title,
+    disableAutoSave,
+  }: {
+    id: string;
+    title: string;
+    disableAutoSave?: boolean;
+  }) => dispatch(timelineActions.updateTitle({ id, title, disableAutoSave })),
   toggleLock: ({ linkToId }: { linkToId: InputsModelId }) =>
     dispatch(inputsActions.toggleTimelineLinkTo({ linkToId })),
 });
