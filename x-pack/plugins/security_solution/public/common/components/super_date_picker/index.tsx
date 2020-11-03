@@ -101,7 +101,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           end: newEnd,
           id,
           isInvalid: false,
-          isQuickSelection,
+          isQuickSelection: kind === 'absolute' ? false : isQuickSelection,
           kql: kqlQuery,
           start: newStart,
           timelineId,
@@ -117,8 +117,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           refetchQuery(queries);
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [end, id, isQuickSelection, kqlQuery, start, timelineId]
+      [end, id, isQuickSelection, kind, kqlQuery, queries, start, timelineId, updateReduxTime]
     );
 
     const onRefreshChange = useCallback(
