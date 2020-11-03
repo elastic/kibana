@@ -8,8 +8,9 @@ import '../../../__mocks__/react_router_history.mock';
 import { setMockValues } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
-import { shallow } from 'enzyme';
+import { shallow, mount } from 'enzyme';
 import { Switch, useParams } from 'react-router-dom';
+import { EuiBadge } from '@elastic/eui';
 
 import { EngineRouter, EngineNav } from './';
 
@@ -40,6 +41,17 @@ describe('EngineNav', () => {
     (useParams as jest.Mock).mockReturnValue({ engineName: '' });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.isEmptyRender()).toBe(true);
+  });
+
+  it('renders an engine label', () => {
+    setMockValues({ myRole: {} });
+    const wrapper = mount(<EngineNav />);
+
+    const label = wrapper.find('[data-test-subj="EngineLabel"]').last();
+    expect(label.text()).toEqual(expect.stringContaining('SOME-ENGINE'));
+
+    // TODO: Test sample & meta engine conditional rendering
+    expect(label.find(EuiBadge).text()).toEqual('SAMPLE ENGINE');
   });
 
   it('renders a default engine overview link', () => {

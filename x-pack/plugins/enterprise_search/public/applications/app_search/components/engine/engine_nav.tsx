@@ -7,9 +7,11 @@
 import React from 'react';
 import { Route, Switch, useParams } from 'react-router-dom';
 import { useValues } from 'kea';
+
+import { EuiText, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SideNavLink } from '../../../shared/layout';
+import { SideNavLink, SideNavItem } from '../../../shared/layout';
 import { AppLogic } from '../../app_logic';
 import {
   getEngineRoute,
@@ -27,6 +29,8 @@ import {
   ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
+
+import './engine_nav.scss';
 
 export const EngineRouter: React.FC = () => {
   const {
@@ -77,6 +81,25 @@ export const EngineNav: React.FC = () => {
 
   return (
     <>
+      <SideNavItem className="appSearchNavEngineLabel" data-test-subj="EngineLabel">
+        <EuiText color="subdued" size="s">
+          <div className="eui-textTruncate">{engineName.toUpperCase()}</div>
+          {isSampleEngine && (
+            <EuiBadge>
+              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.sampleEngineBadge', {
+                defaultMessage: 'SAMPLE ENGINE',
+              })}
+            </EuiBadge>
+          )}
+          {isMetaEngine && (
+            <EuiBadge>
+              {i18n.translate('xpack.enterpriseSearch.appSearch.engine.metaEngineBadge', {
+                defaultMessage: 'META ENGINE',
+              })}
+            </EuiBadge>
+          )}
+        </EuiText>
+      </SideNavItem>
       <SideNavLink to={engineRoute} data-test-subj="EngineOverviewLink">
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.title', {
           defaultMessage: 'Overview',
