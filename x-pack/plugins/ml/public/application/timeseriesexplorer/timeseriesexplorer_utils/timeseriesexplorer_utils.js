@@ -159,7 +159,7 @@ export function processDataForFocusAnomalies(
         if (record.actual !== undefined) {
           // If cannot match chart point for anomaly time
           // substitute the value with the record's actual so it won't plot as null/0
-          if (chartPoint.value === null) {
+          if (chartPoint.value === null || record.function === 'metric') {
             chartPoint.value = record.actual;
           }
 
@@ -186,9 +186,9 @@ export function processDataForFocusAnomalies(
         if (record.multi_bucket_impact !== undefined) {
           chartPoint.multiBucketImpact = record.multi_bucket_impact;
         }
-        if (record.function === 'metric') {
-          chartPoint.metricActualPlotFunction = record.function_description ?? functionDescription;
-        }
+        // if (record.function === 'metric') {
+        //   chartPoint.metricActualPlotFunction = record.function_description ?? functionDescription;
+        // }
       }
     }
   });
