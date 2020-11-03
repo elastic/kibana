@@ -180,8 +180,8 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
       [recentlyUsedRanges, kqlQuery]
     );
 
-    const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
-    const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
+    const endDate = toStr != null ? toStr : new Date(end).toISOString();
+    const startDate = fromStr != null ? fromStr : new Date(start).toISOString();
 
     const [quickRanges] = useUiSetting$<Range[]>(DEFAULT_TIMEPICKER_QUICK_RANGES);
     const commonlyUsedRanges = isEmpty(quickRanges)
@@ -230,16 +230,28 @@ export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
 }: UpdateReduxTime): ReturnUpdateReduxTime => {
   const fromDate = formatDate(start);
   let toDate = formatDate(end, { roundUp: true });
-  if (isQuickSelection && end !== start) {
-    dispatch(
-      inputsActions.setRelativeRangeDatePicker({
-        id,
-        fromStr: start,
-        toStr: end,
-        from: fromDate,
-        to: toDate,
-      })
-    );
+  if (isQuickSelection) {
+    if (end === start) {
+      dispatch(
+        inputsActions.setAbsoluteRangeDatePicker({
+          id,
+          fromStr: start,
+          toStr: end,
+          from: fromDate,
+          to: toDate,
+        })
+      );
+    } else {
+      dispatch(
+        inputsActions.setRelativeRangeDatePicker({
+          id,
+          fromStr: start,
+          toStr: end,
+          from: fromDate,
+          to: toDate,
+        })
+      );
+    }
   } else {
     toDate = formatDate(end);
     dispatch(
