@@ -629,32 +629,46 @@ export const AlertForm = ({
       ) : availableAlertTypes.length ? (
         <Fragment>
           <EuiHorizontalRule />
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem>
-              <EuiFieldText
-                fullWidth
-                data-test-subj="alertSearchField"
-                prepend={<EuiIcon type="search" />}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyUp={(e) => {
-                  if (e.keyCode === ENTER_KEY) {
-                    setSearchText(inputText);
-                  }
-                }}
-                placeholder={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertForm.searchPlaceholderTitle',
-                  { defaultMessage: 'Search' }
-                )}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <SolutionFilter
-                key="solution-filter"
-                solutions={solutions}
-                onChange={(selectedSolutions: string[]) => setSolutionFilter(selectedSolutions)}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiFormRow
+            fullWidth
+            label={
+              <EuiTitle size="xs">
+                <h5>
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertForm.alertTypeSelectLabel"
+                    defaultMessage="Alert type"
+                  />
+                </h5>
+              </EuiTitle>
+            }
+          >
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem>
+                <EuiFieldText
+                  fullWidth
+                  data-test-subj="alertSearchField"
+                  prepend={<EuiIcon type="search" />}
+                  onChange={(e) => setInputText(e.target.value)}
+                  onKeyUp={(e) => {
+                    if (e.keyCode === ENTER_KEY) {
+                      setSearchText(inputText);
+                    }
+                  }}
+                  placeholder={i18n.translate(
+                    'xpack.triggersActionsUI.sections.alertForm.searchPlaceholderTitle',
+                    { defaultMessage: 'Search' }
+                  )}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SolutionFilter
+                  key="solution-filter"
+                  solutions={solutions}
+                  onChange={(selectedSolutions: string[]) => setSolutionFilter(selectedSolutions)}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
           <EuiSpacer />
           {alertTypeNodes}
         </Fragment>
