@@ -60,14 +60,22 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
   }
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
-    const config = this._initializerContext.config.get<MapsLegacyConfig>();
+    const rawConfig = this._initializerContext.config.get<MapsLegacyConfig>();
+    const emsSettings = new EMSSettings(rawConfig);
+
+    const config: MapsLegacyConfig = {
+      ...rawConfig,
+      emsFileApiUrl: emsSettings.getEMSTileApiUrl(),
+      emsTileApiUrl: emsSettings.getEMSTileApiUrl(),
+      emsLandingPageUrl: emsSettings.getEMSLandingPageUrl(),
+      emsFontLibraryUrl: emsSettings.getEMSFontLibraryUrl(),
+    };
+
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
 
     bindSetupCoreAndPlugins(core, config, kibanaVersion);
 
     const getBaseMapsVis = () => new BaseMapsVisualizationProvider();
-
-    const emsSettings = new EMSSettings(config);
 
     return {
       getServiceSettings,

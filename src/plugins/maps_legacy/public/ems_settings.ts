@@ -26,22 +26,22 @@ export class EMSSettings {
     this._config = config;
   }
 
-  isConfigValid() {
+  isConfigValid(): boolean {
     return true;
   }
 
-  getEMSFileApiUrl() {
+  getEMSFileApiUrl(): string {
     return this._config.emsFileApiUrl;
   }
 
-  getEMSTileApiUrl() {
+  getEMSTileApiUrl(): string {
     return this._config.emsTileApiUrl;
   }
-  getEMSLandingPageUrl() {
+  getEMSLandingPageUrl(): string {
     return this._config.emsLandingPageUrl;
   }
 
-  getEMSFontLibraryUrl() {
+  getEMSFontLibraryUrl(): string {
     return this._config.emsFontLibraryUrl;
   }
 }
