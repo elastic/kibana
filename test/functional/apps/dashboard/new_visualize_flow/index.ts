@@ -21,7 +21,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('New Visualize Flow', function () {
-    this.tags(['ciGroup2']);
     loadTestFile(require.resolve('./dashboard_embedding'));
   });
 }
