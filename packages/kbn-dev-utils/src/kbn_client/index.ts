@@ -17,5 +17,5 @@
  * under the License.
  */
 
-export { KbnClient } from './kbn_client';
+export * from './kbn_client';
 export { uriencode } from './kbn_client_requester';
