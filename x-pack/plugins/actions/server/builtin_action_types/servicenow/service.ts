@@ -135,13 +135,12 @@ export const createExternalService = (
         url: fieldsUrl,
         logger,
         proxySettings,
-        method: 'get',
       });
 
       return res.data.result.length > 0 ? res.data.result : [];
     } catch (error) {
       throw new Error(
-        getErrorMessage(i18n.NAME, `Unable to get incident fields. Error: ${error.message}`)
+        getErrorMessage(i18n.NAME, `Unable to get common fields. Error: ${error.message}`)
       );
     }
   };

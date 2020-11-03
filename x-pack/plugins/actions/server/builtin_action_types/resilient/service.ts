@@ -307,7 +307,6 @@ export const createExternalService = (
     try {
       const res = await request({
         axios: axiosInstance,
-        method: 'get',
         url: incidentFieldsUrl,
         logger,
         proxySettings,

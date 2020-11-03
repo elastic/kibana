@@ -73,6 +73,7 @@ const createMock = (): jest.Mocked<ExternalService> => {
       key: 'RJ-107',
       title: 'Test title',
     })),
+    getCommonFields: jest.fn().mockImplementation(() => jiraCommonFields),
   };
 
   service.createComment.mockImplementationOnce(() =>
@@ -97,7 +98,74 @@ const createMock = (): jest.Mocked<ExternalService> => {
 const externalServiceMock = {
   create: createMock,
 };
-
+const jiraFields = [
+  {
+    id: 'issuetype',
+    key: 'issuetype',
+    name: 'Issue Type',
+    custom: false,
+    orderable: true,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['issuetype', 'type'],
+    schema: { type: 'issuetype', system: 'issuetype' },
+  },
+  {
+    id: 'parent',
+    key: 'parent',
+    name: 'Parent',
+    custom: false,
+    orderable: false,
+    navigable: true,
+    searchable: false,
+    clauseNames: ['parent'],
+  },
+  {
+    id: 'summary',
+    key: 'summary',
+    name: 'Summary',
+    custom: false,
+    orderable: true,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['summary'],
+    schema: { type: 'string', system: 'summary' },
+  },
+  {
+    id: 'reporter',
+    key: 'reporter',
+    name: 'Reporter',
+    custom: false,
+    orderable: true,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['reporter'],
+    schema: { type: 'user', system: 'reporter' },
+  },
+  {
+    id: 'priority',
+    key: 'priority',
+    name: 'Priority',
+    custom: false,
+    orderable: true,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['priority'],
+    schema: { type: 'priority', system: 'priority' },
+  },
+  {
+    id: 'description',
+    key: 'description',
+    name: 'Description',
+    custom: false,
+    orderable: true,
+    navigable: true,
+    searchable: true,
+    clauseNames: ['description'],
+    schema: { type: 'string', system: 'description' },
+  },
+];
+const jiraCommonFields = jiraFields.filter(({ id }) => id === 'summary' || id === 'description');
 const mapping: Map<string, Partial<MapRecord>> = new Map();
 
 mapping.set('title', {
@@ -158,4 +226,4 @@ const apiParams: PushToServiceApiParams = {
   externalObject: { summary: 'Incident title', description: 'Incident description' },
 };
 
-export { externalServiceMock, mapping, executorParams, apiParams };
+export { jiraCommonFields, jiraFields, externalServiceMock, mapping, executorParams, apiParams };

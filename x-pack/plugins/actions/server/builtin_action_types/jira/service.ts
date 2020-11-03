@@ -166,7 +166,7 @@ export const createExternalService = (
       throw new Error(
         getErrorMessage(
           i18n.NAME,
-          `Unable to get fields from Jira. Error: ${error.message} Reason: ${createErrorMessage(
+          `Unable to get fields. Error: ${error.message} Reason: ${createErrorMessage(
             error.response?.data
           )}`
         )
@@ -389,7 +389,6 @@ export const createExternalService = (
   const getFieldsByIssueType = async (issueTypeId: string) => {
     const capabilitiesResponse = await getCapabilities();
     const supportsNewAPI = hasSupportForNewAPI(capabilitiesResponse);
-
     try {
       if (!supportsNewAPI) {
         const res = await request({
@@ -433,19 +432,22 @@ export const createExternalService = (
   };
 
   const getCommonFields = async () => {
-    const fields = await getFields();
-    const issueTypes = await getIssueTypes();
-    const fieldTypes = await Promise.all(
-      issueTypes.map((issueType) => getFieldsByIssueType(issueType.id))
-    );
-    const commonFields = fieldTypes.reduce((acc: string[], fieldTypesByIssue) => {
-      const newKeys = Object.keys(fieldTypesByIssue);
-      if (acc.length === 0) {
-        return [...newKeys];
-      }
-      return acc.reduce((add: string[], key) => (newKeys.includes(key) ? [...add, key] : add), []);
-    }, []);
-    return fields.filter((f) => commonFields.includes(f.id));
+    try {
+      const [fields, issueTypes] = await Promise.all([getFields(), getIssueTypes()]);
+      const fieldTypes = await Promise.all(
+        issueTypes.map((issueType) => getFieldsByIssueType(issueType.id))
+      );
+      const commonFields = fieldTypes.reduce((acc: string[], fieldTypesByIssue) => {
+        const newKeys = Object.keys(fieldTypesByIssue);
+        return acc.length === 0
+          ? [...newKeys]
+          : acc.reduce((add: string[], key) => (newKeys.includes(key) ? [...add, key] : add), []);
+      }, []);
+      return fields.filter((f) => commonFields.includes(f.id));
+    } catch (error) {
+      // errors that happen here would be thrown in the contained async calls
+      throw error;
+    }
   };
 
   const getIssues = async (title: string) => {
