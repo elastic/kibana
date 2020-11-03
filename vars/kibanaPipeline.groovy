@@ -365,7 +365,7 @@ def withCiTaskQueue(Map options = [:], Closure closure) {
     bash("${env.WORKSPACE}/kibana/test/scripts/jenkins_setup_parallel_workspace.sh", "Set up duplicate workspace for parallel process")
   }
 
-  def config = [parallel: 16, setup: setupClosure] + options
+  def config = [parallel: 24, setup: setupClosure] + options
 
   withTaskQueue(config) {
     closure.call()
