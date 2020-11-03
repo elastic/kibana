@@ -61,7 +61,7 @@ type XYSettingsProps = Pick<
   adjustedXDomain: DomainRange;
   showLegend: boolean;
   onElementClick: ElementClickListener;
-  onBrushEnd: BrushEndListener;
+  onBrushEnd?: BrushEndListener;
   onRenderChange: RenderChangeListener;
   legendAction?: LegendAction;
   legendColorPicker: LegendColorPicker;

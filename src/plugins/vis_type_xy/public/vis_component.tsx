@@ -39,7 +39,7 @@ import {
 } from '../../charts/public';
 import { Datatable, IInterpreterRenderHandlers } from '../../expressions/public';
 
-import { VisParams } from './types';
+import { Aspect, VisParams } from './types';
 import {
   getAdjustedDomain,
   getXDomain,
@@ -108,10 +108,12 @@ const VisComponent = (props: VisComponentProps) => {
   );
 
   const handleBrush = useCallback(
-    (visData: Datatable, xAccessor: string | number | null): BrushEndListener => (brushArea) => {
-      if (xAccessor !== null) {
-        const event = getBrushFromChartBrushEventFn(visData, xAccessor)(brushArea);
-        props.fireEvent(event);
+    (visData: Datatable, { accessor, params }: Aspect): BrushEndListener | undefined => {
+      if (accessor !== null && 'interval' in params) {
+        return (brushArea) => {
+          const event = getBrushFromChartBrushEventFn(visData, accessor)(brushArea);
+          props.fireEvent(event);
+        };
       }
     },
     [props]
@@ -232,7 +234,7 @@ const VisComponent = (props: VisComponentProps) => {
           adjustedXDomain={adjustedXDomain}
           legendColorPicker={getColorPicker(legendPosition, setColor, getSeriesName)}
           onElementClick={handleFilterClick(visData, config.aspects.x.accessor)}
-          onBrushEnd={handleBrush(visData, config.aspects.x.accessor)}
+          onBrushEnd={handleBrush(visData, config.aspects.x)}
           onRenderChange={onRenderChange}
           legendAction={
             config.aspects.series && (config.aspects.series?.length ?? 0) > 0
