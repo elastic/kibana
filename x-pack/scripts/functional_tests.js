@@ -65,6 +65,9 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/reporting_api_integration/reporting_without_security.config.ts'),
   require.resolve('../test/security_solution_endpoint_api_int/config.ts'),
   require.resolve('../test/ingest_manager_api_integration/config.ts'),
+  require.resolve('../test/saved_object_tagging/functional/config.ts'),
+  require.resolve('../test/saved_object_tagging/api_integration/security_and_spaces/config.ts'),
+  require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
 ];
 
 require('../../src/setup_node_env');
