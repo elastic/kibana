@@ -124,23 +124,18 @@ export const movingAverage: ExpressionFunctionMovingAverage = {
       return input;
     }
 
-    const lastNValuesByBucket: Partial<Record<string, Array<number | undefined>>> = {};
+    const lastNValuesByBucket: Partial<Record<string, number[]>> = {};
     return {
       ...input,
       columns: resultColumns,
       rows: input.rows.map((row) => {
         const newRow = { ...row };
-
         const bucketIdentifier = getBucketIdentifier(row, by);
         const lastNValues = lastNValuesByBucket[bucketIdentifier];
         const currentValue = newRow[inputColumnId];
-        const sanitizedLastNValues = lastNValues?.filter((v) => v != null) as number[];
-        if (sanitizedLastNValues != null && sanitizedLastNValues.length && currentValue != null) {
-          const sanitizedSum = sanitizedLastNValues.reduce(
-            (acc: number, current: number) => acc + current,
-            0
-          );
-          newRow[outputColumnId] = sanitizedSum / sanitizedLastNValues.length;
+        if (lastNValues != null && lastNValues.length && currentValue != null) {
+          const sum = lastNValues.reduce((acc, current) => acc + current, 0);
+          newRow[outputColumnId] = sum / lastNValues.length;
         } else {
           newRow[outputColumnId] = undefined;
         }
