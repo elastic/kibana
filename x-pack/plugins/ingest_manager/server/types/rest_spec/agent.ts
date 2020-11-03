@@ -188,6 +188,7 @@ export const PostAgentUpgradeRequestSchema = {
   body: schema.object({
     source_uri: schema.maybe(schema.string()),
     version: schema.string(),
+    force: schema.maybe(schema.boolean()),
   }),
 };
 
@@ -196,6 +197,7 @@ export const PostBulkAgentUpgradeRequestSchema = {
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
     source_uri: schema.maybe(schema.string()),
     version: schema.string(),
+    force: schema.maybe(schema.boolean()),
   }),
 };
 

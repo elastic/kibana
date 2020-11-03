@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Hapi from 'hapi';
+import Hapi from '@hapi/hapi';
 import * as Rx from 'rxjs';
 import { first, map, take } from 'rxjs/operators';
 import {
@@ -210,18 +210,11 @@ export class ReportingCore {
   }
 
   public getFakeRequest(baseRequest: object, spaceId: string | undefined, logger = this.logger) {
-    // @ts-expect-error _core isn't supposed to be accessed - remove once we upgrade to hapi v18
     const fakeRequest = KibanaRequest.from({
       path: '/',
       route: { settings: {} },
       url: { href: '/' },
       raw: { req: { url: '/' } },
-      // TODO: Remove once we upgrade to hapi v18
-      _core: {
-        info: {
-          uri: 'http://localhost',
-        },
-      },
       ...baseRequest,
     } as Hapi.Request);
 

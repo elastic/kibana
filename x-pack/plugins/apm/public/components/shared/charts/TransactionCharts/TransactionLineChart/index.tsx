@@ -6,7 +6,7 @@
 
 import React, { useCallback } from 'react';
 import { Coordinate, TimeSeries } from '../../../../../../typings/timeseries';
-import { useChartsSync } from '../../../../../hooks/useChartsSync';
+import { useLegacyChartsSync as useChartsSync } from '../../../../../hooks/use_charts_sync';
 // @ts-expect-error
 import CustomPlot from '../../CustomPlot';
 
