@@ -13,8 +13,8 @@ jest.mock('../../../../../src/plugins/kibana_react/public', () => {
       data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
       data-value={props.value}
       value={props.value}
-      onChange={(syntheticEvent: any) => {
-        props.onChange([syntheticEvent['0']]);
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+        props.onChange(e.target.value);
       }}
     />
   );

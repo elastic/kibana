@@ -4,24 +4,28 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { act } from 'react-dom/test-utils';
+import { DocLinksStart } from 'src/core/public';
 
 import '../../__jest__/setup_environment';
 import { registerTestBed, TestBed } from '../../test_utils';
 import { RuntimeField } from '../../types';
-import { RuntimeFieldForm, Props, FormState } from './runtime_field_form';
+import { RuntimeFieldForm, FormState } from '../runtime_field_form/runtime_field_form';
+import { RuntimeFieldEditor, Props } from './runtime_field_editor';
 
 const setup = (props?: Props) =>
-  registerTestBed(RuntimeFieldForm, {
+  registerTestBed(RuntimeFieldEditor, {
     memoryRouter: {
       wrapComponent: false,
     },
   })(props) as TestBed;
 
-const links = {
-  painlessSyntax: 'https://jestTest.elastic.co/to-be-defined.html',
+const docLinks: DocLinksStart = {
+  ELASTIC_WEBSITE_URL: 'https://jestTest.elastic.co',
+  DOC_LINK_VERSION: 'jest',
+  links: {} as any,
 };
 
-describe('Runtime field form', () => {
+describe('Runtime field editor', () => {
   let testBed: TestBed;
   let onChange: jest.Mock<Props['onChange']> = jest.fn();
 
@@ -31,44 +35,20 @@ describe('Runtime field form', () => {
     onChange = jest.fn();
   });
 
-  test('should render expected 3 fields (name, returnType, script)', () => {
-    testBed = setup({ links });
-    const { exists } = testBed;
+  test('should render the <RuntimeFieldForm />', () => {
+    testBed = setup({ docLinks });
+    const { component } = testBed;
 
-    expect(exists('nameField')).toBe(true);
-    expect(exists('typeField')).toBe(true);
-    expect(exists('scriptField')).toBe(true);
+    expect(component.find(RuntimeFieldForm).length).toBe(1);
   });
 
-  test('should have a link to learn more about painless syntax', () => {
-    testBed = setup({ links });
-    const { exists, find } = testBed;
-
-    expect(exists('painlessSyntaxLearnMoreLink')).toBe(true);
-    expect(find('painlessSyntaxLearnMoreLink').props().href).toBe(links.painlessSyntax);
-  });
-
-  test('should accept a "defaultValue" prop', () => {
+  test('should accept a defaultValue and onChange prop to forward the form state', async () => {
     const defaultValue: RuntimeField = {
       name: 'foo',
       type: 'date',
       script: 'test=123',
     };
-    testBed = setup({ defaultValue, links });
-    const { find } = testBed;
-
-    expect(find('nameField.input').props().value).toBe(defaultValue.name);
-    expect(find('typeField').props().value).toBe(defaultValue.type);
-    expect(find('scriptField').props().value).toBe(defaultValue.script);
-  });
-
-  test('should accept an "onChange" prop to forward the form state', async () => {
-    const defaultValue: RuntimeField = {
-      name: 'foo',
-      type: 'date',
-      script: 'test=123',
-    };
-    testBed = setup({ onChange, defaultValue, links });
+    testBed = setup({ onChange, defaultValue, docLinks });
 
     expect(onChange).toHaveBeenCalled();
 
