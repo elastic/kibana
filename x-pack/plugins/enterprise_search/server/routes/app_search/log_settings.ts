@@ -30,11 +30,9 @@ export function registerLogSettingsRoutes({
       path: '/api/app_search/log_settings',
       validate: false,
     },
-    async (context, request, response) => {
-      return enterpriseSearchRequestHandler.createRequest({
-        path: '/as/log_settings',
-      })(context, request, response);
-    }
+    enterpriseSearchRequestHandler.createRequest({
+      path: '/as/log_settings',
+    })
   );
 
   router.put(

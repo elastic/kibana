@@ -23,14 +23,6 @@ describe('log settings routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
-      const mockRequest = {
-        body: {
-          analytics: true,
-        },
-      };
-
-      mockRouter.callRoute(mockRequest);
-
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/log_settings',
       });
