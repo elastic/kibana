@@ -55,6 +55,7 @@ import {
 import { MapSettings } from '../../../reducers/map';
 import { goToSpecifiedPath } from '../../render_app';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
+import { getExistingMapPath } from '../../../../common/constants';
 import { SavedMap } from './saved_map';
 
 interface Props {
@@ -369,10 +370,14 @@ export class MapApp extends React.Component<Props, State> {
 
     this._setBreadcrumbs(mapSavedObjectAttributes.title);
     getCoreChrome().docTitle.change(mapSavedObjectAttributes.title);
-    // TODO
-    /* if (this.props.savedMapId) {
-      getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap.id!);
-    }*/
+    const savedObjectId = this.props.savedMap.getSavedObjectId();
+    if (savedObjectId) {
+      getCoreChrome().recentlyAccessed.add(
+        getExistingMapPath(savedObjectId),
+        mapSavedObjectAttributes.title,
+        savedObjectId
+      );
+    }
 
     this._initMapAndLayerSettings(mapSavedObjectAttributes);
 
