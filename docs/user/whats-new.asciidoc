@@ -238,7 +238,7 @@ for every value of a partition field. With 7.10, it's now possible to configure 
 categorization.
 
 [float]
-==== Feature importance
+=== Improved {feat-imp} details for {dfanalytics}
 
 When you examine the results from your {classification} or {regression} {ml} jobs,
 you can use {feat-imp} to understand which fields had the biggest impact
