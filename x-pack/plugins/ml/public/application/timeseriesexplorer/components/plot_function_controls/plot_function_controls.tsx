@@ -28,13 +28,13 @@ const plotByFunctionOptions = [
   },
 ];
 export const PlotByFunctionControls = ({
-  actualPlotFunction,
-  setPlotByFunction,
+  functionDescription,
+  setFunctionDescription,
 }: {
-  actualPlotFunction: undefined | string;
-  setPlotByFunction: (func: string) => void;
+  functionDescription: undefined | string;
+  setFunctionDescription: (func: string) => void;
 }) => {
-  if (actualPlotFunction === 'unknown' || !actualPlotFunction) return null;
+  if (functionDescription === 'unknown' || !functionDescription) return null;
   return (
     <EuiFlexItem style={{ textAlign: 'right' }} grow={false}>
       <EuiFormRow
@@ -44,8 +44,8 @@ export const PlotByFunctionControls = ({
       >
         <EuiSelect
           options={plotByFunctionOptions}
-          value={actualPlotFunction ?? 'avg'}
-          onChange={(e) => setPlotByFunction(e.target.value)}
+          value={functionDescription ?? 'avg'}
+          onChange={(e) => setFunctionDescription(e.target.value)}
           aria-label="Pick function to plot by (min, max, or average) if metric function"
         />
       </EuiFormRow>

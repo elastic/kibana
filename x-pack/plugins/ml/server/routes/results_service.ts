@@ -37,7 +37,7 @@ function getAnomaliesTableData(client: IScopedClusterClient, payload: any) {
     maxRecords,
     maxExamples,
     influencersFilterQuery,
-    actualPlotFunction,
+    functionDescription,
   } = payload;
   return rs.getAnomaliesTableData(
     jobIds,
@@ -51,7 +51,7 @@ function getAnomaliesTableData(client: IScopedClusterClient, payload: any) {
     maxRecords,
     maxExamples,
     influencersFilterQuery,
-    actualPlotFunction
+    functionDescription
   );
 }
 

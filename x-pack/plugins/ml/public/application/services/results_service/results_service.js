@@ -1307,6 +1307,8 @@ export function resultsServiceProvider(mlApiServices) {
             },
           });
         });
+        console.log('actualPlotFunctionIfMetric', actualPlotFunctionIfMetric);
+
         if (actualPlotFunctionIfMetric !== undefined && actualPlotFunctionIfMetric !== 'unknown') {
           mustCriteria.push({
             term: {
@@ -1315,6 +1317,7 @@ export function resultsServiceProvider(mlApiServices) {
             },
           });
         }
+        console.log('mustCriteria', mustCriteria);
 
         mlApiServices.results
           .anomalySearch({

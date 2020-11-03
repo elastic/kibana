@@ -26,7 +26,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     maxRecords: number,
     maxExamples?: number,
     influencersFilterQuery?: any,
-    actualPlotFunction?: string | undefined
+    functionDescription?: string | undefined
   ) {
     const body = JSON.stringify({
       jobIds,
@@ -40,7 +40,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
       maxRecords,
       maxExamples,
       influencersFilterQuery,
-      actualPlotFunction,
+      functionDescription,
     });
 
     return httpService.http$<any>({

@@ -101,7 +101,7 @@ export function processDataForFocusAnomalies(
   anomalyRecords,
   aggregationInterval,
   modelPlotEnabled,
-  actualPlotFunction
+  functionDescription
 ) {
   const timesToAddPointsFor = [];
 
@@ -136,6 +136,7 @@ export function processDataForFocusAnomalies(
     }
     chartData.push(pointToAdd);
   });
+  const mlFunctionDescription = functionDescription === 'avg' ? 'mean' : functionDescription;
 
   // Iterate through the anomaly records adding the
   // various properties required for display.
@@ -143,7 +144,8 @@ export function processDataForFocusAnomalies(
     // Look for a chart point with the same time as the record.
     // If none found, find closest time in chartData set.
     const recordTime = record[TIME_FIELD_NAME];
-    if (record.function === 'metric' && record.function_description !== actualPlotFunction) return;
+    if (record.function === 'metric' && record.function_description !== mlFunctionDescription)
+      return;
 
     const chartPoint = findChartPointForAnomalyTime(chartData, recordTime, aggregationInterval);
     if (chartPoint !== undefined) {
@@ -187,7 +189,7 @@ export function processDataForFocusAnomalies(
           chartPoint.multiBucketImpact = record.multi_bucket_impact;
         }
         if (record.function === 'metric') {
-          chartPoint.metricActualPlotFunction = record.function_description ?? actualPlotFunction;
+          chartPoint.metricActualPlotFunction = record.function_description ?? functionDescription;
         }
       }
     }

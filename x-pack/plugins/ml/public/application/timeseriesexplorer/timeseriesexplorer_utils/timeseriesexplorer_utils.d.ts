@@ -17,7 +17,7 @@ export function processDataForFocusAnomalies(
   anomalyRecords: any,
   aggregationInterval: any,
   modelPlotEnabled: any,
-  actualPlotFunction: any
+  functionDescription: any
 ): any;
 
 export function processScheduledEventsForChart(chartData: any, scheduledEvents: any): any;

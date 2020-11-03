@@ -84,7 +84,6 @@ import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/
 import { getControlsForDetector } from './get_controls_for_detector';
 import { SeriesControls } from './components/series_controls';
 import { PlotByFunctionControls } from './components/plot_function_controls';
-import { getPlotByOptions, UNKNOWN_METRIC_PLOT_FUNCTION } from './get_plot_by_options';
 import { getToastNotificationService } from '../services/toast_notification_service';
 
 // Used to indicate the chart is being plotted across
@@ -145,7 +144,7 @@ function getTimeseriesexplorerDefaultState() {
     zoomFromFocusLoaded: undefined,
     zoomToFocusLoaded: undefined,
     // Sets function to plot by if original function is metric
-    actualPlotFunction: undefined,
+    functionDescription: undefined,
     defaultFunctionToPlotIfMetric: undefined,
   };
 }
@@ -223,9 +222,9 @@ export class TimeSeriesExplorer extends React.Component {
     });
   };
 
-  setPlotByFunction = (selectedFuction) => {
+  setFunctionDescription = (selectedFuction) => {
     this.setState({
-      actualPlotFunction: selectedFuction,
+      functionDescription: selectedFuction,
     });
   };
 
@@ -282,7 +281,7 @@ export class TimeSeriesExplorer extends React.Component {
    */
   getFocusData(selection) {
     const { selectedJobId, selectedForecastId, selectedDetectorIndex } = this.props;
-    const { modelPlotEnabled, actualPlotFunction } = this.state;
+    const { modelPlotEnabled, functionDescription } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
 
@@ -304,7 +303,7 @@ export class TimeSeriesExplorer extends React.Component {
       entityControls.filter((entity) => entity.fieldValue !== null),
       searchBounds,
       selectedJob,
-      actualPlotFunction,
+      functionDescription,
       TIME_FIELD_NAME
     );
   }
@@ -335,7 +334,7 @@ export class TimeSeriesExplorer extends React.Component {
       tableInterval,
       tableSeverity,
     } = this.props;
-    const { actualPlotFunction } = this.state;
+    const { functionDescription } = this.state;
     const selectedJob = mlJobService.getJob(selectedJobId);
     const entityControls = this.getControlsForDetector();
 
@@ -352,7 +351,7 @@ export class TimeSeriesExplorer extends React.Component {
         ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
         undefined,
         undefined,
-        actualPlotFunction
+        functionDescription
       )
       .pipe(
         map((resp) => {
@@ -397,15 +396,43 @@ export class TimeSeriesExplorer extends React.Component {
 
   getPlotByOptions = () => {
     const { selectedJobId, selectedDetectorIndex } = this.props;
-    const { actualPlotFunction, defaultFunctionToPlotIfMetric } = this.state;
-    this.setPlotByFunction(
-      getPlotByOptions(
-        selectedJobId,
-        selectedDetectorIndex,
-        actualPlotFunction,
-        defaultFunctionToPlotIfMetric
-      )
-    );
+    const selectedJob = mlJobService.getJob(selectedJobId);
+
+    // if the detector's function is metric, fetch the highest scoring anomaly record
+    // and set to plot the function_description (avg/min/max) of that record by default
+    if (selectedJob?.analysis_config?.detectors[selectedDetectorIndex]?.function === 'metric') {
+      const entityControls = this.getControlsForDetector();
+
+      mlResultsService
+        .getRecordsForCriteria(
+          [selectedJob.job_id],
+          this.getCriteriaFields(selectedDetectorIndex, entityControls),
+          0,
+          null,
+          null,
+          1
+        )
+        .toPromise()
+        .then((resp) => {
+          if (Array.isArray(resp?.records) && resp.records.length === 1) {
+            const highestScoringAnomaly = resp.records[0];
+            const defaultFunctionToPlotIfMetric = mlFunctionToESAggregation(
+              highestScoringAnomaly?.function_description
+            );
+            this.setFunctionDescription(defaultFunctionToPlotIfMetric);
+          }
+        })
+        .catch((error) => {
+          getToastNotificationService().displayErrorToast(
+            error,
+            i18n.translate('xpack.ml.timeSeriesExplorer.highestAnomalyScoreErrorToastTitle', {
+              defaultMessage: 'An error occurred getting record with the highest anomaly score',
+            })
+          );
+        });
+    } else {
+      this.setState({ functionDescription: undefined });
+    }
   };
   setForecastId = (forecastId) => {
     this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
@@ -423,19 +450,10 @@ export class TimeSeriesExplorer extends React.Component {
 
     const {
       loadCounter: currentLoadCounter,
-      actualPlotFunction: functionToPlotByIfMetric,
+      functionDescription: functionToPlotByIfMetric,
     } = this.state;
 
     const currentSelectedJob = mlJobService.getJob(selectedJobId);
-
-    if (
-      currentSelectedJob === undefined ||
-      // prevent unnecessary call to elasticsearch
-      // because we know this is a metric function, but we don't know the actual function we should plot yet
-      functionToPlotByIfMetric === UNKNOWN_METRIC_PLOT_FUNCTION
-    ) {
-      return;
-    }
 
     this.contextChartSelectedInitCallDone = false;
 
@@ -726,43 +744,6 @@ export class TimeSeriesExplorer extends React.Component {
     if (detectorId !== selectedDetectorIndex) {
       appStateHandler(APP_STATE_ACTION.SET_DETECTOR_INDEX, detectorId);
     }
-    // if the detector's function is metric, fetch the highest scoring anomaly record
-    // and set to plot the function_description (avg/min/max) of that record by default
-    if (selectedJob?.analysis_config?.detectors[detectorIndex]?.function === 'metric') {
-      const entityControls = this.getControlsForDetector();
-
-      mlResultsService
-        .getRecordsForCriteria(
-          [selectedJob.job_id],
-          this.getCriteriaFields(selectedDetectorIndex, entityControls),
-          0,
-          null,
-          null,
-          1
-        )
-        .toPromise()
-        .then((resp) => {
-          if (Array.isArray(resp?.records) && resp.records.length === 1) {
-            const highestScoringAnomaly = resp.records[0];
-            const defaultFunctionToPlotIfMetric = mlFunctionToESAggregation(
-              highestScoringAnomaly?.function_description
-            );
-            this.setState({ defaultFunctionToPlotIfMetric });
-            this.setPlotByFunction(defaultFunctionToPlotIfMetric);
-          }
-        })
-        .catch((error) => {
-          getToastNotificationService().displayErrorToast(
-            error,
-            i18n.translate('xpack.ml.timeSeriesExplorer.highestAnomalyScoreErrorToastTitle', {
-              defaultMessage: 'An error occurred getting record with the highest anomaly score',
-            })
-          );
-        });
-    } else {
-      this.setState({ actualPlotFunction: undefined });
-    }
-
     // Populate the map of jobs / detectors / field formatters for the selected IDs and refresh.
     mlFieldFormatService.populateFormats([jobId]).catch((err) => {
       console.log('Error populating field formats:', err);
@@ -925,7 +906,7 @@ export class TimeSeriesExplorer extends React.Component {
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
       previousProps.selectedForecastId !== this.props.selectedForecastId ||
       previousProps.selectedJobId !== this.props.selectedJobId ||
-      previousState.actualPlotFunction !== this.state.actualPlotFunction
+      previousState.functionDescription !== this.state.functionDescription
     ) {
       const fullRefresh =
         previousProps === undefined ||
@@ -934,7 +915,7 @@ export class TimeSeriesExplorer extends React.Component {
         !isEqual(previousProps.selectedEntities, this.props.selectedEntities) ||
         previousProps.selectedForecastId !== this.props.selectedForecastId ||
         previousProps.selectedJobId !== this.props.selectedJobId ||
-        previousState.actualPlotFunction !== this.state.actualPlotFunction;
+        previousState.functionDescription !== this.state.functionDescription;
       this.loadSingleMetricData(fullRefresh);
     }
 
@@ -1004,7 +985,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoomTo,
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
-      actualPlotFunction,
+      functionDescription,
     } = this.state;
     const chartProps = {
       modelPlotEnabled,
@@ -1086,10 +1067,13 @@ export class TimeSeriesExplorer extends React.Component {
           selectedEntities={this.props.selectedEntities}
           bounds={bounds}
         >
-          {actualPlotFunction && (
+          {functionDescription && (
             <PlotByFunctionControls
-              actualPlotFunction={actualPlotFunction}
-              setPlotByFunction={this.setPlotByFunction}
+              selectedJobId={selectedJobId}
+              selectedDetectorIndex={selectedDetectorIndex}
+              selectedEntities={this.props.selectedEntities}
+              functionDescription={functionDescription}
+              setFunctionDescription={this.setFunctionDescription}
             />
           )}
 

@@ -58,7 +58,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     maxRecords: number = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
     maxExamples: number = DEFAULT_MAX_EXAMPLES,
     influencersFilterQuery?: any,
-    actualPlotFunction?: string | undefined
+    functionDescription?: string | undefined
   ) {
     // Build the query to return the matching anomaly record results.
     // Add criteria for the time range, record score, plus any specified job IDs.
@@ -106,11 +106,10 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
         },
       });
     });
-
-    if (actualPlotFunction !== undefined) {
+    if (functionDescription !== undefined) {
       boolCriteria.push({
         term: {
-          function_description: actualPlotFunction === 'avg' ? 'mean' : actualPlotFunction,
+          function_description: functionDescription === 'avg' ? 'mean' : functionDescription,
         },
       });
     }

@@ -52,7 +52,7 @@ export function getFocusData(
   nonBlankEntities: any[],
   searchBounds: any,
   selectedJob: Job,
-  actualPlotFunction: string | undefined
+  functionDescription: string | undefined
 ): Observable<FocusData> {
   return forkJoin([
     // Query 1 - load metric data across selected time range.
@@ -63,7 +63,7 @@ export function getFocusData(
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
       focusAggregationInterval.asMilliseconds(),
-      actualPlotFunction
+      functionDescription
     ),
     // Query 2 - load all the records across selected time range for the chart anomaly markers.
     mlResultsService.getRecordsForCriteria(
@@ -72,7 +72,8 @@ export function getFocusData(
       0,
       searchBounds.min.valueOf(),
       searchBounds.max.valueOf(),
-      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE
+      ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
+      functionDescription
     ),
     // Query 3 - load any scheduled events for the selected job.
     mlResultsService.getScheduledEventsByBucket(
@@ -146,7 +147,7 @@ export function getFocusData(
         anomalyRecords,
         focusAggregationInterval,
         modelPlotEnabled,
-        actualPlotFunction
+        functionDescription
       );
       focusChartData = processScheduledEventsForChart(focusChartData, scheduledEvents);
 

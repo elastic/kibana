@@ -348,7 +348,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       threshold: any,
       earliestMs: number,
       latestMs: number,
-      maxResults: number | undefined
+      maxResults: number | undefined,
+      functionDescription?: string | undefined
     ): Observable<RecordsForCriteria> {
       const obj: RecordsForCriteria = { success: true, records: [] };
 
@@ -398,6 +399,14 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
           },
         });
       });
+
+      if (functionDescription !== undefined) {
+        boolCriteria.push({
+          term: {
+            function_description: functionDescription === 'avg' ? 'mean' : functionDescription,
+          },
+        });
+      }
 
       return mlApiServices.results
         .anomalySearch$({
