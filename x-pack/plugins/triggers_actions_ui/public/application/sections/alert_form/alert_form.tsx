@@ -32,8 +32,8 @@ import {
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { EuiText } from '@elastic/eui';
 import { capitalize } from 'lodash';
+import { KibanaFeature } from '../../../../../features/public';
 import {
   getDurationNumberInItsUnit,
   getDurationUnitValue,
@@ -41,7 +41,14 @@ import {
 import { loadAlertTypes } from '../../lib/alert_api';
 import { actionVariablesFromAlertType } from '../../lib/action_variables';
 import { AlertReducerAction } from './alert_reducer';
-import { AlertTypeModel, Alert, IErrorObject, AlertAction, AlertTypeIndex } from '../../../types';
+import {
+  AlertTypeModel,
+  Alert,
+  IErrorObject,
+  AlertAction,
+  AlertTypeIndex,
+  AlertType,
+} from '../../../types';
 import { getTimeOptions } from '../../../common/lib/get_time_options';
 import { useAlertsContext } from '../../context/alerts_context';
 import { ActionForm } from '../action_connector_form';
@@ -84,6 +91,10 @@ export function validateBaseProperties(alertObject: Alert) {
   return validationResult;
 }
 
+function getProducerFeatureName(producer: string, kibanaFeatures: KibanaFeature[]) {
+  return kibanaFeatures.find((featureItem) => featureItem.id === producer)?.name;
+}
+
 interface AlertFormProps {
   alert: Alert;
   dispatch: React.Dispatch<AlertReducerAction>;
@@ -117,7 +128,6 @@ export const AlertForm = ({
 
   const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
 
-  const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
     alert.schedule.interval ? getDurationNumberInItsUnit(alert.schedule.interval) : undefined
   );
@@ -131,23 +141,52 @@ export const AlertForm = ({
     alert.throttle ? getDurationUnitValue(alert.throttle) : 'm'
   );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
+  const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | null>(null);
+
+  const [availableAlertTypes, setAvailableAlertTypes] = useState<
+    Array<{ alertTypeModel: AlertTypeModel; alertType: AlertType }>
+  >([]);
+  const [filteredAlertTypes, setFilteredAlertTypes] = useState<
+    Array<{ alertTypeModel: AlertTypeModel; alertType: AlertType }>
+  >([]);
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
+  const [solutions, setSolutions] = useState<
+    Array<{
+      id: string;
+      title: string;
+    }>
+  >([]);
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
 
   // load alert types
   useEffect(() => {
     (async () => {
       try {
-        const alertTypes = await loadAlertTypes({ http });
+        const alertTypesResult = await loadAlertTypes({ http });
         const index: AlertTypeIndex = new Map();
-        for (const alertTypeItem of alertTypes) {
+        for (const alertTypeItem of alertTypesResult) {
           index.set(alertTypeItem.id, alertTypeItem);
         }
         if (alert.alertTypeId && index.has(alert.alertTypeId)) {
           setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
         }
         setAlertTypesIndex(index);
+        setAvailableAlertTypes(getAvailableAlertTypes(alertTypesResult));
+        setSolutions(
+          alertTypesResult.reduce((result: Array<{ id: string; title: string }>, alertTypeItem) => {
+            if (!result.find((solution) => solution.id === alertTypeItem.producer)) {
+              result.push({
+                id: alertTypeItem.producer,
+                title:
+                  (kibanaFeatures
+                    ? getProducerFeatureName(alertTypeItem.producer, kibanaFeatures)
+                    : capitalize(alertTypeItem.producer)) ?? capitalize(alertTypeItem.producer),
+              });
+            }
+            return result;
+          }, [])
+        );
       } catch (e) {
         toastNotifications.addDanger({
           title: i18n.translate(
@@ -184,42 +223,74 @@ export const AlertForm = ({
     dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
   };
 
+  useEffect(() => {
+    const searchValue = searchText ? searchText.trim().toLocaleLowerCase() : null;
+    setFilteredAlertTypes(
+      availableAlertTypes
+        .filter((alertTypeItem) =>
+          solutionsFilter.length > 0
+            ? solutionsFilter.find((item) => alertTypeItem.alertType!.producer === item)
+            : alertTypeItem
+        )
+        .filter((alertTypeItem) =>
+          searchValue
+            ? alertTypeItem.alertTypeModel.name
+                .toString()
+                .toLocaleLowerCase()
+                .includes(searchValue) ||
+              alertTypeItem.alertType!.producer.toLocaleLowerCase().includes(searchValue)
+            : alertTypeItem
+        )
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [alertTypeRegistry, availableAlertTypes, searchText, JSON.stringify(solutionsFilter)]);
+
+  const getAvailableAlertTypes = (alertTypesResult: AlertType[]) =>
+    alertTypeRegistry
+      .list()
+      .reduce(
+        (
+          arr: Array<{ alertType: AlertType; alertTypeModel: AlertTypeModel }>,
+          alertTypeRegistryItem: AlertTypeModel
+        ) => {
+          const alertType = alertTypesResult.find((item) => alertTypeRegistryItem.id === item.id);
+          if (alertType) {
+            arr.push({
+              alertType,
+              alertTypeModel: alertTypeRegistryItem,
+            });
+          }
+          return arr;
+        },
+        []
+      )
+      .filter((item) => item.alertType && hasAllPrivilege(alert, item.alertType))
+      .filter((item) =>
+        alert.consumer === ALERTS_FEATURE_ID
+          ? !item.alertTypeModel.requiresAppContext
+          : item.alertType!.producer === alert.consumer
+      );
+
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
 
   const AlertParamsExpressionComponent = alertTypeModel
     ? alertTypeModel.alertParamsExpression
     : null;
 
-  const alertTypeRegistryList = alertTypesIndex
-    ? alertTypeRegistry
-        .list()
-        .filter(
-          (alertTypeRegistryItem: AlertTypeModel) =>
-            alertTypesIndex.has(alertTypeRegistryItem.id) &&
-            hasAllPrivilege(alert, alertTypesIndex.get(alertTypeRegistryItem.id))
-        )
-        .filter((alertTypeRegistryItem: AlertTypeModel) =>
-          alert.consumer === ALERTS_FEATURE_ID
-            ? !alertTypeRegistryItem.requiresAppContext
-            : alertTypesIndex.get(alertTypeRegistryItem.id)!.producer === alert.consumer
-        )
-    : [];
-
-  const getProducerFeatureName = (producer: string) => {
-    return kibanaFeatures?.find((featureItem) => featureItem.id === producer)?.name;
-  };
-
-  const alertTypesByProducer = alertTypeRegistryList.reduce(
+  const alertTypesByProducer = filteredAlertTypes.reduce(
     (
       result: Record<string, Array<{ id: string; name: string; alertTypeItem: AlertTypeModel }>>,
-      currentValue
+      alertTypeValue
     ) => {
-      const producer = alertTypesIndex?.get(currentValue.id)?.producer;
+      const producer = alertTypeValue.alertType.producer;
       if (producer) {
         (result[producer] = result[producer] || []).push({
-          name: typeof currentValue.name === 'string' ? currentValue.name : currentValue.id,
-          id: currentValue.id,
-          alertTypeItem: currentValue,
+          name:
+            typeof alertTypeValue.alertTypeModel.name === 'string'
+              ? alertTypeValue.alertTypeModel.name
+              : alertTypeValue.alertTypeModel.id,
+          id: alertTypeValue.alertTypeModel.id,
+          alertTypeItem: alertTypeValue.alertTypeModel,
         });
       }
       return result;
@@ -227,18 +298,17 @@ export const AlertForm = ({
     {}
   );
 
-  const solutions = Object.entries(alertTypesByProducer).map(([solution, items]) => {
-    return { id: solution, title: getProducerFeatureName(solution) ?? capitalize(solution) };
-  });
-
-  const alertTypeNodes = Object.entries(alertTypesByProducer).map(
-    ([solution, items], groupIndex) => (
+  const alertTypeNodes = Object.entries(alertTypesByProducer)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([solution, items], groupIndex) => (
       <Fragment key={`group${groupIndex}`}>
         <EuiTitle data-test-subj={`alertType${groupIndex}Group`} size="xxs">
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiTextColor color="subdued">
-                {getProducerFeatureName(solution) ?? capitalize(solution)}
+                {(kibanaFeatures
+                  ? getProducerFeatureName(solution, kibanaFeatures)
+                  : capitalize(solution)) ?? capitalize(solution)}
               </EuiTextColor>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -247,31 +317,32 @@ export const AlertForm = ({
           </EuiFlexGroup>
         </EuiTitle>
         <EuiHorizontalRule size="full" margin="xs" />
-        {items.map((item, index) => (
-          <>
-            <EuiDescriptionListTitle
-              onClick={() => {
-                setAlertProperty('alertTypeId', item.id);
-                setAlertTypeModel(item.alertTypeItem);
-                setAlertProperty('params', {});
-                if (alertTypesIndex && alertTypesIndex.has(item.id)) {
-                  setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
-                }
-              }}
-            >
-              {item.name}
-            </EuiDescriptionListTitle>
-            {item.alertTypeItem.description ? (
-              <EuiDescriptionListDescription>
-                {item.alertTypeItem.description}
-              </EuiDescriptionListDescription>
-            ) : null}
-            <EuiHorizontalRule size="full" margin="xs" />
-          </>
-        ))}
+        {items
+          .sort((a, b) => a.name.toString().localeCompare(b.name.toString()))
+          .map((item, index) => (
+            <Fragment key={index}>
+              <EuiDescriptionListTitle
+                onClick={() => {
+                  setAlertProperty('alertTypeId', item.id);
+                  setAlertTypeModel(item.alertTypeItem);
+                  setAlertProperty('params', {});
+                  if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+                    setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+                  }
+                }}
+              >
+                {item.name}
+              </EuiDescriptionListTitle>
+              {item.alertTypeItem.description ? (
+                <EuiDescriptionListDescription>
+                  {item.alertTypeItem.description}
+                </EuiDescriptionListDescription>
+              ) : null}
+              <EuiHorizontalRule size="full" margin="xs" />
+            </Fragment>
+          ))}
       </Fragment>
-    )
-  );
+    ));
 
   const alertTypeDetails = (
     <Fragment>
@@ -549,7 +620,7 @@ export const AlertForm = ({
       <EuiSpacer size="m" />
       {alertTypeModel ? (
         <Fragment>{alertTypeDetails}</Fragment>
-      ) : alertTypeNodes.length ? (
+      ) : availableAlertTypes.length ? (
         <Fragment>
           <EuiHorizontalRule />
           <EuiFlexGroup gutterSize="s">

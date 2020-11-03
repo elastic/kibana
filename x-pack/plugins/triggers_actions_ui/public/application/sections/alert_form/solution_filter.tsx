@@ -8,15 +8,20 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFilterGroup, EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 
-interface SoultionFilterProps {
-  solutions: Array<{ id: string; title: string }>;
+interface Solution {
+  id: string;
+  title: string;
+}
+
+interface SolutionFilterProps {
+  solutions: Solution[];
   onChange?: (selectedSolutions: string[]) => void;
 }
 
-export const SolutionFilter: React.FunctionComponent<SoultionFilterProps> = ({
+export const SolutionFilter: React.FunctionComponent<SolutionFilterProps> = ({
   solutions,
   onChange,
-}: SoultionFilterProps) => {
+}: SolutionFilterProps) => {
   const [selectedValues, setSelectedValues] = useState<string[]>([]);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -57,7 +62,7 @@ export const SolutionFilter: React.FunctionComponent<SoultionFilterProps> = ({
                 if (isPreviouslyChecked) {
                   setSelectedValues(selectedValues.filter((val) => val !== item.id));
                 } else {
-                  setSelectedValues(selectedValues.concat(item.id));
+                  setSelectedValues([...selectedValues, item.id]);
                 }
               }}
               checked={selectedValues.includes(item.id) ? 'on' : undefined}
