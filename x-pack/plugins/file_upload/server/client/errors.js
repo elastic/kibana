@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { boomify } from 'boom';
+import { boomify } from '@hapi/boom';
 
 export function wrapError(error) {
   return boomify(error, { statusCode: error.status });

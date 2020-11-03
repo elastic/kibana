@@ -18,8 +18,7 @@ import {
   EuiListGroupItem,
 } from '@elastic/eui';
 
-import { CommonAlertStatus, CommonAlertState } from '../../common/types';
-import { AlertMessage } from '../../server/alerts/types';
+import { CommonAlertStatus, CommonAlertState, AlertMessage } from '../../common/types/alerts';
 import { Legacy } from '../legacy_shims';
 import { replaceTokens } from './lib/replace_tokens';
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
