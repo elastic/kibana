@@ -215,11 +215,11 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof searchFilters.geogridPrecision === 'number'
           ? expandToTileBoundaries(searchFilters.buffer, searchFilters.geogridPrecision)
           : searchFilters.buffer;
-      const extentFilter = (createExtentFilter(
+      const extentFilter = createExtentFilter(
         buffer,
         geoField.name,
         geoField.type as ES_GEO_FIELD_TYPE
-      ) as unknown) as Filter;
+      );
       allFilters.push(extentFilter);
     }
     if (isTimeAware) {
@@ -450,10 +450,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {
     try {
       const indexPattern = await this.getIndexPattern();
-      const fieldType = indexPattern.fields.getByName(field.getRootName())!;
+      const indexPatternField = indexPattern.fields.getByName(field.getRootName())!;
       return await getAutocompleteService().getValueSuggestions({
         indexPattern,
-        field: fieldType,
+        field: indexPatternField,
         query,
       });
     } catch (error) {
