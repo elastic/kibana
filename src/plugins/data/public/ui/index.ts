@@ -17,17 +17,8 @@
  * under the License.
  */
 
-export { SuggestionsComponent } from './typeahead';
-export { IndexPatternSelect } from './index_pattern_select';
-export { FilterBar } from './filter_bar';
-export { QueryStringInput, QueryStringInputProps } from './query_string_input/query_string_input';
+export { IndexPatternSelectProps } from './index_pattern_select';
+export { FilterLabel } from './filter_bar';
+export { QueryStringInput, QueryStringInputProps } from './query_string_input';
 export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
-
-// @internal
-export { ShardFailureOpenModalButton, ShardFailureRequest } from './shard_failure_modal';
-
-// @internal
-export { SavedQueryManagementComponent } from './saved_query_management';
-
-// @internal
-export { SaveQueryForm, SavedQueryMeta } from './saved_query_form';
+export { SuggestionsComponent } from './typeahead';

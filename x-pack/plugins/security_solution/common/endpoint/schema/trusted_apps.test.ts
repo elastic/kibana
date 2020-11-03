@@ -76,7 +76,7 @@ describe('When invoking Trusted Apps Schema', () => {
       os: 'windows',
       entries: [
         {
-          field: 'process.path.text',
+          field: 'process.executable.caseless',
           type: 'match',
           operator: 'included',
           value: 'c:/programs files/Anti-Virus',
@@ -204,7 +204,7 @@ describe('When invoking Trusted Apps Schema', () => {
             field: 'process.hash.*',
             value: 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
           },
-          { field: 'process.path.text', value: '/tmp/dir1' },
+          { field: 'process.executable.caseless', value: '/tmp/dir1' },
         ].forEach((partialEntry) => {
           const bodyMsg3 = {
             ...getCreateTrustedAppItem(),
@@ -293,11 +293,28 @@ describe('When invoking Trusted Apps Schema', () => {
       });
 
       it('should validate that `entry.field` is used only once', () => {
-        const bodyMsg = {
+        let bodyMsg = {
           ...getCreateTrustedAppItem(),
           entries: [getTrustedAppItemEntryItem(), getTrustedAppItemEntryItem()],
         };
-        expect(() => body.validate(bodyMsg)).toThrow();
+        expect(() => body.validate(bodyMsg)).toThrow('[Path] field can only be used once');
+
+        bodyMsg = {
+          ...getCreateTrustedAppItem(),
+          entries: [
+            {
+              ...getTrustedAppItemEntryItem(),
+              field: 'process.hash.*',
+              value: VALID_HASH_MD5,
+            },
+            {
+              ...getTrustedAppItemEntryItem(),
+              field: 'process.hash.*',
+              value: VALID_HASH_MD5,
+            },
+          ],
+        };
+        expect(() => body.validate(bodyMsg)).toThrow('[Hash] field can only be used once');
       });
 
       it('should validate Hash field valid value', () => {
@@ -347,6 +364,21 @@ describe('When invoking Trusted Apps Schema', () => {
             ],
           });
         }).toThrow();
+      });
+
+      it('should trim hash value before validation', () => {
+        expect(() => {
+          body.validate({
+            ...getCreateTrustedAppItem(),
+            entries: [
+              {
+                ...getTrustedAppItemEntryItem(),
+                field: 'process.hash.*',
+                value: `  ${VALID_HASH_MD5}  \r\n`,
+              },
+            ],
+          });
+        }).not.toThrow();
       });
     });
   });

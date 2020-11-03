@@ -144,6 +144,7 @@ export {
   IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
+  IEsRawSearchResponse,
 } from '../common';
 
 /**
@@ -176,6 +177,13 @@ import {
   // tabify
   tabifyAggResponse,
   tabifyGetColumns,
+  // search
+  toSnakeCase,
+  shimAbortSignal,
+  doSearch,
+  includeTotalLoaded,
+  toKibanaSearchResponse,
+  getTotalLoaded,
 } from '../common';
 
 export {
@@ -213,17 +221,29 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
-  toSnakeCase,
   getDefaultSearchParams,
   getShardTimeout,
-  getTotalLoaded,
   shimHitsTotal,
   usageProvider,
   SearchUsage,
 } from './search';
 
+import { trackSearchStatus } from './search';
+
 // Search namespace
 export const search = {
+  esSearch: {
+    utils: {
+      doSearch,
+      shimAbortSignal,
+      trackSearchStatus,
+      includeTotalLoaded,
+      toKibanaSearchResponse,
+      // utils:
+      getTotalLoaded,
+      toSnakeCase,
+    },
+  },
   aggs: {
     CidrMask,
     dateHistogramInterval,

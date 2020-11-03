@@ -7,26 +7,25 @@
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { Policy, PolicyFromES } from '../../../../common/types';
+import { SerializedPolicy } from '../../../../common/types';
 import { savePolicy as savePolicyApi } from '../api';
 import { showApiError } from '../api_errors';
 import { getUiMetricsForPhases, trackUiMetric } from '../ui_metric';
 import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../../constants';
 import { toasts } from '../notification';
-import { serializePolicy } from './policy_serialization';
 
 export const savePolicy = async (
-  policy: Policy,
-  isNew: boolean,
-  originalEsPolicy?: PolicyFromES
+  readSerializedPolicy: () => SerializedPolicy,
+  isNew: boolean
 ): Promise<boolean> => {
-  const serializedPolicy = serializePolicy(policy, originalEsPolicy?.policy);
+  const serializedPolicy = readSerializedPolicy();
+
   try {
     await savePolicyApi(serializedPolicy);
   } catch (err) {
     const title = i18n.translate('xpack.indexLifecycleMgmt.editPolicy.saveErrorMessage', {
       defaultMessage: 'Error saving lifecycle policy {lifecycleName}',
-      values: { lifecycleName: policy.name },
+      values: { lifecycleName: serializedPolicy.name },
     });
     showApiError(err, title);
     return false;
@@ -46,7 +45,7 @@ export const savePolicy = async (
         : i18n.translate('xpack.indexLifecycleMgmt.editPolicy.updatedMessage', {
             defaultMessage: 'Updated',
           }),
-      lifecycleName: policy.name,
+      lifecycleName: serializedPolicy.name,
     },
   });
   toasts.addSuccess(message);

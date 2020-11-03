@@ -18,3 +18,4 @@
  */
 
 export { isEsError } from './is_es_error';
+export { handleEsError } from './handle_es_error';

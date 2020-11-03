@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import { isEmpty, union } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
@@ -104,6 +104,7 @@ interface Props {
   kqlMode: KqlMode;
   onChangeItemsPerPage: OnChangeItemsPerPage;
   query: Query;
+  onRuleChange?: () => void;
   start: string;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
@@ -131,6 +132,7 @@ const EventsViewerComponent: React.FC<Props> = ({
   kqlMode,
   onChangeItemsPerPage,
   query,
+  onRuleChange,
   start,
   sort,
   toggleColumn,
@@ -190,14 +192,10 @@ const EventsViewerComponent: React.FC<Props> = ({
     [isLoadingIndexPattern, combinedQueries, start, end]
   );
 
-  const fields = useMemo(
-    () =>
-      union(
-        columnsHeader.map((c) => c.id),
-        queryFields ?? []
-      ),
-    [columnsHeader, queryFields]
-  );
+  const fields = useMemo(() => [...columnsHeader.map((c) => c.id), ...(queryFields ?? [])], [
+    columnsHeader,
+    queryFields,
+  ]);
 
   const sortField = useMemo(
     () => ({
@@ -290,6 +288,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                 docValueFields={docValueFields}
                 id={id}
                 isEventViewer={true}
+                onRuleChange={onRuleChange}
                 refetch={refetch}
                 sort={sort}
                 toggleColumn={toggleColumn}
@@ -311,8 +310,7 @@ const EventsViewerComponent: React.FC<Props> = ({
                     itemsPerPageOptions={itemsPerPageOptions}
                     onChangeItemsPerPage={onChangeItemsPerPage}
                     onChangePage={loadPage}
-                    serverSideEventCount={totalCountMinusDeleted}
-                    totalCount={pageInfo.fakeTotalCount}
+                    totalCount={totalCountMinusDeleted}
                   />
                 )
               }

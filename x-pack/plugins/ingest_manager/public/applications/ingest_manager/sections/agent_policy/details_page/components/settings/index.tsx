@@ -35,7 +35,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
   ({ agentPolicy: originalAgentPolicy }) => {
     const { notifications } = useCore();
     const {
-      fleet: { enabled: isFleetEnabled },
+      agents: { enabled: isFleetEnabled },
     } = useConfig();
     const history = useHistory();
     const { getPath } = useLink();
@@ -71,7 +71,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
         });
         if (data) {
           notifications.toasts.addSuccess(
-            i18n.translate('xpack.ingestManager.editAgentPolicy.successNotificationTitle', {
+            i18n.translate('xpack.fleet.editAgentPolicy.successNotificationTitle', {
               defaultMessage: "Successfully updated '{name}' settings",
               values: { name: agentPolicy.name },
             })
@@ -82,14 +82,14 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
           notifications.toasts.addDanger(
             error
               ? error.message
-              : i18n.translate('xpack.ingestManager.editAgentPolicy.errorNotificationTitle', {
+              : i18n.translate('xpack.fleet.editAgentPolicy.errorNotificationTitle', {
                   defaultMessage: 'Unable to update agent policy',
                 })
           );
         }
       } catch (e) {
         notifications.toasts.addDanger(
-          i18n.translate('xpack.ingestManager.editAgentPolicy.errorNotificationTitle', {
+          i18n.translate('xpack.fleet.editAgentPolicy.errorNotificationTitle', {
             defaultMessage: 'Unable to update agent policy',
           })
         );
@@ -145,7 +145,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
               <EuiFlexItem>
                 <FormattedMessage
-                  id="xpack.ingestManager.editAgentPolicy.unsavedChangesText"
+                  id="xpack.fleet.editAgentPolicy.unsavedChangesText"
                   defaultMessage="You have unsaved changes"
                 />
               </EuiFlexItem>
@@ -160,7 +160,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                       }}
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.editAgentPolicy.cancelButtonText"
+                        id="xpack.fleet.editAgentPolicy.cancelButtonText"
                         defaultMessage="Cancel"
                       />
                     </EuiButtonEmpty>
@@ -178,12 +178,12 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                     >
                       {isLoading ? (
                         <FormattedMessage
-                          id="xpack.ingestManager.editAgentPolicy.savingButtonText"
+                          id="xpack.fleet.editAgentPolicy.savingButtonText"
                           defaultMessage="Saving…"
                         />
                       ) : (
                         <FormattedMessage
-                          id="xpack.ingestManager.editAgentPolicy.saveButtonText"
+                          id="xpack.fleet.editAgentPolicy.saveButtonText"
                           defaultMessage="Save changes"
                         />
                       )}

@@ -10,7 +10,7 @@ import {
   SavedObjectReference,
 } from 'kibana/public';
 import { Query } from '../../../../../src/plugins/data/public';
-import { PersistableFilter } from '../../common';
+import { DOC_TYPE, PersistableFilter } from '../../common';
 
 export interface Document {
   savedObjectId?: string;
@@ -26,8 +26,6 @@ export interface Document {
   };
   references: SavedObjectReference[];
 }
-
-export const DOC_TYPE = 'lens';
 
 export interface DocumentSaver {
   save: (vis: Document) => Promise<{ savedObjectId: string }>;

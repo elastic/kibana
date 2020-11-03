@@ -13,8 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
 
-  // Failing: See https://github.com/elastic/kibana/issues/77969
-  describe.skip('lens smokescreen tests', () => {
+  describe('lens smokescreen tests', () => {
     it('should allow creation of lens xy chart', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -153,6 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         dimension: 'lnsXY_yDimensionPanel > lns-dimensionTrigger',
         operation: 'max',
         field: 'memory',
+        keepOpen: true,
       });
       await PageObjects.lens.editDimensionLabel('Test of label');
       await PageObjects.lens.editDimensionFormat('Percent');
@@ -160,6 +160,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');
+
+      await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await PageObjects.lens.assertColor('#ff0000');
 
       await testSubjects.existOrFail('indexPattern-dimension-formatDecimals');
@@ -305,6 +307,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2015-09-20 00:00');
       expect(await PageObjects.lens.getDatatableHeaderText(1)).to.eql('Average of bytes');
       expect(await PageObjects.lens.getDatatableCellText(0, 1)).to.eql('6,011.351');
+    });
+
+    it('should allow to change index pattern', async () => {
+      await PageObjects.lens.switchFirstLayerIndexPattern('otherpattern');
+      expect(await PageObjects.lens.getFirstLayerIndexPattern()).to.equal('otherpattern');
+      expect(await PageObjects.lens.isShowingNoResults()).to.equal(true);
     });
   });
 }

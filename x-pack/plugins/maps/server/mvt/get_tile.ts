@@ -21,9 +21,8 @@ import {
   SUPER_FINE_ZOOM_DELTA,
 } from '../../common/constants';
 
-import { hitsToGeoJson } from '../../common/elasticsearch_util';
+import { convertRegularRespToGeoJson, hitsToGeoJson } from '../../common/elasticsearch_util';
 import { flattenHit } from './util';
-import { convertRegularRespToGeoJson } from '../../common/elasticsearch_util';
 import { ESBounds, tile2lat, tile2long, tileToESBbox } from '../../common/geo_tile_utils';
 
 export async function getGridTile({
@@ -107,6 +106,7 @@ export async function getTile({
   y,
   z,
   requestBody = {},
+  geoFieldType,
 }: {
   x: number;
   y: number;
@@ -116,6 +116,7 @@ export async function getTile({
   callElasticsearch: (type: string, ...args: any[]) => Promise<unknown>;
   logger: Logger;
   requestBody: any;
+  geoFieldType: ES_GEO_FIELD_TYPE;
 }): Promise<Buffer | null> {
   const geojsonBbox = tileToGeoJsonPolygon(x, y, z);
 
@@ -181,7 +182,6 @@ export async function getTile({
           },
         ];
       } else {
-        // Perform actual search
         result = await callElasticsearch('search', esSearchQuery);
 
         // Todo: pass in epochMillies-fields
@@ -192,7 +192,7 @@ export async function getTile({
             return flattenHit(geometryFieldName, hit);
           },
           geometryFieldName,
-          ES_GEO_FIELD_TYPE.GEO_SHAPE,
+          geoFieldType,
           []
         );
 

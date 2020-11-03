@@ -67,7 +67,7 @@ describe('Helpers', () => {
         type: 'mapping',
         value: 'some os',
       };
-      const output = getFormattedEntry(payloadIndexPattern, payloadItem, 0);
+      const output = getFormattedEntry(payloadIndexPattern, payloadIndexPattern, payloadItem, 0);
       const expected: FormattedEntry = {
         entryIndex: 0,
         field: {
@@ -88,15 +88,73 @@ describe('Helpers', () => {
   });
 
   describe('#getFormattedEntries', () => {
-    test('it returns formatted entry with fields undefined if it unable to find a matching index pattern field', () => {
-      const payloadIndexPattern: IndexPattern = getMockIndexPattern();
+    test('it returns formatted entry with field and value undefined if it unable to find a matching index pattern field', () => {
+      const payloadIndexPattern = getMockIndexPattern();
       const payloadItems: Entry[] = [{ field: 'field.one', type: 'mapping', value: 'field.one' }];
-      const output = getFormattedEntries(payloadIndexPattern, payloadItems);
+      const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
           entryIndex: 0,
           field: undefined,
           value: undefined,
+          type: 'mapping',
+        },
+      ];
+      expect(output).toEqual(expected);
+    });
+
+    test('it returns "undefined" value if cannot match a pattern field', () => {
+      const payloadIndexPattern = getMockIndexPattern();
+      const payloadItems: Entry[] = [{ field: 'machine.os', type: 'mapping', value: 'yolo' }];
+      const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
+      const expected: FormattedEntry[] = [
+        {
+          entryIndex: 0,
+          field: {
+            name: 'machine.os',
+            type: 'string',
+            esTypes: ['text'],
+            count: 0,
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: false,
+          },
+          value: undefined,
+          type: 'mapping',
+        },
+      ];
+      expect(output).toEqual(expected);
+    });
+
+    test('it returns value and field when they match two independent index patterns', () => {
+      const payloadIndexPattern = getMockIndexPattern();
+      const threatIndexPattern = getMockIndexPattern();
+      const payloadItems: Entry[] = [{ field: 'machine.os', type: 'mapping', value: 'machine.os' }];
+      const output = getFormattedEntries(payloadIndexPattern, threatIndexPattern, payloadItems);
+      const expected: FormattedEntry[] = [
+        {
+          entryIndex: 0,
+          field: {
+            name: 'machine.os',
+            type: 'string',
+            esTypes: ['text'],
+            count: 0,
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: false,
+          },
+          value: {
+            name: 'machine.os',
+            type: 'string',
+            esTypes: ['text'],
+            count: 0,
+            scripted: false,
+            searchable: true,
+            aggregatable: true,
+            readFromDocValues: false,
+          },
           type: 'mapping',
         },
       ];
@@ -109,7 +167,7 @@ describe('Helpers', () => {
         { field: 'machine.os', type: 'mapping', value: 'machine.os' },
         { field: 'ip', type: 'mapping', value: 'ip' },
       ];
-      const output = getFormattedEntries(payloadIndexPattern, payloadItems);
+      const output = getFormattedEntries(payloadIndexPattern, payloadIndexPattern, payloadItems);
       const expected: FormattedEntry[] = [
         {
           field: {

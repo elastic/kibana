@@ -19,7 +19,7 @@ const initialState: DataState = {
   relatedEvents: new Map(),
   resolverComponentInstanceID: undefined,
 };
-
+/* eslint-disable complexity */
 export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialState, action) => {
   if (action.type === 'appReceivedNewExternalProperties') {
     const nextState: DataState = {
@@ -155,6 +155,32 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       }
     } else {
       // the action is stale, ignore it
+      return state;
+    }
+  } else if (action.type === 'userRequestedAdditionalRelatedEvents') {
+    if (state.nodeEventsInCategory) {
+      const nextState: DataState = {
+        ...state,
+        nodeEventsInCategory: {
+          ...state.nodeEventsInCategory,
+          lastCursorRequested: state.nodeEventsInCategory?.cursor,
+        },
+      };
+      return nextState;
+    } else {
+      return state;
+    }
+  } else if (action.type === 'serverFailedToReturnNodeEventsInCategory') {
+    if (state.nodeEventsInCategory) {
+      const nextState: DataState = {
+        ...state,
+        nodeEventsInCategory: {
+          ...state.nodeEventsInCategory,
+          error: true,
+        },
+      };
+      return nextState;
+    } else {
       return state;
     }
   } else if (action.type === 'appRequestedCurrentRelatedEventData') {

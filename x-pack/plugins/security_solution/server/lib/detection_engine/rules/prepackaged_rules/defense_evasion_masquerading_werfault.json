@@ -1,0 +1,51 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies a suspicious WerFault command line parameter, which may indicate an attempt to run unnoticed.",
+  "false_positives": [
+    "Legit Application Crash with rare Werfault commandline value"
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Process Potentially Masquerading as WerFault",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:WerFault.exe and not process.args:(((\"-u\" or \"-pss\") and \"-p\" and \"-s\") or (\"/h\" and \"/shared\") or (\"-k\" and \"-lcq\"))",
+  "references": [
+    "https://twitter.com/SBousseaden/status/1235533224337641473",
+    "https://www.hexacorn.com/blog/2019/09/20/werfault-command-line-switches-v0-1/"
+  ],
+  "risk_score": 47,
+  "rule_id": "6ea41894-66c3-4df7-ad6b-2c5074eb3df8",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

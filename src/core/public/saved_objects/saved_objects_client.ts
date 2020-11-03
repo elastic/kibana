@@ -96,6 +96,12 @@ export interface SavedObjectsBatchResponse<T = unknown> {
   savedObjects: Array<SimpleSavedObject<T>>;
 }
 
+/** @public */
+export interface SavedObjectsDeleteOptions {
+  /** Force deletion of an object that exists in multiple namespaces */
+  force?: boolean;
+}
+
 /**
  * Return type of the Saved Objects `find()` method.
  *
@@ -261,12 +267,20 @@ export class SavedObjectsClient {
    * @param id
    * @returns
    */
-  public delete = (type: string, id: string): ReturnType<SavedObjectsApi['delete']> => {
+  public delete = (
+    type: string,
+    id: string,
+    options?: SavedObjectsDeleteOptions
+  ): ReturnType<SavedObjectsApi['delete']> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
     }
 
-    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE' });
+    const query = {
+      force: !!options?.force,
+    };
+
+    return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query });
   };
 
   /**
@@ -291,6 +305,7 @@ export class SavedObjectsClient {
       defaultSearchOperator: 'default_search_operator',
       fields: 'fields',
       hasReference: 'has_reference',
+      hasReferenceOperator: 'has_reference_operator',
       page: 'page',
       perPage: 'per_page',
       search: 'search',
@@ -303,7 +318,16 @@ export class SavedObjectsClient {
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
-    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]);
+    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Record<
+      string,
+      any
+    >;
+
+    // `has_references` is a structured object. we need to stringify it before sending it, as `fetch`
+    // is not doing it implicitly.
+    if (query.has_reference) {
+      query.has_reference = JSON.stringify(query.has_reference);
+    }
 
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',

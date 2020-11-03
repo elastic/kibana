@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { omit } from 'lodash';
 import { KibanaRequest } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../../security/server';
@@ -46,21 +46,6 @@ export class SpacesClient {
     private readonly internalSavedObjectRepository: any,
     private readonly request: KibanaRequest
   ) {}
-
-  public async canEnumerateSpaces(): Promise<boolean> {
-    if (this.useRbac()) {
-      const checkPrivileges = this.authorization!.checkPrivilegesWithRequest(this.request);
-      const { hasAllRequested } = await checkPrivileges.globally({
-        kibana: this.authorization!.actions.space.manage,
-      });
-      this.debugLogger(`SpacesClient.canEnumerateSpaces, using RBAC. Result: ${hasAllRequested}`);
-      return hasAllRequested;
-    }
-
-    // If not RBAC, then security isn't enabled and we can enumerate all spaces
-    this.debugLogger(`SpacesClient.canEnumerateSpaces, NOT USING RBAC. Result: true`);
-    return true;
-  }
 
   public async getAll(purpose: GetSpacePurpose = 'any'): Promise<Space[]> {
     if (!SUPPORTED_GET_SPACE_PURPOSES.includes(purpose)) {

@@ -10,7 +10,6 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiPanel,
-  EuiResizableContainer,
 } from '@elastic/eui';
 import React from 'react';
 import { ClientMetrics } from './ClientMetrics';
@@ -20,11 +19,14 @@ import { ImpactfulMetrics } from './ImpactfulMetrics';
 import { PageLoadAndViews } from './Panels/PageLoadAndViews';
 import { VisitorBreakdownsPanel } from './Panels/VisitorBreakdowns';
 import { useBreakPoints } from './hooks/useBreakPoints';
-
-export const FULL_HEIGHT = { height: '100%' };
+import { getPercentileLabel } from './UXMetrics/translations';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 
 export function RumDashboard() {
-  const { isLarge, isSmall } = useBreakPoints();
+  const {
+    urlParams: { percentile },
+  } = useUrlParams();
+  const { isSmall } = useBreakPoints();
 
   return (
     <EuiFlexGroup direction={isSmall ? 'row' : 'column'} gutterSize="s">
@@ -33,7 +35,9 @@ export function RumDashboard() {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={1} data-cy={`client-metrics`}>
               <EuiTitle size="xs">
-                <h3>{I18LABELS.pageLoadDuration}</h3>
+                <h3>
+                  {I18LABELS.pageLoad} ({getPercentileLabel(percentile!)})
+                </h3>
               </EuiTitle>
               <EuiSpacer size="s" />
               <ClientMetrics />
@@ -45,22 +49,10 @@ export function RumDashboard() {
         <UXMetrics />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiResizableContainer
-          style={{ height: isLarge ? '1400px' : '850px' }}
-          direction="vertical"
-        >
-          {(EuiResizablePanel, EuiResizableButton) => (
-            <>
-              <EuiResizablePanel initialSize={40} minSize="40%">
-                <PageLoadAndViews />
-              </EuiResizablePanel>
-              <EuiResizableButton />
-              <EuiResizablePanel initialSize={60} minSize="10%">
-                <VisitorBreakdownsPanel />
-              </EuiResizablePanel>
-            </>
-          )}
-        </EuiResizableContainer>
+        <PageLoadAndViews />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <VisitorBreakdownsPanel />
       </EuiFlexItem>
       <EuiFlexItem>
         <ImpactfulMetrics />

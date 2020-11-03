@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { SPACES } from './spaces';
+import { SPACES, ALL_SPACES_ID } from './spaces';
 import { AUTHENTICATION } from './authentication';
 import { TestCase, TestUser, ExpectResponseBody } from './types';
 
@@ -73,7 +73,10 @@ export const getTestTitle = (
 };
 
 export const isUserAuthorizedAtSpace = (user: TestUser | undefined, namespace: string) =>
-  !user || user.authorizedAtSpaces.includes('*') || user.authorizedAtSpaces.includes(namespace);
+  !user ||
+  (user.authorizedAtSpaces.length > 0 && namespace === ALL_SPACES_ID) ||
+  user.authorizedAtSpaces.includes('*') ||
+  user.authorizedAtSpaces.includes(namespace);
 
 export const getRedactedNamespaces = (
   user: TestUser | undefined,

@@ -124,7 +124,7 @@ export const JobSetupScreen = (props: Props) => {
         <EuiTitle size="m">
           <h2>
             <FormattedMessage
-              defaultMessage="Enable Machine Learning for {nodeType}"
+              defaultMessage="Enable machine learning for {nodeType}"
               id="xpack.infra.ml.aomalyFlyout.jobSetup.flyoutHeader"
               values={{ nodeType: props.jobType }}
             />
@@ -164,7 +164,7 @@ export const JobSetupScreen = (props: Props) => {
               <p>
                 <FormattedMessage
                   id="xpack.infra.ml.steps.setupProcess.description"
-                  defaultMessage="Answer the following questions to configure Machine Learning jobs for Metrics. These settings can not be changed once the jobs are created. You can recreate these jobs later; however, any previously detected anomalies will be removed as a result."
+                  defaultMessage="Settings can not be changed once the jobs are created. You can recreate jobs anytime, however, the previously detected anomalies are removed."
                 />
               </p>
             </EuiText>
@@ -183,7 +183,7 @@ export const JobSetupScreen = (props: Props) => {
                 description={
                   <FormattedMessage
                     id="xpack.infra.ml.steps.setupProcess.when.description"
-                    defaultMessage="By default, Machine Learning jobs will analyze the past 4 weeks of data and continue to run indefinitely. You can specify a different start date, end date, or both. We recommend that you run jobs indefinitely."
+                    defaultMessage="By default, machine learning jobs analyze the last 4 weeks of data and continue to run indefinitely."
                   />
                 }
               >
@@ -216,7 +216,7 @@ export const JobSetupScreen = (props: Props) => {
                 description={
                   <FormattedMessage
                     id="xpack.infra.ml.steps.setupProcess.partition.description"
-                    defaultMessage="Partitions allow you to build independent models for different groups of data that share similar behavior. For example, you may want to build seperate models for machine type or cloud availability zone so that anomalies are not weighted equally across groups."
+                    defaultMessage="Partitions enable you to build independent models for groups of data that share similar behavior. For example, you can partition by machine type or cloud availability zone."
                   />
                 }
               >
@@ -227,7 +227,7 @@ export const JobSetupScreen = (props: Props) => {
                       defaultMessage="Partition field"
                     />
                   }
-                  compressed
+                  display="rowCompressed"
                 >
                   <EuiComboBox
                     placeholder={i18n.translate('xpack.infra.metricsExplorer.groupByLabel', {
@@ -267,7 +267,7 @@ export const JobSetupScreen = (props: Props) => {
             <EuiButton fill={true} fullWidth={false} onClick={createJobs}>
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.enableButton"
-                defaultMessage="Enable Jobs"
+                defaultMessage="Enable jobs"
               />
             </EuiButton>
           </EuiFlexItem>

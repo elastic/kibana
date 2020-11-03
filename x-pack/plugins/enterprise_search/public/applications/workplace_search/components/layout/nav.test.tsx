@@ -18,6 +18,6 @@ describe('WorkplaceSearchNav', () => {
 
     expect(wrapper.find(SideNav)).toHaveLength(1);
     expect(wrapper.find(SideNavLink).first().prop('to')).toEqual('/');
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('http://localhost:3002/ws/search');
+    expect(wrapper.find(SideNavLink)).toHaveLength(7);
   });
 });

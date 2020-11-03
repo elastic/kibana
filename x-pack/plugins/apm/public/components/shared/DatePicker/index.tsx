@@ -5,8 +5,7 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { isEmpty, isEqual, pickBy } from 'lodash';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
@@ -15,14 +14,10 @@ import { clearCache } from '../../../services/rest/callApi';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { TimePickerQuickRange, TimePickerTimeDefaults } from './typings';
 
-function removeUndefinedAndEmptyProps<T extends object>(obj: T): Partial<T> {
-  return pickBy(obj, (value) => value !== undefined && !isEmpty(String(value)));
-}
-
 export function DatePicker() {
   const history = useHistory();
   const location = useLocation();
-  const { core } = useApmPluginContext();
+  const { core, plugins } = useApmPluginContext();
 
   const timePickerQuickRanges = core.uiSettings.get<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES
@@ -31,11 +26,6 @@ export function DatePicker() {
   const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
-
-  const DEFAULT_VALUES = {
-    rangeFrom: timePickerTimeDefaults.from,
-    rangeTo: timePickerTimeDefaults.to,
-  };
 
   const commonlyUsedRanges = timePickerQuickRanges.map(
     ({ from, to, display }) => ({
@@ -76,35 +66,48 @@ export function DatePicker() {
     updateUrl({ rangeFrom: start, rangeTo: end });
   }
 
-  const { rangeFrom, rangeTo, refreshPaused, refreshInterval } = urlParams;
-  const timePickerURLParams = removeUndefinedAndEmptyProps({
-    rangeFrom,
-    rangeTo,
-    refreshPaused,
-    refreshInterval,
-  });
+  useEffect(() => {
+    // set time if both to and from are given in the url
+    if (urlParams.rangeFrom && urlParams.rangeTo) {
+      plugins.data.query.timefilter.timefilter.setTime({
+        from: urlParams.rangeFrom,
+        to: urlParams.rangeTo,
+      });
+      return;
+    }
 
-  const nextParams = {
-    ...DEFAULT_VALUES,
-    ...timePickerURLParams,
-  };
-  if (!isEqual(nextParams, timePickerURLParams)) {
-    // When the default parameters are not availbale in the url, replace it adding the necessary parameters.
+    // read time from state and update the url
+    const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
+
     history.replace({
       ...location,
       search: fromQuery({
         ...toQuery(location.search),
-        ...nextParams,
+        rangeFrom:
+          urlParams.rangeFrom ??
+          timePickerSharedState.from ??
+          timePickerTimeDefaults.from,
+        rangeTo:
+          urlParams.rangeTo ??
+          timePickerSharedState.to ??
+          timePickerTimeDefaults.to,
       }),
     });
-  }
+  }, [
+    urlParams.rangeFrom,
+    urlParams.rangeTo,
+    plugins,
+    history,
+    location,
+    timePickerTimeDefaults,
+  ]);
 
   return (
     <EuiSuperDatePicker
-      start={rangeFrom}
-      end={rangeTo}
-      isPaused={refreshPaused}
-      refreshInterval={refreshInterval}
+      start={urlParams.rangeFrom}
+      end={urlParams.rangeTo}
+      isPaused={urlParams.refreshPaused}
+      refreshInterval={urlParams.refreshInterval}
       onTimeChange={onTimeChange}
       onRefresh={({ start, end }) => {
         clearCache();

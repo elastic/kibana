@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { from } from 'rxjs';
 import { AbstractSearchStrategy } from './abstract_search_strategy';
 
 describe('AbstractSearchStrategy', () => {
@@ -34,7 +35,7 @@ describe('AbstractSearchStrategy', () => {
       },
     };
 
-    abstractSearchStrategy = new AbstractSearchStrategy('es');
+    abstractSearchStrategy = new AbstractSearchStrategy();
   });
 
   test('should init an AbstractSearchStrategy instance', () => {
@@ -49,13 +50,13 @@ describe('AbstractSearchStrategy', () => {
     expect(fields).toBe(mockedFields);
     expect(req.pre.indexPatternsService.getFieldsForWildcard).toHaveBeenCalledWith({
       pattern: indexPattern,
-      fieldCapsOptions: { allowNoIndices: true },
+      fieldCapsOptions: { allow_no_indices: true },
     });
   });
 
   test('should return response', async () => {
     const searches = [{ body: 'body', index: 'index' }];
-    const searchFn = jest.fn().mockReturnValue(Promise.resolve({}));
+    const searchFn = jest.fn().mockReturnValue(from(Promise.resolve({})));
 
     const responses = await abstractSearchStrategy.search(
       {
@@ -82,7 +83,6 @@ describe('AbstractSearchStrategy', () => {
 
     expect(responses).toEqual([{}]);
     expect(searchFn).toHaveBeenCalledWith(
-      {},
       {
         params: {
           body: 'body',
@@ -90,9 +90,8 @@ describe('AbstractSearchStrategy', () => {
         },
         indexType: undefined,
       },
-      {
-        strategy: 'es',
-      }
+      {},
+      {}
     );
   });
 });

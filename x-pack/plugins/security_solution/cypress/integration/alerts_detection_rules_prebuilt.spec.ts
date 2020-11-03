@@ -10,6 +10,7 @@ import {
   RELOAD_PREBUILT_RULES_BTN,
   RULES_ROW,
   RULES_TABLE,
+  SHOWING_RULES_TEXT,
 } from '../screens/alerts_detection_rules';
 
 import {
@@ -22,6 +23,7 @@ import {
   deleteFirstRule,
   deleteSelectedRules,
   loadPrebuiltDetectionRules,
+  paginate,
   reloadDeletedRules,
   selectNumberOfRules,
   waitForLoadElasticPrebuiltDetectionRulesTableToBeLoaded,
@@ -61,8 +63,17 @@ describe('Alerts rules, prebuilt rules', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
+    cy.get(SHOWING_RULES_TEXT).should('have.text', `Showing ${expectedNumberOfRules} rules`);
+    cy.get(RULES_TABLE).then(($table1) => {
+      const firstScreenRules = $table1.find(RULES_ROW).length;
+      paginate();
+      waitForRulesToBeLoaded();
+      cy.get(RULES_TABLE).then(($table2) => {
+        const secondScreenRules = $table2.find(RULES_ROW).length;
+        const totalNumberOfRules = firstScreenRules + secondScreenRules;
+
+        expect(totalNumberOfRules).to.eql(expectedNumberOfRules);
+      });
     });
   });
 });
@@ -85,10 +96,6 @@ describe('Deleting prebuilt rules', () => {
 
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
-
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRules);
-    });
   });
 
   afterEach(() => {
@@ -117,9 +124,6 @@ describe('Deleting prebuilt rules', () => {
       'have.text',
       `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
     );
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
-    });
     cy.get(RELOAD_PREBUILT_RULES_BTN).should('exist');
     cy.get(RELOAD_PREBUILT_RULES_BTN).should('have.text', 'Install 1 Elastic prebuilt rule ');
 
@@ -131,9 +135,6 @@ describe('Deleting prebuilt rules', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterRecovering);
-    });
     cy.get(ELASTIC_RULES_BTN).should(
       'have.text',
       `Elastic rules (${expectedNumberOfRulesAfterRecovering})`
@@ -160,9 +161,6 @@ describe('Deleting prebuilt rules', () => {
       'have.text',
       `Elastic rules (${expectedNumberOfRulesAfterDeletion})`
     );
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterDeletion);
-    });
 
     reloadDeletedRules();
 
@@ -172,9 +170,6 @@ describe('Deleting prebuilt rules', () => {
     changeToThreeHundredRowsPerPage();
     waitForRulesToBeLoaded();
 
-    cy.get(RULES_TABLE).then(($table) => {
-      cy.wrap($table.find(RULES_ROW).length).should('eql', expectedNumberOfRulesAfterRecovering);
-    });
     cy.get(ELASTIC_RULES_BTN).should(
       'have.text',
       `Elastic rules (${expectedNumberOfRulesAfterRecovering})`

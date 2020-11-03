@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { createAppContextStartContractMock } from '../../../../mocks';
+
 jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
 });
@@ -21,11 +23,13 @@ import { getInstallation, getInstallationObject } from '../../packages';
 import { getAsset } from './common';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { savedObjectsClientMock } from '../../../../../../../../src/core/server/saved_objects/service/saved_objects_client.mock';
+import { appContextService } from '../../../app_context';
 
 describe('test transform install', () => {
   let legacyScopedClusterClient: jest.Mocked<ILegacyScopedClusterClient>;
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   beforeEach(() => {
+    appContextService.start(createAppContextStartContractMock());
     legacyScopedClusterClient = {
       callAsInternalUser: jest.fn(),
       callAsCurrentUser: jest.fn(),
@@ -160,6 +164,7 @@ describe('test transform install', () => {
         {
           method: 'GET',
           path: '/_transform/endpoint.metadata_current-default-0.15.0-dev.0',
+          ignore: [404],
         },
       ],
       [
@@ -446,6 +451,7 @@ describe('test transform install', () => {
         {
           method: 'GET',
           path: '/_transform/endpoint.metadata-current-default-0.15.0-dev.0',
+          ignore: [404],
         },
       ],
       [

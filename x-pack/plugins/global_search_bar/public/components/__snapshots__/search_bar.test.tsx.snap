@@ -2,81 +2,30 @@
 
 exports[`SearchBar correctly filters and sorts results 1`] = `
 Array [
-  Object {
-    "append": undefined,
-    "className": "euiSelectableTemplateSitewide__listItem",
-    "key": "Canvas",
-    "label": "Canvas",
-    "meta": Array [
-      Object {
-        "text": "Kibana",
-      },
-    ],
-    "prepend": undefined,
-    "title": "Canvas • Kibana",
-    "url": "/app/test/Canvas",
-  },
-  Object {
-    "append": undefined,
-    "className": "euiSelectableTemplateSitewide__listItem",
-    "key": "Discover",
-    "label": "Discover",
-    "meta": Array [
-      Object {
-        "text": "Kibana",
-      },
-    ],
-    "prepend": undefined,
-    "title": "Discover • Kibana",
-    "url": "/app/test/Discover",
-  },
-  Object {
-    "append": undefined,
-    "className": "euiSelectableTemplateSitewide__listItem",
-    "key": "Graph",
-    "label": "Graph",
-    "meta": Array [
-      Object {
-        "text": "Kibana",
-      },
-    ],
-    "prepend": undefined,
-    "title": "Graph • Kibana",
-    "url": "/app/test/Graph",
-  },
+  "Canvas • Kibana",
+  "Discover • Kibana",
+  "Graph • Kibana",
 ]
 `;
 
 exports[`SearchBar correctly filters and sorts results 2`] = `
 Array [
-  Object {
-    "append": undefined,
-    "className": "euiSelectableTemplateSitewide__listItem",
-    "key": "Discover",
-    "label": "Discover",
-    "meta": Array [
-      Object {
-        "text": "Kibana",
-      },
-    ],
-    "prepend": undefined,
-    "title": "Discover • Kibana",
-    "url": "/app/test/Discover",
-  },
-  Object {
-    "append": undefined,
-    "className": "euiSelectableTemplateSitewide__listItem",
-    "key": "My Dashboard",
-    "label": "My Dashboard",
-    "meta": Array [
-      Object {
-        "text": "Test",
-      },
-    ],
-    "prepend": undefined,
-    "title": "My Dashboard • Test",
-    "url": "/app/test/My Dashboard",
-  },
+  "Discover • Kibana",
+  "My Dashboard • Test",
+]
+`;
+
+exports[`SearchBar only display results from the last search 1`] = `
+Array [
+  "Visualize • Kibana",
+  "Map • Kibana",
+]
+`;
+
+exports[`SearchBar only display results from the last search 2`] = `
+Array [
+  "Visualize • Kibana",
+  "Map • Kibana",
 ]
 `;
 
@@ -86,7 +35,7 @@ exports[`SearchBar supports keyboard shortcuts 1`] = `
   aria-haspopup="listbox"
   aria-label="Filter options"
   autocomplete="off"
-  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiFieldSearch-isClearable euiSelectableSearch euiSelectableTemplateSitewide__search"
+  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch euiSelectableTemplateSitewide__search"
   data-test-subj="header-search"
   placeholder="Search Elastic"
   type="search"

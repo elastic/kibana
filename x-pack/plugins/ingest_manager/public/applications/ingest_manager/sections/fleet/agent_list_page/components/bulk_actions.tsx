@@ -18,7 +18,12 @@ import {
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n/react';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 import { Agent } from '../../../../types';
-import { AgentReassignAgentPolicyFlyout, AgentUnenrollAgentModal } from '../../components';
+import {
+  AgentReassignAgentPolicyFlyout,
+  AgentUnenrollAgentModal,
+  AgentUpgradeAgentModal,
+} from '../../components';
+import { useKibanaVersion } from '../../../../hooks';
 
 const Divider = styled.div`
   width: 0;
@@ -59,6 +64,7 @@ export const AgentBulkActions: React.FunctionComponent<{
   setSelectedAgents,
   refreshAgents,
 }) => {
+  const kibanaVersion = useKibanaVersion();
   // Bulk actions menu states
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -67,6 +73,7 @@ export const AgentBulkActions: React.FunctionComponent<{
   // Actions states
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState<boolean>(false);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState<boolean>(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState<boolean>(false);
 
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
@@ -81,7 +88,7 @@ export const AgentBulkActions: React.FunctionComponent<{
         {
           name: (
             <FormattedMessage
-              id="xpack.ingestManager.agentBulkActions.reassignPolicy"
+              id="xpack.fleet.agentBulkActions.reassignPolicy"
               defaultMessage="Assign to new policy"
             />
           ),
@@ -95,7 +102,7 @@ export const AgentBulkActions: React.FunctionComponent<{
         {
           name: (
             <FormattedMessage
-              id="xpack.ingestManager.agentBulkActions.unenrollAgents"
+              id="xpack.fleet.agentBulkActions.unenrollAgents"
               defaultMessage="Unenroll agents"
             />
           ),
@@ -109,7 +116,21 @@ export const AgentBulkActions: React.FunctionComponent<{
         {
           name: (
             <FormattedMessage
-              id="xpack.ingestManager.agentBulkActions.clearSelection"
+              id="xpack.fleet.agentBulkActions.upgradeAgents"
+              defaultMessage="Upgrade agents"
+            />
+          ),
+          icon: <EuiIcon type="refresh" size="m" />,
+          disabled: !atLeastOneActiveAgentSelected,
+          onClick: () => {
+            closeMenu();
+            setIsUpgradeModalOpen(true);
+          },
+        },
+        {
+          name: (
+            <FormattedMessage
+              id="xpack.fleet.agentBulkActions.clearSelection"
               defaultMessage="Clear selection"
             />
           ),
@@ -151,12 +172,27 @@ export const AgentBulkActions: React.FunctionComponent<{
           />
         </EuiPortal>
       )}
+      {isUpgradeModalOpen && (
+        <EuiPortal>
+          <AgentUpgradeAgentModal
+            version={kibanaVersion}
+            agents={selectionMode === 'manual' ? selectedAgents : currentQuery}
+            agentCount={
+              selectionMode === 'manual' ? selectedAgents.length : totalAgents - totalInactiveAgents
+            }
+            onClose={() => {
+              setIsUpgradeModalOpen(false);
+              refreshAgents();
+            }}
+          />
+        </EuiPortal>
+      )}
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
             {totalAgents > SO_SEARCH_LIMIT ? (
               <FormattedMessage
-                id="xpack.ingestManager.agentBulkActions.totalAgentsWithLimit"
+                id="xpack.fleet.agentBulkActions.totalAgentsWithLimit"
                 defaultMessage="Showing {count} of {total} agents"
                 values={{
                   count: <FormattedNumber value={SO_SEARCH_LIMIT} />,
@@ -165,7 +201,7 @@ export const AgentBulkActions: React.FunctionComponent<{
               />
             ) : (
               <FormattedMessage
-                id="xpack.ingestManager.agentBulkActions.totalAgents"
+                id="xpack.fleet.agentBulkActions.totalAgents"
                 defaultMessage="Showing {count, plural, one {# agent} other {# agents}}"
                 values={{ count: totalAgents }}
               />
@@ -190,7 +226,7 @@ export const AgentBulkActions: React.FunctionComponent<{
                     onClick={openMenu}
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.agentBulkActions.agentsSelected"
+                      id="xpack.fleet.agentBulkActions.agentsSelected"
                       defaultMessage="{count, plural, one {# agent} other {# agents}} selected"
                       values={{
                         count:
@@ -221,7 +257,7 @@ export const AgentBulkActions: React.FunctionComponent<{
                   onClick={() => setSelectionMode('query')}
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.agentBulkActions.selectAll"
+                    id="xpack.fleet.agentBulkActions.selectAll"
                     defaultMessage="Select everything on all pages"
                   />
                 </Button>

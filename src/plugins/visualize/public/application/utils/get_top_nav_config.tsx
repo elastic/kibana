@@ -21,6 +21,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { TopNavMenuData } from 'src/plugins/navigation/public';
+import { AppMountParameters } from 'kibana/public';
 import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualizations/public';
 import {
   showSaveModal,
@@ -51,6 +52,7 @@ interface TopNavConfigParams {
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
   embeddableId?: string;
+  onAppLeave: AppMountParameters['onAppLeave'];
 }
 
 export const getTopNavConfig = (
@@ -66,6 +68,7 @@ export const getTopNavConfig = (
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
+    onAppLeave,
   }: TopNavConfigParams,
   {
     application,
@@ -77,6 +80,7 @@ export const getTopNavConfig = (
     visualizeCapabilities,
     i18n: { Context: I18nContext },
     dashboard,
+    savedObjectsTagging,
   }: VisualizeServices
 ) => {
   const { vis, embeddableHandler } = visInstance;
@@ -174,47 +178,84 @@ export const getTopNavConfig = (
     stateTransfer.navigateToWithEmbeddablePackage(originatingApp, { state });
   };
 
+  const navigateToOriginatingApp = () => {
+    if (originatingApp) {
+      application.navigateToApp(originatingApp);
+    }
+  };
+
   const topNavMenu: TopNavMenuData[] = [
-    ...(originatingApp && ((savedVis && savedVis.id) || embeddableId)
+    {
+      id: 'inspector',
+      label: i18n.translate('visualize.topNavMenu.openInspectorButtonLabel', {
+        defaultMessage: 'inspect',
+      }),
+      description: i18n.translate('visualize.topNavMenu.openInspectorButtonAriaLabel', {
+        defaultMessage: 'Open Inspector for visualization',
+      }),
+      testId: 'openInspectorButton',
+      disableButton() {
+        return !embeddableHandler.hasInspector || !embeddableHandler.hasInspector();
+      },
+      run: openInspector,
+      tooltip() {
+        if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
+          return i18n.translate('visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
+            defaultMessage: `This visualization doesn't support any inspectors.`,
+          });
+        }
+      },
+    },
+    {
+      id: 'share',
+      label: i18n.translate('visualize.topNavMenu.shareVisualizationButtonLabel', {
+        defaultMessage: 'share',
+      }),
+      description: i18n.translate('visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
+        defaultMessage: 'Share Visualization',
+      }),
+      testId: 'shareTopNavButton',
+      run: (anchorElement) => {
+        if (share && !embeddableId) {
+          // TODO: support sharing in by-value mode
+          share.toggleShareContextMenu({
+            anchorElement,
+            allowEmbed: true,
+            allowShortUrl: visualizeCapabilities.createShortUrl,
+            shareableUrl: unhashUrl(window.location.href),
+            objectId: savedVis?.id,
+            objectType: 'visualization',
+            sharingData: {
+              title: savedVis?.title,
+            },
+            isDirty: hasUnappliedChanges || hasUnsavedChanges,
+          });
+        }
+      },
+      // disable the Share button if no action specified
+      disableButton: !share || !!embeddableId,
+    },
+    ...(originatingApp === 'dashboards' || originatingApp === 'canvas'
       ? [
           {
-            id: 'saveAndReturn',
-            label: i18n.translate('visualize.topNavMenu.saveAndReturnVisualizationButtonLabel', {
-              defaultMessage: 'Save and return',
+            id: 'cancel',
+            label: i18n.translate('visualize.topNavMenu.cancelButtonLabel', {
+              defaultMessage: 'Cancel',
             }),
-            emphasize: true,
-            iconType: 'check',
-            description: i18n.translate(
-              'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
-              {
-                defaultMessage: 'Finish editing visualization and return to the last app',
-              }
-            ),
-            testId: 'visualizesaveAndReturnButton',
-            disableButton: hasUnappliedChanges,
+            emphasize: false,
+            description: i18n.translate('visualize.topNavMenu.cancelButtonAriaLabel', {
+              defaultMessage: 'Return to the last app without saving changes',
+            }),
+            testId: 'visualizeCancelAndReturnButton',
             tooltip() {
-              if (hasUnappliedChanges) {
-                return i18n.translate(
-                  'visualize.topNavMenu.saveAndReturnVisualizationDisabledButtonTooltip',
-                  {
-                    defaultMessage: 'Apply or Discard your changes before finishing',
-                  }
-                );
+              if (hasUnappliedChanges || hasUnsavedChanges) {
+                return i18n.translate('visualize.topNavMenu.cancelAndReturnButtonTooltip', {
+                  defaultMessage: 'Discard your changes before finishing',
+                });
               }
             },
             run: async () => {
-              const saveOptions = {
-                confirmOverwrite: false,
-                returnToOrigin: true,
-              };
-              if (
-                originatingApp === 'dashboards' &&
-                dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
-                !savedVis
-              ) {
-                return createVisReference();
-              }
-              return doSave(saveOptions);
+              return navigateToOriginatingApp();
             },
           },
         ]
@@ -223,6 +264,7 @@ export const getTopNavConfig = (
       ? [
           {
             id: 'save',
+            iconType: savedVis?.id && originatingApp ? undefined : 'save',
             label:
               savedVis?.id && originatingApp
                 ? i18n.translate('visualize.topNavMenu.saveVisualizationAsButtonLabel', {
@@ -265,6 +307,11 @@ export const getTopNavConfig = (
                 embeddableHandler.updateInput({ title: newTitle });
                 savedVis.copyOnSave = newCopyOnSave;
                 savedVis.description = newDescription;
+
+                if (savedObjectsTagging && savedObjectsTagging.ui.hasTagDecoration(savedVis)) {
+                  savedVis.setTags(selectedTags);
+                }
+
                 const saveOptions = {
                   confirmOverwrite: false,
                   isTitleDuplicateConfirmed,
@@ -279,10 +326,30 @@ export const getTopNavConfig = (
                 return response;
               };
 
+              let selectedTags: string[] = [];
+              let options: React.ReactNode | undefined;
+
+              if (
+                savedVis &&
+                savedObjectsTagging &&
+                savedObjectsTagging.ui.hasTagDecoration(savedVis)
+              ) {
+                selectedTags = savedVis.getTags();
+                options = (
+                  <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
+                    initialSelection={selectedTags}
+                    onTagsSelected={(newSelection) => {
+                      selectedTags = newSelection;
+                    }}
+                  />
+                );
+              }
+
               const saveModal = (
                 <SavedObjectSaveModalOrigin
                   documentInfo={savedVis || { title: '' }}
                   onSave={onSave}
+                  options={options}
                   getAppNameFromId={stateTransfer.getAppNameFromId}
                   objectType={'visualization'}
                   onClose={() => {}}
@@ -290,6 +357,9 @@ export const getTopNavConfig = (
                 />
               );
               const isSaveAsButton = anchorElement.classList.contains('saveAsButton');
+              onAppLeave((actions) => {
+                return actions.default();
+              });
               if (
                 originatingApp === 'dashboards' &&
                 dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
@@ -303,56 +373,53 @@ export const getTopNavConfig = (
           },
         ]
       : []),
-    {
-      id: 'share',
-      label: i18n.translate('visualize.topNavMenu.shareVisualizationButtonLabel', {
-        defaultMessage: 'share',
-      }),
-      description: i18n.translate('visualize.topNavMenu.shareVisualizationButtonAriaLabel', {
-        defaultMessage: 'Share Visualization',
-      }),
-      testId: 'shareTopNavButton',
-      run: (anchorElement) => {
-        if (share && !embeddableId) {
-          // TODO: support sharing in by-value mode
-          share.toggleShareContextMenu({
-            anchorElement,
-            allowEmbed: true,
-            allowShortUrl: visualizeCapabilities.createShortUrl,
-            shareableUrl: unhashUrl(window.location.href),
-            objectId: savedVis?.id,
-            objectType: 'visualization',
-            sharingData: {
-              title: savedVis?.title,
+    ...(originatingApp && ((savedVis && savedVis.id) || embeddableId)
+      ? [
+          {
+            id: 'saveAndReturn',
+            label: i18n.translate('visualize.topNavMenu.saveAndReturnVisualizationButtonLabel', {
+              defaultMessage: 'Save and return',
+            }),
+            emphasize: true,
+            iconType: 'checkInCircleFilled',
+            description: i18n.translate(
+              'visualize.topNavMenu.saveAndReturnVisualizationButtonAriaLabel',
+              {
+                defaultMessage: 'Finish editing visualization and return to the last app',
+              }
+            ),
+            testId: 'visualizesaveAndReturnButton',
+            disableButton: hasUnappliedChanges,
+            tooltip() {
+              if (hasUnappliedChanges) {
+                return i18n.translate(
+                  'visualize.topNavMenu.saveAndReturnVisualizationDisabledButtonTooltip',
+                  {
+                    defaultMessage: 'Apply or Discard your changes before finishing',
+                  }
+                );
+              }
             },
-            isDirty: hasUnappliedChanges || hasUnsavedChanges,
-          });
-        }
-      },
-      // disable the Share button if no action specified
-      disableButton: !share || !!embeddableId,
-    },
-    {
-      id: 'inspector',
-      label: i18n.translate('visualize.topNavMenu.openInspectorButtonLabel', {
-        defaultMessage: 'inspect',
-      }),
-      description: i18n.translate('visualize.topNavMenu.openInspectorButtonAriaLabel', {
-        defaultMessage: 'Open Inspector for visualization',
-      }),
-      testId: 'openInspectorButton',
-      disableButton() {
-        return !embeddableHandler.hasInspector || !embeddableHandler.hasInspector();
-      },
-      run: openInspector,
-      tooltip() {
-        if (!embeddableHandler.hasInspector || !embeddableHandler.hasInspector()) {
-          return i18n.translate('visualize.topNavMenu.openInspectorDisabledButtonTooltip', {
-            defaultMessage: `This visualization doesn't support any inspectors.`,
-          });
-        }
-      },
-    },
+            run: async () => {
+              const saveOptions = {
+                confirmOverwrite: false,
+                returnToOrigin: true,
+              };
+              onAppLeave((actions) => {
+                return actions.default();
+              });
+              if (
+                originatingApp === 'dashboards' &&
+                dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables &&
+                !savedVis
+              ) {
+                return createVisReference();
+              }
+              return doSave(saveOptions);
+            },
+          },
+        ]
+      : []),
   ];
 
   return topNavMenu;

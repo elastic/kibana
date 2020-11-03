@@ -44,7 +44,7 @@ describe('PingHistogram component', () => {
         { x: 1581068989000, downCount: 3, upCount: 36, y: 1 },
         { x: 1581069019000, downCount: 1, upCount: 11, y: 1 },
       ],
-      interval: '1s',
+      minInterval: 60,
     },
   };
 

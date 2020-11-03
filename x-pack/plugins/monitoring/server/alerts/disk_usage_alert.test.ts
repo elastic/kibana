@@ -36,7 +36,7 @@ describe('DiskUsageAlert', () => {
     expect(alert.type).toBe(ALERT_DISK_USAGE);
     expect(alert.label).toBe('Disk Usage');
     expect(alert.defaultThrottle).toBe('1d');
-    expect(alert.defaultParams).toStrictEqual({ threshold: 90, duration: '5m' });
+    expect(alert.defaultParams).toStrictEqual({ threshold: 80, duration: '5m' });
     expect(alert.actionVariables).toStrictEqual([
       { name: 'nodes', description: 'The list of nodes reporting high disk usage.' },
       { name: 'count', description: 'The number of nodes reporting high disk usage.' },
@@ -89,7 +89,6 @@ describe('DiskUsageAlert', () => {
     };
     const kibanaUrl = 'http://localhost:5601';
 
-    const hasScheduledActions = jest.fn();
     const replaceState = jest.fn();
     const scheduleActions = jest.fn();
     const getState = jest.fn();
@@ -98,7 +97,6 @@ describe('DiskUsageAlert', () => {
         callCluster: jest.fn(),
         alertInstanceFactory: jest.fn().mockImplementation(() => {
           return {
-            hasScheduledActions,
             replaceState,
             scheduleActions,
             getState,

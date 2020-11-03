@@ -5,6 +5,7 @@
  */
 
 import { SavedObject } from 'src/core/server';
+import { RequiredPackage, requiredPackages, ValueOf } from '../../../../common';
 import {
   AssetType,
   Installable,
@@ -27,21 +28,16 @@ export {
 
 export {
   BulkInstallResponse,
-  handleInstallPackageFailure,
-  installPackage,
   IBulkInstallPackageError,
+  handleInstallPackageFailure,
+  installPackageFromRegistry,
+  installPackageByUpload,
   ensureInstalledPackage,
 } from './install';
 export { removeInstallation } from './remove';
 
-type RequiredPackage = 'system' | 'endpoint';
-const requiredPackages: Record<RequiredPackage, boolean> = {
-  system: true,
-  endpoint: true,
-};
-
-export function isRequiredPackage(value: string): value is RequiredPackage {
-  return value in requiredPackages;
+export function isRequiredPackage(value: string): value is ValueOf<RequiredPackage> {
+  return Object.values(requiredPackages).some((required) => value === required);
 }
 
 export class PackageNotInstalledError extends Error {

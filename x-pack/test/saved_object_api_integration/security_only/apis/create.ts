@@ -27,6 +27,7 @@ const createTestCases = (overwrite: boolean) => {
     { ...CASES.SINGLE_NAMESPACE_DEFAULT_SPACE, ...fail409(!overwrite) },
     { ...CASES.SINGLE_NAMESPACE_SPACE_1, expectedNamespaces },
     { ...CASES.SINGLE_NAMESPACE_SPACE_2, expectedNamespaces },
+    { ...CASES.MULTI_NAMESPACE_ALL_SPACES, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, ...fail409(!overwrite) },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_1, ...fail409() },
     { ...CASES.MULTI_NAMESPACE_ONLY_SPACE_2, ...fail409() },
@@ -34,6 +35,8 @@ const createTestCases = (overwrite: boolean) => {
     { ...CASES.NEW_SINGLE_NAMESPACE_OBJ, expectedNamespaces },
     { ...CASES.NEW_MULTI_NAMESPACE_OBJ, expectedNamespaces },
     CASES.NEW_NAMESPACE_AGNOSTIC_OBJ,
+    CASES.NEW_EACH_SPACE_OBJ,
+    CASES.NEW_ALL_SPACES_OBJ,
   ];
   const hiddenType = [{ ...CASES.HIDDEN, ...fail400() }];
   const allTypes = normalTypes.concat(hiddenType);

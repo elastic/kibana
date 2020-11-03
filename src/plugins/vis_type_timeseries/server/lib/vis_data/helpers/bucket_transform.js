@@ -64,6 +64,16 @@ function extendStatsBucket(bucket, metrics) {
   return body;
 }
 
+function getPercentileHdrParam(bucket) {
+  return bucket.numberOfSignificantValueDigits
+    ? {
+        hdr: {
+          number_of_significant_value_digits: bucket.numberOfSignificantValueDigits,
+        },
+      }
+    : undefined;
+}
+
 export const bucketTransform = {
   count: () => {
     return {
@@ -139,13 +149,14 @@ export const bucketTransform = {
         bucket.percentiles.filter((p) => p.percentile).map((p) => p.percentile)
       );
     }
-    const agg = {
+
+    return {
       percentiles: {
         field: bucket.field,
         percents,
+        ...getPercentileHdrParam(bucket),
       },
     };
-    return agg;
   },
 
   percentile_rank: (bucket) => {
@@ -155,6 +166,7 @@ export const bucketTransform = {
       percentile_ranks: {
         field: bucket.field,
         values: (bucket.values || []).map((value) => (isEmpty(value) ? 0 : value)),
+        ...getPercentileHdrParam(bucket),
       },
     };
   },

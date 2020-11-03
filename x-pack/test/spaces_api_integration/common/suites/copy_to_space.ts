@@ -124,7 +124,15 @@ export function copyToSpaceTestSuiteFactory(
     });
   };
 
-  const expectNotFoundResponse = async (resp: TestResponse) => {
+  const expectRouteForbiddenResponse = async (resp: TestResponse) => {
+    expect(resp.body).to.eql({
+      statusCode: 403,
+      error: 'Forbidden',
+      message: 'Forbidden',
+    });
+  };
+
+  const expectRouteNotFoundResponse = async (resp: TestResponse) => {
     expect(resp.body).to.eql({
       statusCode: 404,
       error: 'Not Found',
@@ -419,16 +427,16 @@ export function copyToSpaceTestSuiteFactory(
   ) => (overwrite: boolean): CopyToSpaceMultiNamespaceTest[] => {
     // the status code of the HTTP response differs depending on the error type
     // a 403 error actually comes back as an HTTP 200 response
-    const statusCode = outcome === 'noAccess' ? 404 : 200;
+    const statusCode = outcome === 'noAccess' ? 403 : 200;
     const type = 'sharedtype';
     const v4 = new RegExp(/^[0-9A-F]{8}-[0-9A-F]{4}-4[0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}$/i);
     const noConflictId = `${spaceId}_only`;
-    const exactMatchId = 'all_spaces';
+    const exactMatchId = 'each_space';
     const inexactMatchId = `conflict_1_${spaceId}`;
     const ambiguousConflictId = `conflict_2_${spaceId}`;
 
     const getResult = (response: TestResponse) => (response.body as CopyResponse).space_2;
-    const expectForbiddenResponse = (response: TestResponse) => {
+    const expectSavedObjectForbiddenResponse = (response: TestResponse) => {
       expect(response.body).to.eql({
         space_2: {
           success: false,
@@ -456,10 +464,10 @@ export function copyToSpaceTestSuiteFactory(
             expect(successResults).to.eql([{ type, id: noConflictId, meta, destinationId }]);
             expect(errors).to.be(undefined);
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -486,10 +494,10 @@ export function copyToSpaceTestSuiteFactory(
               ]);
             }
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -525,10 +533,10 @@ export function copyToSpaceTestSuiteFactory(
               ]);
             }
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -561,10 +569,10 @@ export function copyToSpaceTestSuiteFactory(
               },
             ]);
           } else if (outcome === 'noAccess') {
-            expectNotFoundResponse(response);
+            expectRouteForbiddenResponse(response);
           } else {
             // unauthorized read/write
-            expectForbiddenResponse(response);
+            expectSavedObjectForbiddenResponse(response);
           }
         },
       },
@@ -743,7 +751,8 @@ export function copyToSpaceTestSuiteFactory(
     expectNoConflictsForNonExistentSpaceResult,
     createExpectWithConflictsOverwritingResult,
     createExpectWithConflictsWithoutOverwritingResult,
-    expectNotFoundResponse,
+    expectRouteForbiddenResponse,
+    expectRouteNotFoundResponse,
     createExpectUnauthorizedAtSpaceWithReferencesResult,
     createExpectUnauthorizedAtSpaceWithoutReferencesResult,
     createMultiNamespaceTestCases,

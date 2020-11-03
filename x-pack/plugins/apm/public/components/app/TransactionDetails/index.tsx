@@ -24,13 +24,14 @@ import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
+import { Correlations } from '../Correlations';
 
 interface Sample {
   traceId: string;
@@ -110,6 +111,8 @@ export function TransactionDetails({
           <h1>{transactionName}</h1>
         </EuiTitle>
       </ApmHeader>
+
+      <Correlations />
 
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>

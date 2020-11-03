@@ -38,6 +38,7 @@ import {
   VectorLayerDescriptor,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
+import { LICENSED_FEATURES } from '../../../licensed_features';
 
 const ACTIVE_COUNT_DATA_ID = 'ACTIVE_COUNT_DATA_ID';
 
@@ -326,5 +327,12 @@ export class BlendedVectorLayer extends VectorLayer implements IVectorLayer {
     }
 
     super._syncData(syncContext, activeSource, activeStyle);
+  }
+
+  async getLicensedFeatures(): Promise<LICENSED_FEATURES[]> {
+    return [
+      ...(await this._clusterSource.getLicensedFeatures()),
+      ...(await this._documentSource.getLicensedFeatures()),
+    ];
   }
 }

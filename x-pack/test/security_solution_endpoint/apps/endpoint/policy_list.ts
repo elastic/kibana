@@ -30,7 +30,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     it('displays page title', async () => {
       const policyTitle = await testSubjects.getVisibleText('header-page-title');
-      expect(policyTitle).to.equal('Policies BETA');
+      expect(policyTitle).to.equal('Policies');
     });
     it('shows header create policy button', async () => {
       const createButtonTitle = await testSubjects.getVisibleText('headerCreateNewPolicyButton');

@@ -47,7 +47,7 @@ interface Props {
 
 const { emptyField } = fieldValidators;
 
-const typeConfig: FieldConfig<any, string> = {
+const typeConfig: FieldConfig<string> = {
   type: FIELD_TYPES.COMBO_BOX,
   label: i18n.translate('xpack.ingestPipelines.pipelineEditor.typeField.typeFieldLabel', {
     defaultMessage: 'Processor',

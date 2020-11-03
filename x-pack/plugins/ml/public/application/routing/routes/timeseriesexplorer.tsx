@@ -98,7 +98,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
   const refresh = useRefresh();
   useEffect(() => {
-    if (refresh !== undefined) {
+    if (refresh !== undefined && refresh.lastRefresh !== lastRefresh) {
       setLastRefresh(refresh?.lastRefresh);
 
       if (refresh.timeRange !== undefined) {
@@ -109,7 +109,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         });
       }
     }
-  }, [refresh?.lastRefresh]);
+  }, [refresh?.lastRefresh, lastRefresh, setGlobalState]);
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
@@ -146,18 +146,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   // `previousSelectedJobIds` to avoid wiping appState.
   const previousSelectedJobIds = usePrevious(selectedJobIds);
   const isJobChange = !isEqual(previousSelectedJobIds, selectedJobIds);
-
-  // Use a side effect to clear appState when changing jobs.
-  useEffect(() => {
-    if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
-      setLastRefresh(Date.now());
-      appStateHandler(APP_STATE_ACTION.CLEAR);
-    }
-    const validatedJobId = validateJobSelection(jobsWithTimeRange, selectedJobIds, setGlobalState);
-    if (typeof validatedJobId === 'string') {
-      setSelectedJobId(validatedJobId);
-    }
-  }, [JSON.stringify(selectedJobIds)]);
 
   // Next we get globalState and appState information to pass it on as props later.
   // If a job change is going on, we fall back to defaults (as if appState was already cleared),
@@ -216,8 +204,20 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
       setAppState('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
     },
-    [JSON.stringify([appState, globalState])]
+    [JSON.stringify(appState?.mlTimeSeriesExplorer), setAppState]
   );
+
+  // Use a side effect to clear appState when changing jobs.
+  useEffect(() => {
+    if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
+      setLastRefresh(Date.now());
+      appStateHandler(APP_STATE_ACTION.CLEAR);
+    }
+    const validatedJobId = validateJobSelection(jobsWithTimeRange, selectedJobIds, setGlobalState);
+    if (typeof validatedJobId === 'string') {
+      setSelectedJobId(validatedJobId);
+    }
+  }, [JSON.stringify(selectedJobIds)]);
 
   const boundsMinMs = bounds?.min?.valueOf();
   const boundsMaxMs = bounds?.max?.valueOf();

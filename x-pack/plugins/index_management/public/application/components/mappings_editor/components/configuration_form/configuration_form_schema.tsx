@@ -11,7 +11,7 @@ import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
 import { FormSchema, FIELD_TYPES, VALIDATION_TYPES, fieldValidators } from '../../shared_imports';
-import { ComboBoxOption, MappingsConfiguration } from '../../types';
+import { ComboBoxOption } from '../../types';
 
 const { containsCharsField, isJsonField } = fieldValidators;
 
@@ -28,7 +28,7 @@ const fieldPathComboBoxConfig = {
   deserializer: (values: string[]): ComboBoxOption[] => values.map((value) => ({ label: value })),
 };
 
-export const configurationFormSchema: FormSchema<MappingsConfiguration> = {
+export const configurationFormSchema: FormSchema = {
   metaField: {
     label: i18n.translate('xpack.idxMgmt.mappingsEditor.configuration.metaFieldEditorLabel', {
       defaultMessage: '_meta field data',

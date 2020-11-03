@@ -5,6 +5,7 @@
  */
 
 import { IEngine } from '../../types';
+import { ApiTokenTypes } from './constants';
 
 export interface ICredentialsDetails {
   engines: IEngine[];
@@ -17,7 +18,7 @@ export interface IApiToken {
   id?: number;
   name: string;
   read?: boolean;
-  type: string;
+  type: ApiTokenTypes;
   write?: boolean;
 }
 

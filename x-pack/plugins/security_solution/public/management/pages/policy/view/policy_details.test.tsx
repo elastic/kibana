@@ -87,7 +87,7 @@ describe('Policy Details', () => {
         const [path] = args;
         if (typeof path === 'string') {
           // GET datasouce
-          if (path === '/api/ingest_manager/package_policies/1') {
+          if (path === '/api/fleet/package_policies/1') {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
               item: policyPackagePolicy,
@@ -96,7 +96,7 @@ describe('Policy Details', () => {
           }
 
           // GET Agent status for agent policy
-          if (path === '/api/ingest_manager/fleet/agent-status') {
+          if (path === '/api/fleet/agent-status') {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
               results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },
@@ -203,7 +203,7 @@ describe('Policy Details', () => {
           asyncActions = asyncActions.then(async () => sleep());
           const [path] = args;
           if (typeof path === 'string') {
-            if (path === '/api/ingest_manager/package_policies/1') {
+            if (path === '/api/fleet/package_policies/1') {
               return Promise.resolve({
                 item: policyPackagePolicy,
                 success: true,
@@ -248,7 +248,7 @@ describe('Policy Details', () => {
 
         // API should be called
         await asyncActions;
-        expect(http.put.mock.calls[0][0]).toEqual(`/api/ingest_manager/package_policies/1`);
+        expect(http.put.mock.calls[0][0]).toEqual(`/api/fleet/package_policies/1`);
         policyView.update();
 
         // Toast notification should be shown

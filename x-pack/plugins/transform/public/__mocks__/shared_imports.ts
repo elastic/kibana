@@ -12,6 +12,7 @@ export const useRequest = jest.fn(() => ({
   error: null,
   data: undefined,
 }));
+export const createSavedSearchesLoader = jest.fn();
 
 // just passing through the reimports
 export { getMlSharedImports } from '../../../ml/public';

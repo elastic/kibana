@@ -53,6 +53,10 @@ describe('editor_frame service', () => {
           query: { query: '', language: 'lucene' },
           filters: [],
           showNoDataPopover: jest.fn(),
+          initialContext: {
+            indexPatternId: '1',
+            fieldName: 'test',
+          },
         });
         instance.unmount();
       })()

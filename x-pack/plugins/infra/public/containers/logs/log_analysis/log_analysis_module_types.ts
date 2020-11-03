@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { HttpHandler } from 'src/core/public';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,
@@ -23,24 +24,35 @@ export interface ModuleDescriptor<JobType extends string> {
   jobTypes: JobType[];
   bucketSpan: number;
   getJobIds: (spaceId: string, sourceId: string) => Record<JobType, string>;
-  getJobSummary: (spaceId: string, sourceId: string) => Promise<FetchJobStatusResponsePayload>;
-  getModuleDefinition: () => Promise<GetMlModuleResponsePayload>;
+  getJobSummary: (
+    spaceId: string,
+    sourceId: string,
+    fetch: HttpHandler
+  ) => Promise<FetchJobStatusResponsePayload>;
+  getModuleDefinition: (fetch: HttpHandler) => Promise<GetMlModuleResponsePayload>;
   setUpModule: (
     start: number | undefined,
     end: number | undefined,
     datasetFilter: DatasetFilter,
-    sourceConfiguration: ModuleSourceConfiguration
+    sourceConfiguration: ModuleSourceConfiguration,
+    fetch: HttpHandler
   ) => Promise<SetupMlModuleResponsePayload>;
-  cleanUpModule: (spaceId: string, sourceId: string) => Promise<DeleteJobsResponsePayload>;
+  cleanUpModule: (
+    spaceId: string,
+    sourceId: string,
+    fetch: HttpHandler
+  ) => Promise<DeleteJobsResponsePayload>;
   validateSetupIndices: (
     indices: string[],
-    timestampField: string
+    timestampField: string,
+    fetch: HttpHandler
   ) => Promise<ValidationIndicesResponsePayload>;
   validateSetupDatasets: (
     indices: string[],
     timestampField: string,
     startTime: number,
-    endTime: number
+    endTime: number,
+    fetch: HttpHandler
   ) => Promise<ValidateLogEntryDatasetsResponsePayload>;
 }
 

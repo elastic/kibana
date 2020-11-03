@@ -19,9 +19,6 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   if (!agent.last_checkin) {
     return 'enrolling';
   }
-  if (agent.upgrade_started_at && !agent.upgraded_at) {
-    return 'upgrading';
-  }
 
   const msLastCheckIn = new Date(lastCheckIn || 0).getTime();
   const msSinceLastCheckIn = new Date().getTime() - msLastCheckIn;
@@ -32,6 +29,9 @@ export function getAgentStatus(agent: Agent, now: number = Date.now()): AgentSta
   }
   if (agent.last_checkin_status === 'degraded') {
     return 'degraded';
+  }
+  if (agent.upgrade_started_at && !agent.upgraded_at) {
+    return 'updating';
   }
   if (intervalsSinceLastCheckIn >= 4) {
     return 'offline';
@@ -60,4 +60,8 @@ export function buildKueryForOfflineAgents() {
   return `${AGENT_SAVED_OBJECT_TYPE}.last_checkin < now-${
     (4 * AGENT_POLLING_THRESHOLD_MS) / 1000
   }s AND not (${buildKueryForErrorAgents()})`;
+}
+
+export function buildKueryForUpdatingAgents() {
+  return `${AGENT_SAVED_OBJECT_TYPE}.upgrade_started_at:*`;
 }

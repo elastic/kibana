@@ -12,7 +12,6 @@ import {
   EuiPageContentBody,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
-  EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -42,7 +41,6 @@ export const Page: FC<{
           </EuiPageContentHeaderSection>
         </EuiPageContentHeader>
         <EuiPageContentBody style={{ maxWidth: 'calc(100% - 0px)' }}>
-          <EuiSpacer size="m" />
           {analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
             <OutlierExploration jobId={jobId} />
           )}

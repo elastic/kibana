@@ -1,0 +1,103 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ManageData render 1`] = `
+<Fragment>
+  <EuiHorizontalRule
+    aria-hidden="true"
+    margin="xl"
+  />
+  <section
+    aria-labelledby="kbnOverviewDataManage__title"
+    className="kbnOverviewDataManage"
+    data-test-subj="kbnOverviewDataManage"
+  >
+    <EuiTitle
+      size="s"
+    >
+      <h2
+        id="kbnOverviewDataManage__title"
+      >
+        <FormattedMessage
+          defaultMessage="Manage your data"
+          id="kibanaOverview.manageData.sectionTitle"
+          values={Object {}}
+        />
+      </h2>
+    </EuiTitle>
+    <EuiSpacer
+      size="m"
+    />
+    <EuiFlexGroup
+      className="kbnOverviewDataManage__content"
+      wrap={true}
+    >
+      <EuiFlexItem
+        className="kbnOverviewDataManage__item"
+        key="security"
+      >
+        <RedirectAppLinks>
+          <Synopsis
+            description="Control who has access and what tasks they can perform."
+            iconType="securityApp"
+            id="security"
+            isBeta={false}
+            title="Protect your data"
+            url="path-to-security-roles"
+            wrapInPanel={true}
+          />
+        </RedirectAppLinks>
+      </EuiFlexItem>
+      <EuiFlexItem
+        className="kbnOverviewDataManage__item"
+        key="monitoring"
+      >
+        <RedirectAppLinks>
+          <Synopsis
+            description="Track the real-time health and performance of your deployment."
+            iconType="monitoringApp"
+            id="monitoring"
+            isBeta={false}
+            title="Monitor the stack"
+            url="path-to-monitoring"
+            wrapInPanel={true}
+          />
+        </RedirectAppLinks>
+      </EuiFlexItem>
+      <EuiFlexItem
+        className="kbnOverviewDataManage__item"
+        key="snapshot_restore"
+      >
+        <RedirectAppLinks>
+          <Synopsis
+            description="Save snapshots to a backup repository, and restore to recover index and cluster state."
+            iconType="storage"
+            id="snapshot_restore"
+            isBeta={false}
+            title="Store & recover backups"
+            url="path-to-snapshot-restore"
+            wrapInPanel={true}
+          />
+        </RedirectAppLinks>
+      </EuiFlexItem>
+      <EuiFlexItem
+        className="kbnOverviewDataManage__item"
+        key="index_lifecycle_management"
+      >
+        <RedirectAppLinks>
+          <Synopsis
+            description="Define lifecycle policies to automatically perform operations as an index ages."
+            iconType="indexSettings"
+            id="index_lifecycle_management"
+            isBeta={false}
+            title="Manage index lifecycles"
+            url="path-to-index-lifecycle-management"
+            wrapInPanel={true}
+          />
+        </RedirectAppLinks>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </section>
+</Fragment>
+`;
+
+exports[`ManageData render empty without any features 1`] = `<Fragment />`;

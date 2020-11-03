@@ -21,6 +21,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteComments(es);
       await deleteCasesUserActions(es);
     });
+
     it('should return empty response', async () => {
       const { body } = await supertest
         .get(`${CASES_URL}/_find`)

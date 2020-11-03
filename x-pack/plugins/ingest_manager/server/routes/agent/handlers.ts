@@ -239,6 +239,7 @@ export const getAgentsHandler: RequestHandler<
       page: request.query.page,
       perPage: request.query.perPage,
       showInactive: request.query.showInactive,
+      showUpgradeable: request.query.showUpgradeable,
       kuery: request.query.kuery,
     });
     const totalInactive = request.query.showInactive

@@ -46,14 +46,14 @@ export const OverviewDatastreamSection: React.FC = () => {
   return (
     <EuiFlexItem component="section">
       <OverviewPanel
-        title={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelTitle', {
+        title={i18n.translate('xpack.fleet.overviewPageDataStreamsPanelTitle', {
           defaultMessage: 'Data streams',
         })}
-        tooltip={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelTooltip', {
+        tooltip={i18n.translate('xpack.fleet.overviewPageDataStreamsPanelTooltip', {
           defaultMessage: 'Data that your agents collect are organized into various data streams.',
         })}
         linkTo={getHref('data_streams')}
-        linkToText={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelAction', {
+        linkToText={i18n.translate('xpack.fleet.overviewPageDataStreamsPanelAction', {
           defaultMessage: 'View data streams',
         })}
       >
@@ -64,7 +64,7 @@ export const OverviewDatastreamSection: React.FC = () => {
             <>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewDatastreamTotalTitle"
+                  id="xpack.fleet.overviewDatastreamTotalTitle"
                   defaultMessage="Data streams"
                 />
               </EuiDescriptionListTitle>
@@ -73,7 +73,7 @@ export const OverviewDatastreamSection: React.FC = () => {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewDatastreamNamespacesTitle"
+                  id="xpack.fleet.overviewDatastreamNamespacesTitle"
                   defaultMessage="Namespaces"
                 />
               </EuiDescriptionListTitle>
@@ -82,7 +82,7 @@ export const OverviewDatastreamSection: React.FC = () => {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewDatastreamSizeTitle"
+                  id="xpack.fleet.overviewDatastreamSizeTitle"
                   defaultMessage="Total size"
                 />
               </EuiDescriptionListTitle>

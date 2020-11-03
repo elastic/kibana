@@ -31,14 +31,15 @@ import { connectorReducer } from './connector_reducer';
 import { updateActionConnector, executeAction } from '../../lib/action_connector_api';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useActionsConnectorsContext } from '../../context/actions_connectors_context';
-import { PLUGIN } from '../../constants/plugin';
-import { ActionTypeExecutorResult } from '../../../../../actions/common';
+import {
+  ActionTypeExecutorResult,
+  isActionTypeExecutorResult,
+} from '../../../../../actions/common';
 import './connector_edit_flyout.scss';
 
 export interface ConnectorEditProps {
   initialConnector: ActionConnector;
-  editFlyoutVisible: boolean;
-  setEditFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   tab?: EditConectorTabs;
 }
 
@@ -49,8 +50,7 @@ export enum EditConectorTabs {
 
 export const ConnectorEditFlyout = ({
   initialConnector,
-  editFlyoutVisible,
-  setEditFlyoutVisibility,
+  onClose,
   tab = EditConectorTabs.Configuration,
 }: ConnectorEditProps) => {
   const {
@@ -84,16 +84,12 @@ export const ConnectorEditFlyout = ({
   const [isExecutingAction, setIsExecutinAction] = useState<boolean>(false);
 
   const closeFlyout = useCallback(() => {
-    setEditFlyoutVisibility(false);
     setConnector('connector', { ...initialConnector, secrets: {} });
     setHasChanges(false);
     setTestExecutionResult(none);
+    onClose();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setEditFlyoutVisibility]);
-
-  if (!editFlyoutVisible) {
-    return null;
-  }
+  }, [onClose]);
 
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);
   const errorsInConnectorConfig = (!connector.isPreconfigured
@@ -153,20 +149,6 @@ export const ConnectorEditFlyout = ({
               }
             )}
           />
-          &emsp;
-          <EuiBetaBadge
-            label="Beta"
-            tooltipContent={i18n.translate(
-              'xpack.triggersActionsUI.sections.preconfiguredConnectorForm.betaBadgeTooltipContent',
-              {
-                defaultMessage:
-                  '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                values: {
-                  pluginName: PLUGIN.getI18nName(i18n),
-                },
-              }
-            )}
-          />
         </h3>
       </EuiTitle>
       <EuiText size="s">
@@ -184,33 +166,30 @@ export const ConnectorEditFlyout = ({
           defaultMessage="Edit connector"
           id="xpack.triggersActionsUI.sections.editConnectorForm.flyoutPreconfiguredTitle"
         />
-        &emsp;
-        <EuiBetaBadge
-          label="Beta"
-          tooltipContent={i18n.translate(
-            'xpack.triggersActionsUI.sections.editConnectorForm.betaBadgeTooltipContent',
-            {
-              defaultMessage:
-                '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-              values: {
-                pluginName: PLUGIN.getI18nName(i18n),
-              },
-            }
-          )}
-        />
       </h3>
     </EuiTitle>
   );
 
   const onExecutAction = () => {
     setIsExecutinAction(true);
-    return executeAction({ id: connector.id, params: testExecutionActionParams, http }).then(
-      (result) => {
+    return executeAction({ id: connector.id, params: testExecutionActionParams, http })
+      .then((result) => {
         setIsExecutinAction(false);
         setTestExecutionResult(some(result));
         return result;
-      }
-    );
+      })
+      .catch((ex: Error | ActionTypeExecutorResult<unknown>) => {
+        const result: ActionTypeExecutorResult<unknown> = isActionTypeExecutorResult(ex)
+          ? ex
+          : {
+              actionId: connector.id,
+              status: 'error',
+              message: ex.message,
+            };
+        setIsExecutinAction(false);
+        setTestExecutionResult(some(result));
+        return result;
+      });
   };
 
   const onSaveClicked = async (closeAfterSave: boolean = true) => {

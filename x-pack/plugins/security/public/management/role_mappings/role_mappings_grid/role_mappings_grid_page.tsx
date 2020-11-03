@@ -24,6 +24,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { NotificationsStart, ApplicationStart, ScopedHistory } from 'src/core/public';
 import { RoleMapping, Role } from '../../../../common/model';
 import { EmptyPrompt } from './empty_prompt';
@@ -330,14 +331,16 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               this.state.roles?.find((r) => r.name === rolename) ?? rolename;
 
             return (
-              <RoleTableDisplay
-                role={role}
-                key={rolename}
-                navigateToApp={this.props.navigateToApp}
-              />
+              <EuiFlexItem grow={false} key={rolename}>
+                <RoleTableDisplay role={role} navigateToApp={this.props.navigateToApp} />
+              </EuiFlexItem>
             );
           });
-          return <div data-test-subj="roleMappingRoles">{roleLinks}</div>;
+          return (
+            <EuiFlexGroup gutterSize="s" data-test-subj="roleMappingRoles" wrap>
+              {roleLinks}
+            </EuiFlexGroup>
+          );
         },
       },
       {

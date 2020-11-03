@@ -49,6 +49,7 @@ const mockInstallation: SavedObject<Installation> = {
     install_status: 'installed',
     install_version: '1.0.0',
     install_started_at: new Date().toISOString(),
+    install_source: 'registry',
   },
 };
 

@@ -86,11 +86,18 @@ export async function getPackageKeysByStatus(
   savedObjectsClient: SavedObjectsClientContract,
   status: InstallationStatus
 ) {
-  const allPackages = await getPackages({ savedObjectsClient });
+  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
   return allPackages.reduce<Array<{ pkgName: string; pkgVersion: string }>>((acc, pkg) => {
     if (pkg.status === status) {
-      acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
+      if (pkg.status === InstallationStatus.installed) {
+        // if we're looking for installed packages grab the version from the saved object because `getPackages` will
+        // return the latest package information from the registry
+        acc.push({ pkgName: pkg.name, pkgVersion: pkg.savedObject.attributes.version });
+      } else {
+        acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
+      }
     }
+
     return acc;
   }, []);
 }
@@ -101,11 +108,14 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [item, savedObject, latestPackage, assets] = await Promise.all([
-    Registry.fetchInfo(pkgName, pkgVersion),
+  const [
+    savedObject,
+    latestPackage,
+    { paths: assets, registryPackageInfo: item },
+  ] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
-    Registry.getArchiveInfo(pkgName, pkgVersion),
+    Registry.loadRegistryPackage(pkgName, pkgVersion),
   ]);
 
   // add properties that aren't (or aren't yet) on Registry response

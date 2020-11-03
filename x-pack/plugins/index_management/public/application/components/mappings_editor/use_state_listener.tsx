@@ -35,8 +35,8 @@ export const useMappingsStateListener = ({ onChange, value }: Args) => {
     const isFieldFormVisible = state.fieldForm !== undefined;
     const emptyNameValue =
       isFieldFormVisible &&
-      (state.fieldForm!.data.raw.name === undefined ||
-        state.fieldForm!.data.raw.name.trim() === '');
+      (state.fieldForm!.data.internal.name === undefined ||
+        state.fieldForm!.data.internal.name.trim() === '');
 
     const bypassFieldFormValidation =
       state.documentFields.status === 'creatingField' && emptyNameValue;

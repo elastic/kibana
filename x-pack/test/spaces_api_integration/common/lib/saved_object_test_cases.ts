@@ -29,9 +29,13 @@ export const MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES = Object.freeze({
     id: 'space_1_and_space_2',
     existingNamespaces: ['space_1', 'space_2'],
   }),
+  EACH_SPACE: Object.freeze({
+    id: 'each_space',
+    existingNamespaces: ['default', 'space_1', 'space_2'], // each individual space
+  }),
   ALL_SPACES: Object.freeze({
     id: 'all_spaces',
-    existingNamespaces: ['default', 'space_1', 'space_2'],
+    existingNamespaces: ['*'], // all current and future spaces
   }),
   DOES_NOT_EXIST: Object.freeze({
     id: 'does_not_exist',

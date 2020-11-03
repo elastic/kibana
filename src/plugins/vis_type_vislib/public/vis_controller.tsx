@@ -20,127 +20,147 @@
 import $ from 'jquery';
 import React, { RefObject } from 'react';
 
-import { Positions } from './utils/collections';
-import { VisTypeVislibDependencies } from './plugin';
 import { mountReactNode } from '../../../core/public/utils';
+import { ChartsPluginSetup } from '../../charts/public';
+import { PersistedState } from '../../visualizations/public';
+import { IInterpreterRenderHandlers } from '../../expressions/public';
+
+import { VisTypeVislibCoreSetup } from './plugin';
 import { VisLegend, CUSTOM_LEGEND_VIS_TYPES } from './vislib/components/legend';
-import { VisParams, ExprVis } from '../../visualizations/public';
-import { getKibanaLegacy } from './services';
+import { BasicVislibParams } from './types';
+import { PieVisParams } from './pie';
 
 const legendClassName = {
-  top: 'visLib--legend-top',
-  bottom: 'visLib--legend-bottom',
-  left: 'visLib--legend-left',
-  right: 'visLib--legend-right',
+  top: 'vislib--legend-top',
+  bottom: 'vislib--legend-bottom',
+  left: 'vislib--legend-left',
+  right: 'vislib--legend-right',
 };
 
-export const createVislibVisController = (deps: VisTypeVislibDependencies) => {
+export type VislibVisController = InstanceType<ReturnType<typeof createVislibVisController>>;
+
+export const createVislibVisController = (
+  core: VisTypeVislibCoreSetup,
+  charts: ChartsPluginSetup
+) => {
   return class VislibVisController {
-    unmount: (() => void) | null = null;
-    visParams?: VisParams;
+    private removeListeners?: () => void;
+    private unmountLegend?: () => void;
+
     legendRef: RefObject<VisLegend>;
     container: HTMLDivElement;
     chartEl: HTMLDivElement;
     legendEl: HTMLDivElement;
-    vislibVis: any;
+    vislibVis?: any;
 
-    constructor(public el: Element, public vis: ExprVis) {
+    constructor(public el: HTMLDivElement) {
       this.el = el;
-      this.vis = vis;
-      this.unmount = null;
       this.legendRef = React.createRef();
 
       // vis mount point
       this.container = document.createElement('div');
-      this.container.className = 'visLib';
+      this.container.className = 'vislib';
       this.el.appendChild(this.container);
 
       // chart mount point
       this.chartEl = document.createElement('div');
-      this.chartEl.className = 'visLib__chart';
+      this.chartEl.className = 'vislib__chart';
       this.container.appendChild(this.chartEl);
 
       // legend mount point
       this.legendEl = document.createElement('div');
-      this.legendEl.className = 'visLib__legend';
+      this.legendEl.className = 'vislib__legend';
       this.container.appendChild(this.legendEl);
     }
 
-    render(esResponse: any, visParams: VisParams): Promise<void> {
+    async render(
+      esResponse: any,
+      visParams: BasicVislibParams | PieVisParams,
+      handlers: IInterpreterRenderHandlers
+    ): Promise<void> {
       if (this.vislibVis) {
-        this.destroy();
+        this.destroy(false);
       }
 
-      getKibanaLegacy().loadFontAwesome();
+      // Used in functional tests to know when chart is loaded by type
+      this.chartEl.dataset.vislibChartType = visParams.type;
 
-      return new Promise(async (resolve) => {
-        if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
-          return resolve();
-        }
+      if (this.el.clientWidth === 0 || this.el.clientHeight === 0) {
+        handlers.done();
+        return;
+      }
 
-        // @ts-expect-error
-        const { Vis: Vislib } = await import('./vislib/vis');
+      const [, { kibanaLegacy }] = await core.getStartServices();
+      kibanaLegacy.loadFontAwesome();
 
-        this.vislibVis = new Vislib(this.chartEl, visParams, deps);
-        this.vislibVis.on('brush', this.vis.API.events.brush);
-        this.vislibVis.on('click', this.vis.API.events.filter);
-        this.vislibVis.on('renderComplete', resolve);
+      // @ts-expect-error
+      const { Vis: Vislib } = await import('./vislib/vis');
+      const { uiState, event: fireEvent } = handlers;
 
-        this.vislibVis.initVisConfig(esResponse, this.vis.getUiState());
+      this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
+      this.vislibVis.on('brush', fireEvent);
+      this.vislibVis.on('click', fireEvent);
+      this.vislibVis.on('renderComplete', handlers.done);
+      this.removeListeners = () => {
+        this.vislibVis.off('brush', fireEvent);
+        this.vislibVis.off('click', fireEvent);
+      };
 
-        if (visParams.addLegend) {
-          $(this.container)
-            .attr('class', (i, cls) => {
-              return cls.replace(/visLib--legend-\S+/g, '');
-            })
-            .addClass((legendClassName as any)[visParams.legendPosition]);
+      this.vislibVis.initVisConfig(esResponse, uiState);
 
-          this.mountLegend(esResponse, visParams.legendPosition);
-        }
+      if (visParams.addLegend) {
+        $(this.container)
+          .attr('class', (i, cls) => {
+            return cls.replace(/vislib--legend-\S+/g, '');
+          })
+          .addClass((legendClassName as any)[visParams.legendPosition]);
 
-        this.vislibVis.render(esResponse, this.vis.getUiState());
+        this.mountLegend(esResponse, visParams, fireEvent, uiState);
+      }
 
-        // refreshing the legend after the chart is rendered.
-        // this is necessary because some visualizations
-        // provide data necessary for the legend only after a render cycle.
-        if (
-          visParams.addLegend &&
-          CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
-        ) {
-          this.unmountLegend();
-          this.mountLegend(esResponse, visParams.legendPosition);
-          this.vislibVis.render(esResponse, this.vis.getUiState());
-        }
-      });
+      this.vislibVis.render(esResponse, uiState);
+
+      // refreshing the legend after the chart is rendered.
+      // this is necessary because some visualizations
+      // provide data necessary for the legend only after a render cycle.
+      if (
+        visParams.addLegend &&
+        CUSTOM_LEGEND_VIS_TYPES.includes(this.vislibVis.visConfigArgs.type)
+      ) {
+        this.unmountLegend?.();
+        this.mountLegend(esResponse, visParams, fireEvent, uiState);
+        this.vislibVis.render(esResponse, uiState);
+      }
     }
 
-    mountLegend(visData: any, position: Positions) {
-      this.unmount = mountReactNode(
+    mountLegend(
+      visData: unknown,
+      { legendPosition, addLegend }: BasicVislibParams | PieVisParams,
+      fireEvent: IInterpreterRenderHandlers['event'],
+      uiState?: PersistedState
+    ) {
+      this.unmountLegend = mountReactNode(
         <VisLegend
           ref={this.legendRef}
-          vis={this.vis}
           vislibVis={this.vislibVis}
           visData={visData}
-          position={position}
-          uiState={this.vis.getUiState()}
+          uiState={uiState}
+          fireEvent={fireEvent}
+          addLegend={addLegend}
+          position={legendPosition}
         />
       )(this.legendEl);
     }
 
-    unmountLegend() {
-      if (this.unmount) {
-        this.unmount();
-      }
-    }
+    destroy(clearElement = true) {
+      this.unmountLegend?.();
 
-    destroy() {
-      if (this.unmount) {
-        this.unmount();
+      if (clearElement) {
+        this.el.innerHTML = '';
       }
 
       if (this.vislibVis) {
-        this.vislibVis.off('brush', this.vis.API.events.brush);
-        this.vislibVis.off('click', this.vis.API.events.filter);
+        this.removeListeners?.();
         this.vislibVis.destroy();
         delete this.vislibVis;
       }

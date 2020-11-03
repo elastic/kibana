@@ -6,19 +6,16 @@
 # used for the 'team' designator within Kibana Stats
 
 # App
-/x-pack/plugins/dashboard_enhanced/ @elastic/kibana-app
 /x-pack/plugins/discover_enhanced/ @elastic/kibana-app
 /x-pack/plugins/lens/ @elastic/kibana-app
 /x-pack/plugins/graph/ @elastic/kibana-app
 /src/plugins/advanced_settings/ @elastic/kibana-app
 /src/plugins/charts/ @elastic/kibana-app
-/src/plugins/dashboard/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
-/src/plugins/input_control_vis/ @elastic/kibana-app
 /src/plugins/management/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
+/src/plugins/timelion/ @elastic/kibana-app
 /src/plugins/vis_default_editor/ @elastic/kibana-app
-/src/plugins/vis_type_markdown/ @elastic/kibana-app
 /src/plugins/vis_type_metric/ @elastic/kibana-app
 /src/plugins/vis_type_table/ @elastic/kibana-app
 /src/plugins/vis_type_tagcloud/ @elastic/kibana-app
@@ -30,32 +27,18 @@
 /src/plugins/visualize/ @elastic/kibana-app
 /src/plugins/visualizations/ @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
-#CC# /src/plugins/vis_type @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/ @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/common/utils @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/migrations @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/public @elastic/kibana-app
-#CC# /src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-app
-#CC# /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
 #CC# /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
-#CC# /src/legacy/core_plugins/console_legacy @elastic/kibana-app
-#CC# /src/legacy/core_plugins/input_control_vis @elastic/kibana-app
 #CC# /src/legacy/core_plugins/timelion @elastic/kibana-app
 #CC# /src/legacy/core_plugins/vis_type_tagcloud @elastic/kibana-app
 #CC# /src/legacy/core_plugins/vis_type_vega @elastic/kibana-app
 #CC# /src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
-#CC# /src/legacy/server/sample_data/ @elastic/kibana-app
 #CC# /src/legacy/server/url_shortening/ @elastic/kibana-app
 #CC# /src/legacy/ui/public/state_management @elastic/kibana-app
-#CC# /src/plugins/charts/public/static/color_maps @elastic/kibana-app
-#CC# /src/plugins/index_pattern_management/public @elastic/kibana-app
-#CC# /src/plugins/input_control_vis/ @elastic/kibana-app
-#CC# /src/plugins/kibana_legacy/ @elastic/kibana-app
-#CC# /src/plugins/timelion @elastic/kibana-app
-#CC# /x-pack/legacy/plugins/dashboard_mode/ @elastic/kibana-app
-#CC# /x-pack/plugins/dashboard_mode @elastic/kibana-app
-#CC# /x-pack/plugins/lens/ @elastic/kibana-app
 
 # App Architecture
 /examples/bfetch_explorer/ @elastic/kibana-app-arch
@@ -86,23 +69,10 @@
 /x-pack/plugins/data_enhanced/ @elastic/kibana-app-arch
 /x-pack/plugins/embeddable_enhanced/ @elastic/kibana-app-arch
 /x-pack/plugins/ui_actions_enhanced/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/kibana/public/management/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/kibana/server/routes/api/management/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/embeddable_api/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/interpreter/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/kibana_react/ @elastic/kibana-app-arch
-#CC# /src/legacy/core_plugins/status_page/public @elastic/kibana-app-arch
-#CC# /src/legacy/server/index_patterns/ @elastic/kibana-app-arch
-#CC# /src/legacy/ui/public/field_editor @elastic/kibana-app-arch
-#CC# /src/legacy/ui/public/management @elastic/kibana-app-arch
-#CC# /src/plugins/advanced_settings/ @elastic/kibana-app-arch
 #CC# /src/plugins/bfetch/ @elastic/kibana-app-arch
-#CC# /src/plugins/charts/ @elastic/kibana-app-arch
-#CC# /src/plugins/index_pattern_management/public/service @elastic/kibana-app-arch
+#CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-arch
 #CC# /src/plugins/inspector/ @elastic/kibana-app-arch
-#CC# /src/plugins/saved_objects/ @elastic/kibana-app-arch
 #CC# /src/plugins/share/ @elastic/kibana-app-arch
-#CC# /src/plugins/vis_default_editor @elastic/kibana-app-arch
 #CC# /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
 #CC# /x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
 #CC# /packages/kbn-interpreter/ @elastic/kibana-app-arch
@@ -135,18 +105,28 @@
 #CC# /x-pack/plugins/beats_management/ @elastic/beats
 
 # Canvas
+/src/plugins/dashboard/ @elastic/kibana-canvas
+/src/plugins/input_control_vis/ @elastic/kibana-canvas
+/src/plugins/vis_type_markdown/ @elastic/kibana-canvas
 /x-pack/plugins/canvas/  @elastic/kibana-canvas
+/x-pack/plugins/dashboard_enhanced/ @elastic/kibana-canvas
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-canvas
+#CC# /src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-canvas
+#CC# /src/legacy/core_plugins/input_control_vis @elastic/kibana-canvas
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-canvas
 #CC# /x-pack/legacy/plugins/canvas/ @elastic/kibana-canvas
+#CC# /x-pack/plugins/dashboard_mode @elastic/kibana-canvas
+#CC# /x-pack/legacy/plugins/dashboard_mode/ @elastic/kibana-canvas
 
 # Core UI
 # Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
 /src/plugins/home/public @elastic/kibana-core-ui
 /src/plugins/home/server/*.ts @elastic/kibana-core-ui
 /src/plugins/home/server/services/ @elastic/kibana-core-ui
+/src/plugins/kibana_overview/ @elastic/kibana-core-ui
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core-ui
 #CC# /src/legacy/core_plugins/newsfeed @elastic/kibana-core-ui
+#CC# /src/legacy/server/sample_data/ @elastic/kibana-core-ui
 #CC# /src/plugins/newsfeed @elastic/kibana-core-ui
 #CC# /src/plugins/home/public @elastic/kibana-core-ui
 #CC# /src/plugins/home/server/services/ @elastic/kibana-core-ui
@@ -177,8 +157,6 @@
 /x-pack/test/functional/apps/maps/ @elastic/kibana-gis
 /x-pack/test/functional/es_archives/maps/ @elastic/kibana-gis
 /x-pack/test/visual_regression/tests/maps/index.js @elastic/kibana-gis
-#CC# /src/legacy/core_plugins/region_map @elastic/kibana-gis
-#CC# /src/legacy/core_plugins/tile_map @elastic/kibana-gis
 #CC# /src/plugins/maps_legacy/ @elastic/kibana-gis
 #CC# /x-pack/plugins/file_upload @elastic/kibana-gis
 #CC# /x-pack/plugins/maps_legacy_licensing @elastic/kibana-gis
@@ -218,12 +196,15 @@
 
 # Platform
 /src/core/  @elastic/kibana-platform
+/src/plugins/saved_objects_tagging_oss  @elastic/kibana-platform
 /config/kibana.yml @elastic/kibana-platform
 /x-pack/plugins/features/  @elastic/kibana-platform
 /x-pack/plugins/licensing/  @elastic/kibana-platform
 /x-pack/plugins/global_search/  @elastic/kibana-platform
 /x-pack/plugins/cloud/ @elastic/kibana-platform
+/x-pack/plugins/saved_objects_tagging/ @elastic/kibana-platform
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-platform
+/x-pack/test/saved_object_tagging/ @elastic/kibana-platform
 /packages/kbn-config-schema/ @elastic/kibana-platform
 /packages/kbn-std/ @elastic/kibana-platform
 /src/legacy/server/config/ @elastic/kibana-platform
@@ -251,6 +232,7 @@
 #CC# /src/legacy/ui/public/documentation_links @elastic/kibana-platform
 #CC# /src/legacy/ui/public/autoload @elastic/kibana-platform
 #CC# /src/plugins/legacy_export/ @elastic/kibana-platform
+#CC# /src/plugins/saved_objects/ @elastic/kibana-platform
 #CC# /src/plugins/status_page/ @elastic/kibana-platform
 #CC# /src/plugins/testbed/server/ @elastic/kibana-platform
 #CC# /x-pack/legacy/plugins/xpack_main/server/ @elastic/kibana-platform
@@ -262,6 +244,8 @@
 
 # Security
 /src/core/server/csp/  @elastic/kibana-security @elastic/kibana-platform
+/src/plugins/security_oss/ @elastic/kibana-security
+/test/security_functional/ @elastic/kibana-security
 /x-pack/plugins/spaces/  @elastic/kibana-security
 /x-pack/plugins/encrypted_saved_objects/  @elastic/kibana-security
 /x-pack/plugins/security/  @elastic/kibana-security
@@ -270,10 +254,8 @@
 /x-pack/test/encrypted_saved_objects_api_integration/ @elastic/kibana-security
 /x-pack/test/functional/apps/security/ @elastic/kibana-security
 /x-pack/test/kerberos_api_integration/ @elastic/kibana-security
-/x-pack/test/login_selector_api_integration/ @elastic/kibana-security
 /x-pack/test/oidc_api_integration/ @elastic/kibana-security
 /x-pack/test/pki_api_integration/ @elastic/kibana-security
-/x-pack/test/saml_api_integration/ @elastic/kibana-security
 /x-pack/test/security_api_integration/ @elastic/kibana-security
 /x-pack/test/security_functional/ @elastic/kibana-security
 /x-pack/test/spaces_api_integration/ @elastic/kibana-security
@@ -323,7 +305,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 #CC# /x-pack/legacy/plugins/alerting/ @elastic/kibana-alerting-services
 #CC# /x-pack/legacy/plugins/task_manager @elastic/kibana-alerting-services
 #CC# /x-pack/legacy/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
-#CC# /x-pack/plugins/alerting_builtins @elastic/kibana-alerting-services
+#CC# /x-pack/plugins/stack_alerts @elastic/kibana-alerting-services
 
 # Enterprise Search
 # Shared
@@ -351,6 +333,8 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 /x-pack/plugins/ingest_pipelines/  @elastic/es-ui
 /packages/kbn-ace/ @elastic/es-ui
 /packages/kbn-monaco/ @elastic/es-ui
+#CC# /src/legacy/core_plugins/kibana/public/dev_tools/ @elastic/es-ui
+#CC# /src/legacy/core_plugins/console_legacy @elastic/es-ui
 #CC# /x-pack/legacy/plugins/rollup/ @elastic/es-ui
 #CC# /x-pack/legacy/server/lib/create_router/ @elastic/es-ui
 #CC# /x-pack/legacy/server/lib/check_license/ @elastic/es-ui
@@ -385,8 +369,9 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 **/*.scss  @elastic/kibana-design
 #CC# /packages/kbn-ui-framework/ @elastic/kibana-design
 
-# Core design
+# Core UI design
 /src/plugins/dashboard/**/*.scss @elastic/kibana-core-ui-designers
+/src/plugins/embeddable/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
 /x-pack/plugins/security/**/*.scss @elastic/kibana-core-ui-designers

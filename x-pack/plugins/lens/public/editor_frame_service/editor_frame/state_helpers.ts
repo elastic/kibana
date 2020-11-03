@@ -9,18 +9,20 @@ import { Ast } from '@kbn/interpreter/common';
 import { Datasource, DatasourcePublicAPI, Visualization } from '../../types';
 import { buildExpression } from './expression_helpers';
 import { Document } from '../../persistence/saved_object_store';
+import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 
 export async function initializeDatasources(
   datasourceMap: Record<string, Datasource>,
   datasourceStates: Record<string, { state: unknown; isLoading: boolean }>,
-  references?: SavedObjectReference[]
+  references?: SavedObjectReference[],
+  initialContext?: VisualizeFieldContext
 ) {
   const states: Record<string, { isLoading: boolean; state: unknown }> = {};
   await Promise.all(
     Object.entries(datasourceMap).map(([datasourceId, datasource]) => {
       if (datasourceStates[datasourceId]) {
         return datasource
-          .initialize(datasourceStates[datasourceId].state || undefined, references)
+          .initialize(datasourceStates[datasourceId].state || undefined, references, initialContext)
           .then((datasourceState) => {
             states[datasourceId] = { isLoading: false, state: datasourceState };
           });

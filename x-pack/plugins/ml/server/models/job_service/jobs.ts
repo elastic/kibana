@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { uniq } from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { parseTimeIntervalForJob } from '../../../common/util/job_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../common/constants/states';
@@ -152,11 +152,18 @@ export function jobsProvider(client: IScopedClusterClient) {
   async function jobsSummary(jobIds: string[] = []) {
     const fullJobsList: CombinedJobWithStats[] = await createFullJobsList();
     const fullJobsIds = fullJobsList.map((job) => job.job_id);
-    const auditMessages: AuditMessage[] = await getAuditMessagesSummary(fullJobsIds);
-    const auditMessagesByJob = auditMessages.reduce((acc, cur) => {
-      acc[cur.job_id] = cur;
-      return acc;
-    }, {} as { [id: string]: AuditMessage });
+    let auditMessagesByJob: { [id: string]: AuditMessage } = {};
+
+    // even if there are errors getting the audit messages, we still want to show the full list
+    try {
+      const auditMessages: AuditMessage[] = await getAuditMessagesSummary(fullJobsIds);
+      auditMessagesByJob = auditMessages.reduce((acc, cur) => {
+        acc[cur.job_id] = cur;
+        return acc;
+      }, auditMessagesByJob);
+    } catch (e) {
+      // fail silently
+    }
 
     const deletingStr = i18n.translate('xpack.ml.models.jobService.deletingJob', {
       defaultMessage: 'deleting',

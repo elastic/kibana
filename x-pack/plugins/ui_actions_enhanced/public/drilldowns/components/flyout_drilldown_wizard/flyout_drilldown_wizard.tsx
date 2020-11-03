@@ -230,7 +230,7 @@ export function FlyoutDrilldownWizard<
         actionFactories={drilldownActionFactories}
         actionFactoryContext={actionFactoryContext}
         onSelectedTriggersChange={setSelectedTriggers}
-        supportedTriggers={supportedTriggers}
+        triggers={supportedTriggers}
         getTriggerInfo={getTrigger}
         triggerPickerDocsLink={triggerPickerDocsLink}
       />

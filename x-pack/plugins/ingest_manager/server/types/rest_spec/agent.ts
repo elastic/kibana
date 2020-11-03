@@ -13,6 +13,7 @@ export const GetAgentsRequestSchema = {
     perPage: schema.number({ defaultValue: 20 }),
     kuery: schema.maybe(schema.string()),
     showInactive: schema.boolean({ defaultValue: false }),
+    showUpgradeable: schema.boolean({ defaultValue: false }),
   }),
 };
 
@@ -58,6 +59,7 @@ export const PostAgentCheckinRequestBodyJSONSchema = {
               'DEGRADED',
               'DATA_DUMP',
               'ACKNOWLEDGED',
+              'UPDATING',
               'UNKNOWN',
             ],
           },
@@ -172,19 +174,29 @@ export const PostAgentUnenrollRequestSchema = {
   ),
 };
 
+export const PostBulkAgentUnenrollRequestSchema = {
+  body: schema.object({
+    agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    force: schema.maybe(schema.boolean()),
+  }),
+};
+
 export const PostAgentUpgradeRequestSchema = {
   params: schema.object({
     agentId: schema.string(),
   }),
   body: schema.object({
-    source_uri: schema.string(),
+    source_uri: schema.maybe(schema.string()),
     version: schema.string(),
+    force: schema.maybe(schema.boolean()),
   }),
 };
 
-export const PostBulkAgentUnenrollRequestSchema = {
+export const PostBulkAgentUpgradeRequestSchema = {
   body: schema.object({
     agents: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    source_uri: schema.maybe(schema.string()),
+    version: schema.string(),
     force: schema.maybe(schema.boolean()),
   }),
 };

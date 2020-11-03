@@ -39,6 +39,7 @@
 |  --- | --- |
 |  [ACTION\_VISUALIZE\_FIELD](./kibana-plugin-plugins-ui_actions-public.action_visualize_field.md) |  |
 |  [ACTION\_VISUALIZE\_GEO\_FIELD](./kibana-plugin-plugins-ui_actions-public.action_visualize_geo_field.md) |  |
+|  [ACTION\_VISUALIZE\_LENS\_FIELD](./kibana-plugin-plugins-ui_actions-public.action_visualize_lens_field.md) |  |
 |  [APPLY\_FILTER\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.apply_filter_trigger.md) |  |
 |  [applyFilterTrigger](./kibana-plugin-plugins-ui_actions-public.applyfiltertrigger.md) |  |
 |  [SELECT\_RANGE\_TRIGGER](./kibana-plugin-plugins-ui_actions-public.select_range_trigger.md) |  |

@@ -43,7 +43,6 @@ storiesOf('Components/ExceptionItem', module)
   })
   .add('with description', () => {
     const payload = getExceptionListItemSchemaMock();
-    payload._tags = [];
     payload.comments = [];
     payload.entries = [
       {
@@ -66,7 +65,6 @@ storiesOf('Components/ExceptionItem', module)
   })
   .add('with comments', () => {
     const payload = getExceptionListItemSchemaMock();
-    payload._tags = [];
     payload.description = '';
     payload.comments = getCommentsArrayMock();
     payload.entries = [
@@ -90,7 +88,6 @@ storiesOf('Components/ExceptionItem', module)
   })
   .add('with nested entries', () => {
     const payload = getExceptionListItemSchemaMock();
-    payload._tags = [];
     payload.description = '';
     payload.comments = [];
 

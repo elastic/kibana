@@ -150,6 +150,14 @@ export const getThresholdAggregationDataProvider = (
   ];
 };
 
+export const isEqlRuleWithGroupId = (ecsData: Ecs) =>
+  ecsData.signal?.rule?.type?.length &&
+  ecsData.signal?.rule?.type[0] === 'eql' &&
+  ecsData.signal?.group?.id?.length;
+
+export const isThresholdRule = (ecsData: Ecs) =>
+  ecsData.signal?.rule?.type?.length && ecsData.signal?.rule?.type[0] === 'threshold';
+
 export const sendAlertToTimelineAction = async ({
   apolloClient,
   createTimeline,
@@ -158,13 +166,12 @@ export const sendAlertToTimelineAction = async ({
   updateTimelineIsLoading,
   searchStrategyClient,
 }: SendAlertToTimelineActionProps) => {
-  let openAlertInBasicTimeline = true;
   const noteContent = ecsData.signal?.rule?.note != null ? ecsData.signal?.rule?.note[0] : '';
   const timelineId =
     ecsData.signal?.rule?.timeline_id != null ? ecsData.signal?.rule?.timeline_id[0] : '';
   const { to, from } = determineToAndFrom({ ecsData });
 
-  if (timelineId !== '' && apolloClient != null) {
+  if (!isEmpty(timelineId) && apolloClient != null) {
     try {
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: true });
       const [responseTimeline, eventDataResp] = await Promise.all([
@@ -173,29 +180,28 @@ export const sendAlertToTimelineAction = async ({
           fetchPolicy: 'no-cache',
           variables: {
             id: timelineId,
+            timelineType: TimelineType.template,
           },
         }),
-        searchStrategyClient.search<
-          TimelineEventsDetailsRequestOptions,
-          TimelineEventsDetailsStrategyResponse
-        >(
-          {
-            defaultIndex: [],
-            docValueFields: [],
-            indexName: ecsData._index ?? '',
-            eventId: ecsData._id,
-            factoryQueryType: TimelineEventsQueries.details,
-          },
-          {
-            strategy: 'securitySolutionTimelineSearchStrategy',
-          }
-        ),
+        searchStrategyClient
+          .search<TimelineEventsDetailsRequestOptions, TimelineEventsDetailsStrategyResponse>(
+            {
+              defaultIndex: [],
+              docValueFields: [],
+              indexName: ecsData._index ?? '',
+              eventId: ecsData._id,
+              factoryQueryType: TimelineEventsQueries.details,
+            },
+            {
+              strategy: 'securitySolutionTimelineSearchStrategy',
+            }
+          )
+          .toPromise(),
       ]);
       const resultingTimeline: TimelineResult = getOr({}, 'data.getOneTimeline', responseTimeline);
-      const eventData: TimelineEventsDetailsItem[] = getOr([], 'data', eventDataResp);
+      const eventData: TimelineEventsDetailsItem[] = eventDataResp.data ?? [];
       if (!isEmpty(resultingTimeline)) {
         const timelineTemplate: TimelineResult = omitTypenameInTimeline(resultingTimeline);
-        openAlertInBasicTimeline = false;
         const { timeline, notes } = formatTimelineResultToModel(
           timelineTemplate,
           true,
@@ -250,16 +256,11 @@ export const sendAlertToTimelineAction = async ({
         });
       }
     } catch {
-      openAlertInBasicTimeline = true;
       updateTimelineIsLoading({ id: TimelineId.active, isLoading: false });
     }
   }
 
-  if (
-    ecsData.signal?.rule?.type?.length &&
-    ecsData.signal?.rule?.type[0] === 'threshold' &&
-    openAlertInBasicTimeline
-  ) {
+  if (isThresholdRule(ecsData)) {
     return createTimeline({
       from,
       notes: null,
@@ -312,26 +313,44 @@ export const sendAlertToTimelineAction = async ({
       ruleNote: noteContent,
     });
   } else {
+    let dataProviders = [
+      {
+        and: [],
+        id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
+        name: ecsData._id,
+        enabled: true,
+        excluded: false,
+        kqlQuery: '',
+        queryMatch: {
+          field: '_id',
+          value: ecsData._id,
+          operator: ':' as const,
+        },
+      },
+    ];
+    if (isEqlRuleWithGroupId(ecsData)) {
+      const signalGroupId = ecsData.signal?.group?.id?.length
+        ? ecsData.signal?.group?.id[0]
+        : 'unknown-signal-group-id';
+      dataProviders = [
+        {
+          ...dataProviders[0],
+          id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${signalGroupId}`,
+          queryMatch: {
+            field: 'signal.group.id',
+            value: signalGroupId,
+            operator: ':' as const,
+          },
+        },
+      ];
+    }
+
     return createTimeline({
       from,
       notes: null,
       timeline: {
         ...timelineDefaults,
-        dataProviders: [
-          {
-            and: [],
-            id: `send-alert-to-timeline-action-default-draggable-event-details-value-formatted-field-value-${TimelineId.active}-alert-id-${ecsData._id}`,
-            name: ecsData._id,
-            enabled: true,
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: '_id',
-              value: ecsData._id,
-              operator: ':',
-            },
-          },
-        ],
+        dataProviders,
         id: TimelineId.active,
         indexNames: [],
         dateRange: {

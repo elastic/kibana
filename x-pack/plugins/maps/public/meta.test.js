@@ -12,14 +12,14 @@ jest.mock('@elastic/ems-client');
 describe('default use without proxy', () => {
   beforeEach(() => {
     require('./kibana_services').getProxyElasticMapsServiceInMaps = () => false;
-    require('./kibana_services').getLicenseId = () => {
-      return 'foobarlicenseid';
-    };
     require('./kibana_services').getIsEmsEnabled = () => true;
     require('./kibana_services').getEmsTileLayerId = () => '123';
     require('./kibana_services').getEmsFileApiUrl = () => 'https://file-api';
     require('./kibana_services').getEmsTileApiUrl = () => 'https://tile-api';
     require('./kibana_services').getEmsLandingPageUrl = () => 'http://test.com';
+    require('./licensed_features').getLicenseId = () => {
+      return 'foobarlicenseid';
+    };
   });
 
   test('should construct EMSClient with absolute file and tile API urls', async () => {

@@ -25,9 +25,10 @@ import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks'
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../src/plugins/visualizations/public/embeddable';
 import { coreMock, httpServiceMock } from '../../../../../../src/core/public/mocks';
 import { IBasePath } from '../../../../../../src/core/public';
-import { AttributeService } from '../../../../../../src/plugins/dashboard/public';
-import { Ast } from '@kbn/interpreter/common';
+import { AttributeService } from '../../../../../../src/plugins/embeddable/public';
 import { LensAttributeService } from '../../lens_attribute_service';
+import { OnSaveProps } from '../../../../../../src/plugins/saved_objects/public/save_modal';
+import { act } from 'react-dom/test-utils';
 
 jest.mock('../../../../../../src/plugins/inspector/public/', () => ({
   isAvailable: false,
@@ -45,6 +46,29 @@ const savedVis: Document = {
   title: 'My title',
   visualizationType: '',
 };
+const defaultSaveMethod = (
+  testAttributes: LensSavedObjectAttributes,
+  savedObjectId?: string
+): Promise<{ id: string }> => {
+  return new Promise(() => {
+    return { id: '123' };
+  });
+};
+const defaultUnwrapMethod = (savedObjectId: string): Promise<LensSavedObjectAttributes> => {
+  return new Promise(() => {
+    return { ...savedVis };
+  });
+};
+const defaultCheckForDuplicateTitle = (props: OnSaveProps): Promise<true> => {
+  return new Promise(() => {
+    return true;
+  });
+};
+const options = {
+  saveMethod: defaultSaveMethod,
+  unwrapMethod: defaultUnwrapMethod,
+  checkForDuplicateTitle: defaultCheckForDuplicateTitle,
+};
 
 const attributeServiceMockFromSavedVis = (document: Document): LensAttributeService => {
   const core = coreMock.createStart();
@@ -52,14 +76,7 @@ const attributeServiceMockFromSavedVis = (document: Document): LensAttributeServ
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
-  >(
-    'lens',
-    jest.fn(),
-    core.savedObjects.client,
-    core.overlays,
-    core.i18n.Context,
-    core.notifications.toasts
-  );
+  >('lens', jest.fn(), core.i18n.Context, core.notifications.toasts, options);
   service.unwrapAttributes = jest.fn((input: LensByValueInput | LensByReferenceInput) => {
     return Promise.resolve({ ...document } as LensSavedObjectAttributes);
   });
@@ -103,8 +120,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       {} as LensEmbeddableInput
     );
@@ -112,7 +135,8 @@ describe('embeddable', () => {
     embeddable.render(mountpoint);
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
-    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual('my | expression');
+    expect(expressionRenderer.mock.calls[0][0]!.expression).toEqual(`my
+| expression`);
   });
 
   it('should re-render if new input is pushed', async () => {
@@ -129,8 +153,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -141,6 +171,7 @@ describe('embeddable', () => {
       timeRange,
       query,
       filters,
+      searchSessionId: 'searchSessionId',
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
@@ -151,7 +182,13 @@ describe('embeddable', () => {
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
-    const input = { savedObjectId: '123', timeRange, query, filters } as LensEmbeddableInput;
+    const input = {
+      savedObjectId: '123',
+      timeRange,
+      query,
+      filters,
+      searchSessionId: 'searchSessionId',
+    } as LensEmbeddableInput;
 
     const embeddable = new Embeddable(
       {
@@ -162,8 +199,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       input
     );
@@ -177,6 +220,8 @@ describe('embeddable', () => {
         filters,
       })
     );
+
+    expect(expressionRenderer.mock.calls[0][0].searchSessionId).toBe(input.searchSessionId);
   });
 
   it('should merge external context with query and filters of the saved object', async () => {
@@ -208,8 +253,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       input
     );
@@ -237,8 +288,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123' } as LensEmbeddableInput
     );
@@ -270,8 +327,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
@@ -283,10 +346,12 @@ describe('embeddable', () => {
     } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    embeddable.updateInput({
-      timeRange,
-      query,
-      filters: [{ meta: { alias: 'test', negate: true, disabled: true } }],
+    act(() => {
+      embeddable.updateInput({
+        timeRange,
+        query,
+        filters: [{ meta: { alias: 'test', negate: true, disabled: true } }],
+      });
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
@@ -311,8 +376,14 @@ describe('embeddable', () => {
         indexPatternService: {} as IndexPatternsContract,
         editable: true,
         getTrigger,
-        documentToExpression: () => Promise.resolve({} as Ast),
-        toExpressionString: () => 'my | expression',
+        documentToExpression: () =>
+          Promise.resolve({
+            type: 'expression',
+            chain: [
+              { type: 'function', function: 'my', arguments: {} },
+              { type: 'function', function: 'expression', arguments: {} },
+            ],
+          }),
       },
       { id: '123', timeRange, query, filters } as LensEmbeddableInput
     );
@@ -324,7 +395,9 @@ describe('embeddable', () => {
     } as LensEmbeddableInput);
     embeddable.render(mountpoint);
 
-    autoRefreshFetchSubject.next();
+    act(() => {
+      autoRefreshFetchSubject.next();
+    });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });

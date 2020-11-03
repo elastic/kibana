@@ -9,9 +9,13 @@ import { ISavedObjectTypeRegistry, SavedObjectsUtils } from '../../../../../src/
 export const getDescriptorNamespace = (
   typeRegistry: ISavedObjectTypeRegistry,
   type: string,
-  namespace?: string
+  namespace?: string | string[]
 ) => {
-  const descriptorNamespace = typeRegistry.isSingleNamespace(type) ? namespace : undefined;
+  const descriptorNamespace = typeRegistry.isSingleNamespace(type)
+    ? Array.isArray(namespace)
+      ? namespace[0]
+      : namespace
+    : undefined;
   return normalizeNamespace(descriptorNamespace);
 };
 

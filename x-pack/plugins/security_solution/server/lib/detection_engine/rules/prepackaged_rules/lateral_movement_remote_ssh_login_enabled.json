@@ -1,0 +1,48 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Detects use of the systemsetup command to enable remote SSH Login.",
+  "from": "now-9m",
+  "index": [
+    "auditbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Remote SSH Login Enabled via systemsetup Command",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:systemsetup and process.args:(\"-f\" and \"-setremotelogin\" and on)",
+  "references": [
+    "https://documents.trendmicro.com/assets/pdf/XCSSET_Technical_Brief.pdf",
+    "https://ss64.com/osx/systemsetup.html"
+  ],
+  "risk_score": 47,
+  "rule_id": "5ae4e6f8-d1bf-40fa-96ba-e29645e1e4dc",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "macOS",
+    "Threat Detection",
+    "Lateral Movement"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0008",
+        "name": "Lateral Movement",
+        "reference": "https://attack.mitre.org/tactics/TA0008/"
+      },
+      "technique": [
+        {
+          "id": "T1021",
+          "name": "Remote Services",
+          "reference": "https://attack.mitre.org/techniques/T1021/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

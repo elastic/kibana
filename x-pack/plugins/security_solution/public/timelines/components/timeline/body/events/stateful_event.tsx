@@ -33,7 +33,7 @@ import { EventsTrGroup, EventsTrSupplement, EventsTrSupplementContainer } from '
 import { ColumnRenderer } from '../renderers/column_renderer';
 import { getRowRenderer } from '../renderers/get_row_renderer';
 import { RowRenderer } from '../renderers/row_renderer';
-import { getEventType } from '../helpers';
+import { isEventBuildingBlockType, getEventType } from '../helpers';
 import { NoteCards } from '../../../notes/note_cards';
 import { useEventDetailsWidthContext } from '../../../../../common/components/events_viewer/event_details_width_context';
 import { EventColumnView } from './event_column_view';
@@ -60,6 +60,7 @@ interface Props {
   onUpdateColumns: OnUpdateColumns;
   isEventPinned: boolean;
   refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
@@ -129,6 +130,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   onUnPinEvent,
   onUpdateColumns,
   refetch,
+  onRuleChange,
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
@@ -183,6 +185,7 @@ const StatefulEventComponent: React.FC<Props> = ({
             className={STATEFUL_EVENT_CSS_CLASS_NAME}
             data-test-subj="event"
             eventType={getEventType(event.ecs)}
+            isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
             showLeftBorder={!isEventViewer}
             ref={divElement}
           >
@@ -207,6 +210,7 @@ const StatefulEventComponent: React.FC<Props> = ({
               onRowSelected={onRowSelected}
               onUnPinEvent={onUnPinEvent}
               refetch={refetch}
+              onRuleChange={onRuleChange}
               selectedEventIds={selectedEventIds}
               showCheckboxes={showCheckboxes}
               showNotes={!!showNotes[event._id]}
@@ -295,6 +299,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       onUnPinEvent,
       onUpdateColumns,
       refetch,
+      onRuleChange,
       rowRenderers,
       selectedEventIds,
       showCheckboxes,

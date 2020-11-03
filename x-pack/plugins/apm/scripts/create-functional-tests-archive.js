@@ -6,13 +6,6 @@
 
 // compile typescript on the fly
 // eslint-disable-next-line import/no-extraneous-dependencies
-require('@babel/register')({
-  extensions: ['.js', '.ts'],
-  plugins: ['@babel/plugin-proposal-optional-chaining'],
-  presets: [
-    '@babel/typescript',
-    ['@babel/preset-env', { targets: { node: 'current' } }],
-  ],
-});
+require('@kbn/optimizer').registerNodeAutoTranspilation();
 
 require('./create-functional-tests-archive/index.ts');

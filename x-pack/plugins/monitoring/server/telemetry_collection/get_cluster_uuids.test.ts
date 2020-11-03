@@ -5,7 +5,7 @@
  */
 
 import sinon from 'sinon';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from 'src/core/server/mocks';
 import {
   getClusterUuids,
   fetchClusterUuids,
@@ -15,6 +15,7 @@ import {
 describe('get_cluster_uuids', () => {
   const callCluster = sinon.stub();
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const soClient = savedObjectsRepositoryMock.create();
   const response = {
     aggregations: {
       cluster_uuids: {
@@ -25,16 +26,18 @@ describe('get_cluster_uuids', () => {
   const expectedUuids = response.aggregations.cluster_uuids.buckets
     .map((bucket) => bucket.key)
     .map((expectedUuid) => ({ clusterUuid: expectedUuid }));
-  const start = new Date().toISOString();
-  const end = new Date().toISOString();
+  const timestamp = Date.now();
 
   describe('getClusterUuids', () => {
     it('returns cluster UUIDs', async () => {
       callCluster.withArgs('search').returns(Promise.resolve(response));
       expect(
-        await getClusterUuids({ callCluster, esClient, start, end, usageCollection: {} as any }, {
-          maxBucketSize: 1,
-        } as any)
+        await getClusterUuids(
+          { callCluster, esClient, soClient, timestamp, usageCollection: {} as any },
+          {
+            maxBucketSize: 1,
+          } as any
+        )
       ).toStrictEqual(expectedUuids);
     });
   });
@@ -43,9 +46,12 @@ describe('get_cluster_uuids', () => {
     it('searches for clusters', async () => {
       callCluster.returns(Promise.resolve(response));
       expect(
-        await fetchClusterUuids({ callCluster, esClient, start, end, usageCollection: {} as any }, {
-          maxBucketSize: 1,
-        } as any)
+        await fetchClusterUuids(
+          { callCluster, esClient, soClient, timestamp, usageCollection: {} as any },
+          {
+            maxBucketSize: 1,
+          } as any
+        )
       ).toStrictEqual(response);
     });
   });

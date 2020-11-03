@@ -43,7 +43,6 @@ describe('ErrorGroupOverview -> List', () => {
       <MemoryRouter>
         <MockApmPluginContextWrapper>
           <MockUrlParamsContextProvider>
-            {/* @ts-expect-error invalid json props */}
             <ErrorGroupList items={props.items} serviceName="opbeans-python" />
           </MockUrlParamsContextProvider>
         </MockApmPluginContextWrapper>

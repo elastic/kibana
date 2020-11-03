@@ -13,7 +13,7 @@ import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
 import { BaseParams } from '../../common/types';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
-interface Props {
+export interface Props {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   reportType: string;

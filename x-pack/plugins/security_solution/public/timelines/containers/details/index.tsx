@@ -29,6 +29,8 @@ export interface UseTimelineEventsDetailsProps {
   skip: boolean;
 }
 
+const ID = 'timelineEventsDetails';
+
 export const useTimelineEventsDetails = ({
   docValueFields,
   indexName,
@@ -49,7 +51,11 @@ export const useTimelineEventsDetails = ({
   );
 
   const timelineDetailsSearch = useCallback(
-    (request: TimelineEventsDetailsRequestOptions) => {
+    (request: TimelineEventsDetailsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -102,6 +108,7 @@ export const useTimelineEventsDetails = ({
         ...(prevRequest ?? {}),
         docValueFields,
         indexName,
+        id: ID,
         eventId,
         factoryQueryType: TimelineEventsQueries.details,
       };
@@ -113,9 +120,7 @@ export const useTimelineEventsDetails = ({
   }, [docValueFields, eventId, indexName, skip]);
 
   useEffect(() => {
-    if (timelineDetailsRequest) {
-      timelineDetailsSearch(timelineDetailsRequest);
-    }
+    timelineDetailsSearch(timelineDetailsRequest);
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
   return [loading, timelineDetailsResponse];

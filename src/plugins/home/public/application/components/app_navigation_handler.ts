@@ -24,6 +24,7 @@ export const createAppNavigationHandler = (targetUrl: string) => (event: MouseEv
   if (event.altKey || event.metaKey || event.ctrlKey) {
     return;
   }
+  const { application, addBasePath } = getServices();
   event.preventDefault();
-  getServices().application.navigateToUrl(targetUrl);
+  application.navigateToUrl(addBasePath(targetUrl));
 };

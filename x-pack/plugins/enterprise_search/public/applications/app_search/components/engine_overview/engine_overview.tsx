@@ -85,7 +85,7 @@ export const EngineOverview: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
       <EngineOverviewHeader />

@@ -13,14 +13,18 @@ import {
   ServiceStatus,
   ServiceStatusLevels,
 } from '../../../../../src/core/server';
-import { contextServiceMock } from '../../../../../src/core/server/mocks';
+import {
+  contextServiceMock,
+  elasticsearchServiceMock,
+  savedObjectsServiceMock,
+} from '../../../../../src/core/server/mocks';
 import { createHttpServer } from '../../../../../src/core/server/test_utils';
 import { registerSettingsRoute } from './settings';
 
 type HttpService = ReturnType<typeof createHttpServer>;
 type HttpSetup = UnwrapPromise<ReturnType<HttpService['setup']>>;
 
-describe('/api/stats', () => {
+describe('/api/settings', () => {
   let server: HttpService;
   let httpSetup: HttpSetup;
   let overallStatus$: BehaviorSubject<ServiceStatus>;
@@ -38,6 +42,12 @@ describe('/api/stats', () => {
                 callAsCurrentUser: mockApiCaller,
               },
             },
+            client: {
+              asCurrentUser: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
+            },
+          },
+          savedObjects: {
+            client: savedObjectsServiceMock.create(),
           },
         },
       }),

@@ -5,11 +5,12 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { AgentSOAttributes } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { getAgents, listAllAgents } from './crud';
+import { createAgentAction, bulkCreateAgentActions } from './actions';
 
 export async function reassignAgent(
   soClient: SavedObjectsClientContract,
@@ -24,6 +25,12 @@ export async function reassignAgent(
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agentId, {
     policy_id: newAgentPolicyId,
     policy_revision: null,
+  });
+
+  await createAgentAction(soClient, {
+    agent_id: agentId,
+    created_at: new Date().toISOString(),
+    type: 'INTERNAL_POLICY_REASSIGN',
   });
 }
 
@@ -56,7 +63,7 @@ export async function reassignAgents(
   const agentsToUpdate = agents.filter((agent) => agent.policy_id !== newAgentPolicyId);
 
   // Update the necessary agents
-  return await soClient.bulkUpdate<AgentSOAttributes>(
+  const res = await soClient.bulkUpdate<AgentSOAttributes>(
     agentsToUpdate.map((agent) => ({
       type: AGENT_SAVED_OBJECT_TYPE,
       id: agent.id,
@@ -66,4 +73,15 @@ export async function reassignAgents(
       },
     }))
   );
+  const now = new Date().toISOString();
+  await bulkCreateAgentActions(
+    soClient,
+    agentsToUpdate.map((agent) => ({
+      agent_id: agent.id,
+      created_at: now,
+      type: 'INTERNAL_POLICY_REASSIGN',
+    }))
+  );
+
+  return res;
 }

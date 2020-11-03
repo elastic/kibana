@@ -139,8 +139,8 @@ export const MonitorListComponent: ({
       mobileOptions: {
         show: false,
       },
-      render: (histogramSeries: HistogramPoint[] | null) => (
-        <MonitorBarSeries histogramSeries={histogramSeries} />
+      render: (histogramSeries: HistogramPoint[] | null, summary: MonitorSummary) => (
+        <MonitorBarSeries histogramSeries={histogramSeries} minInterval={summary.minInterval!} />
       ),
     },
     {
