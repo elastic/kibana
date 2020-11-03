@@ -25,9 +25,8 @@ import { KibanaContextProvider } from '../../kibana_react/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import { TimelionVisDependencies } from './plugin';
 import { TimelionRenderValue } from './timelion_vis_fn';
-// @ts-ignore
+
 const TimelionVisComponent = lazy(() => import('./components/timelion_vis_component'));
-const TimelionVisComponent1 = lazy(() => import('./components/timelion_vis_component1'));
 
 export const getTimelionVisRenderer: (
   deps: TimelionVisDependencies
@@ -46,13 +45,7 @@ export const getTimelionVisRenderer: (
     render(
       <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
         <KibanaContextProvider services={{ ...deps }}>
-          {/* <TimelionVisComponent
-            interval={visParams.interval}
-            seriesList={seriesList}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-          /> */}
-          <TimelionVisComponent1
+          <TimelionVisComponent
             interval={visParams.interval}
             seriesList={seriesList}
             renderComplete={handlers.done}
