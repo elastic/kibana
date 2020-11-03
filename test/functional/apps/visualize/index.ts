@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
     // TODO: Remove when vislib is removed
     describe('newChartUi', function () {
-      this.tags('ciGroup8');
+      this.tags('ciGroup7');
 
       before(async () => {
         await kibanaServer.uiSettings.update({
