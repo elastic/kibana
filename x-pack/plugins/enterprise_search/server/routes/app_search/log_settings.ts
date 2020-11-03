@@ -8,19 +8,6 @@ import { schema } from '@kbn/config-schema';
 
 import { IRouteDependencies } from '../../plugin';
 
-const logSettingsSchema = schema.object({
-  api: schema.maybe(
-    schema.object({
-      enabled: schema.boolean(),
-    })
-  ),
-  analytics: schema.maybe(
-    schema.object({
-      enabled: schema.boolean(),
-    })
-  ),
-});
-
 export function registerLogSettingsRoutes({
   router,
   enterpriseSearchRequestHandler,
@@ -39,7 +26,18 @@ export function registerLogSettingsRoutes({
     {
       path: '/api/app_search/log_settings',
       validate: {
-        body: logSettingsSchema,
+        body: schema.object({
+          api: schema.maybe(
+            schema.object({
+              enabled: schema.boolean(),
+            })
+          ),
+          analytics: schema.maybe(
+            schema.object({
+              enabled: schema.boolean(),
+            })
+          ),
+        }),
       },
     },
     async (context, request, response) => {
