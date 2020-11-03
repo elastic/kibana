@@ -4,10 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { agentPolicyStatuses } from '../../constants';
-import { ValueOf } from '../../types';
+import { DataType, ValueOf } from '../../types';
 import { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import { Output } from './output';
-import { DataType, ValueOf } from '../../index';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
