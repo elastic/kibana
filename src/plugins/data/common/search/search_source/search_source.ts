@@ -75,9 +75,9 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../..';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
-import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
+import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../../search';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
+import type { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
 import { getEsQueryConfig, buildEsQuery, Filter, UI_SETTINGS } from '../../../common';
