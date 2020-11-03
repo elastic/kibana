@@ -183,7 +183,7 @@ export class UpdateSourceEditor extends Component {
                 text: i18n.translate('xpack.maps.source.esSearch.ascendingLabel', {
                   defaultMessage: 'ascending',
                 }),
-                value: SortDirection.ASC,
+                value: SortDirection.asc,
               },
               {
                 text: i18n.translate('xpack.maps.source.esSearch.descendingLabel', {
