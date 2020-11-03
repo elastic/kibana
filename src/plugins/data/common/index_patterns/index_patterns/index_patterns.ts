@@ -35,6 +35,7 @@ import {
   GetFieldsOptions,
   IndexPatternSpec,
   IndexPatternAttributes,
+  IndexPatternAttrsFields,
   FieldSpec,
   IndexPatternFieldMap,
 } from '../types';
@@ -300,9 +301,9 @@ export class IndexPatternsService {
    * Converts field array to map
    * @param fields
    */
-  fieldArrayToMap = (fields: FieldSpec[]) =>
+  fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: IndexPatternAttrsFields) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
-      collector[field.name] = field;
+      collector[field.name] = { ...field, customName: fieldAttrs?.[field.name]?.customName };
       return collector;
     }, {});
 
@@ -324,6 +325,7 @@ export class IndexPatternsService {
         fieldFormatMap,
         typeMeta,
         type,
+        attributes,
       },
     } = savedObject;
 
@@ -339,7 +341,7 @@ export class IndexPatternsService {
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
-      fields: this.fieldArrayToMap(parsedFields),
+      fields: this.fieldArrayToMap(parsedFields, attributes?.fields),
       typeMeta: parsedTypeMeta,
       type,
       fieldFormats: parsedFieldFormatMap,

@@ -9,5 +9,5 @@ Converts field array to map
 <b>Signature:</b>
 
 ```typescript
-fieldArrayToMap: (fields: FieldSpec[]) => Record<string, FieldSpec>;
+fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: IndexPatternAttrsFields | undefined) => Record<string, FieldSpec>;
 ```
