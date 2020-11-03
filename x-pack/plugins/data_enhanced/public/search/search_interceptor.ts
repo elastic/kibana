@@ -4,24 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { throwError, from, Subscription } from 'rxjs';
-import { tap, takeUntil, finalize, catchError } from 'rxjs/operators';
+import { throwError, Subscription } from 'rxjs';
+import { tap, finalize, catchError } from 'rxjs/operators';
 import {
   TimeoutErrorMode,
-  IEsSearchResponse,
   SearchInterceptor,
   SearchInterceptorDeps,
   UI_SETTINGS,
+  IKibanaSearchRequest,
 } from '../../../../../src/plugins/data/public';
-import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../src/plugins/data/common';
 
-import {
-  IAsyncSearchRequest,
-  ENHANCED_ES_SEARCH_STRATEGY,
-  IAsyncSearchOptions,
-  doPartialSearch,
-  throwOnEsError,
-} from '../../common';
+import { ENHANCED_ES_SEARCH_STRATEGY, IAsyncSearchOptions, pollSearch } from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
   private uiSettingsSub: Subscription;
@@ -60,45 +54,28 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
     if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
   };
 
-  public search(
-    request: IAsyncSearchRequest,
-    { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
-  ) {
-    let { id } = request;
-
+  public search({ id, ...request }: IKibanaSearchRequest, options: IAsyncSearchOptions = {}) {
     const { combinedSignal, timeoutSignal, cleanup } = this.setupAbortSignal({
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
-    const abortedPromise = toPromise(combinedSignal);
     const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
+    const search = () => this.runSearch({ id, ...request }, combinedSignal, strategy);
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-    return doPartialSearch<IEsSearchResponse>(
-      () => this.runSearch(request, combinedSignal, strategy),
-      (requestId) => this.runSearch({ ...request, id: requestId }, combinedSignal, strategy),
-      (r) => !r.isRunning,
-      (response) => response.id,
-      id,
-      { pollInterval }
-    ).pipe(
-      tap((r) => {
-        id = r.id ?? id;
-      }),
-      throwOnEsError(),
-      takeUntil(from(abortedPromise.promise)),
+    return pollSearch(search, { ...options, abortSignal: combinedSignal }).pipe(
+      tap((response) => (id = response.id)),
       catchError((e: AbortError) => {
         if (id) {
           this.deps.http.delete(`/internal/search/${strategy}/${id}`);
         }
 
-        return throwError(this.handleSearchError(e, request, timeoutSignal, options));
+        return throwError(this.handleSearchError(e, timeoutSignal, options));
       }),
       finalize(() => {
         this.pendingCount$.next(this.pendingCount$.getValue() - 1);
         cleanup();
-        abortedPromise.cleanup();
       })
     );
   }

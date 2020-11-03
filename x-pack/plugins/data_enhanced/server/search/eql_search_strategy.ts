@@ -4,18 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { Logger } from 'kibana/server';
-import type { ApiResponse } from '@elastic/elasticsearch';
-
-import { search } from '../../../../../src/plugins/data/server';
-import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
-import { getAsyncOptions, getDefaultSearchParams } from './get_default_search_params';
-
-import type { ISearchStrategy, IEsRawSearchResponse } from '../../../../../src/plugins/data/server';
+import { tap } from 'rxjs/operators';
+import type { ISearchStrategy } from '../../../../../src/plugins/data/server';
 import type {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-} from '../../common/search/types';
+  IAsyncSearchOptions,
+} from '../../common';
+import {
+  getDefaultSearchParams,
+  searchUsageObserver,
+  shimAbortSignal,
+} from '../../../../../src/plugins/data/server';
+import { pollSearch } from '../../common';
+import { getDefaultAsyncGetParams, getIgnoreThrottled } from './request_utils';
 
 export const eqlSearchStrategyProvider = (
   logger: Logger
@@ -23,48 +25,39 @@ export const eqlSearchStrategyProvider = (
   return {
     cancel: async (id, options, { esClient }) => {
       logger.debug(`_eql/delete ${id}`);
-      await esClient.asCurrentUser.eql.delete({
-        id,
-      });
+      await esClient.asCurrentUser.eql.delete({ id });
     },
 
-    search: (request, options, { esClient, uiSettingsClient }) => {
+    search: ({ id, ...request }, options: IAsyncSearchOptions, { esClient, uiSettingsClient }) => {
       logger.debug(`_eql/search ${JSON.stringify(request.params) || request.id}`);
 
-      const { utils } = search.esSearch;
-      const asyncOptions = getAsyncOptions();
-      const requestOptions = utils.toSnakeCase({ ...request.options });
       const client = esClient.asCurrentUser.eql;
 
-      return doPartialSearch<ApiResponse<IEsRawSearchResponse>>(
-        async () => {
-          const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
-            uiSettingsClient
-          );
-
-          return client.search(
-            utils.toSnakeCase({
-              ignoreThrottled,
-              ignoreUnavailable,
-              ...asyncOptions,
+      const search = async () => {
+        const params = id
+          ? { id, ...getDefaultAsyncGetParams() }
+          : {
+              ...(await getIgnoreThrottled(uiSettingsClient)),
+              ...(await getDefaultSearchParams(uiSettingsClient)),
+              ...getDefaultAsyncGetParams(),
               ...request.params,
-            }) as EqlSearchStrategyRequest['params'],
-            requestOptions
-          );
-        },
-        (id) =>
-          client.get(
-            {
-              id: id!,
-              ...utils.toSnakeCase(asyncOptions),
-            },
-            requestOptions
-          ),
-        (response) => !response.body.is_running,
-        (response) => response.body.id,
-        request.id,
-        options
-      ).pipe(utils.toKibanaSearchResponse());
+            };
+        const promise = id
+          ? client.get(params, request.options)
+          : client.search(params, request.options);
+        const { body } = await shimAbortSignal(promise, options.abortSignal);
+        return {
+          id: body.id,
+          rawResponse: body,
+          isPartial: body.is_partial,
+          isRunning: body.is_running,
+        };
+      };
+
+      return pollSearch(search, options).pipe(
+        tap((response) => (id = response.id)),
+        tap(searchUsageObserver(logger, usage))
+      );
     },
   };
 };

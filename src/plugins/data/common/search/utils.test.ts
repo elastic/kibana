@@ -17,25 +17,12 @@
  * under the License.
  */
 
-import type { IKibanaSearchResponse } from '../types';
+import { isErrorResponse, isCompleteResponse, isPartialResponse } from './utils';
 
-/**
- * @returns true if response had an error while executing in ES
- */
-export const isErrorResponse = (response?: IKibanaSearchResponse) => {
-  return !response || (!response.isRunning && response.isPartial);
-};
+describe('utils', () => {
+  describe('isErrorResponse', () => {});
 
-/**
- * @returns true if response is completed successfully
- */
-export const isCompleteResponse = (response?: IKibanaSearchResponse) => {
-  return Boolean(response && !response.isRunning && !response.isPartial);
-};
+  describe('isCompleteResponse', () => {});
 
-/**
- * @returns true if request is still running an/d response contains partial results
- */
-export const isPartialResponse = (response?: IKibanaSearchResponse) => {
-  return Boolean(response && response.isRunning && response.isPartial);
-};
+  describe('isPartialResponse', () => {});
+});

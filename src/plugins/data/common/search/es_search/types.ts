@@ -30,10 +30,4 @@ export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestPar
   indexType?: string;
 }
 
-export interface IEsRawSearchResponse<Source = any> extends SearchResponse<Source> {
-  id?: string;
-  is_partial?: boolean;
-  is_running?: boolean;
-}
-
 export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;

@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from './es_search_rxjs_utils';
+import { SearchResponse } from 'elasticsearch';
+
+export interface AsyncSearchResponse<T = unknown> {
+  id?: string;
+  response: SearchResponse<T>;
+  is_partial: boolean;
+  is_running: boolean;
+}

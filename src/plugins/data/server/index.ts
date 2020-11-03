@@ -224,8 +224,12 @@ export {
   SearchStrategyDependencies,
   getDefaultSearchParams,
   getShardTimeout,
+  getTotalLoaded,
+  toKibanaSearchResponse,
   shimHitsTotal,
   usageProvider,
+  searchUsageObserver,
+  shimAbortSignal,
   SearchUsage,
 } from './search';
 
@@ -233,18 +237,6 @@ import { trackSearchStatus } from './search';
 
 // Search namespace
 export const search = {
-  esSearch: {
-    utils: {
-      doSearch,
-      shimAbortSignal,
-      trackSearchStatus,
-      includeTotalLoaded,
-      toKibanaSearchResponse,
-      // utils:
-      getTotalLoaded,
-      toSnakeCase,
-    },
-  },
   aggs: {
     CidrMask,
     dateHistogramInterval,
