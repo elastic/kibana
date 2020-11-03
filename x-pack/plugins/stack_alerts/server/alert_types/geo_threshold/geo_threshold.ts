@@ -144,11 +144,14 @@ export function getMovedEntities(
         []
       )
       // Do not track entries to or exits from 'other'
-      .filter((entityMovementDescriptor: EntityMovementDescriptor) =>
-        trackingEvent === 'entered'
-          ? entityMovementDescriptor.currLocation.shapeId !== OTHER_CATEGORY
-          : entityMovementDescriptor.prevLocation.shapeId !== OTHER_CATEGORY
-      )
+      .filter((entityMovementDescriptor: EntityMovementDescriptor) => {
+        if (trackingEvent !== 'crossing') {
+          return trackingEvent === 'entered'
+            ? entityMovementDescriptor.currLocation.shapeId !== OTHER_CATEGORY
+            : entityMovementDescriptor.prevLocation.shapeId !== OTHER_CATEGORY;
+        }
+        return true;
+      })
   );
 }
 
