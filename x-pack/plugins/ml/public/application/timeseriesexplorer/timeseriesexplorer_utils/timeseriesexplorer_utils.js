@@ -186,9 +186,6 @@ export function processDataForFocusAnomalies(
         if (record.multi_bucket_impact !== undefined) {
           chartPoint.multiBucketImpact = record.multi_bucket_impact;
         }
-        // if (record.function === 'metric') {
-        //   chartPoint.metricActualPlotFunction = record.function_description ?? functionDescription;
-        // }
       }
     }
   });
