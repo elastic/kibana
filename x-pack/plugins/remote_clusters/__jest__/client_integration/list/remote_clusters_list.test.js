@@ -49,7 +49,7 @@ describe('<RemoteClusterList />', () => {
     beforeEach(async () => {
       ({ exists, component } = setup());
 
-      // await nextTick(100); // We need to wait next tick for the mock server response to kick in
+      await nextTick(100); // We need to wait next tick for the mock server response to kick in
       component.update();
     });
 
