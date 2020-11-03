@@ -179,73 +179,79 @@ export function SuggestionPanel({
     ? stagedPreview.visualization.activeId
     : activeVisualizationId;
 
-  const { suggestions, currentStateExpression, currentStateError } = useMemo(() => {
-    const newSuggestions = getSuggestions({
-      datasourceMap,
-      datasourceStates: currentDatasourceStates,
-      visualizationMap,
-      activeVisualizationId: currentVisualizationId,
-      visualizationState: currentVisualizationState,
-    })
-      .filter(({ visualizationId, visualizationState: suggestionVisualizationState }) => {
-        const suggestionVisualization = visualizationMap[visualizationId];
-        // filter out visualizations with errors
-        return (
-          suggestionVisualization.getErrorMessages(suggestionVisualizationState, frame) == null
-        );
+  const { suggestions, currentStateExpression, currentStateError } = useMemo(
+    () => {
+      const newSuggestions = getSuggestions({
+        datasourceMap,
+        datasourceStates: currentDatasourceStates,
+        visualizationMap,
+        activeVisualizationId: currentVisualizationId,
+        visualizationState: currentVisualizationState,
       })
-      .map((suggestion) => ({
-        ...suggestion,
-        previewExpression: preparePreviewExpression(
-          suggestion,
-          visualizationMap[suggestion.visualizationId],
-          datasourceMap,
-          currentDatasourceStates,
-          frame
-        ),
-      }))
-      .filter((suggestion) => !suggestion.hide)
-      .slice(0, MAX_SUGGESTIONS_DISPLAYED);
-
-    const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
-    const datasourceValidationErrors = activeDatasourceId
-      ? activeDatasource?.getErrorMessages(currentDatasourceStates[activeDatasourceId]?.state)
-      : undefined;
-
-    const visualizationValidationErrors = currentVisualizationId
-      ? visualizationMap[currentVisualizationId]?.getErrorMessages(currentVisualizationState, frame)
-      : undefined;
-
-    const validationErrors =
-      datasourceValidationErrors || visualizationValidationErrors
-        ? [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])]
-        : undefined;
-
-    const newStateExpression =
-      currentVisualizationState && currentVisualizationId && !validationErrors
-        ? preparePreviewExpression(
-            { visualizationState: currentVisualizationState },
-            visualizationMap[currentVisualizationId],
+        .filter(({ visualizationId, visualizationState: suggestionVisualizationState }) => {
+          const suggestionVisualization = visualizationMap[visualizationId];
+          // filter out visualizations with errors
+          return (
+            suggestionVisualization.getErrorMessages(suggestionVisualizationState, frame) == null
+          );
+        })
+        .map((suggestion) => ({
+          ...suggestion,
+          previewExpression: preparePreviewExpression(
+            suggestion,
+            visualizationMap[suggestion.visualizationId],
             datasourceMap,
             currentDatasourceStates,
+            frame
+          ),
+        }))
+        .filter((suggestion) => !suggestion.hide)
+        .slice(0, MAX_SUGGESTIONS_DISPLAYED);
+
+      const activeDatasource = activeDatasourceId ? datasourceMap[activeDatasourceId] : null;
+      const datasourceValidationErrors = activeDatasourceId
+        ? activeDatasource?.getErrorMessages(currentDatasourceStates[activeDatasourceId]?.state)
+        : undefined;
+
+      const visualizationValidationErrors = currentVisualizationId
+        ? visualizationMap[currentVisualizationId]?.getErrorMessages(
+            currentVisualizationState,
             frame
           )
         : undefined;
 
-    return {
-      suggestions: newSuggestions,
-      currentStateExpression: newStateExpression,
-      currentStateError: validationErrors,
-    };
-  }, [
-    currentDatasourceStates,
-    currentVisualizationState,
-    currentVisualizationId,
-    activeDatasourceId,
-    datasourceMap,
-    visualizationMap,
-    frame,
-  ]);
+      const validationErrors =
+        datasourceValidationErrors || visualizationValidationErrors
+          ? [...(datasourceValidationErrors || []), ...(visualizationValidationErrors || [])]
+          : undefined;
+
+      const newStateExpression =
+        currentVisualizationState && currentVisualizationId && !validationErrors
+          ? preparePreviewExpression(
+              { visualizationState: currentVisualizationState },
+              visualizationMap[currentVisualizationId],
+              datasourceMap,
+              currentDatasourceStates,
+              frame
+            )
+          : undefined;
+
+      return {
+        suggestions: newSuggestions,
+        currentStateExpression: newStateExpression,
+        currentStateError: validationErrors,
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      currentDatasourceStates,
+      currentVisualizationState,
+      currentVisualizationId,
+      activeDatasourceId,
+      datasourceMap,
+      visualizationMap,
+    ]
+  );
 
   const context: ExecutionContextSearch = useMemo(
     () => ({

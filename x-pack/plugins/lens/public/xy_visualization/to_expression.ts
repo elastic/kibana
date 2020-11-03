@@ -26,8 +26,8 @@ export const toExpression = (
   state.layers.forEach((layer) => {
     metadata[layer.layerId] = {};
     const datasource = datasourceLayers[layer.layerId];
-    datasource?.getTableSpec().forEach((column) => {
-      const operation = datasourceLayers[layer.layerId]?.getOperationForColumnId(column.columnId);
+    datasource.getTableSpec().forEach((column) => {
+      const operation = datasourceLayers[layer.layerId].getOperationForColumnId(column.columnId);
       metadata[layer.layerId][column.columnId] = operation;
     });
   });
@@ -179,7 +179,7 @@ export const buildExpression = (
               layer.accessors
                 .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
                 .forEach((accessor) => {
-                  const operation = datasource?.getOperationForColumnId(accessor);
+                  const operation = datasource.getOperationForColumnId(accessor);
                   if (operation?.label) {
                     columnToLabel[accessor] = operation.label;
                   }
@@ -188,7 +188,7 @@ export const buildExpression = (
 
             const xAxisOperation =
               datasourceLayers &&
-              datasourceLayers[layer.layerId]?.getOperationForColumnId(layer.xAccessor);
+              datasourceLayers[layer.layerId].getOperationForColumnId(layer.xAccessor);
 
             const isHistogramDimension = Boolean(
               xAxisOperation &&
