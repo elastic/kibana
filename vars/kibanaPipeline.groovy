@@ -340,7 +340,7 @@ def call(Map params = [:], Closure closure) {
             buildState.set('shouldSetCommitStatus', true)
           }
           if (config.checkPrChanges && githubPr.isPr()) {
-            pipelineLibraryTests()
+            // pipelineLibraryTests()
 
             print "Checking PR for changes to determine if CI needs to be run..."
 
