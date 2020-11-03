@@ -24,6 +24,7 @@ import {
   AggsCommonStart,
   getCalculateAutoTimeExpression,
 } from '../../../common';
+
 import { AggsSetup, AggsStart } from './types';
 
 import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';

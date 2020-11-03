@@ -37,7 +37,8 @@ import {
   distinctUntilChanged,
 } from 'rxjs/operators';
 import { History } from 'history';
-import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
+import { SavedObjectSaveOpts, SavedObject } from 'src/plugins/saved_objects/public';
+import type { TagDecoratedSavedObject } from 'src/plugins/saved_objects_tagging_oss/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
@@ -70,7 +71,7 @@ import {
 import { NavAction, SavedDashboardPanel } from '../types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
-import { DashboardSaveModal } from './top_nav/save_modal';
+import { DashboardSaveModal, SaveOptions } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { saveDashboard } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
@@ -164,6 +165,7 @@ export class DashboardAppController {
     kbnUrlStateStorage,
     usageCollection,
     navigation,
+    savedObjectsTagging,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const timefilter = queryService.timefilter.timefilter;
@@ -189,6 +191,11 @@ export class DashboardAppController {
       .getStateTransfer(scopedHistory())
       .getIncomingEmbeddablePackage();
 
+    // TS is picky with type guards, we can't just inline `() => false`
+    function defaultTaggingGuard(obj: SavedObject): obj is TagDecoratedSavedObject {
+      return false;
+    }
+
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
@@ -196,6 +203,7 @@ export class DashboardAppController {
       kbnUrlStateStorage,
       history,
       usageCollection,
+      hasTaggingCapabilities: savedObjectsTagging?.ui.hasTagDecoration ?? defaultTaggingGuard,
     });
 
     // sync initial app filters from state to filterManager
@@ -902,6 +910,15 @@ export class DashboardAppController {
       const currentTitle = dashboardStateManager.getTitle();
       const currentDescription = dashboardStateManager.getDescription();
       const currentTimeRestore = dashboardStateManager.getTimeRestore();
+
+      let currentTags: string[] = [];
+      if (savedObjectsTagging) {
+        const dashboard = dashboardStateManager.savedDashboard;
+        if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
+          currentTags = dashboard.getTags();
+        }
+      }
+
       const onSave = ({
         newTitle,
         newDescription,
@@ -909,18 +926,16 @@ export class DashboardAppController {
         newTimeRestore,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
-      }: {
-        newTitle: string;
-        newDescription: string;
-        newCopyOnSave: boolean;
-        newTimeRestore: boolean;
-        isTitleDuplicateConfirmed: boolean;
-        onTitleDuplicate: () => void;
-      }) => {
+        newTags,
+      }: SaveOptions) => {
         dashboardStateManager.setTitle(newTitle);
         dashboardStateManager.setDescription(newDescription);
         dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
         dashboardStateManager.setTimeRestore(newTimeRestore);
+        if (savedObjectsTagging && newTags) {
+          dashboardStateManager.setTags(newTags);
+        }
+
         const saveOptions = {
           confirmOverwrite: false,
           isTitleDuplicateConfirmed,
@@ -932,6 +947,9 @@ export class DashboardAppController {
             dashboardStateManager.setTitle(currentTitle);
             dashboardStateManager.setDescription(currentDescription);
             dashboardStateManager.setTimeRestore(currentTimeRestore);
+            if (savedObjectsTagging) {
+              dashboardStateManager.setTags(currentTags);
+            }
           }
           return response;
         });
@@ -943,6 +961,8 @@ export class DashboardAppController {
           onClose={() => {}}
           title={currentTitle}
           description={currentDescription}
+          tags={currentTags}
+          savedObjectsTagging={savedObjectsTagging}
           timeRestore={currentTimeRestore}
           showCopyOnSave={dash.id ? true : false}
         />
