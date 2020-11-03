@@ -17,6 +17,25 @@
  * under the License.
  */
 
-export { removeQueryParam } from './remove_query_param';
-export { redirectWhenMissing } from './redirect_when_missing';
-export { getQueryParams } from './get_query_params';
+import { getQueryParams } from './get_query_params';
+import { Location } from 'history';
+
+describe('getQueryParams', () => {
+  it('should getQueryParams', () => {
+    const location: Location<any> = {
+      pathname: '/dashboard/c3a76790-3134-11ea-b024-83a7b4783735',
+      search: "?_a=(description:'')&_b=3",
+      state: null,
+      hash: '',
+    };
+
+    const query = getQueryParams(location);
+
+    expect(query).toMatchInlineSnapshot(`
+       Object {
+         "_a": "(description:'')",
+         "_b": "3",
+       }
+     `);
+  });
+});

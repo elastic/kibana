@@ -17,6 +17,11 @@
  * under the License.
  */
 
-export { removeQueryParam } from './remove_query_param';
-export { redirectWhenMissing } from './redirect_when_missing';
-export { getQueryParams } from './get_query_params';
+import { parse, ParsedQuery } from 'query-string';
+import { Location } from 'history';
+
+export function getQueryParams(location: Location): ParsedQuery {
+  const search = (location.search || '').replace(/^\?/, '');
+  const query = parse(search, { sort: false });
+  return query;
+}

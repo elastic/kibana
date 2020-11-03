@@ -83,7 +83,7 @@ import {
   MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
 import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
-import { removeQueryParam } from '../../../../kibana_utils/public';
+import { removeQueryParam, getQueryParams } from '../../../../kibana_utils/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -91,6 +91,9 @@ const fetchStatuses = {
   COMPLETE: 'complete',
   ERROR: 'error',
 };
+
+const getSearchSessionIdFromURL = (history) =>
+  getQueryParams(history.location)[SEARCH_SESSION_ID_QUERY_PARAM];
 
 const app = getAngularModule();
 
@@ -193,16 +196,7 @@ app.directive('discoverApp', function () {
   };
 });
 
-function discoverController(
-  $element,
-  $route,
-  $scope,
-  $timeout,
-  $window,
-  Promise,
-  uiCapabilities,
-  $routeParams
-) {
+function discoverController($element, $route, $scope, $timeout, $window, Promise, uiCapabilities) {
   const { isDefault: isDefaultType } = indexPatternsUtils;
   const subscriptions = new Subscription();
   const refetch$ = new Subject();
@@ -218,11 +212,7 @@ function discoverController(
   };
 
   const history = getHistory();
-
-  let initialSearchSessionId = $routeParams[SEARCH_SESSION_ID_QUERY_PARAM];
-  if (initialSearchSessionId) {
-    removeQueryParam(history, SEARCH_SESSION_ID_QUERY_PARAM);
-  }
+  let isInitialSearch = true;
 
   const {
     appStateContainer,
@@ -814,14 +804,18 @@ function discoverController(
     abortController = new AbortController();
 
     const searchSessionId = (() => {
-      if (initialSearchSessionId) {
-        const searchSessionId = initialSearchSessionId;
-        data.search.session.restore(searchSessionId);
-        initialSearchSessionId = null; // reset to make further searches create new session
-        return searchSessionId;
-      } else {
-        return data.search.session.start();
+      const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+      if (searchSessionIdFromURL) {
+        if (isInitialSearch) {
+          data.search.session.restore(searchSessionIdFromURL);
+          isInitialSearch = false;
+          return searchSessionIdFromURL;
+        } else {
+          // navigating away from background search
+          removeQueryParam(history, SEARCH_SESSION_ID_QUERY_PARAM);
+        }
       }
+      return data.search.session.start();
     })();
 
     $scope
