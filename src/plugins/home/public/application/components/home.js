@@ -21,6 +21,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import {
   OverviewPageFooter,
@@ -120,7 +121,7 @@ export class Home extends Component {
 
   renderNormal() {
     const { addBasePath, solutions, directories } = this.props;
-
+    const { trackUiMetric } = getServices();
     const devTools = this.findDirectoryById('console');
     const addDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.DATA);
     const manageDataFeatures = this.getFeaturesByCategory(FeatureCatalogueCategory.ADMIN);
@@ -171,7 +172,16 @@ export class Home extends Component {
 
           <EuiHorizontalRule margin="xl" aria-hidden="true" />
 
-          <OverviewPageFooter addBasePath={addBasePath} path={HOME_APP_BASE_PATH} />
+          <OverviewPageFooter
+            addBasePath={addBasePath}
+            path={HOME_APP_BASE_PATH}
+            onSetDefaultRoute={() => {
+              trackUiMetric(METRIC_TYPE.CLICK, 'set_home_as_default_route');
+            }}
+            onChangeDefaultRoute={() => {
+              trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
+            }}
+          />
         </div>
       </main>
     );
