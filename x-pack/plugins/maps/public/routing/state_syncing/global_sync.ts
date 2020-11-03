@@ -6,7 +6,7 @@
 import { TimeRange, RefreshInterval, Filter } from 'src/plugins/data/public';
 import { syncQueryStateWithUrl } from '../../../../../../src/plugins/data/public';
 import { getData } from '../../kibana_services';
-import { kbnUrlStateStorage } from '../maps_router';
+import { kbnUrlStateStorage } from '../render_app';
 
 export interface MapsGlobalState {
   time?: TimeRange;
