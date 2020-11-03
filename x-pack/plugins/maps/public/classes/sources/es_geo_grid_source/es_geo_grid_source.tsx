@@ -71,7 +71,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements ITiledSingle
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_GEO_GRID,
-      geoField: normalizedDescriptor.geoField as string,
+      geoField: normalizedDescriptor.geoField!,
       requestType: descriptor.requestType || RENDER_AS.POINT,
       resolution: descriptor.resolution ? descriptor.resolution : GRID_RESOLUTION.COARSE,
     };

@@ -115,7 +115,7 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
     return {
       ...normalizedDescriptor,
       type: SOURCE_TYPES.ES_SEARCH,
-      geoField: normalizedDescriptor.geoField as string,
+      geoField: normalizedDescriptor.geoField!,
       filterByMapBounds:
         typeof descriptor.filterByMapBounds === 'boolean'
           ? descriptor.filterByMapBounds
@@ -125,13 +125,13 @@ export class ESSearchSource extends AbstractESSource implements ITiledSingleLaye
         : [],
       sortField: isValidStringConfig(descriptor.sortField) ? (descriptor.sortField as string) : '',
       sortOrder: isValidStringConfig(descriptor.sortOrder)
-        ? (descriptor.sortOrder as SortDirection)
+        ? descriptor.sortOrder!
         : SortDirection.desc,
       scalingType: isValidStringConfig(descriptor.scalingType)
-        ? (descriptor.scalingType as SCALING_TYPES)
+        ? descriptor.scalingType!
         : SCALING_TYPES.LIMIT,
       topHitsSplitField: isValidStringConfig(descriptor.topHitsSplitField)
-        ? (descriptor.topHitsSplitField as string)
+        ? descriptor.topHitsSplitField!
         : '',
       topHitsSize:
         typeof descriptor.topHitsSize === 'number' && descriptor.topHitsSize > 0
