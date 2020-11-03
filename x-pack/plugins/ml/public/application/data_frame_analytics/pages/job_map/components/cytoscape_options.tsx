@@ -15,16 +15,15 @@ import outlierDetectionJobIcon from './icons/ml_outlier_detection_job.svg';
 import regressionJobIcon from './icons/ml_regression_job.svg';
 
 const lineColor = '#C5CCD7';
-// @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
-const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
-enum MAP_SHAPES {
-  ELLIPSE = 'ellipse',
-  RECTANGLE = 'rectangle',
-  DIAMOND = 'diamond',
-}
+const MAP_SHAPES = {
+  ELLIPSE: 'ellipse',
+  RECTANGLE: 'rectangle',
+  DIAMOND: 'diamond',
+} as const;
+type MapShapes = typeof MAP_SHAPES[keyof typeof MAP_SHAPES];
 
-function shapeForNode(el: cytoscape.NodeSingular): MAP_SHAPES {
+function shapeForNode(el: cytoscape.NodeSingular): MapShapes {
   const type = el.data('type');
   switch (type) {
     case JOB_MAP_NODE_TYPES.ANALYTICS:
@@ -88,7 +87,7 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
         'border-color': (el: cytoscape.NodeSingular) => borderColorForNode(el),
         'border-style': 'solid',
         // @ts-ignore
-        'background-image': isIE11 ? undefined : (el: cytoscape.NodeSingular) => iconForNode(el),
+        'background-image': (el: cytoscape.NodeSingular) => iconForNode(el),
         'border-width': (el: cytoscape.NodeSingular) => (el.selected() ? 2 : 1),
         // @ts-ignore
         color: theme.textColors.default,
@@ -107,7 +106,7 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
         'text-margin-y': theme.paddingSizes.s,
         'text-max-width': '200px',
         'text-valign': 'bottom',
-        'text-wrap': 'ellipsis',
+        'text-wrap': 'wrap',
       },
     },
     {

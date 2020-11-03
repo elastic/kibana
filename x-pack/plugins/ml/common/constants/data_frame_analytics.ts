@@ -11,9 +11,11 @@ export const ANALYSIS_CONFIG_TYPE = {
 } as const;
 export const DEFAULT_RESULTS_FIELD = 'ml';
 
-export enum JOB_MAP_NODE_TYPES {
-  ANALYTICS = 'analytics',
-  TRANSFORM = 'transform',
-  INDEX_PATTERN = 'index-pattern',
-  INFERENCE_MODEL = 'inferenceModel',
-}
+export const JOB_MAP_NODE_TYPES = {
+  ANALYTICS: 'analytics',
+  TRANSFORM: 'transform',
+  INDEX_PATTERN: 'index-pattern',
+  INFERENCE_MODEL: 'inferenceModel',
+} as const;
+
+export type JobMapNodeTypes = typeof JOB_MAP_NODE_TYPES[keyof typeof JOB_MAP_NODE_TYPES];

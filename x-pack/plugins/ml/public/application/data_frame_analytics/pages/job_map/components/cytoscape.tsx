@@ -14,7 +14,10 @@ import React, {
   useCallback,
 } from 'react';
 import cytoscape from 'cytoscape';
+import dagre from 'cytoscape-dagre';
 import { cytoscapeOptions } from './cytoscape_options';
+
+cytoscape.use(dagre);
 
 export const CytoscapeContext = createContext<cytoscape.Core | undefined>(undefined);
 
@@ -50,8 +53,8 @@ function useCytoscape(options: cytoscape.CytoscapeOptions) {
 
 function getLayoutOptions(width: number, height: number) {
   return {
-    name: 'breadthfirst',
-    directed: true,
+    name: 'dagre',
+    rankDir: 'LR',
     fit: true,
     spacingFactor: 0.85,
     boundingBox: { x1: 0, y1: 0, w: width, h: height },
@@ -80,26 +83,13 @@ export function Cytoscape({ children, elements, height, style, width }: Cytoscap
 
   // Set up cytoscape event handlers
   useEffect(() => {
-    const mouseoverHandler: cytoscape.EventHandler = (event) => {
-      event.target.addClass('hover');
-      event.target.connectedEdges().addClass('nodeHover');
-    };
-    const mouseoutHandler: cytoscape.EventHandler = (event) => {
-      event.target.removeClass('hover');
-      event.target.connectedEdges().removeClass('nodeHover');
-    };
-
     if (cy) {
       cy.on('data', dataHandler);
-      cy.on('mouseover', 'edge, node', mouseoverHandler);
-      cy.on('mouseout', 'edge, node', mouseoutHandler);
     }
 
     return () => {
       if (cy) {
         cy.removeListener('data', undefined, dataHandler as cytoscape.EventHandler);
-        cy.removeListener('mouseover', 'edge, node', mouseoverHandler);
-        cy.removeListener('mouseout', 'edge, node', mouseoutHandler);
       }
     };
   }, [cy, elements, height, width]);

@@ -9,11 +9,14 @@ import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ml } from '../../../../services/ml_api_service';
 import { getToastNotifications } from '../../../../util/dependency_cache';
-import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
+import {
+  JOB_MAP_NODE_TYPES,
+  JobMapNodeTypes,
+} from '../../../../../../common/constants/data_frame_analytics';
 
 interface Props {
   id: string;
-  type: JOB_MAP_NODE_TYPES;
+  type: JobMapNodeTypes;
 }
 
 export const DeleteButton: FC<Props> = ({ id, type }) => {

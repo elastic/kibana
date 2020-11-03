@@ -4,9 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
-import { JOB_MAP_NODE_TYPES } from '../../../common/constants/data_frame_analytics';
+import {
+  JOB_MAP_NODE_TYPES,
+  JobMapNodeTypes,
+} from '../../../common/constants/data_frame_analytics';
 import { INDEX_META_DATA_CREATED_BY } from '../../../common/constants/file_datavisualizer';
 import { getAnalysisType } from '../../../common/util/analytics_utils';
 import {
@@ -109,7 +112,7 @@ export class AnalyticsManager {
     type,
   }: {
     id: string;
-    type: JOB_MAP_NODE_TYPES;
+    type: JobMapNodeTypes;
   }): Promise<NextLinkReturnType> {
     try {
       if (type === JOB_MAP_NODE_TYPES.INDEX_PATTERN) {
@@ -178,7 +181,7 @@ export class AnalyticsManager {
       // Create first node for incoming analyticsId
       let data = await this.getAnalyticsJobData(analyticsId);
       let nextLinkId = data?.source?.index[0];
-      let nextType = JOB_MAP_NODE_TYPES.INDEX_PATTERN;
+      let nextType: JobMapNodeTypes = JOB_MAP_NODE_TYPES.INDEX_PATTERN;
       let complete = false;
       let link: NextLinkReturnType;
       let count = 0;
