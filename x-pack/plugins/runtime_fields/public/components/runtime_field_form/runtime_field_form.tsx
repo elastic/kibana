@@ -122,8 +122,7 @@ const RuntimeFieldFormComp = ({ defaultValue, onChange, links }: Props) => {
             >
               <CodeEditor
                 languageId={PainlessLang.ID}
-                // 99% width allows the editor to resize horizontally. 100% prevents it from resizing.
-                width="99%"
+                width="100%"
                 height="300px"
                 value={value}
                 onChange={setValue}
