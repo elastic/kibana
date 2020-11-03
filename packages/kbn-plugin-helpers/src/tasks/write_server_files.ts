@@ -45,9 +45,9 @@ export async function writeServerFiles({
     vfs.src(
       [
         'kibana.json',
-        // always copy over the package.json file if we're building for 7.7-7.9
+        // always copy over the package.json file if we're building for 7.9
         ...(KIBANA_VERSION_79 ? ['package.json'] : []),
-        // always copy over server files if we're building for 7.7-7.9, otherwise rely on `server: true` in kibana.json manifest
+        // always copy over server files if we're building for 7.9, otherwise rely on `server: true` in kibana.json manifest
         ...(KIBANA_VERSION_79 || plugin.manifest.server
           ? config.serverSourcePatterns || [
               'yarn.lock',
