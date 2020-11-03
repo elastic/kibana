@@ -127,9 +127,10 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
         const EventName = await Events[i]._webElement.getText();
         const LinkText = await testSubjects.find('resolver:breadcrumbs:last');
         const linkText = await LinkText._webElement.getText();
-        log.info(i);
-        log.info(EventName);
-        log.info(expectedData[i]);
+        log.debug(i);
+        log.debug(EventName);
+        log.debug(expectedData[i]);
+        log.deb
         expect(EventName).to.equal(linkText);
         expect(EventName).to.equal(expectedData[i]);
       }
