@@ -69,11 +69,11 @@ export interface TableListViewProps {
   /**
    * Indicates which column should be used as the identifying cell in each row.
    */
-  rowHeader?: string;
+  rowHeader: string;
   /**
    * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
    */
-  tableCaption?: string;
+  tableCaption: string;
   searchFilters?: SearchFilterConfig[];
 }
 
