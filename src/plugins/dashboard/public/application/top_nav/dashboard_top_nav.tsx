@@ -33,6 +33,7 @@ import { useKibana } from '../../../../kibana_react/public';
 import {
   getSavedObjectFinder,
   SavedObjectSaveOpts,
+  SaveResult,
   showSaveModal,
 } from '../../../../saved_objects/public';
 import { NavAction } from '../../types';
@@ -45,26 +46,27 @@ import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
 
 export function DashboardTopNav({
+  refreshDashboardContainer,
   dashboardStateManager,
-  timefilter,
-  savedDashboard,
-  dashboardContainer,
   redirectToDashboard,
+  dashboardContainer,
   lastDashboardId,
+  savedDashboard,
   embedSettings,
   indexPatterns,
-  refreshDashboardContainer,
+  timefilter,
 }: DashboardTopNavProps) {
   const {
     core,
     overlays,
     chrome,
     embeddable,
-    savedObjects,
     uiSettings,
-    dashboardConfig,
     navigation,
+    savedObjects,
+    dashboardConfig,
     setHeaderActionMenu,
+    savedObjectsTagging,
   } = useKibana<DashboardAppServices>().services;
 
   /**
@@ -84,6 +86,14 @@ export function DashboardTopNav({
     const currentDescription = dashboardStateManager.getDescription();
     const currentTimeRestore = dashboardStateManager.getTimeRestore();
 
+    let currentTags: string[] = [];
+    if (savedObjectsTagging) {
+      const dashboard = dashboardStateManager.savedDashboard;
+      if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
+        currentTags = dashboard.getTags();
+      }
+    }
+
     const onSave = ({
       newTitle,
       newDescription,
@@ -91,18 +101,23 @@ export function DashboardTopNav({
       newTimeRestore,
       onTitleDuplicate,
       isTitleDuplicateConfirmed,
-    }: DashboardSaveOptions) => {
+      newTags,
+    }: DashboardSaveOptions): Promise<SaveResult> => {
       dashboardStateManager.setTitle(newTitle);
       dashboardStateManager.setDescription(newDescription);
       dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
       dashboardStateManager.setTimeRestore(newTimeRestore);
+      if (savedObjectsTagging && newTags) {
+        dashboardStateManager.setTags(newTags);
+      }
+
       const defaultSaveOptions = {
         confirmOverwrite: false,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
       };
 
-      saveDashboard(
+      return saveDashboard(
         angular.toJson,
         timefilter,
         dashboardStateManager,
@@ -125,6 +140,7 @@ export function DashboardTopNav({
               updateViewMode(ViewMode.VIEW);
             }
           }
+          return { id };
         })
         .catch((error) => {
           core.notifications?.toasts.addDanger({
@@ -141,6 +157,10 @@ export function DashboardTopNav({
           dashboardStateManager.setTitle(currentTitle);
           dashboardStateManager.setDescription(currentDescription);
           dashboardStateManager.setTimeRestore(currentTimeRestore);
+          if (savedObjectsTagging) {
+            dashboardStateManager.setTags(currentTags);
+          }
+          return { error };
         });
     };
 
@@ -150,6 +170,8 @@ export function DashboardTopNav({
         onClose={() => {}}
         title={currentTitle}
         description={currentDescription}
+        tags={currentTags}
+        savedObjectsTagging={savedObjectsTagging}
         timeRestore={currentTimeRestore}
         showCopyOnSave={lastDashboardId ? true : false}
       />
@@ -243,7 +265,6 @@ export function DashboardTopNav({
   const dashboardTopNavActions = {
     [TopNavIds.FULL_SCREEN]: () => {
       dashboardStateManager.setFullScreenMode(true);
-      // updateNavBar();
     },
     [TopNavIds.EXIT_EDIT_MODE]: () => onChangeViewMode(ViewMode.VIEW),
     [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
