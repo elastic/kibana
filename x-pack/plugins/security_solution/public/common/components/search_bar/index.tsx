@@ -350,7 +350,7 @@ export const dispatchUpdateSearch = (dispatch: Dispatch) => ({
   if (updateTime) {
     const fromDate = formatDate(start);
     let toDate = formatDate(end, { roundUp: true });
-    if (isQuickSelection) {
+    if (isQuickSelection && end !== start) {
       dispatch(
         inputsActions.setRelativeRangeDatePicker({
           id,

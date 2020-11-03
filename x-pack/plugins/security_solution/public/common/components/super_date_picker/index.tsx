@@ -230,7 +230,7 @@ export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
 }: UpdateReduxTime): ReturnUpdateReduxTime => {
   const fromDate = formatDate(start);
   let toDate = formatDate(end, { roundUp: true });
-  if (isQuickSelection) {
+  if (isQuickSelection && end !== start) {
     dispatch(
       inputsActions.setRelativeRangeDatePicker({
         id,
