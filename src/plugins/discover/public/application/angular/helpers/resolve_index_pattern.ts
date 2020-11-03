@@ -19,10 +19,54 @@
 import { i18n } from '@kbn/i18n';
 import { ToastsStart } from 'kibana/public';
 import { IndexPattern } from '../../../kibana_services';
-import { SearchSource } from '../../../../../data/common';
+import { IndexPatternsService, SearchSource } from '../../../../../data/common';
+import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
+import { UiActionsStart } from '../../../../../ui_actions/public';
 
-export function resolveIndexPatternLoading(
-  ip: { loaded: IndexPattern; stateVal: string; stateValFound: string },
+interface IndexPatternData {
+  /**
+   * List of existing index patterns
+   */
+  list: IndexPattern[];
+  /**
+   * Loaded index pattern (might be default index pattern if requested was not found)
+   */
+  loaded: IndexPattern;
+  /**
+   * Id of the requested index pattern
+   */
+  stateVal: string;
+  /**
+   * Determines if requested index pattern was found
+   */
+  stateValFound: boolean;
+}
+
+/**
+ * Function to load the given index pattern by id, providing a fallback if it doesn't exist
+ */
+export async function loadIndexPattern(
+  id: string,
+  indexPatterns: IndexPatternsService,
+  config: UiActionsStart
+): Promise<IndexPatternData> {
+  const indexPatternList = await indexPatterns.getCache();
+
+  const actualId = getIndexPatternId(id, indexPatternList, config.get('defaultIndex'));
+  return {
+    list: indexPatternList,
+    loaded: await indexPatterns.get(actualId),
+    stateVal: id,
+    stateValFound: !!id && actualId === id,
+  };
+}
+
+/**
+ * Function used in the discover controller to message the user about the state of the current
+ * index pattern
+ */
+export function resolveIndexPattern(
+  ip: IndexPatternData,
   searchSource: SearchSource,
   toastNotifications: ToastsStart
 ) {

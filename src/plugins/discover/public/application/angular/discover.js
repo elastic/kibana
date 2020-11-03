@@ -52,7 +52,6 @@ import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadc
 import { validateTimeRange } from '../helpers/validate_time_range';
 import { popularizeField } from '../helpers/popularize_field';
 import { getSwitchIndexPatternAppState } from '../helpers/get_switch_index_pattern_app_state';
-import { getIndexPatternId } from '../helpers/get_index_pattern_id';
 import { addFatalError } from '../../../../kibana_legacy/public';
 import {
   DEFAULT_COLUMNS_SETTING,
@@ -60,7 +59,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
 } from '../../../common';
-import { resolveIndexPatternLoading } from './helpers/resolve_index_pattern';
+import { resolveIndexPattern, loadIndexPattern } from './helpers/resolve_index_pattern';
 import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { setBreadcrumbsTitle } from '../helpers/set_breadcrumbs_title';
@@ -123,24 +122,7 @@ app.config(($routeProvider) => {
           const { appStateContainer } = getState({ history });
           const { index } = appStateContainer.getState();
           return Promise.props({
-            ip: indexPatterns.getCache().then((indexPatternList) => {
-              /**
-               *  In making the indexPattern modifiable it was placed in appState. Unfortunately,
-               *  the load order of AppState conflicts with the load order of many other things
-               *  so in order to get the name of the index we should use, and to switch to the
-               *  default if necessary, we parse the appState with a temporary State object and
-               *  then destroy it immediatly after we're done
-               *
-               *  @type {State}
-               */
-              const id = getIndexPatternId(index, indexPatternList, config.get('defaultIndex'));
-              return Promise.props({
-                list: indexPatternList,
-                loaded: indexPatterns.get(id),
-                stateVal: index,
-                stateValFound: !!index && id === index,
-              });
-            }),
+            ip: loadIndexPattern(index, data.indexPatterns, config),
             savedSearch: getServices()
               .getSavedSearchById(savedSearchId)
               .then((savedSearch) => {
@@ -195,7 +177,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
   let inspectorRequest;
   const savedSearch = $route.current.locals.savedObjects.savedSearch;
   $scope.searchSource = savedSearch.searchSource;
-  $scope.indexPattern = resolveIndexPatternLoading(
+  $scope.indexPattern = resolveIndexPattern(
     $route.current.locals.savedObjects.ip,
     $scope.searchSource,
     toastNotifications
