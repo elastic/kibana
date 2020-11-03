@@ -25,22 +25,9 @@
 /src/plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/vis_type_xy/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
-/src/plugins/visualizations/ @elastic/kibana-app
-#CC# /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
-#CC# /src/legacy/core_plugins/kibana/ @elastic/kibana-app
-#CC# /src/legacy/core_plugins/kibana/common/utils @elastic/kibana-app
-#CC# /src/legacy/core_plugins/kibana/migrations @elastic/kibana-app
-#CC# /src/legacy/core_plugins/kibana/public @elastic/kibana-app
-#CC# /src/legacy/core_plugins/kibana/public/discover/ @elastic/kibana-app
-#CC# /src/legacy/core_plugins/kibana/public/local_application_service/ @elastic/kibana-app
-#CC# /src/legacy/core_plugins/timelion @elastic/kibana-app
-#CC# /src/legacy/core_plugins/vis_type_tagcloud @elastic/kibana-app
-#CC# /src/legacy/core_plugins/vis_type_vega @elastic/kibana-app
-#CC# /src/legacy/core_plugins/vis_type_vislib/ @elastic/kibana-app
-#CC# /src/legacy/server/url_shortening/ @elastic/kibana-app
-#CC# /src/legacy/ui/public/state_management @elastic/kibana-app
+/src/plugins/visualizations/ @elastic/kibana-application
 
-# App Architecture
+# Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-arch
 /examples/dashboard_embeddable_examples/ @elastic/kibana-app-arch
 /examples/demo_search/ @elastic/kibana-app-arch
@@ -73,7 +60,6 @@
 #CC# /src/plugins/index_pattern_management/ @elastic/kibana-app-arch
 #CC# /src/plugins/inspector/ @elastic/kibana-app-arch
 #CC# /src/plugins/share/ @elastic/kibana-app-arch
-#CC# /x-pack/plugins/advanced_ui_actions/ @elastic/kibana-app-arch
 #CC# /x-pack/plugins/drilldowns/ @elastic/kibana-app-arch
 #CC# /packages/kbn-interpreter/ @elastic/kibana-app-arch
 
@@ -105,12 +91,9 @@
 /x-pack/plugins/canvas/  @elastic/kibana-presentation
 /x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
 /x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
-#CC# /src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-presentation
-#CC# /src/legacy/core_plugins/input_control_vis @elastic/kibana-presentation
 #CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
 #CC# /x-pack/legacy/plugins/canvas/ @elastic/kibana-presentation
 #CC# /x-pack/plugins/dashboard_mode @elastic/kibana-presentation
-#CC# /x-pack/legacy/plugins/dashboard_mode/ @elastic/kibana-presentation
 
 # Core UI
 # Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon
