@@ -74,7 +74,7 @@ export function DiscoverFieldDetails({
     // regular link click. let the uiActions code handle the navigation and show popup if needed
     event.preventDefault();
     if (trackUiMetric) {
-      trackUiMetric(METRIC_TYPE.CLICK, 'discover_visualize_link_click');
+      trackUiMetric(METRIC_TYPE.CLICK, 'visualize_link_click');
     }
     triggerVisualizeActions(field, indexPattern.id, details.columns);
   };
