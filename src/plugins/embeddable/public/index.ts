@@ -70,6 +70,7 @@ export {
   isSavedObjectEmbeddableInput,
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
+  isContextMenuTriggerContext,
   EmbeddableStateTransfer,
   EmbeddableEditorState,
   EmbeddablePackageState,

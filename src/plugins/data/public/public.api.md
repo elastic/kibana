@@ -11,7 +11,7 @@ import { ApiResponse as ApiResponse_2 } from '@elastic/elasticsearch/lib/Transpo
 import { ApplicationStart } from 'kibana/public';
 import { Assign } from '@kbn/utility-types';
 import { BehaviorSubject } from 'rxjs';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { CoreSetup } from 'src/core/public';
 import { CoreSetup as CoreSetup_2 } from 'kibana/public';
 import { CoreStart } from 'kibana/public';
@@ -1415,8 +1415,6 @@ export interface ISearchSetup {
     //
     // (undocumented)
     aggs: AggsSetup;
-    // Warning: (ae-forgotten-export) The symbol "ISessionService" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ISessionService"
     session: ISessionService;
     // Warning: (ae-forgotten-export) The symbol "SearchUsageCollector" needs to be exported by the entry point index.d.ts
     //
@@ -1432,7 +1430,6 @@ export interface ISearchStart {
     aggs: AggsStart;
     search: ISearchGeneric;
     searchSource: ISearchStartSearchSource;
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "ISessionService"
     session: ISessionService;
     // (undocumented)
     showError: (e: Error) => void;
@@ -1448,6 +1445,17 @@ export interface ISearchStartSearchSource {
 //
 // @public (undocumented)
 export const isErrorResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined;
+
+// Warning: (ae-missing-release-tag) "ISessionService" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export interface ISessionService {
+    clear: () => void;
+    getSession$: () => Observable<string | undefined>;
+    getSessionId: () => string | undefined;
+    restore: (sessionId: string) => void;
+    start: () => string;
+}
 
 // Warning: (ae-missing-release-tag) "isFilter" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
