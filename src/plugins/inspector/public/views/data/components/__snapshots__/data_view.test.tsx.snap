@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Inspector Data View component should render empty state 1`] = `
-<component
+<EnhancedType
   adapters={
     Object {
       "data": DataAdapter {
@@ -235,8 +235,24 @@ exports[`Inspector Data View component should render empty state 1`] = `
         "timeZone": null,
       }
     }
+    kibana={
+      Object {
+        "notifications": Object {
+          "toasts": Object {
+            "danger": [Function],
+            "show": [Function],
+            "success": [Function],
+            "warning": [Function],
+          },
+        },
+        "overlays": Object {
+          "openFlyout": [Function],
+          "openModal": [Function],
+        },
+        "services": Object {},
+      }
+    }
     title="Test Data"
-    uiSettings={Object {}}
   >
     <EuiEmptyPrompt
       body={
@@ -311,7 +327,7 @@ exports[`Inspector Data View component should render empty state 1`] = `
       </div>
     </EuiEmptyPrompt>
   </DataViewComponent>
-</component>
+</EnhancedType>
 `;
 
 exports[`Inspector Data View component should render loading state 1`] = `
@@ -424,20 +440,6 @@ exports[`Inspector Data View component should render loading state 1`] = `
     }
   }
 >
-  <component
-    adapters={
-      Object {
-        "data": DataAdapter {
-          "_events": Object {},
-          "_eventsCount": 0,
-          "_maxListeners": undefined,
-          "tabular": undefined,
-          "tabularOptions": undefined,
-        },
-      }
-    }
-    title="Test Data"
-  />
   <div>
     loading
   </div>

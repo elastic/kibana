@@ -16,18 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { lazy } from 'react';
+import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { InspectorViewDescription, InspectorViewProps } from '../../types';
+import { InspectorViewDescription } from '../../types';
 import { Adapters } from '../../../common';
-import { IUiSettingsClient } from '../../../../../core/public';
 
 const DataViewComponent = lazy(() => import('./components/data_view'));
 
-export const getDataViewDescription = (
-  uiSettings: IUiSettingsClient
-): InspectorViewDescription => ({
+export const getDataViewDescription = (): InspectorViewDescription => ({
   title: i18n.translate('inspector.data.dataTitle', {
     defaultMessage: 'Data',
   }),
@@ -38,7 +35,5 @@ export const getDataViewDescription = (
   shouldShow(adapters: Adapters) {
     return Boolean(adapters.data);
   },
-  component: (props: InspectorViewProps) => (
-    <DataViewComponent {...props} uiSettings={uiSettings} />
-  ),
+  component: DataViewComponent,
 });

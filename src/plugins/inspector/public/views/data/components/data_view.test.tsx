@@ -21,7 +21,6 @@ import React, { Suspense } from 'react';
 import { getDataViewDescription } from '../index';
 import { DataAdapter } from '../../../../common/adapters/data';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { IUiSettingsClient } from '../../../../../../core/public';
 
 jest.mock('../lib/export_csv', () => ({
   exportAsCsv: jest.fn(),
@@ -31,9 +30,7 @@ describe('Inspector Data View', () => {
   let DataView: any;
 
   beforeEach(() => {
-    const uiSettings = {} as IUiSettingsClient;
-
-    DataView = getDataViewDescription(uiSettings);
+    DataView = getDataViewDescription();
   });
 
   it('should only show if data adapter is present', () => {
