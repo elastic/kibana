@@ -220,6 +220,22 @@ export const REPORTING_SYSTEM_ID = 'reporting';
 export const TELEMETRY_COLLECTION_INTERVAL = 86400000;
 
 /**
+ * The amount of time, in milliseconds, to fetch the cluster uuids from es.
+ *
+ * Currently 3 hours.
+ * @type {Number}
+ */
+export const CLUSTER_DETAILS_FETCH_INTERVAL = 10800000;
+
+/**
+ * The amount of time, in milliseconds, to fetch the usage data from es.
+ *
+ * Currently 20 minutes.
+ * @type {Number}
+ */
+export const USAGE_FETCH_INTERVAL = 1200000;
+
+/**
  * The prefix for all alert types used by monitoring
  */
 export const ALERT_PREFIX = 'monitoring_';
