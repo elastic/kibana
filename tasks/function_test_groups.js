@@ -42,8 +42,6 @@ const getDefaultArgs = (tag) => {
     '--bail',
     '--debug',
     '--config',
-    'test/new_visualize_flow/config.js',
-    '--config',
     'test/security_functional/config.ts',
   ];
 };
