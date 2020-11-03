@@ -5,6 +5,7 @@
  */
 import { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import { Output } from './output';
+import { DataType, ValueOf } from '../../index';
 
 export enum AgentPolicyStatus {
   Active = 'active',
@@ -16,7 +17,7 @@ export interface NewAgentPolicy {
   namespace: string;
   description?: string;
   is_default?: boolean;
-  monitoring_enabled?: Array<'logs' | 'metrics'>;
+  monitoring_enabled?: Array<ValueOf<DataType>>;
 }
 
 export interface AgentPolicy extends NewAgentPolicy {
