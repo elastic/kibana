@@ -213,9 +213,6 @@ After importing saved objects, you’ll see a summary of what objects were creat
 image::user/images/copy-import-objects.png[Copy to space UI]
 
 
-[float]
-[[machine-learning-enhancements]]
-=== Machine learning enhancements
 
 [float]
 ==== Data frame analytics model management
