@@ -19,7 +19,7 @@ export function MachineLearningNavigationProvider({
     async navigateToMl() {
       await retry.tryForTime(60 * 1000, async () => {
         await PageObjects.common.navigateToApp('ml');
-        await testSubjects.existOrFail('mlPageOverview', { timeout: 2000 });
+        await testSubjects.existOrFail('mlApp', { timeout: 2000 });
       });
     },
 
@@ -62,6 +62,36 @@ export function MachineLearningNavigationProvider({
         'dataFrameAnalytics',
         'dataVisualizer',
       ]);
+    },
+
+    async assertTabEnabled(tabSubject: string, expectedValue: boolean) {
+      const isEnabled = await testSubjects.isEnabled(tabSubject);
+      expect(isEnabled).to.eql(
+        expectedValue,
+        `Expected ML tab '${tabSubject}' to be '${expectedValue ? 'enabled' : 'disabled'}' (got '${
+          isEnabled ? 'enabled' : 'disabled'
+        }')`
+      );
+    },
+
+    async assertOverviewTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~overview', expectedValue);
+    },
+
+    async assertAnomalyDetectionTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~anomalyDetection', expectedValue);
+    },
+
+    async assertDataFrameAnalyticsTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~dataFrameAnalytics', expectedValue);
+    },
+
+    async assertDataVisualizerTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~dataVisualizer', expectedValue);
+    },
+
+    async assertSettingsTabEnabled(expectedValue: boolean) {
+      await this.assertTabEnabled('~mlMainTab & ~settings', expectedValue);
     },
 
     async navigateToOverview() {

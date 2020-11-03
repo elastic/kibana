@@ -14,6 +14,7 @@ import { filters } from './filters';
 import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
+import { savedObjectsApiProvider } from './saved_objects';
 import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
 
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
@@ -772,5 +773,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     results: resultsApiProvider(httpService),
     jobs: jobsApiProvider(httpService),
     fileDatavisualizer,
+    savedObjects: savedObjectsApiProvider(httpService),
   };
 }

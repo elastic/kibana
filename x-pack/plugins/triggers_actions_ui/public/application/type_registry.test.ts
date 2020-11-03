@@ -15,6 +15,7 @@ const getTestAlertType = (id?: string, name?: string, iconClass?: string) => {
   return {
     id: id || 'test-alet-type',
     name: name || 'Test alert type',
+    description: 'Test description',
     iconClass: iconClass || 'icon',
     validate: (): ValidationResult => {
       return { errors: {} };

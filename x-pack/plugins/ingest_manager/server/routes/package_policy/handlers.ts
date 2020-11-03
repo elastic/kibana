@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RequestHandler, SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { appContextService, packagePolicyService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages';
