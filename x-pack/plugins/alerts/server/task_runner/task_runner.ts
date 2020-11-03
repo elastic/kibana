@@ -224,6 +224,14 @@ export class TaskRunner {
     const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
       alertInstance.hasScheduledActions()
     );
+    generateNewAndResolvedInstanceEvents({
+      eventLogger,
+      originalAlertInstanceIds,
+      currentAlertInstances: instancesWithScheduledActions,
+      alertId,
+      alertLabel,
+      namespace,
+    });
 
     if (!muteAll) {
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
@@ -239,15 +247,6 @@ export class TaskRunner {
           )
       );
     }
-
-    generateNewAndResolvedInstanceEvents({
-      eventLogger,
-      originalAlertInstanceIds,
-      currentAlertInstances: instancesWithScheduledActions,
-      alertId,
-      alertLabel,
-      namespace,
-    });
 
     return {
       alertTypeState: updatedAlertTypeState || undefined,
