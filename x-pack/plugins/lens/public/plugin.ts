@@ -5,7 +5,7 @@
  */
 
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataPublicPluginSetup, DataPublicPluginStart, FieldFormat } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { DashboardStart } from 'src/plugins/dashboard/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
