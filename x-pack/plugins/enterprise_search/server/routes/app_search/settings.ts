@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 
 import { IRouteDependencies } from '../../plugin';
 
-export function registerLogSettingsRoutes({
+export function registerSettingsRoutes({
   router,
   enterpriseSearchRequestHandler,
 }: IRouteDependencies) {

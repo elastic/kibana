@@ -6,7 +6,7 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import { registerLogSettingsRoutes } from './log_settings';
+import { registerSettingsRoutes } from './settings';
 
 describe('log settings routes', () => {
   describe('PUT /api/app_search/log_settings', () => {
@@ -16,7 +16,7 @@ describe('log settings routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({ method: 'put', payload: 'body' });
 
-      registerLogSettingsRoutes({
+      registerSettingsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -57,7 +57,7 @@ describe('log settings routes', () => {
       jest.clearAllMocks();
       mockRouter = new MockRouter({ method: 'get' });
 
-      registerLogSettingsRoutes({
+      registerSettingsRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
