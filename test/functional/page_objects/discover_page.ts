@@ -349,7 +349,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }: FtrProvider
 
     public async closeSidebarFieldFilter() {
       await testSubjects.click('toggleFieldFilterButton');
-      await testSubjects.missingOrFail('filterSelectionPanel', { allowHidden: true });
+      await testSubjects.missingOrFail('filterSelectionPanel');
     }
 
     public async waitForChartLoadingComplete(renderCount: number) {
