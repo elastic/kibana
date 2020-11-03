@@ -139,10 +139,10 @@ export function getTimeScaleFunction(data: DataPublicPluginStart) {
           const newRow = { ...row };
 
           let startOfBucket = moment(row[dateColumnId]);
+          let endOfBucket = startOfBucket.clone().add(intervalDuration);
           if (timeBounds && timeBounds.min) {
             startOfBucket = moment.max(startOfBucket, timeBounds.min);
           }
-          let endOfBucket = startOfBucket.clone().add(intervalDuration);
           if (timeBounds && timeBounds.max) {
             endOfBucket = moment.min(endOfBucket, timeBounds.max);
           }
