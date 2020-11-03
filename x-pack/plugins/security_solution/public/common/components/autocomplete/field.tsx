@@ -32,7 +32,7 @@ export const FieldComponent: React.FC<OperatorProps> = ({
   isClearable = false,
   isRequired = false,
   fieldTypeFilter = [],
-  fieldInputWidth = 190,
+  fieldInputWidth,
   onChange,
 }): JSX.Element => {
   const [touched, setIsTouched] = useState(false);
@@ -85,7 +85,8 @@ export const FieldComponent: React.FC<OperatorProps> = ({
       onFocus={handleTouch}
       singleSelection={{ asPlainText: true }}
       data-test-subj="fieldAutocompleteComboBox"
-      style={{ width: `${fieldInputWidth}px` }}
+      style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+      fullWidth
     />
   );
 };

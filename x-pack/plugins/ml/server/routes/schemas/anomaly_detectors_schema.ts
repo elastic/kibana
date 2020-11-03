@@ -30,6 +30,7 @@ const detectorSchema = schema.object({
   use_null: schema.maybe(schema.boolean()),
   /** Custom rules */
   custom_rules: customRulesSchema,
+  detector_index: schema.maybe(schema.number()),
 });
 
 const customUrlSchema = {
