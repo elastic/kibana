@@ -24,13 +24,13 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
-  getCombinedSignal,
   AbortError,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
   ISessionService,
+  getCombinedSignal,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
@@ -129,18 +129,17 @@ export class SearchInterceptor {
     request: IKibanaSearchRequest,
     signal: AbortSignal,
     strategy?: string
-  ): Observable<IKibanaSearchResponse> {
+  ): Promise<IKibanaSearchResponse> {
     const { id, ...searchRequest } = request;
     const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
     const body = JSON.stringify(searchRequest);
-    return from(
-      this.deps.http.fetch({
-        method: 'POST',
-        path,
-        body,
-        signal,
-      })
-    );
+
+    return this.deps.http.fetch({
+      method: 'POST',
+      path,
+      body,
+      signal,
+    });
   }
 
   /**
@@ -171,11 +170,12 @@ export class SearchInterceptor {
       ...(abortSignal ? [abortSignal] : []),
     ];
 
-    const combinedSignal = getCombinedSignal(signals);
+    const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedSignal(signals);
     const cleanup = () => {
       subscription.unsubscribe();
+      combinedSignal.removeEventListener('abort', cleanup);
+      cleanupCombinedSignal();
     };
-
     combinedSignal.addEventListener('abort', cleanup);
 
     return {
@@ -234,7 +234,7 @@ export class SearchInterceptor {
         abortSignal: options?.abortSignal,
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
-      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+      return from(this.runSearch(request, combinedSignal, options?.strategy)).pipe(
         catchError((e: Error) => {
           return throwError(this.handleSearchError(e, request, timeoutSignal, options));
         }),

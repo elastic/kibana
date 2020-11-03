@@ -401,7 +401,7 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            compressed
+            display="rowCompressed"
             label={labelForAlertChecked}
             isInvalid={errors.interval.length > 0}
             error={errors.interval}

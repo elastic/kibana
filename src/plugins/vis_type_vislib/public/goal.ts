@@ -21,20 +21,21 @@ import { i18n } from '@kbn/i18n';
 
 import { GaugeOptions } from './components/options';
 import { getGaugeCollections, GaugeTypes } from './utils/collections';
-import { createVislibVisController } from './vis_controller';
-import { VisTypeVislibDependencies } from './plugin';
 import { ColorModes, ColorSchemas } from '../../charts/public';
 import { AggGroupNames } from '../../data/public';
 import { Schemas } from '../../vis_default_editor/public';
+import { toExpressionAst } from './to_ast';
+import { BaseVisTypeOptions } from '../../visualizations/public';
+import { BasicVislibParams } from './types';
 
-export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
+export const goalVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   name: 'goal',
   title: i18n.translate('visTypeVislib.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',
   description: i18n.translate('visTypeVislib.goal.goalDescription', {
     defaultMessage: 'A goal chart indicates how close you are to your final goal.',
   }),
-  visualization: createVislibVisController(deps),
+  toExpressionAst,
   visConfig: {
     defaults: {
       addTooltip: true,
@@ -110,4 +111,4 @@ export const createGoalVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
     ]),
   },
   useCustomNoDataScreen: true,
-});
+};

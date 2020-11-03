@@ -41,7 +41,7 @@ describe('AbortUtils', () => {
     describe('rejects', () => {
       test('should not reject if the signal does not abort', async () => {
         const controller = new AbortController();
-        const promise = toPromise(controller.signal);
+        const promise = toPromise(controller.signal).promise;
         const whenRejected = jest.fn();
         promise.catch(whenRejected);
         await flushPromises();
@@ -50,7 +50,7 @@ describe('AbortUtils', () => {
 
       test('should reject if the signal does abort', async () => {
         const controller = new AbortController();
-        const promise = toPromise(controller.signal);
+        const promise = toPromise(controller.signal).promise;
         const whenRejected = jest.fn();
         promise.catch(whenRejected);
         controller.abort();
@@ -58,13 +58,30 @@ describe('AbortUtils', () => {
         expect(whenRejected).toBeCalled();
         expect(whenRejected.mock.calls[0][0]).toBeInstanceOf(AbortError);
       });
+
+      test('should expose cleanup handler', () => {
+        const controller = new AbortController();
+        const promise = toPromise(controller.signal);
+        expect(promise.cleanup).toBeDefined();
+      });
+
+      test('calling clean up handler prevents rejects', async () => {
+        const controller = new AbortController();
+        const { promise, cleanup } = toPromise(controller.signal);
+        const whenRejected = jest.fn();
+        promise.catch(whenRejected);
+        cleanup();
+        controller.abort();
+        await flushPromises();
+        expect(whenRejected).not.toBeCalled();
+      });
     });
   });
 
   describe('getCombinedSignal', () => {
     test('should return an AbortSignal', () => {
-      const signal = getCombinedSignal([]);
-      expect(signal instanceof AbortSignal).toBe(true);
+      const signal = getCombinedSignal([]).signal;
+      expect(signal).toBeInstanceOf(AbortSignal);
     });
 
     test('should not abort if none of the signals abort', async () => {
@@ -72,7 +89,7 @@ describe('AbortUtils', () => {
       const controller2 = new AbortController();
       setTimeout(() => controller1.abort(), 2000);
       setTimeout(() => controller2.abort(), 1000);
-      const signal = getCombinedSignal([controller1.signal, controller2.signal]);
+      const signal = getCombinedSignal([controller1.signal, controller2.signal]).signal;
       expect(signal.aborted).toBe(false);
       jest.advanceTimersByTime(500);
       await flushPromises();
@@ -84,7 +101,7 @@ describe('AbortUtils', () => {
       const controller2 = new AbortController();
       setTimeout(() => controller1.abort(), 2000);
       setTimeout(() => controller2.abort(), 1000);
-      const signal = getCombinedSignal([controller1.signal, controller2.signal]);
+      const signal = getCombinedSignal([controller1.signal, controller2.signal]).signal;
       expect(signal.aborted).toBe(false);
       jest.advanceTimersByTime(1000);
       await flushPromises();
@@ -95,8 +112,56 @@ describe('AbortUtils', () => {
       const controller1 = new AbortController();
       const controller2 = new AbortController();
       controller1.abort();
-      const signal = getCombinedSignal([controller1.signal, controller2.signal]);
+      const signal = getCombinedSignal([controller1.signal, controller2.signal]).signal;
       expect(signal.aborted).toBe(true);
+    });
+
+    describe('cleanup listener', () => {
+      const createMockController = () => {
+        const controller = new AbortController();
+        const spyAddListener = jest.spyOn(controller.signal, 'addEventListener');
+        const spyRemoveListener = jest.spyOn(controller.signal, 'removeEventListener');
+        return {
+          controller,
+          getTotalListeners: () =>
+            Math.max(spyAddListener.mock.calls.length - spyRemoveListener.mock.calls.length, 0),
+        };
+      };
+
+      test('cleanup should cleanup inner listeners', () => {
+        const controller1 = createMockController();
+        const controller2 = createMockController();
+
+        const { cleanup } = getCombinedSignal([
+          controller1.controller.signal,
+          controller2.controller.signal,
+        ]);
+
+        expect(controller1.getTotalListeners()).toBe(1);
+        expect(controller2.getTotalListeners()).toBe(1);
+
+        cleanup();
+
+        expect(controller1.getTotalListeners()).toBe(0);
+        expect(controller2.getTotalListeners()).toBe(0);
+      });
+
+      test('abort should cleanup inner listeners', async () => {
+        const controller1 = createMockController();
+        const controller2 = createMockController();
+
+        getCombinedSignal([controller1.controller.signal, controller2.controller.signal]);
+
+        expect(controller1.getTotalListeners()).toBe(1);
+        expect(controller2.getTotalListeners()).toBe(1);
+
+        controller1.controller.abort();
+
+        await flushPromises();
+
+        expect(controller1.getTotalListeners()).toBe(0);
+        expect(controller2.getTotalListeners()).toBe(0);
+      });
     });
   });
 });
