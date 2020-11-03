@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import './styles/_index.scss';
+import './index.scss';
 import { SearchProfilerUIPlugin } from './plugin';
 
 export function plugin() {
