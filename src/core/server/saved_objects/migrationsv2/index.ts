@@ -23,16 +23,29 @@ import { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { gt } from 'semver';
 import chalk from 'chalk';
 import { isLeft } from 'fp-ts/lib/Either';
-import { TaskEither } from 'fp-ts/lib/TaskEither';
+import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Option from 'fp-ts/lib/Option';
+import { pipe } from 'fp-ts/lib/pipeable';
+// import { constantDelay } from 'retry-ts';
+// import { retrying } from 'retry-ts/lib/TaskEither';
 import * as Actions from './actions';
-import { ActionResponse, AllResponses } from './actions';
+import { IndexMapping } from '../mappings';
 
 export interface BaseState {
+  /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
+  indexPrefix: string;
+  /** Kibana version number */
   kibanaVersion: string;
+  /** The source index is the index from which the migration reads */
+  source: string;
+  /** The target index is the index to which the migration writes */
+  target: string;
+  /** The mappings to apply to the target index */
+  targetMappings: IndexMapping;
+  /** Script to apply to a legacy index before it can be used as a migration source */
+  preMigrationScript?: string;
   retryCount: number;
   retryDelay: number;
-  source: string;
-  target: string;
   aliases: Record<string, string>;
   log: Array<{ level: 'error' | 'info'; message: string }>;
 }
@@ -68,9 +81,37 @@ export type CloneSourceState = BaseState & {
   controlState: 'CLONE_SOURCE';
 };
 
-export type ReindexSourceToAlias = BaseState & {
-  /** Reindex a concrete index   */
-  controlState: 'REINDEX_SOURCE_TO_ALIAS';
+/**
+ * If there's a legacy index prepare it for migration.
+ */
+export type LegacyBaseState = BaseState & {
+  legacy: string;
+};
+
+export type CloneLegacyState = LegacyBaseState & {
+  /** Create a 'source' index for the migration by cloning the legacy index */
+  controlState: 'CLONE_LEGACY';
+};
+
+export type SetLegacyWriteBlockState = LegacyBaseState & {
+  /** Set a write block on the legacy index to prevent any further writes */
+  controlState: 'SET_LEGACY_WRITE_BLOCK';
+};
+
+export type PreMigrateLegacyState = LegacyBaseState & {
+  /** Apply the pre-migration script to the legacy clone to prepare it for a migration */
+  controlState: 'PRE_MIGRATE_LEGACY';
+};
+
+export type PreMigrateLegacyTaskCompleteState = LegacyBaseState & {
+  /** Apply the pre-migration script to the legacy clone to prepare it for a migration */
+  controlState: 'PRE_MIGRATE_LEGACY_TASK_COMPLETE';
+  preMigrationUpdateTaskId: string;
+};
+
+export type DeleteLegacyState = LegacyBaseState & {
+  /** Delete the legacy index */
+  controlState: 'DELETE_LEGACY';
 };
 
 export type State =
@@ -80,13 +121,17 @@ export type State =
   | SetSourceWriteBlockState
   | InitNewIndicesState
   | CloneSourceState
-  | ReindexSourceToAlias;
+  | CloneLegacyState
+  | SetLegacyWriteBlockState
+  | PreMigrateLegacyState
+  | PreMigrateLegacyTaskCompleteState
+  | DeleteLegacyState;
 
-type Model = (currentState: State, result: ActionResponse) => State;
+type Model = (currentState: State, result: Actions.ActionResponse) => State;
 type NextAction = (
   client: ElasticsearchClient,
   state: State
-) => TaskEither<Error, AllResponses> | null;
+) => TaskEither.TaskEither<Actions.ExpectedErrors, Actions.AllResponses> | null;
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -100,7 +145,7 @@ function indexVersion(indexName: string) {
   return (indexName.match(/\.kibana_(\d+\.\d+\.\d+)_\d+/) || [])[1];
 }
 
-export const model: Model = (currentState: State, res: ActionResponse): State => {
+export const model: Model = (currentState: State, res: Actions.ActionResponse): State => {
   let stateP: State = { ...currentState, ...{ log: [] } };
 
   if (isLeft(res)) {
@@ -142,23 +187,23 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
   }
 
   if (stateP.controlState === 'INIT') {
+    const CURRENT_ALIAS = stateP.indexPrefix + '_current';
+    const VERSION_ALIAS = stateP.indexPrefix + stateP.kibanaVersion;
+    const V1_ALIAS = stateP.indexPrefix;
+    const LEGACY_INDEX = stateP.indexPrefix;
+
     if ('fetchIndices' in res.right) {
       const indices = res.right.fetchIndices;
-      console.log('indices', indices);
       const aliases = Object.keys(indices).reduce((acc, index) => {
         Object.keys(indices[index].aliases || {}).forEach((alias) => {
           acc[alias] = index;
         });
         return acc;
       }, {} as Record<string, string>);
-      // Object.entries(body).map(([indexName, indexInfo]) => ({
-      //   index: indexName,
-      //   ...indexInfo,
-      // }))
       if (
-        aliases['.kibana_current'] != null &&
-        aliases['.kibana_7.11.0'] != null &&
-        aliases['.kibana_current'] === aliases['.kibana_7.11.0']
+        aliases[CURRENT_ALIAS] != null &&
+        aliases[VERSION_ALIAS] != null &&
+        aliases[CURRENT_ALIAS] === aliases[VERSION_ALIAS]
       ) {
         // `.kibana_current` and the version specific aliases both exists and
         // are pointing to the same index. This version's migration has already
@@ -166,8 +211,8 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
         stateP = { ...stateP, controlState: 'DONE' };
         // TODO, go to step (6)
       } else if (
-        aliases['.kibana_current'] != null &&
-        gt(indexVersion(aliases['.kibana_current']), '7.11.0')
+        aliases[CURRENT_ALIAS] != null &&
+        gt(indexVersion(aliases[CURRENT_ALIAS]), stateP.kibanaVersion)
       ) {
         // `.kibana_current` is pointing to an index that belongs to a later
         // version of Kibana .e.g. a 7.11.0 node found `.kibana_7.12.0_001`
@@ -176,28 +221,44 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
           controlState: 'FATAL',
           error: new Error(
             'The .kibana_current alias is pointing to a newer version of Kibana: v' +
-              indexVersion(aliases['.kibana_current'])
+              indexVersion(aliases[CURRENT_ALIAS])
           ),
         };
-      } else if (aliases['.kibana_current'] ?? aliases['.kibana'] ?? false) {
+      } else if (aliases[CURRENT_ALIAS] ?? aliases[V1_ALIAS] ?? false) {
         //  The source index is:
         //  1. the index the `.kibana_current` alias points to, or if it doesn’t exist,
-        //  2. the index the `.kibana` alias points to, or if it doesn't exist,
-        const source = aliases['.kibana_current'] || aliases['.kibana'];
+        //  2. the index the `.kibana` alias points to
+        const source = aliases[CURRENT_ALIAS] || aliases[V1_ALIAS];
         stateP = {
           ...stateP,
           controlState: 'SET_SOURCE_WRITE_BLOCK',
           source,
-          target: `.kibana_${stateP.kibanaVersion}_001`,
+          target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
         };
-      } else if (indices['.kibana'] != null) {
-        // Migrate from a concrete index e.g. a < v6.5 `.kibana` index or a <
-        // v7.4.0 `.kibana_task_manager` index.
+      } else if (indices[LEGACY_INDEX] != null) {
+        // Migrate from a legacy index
+
+        // If the user used default index names we can narrow the version
+        // number we use when creating a backup index. This is purely to help
+        // users more easily identify how "old" and index is so that they can
+        // decide if it's safe to delete these rollback backups. Because
+        // backups are kept for rollback, a version number is more useful than
+        // a date.
+        let legacyVersion = '';
+        if (stateP.indexPrefix === '.kibana') {
+          legacyVersion = 'pre6.5.0';
+        } else if (stateP.indexPrefix === '.kibana_task_manager') {
+          legacyVersion = 'pre7.4.0';
+        } else {
+          legacyVersion = 'pre' + stateP.kibanaVersion;
+        }
+
         stateP = {
           ...stateP,
-          controlState: 'REINDEX_SOURCE_TO_ALIAS',
-          source: '.kibana',
-          target: `.kibana_${stateP.kibanaVersion}_001`,
+          controlState: 'SET_LEGACY_WRITE_BLOCK',
+          source: `${stateP.indexPrefix}_${legacyVersion}_001`,
+          target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          legacy: `.kibana`,
         };
       } else {
         // This cluster doesn't have an existing Saved Object index, create a
@@ -205,33 +266,46 @@ export const model: Model = (currentState: State, res: ActionResponse): State =>
         stateP = {
           ...stateP,
           controlState: 'INIT_NEW_INDICES',
-          target: `.kibana_${stateP.kibanaVersion}_001`,
+          target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
         };
       }
     }
     return stateP;
+  } else if (stateP.controlState === 'SET_LEGACY_WRITE_BLOCK') {
+    return { ...stateP, controlState: 'CLONE_LEGACY' };
+  } else if (stateP.controlState === 'CLONE_LEGACY') {
+    if (stateP.preMigrationScript != null) {
+      return {
+        ...stateP,
+        controlState: 'PRE_MIGRATE_LEGACY',
+      };
+    } else {
+      return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
+    }
+  } else if (stateP.controlState === 'PRE_MIGRATE_LEGACY') {
+    if ('updateByQuery' in res.right) {
+      stateP = {
+        ...stateP,
+        controlState: 'PRE_MIGRATE_LEGACY_TASK_COMPLETE',
+        preMigrationUpdateTaskId: res.right.updateByQuery.taskId,
+      };
+    }
+    return stateP;
+  } else if (stateP.controlState === 'PRE_MIGRATE_LEGACY_TASK_COMPLETE') {
+    if ('waitForTask' in res.right && Option.isSome(res.right.waitForTask.failures)) {
+      // TODO: ignore index closed error
+      return { ...stateP, controlState: 'FATAL' };
+    }
+    return { ...stateP, controlState: 'DELETE_LEGACY' };
+  } else if (stateP.controlState === 'DELETE_LEGACY') {
+    return { ...stateP, controlState: 'CLONE_SOURCE' };
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
-    if ('setIndexWriteBlock' in res.right) {
-      stateP = { ...stateP, controlState: 'CLONE_SOURCE' };
-    }
-    return stateP;
+    return { ...stateP, controlState: 'CLONE_SOURCE' };
   } else if (stateP.controlState === 'CLONE_SOURCE') {
-    if ('cloneIndex' in res.right) {
-      stateP = { ...stateP, controlState: 'DONE' };
-    }
-    return stateP;
-  } else if (stateP.controlState === 'REINDEX_SOURCE_TO_ALIAS') {
-    stateP = {
-      ...stateP,
-      controlState: 'SET_SOURCE_WRITE_BLOCK',
-      source: '', // `.kibana_n`
-    };
-    return stateP;
-  } else if (
-    stateP.controlState === 'DONE' ||
-    stateP.controlState === 'FATAL' ||
-    stateP.controlState === 'INIT_NEW_INDICES'
-  ) {
+    return { ...stateP, controlState: 'DONE' };
+  } else if (stateP.controlState === 'INIT_NEW_INDICES') {
+    return { ...stateP, controlState: 'DONE' };
+  } else if (stateP.controlState === 'DONE' || stateP.controlState === 'FATAL') {
     return stateP;
   } else {
     return throwBadControlState(stateP);
@@ -255,10 +329,69 @@ export const next: NextAction = (client, state) => {
     return delay(Actions.setIndexWriteBlock(client, state.source));
   } else if (state.controlState === 'CLONE_SOURCE') {
     return delay(Actions.cloneIndex(client, state.source, state.target));
-  } else if (state.controlState === 'REINDEX_SOURCE_TO_ALIAS') {
-    return null;
+  } else if (state.controlState === 'SET_LEGACY_WRITE_BLOCK') {
+    return delay(
+      pipe(
+        Actions.setIndexWriteBlock(client, state.legacy),
+        TaskEither.orElse((error) => {
+          // Ignore if legacy index doesn't exist, this probably means another
+          // Kibana instance already completed the legacy pre-migration and
+          // deleted it
+          if (error.message === 'index_not_found_exception') {
+            return TaskEither.right({ setIndexWriteBlock: true });
+          } else {
+            return TaskEither.left(error);
+          }
+        })
+      )
+    );
+  } else if (state.controlState === 'CLONE_LEGACY') {
+    return delay(
+      pipe(
+        // Clone legacy index into a new source index, will ignore index exists error
+        Actions.cloneIndex(client, state.legacy, state.source),
+        TaskEither.orElse((error) => {
+          // Ignore if legacy index doesn't exist, this probably means another
+          // Kibana instance already completed the legacy pre-migration and
+          // deleted it
+          if (error.message === 'index_not_found_exception') {
+            return TaskEither.right({
+              cloneIndex: { acknowledged: true, shardsAcknowledged: true },
+            });
+          } else {
+            return TaskEither.left(error);
+          }
+        })
+      )
+    );
+  } else if (state.controlState === 'PRE_MIGRATE_LEGACY') {
+    // Start an update by query to pre-migrate the source index using the
+    // supplied script.
+    return delay(Actions.updateByQuery(client, state.source, state.preMigrationScript));
+  } else if (state.controlState === 'PRE_MIGRATE_LEGACY_TASK_COMPLETE') {
+    // Wait for the preMigrationUpdateTaskId task to complete
+    return pipe(
+      Actions.waitForTask(client, state.preMigrationUpdateTaskId, '60s')
+      // TODO: delete completed task
+    );
+  } else if (state.controlState === 'DELETE_LEGACY') {
+    return delay(
+      pipe(
+        Actions.deleteIndex(client, state.legacy),
+        TaskEither.orElse((error) => {
+          // Ignore if legacy index doesn't exist, this probably means another
+          // Kibana instance already completed the legacy pre-migration and
+          // deleted it
+          if (error.message === 'index_not_found_exception') {
+            return TaskEither.right({});
+          } else {
+            return TaskEither.left(error);
+          }
+        })
+      )
+    );
   } else if (state.controlState === 'INIT_NEW_INDICES') {
-    return null;
+    return delay(Actions.createIndex(client, state.target, state.targetMappings));
   } else if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
     return null; // Terminal state reached
   } else {
@@ -290,11 +423,17 @@ export const next: NextAction = (client, state) => {
  */
 export async function migrationStateMachine(client: ElasticsearchClient, kibanaVersion: string) {
   let state: State = {
+    indexPrefix: '.kibana',
     controlState: 'INIT',
     kibanaVersion,
     aliases: {},
     source: '',
     target: '',
+    targetMappings: {
+      dynamic: 'strict',
+      properties: {},
+      _meta: { migrationMappingPropertyHashes: { test: 'migration' } },
+    },
     retryCount: 0,
     retryDelay: 0,
     log: [],

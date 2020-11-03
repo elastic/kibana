@@ -19,17 +19,50 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
+import * as Option from 'fp-ts/lib/Option';
 import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors } from '@elastic/elasticsearch';
 import { ElasticsearchClient } from '../../elasticsearch';
+import { IndexMapping } from '../mappings';
 
-export type AllResponses = CloneIndexResponse | SetIndexWriteBlockResponse | FetchIndexResponse;
+export type AllResponses =
+  | CloneIndexResponse
+  | SetIndexWriteBlockResponse
+  | FetchIndexResponse
+  | ReindexResponse
+  | WaitForTaskResponse
+  | DeleteIndexResponse
+  | UpdateByQueryResponse;
 
-export type ActionResponse<T = AllResponses> = Either.Either<Error, T>;
+export type ExpectedErrors =
+  | errors.NoLivingConnectionsError
+  | errors.ConnectionError
+  | errors.TimeoutError
+  | errors.ResponseError;
+export type ActionResponse<T = AllResponses> = Either.Either<ExpectedErrors, T>;
 
-const catchEsClientErrors = (e: ElasticsearchClientError) => {
-  return e instanceof ElasticsearchClientError ? Either.left(e) : Promise.reject(e);
+const retryResponseStatuses = [
+  503, // ServiceUnavailable
+  401, // AuthorizationException
+  403, // AuthenticationException
+  408, // RequestTimeout
+  410, // Gone
+];
+
+const catchRetryableEsClientErrors = (e: ElasticsearchClientError) => {
+  if (
+    e instanceof errors.NoLivingConnectionsError ||
+    e instanceof errors.ConnectionError ||
+    e instanceof errors.TimeoutError ||
+    (e instanceof errors.ResponseError &&
+      (retryResponseStatuses.includes(e.statusCode) ||
+        e.body?.error?.type === 'snapshot_in_progress_exception'))
+  ) {
+    return Either.left(e);
+  } else {
+    return Promise.reject(e);
+  }
 };
 
 export interface FetchIndexResponse {
@@ -50,7 +83,7 @@ export interface FetchIndexResponse {
 export const fetchIndices = (
   client: ElasticsearchClient,
   indicesToFetch: string[]
-): TaskEither.TaskEither<ElasticsearchClientError, FetchIndexResponse> => () => {
+): TaskEither.TaskEither<ExpectedErrors, FetchIndexResponse> => () => {
   return client.indices
     .get(
       {
@@ -64,7 +97,7 @@ export const fetchIndices = (
         fetchIndices: body,
       });
     })
-    .catch(catchEsClientErrors);
+    .catch(catchRetryableEsClientErrors);
 };
 
 export interface SetIndexWriteBlockResponse {
@@ -74,7 +107,7 @@ export interface SetIndexWriteBlockResponse {
 export const setIndexWriteBlock = (
   client: ElasticsearchClient,
   index: string
-): TaskEither.TaskEither<ElasticsearchClientError, SetIndexWriteBlockResponse> => () => {
+): TaskEither.TaskEither<ExpectedErrors, SetIndexWriteBlockResponse> => () => {
   return client.indices
     .addBlock(
       {
@@ -92,19 +125,46 @@ export const setIndexWriteBlock = (
         setIndexWriteBlock: res.body.acknowledged,
       });
     })
-    .catch(catchEsClientErrors);
+    .catch(catchRetryableEsClientErrors);
 };
 
 export interface CloneIndexResponse {
-  cloneIndex: { acknowledged: boolean; shardsAcknowledged: boolean };
+  cloneIndex: AcknowledgeResponse;
 }
 
+const waitForStatus = (
+  client: ElasticsearchClient,
+  index: string,
+  status: 'green' | 'yellow' | 'red'
+): TaskEither.TaskEither<ExpectedErrors, {}> => () => {
+  return client.cluster
+    .health({ index, wait_for_status: status, timeout: '60s' })
+    .then(() => {
+      return Either.right({});
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
+/**
+ * Makes a clone of the source index into the target.
+ *
+ * @remarks
+ * This method adds some additional logic to the ES clone index API:
+ *  - it is idempotent, if it gets called multiple times subsequent calls will
+ *    wait for the first clone operation to complete (up to 60s)
+ *  - the first call will wait up to 120s for the cluster state and all shards
+ *    to be updated.
+ *
+ * @param client
+ * @param source
+ * @param target
+ */
 export const cloneIndex = (
   client: ElasticsearchClient,
   source: string,
   target: string
-): TaskEither.TaskEither<ElasticsearchClientError, CloneIndexResponse> => {
-  const cloneTask: TaskEither.TaskEither<ElasticsearchClientError, CloneIndexResponse> = () => {
+): TaskEither.TaskEither<ExpectedErrors, CloneIndexResponse> => {
+  const cloneTask: TaskEither.TaskEither<ExpectedErrors, AcknowledgeResponse> = () => {
     return client.indices
       .clone(
         {
@@ -112,6 +172,7 @@ export const cloneIndex = (
           target,
           wait_for_active_shards: 'all',
           body: { settings: { 'index.blocks.write': false } },
+          timeout: '60s',
         },
         { maxRetries: 0 /** handle retry ourselves for now */ }
       )
@@ -125,86 +186,185 @@ export const cloneIndex = (
          * - acknowledged=true, shards_acknowledged=true, cloning complete
          */
         return Either.right({
-          cloneIndex: {
-            acknowledged: res.body.acknowledged,
-            shardsAcknowledged: res.body.shards_acknowledged,
-          },
+          acknowledged: res.body.acknowledged,
+          shardsAcknowledged: res.body.shards_acknowledged,
         });
       })
-      .catch((error) => {
-        if (error.meta?.body?.error.type === 'resource_already_exists_exception') {
+      .catch((error: errors.ResponseError) => {
+        if (error.message === 'resource_already_exists_exception') {
           /**
            * If the target index already exists it means a previous clone
            * operation had already been started. However, we can't be sure
            * that all shards were started so return shardsAcknowledged: false
            */
           return Either.right({
-            cloneIndex: {
-              acknowledged: true,
-              shardsAcknowledged: false,
-            },
+            acknowledged: true,
+            shardsAcknowledged: false,
           });
         } else {
-          return catchEsClientErrors(error);
+          return catchRetryableEsClientErrors(error);
         }
       });
-  };
-
-  const cloneTargetGreen: TaskEither.TaskEither<
-    ElasticsearchClientError,
-    CloneIndexResponse
-  > = () => {
-    return client.cluster
-      .health({ index: target, wait_for_status: 'green', timeout: '60s' })
-      .then(() => {
-        /** When the index status is 'green' we know that all shards were started */
-        return Either.right({ cloneIndex: { acknowledged: true, shardsAcknowledged: true } });
-      })
-      .catch((e) => {
-        if (e instanceof errors.TimeoutError) {
-          return Either.left(
-            new Error(
-              "Timeout waiting for the Clone Operation to complete. The index status didn't turn green after 60s"
-            )
-          );
-        } else {
-          return Promise.reject(e);
-        }
-      })
-      .catch(catchEsClientErrors);
   };
 
   return pipe(
     cloneTask,
     TaskEither.chain((res) => {
-      /**
-       * If all shards didn't acknowledge the clone operation, wait until the
-       * target index has a 'green' status.
-       */
-      if (res.cloneIndex.acknowledged && res.cloneIndex.shardsAcknowledged) {
-        return TaskEither.right(res);
+      if (res.acknowledged && res.shardsAcknowledged) {
+        // If the cluster state was updated and all shards ackd we're done
+        return TaskEither.right({ cloneIndex: res });
       } else {
-        return cloneTargetGreen;
+        // Otherwise, wait until the target index has a 'green' status.
+        return pipe(
+          waitForStatus(client, target, 'green'),
+          TaskEither.map((value) => {
+            /** When the index status is 'green' we know that all shards were started */
+            return { cloneIndex: { acknowledged: true, shardsAcknowledged: true } };
+          })
+        );
       }
     })
   );
 };
 
-export interface ReindexResponse {
-  reindex: {};
+export interface WaitForTaskResponse {
+  waitForTask: { completed: boolean; failures: Option.Option<any[]>; description: string };
 }
 
+export const waitForTask = (
+  client: ElasticsearchClient,
+  taskId: string,
+  timeout: string
+): TaskEither.TaskEither<ExpectedErrors, WaitForTaskResponse> => () => {
+  return client.tasks
+    .get<{ completed: boolean; response: { failures: any[] }; task: { description: string } }>({
+      task_id: taskId,
+      wait_for_completion: true,
+      timeout,
+    })
+    .then(({ body }) => {
+      return Either.right({
+        waitForTask: {
+          completed: body.completed,
+          failures:
+            body.response.failures.length > 0 ? Option.some(body.response.failures) : Option.none,
+          description: body.task.description,
+        },
+      });
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DeleteIndexResponse {}
+
+export const deleteIndex = (
+  client: ElasticsearchClient,
+  index: string
+): TaskEither.TaskEither<ExpectedErrors, DeleteIndexResponse> => () => {
+  return client.indices
+    .delete({ index, timeout: '60s' })
+    .then(() => {
+      return Either.right({});
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
+export interface UpdateByQueryResponse {
+  updateByQuery: { taskId: string };
+}
+
+/**
+ * Reindex documents from the `sourceIndex` into the `targetIndex` and wait up
+ * to 60 seconds for the operation to complete. Returns a task ID which can be
+ * tracked for progress.
+ *
+ * @remarks This action uses `conflicts: 'proceed'` allowing several Kibana
+ * instances to run this in parralel. To reduce unecessary writes, scripts
+ * should set `ctx.op = "noop"` when a document is read that was already
+ * updated.
+ *
+ * @param client
+ * @param index
+ * @param targetIndex
+ * @param script
+ */
+export const updateByQuery = (
+  client: ElasticsearchClient,
+  index: string,
+  script?: string
+): TaskEither.TaskEither<ExpectedErrors, UpdateByQueryResponse> => () => {
+  return client
+    .updateByQuery({
+      // Ignore version conflicts that can occur from parralel update by query operations
+      conflicts: 'proceed',
+      // Return an error when targeting missing or closed indices
+      allow_no_indices: false,
+      index,
+      // Set batch size to 100, not sure if it's necessary to make this
+      // smaller than the default of 1000?
+      size: 100,
+      body: {
+        script:
+          script != null
+            ? {
+                source: script,
+                lang: 'painless',
+              }
+            : undefined,
+      },
+      // force a refresh so that we can query the target index
+      refresh: true,
+      // Create a task and return task id instead of blocking until complete
+      wait_for_completion: false,
+    })
+    .then(({ body: { task: taskId } }) => {
+      return Either.right({ updateByQuery: { taskId } });
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
+//* ******* UNUSED  */
+export interface ReindexResponse {
+  reindex: { taskId: string };
+}
+
+/**
+ * Reindex documents from the `sourceIndex` into the `targetIndex` and wait up
+ * to 60 seconds for the operation to complete. Returns a task ID which can be
+ * tracked for progress.
+ *
+ * @remarks This action is idempotent allowing several Kibana instances to run
+ * this in parralel. By using `op_type: 'create', conflicts: 'proceed'` there
+ * will be only one write per reindexed document.
+ *
+ * @param client
+ * @param sourceIndex
+ * @param targetIndex
+ * @param reindexScript
+ */
 export const reindex = (
   client: ElasticsearchClient,
   sourceIndex: string,
   targetIndex: string,
   reindexScript?: string
-): TaskEither.TaskEither<ElasticsearchClientError, ReindexResponse> => () => {
+): TaskEither.TaskEither<ExpectedErrors, ReindexResponse> => () => {
   return client
     .reindex({
       body: {
-        dest: { index: targetIndex },
-        source: { index: sourceIndex, size: 100 },
+        // Ignore version conflicts from existing documents
+        conflicts: 'proceed',
+        source: {
+          index: sourceIndex,
+          // Set batch size to 100, not sure if it's necessary to make this
+          // smaller than the default of 1000?
+          size: 100,
+        },
+        dest: {
+          index: targetIndex,
+          // Don't override existing documents, only create if missing
+          op_type: 'create',
+        },
         script:
           reindexScript != null
             ? {
@@ -213,13 +373,210 @@ export const reindex = (
               }
             : undefined,
       },
+      // force a refresh so that we can query the target index
       refresh: true,
+      // Create a task and return task id instead of blocking until complete
       wait_for_completion: false,
     })
-    .then(({ body, statusCode }) => {
-      return Either.right({
-        reindex: { task: body.task },
-      });
+    .then(({ body: { task: taskId } }) => {
+      return Either.right({ reindex: { taskId } });
     })
-    .catch(catchEsClientErrors);
+    .catch(catchRetryableEsClientErrors);
+};
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface UpdateAliasesResponse {}
+
+type AliasAction =
+  | { remove_index: { index: string } }
+  | { remove: { index: string; alias: string } }
+  | { add: { index: string; alias: string } };
+
+/**
+ *
+ * @param client
+ * @param aliasActions
+ */
+export const updateAliases = (
+  client: ElasticsearchClient,
+  aliasActions: AliasAction[]
+): TaskEither.TaskEither<ExpectedErrors, UpdateAliasesResponse> => () => {
+  return client.indices
+    .updateAliases({
+      body: {
+        actions: aliasActions,
+      },
+    })
+    .then(() => {
+      return Either.right({});
+    })
+    .catch(catchRetryableEsClientErrors);
+};
+
+export interface AcknowledgeResponse {
+  acknowledged: boolean;
+  shardsAcknowledged: boolean;
+}
+
+export interface CreateIndexResponse {
+  createIndex: AcknowledgeResponse;
+}
+
+/**
+ * Creates an index with the given mappings
+ *
+ * @remarks
+ * This method adds some additional logic to the ES create index API:
+ *  - it is idempotent, if it gets called multiple times subsequent calls will
+ *    wait for the first create operation to complete (up to 60s)
+ *  - the first call will wait up to 120s for the cluster state and all shards
+ *    to be updated.
+ * @param client
+ * @param indexName
+ * @param mappings
+ */
+export const createIndex = (
+  client: ElasticsearchClient,
+  indexName: string,
+  mappings: IndexMapping
+): TaskEither.TaskEither<ExpectedErrors, CreateIndexResponse> => {
+  const createIndexTask: TaskEither.TaskEither<ExpectedErrors, AcknowledgeResponse> = () => {
+    return client.indices
+      .create(
+        {
+          index: indexName,
+          // wait until all shards are available before creating the index
+          // (since number_of_shards=1 this does not have any effect atm)
+          wait_for_active_shards: 'all',
+          // Wait up to 60s for the cluster state to update and all shards to be
+          // started
+          timeout: '60s',
+          body: {
+            mappings,
+            settings: {
+              // ES rule of thumb: shards should be several GB to 10's of GB, so
+              // Kibana is unlikely to cross that limit.
+              number_of_shards: 1,
+              // Allocate 1 replica if there are enough data nodes
+              auto_expand_replicas: '0-1',
+              // Set an explicit refresh interval so that we don't inherit the
+              // value from incorrectly configured index templates (not required
+              // after we adopt system indices)
+              refresh_interval: '1s',
+            },
+          },
+        },
+        { maxRetries: 0 /** handle retry ourselves for now */ }
+      )
+      .then((res) => {
+        /**
+         * - acknowledged=false, we timed out before the cluster state was
+         *   updated with the newly created index, but it probably will be
+         *   created sometime soon.
+         * - shards_acknowledged=false, we timed out before all shards were
+         *   started
+         * - acknowledged=true, shards_acknowledged=true, index creation complete
+         */
+        return Either.right({
+          acknowledged: res.body.acknowledged,
+          shardsAcknowledged: res.body.shards_acknowledged,
+        });
+      })
+      .catch((error) => {
+        if (error.message === 'resource_already_exists_exception') {
+          /**
+           * If the target index already exists it means a previous create
+           * operation had already been started. However, we can't be sure
+           * that all shards were started so return shardsAcknowledged: false
+           */
+          return Either.right({
+            acknowledged: true,
+            shardsAcknowledged: false,
+          });
+        } else {
+          return catchRetryableEsClientErrors(error);
+        }
+      });
+  };
+
+  return pipe(
+    createIndexTask,
+    TaskEither.chain((res) => {
+      if (res.acknowledged && res.shardsAcknowledged) {
+        // If the cluster state was updated and all shards ackd we're done
+        return TaskEither.right({ createIndex: res });
+      } else {
+        // Otherwise, wait until the target index has a 'green' status.
+        return pipe(
+          waitForStatus(client, indexName, 'green'),
+          TaskEither.map((value) => {
+            /** When the index status is 'green' we know that all shards were started */
+            return { createIndex: { acknowledged: true, shardsAcknowledged: true } };
+          })
+        );
+      }
+    })
+  );
+};
+
+/**
+ * Performs the following steps on a legacy index to prepare the legacy index
+ * for a saved object migration:
+ *  1. Create a new target index
+ *  2. Reindex from legacy to target index
+ *  3. Delete the legacy index
+ *
+ * @remarks
+ * This method is idempotent. Although it will cause some duplicate work, it's
+ * safe to call it several times, or from several Kibana instances in parallel.
+ *
+ * @internalRemarks
+ * - Unlike v1 migrations, we don't create an alias that points to the
+ *   reindexed target. So after migrating a v6 `.kibana` we'll have
+ *   `.kibana_pre6.5_001` but there will be no `.kibana` alias or index. This
+ *   is because we have no way to ensure that we don't accidently reindex from
+ *   a `.kibana` _alias_ instead of an index.
+ * - We apply an reindex script for the task manager index. Because we delete
+ *   the original task manager index there is no way to rollback a failed task
+ *   manager migration without a snapshot. This is an existing limitation in
+ *   our v1 migrations.
+ *
+ * @param client
+ * @param legacyIndex
+ * @param targetIndex
+ * @param targetAlias
+ */
+export const prepareLegacyIndex = (
+  client: ElasticsearchClient,
+  legacyIndex: string,
+  targetIndex: string,
+  preMigrationScript?: string
+) => () => {
+  return pipe(
+    // Clone legacy index into a new target index, will ignore index exists error
+    cloneIndex(client, legacyIndex, targetIndex),
+    TaskEither.orElse((error) => {
+      // Ignore if legacy index doesn't exist, this probably means another
+      // Kibana instance already completed the clone and deleted it
+      if (error.message === 'index_not_found_exception') {
+        return TaskEither.right({});
+      } else {
+        return TaskEither.left(error);
+      }
+    }),
+    // Reindex from legacy to target index, will ignore conflict errors, will
+    // wait for reindex to complete
+    TaskEither.chain(() => reindex(client, legacyIndex, targetIndex, preMigrationScript)),
+    TaskEither.orElse((error) => {
+      // Ignore if legacy index doesn't exist, this probably means another
+      // Kibana instance already deleted it
+      if (error.message === 'index_not_found_exception') {
+        return TaskEither.right({});
+      } else {
+        return TaskEither.left(error);
+      }
+    }),
+    // Delete the legacy index, will ignore index not found errors
+    TaskEither.chain(() => deleteIndex(client, legacyIndex))
+  );
 };
