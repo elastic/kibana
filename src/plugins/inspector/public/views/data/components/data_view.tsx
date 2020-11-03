@@ -61,7 +61,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
   state = {} as DataViewComponentState;
   _isMounted = false;
 
-  public static getDerivedStateFromProps(
+  static getDerivedStateFromProps(
     nextProps: DataViewComponentProps,
     state: DataViewComponentState
   ) {
