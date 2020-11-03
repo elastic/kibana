@@ -5,15 +5,16 @@ kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
   githubPr.withDefaultPrComments {
-    catchError {
-      node('flyweight') {
-        retryable.enable()
+    ciStats.trackBuild {
+      catchError {
+        workers.base(ramDisk: false, bootstrapped: false, size: 'flyweight') {
 
-        kibanaPipeline.notifyOnError {
-          error "Error"
+          kibanaPipeline.notifyOnError {
+            error "Error"
+          }
+
+          sleep 15
         }
-
-        sleep 15
       }
     }
   }
