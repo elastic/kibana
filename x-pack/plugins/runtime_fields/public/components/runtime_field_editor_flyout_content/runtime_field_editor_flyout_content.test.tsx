@@ -9,10 +9,10 @@ import { DocLinksStart } from 'src/core/public';
 import '../../__jest__/setup_environment';
 import { registerTestBed, TestBed } from '../../test_utils';
 import { RuntimeField } from '../../types';
-import { RuntimeFieldEditorFlyout, Props } from './runtime_field_editor_flyout';
+import { RuntimeFieldEditorFlyoutContent, Props } from './runtime_field_editor_flyout_content';
 
 const setup = (props?: Props) =>
-  registerTestBed(RuntimeFieldEditorFlyout, {
+  registerTestBed(RuntimeFieldEditorFlyoutContent, {
     memoryRouter: {
       wrapComponent: false,
     },

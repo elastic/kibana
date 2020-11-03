@@ -8,4 +8,4 @@ export { RuntimeFieldForm, FormState as RuntimeFieldFormState } from './runtime_
 
 export { RuntimeFieldEditor } from './runtime_field_editor';
 
-export { RuntimeFieldEditorFlyout } from './runtime_field_editor_flyout';
+export { RuntimeFieldEditorFlyoutContent } from './runtime_field_editor_flyout_content';

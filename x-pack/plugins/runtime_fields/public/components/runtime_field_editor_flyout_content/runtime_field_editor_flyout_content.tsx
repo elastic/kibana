@@ -66,7 +66,7 @@ export interface Props {
   defaultValue?: RuntimeField;
 }
 
-export const RuntimeFieldEditorFlyout = ({
+export const RuntimeFieldEditorFlyoutContent = ({
   onSave,
   onCancel,
   docLinks,

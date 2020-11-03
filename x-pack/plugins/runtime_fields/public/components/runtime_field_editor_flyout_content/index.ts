@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { RuntimeFieldEditorFlyout } from './runtime_field_editor_flyout';
+export { RuntimeFieldEditorFlyoutContent } from './runtime_field_editor_flyout_content';

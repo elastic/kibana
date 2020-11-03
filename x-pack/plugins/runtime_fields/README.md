@@ -14,7 +14,7 @@ The runtime field editor is exported in 2 flavours:
 ```js
 import React, { useState } from 'react';
 import { EuiFlyoutBody, EuiButton } from '@elastic/eui';
-import { RuntimeFieldEditorFlyout, RuntimeField } from '../runtime_fields/public';
+import { RuntimeFieldEditorFlyoutContent, RuntimeField } from '../runtime_fields/public';
 
 const MyComponent = () => {
   const { docLinksStart } = useCoreContext(); // access the core start service
@@ -30,7 +30,7 @@ const MyComponent = () => {
 
       {isFlyoutVisible && (
         <EuiFlyout onClose={() => setIsFlyoutVisible(false)}>
-          <RuntimeFieldEditorFlyout
+          <RuntimeFieldEditorFlyoutContent
             onSave={saveRuntimeField}
             onCancel={() => setIsFlyoutVisible(false)}
             docLinks={docLinksStart}
@@ -53,7 +53,7 @@ import { EuiButton } from '@elastic/eui';
 import { OverlayRef } from 'src/core/public';
 
 import { createKibanaReactContext, toMountPoint } from '../../src/plugins/kibana_react/public';
-import { RuntimeFieldEditorFlyout, RuntimeField } from '../runtime_fields/public';
+import { RuntimeFieldEditorFlyoutContent, RuntimeField } from '../runtime_fields/public';
 
 const MyComponent = () => {
   // Access the core start service
@@ -72,7 +72,7 @@ const MyComponent = () => {
     flyoutEditor.current = openFlyout(
       toMountPoint(
         <KibanaReactContextProvider>
-          <RuntimeFieldEditorFlyout
+          <RuntimeFieldEditorFlyoutContent
             onSave={saveRuntimeField}
             onCancel={() => flyoutEditor.current?.close()}
             docLinks={docLinksStart}
