@@ -113,8 +113,8 @@ export async function executeEsQueryFactory(
       const ltEpochDateTime = new Date(ltDateTime).getTime();
       const dateRangeUpdatedQuery =
         indexQuery.language === 'kuery'
-          ? `${indexQuery.query} and ${dateField} >= "${gteEpochDateTime}" and ${dateField} < "${ltEpochDateTime}"`
-          : `${dateField}:[${gteDateTime} TO ${ltDateTime}]`;
+          ? `(${dateField} >= "${gteEpochDateTime}" and ${dateField} < "${ltEpochDateTime}") and (${indexQuery.query})`
+          : `(${dateField}:[${gteDateTime} TO ${ltDateTime}]) AND (${indexQuery.query})`;
       esFormattedQuery = getEsFormattedQuery({
         query: dateRangeUpdatedQuery,
         language: indexQuery.language,
