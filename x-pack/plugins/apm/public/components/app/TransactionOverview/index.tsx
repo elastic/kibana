@@ -22,7 +22,7 @@ import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
