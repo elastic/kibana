@@ -6,7 +6,6 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { i18n } from '@kbn/i18n';
 import { AlertTypeModel } from '../../../../types';
 import { validateExpression } from './validation';
 import { IndexThresholdAlertParams } from './types';

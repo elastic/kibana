@@ -29,6 +29,8 @@ import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
+  EuiListGroupItem,
+  EuiListGroup,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -238,7 +240,8 @@ export const AlertForm = ({
                 .toString()
                 .toLocaleLowerCase()
                 .includes(searchValue) ||
-              alertTypeItem.alertType!.producer.toLocaleLowerCase().includes(searchValue)
+              alertTypeItem.alertType!.producer.toLocaleLowerCase().includes(searchValue) ||
+              alertTypeItem.alertTypeModel.description.toLocaleLowerCase().includes(searchValue)
             : alertTypeItem
         )
     );
@@ -317,30 +320,33 @@ export const AlertForm = ({
           </EuiFlexGroup>
         </EuiTitle>
         <EuiHorizontalRule size="full" margin="xs" />
-        {items
-          .sort((a, b) => a.name.toString().localeCompare(b.name.toString()))
-          .map((item, index) => (
-            <Fragment key={index}>
-              <EuiDescriptionListTitle
-                onClick={() => {
-                  setAlertProperty('alertTypeId', item.id);
-                  setAlertTypeModel(item.alertTypeItem);
-                  setAlertProperty('params', {});
-                  if (alertTypesIndex && alertTypesIndex.has(item.id)) {
-                    setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+        <EuiListGroup flush={true} gutterSize="s" maxWidth={false}>
+          {items
+            .sort((a, b) => a.name.toString().localeCompare(b.name.toString()))
+            .map((item, index) => (
+              <Fragment key={index}>
+                <EuiListGroupItem
+                  label={
+                    <EuiDescriptionList>
+                      <EuiDescriptionListTitle>{item.name}</EuiDescriptionListTitle>
+                      <EuiDescriptionListDescription>
+                        {item.alertTypeItem.description}
+                      </EuiDescriptionListDescription>
+                    </EuiDescriptionList>
                   }
-                }}
-              >
-                {item.name}
-              </EuiDescriptionListTitle>
-              {item.alertTypeItem.description ? (
-                <EuiDescriptionListDescription>
-                  {item.alertTypeItem.description}
-                </EuiDescriptionListDescription>
-              ) : null}
-              <EuiHorizontalRule size="full" margin="xs" />
-            </Fragment>
-          ))}
+                  onClick={() => {
+                    setAlertProperty('alertTypeId', item.id);
+                    setAlertTypeModel(item.alertTypeItem);
+                    setAlertProperty('params', {});
+                    if (alertTypesIndex && alertTypesIndex.has(item.id)) {
+                      setDefaultActionGroupId(alertTypesIndex.get(item.id)!.defaultActionGroupId);
+                    }
+                  }}
+                />
+                <EuiHorizontalRule size="full" margin="xs" />
+              </Fragment>
+            ))}
+        </EuiListGroup>
       </Fragment>
     ));
 
@@ -650,7 +656,7 @@ export const AlertForm = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer />
-          <EuiDescriptionList>{alertTypeNodes}</EuiDescriptionList>
+          {alertTypeNodes}
         </Fragment>
       ) : alertTypesIndex ? (
         <NoAuthorizedAlertTypes operation={operation} />
