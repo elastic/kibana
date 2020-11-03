@@ -26,7 +26,7 @@ import {
   goToInProgressAlerts,
   selectAllAlerts,
 } from '../tasks/alerts';
-import { esArchiverLoad } from '../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { DETECTIONS_URL } from '../urls/navigation';
@@ -259,6 +259,7 @@ describe('Alerts', () => {
   // Regression test: https://github.com/elastic/kibana/issues/82004
   context('Regression #82004: Bulk actions ignore daterange filters', () => {
     beforeEach(() => {
+      esArchiverUnload('alerts');
       esArchiverLoad('alerts');
       loginAndWaitForPage(DETECTIONS_URL);
     });
