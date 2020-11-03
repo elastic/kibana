@@ -17,25 +17,14 @@
  * under the License.
  */
 
-import { TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { ShardsResponse } from 'elasticsearch';
 
 /**
- *
+ * Get the `total`/`loaded` for this response (see `IKibanaSearchResponse`). Note that `skipped` is
+ * not included as it is already included in `successful`.
  * @internal
- * NOTE: Temporary workaround until https://github.com/elastic/elasticsearch-js/issues/1297
- * is resolved
- *
- * @param promise a TransportRequestPromise
- * @param signal optional AbortSignal
- *
- * @returns a TransportRequestPromise that will be aborted if the signal is aborted
  */
-export const shimAbortSignal = <T extends TransportRequestPromise<unknown>>(
-  promise: T,
-  signal: AbortSignal | undefined
-): T => {
-  if (signal) {
-    signal.addEventListener('abort', () => promise.abort());
-  }
-  return promise;
-};
+export function getTotalLoaded({ total, failed, successful }: ShardsResponse) {
+  const loaded = failed + successful;
+  return { total, loaded };
+}
