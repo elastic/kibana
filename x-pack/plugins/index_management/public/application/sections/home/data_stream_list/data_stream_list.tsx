@@ -232,7 +232,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       */}
       {dataStreamName && (
         <DataStreamDetailPanel
-          dataStreamName={attemptToURIDecode(dataStreamName)}
+          dataStreamName={attemptToURIDecode(dataStreamName)!}
           backingIndicesLink={reactRouterNavigate(
             history,
             getIndexListUri(`data_stream="${attemptToURIDecode(dataStreamName)}"`, true)

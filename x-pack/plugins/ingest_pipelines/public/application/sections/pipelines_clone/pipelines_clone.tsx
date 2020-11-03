@@ -25,7 +25,7 @@ export const PipelinesClone: FunctionComponent<RouteComponentProps<ParamProps>> 
   const { sourceName } = props.match.params;
   const { services } = useKibana();
 
-  const decodedSourceName = attemptToURIDecode(sourceName);
+  const decodedSourceName = attemptToURIDecode(sourceName)!;
   const { error, data: pipeline, isLoading, isInitialRequest } = services.api.useLoadPipeline(
     decodedSourceName
   );

@@ -101,7 +101,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   const selectedTemplate = Boolean(templateName)
     ? {
-        name: attemptToURIDecode(templateName!),
+        name: attemptToURIDecode(templateName!)!,
         isLegacy: getIsLegacyFromQueryParams(location),
       }
     : null;

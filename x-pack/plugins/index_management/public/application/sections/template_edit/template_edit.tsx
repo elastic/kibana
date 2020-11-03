@@ -27,7 +27,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   location,
   history,
 }) => {
-  const decodedTemplateName = attemptToURIDecode(name);
+  const decodedTemplateName = attemptToURIDecode(name)!;
   const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);
