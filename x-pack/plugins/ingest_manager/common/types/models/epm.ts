@@ -7,7 +7,7 @@
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
-import { agentAssetTypes, dataTypes, requiredPackages } from '../../constants';
+import { agentAssetTypes, dataTypes, defaultPackages, requiredPackages } from '../../constants';
 import { ValueOf } from '../../types';
 
 export enum InstallationStatus {
@@ -275,10 +275,7 @@ export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
 
 export type RequiredPackage = typeof requiredPackages;
 
-export enum DefaultPackages {
-  system = 'system',
-  endpoint = 'endpoint',
-}
+export type DefaultPackages = typeof defaultPackages;
 
 export interface IndexTemplateMappings {
   properties: any;
