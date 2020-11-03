@@ -55,7 +55,10 @@ export function getFocusData(
   selectedJob: Job,
   functionDescription: string | undefined
 ): Observable<FocusData> {
-  const esFunctionToPlotIfMetric = aggregationTypeTransform.toES(functionDescription);
+  const esFunctionToPlotIfMetric =
+    functionDescription !== undefined
+      ? aggregationTypeTransform.toES(functionDescription)
+      : functionDescription;
 
   return forkJoin([
     // Query 1 - load metric data across selected time range.
