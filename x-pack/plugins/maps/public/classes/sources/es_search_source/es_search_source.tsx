@@ -51,7 +51,7 @@ import {
 } from '../vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
-import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/public';
+import { SortDirection, SortDirectionNumeric } from '../../../../../../../src/plugins/data/common';
 import { isValidStringConfig } from '../../util/valid_string_config';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
