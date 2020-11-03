@@ -396,7 +396,6 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
     currentAlertInstances,
     originalAlertInstanceIds,
   } = params;
-
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
 
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
@@ -413,7 +412,7 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
   }
 
   for (const id of currentAlertInstanceIds) {
-    const actionGroup = currentAlertInstances[id]?.getLastScheduledActions()?.group;
+    const { actionGroup } = currentAlertInstances[id].getScheduledActionOptions()!;
     const message = `${params.alertLabel} active instance: '${id}' in actionGroup: '${actionGroup}'`;
     logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message, actionGroup);
   }

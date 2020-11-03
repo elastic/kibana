@@ -81,10 +81,6 @@ export class AlertInstance<
     return this;
   }
 
-  getLastScheduledActions() {
-    return this.meta.lastScheduledActions;
-  }
-
   updateLastScheduledActions(group: string) {
     this.meta.lastScheduledActions = { group, date: new Date() };
   }
