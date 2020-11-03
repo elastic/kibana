@@ -11,6 +11,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { CoreSetup, CoreStart } from '../../../../../src/core/public';
 
 import { IngestManagerSetup } from '../../../ingest_manager/public';
+import { RuntimeFieldsSetup } from '../../../runtime_fields/public';
 import { IndexMgmtMetricsType } from '../types';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
@@ -24,6 +25,7 @@ export interface AppDependencies {
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
+    runtimeFields: RuntimeFieldsSetup;
     ingestManager?: IngestManagerSetup;
   };
   services: {

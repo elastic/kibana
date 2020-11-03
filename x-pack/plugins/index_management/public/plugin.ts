@@ -10,6 +10,7 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/p
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 
 import { IngestManagerSetup } from '../../ingest_manager/public';
+import { RuntimeFieldsSetup } from '../../runtime_fields/public';
 import { UIM_APP_NAME, PLUGIN } from '../common/constants';
 
 import { httpService } from './application/services/http';
@@ -30,6 +31,7 @@ interface PluginsDependencies {
   ingestManager?: IngestManagerSetup;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
+  runtimeFields: RuntimeFieldsSetup;
 }
 
 export class IndexMgmtUIPlugin {
@@ -45,7 +47,7 @@ export class IndexMgmtUIPlugin {
 
   public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): IndexManagementPluginSetup {
     const { http, notifications } = coreSetup;
-    const { ingestManager, usageCollection, management } = plugins;
+    const { ingestManager, usageCollection, management, runtimeFields } = plugins;
 
     httpService.setup(http);
     notificationService.setup(notifications);
@@ -63,7 +65,14 @@ export class IndexMgmtUIPlugin {
           uiMetricService: this.uiMetricService,
           extensionsService: this.extensionsService,
         };
-        return mountManagementSection(coreSetup, usageCollection, services, params, ingestManager);
+        return mountManagementSection(
+          coreSetup,
+          usageCollection,
+          services,
+          params,
+          runtimeFields,
+          ingestManager
+        );
       },
     });
 
