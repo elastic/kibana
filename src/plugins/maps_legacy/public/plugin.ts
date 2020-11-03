@@ -89,7 +89,6 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
       getPrecision,
       config,
       getBaseMapsVis,
-      emsSettings,
     };
   }
 

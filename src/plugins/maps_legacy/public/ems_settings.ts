@@ -27,7 +27,7 @@ export class EMSSettings {
   }
 
   _isEMSUrlSet() {
-    return this._config.emsUrl.length > 0;
+    return this._config.emsUrl && this._config.emsUrl.length > 0;
   }
 
   _getEMSRoot() {

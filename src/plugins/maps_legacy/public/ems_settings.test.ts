@@ -25,15 +25,11 @@ import {
   DEFAULT_EMS_TILE_API_URL,
   MapsLegacyConfig,
 } from '../config';
-import { configSchema as tilemapSchema } from '../../tile_map/config';
-import { configSchema as regionmapSchema } from '../../region_map/config';
 
 describe('EMSSettings', () => {
   const mockConfig: MapsLegacyConfig = {
     includeElasticMapsService: true,
     proxyElasticMapsServiceInMaps: false,
-    tilemap: undefined,
-    regionmap: [],
     manifestServiceUrl: '',
     emsUrl: '',
     emsFileApiUrl: DEFAULT_EMS_FILE_API_URL,
