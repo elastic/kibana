@@ -17,6 +17,7 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsRemoveReferencesToOptions,
   SavedObjectsUtils,
   ISavedObjectTypeRegistry,
 } from '../../../../../src/core/server';
@@ -331,6 +332,25 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
   ) {
     throwErrorIfNamespaceSpecified(options);
     return await this.client.bulkUpdate(objects, {
+      ...options,
+      namespace: spaceIdToNamespace(this.spaceId),
+    });
+  }
+
+  /**
+   * Remove outward references to given object.
+   *
+   * @param type
+   * @param id
+   * @param options
+   */
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ) {
+    throwErrorIfNamespaceSpecified(options);
+    return await this.client.removeReferencesTo(type, id, {
       ...options,
       namespace: spaceIdToNamespace(this.spaceId),
     });

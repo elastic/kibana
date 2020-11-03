@@ -31,6 +31,7 @@ const WATCH_NAME = 'kibana_version_mismatch';
 export class KibanaVersionMismatchAlert extends BaseAlert {
   public type = ALERT_KIBANA_VERSION_MISMATCH;
   public label = LEGACY_ALERT_DETAILS[ALERT_KIBANA_VERSION_MISMATCH].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_KIBANA_VERSION_MISMATCH].description;
   public isLegacy = true;
 
   protected actionVariables = [
