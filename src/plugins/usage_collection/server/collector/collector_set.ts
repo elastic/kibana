@@ -117,6 +117,7 @@ export class CollectorSet {
     const allReady = collectorsTypesNotReady.length === 0;
 
     if (!allReady && this.maximumWaitTimeForAllCollectorsInS >= 0) {
+      // some collectors return false for isReady() and we still have time left to wait
       const nowTimestamp = +new Date();
       this._waitingForAllCollectorsTimestamp =
         this._waitingForAllCollectorsTimestamp || nowTimestamp;

@@ -62,6 +62,8 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
             total: 'long',
           },
         },
+        isReady: () => isCollectorFetchReady, // method to return true/false to confirm if the collector is ready for the fetch method to be called.
+        
         fetch: async (collectorFetchContext: CollectorFetchContext) => {
 
         // query ES or saved objects and get some data
@@ -84,6 +86,9 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
 Some background: 
 
 - `MY_USAGE_TYPE` can be any string. It usually matches the plugin name. As a safety mechanism, we double check there are no duplicates at the moment of registering the collector.
+- isReady() (added in v7.2.0 and v6.8.4) is a way for a usage collector to announce that some async process must finish first before it will return data synchronously. If any collector is not ready, we try fetching again, up to a set amount of time. Once the allocated time interval is up, we collect data from those collectors that are ready and skip any that are not. What this means is that if a collector returns `true` for `isReady` and it actually isn't ready to return data, there won't be telemetry data for that user for the day. Every usage collector owner needs to really think about what it would mean for them if they missed the first few documents when Kibana starts and should implement this function with custom logic. 
+
+ (e.g. the task manager needs to run a task first). If any collector reports that it is not ready when we try and collect data, we reset a flag to try again up to a specified interval
 - The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a Kibana Metricbeat module, the Beat calls Kibana's stats API to invoke usage collection.
 In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest` or `esClient` wraps `asCurrentUser`, where the request headers are expected to have read privilege on the entire `.kibana' index. The `fetch` method also exposes the saved objects client that will have the correct scope when the collectors' `fetch` method is called.
 
@@ -154,7 +159,7 @@ If any of your properties is an array, the schema definition must follow the con
 ```ts
 export const myCollector = makeUsageCollector<Usage>({
   type: 'my_working_collector',
-  isReady: () => true,
+  isReady: () => isFetchReadyToReturnData(),
   fetch() {
     return {
       my_greeting: 'hello',
