@@ -39,6 +39,7 @@ describe('<App />', () => {
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(`Create an index lifecycle policy`);
+      expect(testBed.find('policyNameField').props().value).toBe('');
     });
 
     test('when there are policies', async () => {
@@ -54,6 +55,7 @@ describe('<App />', () => {
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(`Create an index lifecycle policy`);
+      expect(testBed.find('policyNameField').props().value).toBe('');
     });
   });
 

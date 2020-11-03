@@ -71,7 +71,7 @@ import { EditPolicyContextProvider } from './edit_policy_context';
 
 export interface Props {
   policies: PolicyFromES[];
-  policyName: string;
+  policyName?: string;
   getUrlForApp: (
     appId: string,
     options?: {

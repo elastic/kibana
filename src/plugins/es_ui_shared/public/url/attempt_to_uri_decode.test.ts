@@ -63,3 +63,7 @@ test('returns wrong decoded value for % with other escaped characters', () => {
   expect(attemptToURIDecode(encodedName)).toBe(originalName);
   expect(attemptToURIDecode(reactRouterDecoded)).not.toBe(originalName);
 });
+
+test("doesn't convert undefined to a string", () => {
+  expect(attemptToURIDecode(undefined)).toBeUndefined();
+});
