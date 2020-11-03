@@ -18,6 +18,7 @@
  */
 
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 /**
  * This tests both that one of each visualization can be added to a dashboard (as opposed to opening an existing
@@ -27,7 +28,7 @@ import expect from '@kbn/expect';
  * broke?).  The upside is that this offers very good coverage with a minimal time investment.
  */
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardExpect = getService('dashboardExpect');
@@ -44,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
 
   describe('Dashboard Embedding', function describeIndexTests() {
     before(async () => {
-      await esArchiver.load('kibana');
+      await esArchiver.load('new_visualize_flow');
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
@@ -53,12 +54,17 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
     });
 
+    after(async () => {
+      await esArchiver.unload('new_visualize_flow');
+    });
+
     it('adding a metric visualization', async function () {
       const originalPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(originalPanelCount).to.eql(0);
       await testSubjects.exists('addVisualizationButton');
       await testSubjects.click('addVisualizationButton');
       await dashboardVisualizations.createAndEmbedMetric('Embedding Vis Test');
+      await PageObjects.visualize.saveVisualization('Embedding Vis', { redirectToOrigin: true });
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.metricValuesExist(['0']);
       const panelCount = await PageObjects.dashboard.getPanelCount();
@@ -73,6 +79,9 @@ export default function ({ getService, getPageObjects }) {
       await dashboardVisualizations.createAndEmbedMarkdown({
         name: 'Embedding Markdown Test',
         markdown: 'Nice to meet you, markdown is my name',
+      });
+      await PageObjects.visualize.saveVisualization('Embedding Markdown', {
+        redirectToOrigin: true,
       });
       await PageObjects.dashboard.waitForRenderComplete();
       await dashboardExpect.markdownWithValuesExists(['Nice to meet you, markdown is my name']);

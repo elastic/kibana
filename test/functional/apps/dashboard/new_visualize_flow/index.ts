@@ -16,12 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { FtrProviderContext } from '../functional/ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../ftr_provider_context';
+
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('New Visualize Flow', function () {
-    this.tags('ciGroup2');
+    this.tags(['ciGroup2']);
     loadTestFile(require.resolve('./dashboard_embedding'));
   });
 }
