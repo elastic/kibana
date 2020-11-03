@@ -101,6 +101,7 @@ export class Collector<T = unknown, U = T> {
    * @param {Function} options.init (optional) - initialization function
    * @param {Function} options.fetch - function to query data
    * @param {Function} options.formatForBulkUpload - optional
+   * @param {boolean} options.isReady - boolean to indicate collector is ready to report data
    * @param {Function} options.rest - optional other properties
    */
   constructor(
