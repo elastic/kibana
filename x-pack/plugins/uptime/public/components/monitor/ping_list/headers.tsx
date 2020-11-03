@@ -24,7 +24,7 @@ export const PingHeaders = ({ headers }: Props) => {
     <>
       <EuiSpacer size="s" />
       <EuiAccordion
-        id="accordion1"
+        id="responseHeaderAccord"
         buttonContent={
           <EuiText size="xs">
             <h3>

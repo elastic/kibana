@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { shallowWithIntl, renderWithIntl } from 'test_utils/enzyme_helpers';
+import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { PingHeaders } from '../headers';
 
@@ -27,9 +27,5 @@ describe('Ping Headers', () => {
 
   it('shallow renders expected elements for valid props', () => {
     expect(shallowWithIntl(<PingHeaders headers={headers} />)).toMatchSnapshot();
-  });
-
-  it('renders expected elements for valid props', () => {
-    expect(renderWithIntl(<PingHeaders headers={headers} />)).toMatchSnapshot();
   });
 });
