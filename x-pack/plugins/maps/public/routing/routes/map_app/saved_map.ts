@@ -161,7 +161,7 @@ export class SavedMap {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
-          updatedMapEmbeddableInput,
+          input: updatedMapEmbeddableInput,
         },
       });
       return;
