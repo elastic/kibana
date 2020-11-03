@@ -407,59 +407,6 @@ export class TimeSeriesExplorer extends React.Component {
       )
     );
   };
-  /**
-   * Loads available entity values.
-   * @param {Array} entities - Entity controls configuration
-   * @param {Object} searchTerm - Search term for partition, e.g. { partition_field: 'partition' }
-   */
-  loadEntityValues = async (entities, searchTerm = {}) => {
-    this.setState({ entitiesLoading: true });
-
-    const { bounds, selectedJobId, selectedDetectorIndex } = this.props;
-    const selectedJob = mlJobService.getJob(selectedJobId);
-
-    // Populate the entity input datalists with the values from the top records by score
-    // for the selected detector across the full time range. No need to pass through finish().
-    const detectorIndex = selectedDetectorIndex;
-
-    const {
-      partition_field: partitionField,
-      over_field: overField,
-      by_field: byField,
-    } = await mlResultsService
-      .fetchPartitionFieldsValues(
-        selectedJob.job_id,
-        searchTerm,
-        [
-          {
-            fieldName: 'detector_index',
-            fieldValue: detectorIndex,
-          },
-        ],
-        bounds.min.valueOf(),
-        bounds.max.valueOf()
-      )
-      .toPromise();
-
-    const entityValues = {};
-    entities.forEach((entity) => {
-      let fieldValues;
-
-      if (partitionField?.name === entity.fieldName) {
-        fieldValues = partitionField.values;
-      }
-      if (overField?.name === entity.fieldName) {
-        fieldValues = overField.values;
-      }
-      if (byField?.name === entity.fieldName) {
-        fieldValues = byField.values;
-      }
-      entityValues[entity.fieldName] = fieldValues;
-    });
-
-    this.setState({ entitiesLoading: false, entityValues });
-  };
-
   setForecastId = (forecastId) => {
     this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
   };
@@ -952,8 +899,6 @@ export class TimeSeriesExplorer extends React.Component {
       previousProps.selectedDetectorIndex !== this.props.selectedDetectorIndex ||
       !isEqual(previousProps.selectedEntities, this.props.selectedEntities)
     ) {
-      const entityControls = this.getControlsForDetector();
-      this.loadEntityValues(entityControls);
       this.getPlotByOptions();
     }
 
