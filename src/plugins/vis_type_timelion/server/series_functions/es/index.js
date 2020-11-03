@@ -19,7 +19,6 @@
 
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { ES_SEARCH_STRATEGY } from '../../../../data/server';
 import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
@@ -135,7 +134,6 @@ export default new Datasource('es', {
       .search(
         body,
         {
-          strategy: ES_SEARCH_STRATEGY,
           sessionId: tlConfig.request?.body.sessionId,
         },
         tlConfig.context

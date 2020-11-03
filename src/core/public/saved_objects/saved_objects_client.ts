@@ -305,6 +305,7 @@ export class SavedObjectsClient {
       defaultSearchOperator: 'default_search_operator',
       fields: 'fields',
       hasReference: 'has_reference',
+      hasReferenceOperator: 'has_reference_operator',
       page: 'page',
       perPage: 'per_page',
       search: 'search',
@@ -317,7 +318,16 @@ export class SavedObjectsClient {
     };
 
     const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
-    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]);
+    const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Record<
+      string,
+      any
+    >;
+
+    // `has_references` is a structured object. we need to stringify it before sending it, as `fetch`
+    // is not doing it implicitly.
+    if (query.has_reference) {
+      query.has_reference = JSON.stringify(query.has_reference);
+    }
 
     const request: ReturnType<SavedObjectsApi['find']> = this.savedObjectsFetch(path, {
       method: 'GET',
