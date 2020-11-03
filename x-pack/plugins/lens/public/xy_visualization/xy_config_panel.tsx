@@ -108,16 +108,6 @@ const valueLabelsOptions: Array<{
   },
 ];
 
-const valueTooltipContentDisabled = {
-  stacked: i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
-    defaultMessage:
-      'This setting cannot be applied to stacked bar charts. Try other type of charts',
-  }),
-  histogram: i18n.translate('xpack.lens.xyChart.valuesDisabledHelpText', {
-    defaultMessage: 'This setting cannot be applied to bar charts having time dimension.',
-  }),
-};
-
 export function LayerContextMenu(props: VisualizationLayerWidgetProps<State>) {
   const { state, layerId } = props;
   const horizontalOnly = isHorizontalChart(state.layers);
@@ -245,9 +235,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
       : 'show';
 
   const valueLabelsVisibilityMode = state?.valueLabels || 'hide';
-  const tooltipContentValueLabels = isHistogramSeries
-    ? valueTooltipContentDisabled.histogram
-    : valueTooltipContentDisabled.stacked;
 
   const isValueLabelsDisabled = hasNonBarSeries || !hasBarNotStacked || isHistogramSeries;
 
@@ -268,11 +255,17 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               display="columnCompressed"
               label={
                 <TooltipWrapper
-                  tooltipContent={tooltipContentValueLabels}
+                  tooltipContent={i18n.translate(
+                    'xpack.lens.xyChart.valuesStackedDisabledHelpText',
+                    {
+                      defaultMessage:
+                        'This setting can only be used on categorical, un-stacked bar charts',
+                    }
+                  )}
                   condition={isValueLabelsDisabled}
                 >
                   {i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-                    defaultMessage: 'Display',
+                    defaultMessage: 'Labels',
                   })}{' '}
                   {isValueLabelsDisabled ? (
                     <EuiIcon type="questionInCircle" color="subdued" />
@@ -283,7 +276,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               <EuiButtonGroup
                 isFullWidth
                 legend={i18n.translate('xpack.lens.shared.legendVisibilityLabel', {
-                  defaultMessage: 'Display',
+                  defaultMessage: 'Labels',
                 })}
                 isDisabled={isValueLabelsDisabled}
                 data-test-subj="lnsValueLabelsDisplay"

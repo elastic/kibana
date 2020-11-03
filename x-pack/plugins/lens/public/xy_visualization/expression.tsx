@@ -438,7 +438,7 @@ export function XYChart({
 
   const baseThemeWithMaybeValueLabels = !shouldShowValueLabels
     ? chartTheme
-    : mergeThemeWithValueLabelsStyling(chartTheme, valueLabels || 'hide', shouldRotate);
+    : mergeThemeWithValueLabelsStyling(chartTheme, valueLabels, shouldRotate);
 
   return (
     <Chart>
