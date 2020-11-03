@@ -357,6 +357,9 @@ export class BaseAlert {
     return {
       cluster,
       ccs: item.ccs,
+      stackProduct: '',
+      stackProductName: '',
+      stackProductUuid: '',
       ui: {
         isFiring: false,
         message: null,

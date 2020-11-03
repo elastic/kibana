@@ -19,7 +19,7 @@ import { AlertMessageTokenType } from '../../../common/enums';
 import { Legacy } from '../../legacy_shims';
 import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 
-export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string | null {
+export function replaceTokens(alertMessage: AlertMessage | null): JSX.Element | string | null {
   if (!alertMessage) {
     return null;
   }

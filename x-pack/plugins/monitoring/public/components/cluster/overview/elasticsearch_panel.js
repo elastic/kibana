@@ -251,7 +251,7 @@ export function ElasticsearchPanel(props) {
     const alertsList = OVERVIEW_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     overviewAlertStatus = (
       <EuiFlexItem grow={false}>
-        <AlertsBadge alerts={alertsList} />
+        <AlertsBadge alerts={alertsList} debug={true} />
       </EuiFlexItem>
     );
   }

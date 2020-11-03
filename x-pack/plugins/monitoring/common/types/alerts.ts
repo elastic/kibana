@@ -24,7 +24,7 @@ export interface CommonAlertStatus {
 
 export interface CommonAlertState {
   firing: boolean;
-  state: any;
+  state: AlertState;
   meta: any;
 }
 
@@ -74,6 +74,9 @@ export interface AlertState {
   cluster: AlertCluster;
   ccs?: string;
   ui: AlertUiState;
+  stackProduct: string;
+  stackProductUuid: string;
+  stackProductName: string;
 }
 
 export interface AlertNodeState extends AlertState {
@@ -90,9 +93,6 @@ export interface AlertDiskUsageState extends AlertNodeState {
 }
 
 export interface AlertMissingDataState extends AlertState {
-  stackProduct: string;
-  stackProductUuid: string;
-  stackProductName: string;
   gapDuration: number;
 }
 

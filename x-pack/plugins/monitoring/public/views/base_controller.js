@@ -13,6 +13,7 @@ import { Legacy } from '../legacy_shims';
 import { PromiseWithCancel } from '../../common/cancel_promise';
 import { SetupModeFeature } from '../../common/enums';
 import { updateSetupModeData, isSetupModeFeatureEnabled } from '../lib/setup_mode';
+import { AlertsContext } from '../alerts/context';
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 /**
@@ -247,11 +248,13 @@ export class MonitoringViewBaseController {
     const wrappedComponent = (
       <KibanaContextProvider services={services}>
         <I18nContext>
-          {!this._isDataInitialized ? (
-            <PageLoading pageViewTitle={trackPageView ? this.telemetryPageViewTitle : null} />
-          ) : (
-            component
-          )}
+          <AlertsContext.Provider value={{ allAlerts: this.alerts }}>
+            {!this._isDataInitialized ? (
+              <PageLoading pageViewTitle={trackPageView ? this.telemetryPageViewTitle : null} />
+            ) : (
+              component
+            )}
+          </AlertsContext.Provider>
         </I18nContext>
       </KibanaContextProvider>
     );
