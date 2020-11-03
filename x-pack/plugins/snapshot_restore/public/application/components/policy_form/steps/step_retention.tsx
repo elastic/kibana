@@ -135,7 +135,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
       description={
         <FormattedMessage
           id="xpack.snapshotRestore.policyForm.stepRetention.countDescription"
-          defaultMessage="The minimum and maximum number of snapshots to store in your cluster."
+          defaultMessage="The minimum and maximum number of snapshots to store in your cluster. It should not exceed `200`"
         />
       }
       fullWidth
