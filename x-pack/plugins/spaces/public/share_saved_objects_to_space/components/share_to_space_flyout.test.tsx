@@ -8,7 +8,7 @@ import Boom from '@hapi/boom';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { ShareSavedObjectsToSpaceFlyout } from './share_to_space_flyout';
 import { ShareToSpaceForm } from './share_to_space_form';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiSelectable } from '@elastic/eui';
 import { Space } from '../../../common/model/space';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { SelectableSpacesControl } from './selectable_spaces_control';
@@ -392,5 +392,96 @@ describe('ShareToSpaceFlyout', () => {
     expect(mockToastNotifications.addSuccess).toHaveBeenCalledTimes(2);
     expect(mockToastNotifications.addError).not.toHaveBeenCalled();
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  describe('space selection', () => {
+    const mockSpaces = [
+      {
+        // normal "fully authorized" space selection option -- not the active space
+        id: 'space-1',
+        name: 'Space 1',
+        disabledFeatures: [],
+      },
+      {
+        // "partially authorized" space selection option -- not the active space
+        id: 'space-2',
+        name: 'Space 2',
+        disabledFeatures: [],
+        authorizedPurposes: { shareSavedObjectsIntoSpace: false },
+      },
+      {
+        // "active space" selection option (determined by an ID that matches the result of `getActiveSpace`, mocked at top)
+        id: 'my-active-space',
+        name: 'my active space',
+        disabledFeatures: [],
+      },
+    ];
+
+    const expectActiveSpace = (option: any) => {
+      expect(option.append).toMatchInlineSnapshot(`
+        <EuiBadge
+          color="hollow"
+        >
+          Current
+        </EuiBadge>
+      `);
+      // by definition, the active space will always be checked
+      expect(option.checked).toEqual('on');
+      expect(option.disabled).toEqual(true);
+    };
+    const expectInactiveSpace = (option: any, checked: boolean) => {
+      expect(option.append).toBeUndefined();
+      expect(option.checked).toEqual(checked ? 'on' : undefined);
+      expect(option.disabled).toBeUndefined();
+    };
+    const expectPartiallyAuthorizedSpace = (option: any, checked: boolean) => {
+      if (checked) {
+        expect(option.append).toMatchInlineSnapshot(`
+          <EuiIconTip
+            content="You need additional privileges to deselect this space."
+            position="left"
+            type="iInCircle"
+          />
+        `);
+      } else {
+        expect(option.append).toMatchInlineSnapshot(`
+          <EuiIconTip
+            content="You need additional privileges to select this space."
+            position="left"
+            type="iInCircle"
+          />
+        `);
+      }
+      expect(option.checked).toEqual(checked ? 'on' : undefined);
+      expect(option.disabled).toEqual(true);
+    };
+
+    it('correctly defines space selection options when spaces are not selected', async () => {
+      const namespaces = ['my-active-space']; // the saved object's current namespaces; it will always exist in at least the active namespace
+      const { wrapper } = await setup({ mockSpaces, namespaces });
+
+      const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
+      const selectOptions = selectable.prop('options');
+      expect(selectOptions[0]['data-space-id']).toEqual('my-active-space');
+      expectActiveSpace(selectOptions[0]);
+      expect(selectOptions[1]['data-space-id']).toEqual('space-1');
+      expectInactiveSpace(selectOptions[1], false);
+      expect(selectOptions[2]['data-space-id']).toEqual('space-2');
+      expectPartiallyAuthorizedSpace(selectOptions[2], false);
+    });
+
+    it('correctly defines space selection options when spaces are selected', async () => {
+      const namespaces = ['my-active-space', 'space-1', 'space-2']; // the saved object's current namespaces
+      const { wrapper } = await setup({ mockSpaces, namespaces });
+
+      const selectable = wrapper.find(SelectableSpacesControl).find(EuiSelectable);
+      const selectOptions = selectable.prop('options');
+      expect(selectOptions[0]['data-space-id']).toEqual('my-active-space');
+      expectActiveSpace(selectOptions[0]);
+      expect(selectOptions[1]['data-space-id']).toEqual('space-1');
+      expectInactiveSpace(selectOptions[1], true);
+      expect(selectOptions[2]['data-space-id']).toEqual('space-2');
+      expectPartiallyAuthorizedSpace(selectOptions[2], true);
+    });
   });
 });

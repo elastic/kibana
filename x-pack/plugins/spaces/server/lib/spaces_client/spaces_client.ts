@@ -43,7 +43,7 @@ const PURPOSE_PRIVILEGE_MAP: Record<
   ],
 };
 
-function filterUnauthorizesSpaceResults(value: GetSpaceResult | null): value is GetSpaceResult {
+function filterUnauthorizedSpaceResults(value: GetSpaceResult | null): value is GetSpaceResult {
   return value !== null;
 }
 
@@ -132,7 +132,7 @@ export class SpacesClient {
           }
           return { ...space, authorizedPurposes };
         })
-        .filter(filterUnauthorizesSpaceResults);
+        .filter(filterUnauthorizedSpaceResults);
 
       if (authorizedSpaces.length === 0) {
         this.debugLogger(

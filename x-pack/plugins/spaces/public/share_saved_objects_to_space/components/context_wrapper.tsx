@@ -19,7 +19,7 @@ export const ContextWrapper = (props: PropsWithChildren<Props>) => {
   const [coreStart, setCoreStart] = useState<CoreStart>();
 
   useEffect(() => {
-    Promise.all([getStartServices()]).then(([startServices]) => {
+    getStartServices().then((startServices) => {
       const [coreStartValue] = startServices;
       setCoreStart(coreStartValue);
     });
