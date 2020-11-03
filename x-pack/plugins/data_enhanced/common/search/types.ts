@@ -8,6 +8,7 @@ import { EqlSearch } from '@elastic/elasticsearch/api/requestParams';
 import { ApiResponse, TransportRequestOptions } from '@elastic/elasticsearch/lib/Transport';
 
 import {
+  ISearchOptions,
   IEsSearchRequest,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
@@ -38,3 +39,10 @@ export interface EqlSearchStrategyRequest extends IKibanaSearchRequest<EqlReques
 }
 
 export type EqlSearchStrategyResponse<T = unknown> = IKibanaSearchResponse<ApiResponse<T>>;
+
+export interface IAsyncSearchOptions extends ISearchOptions {
+  /**
+   * The number of milliseconds to wait between receiving a response and sending another request
+   */
+  pollInterval?: number;
+}

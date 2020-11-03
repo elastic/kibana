@@ -21,6 +21,7 @@ import {
   EuiFlyoutProps,
   EuiSpacer,
 } from '@elastic/eui';
+import { dataTypes } from '../../../../../../../common';
 import { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useCapabilities, useCore, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
@@ -44,7 +45,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
     description: '',
     namespace: 'default',
     is_default: undefined,
-    monitoring_enabled: ['logs', 'metrics'],
+    monitoring_enabled: Object.values(dataTypes),
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
