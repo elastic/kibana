@@ -122,7 +122,6 @@ export async function installIndexPatterns(
   const packageVersionsInfo = await Promise.all(packageVersionsFetchInfoPromise);
 
   // for each index pattern type, create an index pattern
-  const indexPatternTypes = Object.values(dataTypes);
   indexPatternTypes.forEach(async (indexPatternType) => {
     // if this is an update because a package is being uninstalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
     if (!pkgName && installedPackages.length === 0) {
