@@ -33,7 +33,7 @@ describe('Overview Page', () => {
     });
   });
 
-  describe.skip('with no data', () => {
+  describe('with no data', () => {
     before(() => {
       esArchiverUnload('auditbeat');
       loginAndWaitForPage(OVERVIEW_URL);
