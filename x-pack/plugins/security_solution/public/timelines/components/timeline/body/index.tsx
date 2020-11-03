@@ -86,8 +86,9 @@ const EXTRA_WIDTH = 4; // px
 
 const emptyDetails: TimelineEventsDetailsItem[] = [];
 
-const FullWithFlexGroup = styled(EuiFlexGroup)`
+const FullWidthFlexGroup = styled(EuiFlexGroup)`
   width: 100%;
+  overflow: hidden;
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
@@ -178,7 +179,7 @@ export const Body = React.memo<BodyProps>(
             timelineType={timelineType}
           />
         )}
-        <FullWithFlexGroup>
+        <FullWidthFlexGroup>
           <ScrollableFlexItem grow={2}>
             <div>
               <TimelineBody
@@ -250,7 +251,7 @@ export const Body = React.memo<BodyProps>(
               />
             )}
           </ScrollableFlexItem>
-        </FullWithFlexGroup>
+        </FullWidthFlexGroup>
         <TimelineBodyGlobalStyle />
       </>
     );

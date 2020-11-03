@@ -58,6 +58,7 @@ const EventsComponent: React.FC<Props> = ({
   columnRenderers,
   data,
   eventIdToNoteIds,
+  expanded,
   getNotesByIds,
   id,
   isEventViewer = false,
@@ -88,6 +89,7 @@ const EventsComponent: React.FC<Props> = ({
         getNotesByIds={getNotesByIds}
         isEventPinned={eventIsPinned({ eventId: event._id, pinnedEventIds })}
         isEventViewer={isEventViewer}
+        isExpanded={expanded.eventId === event._id}
         key={`${event._id}_${event._index}`}
         loadingEventIds={loadingEventIds}
         onColumnResized={onColumnResized}

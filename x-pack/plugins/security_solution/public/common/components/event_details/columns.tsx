@@ -14,6 +14,7 @@ import {
   EuiPanel,
   EuiText,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 import React from 'react';
 import { Draggable } from 'react-beautiful-dnd';
@@ -89,6 +90,21 @@ export const getColumns = ({
         />
       </EuiToolTip>
     ),
+  },
+  {
+    field: 'description',
+    name: '',
+    render: (description: string | null | undefined, data: EventFieldsData) => (
+      <EuiIconTip
+        aria-label={i18n.DESCRIPTION}
+        type="iInCircle"
+        color="subdued"
+        content={`${description || ''} ${getExampleText(data.example)}`}
+      />
+    ),
+    sortable: true,
+    truncateText: true,
+    width: '30px',
   },
   {
     field: 'field',
@@ -187,18 +203,7 @@ export const getColumns = ({
       </EuiFlexGroup>
     ),
   },
-  {
-    field: 'description',
-    name: i18n.DESCRIPTION,
-    render: (description: string | null | undefined, data: EventFieldsData) => (
-      <SelectableText>
-        <EuiText size="xs">{`${description || ''} ${getExampleText(data.example)}`}</EuiText>
-      </SelectableText>
-    ),
-    sortable: true,
-    truncateText: true,
-    width: '50%',
-  },
+
   {
     field: 'valuesConcatenated',
     name: i18n.BLANK,

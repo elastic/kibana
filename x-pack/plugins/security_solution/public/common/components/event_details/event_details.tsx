@@ -5,7 +5,7 @@
  */
 
 import { EuiLink, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { BrowserFields } from '../../containers/source';
@@ -54,6 +54,8 @@ export const EventDetails = React.memo<Props>(
     timelineId,
     toggleColumn,
   }) => {
+    const handleTabClick = useCallback((e) => onViewSelected(e.id as View), [onViewSelected]);
+
     const tabs: EuiTabbedContentTab[] = useMemo(
       () => [
         {
@@ -85,7 +87,7 @@ export const EventDetails = React.memo<Props>(
         <EuiTabbedContent
           tabs={tabs}
           selectedTab={view === 'table-view' ? tabs[0] : tabs[1]}
-          onTabClick={(e) => onViewSelected(e.id as View)}
+          onTabClick={handleTabClick}
         />
       </Details>
     );

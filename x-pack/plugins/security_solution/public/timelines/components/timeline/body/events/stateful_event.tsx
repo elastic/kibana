@@ -8,7 +8,7 @@ import React, { useRef, useState, useCallback } from 'react';
 import uuid from 'uuid';
 
 import { BrowserFields } from '../../../../../common/containers/source';
-import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   TimelineItem,
   TimelineNonEcsData,
@@ -76,6 +76,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   getNotesByIds,
   isEventViewer = false,
   isEventPinned = false,
+  isExpanded = false,
   loadingEventIds,
   onColumnResized,
   onEventToggled,
@@ -91,7 +92,7 @@ const StatefulEventComponent: React.FC<Props> = ({
   updateNote,
 }) => {
   const [showNotes, setShowNotes] = useState<{ [eventId: string]: boolean }>({});
-  const { status: timelineStatus } = useShallowEqualSelector<TimelineModel>(
+  const { status: timelineStatus } = useDeepEqualSelector(
     (state) => state.timeline.timelineById[timelineId]
   );
   const divElement = useRef<HTMLDivElement | null>(null);
@@ -117,6 +118,7 @@ const StatefulEventComponent: React.FC<Props> = ({
       data-test-subj="event"
       eventType={getEventType(event.ecs)}
       isBuildingBlockType={isEventBuildingBlockType(event.ecs)}
+      isExpanded={isExpanded}
       showLeftBorder={!isEventViewer}
       ref={divElement}
       onClick={onEventToggled}
