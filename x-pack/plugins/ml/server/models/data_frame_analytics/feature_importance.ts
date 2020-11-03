@@ -11,14 +11,15 @@ import {
   isRegressionAnalysis,
 } from '../../../common/util/analytics_utils';
 import { DEFAULT_RESULTS_FIELD } from '../../../common/constants/data_frame_analytics';
+import type { MlClient } from '../../lib/ml_client';
 // Obtains data for the data frame analytics feature importance functionalities
 // such as baseline, decision paths, or importance summary.
-export function analyticsFeatureImportanceProvider({
-  asInternalUser,
-  asCurrentUser,
-}: IScopedClusterClient) {
+export function analyticsFeatureImportanceProvider(
+  { asCurrentUser }: IScopedClusterClient,
+  mlClient: MlClient
+) {
   async function getRegressionAnalyticsBaseline(analyticsId: string): Promise<number | undefined> {
-    const { body } = await asInternalUser.ml.getDataFrameAnalytics({
+    const { body } = await mlClient.getDataFrameAnalytics({
       id: analyticsId,
     });
     const jobConfig = body.data_frame_analytics[0];

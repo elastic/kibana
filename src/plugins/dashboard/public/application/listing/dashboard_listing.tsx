@@ -26,6 +26,7 @@ import { TableListView, useKibana } from '../../../../kibana_react/public';
 import { ApplicationStart } from '../../../../../core/public';
 import { DashboardSavedObject } from '../../saved_dashboards';
 import { syncQueryStateWithUrl } from '../../../../data/public';
+import { SavedObjectsTaggingApi } from '../../../../saved_objects_tagging_oss/public';
 
 export const EMPTY_FILTER = '';
 
@@ -49,6 +50,7 @@ export const DashboardListing = ({
       dashboardConfig,
       savedObjectsClient,
       chrome,
+      savedObjectsTagging,
     },
   } = useKibana<DashboardAppServices>();
 
@@ -97,7 +99,7 @@ export const DashboardListing = ({
   const hideWriteControls = dashboardConfig.getHideWriteControls();
   const listingLimit = savedObjects.settings.getListingLimit();
 
-  const tableColumns = getTableColumns((id) => redirectToDashboard({ id }));
+  const tableColumns = getTableColumns((id) => redirectToDashboard({ id }), savedObjectsTagging);
   const noItemsFragment = getNoItemsMessage(hideWriteControls, core.application, () =>
     redirectToDashboard({})
   );
@@ -105,6 +107,7 @@ export const DashboardListing = ({
   return (
     <TableListView
       headingId="dashboardListingHeading"
+      rowHeader="title"
       createItem={() => redirectToDashboard({})}
       findItems={(search) => savedDashboards.find(search, listingLimit)}
       deleteItems={
@@ -117,6 +120,9 @@ export const DashboardListing = ({
         hideWriteControls
           ? undefined
           : ({ id }: { id: string | undefined }) => redirectToDashboard({ id })
+      }
+      searchFilters={
+        savedObjectsTagging ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })] : []
       }
       tableColumns={tableColumns}
       listingLimit={listingLimit}
@@ -132,12 +138,18 @@ export const DashboardListing = ({
       tableListTitle={i18n.translate('dashboard.listing.dashboardsTitle', {
         defaultMessage: 'Dashboards',
       })}
+      tableCaption={i18n.translate('dashboard.listing.dashboardsTitle', {
+        defaultMessage: 'Dashboards',
+      })}
       toastNotifications={core.notifications.toasts}
     />
   );
 };
 
-const getTableColumns = (redirectTo: (id?: string) => void) => {
+const getTableColumns = (
+  redirectTo: (id?: string) => void,
+  savedObjectsTagging?: SavedObjectsTaggingApi
+) => {
   return [
     {
       field: 'title',
@@ -159,9 +171,10 @@ const getTableColumns = (redirectTo: (id?: string) => void) => {
       name: i18n.translate('dashboard.listing.table.descriptionColumnName', {
         defaultMessage: 'Description',
       }),
-      dataType: 'string',
+      render: (field: string, record: { description: string }) => <span>{record.description}</span>,
       sortable: true,
     },
+    ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
   ];
 };
 

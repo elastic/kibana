@@ -69,6 +69,7 @@ export async function mountApp({
     embeddable: embeddableStart,
     kibanaLegacy: { dashboardConfig },
     urlForwarding: { navigateToDefaultApp, navigateToLegacyKibanaUrl },
+    savedObjectsTaggingOss,
   } = pluginsStart;
 
   const dashboardServices: DashboardAppServices = {
@@ -89,6 +90,7 @@ export async function mountApp({
     uiSettings: coreStart.uiSettings,
     scopedHistory: () => scopedHistory,
     indexPatterns: dataStart.indexPatterns,
+    savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
     localStorage: new Storage(localStorage),
     addBasePath: coreStart.http.basePath.prepend,
     savedQueryService: dataStart.query.savedQueries,

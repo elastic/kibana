@@ -32,12 +32,9 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import { merge, Observable, pipe, Subscription } from 'rxjs';
+import { SavedObject } from 'src/plugins/saved_objects/public';
 import { DashboardStateManager } from './dashboard_state_manager';
-import {
-  createKbnUrlStateStorage,
-  SavedObjectNotFound,
-  withNotifyOnErrors,
-} from '../../../kibana_utils/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../../kibana_utils/public';
 import {
   DashboardAppComponentActiveState,
   DashboardAppComponentState,
@@ -67,12 +64,8 @@ import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE } from '.';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import { getDashboardTitle } from './dashboard_strings';
-import {
-  DashboardConstants,
-  DashboardContainer,
-  DashboardContainerInput,
-  SavedDashboardPanel,
-} from '..';
+import type { TagDecoratedSavedObject } from '../../../saved_objects_tagging_oss/public';
+import { DashboardContainer, DashboardContainerInput, SavedDashboardPanel } from '..';
 
 // enum UrlParams {
 //   SHOW_TOP_MENU = 'show-top-menu',
@@ -346,6 +339,7 @@ export function DashboardApp({
     // scopedHistory,
     // restorePreviousUrl,
     // embeddableCapabilities,
+    savedObjectsTagging,
     usageCollection,
     // share,
   } = useKibana<DashboardAppServices>().services;
@@ -387,7 +381,7 @@ export function DashboardApp({
       });
   }, [savedDashboardId, savedDashboards, chrome.recentlyAccessed, data.indexPatterns]);
 
-  // Build Dashboard State Manager when Saved Dashboard changes
+  // Build Dashboard State Manager and Dashboard Container when Saved Dashboard changes
   useEffect(() => {
     if (!state.savedDashboard) {
       return;
@@ -403,13 +397,19 @@ export function DashboardApp({
       ...withNotifyOnErrors(core.notifications.toasts),
     });
 
+    // TS is picky with type guards, we can't just inline `() => false`
+    function defaultTaggingGuard(obj: SavedObject): obj is TagDecoratedSavedObject {
+      return false;
+    }
+
     const dashboardStateManager = new DashboardStateManager({
-      savedDashboard: state.savedDashboard,
+      hasTaggingCapabilities: savedObjectsTagging?.ui.hasTagDecoration ?? defaultTaggingGuard,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
       kibanaVersion: initializerContext.env.packageInfo.version,
+      savedDashboard: state.savedDashboard,
       kbnUrlStateStorage,
-      history,
       usageCollection,
+      history,
     });
 
     // sync initial app filters from state to filterManager
@@ -465,32 +465,7 @@ export function DashboardApp({
     // starts syncing `_a` portion of url
     dashboardStateManager.startStateSyncing();
 
-    setState((s) => ({ ...s, dashboardStateManager }));
-
-    return () => {
-      dashboardStateManager.destroy();
-      stopSyncingAppFilters();
-      stopSyncingQueryServiceStateWithUrl();
-    };
-  }, [
-    state.savedDashboard,
-    history,
-    uiSettings,
-    data.query,
-    usageCollection,
-    dashboardConfig,
-    core.notifications.toasts,
-    initializerContext.env.packageInfo.version,
-  ]);
-
-  // Build Dashboard Container when Dashboard State Manager changes
-  useEffect(() => {
-    if (!state.dashboardStateManager) {
-      return;
-    }
-
-    const dashboardStateManager = state.dashboardStateManager;
-
+    // Load dashboard container
     const dashboardFactory = embeddable.getEmbeddableFactory<
       DashboardContainerInput,
       ContainerOutput,
@@ -517,9 +492,27 @@ export function DashboardApp({
         ) {
           return;
         }
-        setState((s) => ({ ...s, dashboardContainer }));
+        setState((s) => ({ ...s, dashboardContainer, dashboardStateManager }));
       });
-  }, [state.dashboardStateManager, data.query, data.search.session, embeddable, indexPatterns]);
+
+    return () => {
+      dashboardStateManager.destroy();
+      stopSyncingAppFilters();
+      stopSyncingQueryServiceStateWithUrl();
+    };
+  }, [
+    history,
+    uiSettings,
+    embeddable,
+    data.query,
+    usageCollection,
+    dashboardConfig,
+    data.search.session,
+    state.savedDashboard,
+    core.notifications.toasts,
+    savedObjectsTagging?.ui.hasTagDecoration,
+    initializerContext.env.packageInfo.version,
+  ]);
 
   // Render Dashboard Container and manage subscriptions
   useEffect(() => {

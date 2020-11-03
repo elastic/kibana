@@ -59,6 +59,7 @@ import {
 import { createKbnUrlTracker } from '../../kibana_utils/public';
 import { KibanaLegacySetup, KibanaLegacyStart } from '../../kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import {
@@ -129,6 +130,7 @@ export interface DashboardStartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export type DashboardSetup = void;

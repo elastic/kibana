@@ -43,6 +43,7 @@ import { UsageCollectionSetup } from '../../../usage_collection/public';
 import { DashboardSetupDependencies, DashboardStart, DashboardStartDependencies } from '../plugin';
 import { IKbnUrlStateStorage, Storage } from '../../../kibana_utils/public';
 import { DashboardStateManager } from './dashboard_state_manager';
+import { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
 import { DashboardContainer, SavedObjectDashboard } from '..';
 
 export type RedirectToDashboard = (props: RedirectToDashboardProps) => void;
@@ -68,6 +69,7 @@ export interface DashboardEmbedSettings {
 
 export interface DashboardSaveOptions {
   newTitle: string;
+  newTags?: string[];
   newDescription: string;
   newCopyOnSave: boolean;
   newTimeRestore: boolean;
@@ -125,6 +127,7 @@ export interface DashboardAppServices {
   initializerContext: PluginInitializerContext;
   savedObjectsClient: SavedObjectsClientContract;
   dashboardConfig: KibanaLegacyStart['dashboardConfig'];
+  savedObjectsTagging?: SavedObjectsTaggingApi;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   navigateToDefaultApp: UrlForwardingStart['navigateToDefaultApp'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
