@@ -4,18 +4,24 @@ library 'kibana-pipeline-library'
 kibanaLibrary.load()
 
 kibanaPipeline(timeoutMinutes: 155, checkPrChanges: true, setCommitStatus: true) {
-  slackNotifications.onFailure(disabled: !params.NOTIFY_ON_FAILURE) {
-    githubPr.withDefaultPrComments {
-      ciStats.trackBuild {
-        catchError {
-          retryable.enable()
-          kibanaPipeline.allCiTasks()
+  githubPr.withDefaultPrComments {
+    catchError {
+      node('flyweight') {
+        retryable.enable()
+
+        def counter = 0
+        notifyOnError {
+          retryable('test') {
+            if (counter < 1) {
+              counter++
+
+              error "Error"
+            } else {
+              sleep 10
+            }
+          }
         }
       }
     }
-  }
-
-  if (params.NOTIFY_ON_FAILURE) {
-    kibanaPipeline.sendMail()
   }
 }

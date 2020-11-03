@@ -68,7 +68,12 @@ def notifyOnError(Closure closure) {
     // If this is the first failed step, it's likely that the error hasn't propagated up far enough to mark the build as a failure
     currentBuild.result = 'FAILURE'
     catchErrors {
-      githubPr.sendComment(false)
+      try {
+        print "Sending comment..."
+        githubPr.sendComment(false)
+      } catch (ex) {
+        buildUtils.printStacktrace(ex)
+      }
     }
     catchErrors {
       // an empty map is a valid config, but is falsey, so let's use .has()
