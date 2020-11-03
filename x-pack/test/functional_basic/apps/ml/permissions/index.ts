@@ -6,11 +6,9 @@
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('data visualizer', function () {
-    this.tags(['skipFirefox']);
-
-    loadTestFile(require.resolve('./index_data_visualizer'));
-    loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));
-    loadTestFile(require.resolve('./file_data_visualizer'));
+  describe('permissions', function () {
+    loadTestFile(require.resolve('./full_ml_access'));
+    loadTestFile(require.resolve('./read_ml_access'));
+    loadTestFile(require.resolve('./no_ml_access'));
   });
 }
