@@ -105,6 +105,34 @@ describe('#savedObjectEvent', () => {
       }
     `);
   });
+
+  test('creates event with `success` outcome for `REMOVE_REFERENCES` action', () => {
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.REMOVE_REFERENCES,
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "saved_object_remove_references",
+          "category": "database",
+          "outcome": "success",
+          "type": "change",
+        },
+        "kibana": Object {
+          "add_to_spaces": undefined,
+          "delete_from_spaces": undefined,
+          "saved_object": Object {
+            "id": "SAVED_OBJECT_ID",
+            "type": "dashboard",
+          },
+        },
+        "message": "User has removed references to dashboard [id=SAVED_OBJECT_ID]",
+      }
+    `);
+  });
 });
 
 describe('#userLoginEvent', () => {

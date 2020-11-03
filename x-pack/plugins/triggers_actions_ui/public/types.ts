@@ -12,6 +12,7 @@ import { TypeRegistry } from './application/type_registry';
 import {
   SanitizedAlert as Alert,
   AlertAction,
+  AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
@@ -21,6 +22,7 @@ import {
 export {
   Alert,
   AlertAction,
+  AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
