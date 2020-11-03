@@ -8,7 +8,7 @@ import { sortBy, slice, get } from 'lodash';
 import moment from 'moment';
 import { SearchResponse } from 'elasticsearch';
 import { IScopedClusterClient } from 'kibana/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';

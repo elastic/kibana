@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { uniq } from 'lodash';
 import { setupRequest } from '../lib/helpers/setup_request';
 import { getServiceAgentName } from '../lib/services/get_service_agent_name';

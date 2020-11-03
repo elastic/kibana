@@ -104,6 +104,11 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is removing a saved object from other spaces.
 | `failure` | User is not authorized to remove a saved object from other spaces.
 
+.2+| `saved_object_remove_references`
+| `unknown` | User is removing references to a saved object.
+| `failure` | User is not authorized to remove references to a saved object.
+
+
 3+a|
 ====== Type: deletion
 

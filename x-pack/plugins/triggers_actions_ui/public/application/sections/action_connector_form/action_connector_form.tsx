@@ -24,10 +24,9 @@ import { ReducerAction } from './connector_reducer';
 import {
   ActionConnector,
   IErrorObject,
-  ActionTypeModel,
+  ActionTypeRegistryContract,
   UserConfiguredActionConnector,
 } from '../../../types';
-import { TypeRegistry } from '../../type_registry';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 
 export function validateBaseProperties(actionObject: ActionConnector) {
@@ -61,7 +60,7 @@ interface ActionConnectorProps<
   };
   errors: IErrorObject;
   http: HttpSetup;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  actionTypeRegistry: ActionTypeRegistryContract;
   docLinks: DocLinksStart;
   capabilities: ApplicationStart['capabilities'];
   consumer?: string;
