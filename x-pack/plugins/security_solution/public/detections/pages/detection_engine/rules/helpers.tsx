@@ -118,15 +118,21 @@ export const getHumanizedDuration = (from: string, interval: string): string => 
   const intervalValue = dateMath.parse(`now-${interval}`) ?? moment();
 
   const fromDuration = moment.duration(intervalValue.diff(fromValue));
-  const fromHumanize = `${Math.floor(fromDuration.asHours())}h`;
 
-  if (fromDuration.asSeconds() < 60) {
-    return `${Math.floor(fromDuration.asSeconds())}s`;
-  } else if (fromDuration.asMinutes() < 60) {
-    return `${Math.floor(fromDuration.asMinutes())}m`;
+  // Basing calculations off floored seconds count as moment durations weren't precise
+  const intervalDuration = Math.floor(fromDuration.asSeconds());
+  // For consistency of display value
+  if (intervalDuration === 0) {
+    return `0s`;
   }
 
-  return fromHumanize;
+  if (intervalDuration % 3600 === 0) {
+    return `${intervalDuration / 3600}h`;
+  } else if (intervalDuration % 60 === 0) {
+    return `${intervalDuration / 60}m`;
+  } else {
+    return `${intervalDuration}s`;
+  }
 };
 
 export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRule => {

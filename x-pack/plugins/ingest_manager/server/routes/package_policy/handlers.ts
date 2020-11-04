@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { TypeOf } from '@kbn/config-schema';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { RequestHandler, SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { appContextService, packagePolicyService } from '../../services';
 import { getPackageInfo } from '../../services/epm/packages';
@@ -90,7 +90,7 @@ export const createPackagePolicyHandler: RequestHandler<
         try {
           // ensure that the returned value by the callback passes schema validation
           updatedNewData = CreatePackagePolicyRequestSchema.body.validate(
-            await callback(updatedNewData)
+            await callback(updatedNewData, context, request)
           );
         } catch (error) {
           // Log the error, but keep going and process the other callbacks

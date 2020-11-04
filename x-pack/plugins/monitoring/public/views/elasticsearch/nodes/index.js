@@ -19,6 +19,8 @@ import {
   ELASTICSEARCH_SYSTEM_ID,
   CODE_PATH_ELASTICSEARCH,
   ALERT_CPU_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
   ALERT_MISSING_MONITORING_DATA,
   ALERT_DISK_USAGE,
   ALERT_MEMORY_USAGE,
@@ -63,7 +65,7 @@ uiRoutes.when('/elasticsearch/nodes', {
 
         const promise = globalState.cluster_uuid
           ? getNodes()
-          : new Promise((resolve) => resolve({}));
+          : new Promise((resolve) => resolve({ data: {} }));
         return promise
           .then((response) => response.data)
           .catch((err) => {
@@ -93,6 +95,8 @@ uiRoutes.when('/elasticsearch/nodes', {
             alertTypeIds: [
               ALERT_CPU_USAGE,
               ALERT_DISK_USAGE,
+              ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+              ALERT_THREAD_POOL_WRITE_REJECTIONS,
               ALERT_MEMORY_USAGE,
               ALERT_MISSING_MONITORING_DATA,
             ],

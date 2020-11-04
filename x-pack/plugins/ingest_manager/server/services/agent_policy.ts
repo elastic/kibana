@@ -18,13 +18,14 @@ import {
   AgentPolicy,
   AgentPolicySOAttributes,
   FullAgentPolicy,
-  AgentPolicyStatus,
   ListWithKuery,
 } from '../types';
 import {
   DeleteAgentPolicyResponse,
   Settings,
+  agentPolicyStatuses,
   storedPackagePoliciesToAgentInputs,
+  dataTypes,
 } from '../../common';
 import { AgentPolicyNameExistsError } from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
@@ -61,8 +62,8 @@ class AgentPolicyService {
     }
 
     if (
-      oldAgentPolicy.status === AgentPolicyStatus.Inactive &&
-      agentPolicy.status !== AgentPolicyStatus.Active
+      oldAgentPolicy.status === agentPolicyStatuses.Inactive &&
+      agentPolicy.status !== agentPolicyStatuses.Active
     ) {
       throw new Error(
         `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`
@@ -83,7 +84,12 @@ class AgentPolicyService {
     return (await this.get(soClient, id)) as AgentPolicy;
   }
 
-  public async ensureDefaultAgentPolicy(soClient: SavedObjectsClientContract) {
+  public async ensureDefaultAgentPolicy(
+    soClient: SavedObjectsClientContract
+  ): Promise<{
+    created: boolean;
+    defaultAgentPolicy: AgentPolicy;
+  }> {
     const agentPolicies = await soClient.find<AgentPolicySOAttributes>({
       type: AGENT_POLICY_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
@@ -95,12 +101,18 @@ class AgentPolicyService {
         ...DEFAULT_AGENT_POLICY,
       };
 
-      return this.create(soClient, newDefaultAgentPolicy);
+      return {
+        created: true,
+        defaultAgentPolicy: await this.create(soClient, newDefaultAgentPolicy),
+      };
     }
 
     return {
-      id: agentPolicies.saved_objects[0].id,
-      ...agentPolicies.saved_objects[0].attributes,
+      created: false,
+      defaultAgentPolicy: {
+        id: agentPolicies.saved_objects[0].id,
+        ...agentPolicies.saved_objects[0].attributes,
+      },
     };
   }
 
@@ -404,7 +416,9 @@ class AgentPolicyService {
       throw new Error('Agent policy not found');
     }
 
-    const { id: defaultAgentPolicyId } = await this.ensureDefaultAgentPolicy(soClient);
+    const {
+      defaultAgentPolicy: { id: defaultAgentPolicyId },
+    } = await this.ensureDefaultAgentPolicy(soClient);
     if (id === defaultAgentPolicyId) {
       throw new Error('The default agent policy cannot be deleted');
     }
@@ -525,8 +539,8 @@ class AgentPolicyService {
               monitoring: {
                 use_output: defaultOutput.name,
                 enabled: true,
-                logs: agentPolicy.monitoring_enabled.indexOf('logs') >= 0,
-                metrics: agentPolicy.monitoring_enabled.indexOf('metrics') >= 0,
+                logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
+                metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
               },
             },
           }

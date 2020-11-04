@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { boomify, isBoom } from 'boom';
+import { boomify, isBoom } from '@hapi/boom';
 import {
   CustomHttpResponseOptions,
   ResponseError,
@@ -22,6 +22,7 @@ import {
   CommentAttributes,
   ESCaseConnector,
   ESCaseAttributes,
+  CommentRequest,
 } from '../../../common/api';
 import { transformESConnectorToCaseConnector } from './cases/helpers';
 
@@ -55,15 +56,16 @@ export const transformNewCase = ({
   updated_by: null,
 });
 
-interface NewCommentArgs {
-  comment: string;
+interface NewCommentArgs extends CommentRequest {
   createdDate: string;
   email?: string | null;
   full_name?: string | null;
   username?: string | null;
 }
+
 export const transformNewComment = ({
   comment,
+  type,
   createdDate,
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -71,6 +73,7 @@ export const transformNewComment = ({
   username,
 }: NewCommentArgs): CommentAttributes => ({
   comment,
+  type,
   created_at: createdDate,
   created_by: { email, full_name, username },
   pushed_at: null,
@@ -121,7 +124,7 @@ export const flattenCaseSavedObjects = (
 export const flattenCaseSavedObject = ({
   savedObject,
   comments = [],
-  totalComment = 0,
+  totalComment = comments.length,
 }: {
   savedObject: SavedObject<ESCaseAttributes>;
   comments?: Array<SavedObject<CommentAttributes>>;

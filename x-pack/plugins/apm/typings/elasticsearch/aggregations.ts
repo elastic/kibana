@@ -145,6 +145,15 @@ export interface AggregationOptionsByType {
     >;
     keyed?: boolean;
   } & AggregationSourceOptions;
+  range: {
+    field: string;
+    ranges: Array<
+      | { key?: string; from: string | number }
+      | { key?: string; to: string | number }
+      | { key?: string; from: string | number; to: string | number }
+    >;
+    keyed?: boolean;
+  };
   auto_date_histogram: {
     buckets: number;
   } & AggregationSourceOptions;
@@ -323,6 +332,18 @@ interface AggregationResponsePart<
     buckets: TAggregationOptionsMap extends { date_range: { keyed: true } }
       ? Record<string, DateRangeBucket>
       : { buckets: DateRangeBucket[] };
+  };
+  range: {
+    buckets: TAggregationOptionsMap extends { range: { keyed: true } }
+      ? Record<
+          string,
+          DateRangeBucket &
+            SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
+        >
+      : Array<
+          DateRangeBucket &
+            SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
+        >;
   };
   auto_date_histogram: {
     buckets: Array<

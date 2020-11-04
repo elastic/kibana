@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
+  SavedObjectsAddToNamespacesOptions,
   SavedObjectsBaseOptions,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -12,18 +13,23 @@ import {
   SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
-  SavedObjectsFindOptions,
-  SavedObjectsUpdateOptions,
-  SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsFindOptions,
+  SavedObjectsRemoveReferencesToOptions,
+  SavedObjectsUpdateOptions,
   SavedObjectsUtils,
 } from '../../../../../src/core/server';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import { SecurityAuditLogger } from '../audit';
+import {
+  AuditLogger,
+  EventOutcome,
+  SavedObjectAction,
+  savedObjectEvent,
+  SecurityAuditLogger,
+} from '../audit';
 import { Actions, CheckSavedObjectsPrivileges } from '../authorization';
 import { CheckPrivilegesResponse } from '../authorization/types';
 import { SpacesService } from '../plugin';
-import { AuditLogger, EventOutcome, SavedObjectAction, savedObjectEvent } from '../audit';
 
 interface SecureSavedObjectsClientWrapperOptions {
   actions: Actions;
@@ -474,6 +480,39 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
     const response = await this.baseClient.bulkUpdate<T>(objects, options);
     return await this.redactSavedObjectsNamespaces(response);
+  }
+
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ) {
+    try {
+      const args = { type, id, options };
+      await this.ensureAuthorized(type, 'delete', options.namespace, {
+        args,
+        auditAction: 'removeReferences',
+      });
+    } catch (error) {
+      this.auditLogger.log(
+        savedObjectEvent({
+          action: SavedObjectAction.REMOVE_REFERENCES,
+          savedObject: { type, id },
+          error,
+        })
+      );
+      throw error;
+    }
+
+    this.auditLogger.log(
+      savedObjectEvent({
+        action: SavedObjectAction.REMOVE_REFERENCES,
+        savedObject: { type, id },
+        outcome: EventOutcome.UNKNOWN,
+      })
+    );
+
+    return await this.baseClient.removeReferencesTo(type, id, options);
   }
 
   private async checkPrivileges(
