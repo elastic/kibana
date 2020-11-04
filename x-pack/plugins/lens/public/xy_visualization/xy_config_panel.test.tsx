@@ -14,6 +14,7 @@ import { FramePublicAPI } from '../types';
 import { State } from './types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_service/mocks';
+import { componentDetailsFlyoutProps } from '../../../index_management/public/application/components';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -135,7 +136,7 @@ describe('XY Config panels', () => {
       expect(component.find(EuiButtonGroup).prop('idSelected')).toEqual('value_labels_inside');
     });
 
-    it('should show the popover, but disable the fitting field if there is no area, line, bar or bar_horizontal series', () => {
+    it('should show the popover, but hide the fitting field if there is no area, line series', () => {
       const state = testState();
       const component = shallow(
         <XyToolbar
@@ -148,13 +149,7 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(
-        component
-          .find(ToolbarPopover)
-          .at(0)
-          .find('[data-test-subj="lnsMissingValuesSelect"]')
-          .prop('disabled')
-      ).toEqual(true);
+      expect(component.exists('[data-test-subj="lnsMissingValuesSelect"]')).toEqual(false);
     });
 
     it('should show the popover, but disabled the display field if there is histogram series', () => {
@@ -208,7 +203,7 @@ describe('XY Config panels', () => {
       ).toEqual(false);
     });
 
-    it('should disable the fitting option for bar series', () => {
+    it('should hide the fitting option for bar series', () => {
       const state = testState();
       const component = shallow(
         <XyToolbar
@@ -222,13 +217,7 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(
-        component
-          .find(ToolbarPopover)
-          .at(0)
-          .find('[data-test-subj="lnsMissingValuesSelect"]')
-          .prop('disabled')
-      ).toEqual(true);
+      expect(component.exists('[data-test-subj="lnsMissingValuesSelect"]')).toEqual(false);
     });
 
     it('should disable the display option for area and line series', () => {
