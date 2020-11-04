@@ -22,13 +22,22 @@ import {
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
-  MapsLegacyConfig,
-} from '../config';
+} from '../common/ems_defaults';
+
+export interface IEMSConfig {
+  emsUrl?: string;
+  includeElasticMapsService?: boolean;
+  proxyElasticMapsServiceInMaps?: boolean;
+  emsFileApiUrl?: string;
+  emsTileApiUrl?: string;
+  emsLandingPageUrl?: string;
+  emsFontLibraryUrl?: string;
+}
 
 export class EMSSettings {
-  private readonly _config: MapsLegacyConfig;
+  private readonly _config: IEMSConfig;
 
-  constructor(config: MapsLegacyConfig) {
+  constructor(config: IEMSConfig) {
     this._config = config;
   }
 
@@ -37,7 +46,7 @@ export class EMSSettings {
   }
 
   _getEMSRoot() {
-    return this._config.emsUrl.replace(/\/$/, '');
+    return this._config.emsUrl!.replace(/\/$/, '');
   }
 
   isConfigValid(): boolean {
@@ -49,7 +58,7 @@ export class EMSSettings {
 
   getEMSFileApiUrl(): string {
     if (this._config.emsFileApiUrl !== DEFAULT_EMS_FILE_API_URL || !this._isEMSUrlSet()) {
-      return this._config.emsFileApiUrl;
+      return this._config.emsFileApiUrl!;
     } else {
       return `${this._getEMSRoot()}/file`;
     }
@@ -57,14 +66,14 @@ export class EMSSettings {
 
   getEMSTileApiUrl(): string {
     if (this._config.emsTileApiUrl !== DEFAULT_EMS_TILE_API_URL || !this._isEMSUrlSet()) {
-      return this._config.emsTileApiUrl;
+      return this._config.emsTileApiUrl!;
     } else {
       return `${this._getEMSRoot()}/tile`;
     }
   }
   getEMSLandingPageUrl(): string {
     if (this._config.emsLandingPageUrl !== DEFAULT_EMS_LANDING_PAGE_URL || !this._isEMSUrlSet()) {
-      return this._config.emsLandingPageUrl;
+      return this._config.emsLandingPageUrl!;
     } else {
       return `${this._getEMSRoot()}/maps`;
     }
@@ -72,7 +81,7 @@ export class EMSSettings {
 
   getEMSFontLibraryUrl(): string {
     if (this._config.emsFontLibraryUrl !== DEFAULT_EMS_FONT_LIBRARY_URL || !this._isEMSUrlSet()) {
-      return this._config.emsFontLibraryUrl;
+      return this._config.emsFontLibraryUrl!;
     } else {
       return `${this._getEMSRoot()}/tile/fonts/{fontstack}/{range}.pbf`;
     }

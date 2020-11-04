@@ -17,31 +17,24 @@
  * under the License.
  */
 
-import { EMSSettings } from './ems_settings';
+import { EMSSettings, IEMSConfig } from './ems_settings';
 import {
   DEFAULT_EMS_FILE_API_URL,
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
-  MapsLegacyConfig,
-} from '../config';
+} from '../common/ems_defaults';
 
 describe('EMSSettings', () => {
-  const mockConfig: MapsLegacyConfig = {
+  const mockConfig: IEMSConfig = {
     includeElasticMapsService: true,
     proxyElasticMapsServiceInMaps: false,
-    manifestServiceUrl: '',
     emsUrl: '',
     emsFileApiUrl: DEFAULT_EMS_FILE_API_URL,
     emsTileApiUrl: DEFAULT_EMS_TILE_API_URL,
     emsLandingPageUrl: DEFAULT_EMS_LANDING_PAGE_URL,
     emsFontLibraryUrl: DEFAULT_EMS_FONT_LIBRARY_URL,
-    emsTileLayerId: {
-      bright: 'road_map',
-      desaturated: 'road_map_desaturated',
-      dark: 'dark_map',
-    },
-  } as MapsLegacyConfig;
+  };
 
   describe('isConfigValid', () => {
     test('should validate defaults', () => {
