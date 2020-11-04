@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { CoreSetup, CoreStart, Plugin, SavedObjectReference } from 'kibana/server';
+import { CoreSetup, CoreStart, Plugin } from 'kibana/server';
 import { identity } from 'lodash';
 import {
   EmbeddableFactoryRegistry,
@@ -27,11 +27,11 @@ import {
   EmbeddableRegistryDefinition,
 } from './types';
 import {
-  baseEmbeddableMigrations,
-  extractBaseEmbeddableInput,
-  injectBaseEmbeddableInput,
-  telemetryBaseEmbeddableInput,
-} from '../common/lib/migrate_base_input';
+  getExtractFunction,
+  getInjectFunction,
+  getMigrateFunction,
+  getTelemetryFunction,
+} from '../common/lib';
 import { SerializableState } from '../../kibana_utils/common';
 import { EmbeddableStateWithType } from '../common/types';
 
@@ -53,106 +53,20 @@ export class EmbeddableServerPlugin implements Plugin<object, object> {
   }
 
   public start(core: CoreStart) {
+    const commonContract = {
+      getEmbeddableFactory: this.getEmbeddableFactory,
+      getEnhancement: this.getEnhancement,
+    };
+
     return {
-      telemetry: this.telemetry,
-      extract: this.extract,
-      inject: this.inject,
-      migrate: this.migrate,
+      telemetry: getTelemetryFunction(commonContract),
+      extract: getExtractFunction(commonContract),
+      inject: getInjectFunction(commonContract),
+      migrate: getMigrateFunction(commonContract),
     };
   }
 
   public stop() {}
-
-  private telemetry = (state: EmbeddableStateWithType, telemetryData: Record<string, any> = {}) => {
-    const enhancements: Record<string, any> = state.enhancements || {};
-    const factory = this.getEmbeddableFactory(state.type);
-
-    let telemetry = telemetryBaseEmbeddableInput(state, telemetryData);
-    if (factory) {
-      telemetry = factory.telemetry(state, telemetry);
-    }
-    Object.keys(enhancements).map((key) => {
-      if (!enhancements[key]) return;
-      telemetry = this.getEnhancement(key).telemetry(enhancements[key], telemetry);
-    });
-
-    return telemetry;
-  };
-
-  private extract = (state: EmbeddableStateWithType) => {
-    const enhancements = state.enhancements || {};
-    const factory = this.getEmbeddableFactory(state.type);
-
-    const baseResponse = extractBaseEmbeddableInput(state);
-    let updatedInput = baseResponse.state;
-    const refs = baseResponse.references;
-
-    if (factory) {
-      const factoryResponse = factory.extract(state);
-      updatedInput = factoryResponse.state;
-      refs.push(...factoryResponse.references);
-    }
-
-    updatedInput.enhancements = {};
-    Object.keys(enhancements).forEach((key) => {
-      if (!enhancements[key]) return;
-      const enhancementResult = this.getEnhancement(key).extract(
-        enhancements[key] as SerializableState
-      );
-      refs.push(...enhancementResult.references);
-      updatedInput.enhancements![key] = enhancementResult.state;
-    });
-
-    return {
-      state: updatedInput,
-      references: refs,
-    };
-  };
-
-  private inject = (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
-    const enhancements = state.enhancements || {};
-    const factory = this.getEmbeddableFactory(state.type);
-
-    let updatedInput = injectBaseEmbeddableInput(state, references);
-
-    if (factory) {
-      updatedInput = factory.inject(updatedInput, references);
-    }
-
-    updatedInput.enhancements = {};
-    Object.keys(enhancements).forEach((key) => {
-      if (!enhancements[key]) return;
-      updatedInput.enhancements![key] = this.getEnhancement(key).inject(
-        enhancements[key] as SerializableState,
-        references
-      );
-    });
-
-    return updatedInput;
-  };
-
-  private migrate = (state: EmbeddableStateWithType, version: string) => {
-    const enhancements = state.enhancements || {};
-    const factory = this.getEmbeddableFactory(state.id);
-
-    let updatedInput = baseEmbeddableMigrations[version]
-      ? baseEmbeddableMigrations[version](state)
-      : state;
-
-    if (factory && factory.migrations[version]) {
-      updatedInput = factory.migrations[version](updatedInput);
-    }
-
-    updatedInput.enhancements = {};
-    Object.keys(enhancements).forEach((key) => {
-      if (!enhancements[key]) return;
-      (updatedInput.enhancements! as Record<string, any>)[key] = this.getEnhancement(
-        key
-      ).migrations[version](enhancements[key] as SerializableState);
-    });
-
-    return updatedInput;
-  };
 
   private registerEnhancement = (enhancement: EnhancementRegistryDefinition) => {
     if (this.enhancements.has(enhancement.id)) {

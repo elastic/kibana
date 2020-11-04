@@ -30,7 +30,6 @@ import {
   Plugin,
   ScopedHistory,
   PublicAppInfo,
-  SavedObjectReference,
 } from '../../../core/public';
 import {
   EmbeddableFactoryRegistry,
@@ -51,16 +50,16 @@ import {
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
-import {
-  baseEmbeddableMigrations,
-  extractBaseEmbeddableInput,
-  injectBaseEmbeddableInput,
-  telemetryBaseEmbeddableInput,
-} from '../common/lib/migrate_base_input';
 import { PersistableStateService, SerializableState } from '../../kibana_utils/common';
 import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
 import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
 import { EmbeddableStateWithType } from '../common/types';
+import {
+  getExtractFunction,
+  getInjectFunction,
+  getMigrateFunction,
+  getTelemetryFunction,
+} from '../common/lib';
 
 export interface EmbeddableSetupDependencies {
   data: DataPublicPluginSetup;
@@ -190,6 +189,11 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       />
     );
 
+    const commonContract = {
+      getEmbeddableFactory: this.getEmbeddableFactory,
+      getEnhancement: this.getEnhancement,
+    };
+
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
@@ -209,10 +213,10 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       },
       EmbeddablePanel: getEmbeddablePanelHoc(),
       getEmbeddablePanel: getEmbeddablePanelHoc,
-      telemetry: this.telemetry,
-      extract: this.extract,
-      inject: this.inject,
-      migrate: this.migrate,
+      telemetry: getTelemetryFunction(commonContract),
+      extract: getExtractFunction(commonContract),
+      inject: getInjectFunction(commonContract),
+      migrate: getMigrateFunction(commonContract),
     };
   }
 
@@ -221,99 +225,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       this.appListSubscription.unsubscribe();
     }
   }
-
-  private telemetry = (state: EmbeddableStateWithType, telemetryData: Record<string, any> = {}) => {
-    const enhancements: Record<string, any> = state.enhancements || {};
-    const factory = this.getEmbeddableFactory(state.id);
-
-    let telemetry = telemetryBaseEmbeddableInput(state, telemetryData);
-    if (factory) {
-      telemetry = factory.telemetry(state, telemetry);
-    }
-    Object.keys(enhancements).map((key) => {
-      if (!enhancements[key]) return;
-      telemetry = this.getEnhancement(key).telemetry(enhancements[key], telemetry);
-    });
-
-    return telemetry;
-  };
-
-  private extract = (state: EmbeddableStateWithType) => {
-    const enhancements = state.enhancements || {};
-    const factory = this.getEmbeddableFactory(state.id);
-
-    const baseResponse = extractBaseEmbeddableInput(state);
-    let updatedInput = baseResponse.state;
-    const refs = baseResponse.references;
-
-    if (factory) {
-      const factoryResponse = factory.extract(state);
-      updatedInput = factoryResponse.state;
-      refs.push(...factoryResponse.references);
-    }
-
-    updatedInput.enhancements = {};
-    Object.keys(enhancements).forEach((key) => {
-      if (!enhancements[key]) return;
-      const enhancementResult = this.getEnhancement(key).extract(
-        enhancements[key] as SerializableState
-      );
-      refs.push(...enhancementResult.references);
-      updatedInput.enhancements![key] = enhancementResult.state;
-    });
-
-    return {
-      state: updatedInput,
-      references: refs,
-    };
-  };
-
-  private inject = (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
-    const enhancements = state.enhancements || {};
-    const factory = this.getEmbeddableFactory(state.id);
-
-    let updatedInput = injectBaseEmbeddableInput(state, references);
-
-    if (factory) {
-      updatedInput = factory.inject(updatedInput, references);
-    }
-
-    updatedInput.enhancements = {};
-    Object.keys(enhancements).forEach((key) => {
-      if (!enhancements[key]) return;
-      updatedInput.enhancements![key] = this.getEnhancement(key).inject(
-        enhancements[key] as SerializableState,
-        references
-      );
-    });
-
-    return updatedInput;
-  };
-
-  private migrate = (state: SerializableState, version: string) => {
-    const enhancements: SerializableState = (state.enhancements as SerializableState) || {};
-    const factory = this.getEmbeddableFactory(state.type as string);
-
-    let updatedInput = baseEmbeddableMigrations[version]
-      ? baseEmbeddableMigrations[version](state)
-      : state;
-
-    if (factory && factory.migrations[version]) {
-      updatedInput = factory.migrations[version](updatedInput);
-    }
-
-    updatedInput.enhancements = {};
-    Object.keys(enhancements).forEach((key) => {
-      if (!enhancements[key]) return;
-      const migrations = this.getEnhancement(key).migrations;
-      if (!migrations[version]) return;
-      (updatedInput.enhancements as SerializableState)[key] = migrations[version](
-        enhancements[key] as SerializableState
-      );
-    });
-
-    return updatedInput;
-  };
 
   private registerEnhancement = (enhancement: EnhancementRegistryDefinition) => {
     if (this.enhancements.has(enhancement.id)) {

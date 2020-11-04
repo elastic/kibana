@@ -17,16 +17,8 @@
  * under the License.
  */
 
-export const semverGte = (semver1: string, semver2: string) => {
-  const regex = /^([0-9]+)\.([0-9]+)\.([0-9]+)$/;
-  const matches1 = regex.exec(semver1) as RegExpMatchArray;
-  const matches2 = regex.exec(semver2) as RegExpMatchArray;
-
-  const [, major1, minor1, patch1] = matches1;
-  const [, major2, minor2, patch2] = matches2;
-
-  return (
-    major1 > major2 ||
-    (major1 === major2 && (minor1 > minor2 || (minor1 === minor2 && patch1 >= patch2)))
-  );
-};
+export * from './extract';
+export * from './inject';
+export * from './migrate';
+export * from './migrate_base_input';
+export * from './telemetry';

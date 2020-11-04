@@ -75,3 +75,8 @@ export type EmbeddableInput = {
 };
 
 export type EmbeddableStateWithType = EmbeddableInput & { type: string };
+
+export interface CommonEmbeddableStartContract {
+  getEmbeddableFactory: (embeddableFactoryId: string) => any;
+  getEnhancement: (enhancementId: string) => any;
+}
