@@ -14,6 +14,8 @@ export interface DocEntry {
   nested?: DocEntry[];
 }
 
+const metaTypes = new Set(['Readonly', 'Type', 'ObjectType', 'AnyType']);
+
 /** Generate documentation for all schema definitions in a set of .ts files */
 export function extractDocumentation(
   fileNames: string[],
@@ -90,7 +92,11 @@ export function extractDocumentation(
     return members;
   }
 
-  function resolveTypeArgument(type: ts.Type): ts.SymbolTable | string {
+  /**
+   * Extracts properties of the type.
+   * @param type
+   */
+  function resolveTypeProperties(type: ts.Type): ts.Symbol[] | string {
     // required to extract members
     type.getProperty('type');
 
@@ -101,44 +107,74 @@ export function extractDocumentation(
 
     if (type.aliasTypeArguments) {
       // @ts-ignores
-      members = type.aliasTypeArguments[0].members;
+      members = type.aliasTypeArguments[0].getProperties();
     }
 
     if (typeArguments.length > 0) {
-      members = resolveTypeArgument(typeArguments[0]);
-    }
-
-    if (members === undefined) {
-      members = checker.typeToString(type);
+      members = resolveTypeProperties(typeArguments[0]);
     }
 
     return members;
   }
 
+  function getResultTypeArguments(symbol: ts.Symbol) {
+    // @ts-ignore
+    const type = symbol.type;
+    // FIXME for some reason during debugging it is never undefined,
+    // only running after the build
+    if (!type) {
+      return;
+    }
+
+    let typeArguments;
+    try {
+      // @ts-ignore
+      typeArguments = checker.getTypeArguments((type as unknown) as ts.TypeReference);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(`Couldn't resolve type argument for "${symbol.name}"`);
+    }
+
+    if (type.aliasTypeArguments) {
+      typeArguments = type.aliasTypeArguments;
+    }
+
+    return typeArguments;
+  }
+
   function serializeProperty(symbol: ts.Symbol): DocEntry {
     // @ts-ignore
     const typeOfSymbol = symbol.type;
-    const typeArguments = checker.getTypeArguments((typeOfSymbol as unknown) as ts.TypeReference);
+
+    const typeArguments = getResultTypeArguments(symbol);
 
     let resultType: ts.Type = typeOfSymbol;
 
-    let members;
-    if (typeArguments.length > 0) {
-      members = resolveTypeArgument(typeArguments[0]);
+    // Normalize type members
+    // Result type can be a union type (e.g string | number), hence
+    // we need to extract it
+    if (typeArguments && metaTypes.has(typeOfSymbol?.symbol?.name)) {
       resultType = typeArguments[0];
+    }
+
+    // Resolve complex types, objects and arrays, that contain nested properties
+    let typeProperties;
+    if (typeArguments && typeArguments.length > 0) {
+      typeProperties = resolveTypeProperties(typeArguments[0]);
     }
 
     let typeAsString = checker.typeToString(resultType);
 
     const nestedEntries: DocEntry[] = [];
-    if (members && typeof members !== 'string' && members.size > 0) {
+    if (Array.isArray(typeProperties) && typeProperties.length > 0) {
+      // if (typeProperties && typeof typeProperties !== 'string' && typeProperties.length > 0) {
       // we hit an object or collection
       typeAsString =
         resultType.symbol.name === 'Array' || typeOfSymbol.symbol.name === 'Array'
           ? `${symbol.getName()}[]`
           : symbol.getName();
 
-      members.forEach((member) => {
+      typeProperties.forEach((member) => {
         nestedEntries.push(serializeProperty(member));
       });
     }
