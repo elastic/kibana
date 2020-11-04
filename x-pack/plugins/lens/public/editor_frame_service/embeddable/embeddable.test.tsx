@@ -46,7 +46,6 @@ const savedVis: Document = {
   visualizationType: '',
 };
 const defaultSaveMethod = (
-  type: string,
   testAttributes: LensSavedObjectAttributes,
   savedObjectId?: string
 ): Promise<{ id: string }> => {
