@@ -152,10 +152,6 @@ export const EMAIL_BODY = (caseUrl: string) =>
     defaultMessage: 'Case reference: {caseUrl}',
   });
 
-export const UNKNOWN = i18n.translate('xpack.securitySolution.case.caseView.unknown', {
-  defaultMessage: 'Unknown',
-});
-
 export const CHANGED_CONNECTOR_FIELD = i18n.translate(
   'xpack.securitySolution.case.caseView.fieldChanged',
   {

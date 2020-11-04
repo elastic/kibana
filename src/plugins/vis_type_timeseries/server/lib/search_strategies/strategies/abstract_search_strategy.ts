@@ -45,12 +45,10 @@ export type ReqFacade = FakeRequest & {
 };
 
 export class AbstractSearchStrategy {
-  public searchStrategyName!: string;
   public indexType?: string;
   public additionalParams: any;
 
-  constructor(name: string, type?: string, additionalParams: any = {}) {
-    this.searchStrategyName = name;
+  constructor(type?: string, additionalParams: any = {}) {
     this.indexType = type;
     this.additionalParams = additionalParams;
   }
@@ -71,7 +69,6 @@ export class AbstractSearchStrategy {
             },
             {
               ...options,
-              strategy: this.searchStrategyName,
             },
             req.requestContext
           )
