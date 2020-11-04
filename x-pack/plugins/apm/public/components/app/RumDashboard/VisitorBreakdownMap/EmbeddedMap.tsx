@@ -77,7 +77,7 @@ export function EmbeddedMapComponent() {
   );
 
   const input: MapEmbeddableInput = {
-    attributes: {},
+    attributes: { title: '' },
     id: uuid.v4(),
     filters: mapFilters,
     refreshConfig: {

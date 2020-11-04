@@ -66,7 +66,7 @@ export const EmbeddedMap = React.memo(({ upPoints, downPoints }: EmbeddedMapProp
 
   const input: MapEmbeddableInput = {
     id: uuid.v4(),
-    attributes: {},
+    attributes: { title: '' },
     filters: [],
     hidePanelTitles: true,
     refreshConfig: {

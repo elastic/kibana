@@ -9,7 +9,7 @@ import { MapEmbeddableInput } from '../../../../../../plugins/maps/public/embedd
 import { fromExpression, Ast } from '@kbn/interpreter/common';
 
 const baseSavedMapInput = {
-  attributes: {},
+  attributes: { title: '' },
   id: 'embeddableId',
   filters: [],
   isLayerTOCOpen: false,
