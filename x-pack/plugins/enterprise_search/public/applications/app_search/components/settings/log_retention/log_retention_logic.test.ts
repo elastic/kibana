@@ -50,7 +50,7 @@ describe('LogRetentionLogic', () => {
   const DEFAULT_VALUES = {
     logRetention: null,
     openedModal: null,
-    logsRetentionUpdating: false,
+    isLogRetentionUpdating: false,
   };
 
   const mount = (defaults?: object) => {
@@ -113,34 +113,34 @@ describe('LogRetentionLogic', () => {
         });
       });
 
-      describe('logsRetentionUpdating', () => {
-        it('resets logsRetentionUpdating to false', () => {
+      describe('isLogRetentionUpdating', () => {
+        it('resets isLogRetentionUpdating to false', () => {
           mount({
-            logsRetentionUpdating: true,
+            isLogRetentionUpdating: true,
           });
 
           LogRetentionLogic.actions.closeModals();
 
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
-            logsRetentionUpdating: false,
+            isLogRetentionUpdating: false,
           });
         });
       });
     });
 
     describe('clearLogRetentionUpdating', () => {
-      describe('logsRetentionUpdating', () => {
-        it('resets logsRetentionUpdating to false', () => {
+      describe('isLogRetentionUpdating', () => {
+        it('resets isLogRetentionUpdating to false', () => {
           mount({
-            logsRetentionUpdating: true,
+            isLogRetentionUpdating: true,
           });
 
           LogRetentionLogic.actions.clearLogRetentionUpdating();
 
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
-            logsRetentionUpdating: false,
+            isLogRetentionUpdating: false,
           });
         });
       });
@@ -250,17 +250,17 @@ describe('LogRetentionLogic', () => {
     });
 
     describe('toggleLogRetention', () => {
-      describe('logsRetentionUpdating', () => {
-        it('sets logsRetentionUpdating to true', () => {
+      describe('isLogRetentionUpdating', () => {
+        it('sets isLogRetentionUpdating to true', () => {
           mount({
-            logsRetentionUpdating: false,
+            isLogRetentionUpdating: false,
           });
 
           LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
 
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
-            logsRetentionUpdating: true,
+            isLogRetentionUpdating: true,
           });
         });
       });
@@ -316,17 +316,17 @@ describe('LogRetentionLogic', () => {
   });
 
   describe('fetchLogRetention', () => {
-    describe('logsRetentionUpdating', () => {
-      it('sets logsRetentionUpdating to true', () => {
+    describe('isLogRetentionUpdating', () => {
+      it('sets isLogRetentionUpdating to true', () => {
         mount({
-          logsRetentionUpdating: false,
+          isLogRetentionUpdating: false,
         });
 
         LogRetentionLogic.actions.fetchLogRetention();
 
         expect(LogRetentionLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          logsRetentionUpdating: true,
+          isLogRetentionUpdating: true,
         });
       });
     });

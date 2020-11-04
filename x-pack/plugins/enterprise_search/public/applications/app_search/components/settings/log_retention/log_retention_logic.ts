@@ -26,7 +26,7 @@ interface ILogRetentionActions {
 
 interface ILogRetentionValues {
   logRetention: ILogRetention | null;
-  logsRetentionUpdating: boolean;
+  isLogRetentionUpdating: boolean;
   openedModal: ELogRetentionOptions | null;
 }
 
@@ -59,7 +59,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
         },
       },
     ],
-    logsRetentionUpdating: [
+    isLogRetentionUpdating: [
       false,
       {
         clearLogRetentionUpdating: () => false,
