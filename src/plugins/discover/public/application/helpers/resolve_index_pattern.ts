@@ -17,17 +17,17 @@
  * under the License.
  */
 import { i18n } from '@kbn/i18n';
-import { ToastsStart } from 'kibana/public';
-import { IndexPattern } from '../../../kibana_services';
-import { IndexPatternsService, SearchSource } from '../../../../../data/common';
-import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
-import { UiActionsStart } from '../../../../../ui_actions/public';
+import { IUiSettingsClient, SavedObject, ToastsStart } from 'kibana/public';
+import { IndexPattern } from '../../kibana_services';
+import { IndexPatternsService, SearchSource } from '../../../../data/common';
+
+type IndexPatternSavedObject = SavedObject & { title: string };
 
 interface IndexPatternData {
   /**
    * List of existing index patterns
    */
-  list: IndexPattern[];
+  list: IndexPatternSavedObject[];
   /**
    * Loaded index pattern (might be default index pattern if requested was not found)
    */
@@ -42,19 +42,59 @@ interface IndexPatternData {
   stateValFound: boolean;
 }
 
+export function findIndexPatternById(
+  indexPatterns: IndexPatternSavedObject[],
+  id: string
+): IndexPatternSavedObject | undefined {
+  if (!Array.isArray(indexPatterns) || !id) {
+    return;
+  }
+  return indexPatterns.find((o) => o.id === id);
+}
+
+/**
+ * Checks if the given defaultIndex exists and returns
+ * the first available index pattern id if not
+ */
+export function getFallbackIndexPatternId(
+  indexPatterns: IndexPatternSavedObject[],
+  defaultIndex: string = ''
+): string {
+  if (defaultIndex && findIndexPatternById(indexPatterns, defaultIndex)) {
+    return defaultIndex;
+  }
+  return !indexPatterns || !indexPatterns.length || !indexPatterns[0].id ? '' : indexPatterns[0].id;
+}
+
+/**
+ * A given index pattern id is checked for existence and a fallback is provided if it doesn't exist
+ * The provided defaultIndex is usually configured in Advanced Settings, if it's also invalid
+ * the first entry of the given list of Indexpatterns is used
+ */
+export function getIndexPatternId(
+  id: string = '',
+  indexPatterns: IndexPatternSavedObject[] = [],
+  defaultIndex: string = ''
+): string {
+  if (!id || !findIndexPatternById(indexPatterns, id)) {
+    return getFallbackIndexPatternId(indexPatterns, defaultIndex);
+  }
+  return id;
+}
+
 /**
  * Function to load the given index pattern by id, providing a fallback if it doesn't exist
  */
 export async function loadIndexPattern(
   id: string,
   indexPatterns: IndexPatternsService,
-  config: UiActionsStart
+  config: IUiSettingsClient
 ): Promise<IndexPatternData> {
-  const indexPatternList = await indexPatterns.getCache();
+  const indexPatternList = ((await indexPatterns.getCache()) as unknown) as IndexPatternSavedObject[];
 
   const actualId = getIndexPatternId(id, indexPatternList, config.get('defaultIndex'));
   return {
-    list: indexPatternList,
+    list: indexPatternList || [],
     loaded: await indexPatterns.get(actualId),
     stateVal: id,
     stateValFound: !!id && actualId === id,

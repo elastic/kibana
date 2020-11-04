@@ -59,7 +59,7 @@ import {
   SAMPLE_SIZE_SETTING,
   SEARCH_ON_PAGE_LOAD_SETTING,
 } from '../../../common';
-import { resolveIndexPattern, loadIndexPattern } from './helpers/resolve_index_pattern';
+import { resolveIndexPattern, loadIndexPattern } from '../helpers/resolve_index_pattern';
 import { getTopNavLinks } from '../components/top_nav/get_top_nav_links';
 import { updateSearchSource } from '../helpers/update_search_source';
 import { setBreadcrumbsTitle } from '../helpers/set_breadcrumbs_title';
