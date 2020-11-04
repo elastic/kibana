@@ -33,7 +33,7 @@ import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_sele
 import { getMapAttributeService } from '../../../map_attribute_service';
 import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
-import { getCoreChrome, getToasts } from '../../../kibana_services';
+import { getCoreChrome, getToasts, getIsAllowByValueEmbeddables } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor, MapCenterAndZoom } from '../../../../common/descriptor_types';
 import { getInitialLayers } from './get_initial_layers';
@@ -207,7 +207,9 @@ export class SavedMap {
   };
 
   public hasSaveAndReturnConfig() {
-    return !!this._originatingApp;
+    const hasOriginatingApp = !!this._originatingApp;
+    const isNewMap = !this.getSavedObjectId();
+    return getIsAllowByValueEmbeddables() ? hasOriginatingApp : !isNewMap && hasOriginatingApp;
   }
 
   public getTitle(): string {

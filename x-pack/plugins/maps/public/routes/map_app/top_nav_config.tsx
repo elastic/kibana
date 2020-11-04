@@ -101,7 +101,9 @@ export function getTopNavConfig({
 
   if (getMapsCapabilities().save) {
     const hasSaveAndReturnConfig = savedMap.hasSaveAndReturnConfig();
-    const mapSavedObjectAttributes = savedMap.getAttributes();
+    const mapDescription = savedMap.getAttributes().description
+      ? savedMap.getAttributes().description
+      : '';
 
     topNavConfigs.push({
       id: 'save',
@@ -163,7 +165,7 @@ export function getTopNavConfig({
             }}
             onClose={() => {}}
             documentInfo={{
-              description: mapSavedObjectAttributes.description,
+              description: mapDescription,
               id: savedMap.getSavedObjectId(),
               title: savedMap.getTitle(),
             }}
@@ -187,9 +189,7 @@ export function getTopNavConfig({
         run: () => {
           savedMap.save({
             newTitle: savedMap.getTitle(),
-            newDescription: mapSavedObjectAttributes.description
-              ? mapSavedObjectAttributes.description
-              : '',
+            newDescription: mapDescription,
             newCopyOnSave: false,
             isTitleDuplicateConfirmed: false,
             returnToOrigin: true,
