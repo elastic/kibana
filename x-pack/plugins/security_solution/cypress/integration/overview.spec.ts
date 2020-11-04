@@ -35,7 +35,7 @@ describe('Overview Page', () => {
   describe('with no data', () => {
     before(() => {
       cy.server();
-      cy.fixture('empty_instance').as('@emptyInstance');
+      cy.fixture('empty_instance').as('emptyInstance');
       loginAndWaitForPage(OVERVIEW_URL);
       cy.route('POST', '**/internal/search/securitySolutionIndexFields', '@emptyInstance');
     });
