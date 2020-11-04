@@ -178,5 +178,9 @@ describe('color_assignment', () => {
       // 3 series in front of (complex object)/y1 - abc/y1, abc/y2
       expect(assignments.palette1.getRank(layers[0], 'formatted', 'y1')).toEqual(2);
     });
+
+    it('should handle missing tables and columns', () => {
+      throw new Error('not implemented');
+    });
   });
 });

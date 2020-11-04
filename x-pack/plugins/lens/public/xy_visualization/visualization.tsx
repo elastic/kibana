@@ -191,12 +191,14 @@ export const getXyVisualization = ({
             triggerIcon: 'disabled',
           };
         }
+        // TODO this should be the actual series name (same logic as the chart)
         const rank = colorAssignments[currentPalette.name].getRank(layer, '', accessor as string);
         const customColor =
           currentYConfig?.color ||
           paletteService.get(currentPalette.name).getColor(
             [
               {
+                // TODO this should be the actual series name (same logic as the chart)
                 name: '',
                 rankAtDepth: rank,
                 totalSeriesAtDepth: totalSeriesCount,

@@ -11,6 +11,7 @@ import { State, SeriesType } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 
 function exampleState(): State {
   return {
@@ -27,9 +28,12 @@ function exampleState(): State {
     ],
   };
 }
+const paletteServiceMock = chartPluginMock.createPaletteRegistry();
+const dataMock = dataPluginMock.createStartContract();
 
 const xyVisualization = getXyVisualization({
-  paletteService: chartPluginMock.createPaletteRegistry(),
+  paletteService: paletteServiceMock,
+  data: dataMock,
 });
 
 describe('xy_visualization', () => {
@@ -305,6 +309,14 @@ describe('xy_visualization', () => {
       frame.datasourceLayers = {
         first: mockDatasource.publicAPIMock,
       };
+
+      frame.activeData = {
+        first: {
+          type: 'datatable',
+          rows: [],
+          columns: [],
+        },
+      };
     });
 
     it('should return options for 3 dimensions', () => {
@@ -405,6 +417,103 @@ describe('xy_visualization', () => {
         { ...exampleOperation, dataType: 'date' },
       ];
       expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
+    });
+
+    describe('color assignment', () => {
+      it('should pass custom y color in accessor config', () => {
+        const baseState = exampleState();
+        const options = xyVisualization.getConfiguration({
+          state: {
+            ...baseState,
+            layers: [
+              {
+                ...baseState.layers[0],
+                splitAccessor: undefined,
+                yConfig: [
+                  {
+                    forAccessor: 'b',
+                    color: 'red',
+                  },
+                ],
+              },
+            ],
+          },
+          frame,
+          layerId: 'first',
+        }).groups;
+        const accessorConfig = options
+          .find(({ groupId }) => groupId === 'y')
+          ?.accessors.find((accessor) => typeof accessor !== 'string' && accessor.columnId === 'b');
+        if (typeof accessorConfig === 'string') {
+          throw new Error('could not find accessor');
+        }
+        expect(accessorConfig?.triggerIcon).toEqual('color');
+        expect(accessorConfig?.color).toEqual('red');
+      });
+
+      it('should query palette to fill in colors for other dimensions', () => {
+        const palette = paletteServiceMock.get('default');
+        (palette.getColor as jest.Mock).mockClear();
+        const baseState = exampleState();
+        const options = xyVisualization.getConfiguration({
+          state: {
+            ...baseState,
+            layers: [
+              {
+                ...baseState.layers[0],
+                splitAccessor: undefined,
+              },
+            ],
+          },
+          frame,
+          layerId: 'first',
+        }).groups;
+        const accessorConfig = options
+          .find(({ groupId }) => groupId === 'y')
+          ?.accessors.find((accessor) => typeof accessor !== 'string' && accessor.columnId === 'c');
+        if (typeof accessorConfig === 'string') {
+          throw new Error('could not find accessor');
+        }
+        expect(accessorConfig?.triggerIcon).toEqual('color');
+        // black is the color returned from the palette mock
+        expect(accessorConfig?.color).toEqual('black');
+        expect(palette.getColor).toHaveBeenCalledWith(
+          [
+            {
+              name: '',
+              // rank 1 because it's the second y metric
+              rankAtDepth: 1,
+              totalSeriesAtDepth: 2,
+            },
+          ],
+          { maxDepth: 1, totalSeries: 2 },
+          undefined
+        );
+      });
+
+      it('should pass name of current series along', () => {
+        throw new Error('not implemented');
+      });
+
+      it('should use custom palette if layer contains palette', () => {
+        throw new Error('not implemented');
+      });
+
+      it('should not show any indicator as long as there is no data', () => {
+        throw new Error('not implemented');
+      });
+
+      it('should show disable icon for splitted series', () => {
+        throw new Error('not implemented');
+      });
+
+      it('should show current palette for break down by dimension', () => {
+        throw new Error('not implemented');
+      });
+
+      it('should show current custom palette for break down by dimension', () => {
+        throw new Error('not implemented');
+      });
     });
   });
 });
