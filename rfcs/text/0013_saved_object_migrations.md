@@ -236,9 +236,9 @@ Note:
    6. Use the cloned `.kibana_pre6.5.0_001` as the source for the rest of the migration algorithm.
 3. If `.kibana` and `.kibana_7.10.0` both exists and are pointing to the same index this version's migration has already been completed.
    1. Because the same version can have plugins enabled at any point in time,
-      perform the mappings update in step (6) and migrate outdated documents
-      with step (7).
-   2. Skip to step (9) to start serving traffic.
+      perform the mappings update in step (7) and migrate outdated documents
+      with step (8).
+   2. Skip to step (10) to start serving traffic.
 4. Fail the migration if:
    1. `.kibana` is pointing to an index that belongs to a later version of Kibana .e.g. `.kibana_7.12.0_001`
    2. (Only in 8.x) The source index contains documents that belong to an unknown Saved Object type (from a disabled plugin). Log an error explaining that the plugin that created these documents needs to be enabled again or that these objects should be deleted. See section (4.2.1.4).

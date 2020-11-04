@@ -33,7 +33,8 @@ export type AllResponses =
   | ReindexResponse
   | WaitForTaskResponse
   | DeleteIndexResponse
-  | UpdateByQueryResponse;
+  | UpdateByQueryResponse
+  | UpdateAndPickupMappingsResponse;
 
 export type ExpectedErrors =
   | errors.NoLivingConnectionsError
@@ -68,7 +69,7 @@ const catchRetryableEsClientErrors = (e: ElasticsearchClientError) => {
 export interface FetchIndexResponse {
   fetchIndices: Record<
     string,
-    { aliases: Record<string, unknown>; mappings: unknown; settings: unknown }
+    { aliases: Record<string, unknown>; mappings: IndexMapping; settings: unknown }
   >;
 }
 
@@ -231,6 +232,15 @@ export interface WaitForTaskResponse {
   waitForTask: { completed: boolean; failures: Option.Option<any[]>; description: string };
 }
 
+/**
+ * Blocks for up to 60s or until a task completes.
+ *
+ * TODO: delete completed tasks
+ *
+ * @param client
+ * @param taskId
+ * @param timeout
+ */
 export const waitForTask = (
   client: ElasticsearchClient,
   taskId: string,
@@ -275,8 +285,7 @@ export interface UpdateByQueryResponse {
 }
 
 /**
- * Reindex documents from the `sourceIndex` into the `targetIndex` and wait up
- * to 60 seconds for the operation to complete. Returns a task ID which can be
+ * Perform an update by query operation. Returns a task ID which can be
  * tracked for progress.
  *
  * @remarks This action uses `conflicts: 'proceed'` allowing several Kibana
@@ -301,8 +310,8 @@ export const updateByQuery = (
       // Return an error when targeting missing or closed indices
       allow_no_indices: false,
       index,
-      // Set batch size to 100, not sure if it's necessary to make this
-      // smaller than the default of 1000?
+      // Set batch size to 100 (this is what we used for v1 migrations)
+      // TODO: profile batch size to see how much of an impact it makes
       size: 100,
       body: {
         script:
@@ -313,7 +322,8 @@ export const updateByQuery = (
               }
             : undefined,
       },
-      // force a refresh so that we can query the target index
+      // force a refresh so that we can query the updated index after the
+      // operation completes
       refresh: true,
       // Create a task and return task id instead of blocking until complete
       wait_for_completion: false,
@@ -515,6 +525,49 @@ export const createIndex = (
           })
         );
       }
+    })
+  );
+};
+
+export interface UpdateAndPickupMappingsResponse {
+  updateAndPickupMappings: { taskId: string };
+}
+
+/**
+ * Updates an index's mappings and runs an update_by_query so that the mapping
+ * changes are "picked up". Returns a taskId to track progress.
+ *
+ * @param client
+ * @param index
+ * @param mappings
+ */
+export const updateAndPickupMappings = (
+  client: ElasticsearchClient,
+  index: string,
+  mappings: IndexMapping
+): TaskEither.TaskEither<ExpectedErrors, UpdateAndPickupMappingsResponse> => {
+  const putMappingTask: TaskEither.TaskEither<ExpectedErrors, { acknowledged: boolean }> = () => {
+    return client.indices
+      .putMapping<Record<string, any>, IndexMapping>({
+        index,
+        timeout: '60s',
+        body: mappings,
+      })
+      .then((res) => {
+        console.log(res.body);
+        // TODO do we need to check res.body.acknowledged?
+        return Either.right({ acknowledged: res.body.acknowledged });
+      })
+      .catch(catchRetryableEsClientErrors);
+  };
+
+  return pipe(
+    putMappingTask,
+    TaskEither.chain((res) => {
+      return updateByQuery(client, index);
+    }),
+    TaskEither.map((res) => {
+      return { updateAndPickupMappings: { taskId: res.updateByQuery.taskId } };
     })
   );
 };

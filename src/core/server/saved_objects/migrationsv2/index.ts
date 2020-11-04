@@ -81,6 +81,17 @@ export type CloneSourceState = BaseState & {
   controlState: 'CLONE_SOURCE';
 };
 
+export type UpdateTargetMappingsState = BaseState & {
+  /** Update the mappings of the target index */
+  controlState: 'UPDATE_TARGET_MAPPINGS';
+};
+
+export type UpdateTargetMappingsWaitForTaskState = BaseState & {
+  /** Update the mappings of the target index */
+  controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK';
+  updateTargetMappingsTaskId: string;
+};
+
 /**
  * If there's a legacy index prepare it for migration.
  */
@@ -103,9 +114,9 @@ export type PreMigrateLegacyState = LegacyBaseState & {
   controlState: 'PRE_MIGRATE_LEGACY';
 };
 
-export type PreMigrateLegacyTaskCompleteState = LegacyBaseState & {
+export type PreMigrateLegacyWaitForTaskState = LegacyBaseState & {
   /** Apply the pre-migration script to the legacy clone to prepare it for a migration */
-  controlState: 'PRE_MIGRATE_LEGACY_TASK_COMPLETE';
+  controlState: 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK';
   preMigrationUpdateTaskId: string;
 };
 
@@ -121,10 +132,12 @@ export type State =
   | SetSourceWriteBlockState
   | InitNewIndicesState
   | CloneSourceState
+  | UpdateTargetMappingsState
+  | UpdateTargetMappingsWaitForTaskState
   | CloneLegacyState
   | SetLegacyWriteBlockState
   | PreMigrateLegacyState
-  | PreMigrateLegacyTaskCompleteState
+  | PreMigrateLegacyWaitForTaskState
   | DeleteLegacyState;
 
 type Model = (currentState: State, result: Actions.ActionResponse) => State;
@@ -143,6 +156,32 @@ function throwBadControlState(controlState: any) {
 
 function indexVersion(indexName: string) {
   return (indexName.match(/\.kibana_(\d+\.\d+\.\d+)_\d+/) || [])[1];
+}
+
+/**
+ * Merge the _meta mappings of an index with the given target mappings.
+ *
+ * @remarks Mapping updates are commutative (deeply merged) by Elasticsearch,
+ * except for the _meta key. The source index we're migrating from might
+ * contain documents created by a plugin that is disabled in the Kibana
+ * instance performing this migration. We merge the _meta mappings from the
+ * source index into the targetMappings to ensure that any
+ * `migrationPropertyHashes` for disabled plugins aren't lost.
+ *
+ * Right now we don't use these `migrationPropertyHashes` but it could be used
+ * in the future to optimize the `UPDATE_TARGET_MAPPINGS` step.
+ *
+ * @param targetMappings
+ * @param indexMappings
+ */
+function mergeMappings(targetMappings: IndexMapping, indexMappings: IndexMapping) {
+  return {
+    ...targetMappings,
+    _meta: {
+      ...indexMappings._meta,
+      ...targetMappings._meta,
+    },
+  };
 }
 
 export const model: Model = (currentState: State, res: Actions.ActionResponse): State => {
@@ -200,22 +239,29 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
         });
         return acc;
       }, {} as Record<string, string>);
+
       if (
+        // `.kibana_current` and the version specific aliases both exists and
+        // are pointing to the same index. This version's migration has already
+        // been completed.
         aliases[CURRENT_ALIAS] != null &&
         aliases[VERSION_ALIAS] != null &&
         aliases[CURRENT_ALIAS] === aliases[VERSION_ALIAS]
       ) {
-        // `.kibana_current` and the version specific aliases both exists and
-        // are pointing to the same index. This version's migration has already
-        // been completed.
-        stateP = { ...stateP, controlState: 'DONE' };
-        // TODO, go to step (6)
+        stateP = {
+          ...stateP,
+          controlState: 'UPDATE_TARGET_MAPPINGS',
+          targetMappings: mergeMappings(
+            stateP.targetMappings,
+            indices[aliases[CURRENT_ALIAS]].mappings
+          ),
+        };
       } else if (
+        // `.kibana_current` is pointing to an index that belongs to a later
+        // version of Kibana .e.g. a 7.11.0 node found `.kibana_7.12.0_001`
         aliases[CURRENT_ALIAS] != null &&
         gt(indexVersion(aliases[CURRENT_ALIAS]), stateP.kibanaVersion)
       ) {
-        // `.kibana_current` is pointing to an index that belongs to a later
-        // version of Kibana .e.g. a 7.11.0 node found `.kibana_7.12.0_001`
         stateP = {
           ...stateP,
           controlState: 'FATAL',
@@ -224,7 +270,11 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
               indexVersion(aliases[CURRENT_ALIAS])
           ),
         };
-      } else if (aliases[CURRENT_ALIAS] ?? aliases[V1_ALIAS] ?? false) {
+      } else if (
+        // If the `.kibana_current` or the `.kibana` alias exists
+        aliases[CURRENT_ALIAS] != null ||
+        aliases[V1_ALIAS] != null
+      ) {
         //  The source index is:
         //  1. the index the `.kibana_current` alias points to, or if it doesn’t exist,
         //  2. the index the `.kibana` alias points to
@@ -234,6 +284,7 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
           controlState: 'SET_SOURCE_WRITE_BLOCK',
           source,
           target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          targetMappings: mergeMappings(stateP.targetMappings, indices[source].mappings),
         };
       } else if (indices[LEGACY_INDEX] != null) {
         // Migrate from a legacy index
@@ -258,6 +309,7 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
           controlState: 'SET_LEGACY_WRITE_BLOCK',
           source: `${stateP.indexPrefix}_${legacyVersion}_001`,
           target: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          targetMappings: mergeMappings(stateP.targetMappings, indices[LEGACY_INDEX].mappings),
           legacy: `.kibana`,
         };
       } else {
@@ -286,12 +338,12 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
     if ('updateByQuery' in res.right) {
       stateP = {
         ...stateP,
-        controlState: 'PRE_MIGRATE_LEGACY_TASK_COMPLETE',
+        controlState: 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK',
         preMigrationUpdateTaskId: res.right.updateByQuery.taskId,
       };
     }
     return stateP;
-  } else if (stateP.controlState === 'PRE_MIGRATE_LEGACY_TASK_COMPLETE') {
+  } else if (stateP.controlState === 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK') {
     if ('waitForTask' in res.right && Option.isSome(res.right.waitForTask.failures)) {
       // TODO: ignore index closed error
       return { ...stateP, controlState: 'FATAL' };
@@ -302,6 +354,20 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
   } else if (stateP.controlState === 'SET_SOURCE_WRITE_BLOCK') {
     return { ...stateP, controlState: 'CLONE_SOURCE' };
   } else if (stateP.controlState === 'CLONE_SOURCE') {
+    return { ...stateP, controlState: 'UPDATE_TARGET_MAPPINGS' };
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
+    if ('updateAndPickupMappings' in res.right) {
+      stateP = {
+        ...stateP,
+        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
+        updateTargetMappingsTaskId: res.right.updateAndPickupMappings.taskId,
+      };
+    }
+    return stateP;
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
+    if ('waitForTask' in res.right && Option.isSome(res.right.waitForTask.failures)) {
+      return { ...stateP, controlState: 'FATAL' };
+    }
     return { ...stateP, controlState: 'DONE' };
   } else if (stateP.controlState === 'INIT_NEW_INDICES') {
     return { ...stateP, controlState: 'DONE' };
@@ -364,16 +430,18 @@ export const next: NextAction = (client, state) => {
         })
       )
     );
+  } else if (state.controlState === 'UPDATE_TARGET_MAPPINGS') {
+    return delay(Actions.updateAndPickupMappings(client, state.target, state.targetMappings));
+  } else if (state.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
+    // Wait for the updateTargetMappingsTaskId task to complete
+    return Actions.waitForTask(client, state.updateTargetMappingsTaskId, '60s');
   } else if (state.controlState === 'PRE_MIGRATE_LEGACY') {
     // Start an update by query to pre-migrate the source index using the
     // supplied script.
     return delay(Actions.updateByQuery(client, state.source, state.preMigrationScript));
-  } else if (state.controlState === 'PRE_MIGRATE_LEGACY_TASK_COMPLETE') {
+  } else if (state.controlState === 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK') {
     // Wait for the preMigrationUpdateTaskId task to complete
-    return pipe(
-      Actions.waitForTask(client, state.preMigrationUpdateTaskId, '60s')
-      // TODO: delete completed task
-    );
+    return Actions.waitForTask(client, state.preMigrationUpdateTaskId, '60s');
   } else if (state.controlState === 'DELETE_LEGACY') {
     return delay(
       pipe(
