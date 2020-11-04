@@ -436,7 +436,7 @@ export interface FramePublicAPI {
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
    * If accessing, make sure to check whether expected columns actually exist.
    */
-  activeData?: Record<string, Datatable>; // TODO wire up
+  activeData?: Record<string, Datatable>;
 
   dateRange: DateRange;
   query: Query;

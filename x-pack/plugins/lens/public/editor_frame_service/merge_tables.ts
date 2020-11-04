@@ -49,6 +49,9 @@ export const mergeTables: ExpressionFunctionDefinition<
   },
   inputTypes: ['kibana_context', 'null'],
   fn(input, { layerIds, tables }, context) {
+    if (!context.inspectorAdapters) {
+      context.inspectorAdapters = {};
+    }
     if (!context.inspectorAdapters.tables) {
       context.inspectorAdapters.tables = {};
     }
