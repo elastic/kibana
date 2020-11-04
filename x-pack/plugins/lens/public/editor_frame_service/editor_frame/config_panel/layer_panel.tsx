@@ -396,6 +396,26 @@ export function LayerPanel(
                               );
                             }}
                           />
+                          {typeof accessorConfig !== 'string' &&
+                            accessorConfig.triggerIcon === 'colorBy' &&
+                            accessorConfig.palette && (
+                              <EuiFlexGroup
+                                className="lnsLayerPanel__paletteContainer"
+                                gutterSize="none"
+                                alignItems="center"
+                              >
+                                {accessorConfig.palette.map((color) => (
+                                  <EuiFlexItem
+                                    key={color}
+                                    className="lnsLayerPanel__paletteColor"
+                                    grow={true}
+                                    style={{
+                                      backgroundColor: color,
+                                    }}
+                                  />
+                                ))}
+                              </EuiFlexGroup>
+                            )}
                         </div>
                       </DragDrop>
                     );

@@ -343,15 +343,21 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   setState: (newState: T) => void;
 };
 
+export type AccessorConfig =
+  | string
+  | {
+      columnId: string;
+      triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none';
+      color?: string;
+      palette?: string[];
+    };
+
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   groupLabel: string;
 
   /** ID is passed back to visualization. For example, `x` */
   groupId: string;
-  accessors: Array<
-    | string
-    | { columnId: string; triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none'; color?: string }
-  >;
+  accessors: AccessorConfig[];
   supportsMoreColumns: boolean;
   /** If required, a warning will appear if accessors are empty */
   required?: boolean;

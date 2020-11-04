@@ -14,7 +14,7 @@ import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import { Visualization, OperationMetadata, VisualizationType } from '../types';
+import { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
@@ -173,9 +173,7 @@ export const getXyVisualization = ({
 
     const datasource = frame.datasourceLayers[layer.layerId];
 
-    let sortedAccessors: Array<
-      { columnId: string; triggerIcon: string; color: string | null } | string
-    > = getSortedAccessors(datasource, layer);
+    let sortedAccessors: AccessorConfig[] = getSortedAccessors(datasource, layer);
 
     if (frame.activeData) {
       const colorAssignments = getColorAssignments(
@@ -189,27 +187,28 @@ export const getXyVisualization = ({
         const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
         if (layerContainsSplits) {
           return {
-            columnId: accessor,
+            columnId: accessor as string,
             triggerIcon: 'disabled',
           };
         }
         const rank = colorAssignments[currentPalette.name].getRank(layer, '', accessor as string);
+        const customColor =
+          currentYConfig?.color ||
+          paletteService.get(currentPalette.name).getColor(
+            [
+              {
+                name: '',
+                rankAtDepth: rank,
+                totalSeriesAtDepth: totalSeriesCount,
+              },
+            ],
+            { maxDepth: 1, totalSeries: totalSeriesCount },
+            currentPalette.params
+          );
         return {
-          columnId: accessor,
-          triggerIcon: 'color',
-          color:
-            currentYConfig?.color ||
-            paletteService.get(currentPalette.name).getColor(
-              [
-                {
-                  name: '',
-                  rankAtDepth: rank,
-                  totalSeriesAtDepth: totalSeriesCount,
-                },
-              ],
-              { maxDepth: 1, totalSeries: totalSeriesCount },
-              currentPalette.params
-            ),
+          columnId: accessor as string,
+          triggerIcon: customColor ? 'color' : 'disabled',
+          color: customColor ? customColor : undefined,
         };
       });
     }
@@ -254,7 +253,17 @@ export const getXyVisualization = ({
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Break down by',
           }),
-          accessors: layer.splitAccessor ? [layer.splitAccessor] : [],
+          accessors: layer.splitAccessor
+            ? [
+                {
+                  columnId: layer.splitAccessor,
+                  triggerIcon: 'colorBy',
+                  palette: paletteService
+                    .get(layer.palette?.name || 'default')
+                    .getColors(10, layer.palette?.params),
+                },
+              ]
+            : [],
           filterOperations: isBucketed,
           suggestedPriority: 0,
           supportsMoreColumns: !layer.splitAccessor,
