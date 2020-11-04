@@ -326,6 +326,7 @@ export const AlertForm = ({
             .map((item, index) => (
               <Fragment key={index}>
                 <EuiListGroupItem
+                  data-test-subj={`${item.id}-SelectOption`}
                   label={
                     <EuiDescriptionList>
                       <EuiDescriptionListTitle>{item.name}</EuiDescriptionListTitle>

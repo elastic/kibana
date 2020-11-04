@@ -179,10 +179,7 @@ describe('alert_add', () => {
     expect(wrapper.find('[data-test-subj="addAlertFlyoutTitle"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
 
-    wrapper.find('[data-test-subj="alertTypesComboBox"]').first().simulate('click');
-    wrapper.find('.euiSelect').first().simulate('click');
-
-    expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
+    wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
 
     expect(wrapper.find('input#alertName').props().value).toBe('');
 
