@@ -31,8 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  // eslint-disable-next-line ban/ban
-  describe.only('discover doc table', function describeIndexTests() {
+  describe('discover doc table', function describeIndexTests() {
     const defaultRowsLimit = 50;
     const rowsHardLimit = 500;
 
