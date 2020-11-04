@@ -264,12 +264,19 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                   )}
                   condition={isValueLabelsDisabled}
                 >
-                  {i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-                    defaultMessage: 'Labels',
-                  })}{' '}
-                  {isValueLabelsDisabled ? (
-                    <EuiIcon type="questionInCircle" color="subdued" />
-                  ) : null}
+                  <span>
+                    {i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
+                      defaultMessage: 'Labels',
+                    })}{' '}
+                    {isValueLabelsDisabled ? (
+                      <EuiIcon
+                        type="questionInCircle"
+                        color="subdued"
+                        size="s"
+                        className="eui-alignTop"
+                      />
+                    ) : null}
+                  </span>
                 </TooltipWrapper>
               }
             >
@@ -292,46 +299,37 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                 }}
               />
             </EuiFormRow>
-            <EuiFormRow
-              display="columnCompressed"
-              label={
-                <TooltipWrapper
-                  tooltipContent={i18n.translate('xpack.lens.xyChart.fittingDisabledHelpText', {
-                    defaultMessage: 'This setting only applies to line and area charts.',
-                  })}
-                  condition={!hasNonBarSeries}
-                >
-                  {i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                    defaultMessage: 'Missing values',
-                  })}{' '}
-                  {!hasNonBarSeries ? <EuiIcon type="questionInCircle" color="subdued" /> : null}
-                </TooltipWrapper>
-              }
-            >
-              <EuiSuperSelect
-                data-test-subj="lnsMissingValuesSelect"
-                disabled={!hasNonBarSeries}
-                compressed
-                options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-                  return {
-                    value: id,
-                    dropdownDisplay: (
-                      <>
-                        <strong>{title}</strong>
-                        <EuiText size="xs" color="subdued">
-                          <p>{description}</p>
-                        </EuiText>
-                      </>
-                    ),
-                    inputDisplay: title,
-                  };
+            {hasNonBarSeries ? (
+              <EuiFormRow
+                display="columnCompressed"
+                label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                  defaultMessage: 'Missing values',
                 })}
-                valueOfSelected={state?.fittingFunction || 'None'}
-                onChange={(value) => setState({ ...state, fittingFunction: value })}
-                itemLayoutAlign="top"
-                hasDividers
-              />
-            </EuiFormRow>
+              >
+                <EuiSuperSelect
+                  data-test-subj="lnsMissingValuesSelect"
+                  compressed
+                  options={fittingFunctionDefinitions.map(({ id, title, description }) => {
+                    return {
+                      value: id,
+                      dropdownDisplay: (
+                        <>
+                          <strong>{title}</strong>
+                          <EuiText size="xs" color="subdued">
+                            <p>{description}</p>
+                          </EuiText>
+                        </>
+                      ),
+                      inputDisplay: title,
+                    };
+                  })}
+                  valueOfSelected={state?.fittingFunction || 'None'}
+                  onChange={(value) => setState({ ...state, fittingFunction: value })}
+                  itemLayoutAlign="top"
+                  hasDividers
+                />
+              </EuiFormRow>
+            ) : null}
           </ToolbarPopover>
           <LegendSettingsPopover
             legendOptions={legendOptions}

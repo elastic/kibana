@@ -32,7 +32,6 @@ export interface ToolbarPopoverProps {
    */
   groupPosition?: ToolbarButtonProps['groupPosition'];
   buttonDataTestSubj?: string;
-  larger?: boolean;
 }
 
 export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
@@ -42,17 +41,15 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
   isDisabled = false,
   groupPosition,
   buttonDataTestSubj,
-  larger,
 }) => {
   const [open, setOpen] = useState(false);
 
   const iconType: string | IconType = typeof type === 'string' ? typeToIconMap[type] : type;
-  const panelClassName = larger ? 'lnsXyToolbar__popoverLarger' : 'lnsXyToolbar__popover';
 
   return (
     <EuiFlexItem grow={false}>
       <EuiPopover
-        panelClassName={panelClassName}
+        panelClassName="lnsXyToolbar__popover"
         ownFocus
         aria-label={title}
         button={
