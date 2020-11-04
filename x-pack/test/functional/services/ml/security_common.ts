@@ -60,12 +60,24 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
     {
       name: 'ft_default_space_ml_all',
       elasticsearch: { cluster: [], indices: [], run_as: [] },
-      kibana: [{ base: [], feature: { ml: ['all'] }, spaces: ['default'] }],
+      kibana: [
+        {
+          base: [],
+          feature: { ml: ['all'], savedObjectsManagement: ['all'] },
+          spaces: ['default'],
+        },
+      ],
     },
     {
       name: 'ft_default_space_ml_read',
       elasticsearch: { cluster: [], indices: [], run_as: [] },
-      kibana: [{ base: [], feature: { ml: ['read'] }, spaces: ['default'] }],
+      kibana: [
+        {
+          base: [],
+          feature: { ml: ['read'], savedObjectsManagement: ['read'] },
+          spaces: ['default'],
+        },
+      ],
     },
     {
       name: 'ft_default_space_ml_none',

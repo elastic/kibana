@@ -36,6 +36,7 @@ const WATCH_NAME = 'xpack_license_expiration';
 export class LicenseExpirationAlert extends BaseAlert {
   public type = ALERT_LICENSE_EXPIRATION;
   public label = LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].description;
   public isLegacy = true;
   protected actionVariables = [
     {
