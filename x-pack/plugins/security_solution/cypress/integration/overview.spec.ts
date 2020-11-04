@@ -36,11 +36,13 @@ describe('Overview Page', () => {
   describe('with no data', () => {
     before(() => {
       esArchiverUnload('auditbeat');
+      esArchiverLoad('empty_kibana');
       loginAndWaitForPage(OVERVIEW_URL);
     });
 
     after(() => {
       esArchiverLoad('auditbeat');
+      esArchiverUnload('empty_kibana');
     });
 
     it('Splash screen should be here', () => {
