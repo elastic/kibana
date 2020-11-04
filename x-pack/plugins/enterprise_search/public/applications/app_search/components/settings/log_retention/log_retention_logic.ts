@@ -19,7 +19,7 @@ interface ILogRetentionActions {
     option: ELogRetentionOptions,
     enabled: boolean
   ): { option: ELogRetentionOptions; enabled: boolean };
-  setOpenModal(option: ELogRetentionOptions): { option: ELogRetentionOptions };
+  setOpenedModal(option: ELogRetentionOptions): { option: ELogRetentionOptions };
   toggleLogRetention(option: ELogRetentionOptions): { option: ELogRetentionOptions };
   updateLogRetention(logRetention: ILogRetention): { logRetention: ILogRetention };
 }
@@ -27,7 +27,7 @@ interface ILogRetentionActions {
 interface ILogRetentionValues {
   logRetention: ILogRetention | null;
   logsRetentionUpdating: boolean;
-  openModal: ELogRetentionOptions | null;
+  openedModal: ELogRetentionOptions | null;
 }
 
 export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRetentionActions>>({
@@ -37,7 +37,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
     closeModals: true,
     fetchLogRetention: true,
     saveLogRetention: (option, enabled) => ({ enabled, option }),
-    setOpenModal: (option) => ({ option }),
+    setOpenedModal: (option) => ({ option }),
     toggleLogRetention: (option) => ({ option }),
     updateLogRetention: (logRetention) => ({ logRetention }),
   }),
@@ -68,12 +68,12 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
         toggleLogRetention: () => true,
       },
     ],
-    openModal: [
+    openedModal: [
       null,
       {
         closeModals: () => null,
         saveLogRetention: () => null,
-        setOpenModal: (_, { option }) => option,
+        setOpenedModal: (_, { option }) => option,
       },
     ],
   }),
@@ -119,7 +119,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
 
       const optionIsAlreadyEnabled = logRetention.enabled;
       if (optionIsAlreadyEnabled) {
-        actions.setOpenModal(option);
+        actions.setOpenedModal(option);
       } else {
         actions.saveLogRetention(option, true);
       }

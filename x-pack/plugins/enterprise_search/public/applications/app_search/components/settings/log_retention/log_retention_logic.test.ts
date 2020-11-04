@@ -49,7 +49,7 @@ describe('LogRetentionLogic', () => {
 
   const DEFAULT_VALUES = {
     logRetention: null,
-    openModal: null,
+    openedModal: null,
     logsRetentionUpdating: false,
   };
 
@@ -82,33 +82,33 @@ describe('LogRetentionLogic', () => {
   });
 
   describe('actions', () => {
-    describe('setOpenModal', () => {
-      describe('openModal', () => {
+    describe('setOpenedModal', () => {
+      describe('openedModal', () => {
         it('should be set to the provided value', () => {
           mount();
 
-          LogRetentionLogic.actions.setOpenModal(ELogRetentionOptions.Analytics);
+          LogRetentionLogic.actions.setOpenedModal(ELogRetentionOptions.Analytics);
 
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
-            openModal: ELogRetentionOptions.Analytics,
+            openedModal: ELogRetentionOptions.Analytics,
           });
         });
       });
     });
 
     describe('closeModals', () => {
-      describe('openModal', () => {
-        it('resets openModal to null', () => {
+      describe('openedModal', () => {
+        it('resets openedModal to null', () => {
           mount({
-            openModal: 'analytics',
+            openedModal: 'analytics',
           });
 
           LogRetentionLogic.actions.closeModals();
 
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
-            openModal: null,
+            openedModal: null,
           });
         });
       });
@@ -195,17 +195,17 @@ describe('LogRetentionLogic', () => {
         jest.spyOn(LogRetentionLogic.actions, 'clearLogRetentionUpdating');
       });
 
-      describe('openModal', () => {
+      describe('openedModal', () => {
         it('should be reset to null', () => {
           mount({
-            openModal: ELogRetentionOptions.Analytics,
+            openedModal: ELogRetentionOptions.Analytics,
           });
 
           LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
 
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
-            openModal: null,
+            openedModal: null,
           });
         });
       });
@@ -265,7 +265,7 @@ describe('LogRetentionLogic', () => {
         });
       });
 
-      it('will call setOpenModal if already enabled', () => {
+      it('will call setOpenedModal if already enabled', () => {
         mount({
           logRetention: {
             [ELogRetentionOptions.Analytics]: {
@@ -273,11 +273,11 @@ describe('LogRetentionLogic', () => {
             },
           },
         });
-        jest.spyOn(LogRetentionLogic.actions, 'setOpenModal');
+        jest.spyOn(LogRetentionLogic.actions, 'setOpenedModal');
 
         LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
 
-        expect(LogRetentionLogic.actions.setOpenModal).toHaveBeenCalledWith(
+        expect(LogRetentionLogic.actions.setOpenedModal).toHaveBeenCalledWith(
           ELogRetentionOptions.Analytics
         );
       });
@@ -306,12 +306,12 @@ describe('LogRetentionLogic', () => {
         logRetention: {},
       });
       jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
-      jest.spyOn(LogRetentionLogic.actions, 'setOpenModal');
+      jest.spyOn(LogRetentionLogic.actions, 'setOpenedModal');
 
       LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.API);
 
       expect(LogRetentionLogic.actions.saveLogRetention).not.toHaveBeenCalled();
-      expect(LogRetentionLogic.actions.setOpenModal).not.toHaveBeenCalled();
+      expect(LogRetentionLogic.actions.setOpenedModal).not.toHaveBeenCalled();
     });
   });
 
