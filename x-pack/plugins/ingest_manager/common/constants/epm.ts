@@ -14,7 +14,19 @@ export const requiredPackages = {
   Endpoint: 'endpoint',
 } as const;
 
+// these are currently identical. we can separate if they later diverge
+export const defaultPackages = requiredPackages;
+
+export const agentAssetTypes = {
+  Input: 'input',
+} as const;
+
 export const dataTypes = {
   Logs: 'logs',
   Metrics: 'metrics',
+} as const;
+
+export const installationStatuses = {
+  Installed: 'installed',
+  NotInstalled: 'not_installed',
 } as const;
