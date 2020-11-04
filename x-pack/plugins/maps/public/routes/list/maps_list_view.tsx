@@ -31,8 +31,6 @@ import {
 } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui';
 import { goToSpecifiedPath } from '../../render_app';
-// @ts-expect-error
-import { addHelpMenuToAppChrome } from '../../help_menu_util';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
@@ -104,7 +102,6 @@ export class MapsListView extends React.Component {
 
   async initMapList() {
     this.fetchItems();
-    addHelpMenuToAppChrome();
     getCoreChrome().docTitle.change(getAppTitle());
     getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
   }

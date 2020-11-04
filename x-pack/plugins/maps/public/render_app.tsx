@@ -16,6 +16,7 @@ import {
   getMapsCapabilities,
   getToasts,
   getEmbeddableService,
+  getDocLinks,
 } from './kibana_services';
 import {
   createKbnUrlStateStorage,
@@ -26,6 +27,37 @@ import { MapList, MapApp } from './routes';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
+
+function setAppChrome() {
+  if (!getMapsCapabilities().save) {
+    getCoreChrome().setBadge({
+      text: i18n.translate('xpack.maps.badge.readOnly.text', {
+        defaultMessage: 'Read only',
+      }),
+      tooltip: i18n.translate('xpack.maps.badge.readOnly.tooltip', {
+        defaultMessage: 'Unable to save maps',
+      }),
+      iconType: 'glasses',
+    });
+  }
+
+  const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = getDocLinks();
+
+  getCoreChrome().setHelpExtension({
+    appName: 'Maps',
+    links: [
+      {
+        linkType: 'documentation',
+        href: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/maps.html`,
+      },
+      {
+        linkType: 'github',
+        title: '[Maps]',
+        labels: ['Team:Geo'],
+      },
+    ],
+  });
+}
 
 export async function renderApp({
   element,
@@ -40,19 +72,7 @@ export async function renderApp({
     ...withNotifyOnErrors(getToasts()),
   });
 
-  const I18nContext = getCoreI18n().Context;
-
-  if (!getMapsCapabilities().save) {
-    getCoreChrome().setBadge({
-      text: i18n.translate('xpack.maps.badge.readOnly.text', {
-        defaultMessage: 'Read only',
-      }),
-      tooltip: i18n.translate('xpack.maps.badge.readOnly.tooltip', {
-        defaultMessage: 'Unable to save maps',
-      }),
-      iconType: 'glasses',
-    });
-  }
+  setAppChrome();
 
   function renderMapApp(routeProps: RouteComponentProps<{ savedMapId?: string }>) {
     const stateTransfer = getEmbeddableService()?.getStateTransfer(
@@ -82,6 +102,7 @@ export async function renderApp({
     );
   }
 
+  const I18nContext = getCoreI18n().Context;
   render(
     <I18nContext>
       <Router history={history}>
