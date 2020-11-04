@@ -14,6 +14,7 @@ export function createCpuUsageAlertType(): AlertTypeModel {
   return {
     id: ALERT_CPU_USAGE,
     name: ALERT_DETAILS[ALERT_CPU_USAGE].label,
+    description: ALERT_DETAILS[ALERT_CPU_USAGE].description,
     iconClass: 'bell',
     alertParamsExpression: (props: Props) => (
       <Expression {...props} paramDetails={ALERT_DETAILS[ALERT_CPU_USAGE].paramDetails} />
