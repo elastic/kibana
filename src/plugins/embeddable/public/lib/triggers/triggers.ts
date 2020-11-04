@@ -58,10 +58,10 @@ export const CONTEXT_MENU_TRIGGER = 'CONTEXT_MENU_TRIGGER';
 export const contextMenuTrigger: Trigger<'CONTEXT_MENU_TRIGGER'> = {
   id: CONTEXT_MENU_TRIGGER,
   title: i18n.translate('embeddableApi.contextMenuTrigger.title', {
-    defaultMessage: 'Context menu',
+    defaultMessage: 'Context menu click',
   }),
   description: i18n.translate('embeddableApi.contextMenuTrigger.description', {
-    defaultMessage: 'A panel top-right corner context menu click.',
+    defaultMessage: 'A panel top-right corner context menu click',
   }),
 };
 
@@ -72,7 +72,7 @@ export const panelBadgeTrigger: Trigger<'PANEL_BADGE_TRIGGER'> = {
     defaultMessage: 'Panel badges',
   }),
   description: i18n.translate('embeddableApi.panelBadgeTrigger.description', {
-    defaultMessage: 'Actions appear in title bar when an embeddable loads in a panel.',
+    defaultMessage: 'Actions appear in title bar when an embeddable loads in a panel',
   }),
 };
 
@@ -83,7 +83,7 @@ export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
     defaultMessage: 'Panel notifications',
   }),
   description: i18n.translate('embeddableApi.panelNotificationTrigger.description', {
-    defaultMessage: 'Actions appear in top-right corner of a panel.',
+    defaultMessage: 'Actions appear in top-right corner of a panel',
   }),
 };
 
