@@ -90,6 +90,8 @@ describe('<WatchList />', () => {
 
           const searchInput = find('watchesTableContainer').find('.euiFieldSearch');
 
+          // Enter the name of "watch1" in the search box
+          // @ts-ignore
           searchInput.instance().value = watch1.name;
           searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
 
@@ -97,6 +99,7 @@ describe('<WatchList />', () => {
 
           const { tableCellsValues } = table.getMetaData('watchesTable');
 
+          // Expect "watch1" is only visible in the table
           expect(tableCellsValues.length).toEqual(1);
           const row = tableCellsValues[0];
           const { name, id, watchStatus } = watch1;
@@ -123,6 +126,7 @@ describe('<WatchList />', () => {
 
           const { tableCellsValues: updatedTableCellsValues } = table.getMetaData('watchesTable');
 
+          // Verify "watch1" is still the only watch visible in the table
           expect(updatedTableCellsValues.length).toEqual(1);
           const updatedRow = updatedTableCellsValues[0];
 

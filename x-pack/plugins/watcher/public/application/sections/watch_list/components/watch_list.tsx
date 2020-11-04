@@ -7,6 +7,7 @@
 import React, { useState, useMemo, useEffect, Fragment } from 'react';
 
 import {
+  CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -57,7 +58,10 @@ export const WatchList = () => {
   // Filter out deleted watches on the client, because the API will return 200 even though some watches
   // may not really be deleted until after they're done firing and this could take some time.
   const [deletedWatches, setDeletedWatches] = useState<string[]>([]);
-  const [pagination, setPagination] = useState({ pageIndex: 0 });
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: PAGINATION.initialPageSize,
+  });
   const [query, setQuery] = useState('');
 
   useEffect(() => {
@@ -381,7 +385,7 @@ export const WatchList = () => {
           : '',
     };
 
-    const handleOnChange = (search) => {
+    const handleOnChange = (search: { queryText: string }) => {
       setQuery(search.queryText);
       return true;
     };
@@ -420,7 +424,7 @@ export const WatchList = () => {
     content = (
       <div data-test-subj="watchesTableContainer">
         <EuiInMemoryTable
-          onTableChange={({ page: { index, size } }) =>
+          onTableChange={({ page: { index, size } }: CriteriaWithPagination<never>) =>
             setPagination({ pageIndex: index, pageSize: size })
           }
           items={availableWatches}

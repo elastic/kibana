@@ -95,4 +95,5 @@ export type TestSubjects =
   | 'createWatchButton'
   | 'emptyPrompt'
   | 'emptyPrompt.createWatchButton'
-  | 'editWatchButton';
+  | 'editWatchButton'
+  | 'watchesTableContainer';
