@@ -807,7 +807,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onTableChange={this.onTableChange}
             filterOptions={filterOptions}
             onExport={this.onExport}
-            canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
+            capabilities={applications.capabilities}
             onDelete={this.onDelete}
             onActionRefresh={this.refreshObject}
             goInspectObject={this.props.goInspectObject}
