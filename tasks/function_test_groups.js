@@ -46,7 +46,7 @@ export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
             '--config',
             'test/ui_capabilities/newsfeed_err/config.ts',
             '--config',
-            'test/new_visualize_flow/config.js',
+            'test/new_visualize_flow/config.ts',
             '--config',
             'test/security_functional/config.ts',
             // '--config', 'test/functional/config.firefox.js',
