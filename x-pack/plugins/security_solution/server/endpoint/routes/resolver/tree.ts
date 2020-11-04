@@ -7,14 +7,17 @@
 import { RequestHandler, Logger } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { eventsIndexPattern, alertsIndexPattern } from '../../../../common/endpoint/constants';
-import { validateTree } from '../../../../common/endpoint/schema/resolver';
+import { validateTreeEntityID } from '../../../../common/endpoint/schema/resolver';
 import { Fetcher } from './utils/fetch';
 import { EndpointAppContext } from '../../types';
 
 export function handleTree(
   log: Logger,
   endpointAppContext: EndpointAppContext
-): RequestHandler<TypeOf<typeof validateTree.params>, TypeOf<typeof validateTree.query>> {
+): RequestHandler<
+  TypeOf<typeof validateTreeEntityID.params>,
+  TypeOf<typeof validateTreeEntityID.query>
+> {
   return async (context, req, res) => {
     try {
       const client = context.core.elasticsearch.legacy.client;

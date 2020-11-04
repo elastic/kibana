@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 /**
  * Used to validate GET requests for a complete resolver tree.
  */
-export const validateTree = {
+export const validateTreeEntityID = {
   params: schema.object({ id: schema.string({ minLength: 1 }) }),
   query: schema.object({
     children: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
@@ -58,17 +58,14 @@ export const validateTree = {
 /**
  * Used to validate GET requests for a complete resolver tree.
  */
-export const validateTree2 = {
+export const validateTree = {
   body: schema.object({
-    // optional
-    // if the ancestry field below is specified ignore these fields
-    levels: schema.object({
-      ancestors: schema.number({ defaultValue: 20, min: 0, max: 1000 }),
-      descendants: schema.number({ defaultValue: 20, min: 0, max: 1000 }),
-    }),
+    // if the ancestry field is specified this field will be ignored
+    descendantLevels: schema.number({ defaultValue: 20, min: 0, max: 1000 }),
     // levels supersedes limit if it is defined
     descendants: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
-    ancestors: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
+    // if the ancestry array isn't specified we'll want to limit this
+    ancestors: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
     timerange: schema.object({
       from: schema.string(),
       to: schema.string(),

@@ -7,12 +7,7 @@ import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
 import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { Nodes, sourceFilter, getNodesFromAggs, Schema } from './aggregation_utils';
-
-interface Timerange {
-  from: string;
-  to: string;
-}
+import { NodeID, sourceFilter, Schema, Timerange } from '../utils/index';
 
 interface DescendantsParams {
   schema: Schema;
@@ -35,11 +30,15 @@ export class DescendantsQuery {
     this.timerange = timerange;
   }
 
-  private query(nodes: Nodes, size: number): JsonObject {
+  private query(nodes: NodeID[], size: number): JsonObject {
     return {
       // TODO look into switching this to doc_values
       _source: this.sourceFields,
-      size: 0,
+      size,
+      collapse: {
+        field: this.schema.id,
+      },
+      sort: [{ '@timestamp': 'asc' }],
       query: {
         bool: {
           filter: [
@@ -75,41 +74,45 @@ export class DescendantsQuery {
           ],
         },
       },
-      aggs: {
-        [this.schema.id]: {
-          terms: {
-            field: this.schema.id,
-            size,
-            order: {
-              timestampMin: 'asc',
-            },
-          },
-          aggs: {
-            singleEvent: {
-              top_hits: {
-                // TODO figure out if we can use doc_values
-                _source: this.sourceFields,
-                size: 1,
-                // TODO there might a use case to make the order configurable
-                sort: [{ '@timestamp': { order: 'asc' } }],
-              },
-            },
-            timestampMin: {
-              min: {
-                field: '@timestamp',
+    };
+  }
+
+  private queryWithAncestryArray(nodes: NodeID[], ancestryField: string, size: number): JsonObject {
+    return {
+      // TODO look into switching this to doc_values
+      _source: this.sourceFields,
+      size,
+      collapse: {
+        field: this.schema.id,
+      },
+      sort: [
+        {
+          _script: {
+            type: 'number',
+            script: {
+              source: `
+                Map ancestryToIndex = [:];
+                List sourceAncestryArray = params._source.process.Ext.ancestry;
+                int length = sourceAncestryArray.length;
+                for (int i = 0; i < length; i++) {
+                  ancestryToIndex[sourceAncestryArray[i]] = i;
+                }
+                for (String id : params.ids) {
+                  def index = ancestryToIndex[id];
+                  if (index != null) {
+                    return index;
+                  }
+                }
+                return -1;
+              `,
+              params: {
+                ids: nodes,
               },
             },
           },
         },
-      },
-    };
-  }
-
-  private queryWithAncestryArray(nodes: Nodes, ancestryField: string, size: number): JsonObject {
-    return {
-      // TODO look into switching this to doc_values
-      _source: this.sourceFields,
-      size: 0,
+        { '@timestamp': 'asc' },
+      ],
       query: {
         bool: {
           filter: [
@@ -152,71 +155,10 @@ export class DescendantsQuery {
           ],
         },
       },
-      aggs: {
-        [this.schema.id]: {
-          terms: {
-            field: this.schema.id,
-            size,
-          },
-          aggs: {
-            singleEvent: {
-              top_hits: {
-                // TODO figure out if we can use doc_values
-                _source: this.sourceFields,
-                size: 1,
-                // TODO there might a use case to make the order configurable
-                sort: [{ '@timestamp': { order: 'asc' } }],
-              },
-            },
-            bucket_sort_order: {
-              bucket_sort: {
-                // first sort the buckets by which documents are more direct descendants of the requested nodes
-                // (a direct descendants are children, then grandchildren etc)
-                // then sort those by which document was created first (timestamp ascending)
-                sort: [{ ancestry: 'asc' }, { timestampMin: 'asc' }],
-              },
-            },
-            timestampMin: {
-              min: {
-                field: '@timestamp',
-              },
-            },
-            ancestry: {
-              max: {
-                script: {
-                  // This will return the location of the id in the ancestry array field. This
-                  // will allow us to sort by levels of the tree.
-                  source: `
-                    Map ancestryToIndex = [:];
-                    List sourceAncestryArray = params._source.process.Ext.ancestry;
-                    int length = sourceAncestryArray.length;
-                    for (int i = 0; i < length; i++) {
-                      ancestryToIndex[sourceAncestryArray[i]] = i;
-                    }
-                    for (String id : params.ids) {
-                      def index = ancestryToIndex[id];
-                      if (index != null) {
-                        return index;
-                      }
-                    }
-                    return -1;
-                  `,
-                  params: {
-                    ids: nodes,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
     };
   }
 
-  /**
-   * TODO get rid of the unknowns
-   */
-  async search(client: IScopedClusterClient, nodes: Nodes, limit: number): Promise<unknown> {
+  async search(client: IScopedClusterClient, nodes: NodeID[], limit: number): Promise<unknown[]> {
     let response: ApiResponse<SearchResponse<unknown>>;
     if (this.schema.ancestry) {
       response = await client.asCurrentUser.search({
@@ -230,7 +172,6 @@ export class DescendantsQuery {
       });
     }
 
-    console.log('response ', JSON.stringify(response, null, 2));
-    return getNodesFromAggs(this.schema.id, response.body.aggregations);
+    return response.body.hits.hits.map((hit) => hit._source);
   }
 }
