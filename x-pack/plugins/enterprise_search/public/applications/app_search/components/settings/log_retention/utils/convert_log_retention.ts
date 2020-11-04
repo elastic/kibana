@@ -41,5 +41,5 @@ const convertLogRetentionPolicyFromServerToClient = ({
   is_default: isDefault,
 }: ILogRetentionServerPolicy): ILogRetentionPolicy => ({
   isDefault,
-  minAgeDays: minAgeDays === null ? null : minAgeDays,
+  minAgeDays,
 });
