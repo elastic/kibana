@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { useValues } from 'kea';
+import { useActions } from 'kea';
 
 import {
   EuiButton,
@@ -19,8 +19,7 @@ import {
   EuiLinkProps,
 } from '@elastic/eui';
 
-import { sendTelemetry } from '../../../shared/telemetry';
-import { HttpLogic } from '../../../shared/http';
+import { TelemetryLogic } from '../../../shared/telemetry';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 
 interface IOnboardingCardProps {
@@ -42,12 +41,10 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
   actionPath,
   complete,
 }) => {
-  const { http } = useValues(HttpLogic);
+  const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>
-    sendTelemetry({
-      http,
-      product: 'workplace_search',
+    sendWorkplaceSearchTelemetry({
       action: 'clicked',
       metric: 'onboarding_card_button',
     });
