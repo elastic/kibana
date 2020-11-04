@@ -448,6 +448,7 @@ export function LayerPanel(
                     columnId: activeId,
                     filterOperations: activeGroup.filterOperations,
                     suggestedPriority: activeGroup?.suggestedPriority,
+                    dimensionGroups: groups,
                     setState: (newState: unknown) => {
                       props.updateAll(
                         datasourceId,
