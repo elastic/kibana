@@ -293,8 +293,9 @@ export const getXyVisualization = ({
     );
   },
 
-toExpression: (state, layers, attributes) => toExpression(state, layers, paletteService, attributes),
-toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
+  toExpression: (state, layers, attributes) =>
+    toExpression(state, layers, paletteService, attributes),
+  toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
 
   getErrorMessages(state, frame) {
     // Data error handling below here
@@ -331,7 +332,7 @@ toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, palet
 
     return errors.length ? errors : undefined;
   },
-};
+});
 
 function validateLayersForDimension(
   dimension: string,
