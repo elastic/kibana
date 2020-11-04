@@ -17,14 +17,4 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-import { AggsCommonSetup, AggsStart as Start } from '../../../common';
-
-export type AggsSetup = AggsCommonSetup;
-
-export interface AggsStart {
-  asScopedToClient: (
-    savedObjectsClient: SavedObjectsClientContract,
-    elasticsearchClient: ElasticsearchClient
-  ) => Promise<Start>;
-}
+export { jobs } from './jobs';
