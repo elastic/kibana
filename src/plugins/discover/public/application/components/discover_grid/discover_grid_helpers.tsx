@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useContext } from 'react';
 import { EuiCodeBlock, EuiDataGridColumn } from '@elastic/eui';
-import { IndexPattern } from '../../../../../data/common/index_patterns/index_patterns';
+import { i18n } from '@kbn/i18n';
+import { IndexPattern, IndexPatternField } from '../../../../../data/common';
 import { DiscoverGridSettings } from './types';
+import { DiscoverGridContext } from './discover_grid_context';
 
 const kibanaJSON = 'kibana-json';
 const geoPoint = 'geo-point';
@@ -39,11 +41,7 @@ export function getEuiGridColumns(
     return 0;
   };
 
-  if (
-    showTimeCol !== false &&
-    indexPattern.timeFieldName &&
-    !columns.find((col) => col === timeFieldName)
-  ) {
+  if (showTimeCol && indexPattern.timeFieldName && !columns.find((col) => col === timeFieldName)) {
     const usedColumns = [indexPattern.timeFieldName, ...columns];
     return usedColumns.map((column) =>
       buildEuiGridColumn(column, getColWidth(column), indexPattern, timeString)
@@ -69,6 +67,64 @@ export function getVisibleColumns(
   return columns;
 }
 
+const FilterInBtn = ({ Component, rowIndex, columnId }: any) => {
+  const context = useContext(DiscoverGridContext);
+  return (
+    <Component
+      onClick={() => {
+        const row = context.rows[rowIndex];
+        const flattened = context.indexPattern.flattenHit(row);
+
+        if (flattened) {
+          context.onFilter(columnId, flattened[columnId], '+');
+        }
+      }}
+      iconType="plusInCircle"
+      aria-label={i18n.translate('discover.grid.filterForAria', {
+        defaultMessage: 'Filter for {value}',
+        values: { value: columnId },
+      })}
+    >
+      {i18n.translate('discover.grid.filterFor', {
+        defaultMessage: 'Filter for',
+      })}
+    </Component>
+  );
+};
+
+const FilterOutBtn = ({ Component, rowIndex, columnId }: any) => {
+  const context = useContext(DiscoverGridContext);
+  return (
+    <Component
+      onClick={() => {
+        const row = context.rows[rowIndex];
+        const flattened = context.indexPattern.flattenHit(row);
+
+        if (flattened) {
+          context.onFilter(columnId, flattened[columnId], '-');
+        }
+      }}
+      iconType="minusInCircle"
+      aria-label={i18n.translate('discover.grid.filterOutAria', {
+        defaultMessage: 'Filter out {value}',
+        values: { value: columnId },
+      })}
+    >
+      {i18n.translate('discover.grid.filterOut', {
+        defaultMessage: 'Filter out',
+      })}
+    </Component>
+  );
+};
+
+export function buildCellActions(field: IndexPatternField) {
+  if (!field.aggregatable) {
+    return [];
+  }
+
+  return [FilterInBtn, FilterOutBtn];
+}
+
 export function buildEuiGridColumn(
   columnName: string,
   columnWidth: number | undefined = 0,
@@ -86,6 +142,7 @@ export function buildEuiGridColumn(
       showSortAsc: { label: 'Sort ASC' },
       showSortDesc: { label: 'Sort DESC' },
     },
+    cellActions: indexPatternField ? buildCellActions(indexPatternField) : [],
   };
 
   // Default DataGrid schemas: boolean, numeric, datetime, json, currency

@@ -18,6 +18,8 @@
  */
 import React from 'react';
 import { DiscoverGridSelection } from './discover_grid_doc_selection';
+import { DocViewFilterFn, ElasticSearchHit } from '../../doc_views/doc_views_types';
+import { IndexPattern } from '../../../kibana_services';
 
 export interface GridContext {
   viewed: number;
@@ -26,13 +28,11 @@ export interface GridContext {
   setSelected: (map: DiscoverGridSelection) => void;
   showSelected: boolean;
   setShowSelected: (value: boolean) => void;
+  rows: ElasticSearchHit[];
+  onFilter: DocViewFilterFn;
+  indexPattern: IndexPattern;
 }
 
-export const DiscoverGridContext = React.createContext<GridContext>({
-  viewed: -1,
-  setViewed: () => void 0,
-  selected: new Map(),
-  setSelected: () => void 0,
-  showSelected: false,
-  setShowSelected: () => void 0,
-});
+const defaultContext = ({} as unknown) as GridContext;
+
+export const DiscoverGridContext = React.createContext<GridContext>(defaultContext);

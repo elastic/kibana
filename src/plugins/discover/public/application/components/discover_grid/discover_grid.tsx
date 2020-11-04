@@ -255,7 +255,17 @@ export const DiscoverGrid = React.memo(
     return (
       <I18nProvider>
         <DiscoverGridContext.Provider
-          value={{ selected, setSelected, showSelected, setShowSelected, viewed, setViewed }}
+          value={{
+            selected,
+            setSelected,
+            showSelected,
+            setShowSelected,
+            viewed,
+            setViewed,
+            rows,
+            onFilter,
+            indexPattern,
+          }}
         >
           <>
             <EuiDataGridMemoized
