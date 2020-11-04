@@ -9,42 +9,51 @@ import buildState from './build_state';
 import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
+import { TriggersActionsPageProvider } from '../../functional_with_es_ssl/page_objects/triggers_actions_ui_page';
 
-const reportName = 'Stack Functional Integration Tests';
-const testsFolder = '../apps';
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
 });
-log.info(`REPO_ROOT = ${REPO_ROOT}`);
-log.info(`WORKSPACE in config file ${process.env.WORKSPACE}`);
-
 const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
-log.info(`INTEGRATION_TEST_ROOT = ${INTEGRATION_TEST_ROOT}`);
-
 const stateFilePath = resolve(INTEGRATION_TEST_ROOT, 'qa/envvars.sh');
-log.info(`stateFilePath = ${stateFilePath}`);
 
+const testsFolder = '../apps';
 const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 
 export default async ({ readConfigFile }) => {
-  const defaultConfigs = await readConfigFile(require.resolve('../../functional/config'));
+  const xpackFunctionalConfig = await readConfigFile(require.resolve('../../functional/config'));
   const { tests, ...provisionedConfigs } = buildState(resolve(__dirname, stateFilePath));
   process.env.stack_functional_integration = true;
 
-  const servers = {
-    kibana: kbnTestConfig.getUrlParts(),
-    elasticsearch: esTestConfig.getUrlParts(),
-  };
-  log.info(`servers data: ${JSON.stringify(servers)}`);
+  logAll(log);
+
   const settings = {
-    ...defaultConfigs.getAll(),
-    junit: {
-      reportName: `${reportName} - ${provisionedConfigs.VM}`,
+    ...xpackFunctionalConfig.getAll(),
+    pageObjects: {
+      triggersActionsUI: TriggersActionsPageProvider,
+      ...xpackFunctionalConfig.get('pageObjects'),
     },
-    servers,
+    apps: {
+      ...xpackFunctionalConfig.get('apps'),
+      triggersConnectors: {
+        pathname: '/app/management/insightsAndAlerting/triggersActions/connectors',
+      },
+    },
+    junit: {
+      reportName: `Stack Functional Integration Tests - ${provisionedConfigs.VM}`,
+    },
+    servers: servers(),
+    kbnTestServer: {
+      ...xpackFunctionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        '--xpack.encryptedSavedObjects.encryptionKey="456XazszSCYexXqz4YktBGHCRkV6hyNK"',
+        '--xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys=["decrypt123XazszSCYexXqz4YktBGHCR"]',
+      ],
+    },
     testFiles: tests.map(prepend).map(logTest),
-    // testFiles: ['monitoring'].map(prepend).map(logTest),
+    // testFiles: ['alerts'].map(prepend).map(logTest),
     // If we need to do things like disable animations, we can do it in configure_start_kibana.sh, in the provisioner...which lives in the integration-test private repo
     uiSettings: {},
     security: { disableTestUser: true },
@@ -76,4 +85,17 @@ function highLight(testPath) {
 function logTest(testPath) {
   log.info(`Testing: '${highLight(truncate(testPath))}'`);
   return testPath;
+}
+function logAll(log) {
+  log.info(`REPO_ROOT = ${REPO_ROOT}`);
+  log.info(`WORKSPACE in config file ${process.env.WORKSPACE}`);
+  log.info(`INTEGRATION_TEST_ROOT = ${INTEGRATION_TEST_ROOT}`);
+  log.info(`stateFilePath = ${stateFilePath}`);
+  log.info(`servers data: ${JSON.stringify(servers, null, 2)}`);
+}
+function servers() {
+  return {
+    kibana: kbnTestConfig.getUrlParts(),
+    elasticsearch: esTestConfig.getUrlParts(),
+  };
 }
