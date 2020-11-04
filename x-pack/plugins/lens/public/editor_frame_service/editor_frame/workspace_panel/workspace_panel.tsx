@@ -260,7 +260,6 @@ export function WorkspacePanel({
       title={title}
       framePublicAPI={framePublicAPI}
       dispatch={dispatch}
-      emptyExpression={expression === null}
       visualizationState={visualizationState}
       visualizationId={activeVisualizationId}
       datasourceStates={datasourceStates}
