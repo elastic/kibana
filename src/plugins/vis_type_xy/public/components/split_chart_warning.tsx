@@ -27,12 +27,14 @@ import {
   EuiPageContentHeaderSection,
   EuiPageContentBody,
   EuiTitle,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from 'react-intl';
 
 export const SplitChartWarning: FC = () => {
   return (
-    <EuiPage style={{ width: '100%' }}>
+    <EuiPage style={{ width: '100%', height: '100%' }}>
       <EuiPageBody component="div">
         <EuiPageContent verticalPosition="center" horizontalPosition="center">
           <EuiPageContentHeader>
@@ -47,10 +49,24 @@ export const SplitChartWarning: FC = () => {
             </EuiPageContentHeaderSection>
           </EuiPageContentHeader>
           <EuiPageContentBody>
-            {i18n.translate('visTypeXy.splitChartWarning.content', {
-              defaultMessage:
-                'Warning split chart aggregations are not supported with vis_type_xy plugin',
-            })}
+            <FormattedMessage
+              id="visTypeXy.splitChartWarning.content"
+              defaultMessage="Split chart aggregations are not supported with new chart ui enabled. Please disable the {link} advanced setting to enable split chart support."
+              values={{
+                link: (
+                  <EuiLink
+                    href="/app/management/kibana/settings/new%20chart%20ui"
+                    target="_blank"
+                    external
+                  >
+                    <FormattedMessage
+                      id="visTypeXy.splitChartWarning.link"
+                      defaultMessage="New chart ui"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
           </EuiPageContentBody>
         </EuiPageContent>
       </EuiPageBody>
