@@ -535,7 +535,7 @@ export class EventsFactory {
   }
 
   addActiveInstance(instanceId: string, actionGroupId: string | undefined): EventsFactory {
-    const kibanaAlerting = (actionGroupId)
+    const kibanaAlerting = actionGroupId
       ? { instance_id: instanceId, action_group_id: actionGroupId }
       : { instance_id: instanceId };
     this.events.push({
