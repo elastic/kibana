@@ -25,15 +25,11 @@ import {
   DEFAULT_EMS_TILE_API_URL,
   MapsLegacyConfig,
 } from '../config';
-import { ConfigSchema as TileMapSchema } from '../../tile_map/config';
-import { ConfigSchema as RegionMapSchema } from '../../region_map/config';
 
 describe('EMSSettings', () => {
   const mockConfig: MapsLegacyConfig = {
     includeElasticMapsService: true,
     proxyElasticMapsServiceInMaps: false,
-    tilemap: ({} as unknown) as TileMapSchema,
-    regionmap: ({} as unknown) as RegionMapSchema,
     manifestServiceUrl: '',
     emsUrl: '',
     emsFileApiUrl: DEFAULT_EMS_FILE_API_URL,
@@ -45,7 +41,7 @@ describe('EMSSettings', () => {
       desaturated: 'road_map_desaturated',
       dark: 'dark_map',
     },
-  };
+  } as MapsLegacyConfig;
 
   describe('isConfigValid', () => {
     test('should validate defaults', () => {
