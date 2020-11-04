@@ -59,11 +59,6 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('feature controls', () => {
-    let isProd = false;
-    before(() => {
-      const kbnConfig = config.get('servers.kibana');
-      isProd = kbnConfig.hostname === 'localhost' && kbnConfig.port === 5620 ? false : true;
-    });
     it(`APIs can't be accessed by user with no privileges`, async () => {
       const username = 'logstash_read';
       const roleName = 'logstash_read';
