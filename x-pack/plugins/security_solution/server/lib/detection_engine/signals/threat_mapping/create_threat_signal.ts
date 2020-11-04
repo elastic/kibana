@@ -56,7 +56,7 @@ export const createThreatSignal = async ({
     // a hit so opt to return the existing result.
     logger.debug(
       buildRuleMessage(
-        'Threat list is empty after filtering for missing data, returning without attempting a match'
+        'Indicator items are empty after filtering for missing data, returning without attempting a match'
       )
     );
     return currentResult;
@@ -72,7 +72,11 @@ export const createThreatSignal = async ({
       lists: exceptionItems,
     });
 
-    logger.debug(buildRuleMessage('Threat list is attempting a match and signal creation'));
+    logger.debug(
+      buildRuleMessage(
+        `${threatFilter.query.bool.should.length} indicator items are being checked for existence of matches`
+      )
+    );
     const newResult = await searchAfterAndBulkCreate({
       gap,
       previousStartedAt,
@@ -103,7 +107,9 @@ export const createThreatSignal = async ({
     const results = combineResults(currentResult, newResult);
     logger.debug(
       buildRuleMessage(
-        `Threat list completed matching a round against indexes and the time to search was ${
+        `${
+          threatFilter.query.bool.should.length
+        } items have completed match checks and the total time to search was ${
           newResult.searchAfterTimes.length !== 0 ? newResult.searchAfterTimes : '(unknown) '
         }ms`
       )

@@ -48,7 +48,7 @@ export const getThreatList = async ({
 
   logger.debug(
     buildRuleMessage(
-      `Querying the threat list from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} threat items`
+      `Querying the indicator items from the index: "${index}" with searchAfter: "${searchAfter}" for up to ${calculatedPerPage} indicator items`
     )
   );
   const response: SearchResponse<ThreatListItem> = await callCluster('search', {
@@ -67,7 +67,7 @@ export const getThreatList = async ({
     size: calculatedPerPage,
   });
 
-  logger.debug(buildRuleMessage(`Retrieved threat list of size: ${response.hits.hits.length}`));
+  logger.debug(buildRuleMessage(`Retrieved indicator items of size: ${response.hits.hits.length}`));
   return response;
 };
 
