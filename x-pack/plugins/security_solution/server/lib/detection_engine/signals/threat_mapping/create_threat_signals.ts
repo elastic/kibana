@@ -50,7 +50,7 @@ export const createThreatSignals = async ({
   concurrentSearches,
   itemsPerSearch,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
-  logger.debug(buildRuleMessage('Starting threat matching'));
+  logger.debug(buildRuleMessage('Indicator matching starting'));
   const perPage = concurrentSearches * itemsPerSearch;
 
   let results: SearchAfterAndBulkCreateReturnType = {
@@ -70,7 +70,7 @@ export const createThreatSignals = async ({
     language: threatLanguage,
     index: threatIndex,
   });
-  logger.debug(buildRuleMessage(`Count of total threat list items is ${threatListCount}`));
+  logger.debug(buildRuleMessage(`Total indicator items are ${threatListCount}`));
 
   let threatList = await getThreatList({
     callCluster: services.callCluster,
@@ -91,7 +91,7 @@ export const createThreatSignals = async ({
   const chunks = chunk(itemsPerSearch, threatList.hits.hits);
   logger.debug(
     buildRuleMessage(
-      `${chunks.length} concurrent threat_match searches starting where each search has ${itemsPerSearch} threat items per search`
+      `${chunks.length} concurrent indicator searches are starting. Each search has ${itemsPerSearch} indicator items`
     )
   );
 
@@ -138,7 +138,7 @@ export const createThreatSignals = async ({
     threatListCount -= threatList.hits.hits.length;
     logger.debug(
       buildRuleMessage(
-        `Concurrent threat_match searches completed with total signals of ${results.createdSignalsCount} found`,
+        `Concurrent indicator match searches completed with ${results.createdSignalsCount} signals found`,
         `search times of ${results.searchAfterTimes}ms,`,
         `bulk create times ${results.bulkCreateTimes}ms,`,
         `all successes are ${results.success}`
@@ -147,16 +147,12 @@ export const createThreatSignals = async ({
     if (results.createdSignalsCount >= params.maxSignals) {
       logger.debug(
         buildRuleMessage(
-          `threat_match detected max signals has been reached, terminating early with approximate number of threat list items not checked left at ${threatListCount}`
+          `Indicator match has reached its max signals count ${params.maxSignals}. Additional indicator items not checked are ${threatListCount}`
         )
       );
       break;
     }
-    logger.debug(
-      buildRuleMessage(
-        `Approximate number of threat list items to left to check are ${threatListCount}`
-      )
-    );
+    logger.debug(buildRuleMessage(`Indicator items left to check are ${threatListCount}`));
 
     threatList = await getThreatList({
       callCluster: services.callCluster,
@@ -175,6 +171,6 @@ export const createThreatSignals = async ({
     });
   }
 
-  logger.debug(buildRuleMessage('Done threat matching'));
+  logger.debug(buildRuleMessage('Indicator Matching completed'));
   return results;
 };

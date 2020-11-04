@@ -362,7 +362,7 @@ export const signalRulesAlertType = ({
           ) {
             throw new Error(
               [
-                'Threat Match rule is missing threatQuery and/or threatIndex and/or threatMapping:',
+                'Indicator match is missing threatQuery and/or threatIndex and/or threatMapping:',
                 `threatQuery: "${threatQuery}"`,
                 `threatIndex: "${threatIndex}"`,
                 `threatMapping: "${threatMapping}"`,
