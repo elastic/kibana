@@ -28,3 +28,5 @@ export {
   LicenseService,
   isAgentUpgradeable,
 } from '../../../../common';
+
+export * from './ui_extensions';

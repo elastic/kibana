@@ -8,10 +8,10 @@ import { ComponentType, LazyExoticComponent } from 'react';
 import { PackagePolicy } from './models';
 
 /** Register a Fleet UI extension */
-export type ExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
+export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
 
 /** Internal storage for registered UI Extension Points */
-export interface ExtensionsStorage {
+export interface UIExtensionsStorage {
   [key: string]: Partial<
     Record<
       UIExtensionPoint['type'],

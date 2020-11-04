@@ -31,6 +31,11 @@ import {
   TutorialModuleNotice,
 } from './applications/ingest_manager/components/home_integration';
 import { registerPackagePolicyComponent } from './applications/ingest_manager/sections/agent_policy/create_package_policy_page/components/custom_package_policy';
+import { createExtensionRegistrationCallback } from './applications/ingest_manager/services';
+import {
+  UIExtensionRegistrationCallback,
+  UIExtensionsStorage,
+} from '../common/types/ui_extensions';
 
 export { IngestManagerConfigType } from '../common/types';
 
@@ -44,6 +49,7 @@ export interface IngestManagerSetup {}
  */
 export interface IngestManagerStart {
   registerPackagePolicyComponent: typeof registerPackagePolicyComponent;
+  registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
 
@@ -62,6 +68,7 @@ export class IngestManagerPlugin
     Plugin<IngestManagerSetup, IngestManagerStart, IngestManagerSetupDeps, IngestManagerStartDeps> {
   private config: IngestManagerConfigType;
   private kibanaVersion: string;
+  private extensions: UIExtensionsStorage = {};
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<IngestManagerConfigType>();
@@ -154,6 +161,8 @@ export class IngestManagerPlugin
         return successPromise;
       },
       registerPackagePolicyComponent,
+
+      registerExtension: createExtensionRegistrationCallback(this.extensions),
     };
   }
 
