@@ -18,7 +18,7 @@
  */
 
 import { createHash } from 'crypto';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
 import { KibanaRequest } from '../../../core/server';

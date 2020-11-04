@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { KibanaRequest, SavedObjectsClientContract } from 'src/core/server';
 import { Agent } from '../../types';
 import * as APIKeyService from '../api_keys';

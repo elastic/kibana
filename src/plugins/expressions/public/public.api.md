@@ -389,6 +389,10 @@ export interface ExpressionFunctionDefinitions {
     //
     // (undocumented)
     cumulative_sum: ExpressionFunctionCumulativeSum;
+    // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionDerivative" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    derivative: ExpressionFunctionDerivative;
     // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionFont" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -399,6 +403,10 @@ export interface ExpressionFunctionDefinitions {
     //
     // (undocumented)
     kibana_context: ExpressionFunctionKibanaContext;
+    // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionMovingAverage" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    moving_average: ExpressionFunctionMovingAverage;
     // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionTheme" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
