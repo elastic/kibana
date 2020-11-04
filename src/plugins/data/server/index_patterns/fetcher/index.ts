@@ -18,4 +18,8 @@
  */
 
 export * from './index_patterns_fetcher';
-export { shouldReadFieldFromDocValues } from './lib';
+export {
+  shouldReadFieldFromDocValues,
+  mergeCapabilitiesWithFields,
+  getCapabilitiesForRollupIndices,
+} from './lib';

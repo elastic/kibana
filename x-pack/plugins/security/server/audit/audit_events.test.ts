@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { URL } from 'url';
 import {
   EventOutcome,
   SavedObjectAction,
@@ -104,6 +105,34 @@ describe('#savedObjectEvent', () => {
       }
     `);
   });
+
+  test('creates event with `success` outcome for `REMOVE_REFERENCES` action', () => {
+    expect(
+      savedObjectEvent({
+        action: SavedObjectAction.REMOVE_REFERENCES,
+        savedObject: { type: 'dashboard', id: 'SAVED_OBJECT_ID' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "error": undefined,
+        "event": Object {
+          "action": "saved_object_remove_references",
+          "category": "database",
+          "outcome": "success",
+          "type": "change",
+        },
+        "kibana": Object {
+          "add_to_spaces": undefined,
+          "delete_from_spaces": undefined,
+          "saved_object": Object {
+            "id": "SAVED_OBJECT_ID",
+            "type": "dashboard",
+          },
+        },
+        "message": "User has removed references to dashboard [id=SAVED_OBJECT_ID]",
+      }
+    `);
+  });
 });
 
 describe('#userLoginEvent', () => {
@@ -192,11 +221,11 @@ describe('#httpRequestEvent', () => {
         },
         "message": "User is requesting [/path] endpoint",
         "url": Object {
-          "domain": undefined,
+          "domain": "localhost",
           "path": "/path",
           "port": undefined,
           "query": undefined,
-          "scheme": undefined,
+          "scheme": "http:",
         },
       }
     `);
@@ -211,12 +240,7 @@ describe('#httpRequestEvent', () => {
           kibanaRequestState: {
             requestId: '123',
             requestUuid: '123e4567-e89b-12d3-a456-426614174000',
-            rewrittenUrl: {
-              path: '/original/path',
-              pathname: '/original/path',
-              query: 'query=param',
-              search: '?query=param',
-            },
+            rewrittenUrl: new URL('http://localhost/original/path?query=param'),
           },
         }),
       })
@@ -234,11 +258,11 @@ describe('#httpRequestEvent', () => {
         },
         "message": "User is requesting [/original/path] endpoint",
         "url": Object {
-          "domain": undefined,
+          "domain": "localhost",
           "path": "/original/path",
           "port": undefined,
           "query": "query=param",
-          "scheme": undefined,
+          "scheme": "http:",
         },
       }
     `);

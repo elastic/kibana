@@ -5,7 +5,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { WATCH_TYPES } from '../../../common/constants';
 import { JsonWatch } from './json_watch';
 import { MonitoringWatch } from './monitoring_watch';

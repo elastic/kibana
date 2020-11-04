@@ -12,9 +12,7 @@ import {
 } from 'jest-snapshot';
 import path from 'path';
 import expect from '@kbn/expect';
-// @ts-expect-error
 import prettier from 'prettier';
-// @ts-expect-error
 import babelTraverse from '@babel/traverse';
 import { Suite, Test } from 'mocha';
 import { flatten } from 'lodash';
