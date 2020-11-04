@@ -14,7 +14,6 @@ import { FramePublicAPI } from '../types';
 import { State } from './types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../editor_frame_service/mocks';
-import { componentDetailsFlyoutProps } from '../../../index_management/public/application/components';
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
