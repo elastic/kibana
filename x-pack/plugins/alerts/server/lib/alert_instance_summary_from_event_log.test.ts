@@ -104,11 +104,13 @@ describe('alertInstanceSummaryFromEventLog', () => {
       Object {
         "instances": Object {
           "instance-1": Object {
+            "actionGroupId": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
           },
           "instance-2": Object {
+            "actionGroupId": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
@@ -184,7 +186,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
     const events = eventsFactory
       .addExecute()
       .addNewInstance('instance-1')
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
       .addResolvedInstance('instance-1')
@@ -202,6 +204,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       Object {
         "instances": Object {
           "instance-1": Object {
+            "actionGroupId": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",
@@ -218,7 +221,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
       .addResolvedInstance('instance-1')
@@ -236,6 +239,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       Object {
         "instances": Object {
           "instance-1": Object {
+            "actionGroupId": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",
@@ -253,10 +257,10 @@ describe('alertInstanceSummaryFromEventLog', () => {
     const events = eventsFactory
       .addExecute()
       .addNewInstance('instance-1')
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
       .getEvents();
 
     const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
@@ -271,6 +275,43 @@ describe('alertInstanceSummaryFromEventLog', () => {
       Object {
         "instances": Object {
           "instance-1": Object {
+            "actionGroupId": "action group A",
+            "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "muted": false,
+            "status": "Active",
+          },
+        },
+        "lastRun": "2020-06-18T00:00:10.000Z",
+        "status": "Active",
+      }
+    `);
+  });
+
+  test('alert with currently active instance that switched action groups', async () => {
+    const alert = createAlert({});
+    const eventsFactory = new EventsFactory();
+    const events = eventsFactory
+      .addExecute()
+      .addNewInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
+      .advanceTime(10000)
+      .addExecute()
+      .addActiveInstance('instance-1', 'action group B')
+      .getEvents();
+
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
+
+    const { lastRun, status, instances } = summary;
+    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+      Object {
+        "instances": Object {
+          "instance-1": Object {
+            "actionGroupId": "action group B",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
@@ -287,10 +328,10 @@ describe('alertInstanceSummaryFromEventLog', () => {
     const eventsFactory = new EventsFactory();
     const events = eventsFactory
       .addExecute()
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
       .getEvents();
 
     const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
@@ -305,6 +346,7 @@ describe('alertInstanceSummaryFromEventLog', () => {
       Object {
         "instances": Object {
           "instance-1": Object {
+            "actionGroupId": "action group A",
             "activeStartDate": undefined,
             "muted": false,
             "status": "Active",
@@ -322,12 +364,12 @@ describe('alertInstanceSummaryFromEventLog', () => {
     const events = eventsFactory
       .addExecute()
       .addNewInstance('instance-1')
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
       .addNewInstance('instance-2')
-      .addActiveInstance('instance-2')
+      .addActiveInstance('instance-2', 'action group B')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
       .addResolvedInstance('instance-2')
       .getEvents();
 
@@ -343,11 +385,13 @@ describe('alertInstanceSummaryFromEventLog', () => {
       Object {
         "instances": Object {
           "instance-1": Object {
+            "actionGroupId": "action group A",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": true,
             "status": "Active",
           },
           "instance-2": Object {
+            "actionGroupId": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
@@ -365,19 +409,19 @@ describe('alertInstanceSummaryFromEventLog', () => {
     const events = eventsFactory
       .addExecute()
       .addNewInstance('instance-1')
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
       .addNewInstance('instance-2')
-      .addActiveInstance('instance-2')
+      .addActiveInstance('instance-2', 'action group B')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group A')
       .addResolvedInstance('instance-2')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group B')
       .advanceTime(10000)
       .addExecute()
-      .addActiveInstance('instance-1')
+      .addActiveInstance('instance-1', 'action group B')
       .getEvents();
 
     const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
@@ -392,11 +436,13 @@ describe('alertInstanceSummaryFromEventLog', () => {
       Object {
         "instances": Object {
           "instance-1": Object {
+            "actionGroupId": "action group B",
             "activeStartDate": "2020-06-18T00:00:00.000Z",
             "muted": false,
             "status": "Active",
           },
           "instance-2": Object {
+            "actionGroupId": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",
@@ -452,14 +498,14 @@ export class EventsFactory {
     return this;
   }
 
-  addActiveInstance(instanceId: string): EventsFactory {
+  addActiveInstance(instanceId: string, actionGroupId: string): EventsFactory {
     this.events.push({
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.activeInstance,
       },
-      kibana: { alerting: { instance_id: instanceId } },
+      kibana: { alerting: { instance_id: instanceId, action_group_id: actionGroupId } },
     });
     return this;
   }

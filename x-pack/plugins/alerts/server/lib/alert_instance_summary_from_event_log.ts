@@ -83,6 +83,7 @@ export function alertInstanceSummaryFromEventLog(
       case EVENT_LOG_ACTIONS.resolvedInstance:
         status.status = 'OK';
         status.activeStartDate = undefined;
+        status.actionGroupId = undefined;
     }
   }
 
