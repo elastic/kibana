@@ -21,14 +21,23 @@ export const getStatsWithXpack: StatsGetter<{}, TelemetryAggregatedStats> = asyn
   const clustersLocalStats = await getLocalStats(clustersDetails, config, context);
   const xpack = await getXPackUsage(esClient).catch(() => undefined); // We want to still report something (and do not lose the license) even when this method fails.
 
-  return clustersLocalStats.map((localStats) => {
-    if (xpack) {
-      return {
-        ...localStats,
-        stack_stats: { ...localStats.stack_stats, xpack },
-      };
-    }
+  return clustersLocalStats
+    .map((localStats) => {
+      if (xpack) {
+        return {
+          ...localStats,
+          stack_stats: { ...localStats.stack_stats, xpack },
+        };
+      }
 
-    return localStats;
-  });
+      return localStats;
+    })
+    .reduce((acc, stats) => {
+      // Concatenate the telemetry reported via monitoring as additional payloads instead of reporting it inside of stack_stats.kibana.plugins.monitoringTelemetry
+      const monitoringTelemetry = stats.stack_stats.kibana?.plugins?.monitoringTelemetry;
+      if (monitoringTelemetry) {
+        delete stats.stack_stats.kibana!.plugins.monitoringTelemetry;
+      }
+      return [...acc, stats, ...(monitoringTelemetry || [])];
+    }, [] as TelemetryAggregatedStats[]);
 };

@@ -48,34 +48,54 @@ const getContext = () => ({
   logger: coreMock.createPluginInitializerContext().logger.get('test'),
 });
 
-const mockUsageCollection = (kibanaUsage = kibana) => ({
+const mockUsageCollection = (kibanaUsage: Record<string, unknown> = kibana) => ({
   bulkFetch: () => kibanaUsage,
   toObject: (data: any) => data,
 });
 
+/**
+ * Instantiate the esClient mock with the common requests
+ */
+function mockEsClient() {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  // mock for license should return a basic license
+  esClient.license.get.mockResolvedValue(
+    // @ts-ignore we only care about the response body
+    { body: { license: { type: 'basic' } } }
+  );
+  // mock for xpack usage should return an empty object
+  esClient.xpack.usage.mockResolvedValue(
+    // @ts-ignore we only care about the response body
+    { body: {} }
+  );
+  // mock for nodes usage should resolve for this test
+  esClient.nodes.usage.mockResolvedValue(
+    // @ts-ignore we only care about the response body
+    { body: { cluster_name: 'test cluster', nodes: nodesUsage } }
+  );
+  // mock for info should resolve for this test
+  esClient.info.mockResolvedValue(
+    // @ts-ignore we only care about the response body
+    {
+      body: {
+        cluster_uuid: 'test',
+        cluster_name: 'test',
+        version: { number: '8.0.0' },
+      },
+    }
+  );
+
+  return esClient;
+}
+
 describe('Telemetry Collection: Get Aggregated Stats', () => {
   test('OSS-like telemetry (no license nor X-Pack telemetry)', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    const esClient = mockEsClient();
     // mock for xpack.usage should throw a 404 for this test
     esClient.xpack.usage.mockRejectedValue(new Error('Not Found'));
     // mock for license should throw a 404 for this test
     esClient.license.get.mockRejectedValue(new Error('Not Found'));
-    // mock for nodes usage should resolve for this test
-    esClient.nodes.usage.mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      { body: { cluster_name: 'test cluster', nodes: nodesUsage } }
-    );
-    // mock for info should resolve for this test
-    esClient.info.mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      {
-        body: {
-          cluster_uuid: 'test',
-          cluster_name: 'test',
-          version: { number: '8.0.0' },
-        },
-      }
-    );
+
     const usageCollection = mockUsageCollection();
     const context = getContext();
 
@@ -95,32 +115,7 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
   });
 
   test('X-Pack telemetry (license + X-Pack)', async () => {
-    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-    // mock for license should return a basic license
-    esClient.license.get.mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      { body: { license: { type: 'basic' } } }
-    );
-    // mock for xpack usage should return an empty object
-    esClient.xpack.usage.mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      { body: {} }
-    );
-    // mock for nodes usage should return the cluster name and nodes usage
-    esClient.nodes.usage.mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      { body: { cluster_name: 'test cluster', nodes: nodesUsage } }
-    );
-    esClient.info.mockResolvedValue(
-      // @ts-ignore we only care about the response body
-      {
-        body: {
-          cluster_uuid: 'test',
-          cluster_name: 'test',
-          version: { number: '8.0.0' },
-        },
-      }
-    );
+    const esClient = mockEsClient();
     const usageCollection = mockUsageCollection();
     const context = getContext();
 
@@ -133,6 +128,31 @@ describe('Telemetry Collection: Get Aggregated Stats', () => {
       context
     );
     stats.forEach((entry) => {
+      expect(entry).toMatchSnapshot({
+        timestamp: expect.any(String),
+      });
+    });
+  });
+
+  test('X-Pack telemetry with appended Monitoring data', async () => {
+    const esClient = mockEsClient();
+    const usageCollection = mockUsageCollection({
+      ...kibana,
+      monitoringTelemetry: [
+        { collectionSource: 'monitoring', timestamp: new Date().toISOString() },
+      ],
+    });
+    const context = getContext();
+
+    const stats = await getStatsWithXpack(
+      [{ clusterUuid: '1234' }],
+      {
+        esClient,
+        usageCollection,
+      } as any,
+      context
+    );
+    stats.forEach((entry, index) => {
       expect(entry).toMatchSnapshot({
         timestamp: expect.any(String),
       });

@@ -286,9 +286,9 @@ export class TelemetryCollectionManagerPlugin
     return stats.map((stat) => {
       const license = licenses[stat.cluster_uuid];
       return {
+        collectionSource: collection.title,
         ...(license ? { license } : {}),
         ...stat,
-        collectionSource: collection.title,
       };
     });
   }

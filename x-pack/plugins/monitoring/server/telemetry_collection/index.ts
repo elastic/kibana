@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { registerMonitoringCollection } from './register_monitoring_collection';
+export { registerMonitoringTelemetryCollection } from './register_monitoring_telemetry_collection';

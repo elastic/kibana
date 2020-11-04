@@ -13,7 +13,6 @@
   ],
   "optionalPlugins": [
     "infra",
-    "telemetryCollectionManager",
     "usageCollection",
     "home",
     "cloud",
