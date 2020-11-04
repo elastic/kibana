@@ -15,21 +15,21 @@ export type Start = void;
 
 export interface AlertingExamplePublicSetupDeps {
   alerts: AlertingSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamplePublicSetupDeps> {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  public setup(core: CoreSetup, { alerts, triggers_actions_ui }: AlertingExamplePublicSetupDeps) {
+  public setup(core: CoreSetup, { alerts, triggersActionsUi }: AlertingExamplePublicSetupDeps) {
     alerts.registerNavigation(
       'alerting_fixture',
       'test.noop',
       (alert: SanitizedAlert, alertType: AlertType) => `/alert/${alert.id}`
     );
 
-    triggers_actions_ui.alertTypeRegistry.register({
+    triggersActionsUi.alertTypeRegistry.register({
       id: 'test.always-firing',
       name: 'Test Always Firing',
+      description: 'Always fires',
       iconClass: 'alert',
       alertParamsExpression: () => React.createElement('div', null, 'Test Always Firing'),
       validate: () => {
@@ -38,9 +38,10 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
       requiresAppContext: false,
     });
 
-    triggers_actions_ui.alertTypeRegistry.register({
+    triggersActionsUi.alertTypeRegistry.register({
       id: 'test.noop',
       name: 'Test Noop',
+      description: `Doesn't do anything`,
       iconClass: 'alert',
       alertParamsExpression: () => React.createElement('div', null, 'Test Noop'),
       validate: () => {

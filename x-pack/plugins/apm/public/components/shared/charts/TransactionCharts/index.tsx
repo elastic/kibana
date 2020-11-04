@@ -24,11 +24,9 @@ import { Coordinate } from '../../../../../typings/timeseries';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
-import { asDecimal, tpmUnit } from '../../../../utils/formatters';
+import { asDecimal, tpmUnit } from '../../../../../common/utils/formatters';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { BrowserLineChart } from './BrowserLineChart';
-import { DurationByCountryMap } from './DurationByCountryMap';
-import { ErroneousTransactionsRateChart } from '../ErroneousTransactionsRateChart';
+import { ErroneousTransactionsRateChart } from '../erroneous_transactions_rate_chart/legacy';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
 import {
   getResponseTimeTickFormatter,
@@ -120,24 +118,6 @@ export function TransactionCharts({
           <TransactionBreakdown />
         </EuiFlexItem>
       </EuiFlexGrid>
-
-      {transactionType === TRANSACTION_PAGE_LOAD && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiFlexGrid columns={2} gutterSize="s">
-            <EuiFlexItem>
-              <EuiPanel>
-                <DurationByCountryMap />
-              </EuiPanel>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel>
-                <BrowserLineChart />
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGrid>
-        </>
-      )}
     </>
   );
 }

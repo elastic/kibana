@@ -20,20 +20,13 @@ import expect from '@kbn/expect';
 import { PluginFunctionalProviderContext } from '../../services';
 import '../../plugins/core_provider_plugin/types';
 
-export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
+export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'settings']);
 
-  describe('index patterns', function () {
+  // skipping the tests as it deletes index patterns created by other test causing unexpected failures
+  // https://github.com/elastic/kibana/issues/79886
+  describe.skip('index patterns', function () {
     let indexPatternId = '';
-    before(async () => {
-      await esArchiver.loadIfNeeded(
-        '../functional/fixtures/es_archiver/getting_started/shakespeare'
-      );
-      await PageObjects.common.navigateToApp('settings');
-      await PageObjects.settings.createIndexPattern('shakespeare', '');
-    });
 
     it('can get all ids', async () => {
       const body = await (await supertest.get('/api/index-patterns-plugin/get-all').expect(200))
@@ -46,14 +39,14 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       const body = await (
         await supertest.get(`/api/index-patterns-plugin/get/${indexPatternId}`).expect(200)
       ).body;
-      expect(body.fields.length > 0).to.equal(true);
+      expect(typeof body.id).to.equal('string');
     });
 
     it('can update index pattern', async () => {
-      const body = await (
-        await supertest.get(`/api/index-patterns-plugin/update/${indexPatternId}`).expect(200)
-      ).body;
-      expect(body).to.eql({});
+      const resp = await supertest
+        .get(`/api/index-patterns-plugin/update/${indexPatternId}`)
+        .expect(200);
+      expect(resp.body).to.eql({});
     });
 
     it('can delete index pattern', async () => {

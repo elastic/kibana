@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
@@ -37,7 +38,12 @@ class IndexLabel extends React.Component {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSwitch
-            label="System indices"
+            label={i18n.translate(
+              'xpack.monitoring.elasticsearch.shardAllocation.tableHead.filterSystemIndices',
+              {
+                defaultMessage: 'Filter for system indices',
+              }
+            )}
             onChange={this.toggleShowSystemIndicesState}
             checked={this.state.showSystemIndices}
             data-test-subj="shardShowSystemIndices"

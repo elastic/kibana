@@ -4,6 +4,8 @@
 
 ## IndexPattern.getSourceFiltering() method
 
+Get the source filtering configuration for that index.
+
 <b>Signature:</b>
 
 ```typescript

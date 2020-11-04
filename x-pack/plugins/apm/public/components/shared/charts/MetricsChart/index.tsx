@@ -5,21 +5,21 @@
  */
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
-import { asPercent } from '../../../../../common/utils/formatters';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
-// @ts-expect-error
-import CustomPlot from '../CustomPlot';
 import {
+  asPercent,
   asDecimal,
   asInteger,
   asDynamicBytes,
   getFixedByteFormatter,
   asDuration,
-} from '../../../../utils/formatters';
+} from '../../../../../common/utils/formatters';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { GenericMetricsChart } from '../../../../../server/lib/metrics/transform_metrics_chart';
+// @ts-expect-error
+import CustomPlot from '../CustomPlot';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { useChartsSync } from '../../../../hooks/useChartsSync';
+import { useLegacyChartsSync as useChartsSync } from '../../../../hooks/use_charts_sync';
 import { Maybe } from '../../../../../typings/common';
 
 interface Props {

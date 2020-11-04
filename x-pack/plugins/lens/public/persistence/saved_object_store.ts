@@ -10,10 +10,10 @@ import {
   SavedObjectReference,
 } from 'kibana/public';
 import { Query } from '../../../../../src/plugins/data/public';
-import { PersistableFilter } from '../../common';
+import { DOC_TYPE, PersistableFilter } from '../../common';
 
 export interface Document {
-  id?: string;
+  savedObjectId?: string;
   type?: string;
   visualizationType: string | null;
   title: string;
@@ -22,19 +22,21 @@ export interface Document {
     datasourceStates: Record<string, unknown>;
     visualization: unknown;
     query: Query;
+    globalPalette?: {
+      activePaletteId: string;
+      state?: unknown;
+    };
     filters: PersistableFilter[];
   };
   references: SavedObjectReference[];
 }
 
-export const DOC_TYPE = 'lens';
-
 export interface DocumentSaver {
-  save: (vis: Document) => Promise<{ id: string }>;
+  save: (vis: Document) => Promise<{ savedObjectId: string }>;
 }
 
 export interface DocumentLoader {
-  load: (id: string) => Promise<Document>;
+  load: (savedObjectId: string) => Promise<Document>;
 }
 
 export type SavedObjectStore = DocumentLoader & DocumentSaver;
@@ -46,20 +48,20 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     this.client = client;
   }
 
-  async save(vis: Document) {
-    const { id, type, references, ...rest } = vis;
+  save = async (vis: Document) => {
+    const { savedObjectId, type, references, ...rest } = vis;
     // TODO: SavedObjectAttributes should support this kind of object,
     // remove this workaround when SavedObjectAttributes is updated.
     const attributes = (rest as unknown) as SavedObjectAttributes;
 
-    const result = await (id
-      ? this.safeUpdate(id, attributes, references)
+    const result = await (savedObjectId
+      ? this.safeUpdate(savedObjectId, attributes, references)
       : this.client.create(DOC_TYPE, attributes, {
           references,
         }));
 
-    return { ...vis, id: result.id };
-  }
+    return { ...vis, savedObjectId: result.id };
+  };
 
   // As Lens is using an object to store its attributes, using the update API
   // will merge the new attribute object with the old one, not overwriting deleted
@@ -68,7 +70,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
   // This function fixes this by doing two updates - one to empty out the document setting
   // every key to null, and a second one to load the new content.
   private async safeUpdate(
-    id: string,
+    savedObjectId: string,
     attributes: SavedObjectAttributes,
     references: SavedObjectReference[]
   ) {
@@ -78,14 +80,14 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     });
     return (
       await this.client.bulkUpdate([
-        { type: DOC_TYPE, id, attributes: resetAttributes, references },
-        { type: DOC_TYPE, id, attributes, references },
+        { type: DOC_TYPE, id: savedObjectId, attributes: resetAttributes, references },
+        { type: DOC_TYPE, id: savedObjectId, attributes, references },
       ])
     ).savedObjects[1];
   }
 
-  async load(id: string): Promise<Document> {
-    const { type, attributes, references, error } = await this.client.get(DOC_TYPE, id);
+  async load(savedObjectId: string): Promise<Document> {
+    const { type, attributes, references, error } = await this.client.get(DOC_TYPE, savedObjectId);
 
     if (error) {
       throw error;
@@ -94,7 +96,7 @@ export class SavedObjectIndexStore implements SavedObjectStore {
     return {
       ...(attributes as SavedObjectAttributes),
       references,
-      id,
+      savedObjectId,
       type,
     } as Document;
   }

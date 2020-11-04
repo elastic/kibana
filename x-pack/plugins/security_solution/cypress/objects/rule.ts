@@ -23,6 +23,12 @@ interface SeverityOverride {
   sourceValue: string;
 }
 
+interface Interval {
+  interval: string;
+  timeType: string;
+  type: string;
+}
+
 export interface CustomRule {
   customQuery: string;
   name: string;
@@ -38,6 +44,8 @@ export interface CustomRule {
   mitre: Mitre[];
   note: string;
   timelineId: string;
+  runsEvery: Interval;
+  lookBack: Interval;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -65,6 +73,8 @@ export interface MachineLearningRule {
   falsePositivesExamples: string[];
   mitre: Mitre[];
   note: string;
+  runsEvery: Interval;
+  lookBack: Interval;
 }
 
 const mitre1: Mitre = {
@@ -83,8 +93,8 @@ const severityOverride1: SeverityOverride = {
 };
 
 const severityOverride2: SeverityOverride = {
-  sourceField: 'agent.type',
-  sourceValue: 'endpoint',
+  sourceField: '@timestamp',
+  sourceValue: '10/02/2020',
 };
 
 const severityOverride3: SeverityOverride = {
@@ -93,8 +103,20 @@ const severityOverride3: SeverityOverride = {
 };
 
 const severityOverride4: SeverityOverride = {
-  sourceField: '@timestamp',
-  sourceValue: '10/02/2020',
+  sourceField: 'agent.type',
+  sourceValue: 'auditbeat',
+};
+
+const runsEvery: Interval = {
+  interval: '1',
+  timeType: 'Seconds',
+  type: 's',
+};
+
+const lookBack: Interval = {
+  interval: '17520',
+  timeType: 'Hours',
+  type: 'h',
 };
 
 export const newRule: CustomRule = {
@@ -109,6 +131,8 @@ export const newRule: CustomRule = {
   mitre: [mitre1, mitre2],
   note: '# test markdown',
   timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+  runsEvery,
+  lookBack,
 };
 
 export const existingRule: CustomRule = {
@@ -132,6 +156,8 @@ export const existingRule: CustomRule = {
   mitre: [],
   note: 'This is my note',
   timelineId: '',
+  runsEvery,
+  lookBack,
 };
 
 export const newOverrideRule: OverrideRule = {
@@ -150,6 +176,8 @@ export const newOverrideRule: OverrideRule = {
   riskOverride: 'destination.port',
   nameOverride: 'agent.type',
   timestampOverride: '@timestamp',
+  runsEvery,
+  lookBack,
 };
 
 export const newThresholdRule: ThresholdRule = {
@@ -166,6 +194,8 @@ export const newThresholdRule: ThresholdRule = {
   timelineId: '0162c130-78be-11ea-9718-118a926974a4',
   thresholdField: 'host.name',
   threshold: '10',
+  runsEvery,
+  lookBack,
 };
 
 export const machineLearningRule: MachineLearningRule = {
@@ -180,10 +210,12 @@ export const machineLearningRule: MachineLearningRule = {
   falsePositivesExamples: ['False1'],
   mitre: [mitre1],
   note: '# test markdown',
+  runsEvery,
+  lookBack,
 };
 
 export const eqlRule: CustomRule = {
-  customQuery: 'process where process_name == "explorer.exe"',
+  customQuery: 'any where process.name == "which"',
   name: 'New EQL Rule',
   description: 'New EQL rule description.',
   severity: 'High',
@@ -194,4 +226,43 @@ export const eqlRule: CustomRule = {
   mitre: [mitre1, mitre2],
   note: '# test markdown',
   timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+  runsEvery,
+  lookBack,
+};
+
+export const eqlSequenceRule: CustomRule = {
+  customQuery:
+    'sequence with maxspan=30s\
+     [any where process.name == "which"]\
+     [any where process.name == "xargs"]',
+  name: 'New EQL Sequence Rule',
+  description: 'New EQL rule description.',
+  severity: 'High',
+  riskScore: '17',
+  tags: ['test', 'newRule'],
+  referenceUrls: ['https://www.google.com/', 'https://elastic.co/'],
+  falsePositivesExamples: ['False1', 'False2'],
+  mitre: [mitre1, mitre2],
+  note: '# test markdown',
+  timelineId: '0162c130-78be-11ea-9718-118a926974a4',
+  runsEvery,
+  lookBack,
+};
+
+export const indexPatterns = [
+  'apm-*-transaction*',
+  'auditbeat-*',
+  'endgame-*',
+  'filebeat-*',
+  'logs-*',
+  'packetbeat-*',
+  'winlogbeat-*',
+];
+
+export const severitiesOverride = ['Low', 'Medium', 'High', 'Critical'];
+
+export const editedRule = {
+  ...existingRule,
+  severity: 'Medium',
+  description: 'Edited Rule description',
 };

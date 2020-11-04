@@ -5,10 +5,10 @@
  */
 
 import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_utils';
-import { BASE_PATH } from '../../../common/constants';
 import { PipelinesClone } from '../../../public/application/sections/pipelines_clone';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
+import { getClonePath, ROUTES } from '../../../public/application/services/navigation';
 
 export type PipelinesCloneTestBed = TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
@@ -29,8 +29,8 @@ export const PIPELINE_TO_CLONE = {
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}create/${PIPELINE_TO_CLONE.name}`],
-    componentRoutePath: `${BASE_PATH}create/:name`,
+    initialEntries: [getClonePath({ clonedPipelineName: PIPELINE_TO_CLONE.name })],
+    componentRoutePath: ROUTES.clone,
   },
   doMountAsync: true,
 };

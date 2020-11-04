@@ -10,12 +10,16 @@ import { AlertType } from '../../../common/alert_types';
 import { ApmPluginStartDeps } from '../../plugin';
 
 export function registerApmAlerts(
-  alertTypeRegistry: ApmPluginStartDeps['triggers_actions_ui']['alertTypeRegistry']
+  alertTypeRegistry: ApmPluginStartDeps['triggersActionsUi']['alertTypeRegistry']
 ) {
   alertTypeRegistry.register({
     id: AlertType.ErrorCount,
     name: i18n.translate('xpack.apm.alertTypes.errorCount', {
       defaultMessage: 'Error count threshold',
+    }),
+    description: i18n.translate('xpack.apm.alertTypes.errorCount.description', {
+      defaultMessage:
+        'Alert when the number of errors in a service exceeds a defined threshold.',
     }),
     iconClass: 'bell',
     alertParamsExpression: lazy(() => import('./ErrorCountAlertTrigger')),
@@ -23,6 +27,17 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.errorCount.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\} errors
+- Triggered value: \\{\\{context.triggerValue\\}\\} errors over the last \\{\\{context.interval\\}\\}`,
+      }
+    ),
   });
 
   alertTypeRegistry.register({
@@ -30,6 +45,13 @@ export function registerApmAlerts(
     name: i18n.translate('xpack.apm.alertTypes.transactionDuration', {
       defaultMessage: 'Transaction duration threshold',
     }),
+    description: i18n.translate(
+      'xpack.apm.alertTypes.transactionDuration.description',
+      {
+        defaultMessage:
+          'Alert when the duration of a specific transaction type in a service exceeds a defined threshold.',
+      }
+    ),
     iconClass: 'bell',
     alertParamsExpression: lazy(
       () => import('./TransactionDurationAlertTrigger')
@@ -38,6 +60,18 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.transactionDuration.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Type: \\{\\{context.transactionType\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\}ms
+- Triggered value: \\{\\{context.triggerValue\\}\\} over the last \\{\\{context.interval\\}\\}`,
+      }
+    ),
   });
 
   alertTypeRegistry.register({
@@ -45,6 +79,13 @@ export function registerApmAlerts(
     name: i18n.translate('xpack.apm.alertTypes.transactionErrorRate', {
       defaultMessage: 'Transaction error rate threshold',
     }),
+    description: i18n.translate(
+      'xpack.apm.alertTypes.transactionErrorRate.description',
+      {
+        defaultMessage:
+          'Alert when the rate of transaction errors in a service exceeds a defined threshold.',
+      }
+    ),
     iconClass: 'bell',
     alertParamsExpression: lazy(
       () => import('./TransactionErrorRateAlertTrigger')
@@ -53,6 +94,18 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.transactionErrorRate.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Type: \\{\\{context.transactionType\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Threshold: \\{\\{context.threshold\\}\\}%
+- Triggered value: \\{\\{context.triggerValue\\}\\}% of errors over the last \\{\\{context.interval\\}\\}`,
+      }
+    ),
   });
 
   alertTypeRegistry.register({
@@ -60,6 +113,13 @@ export function registerApmAlerts(
     name: i18n.translate('xpack.apm.alertTypes.transactionDurationAnomaly', {
       defaultMessage: 'Transaction duration anomaly',
     }),
+    description: i18n.translate(
+      'xpack.apm.alertTypes.transactionDurationAnomaly.description',
+      {
+        defaultMessage:
+          'Alert when the overall transaction duration of a service is considered anomalous.',
+      }
+    ),
     iconClass: 'bell',
     alertParamsExpression: lazy(
       () => import('./TransactionDurationAnomalyAlertTrigger')
@@ -68,5 +128,18 @@ export function registerApmAlerts(
       errors: [],
     }),
     requiresAppContext: true,
+    defaultActionMessage: i18n.translate(
+      'xpack.apm.alertTypes.transactionDurationAnomaly.defaultActionMessage',
+      {
+        defaultMessage: `\\{\\{alertName\\}\\} alert is firing because of the following conditions:
+
+- Service name: \\{\\{context.serviceName\\}\\}
+- Type: \\{\\{context.transactionType\\}\\}
+- Environment: \\{\\{context.environment\\}\\}
+- Severity threshold: \\{\\{context.threshold\\}\\}
+- Severity value: \\{\\{context.thresholdValue\\}\\}
+`,
+      }
+    ),
   });
 }

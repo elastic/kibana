@@ -98,10 +98,6 @@ export {
   isExpressionAstBuilder,
   KIBANA_CONTEXT_NAME,
   KibanaContext,
-  KibanaDatatable,
-  KibanaDatatableColumn,
-  KibanaDatatableColumnMeta,
-  KibanaDatatableRow,
   KnownTypeToString,
   Overflow,
   parse,
@@ -122,4 +118,7 @@ export {
   TypeToString,
   UnmappedTypeStrings,
   ExpressionValueRender as Render,
+  ExpressionsService,
+  ExpressionsServiceSetup,
+  ExpressionsServiceStart,
 } from '../common';

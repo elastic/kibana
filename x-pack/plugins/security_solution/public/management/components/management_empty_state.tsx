@@ -58,7 +58,7 @@ const PolicyEmptyState = React.memo<{
               <h3>
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingTitle"
-                  defaultMessage="Get started with Elastic Endpoint Security"
+                  defaultMessage="Get started with Endpoint Security"
                 />
               </h3>
             </EuiText>
@@ -66,21 +66,21 @@ const PolicyEmptyState = React.memo<{
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionOne"
-                defaultMessage="Elastic Endpoint Security protects your hosts with threat prevention, detection, and deep security data visibility."
+                defaultMessage="Protect your hosts with threat prevention, detection, and deep security data visibility."
               />
             </EuiText>
             <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionTwo"
-                defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Elastic Endpoint Security."
+                defaultMessage="From this page, you’ll be able to view and manage the hosts in your environment running Endpoint Security."
               />
             </EuiText>
             <EuiSpacer size="m" />
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
-                defaultMessage="To get started, add the Elastic Endpoint Security integration to your Agents. For more information, "
+                defaultMessage="To get started, add the Endpoint Security integration to your Agents. For more information, "
               />
               <EuiLink external href="https://www.elastic.co/guide/en/security/current/index.html">
                 <FormattedMessage
@@ -212,7 +212,7 @@ const EndpointsEmptyState = React.memo<{
       headerComponent={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.noEndpointsPrompt"
-          defaultMessage="Next step: Enroll an Agent with Elastic Endpoint Security"
+          defaultMessage="Next step: Enroll an Agent with Endpoint Security"
         />
       }
       bodyComponent={

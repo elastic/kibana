@@ -8,13 +8,8 @@ import { FilterStateStore } from '../../../../../../src/plugins/data/common/es_q
 import { TimelineId, TimelineType, TimelineStatus } from '../../../common/types/timeline';
 
 import { OpenTimelineResult } from '../../timelines/components/open_timeline/types';
-import {
-  GetAllTimeline,
-  SortFieldTimeline,
-  TimelineResult,
-  Direction,
-  DetailItem,
-} from '../../graphql/types';
+import { GetAllTimeline, SortFieldTimeline, TimelineResult, Direction } from '../../graphql/types';
+import { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { allTimelinesQuery } from '../../timelines/containers/all/index.gql_query';
 import { CreateTimelineProps } from '../../detections/components/alerts_table/types';
 import { TimelineModel } from '../../timelines/store/timeline/model';
@@ -37,7 +32,7 @@ export interface MockedProvidedQuery {
 export const mockOpenTimelineQueryResults: MockedProvidedQuery[] = [
   {
     request: {
-      query: allTimelinesQuery,
+      query: (allTimelinesQuery as unknown) as GetAllTimeline.Query,
       variables: {
         onlyUserFavorite: false,
         pageInfo: {
@@ -2124,6 +2119,7 @@ export const mockTimelineModel: TimelineModel = {
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'ef579e40-jibber-jabber',
+  indexNames: [],
   isFavorite: false,
   isLive: false,
   isLoading: false,
@@ -2228,6 +2224,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     highlightedDropAndProviderId: '',
     historyIds: [],
     id: TimelineId.active,
+    indexNames: [],
     isFavorite: false,
     isLive: false,
     isLoading: false,
@@ -2262,7 +2259,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
   ruleNote: '# this is some markdown documentation',
 };
 
-export const mockTimelineDetails: DetailItem[] = [
+export const mockTimelineDetails: TimelineEventsDetailsItem[] = [
   {
     field: 'host.name',
     values: ['apache'],

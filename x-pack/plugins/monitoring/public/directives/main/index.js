@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { EuiSelect, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import template from './index.html';
@@ -19,6 +19,7 @@ import {
 import { Subscription } from 'rxjs';
 import { getSafeForExternalLink } from '../../lib/get_safe_for_external_link';
 import { SetupModeFeature } from '../../../common/enums';
+import './index.scss';
 
 const setOptions = (controller) => {
   if (
@@ -31,13 +32,6 @@ const setOptions = (controller) => {
 
   render(
     <EuiFlexGroup>
-      <EuiFlexItem grow={false}>
-        <EuiTitle
-          style={{ maxWidth: 400, lineHeight: '40px', overflow: 'hidden', whiteSpace: 'nowrap' }}
-        >
-          <h2>{controller.pipelineId}</h2>
-        </EuiTitle>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSelect
           value={controller.pipelineHash}
@@ -185,6 +179,10 @@ export class MonitoringMainController {
   isDisabledTab(product) {
     const setupMode = getSetupModeState();
     if (!isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
+      return false;
+    }
+
+    if (!setupMode.data) {
       return false;
     }
 

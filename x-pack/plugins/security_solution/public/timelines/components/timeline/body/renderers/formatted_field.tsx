@@ -54,6 +54,7 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         fieldName={fieldName}
         value={!isNumber(value) ? value : String(value)}
+        truncate={truncate}
       />
     );
   } else if (fieldType === DATE_FIELD_TYPE) {

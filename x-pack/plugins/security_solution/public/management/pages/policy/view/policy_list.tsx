@@ -405,7 +405,7 @@ export const PolicyList = React.memo(() => {
       )}
       <AdministrationListPage
         data-test-subj="policyListPage"
-        beta={true}
+        beta={false}
         title={
           <FormattedMessage
             id="xpack.securitySolution.policyList.pageTitle"

@@ -8,7 +8,8 @@
   ],
   "index": [
     "filebeat-*",
-    "packetbeat-*"
+    "packetbeat-*",
+    "logs-endpoint.events.*"
   ],
   "language": "kuery",
   "license": "Elastic License",
@@ -23,7 +24,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Network"
+    "Host",
+    "Network",
+    "Threat Detection",
+    "Command and Control"
   ],
   "threat": [
     {
@@ -46,7 +50,7 @@
       "tactic": {
         "id": "TA0010",
         "name": "Exfiltration",
-        "reference": "https://attack.mitre.org/tactics/TA0011/"
+        "reference": "https://attack.mitre.org/tactics/TA0010/"
       },
       "technique": [
         {
@@ -58,5 +62,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 4
 }

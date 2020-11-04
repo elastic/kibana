@@ -10,30 +10,9 @@
   margin-bottom: $euiSizeS;
 }
 
-/**
- * 1. Don't cut off the shadow of the field items
- */
-
-.lnsInnerIndexPatternDataPanel__listWrapper {
-  @include euiOverflowShadow;
-  @include euiScrollBar;
-  margin-left: -$euiSize; /* 1 */
-  position: relative;
-  flex-grow: 1;
-  overflow: auto;
-}
-
-.lnsInnerIndexPatternDataPanel__list {
-  padding-top: $euiSizeS;
-  position: absolute;
-  top: 0;
-  left: $euiSize; /* 1 */
-  right: $euiSizeXS; /* 1 */
-}
-
 .lnsInnerIndexPatternDataPanel__fieldItems {
   // Quick fix for making sure the shadow and focus rings are visible outside the accordion bounds
-  padding: $euiSizeXS $euiSizeXS 0;
+  padding: $euiSizeXS;
 }
 
 .lnsInnerIndexPatternDataPanel__textField {

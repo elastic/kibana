@@ -118,6 +118,7 @@ export const QueryInput = ({
 
   return (
     <QueryStringInput
+      dataTestSubj="indexPattern-filters-queryStringInput"
       size="s"
       isInvalid={isInvalid}
       bubbleSubmitEvent={false}

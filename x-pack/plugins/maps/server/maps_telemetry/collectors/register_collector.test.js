@@ -33,6 +33,7 @@ describe('buildCollectorObj#fetch', () => {
       type: expect.any(String),
       isReady: expect.any(Function),
       fetch: expect.any(Function),
+      schema: expect.any(Object),
     });
   });
 });

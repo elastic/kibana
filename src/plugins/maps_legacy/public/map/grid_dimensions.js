@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
 // geohash precision mapping of geohash grid cell dimensions (width x height, in meters) at equator.
 // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator
 const gridAtEquator = {
@@ -37,5 +35,5 @@ const gridAtEquator = {
 };
 
 export function gridDimensions(precision) {
-  return _.get(gridAtEquator, precision);
+  return gridAtEquator[precision];
 }

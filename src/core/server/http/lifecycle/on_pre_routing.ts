@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from 'hapi';
+import { Lifecycle, Request, ResponseToolkit as HapiResponseToolkit } from '@hapi/hapi';
 import { Logger } from '../../logging';
 import {
   HapiResponseAdapter,
@@ -25,6 +25,7 @@ import {
   KibanaResponse,
   lifecycleResponseFactory,
   LifecycleResponseFactory,
+  KibanaRequestState,
 } from '../router';
 
 enum ResultType {
@@ -108,8 +109,29 @@ export function adoptToHapiOnRequest(fn: OnPreRoutingHandler, log: Logger) {
       }
 
       if (preRoutingResult.isRewriteUrl(result)) {
+        const appState = request.app as KibanaRequestState;
+        appState.rewrittenUrl = appState.rewrittenUrl ?? request.url;
+
         const { url } = result;
-        request.setUrl(url);
+
+        // TODO: Remove once we upgrade to Node.js 12!
+        //
+        // Warning: The following for-loop took 10 days to write, and is a hack
+        // to force V8 to make a copy of the string in memory.
+        //
+        // The reason why we need this is because of what appears to be a bug
+        // in V8 that caused some URL paths to not be routed correctly once
+        // `request.setUrl` was called with the path.
+        //
+        // The details can be seen in this discussion on Twitter:
+        // https://twitter.com/wa7son/status/1319992632366518277
+        let urlCopy = '';
+        for (let i = 0; i < url.length; i++) {
+          urlCopy += url[i];
+        }
+
+        request.setUrl(urlCopy);
+
         // We should update raw request as well since it can be proxied to the old platform
         request.raw.req.url = url;
         return responseToolkit.continue;

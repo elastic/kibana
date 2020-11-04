@@ -16,6 +16,8 @@ import { left } from 'fp-ts/lib/Either';
 import {
   getCreateRulesSchemaMock,
   getCreateRulesSchemaDecodedMock,
+  getCreateThreatMatchRulesSchemaMock,
+  getCreateThreatMatchRulesSchemaDecodedMock,
 } from './create_rules_schema.mock';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
@@ -1229,6 +1231,34 @@ describe('create rules schema', () => {
       expect(message.schema).toEqual({});
     });
 
+    test('empty name is not valid', () => {
+      const payload: CreateRulesSchema = {
+        ...getCreateRulesSchemaMock(),
+        name: '',
+      };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "name"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('empty description is not valid', () => {
+      const payload: CreateRulesSchema = {
+        ...getCreateRulesSchemaMock(),
+        description: '',
+      };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "" supplied to "description"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
       const payload: CreateRulesSchema = {
         rule_id: 'rule-1',
@@ -1658,6 +1688,18 @@ describe('create rules schema', () => {
         exceptions_list: [],
         filters: [],
       };
+      expect(message.schema).toEqual(expected);
+    });
+  });
+
+  describe('threat_mapping', () => {
+    test('You can set a threat query, index, mapping, filters when creating a rule', () => {
+      const payload = getCreateThreatMatchRulesSchemaMock();
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getCreateThreatMatchRulesSchemaDecodedMock();
+      expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
     });
   });

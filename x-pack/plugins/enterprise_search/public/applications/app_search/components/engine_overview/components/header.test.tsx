@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import '../../../../__mocks__/shallow_usecontext.mock';
+import '../../../../__mocks__/kea.mock';
+import '../../../../__mocks__/enterprise_search_url.mock';
+import { mockTelemetryActions } from '../../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
-
-jest.mock('../../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
-import { sendTelemetry } from '../../../../shared/telemetry';
 
 import { EngineOverviewHeader } from './';
 
@@ -28,6 +27,6 @@ describe('EngineOverviewHeader', () => {
     expect(button.prop('isDisabled')).toBeFalsy();
 
     button.simulate('click');
-    expect(sendTelemetry).toHaveBeenCalled();
+    expect(mockTelemetryActions.sendAppSearchTelemetry).toHaveBeenCalled();
   });
 });

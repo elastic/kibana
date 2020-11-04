@@ -28,6 +28,7 @@ export const NetworkHttpQueryTable = ({
   ] = useNetworkHttp({
     endDate,
     filterQuery,
+    indexNames: [],
     ip,
     skip,
     startDate,

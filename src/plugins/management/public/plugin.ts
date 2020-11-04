@@ -33,6 +33,7 @@ import {
   AppNavLinkStatus,
 } from '../../../core/public';
 
+import { MANAGEMENT_APP_ID } from '../common/contants';
 import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
@@ -46,6 +47,8 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+
+  private hasAnyEnabledApps = true;
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
@@ -65,11 +68,12 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         path: '/app/management',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.ADMIN,
+        visible: () => this.hasAnyEnabledApps,
       });
     }
 
     core.application.register({
-      id: 'management',
+      id: MANAGEMENT_APP_ID,
       title: i18n.translate('management.stackManagement.title', {
         defaultMessage: 'Stack Management',
       }),
@@ -96,11 +100,11 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   public start(core: CoreStart) {
     this.managementSections.start({ capabilities: core.application.capabilities });
-    const hasAnyEnabledApps = getSectionsServiceStartPrivate()
+    this.hasAnyEnabledApps = getSectionsServiceStartPrivate()
       .getSectionsEnabled()
       .some((section) => section.getAppsEnabled().length > 0);
 
-    if (!hasAnyEnabledApps) {
+    if (!this.hasAnyEnabledApps) {
       this.appUpdater.next(() => {
         return {
           status: AppStatus.inaccessible,

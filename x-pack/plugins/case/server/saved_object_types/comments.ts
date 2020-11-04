@@ -5,6 +5,7 @@
  */
 
 import { SavedObjectsType } from 'src/core/server';
+import { commentsMigrations } from './migrations';
 
 export const CASE_COMMENT_SAVED_OBJECT = 'cases-comments';
 
@@ -16,6 +17,9 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
     properties: {
       comment: {
         type: 'text',
+      },
+      type: {
+        type: 'keyword',
       },
       created_at: {
         type: 'date',
@@ -67,4 +71,5 @@ export const caseCommentSavedObjectType: SavedObjectsType = {
       },
     },
   },
+  migrations: commentsMigrations,
 };

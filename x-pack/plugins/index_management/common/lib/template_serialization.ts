@@ -85,7 +85,7 @@ export function deserializeTemplateList(
 ): TemplateListItem[] {
   return indexTemplates.map(({ name, index_template: templateSerialized }) => {
     const {
-      template: { mappings, settings, aliases },
+      template: { mappings, settings, aliases } = {},
       ...deserializedTemplate
     } = deserializeTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 
@@ -149,7 +149,7 @@ export function deserializeLegacyTemplateList(
 ): TemplateListItem[] {
   return Object.entries(indexTemplatesByName).map(([name, templateSerialized]) => {
     const {
-      template: { mappings, settings, aliases },
+      template: { mappings, settings, aliases } = {},
       ...deserializedTemplate
     } = deserializeLegacyTemplate({ name, ...templateSerialized }, cloudManagedTemplatePrefix);
 

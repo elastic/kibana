@@ -37,8 +37,8 @@ import { InternalMetricsServiceSetup, InternalMetricsServiceStart } from './metr
 import { InternalRenderingServiceSetup } from './rendering';
 import { InternalHttpResourcesSetup } from './http_resources';
 import { InternalStatusServiceSetup } from './status';
-import { AuditTrailSetup, AuditTrailStart } from './audit_trail';
 import { InternalLoggingServiceSetup } from './logging';
+import { CoreUsageDataStart } from './core_usage_data';
 
 /** @internal */
 export interface InternalCoreSetup {
@@ -52,7 +52,6 @@ export interface InternalCoreSetup {
   environment: InternalEnvironmentServiceSetup;
   rendering: InternalRenderingServiceSetup;
   httpResources: InternalHttpResourcesSetup;
-  auditTrail: AuditTrailSetup;
   logging: InternalLoggingServiceSetup;
   metrics: InternalMetricsServiceSetup;
 }
@@ -67,7 +66,7 @@ export interface InternalCoreStart {
   metrics: InternalMetricsServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
-  auditTrail: AuditTrailStart;
+  coreUsageData: CoreUsageDataStart;
 }
 
 /**

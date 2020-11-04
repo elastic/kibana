@@ -17,5 +17,5 @@
  * under the License.
  */
 
-require('../src/setup_node_env/babel_register');
+require('@kbn/optimizer').registerNodeAutoTranspilation();
 require('../src/dev/run_precommit_hook');

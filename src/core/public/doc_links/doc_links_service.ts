@@ -93,7 +93,7 @@ export class DocLinksService {
           max: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-max-aggregation.html`,
           median: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-percentile-aggregation.html`,
           min: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-min-aggregation.html`,
-          moving_avg: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-movavg-aggregation.html`,
+          moving_avg: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-movfn-aggregation.html`,
           percentile_ranks: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-percentile-rank-aggregation.html`,
           serial_diff: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-serialdiff-aggregation.html`,
           std_dev: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-extendedstats-aggregation.html`,
@@ -119,6 +119,7 @@ export class DocLinksService {
           gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
         },
         query: {
+          eql: `${ELASTICSEARCH_DOCS}eql.html`,
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
           kueryQuerySyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kuery-query.html`,
@@ -227,6 +228,7 @@ export interface DocLinksStart {
       readonly gettingStarted: string;
     };
     readonly query: {
+      readonly eql: string;
       readonly luceneQuerySyntax: string;
       readonly queryDsl: string;
       readonly kueryQuerySyntax: string;

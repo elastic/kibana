@@ -10,10 +10,6 @@ import { EmptySection } from '../../components/app/empty_section';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
-import { APMSection } from '../../components/app/section/apm';
-import { LogsSection } from '../../components/app/section/logs';
-import { MetricsSection } from '../../components/app/section/metrics';
-import { UptimeSection } from '../../components/app/section/uptime';
 import { DatePicker, TimePickerTime } from '../../components/shared/data_picker';
 import { NewsFeed } from '../../components/app/news_feed';
 import { fetchHasData } from '../../data_handler';
@@ -27,19 +23,41 @@ import { getBucketSize } from '../../utils/get_bucket_size';
 import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
 import { getNewsFeed } from '../../services/get_news_feed';
+import { DataSections } from './data_sections';
+import { useTrackPageview, UXHasDataResponse } from '../..';
 
 interface Props {
   routeParams: RouteParams<'/overview'>;
 }
 
-function calculatetBucketSize({ start, end }: { start?: number; end?: number }) {
+function calculateBucketSize({ start, end }: { start?: number; end?: number }) {
   if (start && end) {
     return getBucketSize({ start, end, minInterval: '60s' });
   }
 }
 
 export function OverviewPage({ routeParams }: Props) {
-  const { core } = usePluginContext();
+  const { core, plugins } = usePluginContext();
+
+  // read time from state and update the url
+  const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
+
+  const timePickerDefaults = useKibanaUISettings<TimePickerTime>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
+
+  const relativeTime = {
+    start: routeParams.query.rangeFrom || timePickerSharedState.from || timePickerDefaults.from,
+    end: routeParams.query.rangeTo || timePickerSharedState.to || timePickerDefaults.to,
+  };
+
+  const absoluteTime = {
+    start: getAbsoluteTime(relativeTime.start) as number,
+    end: getAbsoluteTime(relativeTime.end, { roundUp: true }) as number,
+  };
+
+  useTrackPageview({ app: 'observability', path: 'overview' });
+  useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
 
   const { data: alerts = [], status: alertStatus } = useFetcher(() => {
     return getObservabilityAlerts({ core });
@@ -48,9 +66,12 @@ export function OverviewPage({ routeParams }: Props) {
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
 
   const theme = useContext(ThemeContext);
-  const timePickerTime = useKibanaUISettings<TimePickerTime>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
 
-  const result = useFetcher(() => fetchHasData(), []);
+  const result = useFetcher(
+    () => fetchHasData(absoluteTime),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
   const hasData = result.data;
 
   if (!hasData) {
@@ -59,17 +80,7 @@ export function OverviewPage({ routeParams }: Props) {
 
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
-  const relativeTime = {
-    start: routeParams.query.rangeFrom ?? timePickerTime.from,
-    end: routeParams.query.rangeTo ?? timePickerTime.to,
-  };
-
-  const absoluteTime = {
-    start: getAbsoluteTime(relativeTime.start),
-    end: getAbsoluteTime(relativeTime.end, { roundUp: true }),
-  };
-
-  const bucketSize = calculatetBucketSize({
+  const bucketSize = calculateBucketSize({
     start: absoluteTime.start,
     end: absoluteTime.end,
   });
@@ -77,6 +88,8 @@ export function OverviewPage({ routeParams }: Props) {
   const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
     if (id === 'alert') {
       return alertStatus !== FETCH_STATUS.FAILURE && !alerts.length;
+    } else if (id === 'ux') {
+      return !(hasData[id] as UXHasDataResponse).hasData;
     }
     return !hasData[id];
   });
@@ -113,46 +126,12 @@ export function OverviewPage({ routeParams }: Props) {
         <EuiFlexItem grow={6}>
           {/* Data sections */}
           {showDataSections && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup direction="column">
-                {hasData.infra_logs && (
-                  <EuiFlexItem grow={false}>
-                    <LogsSection
-                      absoluteTime={absoluteTime}
-                      relativeTime={relativeTime}
-                      bucketSize={bucketSize?.intervalString}
-                    />
-                  </EuiFlexItem>
-                )}
-                {hasData.infra_metrics && (
-                  <EuiFlexItem grow={false}>
-                    <MetricsSection
-                      absoluteTime={absoluteTime}
-                      relativeTime={relativeTime}
-                      bucketSize={bucketSize?.intervalString}
-                    />
-                  </EuiFlexItem>
-                )}
-                {hasData.apm && (
-                  <EuiFlexItem grow={false}>
-                    <APMSection
-                      absoluteTime={absoluteTime}
-                      relativeTime={relativeTime}
-                      bucketSize={bucketSize?.intervalString}
-                    />
-                  </EuiFlexItem>
-                )}
-                {hasData.uptime && (
-                  <EuiFlexItem grow={false}>
-                    <UptimeSection
-                      absoluteTime={absoluteTime}
-                      relativeTime={relativeTime}
-                      bucketSize={bucketSize?.intervalString}
-                    />
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            <DataSections
+              hasData={hasData}
+              absoluteTime={absoluteTime}
+              relativeTime={relativeTime}
+              bucketSize={bucketSize?.intervalString!}
+            />
           )}
 
           {/* Empty sections */}

@@ -4,8 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export {
-  IEnhancedEsSearchRequest,
-  IAsyncSearchRequest,
-  ENHANCED_ES_SEARCH_STRATEGY,
-} from './types';
+export * from './types';
+export * from './es_search';

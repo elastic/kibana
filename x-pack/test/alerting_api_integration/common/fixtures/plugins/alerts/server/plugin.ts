@@ -36,6 +36,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       id: 'alertsFixture',
       name: 'Alerts',
       app: ['alerts', 'kibana'],
+      category: { id: 'foo', label: 'foo' },
       alerting: [
         'test.always-firing',
         'test.cumulative-firing',

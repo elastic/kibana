@@ -14,6 +14,7 @@ import {
   LogEntriesBaseRequest,
 } from '../../../../common/http_api';
 import { fetchLogEntries } from './api/fetch_log_entries';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const DESIRED_BUFFER_PAGES = 2;
 const LIVE_STREAM_INTERVAL = 5000;
@@ -144,6 +145,7 @@ const useFetchEntriesEffect = (
   dispatch: Dispatch,
   props: LogEntriesProps
 ) => {
+  const { services } = useKibanaContextForPlugin();
   const [prevParams, cachePrevParams] = useState<LogEntriesProps | undefined>();
   const [startedStreaming, setStartedStreaming] = useState(false);
 
@@ -172,7 +174,7 @@ const useFetchEntriesEffect = (
             before: 'last',
           };
 
-      const { data: payload } = await fetchLogEntries(fetchArgs);
+      const { data: payload } = await fetchLogEntries(fetchArgs, services.http.fetch);
       dispatch({ type: Action.ReceiveNewEntries, payload });
 
       // Move position to the bottom if it's the first load.
@@ -228,7 +230,7 @@ const useFetchEntriesEffect = (
             after: state.bottomCursor,
           };
 
-      const { data: payload } = await fetchLogEntries(fetchArgs);
+      const { data: payload } = await fetchLogEntries(fetchArgs, services.http.fetch);
 
       dispatch({
         type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,

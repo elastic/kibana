@@ -53,7 +53,12 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
         return siemResponse.error({ statusCode: 404 });
       }
 
-      const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+      const mlAuthz = buildMlAuthz({
+        license: context.licensing.license,
+        ml,
+        request,
+        savedObjectsClient,
+      });
 
       const ruleDefinitions = request.body;
       const dupes = getDuplicates(ruleDefinitions, 'rule_id');
@@ -69,6 +74,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               building_block_type: buildingBlockType,
               description,
               enabled,
+              event_category_override: eventCategoryOverride,
               false_positives: falsePositives,
               from,
               query: queryOrUndefined,
@@ -91,6 +97,11 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               severity_mapping: severityMapping,
               tags,
               threat,
+              threat_filters: threatFilters,
+              threat_index: threatIndex,
+              threat_mapping: threatMapping,
+              threat_query: threatQuery,
+              threat_language: threatLanguage,
               threshold,
               throttle,
               timestamp_override: timestampOverride,
@@ -149,6 +160,7 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 buildingBlockType,
                 description,
                 enabled,
+                eventCategoryOverride,
                 falsePositives,
                 from,
                 immutable: false,
@@ -176,6 +188,11 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 to,
                 type,
                 threat,
+                threatFilters,
+                threatMapping,
+                threatQuery,
+                threatIndex,
+                threatLanguage,
                 threshold,
                 timestampOverride,
                 references,

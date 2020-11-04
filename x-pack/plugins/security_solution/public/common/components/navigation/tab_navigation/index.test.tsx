@@ -68,6 +68,7 @@ describe('Tab Navigation', () => {
       },
       [CONSTANTS.appQuery]: { query: 'host.name:"siem-es"', language: 'kuery' },
       [CONSTANTS.filters]: [],
+      [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,
@@ -126,6 +127,7 @@ describe('Tab Navigation', () => {
       },
       [CONSTANTS.appQuery]: { query: 'host.name:"siem-es"', language: 'kuery' },
       [CONSTANTS.filters]: [],
+      [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
         id: '',
         isOpen: false,

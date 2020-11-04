@@ -5,7 +5,6 @@
  */
 import { ReactWrapper } from 'enzyme';
 import React from 'react';
-import { useSelector } from 'react-redux';
 
 import '../../../../common/mock/match_media';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
@@ -16,8 +15,7 @@ import { TestProviders } from '../../../../common/mock/test_providers';
 import { Body, BodyProps } from '.';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
 import { TimelineType } from '../../../../../common/types/timeline';
@@ -28,13 +26,9 @@ const mockSort: Sort = {
   sortDirection: Direction.desc,
 };
 
-jest.mock('react-redux', () => {
-  const origin = jest.requireActual('react-redux');
-  return {
-    ...origin,
-    useSelector: jest.fn(),
-  };
-});
+jest.mock('../../../../common/hooks/use_selector', () => ({
+  useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
+}));
 
 jest.mock('../../../../common/components/link_to');
 
@@ -87,7 +81,6 @@ describe('Body', () => {
     toggleColumn: jest.fn(),
     updateNote: jest.fn(),
   };
-  (useSelector as jest.Mock).mockReturnValue(mockTimelineModel);
 
   describe('rendering', () => {
     test('it renders the column headers', () => {
@@ -200,22 +193,6 @@ describe('Body', () => {
       wrapper.find('button[data-test-subj="add-note"]').first().simulate('click');
       wrapper.update();
     };
-
-    // We are doing that because we need to wrapped this component with redux
-    // and redux does not like to be updated and since we need to update our
-    // child component (BODY) and we do not want to scare anyone with this error
-    // we are hiding it!!!
-    // eslint-disable-next-line no-console
-    const originalError = console.error;
-    beforeAll(() => {
-      // eslint-disable-next-line no-console
-      console.error = (...args: string[]) => {
-        if (/<Provider> does not support changing `store` on the fly/.test(args[0])) {
-          return;
-        }
-        originalError.call(console, ...args);
-      };
-    });
 
     beforeEach(() => {
       dispatchAddNoteToEvent.mockClear();

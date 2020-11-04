@@ -6,13 +6,14 @@
 
 import { Field, Fields } from '../../fields/field';
 import {
-  Dataset,
+  RegistryDataStream,
   CallESAsCurrentUser,
   TemplateRef,
   IndexTemplate,
   IndexTemplateMappings,
+  DataType,
 } from '../../../../types';
-import { getDatasetAssetBaseName } from '../index';
+import { getRegistryDataStreamAssetBaseName } from '../index';
 
 interface Properties {
   [key: string]: any;
@@ -189,6 +190,9 @@ function generateKeywordMapping(field: Field): IndexTemplateMapping {
   if (field.ignore_above) {
     mapping.ignore_above = field.ignore_above;
   }
+  if (field.normalizer) {
+    mapping.normalizer = field.normalizer;
+  }
   return mapping;
 }
 
@@ -222,22 +226,24 @@ function getDefaultProperties(field: Field): Properties {
 /**
  * Generates the template name out of the given information
  */
-export function generateTemplateName(dataset: Dataset): string {
-  return getDatasetAssetBaseName(dataset);
+export function generateTemplateName(dataStream: RegistryDataStream): string {
+  return getRegistryDataStreamAssetBaseName(dataStream);
 }
 
 /**
- * Returns a map of the dataset path fields to elasticsearch index pattern.
- * @param datasets an array of Dataset objects
+ * Returns a map of the data stream path fields to elasticsearch index pattern.
+ * @param dataStreams an array of RegistryDataStream objects
  */
-export function generateESIndexPatterns(datasets: Dataset[] | undefined): Record<string, string> {
-  if (!datasets) {
+export function generateESIndexPatterns(
+  dataStreams: RegistryDataStream[] | undefined
+): Record<string, string> {
+  if (!dataStreams) {
     return {};
   }
 
   const patterns: Record<string, string> = {};
-  for (const dataset of datasets) {
-    patterns[dataset.path] = generateTemplateName(dataset) + '-*';
+  for (const dataStream of dataStreams) {
+    patterns[dataStream.path] = generateTemplateName(dataStream) + '-*';
   }
   return patterns;
 }
@@ -389,18 +395,11 @@ const updateExistingIndex = async ({
 }) => {
   const { settings, mappings } = indexTemplate.template;
 
-  // for now, remove from object so as not to update stream or dataset properties of the index until type and name
+  // for now, remove from object so as not to update stream or data stream properties of the index until type and name
   // are added in https://github.com/elastic/kibana/issues/66551.  namespace value we will continue
   // to skip updating and assume the value in the index mapping is correct
   delete mappings.properties.stream;
   delete mappings.properties.data_stream;
-
-  // get the data_stream values from the index template to compose data stream name
-  const indexMappings = await getIndexMappings(indexName, callCluster);
-  const dataStream = indexMappings[indexName].mappings.properties.data_stream.properties;
-  if (!dataStream.type.value || !dataStream.dataset.value || !dataStream.namespace.value)
-    throw new Error(`data_stream values are missing from the index template ${indexName}`);
-  const dataStreamName = `${dataStream.type.value}-${dataStream.dataset.value}-${dataStream.namespace.value}`;
 
   // try to update the mappings first
   try {
@@ -411,13 +410,54 @@ const updateExistingIndex = async ({
     // if update fails, rollover data stream
   } catch (err) {
     try {
+      // get the data_stream values to compose datastream name
+      const searchDataStreamFieldsResponse = await callCluster('search', {
+        index: indexTemplate.index_patterns[0],
+        body: {
+          size: 1,
+          _source: ['data_stream.namespace', 'data_stream.type', 'data_stream.dataset'],
+          query: {
+            bool: {
+              filter: [
+                {
+                  exists: {
+                    field: 'data_stream.type',
+                  },
+                },
+                {
+                  exists: {
+                    field: 'data_stream.dataset',
+                  },
+                },
+                {
+                  exists: {
+                    field: 'data_stream.namespace',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+      if (searchDataStreamFieldsResponse.hits.total.value === 0)
+        throw new Error('data_stream fields are missing from datastream indices');
+      const {
+        dataset,
+        namespace,
+        type,
+      }: {
+        dataset: string;
+        namespace: string;
+        type: DataType;
+      } = searchDataStreamFieldsResponse.hits.hits[0]._source.data_stream;
+      const dataStreamName = `${type}-${dataset}-${namespace}`;
       const path = `/${dataStreamName}/_rollover`;
       await callCluster('transport.request', {
         method: 'POST',
         path,
       });
     } catch (error) {
-      throw new Error(`cannot rollover data stream ${dataStreamName}`);
+      throw new Error(`cannot rollover data stream ${error}`);
     }
   }
   // update settings after mappings was successful to ensure
@@ -431,16 +471,5 @@ const updateExistingIndex = async ({
     });
   } catch (err) {
     throw new Error(`could not update index template settings for ${indexName}`);
-  }
-};
-
-const getIndexMappings = async (indexName: string, callCluster: CallESAsCurrentUser) => {
-  try {
-    const indexMappings = await callCluster('indices.getMapping', {
-      index: indexName,
-    });
-    return indexMappings;
-  } catch (err) {
-    throw new Error(`could not get mapping from ${indexName}`);
   }
 };

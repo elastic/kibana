@@ -7,11 +7,12 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
-  KibanaDatatable,
+  Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
@@ -22,6 +23,7 @@ import {
   SELECT_RANGE_TRIGGER,
   TriggerContext,
   VALUE_CLICK_TRIGGER,
+  VisualizeFieldContext,
 } from '../../../../src/plugins/ui_actions/public';
 
 export type ErrorCallback = (e: { message: string }) => void;
@@ -40,6 +42,7 @@ export interface EditorFrameProps {
   query: Query;
   filters: Filter[];
   savedQuery?: SavedQuery;
+  initialContext?: VisualizeFieldContext;
 
   // Frame loader (app or embeddable) is expected to call this when it loads and updates
   // This should be replaced with a top-down state
@@ -57,8 +60,12 @@ export interface EditorFrameInstance {
 
 export interface EditorFrameSetup {
   // generic type on the API functions to pull the "unknown vs. specific type" error into the implementation
-  registerDatasource: <T, P>(datasource: Datasource<T, P> | Promise<Datasource<T, P>>) => void;
-  registerVisualization: <T>(visualization: Visualization<T> | Promise<Visualization<T>>) => void;
+  registerDatasource: <T, P>(
+    datasource: Datasource<T, P> | (() => Promise<Datasource<T, P>>)
+  ) => void;
+  registerVisualization: <T>(
+    visualization: Visualization<T> | (() => Promise<Visualization<T>>)
+  ) => void;
 }
 
 export interface EditorFrameStart {
@@ -141,7 +148,11 @@ export interface Datasource<T = unknown, P = unknown> {
   // For initializing, either from an empty state or from persisted state
   // Because this will be called at runtime, state might have a type of `any` and
   // datasources should validate their arguments
-  initialize: (state?: P, savedObjectReferences?: SavedObjectReference[]) => Promise<T>;
+  initialize: (
+    state?: P,
+    savedObjectReferences?: SavedObjectReference[],
+    initialContext?: VisualizeFieldContext
+  ) => Promise<T>;
 
   // Given the current state, which parts should be saved?
   getPersistableState: (state: T) => { state: P; savedObjectReferences: SavedObjectReference[] };
@@ -162,9 +173,21 @@ export interface Datasource<T = unknown, P = unknown> {
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
   getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
-  getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForVisualizeField: (
+    state: T,
+    indexPatternId: string,
+    fieldName: string
+  ) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsFromCurrentState: (
+    state: T,
+    activeData?: Record<string, Datatable>
+  ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+  /**
+   * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
+   */
+  uniqueLabels: (state: T) => Record<string, string>;
 }
 
 /**
@@ -210,6 +233,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   columnId: string;
   onRemove?: (accessor: string) => void;
   state: T;
+  activeData?: Record<string, Datatable>;
 };
 
 // The only way a visualization has to restrict the query building
@@ -227,6 +251,7 @@ export interface DatasourceLayerPanelProps<T> {
   layerId: string;
   state: T;
   setState: StateSetter<T>;
+  activeData?: Record<string, Datatable>;
 }
 
 export interface DraggedOperation {
@@ -251,6 +276,7 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   state: T;
   setState: StateSetter<T>;
   dragDropContext: DragContextState;
+  isReorder?: boolean;
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
@@ -288,7 +314,7 @@ export interface OperationMetadata {
 
 export interface LensMultiTable {
   type: 'lens_multitable';
-  tables: Record<string, KibanaDatatable>;
+  tables: Record<string, Datatable>;
   dateRange?: {
     fromDate: Date;
     toDate: Date;
@@ -361,6 +387,7 @@ export interface SuggestionRequest<T = unknown> {
    * State is only passed if the visualization is active.
    */
   state?: T;
+  mainPalette?: PaletteOutput;
   /**
    * The visualization needs to know which table is being suggested
    */
@@ -407,20 +434,47 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
+  /**
+   * Data of the chart currently rendered in the preview.
+   * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
+   * If accessing, make sure to check whether expected columns actually exist.
+   */
+  activeData?: Record<string, Datatable>;
 
   dateRange: DateRange;
   query: Query;
   filters: Filter[];
+
+  /**
+   * A map of all available palettes (keys being the ids).
+   */
+  availablePalettes: PaletteRegistry;
 
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
   removeLayers: (layerIds: string[]) => void;
 }
 
+/**
+ * A visualization type advertised to the user in the chart switcher
+ */
 export interface VisualizationType {
+  /**
+   * Unique id of the visualization type within the visualization defining it
+   */
   id: string;
+  /**
+   * Icon used in the chart switcher
+   */
   icon: IconType;
+  /**
+   * Visible label used in the chart switcher and above the workspace panel in collapsed state
+   */
   label: string;
+  /**
+   * Optional label used in chart type search if chart switcher is expanded and for tooltips
+   */
+  fullLabel?: string;
 }
 
 export interface Visualization<T = unknown> {
@@ -433,7 +487,9 @@ export interface Visualization<T = unknown> {
    * - Loadingn from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (frame: FramePublicAPI, state?: T) => T;
+  initialize: (frame: FramePublicAPI, state?: T, mainPalette?: PaletteOutput) => T;
+
+  getMainPalette?: (state: T) => undefined | PaletteOutput;
 
   /**
    * Visualizations must provide at least one type for the chart switcher,
@@ -517,7 +573,8 @@ export interface Visualization<T = unknown> {
 
   toExpression: (
     state: T,
-    datasourceLayers: Record<string, DatasourcePublicAPI>
+    datasourceLayers: Record<string, DatasourcePublicAPI>,
+    attributes?: Partial<{ title: string; description: string }>
   ) => Ast | string | null;
   /**
    * Expression to render a preview version of the chart in very constrained space.

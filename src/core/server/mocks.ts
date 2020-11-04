@@ -19,6 +19,7 @@
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
@@ -36,7 +37,7 @@ import { capabilitiesServiceMock } from './capabilities/capabilities_service.moc
 import { metricsServiceMock } from './metrics/metrics_service.mock';
 import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
-import { auditTrailServiceMock } from './audit_trail/audit_trail_service.mock';
+import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 
 export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
@@ -54,6 +55,8 @@ export { metricsServiceMock } from './metrics/metrics_service.mock';
 export { renderingMock } from './rendering/rendering_service.mock';
 export { statusServiceMock } from './status/status_service.mock';
 export { contextServiceMock } from './context/context_service.mock';
+export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
@@ -66,7 +69,6 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),
       pingTimeout: duration('30s'),
-      startupTimeout: duration('30s'),
     },
     path: { data: '/tmp' },
     savedObjects: {
@@ -137,7 +139,6 @@ function createCoreSetupMock({
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
-    auditTrail: auditTrailServiceMock.createSetupContract(),
     logging: loggingServiceMock.createSetupContract(),
     metrics: metricsServiceMock.createSetupContract(),
     getStartServices: jest
@@ -150,13 +151,13 @@ function createCoreSetupMock({
 
 function createCoreStartMock() {
   const mock: MockedKeys<CoreStart> = {
-    auditTrail: auditTrailServiceMock.createStartContract(),
     capabilities: capabilitiesServiceMock.createStartContract(),
     elasticsearch: elasticsearchServiceMock.createStart(),
     http: httpServiceMock.createStartContract(),
     metrics: metricsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    coreUsageData: coreUsageDataServiceMock.createStartContract(),
   };
 
   return mock;
@@ -174,7 +175,6 @@ function createInternalCoreSetupMock() {
     httpResources: httpResourcesMock.createSetupContract(),
     rendering: renderingMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
-    auditTrail: auditTrailServiceMock.createSetupContract(),
     logging: loggingServiceMock.createInternalSetupContract(),
     metrics: metricsServiceMock.createInternalSetupContract(),
   };
@@ -189,7 +189,7 @@ function createInternalCoreStartMock() {
     metrics: metricsServiceMock.createInternalStartContract(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
-    auditTrail: auditTrailServiceMock.createStartContract(),
+    coreUsageData: coreUsageDataServiceMock.createStartContract(),
   };
   return startDeps;
 }
@@ -209,7 +209,6 @@ function createCoreRequestHandlerContextMock() {
     uiSettings: {
       client: uiSettingsServiceMock.createClient(),
     },
-    auditor: auditTrailServiceMock.createAuditor(),
   };
 }
 

@@ -20,6 +20,7 @@ import {
 const defaultValues: Record<string, any> = {
   headers: null,
   method: 'post',
+  hasAuth: true,
 };
 
 function parsePort(url: Record<string, string>): Record<string, string | null | number> {
@@ -137,6 +138,77 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         config: {
           ...defaultValues,
           url: webhookSimulatorURL,
+        },
+      });
+    });
+
+    it('should remove headers when a webhook is updated', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'A generic Webhook action',
+          actionTypeId: '.webhook',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+          },
+          config: {
+            url: webhookSimulatorURL,
+            headers: {
+              someHeader: '123',
+            },
+          },
+        })
+        .expect(200);
+
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        isPreconfigured: false,
+        name: 'A generic Webhook action',
+        actionTypeId: '.webhook',
+        config: {
+          ...defaultValues,
+          url: webhookSimulatorURL,
+          headers: {
+            someHeader: '123',
+          },
+        },
+      });
+
+      await supertest
+        .put(`/api/actions/action/${createdAction.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A generic Webhook action',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+          },
+          config: {
+            url: webhookSimulatorURL,
+            headers: {
+              someOtherHeader: '456',
+            },
+          },
+        })
+        .expect(200);
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/actions/action/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        id: fetchedAction.id,
+        isPreconfigured: false,
+        name: 'A generic Webhook action',
+        actionTypeId: '.webhook',
+        config: {
+          ...defaultValues,
+          url: webhookSimulatorURL,
+          headers: {
+            someOtherHeader: '456',
+          },
         },
       });
     });

@@ -4,21 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import * as rt from 'io-ts';
-import { npStart } from '../../../../legacy_singletons';
+import type { HttpHandler } from 'src/core/public';
 
 import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';
-import { createPlainError, throwErrors } from '../../../../../common/runtime_types';
+import { decodeOrThrow } from '../../../../../common/runtime_types';
+
+interface RequestArgs<JobType extends string> {
+  spaceId: string;
+  sourceId: string;
+  jobTypes: JobType[];
+}
 
 export const callJobsSummaryAPI = async <JobType extends string>(
-  spaceId: string,
-  sourceId: string,
-  jobTypes: JobType[]
+  requestArgs: RequestArgs<JobType>,
+  fetch: HttpHandler
 ) => {
-  const response = await npStart.http.fetch('/api/ml/jobs/jobs_summary', {
+  const { spaceId, sourceId, jobTypes } = requestArgs;
+  const response = await fetch('/api/ml/jobs/jobs_summary', {
     method: 'POST',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
@@ -26,10 +29,7 @@ export const callJobsSummaryAPI = async <JobType extends string>(
       })
     ),
   });
-  return pipe(
-    fetchJobStatusResponsePayloadRT.decode(response),
-    fold(throwErrors(createPlainError), identity)
-  );
+  return decodeOrThrow(fetchJobStatusResponsePayloadRT)(response);
 };
 
 export const fetchJobStatusRequestPayloadRT = rt.type({
@@ -54,6 +54,17 @@ const jobStateRT = rt.keyof({
   opening: null,
 });
 
+const jobAnalysisConfigRT = rt.partial({
+  per_partition_categorization: rt.intersection([
+    rt.type({
+      enabled: rt.boolean,
+    }),
+    rt.partial({
+      stop_on_warn: rt.boolean,
+    }),
+  ]),
+});
+
 const jobCategorizationStatusRT = rt.keyof({
   ok: null,
   warn: null,
@@ -64,6 +75,7 @@ const jobModelSizeStatsRT = rt.type({
   categorized_doc_count: rt.number,
   dead_category_count: rt.number,
   frequent_category_count: rt.number,
+  log_time: rt.number,
   rare_category_count: rt.number,
   total_category_count: rt.number,
 });
@@ -79,6 +91,8 @@ export const jobSummaryRT = rt.intersection([
     datafeedIndices: rt.array(rt.string),
     datafeedState: datafeedStateRT,
     fullJob: rt.partial({
+      analysis_config: jobAnalysisConfigRT,
+      create_time: rt.number,
       custom_settings: jobCustomSettingsRT,
       finished_time: rt.number,
       model_size_stats: jobModelSizeStatsRT,

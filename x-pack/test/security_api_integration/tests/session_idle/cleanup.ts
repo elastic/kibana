@@ -30,18 +30,16 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function getNumberOfSessionDocuments() {
-    return (await es.search({ index: '.kibana_security_session*' })).hits.total.value;
+    return (((await es.search({ index: '.kibana_security_session*' })).hits.total as unknown) as {
+      value: number;
+    }).value;
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/76239
-  describe.skip('Session Idle cleanup', () => {
+  describe('Session Idle cleanup', () => {
     beforeEach(async () => {
       await es.cluster.health({ index: '.kibana_security_session*', waitForStatus: 'green' });
-      await es.deleteByQuery({
+      await es.indices.delete({
         index: '.kibana_security_session*',
-        q: '*',
-        waitForCompletion: true,
-        refresh: true,
         ignore: [404],
       });
     });

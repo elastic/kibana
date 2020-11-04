@@ -18,16 +18,10 @@ import { isPostTransformsPreviewResponseSchema } from '../../../common/api_schem
 import { dictionaryToArray } from '../../../common/types/common';
 import { getNestedProperty } from '../../../common/utils/object_utils';
 
-import {
-  formatHumanReadableDateTimeSeconds,
-  multiColumnSortFactory,
-  useDataGrid,
-  RenderCellValue,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
-} from '../../shared_imports';
+import { RenderCellValue, UseIndexDataReturnType } from '../../shared_imports';
 import { getErrorMessage } from '../../../common/utils/errors';
 
+import { useAppDependencies } from '../app_dependencies';
 import {
   getPreviewTransformRequestBody,
   PivotAggsConfigDict,
@@ -36,10 +30,10 @@ import {
   PivotQuery,
   PivotAggsConfig,
 } from '../common';
+import { isPivotAggsWithExtendedForm } from '../common/pivot_aggs';
 
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
-import { isPivotAggsWithExtendedForm } from '../common/pivot_aggs';
 
 /**
  * Checks if the aggregations collection is invalid.
@@ -79,6 +73,9 @@ export const usePivotData = (
     PreviewMappingsProperties
   >({});
   const api = useApi();
+  const {
+    ml: { formatHumanReadableDateTimeSeconds, multiColumnSortFactory, useDataGrid, INDEX_STATUS },
+  } = useAppDependencies();
 
   const aggsArr = useMemo(() => dictionaryToArray(aggs), [aggs]);
   const groupByArr = useMemo(() => dictionaryToArray(groupBy), [groupBy]);
@@ -258,7 +255,13 @@ export const usePivotData = (
 
       return cellValue;
     };
-  }, [pageData, pagination.pageIndex, pagination.pageSize, previewMappingsProperties]);
+  }, [
+    pageData,
+    pagination.pageIndex,
+    pagination.pageSize,
+    previewMappingsProperties,
+    formatHumanReadableDateTimeSeconds,
+  ]);
 
   return {
     ...dataGrid,

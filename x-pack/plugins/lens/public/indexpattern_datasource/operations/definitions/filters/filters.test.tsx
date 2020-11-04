@@ -59,7 +59,6 @@ describe('filters', () => {
               operationType: 'filters',
               scale: 'ordinal',
               isBucketed: true,
-              sourceField: 'Records',
               params: {
                 filters: [
                   {
@@ -112,33 +111,13 @@ describe('filters', () => {
     });
   });
 
-  describe('getPossibleOperationForField', () => {
+  describe('getPossibleOperation', () => {
     it('should return operation with the right type for document', () => {
-      expect(
-        filtersOperation.getPossibleOperationForField({
-          aggregatable: true,
-          searchable: true,
-          name: 'test',
-          displayName: 'test',
-          type: 'document',
-        })
-      ).toEqual({
+      expect(filtersOperation.getPossibleOperation()).toEqual({
         dataType: 'string',
         isBucketed: true,
         scale: 'ordinal',
       });
-    });
-
-    it('should not return operation if field type is not document', () => {
-      expect(
-        filtersOperation.getPossibleOperationForField({
-          aggregatable: false,
-          searchable: true,
-          name: 'test',
-          displayName: 'test',
-          type: 'string',
-        })
-      ).toEqual(undefined);
     });
   });
 

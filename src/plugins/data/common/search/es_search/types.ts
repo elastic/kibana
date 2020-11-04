@@ -31,28 +31,25 @@ export interface ISearchOptions {
    * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
    */
   strategy?: string;
+
+  /**
+   * A session ID, grouping multiple search requests into a single session.
+   */
+  sessionId?: string;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {
   trackTotalHits?: boolean;
 } & Search<T>;
 
-export interface IEsSearchRequest extends IKibanaSearchRequest {
-  params?: ISearchRequestParams;
+export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> {
   indexType?: string;
 }
 
-export interface IEsSearchResponse<Source = any> extends IKibanaSearchResponse {
-  /**
-   * Indicates whether async search is still in flight
-   */
-  isRunning?: boolean;
-  /**
-   * Indicates whether the results returned are complete or partial
-   */
-  isPartial?: boolean;
-  rawResponse: SearchResponse<Source>;
+export interface IEsRawSearchResponse<Source = any> extends SearchResponse<Source> {
+  id?: string;
+  is_partial?: boolean;
+  is_running?: boolean;
 }
 
-export const isEsResponse = (response: any): response is IEsSearchResponse =>
-  response && response.rawResponse;
+export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;

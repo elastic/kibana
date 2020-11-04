@@ -14,6 +14,7 @@ import { UUID } from '../types/uuid';
 import { IsoDateString } from '../types/iso_date_string';
 import { PositiveIntegerGreaterThanZero } from '../types/positive_integer_greater_than_zero';
 import { PositiveInteger } from '../types/positive_integer';
+import { NonEmptyString } from '../types/non_empty_string';
 import { parseScheduleDates } from '../../parse_schedule_dates';
 
 export const author = t.array(t.string);
@@ -28,7 +29,7 @@ export type BuildingBlockType = t.TypeOf<typeof building_block_type>;
 export const buildingBlockTypeOrUndefined = t.union([building_block_type, t.undefined]);
 export type BuildingBlockTypeOrUndefined = t.TypeOf<typeof buildingBlockTypeOrUndefined>;
 
-export const description = t.string;
+export const description = NonEmptyString;
 export type Description = t.TypeOf<typeof description>;
 
 export const descriptionOrUndefined = t.union([description, t.undefined]);
@@ -39,6 +40,12 @@ export type Enabled = t.TypeOf<typeof enabled>;
 
 export const enabledOrUndefined = t.union([enabled, t.undefined]);
 export type EnabledOrUndefined = t.TypeOf<typeof enabledOrUndefined>;
+
+export const event_category_override = t.string;
+export type EventCategoryOverride = t.TypeOf<typeof event_category_override>;
+
+export const eventCategoryOverrideOrUndefined = t.union([event_category_override, t.undefined]);
+export type EventCategoryOverrideOrUndefined = t.TypeOf<typeof eventCategoryOverrideOrUndefined>;
 
 export const false_positives = t.array(t.string);
 export type FalsePositives = t.TypeOf<typeof false_positives>;
@@ -210,7 +217,7 @@ export type MaxSignals = t.TypeOf<typeof max_signals>;
 export const maxSignalsOrUndefined = t.union([max_signals, t.undefined]);
 export type MaxSignalsOrUndefined = t.TypeOf<typeof maxSignalsOrUndefined>;
 
-export const name = t.string;
+export const name = NonEmptyString;
 export type Name = t.TypeOf<typeof name>;
 
 export const nameOrUndefined = t.union([name, t.undefined]);
@@ -299,6 +306,7 @@ export const type = t.keyof({
   query: null,
   saved_query: null,
   threshold: null,
+  threat_match: null,
 });
 export type Type = t.TypeOf<typeof type>;
 

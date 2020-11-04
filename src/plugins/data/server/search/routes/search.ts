@@ -17,12 +17,12 @@
  * under the License.
  */
 
+import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { IRouter } from 'src/core/server';
 import { getRequestAbortedSignal } from '../../lib';
-import { SearchRouteDependencies } from '../search_service';
+import type { SearchRouteDependencies } from '../search_service';
 import { shimHitsTotal } from './shim_hits_total';
-import { isEsResponse } from '../../../common';
 
 export function registerSearchRoute(
   router: IRouter,
@@ -50,23 +50,24 @@ export function registerSearchRoute(
       const [, , selfStart] = await getStartServices();
 
       try {
-        const response = await selfStart.search.search(
-          context,
-          { ...searchRequest, id },
-          {
-            abortSignal,
-            strategy,
-          }
-        );
+        const response = await selfStart.search
+          .search(
+            { ...searchRequest, id },
+            {
+              abortSignal,
+              strategy,
+            },
+            context
+          )
+          .pipe(first())
+          .toPromise();
 
         return res.ok({
           body: {
             ...response,
-            ...(isEsResponse(response)
-              ? {
-                  rawResponse: shimHitsTotal(response.rawResponse),
-                }
-              : {}),
+            ...{
+              rawResponse: shimHitsTotal(response.rawResponse),
+            },
           },
         });
       } catch (err) {

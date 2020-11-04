@@ -59,7 +59,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     application: { navigateToApp },
   } = useCore();
   const {
-    fleet: { enabled: isFleetEnabled },
+    agents: { enabled: isFleetEnabled },
   } = useConfig();
   const {
     params: { policyId, pkgkey },
@@ -241,16 +241,16 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       }
 
       notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.ingestManager.createPackagePolicy.addedNotificationTitle', {
-          defaultMessage: `Successfully added '{packagePolicyName}'`,
+        title: i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationTitle', {
+          defaultMessage: `'{packagePolicyName}' integration added.`,
           values: {
             packagePolicyName: packagePolicy.name,
           },
         }),
         text:
           agentCount && agentPolicy
-            ? i18n.translate('xpack.ingestManager.createPackagePolicy.addedNotificationMessage', {
-                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy`,
+            ? i18n.translate('xpack.fleet.createPackagePolicy.addedNotificationMessage', {
+                defaultMessage: `Fleet will deploy updates to all agents that use the '{agentPolicyName}' policy.`,
                 values: {
                   agentPolicyName: agentPolicy.name,
                 },
@@ -338,27 +338,21 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
   const steps: EuiStepProps[] = [
     from === 'package'
       ? {
-          title: i18n.translate(
-            'xpack.ingestManager.createPackagePolicy.stepSelectAgentPolicyTitle',
-            {
-              defaultMessage: 'Select an agent policy',
-            }
-          ),
+          title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
+            defaultMessage: 'Select an agent policy',
+          }),
           children: stepSelectAgentPolicy,
         }
       : {
-          title: i18n.translate('xpack.ingestManager.createPackagePolicy.stepSelectPackageTitle', {
+          title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectPackageTitle', {
             defaultMessage: 'Select an integration',
           }),
           children: stepSelectPackage,
         },
     {
-      title: i18n.translate(
-        'xpack.ingestManager.createPackagePolicy.stepConfigurePackagePolicyTitle',
-        {
-          defaultMessage: 'Configure integration',
-        }
-      ),
+      title: i18n.translate('xpack.fleet.createPackagePolicy.stepConfigurePackagePolicyTitle', {
+        defaultMessage: 'Configure integration',
+      }),
       status: !packageInfo || !agentPolicy || isLoadingSecondStep ? 'disabled' : undefined,
       'data-test-subj': 'dataCollectionSetupStep',
       children: stepConfigurePackagePolicy,
@@ -392,7 +386,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           <EuiFlexItem grow={false}>
             {!isLoadingSecondStep && agentPolicy && packageInfo && formState === 'INVALID' ? (
               <FormattedMessage
-                id="xpack.ingestManager.createPackagePolicy.errorOnSaveText"
+                id="xpack.fleet.createPackagePolicy.errorOnSaveText"
                 defaultMessage="Your integration policy has errors. Please fix them before saving."
               />
             ) : null}
@@ -408,7 +402,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   data-test-subj="createPackagePolicyCancelButton"
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.createPackagePolicy.cancelButton"
+                    id="xpack.fleet.createPackagePolicy.cancelButton"
                     defaultMessage="Cancel"
                   />
                 </EuiButtonEmpty>
@@ -424,7 +418,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
                   data-test-subj="createPackagePolicySaveButton"
                 >
                   <FormattedMessage
-                    id="xpack.ingestManager.createPackagePolicy.saveButton"
+                    id="xpack.fleet.createPackagePolicy.saveButton"
                     defaultMessage="Save integration"
                   />
                 </EuiButton>

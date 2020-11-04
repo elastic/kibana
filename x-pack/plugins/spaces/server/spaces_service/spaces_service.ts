@@ -63,7 +63,7 @@ export class SpacesService {
         ? (request as Record<string, any>).getBasePath()
         : http.basePath.get(request);
 
-      const spaceId = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
+      const { spaceId } = getSpaceIdFromPath(basePath, http.basePath.serverBasePath);
 
       return spaceId;
     };

@@ -10,6 +10,7 @@ export const ListWithKuerySchema = schema.object({
   perPage: schema.maybe(schema.number({ defaultValue: 20 })),
   sortField: schema.maybe(schema.string()),
   sortOrder: schema.maybe(schema.oneOf([schema.literal('desc'), schema.literal('asc')])),
+  showUpgradeable: schema.maybe(schema.boolean()),
   kuery: schema.maybe(schema.string()),
 });
 

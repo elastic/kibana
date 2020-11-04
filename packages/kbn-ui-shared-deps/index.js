@@ -39,7 +39,6 @@ exports.externals = {
   react: '__kbnSharedDeps__.React',
   'react-dom': '__kbnSharedDeps__.ReactDom',
   'react-dom/server': '__kbnSharedDeps__.ReactDomServer',
-  'react-intl': '__kbnSharedDeps__.ReactIntl',
   'react-router': '__kbnSharedDeps__.ReactRouter',
   'react-router-dom': '__kbnSharedDeps__.ReactRouterDom',
   'styled-components': '__kbnSharedDeps__.StyledComponents',
@@ -62,5 +61,12 @@ exports.externals = {
   '@elastic/eui/dist/eui_charts_theme': '__kbnSharedDeps__.ElasticEuiChartsTheme',
   '@elastic/eui/dist/eui_theme_light.json': '__kbnSharedDeps__.Theme.euiLightVars',
   '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.Theme.euiDarkVars',
+  lodash: '__kbnSharedDeps__.Lodash',
+  'lodash/fp': '__kbnSharedDeps__.LodashFp',
+
+  /**
+   * runtime deps which don't need to be copied across all bundles
+   */
+  tslib: '__kbnSharedDeps__.TsLib',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');

@@ -37,18 +37,19 @@ const createMockPluginSetup = (
   return {
     features: featuresPluginMock.createSetup(),
     elasticsearch: setupMock.elasticsearch || { legacy: { client: {} } },
-    basePath: setupMock.basePath || '/all-about-that-basepath',
+    basePath: { set: jest.fn() },
     router: setupMock.router,
     security: setupMock.security,
     licensing: { license$: Rx.of({ isAvailable: true, isActive: true, type: 'basic' }) } as any,
   };
 };
 
+const logger = createMockLevelLogger();
+
 const createMockPluginStart = (
   mockReportingCore: ReportingCore,
   startMock?: any
 ): ReportingInternalStart => {
-  const logger = createMockLevelLogger();
   const store = new ReportingStore(mockReportingCore, logger);
   return {
     browserDriverFactory: startMock.browserDriverFactory,
@@ -134,7 +135,7 @@ export const createMockReportingCore = async (
   }
 
   config = config || {};
-  const core = new ReportingCore();
+  const core = new ReportingCore(logger);
 
   core.pluginSetup(setupDepsMock);
   core.setConfig(config);

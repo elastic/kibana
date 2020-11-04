@@ -7,7 +7,7 @@ import { get } from 'lodash/fp';
 import { Logger } from 'src/core/server';
 
 import { ListClient } from '../../../../../lists/server';
-import { SignalSearchResponse, SearchTypes } from './types';
+import { SignalSearchResponse } from './types';
 import { BuildRuleMessage } from './rule_messages';
 import {
   EntryList,
@@ -16,6 +16,7 @@ import {
   Type,
 } from '../../../../../lists/common/schemas';
 import { hasLargeValueList } from '../../../../common/detection_engine/utils';
+import { SearchTypes } from '../../../../common/detection_engine/types';
 
 interface FilterEventsAgainstList {
   listClient: ListClient;

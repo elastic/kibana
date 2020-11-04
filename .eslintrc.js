@@ -17,9 +17,6 @@
  * under the License.
  */
 
-const { readdirSync } = require('fs');
-const { resolve } = require('path');
-
 const APACHE_2_0_LICENSE_HEADER = `
 /*
  * Licensed to Elasticsearch B.V. under one or more contributor
@@ -288,7 +285,7 @@ module.exports = {
               },
               {
                 target: [
-                  '(src|x-pack)/legacy/**/*',
+                  'src/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
                 ],
@@ -319,14 +316,11 @@ module.exports = {
               },
               {
                 target: [
-                  '(src|x-pack)/legacy/**/*',
+                  'src/legacy/**/*',
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
                   '!(src|x-pack)/**/*.test.*',
                   '!(x-pack/)?test/**/*',
-                  // next folder contains legacy browser tests which can't be migrated to jest
-                  // which import np files
-                  '!src/legacy/core_plugins/kibana/public/__tests__/**/*',
                 ],
                 from: [
                   '(src|x-pack)/plugins/**/(public|server)/**/*',
@@ -340,14 +334,6 @@ module.exports = {
                 target: [
                   '(src|x-pack)/plugins/**/*',
                   '!(src|x-pack)/plugins/**/server/**/*',
-
-                  'src/legacy/core_plugins/**/*',
-                  '!src/legacy/core_plugins/**/server/**/*',
-                  '!src/legacy/core_plugins/**/index.{js,mjs,ts,tsx}',
-
-                  'x-pack/legacy/plugins/**/*',
-                  '!x-pack/legacy/plugins/**/server/**/*',
-                  '!x-pack/legacy/plugins/**/index.{js,mjs,ts,tsx}',
 
                   'examples/**/*',
                   '!examples/**/server/**/*',
@@ -370,12 +356,7 @@ module.exports = {
               },
               {
                 target: ['src/core/**/*'],
-                from: [
-                  'plugins/**/*',
-                  'src/plugins/**/*',
-                  'src/legacy/core_plugins/**/*',
-                  'src/legacy/ui/**/*',
-                ],
+                from: ['plugins/**/*', 'src/plugins/**/*', 'src/legacy/ui/**/*'],
                 errorMessage: 'The core cannot depend on any plugins.',
               },
               {
@@ -388,12 +369,6 @@ module.exports = {
                 target: [
                   'test/plugin_functional/plugins/**/public/np_ready/**/*',
                   'test/plugin_functional/plugins/**/server/np_ready/**/*',
-                  'src/legacy/core_plugins/**/public/np_ready/**/*',
-                  'src/legacy/core_plugins/vis_type_*/public/**/*',
-                  '!src/legacy/core_plugins/vis_type_*/public/legacy*',
-                  'src/legacy/core_plugins/**/server/np_ready/**/*',
-                  'x-pack/legacy/plugins/**/public/np_ready/**/*',
-                  'x-pack/legacy/plugins/**/server/np_ready/**/*',
                 ],
                 allowSameFolder: true,
                 errorMessage:
@@ -413,6 +388,7 @@ module.exports = {
      */
     {
       files: [
+        '**/*.stories.tsx',
         'x-pack/test/apm_api_integration/**/*.ts',
         'x-pack/test/functional/apps/**/*.js',
         'x-pack/plugins/apm/**/*.js',
@@ -443,22 +419,14 @@ module.exports = {
       settings: {
         // instructs import/no-extraneous-dependencies to treat certain modules
         // as core modules, even if they aren't listed in package.json
-        'import/core-modules': ['plugins', 'legacy/ui'],
+        'import/core-modules': ['plugins'],
 
         'import/resolver': {
           '@kbn/eslint-import-resolver-kibana': {
             forceNode: false,
             rootPackageName: 'kibana',
             kibanaPath: '.',
-            pluginMap: readdirSync(resolve(__dirname, 'x-pack/legacy/plugins')).reduce(
-              (acc, name) => {
-                if (!name.startsWith('_')) {
-                  acc[name] = `x-pack/legacy/plugins/${name}`;
-                }
-                return acc;
-              },
-              {}
-            ),
+            pluginMap: {},
           },
         },
       },
@@ -479,6 +447,7 @@ module.exports = {
           {
             devDependencies: false,
             peerDependencies: true,
+            packageDir: '.',
           },
         ],
       },
@@ -510,6 +479,7 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
+            packageDir: '.',
           },
         ],
       },
@@ -765,32 +735,6 @@ module.exports = {
     },
 
     /**
-     * GIS overrides
-     */
-    {
-      files: ['x-pack/legacy/plugins/maps/**/*.js'],
-      rules: {
-        'react/prefer-stateless-function': [0, { ignorePureComponents: false }],
-      },
-    },
-
-    /**
-     * ML overrides
-     */
-    {
-      files: ['x-pack/plugins/ml/**/*.js'],
-      rules: {
-        'no-shadow': 'error',
-        'import/no-extraneous-dependencies': [
-          'error',
-          {
-            packageDir: './x-pack',
-          },
-        ],
-      },
-    },
-
-    /**
      * Security Solution overrides
      */
     {
@@ -812,7 +756,7 @@ module.exports = {
     },
     {
       // typescript only for front and back end
-      files: ['x-pack/{,legacy/}plugins/security_solution/**/*.{ts,tsx}'],
+      files: ['x-pack/plugins/security_solution/**/*.{ts,tsx}'],
       rules: {
         // This will be turned on after bug fixes are complete
         // '@typescript-eslint/explicit-member-accessibility': 'warn',
@@ -858,7 +802,7 @@ module.exports = {
     // },
     {
       // typescript and javascript for front and back end
-      files: ['x-pack/{,legacy/}plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
+      files: ['x-pack/plugins/security_solution/**/*.{js,mjs,ts,tsx}'],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
         mocha: true,
@@ -1088,9 +1032,7 @@ module.exports = {
      */
     {
       // typescript only for front and back end
-      files: [
-        'x-pack/{,legacy/}plugins/{alerts,alerting_builtins,actions,task_manager,event_log}/**/*.{ts,tsx}',
-      ],
+      files: ['x-pack/plugins/{alerts,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1193,14 +1135,9 @@ module.exports = {
           {
             devDependencies: true,
             peerDependencies: true,
+            packageDir: '.',
           },
         ],
-      },
-    },
-    {
-      files: ['x-pack/plugins/canvas/storybook/**'],
-      rules: {
-        'import/no-extraneous-dependencies': 0,
       },
     },
     {
@@ -1222,13 +1159,7 @@ module.exports = {
       },
     },
     {
-      files: ['x-pack/plugins/canvas/canvas_plugin_src/lib/flot-charts/**/*.js'],
-      env: {
-        jquery: true,
-      },
-    },
-    {
-      files: ['x-pack/plugins/monitoring/public/lib/jquery_flot/**/*.js'],
+      files: ['packages/kbn-ui-shared-deps/flot_charts/**/*.js'],
       env: {
         jquery: true,
       },
@@ -1238,10 +1169,7 @@ module.exports = {
      * TSVB overrides
      */
     {
-      files: [
-        'src/plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}',
-        'src/legacy/core_plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}',
-      ],
+      files: ['src/plugins/vis_type_timeseries/**/*.{js,mjs,ts,tsx}'],
       rules: {
         'import/no-default-export': 'error',
       },
@@ -1273,6 +1201,37 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/prefer-ts-expect-error': 'error',
+      },
+    },
+    {
+      files: [
+        '**/public/**/*.{js,mjs,ts,tsx}',
+        '**/common/**/*.{js,mjs,ts,tsx}',
+        'packages/**/*.{js,mjs,ts,tsx}',
+      ],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['lodash/*', '!lodash/fp'],
+          },
+        ],
+      },
+    },
+
+    /**
+     * Single package.json rules, it tells eslint to ignore the child package.json files
+     * and look for dependencies declarations in the single and root level package.json
+     */
+    {
+      files: ['**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            packageDir: '.',
+          },
+        ],
       },
     },
   ],

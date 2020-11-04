@@ -18,13 +18,8 @@
  */
 
 import expect from '@kbn/expect';
-import { maybeTeamAssign, whichIndex } from '../ingest_helpers';
-import {
-  TOTALS_INDEX,
-  RESEARCH_TOTALS_INDEX,
-  RESEARCH_COVERAGE_INDEX,
-  // COVERAGE_INDEX,
-} from '../constants';
+import { whichIndex } from '../ingest_helpers';
+import { TOTALS_INDEX, RESEARCH_TOTALS_INDEX, RESEARCH_COVERAGE_INDEX } from '../constants';
 
 describe(`Ingest Helper fns`, () => {
   describe(`whichIndex`, () => {
@@ -52,22 +47,6 @@ describe(`Ingest Helper fns`, () => {
         it(`should return the "Prod" Totals Index`, () => {
           const actual = whichIndexAgainstProdJob(isTotal);
           expect(actual).to.be(TOTALS_INDEX);
-        });
-      });
-    });
-  });
-  describe(`maybeTeamAssign`, () => {
-    describe(`against a coverage index`, () => {
-      it(`should have the pipeline prop`, () => {
-        const actual = maybeTeamAssign(true, { a: 'blah' });
-        expect(actual).to.have.property('pipeline');
-      });
-    });
-    describe(`against a totals index`, () => {
-      describe(`for "prod"`, () => {
-        it(`should not have the pipeline prop`, () => {
-          const actual = maybeTeamAssign(false, { b: 'blah' });
-          expect(actual).not.to.have.property('pipeline');
         });
       });
     });

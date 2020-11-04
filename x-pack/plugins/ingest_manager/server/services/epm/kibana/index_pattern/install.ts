@@ -12,7 +12,9 @@ import {
 import * as Registry from '../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { getPackageKeysByStatus } from '../../packages/get';
-import { InstallationStatus, RegistryPackage, CallESAsCurrentUser } from '../../../../types';
+import { dataTypes, installationStatuses } from '../../../../../common/constants';
+import { ValueOf } from '../../../../../common/types';
+import { RegistryPackage, CallESAsCurrentUser, DataType } from '../../../../types';
 import { appContextService } from '../../../../services';
 
 interface FieldFormatMap {
@@ -69,10 +71,7 @@ export interface IndexPatternField {
   lang?: string;
   readFromDocValues: boolean;
 }
-export enum IndexPatternType {
-  logs = 'logs',
-  metrics = 'metrics',
-}
+
 // TODO: use a function overload and make pkgName and pkgVersion required for install/update
 // and not for an update removal.  or separate out the functions
 export async function installIndexPatterns(
@@ -83,36 +82,43 @@ export async function installIndexPatterns(
   // get all user installed packages
   const installedPackages = await getPackageKeysByStatus(
     savedObjectsClient,
-    InstallationStatus.installed
+    installationStatuses.Installed
   );
-
   // TODO: move to install package
   // cache all installed packages if they don't exist
   const packagePromises = installedPackages.map((pkg) =>
-    Registry.ensureCachedArchiveInfo(pkg.pkgName, pkg.pkgVersion)
+    // TODO: this hard-codes 'registry' as installSource, so uploaded packages are ignored
+    // and their fields will be removed from the generated index patterns after this runs.
+    Registry.ensureCachedArchiveInfo(pkg.pkgName, pkg.pkgVersion, 'registry')
   );
   await Promise.all(packagePromises);
 
+  const packageVersionsToFetch = [...installedPackages];
   if (pkgName && pkgVersion) {
-    // add this package to the array if it doesn't already exist
-    const foundPkg = installedPackages.find((pkg) => pkg.pkgName === pkgName);
-    // this may be removed if we add the packged to saved objects before installing index patterns
-    // otherwise this is a first time install
-    // TODO: handle update case when versions are different
-    if (!foundPkg) {
-      installedPackages.push({ pkgName, pkgVersion });
+    const packageToInstall = packageVersionsToFetch.find((pkg) => pkg.pkgName === pkgName);
+
+    if (packageToInstall) {
+      // set the version to the one we want to install
+      // if we're installing for the first time the number will be the same
+      // if this is an upgrade then we'll be modifying the version number to the upgrade version
+      packageToInstall.pkgVersion = pkgVersion;
+    } else {
+      // this will likely not happen because the saved objects should already have the package we're trying
+      // install which means that it should have been found in the case above
+      packageVersionsToFetch.push({ pkgName, pkgVersion });
     }
   }
   // get each package's registry info
-  const installedPackagesFetchInfoPromise = installedPackages.map((pkg) =>
+  const packageVersionsFetchInfoPromise = packageVersionsToFetch.map((pkg) =>
     Registry.fetchInfo(pkg.pkgName, pkg.pkgVersion)
   );
-  const installedPackagesInfo = await Promise.all(installedPackagesFetchInfoPromise);
+
+  const packageVersionsInfo = await Promise.all(packageVersionsFetchInfoPromise);
 
   // for each index pattern type, create an index pattern
-  const indexPatternTypes = [IndexPatternType.logs, IndexPatternType.metrics];
+  const indexPatternTypes = Object.values(dataTypes);
   indexPatternTypes.forEach(async (indexPatternType) => {
-    // if this is an update because a package is being unisntalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
+    // if this is an update because a package is being uninstalled (no pkgkey argument passed) and no other packages are installed, remove the index pattern
     if (!pkgName && installedPackages.length === 0) {
       try {
         await savedObjectsClient.delete(INDEX_PATTERN_SAVED_OBJECT_TYPE, `${indexPatternType}-*`);
@@ -122,9 +128,8 @@ export async function installIndexPatterns(
       return;
     }
 
-    // get all dataset fields from all installed packages
-    const fields = await getAllDatasetFieldsByType(installedPackagesInfo, indexPatternType);
-
+    // get all data stream fields from all installed packages
+    const fields = await getAllDataStreamFieldsByType(packageVersionsInfo, indexPatternType);
     const kibanaIndexPattern = createIndexPattern(indexPatternType, fields);
     // create or overwrite the index pattern
     await savedObjectsClient.create(INDEX_PATTERN_SAVED_OBJECT_TYPE, kibanaIndexPattern, {
@@ -135,23 +140,27 @@ export async function installIndexPatterns(
 }
 
 // loops through all given packages and returns an array
-// of all fields from all datasets matching datasetType
-export const getAllDatasetFieldsByType = async (
+// of all fields from all data streams matching data stream type
+export const getAllDataStreamFieldsByType = async (
   packages: RegistryPackage[],
-  datasetType: IndexPatternType
+  dataStreamType: ValueOf<DataType>
 ): Promise<Fields> => {
-  const datasetsPromises = packages.reduce<Array<Promise<Field[]>>>((acc, pkg) => {
-    if (pkg.datasets) {
-      // filter out datasets by datasetType
-      const matchingDatasets = pkg.datasets.filter((dataset) => dataset.type === datasetType);
-      matchingDatasets.forEach((dataset) => acc.push(loadFieldsFromYaml(pkg, dataset.path)));
+  const dataStreamsPromises = packages.reduce<Array<Promise<Field[]>>>((acc, pkg) => {
+    if (pkg.data_streams) {
+      // filter out data streams by data stream type
+      const matchingDataStreams = pkg.data_streams.filter(
+        (dataStream) => dataStream.type === dataStreamType
+      );
+      matchingDataStreams.forEach((dataStream) =>
+        acc.push(loadFieldsFromYaml(pkg, dataStream.path))
+      );
     }
     return acc;
   }, []);
 
-  // get all the datasets for each installed package into one array
-  const allDatasetFields: Fields[] = await Promise.all(datasetsPromises);
-  return allDatasetFields.flat();
+  // get all the data stream fields for each installed package into one array
+  const allDataStreamFields: Fields[] = await Promise.all(dataStreamsPromises);
+  return allDataStreamFields.flat();
 };
 
 // creates or updates index pattern
@@ -379,7 +388,7 @@ export const ensureDefaultIndices = async (callCluster: CallESAsCurrentUser) => 
   // that no matching indices exist https://github.com/elastic/kibana/issues/62343
   const logger = appContextService.getLogger();
   return Promise.all(
-    Object.keys(IndexPatternType).map(async (indexPattern) => {
+    Object.values(dataTypes).map(async (indexPattern) => {
       const defaultIndexPatternName = indexPattern + INDEX_PATTERN_PLACEHOLDER_SUFFIX;
       const indexExists = await callCluster('indices.exists', { index: defaultIndexPatternName });
       if (!indexExists) {

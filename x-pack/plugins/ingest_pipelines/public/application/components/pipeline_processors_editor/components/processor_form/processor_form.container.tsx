@@ -19,6 +19,7 @@ export type OnSubmitHandler = (processor: ProcessorFormOnSubmitArg) => void;
 export type OnFormUpdateHandler = (form: OnFormUpdateArg<any>) => void;
 
 export interface Fields {
+  type: string;
   fields: { [key: string]: any };
 }
 
@@ -57,17 +58,37 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
     return { ...processor, options } as ProcessorInternal;
   }, [processor, unsavedFormState]);
 
+  const formSerializer = useCallback(
+    (formState) => {
+      return {
+        type: formState.type,
+        fields: formState.customOptions
+          ? {
+              ...formState.customOptions,
+            }
+          : {
+              ...formState.fields,
+              // The description field is not editable in processor forms currently. We re-add it here or it will be
+              // stripped.
+              description: processor ? processor.options.description : undefined,
+            },
+      };
+    },
+    [processor]
+  );
+
   const { form } = useForm({
     defaultValue: { fields: getProcessor().options },
+    serializer: formSerializer,
   });
+  const { subscribe } = form;
 
   const handleSubmit = useCallback(
     async (shouldCloseFlyout: boolean = true) => {
       const { isValid, data } = await form.submit();
 
       if (isValid) {
-        const { type, customOptions, fields } = data as FormData;
-        const options = customOptions ? customOptions : fields;
+        const { type, fields: options } = data as FormData;
 
         unsavedFormState.current = options;
 
@@ -92,14 +113,9 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
   }, [onSubmit, processor]);
 
   useEffect(() => {
-    const subscription = form.subscribe(onFormUpdate);
+    const subscription = subscribe(onFormUpdate);
     return subscription.unsubscribe;
-
-    // TODO: Address this issue
-    // For some reason adding `form` object to the dependencies array here is causing an
-    // infinite update loop.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onFormUpdate]);
+  }, [onFormUpdate, subscribe]);
 
   if (processor) {
     return (
@@ -113,15 +129,15 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
         handleSubmit={handleSubmit}
       />
     );
-  } else {
-    return (
-      <AddProcessorForm
-        {...rest}
-        form={form}
-        esDocsBasePath={services.documentation.getEsDocsBasePath()}
-        closeFlyout={onClose}
-        handleSubmit={handleSubmit}
-      />
-    );
   }
+
+  return (
+    <AddProcessorForm
+      {...rest}
+      form={form}
+      esDocsBasePath={services.documentation.getEsDocsBasePath()}
+      closeFlyout={onClose}
+      handleSubmit={handleSubmit}
+    />
+  );
 };

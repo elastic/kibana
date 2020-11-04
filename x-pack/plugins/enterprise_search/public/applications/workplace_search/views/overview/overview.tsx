@@ -65,7 +65,7 @@ export const Overview: React.FC = () => {
 
   return (
     <EuiPage restrictWidth>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
 
       <EuiPageBody>

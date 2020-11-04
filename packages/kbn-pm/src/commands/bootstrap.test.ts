@@ -19,6 +19,7 @@
 
 jest.mock('../utils/scripts');
 jest.mock('../utils/link_project_executables');
+jest.mock('../utils/validate_dependencies');
 
 import { resolve } from 'path';
 
@@ -29,7 +30,7 @@ import { linkProjectExecutables } from '../utils/link_project_executables';
 import { IPackageJson } from '../utils/package_json';
 import { Project } from '../utils/project';
 import { buildProjectGraph } from '../utils/projects';
-import { installInDir, runScriptInPackageStreaming, yarnWorkspacesInfo } from '../utils/scripts';
+import { installInDir, runScriptInPackageStreaming } from '../utils/scripts';
 import { BootstrapCommand } from './bootstrap';
 import { Kibana } from '../utils/kibana';
 import { log } from '../utils/log';
@@ -37,7 +38,6 @@ import { log } from '../utils/log';
 const mockInstallInDir = installInDir as jest.Mock;
 const mockRunScriptInPackageStreaming = runScriptInPackageStreaming as jest.Mock;
 const mockLinkProjectExecutables = linkProjectExecutables as jest.Mock;
-const mockYarnWorkspacesInfo = yarnWorkspacesInfo as jest.Mock;
 
 const logWriter = new ToolingLogCollectingWriter('debug');
 log.setLogLevel('silent');
@@ -56,18 +56,10 @@ const createProject = (packageJson: IPackageJson, path = '.') => {
     resolve(__dirname, path)
   );
 
-  if (packageJson.workspaces) {
-    project.isWorkspaceRoot = true;
-  }
-
   return project;
 };
 expect.addSnapshotSerializer(absolutePathSnapshotSerializer);
 expect.addSnapshotSerializer(stripAnsiSnapshotSerializer);
-
-beforeEach(() => {
-  mockYarnWorkspacesInfo.mockResolvedValue({});
-});
 
 afterEach(() => {
   jest.resetAllMocks();
@@ -77,10 +69,7 @@ afterEach(() => {
 test('handles dependencies of dependencies', async () => {
   const kibana = createProject({
     dependencies: {
-      bar: '1.0.0',
-    },
-    workspaces: {
-      packages: ['packages/*'],
+      bar: 'link:packages/bar',
     },
   });
   const foo = createProject(
@@ -130,12 +119,6 @@ test('handles dependencies of dependencies', async () => {
        info [kibana] running yarn,
       "",
       "",
-       info [bar] running yarn,
-      "",
-      "",
-       info [foo] running yarn,
-      "",
-      "",
     ]
   `);
 });
@@ -143,10 +126,7 @@ test('handles dependencies of dependencies', async () => {
 test('does not run installer if no deps in package', async () => {
   const kibana = createProject({
     dependencies: {
-      bar: '1.0.0',
-    },
-    workspaces: {
-      packages: ['packages/*'],
+      bar: 'link:packages/bar',
     },
   });
   // bar has no dependencies
@@ -186,9 +166,6 @@ test('handles "frozen-lockfile"', async () => {
     dependencies: {
       foo: '2.2.0',
     },
-    workspaces: {
-      packages: ['packages/*'],
-    },
   });
 
   const projects = new Map([['kibana', kibana]]);
@@ -210,10 +187,7 @@ test('handles "frozen-lockfile"', async () => {
 test('calls "kbn:bootstrap" scripts and links executables after installing deps', async () => {
   const kibana = createProject({
     dependencies: {
-      bar: '1.0.0',
-    },
-    workspaces: {
-      packages: ['packages/*'],
+      bar: 'link:packages/bar',
     },
   });
   const bar = createProject(

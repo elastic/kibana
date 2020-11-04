@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectMigrationFn } from 'kibana/server';
+import { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 import {
   Agent,
   AgentEvent,
@@ -12,6 +13,8 @@ import {
   PackagePolicy,
   EnrollmentAPIKey,
   Settings,
+  AgentAction,
+  Installation,
 } from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<
@@ -91,4 +94,53 @@ export const migrateSettingsToV7100: SavedObjectMigrationFn<
   delete settingsDoc.attributes.kibana_url;
 
   return settingsDoc;
+};
+
+export const migrateAgentActionToV7100 = (
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
+): SavedObjectMigrationFn<AgentAction, AgentAction> => {
+  return encryptedSavedObjects.createMigration(
+    (agentActionDoc): agentActionDoc is SavedObjectUnsanitizedDoc<AgentAction> => {
+      // @ts-expect-error
+      return agentActionDoc.attributes.type === 'CONFIG_CHANGE';
+    },
+    (agentActionDoc) => {
+      let agentActionData;
+      try {
+        agentActionData = agentActionDoc.attributes.data
+          ? JSON.parse(agentActionDoc.attributes.data)
+          : undefined;
+      } catch (e) {
+        // Silently swallow JSON parsing error
+      }
+      if (agentActionData && agentActionData.config) {
+        const {
+          attributes: { data, ...restOfAttributes },
+        } = agentActionDoc;
+        const { config, ...restOfData } = agentActionData;
+        return {
+          ...agentActionDoc,
+          attributes: {
+            ...restOfAttributes,
+            type: 'POLICY_CHANGE',
+            data: JSON.stringify({
+              ...restOfData,
+              policy: config,
+            }),
+          },
+        };
+      } else {
+        return agentActionDoc;
+      }
+    }
+  );
+};
+
+export const migrateInstallationToV7100: SavedObjectMigrationFn<
+  Exclude<Installation, 'install_source'>,
+  Installation
+> = (installationDoc) => {
+  installationDoc.attributes.install_source = 'registry';
+
+  return installationDoc;
 };

@@ -76,6 +76,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
             actionTypeId: '.server-log',
             name: 'Serverlog#xyz',
           },
+          'my-email-connector': {
+            actionTypeId: '.email',
+            name: 'Email#test-preconfigured-email',
+            config: {
+              from: 'me@example.com',
+              host: 'localhost',
+              port: '1025',
+            },
+          },
         })}`,
       ],
     },

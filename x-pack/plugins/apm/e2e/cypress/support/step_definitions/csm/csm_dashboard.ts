@@ -12,11 +12,11 @@ import { verifyClientMetrics } from './client_metrics_helper';
 export const DEFAULT_TIMEOUT = { timeout: 60 * 1000 };
 
 Given(`a user browses the APM UI application for RUM Data`, () => {
-  // open service overview page
+  // Open UX landing page
   const RANGE_FROM = 'now-24h';
   const RANGE_TO = 'now';
   loginAndWaitForPage(
-    `/app/csm`,
+    `/app/ux`,
     {
       from: RANGE_FROM,
       to: RANGE_TO,
@@ -26,7 +26,7 @@ Given(`a user browses the APM UI application for RUM Data`, () => {
 });
 
 Then(`should have correct client metrics`, () => {
-  const metrics = ['4 ms', '0.06 s', '55 '];
+  const metrics = ['80 ms', '4 ms', '76 ms', '55'];
 
   verifyClientMetrics(metrics, true);
 });

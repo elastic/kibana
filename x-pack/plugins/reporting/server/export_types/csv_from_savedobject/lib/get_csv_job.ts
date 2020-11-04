@@ -6,12 +6,9 @@
 
 import { IUiSettingsClient, SavedObjectsClientContract } from 'kibana/server';
 import { EsQueryConfig } from 'src/plugins/data/server';
-import {
-  esQuery,
-  Filter,
-  IIndexPattern,
-  Query,
-} from '../../../../../../../src/plugins/data/server';
+import { esQuery, Filter, Query } from '../../../../../../../src/plugins/data/server';
+import { TimeRangeParams } from '../../common';
+import { GenerateCsvParams } from '../../csv/generate_csv';
 import {
   DocValueFields,
   IndexPatternField,
@@ -23,7 +20,6 @@ import {
 } from '../types';
 import { getDataSource } from './get_data_source';
 import { getFilters } from './get_filters';
-import { GenerateCsvParams } from '../../csv/generate_csv';
 
 export const getEsQueryConfig = async (config: IUiSettingsClient) => {
   const configs = await Promise.all([
@@ -49,11 +45,11 @@ export const getGenerateCsvParams = async (
   savedObjectsClient: SavedObjectsClientContract,
   uiConfig: IUiSettingsClient
 ): Promise<GenerateCsvParams> => {
-  let timerange;
+  let timerange: TimeRangeParams | null;
   if (jobParams.post?.timerange) {
     timerange = jobParams.post?.timerange;
   } else {
-    timerange = panel.timerange;
+    timerange = panel.timerange || null;
   }
   const { indexPatternSavedObjectId } = panel;
   const savedSearchObjectAttr = panel.attributes as SavedSearchObjectAttributes;
@@ -125,7 +121,9 @@ export const getGenerateCsvParams = async (
       _source: { includes },
       docvalue_fields: docValueFields,
       query: esQuery.buildEsQuery(
-        indexPatternSavedObject as IIndexPattern,
+        // compromise made while factoring out IIndexPattern type
+        // @ts-expect-error
+        indexPatternSavedObject,
         (searchSourceQuery as unknown) as Query,
         (combinedFilter as unknown) as Filter,
         esQueryConfig
@@ -136,7 +134,7 @@ export const getGenerateCsvParams = async (
   };
 
   return {
-    jobParams: { browserTimezone: timerange.timezone },
+    browserTimezone: timerange?.timezone,
     indexPatternSavedObject,
     searchRequest,
     fields: includes,

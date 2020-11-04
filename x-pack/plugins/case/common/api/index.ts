@@ -5,6 +5,7 @@
  */
 
 export * from './cases';
+export * from './connectors';
 export * from './runtime_types';
 export * from './saved_object';
 export * from './user';

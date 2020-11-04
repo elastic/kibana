@@ -27,7 +27,7 @@ import {
   EuiHealth,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import _ from 'lodash';
+import { get } from 'lodash';
 import { ELASTICSEARCH_SYSTEM_ID } from '../../../../common/constants';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
@@ -58,7 +58,7 @@ const getNodeTooltip = (node) => {
   return null;
 };
 
-const getSortHandler = (type) => (item) => _.get(item, [type, 'summary', 'lastVal']);
+const getSortHandler = (type) => (item) => get(item, [type, 'summary', 'lastVal']);
 const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, alerts) => {
   const cols = [];
 
@@ -73,7 +73,6 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.nameColumnTitle', {
       defaultMessage: 'Name',
     }),
-    width: '20%',
     field: 'name',
     sortable: true,
     render: (value, node) => {
@@ -88,7 +87,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
 
       let setupModeStatus = null;
       if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
-        const list = _.get(setupMode, 'data.byUuid', {});
+        const list = get(setupMode, 'data.byUuid', {});
         const status = list[node.resolver] || {};
         const instance = {
           uuid: node.resolver,
@@ -131,14 +130,22 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       defaultMessage: 'Alerts',
     }),
     field: 'alerts',
-    width: '175px',
+    // width: '175px',
     sortable: true,
     render: (_field, node) => {
       return (
         <AlertsStatus
           showBadge={true}
           alerts={alerts}
-          stateFilter={(state) => state.nodeId === node.resolver}
+          stateFilter={(state) =>
+            state.nodeId === node.resolver || state.stackProductUuid === node.resolver
+          }
+          nextStepsFilter={(nextStep) => {
+            if (nextStep.text.includes('Elasticsearch nodes')) {
+              return false;
+            }
+            return true;
+          }}
         />
       );
     },
@@ -148,6 +155,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.statusColumnTitle', {
       defaultMessage: 'Status',
     }),
+    dataType: 'boolean',
     field: 'isOnline',
     sortable: true,
     render: (value) => {
@@ -181,22 +189,18 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.shardsColumnTitle', {
       defaultMessage: 'Shards',
     }),
+    dataType: 'number',
     field: 'shardCount',
     sortable: true,
     render: (value, node) => {
-      return node.isOnline ? (
-        <div className="monTableCell__number" data-test-subj="shards">
-          {value}
-        </div>
-      ) : (
-        <OfflineCell />
-      );
+      return node.isOnline ? <span data-test-subj="shards">{value}</span> : <OfflineCell />;
     },
   });
 
   if (showCgroupMetricsElasticsearch) {
     cols.push({
       name: cpuUsageColumnTitle,
+      dataType: 'number',
       field: 'node_cgroup_quota',
       sortable: getSortHandler('node_cgroup_quota'),
       render: (value, node) => (
@@ -213,6 +217,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       name: i18n.translate('xpack.monitoring.elasticsearch.nodes.cpuThrottlingColumnTitle', {
         defaultMessage: 'CPU Throttling',
       }),
+      dataType: 'number',
       field: 'node_cgroup_throttled',
       sortable: getSortHandler('node_cgroup_throttled'),
       render: (value, node) => (
@@ -227,6 +232,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
   } else {
     cols.push({
       name: cpuUsageColumnTitle,
+      dataType: 'number',
       field: 'node_cpu_utilization',
       sortable: getSortHandler('node_cpu_utilization'),
       render: (value, node) => {
@@ -245,6 +251,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
       name: i18n.translate('xpack.monitoring.elasticsearch.nodes.loadAverageColumnTitle', {
         defaultMessage: 'Load Average',
       }),
+      dataType: 'number',
       field: 'node_load_average',
       sortable: getSortHandler('node_load_average'),
       render: (value, node) => (
@@ -265,6 +272,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
         javaVirtualMachine: 'JVM',
       },
     }),
+    dataType: 'number',
     field: 'node_jvm_mem_percent',
     sortable: getSortHandler('node_jvm_mem_percent'),
     render: (value, node) => (
@@ -281,6 +289,7 @@ const getColumns = (showCgroupMetricsElasticsearch, setupMode, clusterUuid, aler
     name: i18n.translate('xpack.monitoring.elasticsearch.nodes.diskFreeSpaceColumnTitle', {
       defaultMessage: 'Disk Free Space',
     }),
+    dataType: 'number',
     field: 'node_free_space',
     sortable: getSortHandler('node_free_space'),
     render: (value, node) => (
@@ -387,7 +396,7 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
             setupMode.data.totalUniqueInstanceCount
           ) {
             const finishMigrationAction =
-              _.get(setupMode.meta, 'liveClusterUuid') === clusterUuid
+              get(setupMode.meta, 'liveClusterUuid') === clusterUuid
                 ? setupMode.shortcutToFinishMigration
                 : setupMode.openFlyout;
 

@@ -266,7 +266,7 @@ describe('IndexPattern Data Panel', () => {
         {...defaultProps}
         state={state}
         setState={setStateSpy}
-        dragDropContext={{ dragging: {}, setDragging: () => {} }}
+        dragDropContext={{ dragging: { id: '1' }, setDragging: () => {} }}
       />
     );
 
@@ -285,7 +285,7 @@ describe('IndexPattern Data Panel', () => {
           indexPatterns: {},
         }}
         setState={jest.fn()}
-        dragDropContext={{ dragging: {}, setDragging: () => {} }}
+        dragDropContext={{ dragging: { id: '1' }, setDragging: () => {} }}
         changeIndexPattern={jest.fn()}
       />
     );
@@ -317,7 +317,7 @@ describe('IndexPattern Data Panel', () => {
         ...defaultProps,
         changeIndexPattern: jest.fn(),
         setState,
-        dragDropContext: { dragging: {}, setDragging: () => {} },
+        dragDropContext: { dragging: { id: '1' }, setDragging: () => {} },
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
         state: {
           indexPatternRefs: [],
@@ -623,11 +623,40 @@ describe('IndexPattern Data Panel', () => {
       ).toEqual(['client', 'source', 'timestampLabel']);
     });
 
+    it('should show meta fields accordion', async () => {
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel
+          {...props}
+          indexPatterns={{
+            '1': {
+              ...props.indexPatterns['1'],
+              fields: [
+                ...props.indexPatterns['1'].fields,
+                { name: '_id', displayName: '_id', meta: true, type: 'string' },
+              ],
+            },
+          }}
+        />
+      );
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternMetaFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
+      expect(
+        wrapper
+          .find('[data-test-subj="lnsIndexPatternMetaFields"]')
+          .find(FieldItem)
+          .first()
+          .prop('field').name
+      ).toEqual('_id');
+    });
+
     it('should display NoFieldsCallout when all fields are empty', async () => {
       const wrapper = mountWithIntl(
         <InnerIndexPatternDataPanel {...defaultProps} existingFields={{ idx1: {} }} />
       );
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(1);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
       expect(
         wrapper
           .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
@@ -654,7 +683,7 @@ describe('IndexPattern Data Panel', () => {
           .length
       ).toEqual(1);
       wrapper.setProps({ existingFields: { idx1: {} } });
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(1);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
     });
 
     it('should filter down by name', () => {
@@ -699,7 +728,7 @@ describe('IndexPattern Data Panel', () => {
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'Records',
       ]);
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(3);
     });
 
     it('should toggle type if clicked again', () => {

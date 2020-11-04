@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
 import { IngestManagerPlugin } from './plugin';
 import {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_INTERVAL_MS,
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
   AGENT_POLLING_REQUEST_TIMEOUT_MS,
 } from '../common';
+
+export { default as apm } from 'elastic-apm-node';
 export { AgentService, ESIndexPatternService, getRegistryUrl, PackageService } from './services';
 export {
   IngestManagerSetupContract,
@@ -19,15 +21,20 @@ export {
   ExternalCallback,
 } from './plugin';
 
-export const config = {
+export const config: PluginConfigDescriptor = {
   exposeToBrowser: {
     epm: true,
-    fleet: true,
+    agents: true,
   },
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('xpack.ingestManager', 'xpack.fleet'),
+    renameFromRoot('xpack.fleet.fleet', 'xpack.fleet.agents'),
+  ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    registryUrl: schema.maybe(schema.uri()),
-    fleet: schema.object({
+    registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+    registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+    agents: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),
       pollingRequestTimeout: schema.number({

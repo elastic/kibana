@@ -1,0 +1,79 @@
+[role="xpack"]
+[[jira-action-type]]
+=== Jira action
+
+The Jira action type uses the https://developer.atlassian.com/cloud/jira/platform/rest/v2/[REST API v2] to create Jira issues.
+
+[float]
+[[jira-connector-configuration]]
+==== Connector configuration
+
+Jira connectors have the following configuration properties:
+
+Name::      The name of the connector. The name is used to identify a  connector in the **Stack Management** UI connector listing, and in the connector list when configuring an action.
+URL::       Jira instance URL.
+Project key:: Jira project key.
+Email (or username)::  The account email (or username) for HTTP Basic authentication.
+API token (or password)::  Jira API authentication token (or password) for HTTP Basic authentication.
+
+[float]
+[[Preconfigured-jira-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-jira:
+   name: preconfigured-jira-action-type
+   actionTypeId: .jira
+   config:
+     apiUrl: https://elastic.atlassian.net
+     projectKey: ES
+   secrets:
+     email: testuser
+     apiToken: tokenkeystorevalue
+--
+
+`config` defines the action type specific to the configuration and contains the following properties:
+
+[cols="2*<"]
+|===
+
+| `apiUrl`
+| An address that corresponds to *URL*.
+
+| `projectKey`
+| A key that corresponds to *Project Key*.
+
+|===
+
+`secrets` defines sensitive information for the action type:
+
+[cols="2*<"]
+|===
+
+| `email`
+| A string that corresponds to *Email*.
+
+| `apiToken`
+| A string that corresponds to *API Token*. Should be stored in the <<creating-keystore, {kib} keystore>>.
+
+|===
+
+[[jira-action-configuration]]
+==== Action configuration
+
+Jira actions have the following configuration properties:
+
+Issue type::              The type of the issue.
+Priority::              The priority of the incident.
+Labels::              The labels of the incident.
+Title::    A title for the issue, used for searching the contents of the knowledge base. 
+Description::          The details about the incident.
+Parent::              The parent issue id or key. Only for `Sub-task` issue types.
+Priority::              The priority of the incident.
+Additional comments::  Additional information for the client, such as how to troubleshoot the issue.
+
+[[configuring-jira]]
+==== Configuring and testing Jira
+
+Jira offers free https://www.atlassian.com/software/jira/free[Instances], which you can use to test incidents.

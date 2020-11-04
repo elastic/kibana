@@ -79,6 +79,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 apiKeyOwner: 'elastic',
                 muteAll: false,
                 mutedInstanceIds: [],
+                executionStatus: match.executionStatus,
               });
               expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
@@ -273,6 +274,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 mutedInstanceIds: [],
                 createdAt: match.createdAt,
                 updatedAt: match.updatedAt,
+                executionStatus: match.executionStatus,
               });
               expect(Date.parse(match.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(match.updatedAt)).to.be.greaterThan(0);
@@ -352,6 +354,85 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 id: createdSecondAlert.id,
                 actions: [],
                 tags: [myTag],
+              });
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle find alert request with executionStatus field appropriately', async () => {
+          const myTag = uuid.v4();
+          const { body: createdAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                enabled: false,
+                tags: [myTag],
+                alertTypeId: 'test.restricted-noop',
+                consumer: 'alertsRestrictedFixture',
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdAlert.id, 'alert', 'alerts');
+
+          // create another type with same tag
+          const { body: createdSecondAlert } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerts/alert`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestAlertData({
+                tags: [myTag],
+                alertTypeId: 'test.restricted-noop',
+                consumer: 'alertsRestrictedFixture',
+              })
+            )
+            .expect(200);
+          objectRemover.add(space.id, createdSecondAlert.id, 'alert', 'alerts');
+
+          const response = await supertestWithoutAuth
+            .get(
+              `${getUrlPrefix(
+                space.id
+              )}/api/alerts/_find?filter=alert.attributes.alertTypeId:test.restricted-noop&fields=["tags","executionStatus"]&sort_field=createdAt`
+            )
+            .auth(user.username, user.password);
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to find any alert types`,
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.data).to.eql([]);
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.page).to.equal(1);
+              expect(response.body.perPage).to.be.greaterThan(0);
+              expect(response.body.total).to.be.greaterThan(0);
+              const [matchFirst, matchSecond] = response.body.data;
+              expect(omit(matchFirst, 'updatedAt')).to.eql({
+                id: createdAlert.id,
+                actions: [],
+                tags: [myTag],
+                executionStatus: matchFirst.executionStatus,
+              });
+              expect(omit(matchSecond, 'updatedAt')).to.eql({
+                id: createdSecondAlert.id,
+                actions: [],
+                tags: [myTag],
+                executionStatus: matchSecond.executionStatus,
               });
               break;
             default:

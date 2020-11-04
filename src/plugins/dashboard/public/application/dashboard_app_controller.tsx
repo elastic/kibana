@@ -37,7 +37,8 @@ import {
   distinctUntilChanged,
 } from 'rxjs/operators';
 import { History } from 'history';
-import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
+import { SavedObjectSaveOpts, SavedObject } from 'src/plugins/saved_objects/public';
+import type { TagDecoratedSavedObject } from 'src/plugins/saved_objects_tagging_oss/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
@@ -66,12 +67,11 @@ import {
   ViewMode,
   ContainerOutput,
   EmbeddableInput,
-  SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
 import { NavAction, SavedDashboardPanel } from '../types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
-import { DashboardSaveModal } from './top_nav/save_modal';
+import { DashboardSaveModal, SaveOptions } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { saveDashboard } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
@@ -82,7 +82,13 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import { IKbnUrlStateStorage, unhashUrl } from '../../../kibana_utils/public';
+import {
+  IKbnUrlStateStorage,
+  removeQueryParam,
+  setStateToKbnUrl,
+  unhashUrl,
+  getQueryParams,
+} from '../../../kibana_utils/public';
 import {
   addFatalError,
   AngularHttpError,
@@ -121,6 +127,9 @@ interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTE
   [UrlParams.HIDE_FILTER_BAR]: boolean;
 }
 
+const getSearchSessionIdFromURL = (history: History): string | undefined =>
+  getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
+
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
   appStatus: {
@@ -140,12 +149,11 @@ export class DashboardAppController {
     dashboardCapabilities,
     scopedHistory,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService },
+    data: { query: queryService, search: searchService },
     core: {
       notifications,
       overlays,
       chrome,
-      injectedMetadata,
       fatalErrors,
       uiSettings,
       savedObjects,
@@ -157,6 +165,7 @@ export class DashboardAppController {
     kbnUrlStateStorage,
     usageCollection,
     navigation,
+    savedObjectsTagging,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
     const timefilter = queryService.timefilter.timefilter;
@@ -178,9 +187,14 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
-    const incomingEmbeddable = embeddable
+    let incomingEmbeddable = embeddable
       .getStateTransfer(scopedHistory())
       .getIncomingEmbeddablePackage();
+
+    // TS is picky with type guards, we can't just inline `() => false`
+    function defaultTaggingGuard(obj: SavedObject): obj is TagDecoratedSavedObject {
+      return false;
+    }
 
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
@@ -189,6 +203,7 @@ export class DashboardAppController {
       kbnUrlStateStorage,
       history,
       usageCollection,
+      hasTaggingCapabilities: savedObjectsTagging?.ui.hasTagDecoration ?? defaultTaggingGuard,
     });
 
     // sync initial app filters from state to filterManager
@@ -344,10 +359,22 @@ export class DashboardAppController {
       dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
         embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
       });
-      let expandedPanelId;
-      if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        expandedPanelId = dashboardContainer.getInput().expandedPanelId;
+
+      // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
+      if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
+        const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
+        embeddablesMap[incomingEmbeddable.embeddableId] = {
+          gridData: originalPanelState.gridData,
+          type: incomingEmbeddable.type,
+          explicitInput: {
+            ...originalPanelState.explicitInput,
+            ...incomingEmbeddable.input,
+            id: incomingEmbeddable.embeddableId,
+          },
+        };
+        incomingEmbeddable = undefined;
       }
+
       const shouldShowEditHelp = getShouldShowEditHelp();
       const shouldShowViewHelp = getShouldShowViewHelp();
       const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
@@ -369,7 +396,7 @@ export class DashboardAppController {
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
         description: dashboardStateManager.getDescription(),
-        expandedPanelId,
+        expandedPanelId: dashboardStateManager.getExpandedPanelId(),
       };
     };
 
@@ -402,8 +429,13 @@ export class DashboardAppController {
     >(DASHBOARD_CONTAINER_TYPE);
 
     if (dashboardFactory) {
+      const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+      if (searchSessionIdFromURL) {
+        searchService.session.restore(searchSessionIdFromURL);
+      }
+      const searchSessionId = searchSessionIdFromURL ?? searchService.session.start();
       dashboardFactory
-        .create(getDashboardInput())
+        .create({ ...getDashboardInput(), searchSessionId })
         .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
           if (container && !isErrorEmbeddable(container)) {
             dashboardContainer = container;
@@ -482,32 +514,16 @@ export class DashboardAppController {
               refreshDashboardContainer();
             });
 
-            if (incomingEmbeddable) {
-              if ('id' in incomingEmbeddable) {
-                container.addOrUpdateEmbeddable<SavedObjectEmbeddableInput>(
-                  incomingEmbeddable.type,
-                  {
-                    savedObjectId: incomingEmbeddable.id,
-                  }
-                );
-              } else if ('input' in incomingEmbeddable) {
-                const input = incomingEmbeddable.input;
-                // @ts-expect-error
-                delete input.id;
-                const explicitInput = {
-                  savedVis: input,
-                };
-                const embeddableId =
-                  'embeddableId' in incomingEmbeddable
-                    ? incomingEmbeddable.embeddableId
-                    : undefined;
-                container.addOrUpdateEmbeddable<EmbeddableInput>(
-                  incomingEmbeddable.type,
-                  // This ugly solution is temporary - https://github.com/elastic/kibana/pull/70272 fixes this whole section
-                  (explicitInput as unknown) as EmbeddableInput,
-                  embeddableId
-                );
-              }
+            // If the incomingEmbeddable does not yet exist in the panels listing, create a new panel using the container's addEmbeddable method.
+            if (
+              incomingEmbeddable &&
+              (!incomingEmbeddable.embeddableId ||
+                !container.getInput().panels[incomingEmbeddable.embeddableId])
+            ) {
+              container.addNewEmbeddable<EmbeddableInput>(
+                incomingEmbeddable.type,
+                incomingEmbeddable.input
+              );
             }
           }
 
@@ -531,9 +547,6 @@ export class DashboardAppController {
       dashboardStateManager.getQuery() || queryStringManager.getDefaultQuery(),
       filterManager.getFilters()
     );
-
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
 
     const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
 
@@ -581,7 +594,7 @@ export class DashboardAppController {
         differences.filters = appStateDashboardInput.filters;
       }
 
-      Object.keys(_.omit(containerInput, ['filters'])).forEach((key) => {
+      Object.keys(_.omit(containerInput, ['filters', 'searchSessionId'])).forEach((key) => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
         const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
           key
@@ -599,7 +612,15 @@ export class DashboardAppController {
     const refreshDashboardContainer = () => {
       const changes = getChangesFromAppStateForContainerState();
       if (changes && dashboardContainer) {
-        dashboardContainer.updateInput(changes);
+        if (getSearchSessionIdFromURL(history)) {
+          // going away from a background search results
+          removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
+        }
+
+        dashboardContainer.updateInput({
+          ...changes,
+          searchSessionId: searchService.session.start(),
+        });
       }
     };
 
@@ -889,6 +910,15 @@ export class DashboardAppController {
       const currentTitle = dashboardStateManager.getTitle();
       const currentDescription = dashboardStateManager.getDescription();
       const currentTimeRestore = dashboardStateManager.getTimeRestore();
+
+      let currentTags: string[] = [];
+      if (savedObjectsTagging) {
+        const dashboard = dashboardStateManager.savedDashboard;
+        if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
+          currentTags = dashboard.getTags();
+        }
+      }
+
       const onSave = ({
         newTitle,
         newDescription,
@@ -896,18 +926,16 @@ export class DashboardAppController {
         newTimeRestore,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
-      }: {
-        newTitle: string;
-        newDescription: string;
-        newCopyOnSave: boolean;
-        newTimeRestore: boolean;
-        isTitleDuplicateConfirmed: boolean;
-        onTitleDuplicate: () => void;
-      }) => {
+        newTags,
+      }: SaveOptions) => {
         dashboardStateManager.setTitle(newTitle);
         dashboardStateManager.setDescription(newDescription);
         dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
         dashboardStateManager.setTimeRestore(newTimeRestore);
+        if (savedObjectsTagging && newTags) {
+          dashboardStateManager.setTags(newTags);
+        }
+
         const saveOptions = {
           confirmOverwrite: false,
           isTitleDuplicateConfirmed,
@@ -919,6 +947,9 @@ export class DashboardAppController {
             dashboardStateManager.setTitle(currentTitle);
             dashboardStateManager.setDescription(currentDescription);
             dashboardStateManager.setTimeRestore(currentTimeRestore);
+            if (savedObjectsTagging) {
+              dashboardStateManager.setTags(currentTags);
+            }
           }
           return response;
         });
@@ -930,6 +961,8 @@ export class DashboardAppController {
           onClose={() => {}}
           title={currentTitle}
           description={currentDescription}
+          tags={currentTags}
+          savedObjectsTagging={savedObjectsTagging}
           timeRestore={currentTimeRestore}
           showCopyOnSave={dash.id ? true : false}
         />
@@ -1084,7 +1117,12 @@ export class DashboardAppController {
           allowEmbed: true,
           allowShortUrl:
             !dashboardConfig.getHideWriteControls() || dashboardCapabilities.createShortUrl,
-          shareableUrl: unhashUrl(window.location.href),
+          shareableUrl: setStateToKbnUrl(
+            '_a',
+            dashboardStateManager.getAppState(),
+            { useHash: false, storeInHashQuery: true },
+            unhashUrl(window.location.href)
+          ),
           objectId: dash.id,
           objectType: 'dashboard',
           sharingData: {
@@ -1113,12 +1151,6 @@ export class DashboardAppController {
         $scope.model.filters = filterManager.getFilters();
         $scope.model.query = queryStringManager.getQuery();
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
-        if (dashboardContainer) {
-          dashboardContainer.updateInput({
-            filters: $scope.model.filters,
-            query: $scope.model.query,
-          });
-        }
       },
     });
 
@@ -1163,6 +1195,7 @@ export class DashboardAppController {
       if (dashboardContainer) {
         dashboardContainer.destroy();
       }
+      searchService.session.clear();
     });
   }
 }

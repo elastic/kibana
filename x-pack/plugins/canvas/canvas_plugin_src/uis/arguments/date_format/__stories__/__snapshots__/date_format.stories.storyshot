@@ -42,7 +42,7 @@ Array [
         <span
           className="euiFormControlLayoutCustomIcon"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
@@ -114,7 +114,7 @@ Array [
         <span
           className="euiFormControlLayoutCustomIcon"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="arrowDown"
@@ -185,7 +185,7 @@ exports[`Storyshots arguments/DateFormat with preset format 1`] = `
       <span
         className="euiFormControlLayoutCustomIcon"
       >
-        <div
+        <span
           aria-hidden="true"
           className="euiFormControlLayoutCustomIcon__icon"
           data-euiicon-type="arrowDown"

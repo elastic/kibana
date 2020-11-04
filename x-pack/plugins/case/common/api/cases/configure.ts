@@ -8,9 +8,10 @@ import * as rt from 'io-ts';
 
 import { ActionResult } from '../../../../actions/common';
 import { UserRT } from '../user';
-import { JiraFieldsRT } from '../connectors/jira';
-import { ServiceNowFieldsRT } from '../connectors/servicenow';
-import { ResilientFieldsRT } from '../connectors/resilient';
+import { JiraCaseFieldsRt } from '../connectors/jira';
+import { ServiceNowCaseFieldsRT } from '../connectors/servicenow';
+import { ResilientCaseFieldsRT } from '../connectors/resilient';
+import { CaseConnectorRt, ESCaseConnector } from '../connectors';
 
 /*
  * This types below are related to the service now configuration
@@ -31,9 +32,9 @@ const CaseFieldRT = rt.union([
 ]);
 
 const ThirdPartyFieldRT = rt.union([
-  JiraFieldsRT,
-  ServiceNowFieldsRT,
-  ResilientFieldsRT,
+  JiraCaseFieldsRt,
+  ServiceNowCaseFieldsRT,
+  ResilientCaseFieldsRT,
   rt.literal('not_mapped'),
 ]);
 
@@ -62,14 +63,13 @@ export type CasesConnectorConfiguration = rt.TypeOf<typeof CasesConnectorConfigu
 
 /** ********************************************************************** */
 
-export type Connector = ActionResult;
+export type ActionConnector = ActionResult;
 
-// TO DO we will need to add this type rt.literal('close-by-thrid-party')
+// TODO: we will need to add this type rt.literal('close-by-third-party')
 const ClosureTypeRT = rt.union([rt.literal('close-by-user'), rt.literal('close-by-pushing')]);
 
 const CasesConfigureBasicRt = rt.type({
-  connector_id: rt.string,
-  connector_name: rt.string,
+  connector: CaseConnectorRt,
   closure_type: ClosureTypeRT,
 });
 
@@ -97,8 +97,12 @@ export const CaseConfigureResponseRt = rt.intersection([
 ]);
 
 export type ClosureType = rt.TypeOf<typeof ClosureTypeRT>;
-
+export type CasesConfigure = rt.TypeOf<typeof CasesConfigureBasicRt>;
 export type CasesConfigureRequest = rt.TypeOf<typeof CasesConfigureRequestRt>;
 export type CasesConfigurePatch = rt.TypeOf<typeof CasesConfigurePatchRt>;
 export type CasesConfigureAttributes = rt.TypeOf<typeof CaseConfigureAttributesRt>;
 export type CasesConfigureResponse = rt.TypeOf<typeof CaseConfigureResponseRt>;
+
+export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
+  connector: ESCaseConnector;
+};

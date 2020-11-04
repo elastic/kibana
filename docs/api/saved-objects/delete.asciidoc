@@ -27,6 +27,14 @@ WARNING: Once you delete a saved object, _it cannot be recovered_.
 `id`::
   (Required, string) The object ID that you want to remove.
 
+[[saved-objects-api-delete-query-params]]
+==== Query parameters
+
+`force`::
+  (Optional, boolean) When true, forces an object to be deleted if it exists in multiple namespaces.
++
+TIP: Use this if you attempted to delete an object and received an HTTP 400 error with the following message: _"Unable to delete saved object that exists in multiple namespaces, use the `force` option to delete it anyway"_
+
 [[saved-objects-api-delete-response-codes]]
 ==== Response code
 

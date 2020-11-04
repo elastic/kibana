@@ -5,17 +5,12 @@
  */
 
 import expect from '@kbn/expect';
-
 import {
+  HostsQueries,
   Direction,
-  GetHostOverviewQuery,
-  GetHostFirstLastSeenQuery,
-  GetHostsTableQuery,
   HostsFields,
-} from '../../../../plugins/security_solution/public/graphql/types';
-import { HostOverviewQuery } from '../../../../plugins/security_solution/public/hosts/containers/hosts/details/host_overview.gql_query';
-import { HostFirstLastSeenGqlQuery } from '../../../../plugins/security_solution/public/hosts/containers/hosts/first_last_seen/first_last_seen.gql_query';
-import { HostsTableQuery } from '../../../../plugins/security_solution/public/hosts/containers/hosts/hosts_table.gql_query';
+} from '../../../../plugins/security_solution/common/search_strategy';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const FROM = '2000-01-01T00:00:00.000Z';
@@ -29,85 +24,77 @@ const CURSOR_ID = '2ab45fc1c41e4c84bbd02202a7e5761f';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const client = getService('securitySolutionGraphQLClient');
+  const supertest = getService('supertest');
 
   describe('hosts', () => {
     before(() => esArchiver.load('auditbeat/hosts'));
     after(() => esArchiver.unload('auditbeat/hosts'));
 
-    it('Make sure that we get Hosts Table data', () => {
-      return client
-        .query<GetHostsTableQuery.Query>({
-          query: HostsTableQuery,
-          variables: {
-            sourceId: 'default',
-            timerange: {
-              interval: '12h',
-              to: TO,
-              from: FROM,
-            },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-            docValueFields: [],
-            sort: {
-              field: HostsFields.lastSeen,
-              direction: Direction.asc,
-            },
-            pagination: {
-              activePage: 0,
-              cursorStart: 0,
-              fakePossibleCount: 3,
-              querySize: 1,
-            },
-            inspect: false,
+    it('Make sure that we get Hosts Table data', async () => {
+      const { body: hosts } = await supertest
+        .post('/internal/search/securitySolutionSearchStrategy/')
+        .set('kbn-xsrf', 'true')
+        .send({
+          factoryQueryType: HostsQueries.hosts,
+          timerange: {
+            interval: '12h',
+            to: TO,
+            from: FROM,
           },
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [],
+          sort: {
+            field: HostsFields.lastSeen,
+            direction: Direction.asc,
+          },
+          pagination: {
+            activePage: 0,
+            cursorStart: 0,
+            fakePossibleCount: 3,
+            querySize: 1,
+          },
+          inspect: false,
         })
-        .then((resp) => {
-          const hosts = resp.data.source.Hosts;
-          expect(hosts.edges.length).to.be(EDGE_LENGTH);
-          expect(hosts.totalCount).to.be(TOTAL_COUNT);
-          expect(hosts.pageInfo.fakeTotalCount).to.equal(3);
-        });
+        .expect(200);
+      expect(hosts.edges.length).to.be(EDGE_LENGTH);
+      expect(hosts.totalCount).to.be(TOTAL_COUNT);
+      expect(hosts.pageInfo.fakeTotalCount).to.equal(3);
     });
 
-    it('Make sure that pagination is working in Hosts Table query', () => {
-      return client
-        .query<GetHostsTableQuery.Query>({
-          query: HostsTableQuery,
-          variables: {
-            sourceId: 'default',
-            timerange: {
-              interval: '12h',
-              to: TO,
-              from: FROM,
-            },
-            sort: {
-              field: HostsFields.lastSeen,
-              direction: Direction.asc,
-            },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-            docValueFields: [],
-            pagination: {
-              activePage: 2,
-              cursorStart: 1,
-              fakePossibleCount: 5,
-              querySize: 2,
-            },
-            inspect: false,
+    it('Make sure that pagination is working in Hosts Table query', async () => {
+      const { body: hosts } = await supertest
+        .post('/internal/search/securitySolutionSearchStrategy/')
+        .set('kbn-xsrf', 'true')
+        .send({
+          factoryQueryType: HostsQueries.hosts,
+          timerange: {
+            interval: '12h',
+            to: TO,
+            from: FROM,
           },
+          sort: {
+            field: HostsFields.lastSeen,
+            direction: Direction.asc,
+          },
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [],
+          pagination: {
+            activePage: 2,
+            cursorStart: 1,
+            fakePossibleCount: 5,
+            querySize: 2,
+          },
+          inspect: false,
         })
-        .then((resp) => {
-          const hosts = resp.data.source.Hosts;
-
-          expect(hosts.edges.length).to.be(EDGE_LENGTH);
-          expect(hosts.totalCount).to.be(TOTAL_COUNT);
-          expect(hosts.edges[0]!.node.host!.os!.name).to.eql([HOST_NAME]);
-        });
+        .expect(200);
+      expect(hosts.edges.length).to.be(EDGE_LENGTH);
+      expect(hosts.totalCount).to.be(TOTAL_COUNT);
+      expect(hosts.edges[0]!.node.host!.os!.name).to.eql([HOST_NAME]);
     });
 
-    it('Make sure that we get Host Overview data', () => {
-      const expectedHost: Omit<GetHostOverviewQuery.HostOverview, 'inspect'> = {
+    it('Make sure that we get Host details data', async () => {
+      const expectedHostDetails = {
         _id: 'zeek-sensor-san-francisco',
-        endpoint: null,
         host: {
           architecture: ['x86_64'],
           id: [CURSOR_ID],
@@ -119,68 +106,59 @@ export default function ({ getService }: FtrProviderContext) {
             name: [HOST_NAME],
             platform: ['ubuntu'],
             version: ['18.04.2 LTS (Bionic Beaver)'],
-            __typename: 'OsEcsFields',
           },
-          type: null,
-          __typename: 'HostEcsFields',
         },
         cloud: {
           instance: {
             id: ['132972452'],
-            __typename: 'CloudInstance',
           },
           machine: {
             type: [],
-            __typename: 'CloudMachine',
           },
           provider: ['digitalocean'],
           region: ['sfo2'],
-          __typename: 'CloudFields',
         },
-        __typename: 'HostItem',
       };
-
-      return client
-        .query<GetHostOverviewQuery.Query>({
-          query: HostOverviewQuery,
-          variables: {
-            sourceId: 'default',
-            hostName: 'zeek-sensor-san-francisco',
-            timerange: {
-              interval: '12h',
-              to: TO,
-              from: FROM,
-            },
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-            docValueFields: [],
-            inspect: false,
+      const {
+        body: { hostDetails },
+      } = await supertest
+        .post('/internal/search/securitySolutionSearchStrategy/')
+        .set('kbn-xsrf', 'true')
+        .send({
+          factoryQueryType: HostsQueries.details,
+          hostName: 'zeek-sensor-san-francisco',
+          timerange: {
+            interval: '12h',
+            to: TO,
+            from: FROM,
           },
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [],
+          inspect: false,
         })
-        .then((resp) => {
-          const hosts = resp.data.source.HostOverview;
-          expect(hosts).to.eql(expectedHost);
-        });
+        .expect(200);
+
+      expect(hostDetails).to.eql(expectedHostDetails);
     });
 
-    it('Make sure that we get Last First Seen for a Host', () => {
-      return client
-        .query<GetHostFirstLastSeenQuery.Query>({
-          query: HostFirstLastSeenGqlQuery,
-          variables: {
-            sourceId: 'default',
-            hostName: 'zeek-sensor-san-francisco',
-            defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
-            docValueFields: [],
-          },
+    it('Make sure that we get Last First Seen for a Host', async () => {
+      const { body: firstLastSeenHost } = await supertest
+        .post('/internal/search/securitySolutionSearchStrategy/')
+        .set('kbn-xsrf', 'true')
+        .send({
+          factoryQueryType: HostsQueries.firstLastSeen,
+          defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
+          docValueFields: [],
+          hostName: 'zeek-sensor-san-francisco',
         })
-        .then((resp) => {
-          const firstLastSeenHost = resp.data.source.HostFirstLastSeen;
-          expect(firstLastSeenHost).to.eql({
-            __typename: 'FirstLastSeenHost',
-            firstSeen: '2019-02-19T19:36:23.561Z',
-            lastSeen: '2019-02-19T20:42:33.561Z',
-          });
-        });
+        .expect(200);
+      const expected = {
+        firstSeen: '2019-02-19T19:36:23.561Z',
+        lastSeen: '2019-02-19T20:42:33.561Z',
+      };
+
+      expect(firstLastSeenHost.firstSeen).to.eql(expected.firstSeen);
+      expect(firstLastSeenHost.lastSeen).to.eql(expected.lastSeen);
     });
   });
 }

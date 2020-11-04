@@ -66,8 +66,8 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
       await testSubjects.setValue('addSpaceName', spaceName);
     }
 
-    async clickSpaceAcustomAvatar() {
-      await testSubjects.click('space-avatar-space_a');
+    async clickCustomizeSpaceAvatar(spaceId: string) {
+      await testSubjects.click(`space-avatar-${spaceId}`);
     }
 
     async clickSpaceInitials() {
@@ -122,10 +122,6 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
       await testSubjects.setValue('spaceURLDisplay', spaceURL);
     }
 
-    async clickFeaturesVisibilityButton() {
-      await testSubjects.click('changeAllFeatureVisibilityPopover');
-    }
-
     async clickHideAllFeatures() {
       await testSubjects.click('spc-toggle-all-features-hide');
     }
@@ -134,8 +130,28 @@ export function SpaceSelectorPageProvider({ getService, getPageObjects }: FtrPro
       await testSubjects.click('spc-toggle-all-features-show');
     }
 
-    async toggleFeatureVisibility(featureName: string) {
-      await testSubjects.click(`feature-${featureName}-toggle`);
+    async openFeatureCategory(categoryName: string) {
+      const category = await find.byCssSelector(
+        `button[aria-controls=featureCategory_${categoryName}]`
+      );
+      const isCategoryExpanded = (await category.getAttribute('aria-expanded')) === 'true';
+      if (!isCategoryExpanded) {
+        await category.click();
+      }
+    }
+
+    async closeFeatureCategory(categoryName: string) {
+      const category = await find.byCssSelector(
+        `button[aria-controls=featureCategory_${categoryName}]`
+      );
+      const isCategoryExpanded = (await category.getAttribute('aria-expanded')) === 'true';
+      if (isCategoryExpanded) {
+        await category.click();
+      }
+    }
+
+    async toggleFeatureCategoryVisibility(categoryName: string) {
+      await testSubjects.click(`featureCategoryButton_${categoryName}`);
     }
 
     async clickOnDescriptionOfSpace() {

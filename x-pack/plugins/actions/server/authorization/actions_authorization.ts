@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { KibanaRequest } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import { ActionsAuthorizationAuditLogger } from './audit_logger';
 import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { AuthorizationMode } from './get_authorization_mode_by_source';
 
 export interface ConstructorOptions {
   request: KibanaRequest;
@@ -22,7 +23,7 @@ export interface ConstructorOptions {
   // actions to continue to execute - which requires that we exempt auth on
   // `get` for Connectors and `execute` for Action execution when used by
   // these legacy alerts
-  shouldUseLegacyRbac?: boolean;
+  authorizationMode?: AuthorizationMode;
 }
 
 const operationAlias: Record<
@@ -43,20 +44,19 @@ export class ActionsAuthorization {
   private readonly authorization?: SecurityPluginSetup['authz'];
   private readonly authentication?: SecurityPluginSetup['authc'];
   private readonly auditLogger: ActionsAuthorizationAuditLogger;
-  private readonly shouldUseLegacyRbac: boolean;
-
+  private readonly authorizationMode: AuthorizationMode;
   constructor({
     request,
     authorization,
     authentication,
     auditLogger,
-    shouldUseLegacyRbac = false,
+    authorizationMode = AuthorizationMode.RBAC,
   }: ConstructorOptions) {
     this.request = request;
     this.authorization = authorization;
     this.authentication = authentication;
     this.auditLogger = auditLogger;
-    this.shouldUseLegacyRbac = shouldUseLegacyRbac;
+    this.authorizationMode = authorizationMode;
   }
 
   public async ensureAuthorized(operation: string, actionTypeId?: string) {
@@ -87,6 +87,9 @@ export class ActionsAuthorization {
   }
 
   private isOperationExemptDueToLegacyRbac(operation: string) {
-    return this.shouldUseLegacyRbac && LEGACY_RBAC_EXEMPT_OPERATIONS.has(operation);
+    return (
+      this.authorizationMode === AuthorizationMode.Legacy &&
+      LEGACY_RBAC_EXEMPT_OPERATIONS.has(operation)
+    );
   }
 }

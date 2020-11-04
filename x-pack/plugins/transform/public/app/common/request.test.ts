@@ -17,6 +17,7 @@ import {
   defaultQuery,
   getPreviewTransformRequestBody,
   getCreateTransformRequestBody,
+  getCreateTransformSettingsRequestBody,
   getPivotQuery,
   isDefaultQuery,
   isMatchAllQuery,
@@ -157,6 +158,9 @@ describe('Transform: Common', () => {
       isContinuousModeEnabled: false,
       transformId: 'the-transform-id',
       transformDescription: 'the-transform-description',
+      transformFrequency: '1m',
+      transformSettingsMaxPageSearchSize: 100,
+      transformSettingsDocsPerSecond: 400,
       destinationIndex: 'the-destination-index',
       touched: true,
       valid: true,
@@ -171,13 +175,48 @@ describe('Transform: Common', () => {
     expect(request).toEqual({
       description: 'the-transform-description',
       dest: { index: 'the-destination-index' },
+      frequency: '1m',
       pivot: {
         aggregations: { 'the-agg-agg-name': { avg: { field: 'the-agg-field' } } },
         group_by: { 'the-group-by-agg-name': { terms: { field: 'the-group-by-field' } } },
       },
+      settings: {
+        max_page_search_size: 100,
+        docs_per_second: 400,
+      },
       source: {
         index: ['the-index-pattern-title'],
         query: { query_string: { default_operator: 'AND', query: 'the-search-query' } },
+      },
+    });
+  });
+
+  test('getCreateTransformSettingsRequestBody() with multiple settings', () => {
+    const transformDetailsState: Partial<StepDetailsExposedState> = {
+      transformSettingsDocsPerSecond: 400,
+      transformSettingsMaxPageSearchSize: 100,
+    };
+
+    const request = getCreateTransformSettingsRequestBody(transformDetailsState);
+
+    expect(request).toEqual({
+      settings: {
+        docs_per_second: 400,
+        max_page_search_size: 100,
+      },
+    });
+  });
+
+  test('getCreateTransformSettingsRequestBody() with one setting', () => {
+    const transformDetailsState: Partial<StepDetailsExposedState> = {
+      transformSettingsDocsPerSecond: 400,
+    };
+
+    const request = getCreateTransformSettingsRequestBody(transformDetailsState);
+
+    expect(request).toEqual({
+      settings: {
+        docs_per_second: 400,
       },
     });
   });

@@ -14,15 +14,18 @@ import {
   EuiIconTip,
   EuiHealth,
 } from '@elastic/eui';
+import {
+  getServiceHealthStatus,
+  getServiceHealthStatusColor,
+} from '../../../../../common/service_health_status';
 import { useTheme } from '../../../../hooks/useTheme';
 import { fontSize, px } from '../../../../style/variables';
-import { asInteger, asDuration } from '../../../../utils/formatters';
+import { asInteger, asDuration } from '../../../../../common/utils/formatters';
 import { MLJobLink } from '../../../shared/Links/MachineLearningLinks/MLJobLink';
-import { popoverWidth } from '../cytoscapeOptions';
+import { popoverWidth } from '../cytoscape_options';
 import { TRANSACTION_REQUEST } from '../../../../../common/transaction_types';
 import {
   getSeverity,
-  getSeverityColor,
   ServiceAnomalyStats,
 } from '../../../../../common/anomaly_detection';
 
@@ -59,12 +62,14 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
   const theme = useTheme();
 
   const anomalyScore = serviceAnomalyStats?.anomalyScore;
-  const anomalySeverity = getSeverity(anomalyScore);
+  const severity = getSeverity(anomalyScore);
   const actualValue = serviceAnomalyStats?.actualValue;
   const mlJobId = serviceAnomalyStats?.jobId;
   const transactionType =
     serviceAnomalyStats?.transactionType ?? TRANSACTION_REQUEST;
   const hasAnomalyDetectionScore = anomalyScore !== undefined;
+
+  const healthStatus = getServiceHealthStatus({ severity });
 
   return (
     <>
@@ -81,7 +86,9 @@ export function AnomalyDetection({ serviceName, serviceAnomalyStats }: Props) {
           <EuiFlexGroup>
             <EuiFlexItem>
               <VerticallyCentered>
-                <EuiHealth color={getSeverityColor(theme, anomalySeverity)} />
+                <EuiHealth
+                  color={getServiceHealthStatusColor(theme, healthStatus)}
+                />
                 <SubduedText>{ANOMALY_DETECTION_SCORE_METRIC}</SubduedText>
               </VerticallyCentered>
             </EuiFlexItem>

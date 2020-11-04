@@ -55,7 +55,6 @@ export default {
     '@elastic/eui$': '<rootDir>/node_modules/@elastic/eui/test-env',
     '@elastic/eui/lib/(.*)?': '<rootDir>/node_modules/@elastic/eui/test-env/$1',
     '^src/plugins/(.*)': '<rootDir>/src/plugins/$1',
-    '^uiExports/(.*)': '<rootDir>/src/dev/jest/mocks/file_mock.js',
     '^test_utils/(.*)': '<rootDir>/src/test_utils/public/$1',
     '^fixtures/(.*)': '<rootDir>/src/fixtures/$1',
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
@@ -100,5 +99,5 @@ export default {
     '<rootDir>/src/plugins/kibana_react/public/util/test_helpers/react_mount_serializer.ts',
     '<rootDir>/node_modules/enzyme-to-json/serializer',
   ],
-  reporters: ['default', '<rootDir>/src/dev/jest/junit_reporter.js'],
+  reporters: ['default', '<rootDir>/packages/kbn-test/target/jest/junit_reporter'],
 };

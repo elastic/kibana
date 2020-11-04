@@ -9,11 +9,10 @@ import * as Rx from 'rxjs';
 import { mergeMap } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
-import { createLayout, LayoutInstance, LayoutParams } from '../../../lib/layouts';
+import { createLayout, LayoutParams } from '../../../lib/layouts';
 import { ScreenshotResults } from '../../../lib/screenshots';
-import { ConditionalHeaders } from '../../../types';
-// @ts-ignore untyped module
-import { pdf } from './pdf';
+import { ConditionalHeaders } from '../../common';
+import { PdfMaker } from './pdf';
 import { getTracker } from './tracker';
 
 const getTimeRange = (urlScreenshots: ScreenshotResults[]) => {
@@ -35,7 +34,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     logger: LevelLogger,
     title: string,
     urls: string[],
-    browserTimezone: string,
+    browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams,
     logo?: string
@@ -43,7 +42,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
     const tracker = getTracker();
     tracker.startLayout();
 
-    const layout = createLayout(captureConfig, layoutParams) as LayoutInstance;
+    const layout = createLayout(captureConfig, layoutParams);
     tracker.endLayout();
 
     tracker.startScreenshots();
@@ -58,7 +57,7 @@ export async function generatePdfObservableFactory(reporting: ReportingCore) {
         tracker.endScreenshots();
 
         tracker.startSetup();
-        const pdfOutput = pdf.create(layout, logo);
+        const pdfOutput = new PdfMaker(layout, logo);
         if (title) {
           const timeRange = getTimeRange(results);
           title += timeRange ? ` - ${timeRange}` : '';

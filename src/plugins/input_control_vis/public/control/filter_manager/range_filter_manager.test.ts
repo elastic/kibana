@@ -25,6 +25,7 @@ import {
   RangeFilterMeta,
   IndexPattern,
   FilterManager as QueryFilterManager,
+  IndexPatternsContract,
 } from '../../../../data/public';
 
 describe('RangeFilterManager', function () {
@@ -46,15 +47,20 @@ describe('RangeFilterManager', function () {
         },
       },
     } as IndexPattern;
+    const indexPatternsServiceMock = ({
+      get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
+    } as unknown) as jest.Mocked<IndexPatternsContract>;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: RangeFilterManager;
-    beforeEach(() => {
+    beforeEach(async () => {
       filterManager = new RangeFilterManager(
         controlId,
         'field1',
-        indexPatternMock,
+        '1',
+        indexPatternsServiceMock,
         queryFilterMock
       );
+      await filterManager.init();
     });
 
     test('should create range filter from slider value', function () {
@@ -75,10 +81,11 @@ describe('RangeFilterManager', function () {
       constructor(
         id: string,
         fieldName: string,
-        indexPattern: IndexPattern,
+        indexPatternId: string,
+        indexPatternsService: IndexPatternsContract,
         queryFilter: QueryFilterManager
       ) {
-        super(id, fieldName, indexPattern, queryFilter);
+        super(id, fieldName, indexPatternId, indexPatternsService, queryFilter);
         this.mockFilters = [];
       }
 
@@ -91,14 +98,15 @@ describe('RangeFilterManager', function () {
       }
     }
 
-    const indexPatternMock: IndexPattern = {} as IndexPattern;
+    const indexPatternsServiceMock = {} as IndexPatternsContract;
     const queryFilterMock: QueryFilterManager = {} as QueryFilterManager;
     let filterManager: MockFindFiltersRangeFilterManager;
     beforeEach(() => {
       filterManager = new MockFindFiltersRangeFilterManager(
         controlId,
         'field1',
-        indexPatternMock,
+        '1',
+        indexPatternsServiceMock,
         queryFilterMock
       );
     });

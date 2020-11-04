@@ -19,6 +19,7 @@ import {
   PostEnrollmentAPIKeyResponse,
 } from '../../../common';
 import * as APIKeyService from '../../services/api_keys';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const getEnrollmentApiKeysHandler: RequestHandler<
   undefined,
@@ -34,11 +35,8 @@ export const getEnrollmentApiKeysHandler: RequestHandler<
     const body: GetEnrollmentAPIKeysResponse = { list: items, total, page, perPage };
 
     return response.ok({ body });
-  } catch (e) {
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 export const postEnrollmentApiKeyHandler: RequestHandler<
@@ -57,17 +55,8 @@ export const postEnrollmentApiKeyHandler: RequestHandler<
     const body: PostEnrollmentAPIKeyResponse = { item: apiKey, action: 'created' };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom) {
-      return response.customError({
-        statusCode: e.output.statusCode,
-        body: { message: e.message },
-      });
-    }
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -81,16 +70,13 @@ export const deleteEnrollmentApiKeyHandler: RequestHandler<TypeOf<
     const body: DeleteEnrollmentAPIKeyResponse = { action: 'deleted' };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `EnrollmentAPIKey ${request.params.keyId} not found` },
       });
     }
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -103,16 +89,13 @@ export const getOneEnrollmentApiKeyHandler: RequestHandler<TypeOf<
     const body: GetOneEnrollmentAPIKeyResponse = { item: apiKey };
 
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `EnrollmentAPIKey ${request.params.keyId} not found` },
       });
     }
 
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };

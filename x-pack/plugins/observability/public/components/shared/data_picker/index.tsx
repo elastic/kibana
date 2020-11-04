@@ -5,9 +5,10 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { UI_SETTINGS, useKibanaUISettings } from '../../../hooks/use_kibana_ui_settings';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { fromQuery, toQuery } from '../../../utils/url';
 
 export interface TimePickerTime {
@@ -34,6 +35,14 @@ interface Props {
 export function DatePicker({ rangeFrom, rangeTo, refreshPaused, refreshInterval }: Props) {
   const location = useLocation();
   const history = useHistory();
+  const { plugins } = usePluginContext();
+
+  useEffect(() => {
+    plugins.data.query.timefilter.timefilter.setTime({
+      from: rangeFrom,
+      to: rangeTo,
+    });
+  }, [plugins, rangeFrom, rangeTo]);
 
   const timePickerQuickRanges = useKibanaUISettings<TimePickerQuickRange[]>(
     UI_SETTINGS.TIMEPICKER_QUICK_RANGES

@@ -7,11 +7,16 @@
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
+import {
+  agentAssetTypes,
+  dataTypes,
+  installationStatuses,
+  requiredPackages,
+} from '../../constants';
+import { ValueOf } from '../../types';
 
-export enum InstallationStatus {
-  installed = 'installed',
-  notInstalled = 'not_installed',
-}
+export type InstallationStatus = typeof installationStatuses;
+
 export enum InstallStatus {
   installed = 'installed',
   notInstalled = 'not_installed',
@@ -20,12 +25,14 @@ export enum InstallStatus {
 }
 
 export type InstallType = 'reinstall' | 'reupdate' | 'rollback' | 'update' | 'install';
+export type InstallSource = 'registry' | 'upload';
 
 export type EpmPackageInstallStatus = 'installed' | 'installing';
 
 export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
-export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
+export type AgentAssetType = typeof agentAssetTypes;
+export type AssetType = KibanaAssetType | ElasticsearchAssetType | ValueOf<AgentAssetType>;
 
 export enum KibanaAssetType {
   dashboard = 'dashboard',
@@ -43,16 +50,12 @@ export enum ElasticsearchAssetType {
   transform = 'transform',
 }
 
-export enum AgentAssetType {
-  input = 'input',
-}
+export type DataType = typeof dataTypes;
 
 export type RegistryRelease = 'ga' | 'beta' | 'experimental';
 
-// from /package/{name}
-// type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
-// https://github.com/elastic/package-registry/blob/master/docs/api/package.json
-export interface RegistryPackage {
+// Fields common to packages that come from direct upload and the registry
+export interface InstallablePackage {
   name: string;
   title?: string;
   version: string;
@@ -61,14 +64,24 @@ export interface RegistryPackage {
   description: string;
   type: string;
   categories: string[];
-  requirement: RequirementsByServiceName;
   screenshots?: RegistryImage[];
   icons?: RegistryImage[];
   assets?: string[];
   internal?: boolean;
   format_version: string;
-  datasets?: Dataset[];
-  config_templates?: RegistryConfigTemplate[];
+  data_streams?: RegistryDataStream[];
+  policy_templates?: RegistryPolicyTemplate[];
+}
+
+// Uploaded package archives don't have extra fields
+// Linter complaint disabled because this extra type is meant for better code readability
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ArchivePackage extends InstallablePackage {}
+
+// Registry packages do have extra fields.
+// cf. type Package struct at https://github.com/elastic/package-registry/blob/master/util/package.go
+export interface RegistryPackage extends InstallablePackage {
+  requirement: RequirementsByServiceName;
   download: string;
   path: string;
 }
@@ -80,7 +93,7 @@ interface RegistryImage {
   size?: string;
   type?: string;
 }
-export interface RegistryConfigTemplate {
+export interface RegistryPolicyTemplate {
   name: string;
   title: string;
   description: string;
@@ -127,8 +140,8 @@ export type RegistrySearchResult = Pick<
   | 'internal'
   | 'download'
   | 'path'
-  | 'datasets'
-  | 'config_templates'
+  | 'data_streams'
+  | 'policy_templates'
 >;
 
 export type ScreenshotItem = RegistryImage;
@@ -174,9 +187,9 @@ export type ElasticsearchAssetTypeToParts = Record<
   ElasticsearchAssetParts[]
 >;
 
-export interface Dataset {
+export interface RegistryDataStream {
   type: string;
-  name: string;
+  dataset: string;
   title: string;
   release: string;
   streams?: RegistryStream[];
@@ -223,7 +236,7 @@ interface PackageAdditions {
 export type PackageList = PackageListItem[];
 
 export type PackageListItem = Installable<RegistrySearchResult>;
-export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
+export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo = Installable<
   // remove the properties we'll be altering/replacing from the base type
   Omit<RegistryPackage, keyof PackageAdditions> &
@@ -240,17 +253,18 @@ export interface Installation extends SavedObjectAttributes {
   install_status: EpmPackageInstallStatus;
   install_version: string;
   install_started_at: string;
+  install_source: InstallSource;
 }
 
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
-  status: InstallationStatus.installed;
+  status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
 };
 
 export type NotInstalled<T = {}> = T & {
-  status: InstallationStatus.notInstalled;
+  status: InstallationStatus['NotInstalled'];
 };
 
 export type AssetReference = KibanaAssetReference | EsAssetReference;
@@ -261,6 +275,8 @@ export type KibanaAssetReference = Pick<SavedObjectReference, 'id'> & {
 export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
 };
+
+export type RequiredPackage = typeof requiredPackages;
 
 export enum DefaultPackages {
   system = 'system',

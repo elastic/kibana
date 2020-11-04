@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ActionConnector } from '../../../types';
+import { UserConfiguredActionConnector } from '../../../types';
 
 export interface EmailActionParams {
   to: string[];
@@ -64,66 +64,58 @@ export interface WebhookActionParams {
   body?: string;
 }
 
-interface EmailConfig {
+export interface EmailConfig {
   from: string;
   host: string;
   port: number;
   secure?: boolean;
+  hasAuth: boolean;
 }
 
-interface EmailSecrets {
+export interface EmailSecrets {
   user: string | null;
   password: string | null;
 }
 
-export interface EmailActionConnector extends ActionConnector {
-  config: EmailConfig;
-  secrets: EmailSecrets;
-}
+export type EmailActionConnector = UserConfiguredActionConnector<EmailConfig, EmailSecrets>;
 
-interface EsIndexConfig {
+export interface EsIndexConfig {
   index: string;
   executionTimeField?: string | null;
   refresh?: boolean;
 }
 
-export interface EsIndexActionConnector extends ActionConnector {
-  config: EsIndexConfig;
-}
+export type EsIndexActionConnector = UserConfiguredActionConnector<EsIndexConfig, unknown>;
 
-interface PagerDutyConfig {
+export interface PagerDutyConfig {
   apiUrl?: string;
 }
 
-interface PagerDutySecrets {
+export interface PagerDutySecrets {
   routingKey: string;
 }
 
-export interface PagerDutyActionConnector extends ActionConnector {
-  config: PagerDutyConfig;
-  secrets: PagerDutySecrets;
-}
+export type PagerDutyActionConnector = UserConfiguredActionConnector<
+  PagerDutyConfig,
+  PagerDutySecrets
+>;
 
-interface SlackSecrets {
+export interface SlackSecrets {
   webhookUrl: string;
 }
 
-export interface SlackActionConnector extends ActionConnector {
-  secrets: SlackSecrets;
-}
+export type SlackActionConnector = UserConfiguredActionConnector<unknown, SlackSecrets>;
 
-interface WebhookConfig {
+export interface WebhookConfig {
   method: string;
   url: string;
   headers: Record<string, string>;
+  hasAuth: boolean;
 }
 
-interface WebhookSecrets {
+export interface WebhookSecrets {
   user: string;
   password: string;
 }
 
-export interface WebhookActionConnector extends ActionConnector {
-  config: WebhookConfig;
-  secrets: WebhookSecrets;
-}
+export type WebhookActionConnector = UserConfiguredActionConnector<WebhookConfig, WebhookSecrets>;

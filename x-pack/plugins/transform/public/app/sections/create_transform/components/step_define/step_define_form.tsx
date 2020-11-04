@@ -25,8 +25,6 @@ import {
 import { PivotAggDict } from '../../../../../../common/types/pivot_aggs';
 import { PivotGroupByDict } from '../../../../../../common/types/pivot_group_by';
 
-import { DataGrid } from '../../../../../shared_imports';
-
 import {
   getIndexDevConsoleStatement,
   getPivotPreviewDevConsoleStatement,
@@ -42,7 +40,7 @@ import {
 import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
 import { useIndexData } from '../../../../hooks/use_index_data';
 import { usePivotData } from '../../../../hooks/use_pivot_data';
-import { useToastNotifications } from '../../../../app_dependencies';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { SearchItems } from '../../../../hooks/use_search_items';
 
 import { AdvancedPivotEditor } from '../advanced_pivot_editor';
@@ -66,6 +64,9 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
   const { searchItems } = props;
   const { indexPattern } = searchItems;
 
+  const {
+    ml: { DataGrid },
+  } = useAppDependencies();
   const toastNotifications = useToastNotifications();
   const stepDefineForm = useStepDefineForm(props);
 
@@ -100,11 +101,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
     dataTestSubj: 'transformPivotPreview',
     toastNotifications,
   };
-
-  // TODO This should use the actual value of `indices.query.bool.max_clause_count`
-  const maxIndexFields = 1024;
-  const numIndexFields = indexPattern.fields.length;
-  const disabledQuery = numIndexFields > maxIndexFields;
 
   const copyToClipboardSource = getIndexDevConsoleStatement(pivotQuery, indexPattern.title);
   const copyToClipboardSourceDescription = i18n.translate(
@@ -180,18 +176,6 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
             label={i18n.translate('xpack.transform.stepDefineForm.indexPatternLabel', {
               defaultMessage: 'Index pattern',
             })}
-            helpText={
-              disabledQuery
-                ? i18n.translate('xpack.transform.stepDefineForm.indexPatternHelpText', {
-                    defaultMessage:
-                      'An optional query for this index pattern is not supported. The number of supported index fields is {maxIndexFields} whereas this index has {numIndexFields} fields.',
-                    values: {
-                      maxIndexFields,
-                      numIndexFields,
-                    },
-                  })
-                : ''
-            }
           >
             <span>{indexPattern.title}</span>
           </EuiFormRow>
@@ -213,7 +197,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                 {/* Flex Column #1: Search Bar / Advanced Search Editor */}
                 {searchItems.savedSearch === undefined && (
                   <>
-                    {!disabledQuery && !isAdvancedSourceEditorEnabled && (
+                    {!isAdvancedSourceEditorEnabled && (
                       <SourceSearchBar
                         indexPattern={indexPattern}
                         searchBar={stepDefineForm.searchBar}

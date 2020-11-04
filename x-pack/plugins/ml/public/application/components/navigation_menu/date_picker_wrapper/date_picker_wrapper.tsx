@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useState, useEffect } from 'react';
+import React, { FC, Fragment, useState, useEffect, useCallback } from 'react';
 import { Subscription } from 'rxjs';
 import { EuiSuperDatePicker, OnRefreshProps } from '@elastic/eui';
 import { TimeRange, TimeHistoryContract } from 'src/plugins/data/public';
@@ -48,13 +48,15 @@ export const DatePickerWrapper: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const getRecentlyUsedRanges = getRecentlyUsedRangesFactory(history);
 
-  const [refreshInterval, setRefreshInterval] = useState<RefreshInterval>(
-    globalState?.refreshInterval ?? timefilter.getRefreshInterval()
+  const refreshInterval: RefreshInterval =
+    globalState?.refreshInterval ?? timefilter.getRefreshInterval();
+
+  const setRefreshInterval = useCallback(
+    (refreshIntervalUpdate: RefreshInterval) => {
+      setGlobalState('refreshInterval', refreshIntervalUpdate);
+    },
+    [setGlobalState]
   );
-  useEffect(() => {
-    setGlobalState({ refreshInterval });
-    timefilter.setRefreshInterval(refreshInterval);
-  }, [refreshInterval?.pause, refreshInterval?.value]);
 
   const [time, setTime] = useState(timefilter.getTime());
   const [recentlyUsedRanges, setRecentlyUsedRanges] = useState(getRecentlyUsedRanges());
@@ -71,33 +73,34 @@ export const DatePickerWrapper: FC = () => {
     const subscriptions = new Subscription();
     const refreshIntervalUpdate$ = timefilter.getRefreshIntervalUpdate$();
     if (refreshIntervalUpdate$ !== undefined) {
-      subscriptions.add(refreshIntervalUpdate$.subscribe(timefilterUpdateListener));
+      subscriptions.add(
+        refreshIntervalUpdate$.subscribe((r) => {
+          setRefreshInterval(timefilter.getRefreshInterval());
+        })
+      );
     }
     const timeUpdate$ = timefilter.getTimeUpdate$();
     if (timeUpdate$ !== undefined) {
-      subscriptions.add(timeUpdate$.subscribe(timefilterUpdateListener));
+      subscriptions.add(
+        timeUpdate$.subscribe((v) => {
+          setTime(timefilter.getTime());
+        })
+      );
     }
     const enabledUpdated$ = timefilter.getEnabledUpdated$();
     if (enabledUpdated$ !== undefined) {
-      subscriptions.add(enabledUpdated$.subscribe(timefilterUpdateListener));
+      subscriptions.add(
+        enabledUpdated$.subscribe((w) => {
+          setIsAutoRefreshSelectorEnabled(timefilter.isAutoRefreshSelectorEnabled());
+          setIsTimeRangeSelectorEnabled(timefilter.isTimeRangeSelectorEnabled());
+        })
+      );
     }
 
     return function cleanup() {
       subscriptions.unsubscribe();
     };
   }, []);
-
-  useEffect(() => {
-    // Force re-render with up-to-date values when isTimeRangeSelectorEnabled/isAutoRefreshSelectorEnabled are changed.
-    timefilterUpdateListener();
-  }, [isTimeRangeSelectorEnabled, isAutoRefreshSelectorEnabled]);
-
-  function timefilterUpdateListener() {
-    setTime(timefilter.getTime());
-    setRefreshInterval(timefilter.getRefreshInterval());
-    setIsAutoRefreshSelectorEnabled(timefilter.isAutoRefreshSelectorEnabled());
-    setIsTimeRangeSelectorEnabled(timefilter.isTimeRangeSelectorEnabled());
-  }
 
   function updateFilter({ start, end }: Duration) {
     const newTime = { from: start, to: end };

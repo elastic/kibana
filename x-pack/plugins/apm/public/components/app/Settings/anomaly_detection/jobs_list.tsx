@@ -80,7 +80,7 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={onAddEnvironments}>
+          <EuiButton fill iconType="plusInCircle" onClick={onAddEnvironments}>
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.addEnvironments',
               {
@@ -97,7 +97,7 @@ export function JobsList({ data, status, onAddEnvironments }: Props) {
           defaultMessage="To add anomaly detection to a new environment, create a machine learning job. Existing machine learning jobs can be managed in {mlJobsLink}."
           values={{
             mlJobsLink: (
-              <MLLink path="jobs">
+              <MLLink path="/jobs">
                 {i18n.translate(
                   'xpack.apm.settings.anomalyDetection.jobList.mlDescriptionText.mlJobsLinkText',
                   {

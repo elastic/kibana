@@ -2,9 +2,12 @@
   extends: [
     'config:base',
   ],
-  includePaths: [
-    'package.json',
-    'x-pack/package.json',
+  ignorePaths: [
+    '**/__fixtures__/**',
+    '**/fixtures/**',
+  ],
+  enabledManagers: [
+    'npm',
   ],
   baseBranches: [
     'master',
@@ -27,31 +30,36 @@
     ],
   },
   separateMajorMinor: false,
-  masterIssue: false,
+  masterIssue: true,
   rangeStrategy: 'bump',
+  semanticCommits: false,
+  vulnerabilityAlerts: {
+    enabled: false,
+  },
   npm: {
     lockFileMaintenance: {
       enabled: false,
     },
     packageRules: [
       {
-        groupSlug: '@elastic/charts',
-        packageNames: ['@elastic/charts'],
-        reviewers: ['markov00'],
-      },
-      {
         packagePatterns: [
           '.*',
         ],
         enabled: false,
       },
+      {
+        groupName: '@elastic/charts',
+        packageNames: ['@elastic/charts'],
+        reviewers: ['markov00'],
+        enabled: true,
+      },
+      {
+        groupName: 'vega related modules',
+        packageNames: ['vega', 'vega-lite', 'vega-schema-url-parser', 'vega-tooltip'],
+        reviewers: ['team:kibana-app'],
+        labels: ['Feature:Lens', 'Team:KibanaApp'],
+        enabled: true,
+      },
     ],
   },
-  prConcurrentLimit: 0,
-  vulnerabilityAlerts: {
-    enabled: false,
-  },
-  rebaseStalePrs: false,
-  rebaseConflictedPrs: false,
-  semanticCommits: false,
 }

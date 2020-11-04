@@ -12,12 +12,12 @@ export const cacheHas = (key: string) => cache.has(key);
 export const cacheClear = () => cache.clear();
 export const cacheDelete = (key: string) => cache.delete(key);
 
-const archiveLocationCache: Map<string, string> = new Map();
-export const getArchiveLocation = (name: string, version: string) =>
-  archiveLocationCache.get(pkgToPkgKey({ name, version }));
+const archiveFilelistCache: Map<string, string[]> = new Map();
+export const getArchiveFilelist = (name: string, version: string) =>
+  archiveFilelistCache.get(pkgToPkgKey({ name, version }));
 
-export const setArchiveLocation = (name: string, version: string, location: string) =>
-  archiveLocationCache.set(pkgToPkgKey({ name, version }), location);
+export const setArchiveFilelist = (name: string, version: string, paths: string[]) =>
+  archiveFilelistCache.set(pkgToPkgKey({ name, version }), paths);
 
-export const deleteArchiveLocation = (name: string, version: string) =>
-  archiveLocationCache.delete(pkgToPkgKey({ name, version }));
+export const deleteArchiveFilelist = (name: string, version: string) =>
+  archiveFilelistCache.delete(pkgToPkgKey({ name, version }));

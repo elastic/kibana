@@ -7,6 +7,7 @@
 import { toExpression } from './lens';
 import { SavedLensInput } from '../../../functions/external/saved_lens';
 import { fromExpression, Ast } from '@kbn/interpreter/common';
+import { chartPluginMock } from 'src/plugins/charts/public/mocks';
 
 const baseEmbeddableInput = {
   id: 'embeddableId',
@@ -19,7 +20,7 @@ describe('toExpression', () => {
       ...baseEmbeddableInput,
     };
 
-    const expression = toExpression(input);
+    const expression = toExpression(input, chartPluginMock.createPaletteRegistry());
     const ast = fromExpression(expression);
 
     expect(ast.type).toBe('expression');
@@ -41,7 +42,7 @@ describe('toExpression', () => {
       },
     };
 
-    const expression = toExpression(input);
+    const expression = toExpression(input, chartPluginMock.createPaletteRegistry());
     const ast = fromExpression(expression);
 
     expect(ast.chain[0].arguments).toHaveProperty('title', [input.title]);
@@ -51,5 +52,17 @@ describe('toExpression', () => {
     expect(timerangeExpression.chain[0].function).toBe('timerange');
     expect(timerangeExpression.chain[0].arguments.from[0]).toEqual(input.timeRange?.from);
     expect(timerangeExpression.chain[0].arguments.to[0]).toEqual(input.timeRange?.to);
+  });
+
+  it('includes empty panel title', () => {
+    const input: SavedLensInput = {
+      ...baseEmbeddableInput,
+      title: '',
+    };
+
+    const expression = toExpression(input, chartPluginMock.createPaletteRegistry());
+    const ast = fromExpression(expression);
+
+    expect(ast.chain[0].arguments).toHaveProperty('title', [input.title]);
   });
 });

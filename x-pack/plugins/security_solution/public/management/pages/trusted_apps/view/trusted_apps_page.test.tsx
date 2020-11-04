@@ -16,11 +16,23 @@ jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
 }));
 
-describe('TrustedAppsPage', () => {
+describe('When on the Trusted Apps Page', () => {
+  const expectedAboutInfo =
+    'Add a trusted application to improve performance or alleviate conflicts with other applications running on your hosts. Trusted applications will be applied to hosts running Endpoint Security.';
+
   let history: AppContextTestRender['history'];
   let coreStart: AppContextTestRender['coreStart'];
   let waitForAction: MiddlewareActionSpyHelper['waitForAction'];
   let render: () => ReturnType<AppContextTestRender['render']>;
+  const originalScrollTo = window.scrollTo;
+
+  beforeAll(() => {
+    window.scrollTo = () => {};
+  });
+
+  afterAll(() => {
+    window.scrollTo = originalScrollTo;
+  });
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
@@ -32,10 +44,12 @@ describe('TrustedAppsPage', () => {
     reactTestingLibrary.act(() => {
       history.push('/trusted_apps');
     });
+    window.scrollTo = jest.fn();
   });
 
-  test('rendering', () => {
-    expect(render()).toMatchSnapshot();
+  it('should display subtitle info about trusted apps', async () => {
+    const { getByTestId } = render();
+    expect(getByTestId('header-panel-subtitle').textContent).toEqual(expectedAboutInfo);
   });
 
   it('should display a Add Trusted App button', async () => {
@@ -79,8 +93,8 @@ describe('TrustedAppsPage', () => {
     });
 
     it('should display create form', async () => {
-      const { getByTestId } = await renderAndClickAddButton();
-      expect(getByTestId('addTrustedAppFlyout-createForm')).toMatchSnapshot();
+      const { queryByTestId } = await renderAndClickAddButton();
+      expect(queryByTestId('addTrustedAppFlyout-createForm')).not.toBeNull();
     });
 
     it('should initially have the flyout Add button disabled', async () => {
@@ -173,6 +187,12 @@ describe('TrustedAppsPage', () => {
         });
 
         afterEach(() => resolveHttpPost());
+
+        it('should display info about Trusted Apps', async () => {
+          expect(renderResult.getByTestId('addTrustedAppFlyout-about').textContent).toEqual(
+            expectedAboutInfo
+          );
+        });
 
         it('should disable the Cancel button', async () => {
           expect(

@@ -10,6 +10,7 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 * <<reporting-kibana-server-settings,Control how the {report-features} communicate with the {kib} server>>
 * <<reporting-job-queue-settings,Manage background jobs>>
 * <<reporting-capture-settings,Capture screenshots>>
+* <<reporting-csv-settings,Increase the byte limit for CSV exports>>
 
 [float]
 [[general-reporting-settings]]
@@ -20,7 +21,7 @@ You can configure `xpack.reporting` settings in your `kibana.yml` to:
 | [[xpack-enable-reporting]]`xpack.reporting.enabled` {ess-icon}
   | Set to `false` to disable the {report-features}.
 
-| `xpack.reporting.encryptionKey` {ess-icon}
+|[[xpack-reporting-encryptionKey]] `xpack.reporting.encryptionKey` {ess-icon}
   | Set to an alphanumeric, at least 32 characters long text string. By default, {kib} will generate a random key when it
   starts, which will cause pending reports to fail after restart. Configure this
   setting to preserve the same key across multiple restarts and multiple instances of {kib}.
@@ -53,20 +54,20 @@ proxy host requires that the {kib} server has network access to the proxy.
 [cols="2*<"]
 |===
 | `xpack.reporting.kibanaServer.port`
-  | The port for accessing {kib}, if different from the `server.port` value.
+  | The port for accessing {kib}, if different from the <<server-port, `server.port`>> value.
 
 | `xpack.reporting.kibanaServer.protocol`
   | The protocol for accessing {kib}, typically `http` or `https`.
 
-| `xpack.reporting.kibanaServer.hostname`
-  | The hostname for accessing {kib}, if different from the `server.host` value.
+|[[xpack-kibanaServer-hostname]] `xpack.reporting.kibanaServer.hostname`
+  | The hostname for accessing {kib}, if different from the <<server-host, `server.host`>> value.
 
 |===
 
 [NOTE]
 ============
-Reporting authenticates requests on the Kibana page only when the hostname matches the
-`xpack.reporting.kibanaServer.hostname` setting. Therefore Reporting would fail if the
+Reporting authenticates requests on the {kib} page only when the hostname matches the
+<<xpack-kibanaServer-hostname, `xpack.reporting.kibanaServer.hostname`>> setting. Therefore Reporting would fail if the
 set value redirects to another server. For that reason, `"0"` is an invalid setting
 because, in the Reporting browser, it becomes an automatic redirect to `"0.0.0.0"`.
 ============
@@ -97,8 +98,8 @@ reports, you might need to change the following settings.
 [NOTE]
 ============
 Running multiple instances of {kib} in a cluster for load balancing of
-reporting requires identical values for `xpack.reporting.encryptionKey` and, if
-security is enabled, `xpack.security.encryptionKey`.
+reporting requires identical values for <<xpack-reporting-encryptionKey, `xpack.reporting.encryptionKey`>> and, if
+security is enabled, <<xpack-security-encryptionKey, `xpack.security.encryptionKey`>>.
 ============
 
 [cols="2*<"]
@@ -177,7 +178,7 @@ available, but there will likely be errors in the visualizations in the report.
 [[reporting-chromium-settings]]
 ==== Chromium settings
 
-When `xpack.reporting.capture.browser.type` is set to `chromium` (default) you can also specify the following settings.
+When <<xpack-reporting-browser, `xpack.reporting.capture.browser.type`>> is set to `chromium` (default) you can also specify the following settings.
 
 [cols="2*<"]
 |===
@@ -214,6 +215,23 @@ a| `xpack.reporting.capture.browser`
   | The maximum {ref}/common-options.html#byte-units[byte size] of a CSV file before being truncated. This setting exists to
   prevent large exports from causing performance and storage issues. Can be specified as number of bytes.
   Defaults to `10mb`.
+|===
+
+[NOTE]
+============
+Setting `xpack.reporting.csv.maxSizeBytes` much larger than the default 10 MB limit has the potential to negatively affect the
+performance of {kib} and your {es} cluster. There is no enforced maximum for this setting, but a reasonable maximum value depends
+on multiple factors:
+
+* The `http.max_content_length` setting in {es}.
+* Network proxies, which are often configured by default to block large requests with a 413 error.
+* The amount of memory available to the {kib} server, which limits the size of CSV data that must be held temporarily.
+
+For information about {kib} memory limits, see <<production, using {kib} in a production environment>>.
+============
+
+[cols="2*<"]
+|===
 
 | `xpack.reporting.csv.scroll.size`
   | Number of documents retrieved from {es} for each scroll iteration during a CSV
@@ -229,10 +247,10 @@ a| `xpack.reporting.capture.browser`
   See OWASP: https://www.owasp.org/index.php/CSV_Injection
   Defaults to `true`.
 
-| `xpack.reporting.csv.enablePanelActionDownload`
-  | Enables CSV export from a saved search on a dashboard. This action is available in the dashboard
-  panel menu for the saved search.
-  Defaults to `true`.
+| `xpack.reporting.csv` `.enablePanelActionDownload`
+  | Enables CSV export from a saved search on a dashboard. This action is available in the dashboard panel menu for the saved search.
+  *Note:* This setting exists for backwards compatibility, but is unused and hardcoded to `true`. CSV export from a saved search on a dashboard
+  is enabled when Reporting is enabled.
 
 |===
 
@@ -246,7 +264,12 @@ a| `xpack.reporting.capture.browser`
   | Reporting uses a weekly index in {es} to store the reporting job and
   the report content. The index is automatically created if it does not already
   exist. Configure this to a unique value, beginning with `.reporting-`, for every
-  {kib} instance that has a unique `kibana.index` setting. Defaults to `.reporting`.
+  {kib} instance that has a unique <<kibana-index, `kibana.index`>> setting. Defaults to `.reporting`.
+
+| `xpack.reporting.capture.networkPolicy`
+  | Capturing a screenshot from a {kib} page involves sending out requests for all the linked web assets. For example, a Markdown
+  visualization can show an image from a remote server. You can configure what type of requests to allow or filter by setting a
+  <<reporting-network-policy, network policy>> for Reporting.
 
 | `xpack.reporting.roles.allow`
   | Specifies the roles in addition to superusers that can use reporting.

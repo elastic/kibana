@@ -47,9 +47,9 @@ export default function rumServicesApiTests({ getService }: FtrProviderContext) 
 
         expectSnapshot(response.body).toMatchInline(`
           Object {
-            "longestLongTask": 109000,
-            "noOfLongTasks": 2,
-            "sumOfLongTasks": 168000,
+            "longestLongTask": 0,
+            "noOfLongTasks": 0,
+            "sumOfLongTasks": 0,
           }
         `);
       });

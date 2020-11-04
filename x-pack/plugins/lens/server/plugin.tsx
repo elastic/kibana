@@ -29,13 +29,13 @@ export class LensServerPlugin implements Plugin<{}, {}, {}, {}> {
   private readonly kibanaIndexConfig: Observable<{ kibana: { index: string } }>;
   private readonly telemetryLogger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext) {
     this.kibanaIndexConfig = initializerContext.config.legacy.globalConfig$;
-    this.telemetryLogger = initializerContext.logger.get('telemetry');
+    this.telemetryLogger = initializerContext.logger.get('usage');
   }
   setup(core: CoreSetup<PluginStartContract>, plugins: PluginSetupContract) {
     setupSavedObjects(core);
-    setupRoutes(core);
+    setupRoutes(core, this.initializerContext.logger.get());
     if (plugins.usageCollection && plugins.taskManager) {
       registerLensUsageCollector(
         plugins.usageCollection,

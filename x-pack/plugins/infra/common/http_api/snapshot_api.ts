@@ -99,7 +99,7 @@ export const SnapshotRequestRT = rt.intersection([
   rt.type({
     timerange: InfraTimerangeInputRT,
     metrics: rt.array(SnapshotMetricInputRT),
-    groupBy: SnapshotGroupByRT,
+    groupBy: rt.union([SnapshotGroupByRT, rt.null]),
     nodeType: ItemTypeRT,
     sourceId: rt.string,
   }),

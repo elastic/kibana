@@ -68,6 +68,7 @@ describe('AggConfig Filters', () => {
         {
           gte: 1024,
           lt: 2048.0,
+          label: 'A custom label',
         }
       );
 
@@ -78,6 +79,7 @@ describe('AggConfig Filters', () => {
       expect(filter.range).toHaveProperty('bytes');
       expect(filter.range.bytes).toHaveProperty('gte', 1024.0);
       expect(filter.range.bytes).toHaveProperty('lt', 2048.0);
+      expect(filter.range.bytes).not.toHaveProperty('label');
       expect(filter.meta).toHaveProperty('formattedValue');
     });
   });

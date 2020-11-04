@@ -15,7 +15,7 @@ interface Props {
 
 const i18nTexts = {
   buttonLabel: i18n.translate('xpack.ingestPipelines.pipelineEditor.loadFromJson.buttonLabel', {
-    defaultMessage: 'Import',
+    defaultMessage: 'Import processors',
   }),
 };
 

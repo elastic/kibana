@@ -35,7 +35,7 @@ describe('Enterprise Search Telemetry API', () => {
     });
   });
 
-  describe('PUT /api/enterprise_search/telemetry', () => {
+  describe('PUT /api/enterprise_search/stats', () => {
     it('increments the saved objects counter for App Search', async () => {
       (incrementUICounter as jest.Mock).mockImplementation(jest.fn(() => successResponse));
 

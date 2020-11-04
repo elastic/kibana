@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await find.clickByButtonText('lnsXYvis');
       await dashboardAddPanel.closeAddPanel();
       await PageObjects.lens.goToTimeRange();
-      await clickInChart(5, 5); // hardcoded position of bar
+      await clickInChart(5, 5); // hardcoded position of bar, depends heavy on data and charts implementation
 
       await retry.try(async () => {
         await testSubjects.click('applyFiltersPopoverButton');
@@ -67,6 +67,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(time.end).to.equal('Sep 21, 2015 @ 12:00:00.000');
       const hasIpFilter = await filterBar.hasFilter('ip', '97.220.3.248');
       expect(hasIpFilter).to.be(true);
+    });
+    it('should be able to add filters by clicking in pie chart', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsPieVis');
+      await find.clickByButtonText('lnsPieVis');
+      await dashboardAddPanel.closeAddPanel();
+
+      await PageObjects.lens.goToTimeRange();
+      await clickInChart(5, 5); // hardcoded position of the slice, depends heavy on data and charts implementation
+
+      await PageObjects.lens.assertExactText(
+        '[data-test-subj="embeddablePanelHeading-lnsPieVis"]',
+        'lnsPieVis'
+      );
+      const hasGeoDestFilter = await filterBar.hasFilter('geo.dest', 'LS');
+      expect(hasGeoDestFilter).to.be(true);
     });
   });
 }

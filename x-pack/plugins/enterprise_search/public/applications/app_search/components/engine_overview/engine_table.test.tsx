@@ -4,19 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import '../../../__mocks__/kea.mock';
+import '../../../__mocks__/enterprise_search_url.mock';
+import { mockTelemetryActions, mountWithIntl } from '../../../__mocks__/';
+
 import React from 'react';
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty, EuiLink } from '@elastic/eui';
-
-import { mountWithContext } from '../../../__mocks__';
-jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
-import { sendTelemetry } from '../../../shared/telemetry';
 
 import { EngineTable } from './engine_table';
 
 describe('EngineTable', () => {
   const onPaginate = jest.fn(); // onPaginate updates the engines API call upstream
 
-  const wrapper = mountWithContext(
+  const wrapper = mountWithIntl(
     <EngineTable
       data={[
         {
@@ -55,9 +55,7 @@ describe('EngineTable', () => {
       expect(link.prop('href')).toEqual('http://localhost:3002/as/engines/test-engine');
       link.simulate('click');
 
-      expect(sendTelemetry).toHaveBeenCalledWith({
-        http: expect.any(Object),
-        product: 'app_search',
+      expect(mockTelemetryActions.sendAppSearchTelemetry).toHaveBeenCalledWith({
         action: 'clicked',
         metric: 'engine_table_link',
       });
@@ -71,10 +69,11 @@ describe('EngineTable', () => {
   });
 
   it('handles empty data', () => {
-    const emptyWrapper = mountWithContext(
+    const emptyWrapper = mountWithIntl(
       <EngineTable data={[]} pagination={{ totalEngines: 0, pageIndex: 0, onPaginate: () => {} }} />
     );
     const emptyTable = emptyWrapper.find(EuiBasicTable);
+
     expect(emptyTable.prop('pagination').pageIndex).toEqual(0);
   });
 });

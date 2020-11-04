@@ -6,6 +6,8 @@
 
 import { useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
+
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
 
 import { extractErrorMessage } from '../../../../common/util/errors';
@@ -19,10 +21,22 @@ import { DataFrameAnalyticsConfig } from '../common';
 
 import { isGetDataFrameAnalyticsStatsResponseOk } from '../pages/analytics_management/services/analytics_service/get_analytics';
 import { DATA_FRAME_TASK_STATE } from '../pages/analytics_management/components/analytics_list/common';
+import { useTrainedModelsApiService } from '../../services/ml_api_service/trained_models';
+import { TotalFeatureImportance } from '../../../../common/types/feature_importance';
+import { getToastNotificationService } from '../../services/toast_notification_service';
+import {
+  isClassificationAnalysis,
+  isRegressionAnalysis,
+} from '../../../../common/util/analytics_utils';
 
 export const useResultsViewConfig = (jobId: string) => {
   const mlContext = useMlContext();
+  const trainedModelsApiService = useTrainedModelsApiService();
+
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
+  const [indexPatternErrorMessage, setIndexPatternErrorMessage] = useState<undefined | string>(
+    undefined
+  );
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [needsDestIndexPattern, setNeedsDestIndexPattern] = useState<boolean>(false);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
@@ -33,6 +47,10 @@ export const useResultsViewConfig = (jobId: string) => {
   const [jobConfigErrorMessage, setJobConfigErrorMessage] = useState<undefined | string>(undefined);
   const [jobStatus, setJobStatus] = useState<DATA_FRAME_TASK_STATE | undefined>(undefined);
 
+  const [totalFeatureImportance, setTotalFeatureImportance] = useState<
+    TotalFeatureImportance[] | undefined
+  >(undefined);
+
   // get analytics configuration, index pattern and field caps
   useEffect(() => {
     (async function () {
@@ -40,6 +58,7 @@ export const useResultsViewConfig = (jobId: string) => {
 
       try {
         const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics(jobId);
+
         const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats(jobId);
         const stats = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? analyticsStats.data_frame_analytics[0]
@@ -54,6 +73,25 @@ export const useResultsViewConfig = (jobId: string) => {
           analyticsConfigs.data_frame_analytics.length > 0
         ) {
           const jobConfigUpdate = analyticsConfigs.data_frame_analytics[0];
+          // don't fetch the total feature importance if it's outlier_detection
+          if (
+            isClassificationAnalysis(jobConfigUpdate.analysis) ||
+            isRegressionAnalysis(jobConfigUpdate.analysis)
+          ) {
+            try {
+              const inferenceModels = await trainedModelsApiService.getTrainedModels(`${jobId}*`, {
+                include: 'total_feature_importance',
+              });
+              const inferenceModel = inferenceModels.find(
+                (model) => model.metadata?.analytics_config?.id === jobId
+              );
+              if (Array.isArray(inferenceModel?.metadata?.total_feature_importance) === true) {
+                setTotalFeatureImportance(inferenceModel?.metadata?.total_feature_importance);
+              }
+            } catch (e) {
+              getToastNotificationService().displayErrorToast(e);
+            }
+          }
 
           try {
             const destIndex = Array.isArray(jobConfigUpdate.dest.index)
@@ -72,7 +110,11 @@ export const useResultsViewConfig = (jobId: string) => {
               setNeedsDestIndexPattern(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
               const sourceIndexPatternId = getIndexPatternIdFromName(sourceIndex) || sourceIndex;
-              indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+              try {
+                indexP = await mlContext.indexPatterns.get(sourceIndexPatternId);
+              } catch (e) {
+                indexP = undefined;
+              }
             }
 
             if (indexP !== undefined) {
@@ -81,6 +123,16 @@ export const useResultsViewConfig = (jobId: string) => {
               setIndexPattern(indexP);
               setIsInitialized(true);
               setIsLoadingJobConfig(false);
+            } else {
+              setIndexPatternErrorMessage(
+                i18n.translate(
+                  'xpack.ml.dataframe.analytics.results.indexPatternsMissingErrorMessage',
+                  {
+                    defaultMessage:
+                      'To view this page, a Kibana index pattern is necessary for either the destination or source index of this analytics job.',
+                  }
+                )
+              );
             }
           } catch (e) {
             setJobCapsServiceErrorMessage(extractErrorMessage(e));
@@ -96,6 +148,7 @@ export const useResultsViewConfig = (jobId: string) => {
 
   return {
     indexPattern,
+    indexPatternErrorMessage,
     isInitialized,
     isLoadingJobConfig,
     jobCapsServiceErrorMessage,
@@ -103,5 +156,6 @@ export const useResultsViewConfig = (jobId: string) => {
     jobConfigErrorMessage,
     jobStatus,
     needsDestIndexPattern,
+    totalFeatureImportance,
   };
 };

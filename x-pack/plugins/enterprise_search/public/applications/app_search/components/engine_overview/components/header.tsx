@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useActions } from 'kea';
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -15,14 +16,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { sendTelemetry } from '../../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../../index';
+import { TelemetryLogic } from '../../../../shared/telemetry';
+import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
 
 export const EngineOverviewHeader: React.FC = () => {
-  const {
-    externalUrl: { getAppSearchUrl },
-    http,
-  } = useContext(KibanaContext) as IKibanaContext;
+  const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   const buttonProps = {
     fill: true,
@@ -31,9 +29,7 @@ export const EngineOverviewHeader: React.FC = () => {
     href: getAppSearchUrl(),
     target: '_blank',
     onClick: () =>
-      sendTelemetry({
-        http,
-        product: 'app_search',
+      sendAppSearchTelemetry({
         action: 'clicked',
         metric: 'header_launch_button',
       }),

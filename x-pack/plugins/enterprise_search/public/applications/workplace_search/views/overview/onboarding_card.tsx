@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
+import React from 'react';
+import { useActions } from 'kea';
 
 import {
   EuiButton,
@@ -17,8 +18,9 @@ import {
   EuiButtonEmptyProps,
   EuiLinkProps,
 } from '@elastic/eui';
-import { sendTelemetry } from '../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../index';
+
+import { TelemetryLogic } from '../../../shared/telemetry';
+import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 
 interface IOnboardingCardProps {
   title: React.ReactNode;
@@ -39,15 +41,10 @@ export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
   actionPath,
   complete,
 }) => {
-  const {
-    http,
-    externalUrl: { getWorkplaceSearchUrl },
-  } = useContext(KibanaContext) as IKibanaContext;
+  const { sendWorkplaceSearchTelemetry } = useActions(TelemetryLogic);
 
   const onClick = () =>
-    sendTelemetry({
-      http,
-      product: 'workplace_search',
+    sendWorkplaceSearchTelemetry({
       action: 'clicked',
       metric: 'onboarding_card_button',
     });

@@ -11,11 +11,12 @@ import { i18n } from '@kbn/i18n';
 /* eslint-disable react/display-name */
 
 import React, { memo } from 'react';
-import { useResolverTheme, SymbolIds } from '../assets';
 
 interface StyledSVGCube {
   readonly isOrigin?: boolean;
 }
+import { useCubeAssets } from '../use_cube_assets';
+import { useSymbolIDs } from '../use_symbol_ids';
 
 /**
  * Icon representing a process node.
@@ -34,15 +35,15 @@ export const CubeForProcess = memo(function ({
   isOrigin?: boolean;
   className?: string;
 }) {
-  const { cubeAssetsForNode } = useResolverTheme();
-  const { cubeSymbol, strokeColor } = cubeAssetsForNode(!running, false);
+  const { cubeSymbol, strokeColor } = useCubeAssets(!running, false);
+  const { processCubeActiveBacking } = useSymbolIDs();
 
   return (
     <StyledSVG
       className={className}
       width="2.15em"
       height="2.15em"
-      viewBox="0 0 100% 100%"
+      viewBox="0 0 34 34"
       data-test-subj={dataTestSubj}
       isOrigin={isOrigin}
     >
@@ -54,7 +55,7 @@ export const CubeForProcess = memo(function ({
       </desc>
       {isOrigin && (
         <use
-          xlinkHref={`#${SymbolIds.processCubeActiveBacking}`}
+          xlinkHref={`#${processCubeActiveBacking}`}
           fill="transparent"
           x={0}
           y={-1}

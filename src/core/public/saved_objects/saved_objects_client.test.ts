@@ -132,7 +132,9 @@ describe('SavedObjectsClient', () => {
           Object {
             "body": undefined,
             "method": "DELETE",
-            "query": undefined,
+            "query": Object {
+              "force": false,
+            },
           },
         ]
       `);
@@ -405,10 +407,7 @@ describe('SavedObjectsClient', () => {
                 "fields": Array [
                   "title",
                 ],
-                "has_reference": Object {
-                  "id": "1",
-                  "type": "reference",
-                },
+                "has_reference": "{\\"id\\":\\"1\\",\\"type\\":\\"reference\\"}",
                 "page": 10,
                 "per_page": 100,
                 "search": "what is the meaning of life?|life",

@@ -19,6 +19,7 @@
 
 import { resolve, join } from 'path';
 import loadJsonFile from 'load-json-file';
+import { getPluginSearchPaths } from './plugins';
 import { PackageInfo, EnvironmentMode } from './types';
 
 /** @internal */
@@ -114,20 +115,11 @@ export class Env {
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
 
-    /**
-     * BEWARE: this needs to stay roughly synchronized with the @kbn/optimizer
-     * `packages/kbn-optimizer/src/optimizer_config.ts` determines the paths
-     * that should be searched for plugins to build
-     */
-    this.pluginSearchPaths = [
-      resolve(this.homeDir, 'src', 'plugins'),
-      ...(options.cliArgs.oss ? [] : [resolve(this.homeDir, 'x-pack', 'plugins')]),
-      resolve(this.homeDir, 'plugins'),
-      ...(options.cliArgs.runExamples
-        ? [resolve(this.homeDir, 'examples'), resolve(this.homeDir, 'x-pack', 'examples')]
-        : []),
-      resolve(this.homeDir, '..', 'kibana-extra'),
-    ];
+    this.pluginSearchPaths = getPluginSearchPaths({
+      rootDir: this.homeDir,
+      oss: options.cliArgs.oss,
+      examples: options.cliArgs.runExamples,
+    });
 
     this.cliArgs = Object.freeze(options.cliArgs);
     this.configs = Object.freeze(options.configs);

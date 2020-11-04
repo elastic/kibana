@@ -22,7 +22,11 @@ import { i18n } from '@kbn/i18n';
 import { BookSavedObjectAttributes, BOOK_SAVED_OBJECT } from '../../common';
 import { createAction } from '../../../../src/plugins/ui_actions/public';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { ViewMode, SavedObjectEmbeddableInput } from '../../../../src/plugins/embeddable/public';
+import {
+  ViewMode,
+  SavedObjectEmbeddableInput,
+  EmbeddableStart,
+} from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
   BOOK_EMBEDDABLE,
@@ -30,11 +34,13 @@ import {
   BookByValueInput,
 } from './book_embeddable';
 import { CreateEditBookComponent } from './create_edit_book_component';
-import { DashboardStart } from '../../../../src/plugins/dashboard/public';
+import { OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { SavedObjectsClientContract } from '../../../../src/core/target/types/public/saved_objects';
 
 interface StartServices {
   openModal: OverlayStart['openModal'];
-  getAttributeService: DashboardStart['getAttributeService'];
+  getAttributeService: EmbeddableStart['getAttributeService'];
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 interface ActionContext {
@@ -56,8 +62,20 @@ export const createEditBookAction = (getStartServices: () => Promise<StartServic
       );
     },
     execute: async ({ embeddable }: ActionContext) => {
-      const { openModal, getAttributeService } = await getStartServices();
-      const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT);
+      const { openModal, getAttributeService, savedObjectsClient } = await getStartServices();
+      const attributeService = getAttributeService<BookSavedObjectAttributes>(BOOK_SAVED_OBJECT, {
+        saveMethod: async (attributes: BookSavedObjectAttributes, savedObjectId?: string) => {
+          if (savedObjectId) {
+            return savedObjectsClient.update(BOOK_EMBEDDABLE, savedObjectId, attributes);
+          }
+          return savedObjectsClient.create(BOOK_EMBEDDABLE, attributes);
+        },
+        checkForDuplicateTitle: (props: OnSaveProps) => {
+          return new Promise(() => {
+            return true;
+          });
+        },
+      });
       const onSave = async (attributes: BookSavedObjectAttributes, useRefType: boolean) => {
         const newInput = await attributeService.wrapAttributes(
           attributes,

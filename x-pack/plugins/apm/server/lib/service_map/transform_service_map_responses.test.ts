@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ServiceHealthStatus } from '../../../common/service_health_status';
+
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
@@ -43,6 +45,7 @@ const anomalies = {
       actualValue: 10000,
       anomalyScore: 50,
       jobId: 'apm-test-1234-ml-module-name',
+      healthStatus: ServiceHealthStatus.warning,
     },
   },
 };
@@ -72,7 +75,11 @@ describe('transformServiceMapResponses', () => {
       (element) => 'source' in element.data && 'target' in element.data
     );
 
-    expect(connection?.data.target).toBe('opbeans-node');
+    expect(connection).toHaveProperty('data');
+    expect(connection?.data).toHaveProperty('target');
+    if (connection?.data && 'target' in connection.data) {
+      expect(connection.data.target).toBe('opbeans-node');
+    }
 
     expect(
       elements.find((element) => element.data.id === '>opbeans-node')

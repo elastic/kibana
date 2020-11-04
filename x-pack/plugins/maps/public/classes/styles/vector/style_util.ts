@@ -5,7 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MB_LOOKUP_FUNCTION, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
+import { MB_LOOKUP_FUNCTION, VECTOR_SHAPE_TYPE, VECTOR_STYLES } from '../../../../common/constants';
 import { Category } from '../../../../common/descriptor_types';
 
 export function getOtherCategoryLabel() {
@@ -14,8 +14,8 @@ export function getOtherCategoryLabel() {
   });
 }
 
-export function getComputedFieldName(styleName: string, fieldName: string) {
-  return `${getComputedFieldNamePrefix(fieldName)}__${styleName}`;
+export function getComputedFieldName(styleName: VECTOR_STYLES, fieldName: string) {
+  return `${getComputedFieldNamePrefix(fieldName)}__${styleName as string}`;
 }
 
 export function getComputedFieldNamePrefix(fieldName: string) {

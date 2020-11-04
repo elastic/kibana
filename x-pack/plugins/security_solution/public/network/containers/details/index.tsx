@@ -9,7 +9,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 
 import { ESTermQuery } from '../../../../common/typed_json';
-import { DEFAULT_INDEX_KEY } from '../../../../common/constants';
 import { inputsModel } from '../../../common/store';
 import { useKibana } from '../../../common/lib/kibana';
 import { createFilter } from '../../../common/containers/helpers';
@@ -19,7 +18,11 @@ import {
   NetworkDetailsRequestOptions,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
-import { AbortError } from '../../../../../../../src/plugins/data/common';
+import {
+  AbortError,
+  isCompleteResponse,
+  isErrorResponse,
+} from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
@@ -38,6 +41,7 @@ interface UseNetworkDetails {
   id?: string;
   docValueFields: DocValueFields[];
   ip: string;
+  indexNames: string[];
   filterQuery?: ESTermQuery | string;
   skip: boolean;
 }
@@ -45,23 +49,31 @@ interface UseNetworkDetails {
 export const useNetworkDetails = ({
   docValueFields,
   filterQuery,
+  indexNames,
   id = ID,
   skip,
   ip,
 }: UseNetworkDetails): [boolean, NetworkDetailsArgs] => {
-  const { data, notifications, uiSettings } = useKibana().services;
+  const { data, notifications } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
-  const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
-  const [networkDetailsRequest, setNetworkDetailsRequest] = useState<NetworkDetailsRequestOptions>({
-    defaultIndex,
-    docValueFields: docValueFields ?? [],
-    factoryQueryType: NetworkQueries.details,
-    filterQuery: createFilter(filterQuery),
-    ip,
-  });
+  const [
+    networkDetailsRequest,
+    setNetworkDetailsRequest,
+  ] = useState<NetworkDetailsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          docValueFields: docValueFields ?? [],
+          factoryQueryType: NetworkQueries.details,
+          filterQuery: createFilter(filterQuery),
+          id,
+          ip,
+        }
+      : null
+  );
 
   const [networkDetailsResponse, setNetworkDetailsResponse] = useState<NetworkDetailsArgs>({
     networkDetails: {},
@@ -75,7 +87,11 @@ export const useNetworkDetails = ({
   });
 
   const networkDetailsSearch = useCallback(
-    (request: NetworkDetailsRequestOptions) => {
+    (request: NetworkDetailsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -88,7 +104,7 @@ export const useNetworkDetails = ({
           })
           .subscribe({
             next: (response) => {
-              if (!response.isPartial && !response.isRunning) {
+              if (isCompleteResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                   setNetworkDetailsResponse((prevResponse) => ({
@@ -99,7 +115,7 @@ export const useNetworkDetails = ({
                   }));
                 }
                 searchSubscription$.unsubscribe();
-              } else if (response.isPartial && !response.isRunning) {
+              } else if (isErrorResponse(response)) {
                 if (!didCancel) {
                   setLoading(false);
                 }
@@ -132,18 +148,20 @@ export const useNetworkDetails = ({
   useEffect(() => {
     setNetworkDetailsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
-        defaultIndex,
-        ip,
+        ...(prevRequest ?? {}),
+        defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
+        factoryQueryType: NetworkQueries.details,
         filterQuery: createFilter(filterQuery),
+        id,
+        ip,
       };
       if (!skip && !deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [defaultIndex, filterQuery, skip, ip, docValueFields]);
+  }, [indexNames, filterQuery, skip, ip, docValueFields, id]);
 
   useEffect(() => {
     networkDetailsSearch(networkDetailsRequest);

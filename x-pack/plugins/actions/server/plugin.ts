@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import {
@@ -26,7 +26,7 @@ import {
   EncryptedSavedObjectsPluginStart,
 } from '../../encrypted_saved_objects/server';
 import { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
-import { LicensingPluginSetup } from '../../licensing/server';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
 import { LICENSE_TYPE } from '../../licensing/common/types';
 import { SpacesPluginSetup, SpacesServiceSetup } from '../../spaces/server';
 import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
@@ -71,7 +71,10 @@ import { ACTIONS_FEATURE } from './feature';
 import { ActionsAuthorization } from './authorization/actions_authorization';
 import { ActionsAuthorizationAuditLogger } from './authorization/audit_logger';
 import { ActionExecutionSource } from './lib/action_execution_source';
-import { shouldLegacyRbacApplyBySource } from './authorization/should_legacy_rbac_apply_by_source';
+import {
+  getAuthorizationModeBySource,
+  AuthorizationMode,
+} from './authorization/get_authorization_mode_by_source';
 
 const EVENT_LOG_PROVIDER = 'actions';
 export const EVENT_LOG_ACTIONS = {
@@ -83,15 +86,20 @@ export interface PluginSetupContract {
   registerType<
     Config extends ActionTypeConfig = ActionTypeConfig,
     Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-    Params extends ActionTypeParams = ActionTypeParams
+    Params extends ActionTypeParams = ActionTypeParams,
+    ExecutorResultData = void
   >(
-    actionType: ActionType<Config, Secrets, Params>
+    actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
   ): void;
 }
 
 export interface PluginStartContract {
-  isActionTypeEnabled(id: string): boolean;
-  isActionExecutable(actionId: string, actionTypeId: string): boolean;
+  isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
+  isActionExecutable(
+    actionId: string,
+    actionTypeId: string,
+    options?: { notifyUsage: boolean }
+  ): boolean;
   getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
   getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
   preconfiguredActions: PreConfiguredAction[];
@@ -110,6 +118,7 @@ export interface ActionsPluginsSetup {
 export interface ActionsPluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
+  licensing: LicensingPluginStart;
 }
 
 const includedHiddenTypes = [
@@ -148,7 +157,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       .toPromise();
 
     this.logger = initContext.logger.get('actions');
-    this.telemetryLogger = initContext.logger.get('telemetry');
+    this.telemetryLogger = initContext.logger.get('usage');
     this.preconfiguredActions = [];
   }
 
@@ -193,6 +202,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     }
 
     const actionTypeRegistry = new ActionTypeRegistry({
+      licensing: plugins.licensing,
       taskRunnerFactory,
       taskManager: plugins.taskManager,
       actionsConfigUtils,
@@ -245,9 +255,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       registerType: <
         Config extends ActionTypeConfig = ActionTypeConfig,
         Secrets extends ActionTypeSecrets = ActionTypeSecrets,
-        Params extends ActionTypeParams = ActionTypeParams
+        Params extends ActionTypeParams = ActionTypeParams,
+        ExecutorResultData = void
       >(
-        actionType: ActionType<Config, Secrets, Params>
+        actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
       ) => {
         if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
@@ -265,6 +276,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
     const {
       logger,
+      licenseState,
       actionExecutor,
       actionTypeRegistry,
       taskRunnerFactory,
@@ -275,13 +287,15 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
       getUnsecuredSavedObjectsClient,
     } = this;
 
+    licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
+
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
     });
 
     const getActionsClientWithRequest = async (
       request: KibanaRequest,
-      source?: ActionExecutionSource<unknown>
+      authorizationContext?: ActionExecutionSource<unknown>
     ) => {
       if (isESOUsingEphemeralEncryptionKey === true) {
         throw new Error(
@@ -303,7 +317,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         request,
         authorization: instantiateAuthorization(
           request,
-          await shouldLegacyRbacApplyBySource(unsecuredSavedObjectsClient, source)
+          await getAuthorizationModeBySource(unsecuredSavedObjectsClient, authorizationContext)
         ),
         actionExecutor: actionExecutor!,
         executionEnqueuer: createExecutionEnqueuerFunction({
@@ -316,7 +330,8 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     };
 
     // Ensure the public API cannot be used to circumvent authorization
-    // using our legacy exemption mechanism
+    // using our legacy exemption mechanism by passing in a legacy SO
+    // as authorizationContext which would then set a Legacy AuthorizationMode
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
@@ -364,11 +379,15 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
 
     return {
-      isActionTypeEnabled: (id) => {
-        return this.actionTypeRegistry!.isActionTypeEnabled(id);
+      isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
+        return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
       },
-      isActionExecutable: (actionId: string, actionTypeId: string) => {
-        return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId);
+      isActionExecutable: (
+        actionId: string,
+        actionTypeId: string,
+        options = { notifyUsage: false }
+      ) => {
+        return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
       },
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
@@ -389,11 +408,11 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
   private instantiateAuthorization = (
     request: KibanaRequest,
-    shouldUseLegacyRbac: boolean = false
+    authorizationMode?: AuthorizationMode
   ) => {
     return new ActionsAuthorization({
       request,
-      shouldUseLegacyRbac,
+      authorizationMode,
       authorization: this.security?.authz,
       authentication: this.security?.authc,
       auditLogger: new ActionsAuthorizationAuditLogger(
@@ -409,6 +428,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     return (request) => ({
       callCluster: elasticsearch.legacy.client.asScoped(request).callAsCurrentUser,
       savedObjectsClient: getScopedClient(request),
+      scopedClusterClient: elasticsearch.client.asScoped(request).asCurrentUser,
       getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient) {
         return clusterClient.asScoped(request);
       },

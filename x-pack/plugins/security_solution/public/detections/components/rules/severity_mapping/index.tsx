@@ -34,12 +34,12 @@ import {
   SeverityMappingItem,
 } from '../../../../../common/detection_engine/schemas/common/schemas';
 
-const SeverityMappingEuiFormRow = styled(EuiFormRow)`
-  width: 468px;
-`;
-
 const NestedContent = styled.div`
   margin-left: 24px;
+`;
+
+const EuiFlexItemComboBoxColumn = styled(EuiFlexItem)`
+  max-width: 376px;
 `;
 
 const EuiFlexItemIconColumn = styled(EuiFlexItem)`
@@ -67,7 +67,6 @@ export const SeverityField = ({
   isDisabled,
   options,
 }: SeverityFieldProps) => {
-  const fieldValueInputWidth = 160;
   const { setValue } = field;
   const { value, isMappingChecked, mapping } = field.value as AboutStepSeverity;
 
@@ -180,7 +179,7 @@ export const SeverityField = ({
   }, [handleSeverityMappingChecked, isDisabled, isMappingChecked]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction={'column'}>
       <EuiFlexItem>
         <EuiFormRow
           label={severityLabel}
@@ -204,7 +203,7 @@ export const SeverityField = ({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <SeverityMappingEuiFormRow
+        <EuiFormRow
           label={severityMappingLabel}
           labelAppend={field.labelAppend}
           helpText={
@@ -222,12 +221,12 @@ export const SeverityField = ({
               <EuiFlexGroup direction={'column'} gutterSize="s">
                 <EuiFlexItem>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiFlexItem>
+                    <EuiFlexItemComboBoxColumn>
                       <EuiFormLabel>{i18n.SOURCE_FIELD}</EuiFormLabel>
-                    </EuiFlexItem>
-                    <EuiFlexItem>
+                    </EuiFlexItemComboBoxColumn>
+                    <EuiFlexItemComboBoxColumn>
                       <EuiFormLabel>{i18n.SOURCE_VALUE}</EuiFormLabel>
-                    </EuiFlexItem>
+                    </EuiFlexItemComboBoxColumn>
                     <EuiFlexItemIconColumn grow={false} />
                     <EuiFlexItemSeverityColumn grow={false}>
                       <EuiFormLabel>{i18n.DEFAULT_SEVERITY}</EuiFormLabel>
@@ -242,7 +241,7 @@ export const SeverityField = ({
                       alignItems="center"
                       gutterSize="s"
                     >
-                      <EuiFlexItem>
+                      <EuiFlexItemComboBoxColumn>
                         <FieldComponent
                           placeholder={''}
                           selectedField={getIFieldTypeFromFieldName(
@@ -253,7 +252,6 @@ export const SeverityField = ({
                           isDisabled={isDisabled}
                           isClearable={false}
                           indexPattern={indices}
-                          fieldInputWidth={fieldValueInputWidth}
                           onChange={handleFieldChange.bind(
                             null,
                             index,
@@ -262,9 +260,9 @@ export const SeverityField = ({
                           data-test-subj={`detectionEngineStepAboutRuleSeverityMappingField-${severityMappingItem.severity}-${index}`}
                           aria-label={`detectionEngineStepAboutRuleSeverityMappingField-${severityMappingItem.severity}-${index}`}
                         />
-                      </EuiFlexItem>
+                      </EuiFlexItemComboBoxColumn>
 
-                      <EuiFlexItem>
+                      <EuiFlexItemComboBoxColumn>
                         <AutocompleteFieldMatchComponent
                           placeholder={''}
                           selectedField={getIFieldTypeFromFieldName(
@@ -276,7 +274,6 @@ export const SeverityField = ({
                           isDisabled={isDisabled}
                           isLoading={false}
                           indexPattern={indices}
-                          fieldInputWidth={fieldValueInputWidth}
                           onChange={handleFieldMatchValueChange.bind(
                             null,
                             index,
@@ -285,7 +282,7 @@ export const SeverityField = ({
                           data-test-subj={`detectionEngineStepAboutRuleSeverityMappingValue-${severityMappingItem.severity}-${index}`}
                           aria-label={`detectionEngineStepAboutRuleSeverityMappingValue-${severityMappingItem.severity}-${index}`}
                         />
-                      </EuiFlexItem>
+                      </EuiFlexItemComboBoxColumn>
                       <EuiFlexItemIconColumn grow={false}>
                         <EuiIcon type={'sortRight'} />
                       </EuiFlexItemIconColumn>
@@ -301,7 +298,7 @@ export const SeverityField = ({
               </EuiFlexGroup>
             )}
           </NestedContent>
-        </SeverityMappingEuiFormRow>
+        </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

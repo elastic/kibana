@@ -18,6 +18,7 @@
  */
 
 import { isAutoInterval } from '../_interval_options';
+import { ES_FIELD_TYPES } from '../../../../types';
 
 interface IntervalValuesRange {
   min: number;
@@ -28,6 +29,7 @@ export interface CalculateHistogramIntervalParams {
   interval: string;
   maxBucketsUiSettings: number;
   maxBucketsUserInput?: number | '';
+  esTypes: ES_FIELD_TYPES[];
   intervalBase?: number;
   values?: IntervalValuesRange;
 }
@@ -77,11 +79,27 @@ const calculateForGivenInterval = (
      - The lower power of 10, times 2
      - The lower power of 10, times 5
  **/
-const calculateAutoInterval = (diff: number, maxBars: number) => {
+const calculateAutoInterval = (diff: number, maxBars: number, esTypes: ES_FIELD_TYPES[]) => {
   const exactInterval = diff / maxBars;
 
-  const lowerPower = Math.pow(10, Math.floor(Math.log10(exactInterval)));
+  // For integer fields that are less than maxBars, we should use 1 as the value of interval
+  // Elastic has 4 integer data types: long, integer, short, byte
+  // see: https://www.elastic.co/guide/en/elasticsearch/reference/current/number.html
+  if (
+    diff < maxBars &&
+    esTypes.every((esType) =>
+      [
+        ES_FIELD_TYPES.INTEGER,
+        ES_FIELD_TYPES.LONG,
+        ES_FIELD_TYPES.SHORT,
+        ES_FIELD_TYPES.BYTE,
+      ].includes(esType)
+    )
+  ) {
+    return 1;
+  }
 
+  const lowerPower = Math.pow(10, Math.floor(Math.log10(exactInterval)));
   const autoBuckets = diff / lowerPower;
 
   if (autoBuckets > maxBars) {
@@ -103,6 +121,7 @@ export const calculateHistogramInterval = ({
   maxBucketsUserInput,
   intervalBase,
   values,
+  esTypes,
 }: CalculateHistogramIntervalParams) => {
   const isAuto = isAutoInterval(interval);
   let calculatedInterval = isAuto ? 0 : parseFloat(interval);
@@ -119,8 +138,10 @@ export const calculateHistogramInterval = ({
       calculatedInterval = isAuto
         ? calculateAutoInterval(
             diff,
+
             // Mind maxBucketsUserInput can be an empty string, hence we need to ensure it here
-            Math.min(maxBucketsUiSettings, maxBucketsUserInput || maxBucketsUiSettings)
+            Math.min(maxBucketsUiSettings, maxBucketsUserInput || maxBucketsUiSettings),
+            esTypes
           )
         : calculateForGivenInterval(diff, calculatedInterval, maxBucketsUiSettings);
     }

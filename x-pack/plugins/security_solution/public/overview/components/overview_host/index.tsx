@@ -22,11 +22,11 @@ import { InspectButtonContainer } from '../../../common/components/inspect';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
 import { LinkButton } from '../../../common/components/links';
-import { Sourcerer } from '../../../common/components/sourcerer';
 
 export interface OwnProps {
   startDate: GlobalTimeArgs['from'];
   endDate: GlobalTimeArgs['to'];
+  indexNames: string[];
   filterQuery?: ESQuery | string;
   setQuery: GlobalTimeArgs['setQuery'];
 }
@@ -37,6 +37,7 @@ export type OverviewHostProps = OwnProps;
 const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   endDate,
   filterQuery,
+  indexNames,
   startDate,
   setQuery,
 }) => {
@@ -47,6 +48,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
   const [loading, { overviewHost, id, inspect, refetch }] = useHostOverview({
     endDate,
     filterQuery,
+    indexNames,
     startDate,
   });
 
@@ -109,10 +111,7 @@ const OverviewHostComponent: React.FC<OverviewHostProps> = ({
               />
             }
           >
-            <>
-              <Sourcerer />
-              {hostPageButton}
-            </>
+            <>{hostPageButton}</>
           </HeaderSection>
 
           <OverviewHostStatsManage

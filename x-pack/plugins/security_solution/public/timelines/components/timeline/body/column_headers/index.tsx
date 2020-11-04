@@ -114,7 +114,7 @@ export const ColumnHeadersComponent = ({
   timelineId,
   toggleColumn,
 }: Props) => {
-  const [draggingIndex, setDraggingIndex] = useState(null);
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null);
   const {
     timelineFullScreen,
     setTimelineFullScreen,
@@ -145,9 +145,7 @@ export const ColumnHeadersComponent = ({
 
   const renderClone: DraggableChildrenFn = useCallback(
     (dragProvided, _dragSnapshot, rubric) => {
-      // TODO: Remove after github.com/DefinitelyTyped/DefinitelyTyped/pull/43057 is merged
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const index = (rubric as any).source.index;
+      const index = rubric.source.index;
       const header = columnHeaders[index];
 
       const onMount = () => setDraggingIndex(index);
@@ -200,6 +198,22 @@ export const ColumnHeadersComponent = ({
   const fullScreen = useMemo(
     () => isFullScreen({ globalFullScreen, timelineId, timelineFullScreen }),
     [globalFullScreen, timelineId, timelineFullScreen]
+  );
+
+  const DroppableContent = useCallback(
+    (dropProvided, snapshot) => (
+      <>
+        <EventsThGroupData
+          data-test-subj="headers-group"
+          ref={dropProvided.innerRef}
+          isDragging={snapshot.isDraggingOver}
+          {...dropProvided.droppableProps}
+        >
+          {ColumnHeaderList}
+        </EventsThGroupData>
+      </>
+    ),
+    [ColumnHeaderList]
   );
 
   return (
@@ -277,18 +291,7 @@ export const ColumnHeadersComponent = ({
           type={DRAG_TYPE_FIELD}
           renderClone={renderClone}
         >
-          {(dropProvided, snapshot) => (
-            <>
-              <EventsThGroupData
-                data-test-subj="headers-group"
-                ref={dropProvided.innerRef}
-                isDragging={snapshot.isDraggingOver}
-                {...dropProvided.droppableProps}
-              >
-                {ColumnHeaderList}
-              </EventsThGroupData>
-            </>
-          )}
+          {DroppableContent}
         </Droppable>
       </EventsTrHeader>
     </EventsThead>

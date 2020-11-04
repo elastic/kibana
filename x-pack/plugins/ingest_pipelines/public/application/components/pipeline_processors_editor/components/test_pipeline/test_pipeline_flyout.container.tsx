@@ -12,13 +12,14 @@ import { useTestPipelineContext } from '../../context';
 import { serialize } from '../../serialize';
 import { DeserializeResult } from '../../deserialize';
 import { Document } from '../../types';
+import { useIsMounted } from '../../use_is_mounted';
 import { TestPipelineFlyout as ViewComponent } from './test_pipeline_flyout';
 
-import { TestPipelineFlyoutTab } from './test_pipeline_flyout_tabs';
-import { documentsSchema } from './test_pipeline_flyout_tabs/documents_schema';
+import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 export interface Props {
   activeTab: TestPipelineFlyoutTab;
+  setActiveTab: (tab: TestPipelineFlyoutTab) => void;
   onClose: () => void;
   processors: DeserializeResult;
 }
@@ -28,16 +29,22 @@ export interface TestPipelineConfig {
   verbose?: boolean;
 }
 
+export interface TestPipelineFlyoutForm {
+  documents: string | Document[];
+}
+
 export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   onClose,
   activeTab,
+  setActiveTab,
   processors,
 }) => {
   const { services } = useKibana();
+  const isMounted = useIsMounted();
 
   const {
     testPipelineData,
-    setCurrentTestPipelineData,
+    testPipelineDataDispatch,
     updateTestOutputPerProcessor,
   } = useTestPipelineContext();
 
@@ -45,14 +52,11 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     config: { documents: cachedDocuments, verbose: cachedVerbose },
   } = testPipelineData;
 
-  const { form } = useForm({
-    schema: documentsSchema,
+  const { form } = useForm<TestPipelineFlyoutForm>({
     defaultValue: {
       documents: cachedDocuments || '',
     },
   });
-
-  const [selectedTab, setSelectedTab] = useState<TestPipelineFlyoutTab>(activeTab);
 
   const [isRunningTest, setIsRunningTest] = useState<boolean>(false);
   const [testingError, setTestingError] = useState<any>(null);
@@ -74,6 +78,10 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         pipeline: { ...serializedProcessors },
       });
 
+      if (!isMounted.current) {
+        return { isSuccessful: false };
+      }
+
       setIsRunningTest(false);
 
       if (error) {
@@ -82,7 +90,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         // reset the per-processor output
         // this is needed in the scenario where the pipeline has already executed,
         // but you modified the sample documents and there was an error on re-execution
-        setCurrentTestPipelineData({
+        testPipelineDataDispatch({
           type: 'updateOutputPerProcessor',
           payload: {
             isExecutingPipeline: false,
@@ -93,7 +101,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
         return { isSuccessful: false };
       }
 
-      setCurrentTestPipelineData({
+      testPipelineDataDispatch({
         type: 'updateConfig',
         payload: {
           config: {
@@ -123,10 +131,11 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
       return { isSuccessful: true };
     },
     [
+      isMounted,
       processors,
       services.api,
       services.notifications.toasts,
-      setCurrentTestPipelineData,
+      testPipelineDataDispatch,
       updateTestOutputPerProcessor,
     ]
   );
@@ -146,8 +155,14 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     });
 
     if (isSuccessful) {
-      setSelectedTab('output');
+      setActiveTab('output');
     }
+  };
+
+  const resetTestOutput = () => {
+    testPipelineDataDispatch({
+      type: 'reset',
+    });
   };
 
   useEffect(() => {
@@ -162,14 +177,15 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   return (
     <ViewComponent
       handleTestPipeline={handleTestPipeline}
+      resetTestOutput={resetTestOutput}
       isRunningTest={isRunningTest}
       cachedVerbose={cachedVerbose}
       cachedDocuments={cachedDocuments}
       testOutput={testOutput}
       form={form}
       validateAndTestPipeline={validateAndTestPipeline}
-      selectedTab={selectedTab}
-      setSelectedTab={setSelectedTab}
+      selectedTab={activeTab}
+      setSelectedTab={setActiveTab}
       testingError={testingError}
       onClose={onClose}
     />

@@ -29,7 +29,7 @@ describe('GET configuration', () => {
       method: 'get',
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: mockCaseConfigure,
       })
@@ -49,7 +49,7 @@ describe('GET configuration', () => {
       method: 'get',
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [{ ...mockCaseConfigure[0], version: undefined }],
       })
@@ -58,8 +58,12 @@ describe('GET configuration', () => {
     const res = await routeHandler(context, req, kibanaResponseFactory);
     expect(res.status).toEqual(200);
     expect(res.payload).toEqual({
-      connector_id: '123',
-      connector_name: 'My connector',
+      connector: {
+        id: '789',
+        name: 'My connector 3',
+        type: '.jira',
+        fields: null,
+      },
       closure_type: 'close-by-user',
       created_at: '2020-04-09T09:43:51.778Z',
       created_by: {
@@ -83,7 +87,7 @@ describe('GET configuration', () => {
       method: 'get',
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [],
       })
@@ -91,6 +95,7 @@ describe('GET configuration', () => {
 
     const res = await routeHandler(context, req, kibanaResponseFactory);
     expect(res.status).toEqual(200);
+
     expect(res.payload).toEqual({});
   });
 
@@ -100,7 +105,7 @@ describe('GET configuration', () => {
       method: 'get',
     });
 
-    const context = createRouteContext(
+    const context = await createRouteContext(
       createMockSavedObjectsRepository({
         caseConfigureSavedObject: [{ ...mockCaseConfigure[0], id: 'throw-error-find' }],
       })

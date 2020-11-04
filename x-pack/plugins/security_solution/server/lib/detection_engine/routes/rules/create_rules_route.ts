@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqlRule } from '../../../../../common/detection_engine/utils';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -53,6 +54,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         building_block_type: buildingBlockType,
         description,
         enabled,
+        event_category_override: eventCategoryOverride,
         false_positives: falsePositives,
         from,
         query: queryOrUndefined,
@@ -78,6 +80,11 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         tags,
         threat,
         threshold,
+        threat_filters: threatFilters,
+        threat_index: threatIndex,
+        threat_query: threatQuery,
+        threat_mapping: threatMapping,
+        threat_language: threatLanguage,
         throttle,
         timestamp_override: timestampOverride,
         to,
@@ -90,7 +97,9 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
         const language =
-          !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
+          !isMlRule(type) && !isEqlRule(type) && languageOrUndefined == null
+            ? 'kuery'
+            : languageOrUndefined;
 
         // TODO: Fix these either with an is conversion or by better typing them within io-ts
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
@@ -104,7 +113,12 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
         throwHttpError(await mlAuthz.validateRuleType(type));
 
         const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
@@ -134,6 +148,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           buildingBlockType,
           description,
           enabled,
+          eventCategoryOverride,
           falsePositives,
           from,
           immutable: false,
@@ -162,6 +177,11 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           type,
           threat,
           threshold,
+          threatFilters,
+          threatIndex,
+          threatQuery,
+          threatMapping,
+          threatLanguage,
           timestampOverride,
           references,
           note,

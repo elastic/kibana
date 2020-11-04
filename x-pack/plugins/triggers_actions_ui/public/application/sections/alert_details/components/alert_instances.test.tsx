@@ -41,24 +41,26 @@ describe('alert_instances', () => {
           muted: false,
         },
         second_instance: {
-          status: 'OK',
+          status: 'Active',
           muted: false,
         },
       },
     });
 
     const instances: AlertInstanceListItem[] = [
-      alertInstanceToListItem(
-        fakeNow.getTime(),
-        alert,
-        'first_instance',
-        alertInstanceSummary.instances.first_instance
-      ),
+      // active first
       alertInstanceToListItem(
         fakeNow.getTime(),
         alert,
         'second_instance',
         alertInstanceSummary.instances.second_instance
+      ),
+      // ok second
+      alertInstanceToListItem(
+        fakeNow.getTime(),
+        alert,
+        'first_instance',
+        alertInstanceSummary.instances.first_instance
       ),
     ];
 
@@ -176,6 +178,7 @@ describe('alertInstanceToListItem', () => {
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start,
+      sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
       isMuted: false,
     });
@@ -196,6 +199,7 @@ describe('alertInstanceToListItem', () => {
       instance: 'id',
       status: { label: 'Active', healthColor: 'primary' },
       start,
+      sortPriority: 0,
       duration: fakeNow.getTime() - fake2MinutesAgo.getTime(),
       isMuted: true,
     });
@@ -213,6 +217,7 @@ describe('alertInstanceToListItem', () => {
       status: { label: 'Active', healthColor: 'primary' },
       start: undefined,
       duration: 0,
+      sortPriority: 0,
       isMuted: false,
     });
   });
@@ -230,6 +235,7 @@ describe('alertInstanceToListItem', () => {
       status: { label: 'OK', healthColor: 'subdued' },
       start: undefined,
       duration: 0,
+      sortPriority: 1,
       isMuted: true,
     });
   });
@@ -254,6 +260,10 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     throttle: null,
     muteAll: false,
     mutedInstanceIds: [],
+    executionStatus: {
+      status: 'unknown',
+      lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
+    },
     ...overloads,
   };
 }

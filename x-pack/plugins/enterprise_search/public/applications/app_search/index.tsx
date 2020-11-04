@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { KibanaContext, IKibanaContext } from '../index';
+import { getAppSearchUrl } from '../shared/enterprise_search_url';
+import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
 import { AppLogic } from './app_logic';
 import { IInitialAppData } from '../../../common/types';
@@ -31,9 +32,11 @@ import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
 import { EngineOverview } from './components/engine_overview';
+import { Settings } from './components/settings';
+import { Credentials } from './components/credentials';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
-  const { config } = useContext(KibanaContext) as IKibanaContext;
+  const { config } = useValues(KibanaLogic);
   return !config.host ? <AppSearchUnconfigured /> : <AppSearchConfigured {...props} />;
 };
 
@@ -49,8 +52,8 @@ export const AppSearchUnconfigured: React.FC = () => (
 );
 
 export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
-  const { hasInitialized } = useValues(AppLogic);
   const { initializeAppData } = useActions(AppLogic);
+  const { hasInitialized } = useValues(AppLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
 
   useEffect(() => {
@@ -74,6 +77,12 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
               <Route exact path={ENGINES_PATH}>
                 <EngineOverview />
               </Route>
+              <Route exact path={SETTINGS_PATH}>
+                <Settings />
+              </Route>
+              <Route exact path={CREDENTIALS_PATH}>
+                <Credentials />
+              </Route>
               <Route>
                 <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>
@@ -87,8 +96,8 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
 
 export const AppSearchNav: React.FC = () => {
   const {
-    externalUrl: { getAppSearchUrl },
-  } = useContext(KibanaContext) as IKibanaContext;
+    myRole: { canViewSettings, canViewAccountCredentials, canViewRoleMappings },
+  } = useValues(AppLogic);
 
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
@@ -97,21 +106,27 @@ export const AppSearchNav: React.FC = () => {
           defaultMessage: 'Engines',
         })}
       </SideNavLink>
-      <SideNavLink isExternal to={getAppSearchUrl(SETTINGS_PATH)}>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
-          defaultMessage: 'Account Settings',
-        })}
-      </SideNavLink>
-      <SideNavLink isExternal to={getAppSearchUrl(CREDENTIALS_PATH)}>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
-          defaultMessage: 'Credentials',
-        })}
-      </SideNavLink>
-      <SideNavLink isExternal to={getAppSearchUrl(ROLE_MAPPINGS_PATH)}>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.roleMappings', {
-          defaultMessage: 'Role Mappings',
-        })}
-      </SideNavLink>
+      {canViewSettings && (
+        <SideNavLink to={SETTINGS_PATH}>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
+            defaultMessage: 'Settings',
+          })}
+        </SideNavLink>
+      )}
+      {canViewAccountCredentials && (
+        <SideNavLink to={CREDENTIALS_PATH}>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
+            defaultMessage: 'Credentials',
+          })}
+        </SideNavLink>
+      )}
+      {canViewRoleMappings && (
+        <SideNavLink isExternal to={getAppSearchUrl(ROLE_MAPPINGS_PATH)}>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.roleMappings', {
+            defaultMessage: 'Role Mappings',
+          })}
+        </SideNavLink>
+      )}
     </SideNav>
   );
 };

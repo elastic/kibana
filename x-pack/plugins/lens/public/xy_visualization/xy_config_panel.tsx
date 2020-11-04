@@ -17,7 +17,6 @@ import {
   EuiFormRow,
   EuiText,
   htmlIdGenerator,
-  EuiForm,
   EuiColorPicker,
   EuiColorPickerProps,
   EuiToolTip,
@@ -25,8 +24,8 @@ import {
 } from '@elastic/eui';
 import {
   VisualizationLayerWidgetProps,
-  VisualizationDimensionEditorProps,
   VisualizationToolbarProps,
+  VisualizationDimensionEditorProps,
 } from '../types';
 import { State, SeriesType, visualizationTypes, YAxisMode, AxesSettingsConfig } from './types';
 import { isHorizontalChart, isHorizontalSeries, getSeriesColor } from './state_helpers';
@@ -36,6 +35,7 @@ import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration } from './axes_configuration';
+import { PalettePicker } from '../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -208,6 +208,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               isDisabled={!hasNonBarSeries}
               type="values"
               groupPosition="left"
+              buttonDataTestSubj="lnsMissingValuesButton"
             >
               <EuiFormRow
                 display="columnCompressed"
@@ -216,6 +217,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
                 })}
               >
                 <EuiSuperSelect
+                  data-test-subj="lnsMissingValuesSelect"
                   compressed
                   options={fittingFunctionDefinitions.map(({ id, title, description }) => {
                     return {
@@ -363,8 +365,22 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
     'auto';
 
+  if (props.groupId === 'breakdown') {
+    return (
+      <>
+        <PalettePicker
+          palettes={props.frame.availablePalettes}
+          activePalette={layer.palette}
+          setPalette={(newPalette) => {
+            setState(updateLayer(state, { ...layer, palette: newPalette }, index));
+          }}
+        />
+      </>
+    );
+  }
+
   return (
-    <EuiForm>
+    <>
       <ColorPicker {...props} />
 
       <EuiFormRow
@@ -428,7 +444,7 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
           }}
         />
       </EuiFormRow>
-    </EuiForm>
+    </>
   );
 }
 
@@ -488,6 +504,7 @@ const ColorPicker = ({
 
   const colorPicker = (
     <EuiColorPicker
+      data-test-subj="indexPattern-dimension-colorPicker"
       compressed
       isClearable
       onChange={handleColor}

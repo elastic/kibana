@@ -6,10 +6,11 @@
 
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { TimelineType } from '../../../../../common/types/timeline';
 import { BrowserFields } from '../../../../common/containers/source';
+import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineSelectors } from '../../../store/timeline';
 
 import { OnDataProviderEdited } from '../events';
@@ -59,7 +60,7 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
     val,
     type = DataProviderType.default,
   }) => {
-    const timelineById = useSelector(timelineSelectors.timelineByIdSelector);
+    const timelineById = useShallowEqualSelector(timelineSelectors.timelineByIdSelector);
     const timelineType = timelineId ? timelineById[timelineId]?.timelineType : TimelineType.default;
     const { getManageTimelineById } = useManageTimeline();
     const isLoading = useMemo(() => getManageTimelineById(timelineId ?? '').isLoading, [
@@ -116,21 +117,38 @@ export const ProviderItemBadge = React.memo<ProviderItemBadgeProps>(
       [unRegisterProvider]
     );
 
-    const button = (
-      <ProviderBadge
-        deleteProvider={!isLoading ? deleteProvider : noop}
-        field={field}
-        kqlQuery={kqlQuery}
-        isEnabled={isEnabled}
-        isExcluded={isExcluded}
-        providerId={providerId}
-        togglePopover={togglePopover}
-        toggleType={onToggleTypeProvider}
-        val={val}
-        operator={operator}
-        type={type}
-        timelineType={timelineType}
-      />
+    const button = useMemo(
+      () => (
+        <ProviderBadge
+          deleteProvider={!isLoading ? deleteProvider : noop}
+          field={field}
+          kqlQuery={kqlQuery}
+          isEnabled={isEnabled}
+          isExcluded={isExcluded}
+          providerId={providerId}
+          togglePopover={togglePopover}
+          toggleType={onToggleTypeProvider}
+          val={val}
+          operator={operator}
+          type={type}
+          timelineType={timelineType}
+        />
+      ),
+      [
+        deleteProvider,
+        field,
+        isEnabled,
+        isExcluded,
+        isLoading,
+        kqlQuery,
+        onToggleTypeProvider,
+        operator,
+        providerId,
+        timelineType,
+        togglePopover,
+        type,
+        val,
+      ]
     );
 
     return (

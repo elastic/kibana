@@ -24,11 +24,11 @@ import { Project } from './project';
 
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'src/test_utils/tsconfig.json')),
-  new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'kibana/test' }),
   new Project(resolve(REPO_ROOT, 'x-pack/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/test/tsconfig.json'), { name: 'x-pack/test' }),
+  new Project(resolve(REPO_ROOT, 'src/test_utils/tsconfig.json')),
+  new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'x-pack/plugins/security_solution/cypress/tsconfig.json'), {
     name: 'security_solution/cypress',
   }),
@@ -46,6 +46,12 @@ export const PROJECTS = [
   // both took closer to 1000ms.
   ...glob
     .sync('packages/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map((path) => new Project(resolve(REPO_ROOT, path))),
+  ...glob
+    .sync('src/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map((path) => new Project(resolve(REPO_ROOT, path))),
+  ...glob
+    .sync('x-pack/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
     .sync('examples/*/tsconfig.json', { cwd: REPO_ROOT })

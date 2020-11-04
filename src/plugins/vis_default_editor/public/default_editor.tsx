@@ -18,15 +18,17 @@
  */
 
 import './index.scss';
+import 'brace/mode/json';
 
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { EventEmitter } from 'events';
 
 import { EditorRenderProps } from 'src/plugins/visualize/public';
+import { Vis, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
 import { KibanaContextProvider, PanelsContainer, Panel } from '../../kibana_react/public';
 import { Storage } from '../../kibana_utils/public';
 
 import { DefaultEditorSideBar } from './components/sidebar';
-import { DefaultEditorControllerState } from './default_editor_controller';
 import { getInitialWidth } from './editor_size';
 
 const localStorage = new Storage(window.localStorage);
@@ -38,13 +40,16 @@ function DefaultEditor({
   uiState,
   timeRange,
   filters,
-  optionTabs,
   query,
   embeddableHandler,
   eventEmitter,
   linked,
   savedSearch,
-}: DefaultEditorControllerState & EditorRenderProps) {
+}: EditorRenderProps & {
+  vis: Vis;
+  eventEmitter: EventEmitter;
+  embeddableHandler: VisualizeEmbeddableContract;
+}) {
   const visRef = useRef<HTMLDivElement>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -105,7 +110,6 @@ function DefaultEditor({
               embeddableHandler={embeddableHandler}
               isCollapsed={isCollapsed}
               onClickCollapse={onClickCollapse}
-              optionTabs={optionTabs}
               vis={vis}
               uiState={uiState}
               isLinkedSearch={linked}

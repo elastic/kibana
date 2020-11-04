@@ -5,7 +5,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { LegacyAPICaller } from 'src/core/server';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
@@ -26,19 +25,15 @@ function findMatchingNodes(stats: any, nodeAttrs: string): any {
   }, []);
 }
 
-async function fetchNodeStats(callAsCurrentUser: LegacyAPICaller): Promise<any> {
-  const params = {
-    format: 'json',
-  };
-
-  return await callAsCurrentUser('nodes.stats', params);
-}
-
 const paramsSchema = schema.object({
   nodeAttrs: schema.string(),
 });
 
-export function registerDetailsRoute({ router, license, lib }: RouteDependencies) {
+export function registerDetailsRoute({
+  router,
+  license,
+  lib: { handleEsError },
+}: RouteDependencies) {
   router.get(
     { path: addBasePath('/nodes/{nodeAttrs}/details'), validate: { params: paramsSchema } },
     license.guardApiRoute(async (context, request, response) => {
@@ -46,20 +41,11 @@ export function registerDetailsRoute({ router, license, lib }: RouteDependencies
       const { nodeAttrs } = params;
 
       try {
-        const stats = await fetchNodeStats(
-          context.core.elasticsearch.legacy.client.callAsCurrentUser
-        );
-        const okResponse = { body: findMatchingNodes(stats, nodeAttrs) };
+        const statsResponse = await context.core.elasticsearch.client.asCurrentUser.nodes.stats();
+        const okResponse = { body: findMatchingNodes(statsResponse.body, nodeAttrs) };
         return response.ok(okResponse);
-      } catch (e) {
-        if (lib.isEsError(e)) {
-          return response.customError({
-            statusCode: e.statusCode,
-            body: e,
-          });
-        }
-        // Case: default
-        return response.internalError({ body: e });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
     })
   );

@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext } from 'react';
-import upperFirst from 'lodash/upperFirst';
-import snakeCase from 'lodash/snakeCase';
+import React from 'react';
+import { useValues, useActions } from 'kea';
+import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
 
 import { EuiButton } from '../../../shared/react_router_helpers';
-import { sendTelemetry } from '../../../shared/telemetry';
-import { KibanaContext, IKibanaContext } from '../../../index';
+import { TelemetryLogic } from '../../../shared/telemetry';
+import { KibanaLogic } from '../../../shared/kibana';
 
 import './product_card.scss';
 
@@ -28,7 +28,24 @@ interface IProductCard {
 }
 
 export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
-  const { http } = useContext(KibanaContext) as IKibanaContext;
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
+  const { config } = useValues(KibanaLogic);
+
+  const LAUNCH_BUTTON_TEXT = i18n.translate(
+    'xpack.enterpriseSearch.overview.productCard.launchButton',
+    {
+      defaultMessage: 'Launch {productName}',
+      values: { productName: product.NAME },
+    }
+  );
+
+  const SETUP_BUTTON_TEXT = i18n.translate(
+    'xpack.enterpriseSearch.overview.productCard.setupButton',
+    {
+      defaultMessage: 'Setup {productName}',
+      values: { productName: product.NAME },
+    }
+  );
 
   return (
     <EuiCard
@@ -51,19 +68,13 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
           to={product.URL}
           shouldNotCreateHref={true}
           onClick={() =>
-            sendTelemetry({
-              http,
-              product: 'enterprise_search',
+            sendEnterpriseSearchTelemetry({
               action: 'clicked',
               metric: snakeCase(product.ID),
             })
           }
-          data-test-subj={`Launch${upperFirst(product.ID)}Button`}
         >
-          {i18n.translate('xpack.enterpriseSearch.overview.productCard.button', {
-            defaultMessage: `Launch {productName}`,
-            values: { productName: product.NAME },
-          })}
+          {config.host ? LAUNCH_BUTTON_TEXT : SETUP_BUTTON_TEXT}
         </EuiButton>
       }
     />
