@@ -14,6 +14,15 @@ interface ValidLayer extends LayerConfig {
   xAccessor: NonNullable<LayerConfig['xAccessor']>;
 }
 
+export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: LayerConfig) => {
+  const originalOrder = datasource
+    .getTableSpec()
+    .map(({ columnId }: { columnId: string }) => columnId)
+    .filter((columnId: string) => layer.accessors.includes(columnId));
+  // When we add a column it could be empty, and therefore have no order
+  return Array.from(new Set(originalOrder.concat(layer.accessors)));
+};
+
 export const toExpression = (
   state: State,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
@@ -91,9 +100,20 @@ export const buildExpression = (
   paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
-  const validLayers = state.layers.filter((layer): layer is ValidLayer =>
-    Boolean(layer.accessors.length)
-  );
+  const validLayers = state.layers
+    .filter((layer): layer is ValidLayer => Boolean(layer.accessors.length))
+    .map((layer) => {
+      if (!datasourceLayers) {
+        return layer;
+      }
+      const sortedAccessors = getSortedAccessors(datasourceLayers[layer.layerId], layer);
+
+      return {
+        ...layer,
+        accessors: sortedAccessors,
+      };
+    });
+
   if (!validLayers.length) {
     return null;
   }

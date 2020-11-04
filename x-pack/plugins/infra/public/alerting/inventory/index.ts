@@ -17,6 +17,9 @@ export function createInventoryMetricAlertType(): AlertTypeModel {
     name: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertName', {
       defaultMessage: 'Inventory',
     }),
+    description: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertDescription', {
+      defaultMessage: 'Alert when the inventory exceeds a defined threshold.',
+    }),
     iconClass: 'bell',
     alertParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
