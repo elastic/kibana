@@ -39,6 +39,11 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await this.waitTableIsLoaded();
     }
 
+    async getCurrentSearchValue() {
+      const searchBox = await testSubjects.find('savedObjectSearchBar');
+      return await searchBox.getAttribute('value');
+    }
+
     async importFile(path: string, overwriteAll = true) {
       log.debug(`importFile(${path})`);
 
