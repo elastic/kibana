@@ -49,5 +49,5 @@ export const UI_SETTINGS = {
   INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
-  AUTOCOMPLETE_IGNORE_TIMERANGE: 'autocomplete:ignoreTimerange',
+  AUTOCOMPLETE_USE_TIMERANGE: 'autocomplete:useTimerange',
 } as const;

@@ -2281,6 +2281,7 @@ export const UI_SETTINGS: {
     readonly INDEXPATTERN_PLACEHOLDER: "indexPattern:placeholder";
     readonly FILTERS_PINNED_BY_DEFAULT: "filters:pinnedByDefault";
     readonly FILTERS_EDITOR_SUGGEST_VALUES: "filterEditor:suggestValues";
+    readonly AUTOCOMPLETE_USE_TIMERANGE: "autocomplete:useTimerange";
 };
 
 

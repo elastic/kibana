@@ -684,15 +684,15 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
     },
-    [UI_SETTINGS.AUTOCOMPLETE_IGNORE_TIMERANGE]: {
+    [UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE]: {
       name: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerange', {
-        defaultMessage: 'Ignore time range',
-        description: 'Ignore the current time range, while constructing autocomplete results',
+        defaultMessage: 'Use time range',
+        description: 'Restrict autocomplete results to the current time range',
       }),
-      value: false,
+      value: true,
       description: i18n.translate('data.advancedSettings.autocompleteIgnoreTimerangeText', {
         defaultMessage:
-          'Set this property to true to get autocomplete suggestions from your full dataset, rather than from the current time range.',
+          'Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range.',
       }),
       schema: schema.boolean(),
     },

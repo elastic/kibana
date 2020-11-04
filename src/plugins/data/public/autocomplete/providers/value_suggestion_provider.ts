@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import dateMath from '@elastic/datemath';
 import { memoize } from 'lodash';
-import moment from 'moment';
 import { CoreSetup } from 'src/core/public';
 import { IIndexPattern, IFieldType, UI_SETTINGS, buildQueryFromFilters } from '../../../common';
 import { getQueryService } from '../../services';
@@ -35,9 +35,9 @@ interface ValueSuggestionsGetFnArgs {
   indexPattern: IIndexPattern;
   field: IFieldType;
   query: string;
+  useTimeRange?: boolean;
   boolFilter?: any[];
   signal?: AbortSignal;
-  ignoreTimeRange?: boolean;
 }
 
 const getAutocompleteTimefilter = (indexPattern: IIndexPattern) => {
@@ -46,10 +46,9 @@ const getAutocompleteTimefilter = (indexPattern: IIndexPattern) => {
 
   // Use a rounded timerange so that memoizing works properly
   const roundedTimerange = {
-    from: moment(timeRange.from).startOf('minute').toISOString(),
-    to: moment(timeRange.to).endOf('minute').toISOString(),
+    from: dateMath.parse(timeRange.from)!.startOf('minute').toISOString(),
+    to: dateMath.parse(timeRange.to)!.endOf('minute').toISOString(),
   };
-
   return timefilter.createFilter(indexPattern, roundedTimerange);
 };
 
@@ -70,15 +69,15 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
     indexPattern,
     field,
     query,
+    useTimeRange,
     boolFilter,
     signal,
-    ignoreTimeRange,
   }: ValueSuggestionsGetFnArgs): Promise<any[]> => {
     const shouldSuggestValues = core!.uiSettings.get<boolean>(
       UI_SETTINGS.FILTERS_EDITOR_SUGGEST_VALUES
     );
-    ignoreTimeRange =
-      ignoreTimeRange ?? core!.uiSettings.get<boolean>(UI_SETTINGS.AUTOCOMPLETE_IGNORE_TIMERANGE);
+    useTimeRange =
+      useTimeRange ?? core!.uiSettings.get<boolean>(UI_SETTINGS.AUTOCOMPLETE_USE_TIMERANGE);
     const { title } = indexPattern;
 
     if (field.type === 'boolean') {
@@ -87,7 +86,7 @@ export const setupValueSuggestionProvider = (core: CoreSetup): ValueSuggestionsG
       return [];
     }
 
-    const timeFilter = ignoreTimeRange ? undefined : getAutocompleteTimefilter(indexPattern);
+    const timeFilter = useTimeRange ? getAutocompleteTimefilter(indexPattern) : undefined;
     const filterQuery = timeFilter ? buildQueryFromFilters([timeFilter], indexPattern).filter : [];
     const filters = [...(boolFilter ? boolFilter : []), ...filterQuery];
     return await requestSuggestions(title, field, query, filters, signal);

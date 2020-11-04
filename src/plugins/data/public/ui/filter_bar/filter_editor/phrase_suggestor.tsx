@@ -85,8 +85,8 @@ export class PhraseSuggestorUI<T extends PhraseSuggestorProps> extends React.Com
       field,
       query,
       signal: this.abortController.signal,
-      // Show all results in filter bar autocomplete?
-      ignoreTimeRange: true,
+      // Show all results in filter bar autocomplete
+      useTimeRange: false,
     });
 
     this.setState({ suggestions, isLoading: false });

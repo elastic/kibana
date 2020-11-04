@@ -10,13 +10,14 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
-  const PageObjects = getPageObjects(['common']);
+  const PageObjects = getPageObjects(['common', 'timePicker']);
 
   describe('value suggestions', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('dashboard/drilldowns');
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
