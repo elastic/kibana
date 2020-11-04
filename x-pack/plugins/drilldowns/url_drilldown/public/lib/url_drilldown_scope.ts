@@ -112,6 +112,7 @@ export type UrlDrilldownEventScope =
   | RangeSelectTriggerEventScope
   | RowClickTriggerEventScope
   | ContextMenuTriggerEventScope;
+
 export type EventScopeInput = ActionContext;
 export interface ValueClickTriggerEventScope {
   key?: string;
@@ -129,6 +130,7 @@ export interface RowClickTriggerEventScope {
   rowIndex: number;
   values: Primitive[];
   keys: string[];
+  columnNames: string[];
 }
 export type ContextMenuTriggerEventScope = object;
 
@@ -186,6 +188,7 @@ function getEventScopeFromRowClickTriggerContext({
   const columns = data.columns || data.table.columns.map(({ id }) => id);
   const values: Primitive[] = [];
   const keys: string[] = [];
+  const columnNames: string[] = [];
   const row = data.table.rows[rowIndex];
 
   for (const columnId of columns) {
@@ -196,14 +199,16 @@ function getEventScopeFromRowClickTriggerContext({
       console.error(data, embeddable ? `Embeddable [${embeddable.getTitle()}]` : null);
       throw new Error('Could not find a datatable column.');
     }
-    values.push(row[column.id]);
-    keys.push(column.name);
+    values.push(row[columnId]);
+    keys.push(column.meta.field || '');
+    columnNames.push(column.name || column.meta.field || '');
   }
 
   const scope: RowClickTriggerEventScope = {
     rowIndex,
     values,
     keys,
+    columnNames,
   };
 
   return scope;
