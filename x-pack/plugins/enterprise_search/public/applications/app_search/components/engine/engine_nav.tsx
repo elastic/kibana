@@ -30,6 +30,20 @@ import {
   ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
+import {
+  ENGINES_TITLE,
+  OVERVIEW_TITLE,
+  ANALYTICS_TITLE,
+  DOCUMENTS_TITLE,
+  SCHEMA_TITLE,
+  CRAWLER_TITLE,
+  RELEVANCE_TUNING_TITLE,
+  SYNONYMS_TITLE,
+  CURATIONS_TITLE,
+  RESULT_SETTINGS_TITLE,
+  SEARCH_UI_TITLE,
+  API_LOGS_TITLE,
+} from './constants';
 
 import './engine_nav.scss';
 
@@ -41,38 +55,19 @@ export const EngineRouter: React.FC = () => {
   // TODO: EngineLogic
 
   const { engineName } = useParams() as { engineName: string };
-  const engineBreadcrumb = [
-    i18n.translate('xpack.enterpriseSearch.appSearch.engines.title', {
-      defaultMessage: 'Engines',
-    }),
-    engineName,
-  ];
+  const engineBreadcrumb = [ENGINES_TITLE, engineName];
 
   return (
     // TODO: Add more routes as we migrate them
     <Switch>
       {canViewEngineAnalytics && (
         <Route path={ENGINE_PATH + ENGINE_ANALYTICS_PATH}>
-          <SetPageChrome
-            trail={[
-              ...engineBreadcrumb,
-              i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.title', {
-                defaultMessage: 'Analytics',
-              }),
-            ]}
-          />
+          <SetPageChrome trail={[...engineBreadcrumb, ANALYTICS_TITLE]} />
           <div data-test-subj="AnalyticsTODO">Just testing right now</div>
         </Route>
       )}
       <Route>
-        <SetPageChrome
-          trail={[
-            ...engineBreadcrumb,
-            i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.title', {
-              defaultMessage: 'Overview',
-            }),
-          ]}
-        />
+        <SetPageChrome trail={[...engineBreadcrumb, OVERVIEW_TITLE]} />
         <div data-test-subj="EngineOverviewTODO">Overview</div>
       </Route>
     </Switch>
@@ -126,15 +121,11 @@ export const EngineNav: React.FC = () => {
         </EuiText>
       </SideNavItem>
       <SideNavLink to={engineRoute} data-test-subj="EngineOverviewLink">
-        {i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.title', {
-          defaultMessage: 'Overview',
-        })}
+        {OVERVIEW_TITLE}
       </SideNavLink>
       {canViewEngineAnalytics && (
         <SideNavLink to={engineRoute + ENGINE_ANALYTICS_PATH} data-test-subj="EngineAnalyticsLink">
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.title', {
-            defaultMessage: 'Analytics',
-          })}
+          {ANALYTICS_TITLE}
         </SideNavLink>
       )}
       {canViewEngineDocuments && (
@@ -143,9 +134,7 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_DOCUMENTS_PATH)}
           data-test-subj="EngineDocumentsLink"
         >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.documents.title', {
-            defaultMessage: 'Documents',
-          })}
+          {DOCUMENTS_TITLE}
         </SideNavLink>
       )}
       {canViewEngineSchema && (
@@ -154,9 +143,7 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_SCHEMA_PATH)}
           data-test-subj="EngineSchemaLink"
         >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.title', {
-            defaultMessage: 'Schema',
-          })}
+          {SCHEMA_TITLE}
           {/* TODO: Engine schema warning icon */}
         </SideNavLink>
       )}
@@ -166,9 +153,7 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_CRAWLER_PATH)}
           data-test-subj="EngineCrawlerLink"
         >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.crawler.title', {
-            defaultMessage: 'Crawler',
-          })}
+          {CRAWLER_TITLE}
         </SideNavLink>
       )}
       {canViewMetaEngineSourceEngines && isMetaEngine && (
@@ -177,9 +162,7 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + META_ENGINE_SOURCE_ENGINES_PATH)}
           data-test-subj="MetaEngineEnginesLink"
         >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.metaEngine.navLink', {
-            defaultMessage: 'Engines',
-          })}
+          {ENGINES_TITLE}
         </SideNavLink>
       )}
       {canManageEngineRelevanceTuning && (
@@ -188,9 +171,7 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_RELEVANCE_TUNING_PATH)}
           data-test-subj="EngineRelevanceTuningLink"
         >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.relevanceTuning.title', {
-            defaultMessage: 'Relevance Tuning',
-          })}
+          {RELEVANCE_TUNING_TITLE}
           {/* TODO: invalid boosts error icon */}
         </SideNavLink>
       )}
@@ -200,9 +181,7 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_SYNONYMS_PATH)}
           data-test-subj="EngineSynonymsLink"
         >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.synonyms.title', {
-            defaultMessage: 'Synonyms',
-          })}
+          {SYNONYMS_TITLE}
         </SideNavLink>
       )}
       {canManageEngineCurations && (
@@ -211,9 +190,7 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_CURATIONS_PATH)}
           data-test-subj="EngineCurationsLink"
         >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.title', {
-            defaultMessage: 'Curations',
-          })}
+          {CURATIONS_TITLE}
         </SideNavLink>
       )}
       {canManageEngineResultSettings && (
@@ -222,9 +199,7 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_RESULT_SETTINGS_PATH)}
           data-test-subj="EngineResultSettingsLink"
         >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.resultSettings.title', {
-            defaultMessage: 'Result Settings',
-          })}
+          {RESULT_SETTINGS_TITLE}
         </SideNavLink>
       )}
       {canManageEngineSearchUi && (
@@ -233,9 +208,7 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_SEARCH_UI_PATH)}
           data-test-subj="EngineSearchUILink"
         >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.searchUI.title', {
-            defaultMessage: 'Search UI',
-          })}
+          {SEARCH_UI_TITLE}
         </SideNavLink>
       )}
       {canViewEngineApiLogs && (
@@ -244,9 +217,7 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_API_LOGS_PATH)}
           data-test-subj="EngineAPILogsLink"
         >
-          {i18n.translate('xpack.enterpriseSearch.appSearch.engine.apiLogs.title', {
-            defaultMessage: 'API Logs',
-          })}
+          {API_LOGS_TITLE}
         </SideNavLink>
       )}
     </>
