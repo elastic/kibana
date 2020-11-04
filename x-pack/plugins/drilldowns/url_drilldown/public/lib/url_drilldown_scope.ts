@@ -19,11 +19,12 @@ import {
   RangeSelectContext,
   ValueClickContext,
 } from '../../../../../../src/plugins/embeddable/public';
-import type { ActionContext, ActionFactoryContext, UrlTrigger } from './url_drilldown';
+import type { ActionContext, ActionFactoryContext } from './url_drilldown';
 import {
   SELECT_RANGE_TRIGGER,
   RowClickContext,
   VALUE_CLICK_TRIGGER,
+  ROW_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
 
 type ContextScopeInput = ActionContext | ActionFactoryContext;
@@ -219,7 +220,9 @@ function getEventScopeFromRowClickTriggerContext({
  * Difference between `event` and `context` variables, is that real `context` variables are available during drilldown creation (e.g. embeddable panel)
  * `event` variables are mapped from trigger context. Since there is no trigger context during drilldown creation, we have to provide some _mock_ variables for validating and previewing the URL
  */
-export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventScope {
+export function getMockEventScope(context: ActionFactoryContext): UrlDrilldownEventScope {
+  const [trigger] = context.triggers;
+
   if (trigger === SELECT_RANGE_TRIGGER) {
     return {
       key: 'event.key',
@@ -241,6 +244,15 @@ export function getMockEventScope([trigger]: UrlTrigger[]): UrlDrilldownEventSco
       value: `event.value`,
       negate: false,
       points,
+    };
+  }
+
+  if (trigger === ROW_CLICK_TRIGGER) {
+    return {
+      rowIndex: 123,
+      values: [0, 1, 2, 3],
+      keys: ['0', '1', '2', '3'],
+      columnNames: ['0', '1', '2', '3'],
     };
   }
 

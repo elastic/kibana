@@ -42,7 +42,9 @@ export type Config = UrlDrilldownConfig;
 export type UrlTrigger =
   | typeof VALUE_CLICK_TRIGGER
   | typeof SELECT_RANGE_TRIGGER
-  | typeof ROW_CLICK_TRIGGER;
+  | typeof ROW_CLICK_TRIGGER
+  | typeof CONTEXT_MENU_TRIGGER;
+
 export interface ActionFactoryContext extends BaseActionFactoryContext<UrlTrigger> {
   embeddable?: IEmbeddable;
 }
@@ -134,7 +136,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     return urlDrilldownBuildScope({
       globalScope: this.deps.getGlobalScope(),
       contextScope: getContextScope(context),
-      eventScope: getMockEventScope(context.triggers),
+      eventScope: getMockEventScope(context),
     });
   };
 
