@@ -125,6 +125,7 @@ export class Embeddable
       case 'lnsXY':
         return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];
       case 'lnsDatatable':
+        return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.tableRowContextMenuClick];
       case 'lnsPie':
         return [VIS_EVENT_TO_TRIGGER.filter];
       case 'lnsMetric':
