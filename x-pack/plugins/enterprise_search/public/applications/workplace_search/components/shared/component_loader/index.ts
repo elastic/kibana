@@ -4,14 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export * from '../../../common/types/workplace_search';
-
-export type TSpacerSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
-
-export interface ISourcePriority {
-  [id: string]: number;
-}
-
-export interface IComponentLoader {
-  text?: string;
-}
+export { ComponentLoader } from './component_loader';

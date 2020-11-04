@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { FtrProviderContext } from 'test/functional/ftr_provider_context';
 import expect from '@kbn/expect';
 
 /**
@@ -27,7 +28,8 @@ import expect from '@kbn/expect';
  * broke?).  The upside is that this offers very good coverage with a minimal time investment.
  */
 
-export default function ({ getService, getPageObjects }) {
+// eslint-disable-next-line import/no-default-export
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dashboardExpect = getService('dashboardExpect');
