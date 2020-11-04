@@ -4,17 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AppTestBed, setup } from './app.helpers';
+import {
+  AppTestBed,
+  getDoubleEncodedPolicyEditPath,
+  getEncodedPolicyEditPath,
+  setup,
+} from './app.helpers';
 import { setupEnvironment } from '../helpers/setup_environment';
 import { getDefaultHotPhasePolicy, POLICY_NAME } from '../edit_policy/constants';
 import { act } from 'react-dom/test-utils';
 
 const SPECIAL_CHARS_NAME = 'test?#$+=&@:';
-const DOLLAR_SIGN_NAME = 'test%';
+const PERCENT_SIGN_NAME = 'test%';
 // navigation doesn't work for % with other special chars or sequence %25
 // known issue https://github.com/elastic/kibana/issues/82440
-const DOLLAR_SIGN_WITH_OTHER_CHARS_NAME = 'test%#';
-const DOLLAR_SIGN_25_SEQUENCE = 'test%25';
+const PERCENT_SIGN_WITH_OTHER_CHARS_NAME = 'test%#';
+const PERCENT_SIGN_25_SEQUENCE = 'test%25';
 
 window.scrollTo = jest.fn();
 
@@ -64,7 +69,7 @@ describe('<App />', () => {
       httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(SPECIAL_CHARS_NAME)]);
     });
 
-    test('when clicked on policy name in table', async () => {
+    test('clicking policy name in the table works', async () => {
       await act(async () => {
         testBed = await setup(['/']);
       });
@@ -80,9 +85,9 @@ describe('<App />', () => {
       );
     });
 
-    test('when loading edit policy page url', async () => {
+    test('loading edit policy page url works', async () => {
       await act(async () => {
-        testBed = await setup([`/policies/edit/${encodeURIComponent(SPECIAL_CHARS_NAME)}`]);
+        testBed = await setup([getEncodedPolicyEditPath(SPECIAL_CHARS_NAME)]);
       });
 
       const { component } = testBed;
@@ -93,11 +98,11 @@ describe('<App />', () => {
       );
     });
 
-    test('when loading edit policy page url with double encoding', async () => {
+    // using double encoding to counteract react-router's v5 internal decodeURI call
+    // when those links are open in a new tab, address bar contains double encoded url
+    test('loading edit policy page url with double encoding works', async () => {
       await act(async () => {
-        testBed = await setup([
-          encodeURI(`/policies/edit/${encodeURIComponent(SPECIAL_CHARS_NAME)}`),
-        ]);
+        testBed = await setup([getDoubleEncodedPolicyEditPath(SPECIAL_CHARS_NAME)]);
       });
 
       const { component } = testBed;
@@ -109,48 +114,46 @@ describe('<App />', () => {
     });
   });
 
-  describe('navigation with dollar sign', () => {
+  describe('navigation with percent sign', () => {
     beforeAll(async () => {
-      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(DOLLAR_SIGN_NAME)]);
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(PERCENT_SIGN_NAME)]);
     });
 
-    test('when loading edit policy page url', async () => {
+    test('loading edit policy page url works', async () => {
       await act(async () => {
-        testBed = await setup([`/policies/edit/${encodeURIComponent(DOLLAR_SIGN_NAME)}`]);
+        testBed = await setup([getEncodedPolicyEditPath(PERCENT_SIGN_NAME)]);
       });
 
       const { component } = testBed;
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${DOLLAR_SIGN_NAME}`
+        `Edit index lifecycle policy ${PERCENT_SIGN_NAME}`
       );
     });
 
-    test('when loading edit policy page url with double encoding', async () => {
+    test('loading edit policy page url with double encoding works', async () => {
       await act(async () => {
-        testBed = await setup([
-          encodeURI(`/policies/edit/${encodeURIComponent(DOLLAR_SIGN_NAME)}`),
-        ]);
+        testBed = await setup([getDoubleEncodedPolicyEditPath(PERCENT_SIGN_NAME)]);
       });
 
       const { component } = testBed;
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${DOLLAR_SIGN_NAME}`
+        `Edit index lifecycle policy ${PERCENT_SIGN_NAME}`
       );
     });
   });
 
-  describe('navigation with dollar sign with other special characters', () => {
+  describe('navigation with percent sign with other special characters', () => {
     beforeAll(async () => {
       httpRequestsMockHelpers.setLoadPolicies([
-        getDefaultHotPhasePolicy(DOLLAR_SIGN_WITH_OTHER_CHARS_NAME),
+        getDefaultHotPhasePolicy(PERCENT_SIGN_WITH_OTHER_CHARS_NAME),
       ]);
     });
 
-    test('when clicked on policy name in table', async () => {
+    test('clicking policy name in the table works', async () => {
       await act(async () => {
         testBed = await setup(['/']);
       });
@@ -162,15 +165,13 @@ describe('<App />', () => {
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${DOLLAR_SIGN_WITH_OTHER_CHARS_NAME}`
+        `Edit index lifecycle policy ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
       );
     });
 
-    test('when loading edit policy page url', async () => {
+    test("loading edit policy page url doesn't work", async () => {
       await act(async () => {
-        testBed = await setup([
-          `/policies/edit/${encodeURIComponent(DOLLAR_SIGN_WITH_OTHER_CHARS_NAME)}`,
-        ]);
+        testBed = await setup([getEncodedPolicyEditPath(PERCENT_SIGN_WITH_OTHER_CHARS_NAME)]);
       });
 
       const { component } = testBed;
@@ -178,32 +179,32 @@ describe('<App />', () => {
 
       // known issue https://github.com/elastic/kibana/issues/82440
       expect(testBed.find('policyTitle').text()).not.toBe(
-        `Edit index lifecycle policy ${DOLLAR_SIGN_WITH_OTHER_CHARS_NAME}`
+        `Edit index lifecycle policy ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
       );
     });
 
-    test('when loading edit policy page url with double encoding', async () => {
+    // using double encoding to counteract react-router's v5 internal decodeURI call
+    // when those links are open in a new tab, address bar contains double encoded url
+    test('loading edit policy page url with double encoding works', async () => {
       await act(async () => {
-        testBed = await setup([
-          encodeURI(`/policies/edit/${encodeURIComponent(DOLLAR_SIGN_WITH_OTHER_CHARS_NAME)}`),
-        ]);
+        testBed = await setup([getDoubleEncodedPolicyEditPath(PERCENT_SIGN_WITH_OTHER_CHARS_NAME)]);
       });
 
       const { component } = testBed;
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${DOLLAR_SIGN_WITH_OTHER_CHARS_NAME}`
+        `Edit index lifecycle policy ${PERCENT_SIGN_WITH_OTHER_CHARS_NAME}`
       );
     });
   });
 
   describe('navigation with %25 sequence', () => {
     beforeAll(async () => {
-      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(DOLLAR_SIGN_25_SEQUENCE)]);
+      httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy(PERCENT_SIGN_25_SEQUENCE)]);
     });
 
-    test('when clicked on policy name in table', async () => {
+    test('clicking policy name in the table works correctly', async () => {
       await act(async () => {
         testBed = await setup(['/']);
       });
@@ -215,13 +216,13 @@ describe('<App />', () => {
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${DOLLAR_SIGN_25_SEQUENCE}`
+        `Edit index lifecycle policy ${PERCENT_SIGN_25_SEQUENCE}`
       );
     });
 
-    test('when loading edit policy page url', async () => {
+    test("loading edit policy page url doesn't work", async () => {
       await act(async () => {
-        testBed = await setup([`/policies/edit/${encodeURIComponent(DOLLAR_SIGN_25_SEQUENCE)}`]);
+        testBed = await setup([getEncodedPolicyEditPath(PERCENT_SIGN_25_SEQUENCE)]);
       });
 
       const { component } = testBed;
@@ -229,22 +230,22 @@ describe('<App />', () => {
 
       // known issue https://github.com/elastic/kibana/issues/82440
       expect(testBed.find('policyTitle').text()).not.toBe(
-        `Edit index lifecycle policy ${DOLLAR_SIGN_25_SEQUENCE}`
+        `Edit index lifecycle policy ${PERCENT_SIGN_25_SEQUENCE}`
       );
     });
 
-    test('when loading edit policy page url with double encoding', async () => {
+    // using double encoding to counteract react-router's v5 internal decodeURI call
+    // when those links are open in a new tab, address bar contains double encoded url
+    test('loading edit policy page url with double encoding works', async () => {
       await act(async () => {
-        testBed = await setup([
-          encodeURI(`/policies/edit/${encodeURIComponent(DOLLAR_SIGN_25_SEQUENCE)}`),
-        ]);
+        testBed = await setup([getDoubleEncodedPolicyEditPath(PERCENT_SIGN_25_SEQUENCE)]);
       });
 
       const { component } = testBed;
       component.update();
 
       expect(testBed.find('policyTitle').text()).toBe(
-        `Edit index lifecycle policy ${DOLLAR_SIGN_25_SEQUENCE}`
+        `Edit index lifecycle policy ${PERCENT_SIGN_25_SEQUENCE}`
       );
     });
   });

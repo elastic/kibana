@@ -53,3 +53,9 @@ export const setup = async (initialEntries: string[]): Promise<AppTestBed> => {
     actions: { clickPolicyNameLink, clickCreatePolicyButton },
   };
 };
+
+export const getEncodedPolicyEditPath = (policyName: string): string =>
+  `/policies/edit/${encodeURIComponent(policyName)}`;
+
+export const getDoubleEncodedPolicyEditPath = (policyName: string): string =>
+  encodeURI(getEncodedPolicyEditPath(policyName));
