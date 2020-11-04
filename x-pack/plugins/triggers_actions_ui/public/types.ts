@@ -12,6 +12,7 @@ import { TypeRegistry } from './application/type_registry';
 import {
   SanitizedAlert as Alert,
   AlertAction,
+  AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
@@ -21,6 +22,7 @@ import {
 export {
   Alert,
   AlertAction,
+  AlertAggregations,
   AlertTaskState,
   AlertInstanceSummary,
   AlertInstanceStatus,
@@ -172,6 +174,7 @@ export interface AlertTypeParamsExpressionProps<
 export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any> {
   id: string;
   name: string | JSX.Element;
+  description: string;
   iconClass: string;
   validate: (alertParams: AlertParamsType) => ValidationResult;
   alertParamsExpression:

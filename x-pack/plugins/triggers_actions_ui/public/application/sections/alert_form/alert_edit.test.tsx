@@ -51,6 +51,7 @@ describe('alert_edit', () => {
       id: 'my-alert-type',
       iconClass: 'test',
       name: 'test-alert',
+      description: 'test',
       validate: (): ValidationResult => {
         return { errors: {} };
       },
