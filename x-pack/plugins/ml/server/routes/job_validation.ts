@@ -53,6 +53,7 @@ export function jobValidationRoutes(
       timeFieldName,
       earliestMs,
       latestMs,
+      undefined,
       datafeedConfig as DatafeedOverride
     );
   }

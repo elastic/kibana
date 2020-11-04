@@ -145,8 +145,8 @@ export function calculateModelMemoryLimitProvider(
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    datafeedConfig?: DatafeedOverride,
-    allowMMLGreaterThanMax = false
+    allowMMLGreaterThanMax = false,
+    datafeedConfig?: DatafeedOverride
   ): Promise<ModelMemoryEstimationResult> {
     const { body: info } = await mlClient.info<MlInfoResponse>();
     const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
