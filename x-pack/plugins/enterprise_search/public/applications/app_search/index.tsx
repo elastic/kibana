@@ -35,7 +35,7 @@ import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
 import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { Settings } from './components/settings';
-import { Credentials } from './components/credentials';
+import { Credentials, CREDENTIALS_TITLE } from './components/credentials';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -123,11 +123,7 @@ export const AppSearchNav: React.FC<IAppSearchNavProps> = ({ subNav }) => {
         </SideNavLink>
       )}
       {canViewAccountCredentials && (
-        <SideNavLink to={CREDENTIALS_PATH}>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
-            defaultMessage: 'Credentials',
-          })}
-        </SideNavLink>
+        <SideNavLink to={CREDENTIALS_PATH}>{CREDENTIALS_TITLE}</SideNavLink>
       )}
       {canViewRoleMappings && (
         <SideNavLink isExternal to={getAppSearchUrl(ROLE_MAPPINGS_PATH)}>
