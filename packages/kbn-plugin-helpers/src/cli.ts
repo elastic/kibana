@@ -19,6 +19,7 @@
 
 import Path from 'path';
 
+import semver from 'semver';
 import { RunWithCommands, createFlagError, createFailError } from '@kbn/dev-utils';
 
 import { findKibanaJson } from './find_kibana_json';
@@ -76,6 +77,19 @@ export function runCli() {
         const plugin = loadKibanaPlatformPlugin(pluginDir);
         const config = await loadConfig(log, plugin);
         const kibanaVersion = await resolveKibanaVersion(versionFlag, plugin);
+
+        if (semver.satisfies(kibanaVersion, '<7.9')) {
+          log.error(
+            'These tools are not designed to work with version before 7.9, please checkout an earlier version of Kibana to build your plugin'
+          );
+          process.exit(1);
+        }
+        if (semver.satisfies(kibanaVersion, '~7.9.0')) {
+          log.warning(
+            'These tools might work with 7.9 versions, but there are known workarounds required. See https://github.com/elastic/kibana/issues/82466 for more info'
+          );
+        }
+
         const sourceDir = plugin.directory;
         const buildDir = Path.resolve(plugin.directory, 'build/kibana', plugin.manifest.id);
 
