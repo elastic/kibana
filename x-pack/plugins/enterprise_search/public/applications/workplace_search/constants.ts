@@ -6,6 +6,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const NAV = {
+  OVERVIEW: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.overview', {
+    defaultMessage: 'Overview',
+  }),
+  SOURCES: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.sources', {
+    defaultMessage: 'Sources',
+  }),
   GROUPS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.groups', {
     defaultMessage: 'Groups',
   }),
@@ -18,6 +24,21 @@ export const NAV = {
   SOURCE_PRIORITIZATION: i18n.translate(
     'xpack.enterpriseSearch.workplaceSearch.nav.groups.sourcePrioritization',
     { defaultMessage: 'Source Prioritization' }
+  ),
+  ROLE_MAPPINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.roleMappings', {
+    defaultMessage: 'Role Mappings',
+  }),
+  SECURITY: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.security', {
+    defaultMessage: 'Security',
+  }),
+  SETTINGS: i18n.translate('xpack.enterpriseSearch.workplaceSearch.nav.settings', {
+    defaultMessage: 'Settings',
+  }),
+  PERSONAL_DASHBOARD: i18n.translate(
+    'xpack.enterpriseSearch.workplaceSearch.nav.personalDashboard',
+    {
+      defaultMessage: 'View my personal dashboard',
+    }
   ),
 };
 
