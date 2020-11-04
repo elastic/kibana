@@ -13,7 +13,7 @@ import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 import { SideNav, SideNavLink } from '../../../shared/layout';
 
 import { GroupSubNav } from '../../views/groups/components/group_sub_nav';
-import { NAV } from '../../views/groups/constants';
+import { NAV } from '../../constants';
 
 import {
   ORG_SOURCES_PATH,
