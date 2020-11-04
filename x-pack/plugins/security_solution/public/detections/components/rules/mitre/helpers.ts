@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { isEmpty } from 'lodash/fp';
+import { subtechniquesOptions } from '../../../mitre/mitre_tactics_techniques';
 
-import { IMitreAttack } from '../../../pages/detection_engine/rules/types';
+import { IMitreAttack, IMitreAttackTechnique } from '../../../pages/detection_engine/rules/types';
 
 export const isMitreAttackInvalid = (
   tacticName: string | null | undefined,
@@ -15,4 +16,11 @@ export const isMitreAttackInvalid = (
     return true;
   }
   return false;
+};
+
+/**
+ * Returns true if the given mitre technique has any subtechniques
+ */
+export const hasSubtechniques = (technique: IMitreAttackTechnique) => {
+  return subtechniquesOptions.some((subtechnique) => subtechnique.techniqueId === technique.id);
 };

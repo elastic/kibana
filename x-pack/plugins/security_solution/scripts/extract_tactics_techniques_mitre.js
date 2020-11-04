@@ -14,9 +14,8 @@ const { camelCase } = require('lodash');
 const { resolve } = require('path');
 
 const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
-// Revert to https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json once we support sub-techniques
 const MITRE_ENTERPRISE_ATTACK_URL =
-  'https://raw.githubusercontent.com/mitre/cti/ATT%26CK-v6.3/enterprise-attack/enterprise-attack.json';
+  'https://raw.githubusercontent.com/mitre/cti/master/enterprise-attack/enterprise-attack.json';
 
 const getTacticsOptions = (tactics) =>
   tactics.map((t) =>
@@ -45,6 +44,24 @@ const getTechniquesOptions = (techniques) =>
   name: '${t.name}',
   reference: '${t.reference}',
   tactics: '${t.tactics.join()}',
+  value: '${camelCase(t.name)}'
+}`.replace(/(\r\n|\n|\r)/gm, ' ')
+  );
+
+const getSubtechniquesOptions = (subtechniques) =>
+  subtechniques.map((t) =>
+    `{
+  label: i18n.translate(
+    'xpack.securitySolution.detectionEngine.mitreAttackSubtechniques.${camelCase(
+      t.name
+    )}Description', {
+      defaultMessage: '${t.name} (${t.id})'
+  }),
+  id: '${t.id}',
+  name: '${t.name}',
+  reference: '${t.reference}',
+  tactics: '${t.tactics.join()}',
+  techniqueId: '${t.techniqueId}',
   value: '${camelCase(t.name)}'
 }`.replace(/(\r\n|\n|\r)/gm, ' ')
   );
@@ -83,7 +100,7 @@ async function main() {
           ];
         }, []);
       const techniques = mitreData
-        .filter((obj) => obj.type === 'attack-pattern')
+        .filter((obj) => obj.type === 'attack-pattern' && obj.x_mitre_is_subtechnique === false)
         .reduce((acc, item) => {
           let tactics = [];
           const { id, reference } = getIdReference(item.external_references);
@@ -104,6 +121,30 @@ async function main() {
           ];
         }, []);
 
+      const subtechniques = mitreData
+        .filter((obj) => obj.x_mitre_is_subtechnique === true)
+        .reduce((acc, item) => {
+          let tactics = [];
+          const { id, reference } = getIdReference(item.external_references);
+          if (item.kill_chain_phases != null && item.kill_chain_phases.length > 0) {
+            item.kill_chain_phases.forEach((tactic) => {
+              tactics = [...tactics, tactic.phase_name];
+            });
+          }
+          const techniqueId = id.split('.')[0];
+
+          return [
+            ...acc,
+            {
+              name: item.name,
+              id,
+              reference,
+              tactics,
+              techniqueId,
+            },
+          ];
+        }, []);
+
       const body = `/*
           * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
           * or more contributor license agreements. Licensed under the Elastic License;
@@ -112,7 +153,7 @@ async function main() {
 
           import { i18n } from '@kbn/i18n';
 
-          import { MitreTacticsOptions, MitreTechniquesOptions } from './types';
+          import { MitreTacticsOptions, MitreTechniquesOptions, MitreSubtechniquesOptions } from './types';
 
           export const tactics = ${JSON.stringify(tactics, null, 2)};
 
@@ -125,6 +166,13 @@ async function main() {
 
           export const techniquesOptions: MitreTechniquesOptions[] =
             ${JSON.stringify(getTechniquesOptions(techniques), null, 2)
+              .replace(/}"/g, '}')
+              .replace(/"{/g, '{')};
+
+          export const subtechniques = ${JSON.stringify(subtechniques, null, 2)};
+
+          export const subtechniquesOptions: MitreSubtechniquesOptions[] =
+            ${JSON.stringify(getSubtechniquesOptions(subtechniques), null, 2)
               .replace(/}"/g, '}')
               .replace(/"{/g, '{')};
       `;
