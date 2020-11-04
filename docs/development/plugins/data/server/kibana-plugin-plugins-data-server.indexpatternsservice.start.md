@@ -8,7 +8,7 @@
 
 ```typescript
 start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps): {
-        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsCommonService>;
+        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract) => Promise<IndexPatternsCommonService>;
     };
 ```
 
@@ -22,6 +22,6 @@ start(core: CoreStart, { fieldFormats, logger }: IndexPatternsServiceStartDeps):
 <b>Returns:</b>
 
 `{
-        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract, elasticsearchClient: ElasticsearchClient) => Promise<IndexPatternsCommonService>;
+        indexPatternsServiceFactory: (savedObjectsClient: SavedObjectsClientContract) => Promise<IndexPatternsCommonService>;
     }`
 

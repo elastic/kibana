@@ -62,12 +62,10 @@ export async function getFields(
   let indexPatternString = indexPattern;
 
   if (!indexPatternString) {
-    const [{ savedObjects, elasticsearch }, { data }] = await framework.core.getStartServices();
+    const [{ savedObjects }, { data }] = await framework.core.getStartServices();
     const savedObjectsClient = savedObjects.getScopedClient(request);
-    const clusterClient = elasticsearch.client.asScoped(request).asCurrentUser;
     const indexPatternsService = await data.indexPatterns.indexPatternsServiceFactory(
-      savedObjectsClient,
-      clusterClient
+      savedObjectsClient
     );
     const defaultIndexPattern = await indexPatternsService.getDefault();
     indexPatternString = get(defaultIndexPattern, 'title', '');

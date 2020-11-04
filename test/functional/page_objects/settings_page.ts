@@ -350,7 +350,6 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
         }
-        await new Promise((r) => setTimeout(r, 5000 * 60));
         await (await this.getCreateIndexPatternButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
