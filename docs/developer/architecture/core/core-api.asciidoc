@@ -364,7 +364,7 @@ Is not available in the browser. Use {kib-repo}blob/{branch}/docs/development/pl
 
 == Patterns
 [[scoped-services]]
-==== Scoped services
+=== Scoped services
 Whenever Kibana needs to get access to data saved in elasticsearch, it
 should perform a check whether an end-user has access to the data. In
 the legacy platform, Kibana requires binding elasticsearch related API
@@ -413,7 +413,7 @@ handler context] exposed the next scoped *core* services:
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.iuisettingsclient.md[`context.uiSettings.client`]
 |===
 
-===== Declare a custom scoped service
+==== Declare a custom scoped service
 
 Plugins can extend the handler context with a custom API that will be
 available to the plugin itself and all dependent plugins. For example,
