@@ -12,6 +12,7 @@ import { EuiText, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SideNavLink, SideNavItem } from '../../../shared/layout';
+import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { AppLogic } from '../../app_logic';
 import {
   getEngineRoute,
@@ -39,15 +40,39 @@ export const EngineRouter: React.FC = () => {
 
   // TODO: EngineLogic
 
+  const { engineName } = useParams() as { engineName: string };
+  const engineBreadcrumb = [
+    i18n.translate('xpack.enterpriseSearch.appSearch.engines.title', {
+      defaultMessage: 'Engines',
+    }),
+    engineName,
+  ];
+
   return (
     // TODO: Add more routes as we migrate them
     <Switch>
       {canViewEngineAnalytics && (
         <Route path={ENGINE_PATH + ENGINE_ANALYTICS_PATH}>
+          <SetPageChrome
+            trail={[
+              ...engineBreadcrumb,
+              i18n.translate('xpack.enterpriseSearch.appSearch.engine.analytics.title', {
+                defaultMessage: 'Analytics',
+              }),
+            ]}
+          />
           <div data-test-subj="AnalyticsTODO">Just testing right now</div>
         </Route>
       )}
       <Route>
+        <SetPageChrome
+          trail={[
+            ...engineBreadcrumb,
+            i18n.translate('xpack.enterpriseSearch.appSearch.engine.overview.title', {
+              defaultMessage: 'Overview',
+            }),
+          ]}
+        />
         <div data-test-subj="EngineOverviewTODO">Overview</div>
       </Route>
     </Switch>
