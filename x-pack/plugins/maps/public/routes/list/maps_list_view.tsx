@@ -178,7 +178,7 @@ export class MapsListView extends React.Component {
     this.setState({ showDeleteModal: true });
   };
 
-  onTableChange = ({ page, sort }: CriteriaWithPagination<SelectionItem>) => {
+  onTableChange = ({ page, sort }: CriteriaWithPagination<TableRow>) => {
     const { index: pageIndex, size: pageSize } = page;
 
     let { field: sortField, direction: sortDirection } = sort || {};
@@ -401,7 +401,7 @@ export class MapsListView extends React.Component {
     let selection;
     if (!this.state.readOnly) {
       selection = {
-        onSelectionChange: (s: SelectionItem[]) => {
+        onSelectionChange: (s: TableRow[]) => {
           this.setState({
             selectedIds: s.map((item) => {
               return item.id;

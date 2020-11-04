@@ -10,7 +10,6 @@ import { Provider } from 'react-redux';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
-import { i18n } from '@kbn/i18n';
 import {
   Embeddable,
   IContainer,
@@ -29,9 +28,7 @@ import {
   Query,
   RefreshInterval,
 } from '../../../../../src/plugins/data/public';
-import { MapSettings } from '../reducers/map';
 import {
-  addLayerWithoutDataSync,
   replaceLayerList,
   setQuery,
   setRefreshConfig,
@@ -54,7 +51,6 @@ import {
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
-  getLayerListRaw,
 } from '../selectors/map_selectors';
 import {
   APP_ID,
@@ -65,11 +61,9 @@ import {
 import { RenderToolTipContent } from '../classes/tooltips/tooltip_property';
 import { getUiActions, getCoreI18n, getHttp } from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
-import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapContainer } from '../connected_components/map_container';
 import { SavedMap } from '../routes/map_app/saved_map';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
-import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 import { getMapAttributeService } from '../map_attribute_service';
 
 import {
@@ -103,6 +97,7 @@ export class MapEmbeddable
       {
         editApp: APP_ID,
         editable: config.editable,
+        indexPatterns: [],
       },
       parent
     );
@@ -152,8 +147,15 @@ export class MapEmbeddable
       store.dispatch(hideViewControl());
     }
 
-    this._dispatchSetQuery(this.input);
-    this._dispatchSetRefreshConfig(this.input);
+    this._dispatchSetQuery({
+      query: this.input.query,
+      timeRange: this.input.timeRange,
+      filters: this.input.filters,
+      forceRefresh: false,
+    });
+    if (this.input.refreshConfig) {
+      this._dispatchSetRefreshConfig(this.input.refreshConfig);
+    }
 
     this._unsubscribeFromStore = this._savedMap.getStore().subscribe(() => {
       this._handleStoreChanges();
@@ -197,7 +199,7 @@ export class MapEmbeddable
   }
 
   public getDescription() {
-    return this._savedMap.getAttributes()?.description;
+    return this._isInitialized ? this._savedMap.getAttributes().description : '';
   }
 
   public supportedTriggers(): Array<keyof TriggerContextMapping> {
@@ -222,24 +224,32 @@ export class MapEmbeddable
       !_.isEqual(containerState.query, this._prevQuery) ||
       !esFilters.onlyDisabledFiltersChanged(containerState.filters, this._prevFilters)
     ) {
-      this._dispatchSetQuery(containerState);
+      this._dispatchSetQuery({
+        query: containerState.query,
+        timeRange: containerState.timeRange,
+        filters: containerState.filters,
+        forceRefresh: false,
+      });
     }
 
-    if (!_.isEqual(containerState.refreshConfig, this._prevRefreshConfig)) {
-      this._dispatchSetRefreshConfig(containerState);
+    if (
+      containerState.refreshConfig &&
+      !_.isEqual(containerState.refreshConfig, this._prevRefreshConfig)
+    ) {
+      this._dispatchSetRefreshConfig(containerState.refreshConfig);
     }
   }
 
   _dispatchSetQuery({
     query,
     timeRange,
-    filters,
+    filters = [],
     forceRefresh,
   }: {
     query?: Query;
     timeRange?: TimeRange;
-    filters: Filter[];
-    forceRefresh?: boolean;
+    filters?: Filter[];
+    forceRefresh: boolean;
   }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
@@ -254,7 +264,7 @@ export class MapEmbeddable
     );
   }
 
-  _dispatchSetRefreshConfig({ refreshConfig }: Pick<MapEmbeddableInput, 'refreshConfig'>) {
+  _dispatchSetRefreshConfig(refreshConfig: RefreshInterval) {
     this._prevRefreshConfig = refreshConfig;
     this._savedMap.getStore().dispatch(
       setRefreshConfig({
@@ -286,7 +296,7 @@ export class MapEmbeddable
             getActionContext={this.getActionContext}
             renderTooltipContent={this._renderTooltipContent}
             title={this.getTitle()}
-            description={this._description}
+            description={this.getDescription()}
           />
         </I18nContext>
       </Provider>,

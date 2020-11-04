@@ -10,7 +10,7 @@ import { AppMountParameters } from 'kibana/public';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapApp } from './map_app_connector';
 import { SavedMap } from './saved_map';
-import { MapEmbeddableInput } from '../../../embeddable/types';
+import { MapEmbeddableInput } from '../../embeddable/types';
 
 interface Props {
   mapEmbeddableInput?: MapEmbeddableInput;
@@ -21,11 +21,15 @@ interface Props {
   originatingApp?: string;
 }
 
+interface State {
+  savedMap: SavedMap;
+}
+
 // react-router-dom.route "render" method may be called multiple times for the same route.
 // Therefore state can not exist in the "render" closure
 // MapAppContainer exists to wrap MapApp in a component so that a single instance of SavedMap
 // exists per route regardless of how many times render method is called.
-export class MapAppContainer extends Component {
+export class MapAppContainer extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -45,7 +49,6 @@ export class MapAppContainer extends Component {
           savedMap={this.state.savedMap}
           onAppLeave={this.props.onAppLeave}
           setHeaderActionMenu={this.props.setHeaderActionMenu}
-          getAppNameFromId={this.props.stateTransfer.getAppNameFromId}
         />
       </Provider>
     );

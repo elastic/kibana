@@ -11,9 +11,7 @@ import {
   getCoreChrome,
   getMapsCapabilities,
   getInspector,
-  getToasts,
   getCoreI18n,
-  getNavigateToApp,
   getIsAllowByValueEmbeddables,
   getSavedObjectsClient,
   getCoreOverlays,
@@ -25,9 +23,7 @@ import {
   showSaveModal,
 } from '../../../../../../src/plugins/saved_objects/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { goToSpecifiedPath } from '../../render_app';
 import { SavedMap } from './saved_map';
-import { EmbeddableStateTransfer } from '../../../../../../src/plugins/embeddable/public';
 import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
 
 function getSaveAndReturnButtonLabel() {
@@ -47,7 +43,6 @@ export function getTopNavConfig({
   enableFullScreen,
   openMapSettings,
   inspectorAdapters,
-  getAppNameFromId,
 }: {
   savedMap: SavedMap;
   isOpenSettingsDisabled: boolean;
@@ -143,10 +138,7 @@ export function getTopNavConfig({
                     id: props.newCopyOnSave ? undefined : savedMap.getSavedObjectId(),
                     title: props.newTitle,
                     copyOnSave: props.newCopyOnSave,
-                    lastSavedTitle:
-                      savedMap.getSavedObjectId() && savedMap.getAttributes()
-                        ? savedMap.getAttributes().title
-                        : undefined,
+                    lastSavedTitle: savedMap.getSavedObjectId() ? savedMap.getTitle() : '',
                     getEsType: () => MAP_SAVED_OBJECT_TYPE,
                     getDisplayName: getMapEmbeddableDisplayName,
                   },
@@ -173,7 +165,7 @@ export function getTopNavConfig({
             documentInfo={{
               description: mapSavedObjectAttributes.description,
               id: savedMap.getSavedObjectId(),
-              title: mapSavedObjectAttributes.title,
+              title: savedMap.getTitle(),
             }}
             objectType={i18n.translate('xpack.maps.topNav.saveModalType', {
               defaultMessage: 'map',
@@ -194,7 +186,7 @@ export function getTopNavConfig({
         iconType: 'checkInCircleFilled',
         run: () => {
           savedMap.save({
-            newTitle: mapSavedObjectAttributes.title ? mapSavedObjectAttributes.title : '',
+            newTitle: savedMap.getTitle(),
             newDescription: mapSavedObjectAttributes.description
               ? mapSavedObjectAttributes.description
               : '',

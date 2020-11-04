@@ -20,15 +20,9 @@ import {
 } from '../../selectors/map_selectors';
 import { setQuery, setRefreshConfig, enableFullScreen, openMapSettings } from '../../actions';
 import { FLYOUT_STATE } from '../../reducers/ui';
-import { getMapsCapabilities } from '../../kibana_services';
 import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 import { MapStoreState } from '../../reducers/store';
-import {
-  MapRefreshConfig,
-  MapCenterAndZoom,
-  LayerDescriptor,
-} from '../../../common/descriptor_types';
-import { MapSettings } from '../../reducers/map';
+import { MapRefreshConfig } from '../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {

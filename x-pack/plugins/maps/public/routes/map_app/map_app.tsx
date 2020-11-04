@@ -9,7 +9,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
-import { EmbeddableStateTransfer, Adapters } from 'src/plugins/embeddable/public';
+import { Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
 import {
   getData,
@@ -39,13 +39,7 @@ import {
 import { MapContainer } from '../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import { getTopNavConfig } from './top_nav_config';
-import {
-  LayerDescriptor,
-  MapRefreshConfig,
-  MapCenterAndZoom,
-  MapQuery,
-} from '../../../common/descriptor_types';
-import { MapSettings } from '../../reducers/map';
+import { MapRefreshConfig, MapQuery } from '../../../common/descriptor_types';
 import { goToSpecifiedPath } from '../../render_app';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
 import { getExistingMapPath } from '../../../common/constants';
@@ -62,7 +56,6 @@ import {
 interface Props {
   savedMap: SavedMap;
   onAppLeave: AppMountParameters['onAppLeave'];
-  layerListConfigOnly: LayerDescriptor[];
   filters: Filter[];
   isFullScreen: boolean;
   isOpenSettingsDisabled: boolean;
@@ -332,12 +325,12 @@ export class MapApp extends React.Component<Props, State> {
     }
 
     this.props.savedMap.setBreadcrumbs();
-    getCoreChrome().docTitle.change(mapSavedObjectAttributes.title);
+    getCoreChrome().docTitle.change(this.props.savedMap.getTitle());
     const savedObjectId = this.props.savedMap.getSavedObjectId();
     if (savedObjectId) {
       getCoreChrome().recentlyAccessed.add(
         getExistingMapPath(savedObjectId),
-        mapSavedObjectAttributes.title,
+        this.props.savedMap.getTitle(),
         savedObjectId
       );
     }

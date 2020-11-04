@@ -10,5 +10,5 @@ export {
   startGlobalStateSyncing,
   MapsGlobalState,
 } from './global_sync';
-export { AppStateManager } from './app_state_manager';
+export { AppStateManager, MapsAppState } from './app_state_manager';
 export { startAppStateSyncing } from './app_sync';

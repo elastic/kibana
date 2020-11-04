@@ -24,6 +24,7 @@ import {
   IKbnUrlStateStorage,
 } from '../../../../src/plugins/kibana_utils/public';
 import { MapList, MapApp } from './routes';
+import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -84,10 +85,12 @@ export async function renderApp({
 
     let mapEmbeddableInput;
     if (routeProps.match.params.savedMapId) {
-      mapEmbeddableInput = { savedObjectId: routeProps.match.params.savedMapId };
+      mapEmbeddableInput = {
+        savedObjectId: routeProps.match.params.savedMapId,
+      } as MapByReferenceInput;
     }
     if (valueInput) {
-      mapEmbeddableInput = valueInput;
+      mapEmbeddableInput = valueInput as MapByValueInput;
     }
 
     return (

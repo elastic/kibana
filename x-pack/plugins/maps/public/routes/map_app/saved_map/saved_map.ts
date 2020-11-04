@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
@@ -32,15 +33,10 @@ import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_sele
 import { getMapAttributeService } from '../../../map_attribute_service';
 import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
-import {
-  getCoreChrome,
-  getCoreOverlays,
-  getSavedObjectsClient,
-  getToasts,
-} from '../../../kibana_services';
+import { getCoreChrome, getToasts } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
-import { getInitialLayers, getInitialLayersFromUrlParam } from './get_initial_layers';
+import { LayerDescriptor, MapCenterAndZoom } from '../../../../common/descriptor_types';
+import { getInitialLayers } from './get_initial_layers';
 import { copyPersistentState } from '../../../reducers/util';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
@@ -146,7 +142,7 @@ export class SavedMap {
       this._attributes.layerListJSON,
       overrides && overrides.defaultLayers !== undefined ? overrides.defaultLayers : []
     );
-    this._store.dispatch(replaceLayerList(layerList));
+    this._store.dispatch<any>(replaceLayerList(layerList));
     if (overrides && overrides.hiddenLayers !== undefined) {
       this._store.dispatch<any>(setHiddenLayers(overrides.hiddenLayers));
     }
@@ -188,7 +184,7 @@ export class SavedMap {
     }
 
     const breadcrumbs = getBreadcrumbs({
-      title: this._attributes.title,
+      title: this._attributes.title ? this._attributes.title : '',
       getHasUnsavedChanges: this.hasUnsavedChanges,
       originatingApp: this._originatingApp,
       getAppNameFromId: this._getStateTransfer().getAppNameFromId,
@@ -197,7 +193,9 @@ export class SavedMap {
   }
 
   public getSavedObjectId(): string | undefined {
-    return this._mapEmbeddableInput?.savedObjectId;
+    return this._mapEmbeddableInput && 'savedObjectId' in this._mapEmbeddableInput
+      ? (this._mapEmbeddableInput as MapByReferenceInput).savedObjectId
+      : undefined;
   }
 
   public getOriginatingApp(): string | undefined {
@@ -210,6 +208,13 @@ export class SavedMap {
 
   public hasSaveAndReturnConfig() {
     return !!this._originatingApp;
+  }
+
+  public getTitle(): string {
+    if (!this._attributes) {
+      throw new Error('Invalid usage, must await getTitle before calling getAttributes');
+    }
+    return this._attributes.title !== undefined ? this._attributes.title : '';
   }
 
   public getAttributes(): MapSavedObjectAttributes {
@@ -242,11 +247,11 @@ export class SavedMap {
 
     let updatedMapEmbeddableInput: MapEmbeddableInput;
     try {
-      updatedMapEmbeddableInput = await getMapAttributeService().wrapAttributes(
+      updatedMapEmbeddableInput = (await getMapAttributeService().wrapAttributes(
         this._attributes,
         saveByReference,
         newCopyOnSave ? undefined : this._mapEmbeddableInput
-      );
+      )) as MapEmbeddableInput;
     } catch (e) {
       // Error toast displayed by wrapAttributes
       this._attributes.title = prevTitle;
@@ -257,11 +262,11 @@ export class SavedMap {
     if (returnToOrigin) {
       if (!this._originatingApp) {
         getToasts().addDanger({
-          title: i18n.translate('xpack.maps.topNav.saveErrorMessage', {
+          title: i18n.translate('xpack.maps.topNav.saveErrorTitle', {
             defaultMessage: `Error saving '{title}'`,
             values: { title: newTitle },
           }),
-          text: i18n.translate('xpack.maps.topNav.saveErrorMessage', {
+          text: i18n.translate('xpack.maps.topNav.saveErrorText', {
             defaultMessage: 'Unable to return to app without an originating app',
           }),
         });
