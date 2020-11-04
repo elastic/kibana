@@ -24,13 +24,16 @@ import {
   MapElements,
   NextLinkReturnType,
 } from './types';
+import type { MlClient } from '../../lib/ml_client';
 
 export class AnalyticsManager {
   private _client: IScopedClusterClient['asInternalUser'];
+  private _mlClient: MlClient;
   public _inferenceModels: any; // TODO: update types
 
-  constructor(client: IScopedClusterClient['asInternalUser']) {
+  constructor(mlClient: MlClient, client: IScopedClusterClient['asInternalUser']) {
     this._client = client;
+    this._mlClient = mlClient;
     this._inferenceModels = [];
   }
 
@@ -64,7 +67,7 @@ export class AnalyticsManager {
   }
   // @ts-ignore // TODO: is this needed?
   private async getAnalyticsModelData(modelId: string) {
-    const resp = await this._client.ml.getTrainedModels({
+    const resp = await this._mlClient.getTrainedModels({
       model_id: modelId,
     });
     const modelData = resp?.body?.trained_model_configs[0];
@@ -72,13 +75,13 @@ export class AnalyticsManager {
   }
 
   private async getAnalyticsModels() {
-    const resp = await this._client.ml.getTrainedModels();
+    const resp = await this._mlClient.getTrainedModels();
     const models = resp?.body?.trained_model_configs;
     return models;
   }
 
   private async getAnalyticsJobData(analyticsId: string) {
-    const resp = await this._client.ml.getDataFrameAnalytics({
+    const resp = await this._mlClient.getDataFrameAnalytics({
       id: analyticsId,
     });
     const jobData = resp?.body?.data_frame_analytics[0];
@@ -306,7 +309,7 @@ export class AnalyticsManager {
 
       // fetch all jobs associated with root transform if defined, otherwise check root index
       if (rootTransform !== undefined || rootIndexPattern !== undefined) {
-        const analyticsJobs = await this._client.ml.getDataFrameAnalytics();
+        const analyticsJobs = await this._mlClient.getDataFrameAnalytics();
         const jobs = analyticsJobs?.body?.data_frame_analytics || [];
         const comparator = rootTransform !== undefined ? rootTransform : rootIndexPattern;
 
@@ -369,7 +372,7 @@ export class AnalyticsManager {
         ? jobData?.dest?.index[0]
         : jobData?.dest?.index;
       const destIndexNodeId = `${destIndex}-${JOB_MAP_NODE_TYPES.INDEX_PATTERN}`;
-      const analyticsJobs = await this._client.ml.getDataFrameAnalytics();
+      const analyticsJobs = await this._mlClient.getDataFrameAnalytics();
       const jobs = analyticsJobs?.body?.data_frame_analytics || [];
 
       // Fetch inference model for incoming job id and add node and edge

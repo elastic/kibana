@@ -8,8 +8,6 @@ import React, { FC, Fragment, useMemo, useState } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { parse } from 'query-string';
-import { decode } from 'rison-node';
 
 import {
   EuiBetaBadge,
@@ -24,6 +22,7 @@ import {
 } from '@elastic/eui';
 
 import { useLocation } from 'react-router-dom';
+import { useUrlState } from '../../../util/url_state';
 import { NavigationMenu } from '../../../components/navigation_menu';
 import { DatePickerWrapper } from '../../../components/navigation_menu/date_picker_wrapper';
 import { DataFrameAnalyticsList } from './components/analytics_list';
@@ -37,27 +36,13 @@ import { JobMap } from '../job_map';
 
 export const Page: FC = () => {
   const [blockRefresh, setBlockRefresh] = useState(false);
+  const [globalState] = useUrlState('_g');
 
   useRefreshInterval(setBlockRefresh);
 
   const location = useLocation();
   const selectedTabId = useMemo(() => location.pathname.split('/').pop(), [location]);
-  const mapJobId = useMemo(() => {
-    const { _g }: Record<string, any> = parse(location.search, { sort: false });
-    let jobId: string | undefined;
-
-    if (_g !== undefined) {
-      let globalState: any = null;
-      try {
-        globalState = decode(_g);
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Could not parse global state');
-      }
-      jobId = globalState.ml?.jobId;
-    }
-    return jobId;
-  }, [location]);
+  const mapJobId = globalState?.ml?.jobId;
 
   return (
     <Fragment>

@@ -27,18 +27,19 @@ interface MapButtonProps {
 }
 
 export const MapButton: FC<MapButtonProps> = ({ item }) => {
-  const toolTipContent = i18n.translate(
-    'xpack.ml.dataframe.analyticsList.mapActionDisabledTooltipContent',
-    {
-      defaultMessage: 'Unknown analysis type.',
-    }
-  );
   const disabled =
     !isRegressionAnalysis(item.config.analysis) &&
     !isOutlierAnalysis(item.config.analysis) &&
     !isClassificationAnalysis(item.config.analysis);
 
   if (disabled) {
+    const toolTipContent = i18n.translate(
+      'xpack.ml.dataframe.analyticsList.mapActionDisabledTooltipContent',
+      {
+        defaultMessage: 'Unknown analysis type.',
+      }
+    );
+
     return (
       <EuiToolTip position="top" content={toolTipContent}>
         <>{mapActionButtonText}</>

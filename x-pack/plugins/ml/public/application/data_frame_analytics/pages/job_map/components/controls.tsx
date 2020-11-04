@@ -6,7 +6,7 @@
 
 import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
 import cytoscape from 'cytoscape';
-import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButtonEmpty,
   EuiDescriptionList,
@@ -19,6 +19,7 @@ import {
   EuiPortal,
   EuiTitle,
 } from '@elastic/eui';
+import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { CytoscapeContext } from './cytoscape';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 // import { DeleteButton } from './delete_button';
@@ -29,13 +30,7 @@ interface Props {
   getNodeData: any;
 }
 
-// TODO move list items to shared place as we use them in the details bit of the wizard
-export interface ListItems {
-  title: string;
-  description: string | JSX.Element;
-}
-
-function getListItems(details: object): ListItems[] {
+function getListItems(details: object): EuiDescriptionListProps['listItems'] {
   return Object.entries(details).map(([key, value]) => ({
     title: key,
     description: typeof value === 'object' ? JSON.stringify(value, null, 2) : value,
@@ -44,7 +39,7 @@ function getListItems(details: object): ListItems[] {
 
 export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
   const [showFlyout, setShowFlyout] = useState<boolean>(false);
-  const [selectedNode, setSelectedNode] = useState<cytoscape.NodeSingular | undefined>(undefined);
+  const [selectedNode, setSelectedNode] = useState<cytoscape.NodeSingular | undefined>();
 
   const cy = useContext(CytoscapeContext);
   const deselect = useCallback(() => {
@@ -69,14 +64,12 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
     if (cy) {
       cy.on('select', 'node', selectHandler);
       cy.on('unselect', 'node', deselect);
-      // cy.on('data viewport', deselect);
     }
 
     return () => {
       if (cy) {
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', deselect);
-        // cy.removeListener('data viewport', undefined, deselect);
       }
     };
   }, [cy, deselect]);
@@ -94,9 +87,10 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
         }}
         iconType="branch"
       >
-        {i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.fetchRelatedNodesButton', {
-          defaultMessage: 'Fetch related nodes',
-        })}
+        <FormattedMessage
+          id="xpack.ml.dataframe.analyticsMap.flyout.fetchRelatedNodesButton"
+          defaultMessage="Fetch related nodes"
+        />
       </EuiButtonEmpty>
     ) : null;
 
@@ -113,10 +107,11 @@ export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {
             <EuiFlexItem grow={false}>
               <EuiTitle size="s">
                 <h3 data-test-subj="mlDataFrameAnalyticsNodeDetailsTitle">
-                  {i18n.translate('xpack.ml.dataframe.analyticsMap.flyoutHeaderTitle', {
-                    defaultMessage: 'Details for {type} {id}',
-                    values: { id: nodeLabel, type: nodeType },
-                  })}
+                  <FormattedMessage
+                    id="xpack.ml.dataframe.analyticsMap.flyoutHeaderTitle"
+                    defaultMessage="Details for {type} {id}"
+                    values={{ id: nodeLabel, type: nodeType }}
+                  />
                 </h3>
               </EuiTitle>
             </EuiFlexItem>

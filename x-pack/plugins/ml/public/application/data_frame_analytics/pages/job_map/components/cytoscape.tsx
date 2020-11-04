@@ -30,7 +30,7 @@ interface CytoscapeProps {
 }
 
 function useCytoscape(options: cytoscape.CytoscapeOptions) {
-  const [cy, setCy] = useState<cytoscape.Core | undefined>(undefined);
+  const [cy, setCy] = useState<cytoscape.Core | undefined>();
   const ref = useRef(null);
 
   useEffect(() => {

@@ -24,6 +24,7 @@ import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manag
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
+import type { MlClient } from '../lib/ml_client';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
@@ -35,13 +36,13 @@ function deleteDestIndexPatternById(context: RequestHandlerContext, indexPattern
   return iph.deleteIndexPatternById(indexPatternId);
 }
 
-function getAnalyticsMap(client: IScopedClusterClient, analyticsId: string) {
-  const analytics = new AnalyticsManager(client.asInternalUser);
+function getAnalyticsMap(mlClient: MlClient, client: IScopedClusterClient, analyticsId: string) {
+  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
   return analytics.getAnalyticsMap(analyticsId);
 }
 
-function getExtendedMap(client: IScopedClusterClient, analyticsId: string) {
-  const analytics = new AnalyticsManager(client.asInternalUser);
+function getExtendedMap(mlClient: MlClient, client: IScopedClusterClient, analyticsId: string) {
+  const analytics = new AnalyticsManager(mlClient, client.asInternalUser);
   return analytics.extendAnalyticsMapForAnalyticsJob(analyticsId);
 }
 
@@ -634,6 +635,7 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         const treatAsRoot = request.query?.treatAsRoot;
         const caller =
           treatAsRoot === 'true' || treatAsRoot === true ? getExtendedMap : getAnalyticsMap;
+
         const results = await caller(mlClient, client, analyticsId);
 
         return response.ok({
@@ -644,5 +646,4 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
       }
     })
   );
-}
 }

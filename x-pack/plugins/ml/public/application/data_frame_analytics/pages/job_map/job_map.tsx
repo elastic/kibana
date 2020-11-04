@@ -13,8 +13,7 @@ import { uniqWith, isEqual } from 'lodash';
 
 import { Cytoscape, Controls, JobMapLegend } from './components';
 import { ml } from '../../../services/ml_api_service';
-// TODO: don't use dep cache - switch to hook
-import { getToastNotifications } from '../../../util/dependency_cache';
+import { useMlKibana } from '../../../contexts/kibana';
 import { useRefDimensions } from './components/use_ref_dimensions';
 
 const cytoscapeDivStyle = {
@@ -53,10 +52,13 @@ interface Props {
 }
 
 export const JobMap: FC<Props> = ({ analyticsId }) => {
-  const toastNotifications = getToastNotifications();
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([]);
   const [nodeDetails, setNodeDetails] = useState({});
   const [error, setError] = useState(undefined);
+
+  const {
+    services: { notifications },
+  } = useMlKibana();
 
   const getData = async (id?: string) => {
     const treatAsRoot = id !== undefined;
@@ -75,7 +77,7 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
     }
 
     if (nodeElements && nodeElements.length === 0) {
-      toastNotifications.add(
+      notifications.toasts.add(
         i18n.translate('xpack.ml.dataframe.analyticsMap.emptyResponseMessage', {
           defaultMessage: 'No related analytics jobs found for {id}.',
           values: { id: idToUse },
@@ -100,7 +102,7 @@ export const JobMap: FC<Props> = ({ analyticsId }) => {
   }, [analyticsId]);
 
   if (error !== undefined) {
-    toastNotifications.addDanger(
+    notifications.toasts.addDanger(
       i18n.translate('xpack.ml.dataframe.analyticsMap.fetchDataErrorMessage', {
         defaultMessage: 'Unable to fetch some data. An error occurred: {error}',
         values: { error: JSON.stringify(error) },
