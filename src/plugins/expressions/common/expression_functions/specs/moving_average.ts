@@ -27,7 +27,7 @@ export interface MovingAverageArgs {
   inputColumnId: string;
   outputColumnId: string;
   outputColumnName?: string;
-  window?: number;
+  window: number;
 }
 
 export type ExpressionFunctionMovingAverage = ExpressionFunctionDefinition<
@@ -107,12 +107,11 @@ export const movingAverage: ExpressionFunctionMovingAverage = {
         defaultMessage: 'The size of window to "slide" across the histogram.',
       }),
       types: ['number'],
-      required: false,
       default: 5,
     },
   },
 
-  fn(input, { by, inputColumnId, outputColumnId, outputColumnName, window = 5 }) {
+  fn(input, { by, inputColumnId, outputColumnId, outputColumnName, window }) {
     const resultColumns = buildResultColumns(
       input,
       outputColumnId,

@@ -22,6 +22,8 @@ import { movingAverage, MovingAverageArgs } from '../moving_average';
 import { ExecutionContext } from '../../../execution/types';
 import { Datatable } from '../../../expression_types/specs/datatable';
 
+const defaultArgs = { window: 5, inputColumnId: 'val', outputColumnId: 'output' };
+
 describe('interpreter/functions#movingAverage', () => {
   const fn = functionWrapper(movingAverage);
   const runFn = (input: Datatable, args: MovingAverageArgs) =>
@@ -34,7 +36,7 @@ describe('interpreter/functions#movingAverage', () => {
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
         rows: [{ val: 5 }, { val: 7 }, { val: 3 }, { val: 2 }],
       },
-      { inputColumnId: 'val', outputColumnId: 'output' }
+      defaultArgs
     );
     expect(result.columns).toContainEqual({
       id: 'output',
@@ -66,7 +68,7 @@ describe('interpreter/functions#movingAverage', () => {
           { val: 8 },
         ],
       },
-      { inputColumnId: 'val', outputColumnId: 'output' }
+      defaultArgs
     );
     expect(result.columns).toContainEqual({
       id: 'output',
@@ -106,7 +108,7 @@ describe('interpreter/functions#movingAverage', () => {
           { val: 0 },
         ],
       },
-      { inputColumnId: 'val', outputColumnId: 'output', window: 3 }
+      { ...defaultArgs, window: 3 }
     );
     expect(result.rows.map((row) => row.output)).toEqual([
       undefined,
@@ -143,7 +145,7 @@ describe('interpreter/functions#movingAverage', () => {
           { val: 8, split: 'B' },
         ],
       },
-      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+      { ...defaultArgs, by: ['split'] }
     );
 
     expect(result.rows.map((row) => row.output)).toEqual([
@@ -177,7 +179,7 @@ describe('interpreter/functions#movingAverage', () => {
           { val: 8, split: 'B' },
         ],
       },
-      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+      { ...defaultArgs, by: ['split'] }
     );
     expect(result.rows.map((row) => row.output)).toEqual([
       undefined,
@@ -211,7 +213,7 @@ describe('interpreter/functions#movingAverage', () => {
           { val: 9, split: '' },
         ],
       },
-      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+      { ...defaultArgs, by: ['split'] }
     );
     expect(result.rows.map((row) => row.output)).toEqual([
       undefined,
@@ -246,7 +248,7 @@ describe('interpreter/functions#movingAverage', () => {
           { val: 8, split: 'B', split2: 'D' },
         ],
       },
-      { inputColumnId: 'val', outputColumnId: 'output', by: ['split', 'split2'] }
+      { ...defaultArgs, by: ['split', 'split2'] }
     );
     expect(result.rows.map((row) => row.output)).toEqual([
       undefined,
@@ -275,7 +277,7 @@ describe('interpreter/functions#movingAverage', () => {
           { val: 11, split: '5' },
         ],
       },
-      { inputColumnId: 'val', outputColumnId: 'output', by: ['split'] }
+      { ...defaultArgs, by: ['split'] }
     );
 
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 1, undefined, 10]);
@@ -288,7 +290,7 @@ describe('interpreter/functions#movingAverage', () => {
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
         rows: [{ val: 5 }, { val: '7' }, { val: '3' }, { val: 2 }],
       },
-      { inputColumnId: 'val', outputColumnId: 'output' }
+      defaultArgs
     );
     expect(result.rows.map((row) => row.output)).toEqual([
       undefined,
@@ -305,7 +307,7 @@ describe('interpreter/functions#movingAverage', () => {
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
         rows: [{ val: 5 }, { val: '7' }, { val: {} }, { val: 3 }, { val: 5 }],
       },
-      { inputColumnId: 'val', outputColumnId: 'output' }
+      defaultArgs
     );
     expect(result.rows.map((row) => row.output)).toEqual([undefined, 5, (5 + 7) / 2, NaN, NaN]);
   });
@@ -333,7 +335,7 @@ describe('interpreter/functions#movingAverage', () => {
         ],
         rows: [{ val: 5 }],
       },
-      { inputColumnId: 'val', outputColumnId: 'output' }
+      defaultArgs
     );
     expect(result.columns).toContainEqual({
       id: 'output',
@@ -367,7 +369,7 @@ describe('interpreter/functions#movingAverage', () => {
         ],
         rows: [{ val: 5 }],
       },
-      { inputColumnId: 'val', outputColumnId: 'output', outputColumnName: 'Output name' }
+      { ...defaultArgs, outputColumnName: 'Output name' }
     );
     expect(result.columns).toContainEqual({
       id: 'output',
@@ -390,7 +392,9 @@ describe('interpreter/functions#movingAverage', () => {
       ],
       rows: [{ val: 5 }],
     };
-    expect(runFn(input, { inputColumnId: 'nonexisting', outputColumnId: 'output' })).toBe(input);
+    expect(
+      runFn(input, { ...defaultArgs, inputColumnId: 'nonexisting', outputColumnId: 'output' })
+    ).toBe(input);
   });
 
   it('throws an error if output column exists already', () => {
@@ -409,7 +413,7 @@ describe('interpreter/functions#movingAverage', () => {
           ],
           rows: [{ val: 5 }],
         },
-        { inputColumnId: 'val', outputColumnId: 'val' }
+        { ...defaultArgs, inputColumnId: 'val', outputColumnId: 'val' }
       )
     ).toThrow();
   });
