@@ -8,9 +8,9 @@ import * as t from 'io-ts';
 
 import { listArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
 import {
-  threatQueryOrUndefined,
-  threatMappingOrUndefined,
-  threatLanguageOrUndefined,
+  threat_mapping,
+  threat_index,
+  threat_query,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 import {
   author,
@@ -23,8 +23,6 @@ import {
   rule_id,
   immutable,
   indexOrUndefined,
-  language,
-  languageOrUndefined,
   licenseOrUndefined,
   output_index,
   timelineIdOrUndefined,
@@ -57,6 +55,7 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
 
+const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(
   t.type({
     author,
@@ -100,21 +99,22 @@ const eqlSpecificRuleParams = t.type({
 
 const threatSpecificRuleParams = t.type({
   type: t.literal('threat_match'),
-  language,
+  language: nonEqlLanguages,
   index: indexOrUndefined,
   query,
   filters: filtersOrUndefined,
   savedId: savedIdOrUndefined,
   threatFilters: filtersOrUndefined,
-  threatQuery: threatQueryOrUndefined,
-  threatMapping: threatMappingOrUndefined,
-  threatLanguage: threatLanguageOrUndefined,
+  threatQuery: threat_query,
+  threatMapping: threat_mapping,
+  threatLanguage: t.union([nonEqlLanguages, t.undefined]),
+  threatIndex: threat_index,
 });
 
 const querySpecificRuleParams = t.exact(
   t.type({
     type: t.literal('query'),
-    language,
+    language: nonEqlLanguages,
     index: indexOrUndefined,
     query,
     filters: filtersOrUndefined,
@@ -126,7 +126,7 @@ const savedQuerySpecificRuleParams = t.type({
   type: t.literal('saved_query'),
   // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
   // if the saved object gets deleted for some reason
-  language: languageOrUndefined,
+  language: t.union([nonEqlLanguages, t.undefined]),
   index: indexOrUndefined,
   query: queryOrUndefined,
   filters: filtersOrUndefined,
@@ -135,7 +135,7 @@ const savedQuerySpecificRuleParams = t.type({
 
 const thresholdSpecificRuleParams = t.type({
   type: t.literal('threshold'),
-  language,
+  language: nonEqlLanguages,
   index: indexOrUndefined,
   query,
   filters: filtersOrUndefined,

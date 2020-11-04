@@ -6,6 +6,7 @@
 
 import expect from '@kbn/expect';
 
+import { FullCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -19,7 +20,6 @@ import {
   waitForRuleSuccess,
   createRule,
 } from '../../utils';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         // create a rule with the action attached and a meta field
-        const ruleWithAction: CreateRulesSchema = {
+        const ruleWithAction: FullCreateSchema = {
           ...getRuleWithWebHookAction(hookAction.id),
           meta: {},
         };

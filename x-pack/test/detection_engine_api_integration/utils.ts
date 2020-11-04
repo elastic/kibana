@@ -9,6 +9,7 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
+import { FullCreateSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
 import {
   CreateExceptionListItemSchema,
@@ -21,7 +22,6 @@ import {
   Status,
   SignalIds,
 } from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
-import { CreateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/create_rules_schema';
 import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
 import {
@@ -74,7 +74,7 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
  * @param ruleId
  * @param enabled Enables the rule on creation or not. Defaulted to false to enable it on import
  */
-export const getSimpleRule = (ruleId = 'rule-1', enabled = true): CreateRulesSchema => ({
+export const getSimpleRule = (ruleId = 'rule-1', enabled = true): FullCreateSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
   enabled,
@@ -105,7 +105,7 @@ export const getSimpleRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
  * This is a representative ML rule payload as expected by the server
  * @param ruleId
  */
-export const getSimpleMlRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
+export const getSimpleMlRule = (ruleId = 'rule-1'): FullCreateSchema => ({
   name: 'Simple ML Rule',
   description: 'Simple Machine Learning Rule',
   anomaly_threshold: 44,
@@ -172,7 +172,7 @@ export const getSignalStatusEmptyResponse = () => ({
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  */
-export const getSimpleRuleWithoutRuleId = (): CreateRulesSchema => {
+export const getSimpleRuleWithoutRuleId = (): FullCreateSchema => {
   const simpleRule = getSimpleRule();
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...ruleWithoutId } = simpleRule;
@@ -371,7 +371,7 @@ export const getSimpleRuleAsNdjson = (ruleIds: string[], enabled = false): Buffe
  * testing upload features.
  * @param rule The rule to convert to ndjson
  */
-export const ruleToNdjson = (rule: Partial<CreateRulesSchema>): Buffer => {
+export const ruleToNdjson = (rule: FullCreateSchema): Buffer => {
   const stringified = JSON.stringify(rule);
   return Buffer.from(`${stringified}\n`);
 };
@@ -568,7 +568,7 @@ export const getWebHookAction = () => ({
   name: 'Some connector',
 });
 
-export const getRuleWithWebHookAction = (id: string): CreateRulesSchema => ({
+export const getRuleWithWebHookAction = (id: string): FullCreateSchema => ({
   ...getSimpleRule(),
   throttle: 'rule',
   actions: [
@@ -711,7 +711,7 @@ export const countDownTest = async (
  */
 export const createRule = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  rule: CreateRulesSchema
+  rule: FullCreateSchema
 ): Promise<RulesSchema> => {
   const { body } = await supertest
     .post(DETECTION_ENGINE_RULES_URL)

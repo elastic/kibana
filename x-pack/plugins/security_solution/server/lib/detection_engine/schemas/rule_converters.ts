@@ -25,7 +25,7 @@ export const typeSpecificSnakeToCamel = (
     case 'threat_match': {
       return {
         type: params.type,
-        language: params.language,
+        language: params.language ?? 'kuery',
         index: params.index,
         query: params.query,
         filters: params.filters,
@@ -34,12 +34,13 @@ export const typeSpecificSnakeToCamel = (
         threatQuery: params.threat_query,
         threatMapping: params.threat_mapping,
         threatLanguage: params.threat_language,
+        threatIndex: params.threat_index,
       };
     }
     case 'query': {
       return {
         type: params.type,
-        language: params.language,
+        language: params.language ?? 'kuery',
         index: params.index,
         query: params.query,
         filters: params.filters,
@@ -59,7 +60,7 @@ export const typeSpecificSnakeToCamel = (
     case 'threshold': {
       return {
         type: params.type,
-        language: params.language,
+        language: params.language ?? 'kuery',
         index: params.index,
         query: params.query,
         filters: params.filters,

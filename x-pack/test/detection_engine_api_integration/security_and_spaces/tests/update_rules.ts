@@ -21,6 +21,7 @@ import {
   getSimpleRuleUpdate,
   getSimpleMlRuleUpdate,
   createRule,
+  getSimpleRule,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -40,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a single rule property of name using a rule_id', async () => {
-        await createRule(supertest, getSimpleRuleUpdate('rule-1'));
+        await createRule(supertest, getSimpleRule('rule-1'));
 
         // update a simple rule's name
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -84,7 +85,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a single rule property of name using an auto-generated rule_id', async () => {
-        const rule = getSimpleRuleUpdate('rule-1');
+        const rule = getSimpleRule('rule-1');
         delete rule.rule_id;
         const createRuleBody = await createRule(supertest, rule);
 
@@ -108,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should update a single rule property of name using the auto-generated id', async () => {
-        const createdBody = await createRule(supertest, getSimpleRuleUpdate('rule-1'));
+        const createdBody = await createRule(supertest, getSimpleRule('rule-1'));
 
         // update a simple rule's name
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -130,7 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change the version of a rule when it updates enabled and another property', async () => {
-        await createRule(supertest, getSimpleRuleUpdate('rule-1'));
+        await createRule(supertest, getSimpleRule('rule-1'));
 
         // update a simple rule's enabled to false and another property
         const updatedRule = getSimpleRuleUpdate('rule-1');
@@ -153,7 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should change other properties when it does updates and effectively delete them such as timeline_title', async () => {
-        await createRule(supertest, getSimpleRuleUpdate('rule-1'));
+        await createRule(supertest, getSimpleRule('rule-1'));
 
         const ruleUpdate = getSimpleRuleUpdate('rule-1');
         ruleUpdate.timeline_title = 'some title';

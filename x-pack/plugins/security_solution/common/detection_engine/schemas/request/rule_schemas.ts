@@ -11,7 +11,7 @@ import {
   threat_filters,
   threat_query,
   threat_mapping,
-  threat_language,
+  threat_index,
 } from '../types/threat_mapping';
 import {
   id,
@@ -36,7 +36,6 @@ import {
   rule_id,
   immutable,
   indexOrUndefined,
-  language,
   output_index,
   query,
   filtersOrUndefined,
@@ -186,8 +185,10 @@ const responseEqlParams = responseSchema(eqlRequiredFields, eqlOptionalFields, {
 
 const threatMatchRequiredFields = {
   type: t.literal('threat_match'),
-  language: t.keyof({ kuery: null, lucene: null }),
   query,
+  threat_query,
+  threat_mapping,
+  threat_index,
 };
 
 const threatMatchOptionalFields = {
@@ -195,30 +196,31 @@ const threatMatchOptionalFields = {
   filters,
   saved_id,
   threat_filters,
-  threat_query,
-  threat_mapping,
-  threat_language,
+  threat_language: t.keyof({ kuery: null, lucene: null }),
+};
+
+const threatMatchDefaultableFields = {
+  language: t.keyof({ kuery: null, lucene: null }),
 };
 
 const createUpdateThreatMatchParams = createUpdateSchema(
   threatMatchRequiredFields,
   threatMatchOptionalFields,
-  {}
+  threatMatchDefaultableFields
 );
 const patchThreatMatchParams = patchSchema(
   threatMatchRequiredFields,
   threatMatchOptionalFields,
-  {}
+  threatMatchDefaultableFields
 );
 const responseThreatMatchParams = responseSchema(
   threatMatchRequiredFields,
   threatMatchOptionalFields,
-  {}
+  threatMatchDefaultableFields
 );
 
 const queryRequiredFields = {
   type: t.literal('query'),
-  language: t.keyof({ kuery: null, lucene: null }),
   query,
 };
 
@@ -228,9 +230,25 @@ const queryOptionalFields = {
   saved_id,
 };
 
-const createUpdateQueryParams = createUpdateSchema(queryRequiredFields, queryOptionalFields, {});
-const patchQueryParams = patchSchema(queryRequiredFields, queryOptionalFields, {});
-const responseQueryParams = responseSchema(queryRequiredFields, queryOptionalFields, {});
+const queryDefaultableFields = {
+  language: t.keyof({ kuery: null, lucene: null }),
+};
+
+const createUpdateQueryParams = createUpdateSchema(
+  queryRequiredFields,
+  queryOptionalFields,
+  queryDefaultableFields
+);
+const patchQueryParams = patchSchema(
+  queryRequiredFields,
+  queryOptionalFields,
+  queryDefaultableFields
+);
+const responseQueryParams = responseSchema(
+  queryRequiredFields,
+  queryOptionalFields,
+  queryDefaultableFields
+);
 
 const savedQueryRequiredFields = {
   type: t.literal('saved_query'),
@@ -240,27 +258,33 @@ const savedQueryRequiredFields = {
 const savedQueryOptionalFields = {
   // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
   // if the saved object gets deleted for some reason
-  language,
   index,
   query,
   filters,
 };
 
+const savedQueryDefaultableFields = {
+  language: t.keyof({ kuery: null, lucene: null }),
+};
+
 const createUpdateSavedQueryParams = createUpdateSchema(
   savedQueryRequiredFields,
   savedQueryOptionalFields,
-  {}
+  savedQueryDefaultableFields
 );
-const patchSavedQueryParams = patchSchema(savedQueryRequiredFields, savedQueryOptionalFields, {});
+const patchSavedQueryParams = patchSchema(
+  savedQueryRequiredFields,
+  savedQueryOptionalFields,
+  savedQueryDefaultableFields
+);
 const responseSavedQueryParams = responseSchema(
   savedQueryRequiredFields,
   savedQueryOptionalFields,
-  {}
+  savedQueryDefaultableFields
 );
 
 const thresholdRequiredFields = {
   type: t.literal('threshold'),
-  language,
   query,
   threshold,
 };
@@ -271,16 +295,24 @@ const thresholdOptionalFields = {
   saved_id: savedIdOrUndefined,
 };
 
+const thresholdDefaultableFields = {
+  language: t.keyof({ kuery: null, lucene: null }),
+};
+
 const createUpdateThresholdParams = createUpdateSchema(
   thresholdRequiredFields,
   thresholdOptionalFields,
-  {}
+  thresholdDefaultableFields
 );
-const patchThresholdParams = patchSchema(thresholdRequiredFields, thresholdOptionalFields, {});
+const patchThresholdParams = patchSchema(
+  thresholdRequiredFields,
+  thresholdOptionalFields,
+  thresholdDefaultableFields
+);
 const responseThresholdParams = responseSchema(
   thresholdRequiredFields,
   thresholdOptionalFields,
-  {}
+  thresholdDefaultableFields
 );
 
 const machineLearningRequiredFields = {

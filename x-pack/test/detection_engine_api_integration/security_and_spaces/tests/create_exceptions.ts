@@ -7,10 +7,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from '@kbn/expect';
+import { FullCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
 import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
 import { CreateExceptionListItemSchema } from '../../../../plugins/lists/common';
 import { EXCEPTION_LIST_URL } from '../../../../plugins/lists/common/constants';
@@ -62,7 +62,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getCreateExceptionListMinimalSchemaMock())
           .expect(200);
 
-        const ruleWithException: CreateRulesSchema = {
+        const ruleWithException: FullCreateSchema = {
           ...getSimpleRule(),
           exceptions_list: [
             {
@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send(getCreateExceptionListMinimalSchemaMock())
           .expect(200);
 
-        const ruleWithException: CreateRulesSchema = {
+        const ruleWithException: FullCreateSchema = {
           ...getSimpleRule(),
           exceptions_list: [
             {
@@ -421,8 +421,15 @@ export default ({ getService }: FtrProviderContext) => {
           };
           await createExceptionListItem(supertest, exceptionListItem);
 
-          const ruleWithException: CreateRulesSchema = {
-            ...getSimpleRule(),
+          const ruleWithException: FullCreateSchema = {
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-1',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'query',
             from: '1900-01-01T00:00:00.000Z',
             query: 'host.name: "suricata-sensor-amsterdam"',
             exceptions_list: [
@@ -459,10 +466,17 @@ export default ({ getService }: FtrProviderContext) => {
           };
           await createExceptionListItem(supertest, exceptionListItem);
 
-          const ruleWithException: CreateRulesSchema = {
-            ...getSimpleRule(),
+          const ruleWithException: FullCreateSchema = {
+            name: 'Simple Rule Query',
+            description: 'Simple Rule Query',
+            enabled: true,
+            risk_score: 1,
+            rule_id: 'rule-1',
+            severity: 'high',
+            index: ['auditbeat-*'],
+            type: 'query',
             from: '1900-01-01T00:00:00.000Z',
-            query: 'host.name: "suricata-sensor-amsterdam"', // this matches all the exceptions we should exclude
+            query: 'host.name: "suricata-sensor-amsterdam"',
             exceptions_list: [
               {
                 id,
