@@ -458,7 +458,7 @@ exports[`Flyout legacy conflicts should allow conflict resolution 1`] = `
 </EuiFlyout>
 `;
 
-exports[`Flyout legacy conflicts should handle errors 1`] = `
+exports[`Flyout legacy conflicts should handle errors 2`] = `
 Array [
   <EuiCallOut
     color="warning"
@@ -522,8 +522,10 @@ Array [
       />
     }
   >
-    <p>
-      foobar
+    <p
+      data-test-subj="importSavedObjectsErrorText"
+    >
+      The file could not be processed due to error: "foobar"
     </p>
   </EuiCallOut>,
 ]
@@ -567,6 +569,7 @@ exports[`Flyout should render import step 1`] = `
         labelType="label"
       >
         <EuiFilePicker
+          accept=".ndjson, .json"
           compressed={false}
           display="large"
           fullWidth={true}
