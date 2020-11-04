@@ -159,8 +159,12 @@ export function processDataForFocusAnomalies(
         if (record.actual !== undefined) {
           // If cannot match chart point for anomaly time
           // substitute the value with the record's actual so it won't plot as null/0
-          if (chartPoint.value === null || record.function === 'metric') {
+          if (chartPoint.value === null) {
             chartPoint.value = record.actual;
+          }
+
+          if (record.function === 'metric') {
+            chartPoint.value = Array.isArray(record.actual) ? record.actual[0] : record.actual;
           }
 
           chartPoint.actual = record.actual;
