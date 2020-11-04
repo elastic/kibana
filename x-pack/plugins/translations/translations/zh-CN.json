@@ -1280,7 +1280,6 @@
     "data.search.aggs.metrics.uniqueCountTitle": "唯一计数",
     "data.search.aggs.otherBucket.labelForMissingValuesLabel": "缺失值的标签",
     "data.search.aggs.otherBucket.labelForOtherBucketLabel": "其他存储桶的标签",
-    "data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage": "已保存的字段“{fieldParameter}”无效，无法用于“{aggType}”聚合。请选择新字段。",
     "data.search.aggs.paramTypes.field.requiredFieldParameterErrorMessage": "{fieldParameter} 是必需字段",
     "data.search.aggs.percentageOfLabel": "{label} 的百分比",
     "data.search.aggs.string.customLabel": "定制标签",
