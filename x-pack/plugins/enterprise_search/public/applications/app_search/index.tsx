@@ -33,7 +33,7 @@ import {
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
-import { EnginesOverview } from './components/engines';
+import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { Settings } from './components/settings';
 import { Credentials } from './components/credentials';
 
@@ -113,9 +113,7 @@ export const AppSearchNav: React.FC<IAppSearchNavProps> = ({ subNav }) => {
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
       <SideNavLink to={ENGINES_PATH} subNav={subNav} isRoot>
-        {i18n.translate('xpack.enterpriseSearch.appSearch.nav.engines', {
-          defaultMessage: 'Engines',
-        })}
+        {ENGINES_TITLE}
       </SideNavLink>
       {canViewSettings && (
         <SideNavLink to={SETTINGS_PATH}>
