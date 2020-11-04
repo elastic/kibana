@@ -9,5 +9,5 @@ Get field list by providing an index patttern (or spec)
 <b>Signature:</b>
 
 ```typescript
-getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions) => Promise<any>;
+getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>;
 ```

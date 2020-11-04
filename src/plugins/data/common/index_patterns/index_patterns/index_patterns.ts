@@ -220,13 +220,13 @@ export class IndexPatternsService {
    * Get field list by providing { pattern }
    * @param options
    */
-  getFieldsForWildcard = async (options: GetFieldsOptions = {}) => {
+  getFieldsForWildcard = async (options: GetFieldsOptions) => {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
-      params: options.params || {},
+      rollupIndex: options.rollupIndex,
     });
   };
 
@@ -236,13 +236,13 @@ export class IndexPatternsService {
    */
   getFieldsForIndexPattern = async (
     indexPattern: IndexPattern | IndexPatternSpec,
-    options: GetFieldsOptions = {}
+    options?: GetFieldsOptions
   ) =>
     this.getFieldsForWildcard({
-      pattern: indexPattern.title as string,
-      ...options,
       type: indexPattern.type,
-      params: indexPattern.typeMeta && indexPattern.typeMeta.params,
+      rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
+      ...options,
+      pattern: indexPattern.title as string,
     });
 
   /**
@@ -379,10 +379,10 @@ export class IndexPatternsService {
     try {
       spec.fields = isFieldRefreshRequired
         ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
-            pattern: title,
+            pattern: title as string,
             metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
             type,
-            params: typeMeta && typeMeta.params,
+            rollupIndex: typeMeta?.params?.rollupIndex,
           })
         : spec.fields;
     } catch (err) {
