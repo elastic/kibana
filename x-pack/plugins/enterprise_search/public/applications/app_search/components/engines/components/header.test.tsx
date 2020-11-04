@@ -11,16 +11,16 @@ import { mockTelemetryActions } from '../../../../__mocks__';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { EngineOverviewHeader } from './';
+import { EnginesOverviewHeader } from './';
 
-describe('EngineOverviewHeader', () => {
+describe('EnginesOverviewHeader', () => {
   it('renders', () => {
-    const wrapper = shallow(<EngineOverviewHeader />);
+    const wrapper = shallow(<EnginesOverviewHeader />);
     expect(wrapper.find('h1')).toHaveLength(1);
   });
 
   it('renders a launch app search button that sends telemetry on click', () => {
-    const wrapper = shallow(<EngineOverviewHeader />);
+    const wrapper = shallow(<EnginesOverviewHeader />);
     const button = wrapper.find('[data-test-subj="launchButton"]');
 
     expect(button.prop('href')).toBe('http://localhost:3002/as');

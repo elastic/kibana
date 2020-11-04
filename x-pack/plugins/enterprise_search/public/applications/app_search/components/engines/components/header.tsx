@@ -19,7 +19,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { TelemetryLogic } from '../../../../shared/telemetry';
 import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
 
-export const EngineOverviewHeader: React.FC = () => {
+export const EnginesOverviewHeader: React.FC = () => {
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   const buttonProps = {
@@ -42,7 +42,7 @@ export const EngineOverviewHeader: React.FC = () => {
           <h1>
             <FormattedMessage
               id="xpack.enterpriseSearch.appSearch.enginesOverview.title"
-              defaultMessage="Engine Overview"
+              defaultMessage="Engines Overview"
             />
           </h1>
         </EuiTitle>

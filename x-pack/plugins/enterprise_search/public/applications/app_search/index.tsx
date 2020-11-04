@@ -33,7 +33,7 @@ import {
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
-import { EngineOverview } from './components/engine_overview';
+import { EnginesOverview } from './components/engines';
 import { Settings } from './components/settings';
 import { Credentials } from './components/credentials';
 
@@ -82,7 +82,7 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
                 <Redirect to={ENGINES_PATH} />
               </Route>
               <Route exact path={ENGINES_PATH}>
-                <EngineOverview />
+                <EnginesOverview />
               </Route>
               <Route exact path={SETTINGS_PATH}>
                 <Settings />

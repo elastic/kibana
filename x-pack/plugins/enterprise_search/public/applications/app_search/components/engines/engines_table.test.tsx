@@ -12,13 +12,13 @@ import React from 'react';
 import { EuiBasicTable, EuiPagination, EuiButtonEmpty } from '@elastic/eui';
 import { EuiLink } from '../../../shared/react_router_helpers';
 
-import { EngineTable } from './engine_table';
+import { EnginesTable } from './engines_table';
 
-describe('EngineTable', () => {
+describe('EnginesTable', () => {
   const onPaginate = jest.fn(); // onPaginate updates the engines API call upstream
 
   const wrapper = mountWithIntl(
-    <EngineTable
+    <EnginesTable
       data={[
         {
           name: 'test-engine',
@@ -71,7 +71,10 @@ describe('EngineTable', () => {
 
   it('handles empty data', () => {
     const emptyWrapper = mountWithIntl(
-      <EngineTable data={[]} pagination={{ totalEngines: 0, pageIndex: 0, onPaginate: () => {} }} />
+      <EnginesTable
+        data={[]}
+        pagination={{ totalEngines: 0, pageIndex: 0, onPaginate: () => {} }}
+      />
     );
     const emptyTable = emptyWrapper.find(EuiBasicTable);
 
