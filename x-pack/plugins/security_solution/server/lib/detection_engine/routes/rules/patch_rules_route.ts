@@ -104,7 +104,12 @@ export const patchRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
         if (type) {
           // reject an unauthorized "promotion" to ML
           throwHttpError(await mlAuthz.validateRuleType(type));

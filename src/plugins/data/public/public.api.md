@@ -1339,9 +1339,9 @@ export class IndexPatternsService {
     // (undocumented)
     getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>;
     getDefault: () => Promise<IndexPattern | null>;
-    getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions) => Promise<any>;
+    getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>;
     // Warning: (ae-forgotten-export) The symbol "GetFieldsOptions" needs to be exported by the entry point index.d.ts
-    getFieldsForWildcard: (options?: GetFieldsOptions) => Promise<any>;
+    getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
     getIds: (refresh?: boolean) => Promise<string[]>;
     getIdsWithTitle: (refresh?: boolean) => Promise<Array<{
         id: string;
@@ -1382,7 +1382,7 @@ export type InputTimeRange = TimeRange | {
 // Warning: (ae-missing-release-tag) "isCompleteResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const isCompleteResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined;
+export const isCompleteResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean;
 
 // Warning: (ae-missing-release-tag) "ISearch" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -1470,7 +1470,7 @@ export const isFilters: (x: unknown) => x is Filter[];
 // Warning: (ae-missing-release-tag) "isPartialResponse" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export const isPartialResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean | undefined;
+export const isPartialResponse: (response?: IKibanaSearchResponse<any> | undefined) => boolean;
 
 // Warning: (ae-missing-release-tag) "isQuery" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -2015,7 +2015,7 @@ export class SearchInterceptor {
     // @internal
     protected pendingCount$: BehaviorSubject<number>;
     // @internal (undocumented)
-    protected runSearch(request: IKibanaSearchRequest, signal: AbortSignal, strategy?: string): Observable<IKibanaSearchResponse>;
+    protected runSearch(request: IKibanaSearchRequest, signal: AbortSignal, strategy?: string): Promise<IKibanaSearchResponse>;
     search(request: IKibanaSearchRequest, options?: ISearchOptions): Observable<IKibanaSearchResponse>;
     // @internal (undocumented)
     protected setupAbortSignal({ abortSignal, timeout, }: {

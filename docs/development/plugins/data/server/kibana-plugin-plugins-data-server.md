@@ -28,13 +28,13 @@
 
 |  Function | Description |
 |  --- | --- |
+|  [getCapabilitiesForRollupIndices(indices)](./kibana-plugin-plugins-data-server.getcapabilitiesforrollupindices.md) |  |
 |  [getDefaultSearchParams(uiSettingsClient)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
 |  [getShardTimeout(config)](./kibana-plugin-plugins-data-server.getshardtimeout.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
 |  [parseInterval(interval)](./kibana-plugin-plugins-data-server.parseinterval.md) |  |
 |  [plugin(initializerContext)](./kibana-plugin-plugins-data-server.plugin.md) | Static code to be shared externally |
 |  [shouldReadFieldFromDocValues(aggregatable, esType)](./kibana-plugin-plugins-data-server.shouldreadfieldfromdocvalues.md) |  |
-|  [toSnakeCase(obj)](./kibana-plugin-plugins-data-server.tosnakecase.md) |  |
 |  [usageProvider(core)](./kibana-plugin-plugins-data-server.usageprovider.md) |  |
 
 ## Interfaces
@@ -45,6 +45,7 @@
 |  [EsQueryConfig](./kibana-plugin-plugins-data-server.esqueryconfig.md) |  |
 |  [FieldDescriptor](./kibana-plugin-plugins-data-server.fielddescriptor.md) |  |
 |  [FieldFormatConfig](./kibana-plugin-plugins-data-server.fieldformatconfig.md) |  |
+|  [IEsRawSearchResponse](./kibana-plugin-plugins-data-server.iesrawsearchresponse.md) |  |
 |  [IEsSearchRequest](./kibana-plugin-plugins-data-server.iessearchrequest.md) |  |
 |  [IFieldSubType](./kibana-plugin-plugins-data-server.ifieldsubtype.md) |  |
 |  [IFieldType](./kibana-plugin-plugins-data-server.ifieldtype.md) |  |
@@ -76,6 +77,7 @@
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
+|  [mergeCapabilitiesWithFields](./kibana-plugin-plugins-data-server.mergecapabilitieswithfields.md) |  |
 |  [search](./kibana-plugin-plugins-data-server.search.md) |  |
 |  [UI\_SETTINGS](./kibana-plugin-plugins-data-server.ui_settings.md) |  |
 

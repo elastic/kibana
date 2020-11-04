@@ -161,9 +161,7 @@ export class RollupIndexPatternCreationConfig extends IndexPatternCreationConfig
   getFetchForWildcardOptions = () => {
     return {
       type: this.type,
-      params: {
-        rollup_index: this.rollupIndex,
-      },
+      rollupIndex: this.rollupIndex,
     };
   };
 }
