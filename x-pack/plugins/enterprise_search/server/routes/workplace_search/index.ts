@@ -6,10 +6,10 @@
 
 import { IRouteDependencies } from '../../plugin';
 
-import { registerWSOverviewRoute } from './overview';
-import { registerWSGroupRoutes } from './groups';
+import { registerOverviewRoute } from './overview';
+import { registerGroupRoutes } from './groups';
 
 export const registerWorkplaceSearchRoutes = (dependencies: IRouteDependencies) => {
-  registerWSOverviewRoute(dependencies);
-  registerWSGroupRoutes(dependencies);
+  registerOverviewRoute(dependencies);
+  registerGroupRoutes(dependencies);
 };

@@ -245,7 +245,7 @@ export function registerBoostsGroupRoute({
   );
 }
 
-export function registerWSGroupRoutes(dependencies: IRouteDependencies) {
+export function registerGroupRoutes(dependencies: IRouteDependencies) {
   registerGroupsRoute(dependencies);
   registerSearchGroupsRoute(dependencies);
   registerGroupRoute(dependencies);
