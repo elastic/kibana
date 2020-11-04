@@ -250,7 +250,6 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             type="values"
             groupPosition="left"
             buttonDataTestSubj="lnsMissingValuesButton"
-            larger
           >
             <EuiFormRow
               display="columnCompressed"
