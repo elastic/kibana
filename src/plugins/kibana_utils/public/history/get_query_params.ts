@@ -17,16 +17,11 @@
  * under the License.
  */
 
-export const DashboardConstants = {
-  LANDING_PAGE_PATH: '/list',
-  CREATE_NEW_DASHBOARD_URL: '/create',
-  ADD_EMBEDDABLE_ID: 'addEmbeddableId',
-  ADD_EMBEDDABLE_TYPE: 'addEmbeddableType',
-  DASHBOARDS_ID: 'dashboards',
-  DASHBOARD_ID: 'dashboard',
-  SEARCH_SESSION_ID: 'searchSessionId',
-};
+import { parse, ParsedQuery } from 'query-string';
+import { Location } from 'history';
 
-export function createDashboardEditUrl(id: string) {
-  return `/view/${id}`;
+export function getQueryParams(location: Location): ParsedQuery {
+  const search = (location.search || '').replace(/^\?/, '');
+  const query = parse(search, { sort: false });
+  return query;
 }
