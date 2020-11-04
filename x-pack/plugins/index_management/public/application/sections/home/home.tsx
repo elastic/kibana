@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useRef } from 'react';
 import { Route, RouteComponentProps, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -96,17 +96,26 @@ export const IndexManagementHome: React.FunctionComponent<RouteComponentProps<Ma
     plugins: { runtimeFields },
   } = useAppContext();
 
+  const closeRuntimeFieldEditor = useRef(() => {});
+
   const onSaveRuntimeField = useCallback((field: RuntimeField) => {
-    console.log('Updated field', field);
+    console.log('Updated field', field); //  eslint-disable-line
   }, []);
 
   const openRuntimeFieldEditor = useCallback(async () => {
     const { openEditor } = await runtimeFields.loadEditor();
-    openEditor({ onSave: onSaveRuntimeField, defaultValue: defaultRuntimeField });
+    closeRuntimeFieldEditor.current = openEditor({
+      onSave: onSaveRuntimeField,
+      defaultValue: defaultRuntimeField,
+    });
   }, [onSaveRuntimeField, runtimeFields]);
 
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('home');
+
+    return () => {
+      closeRuntimeFieldEditor.current();
+    };
   }, []);
 
   return (
