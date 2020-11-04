@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getData } from '../../kibana_services';
-import { MapsAppState } from '../state_syncing/app_state_manager';
+import { getData } from '../../../kibana_services';
+import { MapsAppState } from '../url_state';
 
 export function getInitialQuery({
   mapStateJSON,

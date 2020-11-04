@@ -17,18 +17,15 @@ import {
   getMapsCapabilities,
   getNavigation,
   getToasts,
-} from '../../../kibana_services';
-import { getInitialTimeFilters } from '../../bootstrap/get_initial_time_filters';
-import { getInitialRefreshConfig } from '../../bootstrap/get_initial_refresh_config';
-import { getInitialQuery } from '../../bootstrap/get_initial_query';
+} from '../../kibana_services';
 import {
+  AppStateManager,
+  startAppStateSyncing,
   getGlobalState,
   updateGlobalState,
   startGlobalStateSyncing,
   MapsGlobalState,
-} from '../../state_syncing/global_sync';
-import { AppStateManager } from '../../state_syncing/app_state_manager';
-import { startAppStateSyncing } from '../../state_syncing/app_sync';
+} from './url_state';
 import {
   esFilters,
   Filter,
@@ -38,22 +35,28 @@ import {
   SavedQuery,
   QueryStateChange,
   QueryState,
-} from '../../../../../../../src/plugins/data/public';
-import { MapContainer } from '../../../connected_components/map_container';
-import { getIndexPatternsFromIds } from '../../../index_pattern_util';
+} from '../../../../../../src/plugins/data/public';
+import { MapContainer } from '../../connected_components/map_container';
+import { getIndexPatternsFromIds } from '../../index_pattern_util';
 import { getTopNavConfig } from './top_nav_config';
-import { getBreadcrumbs, unsavedChangesTitle, unsavedChangesWarning } from './get_breadcrumbs';
 import {
   LayerDescriptor,
   MapRefreshConfig,
   MapCenterAndZoom,
   MapQuery,
-} from '../../../../common/descriptor_types';
-import { MapSettings } from '../../../reducers/map';
+} from '../../../common/descriptor_types';
+import { MapSettings } from '../../reducers/map';
 import { goToSpecifiedPath } from '../../render_app';
-import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { getExistingMapPath } from '../../../../common/constants';
-import { SavedMap } from './saved_map';
+import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
+import { getExistingMapPath } from '../../../common/constants';
+import {
+  getInitialQuery,
+  getInitialRefreshConfig,
+  getInitialTimeFilters,
+  SavedMap,
+  unsavedChangesTitle,
+  unsavedChangesWarning,
+} from './saved_map';
 
 interface Props {
   savedMap: SavedMap;

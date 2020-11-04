@@ -9,7 +9,7 @@
 
 export * from '../../embeddable/map_embeddable';
 export * from '../../kibana_services';
-export { renderApp } from '../../routing/render_app';
+export { renderApp } from '../../render_app';
 export * from '../../classes/layers/solution_layers/security';
 export { registerLayerWizard } from '../../classes/layers/layer_wizard_registry';
 export { registerSource } from '../../classes/sources/source_registry';

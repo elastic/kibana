@@ -32,8 +32,8 @@ import {
 import { EuiTableSortingType } from '@elastic/eui';
 import { goToSpecifiedPath } from '../../render_app';
 // @ts-expect-error
-import { addHelpMenuToAppChrome } from '../../../help_menu_util';
-import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { addHelpMenuToAppChrome } from '../../help_menu_util';
+import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getUiSettings,
@@ -41,9 +41,9 @@ import {
   getCoreChrome,
   getNavigateToApp,
   getSavedObjectsClient,
-} from '../../../kibana_services';
-import { getAppTitle } from '../../../../common/i18n_getters';
-import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
+} from '../../kibana_services';
+import { getAppTitle } from '../../../common/i18n_getters';
+import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
 
 export const EMPTY_FILTER = '';
 

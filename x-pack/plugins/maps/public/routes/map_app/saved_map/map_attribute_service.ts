@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AttributeService } from '../../../../src/plugins/embeddable/public';
-import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
-import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
-import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
-import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
-import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
+import { AttributeService } from '../../../../../../../src/plugins/embeddable/public';
+import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { MapByValueInput, MapByReferenceInput } from '../../../embeddable/types';
+import {
+  checkForDuplicateTitle,
+  OnSaveProps,
+} from '../../../../../../../src/plugins/saved_objects/public';
+import {
+  getCoreOverlays,
+  getEmbeddableService,
+  getSavedObjectsClient,
+} from '../../../kibana_services';
 // @ts-expect-error
-import { extractReferences, injectReferences } from '../common/migrations/references';
+import { extractReferences, injectReferences } from '../../../../common/migrations/references';
 
 export type MapAttributeService = AttributeService<
   MapSavedObjectAttributes,

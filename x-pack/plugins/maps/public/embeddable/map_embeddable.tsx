@@ -72,8 +72,9 @@ import { getUiActions, getCoreI18n, getHttp } from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapContainer } from '../connected_components/map_container';
-import { getMapAttributeService } from '../map_attribute_service';
-import { getInitialLayers } from '../routing/bootstrap/get_initial_layers';
+// TODO use SavedMap instead of getMapAttributeService and getInitialLayers
+import { getMapAttributeService } from '../routes/map_app/saved_map/map_attribute_service';
+import { getInitialLayers } from '../routes/map_app/saved_map/get_initial_layers';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
 

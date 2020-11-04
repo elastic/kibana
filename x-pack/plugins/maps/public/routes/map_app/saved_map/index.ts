@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MapApp } from './map_app_connector';
 export { SavedMap } from './saved_map';
-export { MapAppContainer } from './map_app_container';
+export { getInitialQuery } from './get_initial_query';
+export { getInitialRefreshConfig } from './get_initial_refresh_config';
+export { getInitialTimeFilters } from './get_initial_time_filters';
+export { unsavedChangesTitle, unsavedChangesWarning } from './get_breadcrumbs';

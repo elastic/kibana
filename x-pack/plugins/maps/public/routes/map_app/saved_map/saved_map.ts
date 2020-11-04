@@ -29,7 +29,7 @@ import {
   setOpenTOCDetails,
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
-import { getMapAttributeService } from '../../../map_attribute_service';
+import { getMapAttributeService } from './map_attribute_service';
 import {
   checkForDuplicateTitle,
   OnSaveProps,
@@ -41,9 +41,9 @@ import {
   getSavedObjectsClient,
   getToasts,
 } from '../../../kibana_services';
-import { goToSpecifiedPath } from '../../render_app';
+import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
-import { getInitialLayers, getInitialLayersFromUrlParam } from '../../bootstrap/get_initial_layers';
+import { getInitialLayers, getInitialLayersFromUrlParam } from './get_initial_layers';
 import { copyPersistentState } from '../../../reducers/util';
 import { getBreadcrumbs } from './get_breadcrumbs';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';

@@ -15,16 +15,16 @@ import {
   getCoreI18n,
   getNavigateToApp,
   getIsAllowByValueEmbeddables,
-} from '../../../kibana_services';
+} from '../../kibana_services';
 import {
   SavedObjectSaveModalOrigin,
   OnSaveProps,
   showSaveModal,
-} from '../../../../../../../src/plugins/saved_objects/public';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+} from '../../../../../../src/plugins/saved_objects/public';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { goToSpecifiedPath } from '../../render_app';
 import { SavedMap } from './saved_map';
-import { EmbeddableStateTransfer } from '../../../../../../../src/plugins/embeddable/public';
+import { EmbeddableStateTransfer } from '../../../../../../src/plugins/embeddable/public';
 
 function getSaveAndReturnButtonLabel() {
   return getIsAllowByValueEmbeddables()

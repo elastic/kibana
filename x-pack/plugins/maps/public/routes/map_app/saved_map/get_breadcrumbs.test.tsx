@@ -7,7 +7,7 @@
 import { getBreadcrumbs } from './get_breadcrumbs';
 
 jest.mock('../../../kibana_services', () => {});
-jest.mock('../../render_app', () => {});
+jest.mock('../../../render_app', () => {});
 
 const getHasUnsavedChanges = () => {
   return false;

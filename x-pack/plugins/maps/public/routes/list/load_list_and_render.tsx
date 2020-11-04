@@ -7,10 +7,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
-import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
-import { getSavedObjectsClient, getToasts } from '../../../kibana_services';
+import { getSavedObjectsClient, getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 export class LoadListAndRender extends React.Component {
   _isMounted: boolean = false;

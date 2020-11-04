@@ -5,10 +5,13 @@
  */
 
 import { map } from 'rxjs/operators';
-import { connectToQueryState, esFilters } from '../../../../../../src/plugins/data/public';
-import { syncState, BaseStateContainer } from '../../../../../../src/plugins/kibana_utils/public';
-import { getData } from '../../kibana_services';
-import { kbnUrlStateStorage } from '../render_app';
+import { connectToQueryState, esFilters } from '../../../../../../../src/plugins/data/public';
+import {
+  syncState,
+  BaseStateContainer,
+} from '../../../../../../../src/plugins/kibana_utils/public';
+import { getData } from '../../../kibana_services';
+import { kbnUrlStateStorage } from '../../../render_app';
 import { AppStateManager } from './app_state_manager';
 
 export function startAppStateSyncing(appStateManager: AppStateManager) {

@@ -16,14 +16,13 @@ import {
   getMapsCapabilities,
   getToasts,
   getEmbeddableService,
-} from '../kibana_services';
+} from './kibana_services';
 import {
   createKbnUrlStateStorage,
   withNotifyOnErrors,
   IKbnUrlStateStorage,
-} from '../../../../../src/plugins/kibana_utils/public';
-import { LoadListAndRender } from './routes/list/load_list_and_render';
-import { MapAppContainer, MapApp, SavedMap } from './routes/map_app';
+} from '../../../../src/plugins/kibana_utils/public';
+import { MapList, MapApp } from './routes';
 
 export let goToSpecifiedPath: (path: string) => void;
 export let kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -72,7 +71,7 @@ export async function renderApp({
     }
 
     return (
-      <MapAppContainer
+      <MapApp
         mapEmbeddableInput={mapEmbeddableInput}
         embeddableId={embeddableId}
         onAppLeave={onAppLeave}
@@ -98,7 +97,7 @@ export async function renderApp({
                 const newPath = hash.substr(1);
                 return <Redirect to={newPath} />;
               } else if (pathname === '/' || pathname === '') {
-                return <LoadListAndRender />;
+                return <MapList />;
               } else {
                 return <Redirect to="/" />;
               }

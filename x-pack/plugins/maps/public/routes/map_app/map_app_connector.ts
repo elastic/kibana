@@ -9,7 +9,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapApp } from './map_app';
-import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
+import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
 import {
   getFilters,
   getQuery,
@@ -17,18 +17,18 @@ import {
   getRefreshConfig,
   getTimeFilters,
   hasDirtyState,
-} from '../../../selectors/map_selectors';
-import { setQuery, setRefreshConfig, enableFullScreen, openMapSettings } from '../../../actions';
-import { FLYOUT_STATE } from '../../../reducers/ui';
-import { getMapsCapabilities } from '../../../kibana_services';
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
-import { MapStoreState } from '../../../reducers/store';
+} from '../../selectors/map_selectors';
+import { setQuery, setRefreshConfig, enableFullScreen, openMapSettings } from '../../actions';
+import { FLYOUT_STATE } from '../../reducers/ui';
+import { getMapsCapabilities } from '../../kibana_services';
+import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
+import { MapStoreState } from '../../reducers/store';
 import {
   MapRefreshConfig,
   MapCenterAndZoom,
   LayerDescriptor,
-} from '../../../../common/descriptor_types';
-import { MapSettings } from '../../../reducers/map';
+} from '../../../common/descriptor_types';
+import { MapSettings } from '../../reducers/map';
 
 function mapStateToProps(state: MapStoreState) {
   return {
