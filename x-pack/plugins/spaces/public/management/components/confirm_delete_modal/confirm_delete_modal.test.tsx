@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
+import { mountWithIntl, shallowWithIntl } from '@kbn/test/jest';
 import { ConfirmDeleteModal } from './confirm_delete_modal';
 import { spacesManagerMock } from '../../../spaces_manager/mocks';
 import { SpacesManager } from '../../../spaces_manager';

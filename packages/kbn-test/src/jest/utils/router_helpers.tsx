@@ -29,9 +29,10 @@ export const WithMemoryRouter = (initialEntries: string[] = ['/'], initialIndex:
   </MemoryRouter>
 );
 
-export const WithRoute = (componentRoutePath = '/', onRouter = (router: any) => {}) => (
-  WrappedComponent: ComponentType
-) => {
+export const WithRoute = (
+  componentRoutePath: string | string[] = '/',
+  onRouter = (router: any) => {}
+) => (WrappedComponent: ComponentType) => {
   // Create a class component that will catch the router
   // and forward it to our "onRouter()" handler.
   const CatchRouter = withRouter(

@@ -17,17 +17,24 @@
  * under the License.
  */
 
-export { findTestSubject } from './find_test_subject';
+import Fs from 'fs';
+import Path from 'path';
 
-export { WithStore } from './redux_helpers';
+import { CI_PARALLEL_PROCESS_PREFIX } from './ci_parallel_process_prefix';
 
-export { WithMemoryRouter, WithRoute, reactRouterMock } from './router_helpers';
+export function getUniqueJunitReportPath(
+  rootDirectory: string,
+  reportName: string,
+  counter?: number
+): string {
+  const path = Path.resolve(
+    rootDirectory,
+    'target/junit',
+    process.env.JOB || '.',
+    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}${counter ? `-${counter}` : ''}.xml`
+  );
 
-export * from './utils';
-
-export {
-  setSVGElementGetBBox,
-  setHTMLElementOffset,
-  setHTMLElementClientSizes,
-  setSVGElementGetComputedTextLength,
-} from './jsdom_svg_mocks';
+  return Fs.existsSync(path)
+    ? getUniqueJunitReportPath(rootDirectory, reportName, (counter ?? 0) + 1)
+    : path;
+}

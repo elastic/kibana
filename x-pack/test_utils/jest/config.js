@@ -18,13 +18,13 @@ export default {
   collectCoverageFrom: ['legacy/plugins/**/*.js', 'legacy/common/**/*.js', 'legacy/server/**/*.js'],
   moduleNameMapper: {
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-      '<rootDir>/src/dev/jest/mocks/file_mock.js',
-    '\\.(css|less|scss)$': '<rootDir>/../src/dev/jest/mocks/style_mock.js',
+      '<rootDir>/packages/kbn-test/target/jest/mocks/file_mock.js',
+    '\\.(css|less|scss)$': '<rootDir>/../packages/kbn-test/target/jest/mocks/style_mock.js',
   },
   setupFiles: [
-    '<rootDir>/../src/dev/jest/setup/babel_polyfill.js',
-    '<rootDir>/../src/dev/jest/setup/polyfills.js',
-    '<rootDir>/../src/dev/jest/setup/enzyme.js',
+    '<rootDir>/../packages/kbn-test/target/jest/setup/babel_polyfill.js',
+    '<rootDir>/../packages/kbn-test/target/jest/setup/polyfills.js',
+    '<rootDir>/../packages/kbn-test/target/jest/setup/enzyme.js',
   ],
   coverageDirectory: '<rootDir>/../target/kibana-coverage/jest',
   coverageReporters: ['html'],
@@ -39,7 +39,7 @@ export default {
   ],
   testRunner: 'jest-circus/runner',
   transform: {
-    '^.+\\.(js|tsx?)$': '<rootDir>/../src/dev/jest/babel_transform.js',
+    '^.+\\.(js|tsx?)$': '<rootDir>/../packages/kbn-test/target/jest/babel_transform.js',
     '^.+\\.txt?$': 'jest-raw-loader',
     '^.+\\.html?$': 'jest-raw-loader',
   },

@@ -17,15 +17,20 @@
  * under the License.
  */
 
-import Chance from 'chance';
+function stubWebWorker() {
+  if (!window.Worker) {
+    // @ts-ignore we aren't honoring the real Worker spec here
+    window.Worker = function Worker() {
+      this.postMessage = jest.fn();
 
-const chance = new Chance();
-const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
+      // @ts-ignore TypeScript doesn't think this exists on the Worker interface
+      // https://developer.mozilla.org/en-US/docs/Web/API/Worker/terminate
+      this.terminate = jest.fn();
+    };
+  }
+}
 
-export const nextTick = (time = 0) => new Promise((resolve) => setTimeout(resolve, time));
+stubWebWorker();
 
-export const getRandomNumber = (range: { min: number; max: number } = { min: 1, max: 20 }) =>
-  chance.integer(range);
-
-export const getRandomString = (options = {}) =>
-  `${chance.string({ pool: CHARS_POOL, ...options })}-${Date.now()}`;
+// Add an export to avoid TS complaining "stub_web_worker.ts" is not a module.
+export { stubWebWorker };

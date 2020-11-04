@@ -5,7 +5,7 @@
  */
 import { act } from 'react-dom/test-utils';
 
-import { TestBed, SetupFunc, UnwrapPromise } from '../../../../../test_utils';
+import { TestBed, SetupFunc, UnwrapPromise } from '@kbn/test/jest';
 import { TemplateDeserialized } from '../../../common';
 
 interface MappingField {

@@ -17,24 +17,13 @@
  * under the License.
  */
 
-import Fs from 'fs';
-import Path from 'path';
+import Chance from 'chance';
 
-import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
+const chance = new Chance();
+const CHARS_POOL = 'abcdefghijklmnopqrstuvwxyz';
 
-export function getUniqueJunitReportPath(
-  rootDirectory: string,
-  reportName: string,
-  counter?: number
-): string {
-  const path = Path.resolve(
-    rootDirectory,
-    'target/junit',
-    process.env.JOB || '.',
-    `TEST-${CI_PARALLEL_PROCESS_PREFIX}${reportName}${counter ? `-${counter}` : ''}.xml`
-  );
+export const getRandomNumber = (range: { min: number; max: number } = { min: 1, max: 20 }) =>
+  chance.integer(range);
 
-  return Fs.existsSync(path)
-    ? getUniqueJunitReportPath(rootDirectory, reportName, (counter ?? 0) + 1)
-    : path;
-}
+export const getRandomString = (options = {}) =>
+  `${chance.string({ pool: CHARS_POOL, ...options })}-${Date.now()}`;

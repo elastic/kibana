@@ -24,5 +24,5 @@ export default {
       { reportName: 'Jest Integration Tests' },
     ],
   ],
-  setupFilesAfterEnv: ['<rootDir>/../src/dev/jest/setup/after_env.integration.js'],
+  setupFilesAfterEnv: ['<rootDir>/../packages/kbn-test/target/jest/setup/after_env.integration.js'],
 };

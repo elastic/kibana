@@ -28,3 +28,11 @@ const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
 require('whatwg-fetch');
+
+if (!global.URL.hasOwnProperty('createObjectURL')) {
+  Object.defineProperty(global.URL, 'createObjectURL', { value: () => '' });
+}
+
+// Will be replaced with a better solution in EUI
+// https://github.com/elastic/eui/issues/3713
+global._isJest = true;

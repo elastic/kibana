@@ -33,7 +33,7 @@ import {
   IKbnUrlStateStorage,
   ISessionStorageStateStorage,
 } from './state_sync_state_storage';
-import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
+import { StubBrowserStorage } from '@kbn/test/jest';
 import { createBrowserHistory, History } from 'history';
 import { INullableBaseStateContainer } from './types';
 

@@ -28,7 +28,7 @@ You receive in return a function that you need to call to mount the component in
 ```ts
 // remote_clusters_list.helpers.ts
 
-import { registerTestBed } from '../../../../test_utils';
+import { registerTestBed } from '@kbn/test/jest';
 import { RemoteClusterList } from '../../app/sections/remote_cluster_list';
 import { remoteClustersStore } from '../../app/store';
 import routing from '../../app/services/routing';

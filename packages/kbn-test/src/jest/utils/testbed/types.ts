@@ -74,6 +74,7 @@ export interface TestBed<T = string> {
    * and we need to wait for the data to be fetched (and bypass any "loading" state).
    */
   waitFor: (testSubject: T, count?: number) => Promise<void>;
+  waitForFn: (predicate: () => Promise<boolean>, errMessage: string) => Promise<void>;
   form: {
     /**
      * Set the value of a form text input.
@@ -175,7 +176,7 @@ export interface MemoryRouterConfig {
   /** The React Router **initial index** setting ([see documentation](https://github.com/ReactTraining/react-router/blob/master/packages/react-router/docs/api/MemoryRouter.md)) */
   initialIndex?: number;
   /** The route **path** for the mounted component (defaults to `"/"`) */
-  componentRoutePath?: string;
+  componentRoutePath?: string | string[];
   /** A callBack that will be called with the React Router instance once mounted  */
   onRouter?: (router: any) => void;
 }

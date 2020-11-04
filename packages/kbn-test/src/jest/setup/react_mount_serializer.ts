@@ -17,9 +17,14 @@
  * under the License.
  */
 
-export {
-  setSVGElementGetBBox,
-  setHTMLElementOffset,
-  setHTMLElementClientSizes,
-  setSVGElementGetComputedTextLength,
-} from './helpers';
+export function test(value: any) {
+  return value && value.__reactMount__;
+}
+
+export function print(value: any, serialize: any) {
+  // there is no proper way to correctly indent multiline values
+  // so the trick here is to use the Object representation and rewriting the root object name
+  return serialize({
+    reactNode: value.__reactMount__,
+  }).replace('Object', 'MountPoint');
+}
