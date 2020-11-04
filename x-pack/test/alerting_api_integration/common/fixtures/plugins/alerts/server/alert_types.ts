@@ -423,6 +423,26 @@ export function defineAlertTypes(
       throw new Error('this alert is intended to fail');
     },
   };
+  const longRunningAlertType: AlertType = {
+    id: 'test.longRunning',
+    name: 'Test: Long Running',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    async executor() {
+      async function sleep(ms: number) {
+        return new Promise((resolve) => {
+          setTimeout(resolve, ms);
+        });
+      }
+      await sleep(10000);
+    },
+  };
 
   alerts.registerType(getAlwaysFiringAlertType());
   alerts.registerType(getCumulativeFiringAlertType());
@@ -435,4 +455,5 @@ export function defineAlertTypes(
   alerts.registerType(onlyStateVariablesAlertType);
   alerts.registerType(getPatternFiringAlertType());
   alerts.registerType(throwAlertType);
+  alerts.registerType(longRunningAlertType);
 }

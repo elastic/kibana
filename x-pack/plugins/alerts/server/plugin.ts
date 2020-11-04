@@ -302,7 +302,7 @@ export class AlertingPlugin {
     const [{ savedObjects }] = await core.getStartServices();
     return {
       createInternalRepository: () => {
-        return savedObjects.createInternalRepository(['alert']);
+        return savedObjects.createInternalRepository(['alert', 'invalidate_pending_api_key']);
       },
     };
   };
