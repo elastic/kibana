@@ -362,7 +362,7 @@ export class BaseAlert {
       stackProductUuid: '',
       ui: {
         isFiring: false,
-        message: null,
+        message: { text: '' },
         severity: AlertSeverity.Success,
         resolvedMS: 0,
         triggeredMS: 0,

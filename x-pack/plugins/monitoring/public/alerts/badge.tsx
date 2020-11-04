@@ -17,6 +17,7 @@ import { SetupModeContext } from '../components/setup_mode/setup_mode_context';
 import { AlertsContext } from './context';
 import { getAlertPanelsByCategory } from './lib/get_alert_panels_by_category';
 import { getAlertPanelsByNode } from './lib/get_alert_panels_by_node';
+import { getFiringAlertCount } from './lib/get_firing_alert_count';
 
 export const numberOfAlertsLabel = (count: number) => `${count} alert${count > 1 ? 's' : ''}`;
 
@@ -32,6 +33,10 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
   const alertsContext = React.useContext(AlertsContext);
+  const alertCount = inSetupMode
+    ? Object.keys(alertsContext.allAlerts).length
+    : getFiringAlertCount(alerts, stateFilter);
+  const [showByNode, setShowByNode] = React.useState(alertCount > MAX_TO_SHOW_IN_LIST);
 
   if (alerts.length === 0) {
     return null;
@@ -41,20 +46,17 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     defaultMessage: 'Alerts',
   });
 
-  let { panels, alertCount } = getAlertPanelsByCategory(
-    panelTitle,
-    inSetupMode,
-    alerts,
-    alertsContext,
-    stateFilter,
-    nextStepsFilter
-  );
-
-  if (alertCount > MAX_TO_SHOW_IN_LIST) {
-    const result = getAlertPanelsByNode(panelTitle, alerts, stateFilter, nextStepsFilter);
-    panels = result.panels;
-    alertCount = result.alertCount;
-  }
+  const panels = showByNode
+    ? getAlertPanelsByNode(panelTitle, alerts, setShowByNode, stateFilter, nextStepsFilter)
+    : getAlertPanelsByCategory(
+        panelTitle,
+        inSetupMode,
+        alerts,
+        alertsContext,
+        setShowByNode,
+        stateFilter,
+        nextStepsFilter
+      );
 
   const button = (
     <EuiBadge

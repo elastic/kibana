@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiText, EuiSwitch } from '@elastic/eui';
 import { AlertPanel } from '../panel';
 import {
   AlertMessage,
@@ -19,10 +19,10 @@ import { getFormattedDateForAlertState } from './get_formatted_date_for_alert_st
 export function getAlertPanelsByNode(
   panelTitle: string,
   alerts: CommonAlertStatus[],
+  setShowByNode: (value: boolean) => void,
   stateFilter: (state: AlertState) => boolean,
   nextStepsFilter: (nextStep: AlertMessage) => boolean
 ) {
-  let alertCount = 0;
   const alertsByNodes: {
     [uuid: string]: {
       [alertName: string]: {
@@ -46,7 +46,6 @@ export function getAlertPanelsByNode(
         ][alert.alert.type] || { alert: alert.alert, states: [], count: 0 };
         alertsByNodes[alertState.state.stackProductUuid][alert.alert.type].count++;
         alertsByNodes[alertState.state.stackProductUuid][alert.alert.type].states.push(alertState);
-        alertCount++;
       }
       return accum;
     },
@@ -58,18 +57,32 @@ export function getAlertPanelsByNode(
     {
       id: 0,
       title: panelTitle,
-      items: Object.keys(nodes).map((nodeUuid, index) => {
-        const states = nodes[nodeUuid] as CommonAlertState[];
+      items: [
+        ...Object.keys(nodes).map((nodeUuid, index) => {
+          const states = nodes[nodeUuid] as CommonAlertState[];
 
-        return {
+          return {
+            name: (
+              <EuiText>
+                {states[0].state.stackProductName} ({states.length})
+              </EuiText>
+            ),
+            panel: index + 1,
+          };
+        }),
+        {
+          isSeparator: true,
+        },
+        {
           name: (
-            <EuiText>
-              {states[0].state.stackProductName} ({states.length})
-            </EuiText>
+            <EuiSwitch
+              checked={false}
+              onChange={() => setShowByNode(false)}
+              label="Group by alert type"
+            />
           ),
-          panel: index + 1,
-        };
-      }),
+        },
+      ],
     },
     ...Object.keys(nodes).reduce((accum: PanelItem[], nodeUuid, index) => {
       const alertsForNode = Object.values(alertsByNodes[nodeUuid]);
@@ -119,8 +132,5 @@ export function getAlertPanelsByNode(
     }, []),
   ];
 
-  return {
-    panels,
-    alertCount,
-  };
+  return panels;
 }

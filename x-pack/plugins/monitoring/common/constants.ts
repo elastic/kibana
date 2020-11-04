@@ -453,6 +453,41 @@ export const ALERT_DETAILS = {
   },
 };
 
+export const ALERT_PANEL_MENU = [
+  {
+    label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.clusterHealth', {
+      defaultMessage: 'Cluster health',
+    }),
+    alerts: [
+      { alertName: ALERT_NODES_CHANGED, panelIndex: 1 },
+      { alertName: ALERT_ELASTICSEARCH_VERSION_MISMATCH, panelIndex: 2 },
+      { alertName: ALERT_KIBANA_VERSION_MISMATCH, panelIndex: 3 },
+      { alertName: ALERT_LOGSTASH_VERSION_MISMATCH, panelIndex: 4 },
+    ],
+  },
+  {
+    label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.resourceUtilization', {
+      defaultMessage: 'Resource utilization',
+    }),
+    alerts: [
+      { alertName: ALERT_CPU_USAGE, panelIndex: 5 },
+      { alertName: ALERT_DISK_USAGE, panelIndex: 6 },
+      { alertName: ALERT_MEMORY_USAGE, panelIndex: 7 },
+    ],
+  },
+  {
+    label: i18n.translate('xpack.monitoring.alerts.badge.panelCategory.errors', {
+      defaultMessage: 'Errors and exceptions',
+    }),
+    alerts: [
+      { alertName: ALERT_MISSING_MONITORING_DATA, panelIndex: 8 },
+      { alertName: ALERT_LICENSE_EXPIRATION, panelIndex: 9 },
+      { alertName: ALERT_THREAD_POOL_SEARCH_REJECTIONS, panelIndex: 10 },
+      { alertName: ALERT_THREAD_POOL_WRITE_REJECTIONS, panelIndex: 11 },
+    ],
+  },
+];
+
 /**
  * A listing of all alert types
  */

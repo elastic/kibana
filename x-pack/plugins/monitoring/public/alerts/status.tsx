@@ -79,7 +79,11 @@ export const AlertsStatus: React.FC<Props> = (props: Props) => {
 
   if (showBadge || inSetupMode) {
     return (
-      <AlertsBadge alerts={alerts} stateFilter={stateFilter} nextStepsFilter={nextStepsFilter} />
+      <AlertsBadge
+        alerts={Object.values(alerts)}
+        stateFilter={stateFilter}
+        nextStepsFilter={nextStepsFilter}
+      />
     );
   }
 

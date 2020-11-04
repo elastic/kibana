@@ -6,6 +6,10 @@
 import React from 'react';
 import { CommonAlertState, CommonAlertStatus } from '../../common/types/alerts';
 
+export interface AlertsByName {
+  [name: string]: CommonAlertStatus;
+}
+
 export interface AlertStatusAndState {
   alert: CommonAlertStatus;
   alertState: CommonAlertState;
@@ -13,14 +17,15 @@ export interface AlertStatusAndState {
 
 export interface PanelItem {
   id: number;
-  title: string;
+  title: string | React.ReactElement;
   width?: number;
   content?: React.ReactElement;
   items?: ContextMenuItem[];
 }
 
 export interface ContextMenuItem {
-  name: React.ReactElement;
-  panel: number;
+  name?: React.ReactElement;
+  panel?: number;
   isSeparator?: boolean;
+  onClick?: () => void;
 }

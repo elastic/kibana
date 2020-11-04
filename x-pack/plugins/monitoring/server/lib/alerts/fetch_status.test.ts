@@ -27,7 +27,7 @@ describe('fetchStatus', () => {
   const defaultUiState: AlertUiState = {
     isFiring: false,
     severity: AlertSeverity.Success,
-    message: null,
+    message: { text: '' },
     resolvedMS: 0,
     lastCheckedMS: 0,
     triggeredMS: 0,
@@ -88,6 +88,9 @@ describe('fetchStatus', () => {
   it('should return alerts that are firing', async () => {
     alertStates = [
       {
+        stackProductUuid: '',
+        stackProductName: '',
+        stackProduct: '',
         cluster: defaultClusterState,
         ui: {
           ...defaultUiState,
@@ -112,6 +115,9 @@ describe('fetchStatus', () => {
   it('should return alerts that have been resolved in the time period', async () => {
     alertStates = [
       {
+        stackProductUuid: '',
+        stackProductName: '',
+        stackProduct: '',
         cluster: defaultClusterState,
         ui: {
           ...defaultUiState,

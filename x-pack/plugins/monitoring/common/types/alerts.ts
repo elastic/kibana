@@ -110,7 +110,7 @@ export interface AlertThreadPoolRejectionsState extends AlertState {
 export interface AlertUiState {
   isFiring: boolean;
   severity: AlertSeverity;
-  message: AlertMessage | null;
+  message: AlertMessage;
   resolvedMS: number;
   lastCheckedMS: number;
   triggeredMS: number;
