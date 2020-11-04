@@ -9,7 +9,10 @@ import { SuperTest } from 'supertest';
 import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
-import { FullCreateSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
+import {
+  FullCreateSchema,
+  FullResponseSchema,
+} from '../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
 import {
   CreateExceptionListItemSchema,
@@ -37,8 +40,8 @@ import {
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedProperties = (
-  rule: Partial<RulesSchema>
-): Partial<RulesSchema> => {
+  rule: FullResponseSchema
+): Partial<FullResponseSchema> => {
   const {
     /* eslint-disable @typescript-eslint/naming-convention */
     created_at,
@@ -61,8 +64,8 @@ export const removeServerGeneratedProperties = (
  * @param rule Rule to pass in to remove typical server generated properties
  */
 export const removeServerGeneratedPropertiesIncludingRuleId = (
-  rule: Partial<RulesSchema>
-): Partial<RulesSchema> => {
+  rule: FullResponseSchema
+): Partial<FullResponseSchema> => {
   const ruleWithRemovedProperties = removeServerGeneratedProperties(rule);
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...additionalRuledIdRemoved } = ruleWithRemovedProperties;
@@ -712,7 +715,7 @@ export const countDownTest = async (
 export const createRule = async (
   supertest: SuperTest<supertestAsPromised.Test>,
   rule: FullCreateSchema
-): Promise<RulesSchema> => {
+): Promise<FullResponseSchema> => {
   const { body } = await supertest
     .post(DETECTION_ENGINE_RULES_URL)
     .set('kbn-xsrf', 'true')
