@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type GetSpacePurpose =
+import { Space } from './space';
+
+export type GetAllSpacesPurpose =
   | 'any'
   | 'copySavedObjectsIntoSpace'
   | 'findSavedObjects'
   | 'shareSavedObjectsIntoSpace';
+
+export interface GetSpaceResult extends Space {
+  authorizedPurposes?: Record<GetAllSpacesPurpose, boolean>;
+}
