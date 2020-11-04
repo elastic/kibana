@@ -1161,4 +1161,41 @@ describe('other', () => {
   test(`assigns errors from constructor to .errors`, () => {
     expect(client.errors).toBe(clientOpts.errors);
   });
+
+  test(`namespace redaction fails safe`, async () => {
+    const type = 'foo';
+    const id = `${type}-id`;
+    const namespace = 'some-ns';
+    const namespaces = ['some-other-namespace', '*', namespace];
+    const returnValue = { namespaces, foo: 'bar' };
+    clientOpts.baseClient.get.mockReturnValue(returnValue as any);
+
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementationOnce(
+      getMockCheckPrivilegesSuccess // privilege check for authorization
+    );
+    clientOpts.checkSavedObjectsPrivilegesAsCurrentUser.mockImplementation(
+      // privilege check for namespace filtering
+      (_actions: string | string[], _namespaces?: string | string[]) => ({
+        hasAllRequested: false,
+        username: USERNAME,
+        privileges: {
+          kibana: [
+            // this is a contrived scenario as we *shouldn't* get both an unauthorized and authorized result for a given resource...
+            // however, in case we do, we should fail-safe (authorized + unauthorized = unauthorized)
+            { resource: 'some-other-namespace', privilege: 'login:', authorized: false },
+            { resource: 'some-other-namespace', privilege: 'login:', authorized: true },
+          ],
+        },
+      })
+    );
+
+    const result = await client.get(type, id, { namespace });
+    // we will never redact the "All Spaces" ID
+    expect(result).toEqual(expect.objectContaining({ namespaces: ['*', namespace, '?'] }));
+
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenCalledTimes(2);
+    expect(clientOpts.checkSavedObjectsPrivilegesAsCurrentUser).toHaveBeenLastCalledWith('login:', [
+      'some-other-namespace',
+    ]);
+  });
 });

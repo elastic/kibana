@@ -616,12 +616,12 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
 
   private async getNamespacesPrivilegeMap(
     namespaces: string[],
-    previouslypreviouslyAuthorizedSpaceIds: string[]
+    previouslyAuthorizedSpaceIds: string[]
   ) {
     const namespacesToCheck = namespaces.filter(
-      (namespace) => !previouslypreviouslyAuthorizedSpaceIds.includes(namespace)
+      (namespace) => !previouslyAuthorizedSpaceIds.includes(namespace)
     );
-    const initialPrivilegeMap = previouslypreviouslyAuthorizedSpaceIds.reduce(
+    const initialPrivilegeMap = previouslyAuthorizedSpaceIds.reduce(
       (acc, spaceId) => acc.set(spaceId, true),
       new Map<string, boolean>()
     );
@@ -634,7 +634,7 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
     const map = checkPrivilegesResult.privileges.kibana.reduce((acc, { resource, authorized }) => {
       // there should never be a case where more than one privilege is returned for a given space
       // if there is, fail-safe (authorized + unauthorized = unauthorized)
-      if (resource && (!authorized || !acc.hasOwnProperty(resource))) {
+      if (resource && (!authorized || !acc.has(resource))) {
         acc.set(resource, authorized);
       }
       return acc;
@@ -687,18 +687,18 @@ export class SecureSavedObjectsClientWrapper implements SavedObjectsClientContra
       return response;
     }
 
-    const previouslypreviouslyAuthorizedSpaceIds = previouslyAuthorizedNamespaces.map((x) =>
+    const previouslyAuthorizedSpaceIds = previouslyAuthorizedNamespaces.map((x) =>
       this.getSpacesService()!.namespaceToSpaceId(x)
     );
     const { saved_objects: savedObjects } = response;
     // all users can see the "all spaces" ID, and we don't need to recheck authorization for any namespaces that we just checked earlier
     const namespaces = uniq(
       savedObjects.flatMap((savedObject) => savedObject.namespaces || [])
-    ).filter((x) => x !== ALL_SPACES_ID && !previouslypreviouslyAuthorizedSpaceIds.includes(x));
+    ).filter((x) => x !== ALL_SPACES_ID && !previouslyAuthorizedSpaceIds.includes(x));
 
     const privilegeMap = await this.getNamespacesPrivilegeMap(
       namespaces,
-      previouslypreviouslyAuthorizedSpaceIds
+      previouslyAuthorizedSpaceIds
     );
 
     return {
