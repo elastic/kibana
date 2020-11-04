@@ -35,7 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'common',
   ]);
 
-  describe('visual builder', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/75127
+  describe.skip('visual builder', function describeIndexTests() {
     this.tags('includeFirefox');
     beforeEach(async () => {
       await security.testUser.setRoles([
