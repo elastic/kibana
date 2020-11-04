@@ -145,7 +145,6 @@ function getTimeseriesexplorerDefaultState() {
     zoomToFocusLoaded: undefined,
     // Sets function to plot by if original function is metric
     functionDescription: undefined,
-    defaultFunctionToPlotIfMetric: undefined,
   };
 }
 
@@ -408,7 +407,9 @@ export class TimeSeriesExplorer extends React.Component {
       },
       this.props.toastNotificationService
     );
-    this.setFunctionDescription(functionDescriptionToPlot);
+    if (!this.unmounted) {
+      this.setFunctionDescription(functionDescriptionToPlot);
+    }
   };
 
   setForecastId = (forecastId) => {
