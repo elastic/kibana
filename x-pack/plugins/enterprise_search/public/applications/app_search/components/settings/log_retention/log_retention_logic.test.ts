@@ -217,7 +217,7 @@ describe('LogRetentionLogic', () => {
 
         LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
 
-        expect(http.put).toHaveBeenCalledWith(`/api/app_search/log_settings`, {
+        expect(http.put).toHaveBeenCalledWith('/api/app_search/log_settings', {
           body: JSON.stringify({
             analytics: {
               enabled: true,
@@ -341,7 +341,7 @@ describe('LogRetentionLogic', () => {
 
       LogRetentionLogic.actions.fetchLogRetention();
 
-      expect(http.get).toHaveBeenCalledWith(`/api/app_search/log_settings`);
+      expect(http.get).toHaveBeenCalledWith('/api/app_search/log_settings');
       await promise;
       expect(LogRetentionLogic.actions.updateLogRetention).toHaveBeenCalledWith(
         TYPICAL_CLIENT_LOG_RETENTION

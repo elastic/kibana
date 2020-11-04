@@ -109,7 +109,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
       }
     },
     toggleLogRetention: ({ option }) => {
-      const logRetention = values.logRetention && values.logRetention[option];
+      const logRetention = values.logRetention?.[option];
 
       // If the user has found a way to call this before we've retrieved
       // log retention settings from the server, short circuit this and return early
