@@ -159,7 +159,6 @@
     "apollo-server-core": "^1.3.6",
     "apollo-server-errors": "^2.0.2",
     "apollo-server-hapi": "^1.3.6",
-    "apollo-server-module-graphiql": "^1.3.4",
     "archiver": "^3.1.1",
     "axios": "^0.19.2",
     "bluebird": "3.5.5",
