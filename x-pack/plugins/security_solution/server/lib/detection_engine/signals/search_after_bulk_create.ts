@@ -64,12 +64,12 @@ export const searchAfterAndBulkCreate = async ({
     interval,
     buildRuleMessage,
   });
-  logger.debug(buildRuleMessage(`Signal totalToFromTuples: ${totalToFromTuples.length}`));
+  logger.debug(buildRuleMessage(`totalToFromTuples: ${totalToFromTuples.length}`));
 
   while (totalToFromTuples.length > 0) {
     const tuple = totalToFromTuples.pop();
     if (tuple == null || tuple.to == null || tuple.from == null) {
-      logger.error(buildRuleMessage(`[-] malformed signal date tuple`));
+      logger.error(buildRuleMessage(`[-] malformed date tuple`));
       return createSearchAfterReturnType({
         success: false,
         errors: ['malformed date tuple'],
@@ -78,7 +78,7 @@ export const searchAfterAndBulkCreate = async ({
     signalsCreatedCount = 0;
     while (signalsCreatedCount < tuple.maxSignals) {
       try {
-        logger.debug(buildRuleMessage(`Starting signal search with sortIds: ${sortId}`));
+        logger.debug(buildRuleMessage(`sortIds: ${sortId}`));
 
         // perform search_after with optionally undefined sortId
         const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
@@ -106,9 +106,9 @@ export const searchAfterAndBulkCreate = async ({
         ]);
         // determine if there are any candidate signals to be processed
         const totalHits = createTotalHitsFromSearchResult({ searchResult });
-        logger.debug(buildRuleMessage(`signal totalHits: ${totalHits}`));
+        logger.debug(buildRuleMessage(`totalHits: ${totalHits}`));
         logger.debug(
-          buildRuleMessage(`signal searchResult.hit.hits.length: ${searchResult.hits.hits.length}`)
+          buildRuleMessage(`searchResult.hit.hits.length: ${searchResult.hits.hits.length}`)
         );
 
         // search results yielded zero hits so exit
@@ -124,7 +124,7 @@ export const searchAfterAndBulkCreate = async ({
             buildRuleMessage(
               `${
                 totalHits === 0 ? 'totalHits' : 'searchResult.hits.hits.length'
-              } was 0, exiting and moving on to next tuple of signals`
+              } was 0, exiting and moving on to next tuple`
             )
           );
           break;
