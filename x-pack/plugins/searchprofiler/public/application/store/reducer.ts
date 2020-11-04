@@ -9,7 +9,7 @@ import { State } from './store';
 
 import { OnHighlightChangeArgs } from '../components/profile_tree';
 import { ShardSerialized, Targets } from '../types';
-import { hasSearch, hasAggregations } from '../utils';
+import { hasSearch, hasAggregations } from '../lib';
 
 export type Action =
   | { type: 'setProfiling'; value: boolean }

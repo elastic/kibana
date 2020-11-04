@@ -56,6 +56,7 @@ export {
   AssetType,
   Installable,
   KibanaAssetType,
+  KibanaSavedObjectType,
   AssetParts,
   AssetsGroupedByServiceByType,
   CategoryId,
@@ -74,6 +75,7 @@ export {
   PostAgentEnrollRequest,
   PostAgentCheckinRequest,
   DataType,
+  dataTypes,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
