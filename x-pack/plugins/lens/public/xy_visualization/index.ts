@@ -44,8 +44,9 @@ export class XyVisualization {
         layerConfig,
         xyChart,
         getXyChartRenderer,
-        xyVisualization,
+        getXyVisualization,
       } = await import('../async_services');
+      const palettes = await charts.palettes.getPalettes();
       expressions.registerFunction(() => legendConfig);
       expressions.registerFunction(() => yAxisConfig);
       expressions.registerFunction(() => tickLabelsConfig);
@@ -58,11 +59,12 @@ export class XyVisualization {
         getXyChartRenderer({
           formatFactory,
           chartsThemeService: charts.theme,
+          paletteService: palettes,
           timeZone: getTimeZone(core.uiSettings),
           histogramBarTarget: core.uiSettings.get<number>(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
         })
       );
-      return xyVisualization;
+      return getXyVisualization({ paletteService: palettes });
     });
   }
 }

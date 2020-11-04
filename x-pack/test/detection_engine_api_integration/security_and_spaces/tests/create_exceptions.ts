@@ -349,10 +349,10 @@ export default ({ getService }: FtrProviderContext) => {
           getCreateExceptionListMinimalSchemaMock()
         );
 
-        // Rule id of "6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6" is from the file:
-        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/c2_reg_beacon.json
+        // Rule id of "eb079c62-4481-4d6e-9643-3ca499df7aaa" is from the file:
+        // x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules/external_alerts.json
         // since this rule does not have existing exceptions_list that we are going to use for tests
-        const immutableRule = await getRule(supertest, '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6');
+        const immutableRule = await getRule(supertest, 'eb079c62-4481-4d6e-9643-3ca499df7aaa');
         expect(immutableRule.exceptions_list.length).eql(0); // make sure we have no exceptions_list
 
         // add a second exceptions list as a user is allowed to add a second list to an immutable rule
@@ -360,7 +360,7 @@ export default ({ getService }: FtrProviderContext) => {
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
           .send({
-            rule_id: '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6',
+            rule_id: 'eb079c62-4481-4d6e-9643-3ca499df7aaa',
             exceptions_list: [
               {
                 id,
@@ -372,11 +372,11 @@ export default ({ getService }: FtrProviderContext) => {
           })
           .expect(200);
 
-        await downgradeImmutableRule(es, '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6');
+        await downgradeImmutableRule(es, 'eb079c62-4481-4d6e-9643-3ca499df7aaa');
         await installPrePackagedRules(supertest);
         const immutableRuleSecondTime = await getRule(
           supertest,
-          '6d3456a5-4a42-49d1-aaf2-7b1fd475b2c6'
+          'eb079c62-4481-4d6e-9643-3ca499df7aaa'
         );
 
         expect(immutableRuleSecondTime.exceptions_list).to.eql([
