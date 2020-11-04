@@ -19,6 +19,7 @@ import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 import { CriteriaField } from './index';
+import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 interface ResultResponse {
   success: boolean;
@@ -402,9 +403,14 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       });
 
       if (functionDescription !== undefined) {
+        const mlFunctionToPlotIfMetric =
+          functionDescription !== undefined
+            ? aggregationTypeTransform.toML(functionDescription)
+            : functionDescription;
+
         boolCriteria.push({
           term: {
-            function_description: functionDescription,
+            function_description: mlFunctionToPlotIfMetric,
           },
         });
       }

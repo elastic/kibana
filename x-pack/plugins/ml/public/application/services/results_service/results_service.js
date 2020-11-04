@@ -12,6 +12,7 @@ import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
   SWIM_LANE_DEFAULT_PAGE_SIZE,
 } from '../../explorer/explorer_constants';
+import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 /**
  * Service for carrying out Elasticsearch queries to obtain data for the Ml Results dashboards.
@@ -1329,9 +1330,14 @@ export function resultsServiceProvider(mlApiServices) {
           });
         });
         if (actualPlotFunctionIfMetric !== undefined) {
+          const mlFunctionToPlotIfMetric =
+            actualPlotFunctionIfMetric !== undefined
+              ? aggregationTypeTransform.toML(actualPlotFunctionIfMetric)
+              : actualPlotFunctionIfMetric;
+
           mustCriteria.push({
             term: {
-              function_description: actualPlotFunctionIfMetric,
+              function_description: mlFunctionToPlotIfMetric,
             },
           });
         }
