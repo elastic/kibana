@@ -18,6 +18,7 @@ interface ThreadPoolTypes {
 
 interface ThreadPoolRejectionAlertDetails {
   label: string;
+  description: string;
   paramDetails: CommonAlertParamDetails;
 }
 
@@ -28,6 +29,7 @@ export function createThreadPoolRejectionsAlertType(
   return {
     id: alertType,
     name: threadPoolAlertDetails.label,
+    description: threadPoolAlertDetails.description,
     iconClass: 'bell',
     alertParamsExpression: (props: Props) => (
       <>

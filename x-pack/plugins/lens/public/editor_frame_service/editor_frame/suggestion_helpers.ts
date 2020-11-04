@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
@@ -49,6 +50,7 @@ export function getSuggestions({
   visualizationState,
   field,
   visualizeTriggerFieldContext,
+  mainPalette,
 }: {
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -64,6 +66,7 @@ export function getSuggestions({
   visualizationState: unknown;
   field?: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
+  mainPalette?: PaletteOutput;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -100,13 +103,21 @@ export function getSuggestions({
           const table = datasourceSuggestion.table;
           const currentVisualizationState =
             visualizationId === activeVisualizationId ? visualizationState : undefined;
+          const palette =
+            mainPalette ||
+            (activeVisualizationId &&
+            visualizationMap[activeVisualizationId] &&
+            visualizationMap[activeVisualizationId].getMainPalette
+              ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
+              : undefined);
           return getVisualizationSuggestions(
             visualization,
             table,
             visualizationId,
             datasourceSuggestion,
             currentVisualizationState,
-            subVisualizationId
+            subVisualizationId,
+            palette
           );
         })
       )
@@ -165,7 +176,8 @@ function getVisualizationSuggestions(
   visualizationId: string,
   datasourceSuggestion: DatasourceSuggestion & { datasourceId: string },
   currentVisualizationState: unknown,
-  subVisualizationId?: string
+  subVisualizationId?: string,
+  mainPalette?: PaletteOutput
 ) {
   return visualization
     .getSuggestions({
@@ -173,6 +185,7 @@ function getVisualizationSuggestions(
       state: currentVisualizationState,
       keptLayerIds: datasourceSuggestion.keptLayerIds,
       subVisualizationId,
+      mainPalette,
     })
     .map(({ state, ...visualizationSuggestion }) => ({
       ...visualizationSuggestion,
