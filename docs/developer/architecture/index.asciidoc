@@ -9,6 +9,7 @@ to the high rate of change.
 ==============================================
 
 To begin with plugin development, we recommend reading our overview of how plugins work:
+
 * <<kibana-platform-plugin-api>>.
 
 Our developer services are changing all the time. One of the best ways to discover and learn about them is to read the available
@@ -19,16 +20,16 @@ A few services also automatically generate api documentation which can be browse
 
 A few notable services are called out below.
 
+* <<kibana-platform-core-api>>
 * <<development-security>>
-* <<development-plugin-saved-objects>>
 * <<add-data-tutorials>>
 * <<development-visualize-index>>
 
-include::kibana-platform-plugin-api.asciidoc[leveloffset=+1]
+include::plugins/kibana-platform-plugin-api.asciidoc[leveloffset=+1]
+
+include::core/core-api.asciidoc[leveloffset=+1]
 
 include::security/index.asciidoc[leveloffset=+1]
-
-include::development-plugin-saved-objects.asciidoc[leveloffset=+1]
 
 include::add-data-tutorials.asciidoc[leveloffset=+1]
 

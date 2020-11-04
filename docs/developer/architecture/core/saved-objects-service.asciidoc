@@ -1,7 +1,7 @@
-[[development-plugin-saved-objects]]
-== Using Saved Objects
+[[saved-objects-service]]
+== Saved Objects service
 
-Saved Objects allow {kib} plugins to use {es} like a primary
+`Saved Objects service` allows {kib} plugins to use {es} like a primary
 database. Think of it as an Object Document Mapper for {es}. Once a
 plugin has registered one or more Saved Object types, the Saved Objects client
 can be used to query or perform create, read, update and delete operations on
