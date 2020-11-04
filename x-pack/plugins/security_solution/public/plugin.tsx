@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
-
+import React, { lazy, memo, useEffect, useState } from 'react';
 import {
   PluginSetup,
   PluginStart,
@@ -44,8 +44,6 @@ import {
   DEFAULT_INDEX_KEY,
 } from '../common/constants';
 
-import { ConfigureEndpointPackagePolicy } from './management/pages/policy/view/ingest_manager_integration/configure_package_policy';
-
 import { SecurityPageName } from './app/types';
 import { manageOldSiemRoutes } from './helpers';
 import {
@@ -63,6 +61,7 @@ import {
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
 import { getCaseConnectorUI } from './common/lib/connectors';
+import { IntegrationPolicyEditExtensionComponent } from '../../ingest_manager/common/types/ui_extensions';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -332,9 +331,49 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
   public start(core: CoreStart, plugins: StartPlugins) {
     KibanaServices.init({ ...core, ...plugins, kibanaVersion: this.kibanaVersion });
     if (plugins.ingestManager) {
+      const { registerExtension } = plugins.ingestManager;
+
+      const LazyConfigureEndpointPackagePolicy = lazy<IntegrationPolicyEditExtensionComponent>(
+        async () => {
+          const { ConfigureEndpointPackagePolicy } = await import(
+            './management/pages/policy/view/ingest_manager_integration/configure_package_policy'
+          );
+          return {
+            // FIXME: remove casting once old UI component registration is removed
+            default: (ConfigureEndpointPackagePolicy as unknown) as IntegrationPolicyEditExtensionComponent,
+          };
+        }
+      );
+
+      registerExtension({
+        integration: 'endpoint',
+        type: 'integration-policy',
+        view: 'edit',
+        component: LazyConfigureEndpointPackagePolicy,
+      });
+
+      // This will be removed as soon as support for the above extension is implemented in Fleet
+      // @ts-ignore
       plugins.ingestManager.registerPackagePolicyComponent(
         'endpoint',
-        ConfigureEndpointPackagePolicy
+        // eslint-disable-next-line react/display-name
+        memo((props) => {
+          const [Show, setShow] = useState();
+
+          useEffect(() => {
+            import(
+              './management/pages/policy/view/ingest_manager_integration/configure_package_policy'
+            ).then((response) => {
+              // @ts-ignore
+              setShow(() => response.ConfigureEndpointPackagePolicy);
+            });
+          }, []);
+
+          return (
+            // @ts-ignore
+            <>{Show && <Show {...props} />}</>
+          );
+        })
       );
     }
 
