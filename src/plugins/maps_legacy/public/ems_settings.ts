@@ -17,7 +17,13 @@
  * under the License.
  */
 
-import { MapsLegacyConfig } from '../config';
+import {
+  DEFAULT_EMS_FILE_API_URL,
+  DEFAULT_EMS_FONT_LIBRARY_URL,
+  DEFAULT_EMS_LANDING_PAGE_URL,
+  DEFAULT_EMS_TILE_API_URL,
+  MapsLegacyConfig,
+} from '../config';
 
 export class EMSSettings {
   private readonly _config: MapsLegacyConfig;
@@ -42,33 +48,33 @@ export class EMSSettings {
   }
 
   getEMSFileApiUrl(): string {
-    if (this._isEMSUrlSet()) {
-      return `${this._getEMSRoot()}/file`;
-    } else {
+    if (this._config.emsFileApiUrl !== DEFAULT_EMS_FILE_API_URL || !this._isEMSUrlSet()) {
       return this._config.emsFileApiUrl;
+    } else {
+      return `${this._getEMSRoot()}/file`;
     }
   }
 
   getEMSTileApiUrl(): string {
-    if (this._isEMSUrlSet()) {
-      return `${this._getEMSRoot()}/tile`;
-    } else {
+    if (this._config.emsTileApiUrl !== DEFAULT_EMS_TILE_API_URL || !this._isEMSUrlSet()) {
       return this._config.emsTileApiUrl;
+    } else {
+      return `${this._getEMSRoot()}/tile`;
     }
   }
   getEMSLandingPageUrl(): string {
-    if (this._isEMSUrlSet()) {
-      return `${this._getEMSRoot()}/maps`;
-    } else {
+    if (this._config.emsLandingPageUrl !== DEFAULT_EMS_LANDING_PAGE_URL || !this._isEMSUrlSet()) {
       return this._config.emsLandingPageUrl;
+    } else {
+      return `${this._getEMSRoot()}/maps`;
     }
   }
 
   getEMSFontLibraryUrl(): string {
-    if (this._isEMSUrlSet()) {
-      return `${this._getEMSRoot()}/tile/fonts/{fontstack}/{range}.pbf`;
-    } else {
+    if (this._config.emsFontLibraryUrl !== DEFAULT_EMS_FONT_LIBRARY_URL || !this._isEMSUrlSet()) {
       return this._config.emsFontLibraryUrl;
+    } else {
+      return `${this._getEMSRoot()}/tile/fonts/{fontstack}/{range}.pbf`;
     }
   }
 }

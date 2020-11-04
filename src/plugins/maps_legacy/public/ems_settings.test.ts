@@ -117,6 +117,70 @@ describe('EMSSettings', () => {
         );
         expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps');
       });
+
+      describe('internal settings overrides (the below behavior is not publically supported, but aids internal debugging use-cases)', () => {
+        test(`should override internal emsFileApiUrl`, () => {
+          const emsSettings = new EMSSettings({
+            ...mockConfig,
+            ...{
+              emsUrl: 'https://localhost:8080',
+              emsFileApiUrl: 'https://file.foobar',
+            },
+          });
+          expect(emsSettings.getEMSFileApiUrl()).toBe('https://file.foobar');
+          expect(emsSettings.getEMSTileApiUrl()).toBe('https://localhost:8080/tile');
+          expect(emsSettings.getEMSFontLibraryUrl()).toBe(
+            'https://localhost:8080/tile/fonts/{fontstack}/{range}.pbf'
+          );
+          expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps');
+        });
+
+        test(`should override internal emsTileApiUrl`, () => {
+          const emsSettings = new EMSSettings({
+            ...mockConfig,
+            ...{
+              emsUrl: 'https://localhost:8080',
+              emsTileApiUrl: 'https://tile.foobar',
+            },
+          });
+          expect(emsSettings.getEMSFileApiUrl()).toBe('https://localhost:8080/file');
+          expect(emsSettings.getEMSTileApiUrl()).toBe('https://tile.foobar');
+          expect(emsSettings.getEMSFontLibraryUrl()).toBe(
+            'https://localhost:8080/tile/fonts/{fontstack}/{range}.pbf'
+          );
+          expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps');
+        });
+
+        test('should override internal emsFontLibraryUrl', () => {
+          const emsSettings = new EMSSettings({
+            ...mockConfig,
+            ...{
+              emsUrl: 'https://localhost:8080',
+              emsFontLibraryUrl: 'https://maps.foobar/fonts',
+            },
+          });
+          expect(emsSettings.getEMSFileApiUrl()).toBe('https://localhost:8080/file');
+          expect(emsSettings.getEMSTileApiUrl()).toBe('https://localhost:8080/tile');
+          expect(emsSettings.getEMSFontLibraryUrl()).toBe('https://maps.foobar/fonts');
+          expect(emsSettings.getEMSLandingPageUrl()).toBe('https://localhost:8080/maps');
+        });
+
+        test('should override internal emsLandingPageUrl', () => {
+          const emsSettings = new EMSSettings({
+            ...mockConfig,
+            ...{
+              emsUrl: 'https://localhost:8080',
+              emsLandingPageUrl: 'https://maps.foobar',
+            },
+          });
+          expect(emsSettings.getEMSFileApiUrl()).toBe('https://localhost:8080/file');
+          expect(emsSettings.getEMSTileApiUrl()).toBe('https://localhost:8080/tile');
+          expect(emsSettings.getEMSFontLibraryUrl()).toBe(
+            'https://localhost:8080/tile/fonts/{fontstack}/{range}.pbf'
+          );
+          expect(emsSettings.getEMSLandingPageUrl()).toBe('https://maps.foobar');
+        });
+      });
     });
   });
 });
