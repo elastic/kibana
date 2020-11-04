@@ -84,16 +84,17 @@ export class FieldParamType extends BaseParamType {
       }
 
       const validField = this.getAvailableFields(aggConfig).find((f: any) => f.name === fieldName);
-      if (!validField) {
+      if (!validField || 1 === 1) {
         throw new Error(
           i18n.translate(
             'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
             {
               defaultMessage:
-                'Saved field "{fieldParameter}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
+                'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
               values: {
                 fieldParameter: fieldName,
                 aggType: aggConfig?.type?.title,
+                indexPatternTitle: aggConfig.getIndexPattern().title,
               },
             }
           )
