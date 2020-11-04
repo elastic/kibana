@@ -6,29 +6,28 @@
 
 import { i18n } from '@kbn/i18n';
 import { mlResultsService } from '../services/results_service';
-import { getToastNotificationService } from '../services/toast_notification_service';
+import { ToastNotificationService } from '../services/toast_notification_service';
 import { getControlsForDetector } from './get_controls_for_detector';
 import { getCriteriaFields } from './get_criteria_fields';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Get the function description from the record with the highest anomaly score
- * @param selectedDetectorIndex
- * @param selectedEntities
- * @param selectedJobId
- * @param selectedJob
  */
-export const getFunctionDescription = async ({
-  selectedDetectorIndex,
-  selectedEntities,
-  selectedJobId,
-  selectedJob,
-}: {
-  selectedDetectorIndex: number;
-  selectedEntities: Record<string, any>;
-  selectedJobId: string;
-  selectedJob: CombinedJob;
-}) => {
+export const getFunctionDescription = async (
+  {
+    selectedDetectorIndex,
+    selectedEntities,
+    selectedJobId,
+    selectedJob,
+  }: {
+    selectedDetectorIndex: number;
+    selectedEntities: Record<string, any>;
+    selectedJobId: string;
+    selectedJob: CombinedJob;
+  },
+  toastNotificationService: ToastNotificationService
+) => {
   // if the detector's function is metric, fetch the highest scoring anomaly record
   // and set to plot the function_description (avg/min/max) of that record by default
   if (selectedJob?.analysis_config?.detectors[selectedDetectorIndex]?.function !== 'metric') return;
@@ -48,7 +47,7 @@ export const getFunctionDescription = async ({
       return highestScoringAnomaly?.function_description;
     }
   } catch (error) {
-    getToastNotificationService().displayErrorToast(
+    toastNotificationService.displayErrorToast(
       error,
       i18n.translate('xpack.ml.timeSeriesExplorer.highestAnomalyScoreErrorToastTitle', {
         defaultMessage: 'An error occurred getting record with the highest anomaly score',

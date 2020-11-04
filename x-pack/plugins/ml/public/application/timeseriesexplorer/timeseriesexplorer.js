@@ -399,12 +399,15 @@ export class TimeSeriesExplorer extends React.Component {
     const { selectedDetectorIndex, selectedEntities, selectedJobId } = this.props;
     const selectedJob = mlJobService.getJob(selectedJobId);
 
-    const functionDescriptionToPlot = await getFunctionDescription({
-      selectedDetectorIndex,
-      selectedEntities,
-      selectedJobId,
-      selectedJob,
-    });
+    const functionDescriptionToPlot = await getFunctionDescription(
+      {
+        selectedDetectorIndex,
+        selectedEntities,
+        selectedJobId,
+        selectedJob,
+      },
+      this.props.toastNotificationService
+    );
     this.setFunctionDescription(functionDescriptionToPlot);
   };
 
@@ -978,6 +981,7 @@ export class TimeSeriesExplorer extends React.Component {
       zoomToFocusLoaded,
       autoZoomDuration,
     };
+    console.log('this.props', this.props.toastNotificationService);
 
     const jobs = createTimeSeriesJobData(mlJobService.jobs);
 
