@@ -92,7 +92,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
       }
     },
     saveLogRetention: async ({ enabled, option }) => {
-      const updateData = { [option.toString()]: { enabled } };
+      const updateData = { [option]: { enabled } };
 
       try {
         const { http } = HttpLogic.values;
