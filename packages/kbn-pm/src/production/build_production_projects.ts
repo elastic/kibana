@@ -29,13 +29,13 @@ import {
   readPackageJson,
   writePackageJson,
 } from '../utils/package_json';
-import { Project } from '../utils/project';
 import {
   buildProjectGraph,
   getProjects,
   includeTransitiveProjects,
   topologicallyBatchProjects,
 } from '../utils/projects';
+import { Project } from '..';
 
 export async function buildProductionProjects({
   kibanaRoot,
@@ -131,7 +131,7 @@ async function copyToBuild(project: Project, kibanaRoot: string, buildRoot: stri
     dot: true,
     onlyFiles: true,
     parents: true,
-  });
+  } as copy.Options);
 
   // If a project is using an intermediate build directory, we special-case our
   // handling of `package.json`, as the project build process might have copied

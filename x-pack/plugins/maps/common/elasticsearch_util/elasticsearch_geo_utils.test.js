@@ -250,6 +250,30 @@ describe('geoShapeToGeometry', () => {
     expect(shapes[0].coordinates).toEqual(coordinates);
   });
 
+  it('Should convert envelope to geojson', () => {
+    const coordinates = [
+      [100.0, 1.0],
+      [101.0, 0.0],
+    ];
+    const value = {
+      type: 'envelope',
+      coordinates: coordinates,
+    };
+    const shapes = [];
+    geoShapeToGeometry(value, shapes);
+    expect(shapes.length).toBe(1);
+    expect(shapes[0].type).toBe('Polygon');
+    expect(shapes[0].coordinates).toEqual([
+      [
+        [100, 1],
+        [100, 0],
+        [101, 0],
+        [101, 1],
+        [100, 1],
+      ],
+    ]);
+  });
+
   it('Should convert array of values', () => {
     const linestringCoordinates = [
       [-77.03653, 38.897676],

@@ -455,6 +455,10 @@ export function getDatasourceSuggestionsFromCurrentState(
           ({ name }) => name === indexPattern.timeFieldName
         );
 
+        const hasNumericDimension =
+          buckets.length === 1 &&
+          buckets.some((columnId) => layer.columns[columnId].dataType === 'number');
+
         const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
         if (metrics.length === 0) {
           // intermediary chart without metric, don't try to suggest reduced versions
@@ -482,7 +486,9 @@ export function getDatasourceSuggestionsFromCurrentState(
         } else {
           suggestions.push(...createSimplifiedTableSuggestions(state, layerId));
 
-          if (!timeDimension && timeField) {
+          // base range intervals are of number dataType.
+          // Custom range/intervals have a different dataType so they still receive the Over Time suggestion
+          if (!timeDimension && timeField && !hasNumericDimension) {
             // suggest current configuration over time if there is a default time field
             // and no time dimension yet
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
@@ -653,9 +659,13 @@ function createSuggestionWithDefaultDateHistogram(
     field: timeField,
     suggestedPriority: undefined,
   });
+
   const updatedLayer = {
     indexPatternId: layer.indexPatternId,
-    columns: { ...layer.columns, [newId]: timeColumn },
+    columns: {
+      ...layer.columns,
+      [newId]: timeColumn,
+    },
     columnOrder: [...buckets, newId, ...metrics],
   };
   return buildSuggestion({

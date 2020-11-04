@@ -99,6 +99,25 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(definedHealthStatuses.length).to.be(0);
         });
       });
+
+      describe('and fetching a list of services with a filter', () => {
+        let response: PromiseReturnType<typeof supertest.get>;
+        before(async () => {
+          response = await supertest.get(
+            `/api/apm/services?start=${start}&end=${end}&uiFilters=${encodeURIComponent(
+              `{"kuery":"service.name:opbeans-java","environment":"ENVIRONMENT_ALL"}`
+            )}`
+          );
+        });
+
+        it('does not return health statuses for services that are not found in APM data', () => {
+          expect(response.status).to.be(200);
+
+          expect(response.body.items.length).to.be(1);
+
+          expect(response.body.items[0].serviceName).to.be('opbeans-java');
+        });
+      });
     });
   });
 }

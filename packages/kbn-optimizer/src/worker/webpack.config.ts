@@ -63,6 +63,14 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     optimization: {
       noEmitOnErrors: true,
+      splitChunks: {
+        maxAsyncRequests: 10,
+        cacheGroups: {
+          default: {
+            reuseExistingChunk: false,
+          },
+        },
+      },
     },
 
     externals: [UiSharedDeps.externals],

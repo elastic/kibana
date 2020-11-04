@@ -63,6 +63,7 @@ import {
   KibanaLegacyStart,
 } from '../../kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import {
@@ -135,6 +136,7 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export type DashboardSetup = void;
@@ -299,6 +301,7 @@ export class DashboardPlugin
           kibanaLegacy: { dashboardConfig },
           urlForwarding: { navigateToDefaultApp, navigateToLegacyKibanaUrl },
           savedObjects,
+          savedObjectsTaggingOss,
         } = pluginsStart;
 
         const deps: RenderDeps = {
@@ -327,6 +330,7 @@ export class DashboardPlugin
           scopedHistory: () => this.currentHistory!,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjects,
+          savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
           restorePreviousUrl,
         };
         // make sure the index pattern list is up to date
@@ -412,10 +416,7 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: StartDependencies): DashboardStart {
     const { notifications } = core;
-    const {
-      uiActions,
-      data: { indexPatterns, search },
-    } = plugins;
+    const { uiActions } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
@@ -433,24 +434,22 @@ export class DashboardPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
-      const addToLibraryAction = new AddToLibraryAction();
+      const addToLibraryAction = new AddToLibraryAction({ toasts: notifications.toasts });
       uiActions.registerAction(addToLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
-      const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
+
+      const unlinkFromLibraryAction = new UnlinkFromLibraryAction({ toasts: notifications.toasts });
       uiActions.registerAction(unlinkFromLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
 
-      const libraryNotificationAction = new LibraryNotificationAction();
+      const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
     }
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
-      indexPatterns,
-      search,
-      chrome: core.chrome,
-      overlays: core.overlays,
+      savedObjects: plugins.savedObjects,
     });
     const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE

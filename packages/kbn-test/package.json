@@ -5,9 +5,12 @@
   "license": "Apache-2.0",
   "main": "./target/index.js",
   "scripts": {
-    "build": "babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx --ignore *.test.js,**/__tests__/** --source-maps=inline",
+    "build": "../../node_modules/.bin/babel src --out-dir target --delete-dir-on-start --extensions .ts,.js,.tsx --ignore *.test.js,**/__tests__/** --source-maps=inline",
     "kbn:bootstrap": "yarn build",
     "kbn:watch": "yarn build --watch"
+  },
+  "kibana": {
+    "devOnly": true
   },
   "devDependencies": {
     "@kbn/babel-preset": "link:../kbn-babel-preset",

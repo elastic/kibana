@@ -31,8 +31,7 @@ export const CreatePackageJson: Task = {
     const transformedDeps = transformDependencies(pkg.dependencies as { [key: string]: string });
     const foundPkgDeps = await findUsedDependencies(
       transformedDeps,
-      normalizePosixPath(build.resolvePath('.')),
-      build.isOss()
+      normalizePosixPath(build.resolvePath('.'))
     );
 
     const newPkg = {

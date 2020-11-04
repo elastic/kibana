@@ -20,6 +20,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
 
 import {
   Axis,
@@ -96,7 +97,7 @@ export const TimeSeries = ({
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { colors, theme: themeService } = getChartsSetup();
+  const { legacyColors: colors, theme: themeService } = getChartsSetup();
   const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
@@ -165,6 +166,7 @@ export const TimeSeries = ({
           {
             id,
             label,
+            labelFormatted,
             bars,
             lines,
             data,
@@ -188,14 +190,17 @@ export const TimeSeries = ({
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
           const finalColor = color ?? colors.mappedColors.mapping[label];
-
+          let seriesName = label.toString();
+          if (labelFormatted) {
+            seriesName = labelDateFormatter(labelFormatted);
+          }
           if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={label.toString()}
+                name={seriesName}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
@@ -221,7 +226,7 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={label.toString()}
+                name={seriesName}
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}

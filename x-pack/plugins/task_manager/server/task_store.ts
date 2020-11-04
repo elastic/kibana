@@ -20,15 +20,13 @@ import {
   SavedObjectsRawDoc,
   ISavedObjectsRepository,
   SavedObjectsUpdateResponse,
+  ElasticsearchClient,
 } from '../../../../src/core/server';
 
 import { asOk, asErr, Result } from './lib/result_type';
 
 import {
   ConcreteTaskInstance,
-  ElasticJs,
-  TaskDefinition,
-  TaskDictionary,
   TaskInstance,
   TaskLifecycle,
   TaskLifecycleResult,
@@ -43,30 +41,29 @@ import {
   shouldBeOneOf,
   mustBeAllOf,
   filterDownBy,
-  ExistsFilter,
-  TermFilter,
-  RangeFilter,
   asPinnedQuery,
   matchesClauses,
+  SortOptions,
 } from './queries/query_clauses';
 
 import {
-  updateFields,
+  updateFieldsAndMarkAsFailed,
   IdleTaskWithExpiredRunAt,
   InactiveTasks,
   RunningOrClaimingTaskWithExpiredRetryAt,
-  TaskWithSchedule,
-  taskWithLessThanMaxAttempts,
   SortByRunAtAndRetryAt,
   tasksClaimedByOwner,
 } from './queries/mark_available_tasks_as_claimed';
+import { TaskTypeDictionary } from './task_type_dictionary';
+
+import { ESSearchResponse, ESSearchBody } from '../../apm/typings/elasticsearch';
 
 export interface StoreOpts {
-  callCluster: ElasticJs;
+  esClient: ElasticsearchClient;
   index: string;
   taskManagerId: string;
   maxAttempts: number;
-  definitions: TaskDictionary<TaskDefinition>;
+  definitions: TaskTypeDictionary;
   savedObjectsRepository: ISavedObjectsRepository;
   serializer: SavedObjectsSerializer;
 }
@@ -78,6 +75,9 @@ export interface SearchOpts {
   seq_no_primary_term?: boolean;
   search_after?: unknown[];
 }
+
+export type AggregationOpts = Pick<Required<ESSearchBody>, 'aggs'> &
+  Pick<ESSearchBody, 'query' | 'size'>;
 
 export interface UpdateByQuerySearchOpts extends SearchOpts {
   script?: object;
@@ -123,8 +123,8 @@ export class TaskStore {
   public readonly taskManagerId: string;
   public readonly errors$ = new Subject<Error>();
 
-  private callCluster: ElasticJs;
-  private definitions: TaskDictionary<TaskDefinition>;
+  private esClient: ElasticsearchClient;
+  private definitions: TaskTypeDictionary;
   private savedObjectsRepository: ISavedObjectsRepository;
   private serializer: SavedObjectsSerializer;
   private events$: Subject<TaskClaim>;
@@ -132,7 +132,7 @@ export class TaskStore {
   /**
    * Constructs a new TaskStore.
    * @param {StoreOpts} opts
-   * @prop {CallCluster} callCluster - The elastic search connection
+   * @prop {esClient} esClient - An elasticsearch client
    * @prop {string} index - The name of the task manager index
    * @prop {number} maxAttempts - The maximum number of attempts before a task will be abandoned
    * @prop {TaskDefinition} definition - The definition of the task being run
@@ -140,7 +140,7 @@ export class TaskStore {
    * @prop {savedObjectsRepository} - An instance to the saved objects repository
    */
   constructor(opts: StoreOpts) {
-    this.callCluster = opts.callCluster;
+    this.esClient = opts.esClient;
     this.index = opts.index;
     this.taskManagerId = opts.taskManagerId;
     this.maxAttempts = opts.maxAttempts;
@@ -164,13 +164,7 @@ export class TaskStore {
    * @param task - The task being scheduled.
    */
   public async schedule(taskInstance: TaskInstance): Promise<ConcreteTaskInstance> {
-    if (!this.definitions[taskInstance.taskType]) {
-      throw new Error(
-        `Unsupported task type "${taskInstance.taskType}". Supported types are ${Object.keys(
-          this.definitions
-        ).join(', ')}`
-      );
-    }
+    this.definitions.ensureHas(taskInstance.taskType);
 
     let savedObject;
     try {
@@ -265,18 +259,25 @@ export class TaskStore {
     claimTasksById: OwnershipClaimingOpts['claimTasksById'],
     size: OwnershipClaimingOpts['size']
   ): Promise<number> {
+    const taskMaxAttempts = [...this.definitions].reduce((accumulator, [type, { maxAttempts }]) => {
+      return { ...accumulator, [type]: maxAttempts || this.maxAttempts };
+    }, {});
     const queryForScheduledTasks = mustBeAllOf(
       // Either a task with idle status and runAt <= now or
       // status running or claiming with a retryAt <= now.
-      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt),
-      // Either task has a schedule or the attempts < the maximum configured
-      shouldBeOneOf<ExistsFilter | TermFilter | RangeFilter>(
-        TaskWithSchedule,
-        ...Object.entries(this.definitions).map(([type, { maxAttempts }]) =>
-          taskWithLessThanMaxAttempts(type, maxAttempts || this.maxAttempts)
-        )
-      )
+      shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
     );
+
+    // The documents should be sorted by runAt/retryAt, unless there are pinned
+    // tasks being queried, in which case we want to sort by score first, and then
+    // the runAt/retryAt.  That way we'll get the pinned tasks first.  Note that
+    // the score seems to favor newer documents rather than older documents, so
+    // if there are not pinned tasks being queried, we do NOT want to sort by score
+    // at all, just by runAt/retryAt.
+    const sort: SortOptions = [SortByRunAtAndRetryAt];
+    if (claimTasksById && claimTasksById.length) {
+      sort.unshift('_score');
+    }
 
     const apmTrans = apm.startTransaction(`taskManager markAvailableTasksAsClaimed`, 'taskManager');
     const { updated } = await this.updateByQuery(
@@ -289,17 +290,15 @@ export class TaskStore {
           ),
           filterDownBy(InactiveTasks)
         ),
-        update: updateFields({
-          ownerId: this.taskManagerId,
-          status: 'claiming',
-          retryAt: claimOwnershipUntil,
-        }),
-        sort: [
-          // sort by score first, so the "pinned" Tasks are first
-          '_score',
-          // the nsort by other fields
-          SortByRunAtAndRetryAt,
-        ],
+        update: updateFieldsAndMarkAsFailed(
+          {
+            ownerId: this.taskManagerId,
+            retryAt: claimOwnershipUntil,
+          },
+          claimTasksById || [],
+          taskMaxAttempts
+        ),
+        sort,
       }),
       {
         max_docs: size,
@@ -473,30 +472,50 @@ export class TaskStore {
   private async search(opts: SearchOpts = {}): Promise<FetchResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
 
-    let result;
     try {
-      result = await this.callCluster('search', {
+      const {
+        body: {
+          hits: { hits: tasks },
+        },
+      } = await this.esClient.search<SearchResponse<SavedObjectsRawDoc['_source']>>({
         index: this.index,
-        ignoreUnavailable: true,
+        ignore_unavailable: true,
         body: {
           ...opts,
           query,
         },
       });
+
+      return {
+        docs: tasks
+          .filter((doc) => this.serializer.isRawSavedObject(doc))
+          .map((doc) => this.serializer.rawToSavedObject(doc))
+          .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
+          .map(savedObjectToConcreteTaskInstance),
+      };
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
+  }
 
-    const rawDocs = (result as SearchResponse<unknown>).hits.hits;
-
-    return {
-      docs: (rawDocs as SavedObjectsRawDoc[])
-        .filter((doc) => this.serializer.isRawSavedObject(doc))
-        .map((doc) => this.serializer.rawToSavedObject(doc))
-        .map((doc) => omit(doc, 'namespace') as SavedObject<SerializedConcreteTaskInstance>)
-        .map(savedObjectToConcreteTaskInstance),
-    };
+  public async aggregate<TSearchRequest extends AggregationOpts>({
+    aggs,
+    query,
+    size = 0,
+  }: TSearchRequest): Promise<ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>> {
+    const { body } = await this.esClient.search<
+      ESSearchResponse<ConcreteTaskInstance, { body: TSearchRequest }>
+    >({
+      index: this.index,
+      ignore_unavailable: true,
+      body: ensureAggregationOnlyReturnsTaskObjects({
+        query,
+        aggs,
+        size,
+      }),
+    });
+    return body;
   }
 
   private async updateByQuery(
@@ -505,11 +524,13 @@ export class TaskStore {
     { max_docs }: UpdateByQueryOpts = {}
   ): Promise<UpdateByQueryResult> {
     const { query } = ensureQueryOnlyReturnsTaskObjects(opts);
-    let result;
     try {
-      result = await this.callCluster('updateByQuery', {
+      const {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        body: { total, updated, version_conflicts },
+      } = await this.esClient.updateByQuery<UpdateDocumentByQueryResponse>({
         index: this.index,
-        ignoreUnavailable: true,
+        ignore_unavailable: true,
         refresh: true,
         max_docs,
         conflicts: 'proceed',
@@ -518,18 +539,16 @@ export class TaskStore {
           query,
         },
       });
+
+      return {
+        total,
+        updated,
+        version_conflicts,
+      };
     } catch (e) {
       this.errors$.next(e);
       throw e;
     }
-
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { total, updated, version_conflicts } = result as UpdateDocumentByQueryResponse;
-    return {
-      total,
-      updated,
-      version_conflicts,
-    };
   }
 }
 
@@ -578,6 +597,22 @@ function ensureQueryOnlyReturnsTaskObjects(opts: SearchOpts): SearchOpts {
     ? { bool: { must: [queryOnlyTasks, originalQuery] } }
     : queryOnlyTasks;
 
+  return {
+    ...opts,
+    query,
+  };
+}
+
+function ensureAggregationOnlyReturnsTaskObjects(opts: AggregationOpts): AggregationOpts {
+  const originalQuery = opts.query;
+  const filterToOnlyTasks = {
+    bool: {
+      filter: [{ term: { type: 'task' } }],
+    },
+  };
+  const query = originalQuery
+    ? { bool: { must: [filterToOnlyTasks, originalQuery] } }
+    : filterToOnlyTasks;
   return {
     ...opts,
     query,

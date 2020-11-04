@@ -49,7 +49,12 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
         return siemResponse.error({ statusCode: 404 });
       }
 
-      const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+      const mlAuthz = buildMlAuthz({
+        license: context.licensing.license,
+        ml,
+        request,
+        savedObjectsClient,
+      });
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
@@ -183,12 +188,7 @@ export const patchRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) => 
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformValidateBulkError(
-                rule.id,
-                rule,
-                ruleActions,
-                ruleStatuses.saved_objects[0]
-              );
+              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }

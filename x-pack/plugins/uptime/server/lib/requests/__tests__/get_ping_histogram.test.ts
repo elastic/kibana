@@ -35,7 +35,7 @@ describe('getPingHistogram', () => {
     },
   };
 
-  it('returns a single bucket if array has 1', async () => {
+  it.skip('returns a single bucket if array has 1', async () => {
     expect.assertions(2);
     const mockEsClient = jest.fn();
     mockEsClient.mockReturnValue({

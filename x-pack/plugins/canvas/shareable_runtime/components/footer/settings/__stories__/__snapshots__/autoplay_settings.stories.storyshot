@@ -44,12 +44,12 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
           <span
             className="euiSwitch__track"
           >
-            <div
+            <span
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
             />
-            <div
+            <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
@@ -139,7 +139,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: off, 
                 onFocus={[Function]}
                 style={
                   Object {
-                    "minWidth": "auto",
+                    "minWidth": undefined,
                   }
                 }
                 type="submit"
@@ -207,12 +207,12 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
           <span
             className="euiSwitch__track"
           >
-            <div
+            <span
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
             />
-            <div
+            <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
@@ -302,7 +302,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings component: on, 5
                 onFocus={[Function]}
                 style={
                   Object {
-                    "minWidth": "auto",
+                    "minWidth": undefined,
                   }
                 }
                 type="submit"
@@ -370,12 +370,12 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
           <span
             className="euiSwitch__track"
           >
-            <div
+            <span
               className="euiSwitch__icon"
               data-euiicon-type="cross"
               size="m"
             />
-            <div
+            <span
               className="euiSwitch__icon euiSwitch__icon--checked"
               data-euiicon-type="check"
               size="m"
@@ -465,7 +465,7 @@ exports[`Storyshots shareables/Footer/Settings/AutoplaySettings contextual 1`] =
                 onFocus={[Function]}
                 style={
                   Object {
-                    "minWidth": "auto",
+                    "minWidth": undefined,
                   }
                 }
                 type="submit"

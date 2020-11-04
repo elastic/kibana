@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "scripts": {
-    "interpreter:peg": "pegjs src/common/lib/grammar.peg",
+    "interpreter:peg": "../../node_modules/.bin/pegjs src/common/lib/grammar.peg",
     "build": "node scripts/build",
     "kbn:bootstrap": "node scripts/build --dev",
     "kbn:watch": "node scripts/build --dev --watch"

@@ -301,6 +301,15 @@ export interface HostResultList {
 }
 
 /**
+ * The data_stream fields in an elasticsearch document.
+ */
+export interface DataStream {
+  dataset: string;
+  namespace: string;
+  type: string;
+}
+
+/**
  * Operating System metadata.
  */
 export interface OSFields {
@@ -556,6 +565,7 @@ export type HostMetadata = Immutable<{
     version: string;
   };
   host: Host;
+  data_stream: DataStream;
 }>;
 
 export interface LegacyEndpointEvent {
@@ -674,6 +684,11 @@ export type SafeEndpointEvent = Partial<{
     id: ECSField<string>;
     version: ECSField<string>;
     type: ECSField<string>;
+  }>;
+  data_stream: Partial<{
+    type: ECSField<string>;
+    dataset: ECSField<string>;
+    namespace: ECSField<string>;
   }>;
   ecs: Partial<{
     version: ECSField<string>;
@@ -845,6 +860,7 @@ type KbnConfigSchemaNonOptionalProps<Props extends Record<string, unknown>> = Pi
  */
 export interface PolicyConfig {
   windows: {
+    advanced?: {};
     events: {
       dll_and_driver_load: boolean;
       dns: boolean;
@@ -858,19 +874,33 @@ export interface PolicyConfig {
     logging: {
       file: string;
     };
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
   };
   mac: {
+    advanced?: {};
     events: {
       file: boolean;
       process: boolean;
       network: boolean;
     };
     malware: MalwareFields;
+    popup: {
+      malware: {
+        message: string;
+        enabled: boolean;
+      };
+    };
     logging: {
       file: string;
     };
   };
   linux: {
+    advanced?: {};
     events: {
       file: boolean;
       process: boolean;
@@ -889,15 +919,15 @@ export interface UIPolicyConfig {
   /**
    * Windows-specific policy configuration that is supported via the UI
    */
-  windows: Pick<PolicyConfig['windows'], 'events' | 'malware'>;
+  windows: Pick<PolicyConfig['windows'], 'events' | 'malware' | 'popup' | 'advanced'>;
   /**
    * Mac-specific policy configuration that is supported via the UI
    */
-  mac: Pick<PolicyConfig['mac'], 'malware' | 'events'>;
+  mac: Pick<PolicyConfig['mac'], 'malware' | 'events' | 'popup' | 'advanced'>;
   /**
    * Linux-specific policy configuration that is supported via the UI
    */
-  linux: Pick<PolicyConfig['linux'], 'events'>;
+  linux: Pick<PolicyConfig['linux'], 'events' | 'advanced'>;
 }
 
 /** Policy: Malware protection fields */
@@ -1002,6 +1032,7 @@ interface HostPolicyResponseAppliedArtifact {
  */
 export interface HostPolicyResponse {
   '@timestamp': number;
+  data_stream: DataStream;
   elastic: {
     agent: {
       id: string;

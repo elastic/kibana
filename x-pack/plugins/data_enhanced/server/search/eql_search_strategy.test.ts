@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import type { RequestHandlerContext, Logger } from 'kibana/server';
 
-import { Logger, RequestHandlerContext } from 'src/core/server';
 import { EqlSearchStrategyRequest } from '../../common/search/types';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
 
@@ -97,6 +97,18 @@ describe('EQL search strategy', () => {
 
         expect(mockEqlSearch).not.toHaveBeenCalled();
         expect(requestParams).toEqual(expect.objectContaining({ id: 'my-search-id' }));
+      });
+
+      it('emits an error if the client throws', async () => {
+        expect.assertions(1);
+        mockEqlSearch.mockReset().mockRejectedValueOnce(new Error('client error'));
+        const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
+        eqlSearch.search({ options, params }, {}, mockContext).subscribe(
+          () => {},
+          (err) => {
+            expect(err).toEqual(new Error('client error'));
+          }
+        );
       });
     });
 

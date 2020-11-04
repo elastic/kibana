@@ -35,7 +35,7 @@ describe('AbstractSearchStrategy', () => {
       },
     };
 
-    abstractSearchStrategy = new AbstractSearchStrategy('es');
+    abstractSearchStrategy = new AbstractSearchStrategy();
   });
 
   test('should init an AbstractSearchStrategy instance', () => {
@@ -50,7 +50,7 @@ describe('AbstractSearchStrategy', () => {
     expect(fields).toBe(mockedFields);
     expect(req.pre.indexPatternsService.getFieldsForWildcard).toHaveBeenCalledWith({
       pattern: indexPattern,
-      fieldCapsOptions: { allowNoIndices: true },
+      fieldCapsOptions: { allow_no_indices: true },
     });
   });
 
@@ -90,9 +90,7 @@ describe('AbstractSearchStrategy', () => {
         },
         indexType: undefined,
       },
-      {
-        strategy: 'es',
-      },
+      {},
       {}
     );
   });

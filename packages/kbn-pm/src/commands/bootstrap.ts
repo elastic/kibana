@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { sep } from 'path';
 import { linkProjectExecutables } from '../utils/link_project_executables';
 import { log } from '../utils/log';
 import { parallelizeBatches } from '../utils/parallelize';
@@ -26,7 +27,7 @@ import { ICommand } from './';
 import { getAllChecksums } from '../utils/project_checksums';
 import { BootstrapCacheFile } from '../utils/bootstrap_cache_file';
 import { readYarnLock } from '../utils/yarn_lock';
-import { validateYarnLock } from '../utils/validate_yarn_lock';
+import { validateDependencies } from '../utils/validate_dependencies';
 
 export const BootstrapCommand: ICommand = {
   description: 'Install dependencies and crosslink projects',
@@ -34,7 +35,7 @@ export const BootstrapCommand: ICommand = {
 
   async run(projects, projectGraph, { options, kbn }) {
     const batchedProjects = topologicallyBatchProjects(projects, projectGraph);
-
+    const kibanaProjectPath = projects.get('kibana')?.path;
     const extraArgs = [
       ...(options['frozen-lockfile'] === true ? ['--frozen-lockfile'] : []),
       ...(options['prefer-offline'] === true ? ['--prefer-offline'] : []),
@@ -42,18 +43,20 @@ export const BootstrapCommand: ICommand = {
 
     for (const batch of batchedProjects) {
       for (const project of batch) {
+        const isExternalPlugin = project.path.includes(`${kibanaProjectPath}${sep}plugins`);
+
         if (!project.hasDependencies()) {
           continue;
         }
 
-        if (project.isSinglePackageJsonProject) {
+        if (project.isSinglePackageJsonProject || isExternalPlugin) {
           await project.installDependencies({ extraArgs });
           continue;
         }
 
-        if (!project.isEveryDependencyLocal()) {
+        if (!project.isEveryDependencyLocal() && !isExternalPlugin) {
           throw new Error(
-            `[${project.name}] is not an eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`
+            `[${project.name}] is not eligible to hold non local dependencies. Move the non local dependencies into the top level package.json.`
           );
         }
       }
@@ -62,10 +65,11 @@ export const BootstrapCommand: ICommand = {
     const yarnLock = await readYarnLock(kbn);
 
     if (options.validate) {
-      await validateYarnLock(kbn, yarnLock);
+      await validateDependencies(kbn, yarnLock);
     }
 
-    // Create node_modules/bin for every project
+    // Assure all kbn projects with bin defined scripts
+    // copy those scripts into the top level node_modules folder
     await linkProjectExecutables(projects, projectGraph);
 
     /**

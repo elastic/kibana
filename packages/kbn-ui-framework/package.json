@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "grunt prodBuild",
-    "docSiteStart": "grunt docSiteStart",
-    "docSiteBuild": "grunt docSiteBuild",
-    "createComponent": "yo ./generator-kui/app/component.js",
-    "documentComponent": "yo ./generator-kui/app/documentation.js"
+    "build": "../../node_modules/.bin/grunt prodBuild",
+    "docSiteStart": "../../node_modules/.bin/grunt docSiteStart",
+    "docSiteBuild": "../../node_modules/.bin/grunt docSiteBuild",
+    "createComponent": "../../node_modules/.bin/yo ./generator-kui/app/component.js",
+    "documentComponent": "../../node_modules/.bin/yo ./generator-kui/app/documentation.js"
   },
   "kibana": {
     "build": {

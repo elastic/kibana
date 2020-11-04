@@ -14,7 +14,7 @@ pageLoadAssetSize:
   dashboard: 374194
   dashboardEnhanced: 65646
   dashboardMode: 22716
-  data: 1170713
+  data: 1319839
   dataEnhanced: 50420
   devTools: 38637
   discover: 105145
@@ -54,7 +54,7 @@ pageLoadAssetSize:
   mapsLegacy: 116817
   mapsLegacyLicensing: 20214
   ml: 82187
-  monitoring: 268612
+  monitoring: 50000
   navigation: 37269
   newsfeed: 42228
   observability: 89709
@@ -64,11 +64,13 @@ pageLoadAssetSize:
   reporting: 183418
   rollup: 97204
   savedObjects: 108518
-  savedObjectsManagement: 100503
+  savedObjectsManagement: 101836
+  savedObjectsTagging: 59482
+  savedObjectsTaggingOss: 20590
   searchprofiler: 67080
   security: 189428
   securityOss: 30806
-  securitySolution: 622387
+  securitySolution: 283440
   share: 99061
   snapshotRestore: 79032
   spaces: 387915

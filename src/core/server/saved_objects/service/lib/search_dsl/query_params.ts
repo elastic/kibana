@@ -122,10 +122,12 @@ function getClauseForType(
   };
 }
 
-interface HasReferenceQueryParams {
+export interface HasReferenceQueryParams {
   type: string;
   id: string;
 }
+
+export type SearchOperator = 'AND' | 'OR';
 
 interface QueryParams {
   mappings: IndexMapping;
@@ -134,11 +136,56 @@ interface QueryParams {
   type?: string | string[];
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   search?: string;
+  defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
   rootSearchFields?: string[];
-  defaultSearchOperator?: string;
-  hasReference?: HasReferenceQueryParams;
+  hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
+  hasReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
+}
+
+function getReferencesFilter(
+  references: HasReferenceQueryParams[],
+  operator: SearchOperator = 'OR'
+) {
+  if (operator === 'AND') {
+    return {
+      bool: {
+        must: references.map(getClauseForReference),
+      },
+    };
+  } else {
+    return {
+      bool: {
+        should: references.map(getClauseForReference),
+        minimum_should_match: 1,
+      },
+    };
+  }
+}
+
+export function getClauseForReference(reference: HasReferenceQueryParams) {
+  return {
+    nested: {
+      path: 'references',
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'references.id': reference.id,
+              },
+            },
+            {
+              term: {
+                'references.type': reference.type,
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
 }
 
 /**
@@ -155,12 +202,17 @@ export function getQueryParams({
   rootSearchFields,
   defaultSearchOperator,
   hasReference,
+  hasReferenceOperator,
   kueryNode,
 }: QueryParams) {
   const types = getTypes(
     mappings,
     typeToNamespacesMap ? Array.from(typeToNamespacesMap.keys()) : type
   );
+
+  if (hasReference && !Array.isArray(hasReference)) {
+    hasReference = [hasReference];
+  }
 
   // A de-duplicated set of namespaces makes for a more effecient query.
   //
@@ -181,33 +233,11 @@ export function getQueryParams({
   const bool: any = {
     filter: [
       ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
+      ...(hasReference && hasReference.length
+        ? [getReferencesFilter(hasReference, hasReferenceOperator)]
+        : []),
       {
         bool: {
-          must: hasReference
-            ? [
-                {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            term: {
-                              'references.id': hasReference.id,
-                            },
-                          },
-                          {
-                            term: {
-                              'references.type': hasReference.type,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                },
-              ]
-            : undefined,
           should: types.map((shouldType) => {
             const normalizedNamespaces = normalizeNamespaces(
               typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces

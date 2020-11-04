@@ -20,6 +20,7 @@ export function getAlertType(): AlertTypeModel {
   return {
     id: 'example.always-firing',
     name: 'Always Fires',
+    description: 'Alert when called',
     iconClass: 'bolt',
     alertParamsExpression: AlwaysFiringExpression,
     validate: (alertParams: AlwaysFiringParamsProps['alertParams']) => {

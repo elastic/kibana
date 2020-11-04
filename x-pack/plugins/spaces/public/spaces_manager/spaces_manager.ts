@@ -8,10 +8,14 @@ import { skipWhile } from 'rxjs/operators';
 import { HttpSetup } from 'src/core/public';
 import { SavedObjectsManagementRecord } from 'src/plugins/saved_objects_management/public';
 import { Space } from '../../common/model/space';
-import { GetSpacePurpose } from '../../common/model/types';
+import { GetAllSpacesPurpose, GetSpaceResult } from '../../common/model/types';
 import { CopySavedObjectsToSpaceResponse } from '../copy_saved_objects_to_space/types';
 
 type SavedObject = Pick<SavedObjectsManagementRecord, 'type' | 'id'>;
+interface GetAllSpacesOptions {
+  purpose?: GetAllSpacesPurpose;
+  includeAuthorizedPurposes?: boolean;
+}
 
 export class SpacesManager {
   private activeSpace$: BehaviorSubject<Space | null> = new BehaviorSubject<Space | null>(null);
@@ -30,8 +34,10 @@ export class SpacesManager {
     this.refreshActiveSpace();
   }
 
-  public async getSpaces(purpose?: GetSpacePurpose): Promise<Space[]> {
-    return await this.http.get('/api/spaces/space', { query: { purpose } });
+  public async getSpaces(options: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
+    const { purpose, includeAuthorizedPurposes } = options;
+    const query = { purpose, include_authorized_purposes: includeAuthorizedPurposes };
+    return await this.http.get('/api/spaces/space', { query });
   }
 
   public async getSpace(id: string): Promise<Space> {

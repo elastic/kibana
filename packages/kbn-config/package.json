@@ -6,15 +6,17 @@
   "license": "Apache-2.0",
   "private": true,
   "scripts": {
-    "build": "tsc",
+    "build": "../../node_modules/.bin/tsc",
     "kbn:bootstrap": "yarn build"
   },
   "dependencies": {
     "@elastic/safer-lodash-set": "link:../elastic-safer-lodash-set",
     "@kbn/config-schema": "link:../kbn-config-schema",
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
     "@kbn/logging": "link:../kbn-logging",
-    "@kbn/std": "link:../kbn-std",
+    "@kbn/std": "link:../kbn-std"
+  },
+  "devDependencies": {
+    "@kbn/dev-utils": "link:../kbn-dev-utils",
     "@kbn/utility-types": "link:../kbn-utility-types"
   }
 }

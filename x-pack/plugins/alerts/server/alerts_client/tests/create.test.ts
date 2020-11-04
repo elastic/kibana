@@ -6,17 +6,17 @@
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, ConstructorOptions, CreateOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsClientMock, actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
+import { ActionsAuthorization, ActionsClient } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
-const taskManager = taskManagerMock.start();
+const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
@@ -353,6 +353,9 @@ describe('create()', () => {
                                                                               "alertId": "1",
                                                                               "spaceId": "default",
                                                                             },
+                                                                            "schedule": Object {
+                                                                              "interval": "10s",
+                                                                            },
                                                                             "scope": Array [
                                                                               "alerting",
                                                                             ],
@@ -374,6 +377,10 @@ describe('create()', () => {
         "scheduledTaskId": "task-123",
       }
     `);
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
+      ActionsClient
+    >;
+    expect(actionsClient.isActionTypeEnabled).toHaveBeenCalledWith('test', { notifyUsage: true });
   });
 
   test('creates an alert with multiple actions', async () => {
@@ -690,7 +697,11 @@ describe('create()', () => {
 
   test('throws error if loading actions fails', async () => {
     const data = getMockData();
-    const actionsClient = actionsClientMock.create();
+    // Reset from default behaviour
+    const actionsClient = (await alertsClientParams.getActionsClient()) as jest.Mocked<
+      ActionsClient
+    >;
+    actionsClient.getBulk.mockReset();
     actionsClient.getBulk.mockRejectedValueOnce(new Error('Test Error'));
     alertsClientParams.getActionsClient.mockResolvedValue(actionsClient);
     await expect(alertsClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(

@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "cypress:open": "cypress open",
-    "cypress:run": "cypress run --spec **/*.feature"
+    "cypress:open": "../../../../node_modules/.bin/cypress open",
+    "cypress:run": "../../../../node_modules/.bin/cypress run --spec **/*.feature"
   }
 }

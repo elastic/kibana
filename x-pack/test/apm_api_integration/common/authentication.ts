@@ -23,12 +23,21 @@ const roles = {
     kibana: [
       {
         base: [],
-        feature: { apm: ['read'], ml: ['read'] },
+        feature: { apm: ['read'], ml: ['read'], savedObjectsManagement: ['read'] },
         spaces: ['*'],
       },
     ],
   },
   [ApmUser.apmReadUserWithoutMlAccess]: {
+    elasticsearch: {
+      cluster: [],
+      indices: [
+        {
+          names: ['apm-*'],
+          privileges: ['read', 'view_index_metadata'],
+        },
+      ],
+    },
     kibana: [
       {
         base: [],
@@ -41,7 +50,7 @@ const roles = {
     kibana: [
       {
         base: [],
-        feature: { apm: ['all'], ml: ['all'] },
+        feature: { apm: ['all'], ml: ['all'], savedObjectsManagement: ['all'] },
         spaces: ['*'],
       },
     ],
@@ -74,7 +83,7 @@ const users = {
     roles: ['apm_user', ApmUser.apmReadUser],
   },
   [ApmUser.apmReadUserWithoutMlAccess]: {
-    roles: ['apm_user', ApmUser.apmReadUserWithoutMlAccess],
+    roles: [ApmUser.apmReadUserWithoutMlAccess],
   },
   [ApmUser.apmWriteUser]: {
     roles: ['apm_user', ApmUser.apmWriteUser],

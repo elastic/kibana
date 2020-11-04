@@ -93,10 +93,10 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     schema,
   });
   const { getFields, getFormData, submit } = form;
-  const [{ throttle: formThrottle }] = (useFormData({
+  const [{ throttle: formThrottle }] = useFormData<ActionsStepRule>({
     form,
     watch: ['throttle'],
-  }) as unknown) as [Partial<ActionsStepRule>];
+  });
   const throttle = formThrottle || initialState.throttle;
 
   const handleSubmit = useCallback(
@@ -120,9 +120,13 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   }, [getFormData, submit]);
 
   useEffect(() => {
-    if (setForm) {
+    let didCancel = false;
+    if (setForm && !didCancel) {
       setForm(RuleStep.ruleActions, getData);
     }
+    return () => {
+      didCancel = true;
+    };
   }, [getData, setForm]);
 
   const throttleOptions = useMemo(() => {
@@ -142,6 +146,52 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
     [isLoading, throttleOptions]
   );
 
+  const displayActionsOptions = useMemo(
+    () =>
+      throttle !== stepActionsDefaultValue.throttle ? (
+        <>
+          <EuiSpacer />
+          <UseField
+            path="actions"
+            component={RuleActionsField}
+            componentProps={{
+              messageVariables: actionMessageParams,
+            }}
+          />
+        </>
+      ) : (
+        <UseField path="actions" component={GhostFormField} />
+      ),
+    [throttle, actionMessageParams]
+  );
+  // only display the actions dropdown if the user has "read" privileges for actions
+  const displayActionsDropDown = useMemo(() => {
+    return application.capabilities.actions.show ? (
+      <>
+        <UseField
+          path="throttle"
+          component={ThrottleSelectField}
+          componentProps={throttleFieldComponentProps}
+        />
+        {displayActionsOptions}
+        <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
+        <UseField path="enabled" component={GhostFormField} />
+      </>
+    ) : (
+      <>
+        <EuiText>{I18n.NO_ACTIONS_READ_PERMISSIONS}</EuiText>
+        <UseField
+          path="throttle"
+          componentProps={throttleFieldComponentProps}
+          component={GhostFormField}
+        />
+        <UseField path="actions" component={GhostFormField} />
+        <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
+        <UseField path="enabled" component={GhostFormField} />
+      </>
+    );
+  }, [application.capabilities.actions.show, displayActionsOptions, throttleFieldComponentProps]);
+
   if (isReadOnlyView) {
     return (
       <StepContentWrapper addPadding={addPadding}>
@@ -149,48 +199,6 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
       </StepContentWrapper>
     );
   }
-
-  const displayActionsOptions =
-    throttle !== stepActionsDefaultValue.throttle ? (
-      <>
-        <EuiSpacer />
-        <UseField
-          path="actions"
-          component={RuleActionsField}
-          componentProps={{
-            messageVariables: actionMessageParams,
-          }}
-        />
-      </>
-    ) : (
-      <UseField path="actions" component={GhostFormField} />
-    );
-
-  // only display the actions dropdown if the user has "read" privileges for actions
-  const displayActionsDropDown = application.capabilities.actions.show ? (
-    <>
-      <UseField
-        path="throttle"
-        component={ThrottleSelectField}
-        componentProps={throttleFieldComponentProps}
-      />
-      {displayActionsOptions}
-      <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
-      <UseField path="enabled" component={GhostFormField} />
-    </>
-  ) : (
-    <>
-      <EuiText>{I18n.NO_ACTIONS_READ_PERMISSIONS}</EuiText>
-      <UseField
-        path="throttle"
-        componentProps={throttleFieldComponentProps}
-        component={GhostFormField}
-      />
-      <UseField path="actions" component={GhostFormField} />
-      <UseField path="kibanaSiemAppUrl" component={GhostFormField} />
-      <UseField path="enabled" component={GhostFormField} />
-    </>
-  );
 
   return (
     <>

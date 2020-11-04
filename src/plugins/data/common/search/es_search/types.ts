@@ -31,6 +31,11 @@ export interface ISearchOptions {
    * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
    */
   strategy?: string;
+
+  /**
+   * A session ID, grouping multiple search requests into a single session.
+   */
+  sessionId?: string;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {
@@ -39,6 +44,12 @@ export type ISearchRequestParams<T = Record<string, any>> = {
 
 export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> {
   indexType?: string;
+}
+
+export interface IEsRawSearchResponse<Source = any> extends SearchResponse<Source> {
+  id?: string;
+  is_partial?: boolean;
+  is_running?: boolean;
 }
 
 export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;
