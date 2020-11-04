@@ -4,6 +4,8 @@
 
 ## SavedObjectsFindOptions.defaultSearchOperator property
 
+The search operator to use with the provided filter. Defaults to `OR`
+
 <b>Signature:</b>
 
 ```typescript
