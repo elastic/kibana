@@ -23,7 +23,7 @@ import { PLUGIN_ID } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
 
 import { initMlTelemetry } from './lib/telemetry';
-import { initMlServerLog } from './client/log';
+import { initMlServerLog } from './lib/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
 
 import { annotationRoutes } from './routes/annotations';
@@ -50,7 +50,7 @@ import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
-import { setupSavedObjects } from './saved_objects';
+import { setupSavedObjects, jobInitializationFactory } from './saved_objects';
 import { RouteGuard } from './lib/route_guard';
 
 export type MlPluginSetup = SharedServices;
@@ -181,10 +181,15 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     };
   }
 
-  public start(coreStart: CoreStart): MlPluginStart {
+  public async start(coreStart: CoreStart): Promise<MlPluginStart> {
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
     this.savedObjectsStart = coreStart.savedObjects;
+
+    // check whether the job saved objects exist
+    // and create them if needed.
+    const { initializeJobs } = jobInitializationFactory(coreStart);
+    await initializeJobs();
   }
 
   public stop() {
