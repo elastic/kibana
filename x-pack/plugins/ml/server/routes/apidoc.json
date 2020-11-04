@@ -138,6 +138,14 @@
 
     "FieldsService",
     "GetCardinalityOfFields",
-    "GetTimeFieldRange"
+    "GetTimeFieldRange",
+
+    "JobSavedObjects",
+    "SavedObjectsStatus",
+    "RepairJobSavedObjects",
+    "InitializeJobSavedObjects",
+    "AssignJobsToSpaces",
+    "RemoveJobsFromSpaces",
+    "JobsSpaces"
   ]
 }
