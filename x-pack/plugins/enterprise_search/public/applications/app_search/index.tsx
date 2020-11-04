@@ -34,7 +34,7 @@ import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
 import { EnginesOverview, ENGINES_TITLE } from './components/engines';
-import { Settings } from './components/settings';
+import { Settings, SETTINGS_TITLE } from './components/settings';
 import { Credentials, CREDENTIALS_TITLE } from './components/credentials';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
@@ -115,13 +115,7 @@ export const AppSearchNav: React.FC<IAppSearchNavProps> = ({ subNav }) => {
       <SideNavLink to={ENGINES_PATH} subNav={subNav} isRoot>
         {ENGINES_TITLE}
       </SideNavLink>
-      {canViewSettings && (
-        <SideNavLink to={SETTINGS_PATH}>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
-            defaultMessage: 'Settings',
-          })}
-        </SideNavLink>
-      )}
+      {canViewSettings && <SideNavLink to={SETTINGS_PATH}>{SETTINGS_TITLE}</SideNavLink>}
       {canViewAccountCredentials && (
         <SideNavLink to={CREDENTIALS_PATH}>{CREDENTIALS_TITLE}</SideNavLink>
       )}
