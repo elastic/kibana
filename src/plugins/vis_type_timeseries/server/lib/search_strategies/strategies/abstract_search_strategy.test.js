@@ -35,7 +35,7 @@ describe('AbstractSearchStrategy', () => {
       },
     };
 
-    abstractSearchStrategy = new AbstractSearchStrategy('es');
+    abstractSearchStrategy = new AbstractSearchStrategy();
   });
 
   test('should init an AbstractSearchStrategy instance', () => {
@@ -60,22 +60,8 @@ describe('AbstractSearchStrategy', () => {
 
     const responses = await abstractSearchStrategy.search(
       {
-        requestContext: {},
-        framework: {
-          core: {
-            getStartServices: jest.fn().mockReturnValue(
-              Promise.resolve([
-                {},
-                {
-                  data: {
-                    search: {
-                      search: searchFn,
-                    },
-                  },
-                },
-              ])
-            ),
-          },
+        requestContext: {
+          search: { search: searchFn },
         },
       },
       searches
@@ -89,9 +75,6 @@ describe('AbstractSearchStrategy', () => {
           index: 'index',
         },
         indexType: undefined,
-      },
-      {
-        strategy: 'es',
       },
       {}
     );

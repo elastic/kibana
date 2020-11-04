@@ -30,12 +30,27 @@ import {
 } from '../../types';
 import { applyESResp } from './apply_es_resp';
 import { saveSavedObject } from './save_saved_object';
+import { SavedObjectDecorator } from '../decorators';
+
+const applyDecorators = (
+  object: SavedObject,
+  config: SavedObjectConfig,
+  decorators: SavedObjectDecorator[]
+) => {
+  decorators.forEach((decorator) => {
+    decorator.decorateConfig(config);
+    decorator.decorateObject(object);
+  });
+};
 
 export function buildSavedObject(
   savedObject: SavedObject,
-  config: SavedObjectConfig = {},
-  services: SavedObjectKibanaServices
+  config: SavedObjectConfig,
+  services: SavedObjectKibanaServices,
+  decorators: SavedObjectDecorator[] = []
 ) {
+  applyDecorators(savedObject, config, decorators);
+
   const { indexPatterns, savedObjectsClient } = services;
   // type name for this object, used as the ES-type
   const esType = config.type || '';
