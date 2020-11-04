@@ -59,7 +59,7 @@ export default function ({ getService }) {
         expect(body.keywordFields).to.eql(['testTagField']);
 
         // Allowing the test to account for future addition of doc_count
-        expect(body.keywordFields.indexOf('testTagField')).to.be.greaterThan(-1);
+        expect(body.numericFields.indexOf('testTotalField')).to.be.greaterThan(-1);
       });
 
       it("should not return any fields when the index pattern doesn't match any indices", async () => {
