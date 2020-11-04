@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { LicenseState } from './license_state';
 
 export function verifyApiAccess(licenseState: LicenseState) {

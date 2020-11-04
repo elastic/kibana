@@ -74,6 +74,7 @@ export {
   PostAgentEnrollRequest,
   PostAgentCheckinRequest,
   DataType,
+  dataTypes,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];
