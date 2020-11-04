@@ -278,6 +278,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private asScopedProvider = ({ elasticsearch, savedObjects, uiSettings }: CoreStart) => {
     return (request: KibanaRequest): ISearchClient => {
+      savedObjects.createInternalRepository
       const savedObjectsClient = savedObjects.getScopedClient(request, {
         includedHiddenTypes: [BACKGROUND_SESSION_TYPE],
       });

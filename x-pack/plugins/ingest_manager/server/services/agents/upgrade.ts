@@ -64,11 +64,13 @@ export async function sendUpgradeAgentsActions(
         agentIds: string[];
         sourceUri: string | undefined;
         version: string;
+        force?: boolean;
       }
     | {
         kuery: string;
         sourceUri: string | undefined;
         version: string;
+        force?: boolean;
       }
 ) {
   const kibanaVersion = appContextService.getKibanaVersion();
@@ -82,7 +84,9 @@ export async function sendUpgradeAgentsActions(
             showInactive: false,
           })
         ).agents;
-  const agentsToUpdate = agents.filter((agent) => isAgentUpgradeable(agent, kibanaVersion));
+  const agentsToUpdate = options.force
+    ? agents
+    : agents.filter((agent) => isAgentUpgradeable(agent, kibanaVersion));
   const now = new Date().toISOString();
   const data = {
     version: options.version,

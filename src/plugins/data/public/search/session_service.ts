@@ -30,7 +30,7 @@ export class SessionService implements ISessionService {
   }
   private appChangeSubscription$?: Subscription;
   private curApp?: string;
-  private http: HttpStart;
+  private http?: HttpStart;
   private _isStored: boolean = false;
 
   constructor(
@@ -85,7 +85,7 @@ export class SessionService implements ISessionService {
 
   public restore(sessionId: string) {
     this.session$.next(sessionId);
-    return this.http.get(`/internal/session/${encodeURIComponent(sessionId)}`);
+    return this.http!.get(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
 
   public clear() {
@@ -94,7 +94,7 @@ export class SessionService implements ISessionService {
   }
 
   public async save() {
-    const response = await this.http.post(`/internal/session`, {
+    const response = await this.http!.post(`/internal/session`, {
       body: JSON.stringify({
         sessionId: this.sessionId,
       }),

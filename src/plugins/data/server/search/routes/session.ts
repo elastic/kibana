@@ -27,13 +27,16 @@ export function registerSessionRoutes(router: IRouter): void {
       validate: {
         body: schema.object({
           sessionId: schema.string(),
+          name: schema.string(),
+          url: schema.string(),
         }),
       },
     },
     async (context, request, res) => {
-      const { sessionId } = request.body;
+      const { sessionId, name, url } = request.body;
+
       try {
-        const response = await context.search!.session.save(sessionId);
+        const response = await context.search!.session.save(sessionId, name, 'username', url);
 
         return res.ok({
           body: response,

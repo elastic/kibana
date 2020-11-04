@@ -17,8 +17,9 @@
  * under the License.
  */
 
+import { first } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'src/core/server';
+import type { IRouter } from 'src/core/server';
 import { getRequestAbortedSignal } from '../../lib';
 import { shimHitsTotal } from './shim_hits_total';
 
@@ -59,6 +60,7 @@ export function registerSearchRoute(router: IRouter): void {
               isStored,
             }
           )
+          .pipe(first())
           .toPromise();
 
         return res.ok({

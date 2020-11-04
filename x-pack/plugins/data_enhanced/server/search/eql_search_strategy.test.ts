@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Logger } from 'src/core/server';
+import type { Logger } from 'kibana/server';
 import { EqlSearchStrategyRequest } from '../../common/search/types';
 import { eqlSearchStrategyProvider } from './eql_search_strategy';
 import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server';
