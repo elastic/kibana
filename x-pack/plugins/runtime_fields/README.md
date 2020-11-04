@@ -30,6 +30,9 @@ const MyComponent = () => {
   // Access the plugin through context
   const { runtimeFields } = useAppPlugins();
 
+  // Ref for handler to close the editor
+  const closeRuntimeFieldEditor = useRef(() => {});
+
   const saveRuntimeField = (field: RuntimeField) => {
     // Do something with the field
   };
@@ -38,11 +41,18 @@ const MyComponent = () => {
     // Lazy load the editor
     const { openEditor } = await runtimeFields.loadEditor();
 
-    openEditor({
+    closeRuntimeFieldEditor.current = openEditor({
       onSave: saveRuntimeField,
       /* defaultValue: optional field to edit */
     });
   };
+
+  useEffect(() => {
+    return () => {
+      // Make sure to remove the editor when the component unmounts
+      closeRuntimeFieldEditor.current();
+    };
+  }, []);
 
   return (
     <button onClick={openRuntimeFieldsEditor}>Add field</button>

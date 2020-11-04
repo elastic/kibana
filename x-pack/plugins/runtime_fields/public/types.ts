@@ -9,7 +9,7 @@ import { RUNTIME_FIELD_TYPES } from './constants';
 import { OpenRuntimeFieldEditorProps } from './load_editor';
 
 export interface LoadEditorResponse {
-  openEditor(props: OpenRuntimeFieldEditorProps): void;
+  openEditor(props: OpenRuntimeFieldEditorProps): () => void;
 }
 
 export interface PluginSetup {

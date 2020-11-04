@@ -25,8 +25,13 @@ export const getRuntimeFieldEditorLoader = (coreSetup: CoreSetup) => async (): P
   let overlayRef: OverlayRef | null = null;
 
   const openEditor = ({ onSave, defaultValue }: OpenRuntimeFieldEditorProps) => {
-    const onSaveField = (field: RuntimeField) => {
+    const closeEditor = () => {
       overlayRef?.close();
+      overlayRef = null;
+    };
+
+    const onSaveField = (field: RuntimeField) => {
+      closeEditor();
       onSave(field);
     };
 
@@ -42,6 +47,8 @@ export const getRuntimeFieldEditorLoader = (coreSetup: CoreSetup) => async (): P
         </KibanaReactContextProvider>
       )
     );
+
+    return closeEditor;
   };
 
   return {

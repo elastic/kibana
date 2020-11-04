@@ -20,6 +20,8 @@ import { StartPlugins, PluginStart } from './types';
 import { RuntimeFieldEditorFlyoutContent } from './components';
 import { RuntimeFieldsPlugin } from './plugin';
 
+const noop = () => {};
+
 describe('RuntimeFieldsPlugin', () => {
   let coreSetup: CoreSetup<StartPlugins, PluginStart>;
   let plugin: RuntimeFieldsPlugin;
@@ -68,5 +70,13 @@ describe('RuntimeFieldsPlugin', () => {
     expect(arg.props.children.props.onSave).toBeDefined();
     arg.props.children.props.onSave();
     expect(onSaveSpy).toHaveBeenCalled();
+  });
+
+  test('should return a handler to close the flyout', async () => {
+    const setupApi = await plugin.setup(coreSetup, {});
+    const { openEditor } = await setupApi.loadEditor();
+
+    const closeEditorHandler = openEditor({ onSave: noop });
+    expect(typeof closeEditorHandler).toBe('function');
   });
 });
