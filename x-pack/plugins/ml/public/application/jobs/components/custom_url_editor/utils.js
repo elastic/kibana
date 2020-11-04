@@ -297,9 +297,12 @@ export function getTestUrl(job, customUrl) {
 
   return new Promise((resolve, reject) => {
     ml.results
-      .anomalySearch({
-        body,
-      })
+      .anomalySearch(
+        {
+          body,
+        },
+        [job.job_id]
+      )
       .then((resp) => {
         if (resp.hits.total.value > 0) {
           const record = resp.hits.hits[0]._source;
