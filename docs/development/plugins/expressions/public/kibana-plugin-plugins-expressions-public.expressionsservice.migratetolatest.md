@@ -4,7 +4,7 @@
 
 ## ExpressionsService.migrateToLatest property
 
-Injects saved object references into expression AST
+Migrates expression to the latest version
 
 <b>Signature:</b>
 
