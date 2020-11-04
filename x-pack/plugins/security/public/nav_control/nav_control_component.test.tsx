@@ -113,7 +113,7 @@ describe('SecurityNavControl', () => {
     expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(1);
   });
 
-  it('renders a popover with additional user links registered by other plugins', async () => {
+  it('renders a popover with additional user menu links registered by other plugins', async () => {
     const props = {
       user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
       editProfileUrl: '',

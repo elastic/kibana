@@ -20,7 +20,6 @@ import {
 } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { CloudSetup } from '../../cloud/public';
 import {
   ISessionTimeout,
   SessionExpired,
