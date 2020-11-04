@@ -276,7 +276,6 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   columnId: string;
   state: T;
   setState: StateSetter<T>;
-  activeData?: Record<string, Datatable>; // TODO wire up
   dragDropContext: DragContextState;
   isReorder?: boolean;
 };
