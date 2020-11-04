@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import React, { Component } from 'react';
+import { Observable, Subscription } from 'rxjs';
 import {
   EuiAvatar,
   EuiHeaderSectionItemButton,
@@ -15,33 +16,43 @@ import {
   EuiIcon,
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
+  IconType,
+  EuiText,
 } from '@elastic/eui';
 import { AuthenticatedUser } from '../../common/model';
 
 import './nav_control_component.scss';
 
+export interface UserMenuLink {
+  label: string;
+  iconType: IconType;
+  href: string;
+  order?: number;
+}
+
 interface Props {
   user: Promise<AuthenticatedUser>;
   editProfileUrl: string;
   logoutUrl: string;
-  isCloudEnabled?: boolean;
-  cloudResetPasswordUrl?: string;
-  cloudAccountUrl?: string;
-  cloudSecurityUrl?: string;
+  userMenuLinks$: Observable<UserMenuLink[]>;
 }
 
 interface State {
   isOpen: boolean;
   authenticatedUser: AuthenticatedUser | null;
+  userMenuLinks: UserMenuLink[];
 }
 
 export class SecurityNavControl extends Component<Props, State> {
+  private subscription?: Subscription;
+
   constructor(props: Props) {
     super(props);
 
     this.state = {
       isOpen: false,
       authenticatedUser: null,
+      userMenuLinks: [],
     };
 
     props.user.then((authenticatedUser) => {
@@ -49,6 +60,18 @@ export class SecurityNavControl extends Component<Props, State> {
         authenticatedUser,
       });
     });
+  }
+
+  componentDidMount() {
+    this.subscription = this.props.userMenuLinks$.subscribe(async (userMenuLinks) => {
+      this.setState({ userMenuLinks });
+    });
+  }
+
+  componentWillUnmount() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
   onMenuButtonClick = () => {
@@ -68,21 +91,14 @@ export class SecurityNavControl extends Component<Props, State> {
   };
 
   render() {
-    const {
-      editProfileUrl,
-      logoutUrl,
-      isCloudEnabled = false,
-      cloudResetPasswordUrl,
-      cloudAccountUrl,
-      cloudSecurityUrl,
-    } = this.props;
-    const { authenticatedUser } = this.state;
+    const { editProfileUrl, logoutUrl } = this.props;
+    const { authenticatedUser, userMenuLinks } = this.state;
 
-    const name =
+    const username =
       (authenticatedUser && (authenticatedUser.full_name || authenticatedUser.username)) || '';
 
     const buttonContents = authenticatedUser ? (
-      <EuiAvatar name={name} size="s" />
+      <EuiAvatar name={username} size="s" />
     ) : (
       <EuiLoadingSpinner size="m" />
     );
@@ -102,65 +118,19 @@ export class SecurityNavControl extends Component<Props, State> {
       </EuiHeaderSectionItemButton>
     );
 
-    const items: EuiContextMenuPanelItemDescriptor[] = [
-      {
-        name: (
-          <FormattedMessage
-            id="xpack.security.navControlComponent.editProfileLinkText"
-            defaultMessage="Profile"
-          />
-        ),
-        icon: <EuiIcon type="user" size="m" />,
-        href: editProfileUrl,
-        'data-test-subj': 'profileLink',
-      },
-    ];
+    const profileMenuItem = {
+      name: (
+        <FormattedMessage
+          id="xpack.security.navControlComponent.editProfileLinkText"
+          defaultMessage="Profile"
+        />
+      ),
+      icon: <EuiIcon type="user" size="m" />,
+      href: editProfileUrl,
+      'data-test-subj': 'profileLink',
+    };
 
-    if (isCloudEnabled) {
-      if (cloudResetPasswordUrl) {
-        items.push({
-          name: (
-            <FormattedMessage
-              id="xpack.security.navControlComponent.cloudProfileLinkText"
-              defaultMessage="Cloud profile"
-            />
-          ),
-          icon: <EuiIcon type="logoCloud" size="m" />,
-          href: cloudResetPasswordUrl,
-          'data-test-subj': 'cloudProfileLink',
-        });
-      }
-
-      if (cloudAccountUrl) {
-        items.push({
-          name: (
-            <FormattedMessage
-              id="xpack.security.navControlComponent.cloudAccountLinkText"
-              defaultMessage="Account"
-            />
-          ),
-          icon: <EuiIcon type="gear" size="m" />,
-          href: cloudAccountUrl,
-          'data-test-subj': 'cloudAccountLink',
-        });
-      }
-
-      if (cloudSecurityUrl) {
-        items.push({
-          name: (
-            <FormattedMessage
-              id="xpack.security.navControlComponent.cloudSecurityLinkText"
-              defaultMessage="Security"
-            />
-          ),
-          icon: <EuiIcon type="lock" size="m" />,
-          href: cloudSecurityUrl,
-          'data-test-subj': 'cloudSecurityLink',
-        });
-      }
-    }
-
-    items.push({
+    const logoutMenuItem = {
       name: (
         <FormattedMessage
           id="xpack.security.navControlComponent.logoutLinkText"
@@ -171,12 +141,34 @@ export class SecurityNavControl extends Component<Props, State> {
       icon: <EuiIcon type="exit" size="m" />,
       href: logoutUrl,
       'data-test-subj': 'logoutLink',
-    });
+    };
+
+    const items: EuiContextMenuPanelItemDescriptor[] = [];
+
+    items.push(profileMenuItem);
+
+    if (userMenuLinks.length) {
+      const userMenuLinkMenuItems = userMenuLinks
+        .sort(({ order: orderA = Infinity }, { order: orderB = Infinity }) => orderA - orderB)
+        .map(({ label, iconType, href }: UserMenuLink) => ({
+          name: <EuiText>{label}</EuiText>,
+          icon: <EuiIcon type={iconType} size="m" />,
+          href,
+          'data-test-subj': `userMenuLink__${label}`,
+        }));
+
+      items.push(...userMenuLinkMenuItems, {
+        isSeparator: true,
+        key: 'securityNavControlComponent__userMenuLinksSeparator',
+      });
+    }
+
+    items.push(logoutMenuItem);
 
     const panels = [
       {
         id: 0,
-        title: name,
+        title: username,
         items,
       },
     ];

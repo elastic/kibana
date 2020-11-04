@@ -4,50 +4,58 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Subscription } from 'rxjs';
+import { Observable, Subscription, BehaviorSubject, ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { CoreStart } from 'src/core/public';
+
 import ReactDOM from 'react-dom';
 import React from 'react';
+
 import { SecurityLicense } from '../../common/licensing';
-import { SecurityNavControl } from './nav_control_component';
+import { SecurityNavControl, UserMenuLink } from './nav_control_component';
 import { AuthenticationServiceSetup } from '../authentication';
-import { CloudSetup } from '../../../cloud/public';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
   authc: AuthenticationServiceSetup;
   logoutUrl: string;
-  cloud?: CloudSetup;
 }
 
 interface StartDeps {
   core: CoreStart;
 }
 
+export interface SecurityNavControlServiceStart {
+  /**
+   * Returns an Observable of the array of user menu links registered by other plugins
+   */
+  getUserMenuLinks$: () => Observable<UserMenuLink[]>;
+
+  /**
+   * Registers the provided user menu links to be displayed in the user menu in the global nav
+   */
+  setUserMenuLinks: (newUserMenuLink: UserMenuLink[]) => void;
+}
+
 export class SecurityNavControlService {
   private securityLicense!: SecurityLicense;
   private authc!: AuthenticationServiceSetup;
   private logoutUrl!: string;
-  private isCloudEnabled!: boolean;
-  private cloudResetPasswordUrl?: string;
-  private cloudAccountUrl?: string;
-  private cloudSecurityUrl?: string;
 
   private navControlRegistered!: boolean;
 
   private securityFeaturesSubscription?: Subscription;
 
-  public setup({ securityLicense, authc, logoutUrl, cloud }: SetupDeps) {
+  private readonly stop$ = new ReplaySubject(1);
+  private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
+
+  public setup({ securityLicense, authc, logoutUrl }: SetupDeps) {
     this.securityLicense = securityLicense;
     this.authc = authc;
     this.logoutUrl = logoutUrl;
-    this.isCloudEnabled = cloud?.isCloudEnabled || false;
-    this.cloudResetPasswordUrl = cloud?.resetPasswordUrl;
-    this.cloudAccountUrl = cloud?.accountUrl;
-    this.cloudSecurityUrl = cloud?.securityUrl;
   }
 
-  public start({ core }: StartDeps) {
+  public start({ core }: StartDeps): SecurityNavControlServiceStart {
     this.securityFeaturesSubscription = this.securityLicense.features$.subscribe(
       ({ showLinks }) => {
         const isAnonymousPath = core.http.anonymousPaths.isAnonymous(window.location.pathname);
@@ -59,6 +67,13 @@ export class SecurityNavControlService {
         }
       }
     );
+
+    return {
+      getUserMenuLinks$: () => this.userMenuLinks$.pipe(takeUntil(this.stop$)),
+      setUserMenuLinks: (userMenuLink: UserMenuLink[]) => {
+        this.userMenuLinks$.next(userMenuLink);
+      },
+    };
   }
 
   public stop() {
@@ -82,10 +97,7 @@ export class SecurityNavControlService {
           user: currentUserPromise,
           editProfileUrl: core.http.basePath.prepend('/security/account'),
           logoutUrl: this.logoutUrl,
-          isCloudEnabled: this.isCloudEnabled,
-          cloudResetPasswordUrl: this.cloudResetPasswordUrl,
-          cloudAccountUrl: this.cloudAccountUrl,
-          cloudSecurityUrl: this.cloudSecurityUrl,
+          userMenuLinks$: this.userMenuLinks$,
         };
         ReactDOM.render(
           <I18nContext>

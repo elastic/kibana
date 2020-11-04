@@ -6,11 +6,13 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
+import { SecurityPluginStart } from '../../security/public';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { ELASTIC_SUPPORT_LINK } from '../common/constants';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
+import { createUserMenuLinks } from './user_menu_links';
 
-interface CloudConfigType {
+export interface CloudConfigType {
   id?: string;
   resetPasswordUrl?: string;
   deploymentUrl?: string;
@@ -20,6 +22,10 @@ interface CloudConfigType {
 
 interface CloudSetupDependencies {
   home?: HomePublicPluginSetup;
+}
+
+interface CloudStartDependencies {
+  security?: SecurityPluginStart;
 }
 
 export interface CloudSetup {
@@ -33,18 +39,20 @@ export interface CloudSetup {
 
 export class CloudPlugin implements Plugin<CloudSetup> {
   private config!: CloudConfigType;
+  private isCloudEnabled: boolean;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<CloudConfigType>();
+    this.isCloudEnabled = false;
   }
 
   public async setup(core: CoreSetup, { home }: CloudSetupDependencies) {
-    const { id, resetPasswordUrl, deploymentUrl, accountUrl, securityUrl } = this.config;
-    const isCloudEnabled = getIsCloudEnabled(id);
+    const { id, resetPasswordUrl, deploymentUrl } = this.config;
+    this.isCloudEnabled = getIsCloudEnabled(id);
 
     if (home) {
-      home.environment.update({ cloud: isCloudEnabled });
-      if (isCloudEnabled) {
+      home.environment.update({ cloud: this.isCloudEnabled });
+      if (this.isCloudEnabled) {
         home.tutorials.setVariable('cloud', { id, resetPasswordUrl });
       }
     }
@@ -52,14 +60,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     return {
       cloudId: id,
       cloudDeploymentUrl: deploymentUrl,
-      isCloudEnabled,
-      resetPasswordUrl,
-      accountUrl,
-      securityUrl,
+      isCloudEnabled: this.isCloudEnabled,
     };
   }
 
-  public start(coreStart: CoreStart) {
+  public start(coreStart: CoreStart, { security }: CloudStartDependencies) {
     const { deploymentUrl } = this.config;
     coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
     if (deploymentUrl) {
@@ -70,6 +75,11 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         euiIconType: 'arrowLeft',
         href: deploymentUrl,
       });
+    }
+
+    if (security && this.isCloudEnabled) {
+      const userMenuLinks = createUserMenuLinks(this.config);
+      security.navControlService.setUserMenuLinks(userMenuLinks);
     }
   }
 }

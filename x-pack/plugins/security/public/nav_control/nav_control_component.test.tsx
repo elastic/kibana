@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { BehaviorSubject } from 'rxjs';
 import { shallowWithIntl, nextTick, mountWithIntl } from 'test_utils/enzyme_helpers';
 import { SecurityNavControl } from './nav_control_component';
 import { AuthenticatedUser } from '../../common/model';
@@ -17,6 +18,7 @@ describe('SecurityNavControl', () => {
       user: new Promise(() => {}) as Promise<AuthenticatedUser>,
       editProfileUrl: '',
       logoutUrl: '',
+      userMenuLinks$: new BehaviorSubject([]),
     };
 
     const wrapper = shallowWithIntl(<SecurityNavControl {...props} />);
@@ -42,6 +44,7 @@ describe('SecurityNavControl', () => {
       user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
       editProfileUrl: '',
       logoutUrl: '',
+      userMenuLinks$: new BehaviorSubject([]),
     };
 
     const wrapper = shallowWithIntl(<SecurityNavControl {...props} />);
@@ -70,6 +73,7 @@ describe('SecurityNavControl', () => {
       user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
       editProfileUrl: '',
       logoutUrl: '',
+      userMenuLinks$: new BehaviorSubject([]),
     };
 
     const wrapper = mountWithIntl(<SecurityNavControl {...props} />);
@@ -91,6 +95,7 @@ describe('SecurityNavControl', () => {
       user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
       editProfileUrl: '',
       logoutUrl: '',
+      userMenuLinks$: new BehaviorSubject([]),
     };
 
     const wrapper = mountWithIntl(<SecurityNavControl {...props} />);
@@ -108,15 +113,16 @@ describe('SecurityNavControl', () => {
     expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(1);
   });
 
-  it('renders a popover with additional cloud links for cloud users', async () => {
+  it('renders a popover with additional user links registered by other plugins', async () => {
     const props = {
       user: Promise.resolve({ full_name: 'foo' }) as Promise<AuthenticatedUser>,
       editProfileUrl: '',
       logoutUrl: '',
-      isCloudEnabled: true,
-      cloudResetPasswordUrl: 'cloud/password/url',
-      cloudAccountUrl: 'cloud/account/url',
-      cloudSecurityUrl: 'cloud/security/url',
+      userMenuLinks$: new BehaviorSubject([
+        { label: 'link1', href: 'path-to-link-1', iconType: 'empty', order: 1 },
+        { label: 'link2', href: 'path-to-link-2', iconType: 'empty', order: 2 },
+        { label: 'link3', href: 'path-to-link-3', iconType: 'empty', order: 3 },
+      ]),
     };
 
     const wrapper = mountWithIntl(<SecurityNavControl {...props} />);
@@ -125,18 +131,18 @@ describe('SecurityNavControl', () => {
 
     expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(0);
-    expect(findTestSubject(wrapper, 'cloudProfileLink')).toHaveLength(0);
-    expect(findTestSubject(wrapper, 'cloudAccountLink')).toHaveLength(0);
-    expect(findTestSubject(wrapper, 'cloudSecurityLink')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'userMenuLink__link1')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'userMenuLink__link2')).toHaveLength(0);
+    expect(findTestSubject(wrapper, 'userMenuLink__link3')).toHaveLength(0);
     expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(0);
 
     wrapper.find(EuiHeaderSectionItemButton).simulate('click');
 
     expect(findTestSubject(wrapper, 'userMenu')).toHaveLength(1);
     expect(findTestSubject(wrapper, 'profileLink')).toHaveLength(1);
-    expect(findTestSubject(wrapper, 'cloudProfileLink')).toHaveLength(1);
-    expect(findTestSubject(wrapper, 'cloudAccountLink')).toHaveLength(1);
-    expect(findTestSubject(wrapper, 'cloudSecurityLink')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'userMenuLink__link1')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'userMenuLink__link2')).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'userMenuLink__link3')).toHaveLength(1);
     expect(findTestSubject(wrapper, 'logoutLink')).toHaveLength(1);
   });
 });

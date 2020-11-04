@@ -41,7 +41,6 @@ export interface PluginSetupDependencies {
   securityOss: SecurityOssPluginSetup;
   home?: HomePublicPluginSetup;
   management?: ManagementSetup;
-  cloud?: CloudSetup;
 }
 
 export interface PluginStartDependencies {
@@ -74,7 +73,7 @@ export class SecurityPlugin
 
   public setup(
     core: CoreSetup<PluginStartDependencies>,
-    { home, licensing, management, securityOss, cloud }: PluginSetupDependencies
+    { home, licensing, management, securityOss }: PluginSetupDependencies
   ) {
     const { http, notifications } = core;
     const { anonymousPaths } = http;
@@ -103,7 +102,6 @@ export class SecurityPlugin
       securityLicense: license,
       authc: this.authc,
       logoutUrl,
-      cloud,
     });
 
     accountManagementApp.create({
@@ -149,11 +147,13 @@ export class SecurityPlugin
 
   public start(core: CoreStart, { management, securityOss }: PluginStartDependencies) {
     this.sessionTimeout.start();
-    this.navControlService.start({ core });
     this.securityCheckupService.start({ securityOssStart: securityOss, docLinks: core.docLinks });
+
     if (management) {
       this.managementService.start({ capabilities: core.application.capabilities });
     }
+
+    return { navControlService: this.navControlService.start({ core }) };
   }
 
   public stop() {
