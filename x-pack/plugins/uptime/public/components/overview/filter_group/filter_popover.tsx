@@ -54,6 +54,7 @@ export const FilterPopover = ({
     const mItems = selectedItems.concat(allItems ?? []);
     const newItems = mItems.filter((item, index) => mItems.indexOf(item) === index);
     setItems(newItems);
+    setTempSelectedItems(selectedItems);
   }, [allItems, selectedItems]);
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export const FilterPopover = ({
             isDisabled={disabled && selectedItems.length === 0}
             isSelected={tempSelectedItems.length > 0}
             numFilters={items.length}
-            numActiveFilters={tempSelectedItems.length}
+            numActiveFilters={isOpen ? tempSelectedItems.length : selectedItems.length}
             onClick={() => {
               setIsOpen(!isOpen);
               onFilterFieldChange(fieldName, tempSelectedItems);

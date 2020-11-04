@@ -151,6 +151,7 @@ export const getHistogramForMonitors = async (
       },
     },
   };
+
   const result = await queryContext.search(params);
 
   const histoBuckets: any[] = result.aggregations.histogram.buckets;

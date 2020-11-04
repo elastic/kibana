@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LocationLink } from '../../../common/location_link';
 import { MonitorStatusRow } from './monitor_status_row';
@@ -39,8 +39,18 @@ export const MonitorStatusList = ({ summaryPings }: MonitorStatusListProps) => {
 
   return (
     <>
-      <MonitorStatusRow locationNames={downChecks} status={STATUS.DOWN} />
-      <MonitorStatusRow locationNames={absUpChecks} status={STATUS.UP} />
+      <EuiFlexGroup style={{ maxWidth: 1000 }}>
+        {downChecks.size > 0 && (
+          <EuiFlexItem>
+            <MonitorStatusRow locationNames={downChecks} status={STATUS.DOWN} />
+          </EuiFlexItem>
+        )}
+        {absUpChecks.size > 0 && (
+          <EuiFlexItem>
+            <MonitorStatusRow locationNames={absUpChecks} status={STATUS.UP} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
       {(downChecks.has(UNNAMED_LOCATION) || upChecks.has(UNNAMED_LOCATION)) && (
         <>
           <EuiSpacer size="s" />

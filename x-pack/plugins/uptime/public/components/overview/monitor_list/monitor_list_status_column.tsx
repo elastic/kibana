@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
-import { EuiHealth, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip, EuiBadge, EuiSpacer } from '@elastic/eui';
 import { parseTimestamp } from './parse_timestamp';
 import { Ping } from '../../../../common/runtime_types';
 import {
@@ -19,6 +19,7 @@ import {
 } from '../../../../common/constants';
 
 import * as labels from './translations';
+import { UptimeThemeContext } from '../../../contexts';
 
 interface MonitorListStatusColumnProps {
   status: string;
@@ -27,7 +28,7 @@ interface MonitorListStatusColumnProps {
 }
 
 const PaddedSpan = styled.span`
-  padding-left: 17px;
+  padding-left: 5px;
 `;
 
 const StatusColumnFlexG = styled(EuiFlexGroup)`
@@ -35,17 +36,6 @@ const StatusColumnFlexG = styled(EuiFlexGroup)`
     min-width: 230px;
   }
 `;
-
-const getHealthColor = (status: string): string => {
-  switch (status) {
-    case STATUS.UP:
-      return 'success';
-    case STATUS.DOWN:
-      return 'danger';
-    default:
-      return '';
-  }
-};
 
 const getHealthMessage = (status: string): string | null => {
   switch (status) {
@@ -118,29 +108,40 @@ export const MonitorListStatusColumn = ({
   timestamp: tsString,
 }: MonitorListStatusColumnProps) => {
   const timestamp = parseTimestamp(tsString);
+
+  const {
+    colors: { dangerBehindText },
+  } = useContext(UptimeThemeContext);
+
   return (
-    <StatusColumnFlexG alignItems="center" gutterSize="none" wrap={false} responsive={false}>
-      <EuiFlexItem grow={1} style={{ flexBasis: 40 }}>
-        <EuiHealth color={getHealthColor(status)} style={{ display: 'block' }}>
-          {getHealthMessage(status)}
-        </EuiHealth>
-        <PaddedSpan>
-          <EuiToolTip
-            content={
-              <EuiText color="ghost" size="xs">
-                {timestamp.toLocaleString()}
-              </EuiText>
-            }
+    <div>
+      <StatusColumnFlexG alignItems="center" gutterSize="none" wrap={false} responsive={false}>
+        <EuiFlexItem grow={false} style={{ flexBasis: 40 }}>
+          <EuiBadge
+            color={status === STATUS.UP ? 'secondary' : dangerBehindText}
+            style={{ display: 'block' }}
           >
-            <EuiText size="xs" color="subdued">
-              {getRelativeShortTimeStamp(tsString)}
-            </EuiText>
-          </EuiToolTip>
-        </PaddedSpan>
-      </EuiFlexItem>
-      <EuiFlexItem grow={2}>
-        <EuiText size="s">{getLocationStatus(summaryPings, status)}</EuiText>
-      </EuiFlexItem>
-    </StatusColumnFlexG>
+            {getHealthMessage(status)}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <PaddedSpan>
+            <EuiToolTip
+              content={
+                <EuiText color="ghost" size="xs">
+                  {timestamp.toLocaleString()}
+                </EuiText>
+              }
+            >
+              <EuiText size="xs" color="subdued" className="eui-textNoWrap">
+                {getRelativeShortTimeStamp(tsString)}
+              </EuiText>
+            </EuiToolTip>
+          </PaddedSpan>
+        </EuiFlexItem>
+      </StatusColumnFlexG>
+      <EuiSpacer size="xs" />
+      <EuiText size="xs">{getLocationStatus(summaryPings, status)}</EuiText>
+    </div>
   );
 };

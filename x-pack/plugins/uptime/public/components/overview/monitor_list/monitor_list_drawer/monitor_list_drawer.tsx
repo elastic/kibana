@@ -6,13 +6,15 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import moment from 'moment';
+import { EuiLink, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { Alert } from '../../../../../../triggers_actions_ui/public';
 import { MostRecentError } from './most_recent_error';
 import { MonitorStatusList } from './monitor_status_list';
 import { MonitorDetails, MonitorSummary } from '../../../../../common/runtime_types';
 import { ActionsPopover } from './actions_popover/actions_popover_container';
 import { EnabledAlerts } from './enabled_alerts';
-import { Alert } from '../../../../../../triggers_actions_ui/public';
 
 const ContainerDiv = styled.div`
   padding: 10px;
@@ -47,12 +49,33 @@ export function MonitorListDrawerComponent({
     <ContainerDiv>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
-          <EuiText>
-            <EuiLink href={monitorUrl} target="_blank">
-              {monitorUrl}
-              <EuiIcon size="s" type="popout" color="subbdued" />
-            </EuiLink>
-          </EuiText>
+          <EuiFlexGroup style={{ maxWidth: 1000 }}>
+            <EuiFlexItem>
+              <EuiText size="xs">
+                <h3>
+                  {i18n.translate('xpack.uptime.monitorList.drawer.url', {
+                    defaultMessage: 'Url',
+                  })}
+                </h3>
+              </EuiText>
+              <EuiText size="s">
+                <EuiLink href={monitorUrl} target="_blank" external>
+                  {monitorUrl}
+                </EuiLink>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="xs">
+                <h3>
+                  {i18n.translate('xpack.uptime.monitorList.drawer.mostRecentRun', {
+                    defaultMessage: 'Most recent test run',
+                  })}
+                </h3>
+              </EuiText>
+              {/* TODO: add link to details page */}
+              <EuiText size="s">{moment(summary.state.timestamp).format('LLL').toString()}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ActionsPopover summary={summary} />

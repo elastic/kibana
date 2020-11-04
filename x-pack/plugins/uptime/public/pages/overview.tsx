@@ -93,7 +93,7 @@ export const OverviewPageComponent = React.memo(
           <EuiSpacer size="s" />
           <StatusPanel />
           <EuiSpacer size="s" />
-          <MonitorList filters={esFilters} linkParameters={linkParameters} />
+          <MonitorList filters={esFilters} />
         </EmptyState>
       </>
     );

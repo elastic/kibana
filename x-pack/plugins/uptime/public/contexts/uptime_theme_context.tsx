@@ -26,6 +26,7 @@ export interface UptimeThemeContextValues {
 const defaultContext: UptimeThemeContextValues = {
   colors: {
     danger: euiLightVars.euiColorDanger,
+    dangerBehindText: euiDarkVars.euiColorVis9_behindText,
     mean: euiLightVars.euiColorPrimary,
     range: euiLightVars.euiFocusBackgroundColor,
     success: euiLightVars.euiColorSuccess,
@@ -49,7 +50,8 @@ export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMo
   let colors: UptimeAppColors;
   if (darkMode) {
     colors = {
-      danger: euiDarkVars.euiColorDanger,
+      danger: euiDarkVars.euiColorVis9,
+      dangerBehindText: euiDarkVars.euiColorVis9_behindText,
       mean: euiDarkVars.euiColorPrimary,
       gray: euiDarkVars.euiColorLightShade,
       range: euiDarkVars.euiFocusBackgroundColor,
@@ -59,7 +61,8 @@ export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMo
     };
   } else {
     colors = {
-      danger: euiLightVars.euiColorDanger,
+      danger: euiLightVars.euiColorVis9,
+      dangerBehindText: euiLightVars.euiColorVis9_behindText,
       mean: euiLightVars.euiColorPrimary,
       gray: euiLightVars.euiColorLightShade,
       range: euiLightVars.euiFocusBackgroundColor,

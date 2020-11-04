@@ -35,6 +35,7 @@ import { ScopedHistory } from '../../../../../src/core/public';
 
 export interface UptimeAppColors {
   danger: string;
+  dangerBehindText: string;
   success: string;
   gray: string;
   range: string;

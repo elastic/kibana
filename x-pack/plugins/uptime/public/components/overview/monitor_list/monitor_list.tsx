@@ -21,7 +21,6 @@ import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { ExpandedRowMap } from './types';
 import { MonitorBarSeries } from '../../common/charts';
-import { MonitorPageLink } from '../../common/monitor_page_link';
 import { OverviewPageLink } from './overview_page_link';
 import * as labels from './translations';
 import { MonitorListPageSizeSelect } from './monitor_list_page_size_select';
@@ -33,6 +32,7 @@ import { MonitorListHeader } from './monitor_list_header';
 import { URL_LABEL } from '../../common/translations';
 import { EnableMonitorAlert } from './columns/enable_alert';
 import { STATUS_ALERT_COLUMN } from './translations';
+import { MonitorNameColumn } from './columns/monitor_name_col';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -54,16 +54,9 @@ export const noItemsMessage = (loading: boolean, filters?: string) => {
 export const MonitorListComponent: ({
   filters,
   monitorList: { list, error, loading },
-  linkParameters,
   pageSize,
   setPageSize,
-}: Props) => any = ({
-  filters,
-  monitorList: { list, error, loading },
-  linkParameters,
-  pageSize,
-  setPageSize,
-}) => {
+}: Props) => any = ({ filters, monitorList: { list, error, loading }, pageSize, setPageSize }) => {
   const [drawerIds, updateDrawerIds] = useState<string[]>([]);
 
   const items = list.summaries ?? [];
@@ -109,11 +102,7 @@ export const MonitorListComponent: ({
       mobileOptions: {
         fullWidth: true,
       },
-      render: (name: string, summary: MonitorSummary) => (
-        <MonitorPageLink monitorId={summary.monitor_id} linkParameters={linkParameters}>
-          {name ? name : `Unnamed - ${summary.monitor_id}`}
-        </MonitorPageLink>
-      ),
+      render: (name: string, summary: MonitorSummary) => <MonitorNameColumn summary={summary} />,
       sortable: true,
     },
     {
