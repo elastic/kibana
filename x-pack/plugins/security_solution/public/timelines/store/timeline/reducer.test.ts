@@ -48,6 +48,14 @@ import { timelineDefaults } from './defaults';
 import { TimelineById } from './types';
 
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
+jest.mock('../../../common/utils/default_date_settings', () => {
+  const actual = jest.requireActual('../../../common/utils/default_date_settings');
+  return {
+    ...actual,
+    DEFAULT_FROM_MOMENT: new Date('2020-10-27T11:37:31.655Z'),
+    DEFAULT_TO_MOMENT: new Date('2020-10-28T11:37:31.655Z'),
+  };
+});
 
 const basicDataProvider: DataProvider = {
   and: [],
@@ -137,6 +145,31 @@ describe('Timeline', () => {
       expect(update).toEqual({
         foo: {
           ...basicTimeline,
+          show: true,
+        },
+      });
+    });
+
+    test('should override timerange if adding an immutable template', () => {
+      const update = addTimelineToStore({
+        id: 'foo',
+        timeline: {
+          ...basicTimeline,
+          status: TimelineStatus.immutable,
+          timelineType: TimelineType.template,
+        },
+        timelineById: timelineByIdMock,
+      });
+
+      expect(update).toEqual({
+        foo: {
+          ...basicTimeline,
+          status: TimelineStatus.immutable,
+          timelineType: TimelineType.template,
+          dateRange: {
+            start: '2020-10-27T11:37:31.655Z',
+            end: '2020-10-28T11:37:31.655Z',
+          },
           show: true,
         },
       });

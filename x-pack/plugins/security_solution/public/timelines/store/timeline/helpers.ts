@@ -7,7 +7,6 @@
 import { getOr, omit, uniq, isEmpty, isEqualWith, union } from 'lodash/fp';
 
 import uuid from 'uuid';
-import moment from 'moment';
 import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { getColumnWidthFromType } from '../../../timelines/components/timeline/body/column_headers/helpers';
@@ -34,6 +33,10 @@ import { normalizeTimeRange } from '../../../common/components/url_state/normali
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
 import { TimelineById } from './types';
+import {
+  DEFAULT_FROM_MOMENT,
+  DEFAULT_TO_MOMENT,
+} from '../../../common/utils/default_date_settings';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -131,8 +134,8 @@ export const addTimelineToStore = ({
     dateRange:
       timeline.status === TimelineStatus.immutable
         ? {
-            start: moment().subtract(1, 'hours').toISOString(),
-            end: moment().toISOString(),
+            start: DEFAULT_FROM_MOMENT.toISOString(),
+            end: DEFAULT_TO_MOMENT.toISOString(),
           }
         : timeline.dateRange,
   },
