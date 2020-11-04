@@ -19,7 +19,7 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
-import { PanelState, EmbeddableStart } from '../../../../../embeddable/public';
+import { PanelState, EmbeddableStart, ViewMode } from '../../../../../embeddable/public';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../../../kibana_react/public';
@@ -37,7 +37,6 @@ interface State {
   description?: string;
   panels: { [key: string]: PanelState };
   isEmbeddedExternally?: boolean;
-  isEmptyState?: boolean;
 }
 
 export class DashboardViewport extends React.Component<DashboardViewportProps, State> {
@@ -54,7 +53,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       useMargins,
       title,
       isEmbeddedExternally,
-      isEmptyState,
     } = this.props.container.getInput();
 
     this.state = {
@@ -63,7 +61,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
       useMargins,
       title,
       isEmbeddedExternally,
-      isEmptyState,
     };
   }
 
@@ -76,7 +73,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
         title,
         description,
         isEmbeddedExternally,
-        isEmptyState,
       } = this.props.container.getInput();
       if (this.mounted) {
         this.setState({
@@ -85,7 +81,6 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
           useMargins,
           title,
           isEmbeddedExternally,
-          isEmptyState,
         });
       }
     });
@@ -104,8 +99,38 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
     });
   };
 
+  private shouldRenderEmpty() {
+    const container = this.props.container;
+    const getShouldShowEditHelp = () =>
+      container.getPanelCount() === 0 &&
+      container.getInput().viewMode !== ViewMode.VIEW &&
+      !container.getInput().dashboardCapabilities?.hideWriteControls;
+
+    const getShouldShowViewHelp = () =>
+      container.getPanelCount() === 0 &&
+      container.getInput().viewMode === ViewMode.VIEW &&
+      !container.getInput().dashboardCapabilities?.hideWriteControls;
+
+    const shouldShowUnauthorizedEmptyState = () => {
+      const readonlyMode =
+        container.getPanelCount() === 0 &&
+        !getShouldShowEditHelp() &&
+        !getShouldShowViewHelp() &&
+        container.getInput().dashboardCapabilities?.hideWriteControls;
+      const userHasNoPermissions =
+        container.getPanelCount() === 0 &&
+        !container.getInput().dashboardCapabilities?.visualizeCapabilities.save &&
+        !container.getInput().dashboardCapabilities?.mapsCapabilities.save;
+      return readonlyMode || userHasNoPermissions;
+    };
+
+    const shouldShowEditHelp = getShouldShowEditHelp();
+    const shouldShowViewHelp = getShouldShowViewHelp();
+    const isEmptyInReadOnlyMode = shouldShowUnauthorizedEmptyState();
+    return shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadOnlyMode;
+  }
+
   private renderEmptyScreen() {
-    const { renderEmpty } = this.props;
     const { isEmbeddedExternally, isFullScreenMode } = this.state;
     return (
       <div className="dshDashboardEmptyScreen">
@@ -115,7 +140,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             toggleChrome={!isEmbeddedExternally}
           />
         )}
-        {renderEmpty && renderEmpty()}
+        {this.props.container.emptyScreen}
       </div>
     );
   }
@@ -152,8 +177,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
   public render() {
     return (
       <React.Fragment>
-        {this.state.isEmptyState ? this.renderEmptyScreen() : null}
-        {this.renderContainerScreen()}
+        {this.shouldRenderEmpty() ? this.renderEmptyScreen() : this.renderContainerScreen()}
       </React.Fragment>
     );
   }

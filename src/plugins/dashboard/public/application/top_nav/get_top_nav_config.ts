@@ -32,8 +32,7 @@ import { NavAction } from '../../types';
 export function getTopNavConfig(
   dashboardMode: ViewMode,
   actions: { [key: string]: NavAction },
-  hideWriteControls: boolean,
-  onAppLeave?: AppMountParameters['onAppLeave']
+  hideWriteControls: boolean
 ) {
   switch (dashboardMode) {
     case ViewMode.VIEW:

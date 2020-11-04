@@ -33,7 +33,7 @@ import {
   IndexPatternsContract,
   TimefilterContract,
 } from '../../../data/public';
-import { EmbeddableStart } from '../../../embeddable/public';
+import { EmbeddableStart, ViewMode } from '../../../embeddable/public';
 import { KibanaLegacyStart } from '../../../kibana_legacy/public';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
 import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
@@ -89,7 +89,10 @@ export type DashboardAppComponentActiveState = Required<DashboardAppComponentSta
 export type DashboardTopNavProps = Omit<DashboardAppComponentActiveState, 'initialized'> & {
   timefilter: TimefilterContract;
   redirectToDashboard: RedirectToDashboard;
+  addFromLibrary: () => void;
+  updateViewMode: (newViewMode: ViewMode) => void;
   refreshDashboardContainer: () => void;
+  createNew: () => void;
   lastDashboardId?: string;
   embedSettings?: DashboardEmbedSettings;
 };
@@ -112,6 +115,12 @@ export interface DashboardMountProps {
   usageCollection: DashboardSetupDependencies['usageCollection'];
 }
 
+export interface DashboardCapabilities {
+  visualizeCapabilities: { save: boolean };
+  mapsCapabilities: { save: boolean };
+  hideWriteControls: boolean;
+}
+
 export interface DashboardAppServices {
   core: CoreStart;
   chrome: ChromeStart;
@@ -123,25 +132,17 @@ export interface DashboardAppServices {
   savedDashboards: SavedObjectLoader;
   indexPatterns: IndexPatternsContract;
   navigation: NavigationPublicPluginStart;
-  dashboardCapabilities: any; // TODO: Switch this any out for DashboardCapabilities
+  dashboardCapabilities: DashboardCapabilities;
   initializerContext: PluginInitializerContext;
   savedObjectsClient: SavedObjectsClientContract;
-  dashboardConfig: KibanaLegacyStart['dashboardConfig'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   navigateToDefaultApp: UrlForwardingStart['navigateToDefaultApp'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   navigateToLegacyKibanaUrl: UrlForwardingStart['navigateToLegacyKibanaUrl'];
-
   addBasePath: (path: string) => string;
   scopedHistory: () => ScopedHistory;
   restorePreviousUrl: () => void;
-
-  embeddableCapabilities: {
-    visualizeCapabilities: any;
-    mapsCapabilities: any;
-  };
-
   usageCollection?: UsageCollectionSetup;
   share?: SharePluginStart;
 }

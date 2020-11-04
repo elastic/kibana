@@ -32,7 +32,7 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import { merge, Observable, pipe, Subscription } from 'rxjs';
-import { SavedObject } from 'src/plugins/saved_objects/public';
+import { getSavedObjectFinder, SavedObject } from '../../../saved_objects/public';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../../kibana_utils/public';
 import {
@@ -40,6 +40,7 @@ import {
   DashboardAppComponentState,
   DashboardAppProps,
   DashboardAppServices,
+  DashboardCapabilities,
 } from './types';
 import { useKibana } from '../../../kibana_react/public';
 import { DashboardSavedObject } from '../saved_dashboards';
@@ -59,12 +60,15 @@ import {
   EmbeddableFactoryNotFoundError,
   ErrorEmbeddable,
   isErrorEmbeddable,
+  openAddPanelFlyout,
+  ViewMode,
 } from '../../../embeddable/public';
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE } from '.';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
 import { getDashboardTitle } from './dashboard_strings';
 import type { TagDecoratedSavedObject } from '../../../saved_objects_tagging_oss/public';
+import { DashboardEmptyScreen } from './dashboard_empty_screen';
 import { DashboardContainer, DashboardContainerInput, SavedDashboardPanel } from '..';
 
 // enum UrlParams {
@@ -124,13 +128,15 @@ const getChangesFromAppStateForContainerState = ({
 };
 
 const getDashboardContainerInput = ({
-  dashboardStateManager,
   query,
   searchSessionId,
+  dashboardStateManager,
+  dashboardCapabilities,
 }: {
+  dashboardCapabilities: DashboardCapabilities;
   dashboardStateManager: DashboardStateManager;
-  query: QueryStart;
   searchSessionId: string;
+  query: QueryStart;
 }): DashboardContainerInput => {
   const embeddablesMap: {
     [key: string]: DashboardPanelState;
@@ -174,6 +180,7 @@ const getDashboardContainerInput = ({
     // isEmptyState: shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadonlyMode,
     useMargins: dashboardStateManager.getUseMargins(),
     // lastReloadRequestTime,
+    dashboardCapabilities,
     title: dashboardStateManager.getTitle(),
     description: dashboardStateManager.getDescription(),
     expandedPanelId: dashboardStateManager.getExpandedPanelId(),
@@ -323,14 +330,13 @@ export function DashboardApp({
     embeddable,
     data,
     uiSettings,
-    // savedObjects,
+    savedObjects,
     savedDashboards,
     initializerContext,
     indexPatterns,
     // navigation,
-    // dashboardCapabilities,
+    dashboardCapabilities,
     // savedObjectsClient,
-    dashboardConfig,
     // setHeaderActionMenu,
     // navigateToDefaultApp,
     // savedQueryService,
@@ -354,14 +360,61 @@ export function DashboardApp({
       dashboardContainer: state.dashboardContainer,
       appStateDashboardInput: getDashboardContainerInput({
         dashboardStateManager: state.dashboardStateManager,
-        query: data.query,
         searchSessionId: data.search.session.start(),
+        dashboardCapabilities,
+        query: data.query,
       }),
     });
     if (changes) {
       state.dashboardContainer.updateInput(changes);
     }
-  }, [data.query, data.search.session, state.dashboardContainer, state.dashboardStateManager]);
+  }, [
+    data.query,
+    data.search.session,
+    dashboardCapabilities,
+    state.dashboardContainer,
+    state.dashboardStateManager,
+  ]);
+
+  const addFromLibrary = useCallback(() => {
+    if (state.dashboardContainer && !isErrorEmbeddable(state.dashboardContainer)) {
+      openAddPanelFlyout({
+        embeddable: state.dashboardContainer,
+        getAllFactories: embeddable.getEmbeddableFactories,
+        getFactory: embeddable.getEmbeddableFactory,
+        notifications: core.notifications,
+        overlays: core.overlays,
+        SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
+      });
+    }
+  }, [
+    embeddable.getEmbeddableFactories,
+    embeddable.getEmbeddableFactory,
+    state.dashboardContainer,
+    core.notifications,
+    core.overlays,
+    savedObjects,
+    uiSettings,
+  ]);
+
+  const createNew = useCallback(async () => {
+    const type = 'visualization';
+    const factory = embeddable.getEmbeddableFactory(type);
+    if (!factory) {
+      throw new EmbeddableFactoryNotFoundError(type);
+    }
+    const explicitInput = await factory.getExplicitInput();
+    if (state.dashboardContainer) {
+      await state.dashboardContainer.addNewEmbeddable(type, explicitInput);
+    }
+  }, [state.dashboardContainer, embeddable]);
+
+  const updateViewMode = useCallback(
+    (newMode: ViewMode) => {
+      state.dashboardStateManager?.switchViewMode(newMode);
+    },
+    [state.dashboardStateManager?.switchViewMode]
+  );
 
   // Load Saved Dashboard
   useEffect(() => {
@@ -404,7 +457,7 @@ export function DashboardApp({
 
     const dashboardStateManager = new DashboardStateManager({
       hasTaggingCapabilities: savedObjectsTagging?.ui.hasTagDecoration ?? defaultTaggingGuard,
-      hideWriteControls: dashboardConfig.getHideWriteControls(),
+      hideWriteControls: dashboardCapabilities.hideWriteControls,
       kibanaVersion: initializerContext.env.packageInfo.version,
       savedDashboard: state.savedDashboard,
       kbnUrlStateStorage,
@@ -479,9 +532,10 @@ export function DashboardApp({
     dashboardFactory
       .create(
         getDashboardContainerInput({
-          dashboardStateManager,
-          query: data.query,
           searchSessionId: data.search.session.start(),
+          dashboardStateManager,
+          dashboardCapabilities,
+          query: data.query,
         })
       )
       .then((dashboardContainer: DashboardContainer | ErrorEmbeddable | undefined) => {
@@ -502,13 +556,13 @@ export function DashboardApp({
     };
   }, [
     history,
-    uiSettings,
     embeddable,
+    uiSettings,
     data.query,
     usageCollection,
-    dashboardConfig,
     data.search.session,
     state.savedDashboard,
+    dashboardCapabilities,
     core.notifications.toasts,
     savedObjectsTagging?.ui.hasTagDecoration,
     initializerContext.env.packageInfo.version,
@@ -558,6 +612,17 @@ export function DashboardApp({
       refreshDashboardContainer();
     });
 
+    const isEditMode = dashboardContainer.getInput().viewMode !== ViewMode.VIEW;
+    dashboardContainer.emptyScreen = (
+      <DashboardEmptyScreen
+        isReadonlyMode={dashboardContainer.getInput().dashboardCapabilities?.hideWriteControls}
+        onLinkClick={isEditMode ? addFromLibrary : () => updateViewMode(ViewMode.EDIT)}
+        onVisualizeClick={createNew}
+        showLinkToVisualize={isEditMode}
+        uiSettings={uiSettings}
+        http={core.http}
+      />
+    );
     dashboardContainer.render(document.getElementById('dashboardViewport')!);
 
     return () => {
@@ -566,8 +631,13 @@ export function DashboardApp({
       data.search.session.clear();
     };
   }, [
+    createNew,
+    core.http,
+    uiSettings,
     data.query,
     indexPatterns,
+    addFromLibrary,
+    updateViewMode,
     data.search.session,
     state.dashboardContainer,
     refreshDashboardContainer,
@@ -603,15 +673,18 @@ export function DashboardApp({
     <>
       {isActiveState(state) && (
         <DashboardTopNav
-          refreshDashboardContainer={refreshDashboardContainer}
-          indexPatterns={state.indexPatterns}
-          dashboardStateManager={state.dashboardStateManager}
-          timefilter={data.query.timefilter.timefilter}
-          savedDashboard={state.savedDashboard}
-          dashboardContainer={state.dashboardContainer}
-          redirectToDashboard={redirectToDashboard}
-          lastDashboardId={savedDashboardId}
+          createNew={createNew}
           embedSettings={embedSettings}
+          updateViewMode={updateViewMode}
+          addFromLibrary={addFromLibrary}
+          lastDashboardId={savedDashboardId}
+          indexPatterns={state.indexPatterns}
+          savedDashboard={state.savedDashboard}
+          redirectToDashboard={redirectToDashboard}
+          timefilter={data.query.timefilter.timefilter}
+          dashboardContainer={state.dashboardContainer}
+          refreshDashboardContainer={refreshDashboardContainer}
+          dashboardStateManager={state.dashboardStateManager}
         />
       )}
       <div id="dashboardViewport" />

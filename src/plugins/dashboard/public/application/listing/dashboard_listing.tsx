@@ -45,12 +45,12 @@ export const DashboardListing = ({
     services: {
       core,
       data,
+      chrome,
       savedObjects,
       savedDashboards,
-      dashboardConfig,
       savedObjectsClient,
-      chrome,
       savedObjectsTagging,
+      dashboardCapabilities,
     },
   } = useKibana<DashboardAppServices>();
 
@@ -96,7 +96,7 @@ export const DashboardListing = ({
     };
   }, [title, savedObjectsClient, redirectToDashboard, data.query, kbnUrlStateStorage]);
 
-  const hideWriteControls = dashboardConfig.getHideWriteControls();
+  const hideWriteControls = dashboardCapabilities.hideWriteControls;
   const listingLimit = savedObjects.settings.getListingLimit();
 
   const tableColumns = getTableColumns((id) => redirectToDashboard({ id }), savedObjectsTagging);

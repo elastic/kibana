@@ -47,23 +47,24 @@ import {
 import { PLACEHOLDER_EMBEDDABLE } from './placeholder';
 import { PanelPlacementMethod, IPanelPlacementArgs } from './panel/dashboard_panel_placement';
 import { EmbeddableStateTransfer, EmbeddableOutput } from '../../../../embeddable/public';
+import { DashboardCapabilities } from '../types';
 
 export interface DashboardContainerInput extends ContainerInput {
-  viewMode: ViewMode;
-  filters: Filter[];
-  query: Query;
-  timeRange: TimeRange;
+  dashboardCapabilities?: DashboardCapabilities;
   refreshConfig?: RefreshInterval;
-  expandedPanelId?: string;
-  useMargins: boolean;
-  title: string;
-  description?: string;
   isEmbeddedExternally?: boolean;
   isFullScreenMode: boolean;
+  expandedPanelId?: string;
+  timeRange: TimeRange;
+  description?: string;
+  useMargins: boolean;
+  viewMode: ViewMode;
+  filters: Filter[];
+  title: string;
+  query: Query;
   panels: {
     [panelId: string]: DashboardPanelState<EmbeddableInput & { [k: string]: unknown }>;
   };
-  isEmptyState?: boolean;
 }
 
 interface IndexSignature {
@@ -95,12 +96,22 @@ export interface DashboardContainerOptions {
 export type DashboardReactContextValue = KibanaReactContextValue<DashboardContainerOptions>;
 export type DashboardReactContext = KibanaReactContext<DashboardContainerOptions>;
 
+const defaultCapabilities = {
+  hideWriteControls: true,
+  visualizeCapabilities: { save: false },
+  mapsCapabilities: { save: false },
+};
+
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
-  public renderEmpty?: undefined | (() => React.ReactNode);
-
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
+
+  public emptyScreen: React.ReactNode;
+
+  public getPanelCount = () => {
+    return Object.keys(this.getInput().panels).length;
+  };
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -110,6 +121,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   ) {
     super(
       {
+        dashboardCapabilities: defaultCapabilities,
         ...initialInput,
       },
       { embeddableLoaded: {} },
@@ -218,7 +230,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       <I18nProvider>
         <KibanaContextProvider services={this.options}>
           <DashboardViewport
-            renderEmpty={this.renderEmpty}
+            renderEmpty={() => this.emptyScreen}
             container={this}
             PanelComponent={this.embeddablePanel}
           />

@@ -77,7 +77,6 @@ export async function mountApp({
     savedObjects,
     usageCollection,
     core: coreStart,
-    dashboardConfig,
     data: dataStart,
     share: shareStart,
     initializerContext,
@@ -96,10 +95,10 @@ export async function mountApp({
     savedQueryService: dataStart.query.savedQueries,
     savedObjectsClient: coreStart.savedObjects.client,
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
-    dashboardCapabilities: coreStart.application.capabilities.dashboard,
-    embeddableCapabilities: {
-      visualizeCapabilities: coreStart.application.capabilities.visualize,
-      mapsCapabilities: coreStart.application.capabilities.maps,
+    dashboardCapabilities: {
+      hideWriteControls: dashboardConfig.getHideWriteControls(),
+      visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize.save) },
+      mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps.save) },
     },
   };
 
