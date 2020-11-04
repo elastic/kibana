@@ -35,14 +35,10 @@ describe('Overview Page', () => {
 
   describe('with no data', () => {
     before(() => {
-      esArchiverUnload('auditbeat');
-      esArchiverLoad('empty_kibana');
+      cy.server();
+      cy.fixture('empty_instance').as('@emptyInstance');
       loginAndWaitForPage(OVERVIEW_URL);
-    });
-
-    after(() => {
-      esArchiverLoad('auditbeat');
-      esArchiverUnload('empty_kibana');
+      cy.route('POST', '**/internal/search/securitySolutionIndexFields', '@emptyInstance');
     });
 
     it('Splash screen should be here', () => {
