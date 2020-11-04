@@ -9,7 +9,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -27,10 +26,6 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
-  EuiNotificationBadge,
-  EuiDescriptionList,
-  EuiDescriptionListDescription,
-  EuiDescriptionListTitle,
   EuiListGroupItem,
   EuiListGroup,
 } from '@elastic/eui';
