@@ -15,23 +15,35 @@ import { getInternalSavedObjectsClient } from './util';
 import { repairFactory } from './repair';
 import { jobSavedObjectServiceFactory } from './service';
 import { mlLog } from '../lib/log';
+import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
-export function jobInitializationFactory(core: CoreStart) {
-  const client = core.elasticsearch.client;
+/**
+ * Creates initializeJobs function which is used to check whether
+ * ml job saved objects exist and creates them if needed
+ *
+ * @param core: CoreStart
+ */
+export function jobSavedObjectsInitializationFactory(core: CoreStart) {
+  const client = (core.elasticsearch.client as unknown) as IScopedClusterClient;
 
+  /**
+   * Check whether ML saved objects exist.
+   * If they don't, check to see whether ML jobs exist.
+   * If jobs exist, but the saved objects do not, create the saved objects.
+   *
+   */
   async function initializeJobs() {
     try {
-      if (await _needsInitializing()) {
-        mlLog.info('Initializing job saved objects');
-        const savedObjectsClient = getInternalSavedObjectsClient(core);
-        const jobSavedObjectService = jobSavedObjectServiceFactory(savedObjectsClient);
-        const { initSavedObjects } = repairFactory(
-          (client as unknown) as IScopedClusterClient,
-          jobSavedObjectService
-        );
-        await initSavedObjects();
-        mlLog.info('Job saved objects initialized for * space');
+      if ((await _needsInitializing()) === false) {
+        // ml job saved objects have already been initialized
+        return;
       }
+      mlLog.info('Initializing job saved objects');
+      const savedObjectsClient = getInternalSavedObjectsClient(core);
+      const jobSavedObjectService = jobSavedObjectServiceFactory(savedObjectsClient);
+      const { initSavedObjects } = repairFactory(client, jobSavedObjectService);
+      await initSavedObjects();
+      mlLog.info('Job saved objects initialized for * space');
     } catch (error) {
       mlLog.error('Error Initializing jobs');
     }
@@ -64,7 +76,7 @@ export function jobInitializationFactory(core: CoreStart) {
             filter: [
               {
                 term: {
-                  type: 'ml-job',
+                  type: ML_SAVED_OBJECT_TYPE,
                 },
               },
             ],

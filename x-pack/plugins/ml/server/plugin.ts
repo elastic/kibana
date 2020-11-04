@@ -50,7 +50,7 @@ import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
-import { setupSavedObjects, jobInitializationFactory } from './saved_objects';
+import { setupSavedObjects, jobSavedObjectsInitializationFactory } from './saved_objects';
 import { RouteGuard } from './lib/route_guard';
 
 export type MlPluginSetup = SharedServices;
@@ -188,7 +188,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
     // check whether the job saved objects exist
     // and create them if needed.
-    const { initializeJobs } = jobInitializationFactory(coreStart);
+    const { initializeJobs } = jobSavedObjectsInitializationFactory(coreStart);
     await initializeJobs();
   }
 

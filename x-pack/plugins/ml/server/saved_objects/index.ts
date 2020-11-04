@@ -8,4 +8,4 @@ export { setupSavedObjects } from './saved_objects';
 export { JobObject, JobSavedObjectService, jobSavedObjectServiceFactory } from './service';
 export { checksFactory } from './checks';
 export { repairFactory } from './repair';
-export { jobInitializationFactory } from './initialization';
+export { jobSavedObjectsInitializationFactory } from './initialization';
