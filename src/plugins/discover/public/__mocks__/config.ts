@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { UiSettingsClient } from '../../../../core/public';
+import { IUiSettingsClient } from '../../../../core/public';
 
 export const configMock = ({
   get: (key: string) => {
@@ -27,4 +27,4 @@ export const configMock = ({
 
     return '';
   },
-} as unknown) as UiSettingsClient;
+} as unknown) as IUiSettingsClient;
