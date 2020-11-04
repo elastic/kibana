@@ -128,7 +128,7 @@ export class Plugin
           uiSettings: coreStart.uiSettings,
           docLinks: coreStart.docLinks,
           chrome: coreStart.chrome,
-          savedObjectsClient: coreStart.savedObjects.client,
+          savedObjects: coreStart.savedObjects,
           I18nContext: coreStart.i18n.Context,
           capabilities: coreStart.application.capabilities,
           navigateToApp: coreStart.application.navigateToApp,
@@ -136,7 +136,6 @@ export class Plugin
           history: params.history,
           actionTypeRegistry,
           alertTypeRegistry,
-          savedObjects: pluginsStart.savedObjects,
           kibanaFeatures,
         });
       },
