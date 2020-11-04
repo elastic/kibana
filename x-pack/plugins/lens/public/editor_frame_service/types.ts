@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaDatatable } from 'src/plugins/expressions';
+import { Datatable } from 'src/plugins/expressions';
 
-export type TableInspectorAdapter = Record<string, KibanaDatatable>;
+export type TableInspectorAdapter = Record<string, Datatable>;
 export interface LensInspectorAdapters {
   tables?: TableInspectorAdapter;
 }
