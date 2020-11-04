@@ -36,7 +36,7 @@ export const PlotByFunctionControls = ({
 }) => {
   if (functionDescription === undefined) return null;
   return (
-    <EuiFlexItem style={{ textAlign: 'right' }} grow={false}>
+    <EuiFlexItem grow={false}>
       <EuiFormRow
         label={i18n.translate('xpack.ml.timeSeriesExplorer.metricPlotByOption', {
           defaultMessage: 'Function',
@@ -46,7 +46,9 @@ export const PlotByFunctionControls = ({
           options={plotByFunctionOptions}
           value={functionDescription}
           onChange={(e) => setFunctionDescription(e.target.value)}
-          aria-label="Pick function to plot by (min, max, or average) if metric function"
+          aria-label={i18n.translate('xpack.ml.timeSeriesExplorer.metricPlotByOptionLabel', {
+            defaultMessage: 'Pick function to plot by (min, max, or average) if metric function',
+          })}
         />
       </EuiFormRow>
     </EuiFlexItem>
