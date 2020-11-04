@@ -42,15 +42,13 @@ export function registerRoutes(http: HttpServiceSetup) {
           meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
-          type: schema.maybe(schema.string()),
-          rollup_index: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
       const { asCurrentUser } = context.core.elasticsearch.client;
       const indexPatterns = new IndexPatternsFetcher(asCurrentUser);
-      const { pattern, meta_fields: metaFields, type, rollup_index: rollupIndex } = request.query;
+      const { pattern, meta_fields: metaFields } = request.query;
 
       let parsedFields: string[] = [];
       try {
@@ -63,8 +61,6 @@ export function registerRoutes(http: HttpServiceSetup) {
         const fields = await indexPatterns.getFieldsForWildcard({
           pattern,
           metaFields: parsedFields,
-          type,
-          rollupIndex,
         });
 
         return response.ok({

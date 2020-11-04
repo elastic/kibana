@@ -86,22 +86,15 @@ export interface SavedObjectsClientCommon {
 }
 
 export interface GetFieldsOptions {
-  pattern: string;
+  pattern?: string;
   type?: string;
+  params?: any;
   lookBack?: boolean;
   metaFields?: string[];
-  rollupIndex?: string;
-}
-
-export interface GetFieldsOptionsTimePattern {
-  pattern: string;
-  metaFields: string[];
-  lookBack: number;
-  interval: string;
 }
 
 export interface IIndexPatternsApiClient {
-  getFieldsForTimePattern: (options: GetFieldsOptionsTimePattern) => Promise<any>;
+  getFieldsForTimePattern: (options: GetFieldsOptions) => Promise<any>;
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
 }
 
