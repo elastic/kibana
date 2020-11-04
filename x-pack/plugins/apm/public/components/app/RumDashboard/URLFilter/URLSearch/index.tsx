@@ -16,6 +16,7 @@ import { formatToSec } from '../../UXMetrics/KeyUXMetrics';
 import { SelectableUrlList } from './SelectableUrlList';
 import { UrlOption } from './RenderOption';
 import { useUxQuery } from '../../hooks/useUxQuery';
+import { getPercentileLabel } from '../../UXMetrics/translations';
 
 interface Props {
   onChange: (value: string[]) => void;
@@ -26,7 +27,7 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
 
   const { uiFilters, urlParams } = useUrlParams();
 
-  const { searchTerm } = urlParams;
+  const { searchTerm, percentile } = urlParams;
 
   const [popoverIsOpen, setPopoverIsOpen] = useState(false);
 
@@ -104,12 +105,17 @@ export function URLSearch({ onChange: onFilterChange }: Props) {
     setCheckedUrls(clickedItems.map((item) => item.url));
   };
 
+  const percTitle = getPercentileLabel(percentile!);
+
   const items: UrlOption[] = (data?.items ?? []).map((item) => ({
     label: item.url,
     key: item.url,
     meta: [
       I18LABELS.pageViews + ': ' + item.count,
-      I18LABELS.pageLoadDuration + ': ' + formatToSec(item.pld),
+      I18LABELS.pageLoadDuration +
+        ': ' +
+        formatToSec(item.pld) +
+        ` (${percTitle})`,
     ],
     url: item.url,
     checked: checkedUrls?.includes(item.url) ? 'on' : undefined,

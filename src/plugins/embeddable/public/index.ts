@@ -71,6 +71,7 @@ export {
   isRangeSelectTriggerContext,
   isValueClickTriggerContext,
   isRowClickTriggerContext,
+  isContextMenuTriggerContext,
   EmbeddableStateTransfer,
   EmbeddableEditorState,
   EmbeddablePackageState,

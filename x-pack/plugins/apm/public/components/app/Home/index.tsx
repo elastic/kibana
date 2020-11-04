@@ -20,12 +20,12 @@ import { ApmHeader } from '../../shared/ApmHeader';
 import { EuiTabLink } from '../../shared/EuiTabLink';
 import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
+import { ServiceInventoryLink } from '../../shared/Links/apm/service_inventory_link';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceMap } from '../ServiceMap';
-import { ServiceOverview } from '../ServiceOverview';
+import { ServiceInventory } from '../service_inventory';
 import { TraceOverview } from '../TraceOverview';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 
@@ -37,13 +37,13 @@ function getHomeTabs({
   const homeTabs = [
     {
       link: (
-        <ServiceOverviewLink>
+        <ServiceInventoryLink>
           {i18n.translate('xpack.apm.home.servicesTabLabel', {
             defaultMessage: 'Services',
           })}
-        </ServiceOverviewLink>
+        </ServiceInventoryLink>
       ),
-      render: () => <ServiceOverview />,
+      render: () => <ServiceInventory />,
       name: 'services',
     },
     {

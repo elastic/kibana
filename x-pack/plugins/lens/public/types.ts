@@ -7,6 +7,7 @@
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { CoreSetup } from 'kibana/public';
+import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { SavedObjectReference } from 'kibana/public';
 import { ROW_CLICK_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
@@ -181,6 +182,10 @@ export interface Datasource<T = unknown, P = unknown> {
   getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+  /**
+   * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
+   */
+  uniqueLabels: (state: T) => Record<string, string>;
 }
 
 /**
@@ -268,6 +273,7 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   state: T;
   setState: StateSetter<T>;
   dragDropContext: DragContextState;
+  isReorder?: boolean;
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
@@ -375,6 +381,7 @@ export interface SuggestionRequest<T = unknown> {
    * State is only passed if the visualization is active.
    */
   state?: T;
+  mainPalette?: PaletteOutput;
   /**
    * The visualization needs to know which table is being suggested
    */
@@ -426,6 +433,11 @@ export interface FramePublicAPI {
   query: Query;
   filters: Filter[];
 
+  /**
+   * A map of all available palettes (keys being the ids).
+   */
+  availablePalettes: PaletteRegistry;
+
   // Adds a new layer. This has a side effect of updating the datasource state
   addNewLayer: () => string;
   removeLayers: (layerIds: string[]) => void;
@@ -463,7 +475,9 @@ export interface Visualization<T = unknown> {
    * - Loadingn from a saved visualization
    * - When using suggestions, the suggested state is passed in
    */
-  initialize: (frame: FramePublicAPI, state?: T) => T;
+  initialize: (frame: FramePublicAPI, state?: T, mainPalette?: PaletteOutput) => T;
+
+  getMainPalette?: (state: T) => undefined | PaletteOutput;
 
   /**
    * Visualizations must provide at least one type for the chart switcher,

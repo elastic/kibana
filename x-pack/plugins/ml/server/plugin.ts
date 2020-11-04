@@ -14,6 +14,8 @@ import {
   PluginInitializerContext,
   CapabilitiesStart,
   IClusterClient,
+  SavedObjectsServiceStart,
+  SavedObjectsClientContract,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginsSetup, RouteInitialization } from './types';
@@ -37,17 +39,19 @@ import { indicesRoutes } from './routes/indices';
 import { jobAuditMessagesRoutes } from './routes/job_audit_messages';
 import { jobRoutes } from './routes/anomaly_detectors';
 import { jobServiceRoutes } from './routes/job_service';
+import { savedObjectsRoutes } from './routes/saved_objects';
 import { jobValidationRoutes } from './routes/job_validation';
 import { notificationRoutes } from './routes/notification_settings';
 import { resultsServiceRoutes } from './routes/results_service';
 import { systemRoutes } from './routes/system';
 import { MlLicense } from '../common/license';
-import { MlServerLicense } from './lib/license';
 import { createSharedServices, SharedServices } from './shared_services';
 import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
+import { setupSavedObjects } from './saved_objects';
+import { RouteGuard } from './lib/route_guard';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -55,14 +59,15 @@ export type MlPluginStart = void;
 export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup> {
   private log: Logger;
   private version: string;
-  private mlLicense: MlServerLicense;
+  private mlLicense: MlLicense;
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
+  private savedObjectsStart: SavedObjectsServiceStart | null = null;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.version = ctx.env.packageInfo.branch;
-    this.mlLicense = new MlServerLicense();
+    this.mlLicense = new MlLicense();
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
@@ -113,9 +118,20 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
     // initialize capabilities switcher to add license filter to ml capabilities
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
+    setupSavedObjects(coreSetup.savedObjects);
+
+    const getMlSavedObjectsClient = (request: KibanaRequest): SavedObjectsClientContract | null => {
+      if (this.savedObjectsStart === null) {
+        return null;
+      }
+      return this.savedObjectsStart.getScopedClient(request, {
+        includedHiddenTypes: ['ml-job'],
+      });
+    };
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
+      routeGuard: new RouteGuard(this.mlLicense, getMlSavedObjectsClient),
       mlLicense: this.mlLicense,
     };
 
@@ -143,15 +159,16 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit, this.version);
+    savedObjectsRoutes(routeInit);
     systemRoutes(routeInit, {
       spaces: plugins.spaces,
       cloud: plugins.cloud,
       resolveMlCapabilities,
     });
+    trainedModelsRoutes(routeInit);
+
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
-
-    trainedModelsRoutes(routeInit);
 
     return {
       ...createSharedServices(
@@ -167,6 +184,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   public start(coreStart: CoreStart): MlPluginStart {
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
+    this.savedObjectsStart = coreStart.savedObjects;
   }
 
   public stop() {
