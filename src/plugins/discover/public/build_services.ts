@@ -68,7 +68,7 @@ export interface DiscoverServices {
   getSavedSearchUrlById: (id: string) => Promise<string>;
   getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
-  trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export async function buildServices(
@@ -83,10 +83,6 @@ export async function buildServices(
   };
   const savedObjectService = createSavedSearchesLoader(services);
   const { usageCollection } = plugins;
-  let trackUiMetric = (metricType: UiStatsMetricType, eventName: string | string[]) => {};
-  if (usageCollection) {
-    trackUiMetric = usageCollection.reportUiStats.bind(usageCollection, 'discover');
-  }
 
   return {
     addBasePath: core.http.basePath.prepend,
@@ -113,6 +109,6 @@ export async function buildServices(
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
-    trackUiMetric,
+    trackUiMetric: usageCollection?.reportUiStats.bind(usageCollection, 'discover'),
   };
 }

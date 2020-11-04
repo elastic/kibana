@@ -79,7 +79,7 @@ export interface DiscoverSidebarProps {
    * @param metricType
    * @param eventName
    */
-  trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverSidebar({
