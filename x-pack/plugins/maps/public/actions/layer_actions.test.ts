@@ -8,6 +8,14 @@ import { addLayer } from './layer_actions';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { LICENSED_FEATURES } from '../licensed_features';
 
+jest.mock('../kibana_services', () => {
+  return {
+    getMapsCapabilities() {
+      return { save: true };
+    },
+  };
+});
+
 const getStoreMock = jest.fn();
 const dispatchMock = jest.fn();
 
