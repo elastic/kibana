@@ -59,6 +59,7 @@
 |  [PluginSetup](./kibana-plugin-plugins-data-server.pluginsetup.md) |  |
 |  [PluginStart](./kibana-plugin-plugins-data-server.pluginstart.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-server.refreshinterval.md) |  |
+|  [SearchStrategyDependencies](./kibana-plugin-plugins-data-server.searchstrategydependencies.md) |  |
 |  [SearchUsage](./kibana-plugin-plugins-data-server.searchusage.md) |  |
 |  [TabbedAggColumn](./kibana-plugin-plugins-data-server.tabbedaggcolumn.md) | \* |
 |  [TabbedTable](./kibana-plugin-plugins-data-server.tabbedtable.md) | \* |

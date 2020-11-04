@@ -223,6 +223,7 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
+  SearchStrategyDependencies,
   getDefaultSearchParams,
   getShardTimeout,
   shimHitsTotal,
