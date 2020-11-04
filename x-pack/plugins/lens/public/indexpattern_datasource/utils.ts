@@ -38,8 +38,7 @@ export function isDraggedField(fieldCandidate: unknown): fieldCandidate is Dragg
   return (
     typeof fieldCandidate === 'object' &&
     fieldCandidate !== null &&
-    'field' in fieldCandidate &&
-    'indexPatternId' in fieldCandidate
+    ['id', 'field', 'indexPatternId'].every((prop) => prop in fieldCandidate)
   );
 }
 

@@ -108,6 +108,12 @@ export function WorkspacePanel({
         (datasource) => datasource.getTableSpec().length > 0
       );
 
+      const mainPalette =
+        activeVisualizationId &&
+        visualizationMap[activeVisualizationId] &&
+        visualizationMap[activeVisualizationId].getMainPalette
+          ? visualizationMap[activeVisualizationId].getMainPalette!(visualizationState)
+          : undefined;
       const suggestions = getSuggestions({
         datasourceMap: { [activeDatasourceId]: datasourceMap[activeDatasourceId] },
         datasourceStates,
@@ -118,6 +124,7 @@ export function WorkspacePanel({
         activeVisualizationId,
         visualizationState,
         field: dragDropContext.dragging,
+        mainPalette,
       });
 
       return suggestions.find((s) => s.visualizationId === activeVisualizationId) || suggestions[0];

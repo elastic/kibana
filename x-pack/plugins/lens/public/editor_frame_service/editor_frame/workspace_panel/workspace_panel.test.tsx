@@ -716,14 +716,14 @@ describe('workspace_panel', () => {
     let mockDispatch: jest.Mock;
     let frame: jest.Mocked<FramePublicAPI>;
 
-    const draggedField: unknown = {};
+    const draggedField = { id: 'field' };
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
       mockDispatch = jest.fn();
     });
 
-    function initComponent(draggingContext: unknown = draggedField) {
+    function initComponent(draggingContext = draggedField) {
       instance = mount(
         <ChildDragDropProvider dragging={draggingContext} setDragging={() => {}}>
           <WorkspacePanel

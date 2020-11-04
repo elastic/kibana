@@ -14,7 +14,16 @@ export const requiredPackages = {
   Endpoint: 'endpoint',
 } as const;
 
+export const agentAssetTypes = {
+  Input: 'input',
+} as const;
+
 export const dataTypes = {
   Logs: 'logs',
   Metrics: 'metrics',
+} as const;
+
+export const installationStatuses = {
+  Installed: 'installed',
+  NotInstalled: 'not_installed',
 } as const;

@@ -5,7 +5,7 @@
  */
 
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import { getIndexPatternDatasource, IndexPatternColumn, uniqueLabels } from './indexpattern';
+import { getIndexPatternDatasource, IndexPatternColumn } from './indexpattern';
 import { DatasourcePublicAPI, Operation, Datasource } from '../types';
 import { coreMock } from 'src/core/public/mocks';
 import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
@@ -197,27 +197,29 @@ describe('IndexPattern Data Source', () => {
         operationType: 'count',
         sourceField: 'Records',
       };
-      const map = uniqueLabels({
-        a: {
-          columnOrder: ['a', 'b'],
-          columns: {
-            a: col,
-            b: col,
-          },
-          indexPatternId: 'foo',
-        },
-        b: {
-          columnOrder: ['c', 'd'],
-          columns: {
-            c: col,
-            d: {
-              ...col,
-              label: 'Foo [1]',
+      const map = indexPatternDatasource.uniqueLabels(({
+        layers: {
+          a: {
+            columnOrder: ['a', 'b'],
+            columns: {
+              a: col,
+              b: col,
             },
+            indexPatternId: 'foo',
           },
-          indexPatternId: 'foo',
+          b: {
+            columnOrder: ['c', 'd'],
+            columns: {
+              c: col,
+              d: {
+                ...col,
+                label: 'Foo [1]',
+              },
+            },
+            indexPatternId: 'foo',
+          },
         },
-      });
+      } as unknown) as IndexPatternPrivateState);
 
       expect(map).toMatchInlineSnapshot(`
         Object {

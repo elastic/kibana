@@ -16,6 +16,30 @@ export const buildFieldsTermAggregation = (esFields: readonly string[]): Aggrega
   );
 
 const getTermsAggregationTypeFromField = (field: string): AggregationRequest => {
+  if (field === 'host.ip') {
+    return {
+      host_ip: {
+        terms: {
+          script: {
+            source: "doc['host.ip']",
+            lang: 'painless',
+          },
+          size: 10,
+          order: {
+            timestamp: 'desc',
+          },
+        },
+        aggs: {
+          timestamp: {
+            max: {
+              field: '@timestamp',
+            },
+          },
+        },
+      },
+    };
+  }
+
   return {
     [field.replace(/\./g, '_')]: {
       terms: {
