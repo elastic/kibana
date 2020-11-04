@@ -146,6 +146,7 @@ describe('Events Viewer', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
       openEvents();
+      cy.scrollTo('bottom');
       waitsForEventsToBeLoaded();
     });
 
@@ -160,7 +161,6 @@ describe('Events Viewer', () => {
       const expectedOrderAfterDragAndDrop =
         'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
 
-      cy.scrollTo('bottom');
       cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
       dragAndDropColumn({ column: 0, newPosition: 1 });
       cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);
