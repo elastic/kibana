@@ -161,7 +161,9 @@ export class MapEmbeddable
   }
 
   private async initializeOutput() {
-    const savedMapTitle = this._attributes?.title ? this._attributes.title : '';
+    const savedMapTitle = this._savedMap.getAttributes()?.title
+      ? this._savedMap.getAttributes().title
+      : '';
     const input = this.getInput();
     const title = input.hidePanelTitles ? '' : input.title || savedMapTitle;
     const savedObjectId = (input as MapByReferenceInput).savedObjectId;
@@ -195,7 +197,7 @@ export class MapEmbeddable
   }
 
   public getDescription() {
-    return this._attributes?.description;
+    return this._savedMap.getAttributes()?.description;
   }
 
   public supportedTriggers(): Array<keyof TriggerContextMapping> {
