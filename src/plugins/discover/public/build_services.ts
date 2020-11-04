@@ -68,7 +68,6 @@ export interface DiscoverServices {
   getSavedSearchUrlById: (id: string) => Promise<string>;
   getEmbeddableInjector: any;
   uiSettings: IUiSettingsClient;
-  visualizations: VisualizationsStart;
   trackUiMetric: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
@@ -114,7 +113,6 @@ export async function buildServices(
     timefilter: plugins.data.query.timefilter.timefilter,
     toastNotifications: core.notifications.toasts,
     uiSettings: core.uiSettings,
-    visualizations: plugins.visualizations,
     trackUiMetric,
   };
 }
