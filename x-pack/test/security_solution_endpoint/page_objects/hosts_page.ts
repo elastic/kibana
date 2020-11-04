@@ -138,13 +138,11 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
      * Navigate to Events Panel
      */
     async navigateToEventsPanel() {
-      log.debug('Igor is here');
-      console.log('');
-      // if (!(await testSubjects.exists('investigate-in-resolver-button', { timeout: 400 }))) {
-      //   await (await testSubjects.find('navigation-hosts')).click();
-      //   await testSubjects.click('navigation-events');
-      //   await testSubjects.existOrFail('event');
-      // }
+      if (!(await testSubjects.exists('investigate-in-resolver-button', { timeout: 400 }))) {
+        await (await testSubjects.find('navigation-hosts')).click();
+        await testSubjects.click('navigation-events');
+        await testSubjects.existOrFail('event');
+      }
     },
     /**
      * execute Query And Open Resolver
