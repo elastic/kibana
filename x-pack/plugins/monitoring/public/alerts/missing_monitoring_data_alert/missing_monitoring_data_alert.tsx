@@ -14,6 +14,7 @@ export function createMissingMonitoringDataAlertType(): AlertTypeModel {
   return {
     id: ALERT_MISSING_MONITORING_DATA,
     name: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label,
+    description: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].description,
     iconClass: 'bell',
     alertParamsExpression: (props: any) => (
       <Expression

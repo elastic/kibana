@@ -32,10 +32,10 @@ describe('getQueryParams', () => {
     const query = getQueryParams(location);
 
     expect(query).toMatchInlineSnapshot(`
-       Object {
-         "_a": "(description:'')",
-         "_b": "3",
-       }
-     `);
+      Object {
+        "_a": "(description:'')",
+        "_b": "3",
+      }
+    `);
   });
 });
