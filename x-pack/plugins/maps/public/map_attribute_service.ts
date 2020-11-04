@@ -7,11 +7,12 @@
 import { AttributeService } from '../../../../src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './kibana_services';
 // @ts-expect-error
 import { extractReferences, injectReferences } from '../common/migrations/references';
-import { MapByValueInput, MapByReferenceInput } from '.embeddable/types';
+import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
 export type MapAttributeService = AttributeService<
   MapSavedObjectAttributes,
@@ -66,7 +67,7 @@ export function getMapAttributeService(): MapAttributeService {
           copyOnSave: false,
           lastSavedTitle: '',
           getEsType: () => MAP_SAVED_OBJECT_TYPE,
-          getDisplayName: () => MAP_SAVED_OBJECT_TYPE,
+          getDisplayName: () => getMapEmbeddableDisplayName,
         },
         props.isTitleDuplicateConfirmed,
         props.onTitleDuplicate,

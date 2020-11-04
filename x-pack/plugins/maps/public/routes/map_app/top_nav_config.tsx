@@ -15,8 +15,11 @@ import {
   getCoreI18n,
   getNavigateToApp,
   getIsAllowByValueEmbeddables,
+  getSavedObjectsClient,
+  getCoreOverlays,
 } from '../../kibana_services';
 import {
+  checkForDuplicateTitle,
   SavedObjectSaveModalOrigin,
   OnSaveProps,
   showSaveModal,
@@ -25,6 +28,7 @@ import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { goToSpecifiedPath } from '../../render_app';
 import { SavedMap } from './saved_map';
 import { EmbeddableStateTransfer } from '../../../../../../src/plugins/embeddable/public';
+import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
 
 function getSaveAndReturnButtonLabel() {
   return getIsAllowByValueEmbeddables()
@@ -133,11 +137,36 @@ export function getTopNavConfig({
             originatingApp={savedMap.getOriginatingApp()}
             getAppNameFromId={savedMap.getAppNameFromId}
             onSave={async (props: OnSaveProps & { returnToOrigin: boolean }) => {
+              try {
+                await checkForDuplicateTitle(
+                  {
+                    id: props.newCopyOnSave ? undefined : savedMap.getSavedObjectId(),
+                    title: props.newTitle,
+                    copyOnSave: props.newCopyOnSave,
+                    lastSavedTitle:
+                      savedMap.getSavedObjectId() && savedMap.getAttributes()
+                        ? savedMap.getAttributes().title
+                        : undefined,
+                    getEsType: () => MAP_SAVED_OBJECT_TYPE,
+                    getDisplayName: getMapEmbeddableDisplayName,
+                  },
+                  props.isTitleDuplicateConfirmed,
+                  props.onTitleDuplicate,
+                  {
+                    savedObjectsClient: getSavedObjectsClient(),
+                    overlays: getCoreOverlays(),
+                  }
+                );
+              } catch (e) {
+                // ignore duplicate title failure, user notified in save modal
+                return {};
+              }
+
               await savedMap.save({
                 ...props,
                 saveByReference: true,
               });
-              // showSaveModal wrapper requires onSave to return an object with an id to close the modal after save
+              // showSaveModal wrapper requires onSave to return an object with an id to close the modal after successful save
               return { id: 'id' };
             }}
             onClose={() => {}}

@@ -8,7 +8,6 @@ import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
-import { getMapEmbeddableTitle } from '../../../../common/i18n_getters';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
 import {
   getTimeFilters,
@@ -31,10 +30,7 @@ import {
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
 import { getMapAttributeService } from '../../../map_attribute_service';
-import {
-  checkForDuplicateTitle,
-  OnSaveProps,
-} from '../../../../../../../src/plugins/saved_objects/public';
+import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
 import {
   getCoreChrome,
@@ -53,7 +49,7 @@ export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
   private readonly _embeddableId?: string;
   private _initialLayerListConfig: LayerDescriptor[] = [];
-  private readonly _mapEmbeddableInput?: MapEmbeddableInput;
+  private _mapEmbeddableInput?: MapEmbeddableInput;
   private _originatingApp?: string;
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
@@ -228,8 +224,6 @@ export class SavedMap {
     newDescription,
     newTitle,
     newCopyOnSave,
-    isTitleDuplicateConfirmed,
-    onTitleDuplicate,
     returnToOrigin,
     saveByReference,
   }: OnSaveProps & {
@@ -238,30 +232,6 @@ export class SavedMap {
   }) {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await loadAttributes before calling save');
-    }
-
-    if (saveByReference) {
-      try {
-        await checkForDuplicateTitle(
-          {
-            id: newCopyOnSave ? undefined : this.getSavedObjectId(),
-            title: newTitle,
-            copyOnSave: newCopyOnSave,
-            lastSavedTitle: this._attributes.title,
-            getEsType: () => MAP_SAVED_OBJECT_TYPE,
-            getDisplayName: getMapEmbeddableTitle,
-          },
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-          {
-            savedObjectsClient: getSavedObjectsClient(),
-            overlays: getCoreOverlays(),
-          }
-        );
-      } catch (e) {
-        // ignore duplicate title failure, user notified in save modal
-        return;
-      }
     }
 
     const prevTitle = this._attributes.title;
@@ -307,6 +277,7 @@ export class SavedMap {
       return;
     }
 
+    this._mapEmbeddableInput = updatedMapEmbeddableInput;
     // break connection to originating application
     this._originatingApp = undefined;
     getToasts().addSuccess({
@@ -318,7 +289,7 @@ export class SavedMap {
 
     getCoreChrome().docTitle.change(newTitle);
     this.setBreadcrumbs();
-    goToSpecifiedPath(`/map/${updatedMapEmbeddableInput.savedObjectId}${window.location.hash}`);
+    goToSpecifiedPath(`/map/${this.getSavedObjectId()}${window.location.hash}`);
     return;
   }
 

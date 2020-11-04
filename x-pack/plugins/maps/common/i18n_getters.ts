@@ -15,7 +15,7 @@ export function getAppTitle() {
   });
 }
 
-export function getMapEmbeddableTitle() {
+export function getMapEmbeddableDisplayName() {
   return i18n.translate('xpack.maps.embeddableDisplayName', {
     defaultMessage: 'map',
   });

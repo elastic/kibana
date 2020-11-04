@@ -12,7 +12,7 @@ import {
 import '../index.scss';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
-import { getMapEmbeddableTitle } from '../../common/i18n_getters';
+import { getMapEmbeddableDisplayName } from '../../common/i18n_getters';
 import { MapByValueInput, MapByReferenceInput, MapEmbeddableInput } from './types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
 
@@ -37,7 +37,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   }
 
   getDisplayName() {
-    return getMapEmbeddableTitle();
+    return getMapEmbeddableDisplayName();
   }
 
   createFromSavedObject = async (
