@@ -15,6 +15,7 @@ import {
 import { CoreSetup, CoreStart } from 'src/core/server';
 
 import { SecurityPluginSetup } from '../../security/server';
+import { PluginSetupContract as ActionsPluginSetup } from '../../actions/server';
 import { APP_ID } from '../common/constants';
 
 import { ConfigType } from './config';
@@ -34,6 +35,7 @@ import {
   CaseUserActionServiceSetup,
 } from './services';
 import { createCaseClient } from './client';
+import { registerConnectors } from './connectors';
 
 function createConfig$(context: PluginInitializerContext) {
   return context.config.create<ConfigType>().pipe(map((config) => config));
@@ -41,6 +43,7 @@ function createConfig$(context: PluginInitializerContext) {
 
 export interface PluginsSetup {
   security: SecurityPluginSetup;
+  actions: ActionsPluginSetup;
 }
 
 export class CasePlugin {
@@ -93,6 +96,14 @@ export class CasePlugin {
       caseConfigureService: this.caseConfigureService,
       userActionService: this.userActionService,
       router,
+    });
+
+    registerConnectors({
+      actionsRegisterType: plugins.actions.registerType,
+      logger: this.log,
+      caseService: this.caseService,
+      caseConfigureService: this.caseConfigureService,
+      userActionService: this.userActionService,
     });
   }
 

@@ -66,6 +66,14 @@ export interface TableListViewProps {
    * If the table is not empty, this component renders its own h1 element using the same id.
    */
   headingId?: string;
+  /**
+   * Indicates which column should be used as the identifying cell in each row.
+   */
+  rowHeader: string;
+  /**
+   * Describes the content of the table. If not specified, the caption will be "This table contains {itemCount} rows."
+   */
+  tableCaption: string;
   searchFilters?: SearchFilterConfig[];
 }
 
@@ -471,6 +479,8 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         search={search}
         sorting={true}
         data-test-subj="itemsInMemTable"
+        rowHeader={this.props.rowHeader}
+        tableCaption={this.props.tableCaption}
       />
     );
   }
