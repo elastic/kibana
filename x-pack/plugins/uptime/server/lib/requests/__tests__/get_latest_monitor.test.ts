@@ -19,6 +19,11 @@ describe('getLatestMonitor', () => {
           bool: {
             filter: [
               {
+                exists: {
+                  field: 'summary',
+                },
+              },
+              {
                 range: {
                   '@timestamp': {
                     gte: 'now-1h',
