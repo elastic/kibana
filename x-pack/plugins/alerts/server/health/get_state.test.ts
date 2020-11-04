@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { taskManagerMock } from '../../../task_manager/server/mocks';
-import { healthStatus$ } from '.';
+import { getHealthStatusStream } from '.';
 import { TaskStatus } from '../../../task_manager/server';
 import { HealthStatus } from '../types';
 
-describe('healthStatus$()', () => {
+describe('getHealthStatusStream()', () => {
   const mockTaskManager = taskManagerMock.createStart();
 
   it('should return an object with the "unavailable" level and proper summary of "Alerting framework is unhealthy"', async () => {
@@ -35,7 +35,7 @@ describe('healthStatus$()', () => {
         };
       })
     );
-    healthStatus$(mockTaskManager).subscribe(
+    getHealthStatusStream(mockTaskManager).subscribe(
       (val: { level: Readonly<unknown>; summary: string }) => {
         expect(val.level).toBe(false);
       }
@@ -66,7 +66,7 @@ describe('healthStatus$()', () => {
         };
       })
     );
-    healthStatus$(mockTaskManager).subscribe(
+    getHealthStatusStream(mockTaskManager).subscribe(
       (val: { level: Readonly<unknown>; summary: string }) => {
         expect(val.level).toBe(true);
       }

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { interval, Observable } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
-import { get } from 'lodash';
 import { ServiceStatus, ServiceStatusLevels } from '../../../../../src/core/server';
 import { TaskManagerStartContract } from '../../../task_manager/server';
 import { HEALTH_TASK_ID } from './task';
@@ -26,33 +26,47 @@ async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   return null;
 }
 
-export const healthStatus$ = (
+const LEVEL_SUMMARY = {
+  [ServiceStatusLevels.available.toString()]: i18n.translate(
+    'xpack.alerts.server.healthStatus.available',
+    {
+      defaultMessage: 'Alerting framework is available',
+    }
+  ),
+  [ServiceStatusLevels.degraded.toString()]: i18n.translate(
+    'xpack.alerts.server.healthStatus.degraded',
+    {
+      defaultMessage: 'Alerting framework is degraded',
+    }
+  ),
+  [ServiceStatusLevels.unavailable.toString()]: i18n.translate(
+    'xpack.alerts.server.healthStatus.unavailable',
+    {
+      defaultMessage: 'Alerting framework is unavailable',
+    }
+  ),
+};
+
+export const getHealthStatusStream = (
   taskManager: TaskManagerStartContract
 ): Observable<ServiceStatus<unknown>> => {
   return interval(60000 * 5).pipe(
     switchMap(async () => {
       const doc = await getLatestTaskState(taskManager);
-      const body = get(doc, 'state');
-      if (body?.health_status === HealthStatus.OK) {
-        return {
-          level: ServiceStatusLevels.available,
-          summary: 'Alerting framework is available',
-        };
-      } else if (body?.health_status === HealthStatus.Warning) {
-        return {
-          level: ServiceStatusLevels.degraded,
-          summary: 'Alerting framework is degraded',
-        };
-      } else {
-        return {
-          level: ServiceStatusLevels.unavailable,
-          summary: 'Alerting framework is unavailable',
-        };
-      }
+      const level =
+        doc?.state?.health_status === HealthStatus.OK
+          ? ServiceStatusLevels.available
+          : doc?.state?.health_status === HealthStatus.Warning
+          ? ServiceStatusLevels.degraded
+          : ServiceStatusLevels.unavailable;
+      return {
+        level,
+        summary: LEVEL_SUMMARY[level.toString()],
+      };
     }),
     catchError(async (error) => ({
       level: ServiceStatusLevels.unavailable,
-      summary: `Alerting framework is unavailable`,
+      summary: LEVEL_SUMMARY[ServiceStatusLevels.unavailable.toString()],
       meta: { error },
     }))
   );

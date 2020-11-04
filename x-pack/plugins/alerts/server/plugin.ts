@@ -59,14 +59,19 @@ import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../actions/server';
-import { Services } from './types';
+import { AlertsHealth, Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
-import { healthStatus$, scheduleAlertingHealthCheck, initializeAlertingHealth } from './health';
+import {
+  getHealthStatusStream,
+  scheduleAlertingHealthCheck,
+  initializeAlertingHealth,
+} from './health';
 import { AlertsConfig } from './config';
+import { getHealth } from './health/get_health';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -83,6 +88,7 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
   getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
+  getFrameworkHealth: () => Promise<AlertsHealth>;
 }
 
 export interface AlertingPluginsSetup {
@@ -196,7 +202,10 @@ export class AlertingPlugin {
 
     core.getStartServices().then(async ([, startPlugins]) => {
       core.status.set(
-        combineLatest([core.status.derivedStatus$, healthStatus$(startPlugins.taskManager)]).pipe(
+        combineLatest([
+          core.status.derivedStatus$,
+          getHealthStatusStream(startPlugins.taskManager),
+        ]).pipe(
           map(([derivedStatus, healthStatus]) => {
             if (healthStatus.level > derivedStatus.level) {
               return healthStatus as ServiceStatus;
@@ -211,8 +220,7 @@ export class AlertingPlugin {
     initializeAlertingHealth(
       this.logger,
       plugins.taskManager,
-      this.getBasePath,
-      this.createAlertClientHandlerContext(core)
+      this.createSOInternalRepositoryContext(core)
     );
 
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
@@ -309,6 +317,8 @@ export class AlertingPlugin {
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest,
+      getFrameworkHealth: async () =>
+        await getHealth(core.savedObjects.createInternalRepository(['alert'])),
     };
   }
 
@@ -323,19 +333,18 @@ export class AlertingPlugin {
           return alertsClientFactory!.create(request, savedObjects);
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
+        getFrameworkHealth: async () =>
+          await getHealth(savedObjects.createInternalRepository(['alert'])),
       };
     };
   };
 
-  private createAlertClientHandlerContext = (core: CoreSetup) => {
-    const { alertsClientFactory } = this;
-    return async function alertsFakeContext(request: KibanaRequest) {
-      const [{ savedObjects }] = await core.getStartServices();
-      return {
-        getAlertsClient: () => {
-          return alertsClientFactory!.create(request, savedObjects);
-        },
-      };
+  private createSOInternalRepositoryContext = async (core: CoreSetup) => {
+    const [{ savedObjects }] = await core.getStartServices();
+    return {
+      createInternalRepository: () => {
+        return savedObjects.createInternalRepository(['alert']);
+      },
     };
   };
 

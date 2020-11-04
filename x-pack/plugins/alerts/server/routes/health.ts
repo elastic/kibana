@@ -60,8 +60,7 @@ export function healthRoute(
             path: '/_xpack/usage',
           });
 
-        const alertsClient = context.alerting.getAlertsClient();
-        const alertingFrameworkHeath = await alertsClient.getHealth();
+        const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
 
         const frameworkHealth: AlertingFrameworkHealth = {
           isSufficientlySecure: !isSecurityEnabled || (isSecurityEnabled && isTLSEnabled),

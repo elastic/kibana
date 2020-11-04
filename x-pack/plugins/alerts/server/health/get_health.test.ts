@@ -3,67 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AlertsClient, ConstructorOptions } from '../alerts_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
-import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
-import { AlertsAuthorization } from '../../authorization/alerts_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
-import { getBeforeSetup } from './lib';
-import { AlertExecutionStatusErrorReasons, HealthStatus } from '../../types';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsRepositoryMock } from '../../../../../src/core/server/mocks';
+import { AlertExecutionStatusErrorReasons, HealthStatus } from '../types';
+import { getHealth } from './get_health';
 
-const taskManager = taskManagerMock.createStart();
-const alertTypeRegistry = alertTypeRegistryMock.create();
-const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
-const authorization = alertsAuthorizationMock.create();
-const actionsAuthorization = actionsAuthorizationMock.create();
-
-const kibanaVersion = 'v7.10.0';
-const alertsClientParams: jest.Mocked<ConstructorOptions> = {
-  taskManager,
-  alertTypeRegistry,
-  unsecuredSavedObjectsClient,
-  authorization: (authorization as unknown) as AlertsAuthorization,
-  actionsAuthorization: (actionsAuthorization as unknown) as ActionsAuthorization,
-  spaceId: 'default',
-  namespace: 'default',
-  getUserName: jest.fn(),
-  createAPIKey: jest.fn(),
-  invalidateAPIKey: jest.fn(),
-  logger: loggingSystemMock.create().get(),
-  encryptedSavedObjectsClient: encryptedSavedObjects,
-  getActionsClient: jest.fn(),
-  getEventLogClient: jest.fn(),
-  kibanaVersion,
-};
-
-beforeEach(() => {
-  getBeforeSetup(alertsClientParams, taskManager, alertTypeRegistry);
-});
+const savedObjectsRepository = savedObjectsRepositoryMock.create();
 
 describe('getHealth()', () => {
-  const listedTypes = new Set([
-    {
-      actionGroups: [],
-      actionVariables: undefined,
-      defaultActionGroupId: 'default',
-      id: 'myType',
-      name: 'myType',
-      producer: 'myApp',
-    },
-  ]);
-  beforeAll(() => {
-    alertTypeRegistry.list.mockReturnValue(listedTypes);
-  });
-
   test('return true if some of alerts has a decryption error', async () => {
     const lastExecutionDateError = new Date().toISOString();
     const lastExecutionDate = new Date().toISOString();
-    unsecuredSavedObjectsClient.find.mockResolvedValue({
+    savedObjectsRepository.find.mockResolvedValue({
       total: 2,
       per_page: 10,
       page: 1,
@@ -126,8 +76,7 @@ describe('getHealth()', () => {
         },
       ],
     });
-    const alertsClient = new AlertsClient(alertsClientParams);
-    const result = await alertsClient.getHealth();
+    const result = await getHealth(savedObjectsRepository);
     expect(result).toStrictEqual({
       executionHealth: {
         status: HealthStatus.OK,
@@ -142,13 +91,13 @@ describe('getHealth()', () => {
         timestamp: lastExecutionDateError,
       },
     });
-    expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(2);
+    expect(savedObjectsRepository.find).toHaveBeenCalledTimes(2);
   });
 
   test('return false if no alerts with a decryption error', async () => {
     const lastExecutionDateError = new Date().toISOString();
     const lastExecutionDate = new Date().toISOString();
-    unsecuredSavedObjectsClient.find.mockResolvedValue({
+    savedObjectsRepository.find.mockResolvedValue({
       total: 2,
       per_page: 10,
       page: 1,
@@ -211,8 +160,7 @@ describe('getHealth()', () => {
         },
       ],
     });
-    const alertsClient = new AlertsClient(alertsClientParams);
-    const result = await alertsClient.getHealth();
+    const result = await getHealth(savedObjectsRepository);
     expect(result).toStrictEqual({
       executionHealth: {
         status: HealthStatus.Warning,

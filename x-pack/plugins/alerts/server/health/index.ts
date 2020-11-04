@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { healthStatus$ } from './get_state';
+export { getHealthStatusStream } from './get_state';
 export { scheduleAlertingHealthCheck, initializeAlertingHealth } from './task';
