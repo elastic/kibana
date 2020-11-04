@@ -92,7 +92,7 @@ export function getFocusData(
     ),
     // Query 4 - load any annotations for the selected job.
     ml.annotations
-      .getAnnotations({
+      .getAnnotations$({
         jobIds: [selectedJob.job_id],
         earliestMs: searchBounds.min.valueOf(),
         latestMs: searchBounds.max.valueOf(),
