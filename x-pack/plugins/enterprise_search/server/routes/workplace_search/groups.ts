@@ -8,9 +8,6 @@ import { schema } from '@kbn/config-schema';
 
 import { IRouteDependencies } from '../../plugin';
 
-import { IMeta } from '../../../common/types';
-import { IUser, IContentSource, IGroup } from '../../../common/types/workplace_search';
-
 export function registerGroupsRoute({
   router,
   enterpriseSearchRequestHandler,
