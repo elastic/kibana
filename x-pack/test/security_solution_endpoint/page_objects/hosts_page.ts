@@ -22,7 +22,6 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
   const pageObjects = getPageObjects(['common', 'header']);
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
-  const log = getService('log');
 
   /**
    * @function parseStyles
@@ -127,9 +126,9 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
         const EventName = await Events[i]._webElement.getText();
         const LinkText = await testSubjects.find('resolver:breadcrumbs:last');
         const linkText = await LinkText._webElement.getText();
-        log.debug(i);
-        log.debug(EventName);
-        log.debug(expectedData[i]);
+        console.log(i);
+        console.log(EventName);
+        console.log(expectedData[i]);
         expect(EventName).to.equal(linkText);
         expect(EventName).to.equal(expectedData[i]);
       }
@@ -139,11 +138,13 @@ export function SecurityHostsPageProvider({ getService, getPageObjects }: FtrPro
      * Navigate to Events Panel
      */
     async navigateToEventsPanel() {
-      if (!(await testSubjects.exists('investigate-in-resolver-button', { timeout: 400 }))) {
-        await (await testSubjects.find('navigation-hosts')).click();
-        await testSubjects.click('navigation-events');
-        await testSubjects.existOrFail('event');
-      }
+      log.debug('Igor is here');
+      console.log('');
+      // if (!(await testSubjects.exists('investigate-in-resolver-button', { timeout: 400 }))) {
+      //   await (await testSubjects.find('navigation-hosts')).click();
+      //   await testSubjects.click('navigation-events');
+      //   await testSubjects.existOrFail('event');
+      // }
     },
     /**
      * execute Query And Open Resolver
