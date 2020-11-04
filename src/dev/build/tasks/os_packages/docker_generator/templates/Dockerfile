@@ -49,17 +49,13 @@ EXPOSE 5601
 
   # crypto-policies not currently compatible with libnss :sadpanda:
   RUN printf "[main]\nexclude=crypto-policies" >  /etc/dnf/dnf.conf
-
-  # update microdnf to have exclusion feature for dnf configuration
-  RUN for iter in {1..10}; do \
-        {{packageManager}} update microdnf --setopt=tsflags=nodocs -y && \
-        {{packageManager}} clean all && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
-        sleep 10; \
-      done; \
-      (exit $exit_code)
 {{/ubi}}
 
 RUN for iter in {1..10}; do \
+      {{#ubi}}
+        # update microdnf to have exclusion feature for dnf configuration
+        {{packageManager}} update microdnf --setopt=tsflags=nodocs -y && \
+      {{/ubi}}
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
       {{packageManager}} install --setopt=tsflags=nodocs -y \
         fontconfig freetype shadow-utils libnss3.so {{#ubi}}findutils{{/ubi}} && \
