@@ -227,7 +227,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
           type: ['foo', 'bar'],
           namespaces: ['ns-1', 'ns-2'],
         });
-        expect(spacesClient.getAll).toHaveBeenCalledWith('findSavedObjects');
+        expect(spacesClient.getAll).toHaveBeenCalledWith({ purpose: 'findSavedObjects' });
       });
 
       test(`filters options.namespaces based on authorization`, async () => {
@@ -258,7 +258,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
           type: ['foo', 'bar'],
           namespaces: ['ns-1'],
         });
-        expect(spacesClient.getAll).toHaveBeenCalledWith('findSavedObjects');
+        expect(spacesClient.getAll).toHaveBeenCalledWith({ purpose: 'findSavedObjects' });
       });
 
       test(`translates options.namespace: ['*']`, async () => {
@@ -289,7 +289,7 @@ const ERROR_NAMESPACE_SPECIFIED = 'Spaces currently determines the namespaces';
           type: ['foo', 'bar'],
           namespaces: ['ns-1', 'ns-2'],
         });
-        expect(spacesClient.getAll).toHaveBeenCalledWith('findSavedObjects');
+        expect(spacesClient.getAll).toHaveBeenCalledWith({ purpose: 'findSavedObjects' });
       });
     });
 
