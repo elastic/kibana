@@ -10,8 +10,6 @@ your application to Kibana 7.10.
 * <<user-facing-changes-7-10, Breaking changes for users>>
 * <<general-plugin-API-changes-7-10, Breaking changes for plugin developers>>
 
-
-
 [discrete]
 [[user-facing-changes-7-10]]
 === Breaking changes for users
@@ -20,32 +18,6 @@ your application to Kibana 7.10.
 
 // tag::notable-breaking-changes[]
 
-[discrete]
-[[breaking_kibana_signals_template]]
-==== Signals template updated for rollover indices
-
-The `create_index_route` now checks if the template needs to be upgraded
-before creating the index. If the index already exists and the template was upgraded,
-the index rolls over so that the write index has the upgraded mapping.
-This breaks the old mappings that have `risk_score mapped` as a keyword.
-
-In the new mapping, `signal.rule.risk_score` is a float.  After rolling over,
-there is a conflict between the old and new `signal.rule.risk_score` for some
-features, such as aggregations.
-
-*via https://github.com/elastic/kibana/pull/80019[#80019]*
-
-[discrete]
-[[breaking_connector_incident]]
-==== Connect incident fields allowed when cases are sent
-
-You can now specify connector incident fields when cases are sent. This includes:
-
-* Jira: issue type, priority, and parent issue in the case of a subtask.
-* IBM Resilient: issue types, and severity.
-* ServiceNow: urgency, severity, and impact.
-
-*via https://github.com/elastic/kibana/pull/77327[#77327]*
 
 [discrete]
 [[breaking_kibana_legacy_plugins]]
