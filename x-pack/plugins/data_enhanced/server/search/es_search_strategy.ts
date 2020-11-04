@@ -24,20 +24,20 @@ import {
   searchUsageObserver,
   shimAbortSignal,
 } from '../../../../../src/plugins/data/server';
+import type { IAsyncSearchOptions } from '../../common';
+import { pollSearch } from '../../common';
 import {
   getDefaultAsyncGetParams,
   getDefaultAsyncSubmitParams,
   getIgnoreThrottled,
 } from './request_utils';
 import { toKibanaSearchResponse } from './response_utils';
-import { pollSearch } from '../../common/search/poll_search';
-import { IAsyncSearchOptions } from '../../common/search';
 
 export const enhancedEsSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage
-): ISearchStrategy => {
+): ISearchStrategy<IEnhancedEsSearchRequest> => {
   function asyncSearch(
     { id, ...request }: IEsSearchRequest,
     options: IAsyncSearchOptions,

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { agentPolicyStatuses } from '../../constants';
-import { ValueOf } from '../../types';
+import { DataType, ValueOf } from '../../types';
 import { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import { Output } from './output';
 
@@ -15,7 +15,7 @@ export interface NewAgentPolicy {
   namespace: string;
   description?: string;
   is_default?: boolean;
-  monitoring_enabled?: Array<'logs' | 'metrics'>;
+  monitoring_enabled?: Array<ValueOf<DataType>>;
 }
 
 export interface AgentPolicy extends NewAgentPolicy {
