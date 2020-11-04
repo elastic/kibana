@@ -36,7 +36,6 @@ import {
 import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/public';
 import { SharePluginStart } from 'src/plugins/share/public';
 import { ChartsPluginStart } from 'src/plugins/charts/public';
-import { VisualizationsStart } from 'src/plugins/visualizations/public';
 
 import { UiStatsMetricType } from '@kbn/analytics';
 import { DiscoverStartPlugins } from './plugin';

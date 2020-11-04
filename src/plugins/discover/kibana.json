@@ -12,7 +12,6 @@
     "urlForwarding",
     "navigation",
     "uiActions",
-    "visualizations",
     "savedObjects"
   ],
   "optionalPlugins": ["home", "share", "usageCollection"],
