@@ -4,10 +4,70 @@ Welcome to the home of the runtime field editor and everything related to runtim
 
 ## The runtime field editor
 
-The runtime field editor is exported in 2 flavours:
+### Integration
 
-* As the content of a `<EuiFlyout />`
+The recommended way to integrate the runtime fields editor is by adding a plugin dependency to the `"runtimeFields"` x-pack plugin. This way you will be able to lazy load the editor when it is required and it will not increment the bundle size of your plugin.
+
+```js
+// 1. Add the plugin as a dependency in your kibana.json
+{
+  ...
+  "requiredBundles": [
+    "runtimeFields",
+    ...
+  ]
+}
+
+// 2. Access it in your plugin setup()
+export class MyPlugin {
+  setup(core, { runtimeFields }) {
+    // logic to provide it to your app, probably through context
+  }
+}
+
+// 3. Load the editor and open it anywhere in your app
+const MyComponent = () => {
+  // Access the plugin through context
+  const { runtimeFields } = useAppPlugins();
+
+  // Ref for handler to close the editor
+  const closeRuntimeFieldEditor = useRef(() => {});
+
+  const saveRuntimeField = (field: RuntimeField) => {
+    // Do something with the field
+  };
+
+  const openRuntimeFieldsEditor = async() => {
+    // Lazy load the editor
+    const { openEditor } = await runtimeFields.loadEditor();
+
+    closeRuntimeFieldEditor.current = openEditor({
+      onSave: saveRuntimeField,
+      /* defaultValue: optional field to edit */
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      // Make sure to remove the editor when the component unmounts
+      closeRuntimeFieldEditor.current();
+    };
+  }, []);
+
+  return (
+    <button onClick={openRuntimeFieldsEditor}>Add field</button>
+  )
+}
+```
+
+#### Alternative
+
+The runtime field editor is also exported as static React component that you can import into your components. The editor is exported in 2 flavours:
+
+* As the content of a `<EuiFlyout />` (it contains a flyout header and footer)
 * As a standalone component that you can inline anywhere
+
+**Note:** The runtime field editor uses the `<CodeEditor />` that has a dependency on the `Provider` from the `"kibana_react"` plugin. If your app is not already wrapped by this provider you will need to add it at least around the runtime field editor. You can see an example in the ["Using the core.overlays.openFlyout()"](#using-the-coreoverlaysopenflyout) example below.
 
 ### Content of a `<EuiFlyout />`
 
@@ -43,9 +103,9 @@ const MyComponent = () => {
 }
 ```
 
-#### With the `core.overlays.openFlyout`
+#### Using the `core.overlays.openFlyout()`
 
-As an alternative you can open the flyout with the `core.overlays.openFlyout`. In this case you will need to wrap the editor with the `Provider` from the "kibana_react" plugin as it is a required dependency for the `<CodeEditor />` component.
+As an alternative you can open the flyout with the `openFlyout()` helper from core.
 
 ```js
 import React, { useRef } from 'react';

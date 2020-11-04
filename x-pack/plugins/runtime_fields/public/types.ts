@@ -6,9 +6,15 @@
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 
 import { RUNTIME_FIELD_TYPES } from './constants';
+import { OpenRuntimeFieldEditorProps } from './load_editor';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginSetup {}
+export interface LoadEditorResponse {
+  openEditor(props: OpenRuntimeFieldEditorProps): () => void;
+}
+
+export interface PluginSetup {
+  loadEditor(): Promise<LoadEditorResponse>;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginStart {}

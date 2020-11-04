@@ -16,4 +16,8 @@ export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/for
 
 export { TextField } from '../../../../src/plugins/es_ui_shared/static/forms/components';
 
-export { CodeEditor } from '../../../../src/plugins/kibana_react/public';
+export {
+  CodeEditor,
+  toMountPoint,
+  createKibanaReactContext,
+} from '../../../../src/plugins/kibana_react/public';
