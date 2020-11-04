@@ -13,15 +13,15 @@ import { EngineDetails } from './types';
 
 interface EngineValues {
   dataLoading: boolean;
-  engine: EngineDetails;
+  engine: EngineDetails | {};
   engineName: string;
   isMetaEngine: boolean;
   isSampleEngine: boolean;
+  hasSchemaConflicts: boolean;
   engineNotFound: boolean;
 }
 
 interface EngineActions {
-  setIsLoading(): boolean;
   setEngineData(engine: EngineDetails): { engine: EngineDetails };
   setEngineName(engineName: string): { engineName: string };
   setEngineSchema(schema: Schema): Schema;
@@ -34,7 +34,6 @@ interface EngineActions {
 export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
   path: ['enterprise_search', 'app_search', 'engine_logic'],
   actions: {
-    setIsLoading: () => true,
     setEngineData: (engine) => ({ engine }),
     setEngineName: (engineName) => ({ engineName }),
     setEngineSchema: (schema) => schema,
@@ -47,7 +46,8 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     dataLoading: [
       true,
       {
-        setIsLoading: () => true,
+        setEngineData: () => false,
+        clearEngine: () => true,
       },
     ],
     engine: [
@@ -68,18 +68,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
         setEngineName: (_, { engineName }) => engineName,
       },
     ],
-    isMetaEngine: [
-      false,
-      {
-        setEngineData: (_, { engine }) => engine?.type === 'meta',
-      },
-    ],
-    isSampleEngine: [
-      false,
-      {
-        setEngineData: (_, { engine }) => !!engine?.sample,
-      },
-    ],
     engineNotFound: [
       false,
       {
@@ -87,6 +75,14 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       },
     ],
   },
+  selectors: ({ selectors }) => ({
+    isMetaEngine: [() => [selectors.engine], (engine) => engine?.type === 'meta'],
+    isSampleEngine: [() => [selectors.engine], (engine) => !!engine?.sample],
+    hasSchemaConflicts: [
+      () => [selectors.engine],
+      (engine) => !!(engine?.schemaConflicts && Object.keys(engine.schemaConflicts).length > 0),
+    ],
+  }),
   listeners: ({ actions, values }) => ({
     initializeEngine: async () => {
       const { engineName } = values;
