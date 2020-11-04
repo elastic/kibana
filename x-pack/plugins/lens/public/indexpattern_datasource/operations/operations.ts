@@ -372,7 +372,7 @@ function addMetric(
 }
 
 function separateBucketColumns(layer: IndexPatternLayer) {
-  return partition(layer.columnOrder, (columnId) => layer.columns[columnId].isBucketed);
+  return partition(layer.columnOrder, (columnId) => layer.columns[columnId]?.isBucketed);
 }
 
 export function getMetricOperationType(field: IndexPatternField) {

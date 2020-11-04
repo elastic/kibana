@@ -23,6 +23,7 @@ import {
   operationDefinitionMap,
   getOperationDisplay,
   buildColumn,
+  insertNewColumn,
   changeField,
 } from '../operations';
 import { deleteColumn, changeColumn, updateColumnParam, mergeLayer } from '../state_helpers';
@@ -180,6 +181,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
             if (selectedColumn?.operationType === operationType) {
               return;
             }
+            // TODO: Determine if this is inserting a new column vs updating an existing
             setState(
               changeColumn({
                 state,
@@ -187,7 +189,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 columnId,
                 newColumn: buildColumn({
                   columns: props.state.layers[props.layerId].columns,
-                  layerId: props.layerId,
                   op: operationType,
                   indexPattern: currentIndexPattern,
                   previousColumn: selectedColumn,
@@ -200,21 +201,37 @@ export function DimensionEditor(props: DimensionEditorProps) {
             const possibleFields = fieldByOperation[operationType] || [];
 
             if (possibleFields.length === 1) {
-              setState(
-                changeColumn({
-                  state,
-                  layerId,
-                  columnId,
-                  newColumn: buildColumn({
-                    columns: props.state.layers[props.layerId].columns,
-                    layerId: props.layerId,
-                    op: operationType,
-                    indexPattern: currentIndexPattern,
-                    field: fieldMap[possibleFields[0]],
-                    previousColumn: selectedColumn,
-                  }),
-                })
-              );
+              if (!selectedColumn) {
+                setState(
+                  mergeLayer({
+                    state,
+                    layerId,
+                    newLayer: insertNewColumn({
+                      layer: props.state.layers[props.layerId],
+                      indexPattern: currentIndexPattern,
+                      op: operationType,
+                      field: fieldMap[possibleFields[0]],
+                      columnId,
+                    }),
+                  })
+                );
+              } else {
+                // TODO: Better logic for updating a column
+                setState(
+                  changeColumn({
+                    state,
+                    layerId,
+                    columnId,
+                    newColumn: buildColumn({
+                      columns: props.state.layers[props.layerId].columns,
+                      op: operationType,
+                      indexPattern: currentIndexPattern,
+                      field: fieldMap[possibleFields[0]],
+                      previousColumn: selectedColumn,
+                    }),
+                  })
+                );
+              }
             } else {
               setInvalidOperationType(operationType);
             }
@@ -228,9 +245,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
             return;
           }
 
+          // TODO: switch between inserting vs updating
           const newColumn: IndexPatternColumn = buildColumn({
             columns: props.state.layers[props.layerId].columns,
-            layerId: props.layerId,
             op: operationType,
             indexPattern: currentIndexPattern,
             field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
@@ -322,6 +339,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   // we use the operations onFieldChange method to calculate the new column.
                   column = changeField(selectedColumn, currentIndexPattern, fieldMap[choice.field]);
                 } else {
+                  // TODO: This branch of the code is particularly messy
                   // Otherwise we'll use the buildColumn method to calculate a new column
                   const compatibleOperations =
                     ('field' in choice && operationSupportMatrix.operationByField[choice.field]) ||
@@ -340,7 +358,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     columns: props.state.layers[props.layerId].columns,
                     field: fieldMap[choice.field],
                     indexPattern: currentIndexPattern,
-                    layerId: props.layerId,
                     op: operation as OperationType,
                     previousColumn: selectedColumn,
                   });

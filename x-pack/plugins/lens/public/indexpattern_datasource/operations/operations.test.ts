@@ -184,7 +184,6 @@ describe('getOperationTypesForField', () => {
 
     it('should build a column for the given field-based operation type if it is passed in', () => {
       const column = buildColumn({
-        layerId: 'first',
         indexPattern: expectedIndexPatterns[1],
         columns: state.layers.first.columns,
         op: 'count',
@@ -195,7 +194,6 @@ describe('getOperationTypesForField', () => {
 
     it('should build a column for the given no-input operation type if it is passed in', () => {
       const column = buildColumn({
-        layerId: 'first',
         indexPattern: expectedIndexPatterns[1],
         columns: state.layers.first.columns,
         op: 'filters',
@@ -206,7 +204,6 @@ describe('getOperationTypesForField', () => {
     it('should build a column for the given operation type and field if it is passed in', () => {
       const field = expectedIndexPatterns[1].fields[1];
       const column = buildColumn({
-        layerId: 'first',
         indexPattern: expectedIndexPatterns[1],
         columns: state.layers.first.columns,
         op: 'avg',

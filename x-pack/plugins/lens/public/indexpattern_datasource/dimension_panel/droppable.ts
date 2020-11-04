@@ -143,7 +143,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     return false;
   }
 
-  // TODO: test that the operations are inserted in the correct bucket order?
+  // TODO: separate handling for inserting vs updating
   // If only the field has changed use the onFieldChange method on the operation to get the
   // new column, otherwise use the regular buildColumn to get a new column.
   const newColumn = hasFieldChanged

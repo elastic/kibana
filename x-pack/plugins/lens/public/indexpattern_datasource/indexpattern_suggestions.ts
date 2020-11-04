@@ -455,6 +455,7 @@ function getNestedTitle([outerBucketLabel, innerBucketLabel]: string[]) {
   });
 }
 
+// TODO: Use the shared column-switching function
 function createAlternativeMetricSuggestions(
   indexPattern: IndexPattern,
   layerId: string,
@@ -510,27 +511,17 @@ function createSuggestionWithDefaultDateHistogram(
 ) {
   const layer = state.layers[layerId];
   const indexPattern = state.indexPatterns[layer.indexPatternId];
-  const newId = generateId();
-  const [buckets, metrics] = separateBucketColumns(layer);
-  const timeColumn = buildColumn({
-    op: 'date_histogram',
-    indexPattern,
-    columns: layer.columns,
-    field: timeField,
-  });
 
-  const updatedLayer = {
-    indexPatternId: layer.indexPatternId,
-    columns: {
-      ...layer.columns,
-      [newId]: timeColumn,
-    },
-    columnOrder: [...buckets, newId, ...metrics],
-  };
   return buildSuggestion({
     state,
     layerId,
-    updatedLayer,
+    updatedLayer: insertNewColumn({
+      layer,
+      indexPattern,
+      field: timeField,
+      op: 'date_histogram',
+      columnId: generateId(),
+    }),
     label: i18n.translate('xpack.lens.indexpattern.suggestions.overTimeLabel', {
       defaultMessage: 'Over time',
     }),
