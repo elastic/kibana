@@ -64,7 +64,7 @@ import {
 import {
   threat_index,
   concurrent_searches,
-  number_of_items_per_search,
+  items_per_search,
   threat_query,
   threat_filters,
   threat_mapping,
@@ -147,7 +147,7 @@ export const dependentRulesSchema = t.partial({
   threat_index,
   threat_query,
   concurrent_searches,
-  number_of_items_per_search,
+  items_per_search,
   threat_mapping,
   threat_language,
 });
@@ -289,7 +289,7 @@ export const addThreatMatchFields = (typeAndTimelineOnly: TypeAndTimelineOnly): 
       t.exact(t.partial({ concurrent_searches: dependentRulesSchema.props.concurrent_searches })),
       t.exact(
         t.partial({
-          number_of_items_per_search: dependentRulesSchema.props.number_of_items_per_search,
+          items_per_search: dependentRulesSchema.props.items_per_search,
         })
       ),
     ];

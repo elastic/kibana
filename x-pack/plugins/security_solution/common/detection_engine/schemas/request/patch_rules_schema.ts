@@ -51,7 +51,7 @@ import {
 import {
   threat_index,
   concurrent_searches,
-  number_of_items_per_search,
+  items_per_search,
   threat_query,
   threat_filters,
   threat_mapping,
@@ -112,7 +112,7 @@ export const patchRulesSchema = t.exact(
     threat_mapping,
     threat_language,
     concurrent_searches,
-    number_of_items_per_search,
+    items_per_search,
   })
 );
 

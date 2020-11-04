@@ -17,7 +17,7 @@ import {
   ThreatIndex,
   ThreatLanguageOrUndefined,
   ConcurrentSearches,
-  NumberOfItemsPerSearch,
+  ItemsPerSearch,
 } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
 import { PartialFilter, RuleTypeParams } from '../../types';
 import { AlertServices } from '../../../../../../alerts/server';
@@ -64,7 +64,7 @@ export interface CreateThreatSignalsOptions {
   threatLanguage: ThreatLanguageOrUndefined;
   name: string;
   concurrentSearches: ConcurrentSearches;
-  numberOfItemsPerSearch: NumberOfItemsPerSearch;
+  itemsPerSearch: ItemsPerSearch;
 }
 
 export interface CreateThreatSignalOptions {

@@ -1,0 +1,30 @@
+{
+  "concurrent_searches": 100,
+  "items_per_search": 10,
+  "name": "Threat Indicator Concurrent Searches",
+  "description": "Does 100 Concurrent searches with 10 items per search",
+  "rule_id": "threat_mapping_concurrent_search",
+  "risk_score": 1,
+  "severity": "high",
+  "type": "threat_match",
+  "query": "*:*",
+  "tags": ["concurrent_searches_test", "from_script"],
+  "threat_index": ["mock-threat-list"],
+  "threat_query": "*:*",
+  "threat_mapping": [
+    {
+      "entries": [
+        {
+          "field": "source.port",
+          "type": "mapping",
+          "value": "source.port"
+        },
+        {
+          "field": "source.ip",
+          "type": "mapping",
+          "value": "source.ip"
+        }
+      ]
+    }
+  ]
+}

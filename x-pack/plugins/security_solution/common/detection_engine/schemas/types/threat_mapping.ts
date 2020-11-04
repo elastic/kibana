@@ -61,7 +61,7 @@ export type ConcurrentSearches = t.TypeOf<typeof concurrent_searches>;
 export const concurrentSearchesOrUndefined = t.union([concurrent_searches, t.undefined]);
 export type ConcurrentSearchesOrUndefined = t.TypeOf<typeof concurrentSearchesOrUndefined>;
 
-export const number_of_items_per_search = t.number;
-export type NumberOfItemsPerSearch = t.TypeOf<typeof concurrent_searches>;
-export const numberOfItemsPerSearchOrUndefined = t.union([number_of_items_per_search, t.undefined]);
-export type NumberOfItemsPerSearchOrUndefined = t.TypeOf<typeof numberOfItemsPerSearchOrUndefined>;
+export const items_per_search = t.number;
+export type ItemsPerSearch = t.TypeOf<typeof concurrent_searches>;
+export const itemsPerSearchOrUndefined = t.union([items_per_search, t.undefined]);
+export type ItemsPerSearchOrUndefined = t.TypeOf<typeof itemsPerSearchOrUndefined>;

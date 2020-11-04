@@ -55,7 +55,7 @@ const signalSchema = schema.object({
   threatMapping: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threatLanguage: schema.maybe(schema.string()),
   concurrentSearches: schema.maybe(schema.number()),
-  numberOfItemsPerSearch: schema.maybe(schema.number()),
+  itemsPerSearch: schema.maybe(schema.number()),
 });
 
 /**

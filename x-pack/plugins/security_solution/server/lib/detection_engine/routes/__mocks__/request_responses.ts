@@ -408,7 +408,7 @@ export const getResult = (): RuleAlertType => ({
     version: 1,
     exceptionsList: getListArrayMock(),
     concurrentSearches: undefined,
-    numberOfItemsPerSearch: undefined,
+    itemsPerSearch: undefined,
   },
   createdAt: new Date('2019-12-13T16:40:33.400Z'),
   updatedAt: new Date('2019-12-13T16:40:33.400Z'),
