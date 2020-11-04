@@ -15,6 +15,9 @@ const TLSAlert = React.lazy(() => import('./lazy_wrapper/tls_alert'));
 export const initTlsAlertType: AlertTypeInitializer = ({ core, plugins }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.TLS,
   iconClass: 'uptimeApp',
+  documentationUrl(docLinks) {
+    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/tls-certificate-alert.html`;
+  },
   alertParamsExpression: (params: any) => (
     <TLSAlert core={core} plugins={plugins} params={params} />
   ),

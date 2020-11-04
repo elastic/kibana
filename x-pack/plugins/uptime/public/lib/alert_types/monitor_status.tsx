@@ -31,6 +31,9 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   ),
   description,
   iconClass: 'uptimeApp',
+  documentationUrl(docLinks) {
+    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/monitor-status-alert.html`;
+  },
   alertParamsExpression: (params: any) => (
     <MonitorStatusAlert core={core} plugins={plugins} params={params} />
   ),

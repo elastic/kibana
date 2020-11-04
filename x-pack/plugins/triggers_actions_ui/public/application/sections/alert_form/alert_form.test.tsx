@@ -32,6 +32,7 @@ describe('alert_form', () => {
     iconClass: 'test',
     name: 'test-alert',
     description: 'test',
+    documentationUrl: null,
     validate: (): ValidationResult => {
       return { errors: {} };
     },
@@ -59,6 +60,7 @@ describe('alert_form', () => {
     iconClass: 'test',
     name: 'non edit alert',
     description: 'test',
+    documentationUrl: null,
     validate: (): ValidationResult => {
       return { errors: {} };
     },
@@ -244,6 +246,7 @@ describe('alert_form', () => {
           iconClass: 'test',
           name: 'test-alert',
           description: 'test',
+          documentationUrl: null,
           validate: (): ValidationResult => {
             return { errors: {} };
           },
@@ -255,6 +258,7 @@ describe('alert_form', () => {
           iconClass: 'test',
           name: 'test-alert',
           description: 'test',
+          documentationUrl: null,
           validate: (): ValidationResult => {
             return { errors: {} };
           },
