@@ -41,6 +41,7 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
 import { registerEnginesRoute } from './routes/app_search/engines';
 import { registerCredentialsRoutes } from './routes/app_search/credentials';
+import { registerSettingsRoutes } from './routes/app_search/settings';
 
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
@@ -128,6 +129,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     registerConfigDataRoute(dependencies);
     registerEnginesRoute(dependencies);
     registerCredentialsRoutes(dependencies);
+    registerSettingsRoutes(dependencies);
     registerWSOverviewRoute(dependencies);
     registerWSGroupRoutes(dependencies);
 
