@@ -11,6 +11,7 @@ export type AlertsClientMock = jest.Mocked<Schema>;
 
 const createAlertsClientMock = () => {
   const mocked: AlertsClientMock = {
+    aggregate: jest.fn(),
     create: jest.fn(),
     get: jest.fn(),
     getAlertState: jest.fn(),

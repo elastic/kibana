@@ -200,6 +200,9 @@ describe('enable()', () => {
         alertId: '1',
         spaceId: 'default',
       },
+      schedule: {
+        interval: '10s',
+      },
       state: {
         alertInstances: {},
         alertTypeState: {},

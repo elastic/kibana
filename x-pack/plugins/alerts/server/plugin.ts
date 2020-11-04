@@ -33,6 +33,7 @@ import {
 } from '../../../../src/core/server';
 
 import {
+  aggregateAlertRoute,
   createAlertRoute,
   deleteAlertRoute,
   findAlertRoute,
@@ -204,6 +205,7 @@ export class AlertingPlugin {
     // Routes
     const router = core.http.createRouter();
     // Register routes
+    aggregateAlertRoute(router, this.licenseState);
     createAlertRoute(router, this.licenseState);
     deleteAlertRoute(router, this.licenseState);
     findAlertRoute(router, this.licenseState);
