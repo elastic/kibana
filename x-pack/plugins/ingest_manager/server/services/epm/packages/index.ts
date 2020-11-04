@@ -5,14 +5,13 @@
  */
 
 import { SavedObject } from 'src/core/server';
-import { RequiredPackage, requiredPackages, ValueOf } from '../../../../common';
 import {
-  AssetType,
-  Installable,
-  Installation,
-  InstallationStatus,
-  KibanaAssetType,
-} from '../../../types';
+  RequiredPackage,
+  requiredPackages,
+  ValueOf,
+  installationStatuses,
+} from '../../../../common';
+import { AssetType, Installable, Installation, KibanaAssetType } from '../../../types';
 
 export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 export {
@@ -56,11 +55,11 @@ export function createInstallableFrom<T>(
   return savedObject
     ? {
         ...from,
-        status: InstallationStatus.installed,
+        status: installationStatuses.Installed,
         savedObject,
       }
     : {
         ...from,
-        status: InstallationStatus.notInstalled,
+        status: installationStatuses.NotInstalled,
       };
 }

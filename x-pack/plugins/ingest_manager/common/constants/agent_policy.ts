@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { AgentPolicy, DefaultPackages } from '../types';
+import { defaultPackages } from './epm';
+import { AgentPolicy } from '../types';
 export const AGENT_POLICY_SAVED_OBJECT_TYPE = 'ingest-agent-policies';
 
 export const agentPolicyStatuses = {
@@ -24,4 +25,4 @@ export const DEFAULT_AGENT_POLICY: Omit<
   monitoring_enabled: ['logs', 'metrics'] as Array<'logs' | 'metrics'>,
 };
 
-export const DEFAULT_AGENT_POLICIES_PACKAGES = [DefaultPackages.system];
+export const DEFAULT_AGENT_POLICIES_PACKAGES = [defaultPackages.System];
