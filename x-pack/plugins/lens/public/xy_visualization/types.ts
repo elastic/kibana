@@ -6,6 +6,7 @@
 
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { ArgumentType, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { LensIconChartArea } from '../assets/chart_area';
 import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
@@ -335,6 +336,11 @@ export const layerConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'JSON key-value pairs of column ID to label',
     },
+    palette: {
+      default: `{theme "palette" default={system_palette name="default"} }`,
+      help: '',
+      types: ['palette'],
+    },
   },
   fn: function fn(input: unknown, args: LayerArgs) {
     return {
@@ -374,6 +380,7 @@ export interface LayerConfig {
   yConfig?: YConfig[];
   seriesType: SeriesType;
   splitAccessor?: string;
+  palette?: PaletteOutput;
 }
 
 export interface ValidLayer extends LayerConfig {
@@ -385,6 +392,8 @@ export type LayerArgs = LayerConfig & {
   yScaleType: 'time' | 'linear' | 'log' | 'sqrt';
   xScaleType: 'time' | 'linear' | 'ordinal';
   isHistogram: boolean;
+  // palette will always be set on the expression
+  palette: PaletteOutput;
 };
 
 // Arguments to XY chart expression, with computed properties

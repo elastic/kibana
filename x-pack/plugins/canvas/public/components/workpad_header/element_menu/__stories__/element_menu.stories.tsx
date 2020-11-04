@@ -76,7 +76,7 @@ the following columns:
 **{{name}}**
 {{/each}}
 
-You can use standard Markdown in here, but you can also access your piped-in data using Handlebars. If you want to know more, check out the [Handlebars documentation](https://handlebarsjs.com/guide/expressions.html).
+You can use standard Markdown in here, but you can also access your piped-in data using Handlebars. If you want to know more, check out the [Handlebars documentation](https://ela.st/handlebars-docs).
 
 #### Enjoy!" | render`,
   },

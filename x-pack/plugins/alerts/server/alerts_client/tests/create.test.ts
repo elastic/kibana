@@ -353,6 +353,9 @@ describe('create()', () => {
                                                                               "alertId": "1",
                                                                               "spaceId": "default",
                                                                             },
+                                                                            "schedule": Object {
+                                                                              "interval": "10s",
+                                                                            },
                                                                             "scope": Array [
                                                                               "alerting",
                                                                             ],

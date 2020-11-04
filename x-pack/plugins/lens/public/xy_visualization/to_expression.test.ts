@@ -6,11 +6,15 @@
 
 import { Ast } from '@kbn/interpreter/target/common';
 import { Position } from '@elastic/charts';
-import { xyVisualization } from './xy_visualization';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { getXyVisualization } from './xy_visualization';
 import { Operation } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 
 describe('#toExpression', () => {
+  const xyVisualization = getXyVisualization({
+    paletteService: chartPluginMock.createPaletteRegistry(),
+  });
   let mockDatasource: ReturnType<typeof createMockDatasource>;
   let frame: ReturnType<typeof createMockFramePublicAPI>;
 

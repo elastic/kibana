@@ -24,8 +24,8 @@ import {
 } from '@elastic/eui';
 import {
   VisualizationLayerWidgetProps,
-  VisualizationDimensionEditorProps,
   VisualizationToolbarProps,
+  VisualizationDimensionEditorProps,
 } from '../types';
 import {
   State,
@@ -47,6 +47,7 @@ import { ToolbarPopover, LegendSettingsPopover } from '../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { TooltipWrapper } from './tooltip_wrapper';
 import { getAxesConfiguration } from './axes_configuration';
+import { PalettePicker } from '../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -454,6 +455,20 @@ export function DimensionEditor(props: VisualizationDimensionEditorProps<State>)
     (layer.yConfig &&
       layer.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode) ||
     'auto';
+
+  if (props.groupId === 'breakdown') {
+    return (
+      <>
+        <PalettePicker
+          palettes={props.frame.availablePalettes}
+          activePalette={layer.palette}
+          setPalette={(newPalette) => {
+            setState(updateLayer(state, { ...layer, palette: newPalette }, index));
+          }}
+        />
+      </>
+    );
+  }
 
   return (
     <>

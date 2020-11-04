@@ -415,11 +415,20 @@ export const showDataGridColumnChartErrorMessageToast = (
 // helper function to transform { [key]: [val] } => { [key]: val }
 // for when `fields` is used in es.search since response is always an array of values
 // since response always returns an array of values for each field
-export const getProcessedFields = (originalObj: object) => {
+export const getProcessedFields = (originalObj: object, omitBy?: (key: string) => boolean) => {
   const obj: { [key: string]: any } = { ...originalObj };
   for (const key of Object.keys(obj)) {
-    if (Array.isArray(obj[key]) && obj[key].length === 1) {
-      obj[key] = obj[key][0];
+    // if no conditional is included, process everything
+    if (omitBy === undefined) {
+      if (Array.isArray(obj[key]) && obj[key].length === 1) {
+        obj[key] = obj[key][0];
+      }
+    } else {
+      // else only process the fields for things users don't want to omit
+      if (omitBy(key) === false)
+        if (Array.isArray(obj[key]) && obj[key].length === 1) {
+          obj[key] = obj[key][0];
+        }
     }
   }
   return obj;
