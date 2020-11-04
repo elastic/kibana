@@ -21,6 +21,7 @@ import { MlApiServices } from '../ml_api_service';
 import { CriteriaField } from './index';
 import type { DatafeedOverride } from '../../../../common/types/modules';
 import type { Aggregation } from '../../../../common/types/anomaly_detection_jobs/datafeed';
+import { findAggField } from '../../../../common/util/validation_utils';
 
 interface ResultResponse {
   success: boolean;
@@ -175,8 +176,10 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
           // first item under aggregations can be any name, not necessarily 'buckets'
           const accessor = Object.keys(aggFields)[0];
           const tempAggs = { ...(aggFields[accessor].aggs ?? aggFields[accessor].aggregations) };
-          if (tempAggs.hasOwnProperty(metricFieldName)) {
-            tempAggs.metric = tempAggs[metricFieldName];
+          const foundValue = findAggField(tempAggs, metricFieldName);
+
+          if (foundValue !== undefined) {
+            tempAggs.metric = foundValue;
             delete tempAggs[metricFieldName];
           }
           body.aggs.byTime.aggs = tempAggs;

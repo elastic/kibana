@@ -16,6 +16,7 @@ import {
   getSamplerAggregationsResponsePath,
 } from '../../lib/query_utils';
 import { AggCardinality } from '../../../common/types/fields';
+import { DatafeedOverride } from '../../../common/types/modules';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
@@ -593,16 +594,17 @@ export class DataVisualizer {
     timeFieldName: string,
     earliestMs?: number,
     latestMs?: number,
-    datafeedConfig?: any
+    datafeedConfig?: DatafeedOverride
   ) {
-    const datafeedHasScriptFields = typeof datafeedConfig?.script_fields === 'object';
-
     const index = indexPatternTitle;
     const size = 0;
     const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
+    const datafeedAggConfig = datafeedConfig?.aggregations ?? datafeedConfig?.aggs;
+
     // Value count aggregation faster way of checking if field exists than using
     // filter aggregation with exists query.
-    const aggs: Aggs = {};
+    const aggs: Aggs = datafeedAggConfig !== undefined ? { ...datafeedAggConfig } : {};
+
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
       aggs[`${safeFieldName}_count`] = {
@@ -610,7 +612,7 @@ export class DataVisualizer {
       };
 
       let cardinalField: AggCardinality;
-      if (datafeedHasScriptFields && datafeedConfig?.script_fields.hasOwnProperty(field)) {
+      if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
         cardinalField = aggs[`${safeFieldName}_cardinality`] = {
           cardinality: { script: datafeedConfig?.script_fields[field].script },
         };
@@ -619,7 +621,6 @@ export class DataVisualizer {
           cardinality: { field },
         };
       }
-
       aggs[`${safeFieldName}_cardinality`] = cardinalField;
     });
 
@@ -668,7 +669,7 @@ export class DataVisualizer {
           },
         });
       } else {
-        if (datafeedHasScriptFields && datafeedConfig.script_fields.hasOwnProperty(field)) {
+        if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
           const cardinality = get(
             aggregations,
             [...aggsPath, `${safeFieldName}_cardinality`, 'value'],

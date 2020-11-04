@@ -11,6 +11,7 @@ import { validateJobObject } from './validate_job_object';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { Detector } from '../../../common/types/anomaly_detection_jobs';
 import { MessageId, JobValidationMessage } from '../../../common/constants/messages';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
 
 function isValidCategorizationConfig(job: CombinedJob, fieldName: string): boolean {
   return (
@@ -79,6 +80,7 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
           index: job.datafeed_config.indices.join(','),
           fields: uniqueFieldNames,
         });
+        const datafeedAggConfig = datafeedConfig?.aggregations ?? datafeedConfig?.aggs;
 
         let aggregatableFieldNames: string[] = [];
         // parse fieldCaps to return an array of just the fields which are aggregatable
@@ -90,6 +92,14 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
             ) {
               return true;
             }
+            // if datafeed has aggregation fields, check recursively if field exist
+            if (
+              datafeedAggConfig !== undefined &&
+              isValidAggregationField(datafeedAggConfig, fieldName)
+            ) {
+              return true;
+            }
+
             if (typeof fieldCaps.fields[field] !== 'undefined') {
               const fieldType = Object.keys(fieldCaps.fields[field])[0];
               return fieldCaps.fields[field][fieldType].aggregatable;

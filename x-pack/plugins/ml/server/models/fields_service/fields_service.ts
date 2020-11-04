@@ -11,6 +11,7 @@ import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { DatafeedOverride } from '../../../common/types/modules';
 import { AggCardinality } from '../../../common/types/fields';
+import { isValidAggregationField } from '../../../common/util/validation_utils';
 
 /**
  * Service for carrying out queries to obtain data
@@ -45,10 +46,17 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       fields: fieldNames,
     });
     const aggregatableFields: string[] = [];
+    const datafeedAggConfig = datafeedConfig?.aggregations ?? datafeedConfig?.aggs;
     fieldNames.forEach((fieldName) => {
       if (
         typeof datafeedConfig?.script_fields === 'object' &&
         datafeedConfig.script_fields.hasOwnProperty(fieldName)
+      ) {
+        aggregatableFields.push(fieldName);
+      }
+      if (
+        datafeedAggConfig !== undefined &&
+        isValidAggregationField(datafeedAggConfig, fieldName)
       ) {
         aggregatableFields.push(fieldName);
       }
