@@ -149,7 +149,7 @@ describe('ServiceInventory', () => {
       "Looks like you don't have any APM services installed. Let's add some!"
     );
 
-    expect(gettingStartedMessage).not.toBeEmpty();
+    expect(gettingStartedMessage).not.toBeEmptyDOMElement();
   });
 
   it('should render empty message, when list is empty and historical data is found', async () => {
@@ -165,7 +165,7 @@ describe('ServiceInventory', () => {
     await waitFor(() => expect(httpGet).toHaveBeenCalledTimes(1));
     const noServicesText = await findByText('No services found');
 
-    expect(noServicesText).not.toBeEmpty();
+    expect(noServicesText).not.toBeEmptyDOMElement();
   });
 
   describe('when legacy data is found', () => {

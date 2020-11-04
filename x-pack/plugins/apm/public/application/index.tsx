@@ -35,7 +35,6 @@ import { createStaticIndexPattern } from '../services/rest/index_pattern';
 import { setHelpExtension } from '../setHelpExtension';
 import { px, units } from '../style/variables';
 import { setReadonlyBadge } from '../updateBadge';
-import { getActionMenuMountPoint } from './action_menu';
 
 const MainContainer = styled.div`
   padding: ${px(units.plus)};
@@ -109,13 +108,13 @@ export function ApmAppRoot({
  * This module is rendered asynchronously in the Kibana platform.
  */
 
-export const renderApp = async (
+export const renderApp = (
   core: CoreStart,
   setupDeps: ApmPluginSetupDeps,
   appMountParameters: AppMountParameters,
   config: ConfigSchema
 ) => {
-  const { element, setHeaderActionMenu } = appMountParameters;
+  const { element } = appMountParameters;
   const apmPluginContextValue = {
     appMountParameters,
     config,
@@ -127,9 +126,6 @@ export const renderApp = async (
   setHelpExtension(core);
   setReadonlyBadge(core);
   createCallApmApi(core.http);
-  setHeaderActionMenu((el) =>
-    getActionMenuMountPoint(apmPluginContextValue, routes)(el)
-  );
 
   // Automatically creates static index pattern and stores as saved object
   createStaticIndexPattern().catch((e) => {
