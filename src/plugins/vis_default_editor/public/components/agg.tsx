@@ -164,7 +164,7 @@ function DefaultEditorAgg({
 
   const renderAggButtons = () => {
     const actionIcons = [];
-    const aggTitle = agg.type?.title.toLowerCase();
+    const aggTitle = agg.type?.title?.toLowerCase();
 
     if (showError) {
       actionIcons.push({
