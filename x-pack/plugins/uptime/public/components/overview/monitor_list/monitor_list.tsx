@@ -9,13 +9,11 @@ import {
   EuiBasicTable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import React, { useState } from 'react';
-import styled from 'styled-components';
 import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
@@ -39,12 +37,6 @@ interface Props extends MonitorListProps {
   setPageSize: (val: number) => void;
   monitorList: MonitorList;
 }
-
-const TruncatedEuiLink = styled(EuiLink)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
 
 export const noItemsMessage = (loading: boolean, filters?: string) => {
   if (loading) return labels.LOADING;
@@ -109,10 +101,11 @@ export const MonitorListComponent: ({
       align: 'left' as const,
       field: 'state.url.full',
       name: URL_LABEL,
-      render: (url: string, summary: MonitorSummary) => (
-        <TruncatedEuiLink href={url} target="_blank" color="text">
-          {url} <EuiIcon size="s" type="popout" color="subbdued" />
-        </TruncatedEuiLink>
+      truncate: true,
+      render: (url: string) => (
+        <EuiLink href={url} target="_blank" color="text" external>
+          {url}
+        </EuiLink>
       ),
     },
     {
@@ -136,7 +129,7 @@ export const MonitorListComponent: ({
       align: 'center' as const,
       field: '',
       name: STATUS_ALERT_COLUMN,
-      width: '150px',
+      width: '100px',
       render: (item: MonitorSummary) => (
         <EnableMonitorAlert
           monitorId={item.monitor_id}
@@ -185,6 +178,7 @@ export const MonitorListComponent: ({
         items={items}
         noItemsMessage={noItemsMessage(loading, filters)}
         columns={columns}
+        tableLayout={'auto'}
       />
       <EuiSpacer size="m" />
       <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
