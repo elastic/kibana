@@ -114,7 +114,6 @@ async function executor(
 
     const { comments, externalId, ...restParams } = pushToServiceParams;
     const incidentConfiguration = config.incidentConfiguration;
-    // TO DO STEPH
     const mapping = incidentConfiguration ? buildMap(incidentConfiguration.mapping) : null;
     const externalObject =
       config.incidentConfiguration && mapping
