@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
+import { PaletteRegistry } from 'src/plugins/charts/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
@@ -73,7 +74,11 @@ function getDescription(state?: State) {
   };
 }
 
-export const xyVisualization: Visualization<State> = {
+export const getXyVisualization = ({
+  paletteService,
+}: {
+  paletteService: PaletteRegistry;
+}): Visualization<State> => ({
   id: 'lnsXY',
 
   visualizationTypes,
@@ -210,9 +215,15 @@ export const xyVisualization: Visualization<State> = {
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           required: layer.seriesType.includes('percentage'),
+          enableDimensionEditor: true,
         },
       ],
     };
+  },
+
+  getMainPalette: (state) => {
+    if (!state || state.layers.length === 0) return;
+    return state.layers[0].palette;
   },
 
   setDimension({ prevState, layerId, columnId, groupId }) {
@@ -247,6 +258,8 @@ export const xyVisualization: Visualization<State> = {
       delete newLayer.xAccessor;
     } else if (newLayer.splitAccessor === columnId) {
       delete newLayer.splitAccessor;
+      // as the palette is associated with the break down by dimension, remove it together with the dimension
+      delete newLayer.palette;
     } else if (newLayer.accessors.includes(columnId)) {
       newLayer.accessors = newLayer.accessors.filter((a) => a !== columnId);
     }
@@ -293,9 +306,10 @@ export const xyVisualization: Visualization<State> = {
     );
   },
 
-  toExpression,
-  toPreviewExpression,
-};
+  toExpression: (state, layers, attributes) =>
+    toExpression(state, layers, paletteService, attributes),
+  toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
+});
 
 function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
   return {
