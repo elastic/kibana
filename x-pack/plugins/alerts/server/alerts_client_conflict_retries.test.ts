@@ -305,14 +305,6 @@ beforeEach(() => {
   jest.resetAllMocks();
 
   alertsClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
-  /* alertsClientParams.invalidateAPIKey.mockResolvedValue({
-    apiKeysEnabled: true,
-    result: {
-      invalidated_api_keys: [],
-      previously_invalidated_api_keys: [],
-      error_count: 0,
-    },
-  }); */
   alertsClientParams.getUserName.mockResolvedValue('elastic');
 
   taskManager.runNow.mockResolvedValue({ id: '' });

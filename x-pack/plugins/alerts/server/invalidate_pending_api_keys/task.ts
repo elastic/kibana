@@ -112,12 +112,13 @@ function taskRunner(
     const { state } = taskInstance;
     return {
       async run() {
+        let totalInvalidated = 0;
         try {
           const repository = (await internalSavedObjectsRepository).createInternalRepository();
-          const res = await repository.find<InvalidatePendingApiKey>({
+          const apiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
             type: 'invalidate_pending_api_key',
           });
-          res.saved_objects.forEach(async (obj) => {
+          apiKeysToInvalidate.saved_objects.forEach(async (obj) => {
             const response = await invalidateAPIKey(
               { id: obj.attributes.apiKeyId },
               securityPluginSetup
@@ -127,19 +128,18 @@ function taskRunner(
             } else {
               try {
                 await repository.delete('invalidate_pending_api_key', obj.id);
+                totalInvalidated++;
               } catch (err) {
-                // Skip the cleanup error
                 logger.error(
                   `Failed to cleanup api key "${obj.attributes.apiKeyId}". Error: ${err.message}`
                 );
               }
             }
           });
-          // TODO: clean all
           return {
             state: {
               runs: (state.runs || 0) + 1,
-              total_removed: 0,
+              total_invalidated: totalInvalidated,
             },
           };
         } catch (errMsg) {
@@ -147,7 +147,7 @@ function taskRunner(
           return {
             state: {
               runs: (state.runs || 0) + 1,
-              total_removed: 0,
+              total_invalidated: totalInvalidated,
             },
           };
         }
