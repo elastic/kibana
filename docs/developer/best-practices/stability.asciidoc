@@ -61,7 +61,7 @@ With each feature we ship, we have a **hard requirement** for test coverage of c
 
 **Measuring quality after code ships:** After code ships, subsequent bug reports indicate we need to improve our sense of gauging adequate test coverage. If severe or many bug reports arise, then we’ll retro and identify the gaps in our culture and process.
 
-==== Guiding questions for adding test coverage
+**Guiding questions for adding test coverage**
 
 * Is core library code and critical code covered by unit tests?
 * Are server-side APIs covered by API integration tests?
