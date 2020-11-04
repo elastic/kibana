@@ -105,6 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
             'graph',
             'monitoring',
             'savedObjectsManagement',
+            'savedObjectsTagging',
             'ml',
             'apm',
             'stackAlerts',
