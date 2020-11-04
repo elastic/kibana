@@ -75,7 +75,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   input: 'none',
   isTransferable: () => true,
 
-  buildColumn({ suggestedPriority, previousColumn }) {
+  buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
     if (previousColumn?.operationType === 'terms') {
       params = {
@@ -96,7 +96,6 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       dataType: 'string',
       operationType: 'filters',
       scale: 'ordinal',
-      suggestedPriority,
       isBucketed: true,
       params,
     };

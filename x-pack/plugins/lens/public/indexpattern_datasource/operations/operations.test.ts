@@ -187,7 +187,6 @@ describe('getOperationTypesForField', () => {
         layerId: 'first',
         indexPattern: expectedIndexPatterns[1],
         columns: state.layers.first.columns,
-        suggestedPriority: 0,
         op: 'count',
         field: documentField,
       });
@@ -199,7 +198,6 @@ describe('getOperationTypesForField', () => {
         layerId: 'first',
         indexPattern: expectedIndexPatterns[1],
         columns: state.layers.first.columns,
-        suggestedPriority: 0,
         op: 'filters',
       });
       expect(column.operationType).toEqual('filters');
@@ -211,7 +209,6 @@ describe('getOperationTypesForField', () => {
         layerId: 'first',
         indexPattern: expectedIndexPatterns[1],
         columns: state.layers.first.columns,
-        suggestedPriority: 0,
         op: 'avg',
         field,
       }) as AvgIndexPatternColumn;

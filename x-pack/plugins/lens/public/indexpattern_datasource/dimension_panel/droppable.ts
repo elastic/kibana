@@ -143,6 +143,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     return false;
   }
 
+  // TODO: test that the operations are inserted in the correct bucket order?
   // If only the field has changed use the onFieldChange method on the operation to get the
   // new column, otherwise use the regular buildColumn to get a new column.
   const newColumn = hasFieldChanged
@@ -151,8 +152,6 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
         op: operationsForNewField[0],
         columns: state.layers[layerId].columns,
         indexPattern: currentIndexPattern,
-        layerId,
-        suggestedPriority: props.suggestedPriority,
         field: droppedItem.field,
         previousColumn: selectedColumn,
       });

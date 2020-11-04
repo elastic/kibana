@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DimensionPriority, OperationMetadata } from '../../types';
+import _, { partition } from 'lodash';
+import { OperationMetadata } from '../../types';
 import {
   operationDefinitionMap,
   operationDefinitions,
@@ -12,8 +13,10 @@ import {
   OperationType,
   IndexPatternColumn,
 } from './definitions';
-import { IndexPattern, IndexPatternField } from '../types';
+import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
 import { documentField } from '../document_field';
+
+export { operationDefinitionMap } from './definitions';
 
 /**
  * Returns all available operation types as a list at runtime.
@@ -197,24 +200,18 @@ export function changeField(
  * Builds a column object based on the context passed in. It tries
  * to find the applicable operation definition and then calls the `buildColumn`
  * function of that definition. It passes in the given `field` (if available),
- * `suggestedPriority`, `layerId` and the currently existing `columns`.
- * * If `op` is specified, the specified operation definition is used directly.
- * * If `asDocumentOperation` is true, the first matching document-operation is used.
+ * and the currently existing `columns`.
  * * If `field` is specified, the first matching field based operation applicable to the field is used.
  */
 export function buildColumn({
   op,
   columns,
   field,
-  layerId,
   indexPattern,
-  suggestedPriority,
   previousColumn,
 }: {
   op: OperationType;
   columns: Partial<Record<string, IndexPatternColumn>>;
-  suggestedPriority: DimensionPriority | undefined;
-  layerId: string;
   indexPattern: IndexPattern;
   field?: IndexPatternField;
   previousColumn?: IndexPatternColumn;
@@ -227,8 +224,6 @@ export function buildColumn({
 
   const baseOptions = {
     columns,
-    suggestedPriority,
-    layerId,
     indexPattern,
     previousColumn,
   };
@@ -247,4 +242,147 @@ export function buildColumn({
   });
 }
 
-export { operationDefinitionMap } from './definitions';
+export function insertNewColumn({
+  op,
+  layer,
+  columnId,
+  field,
+  indexPattern,
+}: {
+  op: OperationType;
+  layer: IndexPatternLayer;
+  columnId: string;
+  indexPattern: IndexPattern;
+  field?: IndexPatternField;
+}): IndexPatternLayer {
+  const operationDefinition = operationDefinitionMap[op];
+
+  if (!operationDefinition) {
+    throw new Error('No suitable operation found for given parameters');
+  }
+
+  const baseOptions = {
+    columns: layer.columns,
+    indexPattern,
+    previousColumn: layer.columns[columnId],
+  };
+
+  // TODO: Reference based operations require more setup to create the references
+
+  if (operationDefinition.input === 'none') {
+    const isBucketed = Boolean(operationDefinition.getPossibleOperation()?.isBucketed);
+    if (isBucketed) {
+      return addBucket(layer, operationDefinition.buildColumn(baseOptions), columnId);
+    } else {
+      return addMetric(layer, operationDefinition.buildColumn(baseOptions), columnId);
+    }
+  }
+
+  if (!field) {
+    throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
+  }
+
+  const isBucketed = Boolean(operationDefinition.getPossibleOperationForField(field)?.isBucketed);
+  if (isBucketed) {
+    return addBucket(layer, operationDefinition.buildColumn({ ...baseOptions, field }), columnId);
+  } else {
+    return addMetric(layer, operationDefinition.buildColumn({ ...baseOptions, field }), columnId);
+  }
+}
+
+function addBucket(
+  layer: IndexPatternLayer,
+  column: IndexPatternColumn,
+  addedColumnId: string
+): IndexPatternLayer {
+  const [buckets, metrics] = separateBucketColumns(layer);
+
+  if (buckets.length === 0 && column.operationType === 'terms') {
+    column.params.size = 5;
+  }
+
+  const updatedColumns = {
+    ...layer.columns,
+    [addedColumnId]: column,
+  };
+
+  const oldDateHistogramIndex = layer.columnOrder.findIndex(
+    (columnId) => layer.columns[columnId].operationType === 'date_histogram'
+  );
+  const oldDateHistogramId =
+    oldDateHistogramIndex > -1 ? layer.columnOrder[oldDateHistogramIndex] : null;
+
+  // TODO: Use the logic here more generally during drag and drop suggestions
+  let updatedColumnOrder: string[] = [];
+  if (oldDateHistogramId) {
+    if (column.operationType === 'terms') {
+      // Insert the new terms bucket above the first date histogram
+      updatedColumnOrder = [
+        ...buckets.slice(0, oldDateHistogramIndex),
+        addedColumnId,
+        ...buckets.slice(oldDateHistogramIndex, buckets.length),
+        ...metrics,
+      ];
+    } else if (column.operationType === 'date_histogram') {
+      // Replace date histogram with new date histogram
+      delete updatedColumns[oldDateHistogramId];
+      updatedColumnOrder = layer.columnOrder.map((columnId) =>
+        columnId !== oldDateHistogramId ? columnId : addedColumnId
+      );
+    }
+  } else {
+    // Insert the new bucket after existing buckets. Users will see the same data
+    // they already had, with an extra level of detail.
+    updatedColumnOrder = [...buckets, addedColumnId, ...metrics];
+  }
+  return {
+    ...layer,
+    columns: updatedColumns,
+    columnOrder: updatedColumnOrder,
+  };
+}
+
+function addMetric(
+  layer: IndexPatternLayer,
+  column: IndexPatternColumn,
+  addedColumnId: string
+): IndexPatternLayer {
+  const [, metrics] = separateBucketColumns(layer);
+
+  // Add metrics if there are 0 or > 1 metric
+  if (metrics.length !== 1) {
+    return {
+      ...layer,
+      columns: {
+        ...layer.columns,
+        [addedColumnId]: column,
+      },
+      columnOrder: [...layer.columnOrder, addedColumnId],
+    };
+  }
+
+  // Replacing old column with new column, keeping the old ID
+  const newColumns = { ...layer.columns, [metrics[0]]: column };
+
+  return {
+    ...layer,
+    columns: newColumns,
+    columnOrder: layer.columnOrder, // Order is kept by replacing
+  };
+}
+
+function separateBucketColumns(layer: IndexPatternLayer) {
+  return partition(layer.columnOrder, (columnId) => layer.columns[columnId].isBucketed);
+}
+
+export function getMetricOperationType(field: IndexPatternField) {
+  const match = operationDefinitions.sort(getSortScoreByPriority).find((definition) => {
+    if (definition.input !== 'field') return;
+    const metadata = definition.getPossibleOperationForField(field);
+    if (!metadata) return;
+    return (
+      !metadata.isBucketed && (metadata.dataType === 'number' || metadata.dataType === 'document')
+    );
+  });
+  return match?.type;
+}

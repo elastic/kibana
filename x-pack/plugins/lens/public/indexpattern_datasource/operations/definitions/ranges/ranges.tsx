@@ -121,12 +121,11 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       };
     }
   },
-  buildColumn({ suggestedPriority, indexPattern, field }) {
+  buildColumn({ indexPattern, field }) {
     return {
       label: field.name,
       dataType: 'number', // string for Range
       operationType: 'range',
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       scale: 'interval', // ordinal for Range

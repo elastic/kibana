@@ -187,7 +187,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 columnId,
                 newColumn: buildColumn({
                   columns: props.state.layers[props.layerId].columns,
-                  suggestedPriority: props.suggestedPriority,
                   layerId: props.layerId,
                   op: operationType,
                   indexPattern: currentIndexPattern,
@@ -208,7 +207,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   columnId,
                   newColumn: buildColumn({
                     columns: props.state.layers[props.layerId].columns,
-                    suggestedPriority: props.suggestedPriority,
                     layerId: props.layerId,
                     op: operationType,
                     indexPattern: currentIndexPattern,
@@ -232,7 +230,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
           const newColumn: IndexPatternColumn = buildColumn({
             columns: props.state.layers[props.layerId].columns,
-            suggestedPriority: props.suggestedPriority,
             layerId: props.layerId,
             op: operationType,
             indexPattern: currentIndexPattern,
@@ -344,7 +341,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     field: fieldMap[choice.field],
                     indexPattern: currentIndexPattern,
                     layerId: props.layerId,
-                    suggestedPriority: props.suggestedPriority,
                     op: operation as OperationType,
                     previousColumn: selectedColumn,
                   });

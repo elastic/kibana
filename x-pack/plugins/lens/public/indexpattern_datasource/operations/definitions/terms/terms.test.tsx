@@ -211,7 +211,6 @@ describe('terms', () => {
     it('should use type from the passed field', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
-        suggestedPriority: undefined,
         indexPattern: createMockedIndexPattern(),
         field: {
           aggregatable: true,
@@ -228,7 +227,6 @@ describe('terms', () => {
     it('should use existing metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
-        suggestedPriority: undefined,
         indexPattern: createMockedIndexPattern(),
         columns: {
           col1: {

@@ -531,57 +531,6 @@ describe('state_helpers', () => {
         })
       ).toEqual(['col1', 'col3', 'col2']);
     });
-
-    it('should reorder aggregations based on suggested priority', () => {
-      expect(
-        getColumnOrder({
-          indexPatternId: '',
-          columnOrder: [],
-          columns: {
-            col1: {
-              label: 'Top values of category',
-              dataType: 'string',
-              isBucketed: true,
-
-              // Private
-              operationType: 'terms',
-              sourceField: 'category',
-              params: {
-                size: 5,
-                orderBy: {
-                  type: 'alphabetical',
-                },
-                orderDirection: 'asc',
-              },
-              suggestedPriority: 2,
-            },
-            col2: {
-              label: 'Average of bytes',
-              dataType: 'number',
-              isBucketed: false,
-
-              // Private
-              operationType: 'avg',
-              sourceField: 'bytes',
-              suggestedPriority: 0,
-            },
-            col3: {
-              label: 'Date histogram of timestamp',
-              dataType: 'date',
-              isBucketed: true,
-
-              // Private
-              operationType: 'date_histogram',
-              sourceField: 'timestamp',
-              suggestedPriority: 1,
-              params: {
-                interval: '1d',
-              },
-            },
-          },
-        })
-      ).toEqual(['col3', 'col1', 'col2']);
-    });
   });
 
   describe('updateLayerIndexPattern', () => {

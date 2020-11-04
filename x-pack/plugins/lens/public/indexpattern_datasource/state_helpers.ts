@@ -149,16 +149,7 @@ export function getColumnOrder(layer: IndexPatternLayer): string[] {
     ([id, col]) => col.isBucketed
   );
 
-  return aggregations
-    .sort(([id, col], [id2, col2]) => {
-      return (
-        // Sort undefined orders last
-        (col.suggestedPriority !== undefined ? col.suggestedPriority : Number.MAX_SAFE_INTEGER) -
-        (col2.suggestedPriority !== undefined ? col2.suggestedPriority : Number.MAX_SAFE_INTEGER)
-      );
-    })
-    .map(([id]) => id)
-    .concat(metrics.map(([id]) => id));
+  return aggregations.map(([id]) => id).concat(metrics.map(([id]) => id));
 }
 
 export function mergeLayer({

@@ -41,12 +41,11 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       };
     }
   },
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  buildColumn({ field, previousColumn }) {
     return {
       label: countLabel,
       dataType: 'number',
       operationType: 'count',
-      suggestedPriority,
       isBucketed: false,
       scale: 'ratio',
       sourceField: field.name,

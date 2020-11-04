@@ -63,7 +63,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
     );
   },
-  buildColumn({ suggestedPriority, columns, field }) {
+  buildColumn({ columns, field }) {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
@@ -73,7 +73,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       dataType: field.type as DataType,
       operationType: 'terms',
       scale: 'ordinal',
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       params: {

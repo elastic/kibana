@@ -59,7 +59,7 @@ export const dateHistogramOperation: OperationDefinition<
       };
     }
   },
-  buildColumn({ suggestedPriority, field }) {
+  buildColumn({ field }) {
     let interval = autoInterval;
     let timeZone: string | undefined;
     if (field.aggregationRestrictions && field.aggregationRestrictions.date_histogram) {
@@ -70,7 +70,6 @@ export const dateHistogramOperation: OperationDefinition<
       label: field.displayName,
       dataType: 'date',
       operationType: 'date_histogram',
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       scale: 'interval',
@@ -140,7 +139,7 @@ export const dateHistogramOperation: OperationDefinition<
       },
     };
   },
-  paramEditor: ({ state, setState, currentColumn, layerId, dateRange, data }) => {
+  paramEditor: ({ state, setState, currentColumn, layerId, columnId, dateRange, data }) => {
     const field =
       currentColumn &&
       state.indexPatterns[state.layers[layerId].indexPatternId].fields.find(
@@ -171,15 +170,7 @@ export const dateHistogramOperation: OperationDefinition<
       const isCalendarInterval = calendarOnlyIntervals.has(newInterval.unit);
       const value = `${isCalendarInterval ? '1' : newInterval.value}${newInterval.unit || 'd'}`;
 
-      setState(
-        updateColumnParam({
-          state,
-          layerId,
-          currentColumn,
-          value,
-          paramName: 'interval',
-        })
-      );
+      setState(updateColumnParam({ state, layerId, currentColumn, paramName: 'interval', value }));
     };
 
     return (

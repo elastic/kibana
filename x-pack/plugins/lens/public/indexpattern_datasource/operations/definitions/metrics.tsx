@@ -52,11 +52,10 @@ function buildMetricOperation<T extends MetricColumn<string>>({
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
-    buildColumn: ({ suggestedPriority, field, previousColumn }) => ({
+    buildColumn: ({ field, previousColumn }) => ({
       label: ofName(field.displayName),
       dataType: 'number',
       operationType: type,
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',

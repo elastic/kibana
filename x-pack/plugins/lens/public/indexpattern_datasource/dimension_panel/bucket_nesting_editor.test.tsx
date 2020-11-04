@@ -29,7 +29,6 @@ describe('BucketNestingEditor', () => {
         orderDirection: 'asc',
       },
       sourceField: 'a',
-      suggestedPriority: 0,
       ...col,
     };
 
@@ -44,9 +43,9 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['a', 'b', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0 }),
-            b: mockCol({ suggestedPriority: 1 }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+            a: mockCol(),
+            b: mockCol(),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
@@ -65,9 +64,9 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['b', 'a', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0 }),
-            b: mockCol({ suggestedPriority: 1 }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+            a: mockCol(),
+            b: mockCol(),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
@@ -87,9 +86,9 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['b', 'a', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0 }),
-            b: mockCol({ suggestedPriority: 1 }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+            a: mockCol(),
+            b: mockCol(),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
@@ -107,9 +106,9 @@ describe('BucketNestingEditor', () => {
       layer: {
         columnOrder: ['a', 'b', 'c'],
         columns: {
-          a: mockCol({ suggestedPriority: 0 }),
-          b: mockCol({ suggestedPriority: 1 }),
-          c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+          a: mockCol(),
+          b: mockCol(),
+          c: mockCol({ operationType: 'min', isBucketed: false }),
         },
         indexPatternId: 'foo',
       },
@@ -132,9 +131,9 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['a', 'b', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0, operationType: 'avg', isBucketed: false }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: false }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+            a: mockCol({ operationType: 'avg', isBucketed: false }),
+            b: mockCol({ operationType: 'max', isBucketed: false }),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
@@ -153,9 +152,9 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['a', 'b', 'c'],
           columns: {
-            a: mockCol({ suggestedPriority: 0 }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: false }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: false }),
+            a: mockCol(),
+            b: mockCol({ operationType: 'max', isBucketed: false }),
+            c: mockCol({ operationType: 'min', isBucketed: false }),
           },
           indexPatternId: 'foo',
         }}
@@ -174,9 +173,9 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
-            a: mockCol({ suggestedPriority: 0, operationType: 'count', isBucketed: true }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: true }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: true }),
+            a: mockCol({ operationType: 'count', isBucketed: true }),
+            b: mockCol({ operationType: 'max', isBucketed: true }),
+            c: mockCol({ operationType: 'min', isBucketed: true }),
           },
           indexPatternId: 'foo',
         }}
@@ -198,9 +197,9 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
-            a: mockCol({ suggestedPriority: 0, operationType: 'count', isBucketed: true }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: true }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: true }),
+            a: mockCol({ operationType: 'count', isBucketed: true }),
+            b: mockCol({ operationType: 'max', isBucketed: true }),
+            c: mockCol({ operationType: 'min', isBucketed: true }),
           },
           indexPatternId: 'foo',
         }}
@@ -225,9 +224,9 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
-            a: mockCol({ suggestedPriority: 0, operationType: 'count', isBucketed: true }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: true }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: true }),
+            a: mockCol({ operationType: 'count', isBucketed: true }),
+            b: mockCol({ operationType: 'max', isBucketed: true }),
+            c: mockCol({ operationType: 'min', isBucketed: true }),
           },
           indexPatternId: 'foo',
         }}
@@ -252,9 +251,9 @@ describe('BucketNestingEditor', () => {
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
-            a: mockCol({ suggestedPriority: 0, operationType: 'count', isBucketed: true }),
-            b: mockCol({ suggestedPriority: 1, operationType: 'max', isBucketed: true }),
-            c: mockCol({ suggestedPriority: 2, operationType: 'min', isBucketed: true }),
+            a: mockCol({ operationType: 'count', isBucketed: true }),
+            b: mockCol({ operationType: 'max', isBucketed: true }),
+            c: mockCol({ operationType: 'min', isBucketed: true }),
           },
           indexPatternId: 'foo',
         }}

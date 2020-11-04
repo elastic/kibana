@@ -300,7 +300,6 @@ export function LayerPanel(
                               ...layerDatasourceConfigProps,
                               columnId: accessor,
                               filterOperations: group.filterOperations,
-                              suggestedPriority: group.suggestedPriority,
                               onClick: () => {
                                 if (activeId) {
                                   setActiveDimension(initialActiveDimensionState);
@@ -447,7 +446,6 @@ export function LayerPanel(
                     core: props.core,
                     columnId: activeId,
                     filterOperations: activeGroup.filterOperations,
-                    suggestedPriority: activeGroup?.suggestedPriority,
                     setState: (newState: unknown) => {
                       props.updateAll(
                         datasourceId,
