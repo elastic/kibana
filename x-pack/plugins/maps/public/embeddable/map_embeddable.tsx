@@ -29,11 +29,9 @@ import {
   Query,
   RefreshInterval,
 } from '../../../../../src/plugins/data/public';
-import { createMapStore, MapStore } from '../reducers/store';
 import { MapSettings } from '../reducers/map';
 import {
   addLayerWithoutDataSync,
-  setGotoWithCenter,
   replaceLayerList,
   setQuery,
   setRefreshConfig,
@@ -43,11 +41,7 @@ import {
   hideToolbarOverlay,
   hideLayerControl,
   hideViewControl,
-  setHiddenLayers,
-  setMapSettings,
   setReadOnly,
-  setIsLayerTOCOpen,
-  setOpenTOCDetails,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -60,6 +54,7 @@ import {
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
+  getLayerListRaw,
 } from '../selectors/map_selectors';
 import {
   APP_ID,
@@ -72,11 +67,10 @@ import { getUiActions, getCoreI18n, getHttp } from '../kibana_services';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapSavedObjectAttributes } from '../../common/map_saved_object_type';
 import { MapContainer } from '../connected_components/map_container';
-// TODO use SavedMap instead of getMapAttributeService and getInitialLayers
-import { getMapAttributeService } from '../routes/map_app/saved_map/map_attribute_service';
-import { getInitialLayers } from '../routes/map_app/saved_map/get_initial_layers';
+import { SavedMap } from '../routes/map_app/saved_map';
 import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { DEFAULT_IS_LAYER_TOC_OPEN } from '../reducers/ui';
+import { getMapAttributeService } from '../map_attribute_service';
 
 import {
   MapByValueInput,
@@ -87,16 +81,13 @@ import {
 } from './types';
 export { MapEmbeddableInput };
 
-const attributeService = getMapAttributeService();
-
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
-  private _attributes: MapSavedObjectAttributes | null = null;
+  private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
-  private _store: MapStore;
   private _subscription: Subscription;
   private _prevTimeRange?: TimeRange;
   private _prevQuery?: Query;
@@ -116,13 +107,19 @@ export class MapEmbeddable
       parent
     );
 
-    this._store = createMapStore();
-    this.initialize(initialInput);
+    this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
+    this.initializeSaveMap();
     this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
   }
 
-  private async initialize(input: MapEmbeddableInput) {
-    this._attributes = await attributeService.unwrapAttributes(input);
+  private async initializeSaveMap() {
+    const overrides = {
+      isLayerTOCOpen: this.input.isLayerTOCOpen,
+      openTOCDetails: this.input.openTOCDetails,
+      mapCenter: this.input.mapCenter,
+      hiddenLayers: this.input.hiddenLayers,
+    };
+    await this._savedMap.loadAttributes(overrides);
     this.initializeStore();
     this.initializeOutput();
     this._isInitialized = true;
@@ -132,85 +129,33 @@ export class MapEmbeddable
   }
 
   private async initializeStore() {
-    this._store.dispatch(setReadOnly(true));
-    this._store.dispatch(disableScrollZoom());
-
-    if (this._attributes?.mapStateJSON) {
-      const mapState = JSON.parse(this._attributes.mapStateJSON);
-      if (mapState.settings) {
-        this._store.dispatch(setMapSettings(mapState.settings));
-      }
-    }
-
-    let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
-    if (_.has(this.input, 'isLayerTOCOpen')) {
-      isLayerTOCOpen = this.input.isLayerTOCOpen;
-    } else if (this._attributes?.uiStateJSON) {
-      const uiState = JSON.parse(this._attributes.uiStateJSON);
-      if ('isLayerTOCOpen' in uiState) {
-        isLayerTOCOpen = uiState.isLayerTOCOpen;
-      }
-    }
-    this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
-
-    let openTOCDetails = [];
-    if (_.has(this.input, 'openTOCDetails')) {
-      openTOCDetails = this.input.openTOCDetails;
-    } else if (this._attributes?.uiStateJSON) {
-      const uiState = JSON.parse(this._attributes.uiStateJSON);
-      if ('openTOCDetails' in uiState) {
-        openTOCDetails = uiState.openTOCDetails;
-      }
-    }
-    this._store.dispatch(setOpenTOCDetails(openTOCDetails));
+    const store = this._savedMap.getStore();
+    store.dispatch(setReadOnly(true));
+    store.dispatch(disableScrollZoom());
 
     if (_.has(this.input, 'disableInteractive') && this.input.disableInteractive) {
-      this._store.dispatch(disableInteractive());
+      store.dispatch(disableInteractive());
     }
 
     if (_.has(this.input, 'disableTooltipControl') && this.input.disableTooltipControl) {
-      this._store.dispatch(disableTooltipControl());
+      store.dispatch(disableTooltipControl());
     }
     if (_.has(this.input, 'hideToolbarOverlay') && this.input.hideToolbarOverlay) {
-      this._store.dispatch(hideToolbarOverlay());
+      store.dispatch(hideToolbarOverlay());
     }
 
     if (_.has(this.input, 'hideLayerControl') && this.input.hideLayerControl) {
-      this._store.dispatch(hideLayerControl());
+      store.dispatch(hideLayerControl());
     }
 
     if (_.has(this.input, 'hideViewControl') && this.input.hideViewControl) {
-      this._store.dispatch(hideViewControl());
+      store.dispatch(hideViewControl());
     }
 
-    if (this.input.mapCenter) {
-      this._store.dispatch(
-        setGotoWithCenter({
-          lat: this.input.mapCenter.lat,
-          lon: this.input.mapCenter.lon,
-          zoom: this.input.mapCenter.zoom,
-        })
-      );
-    } else if (this._attributes?.mapStateJSON) {
-      const mapState = JSON.parse(this._attributes.mapStateJSON);
-      this._store.dispatch(
-        setGotoWithCenter({
-          lat: mapState.center.lat,
-          lon: mapState.center.lon,
-          zoom: mapState.zoom,
-        })
-      );
-    }
-
-    const layerList = getInitialLayers(this._attributes.layerListJSON);
-    this.setLayerList(layerList);
-    if (this.input.hiddenLayers) {
-      this._store.dispatch<any>(setHiddenLayers(this.input.hiddenLayers));
-    }
     this._dispatchSetQuery(this.input);
     this._dispatchSetRefreshConfig(this.input);
 
-    this._unsubscribeFromStore = this._store.subscribe(() => {
+    this._unsubscribeFromStore = this._savedMap.getStore().subscribe(() => {
       this._handleStoreChanges();
     });
   }
@@ -226,26 +171,27 @@ export class MapEmbeddable
       title,
       editPath: `/${MAP_PATH}/${savedObjectId}`,
       editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
+      indexPatterns: await this.getIndexPatterns(),
     });
   }
 
   public inputIsRefType(
     input: MapByValueInput | MapByReferenceInput
   ): input is MapByReferenceInput {
-    return attributeService.inputIsRefType(input);
+    return getMapAttributeService().inputIsRefType(input);
   }
 
   public async getInputAsRefType(): Promise<MapByReferenceInput> {
-    const input = attributeService.getExplicitInputFromEmbeddable(this);
-    return attributeService.getInputAsRefType(input, {
+    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
+    return getMapAttributeService().getInputAsRefType(input, {
       showSaveModal: true,
       saveModalTitle: this.getTitle(),
     });
   }
 
   public async getInputAsValueType(): Promise<MapByValueInput> {
-    const input = attributeService.getExplicitInputFromEmbeddable(this);
-    return attributeService.getInputAsValueType(input);
+    const input = getMapAttributeService().getExplicitInputFromEmbeddable(this);
+    return getMapAttributeService().getInputAsValueType(input);
   }
 
   public getDescription() {
@@ -261,11 +207,11 @@ export class MapEmbeddable
   };
 
   setEventHandlers = (eventHandlers: EventHandlers) => {
-    this._store.dispatch(setEventHandlers(eventHandlers));
+    this._savedMap.getStore().dispatch(setEventHandlers(eventHandlers));
   };
 
   getInspectorAdapters() {
-    return getInspectorAdapters(this._store.getState());
+    return getInspectorAdapters(this._savedMap.getStore().getState());
   }
 
   onContainerStateChanged(containerState: MapEmbeddableInput) {
@@ -296,7 +242,7 @@ export class MapEmbeddable
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
     this._prevFilters = filters;
-    this._store.dispatch<any>(
+    this._savedMap.getStore().dispatch<any>(
       setQuery({
         filters: filters.filter((filter) => !filter.meta.disabled),
         query,
@@ -308,7 +254,7 @@ export class MapEmbeddable
 
   _dispatchSetRefreshConfig({ refreshConfig }: Pick<MapEmbeddableInput, 'refreshConfig'>) {
     this._prevRefreshConfig = refreshConfig;
-    this._store.dispatch(
+    this._savedMap.getStore().dispatch(
       setRefreshConfig({
         isPaused: refreshConfig.pause,
         interval: refreshConfig.value,
@@ -330,7 +276,7 @@ export class MapEmbeddable
     const I18nContext = getCoreI18n().Context;
 
     render(
-      <Provider store={this._store}>
+      <Provider store={this._savedMap.getStore()}>
         <I18nContext>
           <MapContainer
             addFilters={this.input.hideFilterActions ? null : this.addFilters}
@@ -347,30 +293,20 @@ export class MapEmbeddable
   }
 
   setLayerList(layerList: LayerDescriptor[]) {
-    this.setIndexPatterns(layerList);
-    this._store.dispatch<any>(replaceLayerList(layerList));
+    this._savedMap.getStore().dispatch<any>(replaceLayerList(layerList));
+    this.getIndexPatterns().then((indexPatterns) => {
+      this.updateOutput({
+        ...this.getOutput(),
+        indexPatterns,
+      });
+    });
   }
 
-  private async setIndexPatterns(layerList: LayerDescriptor[]) {
-    let queryableIndexPatternIds: string[];
-    try {
-      const tempStore = createMapStore();
-      layerList.forEach((layerDescriptor: LayerDescriptor) => {
-        tempStore.dispatch(addLayerWithoutDataSync(layerDescriptor));
-      });
-      queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(tempStore.getState());
-    } catch (error) {
-      throw new Error(
-        i18n.translate('xpack.maps.mapEmbeddable.invalidLayerList', {
-          defaultMessage: 'Unable to set map embeddable layer list, invalid layer list',
-        })
-      );
-    }
-    const indexPatterns = await getIndexPatternsFromIds(queryableIndexPatternIds);
-    this.updateOutput({
-      ...this.getOutput(),
-      indexPatterns,
-    });
+  private async getIndexPatterns() {
+    const queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(
+      this._savedMap.getStore().getState()
+    );
+    return await getIndexPatternsFromIds(queryableIndexPatternIds);
   }
 
   addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
@@ -428,8 +364,8 @@ export class MapEmbeddable
   }
 
   _handleStoreChanges() {
-    const center = getMapCenter(this._store.getState());
-    const zoom = getMapZoom(this._store.getState());
+    const center = getMapCenter(this._savedMap.getStore().getState());
+    const zoom = getMapZoom(this._savedMap.getStore().getState());
 
     const mapCenter = this.input.mapCenter || undefined;
     if (
@@ -447,21 +383,21 @@ export class MapEmbeddable
       });
     }
 
-    const isLayerTOCOpen = getIsLayerTOCOpen(this._store.getState());
+    const isLayerTOCOpen = getIsLayerTOCOpen(this._savedMap.getStore().getState());
     if (this.input.isLayerTOCOpen !== isLayerTOCOpen) {
       this.updateInput({
         isLayerTOCOpen,
       });
     }
 
-    const openTOCDetails = getOpenTOCDetails(this._store.getState());
+    const openTOCDetails = getOpenTOCDetails(this._savedMap.getStore().getState());
     if (!_.isEqual(this.input.openTOCDetails, openTOCDetails)) {
       this.updateInput({
         openTOCDetails,
       });
     }
 
-    const hiddenLayerIds = getHiddenLayerIds(this._store.getState());
+    const hiddenLayerIds = getHiddenLayerIds(this._savedMap.getStore().getState());
 
     if (!_.isEqual(this.input.hiddenLayers, hiddenLayerIds)) {
       this.updateInput({

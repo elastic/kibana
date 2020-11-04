@@ -50,6 +50,7 @@ import { goToSpecifiedPath } from '../../render_app';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
 import { getExistingMapPath } from '../../../common/constants';
 import {
+  getInitialLayersFromUrlParam,
   getInitialQuery,
   getInitialRefreshConfig,
   getInitialTimeFilters,
@@ -309,7 +310,10 @@ export class MapApp extends React.Component<Props, State> {
   async _initMap() {
     let mapSavedObjectAttributes;
     try {
-      mapSavedObjectAttributes = await this.props.savedMap.loadAttributes();
+      const overrides = {
+        defaultLayers: getInitialLayersFromUrlParam(),
+      };
+      mapSavedObjectAttributes = await this.props.savedMap.loadAttributes(overrides);
     } catch (err) {
       if (this._isMounted) {
         getToasts().addWarning({

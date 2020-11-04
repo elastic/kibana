@@ -27,9 +27,10 @@ import {
   replaceLayerList,
   setIsLayerTOCOpen,
   setOpenTOCDetails,
+  setHiddenLayers,
 } from '../../../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_selectors';
-import { getMapAttributeService } from './map_attribute_service';
+import { getMapAttributeService } from '../../../map_attribute_service';
 import {
   checkForDuplicateTitle,
   OnSaveProps,
@@ -54,7 +55,7 @@ export class SavedMap {
   private _initialLayerListConfig: LayerDescriptor[] = [];
   private readonly _mapEmbeddableInput?: MapEmbeddableInput;
   private _originatingApp?: string;
-  private readonly _stateTransfer: EmbeddableStateTransfer;
+  private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
 
   constructor({
@@ -66,7 +67,7 @@ export class SavedMap {
     mapEmbeddableInput?: MapEmbeddableInput;
     embeddableId?: string;
     originatingApp?: string;
-    stateTransfer: EmbeddableStateTransfer;
+    stateTransfer?: EmbeddableStateTransfer;
   }) {
     this._mapEmbeddableInput = mapEmbeddableInput;
     this._embeddableId = embeddableId;
@@ -79,7 +80,13 @@ export class SavedMap {
     return this._store;
   }
 
-  async loadAttributes() {
+  async loadAttributes(overrides?: {
+    isLayerTOCOpen?: boolean;
+    openTOCDetails?: string[];
+    mapCenter?: MapCenterAndZoom;
+    hiddenLayers?: string[];
+    defaultLayers?: LayerDescriptor[];
+  }) {
     if (!this._mapEmbeddableInput) {
       this._attributes = {
         title: i18n.translate('xpack.maps.newMapTitle', {
@@ -91,14 +98,44 @@ export class SavedMap {
       this._attributes = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
     }
 
-    const layerList = getInitialLayers(
-      this._attributes.layerListJSON,
-      getInitialLayersFromUrlParam()
-    );
-    this._store.dispatch(replaceLayerList(layerList));
-    this._initialLayerListConfig = copyPersistentState(layerList);
+    if (this._attributes?.mapStateJSON) {
+      const mapState = JSON.parse(this._attributes.mapStateJSON);
+      if (mapState.settings) {
+        this._store.dispatch(setMapSettings(mapState.settings));
+      }
+    }
 
-    if (this._attributes.mapStateJSON) {
+    let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
+    if (overrides && overrides.isLayerTOCOpen !== undefined) {
+      isLayerTOCOpen = overrides.isLayerTOCOpen;
+    } else if (this._attributes?.uiStateJSON) {
+      const uiState = JSON.parse(this._attributes.uiStateJSON);
+      if ('isLayerTOCOpen' in uiState) {
+        isLayerTOCOpen = uiState.isLayerTOCOpen;
+      }
+    }
+    this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
+
+    let openTOCDetails = [];
+    if (overrides && overrides.openTOCDetails !== undefined) {
+      openTOCDetails = overrides.openTOCDetails;
+    } else if (this._attributes?.uiStateJSON) {
+      const uiState = JSON.parse(this._attributes.uiStateJSON);
+      if ('openTOCDetails' in uiState) {
+        openTOCDetails = uiState.openTOCDetails;
+      }
+    }
+    this._store.dispatch(setOpenTOCDetails(openTOCDetails));
+
+    if (overrides && overrides.mapCenter !== undefined) {
+      this._store.dispatch(
+        setGotoWithCenter({
+          lat: overrides.mapCenter.lat,
+          lon: overrides.mapCenter.lon,
+          zoom: overrides.mapCenter.zoom,
+        })
+      );
+    } else if (this._attributes?.mapStateJSON) {
       const mapState = JSON.parse(this._attributes.mapStateJSON);
       this._store.dispatch(
         setGotoWithCenter({
@@ -107,18 +144,17 @@ export class SavedMap {
           zoom: mapState.zoom,
         })
       );
-      if (mapState.settings) {
-        this._store.dispatch(setMapSettings(mapState.settings));
-      }
     }
 
-    if (this._attributes.uiStateJSON) {
-      const uiState = JSON.parse(this._attributes.uiStateJSON);
-      this._store.dispatch(
-        setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN))
-      );
-      this._store.dispatch(setOpenTOCDetails(_.get(uiState, 'openTOCDetails', [])));
+    const layerList = getInitialLayers(
+      this._attributes.layerListJSON,
+      overrides && overrides.defaultLayers !== undefined ? overrides.defaultLayers : []
+    );
+    this._store.dispatch(replaceLayerList(layerList));
+    if (overrides && overrides.hiddenLayers !== undefined) {
+      this._store.dispatch<any>(setHiddenLayers(overrides.hiddenLayers));
     }
+    this._initialLayerListConfig = copyPersistentState(layerList);
 
     return this._attributes;
   }
@@ -142,6 +178,14 @@ export class SavedMap {
         !_.isEqual(JSON.parse(JSON.stringify(layerListConfigOnly)), savedLayerList);
   };
 
+  private _getStateTransfer() {
+    if (!this._stateTransfer) {
+      throw new Error('stateTransfer not provided in constructor');
+    }
+
+    return this._stateTransfer;
+  }
+
   setBreadcrumbs() {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await loadAttributes before calling hasUnsavedChanges');
@@ -151,7 +195,7 @@ export class SavedMap {
       title: this._attributes.title,
       getHasUnsavedChanges: this.hasUnsavedChanges,
       originatingApp: this._originatingApp,
-      getAppNameFromId: this._stateTransfer.getAppNameFromId,
+      getAppNameFromId: this._getStateTransfer().getAppNameFromId,
     });
     getCoreChrome().setBreadcrumbs(breadcrumbs);
   }
@@ -165,7 +209,7 @@ export class SavedMap {
   }
 
   public getAppNameFromId = (appId: string): string | undefined => {
-    return this._stateTransfer.getAppNameFromId(appId);
+    return this._getStateTransfer().getAppNameFromId(appId);
   };
 
   public hasSaveAndReturnConfig() {
@@ -253,7 +297,7 @@ export class SavedMap {
         });
         return;
       }
-      this._stateTransfer.navigateToWithEmbeddablePackage(this._originatingApp, {
+      this._getStateTransfer().navigateToWithEmbeddablePackage(this._originatingApp, {
         state: {
           embeddableId: newCopyOnSave ? undefined : this._embeddableId,
           type: MAP_SAVED_OBJECT_TYPE,
