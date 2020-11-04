@@ -22,15 +22,16 @@ import { IndexPatternColumn, OperationType } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,
-  buildColumn,
   insertNewColumn,
-  changeField,
+  deleteColumn,
+  updateColumnParam,
+  replaceColumn,
 } from '../operations';
-import { deleteColumn, changeColumn, updateColumnParam, mergeLayer } from '../state_helpers';
+import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField, fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import { IndexPattern, IndexPatternField } from '../types';
+import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 
@@ -181,57 +182,43 @@ export function DimensionEditor(props: DimensionEditorProps) {
             if (selectedColumn?.operationType === operationType) {
               return;
             }
-            // TODO: Determine if this is inserting a new column vs updating an existing
-            setState(
-              changeColumn({
-                state,
-                layerId,
-                columnId,
-                newColumn: buildColumn({
-                  columns: props.state.layers[props.layerId].columns,
-                  op: operationType,
+            const newLayer = selectedColumn
+              ? replaceColumn({
+                  layer: props.state.layers[props.layerId],
                   indexPattern: currentIndexPattern,
-                  previousColumn: selectedColumn,
-                }),
-              })
-            );
+                  columnId,
+                  op: operationType,
+                })
+              : insertNewColumn({
+                  layer: props.state.layers[props.layerId],
+                  indexPattern: currentIndexPattern,
+                  columnId,
+                  op: operationType,
+                });
+            setState(mergeLayer({ state, layerId, newLayer }));
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
             const possibleFields = fieldByOperation[operationType] || [];
 
             if (possibleFields.length === 1) {
-              if (!selectedColumn) {
-                setState(
-                  mergeLayer({
-                    state,
-                    layerId,
-                    newLayer: insertNewColumn({
-                      layer: props.state.layers[props.layerId],
-                      indexPattern: currentIndexPattern,
-                      op: operationType,
-                      field: fieldMap[possibleFields[0]],
-                      columnId,
-                    }),
-                  })
-                );
-              } else {
-                // TODO: Better logic for updating a column
-                setState(
-                  changeColumn({
-                    state,
-                    layerId,
+              const newLayer = selectedColumn
+                ? replaceColumn({
+                    layer: props.state.layers[props.layerId],
+                    indexPattern: currentIndexPattern,
                     columnId,
-                    newColumn: buildColumn({
-                      columns: props.state.layers[props.layerId].columns,
-                      op: operationType,
-                      indexPattern: currentIndexPattern,
-                      field: fieldMap[possibleFields[0]],
-                      previousColumn: selectedColumn,
-                    }),
+                    op: operationType,
+                    field: fieldMap[possibleFields[0]],
                   })
-                );
-              }
+                : insertNewColumn({
+                    layer: props.state.layers[props.layerId],
+                    indexPattern: currentIndexPattern,
+                    columnId,
+                    op: operationType,
+                    field: fieldMap[possibleFields[0]],
+                  });
+
+              setState(mergeLayer({ state, layerId, newLayer }));
             } else {
               setInvalidOperationType(operationType);
             }
@@ -241,27 +228,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
           setInvalidOperationType(null);
 
-          if (selectedColumn?.operationType === operationType) {
+          if (selectedColumn.operationType === operationType) {
             return;
           }
 
-          // TODO: switch between inserting vs updating
-          const newColumn: IndexPatternColumn = buildColumn({
-            columns: props.state.layers[props.layerId].columns,
-            op: operationType,
+          const newLayer = replaceColumn({
+            layer: props.state.layers[props.layerId],
             indexPattern: currentIndexPattern,
+            columnId,
+            op: operationType,
             field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
-            previousColumn: selectedColumn,
           });
 
-          setState(
-            changeColumn({
-              state,
-              layerId,
-              columnId,
-              newColumn,
-            })
-          );
+          setState(mergeLayer({ state, layerId, newLayer }));
         },
       };
     }
@@ -320,26 +299,29 @@ export function DimensionEditor(props: DimensionEditorProps) {
               incompatibleSelectedOperationType={incompatibleSelectedOperationType}
               onDeleteColumn={() => {
                 setState(
-                  deleteColumn({
+                  mergeLayer({
                     state,
                     layerId,
-                    columnId,
+                    newLayer: deleteColumn({ layer: state.layers[layerId], columnId }),
                   })
                 );
               }}
               onChoose={(choice) => {
-                let column: IndexPatternColumn;
+                let newLayer: IndexPatternLayer;
                 if (
                   !incompatibleSelectedOperationType &&
                   selectedColumn &&
                   'field' in choice &&
                   choice.operationType === selectedColumn.operationType
                 ) {
-                  // If we just changed the field are not in an error state and the operation didn't change,
-                  // we use the operations onFieldChange method to calculate the new column.
-                  column = changeField(selectedColumn, currentIndexPattern, fieldMap[choice.field]);
+                  newLayer = replaceColumn({
+                    layer: state.layers[layerId],
+                    columnId,
+                    indexPattern: currentIndexPattern,
+                    field: fieldMap[choice.field],
+                    // TODO: don't keep params?
+                  });
                 } else {
-                  // TODO: This branch of the code is particularly messy
                   // Otherwise we'll use the buildColumn method to calculate a new column
                   const compatibleOperations =
                     ('field' in choice && operationSupportMatrix.operationByField[choice.field]) ||
@@ -354,24 +336,25 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   } else if ('field' in choice) {
                     operation = choice.operationType;
                   }
-                  column = buildColumn({
-                    columns: props.state.layers[props.layerId].columns,
-                    field: fieldMap[choice.field],
-                    indexPattern: currentIndexPattern,
-                    op: operation as OperationType,
-                    previousColumn: selectedColumn,
-                  });
+                  newLayer = selectedColumn
+                    ? replaceColumn({
+                        layer: state.layers[layerId],
+                        columnId,
+                        indexPattern: currentIndexPattern,
+                        op: operation,
+                        field: fieldMap[choice.field],
+                        // TODO: don't keep params?
+                      })
+                    : insertNewColumn({
+                        layer: state.layers[layerId],
+                        columnId,
+                        indexPattern: currentIndexPattern,
+                        op: operation as OperationType,
+                        field: fieldMap[choice.field],
+                      });
                 }
 
-                setState(
-                  changeColumn({
-                    state,
-                    layerId,
-                    columnId,
-                    newColumn: column,
-                    keepParams: false,
-                  })
-                );
+                setState(mergeLayer({ state, layerId, newLayer }));
                 setInvalidOperationType(null);
               }}
             />

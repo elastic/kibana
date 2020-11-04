@@ -12,8 +12,6 @@ import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
 import { ChangeIndexPattern } from './change_indexpattern';
 
-jest.mock('./state_helpers');
-
 interface IndexPatternPickerOption {
   label: string;
   checked?: 'on' | 'off';

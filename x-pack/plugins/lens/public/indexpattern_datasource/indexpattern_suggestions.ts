@@ -10,8 +10,8 @@ import { generateId } from '../id_generator';
 import { DatasourceSuggestion, TableChangeType } from '../types';
 import { columnToOperation } from './indexpattern';
 import {
-  buildColumn,
   insertNewColumn,
+  replaceColumn,
   getMetricOperationType,
   getOperationTypesForField,
   operationDefinitionMap,
@@ -180,22 +180,43 @@ function getExistingLayerSuggestionsForField(
   if (!usableAsBucketOperation && operations.length > 0) {
     const metricOperation = getMetricOperationType(field);
     if (metricOperation) {
-      const updatedLayer = insertNewColumn({
+      const layerWithNewMetric = insertNewColumn({
         layer,
         indexPattern,
         field,
         columnId: generateId(),
         op: metricOperation,
       });
-      if (updatedLayer) {
+      if (layerWithNewMetric) {
         suggestions.push(
           buildSuggestion({
             state,
-            updatedLayer,
             layerId,
+            updatedLayer: layerWithNewMetric,
             changeType: 'extended',
           })
         );
+      }
+
+      const [, metrics] = separateBucketColumns(layer);
+      if (metrics.length === 1) {
+        const layerWithReplacedMetric = replaceColumn({
+          layer,
+          indexPattern,
+          field,
+          columnId: metrics[0],
+          op: metricOperation,
+        });
+        if (layerWithReplacedMetric) {
+          suggestions.push(
+            buildSuggestion({
+              state,
+              layerId,
+              updatedLayer: layerWithReplacedMetric,
+              changeType: 'extended',
+            })
+          );
+        }
       }
     }
   }
@@ -361,7 +382,7 @@ export function getDatasourceSuggestionsFromCurrentState(
             // suggest current metric over time if there is a default time field
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
           }
-          suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
+          // suggestions.push(...createAlternativeMetricSuggestions(indexPattern, layerId, state));
           // also suggest simple current state
           suggestions.push(
             buildSuggestion({
@@ -461,6 +482,7 @@ function createAlternativeMetricSuggestions(
   layerId: string,
   state: IndexPatternPrivateState
 ) {
+  return;
   const layer = state.layers[layerId];
   const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
   layer.columnOrder.forEach((columnId) => {

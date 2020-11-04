@@ -16,7 +16,7 @@ import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { IndexPatternColumn } from '../operations';
 
-jest.mock('../state_helpers');
+jest.mock('../operations');
 
 const expectedIndexPatterns = {
   1: {
@@ -412,7 +412,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       layers: {
         myLayer: {
           ...testState.layers.myLayer,
-          columnOrder: ['col1', 'col2'],
+          columnOrder: ['col2', 'col1'],
           columns: {
             ...testState.layers.myLayer.columns,
             col2: expect.objectContaining({
@@ -456,45 +456,6 @@ describe('IndexPatternDimensionEditorPanel', () => {
             }),
           }),
         }),
-      },
-    });
-  });
-
-  it('does not set the size of the terms aggregation', () => {
-    const dragging = {
-      field: { type: 'string', name: 'mystring', aggregatable: true },
-      indexPatternId: 'foo',
-      id: 'bar',
-    };
-    const testState = dragDropState();
-    onDrop({
-      ...defaultProps,
-      dragDropContext: {
-        ...dragDropContext,
-        dragging,
-      },
-      droppedItem: dragging,
-      state: testState,
-      columnId: 'col2',
-      filterOperations: (op: OperationMetadata) => op.isBucketed,
-      layerId: 'myLayer',
-    });
-
-    expect(setState).toBeCalledTimes(1);
-    expect(setState).toHaveBeenCalledWith({
-      ...testState,
-      layers: {
-        myLayer: {
-          ...testState.layers.myLayer,
-          columnOrder: ['col1', 'col2'],
-          columns: {
-            ...testState.layers.myLayer.columns,
-            col2: expect.objectContaining({
-              operationType: 'terms',
-              params: expect.objectContaining({ size: 3 }),
-            }),
-          },
-        },
       },
     });
   });

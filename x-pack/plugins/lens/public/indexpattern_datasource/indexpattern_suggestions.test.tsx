@@ -841,7 +841,7 @@ describe('IndexPattern Data Source suggestions', () => {
         );
       });
 
-      it('replaces a metric column on a number field if only one other metric is already set', () => {
+      it('suggests both replacing and adding metric if only one other metric is set', () => {
         const initialState = stateWithNonEmptyTables();
         const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
           name: 'memory',
@@ -860,6 +860,26 @@ describe('IndexPattern Data Source suggestions', () => {
                   columns: {
                     cola: initialState.layers.currentLayer.columns.cola,
                     colb: expect.objectContaining({
+                      operationType: 'avg',
+                      sourceField: 'memory',
+                    }),
+                  },
+                }),
+              }),
+            }),
+          })
+        );
+
+        expect(suggestions).toContainEqual(
+          expect.objectContaining({
+            state: expect.objectContaining({
+              layers: expect.objectContaining({
+                currentLayer: expect.objectContaining({
+                  columnOrder: ['cola', 'colb', 'id1'],
+                  columns: {
+                    cola: initialState.layers.currentLayer.columns.cola,
+                    colb: initialState.layers.currentLayer.columns.colb,
+                    id1: expect.objectContaining({
                       operationType: 'avg',
                       sourceField: 'memory',
                     }),
@@ -901,57 +921,6 @@ describe('IndexPattern Data Source suggestions', () => {
                 previousLayer: modifiedState.layers.previousLayer,
                 currentLayer: expect.objectContaining({
                   columnOrder: ['cola', 'id1'],
-                  columns: {
-                    ...modifiedState.layers.currentLayer.columns,
-                    id1: expect.objectContaining({
-                      operationType: 'avg',
-                      sourceField: 'memory',
-                    }),
-                  },
-                }),
-              },
-            }),
-          })
-        );
-      });
-
-      it('adds a metric column on a number field if 2 or more other metric', () => {
-        const initialState = stateWithNonEmptyTables();
-        const modifiedState: IndexPatternPrivateState = {
-          ...initialState,
-          layers: {
-            ...initialState.layers,
-            currentLayer: {
-              ...initialState.layers.currentLayer,
-              columns: {
-                ...initialState.layers.currentLayer.columns,
-                colc: {
-                  dataType: 'number',
-                  isBucketed: false,
-                  sourceField: 'dest',
-                  label: 'Unique count of dest',
-                  operationType: 'cardinality',
-                },
-              },
-              columnOrder: ['cola', 'colb', 'colc'],
-            },
-          },
-        };
-        const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', {
-          name: 'memory',
-          displayName: 'memory',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        });
-
-        expect(suggestions).toContainEqual(
-          expect.objectContaining({
-            state: expect.objectContaining({
-              layers: {
-                previousLayer: modifiedState.layers.previousLayer,
-                currentLayer: expect.objectContaining({
-                  columnOrder: ['cola', 'colb', 'colc', 'id1'],
                   columns: {
                     ...modifiedState.layers.currentLayer.columns,
                     id1: expect.objectContaining({
