@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { PackageInfo, InstallationStatus } from '../types';
+import { installationStatuses } from '../constants';
+import { PackageInfo } from '../types';
 import { packageToPackagePolicy, packageToPackagePolicyInputs } from './package_to_package_policy';
 
 describe('Ingest Manager - packageToPackagePolicy', () => {
@@ -28,7 +29,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
         map: [],
       },
     },
-    status: InstallationStatus.notInstalled,
+    status: installationStatuses.NotInstalled,
   };
 
   describe('packageToPackagePolicyInputs', () => {
