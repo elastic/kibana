@@ -10,7 +10,6 @@ import { expandHostStats, expandNetworkStats } from '../tasks/overview';
 import { loginAndWaitForPage } from '../tasks/login';
 
 import { OVERVIEW_URL } from '../urls/navigation';
-import { esArchiverUnload, esArchiverLoad } from '../tasks/es_archiver';
 
 describe('Overview Page', () => {
   it('Host stats render with correct values', () => {
