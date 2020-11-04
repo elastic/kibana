@@ -24,6 +24,7 @@ const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 export default async ({ readConfigFile }) => {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../../functional/config'));
   const { tests, ...provisionedConfigs } = buildState(resolve(__dirname, stateFilePath));
+  log.info(tests); // TODO: Delete this line
   process.env.stack_functional_integration = true;
 
   logAll(log);
@@ -52,8 +53,8 @@ export default async ({ readConfigFile }) => {
         '--xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys=["decrypt123XazszSCYexXqz4YktBGHCR"]',
       ],
     },
-    testFiles: tests.map(prepend).map(logTest),
-    // testFiles: ['alerts'].map(prepend).map(logTest),
+    // testFiles: tests.map(prepend).map(logTest),
+    testFiles: ['alerts'].map(prepend).map(logTest),
     // If we need to do things like disable animations, we can do it in configure_start_kibana.sh, in the provisioner...which lives in the integration-test private repo
     uiSettings: {},
     security: { disableTestUser: true },
@@ -83,7 +84,7 @@ function highLight(testPath) {
   return testPath.replace(cleaned, colored);
 }
 function logTest(testPath) {
-  log.info(`Testing: '${highLight(truncate(testPath))}'`);
+  log.info(`### Testing: '${highLight(truncate(testPath))}'`);
   return testPath;
 }
 function logAll(log) {
