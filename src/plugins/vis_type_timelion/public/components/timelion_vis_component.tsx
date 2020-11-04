@@ -19,26 +19,18 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { compact, cloneDeep, last, map } from 'lodash';
-import {
-  AreaSeries,
-  BarSeries,
-  Chart,
-  ScaleType,
-  Settings,
-  Position,
-  Axis,
-  TooltipType,
-  YDomainRange,
-} from '@elastic/charts';
+import { Chart, Settings, Position, Axis, TooltipType, YDomainRange } from '@elastic/charts';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { useKibana } from '../../../kibana_react/public';
 
-import { buildOptions, colors, Axis as IAxis } from '../helpers/panel_utils';
+import { AreaSeriesComponent } from './area_series';
+import { BarSeriesComponent } from './bar_series';
+
+import { buildOptions, colors, Axis as IAxis, Options } from '../helpers/panel_utils';
 import { tickFormatters } from '../helpers/tick_formatters';
 
 import { Series, Sheet } from '../helpers/timelion_request_handler';
-import { getBarStyles, getAreaStyles } from '../helpers/series_styles';
 import { TimelionVisDependencies } from '../plugin';
 
 import './index.scss';
@@ -50,7 +42,7 @@ interface TimelionVisComponentProps {
   renderComplete: IInterpreterRenderHandlers['done'];
 }
 
-function TimelionVisComponent1({
+function TimelionVisComponent({
   interval,
   seriesList,
   renderComplete,
@@ -58,7 +50,9 @@ function TimelionVisComponent1({
 }: TimelionVisComponentProps) {
   const kibana = useKibana<TimelionVisDependencies>();
   const [chart, setChart] = useState(() => cloneDeep(seriesList.list));
-  const options = buildOptions(interval, kibana.services.timefilter, kibana.services.uiSettings);
+  const [options, setOptions] = useState<Options>(
+    buildOptions(interval, kibana.services.timefilter, kibana.services.uiSettings)
+  );
 
   const updateYAxes = function (yaxes: IAxis[]) {
     yaxes.forEach((yaxis: IAxis) => {
@@ -105,6 +99,10 @@ function TimelionVisComponent1({
     setChart(newChart);
   }, [seriesList.list]);
 
+  useEffect(() => {
+    setOptions(buildOptions(interval, kibana.services.timefilter, kibana.services.uiSettings));
+  }, [interval, kibana.services.timefilter, kibana.services.uiSettings]);
+
   // temp solution
   const getLegendPosition = useCallback(() => {
     const chartGlobal = chart[0]._global;
@@ -125,6 +123,10 @@ function TimelionVisComponent1({
 
   const brushEndListener = useCallback(
     ({ x }) => {
+      if (!x) {
+        return;
+      }
+
       fireEvent({
         name: 'applyFilter',
         data: {
@@ -145,11 +147,14 @@ function TimelionVisComponent1({
     [fireEvent]
   );
 
-  const onRenderChange = function (isRendered: boolean) {
-    if (!isRendered) {
-      renderComplete();
-    }
-  };
+  const onRenderChange = useCallback(
+    (isRendered: boolean) => {
+      if (!isRendered) {
+        renderComplete();
+      }
+    },
+    [renderComplete]
+  );
 
   const title: string = useMemo(() => last(compact(map(seriesList.list, '_title'))) || '', [
     seriesList.list,
@@ -215,38 +220,11 @@ function TimelionVisComponent1({
           />
         )}
         {chart.map((data, index) => {
+          const key = `${index}-${data.label}`;
           if (data.bars) {
-            return (
-              <BarSeries
-                key={data.label + index}
-                id={data.label}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor={0}
-                yAccessors={[1]}
-                data={data.data}
-                sortIndex={index}
-                stackAccessors={data.stack ? [0] : undefined}
-                color={data.color}
-                {...getBarStyles(data.bars, data.color)}
-              />
-            );
+            return <BarSeriesComponent key={key} data={data} index={index} />;
           } else {
-            return (
-              <AreaSeries
-                key={data.label + index}
-                id={data.label}
-                xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
-                xAccessor={0}
-                yAccessors={[1]}
-                data={data.data}
-                sortIndex={index}
-                color={data.color}
-                stackAccessors={data.stack ? [0] : undefined}
-                {...getAreaStyles(data)}
-              />
-            );
+            return <AreaSeriesComponent key={key} data={data} index={index} />;
           }
         })}
       </Chart>
@@ -256,4 +234,4 @@ function TimelionVisComponent1({
 
 // default export required for React.Lazy
 // eslint-disable-next-line import/no-default-export
-export { TimelionVisComponent1 as default };
+export { TimelionVisComponent as default };
