@@ -1,3 +1,4 @@
+[[testing-kibana-plugin]]
 == Testing Kibana Plugin
 === Mock Kibana Platform services in tests
 

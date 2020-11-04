@@ -38,8 +38,10 @@ The {kib} directory must be named `kibana`, and your plugin directory should be 
 * <<migrating-legacy-plugins-examples>>
 * <<external-plugin-functional-tests>>
 * <<external-plugin-localization>>
+* <<testing-kibana-plugin>>
 
 include::migrating-legacy-plugins.asciidoc[leveloffset=+1]
 include::migrating-legacy-plugins-examples.asciidoc[leveloffset=+1]
 include::external-plugin-functional-tests.asciidoc[leveloffset=+1]
 include::external-plugin-localization.asciidoc[leveloffset=+1]
+include::testing-kibana-plugin.asciidoc[leveloffset=+1]

@@ -25,7 +25,7 @@ A few notable services are called out below.
 * <<add-data-tutorials>>
 * <<development-visualize-index>>
 
-include::plugins/kibana-platform-plugin-api.asciidoc[leveloffset=+1]
+include::kibana-platform-plugin-api.asciidoc[leveloffset=+1]
 
 include::core/core-api.asciidoc[leveloffset=+1]
 

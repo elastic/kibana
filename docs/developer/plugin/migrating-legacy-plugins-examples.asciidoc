@@ -4,17 +4,15 @@
 This document is a list of examples of how to migrate plugin code from
 legacy APIs to their Kibana Platform equivalents.
 
+[[config-migration]]
 === Configuration
-
 ==== Declaring config schema
 
 Declaring the schema of your configuration fields is similar to the
 Legacy Platform but uses the `@kbn/config-schema` package instead of
-Joi. This package has full TypeScript support, but may be missing some
-features you need. Let the Platform team know by opening an issue and
-we’ll add what you’re missing.
+Joi. This package has full TypeScript support out-of-the-box.
 
-[source,ts]
+[source,typescript]
 ----
 // Legacy config schema
 import Joi from 'joi';
@@ -53,14 +51,14 @@ export type MyPluginConfig = TypeOf<typeof config.schema>;
 
 After setting the config schema for your plugin, you might want to reach
 the configuration in the plugin. It is provided as part of the
-link:../../docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md[PluginInitializerContext]
+{kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md[PluginInitializerContext]
 in the _constructor_ of the plugin:
 
-[source,ts]
+[source,typescript]
 ----
 // myPlugin/(public|server)/index.ts
 
-import { PluginInitializerContext } from 'kibana/server';
+import type { PluginInitializerContext } from 'kibana/server';
 import { MyPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {
@@ -68,14 +66,14 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 ----
 
-[source,ts]
+[source,typescript]
 ----
 // myPlugin/(public|server)/plugin.ts
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext, PluginName } from 'kibana/server';
-import { MyPlugin } from './plugin';
+import type { MyPluginConfig } from './config';
 
 export class MyPlugin implements Plugin {
   private readonly config$: Observable<MyPluginConfig>;
@@ -88,65 +86,41 @@ export class MyPlugin implements Plugin {
 
   public async setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
     const isEnabled = await this.config$.pipe(first()).toPromise();
-    ...
   }
-  ...
-}
 }
 ----
 
-Additionally, some plugins need to read other plugins’ config to act
-accordingly (like timing out a request, matching ElasticSearch’s
-timeout). For those use cases, the plugin can rely on the _globalConfig_
-and _env_ properties in the context:
+Additionally, some plugins need to access runtime env configuration
 
-[source,ts]
+[source,typescript]
 ----
 export class MyPlugin implements Plugin {
-...
   public async setup(core: CoreSetup, deps: Record<PluginName, unknown>) {
-    const { mode: { dev }, packageInfo: { version } } = this.initializerContext.env;
-    const { elasticsearch: { shardTimeout }, path: { data } } = await this.initializerContext.config.legacy.globalConfig$
-      .pipe(first()).toPromise();
-    ...
+    const { mode: { dev }, packageInfo: { version } } = this.initializerContext.env
   }
 ----
 
-==== Using Kibana Platform config from a Legacy plugin
+=== Create a Kibana Platform plugin
 
-During the migration process, you’ll want to migrate your schema to the
-new format. However, legacy plugins cannot directly get access to New
-Platform’s config service due to the way that config is tied to the
-`kibana.json` file (which does not exist for legacy plugins).
-
-There is a workaround though:
-
-* Create a Kibana Platform plugin that contains your plugin’s config schema
-in the new format
-* Expose the config from the Kibana Platform plugin in its setup contract
-* Read the config from the setup contract in your legacy plugin
-
-===== Create a Kibana Platform plugin
-
-For example, if wanted to move the legacy `timelion` plugin’s
-configuration to the Kibana Platform, we could create a NP plugin with the
-same name in `src/plugins/timelion` with the following files:
+For example, if wanted to move the legacy `demoplugin` plugin’s
+configuration to the Kibana Platform, we could create an NP plugin with the
+same name in `src/plugins/demoplugin` with the following files:
 
 [source,json5]
 ----
-// src/plugins/timelion/kibana.json
+// src/plugins/demoplugin/kibana.json
 {
-  "id": "timelion",
+  "id": "demoplugin",
   "server": true
 }
 ----
 
-[source,ts]
+[source,typescript]
 ----
-// src/plugins/timelion/server/index.ts
+// src/plugins/demoplugin/server/index.ts
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginInitializerContext } from 'src/core/server';
-import { TimelionPlugin } from './plugin';
+import type { PluginInitializerContext } from 'kibana/server';
+import { DemoPlugin } from './plugin';
 
 export const config = {
   schema: schema.object({
@@ -154,64 +128,40 @@ export const config = {
   });
 }
 
-export const plugin = (initContext: PluginInitializerContext) => new TimelionPlugin(initContext);
+export const plugin = (initContext: PluginInitializerContext) => new DemoPlugin(initContext);
 
-export type TimelionConfig = TypeOf<typeof config.schema>;
-export { TimelionSetup } from './plugin';
+export type DemoPluginConfig = TypeOf<typeof config.schema>;
+export { DemoPluginSetup } from './plugin';
 ----
 
-[source,ts]
+[source,typescript]
 ----
-// src/plugins/timelion/server/plugin.ts
-import { PluginInitializerContext, Plugin, CoreSetup } from '../../core/server';
-import { TimelionConfig } from '.';
+// src/plugins/demoplugin/server/plugin.ts
+import type { PluginInitializerContext, Plugin, CoreSetup } from 'kibana/server';
+import type { DemoPluginConfig } from '.';
+export interface DemoPluginSetup {};
 
-export class TimelionPlugin implements Plugin<TimelionSetup> {
+export class DemoPlugin implements Plugin<DemoPluginSetup> {
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    return {
-      __legacy: {
-        config$: this.initContext.config.create<TimelionConfig>(),
-      },
-    };
+    return {};
   }
 
   public start() {}
   public stop() {}
 }
-
-export interface TimelionSetup {
-  /** @deprecated */
-  __legacy: {
-    config$: Observable<TimelionConfig>;
-  };
-}
 ----
 
-With the Kibana Platform plugin in place, you can then read this `config$`
-Observable from your legacy plugin:
-
-[source,ts]
-----
-import { take } from 'rxjs/operators';
-
-new kibana.Plugin({
-  async init(server) {
-    const { config$ } = server.newPlatform.setup.plugins.timelion;
-    const currentConfig = await config$.pipe(take(1)).toPromise();
-  }
-});
-----
-
+[[http-routes-migration]]
 === HTTP Routes
 
 In the legacy platform, plugins have direct access to the Hapi `server`
 object which gives full access to all of Hapi’s API. In the New
 Platform, plugins have access to the
-link:/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md[HttpServiceSetup]
+{kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.httpservicesetup.md[HttpServiceSetup]
 interface, which is exposed via the
-link:/docs/development/core/server/kibana-plugin-core-server.coresetup.md[CoreSetup]
+{kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.coresetup.md[CoreSetup]
 object injected into the `setup` method of server-side plugins.
 
 This interface has a different API with slightly different behaviors.
@@ -219,22 +169,17 @@ This interface has a different API with slightly different behaviors.
 * All input (body, query parameters, and URL parameters) must be
 validated using the `@kbn/config-schema` package. If no validation
 schema is provided, these values will be empty objects.
-* All exceptions thrown by handlers result in 500 errors. If you need a
+* All exceptions are thrown by handlers result in 500 errors. If you need a
 specific HTTP error code, catch any exceptions in your handler and
 construct the appropriate response using the provided response factory.
-While you can continue using the `boom` module internally in your
+While you can continue using the `Boom` module internally in your
 plugin, the framework does not have native support for converting Boom
 exceptions into HTTP responses.
 
-Because of the incompatibility between the legacy and Kibana Platform HTTP
-Route API’s it might be helpful to break up your migration work into
-several stages.
-
-==== 1. Legacy route registration
-
-[source,ts]
+Migrate legacy route registration:
+[source,typescript]
 ----
-// legacy/plugins/myplugin/index.ts
+// legacy/plugins/demoplugin/index.ts
 import Joi from 'joi';
 
 new kibana.Plugin({
@@ -256,103 +201,15 @@ new kibana.Plugin({
   }
 });
 ----
-
-==== 2. Kibana Platform shim using legacy router
-
-Create a Kibana Platform shim and inject the legacy `server.route` into
-your plugin’s setup function.
-
-[source,ts]
-----
-// legacy/plugins/demoplugin/index.ts
-import { Plugin, LegacySetup } from './server/plugin';
-export default (kibana) => {
-  return new kibana.Plugin({
-    id: 'demo_plugin',
-
-    init(server) {
-      // core shim
-      const coreSetup: server.newPlatform.setup.core;
-      const pluginSetup = {};
-      const legacySetup: LegacySetup = {
-        route: server.route
-      };
-
-      new Plugin().setup(coreSetup, pluginSetup, legacySetup);
-    }
-  }
-}
-----
-
-[source,ts]
-----
-// legacy/plugins/demoplugin/server/plugin.ts
-import { CoreSetup } from 'src/core/server';
-import { Legacy } from 'kibana';
-
-export interface LegacySetup {
-  route: Legacy.Server['route'];
-};
-
-export interface DemoPluginsSetup {};
-
-export class Plugin {
-  public setup(core: CoreSetup, plugins: DemoPluginsSetup, __LEGACY: LegacySetup) {
-    __LEGACY.route({
-      path: '/api/demoplugin/search',
-      method: 'POST',
-      options: {
-        validate: {
-          payload: Joi.object({
-            field1: Joi.string().required(),
-          }),
-        }
-      },
-      async handler(req) {
-        return { message: `Received field1: ${req.payload.field1}` };
-      },
-    });
-  }
-}
-----
-
-==== 3. Kibana Platform shim using Kibana Platform router
-
-We now switch the shim to use the real Kibana Platform HTTP API’s in
-`coreSetup` instead of relying on the legacy `server.route`. Since our
-plugin is now using the Kibana Platform API’s we are guaranteed that our
-HTTP route handling is 100% compatible with the Kibana Platform. As a
-result, we will also have to adapt our route registration accordingly.
-
-[source,ts]
-----
-// legacy/plugins/demoplugin/index.ts
-import { Plugin } from './server/plugin';
-export default (kibana) => {
-  return new kibana.Plugin({
-    id: 'demo_plugin',
-
-    init(server) {
-      // core shim
-      const coreSetup = server.newPlatform.setup.core;
-      const pluginSetup = {};
-
-      new Plugin().setup(coreSetup, pluginSetup);
-    }
-  }
-}
-----
-
-[source,ts]
+to the Kibana platform format:
+[source,typescript]
 ----
 // legacy/plugins/demoplugin/server/plugin.ts
 import { schema } from '@kbn/config-schema';
-import { CoreSetup } from 'src/core/server';
+import type { CoreSetup } from 'kibana/server';
 
-export interface DemoPluginsSetup {};
-
-class Plugin {
-  public setup(core: CoreSetup, pluginSetup: DemoPluginSetup) {
+class DemoPlugin {
+  public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     router.post(
       {
@@ -379,16 +236,15 @@ If your plugin still relies on throwing Boom errors from routes, you can
 use the `router.handleLegacyErrors` as a temporary solution until error
 migration is complete:
 
-[source,ts]
+[source,typescript]
 ----
 // legacy/plugins/demoplugin/server/plugin.ts
 import { schema } from '@kbn/config-schema';
-import { CoreSetup } from 'src/core/server';
+import { CoreSetup } from 'kibana/server';
+import Boom from 'boom';
 
-export interface DemoPluginsSetup {};
-
-class Plugin {
-  public setup(core: CoreSetup, pluginSetup: DemoPluginSetup) {
+class DemoPlugin {
+  public setup(core: CoreSetup) {
     const router = core.http.createRouter();
     router.post(
       {
@@ -407,28 +263,16 @@ class Plugin {
 }
 ----
 
-===== 4. Kibana Platform plugin
-
-As the final step we delete the shim and move all our code into a New
-Platform plugin. Since we were already consuming the Kibana Platform API’s
-no code changes are necessary inside `plugin.ts`.
-
-[source,ts]
-----
-// Move legacy/plugins/demoplugin/server/plugin.ts -> plugins/demoplugin/server/plugin.ts
-----
-
-==== Accessing Services
+=== Accessing Services
 
 Services in the Legacy Platform were typically available via methods on
 either `server.plugins.*`, `server.*`, or `req.*`. In the Kibana Platform,
 all services are available via the `context` argument to the route
 handler. The type of this argument is the
-link:/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md[RequestHandlerContext].
-The APIs available here will include all Core services and any services
-registered by plugins this plugin depends on.
+{kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md[RequestHandlerContext].
+The APIs available here will include all Core services and any services registered by plugins this plugin depends on.
 
-[source,ts]
+[source,typescript]
 ----
 new kibana.Plugin({
   init(server) {
@@ -445,7 +289,7 @@ new kibana.Plugin({
   }
 });
 
-class Plugin {
+class DemoPlugin {
   public setup(core) {
     const router = core.http.createRouter();
     router.post(
@@ -453,7 +297,7 @@ class Plugin {
         path: '/api/my-plugin/my-route',
       },
       async (context, req, res) => {
-        const results = await context.elasticsearch.dataClient.callAsCurrentUser('search', query);
+        const results = await context.core.elasticsearch.client.asCurrentUser.search(query);
         return res.ok({
           body: { results }
         });
@@ -463,25 +307,25 @@ class Plugin {
 }
 ----
 
-==== Migrating Hapi ``pre'' handlers
+=== Migrating Hapi pre-handlers
 
-In the Legacy Platform, routes could provide a ``pre'' option in their
-config to register a function that should be run prior to the route
-handler. These ``pre'' handlers allow routes to share some business
+In the Legacy Platform, routes could provide a `pre` option in their
+config to register a function that should be run before the route
+handler. These `pre` handlers allow routes to share some business
 logic that may do some pre-work or validation. In Kibana, these are
 often used for license checks.
 
 The Kibana Platform’s HTTP interface does not provide this
-functionality, however it is simple enough to port over using a
-higher-order function that can wrap the route handler.
+functionality, however, it is simple enough to port overusing a
+a higher-order function that can wrap the route handler.
 
-===== Simple example
+==== Simple example
 
 In this simple example, a pre-handler is used to either abort the
 request with an error or continue as normal. This is a simple
-``gate-keeping'' pattern.
+`gate-keeping` pattern.
 
-[source,ts]
+[source,typescript]
 ----
 // Legacy pre-handler
 const licensePreRouting = (request) => {
@@ -503,15 +347,15 @@ server.route({
 })
 ----
 
-In the Kibana Platform, the same functionality can be acheived by
+In the Kibana Platform, the same functionality can be achieved by
 creating a function that takes a route handler (or factory for a route
-handler) as an argument and either invokes it in the successful case or
+handler) as an argument and either invoke it in the successful case or
 returns an error response in the failure case.
 
-We’ll call this a ``high-order handler'' similar to the ``high-order
-component'' pattern common in the React ecosystem.
+We’ll call this a `high-order handler` similar to the `high-order
+component` pattern common in the React ecosystem.
 
-[source,ts]
+[source,typescript]
 ----
 // Kibana Platform high-order handler
 const checkLicense = <P, Q, B>(
@@ -537,13 +381,13 @@ router.get(
 )
 ----
 
-===== Full Example
+==== Full Example
 
 In some cases, the route handler may need access to data that the
 pre-handler retrieves. In this case, you can utilize a handler _factory_
 rather than a raw handler.
 
-[source,ts]
+[source,typescript]
 ----
 // Legacy pre-handler
 const licensePreRouting = (request) => {
@@ -573,12 +417,12 @@ server.route({
 ----
 
 In many cases, it may be simpler to duplicate the function call to
-retrieve the data again in the main handler. In this other cases, you
+retrieve the data again in the main handler. In other cases, you
 can utilize a handler _factory_ rather than a raw handler as the
 argument to your high-order handler. This way the high-order handler can
 pass arbitrary arguments to the route handler.
 
-[source,ts]
+[source,typescript]
 ----
 // Kibana Platform high-order handler
 const checkLicense = <P, Q, B>(
@@ -609,58 +453,14 @@ router.get(
 
 In the Legacy Platform, the `ui/chrome` import contained APIs for a very
 wide range of features. In the Kibana Platform, some of these APIs have
-changed or moved elsewhere.
-
-[width="100%",cols="16%,36%,48%",options="header",]
-|===
-|Legacy Platform |Kibana Platform |Notes
-|`chrome.addBasePath`
-|link:/docs/development/core/public/kibana-plugin-public.httpservicebase.basepath.md[`core.http.basePath.prepend`]
-|
-
-|`chrome.breadcrumbs.set`
-|link:/docs/development/core/public/kibana-plugin-public.chromestart.setbreadcrumbs.md[`core.chrome.setBreadcrumbs`]
-|
-
-|`chrome.getUiSettingsClient`
-|link:/docs/development/core/public/kibana-plugin-public.uisettingsclient.md[`core.uiSettings`]
-|
-
-|`chrome.helpExtension.set`
-|link:/docs/development/core/public/kibana-plugin-public.chromestart.sethelpextension.md[`core.chrome.setHelpExtension`]
-|
-
-|`chrome.setVisible`
-|link:/docs/development/core/public/kibana-plugin-public.chromestart.setisvisible.md[`core.chrome.setIsVisible`]
-|
-
-|`chrome.getInjected`
-|link:/docs/development/core/public/kibana-plugin-public.coresetup.injectedmetadata.md[`core.injectedMetadata.getInjected`]
-(temporary) |A temporary API is available to read injected vars provided
-by legacy plugins. This will be removed after
-https://github.com/elastic/kibana/issues/41990[#41990] is completed.
-
-|`chrome.setRootTemplate` / `chrome.setRootController` |– |Use
-application mounting via `core.application.register` (not currently
-avaiable to legacy plugins).
-
-|`chrome.navLinks.update`
-|link:/docs/development/core/public/kibana-plugin-public.appbase.updater_.md[`core.appbase.updater`]
-|Use the `updater$` property when registering your application via
-`core.application.register`
-|===
-
-In most cases, the most convenient way to access these APIs will be via
-the
-link:/docs/development/core/public/kibana-plugin-public.appmountcontext.md[AppMountContext]
-object passed to your application when your app is mounted on the page.
+changed or moved elsewhere. See <<client-side-core-migration-table>>
 
 ==== Updating an application navlink
 
 In the legacy platform, the navlink could be updated using
 `chrome.navLinks.update`
 
-[source,ts]
+[source,typescript]
 ----
 uiModules.get('xpack/ml').run(() => {
   const showAppLink = xpackInfo.get('features.ml.showLinks', false);
@@ -680,7 +480,7 @@ In the Kibana Platform, navlinks should not be updated directly. Instead,
 it is now possible to add an `updater` when registering an application
 to change the application or the navlink state at runtime.
 
-[source,ts]
+[source,typescript]
 ----
 // my_plugin has a required dependencie to the `licensing` plugin
 interface MyPluginSetupDeps {
@@ -712,9 +512,9 @@ export class MyPlugin implements Plugin {
 
 === Chromeless Applications
 
-In Kibana, a ``chromeless'' application is one where the primary Kibana
+In Kibana, a `chromeless` application is one where the primary Kibana
 UI components such as header or navigation can be hidden. In the legacy
-platform these were referred to as ``hidden'' applications, and were set
+platform, these were referred to as `hidden` applications and were set
 via the `hidden` property in a Kibana plugin. Chromeless applications
 are also not displayed in the left navbar.
 
@@ -722,7 +522,7 @@ To mark an application as chromeless, specify `chromeless: false` when
 registering your application to hide the chrome UI when the application
 is mounted:
 
-[source,ts]
+[source,typescript]
 ----
 application.register({
   id: 'chromeless',
@@ -737,10 +537,9 @@ If you wish to render your application at a route that does not follow
 the `/app/${appId}` pattern, this can be done via the `appRoute`
 property. Doing this currently requires you to register a server route
 where you can return a bootstrapped HTML page for your application
-bundle. Instructions on registering this server route is covered in the
-next section: link:#render-html-content[Render HTML Content].
+bundle.
 
-[source,ts]
+[source,typescript]
 ----
 application.register({
   id: 'chromeless',
@@ -752,6 +551,7 @@ application.register({
 });
 ----
 
+[[render-html-migration]]
 === Render HTML Content
 
 You can return a blank HTML page bootstrapped with the core application
@@ -786,12 +586,13 @@ httpResources.register(
 );
 ----
 
+[[saved-objects-migration]]
 === Saved Objects types
 
 In the legacy platform, saved object types were registered using static
 definitions in the `uiExports` part of the plugin manifest.
 
-In the Kibana Platform, all these registration are to be performed
+In the Kibana Platform, all these registrations are to be performed
 programmatically during your plugin’s `setup` phase, using the core
 `savedObjects`’s `registerType` setup API.
 
@@ -904,7 +705,7 @@ First type:
 [source,typescript]
 ----
 // src/plugins/my_plugin/server/saved_objects/first_type.ts
-import { SavedObjectsType } from 'src/core/server';
+import type { SavedObjectsType } from 'kibana/server';
 
 export const firstType: SavedObjectsType = {
   name: 'first-type',
@@ -943,7 +744,7 @@ Second type:
 [source,typescript]
 ----
 // src/plugins/my_plugin/server/saved_objects/second_type.ts
-import { SavedObjectsType } from 'src/core/server';
+import type { SavedObjectsType } from 'kibana/server';
 
 export const secondType: SavedObjectsType = {
   name: 'second-type',
@@ -1001,7 +802,7 @@ However, there are some minor changes:
 * The `schema.isNamespaceAgnostic` property has been renamed:
 `SavedObjectsType.namespaceType`. It no longer accepts a boolean but
 instead an enum of `single', `multiple', or `agnostic' (see
-link:/docs/development/core/server/kibana-plugin-core-server.savedobjectsnamespacetype.md[SavedObjectsNamespaceType]).
+{kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsnamespacetype.md[SavedObjectsNamespaceType]).
 * The `schema.indexPattern` was accepting either a `string` or a
 `(config: LegacyConfig) => string`. `SavedObjectsType.indexPattern` only
 accepts a string, as you can access the configuration during your
@@ -1039,7 +840,7 @@ const migration: SavedObjectMigrationFn<OldAttributes, MigratedAttributes> = (do
 ==== Remarks
 
 The `registerType` API will throw if called after the service has
-started, and therefor cannot be used from legacy plugin code. Legacy
+started, and therefore cannot be used from legacy plugin code. Legacy
 plugins should use the legacy savedObjects service and the legacy way to
 register saved object types until migrated.
 
@@ -1063,7 +864,7 @@ uiExports: {
 }
 ----
 
-[source,ts]
+[source,typescript]
 ----
 // After:
 // src/plugins/my-plugin/server/plugin.ts
@@ -1103,14 +904,14 @@ string-based endpoint names the `LegacyAPICaller` was using
 
 before:
 
-[source,ts]
+[source,typescript]
 ----
 const body = await client.callAsInternalUser('indices.get', { index: 'id' });
 ----
 
 after:
 
-[source,ts]
+[source,typescript]
 ----
 const { body } = await client.asInternalUser.indices.get({ index: 'id' });
 ----
@@ -1120,21 +921,21 @@ of only the body payload
 
 before:
 
-[source,ts]
+[source,typescript]
 ----
 const body = await legacyClient.callAsInternalUser('get', { id: 'id' });
 ----
 
 after:
 
-[source,ts]
+[source,typescript]
 ----
 const { body } = await client.asInternalUser.get({ id: 'id' });
 ----
 
 Note that more information from the ES response is available:
 
-[source,ts]
+[source,typescript]
 ----
 const {
   body,        // response payload
@@ -1150,14 +951,14 @@ type
 
 before:
 
-[source,ts]
+[source,typescript]
 ----
 const body: GetResponse = await legacyClient.callAsInternalUser('get', { id: 'id' });
 ----
 
 after:
 
-[source,ts]
+[source,typescript]
 ----
 // body is of type `GetResponse`
 const { body } = await client.asInternalUser.get<GetResponse>({ id: 'id' });
@@ -1173,7 +974,7 @@ There are no longer specific errors for every HTTP status code (such as
 
 before:
 
-[source,ts]
+[source,typescript]
 ----
 import { errors } from 'elasticsearch';
 try {
@@ -1188,7 +989,7 @@ try {
 
 after:
 
-[source,ts]
+[source,typescript]
 ----
 import { errors } from '@elastic/elasticsearch';
 try {
@@ -1209,11 +1010,11 @@ try {
 * the parameter property names changed from camelCase to snake_case
 
 Even if technically, the javascript client accepts both formats, the
-typescript definitions are only defining the snake_case properties.
+typescript definitions are only defining snake_case properties.
 
 before:
 
-[source,ts]
+[source,typescript]
 ----
 legacyClient.callAsCurrentUser('get', {
   id: 'id',
@@ -1223,7 +1024,7 @@ legacyClient.callAsCurrentUser('get', {
 
 after:
 
-[source,ts]
+[source,typescript]
 ----
 client.asCurrentUser.get({
   id: 'id',
@@ -1238,7 +1039,7 @@ method that can be used to cancel the request.
 
 before:
 
-[source,ts]
+[source,typescript]
 ----
 const controller = new AbortController();
 legacyClient.callAsCurrentUser('ping', {}, {
@@ -1250,7 +1051,7 @@ controller.abort();
 
 after:
 
-[source,ts]
+[source,typescript]
 ----
 const request = client.asCurrentUser.ping();
 // later
@@ -1264,7 +1065,7 @@ Note that doing so is strongly discouraged due to potential side effects
 with the ES service internal behavior when scoping as the internal or as
 the current user.
 
-[source,ts]
+[source,typescript]
 ----
 const request = client.asCurrentUser.ping({}, { 
   headers: {
@@ -1279,10 +1080,10 @@ object yet. You might have to copy response type definitions from the
 Legacy Elasticsearch library until
 https://github.com/elastic/elasticsearch-js/pull/970 merged.
 
-[source,ts]
+[source,typescript]
 ----
 // platform provides a few typings for internal purposes
-import { SearchResponse } from 'src/core/server';
+import type { SearchResponse } from 'kibana/server';
 type SearchSource = {...};
 type SearchBody = SearchResponse<SearchSource>;
 const { body } = await client.search<SearchBody>(...);
@@ -1293,14 +1094,14 @@ const { body } = await client.info<Info>(...);
 * Functional tests are subject to migration to the new client as well.
 before:
 
-[source,ts]
+[source,typescript]
 ----
 const client = getService('legacyEs');
 ----
 
 after:
 
-[source,ts]
+[source,typescript]
 ----
 const client = getService('es');
 ----
@@ -1314,12 +1115,12 @@ and new client.
 
 Apart from the API format change, accessing the client from within a
 route handler did not change. As it was done for the legacy client, a
-preconfigured scoped client bound to the request is accessible using
+preconfigured <<scoped-services, scoped client>> bound to the request is accessible using
 `core` context provider:
 
 before:
 
-[source,ts]
+[source,typescript]
 ----
 router.get(
   {
@@ -1338,7 +1139,7 @@ router.get(
 
 after:
 
-[source,ts]
+[source,typescript]
 ----
 router.get(
   {
@@ -1357,7 +1158,7 @@ router.get(
 
 ==== Creating a custom client
 
-Note that the `plugins` option is now longer available on the new
+Note that the `plugins` option is no longer available on the new
 client. As the API is now exhaustive, adding custom endpoints using
 plugins should no longer be necessary.
 
@@ -1365,7 +1166,7 @@ The API to create custom clients did not change much:
 
 before:
 
-[source,ts]
+[source,typescript]
 ----
 const customClient = coreStart.elasticsearch.legacy.createClient('my-custom-client', customConfig);
 // do something with the client, such as
@@ -1376,7 +1177,7 @@ customClient.close();
 
 after:
 
-[source,ts]
+[source,typescript]
 ----
 const customClient = coreStart.elasticsearch.createClient('my-custom-client', customConfig);
 // do something with the client, such as
@@ -1388,7 +1189,7 @@ customClient.close();
 If, for any reasons, one still needs to reach an endpoint not listed on
 the client API, using `request.transport` is still possible:
 
-[source,ts]
+[source,typescript]
 ----
 const { body } = await client.asCurrentUser.transport.request({
   method: 'get',

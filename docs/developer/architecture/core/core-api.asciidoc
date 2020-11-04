@@ -29,6 +29,7 @@ export class MyPlugin {
 
 == Core services
 === Server-side
+[[configuration-service]]
 ==== Configuration service
 Kibana provides `ConfigService` if a plugin developer may want to support
 adjustable runtime behavior for their plugins.
@@ -130,7 +131,7 @@ export const config = {
   schema: schema.object({ enabled: schema.boolean({ defaultValue: false }) }),
 };
 ----
-
+[[handle-plugin-configuration-deprecations]]
 ===== Handle plugin configuration deprecations
 If your plugin has deprecated properties, you can describe them using
 the `deprecations` config descriptor field.
@@ -378,8 +379,7 @@ async function handler(req, res) {
 }
 ----
 
-The Kibana Platform introduced link:/rfcs/text/0003_handler_interface.md[a
-handler interface] on the server-side to perform that association
+The Kibana Platform introduced a handler interface on the server-side to perform that association
 internally. Core services, that require impersonation with an incoming
 request, are exposed via `context` argument of
 {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandler.md[the

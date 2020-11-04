@@ -140,7 +140,7 @@ The platform does not impose any technical restrictions on how the
 the internals of the plugin are architected, though there are certain
 considerations related to how plugins interact with the core and how plugins
 interact with other plugins that may greatly impact how they are built.
-
+[[plugin-lifecycles]]
 === Lifecycles & Core Services
 
 The various independent domains that makeup `core` are represented by a
@@ -346,6 +346,3 @@ functions can only access the APIs that are exposed _during_ that lifecycle.
 In Kibana 7.10, support for legacy plugins was removed. See
 <<migrating-legacy-plugins>> for detailed information on how to convert existing
 legacy plugins to this new API.
-
-== Testing Kibana Platform Plugin
-include::testing.asciidoc
