@@ -172,7 +172,7 @@ export function checksFactory(
             filter: [
               {
                 term: {
-                  type: 'ml-job',
+                  type: ML_SAVED_OBJECT_TYPE,
                 },
               },
             ],
