@@ -13,7 +13,6 @@
     "watch": "yarn build --watch"
   },
   "dependencies": {
-    "@kbn/dev-utils": "link:../kbn-dev-utils",
-    "@kbn/utils": "link:../kbn-utils"
+    "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }
