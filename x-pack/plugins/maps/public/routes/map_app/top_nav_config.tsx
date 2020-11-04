@@ -102,7 +102,7 @@ export function getTopNavConfig({
   if (getMapsCapabilities().save) {
     const hasSaveAndReturnConfig = savedMap.hasSaveAndReturnConfig();
     const mapDescription = savedMap.getAttributes().description
-      ? savedMap.getAttributes().description
+      ? savedMap.getAttributes().description!
       : '';
 
     topNavConfigs.push({
