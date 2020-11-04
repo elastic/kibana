@@ -19,7 +19,6 @@ import {
   DeleteAgentPolicyRequestSchema,
   GetFullAgentPolicyRequestSchema,
   AgentPolicy,
-  DefaultPackages,
   NewPackagePolicy,
 } from '../../types';
 import {
@@ -31,6 +30,7 @@ import {
   CopyAgentPolicyResponse,
   DeleteAgentPolicyResponse,
   GetFullAgentPolicyResponse,
+  defaultPackages,
 } from '../../../common';
 import { defaultIngestErrorHandler } from '../../errors';
 
@@ -117,7 +117,7 @@ export const createAgentPolicyHandler: RequestHandler<
       // successfully
       withSysMonitoring
         ? packagePolicyService
-            .buildPackagePolicyFromPackage(soClient, DefaultPackages.system)
+            .buildPackagePolicyFromPackage(soClient, defaultPackages.System)
             .catch(() => undefined)
         : undefined,
     ]);
