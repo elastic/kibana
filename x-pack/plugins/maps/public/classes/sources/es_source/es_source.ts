@@ -81,7 +81,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuid(),
       type: isValidStringConfig(descriptor.type) ? descriptor.type! : '',
       indexPatternId: descriptor.indexPatternId!,
-      applyGlobalQuery: !!descriptor.applyGlobalQuery ? !!descriptor.applyGlobalQuery : true,
+      applyGlobalQuery:
+        // backfill old _.get usage
+        typeof descriptor.applyGlobalQuery !== 'undefined' ? !!descriptor.applyGlobalQuery : true,
     };
   }
 
