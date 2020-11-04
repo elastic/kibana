@@ -19,23 +19,18 @@ export const sourceTitle = i18n.translate('xpack.maps.source.emsTileTitle', {
 });
 
 export class EMSTMSSource extends AbstractTMSSource {
-  static createDescriptor(sourceConfig) {
+  static createDescriptor(descriptor) {
     return {
       type: SOURCE_TYPES.EMS_TMS,
-      id: sourceConfig.id,
-      isAutoSelect: !!sourceConfig.isAutoSelect,
+      id: descriptor.id,
+      isAutoSelect:
+        typeof descriptor.isAutoSelect !== 'undefined' ? !!descriptor.isAutoSelect : false,
     };
   }
 
   constructor(descriptor, inspectorAdapters) {
-    super(
-      {
-        id: descriptor.id,
-        type: EMSTMSSource.type,
-        isAutoSelect: !!descriptor.isAutoSelect ? !!descriptor.isAutoSelect : false,
-      },
-      inspectorAdapters
-    );
+    descriptor = EMSTMSSource.createDescriptor(descriptor);
+    super(descriptor, inspectorAdapters);
   }
 
   renderSourceSettingsEditor({ onChange }) {
