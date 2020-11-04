@@ -287,6 +287,42 @@ describe('alertInstanceSummaryFromEventLog', () => {
     `);
   });
 
+  test('alert with currently active instance with no action group in event log', async () => {
+    const alert = createAlert({});
+    const eventsFactory = new EventsFactory();
+    const events = eventsFactory
+      .addExecute()
+      .addNewInstance('instance-1')
+      .addActiveInstance('instance-1', undefined)
+      .advanceTime(10000)
+      .addExecute()
+      .addActiveInstance('instance-1', undefined)
+      .getEvents();
+
+    const summary: AlertInstanceSummary = alertInstanceSummaryFromEventLog({
+      alert,
+      events,
+      dateStart,
+      dateEnd,
+    });
+
+    const { lastRun, status, instances } = summary;
+    expect({ lastRun, status, instances }).toMatchInlineSnapshot(`
+      Object {
+        "instances": Object {
+          "instance-1": Object {
+            "actionGroupId": undefined,
+            "activeStartDate": "2020-06-18T00:00:00.000Z",
+            "muted": false,
+            "status": "Active",
+          },
+        },
+        "lastRun": "2020-06-18T00:00:10.000Z",
+        "status": "Active",
+      }
+    `);
+  });
+
   test('alert with currently active instance that switched action groups', async () => {
     const alert = createAlert({});
     const eventsFactory = new EventsFactory();
@@ -498,14 +534,17 @@ export class EventsFactory {
     return this;
   }
 
-  addActiveInstance(instanceId: string, actionGroupId: string): EventsFactory {
+  addActiveInstance(instanceId: string, actionGroupId: string | undefined): EventsFactory {
+    const kibanaAlerting = (actionGroupId)
+      ? { instance_id: instanceId, action_group_id: actionGroupId }
+      : { instance_id: instanceId };
     this.events.push({
       '@timestamp': this.date,
       event: {
         provider: EVENT_LOG_PROVIDER,
         action: EVENT_LOG_ACTIONS.activeInstance,
       },
-      kibana: { alerting: { instance_id: instanceId, action_group_id: actionGroupId } },
+      kibana: { alerting: kibanaAlerting },
     });
     return this;
   }
