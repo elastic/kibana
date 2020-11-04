@@ -22,6 +22,7 @@ export interface ExpressionFunctionDefinitions
 |  [font](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinitions.font.md) | <code>ExpressionFunctionFont</code> |  |
 |  [kibana\_context](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinitions.kibana_context.md) | <code>ExpressionFunctionKibanaContext</code> |  |
 |  [kibana](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinitions.kibana.md) | <code>ExpressionFunctionKibana</code> |  |
+|  [moving\_average](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinitions.moving_average.md) | <code>ExpressionFunctionMovingAverage</code> |  |
 |  [theme](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinitions.theme.md) | <code>ExpressionFunctionTheme</code> |  |
 |  [var\_set](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinitions.var_set.md) | <code>ExpressionFunctionVarSet</code> |  |
 |  [var](./kibana-plugin-plugins-expressions-public.expressionfunctiondefinitions.var.md) | <code>ExpressionFunctionVar</code> |  |
