@@ -36,7 +36,8 @@ import { registerRollupSearchStrategy } from './lib/search_strategies';
 import { elasticsearchJsPlugin } from './client/elasticsearch_rollup';
 import { isEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
-import { getCapabilitiesForRollupIndices } from '../../../../src/plugins/data/server';
+import { getCapabilitiesForRollupIndices } from './lib/map_capabilities';
+import { mergeCapabilitiesWithFields } from './lib/merge_capabilities_with_fields';
 
 interface RollupContext {
   client: ILegacyScopedClusterClient;
@@ -106,6 +107,7 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
         isEsError,
         formatEsError,
         getCapabilitiesForRollupIndices,
+        mergeCapabilitiesWithFields,
       },
       sharedImports: {
         IndexPatternsFetcher,

@@ -28,7 +28,6 @@
 
 |  Function | Description |
 |  --- | --- |
-|  [getCapabilitiesForRollupIndices(indices)](./kibana-plugin-plugins-data-server.getcapabilitiesforrollupindices.md) |  |
 |  [getDefaultSearchParams(uiSettingsClient)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
 |  [getShardTimeout(config)](./kibana-plugin-plugins-data-server.getshardtimeout.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
@@ -77,7 +76,6 @@
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
-|  [mergeCapabilitiesWithFields](./kibana-plugin-plugins-data-server.mergecapabilitieswithfields.md) |  |
 |  [search](./kibana-plugin-plugins-data-server.search.md) |  |
 |  [UI\_SETTINGS](./kibana-plugin-plugins-data-server.ui_settings.md) |  |
 

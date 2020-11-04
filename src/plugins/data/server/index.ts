@@ -134,8 +134,6 @@ export {
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
-  mergeCapabilitiesWithFields,
-  getCapabilitiesForRollupIndices,
 } from './index_patterns';
 
 export {

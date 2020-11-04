@@ -6,11 +6,8 @@
 import { keyBy, isString } from 'lodash';
 import { ILegacyScopedClusterClient } from 'src/core/server';
 import { ReqFacade } from '../../../../../../src/plugins/vis_type_timeseries/server';
-
-import {
-  mergeCapabilitiesWithFields,
-  getCapabilitiesForRollupIndices,
-} from '../../../../../../src/plugins/data/server';
+import { mergeCapabilitiesWithFields } from '../merge_capabilities_with_fields';
+import { getCapabilitiesForRollupIndices } from '../map_capabilities';
 
 const getRollupIndices = (rollupData: { [key: string]: any }) => Object.keys(rollupData);
 
