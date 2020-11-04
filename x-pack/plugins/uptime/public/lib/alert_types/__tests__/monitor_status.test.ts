@@ -203,6 +203,7 @@ describe('monitor status alert type', () => {
       Object {
         "alertParamsExpression": [Function],
         "defaultActionMessage": "Monitor {{state.monitorName}} with url {{{state.monitorUrl}}} is {{state.statusMessage}} from {{state.observerLocation}}. The latest error message is {{{state.latestErrorMessage}}}",
+        "description": "Alert when a monitor is down or an availability threshold is breached.",
         "iconClass": "uptimeApp",
         "id": "xpack.uptime.alerts.monitorStatus",
         "name": <FormattedMessage

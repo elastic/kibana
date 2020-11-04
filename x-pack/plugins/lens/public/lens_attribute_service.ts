@@ -38,11 +38,7 @@ export function getLensAttributeService(
     LensByValueInput,
     LensByReferenceInput
   >(DOC_TYPE, {
-    saveMethod: async (
-      type: string,
-      attributes: LensSavedObjectAttributes,
-      savedObjectId?: string
-    ) => {
+    saveMethod: async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
       const savedDoc = await savedObjectStore.save({
         ...attributes,
         savedObjectId,
