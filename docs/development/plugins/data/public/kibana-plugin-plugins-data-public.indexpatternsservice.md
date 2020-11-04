@@ -39,7 +39,6 @@ export declare class IndexPatternsService
 
 |  Method | Modifiers | Description |
 |  --- | --- | --- |
-|  [create(spec, skipFetchFields)](./kibana-plugin-plugins-data-public.indexpatternsservice.create.md) |  | Create a new index pattern instance |
 |  [createAndSave(spec, override, skipFetchFields)](./kibana-plugin-plugins-data-public.indexpatternsservice.createandsave.md) |  | Create a new index pattern and save it right away |
 |  [createSavedObject(indexPattern, override)](./kibana-plugin-plugins-data-public.indexpatternsservice.createsavedobject.md) |  | Save a new index pattern |
 |  [delete(indexPatternId)](./kibana-plugin-plugins-data-public.indexpatternsservice.delete.md) |  | Deletes an index pattern from .kibana index |

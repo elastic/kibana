@@ -1324,7 +1324,6 @@ export class IndexPatternsService {
     // Warning: (ae-forgotten-export) The symbol "IndexPatternsServiceDeps" needs to be exported by the entry point index.d.ts
     constructor({ uiSettings, savedObjectsClient, apiClient, fieldFormats, onNotification, onError, onRedirectNoIndexPattern, }: IndexPatternsServiceDeps);
     clearCache: (id?: string | undefined) => void;
-    create(spec: IndexPatternSpec, skipFetchFields?: boolean): Promise<IndexPattern>;
     createAndSave(spec: IndexPatternSpec, override?: boolean, skipFetchFields?: boolean): Promise<IndexPattern>;
     createSavedObject(indexPattern: IndexPattern, override?: boolean): Promise<IndexPattern>;
     delete(indexPatternId: string): Promise<{}>;
