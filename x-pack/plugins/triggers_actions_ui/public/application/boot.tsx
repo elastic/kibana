@@ -17,7 +17,9 @@ interface BootDeps extends AppDeps {
 export const boot = (bootDeps: BootDeps) => {
   const { I18nContext, element, ...appDeps } = bootDeps;
 
-  setSavedObjectsClient(appDeps.savedObjects.client);
+  if (appDeps.savedObjects) {
+    setSavedObjectsClient(appDeps.savedObjects.client);
+  }
 
   render(
     <I18nContext>
