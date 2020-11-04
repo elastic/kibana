@@ -430,7 +430,7 @@ export class IndexPatternsService {
    * @param spec
    * @param skipFetchFields
    */
-  async create(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
+  private async create(spec: IndexPatternSpec, skipFetchFields = false): Promise<IndexPattern> {
     const shortDotsEnable = await this.config.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
 

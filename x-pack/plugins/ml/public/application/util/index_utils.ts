@@ -89,7 +89,9 @@ export async function getIndexPatternAndSavedSearch(savedSearchId: string) {
     return resp;
   }
   const indexPatternId = ss.references.find((r) => r.type === 'index-pattern')?.id;
-  resp.indexPattern = await getIndexPatternById(indexPatternId!);
+  if (indexPatternId) {
+    resp.indexPattern = await getIndexPatternById(indexPatternId);
+  }
   resp.savedSearch = ss;
   return resp;
 }
@@ -104,11 +106,7 @@ export function getQueryFromSavedSearch(savedSearch: SavedSearchSavedObject) {
 
 export function getIndexPatternById(id: string): Promise<IndexPattern> {
   if (indexPatternsContract !== null) {
-    if (id) {
-      return indexPatternsContract.get(id);
-    } else {
-      return indexPatternsContract.create({});
-    }
+    return indexPatternsContract.get(id);
   } else {
     throw new Error('Index patterns are not initialized!');
   }

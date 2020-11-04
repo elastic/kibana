@@ -174,11 +174,13 @@ describe('IndexPatterns', () => {
     const title = 'kibana-*';
     indexPatterns.refreshFields = jest.fn();
 
+    // @ts-expect-error
     const indexPattern = await indexPatterns.create({ title }, true);
     expect(indexPattern).toBeInstanceOf(IndexPattern);
     expect(indexPattern.title).toBe(title);
     expect(indexPatterns.refreshFields).not.toBeCalled();
 
+    // @ts-expect-error
     await indexPatterns.create({ title });
     expect(indexPatterns.refreshFields).toBeCalled();
   });
