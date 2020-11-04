@@ -342,6 +342,11 @@
             }
           },
           "type": "text"
+        },
+        "runtime_number": {
+          "type": "runtime",
+          "runtime_type" : "long",
+          "script" : { "source" : "emit(doc['bytes'].value)" }
         }
       }
     },
@@ -707,6 +712,11 @@
             }
           },
           "type": "text"
+        },
+        "runtime_number": {
+          "type": "runtime",
+          "runtime_type" : "long",
+          "script" : { "source" : "emit(doc['bytes'].value)" }
         }
       }
     },
@@ -1072,6 +1082,11 @@
             }
           },
           "type": "text"
+        },
+        "runtime_number": {
+          "type": "runtime",
+          "runtime_type" : "long",
+          "script" : { "source" : "emit(doc['bytes'].value)" }
         }
       }
     },

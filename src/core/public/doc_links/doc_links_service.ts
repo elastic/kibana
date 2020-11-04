@@ -17,8 +17,8 @@
  * under the License.
  */
 
+import { deepFreeze } from '@kbn/std';
 import { InjectedMetadataSetup } from '../injected_metadata';
-import { deepFreeze } from '../../utils';
 
 interface StartDeps {
   injectedMetadata: InjectedMetadataSetup;
@@ -38,11 +38,14 @@ export class DocLinksService {
       links: {
         dashboard: {
           drilldowns: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/drilldowns.html`,
+          drilldownsTriggerPicker: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url-drilldown.html#trigger-picker`,
+          urlDrilldownTemplateSyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url-drilldown.html#templating`,
+          urlDrilldownVariables: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/url-drilldown.html#variables`,
         },
         filebeat: {
           base: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}`,
-          installation: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation.html`,
-          configuration: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-configuration.html`,
+          installation: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-installation-configuration.html`,
+          configuration: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/configuring-howto-filebeat.html`,
           elasticsearchOutput: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/elasticsearch-output.html`,
           startup: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/filebeat-starting.html`,
           exportedFields: `${ELASTIC_WEBSITE_URL}guide/en/beats/filebeat/${DOC_LINK_VERSION}/exported-fields.html`,
@@ -116,6 +119,7 @@ export class DocLinksService {
           gettingStarted: `${ELASTIC_WEBSITE_URL}guide/en/security/${DOC_LINK_VERSION}/index.html`,
         },
         query: {
+          eql: `${ELASTICSEARCH_DOCS}eql.html`,
           luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
           queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
           kueryQuerySyntax: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/kuery-query.html`,
@@ -126,6 +130,10 @@ export class DocLinksService {
         management: {
           kibanaSearchSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-search-settings`,
           dashboardSettings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/advanced-options.html#kibana-dashboard-settings`,
+        },
+        visualize: {
+          guide: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/visualize.html`,
+          timelionDeprecation: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/dashboard.html#timelion-deprecation`,
         },
       },
     });
@@ -139,6 +147,9 @@ export interface DocLinksStart {
   readonly links: {
     readonly dashboard: {
       readonly drilldowns: string;
+      readonly drilldownsTriggerPicker: string;
+      readonly urlDrilldownTemplateSyntax: string;
+      readonly urlDrilldownVariables: string;
     };
     readonly filebeat: {
       readonly base: string;
@@ -217,6 +228,7 @@ export interface DocLinksStart {
       readonly gettingStarted: string;
     };
     readonly query: {
+      readonly eql: string;
       readonly luceneQuerySyntax: string;
       readonly queryDsl: string;
       readonly kueryQuerySyntax: string;
@@ -225,5 +237,6 @@ export interface DocLinksStart {
       readonly dateMath: string;
     };
     readonly management: Record<string, string>;
+    readonly visualize: Record<string, string>;
   };
 }

@@ -21,18 +21,18 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentConfig } from '../../../../types';
+import { AgentPolicy } from '../../../../types';
 import { useInput, useCore, sendRequest } from '../../../../hooks';
 import { enrollmentAPIKeyRouteService } from '../../../../services';
 
 function useCreateApiKeyForm(
-  configDefaultValue: string | undefined,
+  policyIdDefaultValue: string | undefined,
   onSuccess: (keyId: string) => void
 ) {
   const { notifications } = useCore();
   const [isLoading, setIsLoading] = useState(false);
   const apiKeyNameInput = useInput('');
-  const configIdInput = useInput(configDefaultValue);
+  const policyIdInput = useInput(policyIdDefaultValue);
 
   const onSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -43,15 +43,15 @@ function useCreateApiKeyForm(
         path: enrollmentAPIKeyRouteService.getCreatePath(),
         body: JSON.stringify({
           name: apiKeyNameInput.value,
-          config_id: configIdInput.value,
+          policy_id: policyIdInput.value,
         }),
       });
-      configIdInput.clear();
+      policyIdInput.clear();
       apiKeyNameInput.clear();
       setIsLoading(false);
       onSuccess(res.data.item.id);
       notifications.toasts.addSuccess(
-        i18n.translate('xpack.ingestManager.newEnrollmentKey.keyCreatedToasts', {
+        i18n.translate('xpack.fleet.newEnrollmentKey.keyCreatedToasts', {
           defaultMessage: 'Enrollment token created.',
         })
       );
@@ -66,22 +66,22 @@ function useCreateApiKeyForm(
   return {
     isLoading,
     onSubmit,
-    configIdInput,
+    policyIdInput,
     apiKeyNameInput,
   };
 }
 
 interface Props {
   onClose: () => void;
-  agentConfigs: AgentConfig[];
+  agentPolicies: AgentPolicy[];
 }
 
 export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
   onClose,
-  agentConfigs = [],
+  agentPolicies = [],
 }) => {
-  const configDefaultValue = agentConfigs.find((config) => config.is_default)?.id;
-  const form = useCreateApiKeyForm(configDefaultValue, () => {
+  const policyIdDefaultValue = agentPolicies.find((agentPolicy) => agentPolicy.is_default)?.id;
+  const form = useCreateApiKeyForm(policyIdDefaultValue, () => {
     onClose();
   });
 
@@ -89,7 +89,7 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
     <EuiForm>
       <form onSubmit={form.onSubmit}>
         <EuiFormRow
-          label={i18n.translate('xpack.ingestManager.newEnrollmentKey.nameLabel', {
+          label={i18n.translate('xpack.fleet.newEnrollmentKey.nameLabel', {
             defaultMessage: 'Name',
           })}
         >
@@ -102,20 +102,23 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
         </EuiFormRow>
 
         <EuiFormRow
-          label={i18n.translate('xpack.ingestManager.newEnrollmentKey.configLabel', {
-            defaultMessage: 'Configuration',
+          label={i18n.translate('xpack.fleet.newEnrollmentKey.policyLabel', {
+            defaultMessage: 'Policy',
           })}
         >
           <EuiSelect
             required={true}
-            defaultValue={configDefaultValue}
-            {...form.configIdInput.props}
-            options={agentConfigs.map((config) => ({ value: config.id, text: config.name }))}
+            defaultValue={policyIdDefaultValue}
+            {...form.policyIdInput.props}
+            options={agentPolicies.map((agentPolicy) => ({
+              value: agentPolicy.id,
+              text: agentPolicy.name,
+            }))}
           />
         </EuiFormRow>
         <EuiButton type="submit" fill isLoading={form.isLoading}>
           <FormattedMessage
-            id="xpack.ingestManager.newEnrollmentKey.submitButton"
+            id="xpack.fleet.newEnrollmentKey.submitButton"
             defaultMessage="Create enrollment token"
           />
         </EuiButton>
@@ -129,8 +132,8 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
         <EuiTitle size="m">
           <h2 id="FleetNewEnrollmentKeyFlyoutTitle">
             <FormattedMessage
-              id="xpack.ingestManager.newEnrollmentKey.flyoutTitle"
-              defaultMessage="Create a new enrollment token"
+              id="xpack.fleet.newEnrollmentKey.flyoutTitle"
+              defaultMessage="Create enrollment token"
             />
           </h2>
         </EuiTitle>
@@ -141,7 +144,7 @@ export const NewEnrollmentTokenFlyout: React.FunctionComponent<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.ingestManager.newEnrollmentKey.cancelButtonLabel"
+                id="xpack.fleet.newEnrollmentKey.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
             </EuiButtonEmpty>

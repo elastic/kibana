@@ -22,8 +22,16 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { FilterRatioAgg } from './filter_ratio';
 import { FIELDS, METRIC, SERIES, PANEL } from '../../../test_utils';
 import { EuiComboBox } from '@elastic/eui';
+import { dataPluginMock } from '../../../../../data/public/mocks';
+import { setDataStart } from '../../../services';
+
+jest.mock('../query_bar_wrapper', () => ({
+  QueryBarWrapper: jest.fn(() => null),
+}));
 
 describe('TSVB Filter Ratio', () => {
+  beforeAll(() => setDataStart(dataPluginMock.createStartContract()));
+
   const setup = (metric) => {
     const series = { ...SERIES, metrics: [metric] };
     const panel = { ...PANEL, series };

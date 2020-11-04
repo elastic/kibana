@@ -11,7 +11,7 @@ import { transformError, buildSiemResponse } from '../../detection_engine/routes
 import { TIMELINE_DRAFT_URL } from '../../../../common/constants';
 import { buildFrameworkRequest } from './utils/common';
 import { SetupPlugins } from '../../../plugin';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 import { getDraftTimeline, resetTimeline, getTimeline, persistTimeline } from '../saved_object';
 import { draftTimelineDefaults } from '../default_timeline';
 import { cleanDraftTimelineSchema } from './schemas/clean_draft_timelines_schema';
@@ -26,7 +26,7 @@ export const cleanDraftTimelinesRoute = (
     {
       path: TIMELINE_DRAFT_URL,
       validate: {
-        body: buildRouteValidation(cleanDraftTimelineSchema),
+        body: buildRouteValidationWithExcess(cleanDraftTimelineSchema),
       },
       options: {
         tags: ['access:securitySolution'],

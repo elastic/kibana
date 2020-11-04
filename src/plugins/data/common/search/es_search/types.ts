@@ -16,28 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { SearchParams, SearchResponse } from 'elasticsearch';
+import { SearchResponse } from 'elasticsearch';
+import { Search } from '@elastic/elasticsearch/api/requestParams';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
 
-export type ISearchRequestParams = {
-  trackTotalHits?: boolean;
-} & SearchParams;
+export interface ISearchOptions {
+  /**
+   * An `AbortSignal` that allows the caller of `search` to abort a search request.
+   */
+  abortSignal?: AbortSignal;
+  /**
+   * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
+   */
+  strategy?: string;
 
-export interface IEsSearchRequest extends IKibanaSearchRequest {
-  params?: ISearchRequestParams;
+  /**
+   * A session ID, grouping multiple search requests into a single session.
+   */
+  sessionId?: string;
+}
+
+export type ISearchRequestParams<T = Record<string, any>> = {
+  trackTotalHits?: boolean;
+} & Search<T>;
+
+export interface IEsSearchRequest extends IKibanaSearchRequest<ISearchRequestParams> {
   indexType?: string;
 }
 
-export interface IEsSearchResponse extends IKibanaSearchResponse {
-  /**
-   * Indicates whether async search is still in flight
-   */
-  isRunning?: boolean;
-  /**
-   * Indicates whether the results returned are complete or partial
-   */
-  isPartial?: boolean;
-  rawResponse: SearchResponse<any>;
+export interface IEsRawSearchResponse<Source = any> extends SearchResponse<Source> {
+  id?: string;
+  is_partial?: boolean;
+  is_running?: boolean;
 }
+
+export type IEsSearchResponse<Source = any> = IKibanaSearchResponse<SearchResponse<Source>>;

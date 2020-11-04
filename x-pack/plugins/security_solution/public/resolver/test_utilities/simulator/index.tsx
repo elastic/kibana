@@ -7,8 +7,7 @@
 import React from 'react';
 import { Store, createStore, applyMiddleware } from 'redux';
 import { mount, ReactWrapper } from 'enzyme';
-import { createMemoryHistory, History as HistoryPackageHistoryInterface } from 'history';
-import { CoreStart } from '../../../../../../../src/core/public';
+import { History as HistoryPackageHistoryInterface, createMemoryHistory } from 'history';
 import { coreMock } from '../../../../../../../src/core/public/mocks';
 import { spyMiddlewareFactory } from '../spy_middleware_factory';
 import { resolverMiddlewareFactory } from '../../store/middleware';
@@ -17,6 +16,7 @@ import { MockResolver } from './mock_resolver';
 import { ResolverState, DataAccessLayer, SpyMiddleware, SideEffectSimulator } from '../../types';
 import { ResolverAction } from '../../store/actions';
 import { sideEffectSimulatorFactory } from '../../view/side_effect_simulator_factory';
+import { uiSetting } from '../../mocks/ui_setting';
 
 /**
  * Test a Resolver instance using jest, enzyme, and a mock data layer.
@@ -45,10 +45,35 @@ export class Simulator {
    */
   private readonly sideEffectSimulator: SideEffectSimulator;
 
+  /**
+   * An `enzyme` supported CSS selector for process node elements.
+   */
+  public static nodeElementSelector({
+    entityID,
+    selected = false,
+  }: ProcessNodeElementSelectorOptions = {}): string {
+    let selector: string = baseNodeElementSelector;
+    if (entityID !== undefined) {
+      selector += `[data-test-resolver-node-id="${entityID}"]`;
+    }
+    if (selected) {
+      selector += '[aria-selected="true"]';
+    }
+    return selector;
+  }
+
+  /**
+   * The simulator returns enzyme `ReactWrapper`s from various methods. Use this predicate to determine if they are DOM nodes.
+   */
+  public static isDOM(wrapper: ReactWrapper): boolean {
+    return typeof wrapper.type() === 'string';
+  }
+
   constructor({
     dataAccessLayer,
     resolverComponentInstanceID,
     databaseDocumentID,
+    indices,
     history,
   }: {
     /**
@@ -60,9 +85,13 @@ export class Simulator {
      */
     resolverComponentInstanceID: string;
     /**
+     * Indices that the backend would use to find the document ID.
+     */
+    indices: string[];
+    /**
      * a databaseDocumentID to pass to Resolver. Resolver will use this in requests to the mock data layer.
      */
-    databaseDocumentID?: string;
+    databaseDocumentID: string;
     history?: HistoryPackageHistoryInterface<never>;
   }) {
     // create the spy middleware (for debugging tests)
@@ -86,7 +115,9 @@ export class Simulator {
     this.history = history ?? createMemoryHistory();
 
     // Used for `KibanaContextProvider`
-    const coreStart: CoreStart = coreMock.createStart();
+    const coreStart = coreMock.createStart();
+
+    coreStart.uiSettings.get.mockImplementation(uiSetting);
 
     this.sideEffectSimulator = sideEffectSimulatorFactory();
 
@@ -99,6 +130,7 @@ export class Simulator {
         store={this.store}
         coreStart={coreStart}
         databaseDocumentID={databaseDocumentID}
+        indices={indices}
       />
     );
   }
@@ -122,6 +154,20 @@ export class Simulator {
    */
   public set resolverComponentInstanceID(value: string) {
     this.wrapper.setProps({ resolverComponentInstanceID: value });
+  }
+
+  /**
+   * Change the indices (updates the React component props.)
+   */
+  public set indices(value: string[]) {
+    this.wrapper.setProps({ indices: value });
+  }
+
+  /**
+   * Get the indices (updates the React component props.)
+   */
+  public get indices(): string[] {
+    return this.wrapper.prop('indices');
   }
 
   /**
@@ -151,7 +197,7 @@ export class Simulator {
    * After 10 times, quit.
    * Use this to continually check a value. See `toYieldEqualTo`.
    */
-  public async *map<R>(mapper: () => R): AsyncIterable<R> {
+  public async *map<R>(mapper: (() => Promise<R>) | (() => R)): AsyncIterable<R> {
     let timeoutCount = 0;
     while (timeoutCount < 10) {
       timeoutCount++;
@@ -171,7 +217,7 @@ export class Simulator {
    * returns a `ReactWrapper` even if nothing is found, as that is how `enzyme` does things.
    */
   public processNodeElements(options: ProcessNodeElementSelectorOptions = {}): ReactWrapper {
-    return this.domNodes(processNodeElementSelector(options));
+    return this.domNodes(Simulator.nodeElementSelector(options));
   }
 
   /**
@@ -208,7 +254,7 @@ export class Simulator {
    */
   public unselectedProcessNode(entityID: string): ReactWrapper {
     return this.processNodeElements({ entityID }).not(
-      processNodeElementSelector({ entityID, selected: true })
+      Simulator.nodeElementSelector({ entityID, selected: true })
     );
   }
 
@@ -221,11 +267,25 @@ export class Simulator {
   }
 
   /**
-   * This manually runs the animation frames tied to a configurable timestamp in the future
+   * This manually runs the animation frames tied to a configurable timestamp in the future.
    */
   public runAnimationFramesTimeFromNow(time: number = 0) {
     this.sideEffectSimulator.controls.time = time;
     this.sideEffectSimulator.controls.provideAnimationFrame();
+  }
+
+  /**
+   * The last value written to the clipboard via the `SideEffectors`.
+   */
+  public get clipboardText(): string {
+    return this.sideEffectSimulator.controls.clipboardText;
+  }
+
+  /**
+   * Call this to resolve the promise returned by the `SideEffectors` `writeText` method (which in production points to `navigator.clipboard.writeText`.
+   */
+  confirmTextWrittenToClipboard(): void {
+    this.sideEffectSimulator.controls.confirmTextWrittenToClipboard();
   }
 
   /**
@@ -244,6 +304,13 @@ export class Simulator {
   }
 
   /**
+   * Given a `role`, return DOM nodes that have it. Use this to assert that ARIA roles are present as expected.
+   */
+  public domNodesWithRole(role: string): ReactWrapper {
+    return this.domNodes(`[role="${role}"]`);
+  }
+
+  /**
    * Given a 'data-test-subj' selector, it will return the domNode
    */
   public testSubject(selector: string): ReactWrapper {
@@ -251,12 +318,35 @@ export class Simulator {
   }
 
   /**
+   * Given a `ReactWrapper`, returns a wrapper containing immediately following `dd` siblings.
+   * `subject` must contain just 1 element.
+   */
+  public descriptionDetails(subject: ReactWrapper): ReactWrapper {
+    // find the associated DOM nodes, then return an enzyme wrapper that only contains those.
+    const subjectNode = subject.getDOMNode();
+    let current = subjectNode.nextElementSibling;
+    const associated: Set<Element> = new Set();
+    // Multiple `dt`s can be associated with a set of `dd`s. Skip immediately following `dt`s.
+    while (current !== null && current.nodeName === 'DT') {
+      current = current.nextElementSibling;
+    }
+    while (current !== null && current.nodeName === 'DD') {
+      associated.add(current);
+      current = current.nextElementSibling;
+    }
+    return subject
+      .closest('dl')
+      .find('dd')
+      .filterWhere((candidate) => {
+        return associated.has(candidate.getDOMNode());
+      });
+  }
+
+  /**
    * Return DOM nodes that match `enzymeSelector`.
    */
   private domNodes(enzymeSelector: string): ReactWrapper {
-    return this.wrapper
-      .find(enzymeSelector)
-      .filterWhere((wrapper) => typeof wrapper.type() === 'string');
+    return this.wrapper.find(enzymeSelector).filterWhere(Simulator.isDOM);
   }
 
   /**
@@ -276,10 +366,7 @@ export class Simulator {
       const title = titles.at(index).text();
       const description = descriptions.at(index).text();
 
-      // Exclude timestamp since we can't currently calculate the expected description for it from tests
-      if (title !== '@timestamp') {
-        entries.push([title, description]);
-      }
+      entries.push([title, description]);
     }
     return entries;
   }
@@ -288,7 +375,7 @@ export class Simulator {
    * Resolve the wrapper returned by `wrapperFactory` only once it has at least 1 element in it.
    */
   public async resolveWrapper(
-    wrapperFactory: () => ReactWrapper,
+    wrapperFactory: (() => Promise<ReactWrapper>) | (() => ReactWrapper),
     predicate: (wrapper: ReactWrapper) => boolean = (wrapper) => wrapper.length > 0
   ): Promise<ReactWrapper | undefined> {
     for await (const wrapper of this.map(wrapperFactory)) {
@@ -299,7 +386,7 @@ export class Simulator {
   }
 }
 
-const baseResolverSelector = '[data-test-subj="resolver:node"]';
+const baseNodeElementSelector = '[data-test-subj="resolver:node"]';
 
 interface ProcessNodeElementSelectorOptions {
   /**
@@ -310,21 +397,4 @@ interface ProcessNodeElementSelectorOptions {
    * If true, only get nodes with an `[aria-selected="true"]` attribute.
    */
   selected?: boolean;
-}
-
-/**
- * An `enzyme` supported CSS selector for process node elements.
- */
-function processNodeElementSelector({
-  entityID,
-  selected = false,
-}: ProcessNodeElementSelectorOptions = {}): string {
-  let selector: string = baseResolverSelector;
-  if (entityID !== undefined) {
-    selector += `[data-test-resolver-node-id="${entityID}"]`;
-  }
-  if (selected) {
-    selector += '[aria-selected="true"]';
-  }
-  return selector;
 }

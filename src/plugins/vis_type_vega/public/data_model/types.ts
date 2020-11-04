@@ -43,10 +43,17 @@ interface Encoding {
   y: Coordinate;
 }
 
-interface AutoSize {
-  type: string;
-  contains: string;
-}
+type AutoSize =
+  | 'pad'
+  | 'fit'
+  | 'fit-x'
+  | 'fit-y'
+  | 'none'
+  | {
+      type: string;
+      contains: string;
+    }
+  | { signal: string };
 
 interface Padding {
   left: number;
@@ -63,7 +70,7 @@ interface Mark {
 type Renderer = 'svg' | 'canvas';
 
 interface VegaSpecConfig extends KibanaConfig {
-  kibana: KibanaConfig;
+  kibana?: KibanaConfig;
   padding: Padding;
   projection: Projection;
   autosize: AutoSize;
@@ -103,10 +110,10 @@ export interface VegaSpec {
   encoding?: Encoding;
   mark?: string;
   title?: string;
-  autosize: AutoSize;
-  projections: Projection[];
-  width?: number;
-  height?: number;
+  autosize?: AutoSize;
+  projections?: Projection[];
+  width?: number | 'container';
+  height?: number | 'container';
   padding?: number | Padding;
   _hostConfig?: KibanaConfig;
   config: VegaSpecConfig;
@@ -200,6 +207,7 @@ export interface TooltipConfig {
   position?: ToolTipPositions;
   padding?: number | Padding;
   centerOnMark?: boolean | number;
+  textTruncate?: boolean;
 }
 
 export interface DstObj {

@@ -6,45 +6,32 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
-import { act } from 'react-dom/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../../common/mock/match_media';
+import { mockBrowserFields, mockDocValueFields } from '../../../common/containers/source/mock';
+
 import {
-  useSignalIndex,
-  ReturnSignalIndex,
-} from '../../../detections/containers/detection_engine/alerts/use_signal_index';
-import { mocksSource } from '../../../common/containers/source/mock';
-// we don't have the types for waitFor just yet, so using "as waitFor" until when we do
-import { wait as waitFor } from '@testing-library/react';
-import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
-import { Direction } from '../../../graphql/types';
-import { timelineQuery } from '../../containers/index.gql_query';
-import { timelineActions } from '../../store/timeline';
+  mockIndexNames,
+  mockIndexPattern,
+  mockTimelineData,
+  TestProviders,
+} from '../../../common/mock';
 
-import { Sort } from './body/sort';
-import { mockDataProviders } from './data_providers/mock/mock_data_providers';
-import { StatefulTimeline, Props as StatefulTimelineProps } from './index';
-import { Timeline } from './timeline';
-import { TimelineType, TimelineStatus } from '../../../../common/types/timeline';
+import { StatefulTimeline, OwnProps as StatefulTimelineOwnProps } from './index';
+import { useTimelineEvents } from '../../containers/index';
 
-jest.mock('../../../common/lib/kibana', () => {
-  const originalModule = jest.requireActual('../../../common/lib/kibana');
-  return {
-    ...originalModule,
-    useGetUserSavedObjectPermissions: jest.fn(),
-  };
-});
+jest.mock('../../containers/index', () => ({
+  useTimelineEvents: jest.fn(),
+}));
 
+jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/url_state/normalize_time_range.ts');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-const mockUseSignalIndex: jest.Mock = useSignalIndex as jest.Mock<ReturnSignalIndex>;
-jest.mock('../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
 
@@ -54,107 +41,37 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('../flyout/header_with_close_button');
-describe('StatefulTimeline', () => {
-  let props = {} as StatefulTimelineProps;
-  const sort: Sort = {
-    columnId: '@timestamp',
-    sortDirection: Direction.desc,
-  };
-  const startDate = '2018-03-23T18:49:23.132Z';
-  const endDate = '2018-03-24T03:33:52.253Z';
+jest.mock('../../../common/containers/sourcerer', () => {
+  const originalModule = jest.requireActual('../../../common/containers/sourcerer');
 
-  const mocks = [
-    { request: { query: timelineQuery }, result: { data: { events: mockTimelineData } } },
-    ...mocksSource,
-  ];
+  return {
+    ...originalModule,
+    useSourcererScope: jest.fn().mockReturnValue({
+      browserFields: mockBrowserFields,
+      docValueFields: mockDocValueFields,
+      loading: false,
+      indexPattern: mockIndexPattern,
+      selectedPatterns: mockIndexNames,
+    }),
+  };
+});
+describe('StatefulTimeline', () => {
+  const props: StatefulTimelineOwnProps = {
+    id: 'id',
+    onClose: jest.fn(),
+    usersViewing: [],
+  };
 
   beforeEach(() => {
-    props = {
-      addProvider: timelineActions.addProvider,
-      columns: defaultHeaders,
-      createTimeline: timelineActions.createTimeline,
-      dataProviders: mockDataProviders,
-      eventType: 'raw',
-      end: endDate,
-      filters: [],
-      graphEventId: undefined,
-      id: 'foo',
-      isLive: false,
-      isSaving: false,
-      isTimelineExists: false,
-      itemsPerPage: 5,
-      itemsPerPageOptions: [5, 10, 20],
-      kqlMode: 'search',
-      kqlQueryExpression: '',
-      onClose: jest.fn(),
-      onDataProviderEdited: timelineActions.dataProviderEdited,
-      removeColumn: timelineActions.removeColumn,
-      removeProvider: timelineActions.removeProvider,
-      show: true,
-      showCallOutUnauthorizedMsg: false,
-      sort,
-      start: startDate,
-      status: TimelineStatus.active,
-      timelineType: TimelineType.default,
-      updateColumns: timelineActions.updateColumns,
-      updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
-      updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
-      updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
-      updateDataProviderType: timelineActions.updateDataProviderType,
-      updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
-      updateItemsPerPage: timelineActions.updateItemsPerPage,
-      updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,
-      updateSort: timelineActions.updateSort,
-      upsertColumn: timelineActions.upsertColumn,
-      usersViewing: ['elastic'],
-    };
+    (useTimelineEvents as jest.Mock).mockReturnValue([false, { events: mockTimelineData }]);
   });
 
-  describe('indexToAdd', () => {
-    test('Make sure that indexToAdd return an unknown index if signalIndex does not exist', async () => {
-      mockUseSignalIndex.mockImplementation(() => ({
-        loading: false,
-        signalIndexExists: false,
-        signalIndexName: undefined,
-      }));
-      const wrapper = mount(
-        <TestProviders>
-          <MockedProvider mocks={mocks} addTypename={false}>
-            <StatefulTimeline {...props} />
-          </MockedProvider>
-        </TestProviders>
-      );
-      await act(async () => {
-        await waitFor(() => {
-          wrapper.update();
-          const timeline = wrapper.find(Timeline);
-          expect(timeline.props().indexToAdd).toEqual([
-            'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51',
-          ]);
-        });
-      });
-    });
-
-    test('Make sure that indexToAdd return siem signal index if signalIndex exist', async () => {
-      mockUseSignalIndex.mockImplementation(() => ({
-        loading: false,
-        signalIndexExists: true,
-        signalIndexName: 'mock-siem-signals-index',
-      }));
-      const wrapper = mount(
-        <TestProviders>
-          <MockedProvider mocks={mocks} addTypename={false}>
-            <StatefulTimeline {...props} />
-          </MockedProvider>
-        </TestProviders>
-      );
-      await act(async () => {
-        await waitFor(() => {
-          wrapper.update();
-          const timeline = wrapper.find(Timeline);
-          expect(timeline.props().indexToAdd).toEqual(['mock-siem-signals-index']);
-        });
-      });
-    });
+  test('renders ', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulTimeline {...props} />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="timeline"]')).toBeTruthy();
   });
 });

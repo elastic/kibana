@@ -28,7 +28,7 @@ import {
   resetFields,
 } from '../tasks/fields_browser';
 import { loginAndWaitForPage } from '../tasks/login';
-import { openTimeline } from '../tasks/security_main';
+import { openTimelineUsingToggle } from '../tasks/security_main';
 import { openTimelineFieldsBrowser, populateTimeline } from '../tasks/timeline';
 
 import { HOSTS_URL } from '../urls/navigation';
@@ -48,7 +48,7 @@ describe('Fields Browser', () => {
   context('Fields Browser rendering', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
-      openTimeline();
+      openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();
     });
@@ -111,7 +111,7 @@ describe('Fields Browser', () => {
   context('Editing the timeline', () => {
     before(() => {
       loginAndWaitForPage(HOSTS_URL);
-      openTimeline();
+      openTimelineUsingToggle();
       populateTimeline();
       openTimelineFieldsBrowser();
     });

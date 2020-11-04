@@ -23,10 +23,11 @@ export interface FixtureStartDeps {
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   public setup(core: CoreSetup<FixtureStartDeps>, { features, alerts }: FixtureSetupDeps) {
-    features.registerFeature({
+    features.registerKibanaFeature({
       id: 'alertsRestrictedFixture',
       name: 'AlertRestricted',
       app: ['alerts', 'kibana'],
+      category: { id: 'foo', label: 'foo' },
       alerting: ['test.restricted-noop', 'test.unrestricted-noop', 'test.noop'],
       privileges: {
         all: {

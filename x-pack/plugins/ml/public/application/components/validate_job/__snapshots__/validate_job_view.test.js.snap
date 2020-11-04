@@ -8,7 +8,7 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
       iconSide="right"
       iconType="questionInCircle"
       isDisabled={false}
-      isLoading={false}
+      isLoading={true}
       onClick={[Function]}
       size="s"
     >
@@ -18,62 +18,6 @@ exports[`ValidateJob renders button and modal with a message 1`] = `
         values={Object {}}
       />
     </EuiButton>
-    <Modal
-      close={[Function]}
-      title={
-        <FormattedMessage
-          defaultMessage="Validate job {title}"
-          id="xpack.ml.validateJob.modal.validateJobTitle"
-          values={
-            Object {
-              "title": "test-id",
-            }
-          }
-        />
-      }
-    >
-      <MessageList
-        idFilterList={Array []}
-        messages={
-          Array [
-            Object {
-              "fieldName": "airline",
-              "id": "over_field_low_cardinality",
-              "status": "warning",
-              "text": "Cardinality of over_field \\"airline\\" is low and therefore less suitable for population analysis.",
-              "url": "https://www.elastic.co/blog/sizing-machine-learning-with-elasticsearch",
-            },
-          ]
-        }
-      />
-      <EuiText>
-        <FormattedMessage
-          defaultMessage="Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results."
-          id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
-          values={Object {}}
-        />
-      </EuiText>
-      <EuiText>
-        <FormattedMessage
-          defaultMessage="For more information, see {mlJobTipsLink}."
-          id="xpack.ml.validateJob.modal.linkToJobTipsText"
-          values={
-            Object {
-              "mlJobTipsLink": <EuiLink
-                href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/create-jobs.html#job-tips"
-                target="_blank"
-              >
-                <FormattedMessage
-                  defaultMessage="Machine Learning Job Tips"
-                  id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
-                  values={Object {}}
-                />
-              </EuiLink>,
-            }
-          }
-        />
-      </EuiText>
-    </Modal>
   </div>
 </Fragment>
 `;
@@ -108,7 +52,7 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
       iconSide="right"
       iconType="questionInCircle"
       isDisabled={false}
-      isLoading={false}
+      isLoading={true}
       onClick={[Function]}
       size="s"
     >
@@ -118,52 +62,6 @@ exports[`ValidateJob renders the button and modal with a success message 1`] = `
         values={Object {}}
       />
     </EuiButton>
-    <Modal
-      close={[Function]}
-      title={
-        <FormattedMessage
-          defaultMessage="Validate job {title}"
-          id="xpack.ml.validateJob.modal.validateJobTitle"
-          values={
-            Object {
-              "title": "test-id",
-            }
-          }
-        />
-      }
-    >
-      <MessageList
-        idFilterList={Array []}
-        messages={Array []}
-      />
-      <EuiText>
-        <FormattedMessage
-          defaultMessage="Job validation performs certain checks against job configurations and underlying source data and provides specific advice on how to adjust settings that are more likely to produce insightful results."
-          id="xpack.ml.validateJob.modal.jobValidationDescriptionText"
-          values={Object {}}
-        />
-      </EuiText>
-      <EuiText>
-        <FormattedMessage
-          defaultMessage="For more information, see {mlJobTipsLink}."
-          id="xpack.ml.validateJob.modal.linkToJobTipsText"
-          values={
-            Object {
-              "mlJobTipsLink": <EuiLink
-                href="https://www.elastic.co/guide/en/machine-learning/jest-metadata-mock-branch/create-jobs.html#job-tips"
-                target="_blank"
-              >
-                <FormattedMessage
-                  defaultMessage="Machine Learning Job Tips"
-                  id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
-                  values={Object {}}
-                />
-              </EuiLink>,
-            }
-          }
-        />
-      </EuiText>
-    </Modal>
   </div>
 </Fragment>
 `;

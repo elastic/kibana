@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ResolverEvent } from '../../../../../common/endpoint/types';
-import { eventId } from '../../../../../common/endpoint/models/event';
+import { SafeResolverEvent } from '../../../../../common/endpoint/types';
+import {
+  eventIDSafeVersion,
+  timestampSafeVersion,
+} from '../../../../../common/endpoint/models/event';
 import { JsonObject } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { ChildrenPaginationCursor } from './children_pagination';
 
@@ -15,6 +18,11 @@ interface PaginationCursor {
   timestamp: number;
   eventID: string;
 }
+
+/**
+ * The sort direction for the timestamp field
+ */
+export type TimeSortDirection = 'asc' | 'desc';
 
 /**
  * Defines the sorting fields for queries that leverage pagination
@@ -111,11 +119,12 @@ export class PaginationBuilder {
    *
    * @param results the events that were returned by the ES query
    */
-  static buildCursor(results: ResolverEvent[]): string | null {
+  static buildCursor(results: SafeResolverEvent[]): string | null {
     const lastResult = results[results.length - 1];
     const cursor = {
-      timestamp: lastResult['@timestamp'],
-      eventID: eventId(lastResult) === undefined ? '' : String(eventId(lastResult)),
+      timestamp: timestampSafeVersion(lastResult) ?? 0,
+      eventID:
+        eventIDSafeVersion(lastResult) === undefined ? '' : String(eventIDSafeVersion(lastResult)),
     };
     return urlEncodeCursor(cursor);
   }
@@ -126,7 +135,10 @@ export class PaginationBuilder {
    * @param requestLimit the request limit for a query.
    * @param results the events that were returned by the ES query
    */
-  static buildCursorRequestLimit(requestLimit: number, results: ResolverEvent[]): string | null {
+  static buildCursorRequestLimit(
+    requestLimit: number,
+    results: SafeResolverEvent[]
+  ): string | null {
     if (requestLimit <= results.length && results.length > 0) {
       return PaginationBuilder.buildCursor(results);
     }
@@ -158,10 +170,14 @@ export class PaginationBuilder {
    * Helper for creates an object for adding the pagination fields to a query
    *
    * @param tiebreaker a unique field to use as the tiebreaker for the search_after
+   * @param timeSort is the timestamp sort direction
    * @returns an object containing the pagination information
    */
-  buildQueryFieldsAsInterface(tiebreaker: string): PaginationFields {
-    const sort: SortFields = [{ '@timestamp': 'asc' }, { [tiebreaker]: 'asc' }];
+  buildQueryFieldsAsInterface(
+    tiebreaker: string,
+    timeSort: TimeSortDirection = 'asc'
+  ): PaginationFields {
+    const sort: SortFields = [{ '@timestamp': timeSort }, { [tiebreaker]: 'asc' }];
     let searchAfter: SearchAfterFields | undefined;
     if (this.timestamp && this.eventID) {
       searchAfter = [this.timestamp, this.eventID];
@@ -174,11 +190,12 @@ export class PaginationBuilder {
    * Creates an object for adding the pagination fields to a query
    *
    * @param tiebreaker a unique field to use as the tiebreaker for the search_after
+   * @param timeSort is the timestamp sort direction
    * @returns an object containing the pagination information
    */
-  buildQueryFields(tiebreaker: string): JsonObject {
+  buildQueryFields(tiebreaker: string, timeSort: TimeSortDirection = 'asc'): JsonObject {
     const fields: JsonObject = {};
-    const pagination = this.buildQueryFieldsAsInterface(tiebreaker);
+    const pagination = this.buildQueryFieldsAsInterface(tiebreaker, timeSort);
     fields.sort = pagination.sort;
     fields.size = pagination.size;
     if (pagination.searchAfter) {

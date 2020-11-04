@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './frame_layout.scss';
+
 import React from 'react';
 import { EuiPage, EuiPageSideBar, EuiPageBody } from '@elastic/eui';
 

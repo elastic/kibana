@@ -2,39 +2,46 @@
 [[xpack-security-authorization]]
 
 === Granting access to {kib}
-The Elastic Stack comes with the `kibana_admin` {ref}/built-in-roles.html[built-in role], which you can use to grant access to all Kibana features in all spaces. To grant users access to a subset of spaces or features, you can create a custom role that grants the desired Kibana privileges.
+The Elastic Stack comes with the `kibana_admin` {ref}/built-in-roles.html[built-in role], which you can use to grant access to all {kib} features in all spaces. To grant users access to a subset of spaces or features, you can create a custom role that grants the desired {kib} privileges.
 
-When you assign a user multiple roles, the user receives a union of the roles’ privileges. Therefore, assigning the `kibana_admin` role in addition to a custom role that grants Kibana privileges is ineffective because `kibana_admin` has access to all the features in all spaces.
+When you assign a user multiple roles, the user receives a union of the roles’ privileges. Therefore, assigning the `kibana_admin` role in addition to a custom role that grants {kib} privileges is ineffective because `kibana_admin` has access to all the features in all spaces.
 
-NOTE: When running multiple tenants of Kibana by changing the `kibana.index` in your `kibana.yml`, you cannot use `kibana_admin` to grant access. You must create custom roles that authorize the user for that specific tenant. Although multi-tenant installations are supported, the recommended approach to securing access to Kibana segments is to grant users access to specific spaces.
+NOTE: When running multiple tenants of {kib} by changing the `kibana.index` in your `kibana.yml`, you cannot use `kibana_admin` to grant access. You must create custom roles that authorize the user for that specific tenant. Although multi-tenant installations are supported, the recommended approach to securing access to {kib} segments is to grant users access to specific spaces.
 
 [role="xpack"]
 [[xpack-kibana-role-management]]
 === {kib} role management
 
-To create a role that grants {kib} privileges, open the menu, go to *Stack Management > Security > Roles* and click **Create role**. 
+To create a role that grants {kib} privileges, open the menu, then click *Stack Management > Roles* and click **Create role**.
+
+[float]
+==== Required permissions
+
+The `manage_security` cluster privilege is required to access role management.
 
 [[adding_kibana_privileges]]
 ==== Adding {kib} privileges
 
-To assign {kib} privileges to the role, click **Add space privilege** in the Kibana section.
+To assign {kib} privileges to the role, click **Add {kib} privilege** in the {kib} section.
 
 [role="screenshot"]
-image::user/security/images/add-space-privileges.png[Add space privileges]
+image::user/security/images/add-space-privileges.png[Add {kib} privileges]
 
 Open the **Spaces** selection control to specify whether to grant the role access to all spaces *** Global (all spaces)** or one or more individual spaces. If you select *** Global (all spaces)**, you can’t select individual spaces until you clear your selection.
 
 Use the **Privilege** menu to grant access to features. The default is **Custom**, which you can use to grant access to individual features. Otherwise, you can grant read and write access to all current and future features by selecting **All**, or grant read access to all current and future features by selecting **Read**.
 
-When using the **Customize by feature** option, you can choose either **All**, **Read** or **None** for access to each feature. As new features are added to Kibana, roles that use the custom option do not automatically get access to the new features. You must manually update the roles.
+When using the **Customize by feature** option, you can choose either **All**, **Read** or **None** for access to each feature. As new features are added to {kib}, roles that use the custom option do not automatically get access to the new features. You must manually update the roles.
 
-NOTE: Machine Learning and Stack Monitoring rely on built-in roles to grant access. When a user is assigned the appropriate roles, the Machine Learning and Stack Monitoring application are available; otherwise, these applications are not visible.
+NOTE: *{stack-monitor-app}* relies on built-in roles to grant access. When a
+user is assigned the appropriate roles, the *{stack-monitor-app}* application is
+available; otherwise, it is not visible.
 
-To apply your changes, click **Create space privilege**. The space privilege shows up under the Kibana privileges section of the role.
+To apply your changes, click **Add {kib} privilege**. The privilege shows up under the {kib} privileges section of the role.
 
 
 [role="screenshot"]
-image::user/security/images/create-space-privilege.png[Create space privilege]
+image::user/security/images/create-space-privilege.png[Add {kib} privilege]
 
 ==== Feature availability
 
@@ -62,9 +69,9 @@ Features are available to users when their roles grant access to the features, *
 
 ==== Assigning different privileges to different spaces
 
-Using the same role, it’s possible to assign different privileges to different spaces. After you’ve added space privileges, click **Add space privilege**. If you’ve already added privileges for either *** Global (all spaces)** or an individual space, you will not be able to select these in the **Spaces** selection control.
+Using the same role, it’s possible to assign different privileges to different spaces. After you’ve added privileges, click **Add {kib} privilege**. If you’ve already added privileges for either *** Global (all spaces)** or an individual space, you will not be able to select these in the **Spaces** selection control.
 
-Additionally, if you’ve already assigned privileges at *** Global (all spaces)**, you are only able to assign additional privileges to individual spaces. Similar to the behavior of multiple roles granting the union of all privileges, space privileges are also a union. If you’ve already granted the user the **All** privilege at *** Global (all spaces)**, you’re not able to restrict the role to only the **Read** privilege at an individual space.
+Additionally, if you’ve already assigned privileges at *** Global (all spaces)**, you are only able to assign additional privileges to individual spaces. Similar to the behavior of multiple roles granting the union of all privileges, {kib} privileges are also a union. If you’ve already granted the user the **All** privilege at *** Global (all spaces)**, you’re not able to restrict the role to only the **Read** privilege at an individual space.
 
 
 ==== Privilege summary
@@ -76,39 +83,37 @@ image::user/security/images/view-privilege-summary.png[View privilege summary]
 
 ==== Example 1: Grant all access to Dashboard at an individual space
 
-. Click **Add space privilege**.
+. Click **Add {kib} privilege**.
 . For **Spaces**, select an individual space.
 . For **Privilege**, leave the default selection of **Custom**.
 . For the Dashboard feature, select **All**
-. Click **Create space privilege**.
+. Click **Add {kib} privilege**.
 
 [role="screenshot"]
 image::user/security/images/privilege-example-1.png[Privilege example 1]
 
 ==== Example 2: Grant all access to one space and read access to another
 
-. Click **Add space privilege**.
+. Click **Add {kib} privilege**.
 . For **Spaces**, select the first space.
 . For **Privilege**, select **All**.
-. Click **Create space privilege**.
-. Click **Add space privilege**.
+. Click **Add {kib} privilege**.
 . For **Spaces**, select the second space.
 . For **Privilege**, select **Read**.
-. Click **Create space privilege**.
+. Click **Add {kib} privilege**.
 
 [role="screenshot"]
 image::user/security/images/privilege-example-2.png[Privilege example 2]
 
 ==== Example 3: Grant read access to all spaces and write access to an individual space
 
-. Click **Add space privilege**.
+. Click **Add {kib} privilege**.
 . For **Spaces**, select *** Global (all spaces)**.
 . For **Privilege**, select **Read**.
-. Click **Create space privilege**.
-. Click **Add space privilege**.
+. Click **Add {kib} privilege**.
 . For **Spaces**, select the individual space.
 . For **Privilege**, select **All**.
-. Click **Create space privilege**.
+. Click **Add {kib} privilege**.
 
 [role="screenshot"]
 image::user/security/images/privilege-example-3.png[Privilege example 3]

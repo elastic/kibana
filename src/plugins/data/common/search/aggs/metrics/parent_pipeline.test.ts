@@ -66,9 +66,6 @@ describe('parent pipeline aggs', function () {
       ) => {
         const field = {
           name: 'field',
-          format: {
-            toJSON: () => ({ id: 'bytes' }),
-          },
         };
         const indexPattern = {
           id: '1234',
@@ -77,6 +74,9 @@ describe('parent pipeline aggs', function () {
             getByName: () => field,
             filter: () => [field],
           },
+          getFormatterForField: () => ({
+            toJSON: () => ({ id: 'bytes' }),
+          }),
         } as any;
 
         const aggConfigs = new AggConfigs(

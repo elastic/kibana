@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { generatePath } from 'react-router-dom';
+
 import { CURRENT_MAJOR_VERSION } from '../../../common/version';
 
 export const SETUP_GUIDE_PATH = '/setup_guide';
@@ -48,9 +50,9 @@ export const ROLE_MAPPING_NEW_PATH = `${ROLE_MAPPINGS_PATH}/new`;
 export const USERS_PATH = `${ORG_PATH}/users`;
 export const SECURITY_PATH = `${ORG_PATH}/security`;
 
-export const GROUPS_PATH = `${ORG_PATH}/groups`;
+export const GROUPS_PATH = '/groups';
 export const GROUP_PATH = `${GROUPS_PATH}/:groupId`;
-export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source-prioritization`;
+export const GROUP_SOURCE_PRIORITIZATION_PATH = `${GROUPS_PATH}/:groupId/source_prioritization`;
 
 export const SOURCES_PATH = '/sources';
 export const ORG_SOURCES_PATH = `${ORG_PATH}${SOURCES_PATH}`;
@@ -107,4 +109,11 @@ export const EDIT_SLACK_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/slack/edit`;
 export const EDIT_ZENDESK_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/zendesk/edit`;
 export const EDIT_CUSTOM_PATH = `${ORG_SETTINGS_CONNECTORS_PATH}/custom/edit`;
 
-export const getSourcePath = (sourceId: string): string => `${ORG_SOURCES_PATH}/${sourceId}`;
+export const getContentSourcePath = (
+  path: string,
+  sourceId: string,
+  isOrganization: boolean
+): string => generatePath(isOrganization ? ORG_PATH + path : path, { sourceId });
+export const getGroupPath = (groupId: string) => generatePath(GROUP_PATH, { groupId });
+export const getGroupSourcePrioritizationPath = (groupId: string) =>
+  `${GROUPS_PATH}/${groupId}/source_prioritization`;

@@ -5,11 +5,7 @@
  */
 
 import { Unionize, Overwrite } from 'utility-types';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { ChartBase } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
@@ -58,14 +54,14 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
   aggs,
   additionalFilters = [],
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
   chartBase: ChartBase;
   aggs: T;
   additionalFilters?: Filter[];
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
   const projection = getMetricsProjection({
     setup,
@@ -83,7 +79,11 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
       },
       aggs: {
         timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: getMetricsDateHistogramParams(
+            start,
+            end,
+            config['xpack.apm.metricsInterval']
+          ),
           aggs,
         },
         ...aggs,

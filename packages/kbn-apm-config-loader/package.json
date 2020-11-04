@@ -1,0 +1,17 @@
+{
+  "name": "@kbn/apm-config-loader",
+  "main": "./target/index.js",
+  "types": "./target/index.d.ts",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "../../node_modules/.bin/tsc",
+    "kbn:bootstrap": "yarn build",
+    "kbn:watch": "yarn build --watch"
+  },
+  "dependencies": {
+    "@elastic/safer-lodash-set": "link:../elastic-safer-lodash-set",
+    "@kbn/utils": "link:../kbn-utils"
+  }
+}

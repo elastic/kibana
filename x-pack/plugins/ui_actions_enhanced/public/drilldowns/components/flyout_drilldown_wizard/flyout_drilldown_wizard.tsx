@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormDrilldownWizard } from '../form_drilldown_wizard';
 import { FlyoutFrame } from '../flyout_frame';
@@ -16,15 +16,25 @@ import {
   txtEditDrilldownTitle,
 } from './i18n';
 import { DrilldownHelloBar } from '../drilldown_hello_bar';
-import { ActionFactory } from '../../../dynamic_actions';
+import {
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+} from '../../../dynamic_actions';
+import { Trigger, TriggerId } from '../../../../../../../src/plugins/ui_actions/public';
+import { ActionFactoryPlaceContext } from '../types';
 
-export interface DrilldownWizardConfig<ActionConfig extends object = object> {
+export interface DrilldownWizardConfig<ActionConfig extends BaseActionConfig = BaseActionConfig> {
   name: string;
   actionFactory?: ActionFactory;
   actionConfig?: ActionConfig;
+  selectedTriggers?: TriggerId[];
 }
 
-export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object = object> {
+export interface FlyoutDrilldownWizardProps<
+  CurrentActionConfig extends BaseActionConfig = BaseActionConfig,
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+> {
   drilldownActionFactories: ActionFactory[];
 
   onSubmit?: (drilldownWizardConfig: Required<DrilldownWizardConfig>) => void;
@@ -38,19 +48,36 @@ export interface FlyoutDrilldownWizardProps<CurrentActionConfig extends object =
   showWelcomeMessage?: boolean;
   onWelcomeHideClick?: () => void;
 
-  actionFactoryContext?: object;
+  actionFactoryPlaceContext?: ActionFactoryPlaceContext<ActionFactoryContext>;
 
+  /**
+   * General overview of drilldowns
+   */
   docsLink?: string;
+
+  /**
+   * Link that explains different triggers
+   */
+  triggerPickerDocsLink?: string;
+
+  getTrigger: (triggerId: TriggerId) => Trigger;
+
+  /**
+   * List of possible triggers in current context
+   */
+  supportedTriggers: TriggerId[];
 }
 
 function useWizardConfigState(
+  actionFactoryContext: BaseActionFactoryContext,
   initialDrilldownWizardConfig?: DrilldownWizardConfig
 ): [
   DrilldownWizardConfig,
   {
     setName: (name: string) => void;
-    setActionConfig: (actionConfig: object) => void;
+    setActionConfig: (actionConfig: BaseActionConfig) => void;
     setActionFactory: (actionFactory?: ActionFactory) => void;
+    setSelectedTriggers: (triggers?: TriggerId[]) => void;
   }
 ] {
   const [wizardConfig, setWizardConfig] = useState<DrilldownWizardConfig>(
@@ -77,7 +104,7 @@ function useWizardConfigState(
           name,
         });
       },
-      setActionConfig: (actionConfig: object) => {
+      setActionConfig: (actionConfig: BaseActionConfig) => {
         setWizardConfig({
           ...wizardConfig,
           actionConfig,
@@ -85,10 +112,13 @@ function useWizardConfigState(
       },
       setActionFactory: (actionFactory?: ActionFactory) => {
         if (actionFactory) {
+          const actionConfig = (actionConfigCache[actionFactory.id] ??
+            actionFactory.createConfig(actionFactoryContext)) as BaseActionConfig;
           setWizardConfig({
             ...wizardConfig,
             actionFactory,
-            actionConfig: actionConfigCache[actionFactory.id] ?? actionFactory.createConfig(),
+            actionConfig,
+            selectedTriggers: [],
           });
         } else {
           if (wizardConfig.actionFactory?.id) {
@@ -105,11 +135,19 @@ function useWizardConfigState(
           });
         }
       },
+      setSelectedTriggers: (selectedTriggers: TriggerId[] = []) => {
+        setWizardConfig({
+          ...wizardConfig,
+          selectedTriggers,
+        });
+      },
     },
   ];
 }
 
-export function FlyoutDrilldownWizard<CurrentActionConfig extends object = object>({
+export function FlyoutDrilldownWizard<
+  CurrentActionConfig extends BaseActionConfig = BaseActionConfig
+>({
   onClose,
   onBack,
   onSubmit = () => {},
@@ -119,11 +157,26 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
   showWelcomeMessage = true,
   onWelcomeHideClick,
   drilldownActionFactories,
-  actionFactoryContext,
+  actionFactoryPlaceContext,
   docsLink,
+  triggerPickerDocsLink,
+  getTrigger,
+  supportedTriggers,
 }: FlyoutDrilldownWizardProps<CurrentActionConfig>) {
-  const [wizardConfig, { setActionFactory, setActionConfig, setName }] = useWizardConfigState(
+  const [
+    wizardConfig,
+    { setActionFactory, setActionConfig, setName, setSelectedTriggers },
+  ] = useWizardConfigState(
+    { ...actionFactoryPlaceContext, triggers: supportedTriggers },
     initialDrilldownWizardConfig
+  );
+
+  const actionFactoryContext: BaseActionFactoryContext = useMemo(
+    () => ({
+      ...actionFactoryPlaceContext,
+      triggers: wizardConfig.selectedTriggers ?? [],
+    }),
+    [actionFactoryPlaceContext, wizardConfig.selectedTriggers]
   );
 
   const isActionValid = (
@@ -132,8 +185,12 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
     if (!wizardConfig.name) return false;
     if (!wizardConfig.actionFactory) return false;
     if (!wizardConfig.actionConfig) return false;
+    if (!wizardConfig.selectedTriggers || wizardConfig.selectedTriggers.length === 0) return false;
 
-    return wizardConfig.actionFactory.isConfigValid(wizardConfig.actionConfig);
+    return wizardConfig.actionFactory.isConfigValid(
+      wizardConfig.actionConfig,
+      actionFactoryContext
+    );
   };
 
   const footer = (
@@ -171,7 +228,11 @@ export function FlyoutDrilldownWizard<CurrentActionConfig extends object = objec
         currentActionFactory={wizardConfig.actionFactory}
         onActionFactoryChange={setActionFactory}
         actionFactories={drilldownActionFactories}
-        actionFactoryContext={actionFactoryContext!}
+        actionFactoryContext={actionFactoryContext}
+        onSelectedTriggersChange={setSelectedTriggers}
+        triggers={supportedTriggers}
+        getTriggerInfo={getTrigger}
+        triggerPickerDocsLink={triggerPickerDocsLink}
       />
       {mode === 'edit' && (
         <>

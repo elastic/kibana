@@ -3,7 +3,6 @@
 exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
 <div
   className="euiPopover euiPopover--anchorDownLeft"
-  container={null}
   onKeyDown={[Function]}
   onMouseDown={[Function]}
   onMouseUp={[Function]}
@@ -15,15 +14,20 @@ exports[`Storyshots components/WorkpadHeader/ElementMenu default 1`] = `
   >
     <button
       aria-label="Add an element"
-      className="euiButton euiButton--primary euiButton--small canvasElementMenu__popoverButton euiButton--fill"
+      className="euiButton euiButton--primary euiButton--small euiButton--fill canvasElementMenu__popoverButton"
       data-test-subj="add-element-button"
       onClick={[Function]}
+      style={
+        Object {
+          "minWidth": undefined,
+        }
+      }
       type="button"
     >
       <span
         className="euiButtonContent euiButton__content"
       >
-        <div
+        <span
           className="euiButtonContent__icon"
           data-euiicon-type="plusInCircle"
           size="m"

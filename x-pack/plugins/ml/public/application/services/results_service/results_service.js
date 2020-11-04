@@ -4,8 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import each from 'lodash/each';
-import get from 'lodash/get';
+import { each, get } from 'lodash';
 
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { escapeForElasticsearchQuery } from '../../util/string_utils';
@@ -28,7 +27,7 @@ export function resultsServiceProvider(mlApiServices) {
     // Pass an empty array or ['*'] to search over all job IDs.
     // Returned response contains a results property, with a key for job
     // which has results for the specified time range.
-    getScoresByBucket(jobIds, earliestMs, latestMs, interval, perPage = 10, fromPage = 1) {
+    getScoresByBucket(jobIds, earliestMs, latestMs, intervalMs, perPage = 10, fromPage = 1) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -88,6 +87,11 @@ export function resultsServiceProvider(mlApiServices) {
                 },
               },
               aggs: {
+                jobsCardinality: {
+                  cardinality: {
+                    field: 'job_id',
+                  },
+                },
                 jobId: {
                   terms: {
                     field: 'job_id',
@@ -111,7 +115,7 @@ export function resultsServiceProvider(mlApiServices) {
                     byTime: {
                       date_histogram: {
                         field: 'timestamp',
-                        interval: interval,
+                        fixed_interval: `${intervalMs}ms`,
                         min_doc_count: 1,
                         extended_bounds: {
                           min: earliestMs,
@@ -148,6 +152,7 @@ export function resultsServiceProvider(mlApiServices) {
               });
               obj.results[jobId] = resultsForTime;
             });
+            obj.cardinality = resp.aggregations?.jobsCardinality?.value ?? 0;
 
             resolve(obj);
           })
@@ -486,7 +491,7 @@ export function resultsServiceProvider(mlApiServices) {
       influencerFieldValues,
       earliestMs,
       latestMs,
-      interval,
+      intervalMs,
       maxResults = ANOMALY_SWIM_LANE_HARD_LIMIT,
       perPage = SWIM_LANE_DEFAULT_PAGE_SIZE,
       fromPage = 1,
@@ -609,7 +614,7 @@ export function resultsServiceProvider(mlApiServices) {
                     byTime: {
                       date_histogram: {
                         field: 'timestamp',
-                        interval,
+                        fixed_interval: `${intervalMs}ms`,
                         min_doc_count: 1,
                       },
                       aggs: {
@@ -720,7 +725,6 @@ export function resultsServiceProvider(mlApiServices) {
         mlApiServices.results
           .anomalySearch({
             size: maxResults !== undefined ? maxResults : 100,
-            rest_total_hits_as_int: true,
             body: {
               _source: ['job_id', 'detector_index', 'influencers', 'record_score'],
               query: {
@@ -744,7 +748,7 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
@@ -852,7 +856,6 @@ export function resultsServiceProvider(mlApiServices) {
         mlApiServices.results
           .anomalySearch({
             size: maxResults !== undefined ? maxResults : 100,
-            rest_total_hits_as_int: true,
             body: {
               query: {
                 bool: {
@@ -875,7 +878,7 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
@@ -977,7 +980,6 @@ export function resultsServiceProvider(mlApiServices) {
         mlApiServices.results
           .anomalySearch({
             size: maxResults !== undefined ? maxResults : 100,
-            rest_total_hits_as_int: true,
             body: {
               query: {
                 bool: {
@@ -1000,7 +1002,7 @@ export function resultsServiceProvider(mlApiServices) {
             },
           })
           .then((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit) => {
                 obj.records.push(hit._source);
               });
@@ -1027,7 +1029,7 @@ export function resultsServiceProvider(mlApiServices) {
     // Extra query object can be supplied, or pass null if no additional query.
     // Returned response contains a results property, which is an object
     // of document counts against time (epoch millis).
-    getEventRateData(index, query, timeFieldName, earliestMs, latestMs, interval) {
+    getEventRateData(index, query, timeFieldName, earliestMs, latestMs, intervalMs) {
       return new Promise((resolve, reject) => {
         const obj = { success: true, results: {} };
 
@@ -1053,7 +1055,6 @@ export function resultsServiceProvider(mlApiServices) {
         mlApiServices
           .esSearch({
             index,
-            rest_total_hits_as_int: true,
             size: 0,
             body: {
               query: {
@@ -1068,7 +1069,7 @@ export function resultsServiceProvider(mlApiServices) {
                 eventRate: {
                   date_histogram: {
                     field: timeFieldName,
-                    interval: interval,
+                    fixed_interval: `${intervalMs}ms`,
                     min_doc_count: 0,
                     extended_bounds: {
                       min: earliestMs,
@@ -1085,7 +1086,7 @@ export function resultsServiceProvider(mlApiServices) {
               const time = dataForTime.key;
               obj.results[time] = dataForTime.doc_count;
             });
-            obj.total = resp.hits.total;
+            obj.total = resp.hits.total.value;
 
             resolve(obj);
           })
@@ -1112,7 +1113,7 @@ export function resultsServiceProvider(mlApiServices) {
       timeFieldName,
       earliestMs,
       latestMs,
-      interval
+      intervalMs
     ) {
       return new Promise((resolve, reject) => {
         if (splitField === undefined) {
@@ -1181,7 +1182,7 @@ export function resultsServiceProvider(mlApiServices) {
                 byTime: {
                   date_histogram: {
                     field: timeFieldName,
-                    interval: interval,
+                    fixed_interval: `${intervalMs}ms`,
                     min_doc_count: AGGREGATION_MIN_DOC_COUNT,
                   },
                   aggs: {
@@ -1222,13 +1223,13 @@ export function resultsServiceProvider(mlApiServices) {
           .esSearch({
             index,
             body,
-            rest_total_hits_as_int: true,
+            track_total_hits: true,
           })
           .then((resp) => {
             // Because of the sampling, results of metricFunctions which use sum or count
             // can be significantly skewed. Taking into account totalHits we calculate a
             // a factor to normalize results for these metricFunctions.
-            const totalHits = get(resp, ['hits', 'total'], 0);
+            const totalHits = resp.hits.total.value;
             const successfulShards = get(resp, ['_shards', 'successful'], 0);
 
             let normalizeFactor = 1;
@@ -1271,7 +1272,7 @@ export function resultsServiceProvider(mlApiServices) {
     // criteria, time range, and aggregation interval.
     // criteriaFields parameter must be an array, with each object in the array having 'fieldName'
     // 'fieldValue' properties.
-    getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, interval) {
+    getRecordMaxScoreByTime(jobId, criteriaFields, earliestMs, latestMs, intervalMs) {
       return new Promise((resolve, reject) => {
         const obj = {
           success: true,
@@ -1325,7 +1326,7 @@ export function resultsServiceProvider(mlApiServices) {
                 times: {
                   date_histogram: {
                     field: 'timestamp',
-                    interval: interval,
+                    fixed_interval: `${intervalMs}ms`,
                     min_doc_count: 1,
                   },
                   aggs: {

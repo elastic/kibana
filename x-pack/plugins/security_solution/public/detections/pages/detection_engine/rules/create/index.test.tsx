@@ -10,7 +10,7 @@ import { shallow } from 'enzyme';
 import '../../../../../common/mock/match_media';
 import { TestProviders } from '../../../../../common/mock';
 import { CreateRulePage } from './index';
-import { useUserInfo } from '../../../../components/user_info';
+import { useUserData } from '../../../../components/user_info';
 
 jest.mock('react-router-dom', () => {
   const original = jest.requireActual('react-router-dom');
@@ -29,7 +29,7 @@ jest.mock('../../../../components/user_info');
 
 describe('CreateRulePage', () => {
   it('renders correctly', () => {
-    (useUserInfo as jest.Mock).mockReturnValue({});
+    (useUserData as jest.Mock).mockReturnValue([{}]);
     const wrapper = shallow(<CreateRulePage />, { wrappingComponent: TestProviders });
 
     expect(wrapper.find('[title="Create new rule"]')).toHaveLength(1);

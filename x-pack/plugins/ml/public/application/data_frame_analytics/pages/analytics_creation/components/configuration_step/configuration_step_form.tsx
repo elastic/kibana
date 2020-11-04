@@ -91,6 +91,7 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
     requiredFieldsError,
     sourceIndex,
     trainingPercent,
+    useEstimatedMml,
   } = form;
 
   const toastNotifications = getToastNotifications();
@@ -164,7 +165,8 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
 
   const debouncedGetExplainData = debounce(async () => {
     const jobTypeChanged = previousJobType !== jobType;
-    const shouldUpdateModelMemoryLimit = !firstUpdate.current || !modelMemoryLimit;
+    const shouldUpdateModelMemoryLimit =
+      (!firstUpdate.current || !modelMemoryLimit) && useEstimatedMml === true;
     const shouldUpdateEstimatedMml =
       !firstUpdate.current || !modelMemoryLimit || estimatedModelMemoryLimit === '';
 
@@ -209,7 +211,6 @@ export const ConfigurationStepForm: FC<CreateAnalyticsStepProps> = ({
       let unsupportedFieldsErrorMessage;
       if (
         jobType === ANALYSIS_CONFIG_TYPE.CLASSIFICATION &&
-        errorMessage.includes('status_exception') &&
         (errorMessage.includes('must have at most') || errorMessage.includes('must have at least'))
       ) {
         maxDistinctValuesErrorMessage = errorMessage;

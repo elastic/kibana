@@ -17,7 +17,12 @@
  * under the License.
  */
 
-import { IndexPattern, IndexPatternField, FieldFormatInstanceType } from 'src/plugins/data/public';
+import {
+  IndexPattern,
+  IndexPatternField,
+  FieldFormatInstanceType,
+  IndexPatternsService,
+} from 'src/plugins/data/public';
 
 jest.mock('brace/mode/groovy', () => ({}));
 
@@ -94,6 +99,12 @@ const field = {
   format: new Format(),
 };
 
+const services = {
+  redirectAway: () => {},
+  saveIndexPattern: async () => {},
+  indexPatternService: {} as IndexPatternsService,
+};
+
 describe('FieldEditor', () => {
   let indexPattern: IndexPattern;
 
@@ -113,6 +124,7 @@ describe('FieldEditor', () => {
     indexPattern = ({
       fields,
       getFormatterForField: () => ({ params: () => ({}) }),
+      getFormatterForFieldNoDefault: () => ({ params: () => ({}) }),
     } as unknown) as IndexPattern;
   });
 
@@ -122,7 +134,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (field as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -138,12 +150,12 @@ describe('FieldEditor', () => {
       name: 'test',
       script: 'doc.test.value',
     };
-    fieldList.push(testField as IndexPatternField);
+    fieldList.push((testField as unknown) as IndexPatternField);
     indexPattern.fields.getByName = (name) => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name] as IndexPatternField;
+      return (flds[name] as unknown) as IndexPatternField;
     };
 
     const component = createComponentWithContext<FieldEdiorProps>(
@@ -151,7 +163,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -173,7 +185,7 @@ describe('FieldEditor', () => {
       const flds = {
         [testField.name]: testField,
       };
-      return flds[name] as IndexPatternField;
+      return (flds[name] as unknown) as IndexPatternField;
     };
 
     const component = createComponentWithContext<FieldEdiorProps>(
@@ -181,7 +193,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -198,7 +210,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );
@@ -223,7 +235,7 @@ describe('FieldEditor', () => {
       {
         indexPattern,
         spec: (testField as unknown) as IndexPatternField,
-        services: { redirectAway: () => {} },
+        services,
       },
       mockContext
     );

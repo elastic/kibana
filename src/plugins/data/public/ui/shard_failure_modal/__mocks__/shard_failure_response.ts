@@ -16,9 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ShardFailureResponse } from '../shard_failure_types';
 
-export const shardFailureResponse = {
+import { SearchResponse } from 'elasticsearch';
+
+export const shardFailureResponse: SearchResponse<any> = {
   _shards: {
     total: 2,
     successful: 1,
@@ -43,4 +44,4 @@ export const shardFailureResponse = {
       },
     ],
   },
-} as ShardFailureResponse;
+} as any;

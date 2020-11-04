@@ -24,11 +24,11 @@ import {
   ExecutorSubActionPushParams,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
+  PushToServiceResponse,
 } from './types';
 
 // TODO: to remove, need to support Case
 import { buildMap, mapParams } from '../case/utils';
-import { PushToServiceResponse } from './case_types';
 
 interface GetActionTypeParams {
   logger: Logger;

@@ -128,7 +128,8 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
       if (!isLayerInOrder(mbMap, mapLayer, LAYER_CLASS.LABEL, beneathMbLayerId)) {
         moveMapLayer(mbMap, mbLayers, mapLayer, LAYER_CLASS.LABEL, beneathMbLayerId);
       }
-      beneathMbLayerId = getBottomMbLayerId(mbLayers, mapLayer, LAYER_CLASS.LABEL);
+      const bottomMbLayerId = getBottomMbLayerId(mbLayers, mapLayer, LAYER_CLASS.LABEL);
+      if (bottomMbLayerId) beneathMbLayerId = bottomMbLayerId;
     });
 
   // Sort map layers
@@ -137,6 +138,7 @@ export function syncLayerOrder(mbMap: MbMap, spatialFiltersLayer: ILayer, layerL
     if (!isLayerInOrder(mbMap, mapLayer, layerClass, beneathMbLayerId)) {
       moveMapLayer(mbMap, mbLayers, mapLayer, layerClass, beneathMbLayerId);
     }
-    beneathMbLayerId = getBottomMbLayerId(mbLayers, mapLayer, layerClass);
+    const bottomMbLayerId = getBottomMbLayerId(mbLayers, mapLayer, layerClass);
+    if (bottomMbLayerId) beneathMbLayerId = bottomMbLayerId;
   });
 }

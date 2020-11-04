@@ -9,12 +9,13 @@
  * Jest to accept its use within a jest.mock()
  */
 export const mockHistory = {
-  createHref: jest.fn(({ pathname }) => `/enterprise_search${pathname}`),
+  createHref: jest.fn(({ pathname }) => `/app/enterprise_search${pathname}`),
   push: jest.fn(),
   location: {
     pathname: '/current-path',
   },
-};
+  listen: jest.fn(() => jest.fn()),
+} as any;
 export const mockLocation = {
   key: 'someKey',
   pathname: '/current-path',
@@ -24,8 +25,10 @@ export const mockLocation = {
 };
 
 jest.mock('react-router-dom', () => ({
+  ...(jest.requireActual('react-router-dom') as object),
   useHistory: jest.fn(() => mockHistory),
   useLocation: jest.fn(() => mockLocation),
+  useParams: jest.fn(() => ({})),
 }));
 
 /**

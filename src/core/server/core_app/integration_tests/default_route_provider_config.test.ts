@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 import { Root } from '../../root';
 
 const { startES } = kbnTestServer.createTestServers({
@@ -24,7 +24,8 @@ const { startES } = kbnTestServer.createTestServers({
 });
 let esServer: kbnTestServer.TestElasticsearchUtils;
 
-describe('default route provider', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/81072
+describe.skip('default route provider', () => {
   let root: Root;
 
   beforeAll(async () => {

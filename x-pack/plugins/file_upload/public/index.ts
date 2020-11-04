@@ -10,4 +10,5 @@ export function plugin() {
   return new FileUploadPlugin();
 }
 
+export { StartContract } from './plugin';
 export { FileUploadComponentProps } from './get_file_upload_component';

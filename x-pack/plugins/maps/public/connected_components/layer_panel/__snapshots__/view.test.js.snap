@@ -5,7 +5,7 @@ exports[`LayerPanel is rendered 1`] = `
   services={
     Object {
       "appName": "maps",
-      "data": undefined,
+      "data": Object {},
       "storage": Storage {
         "clear": [Function],
         "get": [Function],
@@ -57,6 +57,8 @@ exports[`LayerPanel is rendered 1`] = `
           buttonContent="Source details"
           id="accordion1"
           initialIsOpen={false}
+          isLoading={false}
+          isLoadingMessage={false}
           paddingSize="none"
         >
           <EuiText

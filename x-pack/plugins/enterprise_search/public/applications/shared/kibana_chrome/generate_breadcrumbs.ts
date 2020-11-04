@@ -4,8 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useValues } from 'kea';
 import { EuiBreadcrumb } from '@elastic/eui';
-import { History } from 'history';
+
+import { KibanaLogic } from '../kibana';
+import { HttpLogic } from '../http';
 
 import {
   ENTERPRISE_SEARCH_PLUGIN,
@@ -13,57 +16,94 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
 } from '../../../../common/constants';
 
-import { letBrowserHandleEvent } from '../react_router_helpers';
+import { stripLeadingSlash } from '../../../../common/strip_slashes';
+import { letBrowserHandleEvent, createHref } from '../react_router_helpers';
 
 /**
- * Generate React-Router-friendly EUI breadcrumb objects
+ * Types
+ */
+
+interface IBreadcrumb {
+  text: string;
+  path?: string;
+  // Used to navigate outside of the React Router basename,
+  // i.e. if we need to go from App Search to Enterprise Search
+  shouldNotCreateHref?: boolean;
+}
+export type TBreadcrumbs = IBreadcrumb[];
+export type TBreadcrumbTrail = string[]; // A trail of breadcrumb text
+
+/**
+ * Generate an array of breadcrumbs based on:
+ * 1. A passed array of breadcrumb text (the trail prop)
+ * 2. The current React Router path
+ *
+ * To correctly generate working breadcrumbs, ensure the trail array passed to
+ * SetPageChrome matches up with the routed path. For example, a page with a trail of:
+ *    `['Groups', 'Example Group Name', 'Source Prioritization']`
+ * should have a router pathname of:
+ *   `'/groups/{example-group-id}/source_prioritization'`
+ *
+ * Which should then generate the following breadcrumb output:
+ * Groups (linked to `/groups`)
+ * > Example Group Name (linked to `/groups/{example-group-id}`)
+ * > Source Prioritization (linked to `/groups/{example-group-id}/source_prioritization`)
+ */
+
+export const useGenerateBreadcrumbs = (trail: TBreadcrumbTrail): TBreadcrumbs => {
+  const { history } = useValues(KibanaLogic);
+  const pathArray = stripLeadingSlash(history.location.pathname).split('/');
+
+  return trail.map((text, i) => {
+    const path = pathArray[i] ? '/' + pathArray.slice(0, i + 1).join('/') : undefined;
+    return { text, path };
+  });
+};
+
+/**
+ * Convert IBreadcrumb objects to React-Router-friendly EUI breadcrumb objects
  * https://elastic.github.io/eui/#/navigation/breadcrumbs
  */
 
-interface IGenerateBreadcrumbProps {
-  text: string;
-  path?: string;
-  history?: History;
-}
+export const useEuiBreadcrumbs = (breadcrumbs: TBreadcrumbs): EuiBreadcrumb[] => {
+  const { navigateToUrl, history } = useValues(KibanaLogic);
+  const { http } = useValues(HttpLogic);
 
-export const generateBreadcrumb = ({ text, path, history }: IGenerateBreadcrumbProps) => {
-  const breadcrumb = { text } as EuiBreadcrumb;
+  return breadcrumbs.map(({ text, path, shouldNotCreateHref }) => {
+    const breadcrumb: EuiBreadcrumb = { text };
 
-  if (path && history) {
-    breadcrumb.href = history.createHref({ pathname: path });
-    breadcrumb.onClick = (event) => {
-      if (letBrowserHandleEvent(event)) return;
-      event.preventDefault();
-      history.push(path);
-    };
-  }
+    if (path) {
+      breadcrumb.href = createHref(path, { history, http }, { shouldNotCreateHref });
+      breadcrumb.onClick = (event) => {
+        if (letBrowserHandleEvent(event)) return;
+        event.preventDefault();
+        navigateToUrl(path, { shouldNotCreateHref });
+      };
+    }
 
-  return breadcrumb;
+    return breadcrumb;
+  });
 };
 
 /**
  * Product-specific breadcrumb helpers
  */
 
-export type TBreadcrumbs = IGenerateBreadcrumbProps[];
-
-export const enterpriseSearchBreadcrumbs = (history: History) => (
-  breadcrumbs: TBreadcrumbs = []
-) => [
-  generateBreadcrumb({ text: ENTERPRISE_SEARCH_PLUGIN.NAME }),
-  ...breadcrumbs.map(({ text, path }: IGenerateBreadcrumbProps) =>
-    generateBreadcrumb({ text, path, history })
-  ),
-];
-
-export const appSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
-  enterpriseSearchBreadcrumbs(history)([
-    { text: APP_SEARCH_PLUGIN.NAME, path: '/' },
+export const useEnterpriseSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
+  useEuiBreadcrumbs([
+    {
+      text: ENTERPRISE_SEARCH_PLUGIN.NAME,
+      path: ENTERPRISE_SEARCH_PLUGIN.URL,
+      shouldNotCreateHref: true,
+    },
     ...breadcrumbs,
   ]);
 
-export const workplaceSearchBreadcrumbs = (history: History) => (breadcrumbs: TBreadcrumbs = []) =>
-  enterpriseSearchBreadcrumbs(history)([
+export const useAppSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([{ text: APP_SEARCH_PLUGIN.NAME, path: '/' }, ...breadcrumbs]);
+
+export const useWorkplaceSearchBreadcrumbs = (breadcrumbs: TBreadcrumbs = []) =>
+  useEnterpriseSearchBreadcrumbs([
     { text: WORKPLACE_SEARCH_PLUGIN.NAME, path: '/' },
     ...breadcrumbs,
   ]);

@@ -8,18 +8,18 @@ import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';
-import {
-  PinnedEvent,
-  TimelineNonEcsData,
+import { PinnedEvent } from '../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import type {
+  TimelineEventsType,
   TimelineType,
   TimelineStatus,
-} from '../../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
-import type { RowRendererId } from '../../../../common/types/timeline';
+  RowRendererId,
+} from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
-export type EventType = 'all' | 'raw' | 'alert' | 'signal';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
@@ -52,7 +52,7 @@ export interface TimelineModel {
   /** A summary of the events and notes in this timeline */
   description: string;
   /** Typoe of event you want to see in this timeline */
-  eventType?: EventType;
+  eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
   /** A list of Ids of excluded Row Renderers */
@@ -66,6 +66,8 @@ export interface TimelineModel {
   highlightedDropAndProviderId: string;
   /** Uniquely identifies the timeline */
   id: string;
+  /** TO DO sourcerer @X define this */
+  indexNames: string[];
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
   /** Events to be rendered as loading **/
@@ -136,6 +138,7 @@ export type SubsetTimelineModel = Readonly<
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
+    | 'indexNames'
     | 'isFavorite'
     | 'isLive'
     | 'isSelectAllChecked'

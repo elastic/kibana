@@ -59,7 +59,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should not allow to enroll an agent with a invalid enrollment', async () => {
       await supertest
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set('Authorization', 'ApiKey NOTAVALIDKEY')
         .send({
@@ -76,7 +76,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should not allow to enroll an agent with a shared id if it already exists ', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
           'authorization',
@@ -98,7 +98,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should not allow to enroll an agent with a version > kibana', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
           'authorization',
@@ -115,12 +115,12 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(400);
-      expect(apiResponse.message).to.match(/Agent version is not compatible with kibana/);
+      expect(apiResponse.message).to.match(/is not compatible/);
     });
 
     it('should allow to enroll an agent with a valid enrollment token', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
           'Authorization',
@@ -136,13 +136,12 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-      expect(apiResponse.success).to.eql(true);
-      expect(apiResponse.item).to.have.keys('id', 'active', 'access_api_key', 'type', 'config_id');
+      expect(apiResponse.item).to.have.keys('id', 'active', 'access_api_key', 'type', 'policy_id');
     });
 
     it('when enrolling an agent it should generate an access api key with limited privileges', async () => {
       const { body: apiResponse } = await supertest
-        .post(`/api/ingest_manager/fleet/agents/enroll`)
+        .post(`/api/fleet/agents/enroll`)
         .set('kbn-xsrf', 'xxx')
         .set(
           'Authorization',
@@ -158,7 +157,7 @@ export default function (providerContext: FtrProviderContext) {
           },
         })
         .expect(200);
-      expect(apiResponse.success).to.eql(true);
+
       const { body: privileges } = await getEsClientForAPIKey(
         providerContext,
         apiResponse.item.access_api_key

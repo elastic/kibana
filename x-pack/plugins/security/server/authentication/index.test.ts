@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { licenseMock } from '../../common/licensing/index.mock';
-
 jest.mock('./api_keys');
 jest.mock('./authenticator');
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   loggingSystemMock,
@@ -18,17 +17,20 @@ import {
   httpServiceMock,
   elasticsearchServiceMock,
 } from '../../../../../src/core/server/mocks';
+import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import { securityAuditLoggerMock } from '../audit/index.mock';
+import { auditServiceMock, securityAuditLoggerMock } from '../audit/index.mock';
+import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
+import { sessionMock } from '../session_management/session.mock';
 
 import {
   AuthenticationHandler,
   AuthToolkit,
   ILegacyClusterClient,
-  CoreSetup,
   KibanaRequest,
   LoggerFactory,
   LegacyScopedClusterClient,
+  HttpServiceSetup,
 } from '../../../../../src/core/server';
 import { AuthenticatedUser } from '../../common/model';
 import { ConfigSchema, ConfigType, createConfig } from '../config';
@@ -41,24 +43,27 @@ import {
   InvalidateAPIKeyParams,
 } from './api_keys';
 import { SecurityLicense } from '../../common/licensing';
-import { SecurityAuditLogger } from '../audit';
+import { AuditServiceSetup, SecurityAuditLogger } from '../audit';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
-import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
+import { Session } from '../session_management';
 
 describe('setupAuthentication()', () => {
   let mockSetupAuthenticationParams: {
-    auditLogger: jest.Mocked<SecurityAuditLogger>;
+    legacyAuditLogger: jest.Mocked<SecurityAuditLogger>;
+    audit: jest.Mocked<AuditServiceSetup>;
     config: ConfigType;
     loggers: LoggerFactory;
-    http: jest.Mocked<CoreSetup['http']>;
+    http: jest.Mocked<HttpServiceSetup>;
     clusterClient: jest.Mocked<ILegacyClusterClient>;
     license: jest.Mocked<SecurityLicense>;
     getFeatureUsageService: () => jest.Mocked<SecurityFeatureUsageServiceStart>;
+    session: jest.Mocked<PublicMethodsOf<Session>>;
   };
   let mockScopedClusterClient: jest.Mocked<PublicMethodsOf<LegacyScopedClusterClient>>;
   beforeEach(() => {
     mockSetupAuthenticationParams = {
-      auditLogger: securityAuditLoggerMock.create(),
+      legacyAuditLogger: securityAuditLoggerMock.create(),
+      audit: auditServiceMock.create(),
       http: coreMock.createSetup().http,
       config: createConfig(
         ConfigSchema.validate({
@@ -75,6 +80,7 @@ describe('setupAuthentication()', () => {
       getFeatureUsageService: jest
         .fn()
         .mockReturnValue(securityFeatureUsageServiceMock.createStartContract()),
+      session: sessionMock.create(),
     };
 
     mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
@@ -85,31 +91,13 @@ describe('setupAuthentication()', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('properly initializes session storage and registers auth handler', async () => {
-    const config = {
-      encryptionKey: 'ab'.repeat(16),
-      secureCookies: true,
-      cookieName: 'my-sid-cookie',
-    };
-
+  it('properly registers auth handler', async () => {
     await setupAuthentication(mockSetupAuthenticationParams);
 
     expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledTimes(1);
     expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledWith(
       expect.any(Function)
     );
-
-    expect(
-      mockSetupAuthenticationParams.http.createCookieSessionStorageFactory
-    ).toHaveBeenCalledTimes(1);
-    expect(
-      mockSetupAuthenticationParams.http.createCookieSessionStorageFactory
-    ).toHaveBeenCalledWith({
-      encryptionKey: config.encryptionKey,
-      isSecure: config.secureCookies,
-      name: config.cookieName,
-      validate: expect.any(Function),
-    });
   });
 
   describe('authentication handler', () => {
@@ -120,6 +108,11 @@ describe('setupAuthentication()', () => {
       mockAuthToolkit = httpServiceMock.createAuthToolkit();
 
       await setupAuthentication(mockSetupAuthenticationParams);
+
+      expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledTimes(1);
+      expect(mockSetupAuthenticationParams.http.registerAuth).toHaveBeenCalledWith(
+        expect.any(Function)
+      );
 
       authHandler = mockSetupAuthenticationParams.http.registerAuth.mock.calls[0][0];
       authenticate = jest.requireMock('./authenticator').Authenticator.mock.instances[0]
@@ -195,15 +188,20 @@ describe('setupAuthentication()', () => {
       expect(authenticate).toHaveBeenCalledWith(mockRequest);
     });
 
-    it('redirects user if redirection is requested by the authenticator', async () => {
+    it('redirects user if redirection is requested by the authenticator preserving authentication response headers if any', async () => {
       const mockResponse = httpServerMock.createLifecycleResponseFactory();
-      authenticate.mockResolvedValue(AuthenticationResult.redirectTo('/some/url'));
+      authenticate.mockResolvedValue(
+        AuthenticationResult.redirectTo('/some/url', {
+          authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
+        })
+      );
 
       await authHandler(httpServerMock.createKibanaRequest(), mockResponse, mockAuthToolkit);
 
       expect(mockAuthToolkit.redirected).toHaveBeenCalledTimes(1);
       expect(mockAuthToolkit.redirected).toHaveBeenCalledWith({
         location: '/some/url',
+        'WWW-Authenticate': 'Negotiate',
       });
       expect(mockAuthToolkit.authenticated).not.toHaveBeenCalled();
       expect(mockResponse.internalError).not.toHaveBeenCalled();

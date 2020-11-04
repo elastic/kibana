@@ -5,7 +5,6 @@
  */
 
 import { Dispatch, SetStateAction } from 'react';
-import { SearchResponse } from 'elasticsearch';
 
 import { EuiDataGridPaginationProps, EuiDataGridSorting, EuiDataGridColumn } from '@elastic/eui';
 
@@ -43,16 +42,6 @@ export type EsSorting = Dictionary<{
   order: 'asc' | 'desc';
 }>;
 
-// The types specified in `@types/elasticsearch` are out of date and still have `total: number`.
-export interface SearchResponse7 extends SearchResponse<any> {
-  hits: SearchResponse<any>['hits'] & {
-    total: {
-      value: number;
-      relation: string;
-    };
-  };
-}
-
 export interface UseIndexDataReturnType
   extends Pick<
     UseDataGridReturnType,
@@ -74,6 +63,9 @@ export interface UseIndexDataReturnType
     | 'tableItems'
     | 'toggleChartVisibility'
     | 'visibleColumns'
+    | 'baseline'
+    | 'predictionFieldName'
+    | 'resultsField'
   > {
   renderCellValue: RenderCellValue;
 }
@@ -105,4 +97,7 @@ export interface UseDataGridReturnType {
   tableItems: DataGridItem[];
   toggleChartVisibility: () => void;
   visibleColumns: ColumnId[];
+  baseline?: number;
+  predictionFieldName?: string;
+  resultsField?: string;
 }

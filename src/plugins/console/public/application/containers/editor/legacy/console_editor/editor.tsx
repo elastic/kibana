@@ -67,9 +67,8 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService },
+    services: { history, notifications, settings: settingsService, esHostService },
     docLinkVersion,
-    elasticsearchUrl,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
@@ -183,6 +182,9 @@ function EditorUI({ initialTextValue }: EditorProps) {
       unsubscribeResizer();
       clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
+      if (editorInstanceRef.current) {
+        editorInstanceRef.current.getCoreEditor().destroy();
+      }
     };
   }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
 
@@ -232,7 +234,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
           <EuiFlexItem>
             <ConsoleMenu
               getCurl={() => {
-                return editorInstanceRef.current!.getRequestsAsCURL(elasticsearchUrl);
+                return editorInstanceRef.current!.getRequestsAsCURL(esHostService.getHost());
               }}
               getDocumentation={() => {
                 return getDocumentation(editorInstanceRef.current!, docLinkVersion);

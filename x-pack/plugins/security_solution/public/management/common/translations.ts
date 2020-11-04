@@ -13,3 +13,11 @@ export const ENDPOINTS_TAB = i18n.translate('xpack.securitySolution.endpointsTab
 export const POLICIES_TAB = i18n.translate('xpack.securitySolution.policiesTab', {
   defaultMessage: 'Policies',
 });
+
+export const TRUSTED_APPS_TAB = i18n.translate('xpack.securitySolution.trustedAppsTab', {
+  defaultMessage: 'Trusted applications',
+});
+
+export const BETA_BADGE_LABEL = i18n.translate('xpack.securitySolution.administration.list.beta', {
+  defaultMessage: 'Beta',
+});

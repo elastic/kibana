@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { deepFreeze } from '@kbn/std';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   KibanaRequest,
   Logger,
@@ -11,7 +13,6 @@ import {
   ILegacyClusterClient,
   Headers,
 } from '../../../../../../src/core/server';
-import { deepFreeze } from '../../../../../../src/core/server';
 import { AuthenticatedUser } from '../../../common/model';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';

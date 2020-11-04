@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import semver from 'semver';
 import { SavedObjectsClientContract } from 'src/core/server';
 import { AgentType, Agent, AgentSOAttributes } from '../../types';
@@ -16,11 +16,12 @@ import { appContextService } from '../app_context';
 export async function enroll(
   soClient: SavedObjectsClientContract,
   type: AgentType,
-  configId: string,
+  agentPolicyId: string,
   metadata?: { local: any; userProvided: any },
   sharedId?: string
 ): Promise<Agent> {
-  validateAgentVersion(metadata);
+  const agentVersion = metadata?.local?.elastic?.agent?.version;
+  validateAgentVersion(agentVersion);
 
   const existingAgent = sharedId ? await getAgentBySharedId(soClient, sharedId) : null;
 
@@ -33,7 +34,7 @@ export async function enroll(
   const agentData: AgentSOAttributes = {
     shared_id: sharedId,
     active: true,
-    config_id: configId,
+    policy_id: agentPolicyId,
     type,
     enrolled_at: enrolledAt,
     user_provided_metadata: metadata?.userProvided ?? {},
@@ -64,7 +65,7 @@ export async function enroll(
     );
   }
 
-  const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agent.id, configId);
+  const accessAPIKey = await APIKeyService.generateAccessApiKey(soClient, agent.id);
 
   await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, {
     access_api_key_id: accessAPIKey.id,
@@ -89,24 +90,50 @@ async function getAgentBySharedId(soClient: SavedObjectsClientContract, sharedId
   return null;
 }
 
-export function validateAgentVersion(metadata?: { local: any; userProvided: any }) {
-  const kibanaVersion = semver.parse(appContextService.getKibanaVersion());
-  if (!kibanaVersion) {
-    throw Boom.badRequest('Kibana version is not set');
-  }
-  const version = semver.parse(metadata?.local?.elastic?.agent?.version);
-  if (!version) {
-    throw Boom.badRequest('Agent version not provided in metadata.');
+export function validateAgentVersion(
+  agentVersion: string,
+  kibanaVersion = appContextService.getKibanaVersion()
+) {
+  const agentVersionParsed = semver.parse(agentVersion);
+  if (!agentVersionParsed) {
+    throw Boom.badRequest('Agent version not provided');
   }
 
-  if (!version || !semver.lte(formatVersion(version), formatVersion(kibanaVersion))) {
-    throw Boom.badRequest('Agent version is not compatible with kibana version');
+  const kibanaVersionParsed = semver.parse(kibanaVersion);
+  if (!kibanaVersionParsed) {
+    throw Boom.badRequest('Kibana version is not set or provided');
   }
-}
 
-/**
- * used to remove prelease from version as includePrerelease in not working as expected
- */
-function formatVersion(version: semver.SemVer) {
-  return `${version.major}.${version.minor}.${version.patch}`;
+  const diff = semver.diff(agentVersion, kibanaVersion);
+  switch (diff) {
+    // section 1) very close versions, only patch release differences - all combos should work
+    // Agent a.b.1 < Kibana a.b.2
+    // Agent a.b.2 > Kibana a.b.1
+    case null:
+    case 'prerelease':
+    case 'prepatch':
+    case 'patch':
+      return; // OK
+
+    // section 2) somewhat close versions, Agent minor release is 1 or 2 versions back and is older than the stack:
+    // Agent a.9.x < Kibana a.10.x
+    // Agent a.9.x < Kibana a.11.x
+    case 'preminor':
+    case 'minor':
+      if (
+        agentVersionParsed.minor < kibanaVersionParsed.minor &&
+        kibanaVersionParsed.minor - agentVersionParsed.minor <= 2
+      )
+        return;
+
+    // section 3) versions where Agent is a minor version or major version greater (newer) than the stack should not work:
+    // Agent 7.10.x > Kibana 7.9.x
+    // Agent 8.0.x > Kibana 7.9.x
+    default:
+      if (semver.lte(agentVersionParsed, kibanaVersionParsed)) return;
+      else
+        throw Boom.badRequest(
+          `Agent version ${agentVersion} is not compatible with Kibana version ${kibanaVersion}`
+        );
+  }
 }

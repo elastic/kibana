@@ -45,7 +45,7 @@ describe('canFormatFeatureProperties', () => {
   });
 });
 
-describe('filterAndFormatPropertiesToHtml', () => {
+describe('getTooltipProperties', () => {
   const descriptorWithFields = {
     ...descriptor,
     fields: [
@@ -67,7 +67,7 @@ describe('filterAndFormatPropertiesToHtml', () => {
 
   it('should get tooltipproperties', async () => {
     const source = new MVTSingleLayerVectorSource(descriptorWithFields);
-    const tooltipProperties = await source.filterAndFormatPropertiesToHtml({
+    const tooltipProperties = await source.getTooltipProperties({
       foo: 'bar',
       fooz: 123,
     });

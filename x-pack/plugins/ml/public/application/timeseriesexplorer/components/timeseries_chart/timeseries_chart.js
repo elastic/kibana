@@ -12,10 +12,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import isEqual from 'lodash/isEqual';
-import reduce from 'lodash/reduce';
-import each from 'lodash/each';
-import get from 'lodash/get';
+import { isEqual, reduce, each, get } from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -36,7 +33,7 @@ import {
   showMultiBucketAnomalyMarker,
   showMultiBucketAnomalyTooltip,
 } from '../../../util/chart_utils';
-import { formatHumanReadableDateTimeSeconds } from '../../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../common/util/date_utils';
 import { getTimeBucketsFromCache } from '../../../util/time_buckets';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
@@ -552,7 +549,7 @@ class TimeseriesChartIntl extends Component {
   renderFocusChart() {
     const {
       focusAggregationInterval,
-      focusAnnotationData,
+      focusAnnotationData: focusAnnotationDataOriginalPropValue,
       focusChartData,
       focusForecastData,
       modelPlotEnabled,
@@ -564,6 +561,10 @@ class TimeseriesChartIntl extends Component {
       zoomFromFocusLoaded,
       zoomToFocusLoaded,
     } = this.props;
+
+    const focusAnnotationData = Array.isArray(focusAnnotationDataOriginalPropValue)
+      ? focusAnnotationDataOriginalPropValue
+      : [];
 
     if (focusChartData === undefined) {
       return;
@@ -671,7 +672,7 @@ class TimeseriesChartIntl extends Component {
 
       // if annotations are present, we extend yMax to avoid overlap
       // between annotation labels, chart lines and anomalies.
-      if (focusAnnotationData && focusAnnotationData.length > 0) {
+      if (showAnnotations && focusAnnotationData && focusAnnotationData.length > 0) {
         const levels = getAnnotationLevels(focusAnnotationData);
         const maxLevel = d3.max(Object.keys(levels).map((key) => levels[key]));
         // TODO needs revisiting to be a more robust normalization

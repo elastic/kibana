@@ -172,18 +172,12 @@ export const getMlJobsUsage = async (ml: MlPluginSetup | undefined): Promise<MlJ
 
   if (ml) {
     try {
-      const fakeRequest = { headers: {}, params: 'DummyKibanaRequest' } as KibanaRequest;
+      const fakeRequest = { headers: {} } as KibanaRequest;
       const fakeSOClient = {} as SavedObjectsClient;
-      const internalMlClient = {
-        callAsCurrentUser: ml?.mlClient.callAsInternalUser,
-        callAsInternalUser: ml?.mlClient.callAsInternalUser,
-      };
 
-      const modules = await ml
-        .modulesProvider(internalMlClient, fakeRequest, fakeSOClient)
-        .listModules();
+      const modules = await ml.modulesProvider(fakeRequest, fakeSOClient).listModules();
       const moduleJobs = modules.flatMap((module) => module.jobs);
-      const jobs = await ml.jobServiceProvider(internalMlClient, fakeRequest).jobsSummary();
+      const jobs = await ml.jobServiceProvider(fakeRequest).jobsSummary();
 
       jobsUsage = jobs.filter(isSecurityJob).reduce((usage, job) => {
         const isElastic = moduleJobs.some((moduleJob) => moduleJob.id === job.id);

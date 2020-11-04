@@ -11,7 +11,12 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
-import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../src/plugins/data/public';
+import {
+  APPLY_FILTER_TRIGGER,
+  ActionExecutionContext,
+  TriggerContextMapping,
+} from '../../../../../src/plugins/ui_actions/public';
 import {
   esFilters,
   TimeRange,
@@ -57,6 +62,7 @@ export { MapEmbeddableInput, MapEmbeddableConfig };
 export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput> {
   type = MAP_SAVED_OBJECT_TYPE;
 
+  private _description: string;
   private _renderTooltipContent?: RenderToolTipContent;
   private _eventHandlers?: EventHandlers;
   private _layerList: LayerDescriptor[];
@@ -90,6 +96,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       parent
     );
 
+    this._description = config.description ? config.description : '';
     this._renderTooltipContent = renderTooltipContent;
     this._eventHandlers = eventHandlers;
     this._layerList = config.layerList;
@@ -97,6 +104,14 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     this._store = createMapStore();
 
     this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
+  }
+
+  public getDescription() {
+    return this._description;
+  }
+
+  supportedTriggers(): Array<keyof TriggerContextMapping> {
+    return [APPLY_FILTER_TRIGGER];
   }
 
   setRenderTooltipContent = (renderTooltipContent: RenderToolTipContent) => {
@@ -129,12 +144,12 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     query,
     timeRange,
     filters,
-    refresh,
+    forceRefresh,
   }: {
     query?: Query;
     timeRange?: TimeRange;
     filters: Filter[];
-    refresh?: boolean;
+    forceRefresh?: boolean;
   }) {
     this._prevTimeRange = timeRange;
     this._prevQuery = query;
@@ -144,7 +159,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
         filters: filters.filter((filter) => !filter.meta.disabled),
         query,
         timeFilters: timeRange,
-        refresh,
+        forceRefresh,
       })
     );
   }
@@ -226,7 +241,11 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
         <I18nContext>
           <MapContainer
             addFilters={this.input.hideFilterActions ? null : this.addFilters}
+            getFilterActions={this.getFilterActions}
+            getActionContext={this.getActionContext}
             renderTooltipContent={this._renderTooltipContent}
+            title={this.getTitle()}
+            description={this._description}
           />
         </I18nContext>
       </Provider>,
@@ -243,11 +262,34 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
     return await this._store.dispatch<any>(replaceLayerList(this._layerList));
   }
 
-  addFilters = (filters: Filter[]) => {
-    getUiActions().executeTriggerActions(APPLY_FILTER_TRIGGER, {
-      embeddable: this,
+  addFilters = async (filters: Filter[], actionId: string = ACTION_GLOBAL_APPLY_FILTER) => {
+    const executeContext = {
+      ...this.getActionContext(),
       filters,
+    };
+    const action = getUiActions().getAction(actionId);
+    if (!action) {
+      throw new Error('Unable to apply filter, could not locate action');
+    }
+    action.execute(executeContext);
+  };
+
+  getFilterActions = async () => {
+    return await getUiActions().getTriggerCompatibleActions(APPLY_FILTER_TRIGGER, {
+      embeddable: this,
+      filters: [],
     });
+  };
+
+  getActionContext = () => {
+    const trigger = getUiActions().getTrigger(APPLY_FILTER_TRIGGER);
+    if (!trigger) {
+      throw new Error('Unable to get context, could not locate trigger');
+    }
+    return {
+      embeddable: this,
+      trigger,
+    } as ActionExecutionContext;
   };
 
   destroy() {
@@ -270,7 +312,7 @@ export class MapEmbeddable extends Embeddable<MapEmbeddableInput, MapEmbeddableO
       query: this._prevQuery,
       timeRange: this._prevTimeRange,
       filters: this._prevFilters ?? [],
-      refresh: true,
+      forceRefresh: true,
     });
   }
 

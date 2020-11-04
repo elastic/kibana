@@ -4,9 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { SavedObject } from 'src/core/server';
-import { Agent, AgentSOAttributes, AgentAction, AgentActionSOAttributes } from '../../types';
+import {
+  Agent,
+  AgentSOAttributes,
+  AgentAction,
+  AgentPolicyAction,
+  AgentActionSOAttributes,
+  AgentPolicyActionSOAttributes,
+  BaseAgentActionSOAttributes,
+} from '../../types';
 
 export function savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
   if (so.error) {
@@ -27,7 +35,13 @@ export function savedObjectToAgent(so: SavedObject<AgentSOAttributes>): Agent {
   };
 }
 
-export function savedObjectToAgentAction(so: SavedObject<AgentActionSOAttributes>): AgentAction {
+export function savedObjectToAgentAction(so: SavedObject<AgentActionSOAttributes>): AgentAction;
+export function savedObjectToAgentAction(
+  so: SavedObject<AgentPolicyActionSOAttributes>
+): AgentPolicyAction;
+export function savedObjectToAgentAction(
+  so: SavedObject<BaseAgentActionSOAttributes>
+): AgentAction | AgentPolicyAction {
   if (so.error) {
     if (so.error.statusCode === 404) {
       throw Boom.notFound(so.error.message);
@@ -36,9 +50,42 @@ export function savedObjectToAgentAction(so: SavedObject<AgentActionSOAttributes
     throw new Error(so.error.message);
   }
 
+  // If it's an AgentPolicyAction
+  if (isPolicyActionSavedObject(so)) {
+    return {
+      id: so.id,
+      type: so.attributes.type,
+      created_at: so.attributes.created_at,
+      policy_id: so.attributes.policy_id,
+      policy_revision: so.attributes.policy_revision,
+      data: so.attributes.data ? JSON.parse(so.attributes.data) : undefined,
+      ack_data: so.attributes.ack_data ? JSON.parse(so.attributes.ack_data) : undefined,
+    };
+  }
+
+  if (!isAgentActionSavedObject(so)) {
+    throw new Error(`Malformed saved object AgentAction ${so.id}`);
+  }
+
+  // If it's an AgentAction
   return {
     id: so.id,
-    ...so.attributes,
+    type: so.attributes.type,
+    created_at: so.attributes.created_at,
+    agent_id: so.attributes.agent_id,
     data: so.attributes.data ? JSON.parse(so.attributes.data) : undefined,
+    ack_data: so.attributes.ack_data ? JSON.parse(so.attributes.ack_data) : undefined,
   };
+}
+
+export function isAgentActionSavedObject(
+  so: SavedObject<BaseAgentActionSOAttributes>
+): so is SavedObject<AgentActionSOAttributes> {
+  return (so.attributes as AgentActionSOAttributes).agent_id !== undefined;
+}
+
+export function isPolicyActionSavedObject(
+  so: SavedObject<BaseAgentActionSOAttributes>
+): so is SavedObject<AgentPolicyActionSOAttributes> {
+  return (so.attributes as AgentPolicyActionSOAttributes).policy_id !== undefined;
 }

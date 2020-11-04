@@ -15,14 +15,16 @@ A few services also automatically generate api documentation which can be browse
 A few notable services are called out below.
 
 * <<development-security>>
+* <<development-plugin-saved-objects>>
 * <<add-data-tutorials>>
 * <<development-visualize-index>>
-* <<code-exploration>>
+
+include::security/index.asciidoc[leveloffset=+1]
+
+include::development-plugin-saved-objects.asciidoc[leveloffset=+1]
 
 include::add-data-tutorials.asciidoc[leveloffset=+1]
 
 include::development-visualize-index.asciidoc[leveloffset=+1]
 
-include::security/index.asciidoc[leveloffset=+1]
 
-include::code-exploration.asciidoc[leveloffset=+1]

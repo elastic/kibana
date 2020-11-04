@@ -90,8 +90,9 @@ describe('config validation', () => {
   };
 
   test('config validation passes when only required fields are provided', () => {
-    const config: Record<string, string> = {
+    const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -101,9 +102,10 @@ describe('config validation', () => {
 
   test('config validation passes when valid methods are provided', () => {
     ['post', 'put'].forEach((method) => {
-      const config: Record<string, string> = {
+      const config: Record<string, string | boolean> = {
         url: 'http://mylisteningserver:9200/endpoint',
         method,
+        hasAuth: true,
       };
       expect(validateConfig(actionType, config)).toEqual({
         ...defaultValues,
@@ -127,8 +129,9 @@ describe('config validation', () => {
   });
 
   test('config validation passes when a url is specified', () => {
-    const config: Record<string, string> = {
+    const config: Record<string, string | boolean> = {
       url: 'http://mylisteningserver:9200/endpoint',
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -155,6 +158,7 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...defaultValues,
@@ -176,7 +180,7 @@ describe('config validation', () => {
 `);
   });
 
-  test('config validation passes when kibana config whitelists the url', () => {
+  test('config validation passes when kibana config url does not present in allowedHosts', () => {
     // any for testing
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const config: Record<string, any> = {
@@ -184,6 +188,7 @@ describe('config validation', () => {
       headers: {
         'Content-Type': 'application/json',
       },
+      hasAuth: true,
     };
 
     expect(validateConfig(actionType, config)).toEqual({
@@ -192,13 +197,13 @@ describe('config validation', () => {
     });
   });
 
-  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: (_) => {
-          throw new Error(`target url is not whitelisted`);
+        ensureUriAllowed: (_) => {
+          throw new Error(`target url is not present in allowedHosts`);
         },
       },
     });
@@ -215,7 +220,7 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(actionType, config);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring webhook action: target url is not whitelisted"`
+      `"error validating action type config: error configuring webhook action: target url is not present in allowedHosts"`
     );
   });
 });
@@ -263,6 +268,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
+      hasAuth: true,
     };
     await actionType.executor({
       actionId: 'some-id',
@@ -320,6 +326,7 @@ describe('execute()', () => {
       headers: {
         aheader: 'a value',
       },
+      hasAuth: false,
     };
     const secrets: ActionTypeSecretsType = { user: null, password: null };
     await actionType.executor({

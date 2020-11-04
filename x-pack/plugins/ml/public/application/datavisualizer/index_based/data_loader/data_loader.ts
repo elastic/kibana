@@ -80,7 +80,7 @@ export class DataLoader {
     earliest: number | undefined,
     latest: number | undefined,
     fields: FieldRequestConfig[],
-    interval?: string
+    interval?: number
   ): Promise<any[]> {
     const stats = await ml.getVisualizerFieldStats({
       indexPatternTitle: this._indexPatternTitle,

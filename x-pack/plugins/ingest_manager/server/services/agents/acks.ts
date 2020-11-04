@@ -10,15 +10,17 @@ import {
   SavedObjectsBulkResponse,
   SavedObjectsClientContract,
 } from 'src/core/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import LRU from 'lru-cache';
 import {
   Agent,
   AgentAction,
+  AgentPolicyAction,
+  AgentPolicyActionV7_9,
   AgentEvent,
   AgentEventSOAttributes,
   AgentSOAttributes,
   AgentActionSOAttributes,
-  FullAgentConfig,
 } from '../../types';
 import {
   AGENT_EVENT_SAVED_OBJECT_TYPE,
@@ -27,14 +29,24 @@ import {
 } from '../../constants';
 import { getAgentActionByIds } from './actions';
 import { forceUnenrollAgent } from './unenroll';
+import { ackAgentUpgraded } from './upgrade';
 
 const ALLOWED_ACKNOWLEDGEMENT_TYPE: string[] = ['ACTION_RESULT'];
+
+const actionCache = new LRU<string, AgentAction>({
+  max: 20,
+  maxAge: 10 * 60 * 1000, // 10 minutes
+});
 
 export async function acknowledgeAgentActions(
   soClient: SavedObjectsClientContract,
   agent: Agent,
   agentEvents: AgentEvent[]
 ): Promise<AgentAction[]> {
+  if (agentEvents.length === 0) {
+    return [];
+  }
+
   for (const agentEvent of agentEvents) {
     if (!isAllowedType(agentEvent.type)) {
       throw Boom.badRequest(`${agentEvent.type} not allowed for acknowledgment only ACTION_RESULT`);
@@ -45,9 +57,9 @@ export async function acknowledgeAgentActions(
     .map((event) => event.action_id)
     .filter((actionId) => actionId !== undefined) as string[];
 
-  let actions;
+  let actions: AgentAction[];
   try {
-    actions = await getAgentActionByIds(soClient, actionIds);
+    actions = await fetchActionsUsingCache(soClient, actionIds);
   } catch (error) {
     if (Boom.isBoom(error) && error.output.statusCode === 404) {
       throw Boom.badRequest(`One or more actions cannot be found`);
@@ -55,14 +67,14 @@ export async function acknowledgeAgentActions(
     throw error;
   }
 
+  const agentActionsIds: string[] = [];
   for (const action of actions) {
-    if (action.agent_id !== agent.id) {
+    if (action.agent_id) {
+      agentActionsIds.push(action.id);
+    }
+    if (action.agent_id && action.agent_id !== agent.id) {
       throw Boom.badRequest(`${action.id} not found`);
     }
-  }
-
-  if (actions.length === 0) {
-    return [];
   }
 
   const isAgentUnenrolled = actions.some((action) => action.type === 'UNENROLL');
@@ -70,50 +82,79 @@ export async function acknowledgeAgentActions(
     await forceUnenrollAgent(soClient, agent.id);
   }
 
-  const config = getLatestConfigIfUpdated(agent, actions);
+  const upgradeAction = actions.find((action) => action.type === 'UPGRADE');
+  if (upgradeAction) {
+    await ackAgentUpgraded(soClient, upgradeAction);
+  }
+
+  const configChangeAction = getLatestConfigChangePolicyActionIfUpdated(agent, actions);
 
   await soClient.bulkUpdate<AgentSOAttributes | AgentActionSOAttributes>([
-    ...(config ? [buildUpdateAgentConfig(agent.id, config)] : []),
-    ...buildUpdateAgentActionSentAt(actionIds),
+    ...(configChangeAction
+      ? [
+          {
+            type: AGENT_SAVED_OBJECT_TYPE,
+            id: agent.id,
+            attributes: {
+              policy_revision: configChangeAction.policy_revision,
+              packages: configChangeAction?.ack_data?.packages,
+            },
+          },
+        ]
+      : []),
+    ...buildUpdateAgentActionSentAt(agentActionsIds),
   ]);
 
   return actions;
 }
 
-function getLatestConfigIfUpdated(agent: Agent, actions: AgentAction[]) {
-  return actions.reduce<null | FullAgentConfig>((acc, action) => {
-    if (action.type !== 'CONFIG_CHANGE') {
-      return acc;
-    }
-    const data = action.data || {};
+async function fetchActionsUsingCache(
+  soClient: SavedObjectsClientContract,
+  actionIds: string[]
+): Promise<AgentAction[]> {
+  const missingActionIds: string[] = [];
+  const actions = actionIds
+    .map((actionId) => {
+      const action = actionCache.get(actionId);
+      if (!action) {
+        missingActionIds.push(actionId);
+      }
+      return action;
+    })
+    .filter((action): action is AgentAction => action !== undefined);
 
-    if (data?.config?.id !== agent.config_id) {
-      return acc;
-    }
+  if (missingActionIds.length === 0) {
+    return actions;
+  }
 
-    const currentRevision = (acc && acc.revision) || agent.config_revision || 0;
+  const freshActions = await getAgentActionByIds(soClient, actionIds, false);
+  freshActions.forEach((action) => actionCache.set(action.id, action));
 
-    return data?.config?.revision > currentRevision ? data?.config : acc;
-  }, null);
+  return [...freshActions, ...actions];
 }
 
-function buildUpdateAgentConfig(agentId: string, config: FullAgentConfig) {
-  const packages = config.inputs.reduce<string[]>((acc, input) => {
-    const packageName = input.meta?.package?.name;
-    if (packageName && acc.indexOf(packageName) < 0) {
-      return [packageName, ...acc];
-    }
-    return acc;
-  }, []);
+function isAgentPolicyAction(
+  action: AgentAction | AgentPolicyAction | AgentPolicyActionV7_9
+): action is AgentPolicyAction | AgentPolicyActionV7_9 {
+  return (action as AgentPolicyAction).policy_id !== undefined;
+}
 
-  return {
-    type: AGENT_SAVED_OBJECT_TYPE,
-    id: agentId,
-    attributes: {
-      config_revision: config.revision,
-      packages,
-    },
-  };
+function getLatestConfigChangePolicyActionIfUpdated(
+  agent: Agent,
+  actions: Array<AgentAction | AgentPolicyAction | AgentPolicyActionV7_9>
+): AgentPolicyAction | AgentPolicyActionV7_9 | null {
+  return actions.reduce<null | AgentPolicyAction | AgentPolicyActionV7_9>((acc, action) => {
+    if (
+      !isAgentPolicyAction(action) ||
+      (action.type !== 'POLICY_CHANGE' && action.type !== 'CONFIG_CHANGE') ||
+      action.policy_id !== agent.policy_id ||
+      (action?.policy_revision ?? 0) < (agent.policy_revision || 0)
+    ) {
+      return acc;
+    }
+
+    return action;
+  }, null);
 }
 
 function buildUpdateAgentActionSentAt(

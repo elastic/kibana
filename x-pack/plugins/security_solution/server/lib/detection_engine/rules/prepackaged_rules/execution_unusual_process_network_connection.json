@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies network activity from unexpected system applications. This may indicate adversarial activity as these applications are often leveraged by adversaries to execute code and evade detection.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -16,7 +17,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -29,12 +33,12 @@
       "technique": [
         {
           "id": "T1127",
-          "name": "Trusted Developer Utilities",
+          "name": "Trusted Developer Utilities Proxy Execution",
           "reference": "https://attack.mitre.org/techniques/T1127/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

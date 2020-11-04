@@ -10,8 +10,6 @@ import { HelloWorldEmbeddable } from '../../../../examples/embeddable_examples/p
 /** eslint-enable */
 import { TimeRangeEmbeddable, TimeRangeContainer } from './test_helpers';
 
-jest.mock('ui/new_platform');
-
 test('canInheritTimeRange returns false if embeddable is inside container without a time range', () => {
   const embeddable = new TimeRangeEmbeddable(
     { id: '1234', timeRange: { from: 'noxw-15m', to: 'now' } },

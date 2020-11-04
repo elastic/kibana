@@ -12,7 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/constants/states';
 import { Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -481,9 +481,9 @@ export default ({ getService }: FtrProviderContext) => {
         startDatafeed: false,
       },
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
-        message: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
+        message: 'Forbidden',
       },
     },
   ];

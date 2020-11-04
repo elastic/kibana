@@ -39,9 +39,9 @@ export class TelemetryNotifications {
   }
 
   public shouldShowOptedInNoticeBanner = (): boolean => {
-    const userHasSeenOptedInNotice = this.telemetryService.getUserHasSeenOptedInNotice();
+    const userShouldSeeOptInNotice = this.telemetryService.getUserShouldSeeOptInNotice();
     const bannerOnScreen = typeof this.optedInNoticeBannerId !== 'undefined';
-    return !bannerOnScreen && userHasSeenOptedInNotice;
+    return !bannerOnScreen && userShouldSeeOptInNotice;
   };
 
   public renderOptedInNoticeBanner = (): void => {

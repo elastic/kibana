@@ -4,15 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Client } from '@elastic/elasticsearch';
 import { argv } from 'yargs';
 import pLimit from 'p-limit';
 import pRetry from 'p-retry';
-import { parse, format } from 'url';
 import { set } from '@elastic/safer-lodash-set';
 import { uniq, without, merge, flatten } from 'lodash';
 import * as histogram from 'hdr-histogram-js';
-import { ESSearchResponse } from '../../typings/elasticsearch';
 import {
   HOST_NAME,
   SERVICE_NAME,
@@ -28,6 +25,8 @@ import {
 } from '../../common/elasticsearch_fieldnames';
 import { stampLogger } from '../shared/stamp-logger';
 import { createOrUpdateIndex } from '../shared/create-or-update-index';
+import { parseIndexUrl } from '../shared/parse_index_url';
+import { ESClient, getEsClient } from '../shared/get_es_client';
 
 // This script will try to estimate how many latency metric documents
 // will be created based on the available transaction documents.
@@ -125,41 +124,18 @@ export async function aggregateLatencyMetrics() {
   const source = String(argv.source ?? '');
   const dest = String(argv.dest ?? '');
 
-  function getClientOptionsFromIndexUrl(
-    url: string
-  ): { node: string; index: string } {
-    const parsed = parse(url);
-    const { pathname, ...rest } = parsed;
+  const sourceOptions = parseIndexUrl(source);
 
-    return {
-      node: format(rest),
-      index: pathname!.replace('/', ''),
-    };
-  }
+  const sourceClient = getEsClient({ node: sourceOptions.node });
 
-  const sourceOptions = getClientOptionsFromIndexUrl(source);
-
-  const sourceClient = new Client({
-    node: sourceOptions.node,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-    requestTimeout: 120000,
-  });
-
-  let destClient: Client | undefined;
+  let destClient: ESClient | undefined;
   let destOptions: { node: string; index: string } | undefined;
 
   const uploadMetrics = !!dest;
 
   if (uploadMetrics) {
-    destOptions = getClientOptionsFromIndexUrl(dest);
-    destClient = new Client({
-      node: destOptions.node,
-      ssl: {
-        rejectUnauthorized: false,
-      },
-    });
+    destOptions = parseIndexUrl(dest);
+    destClient = getEsClient({ node: destOptions.node });
 
     const mappings = (
       await sourceClient.indices.getMapping({
@@ -298,10 +274,9 @@ export async function aggregateLatencyMetrics() {
               },
             };
 
-            const response = (await sourceClient.search(params))
-              .body as ESSearchResponse<unknown, typeof params>;
+            const response = await sourceClient.search(params);
 
-            const { aggregations } = response;
+            const { aggregations } = response.body;
 
             if (!aggregations) {
               return buckets;
@@ -333,10 +308,9 @@ export async function aggregateLatencyMetrics() {
               },
             };
 
-            const response = (await sourceClient.search(params))
-              .body as ESSearchResponse<unknown, typeof params>;
+            const response = await sourceClient.search(params);
 
-            return response.hits.total.value;
+            return response.body.hits.total.value;
           }
 
           const [buckets, numberOfTransactionDocuments] = await Promise.all([
@@ -415,7 +389,7 @@ export async function aggregateLatencyMetrics() {
               return;
             }
 
-            const response = await destClient?.bulk({
+            const response = await (destClient as any)?.bulk({
               refresh: 'wait_for',
               body: flatten(
                 docs.map((doc) => [

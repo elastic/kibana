@@ -133,6 +133,7 @@ export interface FieldEdiorProps {
   spec: IndexPatternField['spec'];
   services: {
     redirectAway: () => void;
+    indexPatternService: DataPublicPluginStart['indexPatterns'];
   };
 }
 
@@ -207,7 +208,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         DefaultFieldFormat as FieldFormatInstanceType,
         data.fieldFormats
       ),
-      fieldFormatId: get(indexPattern, ['fieldFormatMap', spec.name, 'type', 'id']),
+      fieldFormatId: indexPattern.getFormatterForFieldNoDefault(spec.name)?.type?.id,
       fieldFormatParams: format.params(),
     });
   }
@@ -219,13 +220,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onTypeChange = (type: KBN_FIELD_TYPES) => {
-    const { uiSettings, data } = this.context.services;
+    const { data } = this.context.services;
     const { spec, format } = this.state;
     const DefaultFieldFormat = data.fieldFormats.getDefaultType(type) as FieldFormatInstanceType;
 
     spec.type = type;
-
-    spec.format = new DefaultFieldFormat(null, (key) => uiSettings.get(key));
 
     this.setState({
       fieldTypeFormats: getFieldTypeFormatsList(spec, DefaultFieldFormat, data.fieldFormats),
@@ -246,7 +245,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   onFormatChange = (formatId: string, params?: any) => {
-    const { spec, fieldTypeFormats } = this.state;
+    const { fieldTypeFormats } = this.state;
     const { uiSettings, data } = this.context.services;
 
     const FieldFormat = data.fieldFormats.getType(
@@ -254,11 +253,10 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     ) as FieldFormatInstanceType;
 
     const newFormat = new FieldFormat(params, (key) => uiSettings.get(key));
-    spec.format = newFormat;
 
     this.setState({
-      fieldFormatId: FieldFormat.id,
-      fieldFormatParams: newFormat.params(),
+      fieldFormatId: formatId,
+      fieldFormatParams: params,
       format: newFormat,
     });
   };
@@ -514,7 +512,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             fieldType={spec.type}
             fieldFormat={format}
             fieldFormatId={fieldFormatId}
-            fieldFormatParams={fieldFormatParams}
+            fieldFormatParams={fieldFormatParams || {}}
             fieldFormatEditors={indexPatternManagementStart.fieldFormatEditors}
             onChange={this.onFormatParamsChange}
             onError={this.onFormatParamsError}
@@ -757,29 +755,24 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   };
 
   deleteField = () => {
-    const { redirectAway } = this.props.services;
+    const { redirectAway, indexPatternService } = this.props.services;
     const { indexPattern } = this.props;
     const { spec } = this.state;
-    const remove = indexPattern.removeScriptedField(spec.name);
-
-    if (remove) {
-      remove.then(() => {
-        const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
-          defaultMessage: "Deleted '{fieldName}'",
-          values: { fieldName: spec.name },
-        });
-        this.context.services.notifications.toasts.addSuccess(message);
-        redirectAway();
+    indexPattern.removeScriptedField(spec.name);
+    indexPatternService.updateSavedObject(indexPattern).then(() => {
+      const message = i18n.translate('indexPatternManagement.deleteField.deletedHeader', {
+        defaultMessage: "Deleted '{fieldName}'",
+        values: { fieldName: spec.name },
       });
-    } else {
+      this.context.services.notifications.toasts.addSuccess(message);
       redirectAway();
-    }
+    });
   };
 
   saveField = async () => {
     const field = this.state.spec;
     const { indexPattern } = this.props;
-    const { fieldFormatId } = this.state;
+    const { fieldFormatId, fieldFormatParams } = this.state;
 
     if (field.scripted) {
       this.setState({
@@ -788,7 +781,6 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
       const isValid = await isScriptValid({
         name: field.name,
-        lang: field.lang as string,
         script: field.script as string,
         indexPatternTitle: indexPattern.title,
         http: this.context.services.http,
@@ -803,7 +795,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       }
     }
 
-    const { redirectAway } = this.props.services;
+    const { redirectAway, indexPatternService } = this.props.services;
     const fieldExists = !!indexPattern.fields.getByName(field.name);
 
     let oldField: IndexPatternField['spec'];
@@ -815,14 +807,14 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.fields.add(field);
     }
 
-    if (!fieldFormatId) {
-      indexPattern.fieldFormatMap[field.name] = undefined;
+    if (fieldFormatId) {
+      indexPattern.setFieldFormat(field.name, { id: fieldFormatId, params: fieldFormatParams });
     } else {
-      indexPattern.fieldFormatMap[field.name] = field.format;
+      indexPattern.deleteFieldFormat(field.name);
     }
 
-    return indexPattern
-      .save()
+    return indexPatternService
+      .updateSavedObject(indexPattern)
       .then(() => {
         const message = i18n.translate('indexPatternManagement.deleteField.savedHeader', {
           defaultMessage: "Saved '{fieldName}'",
@@ -831,7 +823,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         this.context.services.notifications.toasts.addSuccess(message);
         redirectAway();
       })
-      .catch((error) => {
+      .catch(() => {
         if (oldField) {
           indexPattern.fields.update(oldField);
         } else {

@@ -41,7 +41,6 @@ import {
 export const termsAggFilter = [
   '!top_hits',
   '!percentiles',
-  '!median',
   '!std_dev',
   '!derivative',
   '!moving_avg',
@@ -82,7 +81,9 @@ export const getTermsBucketAgg = () =>
       return agg.getFieldDisplayName() + ': ' + params.order.text;
     },
     getSerializedFormat(agg) {
-      const format = agg.params.field ? agg.params.field.format.toJSON() : {};
+      const format = agg.params.field
+        ? agg.aggConfigs.indexPattern.getFormatterForField(agg.params.field).toJSON()
+        : { id: undefined, params: undefined };
       return {
         id: 'terms',
         params: {
@@ -196,14 +197,14 @@ export const getTermsBucketAgg = () =>
             return;
           }
 
-          const orderAggId = orderAgg.id;
+          const orderAggPath = orderAgg.getValueBucketPath();
 
           if (orderAgg.parentId && aggs) {
             orderAgg = aggs.byId(orderAgg.parentId);
           }
 
           output.subAggs = (output.subAggs || []).concat(orderAgg);
-          order[orderAggId] = dir;
+          order[orderAggPath] = dir;
         },
       },
       {

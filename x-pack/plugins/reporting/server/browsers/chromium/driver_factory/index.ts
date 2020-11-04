@@ -21,6 +21,7 @@ import { InnerSubscriber } from 'rxjs/internal/InnerSubscriber';
 import { ignoreElements, map, mergeMap, tap } from 'rxjs/operators';
 import { getChromiumDisconnectedError } from '../';
 import { BROWSER_TYPE } from '../../../../common/constants';
+import { durationToNumber } from '../../../../common/schema_utils';
 import { CaptureConfig } from '../../../../server/types';
 import { LevelLogger } from '../../../lib';
 import { safeChildProcess } from '../../safe_child_process';
@@ -59,33 +60,11 @@ export class HeadlessChromiumDriverFactory {
 
   type = BROWSER_TYPE;
 
-  test(logger: LevelLogger) {
-    const chromiumArgs = args({
-      userDataDir: this.userDataDir,
-      viewport: { width: 800, height: 600 },
-      disableSandbox: this.browserConfig.disableSandbox,
-      proxy: this.browserConfig.proxy,
-    });
-
-    return puppeteerLaunch({
-      userDataDir: this.userDataDir,
-      executablePath: this.binaryPath,
-      ignoreHTTPSErrors: true,
-      args: chromiumArgs,
-    } as LaunchOptions).catch((error: Error) => {
-      logger.error(
-        `The Reporting plugin encountered issues launching Chromium in a self-test. You may have trouble generating reports.`
-      );
-      logger.error(error);
-      return null;
-    });
-  }
-
   /*
    * Return an observable to objects which will drive screenshot capture for a page
    */
   createPage(
-    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone: string },
+    { viewport, browserTimezone }: { viewport: ViewportConfig; browserTimezone?: string },
     pLogger: LevelLogger
   ): Rx.Observable<{ driver: HeadlessChromiumDriver; exit$: Rx.Observable<never> }> {
     return Rx.Observable.create(async (observer: InnerSubscriber<any, any>) => {
@@ -112,7 +91,7 @@ export class HeadlessChromiumDriverFactory {
 
         // Set the default timeout for all navigation methods to the openUrl timeout (30 seconds)
         // All waitFor methods have their own timeout config passed in to them
-        page.setDefaultTimeout(this.captureConfig.timeouts.openUrl);
+        page.setDefaultTimeout(durationToNumber(this.captureConfig.timeouts.openUrl));
 
         logger.debug(`Browser page driver created`);
       } catch (err) {

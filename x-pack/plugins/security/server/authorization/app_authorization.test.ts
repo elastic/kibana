@@ -18,7 +18,7 @@ import { authorizationMock } from './index.mock';
 
 const createFeaturesSetupContractMock = (): FeaturesSetupContract => {
   const mock = featuresPluginMock.createSetup();
-  mock.getFeatures.mockReturnValue([
+  mock.getKibanaFeatures.mockReturnValue([
     { id: 'foo', name: 'Foo', app: ['foo'], privileges: {} } as any,
   ]);
   return mock;
@@ -132,7 +132,7 @@ describe('initAppAuthorization', () => {
 
     expect(mockResponse.notFound).not.toHaveBeenCalled();
     expect(mockPostAuthToolkit.next).toHaveBeenCalledTimes(1);
-    expect(mockCheckPrivileges).toHaveBeenCalledWith(mockAuthz.actions.app.get('foo'));
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({ kibana: mockAuthz.actions.app.get('foo') });
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 
@@ -170,9 +170,9 @@ describe('initAppAuthorization', () => {
 
     await postAuthHandler(mockRequest, mockResponse, mockPostAuthToolkit);
 
-    expect(mockResponse.notFound).toHaveBeenCalledTimes(1);
+    expect(mockResponse.forbidden).toHaveBeenCalledTimes(1);
     expect(mockPostAuthToolkit.next).not.toHaveBeenCalled();
-    expect(mockCheckPrivileges).toHaveBeenCalledWith(mockAuthz.actions.app.get('foo'));
+    expect(mockCheckPrivileges).toHaveBeenCalledWith({ kibana: mockAuthz.actions.app.get('foo') });
     expect(mockAuthz.mode.useRbacForRequest).toHaveBeenCalledWith(mockRequest);
   });
 });

@@ -19,9 +19,9 @@
 
 import { Observable, Subject } from 'rxjs';
 import { first, map, shareReplay, takeUntil } from 'rxjs/operators';
+import { merge } from '@kbn/std';
 
 import { CoreService } from '../../types';
-import { merge } from '../../utils';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
 import {
@@ -32,7 +32,6 @@ import {
 import { ClusterClient, ICustomClusterClient, ElasticsearchClientConfig } from './client';
 import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
 import { InternalHttpServiceSetup, GetAuthHeaders } from '../http/';
-import { AuditTrailStart, AuditorFactory } from '../audit_trail';
 import { InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart } from './types';
 import { pollEsNodesVersion } from './version_check/ensure_es_version';
 import { calculateStatus$ } from './status';
@@ -41,16 +40,11 @@ interface SetupDeps {
   http: InternalHttpServiceSetup;
 }
 
-interface StartDeps {
-  auditTrail: AuditTrailStart;
-}
-
 /** @internal */
 export class ElasticsearchService
   implements CoreService<InternalElasticsearchServiceSetup, InternalElasticsearchServiceStart> {
   private readonly log: Logger;
   private readonly config$: Observable<ElasticsearchConfig>;
-  private auditorFactory?: AuditorFactory;
   private stop$ = new Subject();
   private kibanaVersion: string;
   private getAuthHeaders?: GetAuthHeaders;
@@ -103,8 +97,7 @@ export class ElasticsearchService
       status$: calculateStatus$(esNodesCompatibility$),
     };
   }
-  public async start({ auditTrail }: StartDeps): Promise<InternalElasticsearchServiceStart> {
-    this.auditorFactory = auditTrail;
+  public async start(): Promise<InternalElasticsearchServiceStart> {
     if (!this.legacyClient || !this.createLegacyCustomClient) {
       throw new Error('ElasticsearchService needs to be setup before calling start');
     }
@@ -123,6 +116,7 @@ export class ElasticsearchService
       client: this.client!,
       createClient,
       legacy: {
+        config$: this.config$,
         client: this.legacyClient,
         createClient: this.createLegacyCustomClient,
       },
@@ -152,15 +146,7 @@ export class ElasticsearchService
     return new LegacyClusterClient(
       config,
       this.coreContext.logger.get('elasticsearch', type),
-      this.getAuditorFactory,
       this.getAuthHeaders
     );
   }
-
-  private getAuditorFactory = () => {
-    if (!this.auditorFactory) {
-      throw new Error('auditTrail has not been initialized');
-    }
-    return this.auditorFactory;
-  };
 }

@@ -5,21 +5,16 @@
  */
 
 import React, { useState, useEffect, useMemo, useContext, useCallback } from 'react';
+import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiImage,
-  EuiText,
-  EuiBetaBadge,
-  EuiButtonEmpty,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
+import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
+  ExpressionRenderError,
   ReactExpressionRendererType,
 } from '../../../../../../../src/plugins/expressions/public';
 import { Action } from '../state_management';
@@ -35,10 +30,18 @@ import { getSuggestions, switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
 import { debouncedComponent } from '../../../debounced_component';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
-import { UiActionsStart } from '../../../../../../../src/plugins/ui_actions/public';
+import {
+  UiActionsStart,
+  VisualizeFieldContext,
+} from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
-import { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
+import {
+  DataPublicPluginStart,
+  TimefilterContract,
+} from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
+import { DropIllustration } from '../../../assets/drop_illustration';
+import { getOriginalRequestErrorMessage } from '../../error_helper';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -59,12 +62,16 @@ export interface WorkspacePanelProps {
   core: CoreStart | CoreSetup;
   plugins: { uiActions?: UiActionsStart; data: DataPublicPluginStart };
   title?: string;
+  visualizeTriggerFieldContext?: VisualizeFieldContext;
 }
 
-export const WorkspacePanel = debouncedComponent(InnerWorkspacePanel);
+interface WorkspaceState {
+  expressionBuildError: string | undefined;
+  expandError: boolean;
+}
 
 // Exported for testing purposes only.
-export function InnerWorkspacePanel({
+export function WorkspacePanel({
   activeDatasourceId,
   activeVisualizationId,
   visualizationMap,
@@ -77,12 +84,8 @@ export function InnerWorkspacePanel({
   plugins,
   ExpressionRenderer: ExpressionRendererComponent,
   title,
+  visualizeTriggerFieldContext,
 }: WorkspacePanelProps) {
-  const IS_DARK_THEME = core.uiSettings.get('theme:darkMode');
-  const emptyStateGraphicURL = IS_DARK_THEME
-    ? '/plugins/lens/assets/lens_app_graphic_dark_2x.png'
-    : '/plugins/lens/assets/lens_app_graphic_light_2x.png';
-
   const dragDropContext = useContext(DragContext);
 
   const suggestionForDraggedField = useMemo(
@@ -113,7 +116,7 @@ export function InnerWorkspacePanel({
     [dragDropContext.dragging]
   );
 
-  const [localState, setLocalState] = useState({
+  const [localState, setLocalState] = useState<WorkspaceState>({
     expressionBuildError: undefined as string | undefined,
     expandError: false,
   });
@@ -129,7 +132,7 @@ export function InnerWorkspacePanel({
           visualizationState,
           datasourceMap,
           datasourceStates,
-          framePublicAPI,
+          datasourceLayers: framePublicAPI.datasourceLayers,
         });
       } catch (e) {
         // Most likely an error in the expression provided by a datasource or visualization
@@ -168,11 +171,6 @@ export function InnerWorkspacePanel({
     [plugins.uiActions]
   );
 
-  const autoRefreshFetch$ = useMemo(
-    () => plugins.data.query.timefilter.timefilter.getAutoRefreshFetch$(),
-    [plugins.data.query.timefilter.timefilter]
-  );
-
   useEffect(() => {
     // reset expression error if component attempts to run it again
     if (expression && localState.expressionBuildError) {
@@ -192,115 +190,68 @@ export function InnerWorkspacePanel({
   }
 
   function renderEmptyWorkspace() {
-    const tooltipContent = i18n.translate('xpack.lens.editorFrame.tooltipContent', {
-      defaultMessage:
-        'Lens is in beta and is subject to change.  The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features',
-    });
     return (
-      <div className="eui-textCenter">
-        <EuiText textAlign="center" grow={false} color="subdued" data-test-subj="empty-workspace">
-          <h3>
-            <FormattedMessage
-              id="xpack.lens.editorFrame.emptyWorkspace"
-              defaultMessage="Drop some fields here to start"
-            />
-          </h3>
-          <EuiImage
-            style={{ width: 360 }}
-            url={core.http.basePath.prepend(emptyStateGraphicURL)}
-            alt=""
-          />
-          <p>
-            <FormattedMessage
-              id="xpack.lens.editorFrame.emptyWorkspaceHeading"
-              defaultMessage="Lens is a new tool for creating visualizations"
-            />{' '}
-            <EuiBetaBadge label="Beta" tooltipContent={tooltipContent} />
-          </p>
-          <p>
-            <small>
-              <EuiLink
-                href="https://www.elastic.co/products/kibana/feedback"
-                target="_blank"
-                external
-              >
-                <FormattedMessage
-                  id="xpack.lens.editorFrame.goToForums"
-                  defaultMessage="Make requests and give feedback"
-                />
-              </EuiLink>
-            </small>
-          </p>
-        </EuiText>
-      </div>
+      <EuiText
+        className={classNames('lnsWorkspacePanel__emptyContent')}
+        textAlign="center"
+        color="subdued"
+        data-test-subj="empty-workspace"
+        size="s"
+      >
+        <h2>
+          <strong>
+            {expression === null
+              ? i18n.translate('xpack.lens.editorFrame.emptyWorkspace', {
+                  defaultMessage: 'Drop some fields here to start',
+                })
+              : i18n.translate('xpack.lens.editorFrame.emptyWorkspaceSimple', {
+                  defaultMessage: 'Drop field here',
+                })}
+          </strong>
+        </h2>
+        <DropIllustration aria-hidden={true} className="lnsWorkspacePanel__dropIllustration" />
+        {expression === null && (
+          <>
+            <p>
+              {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
+                defaultMessage: 'Lens is a new tool for creating visualization',
+              })}
+            </p>
+            <p>
+              <small>
+                <EuiLink
+                  href="https://www.elastic.co/products/kibana/feedback"
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate('xpack.lens.editorFrame.goToForums', {
+                    defaultMessage: 'Make requests and give feedback',
+                  })}
+                </EuiLink>
+              </small>
+            </p>
+          </>
+        )}
+      </EuiText>
     );
   }
 
   function renderVisualization() {
-    if (expression === null) {
+    // we don't want to render the emptyWorkspace on visualizing field from Discover
+    // as it is specific for the drag and drop functionality and can confuse the users
+    if (expression === null && !visualizeTriggerFieldContext) {
       return renderEmptyWorkspace();
     }
-
-    if (localState.expressionBuildError) {
-      return (
-        <EuiFlexGroup direction="column" alignItems="center">
-          <EuiFlexItem>
-            <EuiIcon type="alert" size="xl" color="danger" />
-          </EuiFlexItem>
-          <EuiFlexItem data-test-subj="expression-failure">
-            <FormattedMessage
-              id="xpack.lens.editorFrame.expressionFailure"
-              defaultMessage="An error occurred in the expression"
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{localState.expressionBuildError}</EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
-
     return (
-      <div className="lnsExpressionRenderer">
-        <ExpressionRendererComponent
-          className="lnsExpressionRenderer__component"
-          padding="m"
-          expression={expression!}
-          reload$={autoRefreshFetch$}
-          onEvent={onEvent}
-          renderError={(errorMessage?: string | null) => {
-            return (
-              <EuiFlexGroup direction="column" alignItems="center">
-                <EuiFlexItem>
-                  <EuiIcon type="alert" size="xl" color="danger" />
-                </EuiFlexItem>
-                <EuiFlexItem data-test-subj="expression-failure">
-                  <FormattedMessage
-                    id="xpack.lens.editorFrame.dataFailure"
-                    defaultMessage="An error occurred when loading data."
-                  />
-                </EuiFlexItem>
-                {errorMessage ? (
-                  <EuiFlexItem className="eui-textBreakAll" grow={false}>
-                    <EuiButtonEmpty
-                      onClick={() => {
-                        setLocalState((prevState) => ({
-                          ...prevState,
-                          expandError: !prevState.expandError,
-                        }));
-                      }}
-                    >
-                      {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
-                        defaultMessage: 'Show details of error',
-                      })}
-                    </EuiButtonEmpty>
-
-                    {localState.expandError ? errorMessage : null}
-                  </EuiFlexItem>
-                ) : null}
-              </EuiFlexGroup>
-            );
-          }}
-        />
-      </div>
+      <VisualizationWrapper
+        expression={expression}
+        framePublicAPI={framePublicAPI}
+        timefilter={plugins.data.query.timefilter.timefilter}
+        onEvent={onEvent}
+        setLocalState={setLocalState}
+        localState={localState}
+        ExpressionRendererComponent={ExpressionRendererComponent}
+      />
     );
   }
 
@@ -317,13 +268,119 @@ export function InnerWorkspacePanel({
       visualizationMap={visualizationMap}
     >
       <DragDrop
+        className="lnsWorkspacePanel__dragDrop"
         data-test-subj="lnsWorkspace"
         draggable={false}
         droppable={Boolean(suggestionForDraggedField)}
         onDrop={onDrop}
       >
-        {renderVisualization()}
+        <div>
+          {renderVisualization()}
+          {Boolean(suggestionForDraggedField) && expression !== null && renderEmptyWorkspace()}
+        </div>
       </DragDrop>
     </WorkspacePanelWrapper>
   );
 }
+
+export const InnerVisualizationWrapper = ({
+  expression,
+  framePublicAPI,
+  timefilter,
+  onEvent,
+  setLocalState,
+  localState,
+  ExpressionRendererComponent,
+}: {
+  expression: Ast | null | undefined;
+  framePublicAPI: FramePublicAPI;
+  timefilter: TimefilterContract;
+  onEvent: (event: ExpressionRendererEvent) => void;
+  setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
+  localState: WorkspaceState;
+  ExpressionRendererComponent: ReactExpressionRendererType;
+}) => {
+  const autoRefreshFetch$ = useMemo(() => timefilter.getAutoRefreshFetch$(), [timefilter]);
+
+  const context: ExecutionContextSearch = useMemo(
+    () => ({
+      query: framePublicAPI.query,
+      timeRange: {
+        from: framePublicAPI.dateRange.fromDate,
+        to: framePublicAPI.dateRange.toDate,
+      },
+      filters: framePublicAPI.filters,
+    }),
+    [
+      framePublicAPI.query,
+      framePublicAPI.dateRange.fromDate,
+      framePublicAPI.dateRange.toDate,
+      framePublicAPI.filters,
+    ]
+  );
+
+  if (localState.expressionBuildError) {
+    return (
+      <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+        <EuiFlexItem>
+          <EuiIcon type="alert" size="xl" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj="expression-failure">
+          <FormattedMessage
+            id="xpack.lens.editorFrame.expressionFailure"
+            defaultMessage="An error occurred in the expression"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{localState.expressionBuildError}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+  return (
+    <div className="lnsExpressionRenderer">
+      <ExpressionRendererComponent
+        className="lnsExpressionRenderer__component"
+        padding="m"
+        expression={expression!}
+        searchContext={context}
+        reload$={autoRefreshFetch$}
+        onEvent={onEvent}
+        renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
+          const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
+          return (
+            <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+              <EuiFlexItem>
+                <EuiIcon type="alert" size="xl" color="danger" />
+              </EuiFlexItem>
+              <EuiFlexItem data-test-subj="expression-failure">
+                <FormattedMessage
+                  id="xpack.lens.editorFrame.dataFailure"
+                  defaultMessage="An error occurred when loading data."
+                />
+              </EuiFlexItem>
+              {visibleErrorMessage ? (
+                <EuiFlexItem className="eui-textBreakAll" grow={false}>
+                  <EuiButtonEmpty
+                    onClick={() => {
+                      setLocalState((prevState: WorkspaceState) => ({
+                        ...prevState,
+                        expandError: !prevState.expandError,
+                      }));
+                    }}
+                  >
+                    {i18n.translate('xpack.lens.editorFrame.expandRenderingErrorButton', {
+                      defaultMessage: 'Show details of error',
+                    })}
+                  </EuiButtonEmpty>
+
+                  {localState.expandError ? visibleErrorMessage : null}
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          );
+        }}
+      />
+    </div>
+  );
+};
+
+export const VisualizationWrapper = debouncedComponent(InnerVisualizationWrapper);

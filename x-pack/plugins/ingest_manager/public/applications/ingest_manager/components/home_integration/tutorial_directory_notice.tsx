@@ -16,10 +16,7 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import {
-  TutorialDirectoryNoticeComponent,
-  TutorialDirectoryHeaderLinkComponent,
-} from 'src/plugins/home/public';
+import type { TutorialDirectoryNoticeComponent } from 'src/plugins/home/public';
 import { sendPutSettings, useGetSettings, useLink, useCapabilities } from '../../hooks';
 
 const FlexItemButtonWrapper = styled(EuiFlexItem)`
@@ -33,7 +30,7 @@ const tutorialDirectoryNoticeState$ = new BehaviorSubject({
   hasSeenNotice: false,
 });
 
-export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
+const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(() => {
   const { getHref } = useLink();
   const { show: hasIngestManager } = useCapabilities();
   const { data: settingsData, isLoading } = useGetSettings();
@@ -63,13 +60,13 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
         iconType="cheer"
         title={
           <FormattedMessage
-            id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeTitle"
-            defaultMessage="{newPrefix} Elastic Agent and Ingest Manager Beta"
+            id="xpack.fleet.homeIntegration.tutorialDirectory.noticeTitle"
+            defaultMessage="{newPrefix} Elastic Agent and Fleet Beta"
             values={{
               newPrefix: (
                 <strong>
                   <FormattedMessage
-                    id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeTitle.newPrefix"
+                    id="xpack.fleet.homeIntegration.tutorialDirectory.noticeTitle.newPrefix"
                     defaultMessage="New:"
                   />
                 </strong>
@@ -80,15 +77,15 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
       >
         <p>
           <FormattedMessage
-            id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeText"
+            id="xpack.fleet.homeIntegration.tutorialDirectory.noticeText"
             defaultMessage="The Elastic Agent provides a simple, unified way to add monitoring for logs, metrics, and other types of data to your hosts.
-                You no longer need to install multiple Beats and other agents, which makes it easier and faster to deploy configurations across your infrastructure.
+                You no longer need to install multiple Beats and other agents, which makes it easier and faster to deploy policies across your infrastructure.
                 For more information, read our {blogPostLink}."
             values={{
               blogPostLink: (
                 <EuiLink href="https://ela.st/ingest-manager-announcement" external target="_blank">
                   <FormattedMessage
-                    id="xpack.ingestManager.homeIntegration.tutorialDirectory.noticeText.blogPostLink"
+                    id="xpack.fleet.homeIntegration.tutorialDirectory.noticeText.blogPostLink"
                     defaultMessage="announcement blog post"
                   />
                 </EuiLink>
@@ -101,8 +98,8 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
             <div>
               <EuiButton size="s" href={getHref('overview')}>
                 <FormattedMessage
-                  id="xpack.ingestManager.homeIntegration.tutorialDirectory.ingestManagerAppButtonText"
-                  defaultMessage="Try Ingest Manager Beta"
+                  id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"
+                  defaultMessage="Try Fleet Beta"
                 />
               </EuiButton>
             </div>
@@ -116,7 +113,7 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
                 }}
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.homeIntegration.tutorialDirectory.dismissNoticeButtonText"
+                  id="xpack.fleet.homeIntegration.tutorialDirectory.dismissNoticeButtonText"
                   defaultMessage="Dismiss message"
                 />
               </EuiButtonEmpty>
@@ -128,27 +125,6 @@ export const TutorialDirectoryNotice: TutorialDirectoryNoticeComponent = memo(()
   ) : null;
 });
 
-export const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo(() => {
-  const { getHref } = useLink();
-  const { show: hasIngestManager } = useCapabilities();
-  const [noticeState, setNoticeState] = useState({
-    settingsDataLoaded: false,
-    hasSeenNotice: false,
-  });
-
-  useEffect(() => {
-    const subscription = tutorialDirectoryNoticeState$.subscribe((value) => setNoticeState(value));
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  return hasIngestManager && noticeState.settingsDataLoaded && noticeState.hasSeenNotice ? (
-    <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('overview')}>
-      <FormattedMessage
-        id="xpack.ingestManager.homeIntegration.tutorialDirectory.ingestManagerAppButtonText"
-        defaultMessage="Try Ingest Manager Beta"
-      />
-    </EuiButtonEmpty>
-  ) : null;
-});
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default TutorialDirectoryNotice;

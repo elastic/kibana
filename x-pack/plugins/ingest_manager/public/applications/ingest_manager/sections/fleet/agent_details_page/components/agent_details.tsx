@@ -13,20 +13,25 @@ import {
   EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Agent, AgentConfig } from '../../../../types';
-import { useLink } from '../../../../hooks';
+import { EuiText } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { Agent, AgentPolicy } from '../../../../types';
+import { useKibanaVersion, useLink } from '../../../../hooks';
 import { AgentHealth } from '../../components';
+import { isAgentUpgradeable } from '../../../../services';
 
 export const AgentDetailsContent: React.FunctionComponent<{
   agent: Agent;
-  agentConfig?: AgentConfig;
-}> = memo(({ agent, agentConfig }) => {
+  agentPolicy?: AgentPolicy;
+}> = memo(({ agent, agentPolicy }) => {
   const { getHref } = useLink();
+  const kibanaVersion = useKibanaVersion();
   return (
     <EuiDescriptionList>
       {[
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.hostNameLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.hostNameLabel', {
             defaultMessage: 'Host name',
           }),
           description:
@@ -36,45 +41,76 @@ export const AgentDetailsContent: React.FunctionComponent<{
               : '-',
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.hostIdLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.hostIdLabel', {
             defaultMessage: 'Agent ID',
           }),
           description: agent.id,
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.statusLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
             defaultMessage: 'Status',
           }),
           description: <AgentHealth agent={agent} />,
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.agentConfigurationLabel', {
-            defaultMessage: 'Agent configuration',
+          title: i18n.translate('xpack.fleet.agentDetails.agentPolicyLabel', {
+            defaultMessage: 'Agent policy',
           }),
-          description: agentConfig ? (
+          description: agentPolicy ? (
             <EuiLink
-              href={getHref('configuration_details', { configId: agent.config_id! })}
+              href={getHref('policy_details', { policyId: agent.policy_id! })}
               className="eui-textBreakWord"
             >
-              {agentConfig.name || agent.config_id}
+              {agentPolicy.name || agent.policy_id}
             </EuiLink>
           ) : (
-            agent.config_id || '-'
+            agent.policy_id || '-'
           ),
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.versionLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.versionLabel', {
             defaultMessage: 'Agent version',
           }),
           description:
             typeof agent.local_metadata.elastic === 'object' &&
             typeof agent.local_metadata.elastic.agent === 'object' &&
-            typeof agent.local_metadata.elastic.agent.version === 'string'
-              ? agent.local_metadata.elastic.agent.version
+            typeof agent.local_metadata.elastic.agent.version === 'string' ? (
+              <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+                <EuiFlexItem grow={false} className="eui-textNoWrap">
+                  {agent.local_metadata.elastic.agent.version}
+                </EuiFlexItem>
+                {isAgentUpgradeable(agent, kibanaVersion) ? (
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="subdued" size="s" className="eui-textNoWrap">
+                      <EuiIcon size="m" type="alert" color="warning" />
+                      &nbsp;
+                      <FormattedMessage
+                        id="xpack.fleet.agentList.agentUpgradeLabel"
+                        defaultMessage="Upgrade available"
+                      />
+                    </EuiText>
+                  </EuiFlexItem>
+                ) : null}
+              </EuiFlexGroup>
+            ) : (
+              '-'
+            ),
+        },
+        {
+          title: i18n.translate('xpack.fleet.agentDetails.releaseLabel', {
+            defaultMessage: 'Agent release',
+          }),
+          description:
+            typeof agent.local_metadata.elastic === 'object' &&
+            typeof agent.local_metadata.elastic.agent === 'object' &&
+            typeof agent.local_metadata.elastic.agent.snapshot === 'boolean'
+              ? agent.local_metadata.elastic.agent.snapshot === true
+                ? 'snapshot'
+                : 'stable'
               : '-',
         },
         {
-          title: i18n.translate('xpack.ingestManager.agentDetails.platformLabel', {
+          title: i18n.translate('xpack.fleet.agentDetails.platformLabel', {
             defaultMessage: 'Platform',
           }),
           description:

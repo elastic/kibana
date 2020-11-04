@@ -20,10 +20,11 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import React, { useState, useCallback, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { State } from '../../../common/store';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 
 import { renderers } from './catalog';
 import { setExcludedRowRendererIds as dispatchSetExcludedRowRendererIds } from '../../../timelines/store/timeline/actions';
@@ -81,7 +82,7 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
 }) => {
   const tableRef = useRef<EuiInMemoryTable<{}>>();
   const dispatch = useDispatch();
-  const excludedRowRendererIds = useSelector(
+  const excludedRowRendererIds = useShallowEqualSelector(
     (state: State) => state.timeline.timelineById[timelineId]?.excludedRowRendererIds || []
   );
   const [show, setShow] = useState(false);
@@ -102,12 +103,10 @@ const StatefulRowRenderersBrowserComponent: React.FC<StatefulRowRenderersBrowser
   const hideFieldBrowser = useCallback(() => setShow(false), []);
 
   const handleDisableAll = useCallback(() => {
-    // eslint-disable-next-line no-unused-expressions
     tableRef?.current?.setSelection([]);
   }, [tableRef]);
 
   const handleEnableAll = useCallback(() => {
-    // eslint-disable-next-line no-unused-expressions
     tableRef?.current?.setSelection(renderers);
   }, [tableRef]);
 

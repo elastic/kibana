@@ -6,7 +6,7 @@
 
 import { last } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import { connect, ConnectedProps } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { IIndexPattern } from 'src/plugins/data/public';
 
@@ -16,16 +16,16 @@ import {
   FlowTargetSourceDest,
   NetworkTopCountriesEdges,
   NetworkTopTablesFields,
-  NetworkTopTablesSortField,
-} from '../../../graphql/types';
-import { State } from '../../../common/store';
+  SortField,
+} from '../../../../common/search_strategy';
+import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 
 import { Criteria, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
 
 import { getCountriesColumnsCurated } from './columns';
 import * as i18n from './translations';
 
-interface OwnProps {
+interface NetworkTopCountriesTableProps {
   data: NetworkTopCountriesEdges[];
   fakeTotalCount: number;
   flowTargeted: FlowTargetSourceDest;
@@ -38,8 +38,6 @@ interface OwnProps {
   totalCount: number;
   type: networkModel.NetworkType;
 }
-
-type NetworkTopCountriesTableProps = OwnProps & PropsFromRedux;
 
 const rowItems: ItemsPerRow[] = [
   {
@@ -54,139 +52,132 @@ const rowItems: ItemsPerRow[] = [
 
 export const NetworkTopCountriesTableId = 'networkTopCountries-top-talkers';
 
-const NetworkTopCountriesTableComponent = React.memo<NetworkTopCountriesTableProps>(
-  ({
-    activePage,
-    data,
-    fakeTotalCount,
-    flowTargeted,
-    id,
-    indexPattern,
-    isInspect,
-    limit,
-    loading,
-    loadPage,
-    showMorePagesIndicator,
-    sort,
-    totalCount,
-    type,
-    updateNetworkTable,
-  }) => {
-    let tableType: networkModel.TopCountriesTableType;
-    const headerTitle: string =
+const NetworkTopCountriesTableComponent: React.FC<NetworkTopCountriesTableProps> = ({
+  data,
+  fakeTotalCount,
+  flowTargeted,
+  id,
+  indexPattern,
+  isInspect,
+  loading,
+  loadPage,
+  showMorePagesIndicator,
+  totalCount,
+  type,
+}) => {
+  const dispatch = useDispatch();
+  const getTopCountriesSelector = networkSelectors.topCountriesSelector();
+  const { activePage, limit, sort } = useShallowEqualSelector((state) =>
+    getTopCountriesSelector(state, type, flowTargeted)
+  );
+
+  const headerTitle: string = useMemo(
+    () =>
       flowTargeted === FlowTargetSourceDest.source
         ? i18n.SOURCE_COUNTRIES
-        : i18n.DESTINATION_COUNTRIES;
+        : i18n.DESTINATION_COUNTRIES,
+    [flowTargeted]
+  );
 
+  const tableType: networkModel.TopCountriesTableType = useMemo(() => {
     if (type === networkModel.NetworkType.page) {
-      tableType =
-        flowTargeted === FlowTargetSourceDest.source
-          ? networkModel.NetworkTableType.topCountriesSource
-          : networkModel.NetworkTableType.topCountriesDestination;
-    } else {
-      tableType =
-        flowTargeted === FlowTargetSourceDest.source
-          ? networkModel.IpDetailsTableType.topCountriesSource
-          : networkModel.IpDetailsTableType.topCountriesDestination;
+      return flowTargeted === FlowTargetSourceDest.source
+        ? networkModel.NetworkTableType.topCountriesSource
+        : networkModel.NetworkTableType.topCountriesDestination;
     }
 
-    const field =
-      sort.field === NetworkTopTablesFields.bytes_out ||
-      sort.field === NetworkTopTablesFields.bytes_in
-        ? `node.network.${sort.field}`
-        : `node.${flowTargeted}.${sort.field}`;
+    return flowTargeted === FlowTargetSourceDest.source
+      ? networkModel.NetworkDetailsTableType.topCountriesSource
+      : networkModel.NetworkDetailsTableType.topCountriesDestination;
+  }, [flowTargeted, type]);
 
-    const updateLimitPagination = useCallback(
-      (newLimit) =>
-        updateNetworkTable({
+  const field =
+    sort.field === NetworkTopTablesFields.bytes_out ||
+    sort.field === NetworkTopTablesFields.bytes_in
+      ? `node.network.${sort.field}`
+      : `node.${flowTargeted}.${sort.field}`;
+
+  const updateLimitPagination = useCallback(
+    (newLimit) =>
+      dispatch(
+        networkActions.updateNetworkTable({
           networkType: type,
           tableType,
           updates: { limit: newLimit },
-        }),
-      [type, updateNetworkTable, tableType]
-    );
+        })
+      ),
+    [dispatch, type, tableType]
+  );
 
-    const updateActivePage = useCallback(
-      (newPage) =>
-        updateNetworkTable({
+  const updateActivePage = useCallback(
+    (newPage) =>
+      dispatch(
+        networkActions.updateNetworkTable({
           networkType: type,
           tableType,
           updates: { activePage: newPage },
-        }),
-      [type, updateNetworkTable, tableType]
-    );
+        })
+      ),
+    [dispatch, type, tableType]
+  );
 
-    const onChange = useCallback(
-      (criteria: Criteria) => {
-        if (criteria.sort != null) {
-          const splitField = criteria.sort.field.split('.');
-          const lastField = last(splitField);
-          const newSortDirection =
-            lastField !== sort.field ? Direction.desc : criteria.sort.direction; // sort by desc on init click
-          const newTopCountriesSort: NetworkTopTablesSortField = {
-            field: lastField as NetworkTopTablesFields,
-            direction: newSortDirection as Direction,
-          };
-          if (!deepEqual(newTopCountriesSort, sort)) {
-            updateNetworkTable({
+  const onChange = useCallback(
+    (criteria: Criteria) => {
+      if (criteria.sort != null) {
+        const splitField = criteria.sort.field.split('.');
+        const lastField = last(splitField) as NetworkTopTablesFields;
+        const newSortDirection =
+          lastField !== sort.field ? Direction.desc : (criteria.sort.direction as Direction); // sort by desc on init click
+        const newTopCountriesSort: SortField<NetworkTopTablesFields> = {
+          field: lastField,
+          direction: newSortDirection,
+        };
+        if (!deepEqual(newTopCountriesSort, sort)) {
+          dispatch(
+            networkActions.updateNetworkTable({
               networkType: type,
               tableType,
               updates: {
                 sort: newTopCountriesSort,
               },
-            });
-          }
+            })
+          );
         }
-      },
-      [type, sort, tableType, updateNetworkTable]
-    );
+      }
+    },
+    [sort, dispatch, type, tableType]
+  );
 
-    const columns = useMemo(
-      () =>
-        getCountriesColumnsCurated(indexPattern, flowTargeted, type, NetworkTopCountriesTableId),
-      [indexPattern, flowTargeted, type]
-    );
+  const columns = useMemo(
+    () => getCountriesColumnsCurated(indexPattern, flowTargeted, type, NetworkTopCountriesTableId),
+    [indexPattern, flowTargeted, type]
+  );
 
-    return (
-      <PaginatedTable
-        activePage={activePage}
-        columns={columns}
-        dataTestSubj={`table-${tableType}`}
-        headerCount={totalCount}
-        headerTitle={headerTitle}
-        headerUnit={i18n.UNIT(totalCount)}
-        id={id}
-        isInspect={isInspect}
-        itemsPerRow={rowItems}
-        limit={limit}
-        loading={loading}
-        loadPage={loadPage}
-        onChange={onChange}
-        pageOfItems={data}
-        showMorePagesIndicator={showMorePagesIndicator}
-        sorting={{ field, direction: sort.direction }}
-        totalCount={fakeTotalCount}
-        updateActivePage={updateActivePage}
-        updateLimitPagination={updateLimitPagination}
-      />
-    );
-  }
-);
+  return (
+    <PaginatedTable
+      activePage={activePage}
+      columns={columns}
+      dataTestSubj={`table-${tableType}`}
+      headerCount={totalCount}
+      headerTitle={headerTitle}
+      headerUnit={i18n.UNIT(totalCount)}
+      id={id}
+      isInspect={isInspect}
+      itemsPerRow={rowItems}
+      limit={limit}
+      loading={loading}
+      loadPage={loadPage}
+      onChange={onChange}
+      pageOfItems={data}
+      showMorePagesIndicator={showMorePagesIndicator}
+      sorting={{ field, direction: sort.direction }}
+      totalCount={fakeTotalCount}
+      updateActivePage={updateActivePage}
+      updateLimitPagination={updateLimitPagination}
+    />
+  );
+};
 
 NetworkTopCountriesTableComponent.displayName = 'NetworkTopCountriesTableComponent';
 
-const makeMapStateToProps = () => {
-  const getTopCountriesSelector = networkSelectors.topCountriesSelector();
-  return (state: State, { type, flowTargeted }: OwnProps) =>
-    getTopCountriesSelector(state, type, flowTargeted);
-};
-
-const mapDispatchToProps = {
-  updateNetworkTable: networkActions.updateNetworkTable,
-};
-
-const connector = connect(makeMapStateToProps, mapDispatchToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const NetworkTopCountriesTable = connector(NetworkTopCountriesTableComponent);
+export const NetworkTopCountriesTable = React.memo(NetworkTopCountriesTableComponent);

@@ -1,0 +1,15 @@
+{
+  "name": "@kbn/utils",
+  "main": "./target/index.js",
+  "version": "1.0.0",
+  "license": "Apache-2.0",
+  "private": true,
+  "scripts": {
+    "build": "../../node_modules/.bin/tsc",
+    "kbn:bootstrap": "yarn build",
+    "kbn:watch": "yarn build --watch"
+  },
+  "dependencies": {
+    "@kbn/config-schema": "link:../kbn-config-schema"
+  }
+}

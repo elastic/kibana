@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-fieldFormatMap: any;
+fieldFormatMap: Record<string, any>;
 ```

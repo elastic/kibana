@@ -10,9 +10,10 @@ import open from 'opn';
 import { ElementHandle, EvaluateFn, Page, Response, SerializableOrJSHandle } from 'puppeteer';
 import { parse as parseUrl } from 'url';
 import { getDisallowedOutgoingUrlError } from '../';
+import { ConditionalHeaders, ConditionalHeadersConditions } from '../../../export_types/common';
 import { LevelLogger } from '../../../lib';
 import { ViewZoomWidthHeight } from '../../../lib/layouts/layout';
-import { ConditionalHeaders, ElementPosition } from '../../../types';
+import { ElementPosition } from '../../../lib/screenshots';
 import { allowRequest, NetworkPolicy } from '../../network_policy';
 
 export interface ChromiumDriverOptions {
@@ -32,8 +33,6 @@ interface EvaluateOpts {
 interface EvaluateMetaOpts {
   context: string;
 }
-
-type ConditionalHeadersConditions = ConditionalHeaders['conditions'];
 
 interface InterceptedRequest {
   requestId: string;
@@ -303,7 +302,7 @@ export class HeadlessChromiumDriver {
       if (!allowed || !this.allowRequest(interceptedUrl)) {
         this.page.browser().close();
         logger.error(getDisallowedOutgoingUrlError(interceptedUrl));
-        throw getDisallowedOutgoingUrlError(interceptedUrl);
+        return;
       }
     });
 

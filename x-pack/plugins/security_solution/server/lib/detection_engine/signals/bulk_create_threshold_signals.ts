@@ -15,6 +15,7 @@ import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
 import { SignalSearchResponse } from './types';
+import { BuildRuleMessage } from './rule_messages';
 
 // used to generate constant Threshold Signals ID when run with the same params
 const NAMESPACE_ID = '0684ec03-7201-4ee0-8ee0-3a3f6b2479b2';
@@ -40,6 +41,7 @@ interface BulkCreateThresholdSignalsParams {
   tags: string[];
   throttle: string;
   startedAt: Date;
+  buildRuleMessage: BuildRuleMessage;
 }
 
 interface FilterObject {
@@ -195,6 +197,7 @@ export const bulkCreateThresholdSignals = async (
     params.ruleParams.threshold!,
     params.ruleParams.ruleId
   );
+  const buildRuleMessage = params.buildRuleMessage;
 
-  return singleBulkCreate({ ...params, filteredEvents: ecsResults });
+  return singleBulkCreate({ ...params, filteredEvents: ecsResults, buildRuleMessage });
 };

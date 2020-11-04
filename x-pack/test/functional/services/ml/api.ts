@@ -11,7 +11,7 @@ import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
-import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/data_frame_task_state';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
 import {
@@ -268,7 +268,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async waitForDFAJobTrainingRecordCountToBePositive(analyticsId: string) {
       await retry.waitForWithTimeout(
         `'${analyticsId}' to have training_docs_count > 0`,
-        10 * 1000,
+        60 * 1000,
         async () => {
           const trainingRecordCount = await this.getDFAJobTrainingRecordCount(analyticsId);
           if (trainingRecordCount > 0) {
@@ -721,6 +721,26 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           throw new Error(errorMsg ?? `annotation '${annotationId}' should not exist`);
         }
       });
+    },
+
+    async runDFAJob(dfaId: string) {
+      log.debug(`Starting data frame analytics job '${dfaId}'...`);
+      const startResponse = await esSupertest
+        .post(`/_ml/data_frame/analytics/${dfaId}/_start`)
+        .set({ 'Content-Type': 'application/json' })
+        .expect(200)
+        .then((res: any) => res.body);
+
+      expect(startResponse)
+        .to.have.property('acknowledged')
+        .eql(true, 'Response for start data frame analytics job request should be acknowledged');
+    },
+
+    async createAndRunDFAJob(dfaConfig: DataFrameAnalyticsConfig) {
+      await this.createDataFrameAnalyticsJob(dfaConfig);
+      await this.runDFAJob(dfaConfig.id);
+      await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
+      await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED);
     },
   };
 }

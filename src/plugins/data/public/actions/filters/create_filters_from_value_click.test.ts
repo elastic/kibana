@@ -30,11 +30,7 @@ import { ValueClickContext } from '../../../../embeddable/public';
 
 const mockField = {
   name: 'bytes',
-  indexPattern: {
-    id: 'logstash-*',
-  },
   filterable: true,
-  format: new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
 };
 
 describe('createFiltersFromValueClick', () => {
@@ -49,12 +45,16 @@ describe('createFiltersFromValueClick', () => {
               name: 'test',
               id: '1-1',
               meta: {
-                type: 'histogram',
-                indexPatternId: 'logstash-*',
-                aggConfigParams: {
-                  field: 'bytes',
-                  interval: 30,
-                  otherBucket: true,
+                type: 'date',
+                source: 'esaggs',
+                sourceParams: {
+                  indexPatternId: 'logstash-*',
+                  type: 'histogram',
+                  params: {
+                    field: 'bytes',
+                    interval: 30,
+                    otherBucket: true,
+                  },
                 },
               },
             },
@@ -81,6 +81,8 @@ describe('createFiltersFromValueClick', () => {
           getByName: () => mockField,
           filter: () => [mockField],
         },
+        getFormatterForField: () =>
+          new fieldFormats.BytesFormat({}, (() => {}) as FieldFormatsGetConfigFn),
       }),
     } as unknown) as IndexPatternsContract);
   });
@@ -93,9 +95,7 @@ describe('createFiltersFromValueClick', () => {
   });
 
   test('handles an event when aggregations type is a terms', async () => {
-    if (dataPoints[0].table.columns[0].meta) {
-      dataPoints[0].table.columns[0].meta.type = 'terms';
-    }
+    (dataPoints[0].table.columns[0].meta.sourceParams as any).type = 'terms';
     const filters = await createFiltersFromValueClickAction({ data: dataPoints });
 
     expect(filters.length).toEqual(1);

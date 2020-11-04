@@ -5,13 +5,13 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { IIndexPattern } from 'src/plugins/data/server';
+import { IndexPatternAttributes } from 'src/plugins/data/server';
 
 export class IndexPatternHandler {
   constructor(private savedObjectsClient: SavedObjectsClientContract) {}
   // returns a id based on an index pattern name
   async getIndexPatternId(indexName: string) {
-    const response = await this.savedObjectsClient.find<IIndexPattern>({
+    const response = await this.savedObjectsClient.find<IndexPatternAttributes>({
       type: 'index-pattern',
       perPage: 10,
       search: `"${indexName}"`,

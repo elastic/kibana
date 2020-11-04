@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 
 import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
 
-import { intervalOptions } from './_interval_options';
+import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
 import { createFilterDateHistogram } from './create_filter/date_histogram';
 import { BucketAggType, IBucketAggConfig } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';
@@ -34,6 +34,7 @@ import { writeParams } from '../agg_params';
 import { isMetricAggType } from '../metrics/metric_agg_type';
 import { BaseAggParams } from '../types';
 import { dateHistogramInterval } from '../utils';
+import { inferTimeZone } from '../utils';
 
 /** @internal */
 export type CalculateBoundsFn = (timeRange: TimeRange) => TimeRangeBounds;
@@ -44,7 +45,7 @@ const updateTimeBuckets = (
   customBuckets?: IBucketDateHistogramAggConfig['buckets']
 ) => {
   const bounds =
-    agg.params.timeRange && (agg.fieldIsTimeField() || agg.params.interval === 'auto')
+    agg.params.timeRange && (agg.fieldIsTimeField() || isAutoInterval(agg.params.interval))
       ? calculateBounds(agg.params.timeRange)
       : undefined;
   const buckets = customBuckets || agg.buckets;
@@ -149,7 +150,7 @@ export const getDateHistogramBucketAgg = ({
           return agg.getIndexPattern().timeFieldName;
         },
         onChange(agg: IBucketDateHistogramAggConfig) {
-          if (get(agg, 'params.interval') === 'auto' && !agg.fieldIsTimeField()) {
+          if (isAutoInterval(get(agg, 'params.interval')) && !agg.fieldIsTimeField()) {
             delete agg.params.interval;
           }
         },
@@ -187,7 +188,7 @@ export const getDateHistogramBucketAgg = ({
           }
           return state;
         },
-        default: 'auto',
+        default: autoInterval,
         options: intervalOptions,
         write(agg, output, aggs) {
           updateTimeBuckets(agg, calculateBounds);
@@ -235,25 +236,7 @@ export const getDateHistogramBucketAgg = ({
         // time_zones being persisted into saved_objects
         serialize: noop,
         write(agg, output) {
-          // If a time_zone has been set explicitly always prefer this.
-          let tz = agg.params.time_zone;
-          if (!tz && agg.params.field) {
-            // If a field has been configured check the index pattern's typeMeta if a date_histogram on that
-            // field requires a specific time_zone
-            tz = get(agg.getIndexPattern(), [
-              'typeMeta',
-              'aggs',
-              'date_histogram',
-              agg.params.field.name,
-              'time_zone',
-            ]);
-          }
-          if (!tz) {
-            // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
-            const detectedTimezone = moment.tz.guess();
-            const tzOffset = moment().format('Z');
-            tz = isDefaultTimezone() ? detectedTimezone || tzOffset : getConfig('dateFormat:tz');
-          }
+          const tz = inferTimeZone(agg.params, agg.getIndexPattern(), isDefaultTimezone, getConfig);
           output.params.time_zone = tz;
         },
       },

@@ -8,22 +8,23 @@ import { getOr } from 'lodash/fp';
 import React, { useEffect } from 'react';
 import { AuthenticationTable } from '../../components/authentications_table';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { AuthenticationsQuery } from '../../containers/authentications';
+import { useAuthentications } from '../../containers/authentications';
 import { HostsComponentsQueryProps } from './types';
-import { hostsModel } from '../../store';
 import {
   MatrixHistogramOption,
   MatrixHistogramMappingTypes,
-  MatrixHisrogramConfigs,
+  MatrixHistogramConfigs,
 } from '../../../common/components/matrix_histogram/types';
-import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
-import { KpiHostsChartColors } from '../../components/kpi_hosts/types';
+import { MatrixHistogram } from '../../../common/components/matrix_histogram';
+import { HostsKpiChartColors } from '../../components/kpi_hosts/types';
 import * as i18n from '../translations';
-import { HistogramType } from '../../../graphql/types';
+import { MatrixHistogramType } from '../../../../common/search_strategy/security_solution';
 
 const AuthenticationTableManage = manageQuery(AuthenticationTable);
-const ID = 'authenticationsOverTimeQuery';
-const authStackByOptions: MatrixHistogramOption[] = [
+
+const ID = 'authenticationsHistogramQuery';
+
+const authenticationsStackByOptions: MatrixHistogramOption[] = [
   {
     text: 'event.outcome',
     value: 'event.outcome',
@@ -31,44 +32,59 @@ const authStackByOptions: MatrixHistogramOption[] = [
 ];
 const DEFAULT_STACK_BY = 'event.outcome';
 
-enum AuthMatrixDataGroup {
-  authSuccess = 'success',
-  authFailure = 'failure',
+enum AuthenticationsMatrixDataGroup {
+  authenticationsSuccess = 'success',
+  authenticationsFailure = 'failure',
 }
 
-export const authMatrixDataMappingFields: MatrixHistogramMappingTypes = {
-  [AuthMatrixDataGroup.authSuccess]: {
-    key: AuthMatrixDataGroup.authSuccess,
+export const authenticationsMatrixDataMappingFields: MatrixHistogramMappingTypes = {
+  [AuthenticationsMatrixDataGroup.authenticationsSuccess]: {
+    key: AuthenticationsMatrixDataGroup.authenticationsSuccess,
     value: null,
-    color: KpiHostsChartColors.authSuccess,
+    color: HostsKpiChartColors.authenticationsSuccess,
   },
-  [AuthMatrixDataGroup.authFailure]: {
-    key: AuthMatrixDataGroup.authFailure,
+  [AuthenticationsMatrixDataGroup.authenticationsFailure]: {
+    key: AuthenticationsMatrixDataGroup.authenticationsFailure,
     value: null,
-    color: KpiHostsChartColors.authFailure,
+    color: HostsKpiChartColors.authenticationsFailure,
   },
 };
 
-const histogramConfigs: MatrixHisrogramConfigs = {
+const histogramConfigs: MatrixHistogramConfigs = {
   defaultStackByOption:
-    authStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ?? authStackByOptions[0],
+    authenticationsStackByOptions.find((o) => o.text === DEFAULT_STACK_BY) ??
+    authenticationsStackByOptions[0],
   errorMessage: i18n.ERROR_FETCHING_AUTHENTICATIONS_DATA,
-  histogramType: HistogramType.authentications,
-  mapping: authMatrixDataMappingFields,
-  stackByOptions: authStackByOptions,
+  histogramType: MatrixHistogramType.authentications,
+  mapping: authenticationsMatrixDataMappingFields,
+  stackByOptions: authenticationsStackByOptions,
   title: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
 };
 
-export const AuthenticationsQueryTabBody = ({
+const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
   docValueFields,
   endDate,
   filterQuery,
+  indexNames,
   skip,
   setQuery,
   startDate,
   type,
-}: HostsComponentsQueryProps) => {
+}) => {
+  const [
+    loading,
+    { authentications, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch },
+  ] = useAuthentications({
+    docValueFields,
+    endDate,
+    filterQuery,
+    indexNames,
+    skip,
+    startDate,
+    type,
+  });
+
   useEffect(() => {
     return () => {
       if (deleteQuery) {
@@ -79,55 +95,37 @@ export const AuthenticationsQueryTabBody = ({
 
   return (
     <>
-      <MatrixHistogramContainer
+      <MatrixHistogram
         endDate={endDate}
         filterQuery={filterQuery}
         id={ID}
+        indexNames={indexNames}
         setQuery={setQuery}
-        sourceId="default"
         startDate={startDate}
-        type={hostsModel.HostsType.page}
         {...histogramConfigs}
       />
-      <AuthenticationsQuery
-        docValueFields={docValueFields}
-        endDate={endDate}
-        filterQuery={filterQuery}
-        skip={skip}
-        sourceId="default"
-        startDate={startDate}
+
+      <AuthenticationTableManage
+        data={authentications}
+        deleteQuery={deleteQuery}
+        fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+        id={id}
+        inspect={inspect}
+        isInspect={isInspected}
+        loading={loading}
+        loadPage={loadPage}
+        refetch={refetch}
+        showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
+        setQuery={setQuery}
+        totalCount={totalCount}
         type={type}
-      >
-        {({
-          authentications,
-          totalCount,
-          loading,
-          pageInfo,
-          loadPage,
-          id,
-          inspect,
-          isInspected,
-          refetch,
-        }) => (
-          <AuthenticationTableManage
-            data={authentications}
-            deleteQuery={deleteQuery}
-            fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-            id={id}
-            inspect={inspect}
-            isInspect={isInspected}
-            loading={loading}
-            loadPage={loadPage}
-            refetch={refetch}
-            showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
-            setQuery={setQuery}
-            totalCount={totalCount}
-            type={type}
-          />
-        )}
-      </AuthenticationsQuery>
+      />
     </>
   );
 };
+
+AuthenticationsQueryTabBodyComponent.displayName = 'AuthenticationsQueryTabBodyComponent';
+
+export const AuthenticationsQueryTabBody = React.memo(AuthenticationsQueryTabBodyComponent);
 
 AuthenticationsQueryTabBody.displayName = 'AuthenticationsQueryTabBody';

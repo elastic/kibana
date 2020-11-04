@@ -46,15 +46,15 @@ export const OverviewDatastreamSection: React.FC = () => {
   return (
     <EuiFlexItem component="section">
       <OverviewPanel
-        title={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelTitle', {
-          defaultMessage: 'Datasets',
+        title={i18n.translate('xpack.fleet.overviewPageDataStreamsPanelTitle', {
+          defaultMessage: 'Data streams',
         })}
-        tooltip={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelTooltip', {
-          defaultMessage: 'Data that your agents collect are organized into various datasets.',
+        tooltip={i18n.translate('xpack.fleet.overviewPageDataStreamsPanelTooltip', {
+          defaultMessage: 'Data that your agents collect are organized into various data streams.',
         })}
         linkTo={getHref('data_streams')}
-        linkToText={i18n.translate('xpack.ingestManager.overviewPageDataStreamsPanelAction', {
-          defaultMessage: 'View datasets',
+        linkToText={i18n.translate('xpack.fleet.overviewPageDataStreamsPanelAction', {
+          defaultMessage: 'View data streams',
         })}
       >
         <OverviewStats>
@@ -64,8 +64,8 @@ export const OverviewDatastreamSection: React.FC = () => {
             <>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewDatastreamTotalTitle"
-                  defaultMessage="Datasets"
+                  id="xpack.fleet.overviewDatastreamTotalTitle"
+                  defaultMessage="Data streams"
                 />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
@@ -73,7 +73,7 @@ export const OverviewDatastreamSection: React.FC = () => {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewDatastreamNamespacesTitle"
+                  id="xpack.fleet.overviewDatastreamNamespacesTitle"
                   defaultMessage="Namespaces"
                 />
               </EuiDescriptionListTitle>
@@ -82,7 +82,7 @@ export const OverviewDatastreamSection: React.FC = () => {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewDatastreamSizeTitle"
+                  id="xpack.fleet.overviewDatastreamSizeTitle"
                   defaultMessage="Total size"
                 />
               </EuiDescriptionListTitle>

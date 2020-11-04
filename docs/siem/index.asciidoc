@@ -1,19 +1,22 @@
 [role="xpack"]
 [[xpack-siem]]
-= SIEM
+= Elastic Security
 
 [partintro]
 --
 
-The SIEM app in Kibana provides an interactive workspace for security teams to
-triage events and perform initial investigations. It enables analysis of
-host-related and network-related security events as part of alert investigations
-or interactive threat hunting.
+Elastic Security combines SIEM threat detection features with endpoint
+prevention and response capabilities in one solution, including:
 
+* A detection engine to identify attacks and system misconfiguration
+* A workspace for event triage and investigations
+* Interactive visualizations to investigate process relationships
+* Embedded case management and automated actions
+* Detection of signatureless attacks with prebuilt {ml} anomaly jobs and
+detection rules
 
 [role="screenshot"]
-image::siem/images/overview-ui.png[SIEM Overview in Kibana]
-
+image::siem/images/overview-ui.png[Elastic Security in Kibana]
 
 [float]
 == Add data
@@ -31,15 +34,14 @@ https://www.elastic.co/products/beats/winlogbeat[{winlogbeat}], and
 https://www.elastic.co/products/beats/packetbeat[{packetbeat}]
 send security events and other data to Elasticsearch.
 
-The default index patterns for SIEM events are `auditbeat-*`, `winlogbeat-*`,
-`filebeat-*`, `packetbeat-*`, `endgame-*`, and `apm-*-transaction*`. You can 
-change the default index patterns in
-*Kibana > Management > Advanced Settings > siem:defaultIndex*.
+The default index patterns for Elastic Security events are `auditbeat-*`, `winlogbeat-*`,
+`filebeat-*`, `packetbeat-*`, `endgame-*`, `logs-*`, and `apm-*-transaction*`. To change the default pattern patterns, go to *Stack Management > Advanced Settings > securitySolution:defaultIndex*.
 
 [float]
-=== Elastic Endpoint Sensor Management Platform
+=== Elastic Security endpoint agent
 
-The Elastic Endpoint Sensor Management Platform (SMP) ships host and network events directly to the SIEM application, and is fully ECS compliant.
+The agent detects and protects against malware, and ships host and network
+events directly to Elastic Security.
 
 [float]
 === Elastic Common Schema (ECS) for normalizing data
@@ -49,7 +51,7 @@ used for storing event data in Elasticsearch. ECS helps users normalize their
 event data to better analyze, visualize, and correlate the data represented in
 their events.
 
-SIEM can ingest and normalize events from ECS-compatible data sources.
+Elastic Security can ingest and normalize events from ECS-compatible data sources.
 
 --
 

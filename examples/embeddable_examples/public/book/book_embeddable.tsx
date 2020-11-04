@@ -26,10 +26,10 @@ import {
   EmbeddableOutput,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
+  AttributeService,
 } from '../../../../src/plugins/embeddable/public';
 import { BookSavedObjectAttributes } from '../../common';
 import { BookEmbeddableComponent } from './book_component';
-import { AttributeService } from '../../../../src/plugins/dashboard/public';
 
 export const BOOK_EMBEDDABLE = 'book';
 export type BookEmbeddableInput = BookByValueInput | BookByReferenceInput;
@@ -60,7 +60,8 @@ function getHasMatch(search?: string, savedAttributes?: BookSavedObjectAttribute
   );
 }
 
-export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddableOutput>
+export class BookEmbeddable
+  extends Embeddable<BookEmbeddableInput, BookEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<BookByValueInput, BookByReferenceInput> {
   public readonly type = BOOK_EMBEDDABLE;
   private subscription: Subscription;
@@ -70,11 +71,7 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
 
   constructor(
     initialInput: BookEmbeddableInput,
-    private attributeService: AttributeService<
-      BookSavedObjectAttributes,
-      BookByValueInput,
-      BookByReferenceInput
-    >,
+    private attributeService: AttributeService<BookSavedObjectAttributes>,
     {
       parent,
     }: {
@@ -92,22 +89,28 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
       } else {
         this.updateOutput({
           attributes: this.attributes,
+          defaultTitle: this.attributes.title,
           hasMatch: getHasMatch(this.input.search, this.attributes),
         });
       }
     });
   }
 
-  inputIsRefType = (input: BookEmbeddableInput): input is BookByReferenceInput => {
+  readonly inputIsRefType = (input: BookEmbeddableInput): input is BookByReferenceInput => {
     return this.attributeService.inputIsRefType(input);
   };
 
-  getInputAsValueType = async (): Promise<BookByValueInput> => {
-    return this.attributeService.getInputAsValueType(this.input);
+  readonly getInputAsValueType = async (): Promise<BookByValueInput> => {
+    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.attributeService.getInputAsValueType(input);
   };
 
-  getInputAsRefType = async (): Promise<BookByReferenceInput> => {
-    return this.attributeService.getInputAsRefType(this.input, { showSaveModal: true });
+  readonly getInputAsRefType = async (): Promise<BookByReferenceInput> => {
+    const input = this.attributeService.getExplicitInputFromEmbeddable(this);
+    return this.attributeService.getInputAsRefType(input, {
+      showSaveModal: true,
+      saveModalTitle: this.getTitle(),
+    });
   };
 
   public render(node: HTMLElement) {
@@ -123,6 +126,7 @@ export class BookEmbeddable extends Embeddable<BookEmbeddableInput, BookEmbeddab
 
     this.updateOutput({
       attributes: this.attributes,
+      defaultTitle: this.attributes.title,
       hasMatch: getHasMatch(this.input.search, this.attributes),
     });
   }

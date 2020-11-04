@@ -7,7 +7,7 @@ import { Observable, Subscription } from 'rxjs';
 import { IngestManagerConfigType } from '../';
 
 /**
- * Kibana config observable service, *NOT* agent config
+ * Kibana config observable service, *NOT* agent policy
  */
 class ConfigService {
   private observable: Observable<IngestManagerConfigType> | null = null;

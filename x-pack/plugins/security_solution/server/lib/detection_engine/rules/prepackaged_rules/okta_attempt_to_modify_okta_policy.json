@@ -7,13 +7,14 @@
     "Consider adding exceptions to this rule to filter false positives if Okta policies are regularly modified in your organization."
   ],
   "index": [
-    "filebeat-*"
+    "filebeat-*",
+    "logs-okta*"
   ],
   "language": "kuery",
   "license": "Elastic License",
   "name": "Attempt to Modify Okta Policy",
   "note": "The Okta Filebeat module must be enabled to use this rule.",
-  "query": "event.module:okta and event.dataset:okta.system and event.action:policy.lifecycle.update",
+  "query": "event.dataset:okta.system and event.action:policy.lifecycle.update",
   "references": [
     "https://developer.okta.com/docs/reference/api/system-log/",
     "https://developer.okta.com/docs/reference/api/event-types/"
@@ -23,11 +24,12 @@
   "severity": "low",
   "tags": [
     "Elastic",
+    "Identity",
     "Okta",
+    "Continuous Monitoring",
     "SecOps",
-    "Monitoring",
-    "Continuous Monitoring"
+    "Monitoring"
   ],
   "type": "query",
-  "version": 1
+  "version": 2
 }

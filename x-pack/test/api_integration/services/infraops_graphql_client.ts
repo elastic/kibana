@@ -47,6 +47,7 @@ export function InfraOpsGraphQLClientFactoryProvider({ getService }: FtrProvider
     return new ApolloClient({
       cache: new InMemoryCache({
         fragmentMatcher: new IntrospectionFragmentMatcher({
+          // @ts-expect-error apollo-cache-inmemory types don't match actual introspection data
           introspectionQueryResultData,
         }),
       }),

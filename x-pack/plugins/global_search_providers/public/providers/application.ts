@@ -17,7 +17,8 @@ export const createApplicationResultProvider = (
     mergeMap((application) => application.applications$),
     map((apps) =>
       [...apps.values()].filter(
-        (app) => app.status === 0 && (app.legacy === true || app.chromeless !== true)
+        // only include non-chromeless enabled apps with visible navLinks
+        (app) => app.status === 0 && app.navLinkStatus === 1 && app.chromeless !== true
       )
     ),
     shareReplay(1)

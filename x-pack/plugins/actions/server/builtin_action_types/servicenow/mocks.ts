@@ -5,7 +5,7 @@
  */
 
 import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
-import { MapRecord } from './case_types';
+import { MapRecord } from '../case/types';
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
@@ -75,7 +75,7 @@ const executorParams: ExecutorSubActionPushParams = {
   comment: 'test-alert comment',
   severity: '1',
   urgency: '2',
-  impact: '1',
+  impact: '3',
   comments: [
     {
       commentId: 'case-comment-1',

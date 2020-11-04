@@ -7,8 +7,8 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { mockIndexPattern } from '../../../../common/mock';
-import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import { FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
@@ -17,7 +17,7 @@ import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { TimelineHeader } from '.';
 import { TimelineStatus, TimelineType } from '../../../../../common/types/timeline';
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 jest.mock('../../../../common/lib/kibana');
 

@@ -40,24 +40,18 @@ module.exports = () => {
         },
       ],
     ],
-    // NOTE: we can enable this by default for everything as soon as we only have one instance
-    // of lodash across the entire project. For now we are just enabling it for siem
-    // as they are extensively using the lodash v4
-    overrides: [
-      {
-        test: [/x-pack[\/\\]legacy[\/\\]plugins[\/\\]siem[\/\\]public/],
+    env: {
+      production: {
         plugins: [
           [
-            require.resolve('babel-plugin-transform-imports'),
+            require.resolve('babel-plugin-transform-react-remove-prop-types'),
             {
-              'lodash/?(((\\w*)?/?)*)': {
-                transform: 'lodash/${1}/${member}',
-                preventFullImport: false,
-              },
+              mode: 'remove',
+              removeImport: true,
             },
           ],
         ],
       },
-    ],
+    },
   };
 };

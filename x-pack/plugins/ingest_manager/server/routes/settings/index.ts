@@ -7,8 +7,8 @@ import { IRouter, RequestHandler } from 'src/core/server';
 import { TypeOf } from '@kbn/config-schema';
 import { PLUGIN_ID, SETTINGS_API_ROUTES } from '../../constants';
 import { PutSettingsRequestSchema, GetSettingsRequestSchema } from '../../types';
-
-import { settingsService } from '../../services';
+import { defaultIngestErrorHandler } from '../../errors';
+import { settingsService, agentPolicyService, appContextService } from '../../services';
 
 export const getSettingsHandler: RequestHandler = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
@@ -16,21 +16,17 @@ export const getSettingsHandler: RequestHandler = async (context, request, respo
   try {
     const settings = await settingsService.getSettings(soClient);
     const body = {
-      success: true,
       item: settings,
     };
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Setings not found` },
       });
     }
 
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 
@@ -40,24 +36,24 @@ export const putSettingsHandler: RequestHandler<
   TypeOf<typeof PutSettingsRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
+  const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   try {
     const settings = await settingsService.saveSettings(soClient, request.body);
+    await agentPolicyService.bumpAllAgentPolicies(soClient, {
+      user: user || undefined,
+    });
     const body = {
-      success: true,
       item: settings,
     };
     return response.ok({ body });
-  } catch (e) {
-    if (e.isBoom && e.output.statusCode === 404) {
+  } catch (error) {
+    if (error.isBoom && error.output.statusCode === 404) {
       return response.notFound({
         body: { message: `Setings not found` },
       });
     }
 
-    return response.customError({
-      statusCode: 500,
-      body: { message: e.message },
-    });
+    return defaultIngestErrorHandler({ error, response });
   }
 };
 

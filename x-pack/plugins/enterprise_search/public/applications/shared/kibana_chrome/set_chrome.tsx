@@ -4,60 +4,89 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useContext, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
-import { EuiBreadcrumb } from '@elastic/eui';
-import { KibanaContext, IKibanaContext } from '../../index';
+import React, { useEffect } from 'react';
+import { useValues } from 'kea';
+
+import { KibanaLogic } from '../kibana';
+
 import {
-  appSearchBreadcrumbs,
-  workplaceSearchBreadcrumbs,
-  TBreadcrumbs,
+  useGenerateBreadcrumbs,
+  useEnterpriseSearchBreadcrumbs,
+  useAppSearchBreadcrumbs,
+  useWorkplaceSearchBreadcrumbs,
+  TBreadcrumbTrail,
 } from './generate_breadcrumbs';
-import { appSearchTitle, workplaceSearchTitle, TTitle } from './generate_title';
+import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
 /**
  * Helpers for setting Kibana chrome (breadcrumbs, doc titles) on React view mount
  * @see https://github.com/elastic/kibana/blob/master/src/core/public/chrome/chrome_service.tsx
+ *
+ * Example usage (don't forget to i18n.translate() page titles!):
+ *
+ * <SetAppSearchPageChrome trail={['Engines', 'Example Engine Name, 'Curations']} />
+ * Breadcrumb output: Enterprise Search > App Search > Engines > Example Engine Name > Curations
+ * Title output: Curations - Example Engine Name - Engines - App Search - Elastic
+ *
+ * <SetWorkplaceSearchChrome />
+ * Breadcrumb output: Enterprise Search > Workplace Search
+ * Title output: Workplace Search - Elastic
  */
 
-export type TSetBreadcrumbs = (breadcrumbs: EuiBreadcrumb[]) => void;
-
-interface IBreadcrumbsProps {
-  text: string;
-  isRoot?: never;
+interface ISetChromeProps {
+  trail?: TBreadcrumbTrail;
 }
-interface IRootBreadcrumbsProps {
-  isRoot: true;
-  text?: never;
-}
-type TBreadcrumbsProps = IBreadcrumbsProps | IRootBreadcrumbsProps;
 
-export const SetAppSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
-  const history = useHistory();
-  const { setBreadcrumbs, setDocTitle } = useContext(KibanaContext) as IKibanaContext;
+export const SetEnterpriseSearchChrome: React.FC<ISetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
-  const crumb = isRoot ? [] : [{ text, path: history.location.pathname }];
-  const title = isRoot ? [] : [text];
+  const title = reverseArray(trail);
+  const docTitle = enterpriseSearchTitle(title);
+
+  const crumbs = useGenerateBreadcrumbs(trail);
+  const breadcrumbs = useEnterpriseSearchBreadcrumbs(crumbs);
 
   useEffect(() => {
-    setBreadcrumbs(appSearchBreadcrumbs(history)(crumb as TBreadcrumbs | []));
-    setDocTitle(appSearchTitle(title as TTitle | []));
-  }, []);
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
 
   return null;
 };
 
-export const SetWorkplaceSearchChrome: React.FC<TBreadcrumbsProps> = ({ text, isRoot }) => {
-  const history = useHistory();
-  const { setBreadcrumbs, setDocTitle } = useContext(KibanaContext) as IKibanaContext;
+export const SetAppSearchChrome: React.FC<ISetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
-  const crumb = isRoot ? [] : [{ text, path: history.location.pathname }];
-  const title = isRoot ? [] : [text];
+  const title = reverseArray(trail);
+  const docTitle = appSearchTitle(title);
+
+  const crumbs = useGenerateBreadcrumbs(trail);
+  const breadcrumbs = useAppSearchBreadcrumbs(crumbs);
 
   useEffect(() => {
-    setBreadcrumbs(workplaceSearchBreadcrumbs(history)(crumb as TBreadcrumbs | []));
-    setDocTitle(workplaceSearchTitle(title as TTitle | []));
-  }, []);
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
 
   return null;
 };
+
+export const SetWorkplaceSearchChrome: React.FC<ISetChromeProps> = ({ trail = [] }) => {
+  const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
+
+  const title = reverseArray(trail);
+  const docTitle = workplaceSearchTitle(title);
+
+  const crumbs = useGenerateBreadcrumbs(trail);
+  const breadcrumbs = useWorkplaceSearchBreadcrumbs(crumbs);
+
+  useEffect(() => {
+    setBreadcrumbs(breadcrumbs);
+    setDocTitle(docTitle);
+  }, [trail]);
+
+  return null;
+};
+
+// Small util - performantly reverses an array without mutating the original array
+const reverseArray = (array: string[]) => array.slice().reverse();

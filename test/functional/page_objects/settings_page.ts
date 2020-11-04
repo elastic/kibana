@@ -282,9 +282,17 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async clickIndexPatternLogstash() {
-      const indexLink = await find.byXPath(`//a[descendant::*[text()='logstash-*']]`);
+    async hasIndexPattern(name: string) {
+      return await find.existsByLinkText(name);
+    }
+
+    async clickIndexPatternByName(name: string) {
+      const indexLink = await find.byXPath(`//a[descendant::*[text()='${name}']]`);
       await indexLink.click();
+    }
+
+    async clickIndexPatternLogstash() {
+      await this.clickIndexPatternByName('logstash-*');
     }
 
     async getIndexPatternList() {
@@ -320,6 +328,13 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
       await retry.try(async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickKibanaIndexPatterns();
+        const exists = await this.hasIndexPattern(indexPatternName);
+
+        if (exists) {
+          await this.clickIndexPatternByName(indexPatternName);
+          return;
+        }
+
         await PageObjects.header.waitUntilLoadingHasFinished();
         await this.clickAddNewIndexPatternButton();
         if (!isStandardIndexPattern) {
@@ -352,6 +367,7 @@ export function SettingsPageProvider({ getService, getPageObjects }: FtrProvider
     }
 
     async clickAddNewIndexPatternButton() {
+      await PageObjects.common.scrollKibanaBodyTop();
       await testSubjects.click('createIndexPatternButton');
     }
 

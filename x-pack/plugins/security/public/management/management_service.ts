@@ -5,7 +5,7 @@
  */
 
 import { Subscription } from 'rxjs';
-import { StartServicesAccessor, FatalErrorsSetup } from 'src/core/public';
+import { StartServicesAccessor, FatalErrorsSetup, Capabilities } from 'src/core/public';
 import {
   ManagementApp,
   ManagementSetup,
@@ -27,6 +27,10 @@ interface SetupParams {
   getStartServices: StartServicesAccessor<PluginStartDependencies>;
 }
 
+interface StartParams {
+  capabilities: Capabilities;
+}
+
 export class ManagementService {
   private license!: SecurityLicense;
   private licenseFeaturesSubscription?: Subscription;
@@ -44,7 +48,7 @@ export class ManagementService {
     this.securitySection.registerApp(roleMappingsManagementApp.create({ getStartServices }));
   }
 
-  start() {
+  start({ capabilities }: StartParams) {
     this.licenseFeaturesSubscription = this.license.features$.subscribe(async (features) => {
       const securitySection = this.securitySection!;
 
@@ -61,6 +65,11 @@ export class ManagementService {
       // Iterate over all registered apps and update their enable status depending on the available
       // license features.
       for (const [app, enableStatus] of securityManagementAppsStatuses) {
+        if (capabilities.management.security[app.id] !== true) {
+          app.disable();
+          continue;
+        }
+
         if (app.enabled === enableStatus) {
           continue;
         }

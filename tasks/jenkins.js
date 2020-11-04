@@ -29,16 +29,13 @@ module.exports = function (grunt) {
     'run:i18nCheck',
     'run:telemetryCheck',
     'run:checkFileCasing',
-    'run:checkLockfileSymlinks',
     'run:licenses',
-    'run:verifyDependencyVersions',
     'run:verifyNotice',
     'run:mocha',
     'run:test_jest',
     'run:test_jest_integration',
     'run:test_projects',
     'run:test_hardening',
-    'run:test_package_safer_lodash_set',
     'run:apiIntegrationTests',
   ]);
 };

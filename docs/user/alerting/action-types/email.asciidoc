@@ -12,7 +12,7 @@ Email connectors have the following configuration properties:
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 Sender::    The from address for all emails sent with this connector, specified in `user@host-name` format.
-Host::      Host name of the service provider. If you are using the <<action-settings, `xpack.actions.whitelistedHosts`>> setting, make sure this hostname is whitelisted.
+Host::      Host name of the service provider. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure this hostname is added to the allowed hosts.
 Port::      The port to connect to on the service provider.
 Secure::    If true the connection will use TLS when connecting to the service provider. See https://nodemailer.com/smtp/#tls-options[nodemailer TLS documentation] for more information.
 Username::  username for 'login' type authentication.

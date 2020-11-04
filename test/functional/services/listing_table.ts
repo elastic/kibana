@@ -33,7 +33,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
    */
   class ListingTable {
     private async getSearchFilter() {
-      const searchFilter = await find.allByCssSelector('.euiFieldSearch');
+      const searchFilter = await find.allByCssSelector('main .euiFieldSearch');
       return searchFilter[0];
     }
 
@@ -56,7 +56,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
 
     private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
       const visualizationNames = [];
-      const links = await find.allByCssSelector('.kuiLink');
+      const links = await find.allByCssSelector('.euiTableRow .euiLink');
       for (let i = 0; i < links.length; i++) {
         visualizationNames.push(await links[i].getVisibleText());
       }
@@ -73,7 +73,9 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
       let visualizationNames: string[] = [];
       while (morePages) {
         visualizationNames = visualizationNames.concat(await this.getAllItemsNamesOnCurrentPage());
-        morePages = !((await testSubjects.getAttribute('pagerNextButton', 'disabled')) === 'true');
+        morePages = !(
+          (await testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
+        );
         if (morePages) {
           await testSubjects.click('pagerNextButton');
           await header.waitUntilLoadingHasFinished();
@@ -99,15 +101,23 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
      * Types name into search field on Landing page and waits till search completed
      * @param name item name
      */
-    public async searchForItemWithName(name: string) {
+    public async searchForItemWithName(name: string, { escape = true }: { escape?: boolean } = {}) {
       log.debug(`searchForItemWithName: ${name}`);
 
       await retry.try(async () => {
         const searchFilter = await this.getSearchFilter();
         await searchFilter.clearValue();
         await searchFilter.click();
-        // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
-        await searchFilter.type(name.replace('-', ' '));
+
+        if (escape) {
+          name = name
+            // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
+            .replace('-', ' ')
+            // Remove `[*]` from search as it is not supported by EUI Query's syntax.
+            .replace(/ *\[[^)]*\] */g, '');
+        }
+
+        await searchFilter.type(name);
         await common.pressEnterKey();
       });
 
@@ -159,7 +169,9 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
      * @param name item name
      */
     public async clickItemLink(appName: 'dashboard' | 'visualize', name: string) {
-      await testSubjects.click(`${appName}ListingTitleLink-${name.split(' ').join('-')}`);
+      await testSubjects.click(
+        `${prefixMap[appName]}ListingTitleLink-${name.split(' ').join('-')}`
+      );
     }
 
     /**
@@ -182,7 +194,7 @@ export function ListingTableProvider({ getService, getPageObjects }: FtrProvider
       await retry.tryForTime(20000, async () => {
         // newItemButton button is only visible when there are items in the listing table is displayed.
         const isnNewItemButtonPresent = await testSubjects.exists('newItemButton', {
-          timeout: 5000,
+          timeout: 10000,
         });
         if (isnNewItemButtonPresent) {
           await testSubjects.click('newItemButton');

@@ -17,25 +17,22 @@
  * under the License.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { filter, first } from 'rxjs/operators';
 import { getEmsTileLayerId, getUiSettings, getToasts } from '../kibana_services';
+import { lazyLoadMapsLegacyModules } from '../lazy_load_bundle';
+import { getServiceSettings } from '../get_service_settings';
 
 const WMS_MINZOOM = 0;
 const WMS_MAXZOOM = 22; //increase this to 22. Better for WMS
 
-export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) {
+export function BaseMapsVisualizationProvider() {
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
    * @class BaseMapsVisualization
    * @constructor
    */
-
-  const serviceSettings = mapServiceSettings;
-  const toastService = getToasts();
-
   return class BaseMapsVisualization {
     constructor(element, vis) {
       this.vis = vis;
@@ -95,9 +92,9 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
       const centerFromUIState = uiState.get('mapCenter');
       options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.params.mapZoom;
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
-      const services = { toastService };
 
-      this._kibanaMap = getKibanaMap(this._container, options, services);
+      const modules = await lazyLoadMapsLegacyModules();
+      this._kibanaMap = new modules.KibanaMap(this._container, options);
       this._kibanaMap.setMinZoom(WMS_MINZOOM); //use a default
       this._kibanaMap.setMaxZoom(WMS_MAXZOOM); //use a default
 
@@ -138,6 +135,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
       const mapParams = this._getMapsParams();
       if (!this._tmsConfigured()) {
         try {
+          const serviceSettings = await getServiceSettings();
           const tmsServices = await serviceSettings.getTMSServices();
           const userConfiguredTmsLayer = tmsServices[0];
           const initBasemapLayer = userConfiguredTmsLayer
@@ -147,7 +145,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
             this._setTmsLayer(initBasemapLayer);
           }
         } catch (e) {
-          toastService.addWarning(e.message);
+          getToasts().addWarning(e.message);
           return;
         }
         return;
@@ -174,7 +172,7 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
           this._setTmsLayer(selectedTmsLayer);
         }
       } catch (tmsLoadingError) {
-        toastService.addWarning(tmsLoadingError.message);
+        getToasts().addWarning(tmsLoadingError.message);
       }
     }
 
@@ -189,13 +187,14 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
         isDesaturated = true;
       }
       const isDarkMode = getUiSettings().get('theme:darkMode');
+      const serviceSettings = await getServiceSettings();
       const meta = await serviceSettings.getAttributesForTMSLayer(
         tmsLayer,
         isDesaturated,
         isDarkMode
       );
       const showZoomMessage = serviceSettings.shouldShowZoomMessage(tmsLayer);
-      const options = _.cloneDeep(tmsLayer);
+      const options = { ...tmsLayer };
       delete options.id;
       delete options.subdomains;
       this._kibanaMap.setBaseLayer({
@@ -228,12 +227,11 @@ export function BaseMapsVisualizationProvider(getKibanaMap, mapServiceSettings) 
     }
 
     _getMapsParams() {
-      return _.assign(
-        {},
-        this.vis.type.visConfig.defaults,
-        { type: this.vis.type.name },
-        this._params
-      );
+      return {
+        ...this.vis.type.visConfig.defaults,
+        type: this.vis.type.name,
+        ...this._params,
+      };
     }
 
     _whenBaseLayerIsLoaded() {

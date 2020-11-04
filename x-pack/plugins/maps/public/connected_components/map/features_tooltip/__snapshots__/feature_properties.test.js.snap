@@ -1,11 +1,12 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FeatureProperties should not show filter button 1`] = `
+exports[`FeatureProperties should render 1`] = `
 <table
   className="eui-yScrollWithShadows mapFeatureTooltip_table"
 >
   <tbody>
     <tr
+      className="mapFeatureTooltip_row"
       key="prop1"
     >
       <td
@@ -21,8 +22,10 @@ exports[`FeatureProperties should not show filter button 1`] = `
           }
         }
       />
+      <td />
     </tr>
     <tr
+      className="mapFeatureTooltip_row"
       key="prop2"
     >
       <td
@@ -38,6 +41,7 @@ exports[`FeatureProperties should not show filter button 1`] = `
           }
         }
       />
+      <td />
     </tr>
   </tbody>
 </table>
@@ -56,12 +60,13 @@ exports[`FeatureProperties should show error message if unable to load tooltip c
 </EuiCallOut>
 `;
 
-exports[`FeatureProperties should show only filter button for filterable properties 1`] = `
+exports[`FeatureProperties should show filter button for filterable properties 1`] = `
 <table
   className="eui-yScrollWithShadows mapFeatureTooltip_table"
 >
   <tbody>
     <tr
+      className="mapFeatureTooltip_row"
       key="prop1"
     >
       <td
@@ -78,17 +83,21 @@ exports[`FeatureProperties should show only filter button for filterable propert
         }
       />
       <td>
-        <EuiButtonIcon
+        <EuiButtonEmpty
           aria-label="Filter on property"
-          className="mapFeatureTooltip__filterButton"
           data-test-subj="mapTooltipCreateFilterButton"
-          iconType="plusInCircle"
           onClick={[Function]}
+          size="xs"
           title="Filter on property"
-        />
+        >
+          <EuiIcon
+            type="filter"
+          />
+        </EuiButtonEmpty>
       </td>
     </tr>
     <tr
+      className="mapFeatureTooltip_row"
       key="prop2"
     >
       <td
@@ -104,6 +113,81 @@ exports[`FeatureProperties should show only filter button for filterable propert
           }
         }
       />
+      <td />
+    </tr>
+  </tbody>
+</table>
+`;
+
+exports[`FeatureProperties should show view actions button when there are available actions 1`] = `
+<table
+  className="eui-yScrollWithShadows mapFeatureTooltip_table"
+>
+  <tbody>
+    <tr
+      className="mapFeatureTooltip_row"
+      key="prop1"
+    >
+      <td
+        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+      >
+        prop1
+      </td>
+      <td
+        className="eui-textOverflowWrap"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "foobar1",
+          }
+        }
+      />
+      <td
+        className="mapFeatureTooltip_actionsRow"
+      >
+        <span>
+          <EuiButtonEmpty
+            aria-label="Filter on property"
+            data-test-subj="mapTooltipCreateFilterButton"
+            onClick={[Function]}
+            size="xs"
+            title="Filter on property"
+          >
+            <EuiIcon
+              type="filter"
+            />
+          </EuiButtonEmpty>
+          <EuiButtonEmpty
+            aria-label="View filter actions"
+            data-test-subj="mapTooltipMoreActionsButton"
+            onClick={[Function]}
+            size="xs"
+            title="View filter actions"
+          >
+            <EuiIcon
+              type="arrowRight"
+            />
+          </EuiButtonEmpty>
+        </span>
+      </td>
+    </tr>
+    <tr
+      className="mapFeatureTooltip_row"
+      key="prop2"
+    >
+      <td
+        className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel"
+      >
+        prop2
+      </td>
+      <td
+        className="eui-textOverflowWrap"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": "foobar2",
+          }
+        }
+      />
+      <td />
     </tr>
   </tbody>
 </table>

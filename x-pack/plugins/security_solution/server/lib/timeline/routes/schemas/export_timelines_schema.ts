@@ -11,8 +11,6 @@ export const exportTimelinesQuerySchema = rt.type({
   file_name: rt.string,
 });
 
-export const exportTimelinesRequestBodySchema = unionWithNullType(
-  rt.partial({
-    ids: unionWithNullType(rt.array(rt.string)),
-  })
-);
+export const exportTimelinesRequestBodySchema = rt.partial({
+  ids: unionWithNullType(rt.array(rt.string)),
+});

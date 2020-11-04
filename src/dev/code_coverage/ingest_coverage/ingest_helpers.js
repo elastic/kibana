@@ -24,7 +24,6 @@ import {
   COVERAGE_INDEX,
   RESEARCH_COVERAGE_INDEX,
   RESEARCH_TOTALS_INDEX,
-  TEAM_ASSIGNMENT_PIPELINE_NAME,
   TOTALS_INDEX,
 } from './constants';
 
@@ -68,12 +67,6 @@ function color(whichColor) {
   return function colorInner(x) {
     return chalk[whichColor].bgWhiteBright(x);
   };
-}
-
-export function maybeTeamAssign(isACoverageIndex, body) {
-  const doAddTeam = isACoverageIndex ? true : false;
-  const payload = doAddTeam ? { ...body, pipeline: TEAM_ASSIGNMENT_PIPELINE_NAME } : body;
-  return payload;
 }
 
 export function whichIndex(isResearchJob) {

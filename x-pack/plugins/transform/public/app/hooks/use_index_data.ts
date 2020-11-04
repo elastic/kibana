@@ -9,27 +9,17 @@ import { useEffect } from 'react';
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import {
-  getFieldType,
-  getDataGridSchemaFromKibanaFieldType,
-  getFieldsFromKibanaIndexPattern,
-  getErrorMessage,
-  showDataGridColumnChartErrorMessageToast,
-  useDataGrid,
-  useRenderCellValue,
-  EsSorting,
-  SearchResponse7,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
-} from '../../shared_imports';
+  isEsSearchResponse,
+  isFieldHistogramsResponseSchema,
+} from '../../../common/api_schemas/type_guards';
+import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
+import { getErrorMessage } from '../../../common/utils/errors';
 import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
-
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
-import { useToastNotifications } from '../app_dependencies';
-
-type IndexSearchResponse = SearchResponse7;
+import { useAppDependencies, useToastNotifications } from '../app_dependencies';
 
 export const useIndexData = (
   indexPattern: SearchItems['indexPattern'],
@@ -37,6 +27,18 @@ export const useIndexData = (
 ): UseIndexDataReturnType => {
   const api = useApi();
   const toastNotifications = useToastNotifications();
+  const {
+    ml: {
+      getFieldType,
+      getDataGridSchemaFromKibanaFieldType,
+      getFieldsFromKibanaIndexPattern,
+      showDataGridColumnChartErrorMessageToast,
+      useDataGrid,
+      useRenderCellValue,
+      getProcessedFields,
+      INDEX_STATUS,
+    },
+  } = useAppDependencies();
 
   const indexPatternFields = getFieldsFromKibanaIndexPattern(indexPattern);
 
@@ -82,6 +84,8 @@ export const useIndexData = (
     const esSearchRequest = {
       index: indexPattern.title,
       body: {
+        fields: ['*'],
+        _source: false,
         // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
         query: isDefaultQuery(query) ? matchAllQuery : query,
         from: pagination.pageIndex * pagination.pageSize,
@@ -90,37 +94,39 @@ export const useIndexData = (
       },
     };
 
-    try {
-      const resp: IndexSearchResponse = await api.esSearch(esSearchRequest);
+    const resp = await api.esSearch(esSearchRequest);
 
-      const docs = resp.hits.hits.map((d) => d._source);
-
-      setRowCount(resp.hits.total.value);
-      setTableItems(docs);
-      setStatus(INDEX_STATUS.LOADED);
-    } catch (e) {
-      setErrorMessage(getErrorMessage(e));
+    if (!isEsSearchResponse(resp)) {
+      setErrorMessage(getErrorMessage(resp));
       setStatus(INDEX_STATUS.ERROR);
       return;
     }
+
+    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
+
+    setRowCount(resp.hits.total.value);
+    setTableItems(docs);
+    setStatus(INDEX_STATUS.LOADED);
   };
 
   const fetchColumnChartsData = async function () {
-    try {
-      const columnChartsData = await api.getHistogramsForFields(
-        indexPattern.title,
-        columns
-          .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
-          .map((cT) => ({
-            fieldName: cT.id,
-            type: getFieldType(cT.schema),
-          })),
-        isDefaultQuery(query) ? matchAllQuery : query
-      );
-      setColumnCharts(columnChartsData);
-    } catch (e) {
-      showDataGridColumnChartErrorMessageToast(e, toastNotifications);
+    const columnChartsData = await api.getHistogramsForFields(
+      indexPattern.title,
+      columns
+        .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+        .map((cT) => ({
+          fieldName: cT.id,
+          type: getFieldType(cT.schema),
+        })),
+      isDefaultQuery(query) ? matchAllQuery : query
+    );
+
+    if (!isFieldHistogramsResponseSchema(columnChartsData)) {
+      showDataGridColumnChartErrorMessageToast(columnChartsData, toastNotifications);
+      return;
     }
+
+    setColumnCharts(columnChartsData);
   };
 
   useEffect(() => {

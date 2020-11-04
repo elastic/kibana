@@ -7,37 +7,18 @@
 <b>Signature:</b>
 
 ```typescript
-toSpec(): {
-        count: number;
-        script: string | undefined;
-        lang: string | undefined;
-        conflictDescriptions: Record<string, string[]> | undefined;
-        name: string;
-        type: string;
-        esTypes: string[] | undefined;
-        scripted: boolean;
-        searchable: boolean;
-        aggregatable: boolean;
-        readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
-        format: any;
-    };
+toSpec({ getFormatterForField, }?: {
+        getFormatterForField?: IndexPattern['getFormatterForField'];
+    }): FieldSpec;
 ```
+
+## Parameters
+
+|  Parameter | Type | Description |
+|  --- | --- | --- |
+|  { getFormatterForField, } | <code>{</code><br/><code>        getFormatterForField?: IndexPattern['getFormatterForField'];</code><br/><code>    }</code> |  |
+
 <b>Returns:</b>
 
-`{
-        count: number;
-        script: string | undefined;
-        lang: string | undefined;
-        conflictDescriptions: Record<string, string[]> | undefined;
-        name: string;
-        type: string;
-        esTypes: string[] | undefined;
-        scripted: boolean;
-        searchable: boolean;
-        aggregatable: boolean;
-        readFromDocValues: boolean;
-        subType: import("../types").IFieldSubType | undefined;
-        format: any;
-    }`
+`FieldSpec`
 

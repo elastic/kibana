@@ -43,6 +43,7 @@ export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
         heartbeatIndices,
         certAgeThreshold: parseInt(age, 10),
         certExpirationThreshold: parseInt(expiration, 10),
+        defaultConnectors: [],
       };
     },
     applyButtonIsDisabled: async () => {

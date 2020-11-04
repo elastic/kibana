@@ -6,12 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { APP_ID, APP_ICON, MAP_PATH } from '../common/constants';
-import { getShowMapVisualizationTypes, getVisualizations } from './kibana_services';
 
-export function getMapsVisTypeAlias() {
-  const showMapVisualizationTypes = getShowMapVisualizationTypes();
+export function getMapsVisTypeAlias(visualizations, showMapVisualizationTypes) {
   if (!showMapVisualizationTypes) {
-    getVisualizations().hideTypes(['region_map', 'tile_map']);
+    visualizations.hideTypes(['region_map', 'tile_map']);
   }
 
   const description = i18n.translate('xpack.maps.visTypeAlias.description', {

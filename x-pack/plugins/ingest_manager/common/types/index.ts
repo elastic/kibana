@@ -9,21 +9,22 @@ export * from './rest_spec';
 export interface IngestManagerConfigType {
   enabled: boolean;
   registryUrl?: string;
-  fleet: {
+  registryProxyUrl?: string;
+  agents: {
     enabled: boolean;
     tlsCheckDisabled: boolean;
     pollingRequestTimeout: number;
     maxConcurrentConnections: number;
     kibana: {
-      host?: string;
+      host?: string[] | string;
       ca_sha256?: string;
     };
     elasticsearch: {
       host?: string;
       ca_sha256?: string;
     };
-    agentConfigRolloutRateLimitIntervalMs: number;
-    agentConfigRolloutRateLimitRequestPerInterval: number;
+    agentPolicyRolloutRateLimitIntervalMs: number;
+    agentPolicyRolloutRateLimitRequestPerInterval: number;
   };
 }
 
@@ -33,3 +34,8 @@ export interface IngestManagerConfigType {
 // and https://github.com/Microsoft/TypeScript/pull/12253#issuecomment-263132208
 // and https://github.com/Microsoft/TypeScript/issues/21826#issuecomment-479851685
 export const entries = Object.entries as <T>(o: T) => Array<[keyof T, T[keyof T]]>;
+
+/**
+ * Creates a Union Type for all the values of an object
+ */
+export type ValueOf<T> = T[keyof T];

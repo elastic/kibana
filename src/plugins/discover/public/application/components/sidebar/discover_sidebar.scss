@@ -42,52 +42,13 @@
 }
 
 .dscSidebarItem {
-  border-top: 1px solid transparent;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  font-size: $euiFontSizeXS;
-  border-top: solid 1px transparent;
-  border-bottom: solid 1px transparent;
-  line-height: normal;
-  margin-bottom: $euiSizeXS * 0.5;
-
   &:hover,
-  &:focus {
+  &:focus-within,
+  &[class*='-isActive'] {
     .dscSidebarItem__action {
       opacity: 1;
     }
   }
-}
-
-.dscSidebarItem--active {
-  border-top: 1px solid $euiColorLightShade;
-  color: $euiColorFullShade;
-}
-
-.dscSidebarField {
-  padding: $euiSizeXS;
-  display: flex;
-  align-items: center;
-  max-width: 100%;
-  width: 100%;
-  border: none;
-  border-radius: $euiBorderRadius - 1px;
-  text-align: left;
-}
-
-.dscSidebarField__name {
-  margin-left: $euiSizeS;
-  flex-grow: 1;
-  word-break: break-word;
-  padding-right: 1px;
-}
-
-.dscSidebarField__fieldIcon {
-  margin-top: $euiSizeXS / 2;
-  margin-right: $euiSizeXS / 2;
 }
 
 /**
@@ -101,7 +62,7 @@
   &:focus {
     opacity: 1; /* 2 */
   }
-  font-size: 12px;
+  font-size: $euiFontSizeXS;
   padding: 2px 6px !important;
   height: 22px !important;
   min-width: auto !important;
@@ -130,8 +91,6 @@
 }
 
 .dscFieldDetails {
-  padding: $euiSizeS;
-  background-color: $euiColorLightestShade;
   color: $euiTextColor;
   margin-bottom: $euiSizeS;
 }

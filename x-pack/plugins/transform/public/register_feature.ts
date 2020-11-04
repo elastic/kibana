@@ -23,7 +23,7 @@ export const registerFeature = (home: HomePublicPluginSetup) => {
     }),
     icon: 'managementApp', // there is currently no Transforms icon, so using the general management app icon
     path: '/app/management/data/transform',
-    showOnHomePage: true,
+    showOnHomePage: false,
     category: FeatureCatalogueCategory.ADMIN,
   });
 };

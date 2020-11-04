@@ -4,11 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EsFieldName,
-  GroupByConfigWithUiSupport,
-  PIVOT_SUPPORTED_GROUP_BY_AGGS,
-} from '../../../../../common';
+import { EsFieldName } from '../../../../../../../common/types/fields';
+
+import { GroupByConfigWithUiSupport, PIVOT_SUPPORTED_GROUP_BY_AGGS } from '../../../../../common';
 
 export function getDefaultGroupByConfig(
   aggName: string,

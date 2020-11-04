@@ -5,17 +5,24 @@
   "ui": true,
   "requiredPlugins": [
     "data",
-    "kibanaLegacy",
+    "urlForwarding",
     "navigation",
     "savedObjects",
     "visualizations",
-    "embeddable"
+    "embeddable",
+    "dashboard",
+    "uiActions"
   ],
-  "optionalPlugins": ["home", "share"],
+  "optionalPlugins": [
+    "home",
+    "share",
+    "savedObjectsTaggingOss"
+  ],
   "requiredBundles": [
     "kibanaUtils",
     "kibanaReact",
     "home",
-    "discover"
+    "discover",
+    "visDefaultEditor"
   ]
 }

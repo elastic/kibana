@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { FetchOptions, ISearchSource } from 'src/plugins/data/public';
+import { ISearchOptions, ISearchSource } from 'src/plugins/data/public';
 import { ExpressionAstFunction } from 'src/plugins/expressions/common';
 import { IAggConfigs } from '../agg_configs';
 import { IAggConfig } from '../agg_config';
@@ -56,7 +56,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   modifyAggConfigOnSearchRequestStart: (
     aggConfig: TAggConfig,
     searchSource?: ISearchSource,
-    options?: FetchOptions
+    options?: ISearchOptions
   ) => void;
 
   constructor(config: Record<string, any>) {

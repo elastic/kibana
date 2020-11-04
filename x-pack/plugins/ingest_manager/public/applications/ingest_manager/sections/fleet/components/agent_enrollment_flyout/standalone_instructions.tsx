@@ -15,73 +15,75 @@ import {
   EuiFlexGroup,
   EuiCodeBlock,
   EuiCopy,
+  EuiLink,
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { AgentConfig } from '../../../../types';
-import { useCore, sendGetOneAgentConfigFull } from '../../../../hooks';
-import { DownloadStep, AgentConfigSelectionStep } from './steps';
-import { configToYaml, agentConfigRouteService } from '../../../../services';
+import { AgentPolicy } from '../../../../types';
+import { useCore, useLink, sendGetOneAgentPolicyFull } from '../../../../hooks';
+import { DownloadStep, AgentPolicySelectionStep } from './steps';
+import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../../services';
 
 interface Props {
-  agentConfigs?: AgentConfig[];
+  agentPolicies?: AgentPolicy[];
 }
 
-const RUN_INSTRUCTIONS = './elastic-agent run';
+const RUN_INSTRUCTIONS = './elastic-agent install';
 
-export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentConfigs }) => {
+export const StandaloneInstructions = React.memo<Props>(({ agentPolicies }) => {
+  const { getHref } = useLink();
   const core = useCore();
   const { notifications } = core;
 
-  const [selectedConfigId, setSelectedConfigId] = useState<string | undefined>();
-  const [fullAgentConfig, setFullAgentConfig] = useState<any | undefined>();
+  const [selectedPolicyId, setSelectedPolicyId] = useState<string | undefined>();
+  const [fullAgentPolicy, setFullAgentPolicy] = useState<any | undefined>();
 
-  const downloadLink = selectedConfigId
+  const downloadLink = selectedPolicyId
     ? core.http.basePath.prepend(
-        `${agentConfigRouteService.getInfoFullDownloadPath(selectedConfigId)}?standalone=true`
+        `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicyId)}?standalone=true`
       )
     : undefined;
 
   useEffect(() => {
-    async function fetchFullConfig() {
+    async function fetchFullPolicy() {
       try {
-        if (!selectedConfigId) {
+        if (!selectedPolicyId) {
           return;
         }
-        const res = await sendGetOneAgentConfigFull(selectedConfigId, { standalone: true });
+        const res = await sendGetOneAgentPolicyFull(selectedPolicyId, { standalone: true });
         if (res.error) {
           throw res.error;
         }
 
         if (!res.data) {
-          throw new Error('No data while fetching full agent config');
+          throw new Error('No data while fetching full agent policy');
         }
 
-        setFullAgentConfig(res.data.item);
+        setFullAgentPolicy(res.data.item);
       } catch (error) {
         notifications.toasts.addError(error, {
           title: 'Error',
         });
       }
     }
-    fetchFullConfig();
-  }, [selectedConfigId, notifications.toasts]);
+    fetchFullPolicy();
+  }, [selectedPolicyId, notifications.toasts]);
 
-  const yaml = useMemo(() => configToYaml(fullAgentConfig), [fullAgentConfig]);
+  const yaml = useMemo(() => fullAgentPolicyToYaml(fullAgentPolicy), [fullAgentPolicy]);
   const steps: EuiContainedStepProps[] = [
     DownloadStep(),
-    AgentConfigSelectionStep({ agentConfigs, setSelectedConfigId }),
+    AgentPolicySelectionStep({ agentPolicies, setSelectedPolicyId }),
     {
-      title: i18n.translate('xpack.ingestManager.agentEnrollment.stepConfigureAgentTitle', {
+      title: i18n.translate('xpack.fleet.agentEnrollment.stepConfigureAgentTitle', {
         defaultMessage: 'Configure the agent',
       }),
       children: (
         <>
           <EuiText>
             <FormattedMessage
-              id="xpack.ingestManager.agentEnrollment.stepConfigureAgentDescription"
-              defaultMessage="Copy this configuration and put it into a file named {fileName} on the system where the Elastic Agent is installed. Don’t forget to modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of the configuration file so that it uses your actual Elasticsearch credentials."
+              id="xpack.fleet.agentEnrollment.stepConfigureAgentDescription"
+              defaultMessage="Copy this policy to the {fileName} on the host where the Elastic Agent is installed. Modify {ESUsernameVariable} and {ESPasswordVariable} in the {outputSection} section of {fileName} to use your Elasticsearch credentials."
               values={{
                 fileName: <EuiCode>elastic-agent.yml</EuiCode>,
                 ESUsernameVariable: <EuiCode>ES_USERNAME</EuiCode>,
@@ -96,7 +98,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
                   {(copy) => (
                     <EuiButton onClick={copy} iconType="copyClipboard">
                       <FormattedMessage
-                        id="xpack.ingestManager.agentEnrollment.copyConfigurationButton"
+                        id="xpack.fleet.agentEnrollment.copyPolicyButton"
                         defaultMessage="Copy to clipboard"
                       />
                     </EuiButton>
@@ -106,8 +108,8 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
               <EuiFlexItem grow={false}>
                 <EuiButton iconType="download" href={downloadLink} isDisabled={!downloadLink}>
                   <FormattedMessage
-                    id="xpack.ingestManager.agentEnrollment.downloadConfigurationButton"
-                    defaultMessage="Download configuration"
+                    id="xpack.fleet.agentEnrollment.downloadPolicyButton"
+                    defaultMessage="Download policy"
                   />
                 </EuiButton>
               </EuiFlexItem>
@@ -121,15 +123,15 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
       ),
     },
     {
-      title: i18n.translate('xpack.ingestManager.agentEnrollment.stepRunAgentTitle', {
+      title: i18n.translate('xpack.fleet.agentEnrollment.stepRunAgentTitle', {
         defaultMessage: 'Start the agent',
       }),
       children: (
         <>
           <EuiText>
             <FormattedMessage
-              id="xpack.ingestManager.agentEnrollment.stepRunAgentDescription"
-              defaultMessage="From the agent’s directory, run the following command to start the agent."
+              id="xpack.fleet.agentEnrollment.stepRunAgentDescription"
+              defaultMessage="From the agent directory, run this command to install, enroll and start an Elastic Agent. You can reuse this command to set up agents on more than one host. Requires administrator privileges."
             />
             <EuiSpacer size="m" />
             <EuiCodeBlock fontSize="m">{RUN_INSTRUCTIONS}</EuiCodeBlock>
@@ -138,7 +140,7 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
               {(copy) => (
                 <EuiButton onClick={copy} iconType="copyClipboard">
                   <FormattedMessage
-                    id="xpack.ingestManager.agentEnrollment.copyRunInstructionsButton"
+                    id="xpack.fleet.agentEnrollment.copyRunInstructionsButton"
                     defaultMessage="Copy to clipboard"
                   />
                 </EuiButton>
@@ -149,15 +151,25 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
       ),
     },
     {
-      title: i18n.translate('xpack.ingestManager.agentEnrollment.stepCheckForDataTitle', {
+      title: i18n.translate('xpack.fleet.agentEnrollment.stepCheckForDataTitle', {
         defaultMessage: 'Check for data',
       }),
       children: (
         <>
           <EuiText>
             <FormattedMessage
-              id="xpack.ingestManager.agentEnrollment.stepCheckForDataDescription"
-              defaultMessage="After starting the agent, the agent should begin sending data. You can view this data on Ingest Manager’s datasets page."
+              id="xpack.fleet.agentEnrollment.stepCheckForDataDescription"
+              defaultMessage="The agent should begin sending data. Go to {link} to view your data."
+              values={{
+                link: (
+                  <EuiLink href={getHref('data_streams')}>
+                    <FormattedMessage
+                      id="xpack.fleet.agentEnrollment.goToDataStreamsLink"
+                      defaultMessage="data streams"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           </EuiText>
         </>
@@ -169,12 +181,12 @@ export const StandaloneInstructions: React.FunctionComponent<Props> = ({ agentCo
     <>
       <EuiText>
         <FormattedMessage
-          id="xpack.ingestManager.agentEnrollment.standaloneDescription"
-          defaultMessage="Agents running in standalone mode need to be updated manually if you ever wish to make changes to their configuration. Follow the instructions below to download and setup an Elastic Agent in standalone mode."
+          id="xpack.fleet.agentEnrollment.standaloneDescription"
+          defaultMessage="Run an Elastic Agent standalone to configure and update the agent manually on the host where the agent is installed."
         />
       </EuiText>
       <EuiSpacer size="l" />
       <EuiSteps steps={steps} />
     </>
   );
-};
+});

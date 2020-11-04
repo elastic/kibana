@@ -69,7 +69,7 @@ describe('pagerduty connector validation', () => {
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        routingKey: ['A routing key is required.'],
+        routingKey: ['An integration key / routing key is required.'],
       },
     });
   });
@@ -91,6 +91,7 @@ describe('pagerduty action params validation', () => {
 
     expect(actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
+        dedupKey: [],
         summary: [],
         timestamp: [],
       },

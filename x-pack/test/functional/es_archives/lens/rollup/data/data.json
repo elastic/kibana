@@ -1,0 +1,59 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "lens_rolled_up_data",
+    "id": "lens_rolled_up_data$vuSq1a9Ph2Nq-2yfGpE34g",
+    "source": {
+      "@timestamp.date_histogram.time_zone": "UTC",
+      "@timestamp.date_histogram.timestamp": 1442710800000,
+      "geo.src.terms.value": "CN",
+      "bytes.max.value": 5678.0,
+      "_rollup.version": 2,
+      "bytes.sum.value": 5678.0,
+      "@timestamp.date_histogram.interval": "60m",
+      "geo.src.terms._count": 1,
+      "@timestamp.date_histogram._count": 1,
+      "_rollup.id": "lens_rolled_up_data"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "lens_rolled_up_data",
+    "id": "lens_rolled_up_data$QFyUWoecErSYPMrIb6CgZA",
+    "source": {
+      "@timestamp.date_histogram.time_zone": "UTC",
+      "@timestamp.date_histogram.timestamp": 1442710800000,
+      "geo.src.terms.value": "US",
+      "bytes.max.value": 1234.0,
+      "_rollup.version": 2,
+      "bytes.sum.value": 1234.0,
+      "@timestamp.date_histogram.interval": "60m",
+      "geo.src.terms._count": 1,
+      "@timestamp.date_histogram._count": 1,
+      "_rollup.id": "lens_rolled_up_data"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "lens_rolled_up_data",
+    "id": "lens_rolled_up_data$cKCjv1OPjYiyv5WPPblohw",
+    "source": {
+      "@timestamp.date_histogram.time_zone": "UTC",
+      "@timestamp.date_histogram.timestamp": 1442714400000,
+      "geo.src.terms.value": "CN",
+      "bytes.max.value": 9876.0,
+      "_rollup.version": 2,
+      "bytes.sum.value": 9876.0,
+      "@timestamp.date_histogram.interval": "60m",
+      "geo.src.terms._count": 1,
+      "@timestamp.date_histogram._count": 1,
+      "_rollup.id": "lens_rolled_up_data"
+    }
+  }
+}

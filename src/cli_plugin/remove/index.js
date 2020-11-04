@@ -17,10 +17,10 @@
  * under the License.
  */
 
+import { getConfigPath } from '@kbn/utils';
 import { remove } from './remove';
 import { Logger } from '../lib/logger';
 import { parse } from './settings';
-import { getConfigPath } from '../../core/server/path';
 import { logWarnings } from '../lib/log_warnings';
 
 function processCommand(command, options) {

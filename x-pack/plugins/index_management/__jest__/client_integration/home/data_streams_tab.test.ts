@@ -9,7 +9,13 @@ import { act } from 'react-dom/test-utils';
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
-import { DataStreamsTabTestBed, setup, createDataStreamPayload } from './data_streams_tab.helpers';
+import {
+  DataStreamsTabTestBed,
+  setup,
+  createDataStreamPayload,
+  createDataStreamBackingIndex,
+  createNonDataStreamIndex,
+} from './data_streams_tab.helpers';
 
 describe('Data Streams tab', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -78,47 +84,28 @@ describe('Data Streams tab', () => {
 
   describe('when there are data streams', () => {
     beforeEach(async () => {
-      httpRequestsMockHelpers.setLoadIndicesResponse([
-        {
-          health: '',
-          status: '',
-          primary: '',
-          replica: '',
-          documents: '',
-          documents_deleted: '',
-          size: '',
-          primary_size: '',
-          name: 'data-stream-index',
-          data_stream: 'dataStream1',
-        },
-        {
-          health: 'green',
-          status: 'open',
-          primary: 1,
-          replica: 1,
-          documents: 10000,
-          documents_deleted: 100,
-          size: '156kb',
-          primary_size: '156kb',
-          name: 'non-data-stream-index',
-        },
+      const {
+        setLoadIndicesResponse,
+        setLoadDataStreamsResponse,
+        setLoadDataStreamResponse,
+      } = httpRequestsMockHelpers;
+
+      setLoadIndicesResponse([
+        createDataStreamBackingIndex('data-stream-index', 'dataStream1'),
+        createNonDataStreamIndex('non-data-stream-index'),
       ]);
 
       const dataStreamForDetailPanel = createDataStreamPayload('dataStream1');
-
-      httpRequestsMockHelpers.setLoadDataStreamsResponse([
+      setLoadDataStreamsResponse([
         dataStreamForDetailPanel,
         createDataStreamPayload('dataStream2'),
       ]);
-
-      httpRequestsMockHelpers.setLoadDataStreamResponse(dataStreamForDetailPanel);
+      setLoadDataStreamResponse(dataStreamForDetailPanel);
 
       testBed = await setup();
-
       await act(async () => {
         testBed.actions.goToDataStreamsList();
       });
-
       testBed.component.update();
     });
 
@@ -127,8 +114,8 @@ describe('Data Streams tab', () => {
       const { tableCellsValues } = table.getMetaData('dataStreamTable');
 
       expect(tableCellsValues).toEqual([
-        ['', 'dataStream1', '1', 'Delete'],
-        ['', 'dataStream2', '1', 'Delete'],
+        ['', 'dataStream1', 'green', '1', 'Delete'],
+        ['', 'dataStream2', 'green', '1', 'Delete'],
       ]);
     });
 
@@ -144,6 +131,30 @@ describe('Data Streams tab', () => {
 
       expect(server.requests.length).toBe(totalRequests + 1);
       expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/data_streams`);
+    });
+
+    test('has a switch that will reload the data streams with additional stats when clicked', async () => {
+      const { exists, actions, table, component } = testBed;
+      const totalRequests = server.requests.length;
+
+      expect(exists('includeStatsSwitch')).toBe(true);
+
+      // Changing the switch will automatically reload the data streams.
+      await act(async () => {
+        actions.clickIncludeStatsSwitch();
+      });
+      component.update();
+
+      // A request is sent, but sinon isn't capturing the query parameters for some reason.
+      expect(server.requests.length).toBe(totalRequests + 1);
+      expect(server.requests[server.requests.length - 1].url).toBe(`${API_BASE_PATH}/data_streams`);
+
+      // The table renders with the stats columns though.
+      const { tableCellsValues } = table.getMetaData('dataStreamTable');
+      expect(tableCellsValues).toEqual([
+        ['', 'dataStream1', 'green', 'December 31st, 1969 7:00:00 PM', '1b', '1', 'Delete'],
+        ['', 'dataStream2', 'green', 'December 31st, 1969 7:00:00 PM', '1b', '1', 'Delete'],
+      ]);
     });
 
     test('clicking the indices count navigates to the backing indices', async () => {
@@ -231,6 +242,48 @@ describe('Data Streams tab', () => {
         expect(JSON.parse(JSON.parse(requestBody).body)).toEqual({
           dataStreams: ['dataStream1'],
         });
+      });
+    });
+  });
+
+  describe('when there are special characters', () => {
+    beforeEach(async () => {
+      const {
+        setLoadIndicesResponse,
+        setLoadDataStreamsResponse,
+        setLoadDataStreamResponse,
+      } = httpRequestsMockHelpers;
+
+      setLoadIndicesResponse([
+        createDataStreamBackingIndex('data-stream-index', '%dataStream'),
+        createDataStreamBackingIndex('data-stream-index2', 'dataStream2'),
+      ]);
+
+      const dataStreamDollarSign = createDataStreamPayload('%dataStream');
+      setLoadDataStreamsResponse([dataStreamDollarSign]);
+      setLoadDataStreamResponse(dataStreamDollarSign);
+
+      testBed = await setup();
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+    });
+
+    describe('detail panel', () => {
+      test('opens when the data stream name in the table is clicked', async () => {
+        const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
+        await actions.clickNameAt(0);
+        expect(findDetailPanel().length).toBe(1);
+        expect(findDetailPanelTitle()).toBe('%dataStream');
+      });
+
+      test('clicking the indices count navigates to the backing indices', async () => {
+        const { table, actions } = testBed;
+        await actions.clickIndicesAt(0);
+        expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
+          ['', '', '', '', '', '', '', '%dataStream'],
+        ]);
       });
     });
   });

@@ -5,5 +5,8 @@
   "main": "index.js",
   "keywords": [],
   "author": "Spencer Alger <email@spalger.com>",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "kibana": {
+    "devOnly": true
+  }
 }

@@ -21,5 +21,6 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField>
 |  [remove(field)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.remove.md) |  |
 |  [removeAll()](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.removeall.md) |  |
 |  [replaceAll(specs)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.replaceall.md) |  |
+|  [toSpec(options)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.tospec.md) |  |
 |  [update(field)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.update.md) |  |
 

@@ -10,11 +10,16 @@ import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
 export const featureCatalogueEntry = {
   id: 'canvas',
   title: 'Canvas',
+  subtitle: i18n.translate('xpack.canvas.featureCatalogue.canvasSubtitle', {
+    defaultMessage: 'Design pixel-perfect presentations.',
+  }),
   description: i18n.translate('xpack.canvas.appDescription', {
     defaultMessage: 'Showcase your data in a pixel-perfect way.',
   }),
   icon: 'canvasApp',
   path: '/app/canvas',
-  showOnHomePage: true,
+  showOnHomePage: false,
   category: FeatureCatalogueCategory.DATA,
+  solutionId: 'kibana',
+  order: 300,
 };

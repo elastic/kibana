@@ -17,8 +17,10 @@
  * under the License.
  */
 import React from 'react';
+import { Subscription } from 'rxjs';
+import { identity } from 'lodash';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
-import { getSavedObjectFinder } from '../../saved_objects/public';
+import { getSavedObjectFinder, showSaveModal } from '../../saved_objects/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { Start as InspectorStart } from '../../inspector/public';
 import {
@@ -27,8 +29,16 @@ import {
   CoreStart,
   Plugin,
   ScopedHistory,
+  PublicAppInfo,
+  SavedObjectReference,
 } from '../../../core/public';
-import { EmbeddableFactoryRegistry, EmbeddableFactoryProvider } from './types';
+import {
+  EmbeddableFactoryRegistry,
+  EmbeddableFactoryProvider,
+  EnhancementsRegistry,
+  EnhancementRegistryDefinition,
+  EnhancementRegistryItem,
+} from './types';
 import { bootstrap } from './bootstrap';
 import {
   EmbeddableFactory,
@@ -37,9 +47,18 @@ import {
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
   EmbeddablePanel,
+  SavedObjectEmbeddableInput,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
+import {
+  extractBaseEmbeddableInput,
+  injectBaseEmbeddableInput,
+  telemetryBaseEmbeddableInput,
+} from '../common/lib/migrate_base_input';
+import { PersistableState, SerializableState } from '../../kibana_utils/common';
+import { ATTRIBUTE_SERVICE_KEY, AttributeService } from './lib/attribute_service';
+import { AttributeServiceOptions } from './lib/attribute_service/attribute_service';
 
 export interface EmbeddableSetupDependencies {
   data: DataPublicPluginSetup;
@@ -61,10 +80,11 @@ export interface EmbeddableSetup {
     id: string,
     factory: EmbeddableFactoryDefinition<I, O, E>
   ) => () => EmbeddableFactory<I, O, E>;
+  registerEnhancement: (enhancement: EnhancementRegistryDefinition) => void;
   setCustomEmbeddableFactoryProvider: (customProvider: EmbeddableFactoryProvider) => void;
 }
 
-export interface EmbeddableStart {
+export interface EmbeddableStart extends PersistableState<EmbeddableInput> {
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
@@ -76,6 +96,16 @@ export interface EmbeddableStart {
   EmbeddablePanel: EmbeddablePanelHOC;
   getEmbeddablePanel: (stateTransfer?: EmbeddableStateTransfer) => EmbeddablePanelHOC;
   getStateTransfer: (history?: ScopedHistory) => EmbeddableStateTransfer;
+  getAttributeService: <
+    A extends { title: string },
+    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+      [ATTRIBUTE_SERVICE_KEY]: A;
+    },
+    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  >(
+    type: string,
+    options: AttributeServiceOptions<A>
+  ) => AttributeService<A, V, R>;
 }
 
 export type EmbeddablePanelHOC = React.FC<{ embeddable: IEmbeddable; hideHeader?: boolean }>;
@@ -86,9 +116,12 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     EmbeddableFactoryDefinition
   > = new Map();
   private readonly embeddableFactories: EmbeddableFactoryRegistry = new Map();
+  private readonly enhancements: EnhancementsRegistry = new Map();
   private customEmbeddableFactoryProvider?: EmbeddableFactoryProvider;
   private outgoingOnlyStateTransfer: EmbeddableStateTransfer = {} as EmbeddableStateTransfer;
   private isRegistryReady = false;
+  private appList?: ReadonlyMap<string, PublicAppInfo>;
+  private appListSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {}
 
@@ -97,6 +130,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
 
     return {
       registerEmbeddableFactory: this.registerEmbeddableFactory,
+      registerEnhancement: this.registerEnhancement,
       setCustomEmbeddableFactoryProvider: (provider: EmbeddableFactoryProvider) => {
         if (this.customEmbeddableFactoryProvider) {
           throw new Error(
@@ -121,7 +155,15 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     });
 
-    this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(core.application.navigateToApp);
+    this.appListSubscription = core.application.applications$.subscribe((appList) => {
+      this.appList = appList;
+    });
+
+    this.outgoingOnlyStateTransfer = new EmbeddableStateTransfer(
+      core.application.navigateToApp,
+      undefined,
+      this.appList
+    );
     this.isRegistryReady = true;
 
     const getEmbeddablePanelHoc = (stateTransfer?: EmbeddableStateTransfer) => ({
@@ -149,17 +191,130 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     return {
       getEmbeddableFactory: this.getEmbeddableFactory,
       getEmbeddableFactories: this.getEmbeddableFactories,
+      getAttributeService: (type: string, options) =>
+        new AttributeService(
+          type,
+          showSaveModal,
+          core.i18n.Context,
+          core.notifications.toasts,
+          options,
+          this.getEmbeddableFactory
+        ),
       getStateTransfer: (history?: ScopedHistory) => {
         return history
-          ? new EmbeddableStateTransfer(core.application.navigateToApp, history)
+          ? new EmbeddableStateTransfer(core.application.navigateToApp, history, this.appList)
           : this.outgoingOnlyStateTransfer;
       },
       EmbeddablePanel: getEmbeddablePanelHoc(),
       getEmbeddablePanel: getEmbeddablePanelHoc,
+      telemetry: this.telemetry,
+      extract: this.extract,
+      inject: this.inject,
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.appListSubscription) {
+      this.appListSubscription.unsubscribe();
+    }
+  }
+
+  private telemetry = (state: EmbeddableInput, telemetryData: Record<string, any> = {}) => {
+    const enhancements: Record<string, any> = state.enhancements || {};
+    const factory = this.getEmbeddableFactory(state.id);
+
+    let telemetry = telemetryBaseEmbeddableInput(state, telemetryData);
+    if (factory) {
+      telemetry = factory.telemetry(state, telemetry);
+    }
+    Object.keys(enhancements).map((key) => {
+      if (!enhancements[key]) return;
+      telemetry = this.getEnhancement(key).telemetry(enhancements[key], telemetry);
+    });
+
+    return telemetry;
+  };
+
+  private extract = (state: EmbeddableInput) => {
+    const enhancements = state.enhancements || {};
+    const factory = this.getEmbeddableFactory(state.id);
+
+    const baseResponse = extractBaseEmbeddableInput(state);
+    let updatedInput = baseResponse.state;
+    const refs = baseResponse.references;
+
+    if (factory) {
+      const factoryResponse = factory.extract(state);
+      updatedInput = factoryResponse.state;
+      refs.push(...factoryResponse.references);
+    }
+
+    updatedInput.enhancements = {};
+    Object.keys(enhancements).forEach((key) => {
+      if (!enhancements[key]) return;
+      const enhancementResult = this.getEnhancement(key).extract(
+        enhancements[key] as SerializableState
+      );
+      refs.push(...enhancementResult.references);
+      updatedInput.enhancements![key] = enhancementResult.state;
+    });
+
+    return {
+      state: updatedInput,
+      references: refs,
+    };
+  };
+
+  private inject = (state: EmbeddableInput, references: SavedObjectReference[]) => {
+    const enhancements = state.enhancements || {};
+    const factory = this.getEmbeddableFactory(state.id);
+
+    let updatedInput = injectBaseEmbeddableInput(state, references);
+
+    if (factory) {
+      updatedInput = factory.inject(updatedInput, references);
+    }
+
+    updatedInput.enhancements = {};
+    Object.keys(enhancements).forEach((key) => {
+      if (!enhancements[key]) return;
+      updatedInput.enhancements![key] = this.getEnhancement(key).inject(
+        enhancements[key] as SerializableState,
+        references
+      );
+    });
+
+    return updatedInput;
+  };
+
+  private registerEnhancement = (enhancement: EnhancementRegistryDefinition) => {
+    if (this.enhancements.has(enhancement.id)) {
+      throw new Error(`enhancement with id ${enhancement.id} already exists in the registry`);
+    }
+    this.enhancements.set(enhancement.id, {
+      id: enhancement.id,
+      telemetry: enhancement.telemetry || (() => ({})),
+      inject: enhancement.inject || identity,
+      extract:
+        enhancement.extract ||
+        ((state: SerializableState) => {
+          return { state, references: [] };
+        }),
+    });
+  };
+
+  private getEnhancement = (id: string): EnhancementRegistryItem => {
+    return (
+      this.enhancements.get(id) || {
+        id: 'unknown',
+        telemetry: () => ({}),
+        inject: identity,
+        extract: (state: SerializableState) => {
+          return { state, references: [] };
+        },
+      }
+    );
+  };
 
   private getEmbeddableFactories = () => {
     this.ensureFactoriesExist();
@@ -198,12 +353,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
     }
     this.ensureFactoryExists(embeddableFactoryId);
     const factory = this.embeddableFactories.get(embeddableFactoryId);
-
-    if (!factory) {
-      throw new Error(
-        `Embeddable factory [embeddableFactoryId = ${embeddableFactoryId}] does not exist.`
-      );
-    }
 
     return factory as EmbeddableFactory<I, O, E>;
   };

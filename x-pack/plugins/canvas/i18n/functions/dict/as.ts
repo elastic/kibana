@@ -20,7 +20,7 @@ export const help: FunctionHelp<FunctionFactory<typeof asFn>> = {
   }),
   args: {
     name: i18n.translate('xpack.canvas.functions.as.args.nameHelpText', {
-      defaultMessage: 'A name to give the column.',
+      defaultMessage: 'The name to give the column.',
     }),
   },
 };

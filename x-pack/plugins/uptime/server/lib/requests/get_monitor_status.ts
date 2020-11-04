@@ -71,6 +71,8 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
                   },
                 },
               },
+              // append user filters, if defined
+              ...(filters?.bool ? [filters] : []),
             ],
           },
         },
@@ -116,10 +118,6 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
       },
     };
 
-    if (filters?.bool) {
-      esParams.body.query.bool = Object.assign({}, esParams.body.query.bool, filters.bool);
-    }
-
     /**
      * Perform a logical `and` against the selected location filters.
      */
@@ -142,7 +140,7 @@ export const getMonitorStatus: UMElasticsearchQueryFn<
   } while (afterKey !== undefined);
 
   return monitors
-    .filter((monitor: any) => monitor?.doc_count > numTimes)
+    .filter((monitor: any) => monitor?.doc_count >= numTimes)
     .map(({ key, doc_count: count, fields }: any) => ({
       ...key,
       count,

@@ -53,7 +53,11 @@ export const queryEsSQL = async (
     });
 
     const columns = response.columns.map(({ name, type }) => {
-      return { name: sanitizeName(name), type: normalizeType(type) };
+      return {
+        id: sanitizeName(name),
+        name: sanitizeName(name),
+        meta: { type: normalizeType(type) },
+      };
     });
     const columnNames = map(columns, 'name');
     let rows = response.rows.map((row) => zipObject(columnNames, row));
@@ -82,6 +86,9 @@ export const queryEsSQL = async (
 
     return {
       type: 'datatable',
+      meta: {
+        type: 'essql',
+      },
       columns,
       rows,
     };

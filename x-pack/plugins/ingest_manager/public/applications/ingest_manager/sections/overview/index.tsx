@@ -16,10 +16,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { WithHeaderLayout } from '../../layouts';
-import { useGetAgentConfigs, useBreadcrumbs } from '../../hooks';
+import { useGetAgentPolicies, useBreadcrumbs } from '../../hooks';
 import { AgentEnrollmentFlyout } from '../fleet/components';
 import { OverviewAgentSection } from './components/agent_section';
-import { OverviewConfigurationSection } from './components/configuration_section';
+import { OverviewPolicySection } from './components/agent_policy_section';
 import { OverviewIntegrationSection } from './components/integration_section';
 import { OverviewDatastreamSection } from './components/datastream_section';
 
@@ -29,12 +29,12 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
   // Agent enrollment flyout state
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
 
-  // Agent configs required for enrollment flyout
-  const agentConfigsRequest = useGetAgentConfigs({
+  // Agent policies required for enrollment flyout
+  const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
   });
-  const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
+  const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
 
   return (
     <WithHeaderLayout
@@ -45,20 +45,17 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
               <EuiFlexItem grow={false}>
                 <EuiTitle size="l">
                   <h1>
-                    <FormattedMessage
-                      id="xpack.ingestManager.overviewPageTitle"
-                      defaultMessage="Ingest Manager"
-                    />
+                    <FormattedMessage id="xpack.fleet.overviewPageTitle" defaultMessage="Fleet" />
                   </h1>
                 </EuiTitle>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
                 <EuiBetaBadge
-                  label={i18n.translate('xpack.ingestManager.betaBadge.labelText', {
+                  label={i18n.translate('xpack.fleet.betaBadge.labelText', {
                     defaultMessage: 'Beta',
                   })}
-                  tooltipContent={i18n.translate('xpack.ingestManager.betaBadge.tooltipText', {
+                  tooltipContent={i18n.translate('xpack.fleet.betaBadge.tooltipText', {
                     defaultMessage:
                       'This plugin is not recommended for production environments. Please report bugs in our Discuss forum.',
                   })}
@@ -70,8 +67,8 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
             <EuiText color="subdued">
               <p>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewPageSubtitle"
-                  defaultMessage="Central management for Elastic Agents and agent configurations."
+                  id="xpack.fleet.overviewPageSubtitle"
+                  defaultMessage="Manage Elastic Agents and their policies in a central location."
                 />
               </p>
             </EuiText>
@@ -83,7 +80,7 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
           <EuiFlexItem grow={false}>
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
-                id="xpack.ingestManager.overviewPageEnrollAgentButton"
+                id="xpack.fleet.overviewPageEnrollAgentButton"
                 defaultMessage="Add agent"
               />
             </EuiButton>
@@ -93,14 +90,14 @@ export const IngestManagerOverview: React.FunctionComponent = () => {
     >
       {isEnrollmentFlyoutOpen && (
         <AgentEnrollmentFlyout
-          agentConfigs={agentConfigs}
+          agentPolicies={agentPolicies}
           onClose={() => setIsEnrollmentFlyoutOpen(false)}
         />
       )}
 
       <EuiFlexGrid gutterSize="l" columns={2}>
         <OverviewIntegrationSection />
-        <OverviewConfigurationSection agentConfigs={agentConfigs} />
+        <OverviewPolicySection agentPolicies={agentPolicies} />
         <OverviewAgentSection />
         <OverviewDatastreamSection />
       </EuiFlexGrid>

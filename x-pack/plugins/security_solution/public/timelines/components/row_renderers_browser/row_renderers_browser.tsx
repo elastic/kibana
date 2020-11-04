@@ -88,7 +88,7 @@ const RowRenderersBrowserComponent = React.forwardRef(
       (item: RowRendererOption) => () => {
         const newSelection = xor([item], notExcludedRowRenderers);
         // @ts-expect-error
-        ref?.current?.setSelection(newSelection); // eslint-disable-line no-unused-expressions
+        ref?.current?.setSelection(newSelection);
       },
       [notExcludedRowRenderers, ref]
     );

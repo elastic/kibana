@@ -9,7 +9,6 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { AbstractLayer, ILayer } from '../../../../../../classes/layers/layer';
 import { AbstractSource, ISource } from '../../../../../../classes/sources/source';
-import { AbstractStyle, IStyle } from '../../../../../../classes/styles/style';
 
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 
@@ -17,20 +16,17 @@ let supportsFitToBounds: boolean;
 
 class MockSource extends AbstractSource implements ISource {}
 
-class MockStyle extends AbstractStyle implements IStyle {}
-
 class LayerMock extends AbstractLayer implements ILayer {
   constructor() {
     const sourceDescriptor = {
       type: 'mySourceType',
     };
     const source = new MockSource(sourceDescriptor);
-    const style = new MockStyle({ type: 'myStyleType' });
     const layerDescriptor = {
       id: 'testLayer',
       sourceDescriptor,
     };
-    super({ layerDescriptor, source, style });
+    super({ layerDescriptor, source });
   }
 
   async supportsFitToBounds(): Promise<boolean> {

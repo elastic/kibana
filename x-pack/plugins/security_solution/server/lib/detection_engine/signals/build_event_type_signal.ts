@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SignalSourceHit } from './types';
+import { BaseSignalHit } from './types';
 
-export const buildEventTypeSignal = (doc: SignalSourceHit): object => {
+export const buildEventTypeSignal = (doc: BaseSignalHit): object => {
   if (doc._source.event != null && doc._source.event instanceof Object) {
     return { ...doc._source.event, kind: 'signal' };
   } else {

@@ -6,15 +6,15 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import * as api from '../api';
-import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 import { getFoundExceptionListItemSchemaMock } from '../../../common/schemas/response/found_exception_list_item_schema.mock';
 import { ExceptionListItemSchema } from '../../../common/schemas';
 import { UseExceptionListProps, UseExceptionListSuccess } from '../types';
 
 import { ReturnExceptionListAndItems, useExceptionList } from './use_exception_list';
 
-const mockKibanaHttpService = createKibanaCoreStartMock().http;
+const mockKibanaHttpService = coreMock.createStart().http;
 
 describe('useExceptionList', () => {
   const onErrorMock = jest.fn();

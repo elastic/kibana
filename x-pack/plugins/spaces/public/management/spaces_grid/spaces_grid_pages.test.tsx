@@ -13,7 +13,7 @@ import { SpacesGridPage } from './spaces_grid_page';
 import { httpServiceMock, scopedHistoryMock } from 'src/core/public/mocks';
 import { notificationServiceMock } from 'src/core/public/mocks';
 import { featuresPluginMock } from '../../../../features/public/mocks';
-import { Feature } from '../../../../features/public';
+import { KibanaFeature } from '../../../../features/public';
 
 const spaces = [
   {
@@ -42,11 +42,11 @@ spacesManager.getSpaces = jest.fn().mockResolvedValue(spaces);
 
 const featuresStart = featuresPluginMock.createStart();
 featuresStart.getFeatures.mockResolvedValue([
-  new Feature({
+  new KibanaFeature({
     id: 'feature-1',
     name: 'feature 1',
-    icon: 'spacesApp',
     app: [],
+    category: { id: 'foo', label: 'foo' },
     privileges: null,
   }),
 ]);

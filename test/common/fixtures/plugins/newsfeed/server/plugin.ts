@@ -25,7 +25,7 @@ export class NewsFeedSimulatorPlugin implements Plugin {
 
   public setup({ http }: CoreSetup) {
     const router = http.createRouter();
-    const version = this.initializerContext.env.packageInfo.version;
+    const version = this.initializerContext.env.packageInfo.version.replace('-SNAPSHOT', '');
 
     router.get(
       {

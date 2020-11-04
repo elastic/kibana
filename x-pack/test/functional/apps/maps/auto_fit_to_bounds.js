@@ -6,15 +6,21 @@
 
 import expect from '@kbn/expect';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
+  const security = getService('security');
 
   describe('auto fit map to bounds', () => {
     describe('initial location', () => {
       before(async () => {
+        await security.testUser.setRoles(['global_maps_all', 'test_logstash_reader']);
         await PageObjects.maps.loadSavedMap(
           'document example - auto fit to bounds for initial location'
         );
+      });
+
+      after(async () => {
+        await security.testUser.restoreDefaults();
       });
 
       it('should automatically fit to bounds on initial map load', async () => {

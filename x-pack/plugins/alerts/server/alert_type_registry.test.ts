@@ -7,9 +7,9 @@
 import { TaskRunnerFactory } from './task_runner';
 import { AlertTypeRegistry } from './alert_type_registry';
 import { AlertType } from './types';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 
-const taskManager = taskManagerMock.setup();
+const taskManager = taskManagerMock.createSetup();
 const alertTypeRegistryParams = {
   taskManager,
   taskRunnerFactory: new TaskRunnerFactory(),
@@ -118,7 +118,6 @@ describe('register()', () => {
           "alerting:test": Object {
             "createTaskRunner": [Function],
             "title": "Test",
-            "type": "alerting:test",
           },
         },
       ]
@@ -316,22 +315,13 @@ function alertTypeWithVariables(id: string, context: string, state: string): Ale
     producer: 'alerts',
   };
 
-  if (!context && !state) {
-    return baseAlert;
-  }
+  if (!context && !state) return baseAlert;
 
-  const actionVariables = {
-    context: [{ name: context, description: `${id} context` }],
-    state: [{ name: state, description: `${id} state` }],
+  return {
+    ...baseAlert,
+    actionVariables: {
+      ...(context ? { context: [{ name: context, description: `${id} context` }] } : {}),
+      ...(state ? { state: [{ name: state, description: `${id} state` }] } : {}),
+    },
   };
-
-  if (!context) {
-    delete actionVariables.context;
-  }
-
-  if (!state) {
-    delete actionVariables.state;
-  }
-
-  return { ...baseAlert, actionVariables };
 }

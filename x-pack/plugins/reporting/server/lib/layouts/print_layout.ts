@@ -5,14 +5,21 @@
  */
 
 import path from 'path';
+import { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
 import { EvaluateFn, SerializableOrJSHandle } from 'puppeteer';
 import { LevelLogger } from '../';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { CaptureConfig } from '../../types';
-import { getDefaultLayoutSelectors, LayoutSelectorDictionary, LayoutTypes, Size } from './';
+import {
+  getDefaultLayoutSelectors,
+  LayoutInstance,
+  LayoutSelectorDictionary,
+  LayoutTypes,
+  Size,
+} from './';
 import { Layout } from './layout';
 
-export class PrintLayout extends Layout {
+export class PrintLayout extends Layout implements LayoutInstance {
   public readonly selectors: LayoutSelectorDictionary = {
     ...getDefaultLayoutSelectors(),
     screenshot: '[data-shared-item]',
@@ -84,11 +91,11 @@ export class PrintLayout extends Layout {
     };
   }
 
-  public getPdfPageOrientation() {
+  public getPdfPageOrientation(): PageOrientation {
     return 'portrait';
   }
 
-  public getPdfPageSize() {
+  public getPdfPageSize(): PredefinedPageSize {
     return 'A4';
   }
 }

@@ -7,7 +7,7 @@
 import React, { useCallback, useState } from 'react';
 
 import { BrowserFields } from '../../containers/source';
-import { DetailItem } from '../../../graphql/types';
+import { TimelineEventsDetailsItem } from '../../../../common/search_strategy/timeline';
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { OnUpdateColumns } from '../../../timelines/components/timeline/events';
 
@@ -16,7 +16,7 @@ import { EventDetails, View } from './event_details';
 interface Props {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
-  data: DetailItem[];
+  data: TimelineEventsDetailsItem[];
   id: string;
   onEventToggled: () => void;
   onUpdateColumns: OnUpdateColumns;

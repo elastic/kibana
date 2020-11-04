@@ -21,7 +21,12 @@ import React, { useState } from 'react';
 import { EuiForm, EuiButtonIcon, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { IAggConfig, Query, QueryStringInput } from '../../../../data/public';
+import {
+  IAggConfig,
+  Query,
+  QueryStringInput,
+  DataPublicPluginStart,
+} from '../../../../data/public';
 import { useKibana } from '../../../../kibana_react/public';
 
 interface FilterRowProps {
@@ -49,7 +54,7 @@ function FilterRow({
   onChangeValue,
   onRemoveFilter,
 }: FilterRowProps) {
-  const { services } = useKibana();
+  const { services } = useKibana<{ data: DataPublicPluginStart; appName: string }>();
   const [showCustomLabel, setShowCustomLabel] = useState(false);
   const filterLabel = i18n.translate('visDefaultEditor.controls.filters.filterLabel', {
     defaultMessage: 'Filter {index}',
@@ -110,6 +115,7 @@ function FilterRow({
           dataTestSubj={dataTestSubj}
           bubbleSubmitEvent={true}
           languageSwitcherPopoverAnchorPosition="leftDown"
+          size="s"
         />
       </EuiFormRow>
       {showCustomLabel ? (
@@ -124,7 +130,7 @@ function FilterRow({
             },
           })}
           fullWidth={true}
-          compressed
+          display="rowCompressed"
         >
           <EuiFieldText
             value={customLabel}

@@ -9,6 +9,7 @@ import { isString } from 'lodash';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 
 import { LogEntriesItem } from '../../../common/http_api';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { UrlStateContainer } from '../../utils/url_state';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { fetchLogEntriesItem } from './log_entries/api/fetch_log_entries_item';
@@ -26,6 +27,7 @@ export interface FlyoutOptionsUrlState {
 }
 
 export const useLogFlyout = () => {
+  const { services } = useKibanaContextForPlugin();
   const { sourceId } = useLogSourceContext();
   const [flyoutVisible, setFlyoutVisibility] = useState<boolean>(false);
   const [flyoutId, setFlyoutId] = useState<string | null>(null);
@@ -39,7 +41,7 @@ export const useLogFlyout = () => {
         if (!flyoutId) {
           return;
         }
-        return await fetchLogEntriesItem({ sourceId, id: flyoutId });
+        return await fetchLogEntriesItem({ sourceId, id: flyoutId }, services.http.fetch);
       },
       onResolve: (response) => {
         if (response) {

@@ -66,7 +66,7 @@ const PreviewTab = ({ template }: { template: { [key: string]: any } }) => {
         <p>
           <FormattedMessage
             id="xpack.idxMgmt.templateForm.stepReview.previewTab.descriptionText"
-            defaultMessage="This is the final template that will be applied to your indices."
+            defaultMessage="This is the final template that will be applied to matching indices. Component templates are applied in the order specified. Explicit mappings, settings, and aliases override the component templates."
           />
         </p>
       </EuiText>

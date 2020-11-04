@@ -15,47 +15,70 @@ import {
   listData,
   endpointPackageInfo,
   nonExistingPolicies,
+  patterns,
+  searchBarQuery,
+  isTransformEnabled,
 } from './selectors';
-import { EndpointState } from '../types';
+import { EndpointState, PolicyIds } from '../types';
 import {
-  sendGetEndpointSpecificPackageConfigs,
+  sendGetEndpointSpecificPackagePolicies,
   sendGetEndpointSecurityPackage,
-  sendGetAgentConfigList,
+  sendGetAgentPolicyList,
+  sendGetFleetAgentsWithEndpoint,
 } from '../../policy/store/policy_list/services/ingest';
-import { AGENT_CONFIG_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../../../../../../ingest_manager/common';
+import { metadataCurrentIndexPattern } from '../../../../../common/endpoint/constants';
+import { IIndexPattern, Query } from '../../../../../../../../src/plugins/data/public';
 
-export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (coreStart) => {
+export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState> = (
+  coreStart,
+  depsStart
+) => {
+  async function fetchIndexPatterns(): Promise<IIndexPattern[]> {
+    const { indexPatterns } = depsStart.data;
+    const fields = await indexPatterns.getFieldsForWildcard({
+      pattern: metadataCurrentIndexPattern,
+    });
+    const indexPattern: IIndexPattern = {
+      title: metadataCurrentIndexPattern,
+      fields,
+    };
+    return [indexPattern];
+  }
+  // eslint-disable-next-line complexity
   return ({ getState, dispatch }) => (next) => async (action) => {
     next(action);
-    const state = getState();
 
     // Endpoint list
     if (
-      action.type === 'userChangedUrl' &&
-      isOnEndpointPage(state) &&
-      hasSelectedEndpoint(state) !== true
+      (action.type === 'userChangedUrl' || action.type === 'appRequestedEndpointList') &&
+      isOnEndpointPage(getState()) &&
+      hasSelectedEndpoint(getState()) !== true
     ) {
-      if (!endpointPackageInfo(state)) {
-        sendGetEndpointSecurityPackage(coreStart.http)
-          .then((packageInfo) => {
-            dispatch({
-              type: 'serverReturnedEndpointPackageInfo',
-              payload: packageInfo,
-            });
-          })
-          .catch((error) => {
-            // eslint-disable-next-line no-console
-            console.error(error);
+      if (!endpointPackageInfo(getState())) {
+        try {
+          const packageInfo = await sendGetEndpointSecurityPackage(coreStart.http);
+          dispatch({
+            type: 'serverReturnedEndpointPackageInfo',
+            payload: packageInfo,
           });
+        } catch (error) {
+          // Ignore Errors, since this should not hinder the user's ability to use the UI
+          // eslint-disable-next-line no-console
+          console.error(error);
+        }
       }
 
-      const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
+      const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
       let endpointResponse;
 
       try {
+        const decodedQuery: Query = searchBarQuery(getState());
+
         endpointResponse = await coreStart.http.post<HostResultList>('/api/endpoint/metadata', {
           body: JSON.stringify({
             paging_properties: [{ page_index: pageIndex }, { page_size: pageSize }],
+            filters: { kql: decodedQuery.query },
           }),
         });
         endpointResponse.request_page_index = Number(pageIndex);
@@ -65,27 +88,78 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           payload: endpointResponse,
         });
 
-        getNonExistingPoliciesForEndpointsList(
-          coreStart.http,
-          endpointResponse.hosts,
-          nonExistingPolicies(state)
-        )
-          .then((missingPolicies) => {
-            if (missingPolicies !== undefined) {
-              dispatch({
-                type: 'serverReturnedEndpointNonExistingPolicies',
-                payload: missingPolicies,
-              });
-            }
-          })
+        try {
+          const endpointsTotalCount = await endpointsTotal(coreStart.http);
+          dispatch({
+            type: 'serverReturnedEndpointsTotal',
+            payload: endpointsTotalCount,
+          });
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnEndpointsTotal',
+            payload: error,
+          });
+        }
+
+        try {
+          const agentsWithEndpoint = await sendGetFleetAgentsWithEndpoint(coreStart.http);
+          dispatch({
+            type: 'serverReturnedAgenstWithEndpointsTotal',
+            payload: agentsWithEndpoint.total,
+          });
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnAgenstWithEndpointsTotal',
+            payload: error,
+          });
+        }
+
+        try {
+          const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+            coreStart.http,
+            endpointResponse.hosts,
+            nonExistingPolicies(getState())
+          );
+          if (ingestPolicies?.packagePolicy !== undefined) {
+            dispatch({
+              type: 'serverReturnedEndpointNonExistingPolicies',
+              payload: ingestPolicies.packagePolicy,
+            });
+          }
+          if (ingestPolicies?.agentPolicy !== undefined) {
+            dispatch({
+              type: 'serverReturnedEndpointAgentPolicies',
+              payload: ingestPolicies.agentPolicy,
+            });
+          }
+        } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
           // eslint-disable-next-line no-console
-          .catch((error) => console.error(error));
+          console.error(error);
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnEndpointList',
           payload: error,
         });
+      }
+
+      // get index pattern and fields for search bar
+      if (patterns(getState()).length === 0 && isTransformEnabled(getState())) {
+        try {
+          const indexPatterns = await fetchIndexPatterns();
+          if (indexPatterns !== undefined) {
+            dispatch({
+              type: 'serverReturnedMetadataPatterns',
+              payload: indexPatterns,
+            });
+          }
+        } catch (error) {
+          dispatch({
+            type: 'serverFailedToReturnMetadataPatterns',
+            payload: error,
+          });
+        }
       }
 
       // No endpoints, so we should check to see if there are policies for onboarding
@@ -105,7 +179,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         });
 
         try {
-          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackageConfigs(
+          const policyDataResponse: GetPolicyListResponse = await sendGetEndpointSpecificPackagePolicies(
             http,
             {
               query: {
@@ -132,18 +206,23 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
         dispatch({
           type: 'serverCancelledPolicyItemsLoading',
         });
+
+        dispatch({
+          type: 'serverReturnedEndpointExistValue',
+          payload: true,
+        });
       }
     }
 
     // Endpoint Details
-    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(state) === true) {
+    if (action.type === 'userChangedUrl' && hasSelectedEndpoint(getState()) === true) {
       dispatch({
         type: 'serverCancelledPolicyItemsLoading',
       });
 
       // If user navigated directly to a endpoint details page, load the endpoint list
-      if (listData(state).length === 0) {
-        const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(state);
+      if (listData(getState()).length === 0) {
+        const { page_index: pageIndex, page_size: pageSize } = uiQueryParams(getState());
         try {
           const response = await coreStart.http.post('/api/endpoint/metadata', {
             body: JSON.stringify({
@@ -156,22 +235,29 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
             payload: response,
           });
 
-          getNonExistingPoliciesForEndpointsList(
-            coreStart.http,
-            response.hosts,
-            nonExistingPolicies(state)
-          )
-            .then((missingPolicies) => {
-              if (missingPolicies !== undefined) {
-                dispatch({
-                  type: 'serverReturnedEndpointNonExistingPolicies',
-                  payload: missingPolicies,
-                });
-              }
-            })
+          try {
+            const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+              coreStart.http,
+              response.hosts,
+              nonExistingPolicies(getState())
+            );
+            if (ingestPolicies?.packagePolicy !== undefined) {
+              dispatch({
+                type: 'serverReturnedEndpointNonExistingPolicies',
+                payload: ingestPolicies.packagePolicy,
+              });
+            }
+            if (ingestPolicies?.agentPolicy !== undefined) {
+              dispatch({
+                type: 'serverReturnedEndpointAgentPolicies',
+                payload: ingestPolicies.agentPolicy,
+              });
+            }
+          } catch (error) {
             // Ignore Errors, since this should not hinder the user's ability to use the UI
             // eslint-disable-next-line no-console
-            .catch((error) => console.error(error));
+            console.error(error);
+          }
         } catch (error) {
           dispatch({
             type: 'serverFailedToReturnEndpointList',
@@ -185,7 +271,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       }
 
       // call the endpoint details api
-      const { selected_endpoint: selectedEndpoint } = uiQueryParams(state);
+      const { selected_endpoint: selectedEndpoint } = uiQueryParams(getState());
       try {
         const response = await coreStart.http.get<HostInfo>(
           `/api/endpoint/metadata/${selectedEndpoint}`
@@ -194,22 +280,30 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
           type: 'serverReturnedEndpointDetails',
           payload: response,
         });
-        getNonExistingPoliciesForEndpointsList(
-          coreStart.http,
-          [response],
-          nonExistingPolicies(state)
-        )
-          .then((missingPolicies) => {
-            if (missingPolicies !== undefined) {
-              dispatch({
-                type: 'serverReturnedEndpointNonExistingPolicies',
-                payload: missingPolicies,
-              });
-            }
-          })
+
+        try {
+          const ingestPolicies = await getAgentAndPoliciesForEndpointsList(
+            coreStart.http,
+            [response],
+            nonExistingPolicies(getState())
+          );
+          if (ingestPolicies !== undefined) {
+            dispatch({
+              type: 'serverReturnedEndpointNonExistingPolicies',
+              payload: ingestPolicies.packagePolicy,
+            });
+          }
+          if (ingestPolicies?.agentPolicy !== undefined) {
+            dispatch({
+              type: 'serverReturnedEndpointAgentPolicies',
+              payload: ingestPolicies.agentPolicy,
+            });
+          }
+        } catch (error) {
           // Ignore Errors, since this should not hinder the user's ability to use the UI
           // eslint-disable-next-line no-console
-          .catch((error) => console.error(error));
+          console.error(error);
+        }
       } catch (error) {
         dispatch({
           type: 'serverFailedToReturnEndpointDetails',
@@ -220,7 +314,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       // call the policy response api
       try {
         const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
-          query: { hostId: selectedEndpoint },
+          query: { agentId: selectedEndpoint },
         });
         dispatch({
           type: 'serverReturnedEndpointPolicyResponse',
@@ -236,11 +330,11 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
   };
 };
 
-const getNonExistingPoliciesForEndpointsList = async (
+const getAgentAndPoliciesForEndpointsList = async (
   http: HttpStart,
   hosts: HostResultList['hosts'],
   currentNonExistingPolicies: EndpointState['nonExistingPolicies']
-): Promise<EndpointState['nonExistingPolicies'] | undefined> => {
+): Promise<PolicyIds | undefined> => {
   if (hosts.length === 0) {
     return;
   }
@@ -258,54 +352,73 @@ const getNonExistingPoliciesForEndpointsList = async (
     return;
   }
 
-  // We use the Agent Config API here, instead of the Package Config, because we can't use
-  // filter by ID of the Saved Object. Agent Config, however, keeps a reference (array) of
-  // Package Ids that it uses, thus if a reference exists there, then the package config (policy)
+  // We use the Agent Policy API here, instead of the Package Policy, because we can't use
+  // filter by ID of the Saved Object. Agent Policy, however, keeps a reference (array) of
+  // Package Ids that it uses, thus if a reference exists there, then the package policy (policy)
   // exists.
   const policiesFound = (
-    await sendGetAgentConfigList(http, {
+    await sendGetAgentPolicyList(http, {
       query: {
-        kuery: `${AGENT_CONFIG_SAVED_OBJECT_TYPE}.package_configs: (${policyIdsToCheck.join(
+        kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.package_policies: (${policyIdsToCheck.join(
           ' or '
         )})`,
       },
     })
-  ).items.reduce<EndpointState['nonExistingPolicies']>((list, agentConfig) => {
-    (agentConfig.package_configs as string[]).forEach((packageConfig) => {
-      list[packageConfig as string] = true;
-    });
-    return list;
-  }, {});
-
-  const nonExisting = policyIdsToCheck.reduce<EndpointState['nonExistingPolicies']>(
-    (list, policyId) => {
-      if (policiesFound[policyId]) {
-        return list;
-      }
-      list[policyId] = true;
+  ).items.reduce<PolicyIds>(
+    (list, agentPolicy) => {
+      (agentPolicy.package_policies as string[]).forEach((packagePolicy) => {
+        list.packagePolicy[packagePolicy as string] = true;
+        list.agentPolicy[packagePolicy as string] = agentPolicy.id;
+      });
       return list;
     },
-    {}
+    { packagePolicy: {}, agentPolicy: {} }
   );
 
-  if (Object.keys(nonExisting).length === 0) {
+  // packagePolicy contains non-existing packagePolicy ids whereas agentPolicy contains existing agentPolicy ids
+  const nonExistingPackagePoliciesAndExistingAgentPolicies = policyIdsToCheck.reduce<PolicyIds>(
+    (list, policyId: string) => {
+      if (policiesFound.packagePolicy[policyId as string]) {
+        list.agentPolicy[policyId as string] = policiesFound.agentPolicy[policyId];
+        return list;
+      }
+      list.packagePolicy[policyId as string] = true;
+      return list;
+    },
+    { packagePolicy: {}, agentPolicy: {} }
+  );
+
+  if (
+    Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.packagePolicy).length === 0 &&
+    Object.keys(nonExistingPackagePoliciesAndExistingAgentPolicies.agentPolicy).length === 0
+  ) {
     return;
   }
 
-  return nonExisting;
+  return nonExistingPackagePoliciesAndExistingAgentPolicies;
+};
+
+const endpointsTotal = async (http: HttpStart): Promise<number> => {
+  try {
+    return (
+      await http.post<HostResultList>('/api/endpoint/metadata', {
+        body: JSON.stringify({
+          paging_properties: [{ page_index: 0 }, { page_size: 1 }],
+        }),
+      })
+    ).total;
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`error while trying to check for total endpoints`);
+    // eslint-disable-next-line no-console
+    console.error(error);
+  }
+  return 0;
 };
 
 const doEndpointsExist = async (http: HttpStart): Promise<boolean> => {
   try {
-    return (
-      (
-        await http.post<HostResultList>('/api/endpoint/metadata', {
-          body: JSON.stringify({
-            paging_properties: [{ page_index: 0 }, { page_size: 1 }],
-          }),
-        })
-      ).hosts.length !== 0
-    );
+    return (await endpointsTotal(http)) > 0;
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(`error while trying to check if endpoints exist`);

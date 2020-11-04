@@ -3,8 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Logger, KibanaRequest } from '../../../../../src/core/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { Logger, KibanaRequest } from 'src/core/server';
 import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
 import {
   ActionTypeExecutorResult,
@@ -16,15 +16,19 @@ import {
 } from '../types';
 import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
 import { SpacesServiceSetup } from '../../../spaces/server';
-import { EVENT_LOG_ACTIONS, PluginStartContract } from '../plugin';
+import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { ActionsClient } from '../actions_client';
+import { ActionExecutionSource } from './action_execution_source';
 
 export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceSetup;
   getServices: GetServicesFunction;
-  getActionsClientWithRequest: PluginStartContract['getActionsClientWithRequest'];
+  getActionsClientWithRequest: (
+    request: KibanaRequest,
+    authorizationContext?: ActionExecutionSource<unknown>
+  ) => Promise<PublicMethodsOf<ActionsClient>>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
@@ -32,10 +36,11 @@ export interface ActionExecutorContext {
   proxySettings?: ProxySettings;
 }
 
-export interface ExecuteOptions {
+export interface ExecuteOptions<Source = unknown> {
   actionId: string;
   request: KibanaRequest;
   params: Record<string, unknown>;
+  source?: ActionExecutionSource<Source>;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -61,6 +66,7 @@ export class ActionExecutor {
     actionId,
     params,
     request,
+    source,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
@@ -73,6 +79,7 @@ export class ActionExecutor {
     }
 
     const {
+      logger,
       spaces,
       getServices,
       encryptedSavedObjectsClient,
@@ -88,14 +95,14 @@ export class ActionExecutor {
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
     const { actionTypeId, name, config, secrets } = await getActionInfo(
-      await getActionsClientWithRequest(request),
+      await getActionsClientWithRequest(request, source),
       encryptedSavedObjectsClient,
       preconfiguredActions,
       actionId,
       namespace.namespace
     );
 
-    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId)) {
+    if (!actionTypeRegistry.isActionExecutable(actionId, actionTypeId, { notifyUsage: true })) {
       actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
     }
     const actionType = actionTypeRegistry.get(actionTypeId);
@@ -165,11 +172,15 @@ export class ActionExecutor {
       event.message = `action execution failure: ${actionLabel}`;
       event.error = event.error || {};
       event.error.message = actionErrorToMessage(result);
+      logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
     } else {
       event.event.outcome = 'failure';
-      event.message = `action execution returned unexpected result: ${actionLabel}`;
+      event.message = `action execution returned unexpected result: ${actionLabel}: "${result.status}"`;
       event.error = event.error || {};
       event.error.message = 'action execution returned unexpected result';
+      logger.warn(
+        `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
+      );
     }
 
     eventLogger.logEvent(event);

@@ -17,10 +17,12 @@
  * under the License.
  */
 
-export { ISearchStrategy, ISearchOptions, ISearchSetup, ISearchStart } from './types';
+export { ISearchStrategy, ISearchSetup, ISearchStart, SearchEnhancements } from './types';
 
-export { getDefaultSearchParams, getTotalLoaded } from './es_search';
+export * from './es_search';
 
 export { usageProvider, SearchUsage } from './collectors';
 
 export * from './aggs';
+
+export { shimHitsTotal } from './routes';

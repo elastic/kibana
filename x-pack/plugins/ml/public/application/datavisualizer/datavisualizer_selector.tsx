@@ -52,7 +52,10 @@ function startTrialDescription() {
 export const DatavisualizerSelector: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
   const {
-    services: { licenseManagement },
+    services: {
+      licenseManagement,
+      http: { basePath },
+    },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
 
@@ -183,13 +186,18 @@ export const DatavisualizerSelector: FC = () => {
                     }
                     description={startTrialDescription()}
                     footer={
-                      <EuiButton target="_blank" href="management/stack/license_management/home">
+                      <EuiButton
+                        target="_blank"
+                        href={`${basePath.get()}/app/management/stack/license_management/home`}
+                        data-test-subj="mlDataVisualizerStartTrialButton"
+                      >
                         <FormattedMessage
                           id="xpack.ml.datavisualizer.selector.startTrialButtonLabel"
                           defaultMessage="Start trial"
                         />
                       </EuiButton>
                     }
+                    data-test-subj="mlDataVisualizerCardStartTrial"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>

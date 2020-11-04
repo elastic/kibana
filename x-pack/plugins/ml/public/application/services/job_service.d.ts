@@ -5,6 +5,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { TimeRange } from 'src/plugins/data/common/query/timefilter/types';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import { Calendar } from '../../../common/types/calendars';
 
@@ -15,7 +16,7 @@ export interface ExistingJobsAndGroups {
 
 declare interface JobService {
   jobs: CombinedJob[];
-  createResultsUrlForJobs: (jobs: any[], target: string) => string;
+  createResultsUrlForJobs: (jobs: any[], target: string, timeRange?: TimeRange) => string;
   tempJobCloningObjects: {
     job: any;
     skipTimeRangeStep: boolean;

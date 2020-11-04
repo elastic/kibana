@@ -21,12 +21,13 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign, Ensure } from '@kbn/utility-types';
 
-import { FetchOptions, ISearchSource } from 'src/plugins/data/public';
+import { ISearchSource } from 'src/plugins/data/public';
 import {
   ExpressionAstFunction,
   ExpressionAstArgument,
   SerializedFieldFormat,
 } from 'src/plugins/expressions/common';
+import { ISearchOptions } from '../es_search';
 
 import { IAggType } from './agg_type';
 import { writeParams } from './agg_params';
@@ -213,11 +214,11 @@ export class AggConfig {
 
   /**
    *  Hook for pre-flight logic, see AggType#onSearchRequestStart
-   *  @param {Courier.SearchSource} searchSource
-   *  @param {Courier.FetchOptions} options
+   *  @param {SearchSource} searchSource
+   *  @param {ISearchOptions} options
    *  @return {Promise<undefined>}
    */
-  onSearchRequestStart(searchSource: ISearchSource, options?: FetchOptions) {
+  onSearchRequestStart(searchSource: ISearchSource, options?: ISearchOptions) {
     if (!this.type) {
       return Promise.resolve();
     }
@@ -397,6 +398,15 @@ export class AggConfig {
 
   getField() {
     return this.params.field;
+  }
+
+  /**
+   * Returns the bucket path containing the main value the agg will produce
+   * (e.g. for sum of bytes it will point to the sum, for median it will point
+   *  to the 50 percentile in the percentile multi value bucket)
+   */
+  getValueBucketPath() {
+    return this.type.getValueBucketPath(this);
   }
 
   makeLabel(percentageMode = false) {

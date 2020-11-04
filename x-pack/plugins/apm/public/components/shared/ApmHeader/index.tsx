@@ -6,14 +6,14 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { KueryBar } from '../KueryBar';
 import { DatePicker } from '../DatePicker';
 import { EnvironmentFilter } from '../EnvironmentFilter';
+import { KueryBar } from '../KueryBar';
 
 export function ApmHeader({ children }: { children: ReactNode }) {
   return (
     <>
-      <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
         <EuiFlexItem>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <DatePicker />

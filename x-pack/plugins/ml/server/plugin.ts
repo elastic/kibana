@@ -9,18 +9,17 @@ import {
   CoreSetup,
   CoreStart,
   Plugin,
-  ILegacyScopedClusterClient,
   KibanaRequest,
   Logger,
   PluginInitializerContext,
-  ILegacyCustomClusterClient,
   CapabilitiesStart,
+  IClusterClient,
 } from 'kibana/server';
+import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginsSetup, RouteInitialization } from './types';
-import { PLUGIN_ID, PLUGIN_ICON } from '../common/constants/app';
+import { PLUGIN_ID } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
 
-import { elasticsearchJsPlugin } from './client/elasticsearch_ml';
 import { initMlTelemetry } from './lib/telemetry';
 import { initMlServerLog } from './client/log';
 import { initSampleDataSets } from './lib/sample_data_sets';
@@ -48,18 +47,9 @@ import { createSharedServices, SharedServices } from './shared_services';
 import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
+import { trainedModelsRoutes } from './routes/trained_models';
 
-declare module 'kibana/server' {
-  interface RequestHandlerContext {
-    [PLUGIN_ID]?: {
-      mlClient: ILegacyScopedClusterClient;
-    };
-  }
-}
-
-export interface MlPluginSetup extends SharedServices {
-  mlClient: ILegacyCustomClusterClient;
-}
+export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
 
 export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, PluginsSetup> {
@@ -67,6 +57,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   private version: string;
   private mlLicense: MlServerLicense;
   private capabilities: CapabilitiesStart | null = null;
+  private clusterClient: IClusterClient | null = null;
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
@@ -77,16 +68,15 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
     const { admin, user, apmUser } = getPluginPrivileges();
 
-    plugins.features.registerFeature({
+    plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
       name: i18n.translate('xpack.ml.featureRegistry.mlFeatureName', {
         defaultMessage: 'Machine Learning',
       }),
-      icon: PLUGIN_ICON,
       order: 500,
-      navLinkId: PLUGIN_ID,
+      category: DEFAULT_APP_CATEGORIES.kibana,
       app: [PLUGIN_ID, 'kibana'],
-      catalogue: [PLUGIN_ID],
+      catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       management: {
         insightsAndAlerting: ['jobsListLink'],
       },
@@ -123,17 +113,6 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
     // initialize capabilities switcher to add license filter to ml capabilities
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
-
-    // Can access via router's handler function 'context' parameter - context.ml.mlClient
-    const mlClient = coreSetup.elasticsearch.legacy.createClient(PLUGIN_ID, {
-      plugins: [elasticsearchJsPlugin],
-    });
-
-    coreSetup.http.registerRouteHandlerContext(PLUGIN_ID, (context, request) => {
-      return {
-        mlClient: mlClient.asScoped(request),
-      };
-    });
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
@@ -172,14 +151,22 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     initMlServerLog({ log: this.log });
     initMlTelemetry(coreSetup, plugins.usageCollection);
 
+    trainedModelsRoutes(routeInit);
+
     return {
-      ...createSharedServices(this.mlLicense, plugins.spaces, plugins.cloud, resolveMlCapabilities),
-      mlClient,
+      ...createSharedServices(
+        this.mlLicense,
+        plugins.spaces,
+        plugins.cloud,
+        resolveMlCapabilities,
+        () => this.clusterClient
+      ),
     };
   }
 
   public start(coreStart: CoreStart): MlPluginStart {
     this.capabilities = coreStart.capabilities;
+    this.clusterClient = coreStart.elasticsearch.client;
   }
 
   public stop() {

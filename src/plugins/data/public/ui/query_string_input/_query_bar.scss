@@ -8,30 +8,37 @@
   border-right: none !important;
 }
 
+.kbnQueryBar__textareaWrap {
+  overflow: visible !important; // Override EUI form control
+  display: flex;
+  flex: 1 1 100%;
+  position: relative;
+}
+
 .kbnQueryBar__textarea {
   z-index: $euiZContentMenu;
   resize: none !important; // When in the group, it will autosize
-  height: $euiSizeXXL;
+  height: $euiFormControlHeight;
   // Unlike most inputs within layout control groups, the text area still needs a border.
   // These adjusts help it sit above the control groups shadow to line up correctly.
-  padding-top: $euiSizeS + 3px !important;
-  transform: translateY(-2px);
-  padding: $euiSizeS - 1px;
+  padding: $euiSizeS;
+  padding-top: $euiSizeS + 3px;
+  transform: translateY(-1px) translateX(-1px);
+
+  &:not(:focus):not(:invalid) {
+    @include euiYScrollWithShadows;
+  }
 
   &:not(:focus) {
-    @include euiYScrollWithShadows;
     white-space: nowrap;
     overflow-y: hidden;
     overflow-x: hidden;
-    border: none;
-    box-shadow: none;
   }
 
   // When focused, let it scroll
   &:focus {
     overflow-x: auto;
     overflow-y: auto;
-    width: calc(100% + 1px); // To overtake the group's fake border
     white-space: normal;
   }
 }
@@ -59,6 +66,7 @@
     &.kbnQueryBar__datePickerWrapper-isHidden {
       width: 0;
       overflow: hidden;
+      max-width: 0;
     }
   }
 }

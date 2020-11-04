@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = await appsMenu.readLinks();
-        expect(navLinks.map((link) => link.text)).to.eql(['Discover', 'Stack Management']);
+        expect(navLinks.map((link) => link.text)).to.eql(['Overview', 'Discover']);
       });
 
       it('shows save button', async () => {
@@ -184,7 +184,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Discover', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Discover']);
       });
 
       it(`doesn't show save button`, async () => {
@@ -275,7 +275,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows discover navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Discover', 'Stack Management']);
+        expect(navLinks).to.eql(['Overview', 'Discover']);
       });
 
       it(`doesn't show save button`, async () => {
@@ -412,12 +412,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_discover_privileges_user');
       });
 
-      it(`shows 404`, async () => {
+      it(`shows 403`, async () => {
         await PageObjects.common.navigateToUrl('discover', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.error.expectNotFound();
+        await PageObjects.error.expectForbidden();
       });
     });
   });

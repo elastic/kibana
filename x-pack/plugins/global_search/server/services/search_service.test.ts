@@ -62,8 +62,8 @@ describe('SearchService', () => {
 
   beforeEach(() => {
     service = new SearchService();
-    basePath = httpServiceMock.createBasePath();
-    basePath.prepend.mockImplementation((path) => `/base-path${path}`);
+    basePath = httpServiceMock.createBasePath('/base-path');
+    basePath.get.mockReturnValue('/base-path/s/space');
     coreStart = coreMock.createStart();
     licenseChecker = licenseCheckerMock.create();
   });
@@ -283,7 +283,7 @@ describe('SearchService', () => {
         expect(batch.results).toHaveLength(2);
         expect(batch.results[0]).toEqual({
           ...resultA,
-          url: '/base-path/foo/bar',
+          url: '/base-path/s/space/foo/bar',
         });
         expect(batch.results[1]).toEqual({
           ...resultB,

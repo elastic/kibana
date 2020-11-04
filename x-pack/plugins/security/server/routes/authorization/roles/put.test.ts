@@ -15,7 +15,7 @@ import {
   httpServerMock,
 } from '../../../../../../../src/core/server/mocks';
 import { routeDefinitionParamsMock } from '../../index.mock';
-import { Feature } from '../../../../../features/server';
+import { KibanaFeature } from '../../../../../features/server';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 
 const application = 'kibana-.kibana';
@@ -83,10 +83,11 @@ const putRoleTest = (
     );
 
     mockRouteDefinitionParams.getFeatures.mockResolvedValue([
-      new Feature({
+      new KibanaFeature({
         id: 'feature_1',
         name: 'feature 1',
         app: [],
+        category: { id: 'foo', label: 'foo' },
         privileges: {
           all: {
             ui: [],

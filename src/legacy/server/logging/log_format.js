@@ -91,7 +91,7 @@ export default class TransformObjStream extends Stream.Transform {
         method: event.method || '',
         headers: event.headers,
         remoteAddress: source.remoteAddress,
-        userAgent: source.remoteAddress,
+        userAgent: source.userAgent,
         referer: source.referer,
       };
 

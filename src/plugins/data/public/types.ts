@@ -27,9 +27,8 @@ import { FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction } from './actions';
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
-import { IndexPatternSelectProps } from './ui/index_pattern_select';
 import { IndexPatternsContract } from './index_patterns';
-import { StatefulSearchBarProps } from './ui/search_bar/create_search_bar';
+import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 
 export interface DataPublicPluginEnhancements {
@@ -46,6 +45,9 @@ export interface DataStartDependencies {
   uiActions: UiActionsStart;
 }
 
+/**
+ * Data plugin public Setup contract
+ */
 export interface DataPublicPluginSetup {
   autocomplete: AutocompleteSetup;
   search: ISearchSetup;
@@ -57,20 +59,61 @@ export interface DataPublicPluginSetup {
   __enhance: (enhancements: DataPublicPluginEnhancements) => void;
 }
 
+/**
+ * Data plugin prewired UI components
+ */
+export interface DataPublicPluginStartUi {
+  IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+  SearchBar: React.ComponentType<StatefulSearchBarProps>;
+}
+
+/**
+ * utilities to generate filters from action context
+ */
+export interface DataPublicPluginStartActions {
+  createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
+  createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
+}
+
+/**
+ * Data plugin public Start contract
+ */
 export interface DataPublicPluginStart {
-  actions: {
-    createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;
-    createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;
-  };
+  /**
+   * filter creation utilities
+   * {@link DataPublicPluginStartActions}
+   */
+  actions: DataPublicPluginStartActions;
+  /**
+   * autocomplete service
+   * {@link AutocompleteStart}
+   */
   autocomplete: AutocompleteStart;
+  /**
+   * index patterns service
+   * {@link IndexPatternsContract}
+   */
   indexPatterns: IndexPatternsContract;
+  /**
+   * search service
+   * {@link ISearchStart}
+   */
   search: ISearchStart;
+  /**
+   * field formats service
+   * {@link FieldFormatsStart}
+   */
   fieldFormats: FieldFormatsStart;
+  /**
+   * query service
+   * {@link QueryStart}
+   */
   query: QueryStart;
-  ui: {
-    IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-    SearchBar: React.ComponentType<StatefulSearchBarProps>;
-  };
+  /**
+   * prewired UI components
+   * {@link DataPublicPluginStartUi}
+   */
+  ui: DataPublicPluginStartUi;
 }
 
 export interface IDataPluginServices extends Partial<CoreStart> {

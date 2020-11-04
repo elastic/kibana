@@ -7,10 +7,12 @@
 import { AppMountParameters, CoreSetup, CoreStart } from 'kibana/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
 import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { KibanaLegacySetup } from 'src/plugins/kibana_legacy/public';
+import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
+import { GlobalSearchPluginSetup } from '../../global_search/public';
 import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
@@ -24,23 +26,30 @@ import {
   DatatableVisualizationPluginSetupPlugins,
 } from './datatable_visualization';
 import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
-import { stopReportManager } from './lens_ui_telemetry';
 import { AppNavLinkStatus } from '../../../../src/core/public';
+import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
+import {
+  UiActionsStart,
+  ACTION_VISUALIZE_FIELD,
+  VISUALIZE_FIELD_TRIGGER,
+} from '../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
+import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
+import { getSearchProvider } from './search_provider';
 
-import './index.scss';
+import { LensAttributeService } from './lens_attribute_service';
 
 export interface LensPluginSetupDependencies {
-  kibanaLegacy: KibanaLegacySetup;
+  urlForwarding: UrlForwardingSetup;
   expressions: ExpressionsSetup;
   data: DataPublicPluginSetup;
   embeddable?: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   charts: ChartsPluginSetup;
+  globalSearch?: GlobalSearchPluginSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -48,17 +57,21 @@ export interface LensPluginStartDependencies {
   expressions: ExpressionsStart;
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
+  dashboard: DashboardStart;
   embeddable: EmbeddableStart;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }
-
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
   private editorFrameService: EditorFrameService;
   private createEditorFrame: EditorFrameStart['createInstance'] | null = null;
+  private attributeService: (() => Promise<LensAttributeService>) | null = null;
   private indexpatternDatasource: IndexPatternDatasource;
   private xyVisualization: XyVisualization;
   private metricVisualization: MetricVisualization;
   private pieVisualization: PieVisualization;
+
+  private stopReportManager?: () => void;
 
   constructor() {
     this.datatableVisualization = new DatatableVisualization();
@@ -72,19 +85,29 @@ export class LensPlugin {
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
     {
-      kibanaLegacy,
+      urlForwarding,
       expressions,
       data,
       embeddable,
       visualizations,
       charts,
+      globalSearch,
     }: LensPluginSetupDependencies
   ) {
-    const editorFrameSetupInterface = this.editorFrameService.setup(core, {
-      data,
-      embeddable,
-      expressions,
-    });
+    this.attributeService = async () => {
+      const { getLensAttributeService } = await import('./async_services');
+      const [coreStart, startDependencies] = await core.getStartServices();
+      return getLensAttributeService(coreStart, startDependencies);
+    };
+    const editorFrameSetupInterface = this.editorFrameService.setup(
+      core,
+      {
+        data,
+        embeddable,
+        expressions,
+      },
+      this.attributeService
+    );
     const dependencies: IndexPatternDatasourceSetupPlugins &
       XyVisualizationPluginSetupPlugins &
       DatatableVisualizationPluginSetupPlugins &
@@ -106,24 +129,58 @@ export class LensPlugin {
 
     visualizations.registerAlias(getLensAliasConfig());
 
+    const getByValueFeatureFlag = async () => {
+      const [, deps] = await core.getStartServices();
+      return deps.dashboard.dashboardFeatureFlagConfig;
+    };
+
     core.application.register({
       id: 'lens',
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const { mountApp } = await import('./app_plugin/mounter');
-        return mountApp(core, params, this.createEditorFrame!);
+        const { mountApp, stopReportManager } = await import('./async_services');
+        this.stopReportManager = stopReportManager;
+        return mountApp(core, params, {
+          createEditorFrame: this.createEditorFrame!,
+          attributeService: this.attributeService!,
+          getByValueFeatureFlag,
+        });
       },
     });
 
-    kibanaLegacy.forwardApp('lens', 'lens');
+    if (globalSearch) {
+      globalSearch.registerResultProvider(
+        getSearchProvider(
+          core.getStartServices().then(
+            ([
+              {
+                application: { capabilities },
+              },
+            ]) => capabilities
+          )
+        )
+      );
+    }
+
+    urlForwarding.forwardApp('lens', 'lens');
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    // unregisters the Visualize action and registers the lens one
+    if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
+      startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
+    }
+    startDependencies.uiActions.addTriggerAction(
+      VISUALIZE_FIELD_TRIGGER,
+      visualizeFieldAction(core.application)
+    );
   }
 
   stop() {
-    stopReportManager();
+    if (this.stopReportManager) {
+      this.stopReportManager();
+    }
   }
 }

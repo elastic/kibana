@@ -13,6 +13,7 @@ import { EuiIcon, EuiTitle, EuiText, EuiLink as EuiLinkExternal } from '@elastic
 import { EuiLink } from '../react_router_helpers';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../common/constants';
+import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
 import { NavContext, INavContext } from './layout';
 
@@ -65,6 +66,7 @@ interface ISideNavLinkProps {
   isExternal?: boolean;
   className?: string;
   isRoot?: boolean;
+  subNav?: React.ReactNode;
 }
 
 export const SideNavLink: React.FC<ISideNavLinkProps> = ({
@@ -73,12 +75,13 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
   children,
   className,
   isRoot,
+  subNav,
   ...rest
 }) => {
   const { closeNavigation } = useContext(NavContext) as INavContext;
 
   const { pathname } = useLocation();
-  const currentPath = pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
+  const currentPath = stripTrailingSlash(pathname);
   const isActive = currentPath === to || (isRoot && currentPath === '');
 
   const classes = classNames('enterpriseSearchNavLinks__item', className, {
@@ -102,6 +105,7 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
           {children}
         </EuiLink>
       )}
+      {subNav && <ul className="enterpriseSearchNavLinks__subNav">{subNav}</ul>}
     </li>
   );
 };

@@ -161,7 +161,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -295,7 +295,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -358,6 +358,13 @@ Object {
       "transaction_results": Object {
         "aggs": Object {
           "timeseries": Object {
+            "aggs": Object {
+              "count": Object {
+                "value_count": Object {
+                  "field": "transaction.duration.us",
+                },
+              },
+            },
             "date_histogram": Object {
               "extended_bounds": Object {
                 "max": 1528977600000,
@@ -394,7 +401,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -452,6 +459,13 @@ Object {
       "transaction_results": Object {
         "aggs": Object {
           "timeseries": Object {
+            "aggs": Object {
+              "count": Object {
+                "value_count": Object {
+                  "field": "transaction.duration.us",
+                },
+              },
+            },
             "date_histogram": Object {
               "extended_bounds": Object {
                 "max": 1528977600000,
@@ -488,7 +502,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -551,6 +565,13 @@ Object {
       "transaction_results": Object {
         "aggs": Object {
           "timeseries": Object {
+            "aggs": Object {
+              "count": Object {
+                "value_count": Object {
+                  "field": "transaction.duration.us",
+                },
+              },
+            },
             "date_histogram": Object {
               "extended_bounds": Object {
                 "max": 1528977600000,
@@ -587,7 +608,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -618,7 +639,7 @@ Object {
   "body": Object {
     "aggs": Object {
       "stats": Object {
-        "extended_stats": Object {
+        "max": Object {
           "field": "transaction.duration.us",
         },
       },
@@ -652,7 +673,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],

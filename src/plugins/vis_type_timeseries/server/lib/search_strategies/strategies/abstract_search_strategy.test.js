@@ -16,26 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { from } from 'rxjs';
 import { AbstractSearchStrategy } from './abstract_search_strategy';
-
-class SearchRequest {
-  constructor(req, callWithRequest) {
-    this.req = req;
-    this.callWithRequest = callWithRequest;
-  }
-}
 
 describe('AbstractSearchStrategy', () => {
   let abstractSearchStrategy;
-  let server;
-  let callWithRequestFactory;
   let req;
   let mockedFields;
   let indexPattern;
 
   beforeEach(() => {
-    server = {};
-    callWithRequestFactory = jest.fn().mockReturnValue('callWithRequest');
     mockedFields = {};
     req = {
       pre: {
@@ -45,16 +35,11 @@ describe('AbstractSearchStrategy', () => {
       },
     };
 
-    abstractSearchStrategy = new AbstractSearchStrategy(
-      server,
-      callWithRequestFactory,
-      SearchRequest
-    );
+    abstractSearchStrategy = new AbstractSearchStrategy();
   });
 
   test('should init an AbstractSearchStrategy instance', () => {
-    expect(abstractSearchStrategy.getCallWithRequestInstance).toBeDefined();
-    expect(abstractSearchStrategy.getSearchRequest).toBeDefined();
+    expect(abstractSearchStrategy.search).toBeDefined();
     expect(abstractSearchStrategy.getFieldsForWildcard).toBeDefined();
     expect(abstractSearchStrategy.checkForViability).toBeDefined();
   });
@@ -65,20 +50,48 @@ describe('AbstractSearchStrategy', () => {
     expect(fields).toBe(mockedFields);
     expect(req.pre.indexPatternsService.getFieldsForWildcard).toHaveBeenCalledWith({
       pattern: indexPattern,
+      fieldCapsOptions: { allow_no_indices: true },
     });
   });
 
-  test('should invoke callWithRequestFactory with req param passed', () => {
-    abstractSearchStrategy.getCallWithRequestInstance(req);
+  test('should return response', async () => {
+    const searches = [{ body: 'body', index: 'index' }];
+    const searchFn = jest.fn().mockReturnValue(from(Promise.resolve({})));
 
-    expect(callWithRequestFactory).toHaveBeenCalledWith(server, req);
-  });
+    const responses = await abstractSearchStrategy.search(
+      {
+        requestContext: {},
+        framework: {
+          core: {
+            getStartServices: jest.fn().mockReturnValue(
+              Promise.resolve([
+                {},
+                {
+                  data: {
+                    search: {
+                      search: searchFn,
+                    },
+                  },
+                },
+              ])
+            ),
+          },
+        },
+      },
+      searches
+    );
 
-  test('should return a search request', () => {
-    const searchRequest = abstractSearchStrategy.getSearchRequest(req);
-
-    expect(searchRequest instanceof SearchRequest).toBe(true);
-    expect(searchRequest.callWithRequest).toBe('callWithRequest');
-    expect(searchRequest.req).toBe(req);
+    expect(responses).toEqual([{}]);
+    expect(searchFn).toHaveBeenCalledWith(
+      {
+        params: {
+          body: 'body',
+          index: 'index',
+        },
+        indexType: undefined,
+      },
+      {},
+      {}
+    );
   });
 });

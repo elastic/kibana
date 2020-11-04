@@ -58,6 +58,7 @@ describe('BuilderExceptionListItemComponent', () => {
             andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
+            setErrorsExist={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -86,6 +87,7 @@ describe('BuilderExceptionListItemComponent', () => {
             andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
+            setErrorsExist={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -112,6 +114,7 @@ describe('BuilderExceptionListItemComponent', () => {
             andLogicIncluded={true}
             isOnlyItem={false}
             listType="detection"
+            setErrorsExist={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -140,6 +143,7 @@ describe('BuilderExceptionListItemComponent', () => {
             andLogicIncluded={false}
             isOnlyItem={false}
             listType="detection"
+            setErrorsExist={jest.fn()}
             onDeleteExceptionItem={jest.fn()}
             onChangeExceptionItem={jest.fn()}
           />
@@ -175,6 +179,7 @@ describe('BuilderExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
+          setErrorsExist={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -202,6 +207,7 @@ describe('BuilderExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={false}
           listType="detection"
+          setErrorsExist={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -230,6 +236,7 @@ describe('BuilderExceptionListItemComponent', () => {
           // this to be true, but done for testing purposes
           isOnlyItem={true}
           listType="detection"
+          setErrorsExist={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -256,6 +263,7 @@ describe('BuilderExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
+          setErrorsExist={jest.fn()}
           onDeleteExceptionItem={jest.fn()}
           onChangeExceptionItem={jest.fn()}
         />
@@ -284,6 +292,7 @@ describe('BuilderExceptionListItemComponent', () => {
           andLogicIncluded={false}
           isOnlyItem={true}
           listType="detection"
+          setErrorsExist={jest.fn()}
           onDeleteExceptionItem={mockOnDeleteExceptionItem}
           onChangeExceptionItem={jest.fn()}
         />

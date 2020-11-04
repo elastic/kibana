@@ -20,7 +20,7 @@ root)
 |`yarn test:jest_integration -t regexp [test path]`
 
 |Mocha
-|`src/**/__tests__/**/*.js` `!src/**/public/__tests__/*.js``packages/kbn-datemath/test/**/*.js` `packages/kbn-dev-utils/src/**/__tests__/**/*.js` `tasks/**/__tests__/**/*.js`
+|`src/**/__tests__/**/*.js` `!src/**/public/__tests__/*.js` `packages/kbn-dev-utils/src/**/__tests__/**/*.js` `tasks/**/__tests__/**/*.js`
 |`node scripts/mocha --grep=regexp [test path]`
 
 |Functional

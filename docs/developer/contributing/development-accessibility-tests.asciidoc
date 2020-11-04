@@ -1,23 +1,104 @@
 [[development-accessibility-tests]]
 == Automated Accessibility Testing
 
+
+To write an accessibility test, use the provided accessibility service `getService('a11y')`. Accessibility tests are fairly straightforward to write as https://github.com/dequelabs/axe-core[axe] does most of the heavy lifting. Navigate to the UI that you need to test, then call `testAppSnapshot();` from the service imported earlier to make sure axe finds no failures. Navigate through every portion of the UI for the best coverage.
+
+An example test might look like this:
+[source,js]
+----
+export default function ({ getService, getPageObjects }) {
+  const { common, home } = getPageObjects(['common', 'home']);
+  const a11y = getService('a11y'); /* this is the wrapping service around axe */
+
+  describe('Kibana Home', () => {
+    before(async () => {
+      await common.navigateToApp('home'); /* navigates to the page we want to test */
+    });
+
+    it('Kibana Home view', async () => {
+      await retry.waitFor(
+        'home page visible',
+        async () => await testSubjects.exists('homeApp')
+      ); /* confirm you're on the correct page and that it's loaded */
+      await a11y.testAppSnapshot(); /* this expects that there are no failures found by axe */
+    });
+
+    /**
+     * If these tests were added by our QA team, tests that fail that require significant app code
+     * changes to be fixed will be skipped with a corresponding issue label with more info
+     */
+    // Skipped due to https://github.com/elastic/kibana/issues/99999
+    it.skip('all plugins view page meets a11y requirements', async () => {
+      await home.clickAllKibanaPlugins();
+      await a11y.testAppSnapshot();
+    });
+
+    /**
+     * Testing all the versions and different views of of a page is important to get good
+     * coverage. Things like empty states, different license levels, different permissions, and
+     * loaded data can all significantly change the UI which necessitates their own test.
+     */
+    it('Add Kibana sample data page', async () => {
+      await common.navigateToUrl('home', '/tutorial_directory/sampleData', {
+        useActualUrl: true,
+      });
+      await a11y.testAppSnapshot();
+    });
+  });
+}
+----
+
+=== Running tests
 To run the tests locally:
 
 [arabic]
-. In one terminal window run
-`node scripts/functional_tests_server --config test/accessibility/config.ts`
-. In another terminal window run
-`node scripts/functional_test_runner.js --config test/accessibility/config.ts`
+. In one terminal window run:
++
+[source,shell]
+-----------
+node scripts/functional_tests_server --config test/accessibility/config.ts
+-----------
+
+. When the server prints that it is ready, in another terminal window run:
++
+[source,shell]
+-----------
+node scripts/functional_test_runner.js --config test/accessibility/config.ts
+-----------
 
 To run the x-pack tests, swap the config file out for
 `x-pack/test/accessibility/config.ts`.
 
-After the server is up, you can go to this instance of {kib} at
-`localhost:5620`.
-
 The testing is done using https://github.com/dequelabs/axe-core[axe].
-The same thing that runs in CI, can be run locally using their browser
-plugins:
+You can run the same thing that runs CI using browser plugins:
 
 * https://chrome.google.com/webstore/detail/axe-web-accessibility-tes/lhdoppojpmngadmnindnejefpokejbdd?hl=en-US[Chrome]
 * https://addons.mozilla.org/en-US/firefox/addon/axe-devtools/[Firefox]
+
+=== Anatomy of a failure
+
+Failures can seem confusing if you've never seen one before. Here is a breakdown of what a failure coming from CI might look like:
+[source,bash]
+----
+1)    Dashboard
+       create dashboard button:
+
+      Error: a11y report:
+
+ VIOLATION
+   [aria-hidden-focus]: Ensures aria-hidden elements do not contain focusable elements
+     Help: https://dequeuniversity.com/rules/axe/3.5/aria-hidden-focus?application=axeAPI
+     Elements:
+       - #example
+       at Accessibility.testAxeReport (test/accessibility/services/a11y/a11y.ts:90:15)
+       at Accessibility.testAppSnapshot (test/accessibility/services/a11y/a11y.ts:58:18)
+       at process._tickCallback (internal/process/next_tick.js:68:7)
+----
+
+
+* "Dashboard" and "create dashboard button" are the names of the test suite and specific test that failed.
+* Always in brackets, "[aria-hidden-focus]" is the name of the axe rule that failed, followed by a short description.
+* "Help: <url>" links to the axe documentation for that rule, including severity, remediation tips, and good and bad code examples.
+* "Elements:"  points to where in the DOM the failure originated (using CSS selector syntax). In this example, the problem came from an element with the ID `example`. If the selector is too complicated to find the source of the problem, use the browser plugins mentioned earlier to locate it. If you have a general idea where the issue is coming from, you can also try adding unique IDs to the page to narrow down the location.
+* The stack trace points to the internals of axe. The stack trace is there in case the test failure is a bug in axe and not in your code, although this is unlikely.

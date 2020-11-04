@@ -1,0 +1,26 @@
+{
+    "job_id": "JOB_ID",
+    "indices": [
+      "INDEX_PATTERN_NAME"
+    ],
+    "max_empty_searches": 10,
+    "query": {
+        "bool": {
+            "must": [
+              {
+                "bool": {
+                  "should": [
+                    {"term": {"process.name": "arp"}},
+                    {"term": {"process.name": "echo"}},
+                    {"term": {"process.name": "ethtool"}},
+                    {"term": {"process.name": "ifconfig"}},
+                    {"term": {"process.name": "ip"}},
+                    {"term": {"process.name": "iptables"}},
+                    {"term": {"process.name": "ufw"}}
+                  ]
+                }
+              }
+            ]
+        }
+    }
+}

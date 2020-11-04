@@ -12,11 +12,10 @@ import enzymeToJson from 'enzyme-to-json';
 import { Location } from 'history';
 import moment from 'moment';
 import { Moment } from 'moment-timezone';
-import { render, waitForElement } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { APMConfig } from '../../server';
-import { LocationProvider } from '../context/LocationContext';
 import { PromiseReturnType } from '../../typings/common';
 import { EuiThemeProvider } from '../../../observability/public';
 import {
@@ -25,6 +24,22 @@ import {
   ESSearchRequest,
 } from '../../typings/elasticsearch';
 import { MockApmPluginContextWrapper } from '../context/ApmPluginContext/MockApmPluginContext';
+import { UrlParamsProvider } from '../context/UrlParamsContext';
+import { UIFilters } from '../../typings/ui_filters';
+
+const originalConsoleWarn = console.warn; // eslint-disable-line no-console
+/**
+ *  A dependency we're using is using deprecated react methods. Override the
+ * console to hide the warnings. These should go away when we switch to
+ * Elastic Charts
+ */
+export function disableConsoleWarning(messageToDisable: string) {
+  return jest.spyOn(console, 'warn').mockImplementation((message) => {
+    if (!message.startsWith(messageToDisable)) {
+      originalConsoleWarn(message);
+    }
+  });
+}
 
 export function toJson(wrapper: ReactWrapper) {
   return enzymeToJson(wrapper, {
@@ -54,16 +69,16 @@ export async function getRenderedHref(Component: React.FC, location: Location) {
   const el = render(
     <MockApmPluginContextWrapper>
       <MemoryRouter initialEntries={[location]}>
-        <LocationProvider>
+        <UrlParamsProvider>
           <Component />
-        </LocationProvider>
+        </UrlParamsProvider>
       </MemoryRouter>
     </MockApmPluginContextWrapper>
   );
-
-  await waitForElement(() => el.container.querySelector('a'));
-
   const a = el.container.querySelector('a');
+
+  await waitFor(() => {}, { container: a! });
+
   return a ? a.getAttribute('href') : '';
 }
 
@@ -104,7 +119,8 @@ interface MockSetup {
   apmEventClient: any;
   internalClient: any;
   config: APMConfig;
-  uiFiltersES: ESFilter[];
+  uiFilters: UIFilters;
+  esFilter: ESFilter[];
   indices: {
     /* eslint-disable @typescript-eslint/naming-convention */
     'apm_oss.sourcemapIndices': string;
@@ -151,8 +167,22 @@ export async function inspectSearchParams(
     end: 1528977600000,
     apmEventClient: { search: spy } as any,
     internalClient: { search: spy } as any,
-    config: new Proxy({}, { get: () => 'myIndex' }) as APMConfig,
-    uiFiltersES: [{ term: { 'my.custom.ui.filter': 'foo-bar' } }],
+    config: new Proxy(
+      {},
+      {
+        get: (_, key) => {
+          switch (key) {
+            default:
+              return 'myIndex';
+
+            case 'xpack.apm.metricsInterval':
+              return 30;
+          }
+        },
+      }
+    ) as APMConfig,
+    uiFilters: { environment: 'test' },
+    esFilter: [{ term: { 'service.environment': 'test' } }],
     indices: {
       /* eslint-disable @typescript-eslint/naming-convention */
       'apm_oss.sourcemapIndices': 'myIndex',

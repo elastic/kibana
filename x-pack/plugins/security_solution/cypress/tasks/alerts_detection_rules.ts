@@ -24,7 +24,10 @@ import {
   SORT_RULES_BTN,
   THREE_HUNDRED_ROWS,
   EXPORT_ACTION_BTN,
+  EDIT_RULE_ACTION_BTN,
+  NEXT_BTN,
 } from '../screens/alerts_detection_rules';
+import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
 export const activateRule = (rulePosition: number) => {
   cy.get(RULE_SWITCH).eq(rulePosition).click({ force: true });
@@ -35,9 +38,19 @@ export const changeToThreeHundredRowsPerPage = () => {
   cy.get(THREE_HUNDRED_ROWS).click();
 };
 
+export const editFirstRule = () => {
+  cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
+  cy.get(EDIT_RULE_ACTION_BTN).click();
+};
+
 export const deleteFirstRule = () => {
   cy.get(COLLAPSED_ACTION_BTN).first().click({ force: true });
   cy.get(DELETE_RULE_ACTION_BTN).click();
+};
+
+export const deleteRule = () => {
+  cy.get(ALL_ACTIONS).click();
+  cy.get(DELETE_RULE).click();
 };
 
 export const deleteSelectedRules = () => {
@@ -69,6 +82,10 @@ export const loadPrebuiltDetectionRules = () => {
   cy.get(LOAD_PREBUILT_RULES_BTN).should('exist').click({ force: true });
 };
 
+export const paginate = () => {
+  cy.get(NEXT_BTN).click();
+};
+
 export const reloadDeletedRules = () => {
   cy.get(RELOAD_PREBUILT_RULES_BTN).click({ force: true });
 };
@@ -80,9 +97,9 @@ export const selectNumberOfRules = (numberOfRules: number) => {
 };
 
 export const sortByActivatedRules = () => {
-  cy.get(SORT_RULES_BTN).click({ force: true });
+  cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
   waitForRulesToBeLoaded();
-  cy.get(SORT_RULES_BTN).click({ force: true });
+  cy.get(SORT_RULES_BTN).contains('Activated').click({ force: true });
   waitForRulesToBeLoaded();
 };
 

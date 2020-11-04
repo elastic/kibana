@@ -9,13 +9,12 @@ Constructs a new instance of the `IndexPattern` class
 <b>Signature:</b>
 
 ```typescript
-constructor(id: string | undefined, { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, uiSettingsValues, }: IndexPatternDeps);
+constructor({ spec, fieldFormats, shortDotsEnable, metaFields, }: IndexPatternDeps);
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  id | <code>string &#124; undefined</code> |  |
-|  { getConfig, savedObjectsClient, apiClient, patternCache, fieldFormats, onNotification, onError, uiSettingsValues, } | <code>IndexPatternDeps</code> |  |
+|  { spec, fieldFormats, shortDotsEnable, metaFields, } | <code>IndexPatternDeps</code> |  |
 

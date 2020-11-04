@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 
 import { SecurityPluginSetup } from '../../../security/server';
@@ -58,9 +58,9 @@ export function annotationRoutes(
         tags: ['access:ml:canGetAnnotations'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const { getAnnotations } = annotationServiceProvider(legacyClient);
+        const { getAnnotations } = annotationServiceProvider(client);
         const resp = await getAnnotations(request.body);
 
         return response.ok({
@@ -91,14 +91,14 @@ export function annotationRoutes(
         tags: ['access:ml:canCreateAnnotation'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(legacyClient);
+        const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
         if (annotationsFeatureAvailable === false) {
           throw getAnnotationsFeatureUnavailableErrorMessage();
         }
 
-        const { indexAnnotation } = annotationServiceProvider(legacyClient);
+        const { indexAnnotation } = annotationServiceProvider(client);
 
         const currentUser =
           securityPlugin !== undefined ? securityPlugin.authc.getCurrentUser(request) : {};
@@ -134,15 +134,15 @@ export function annotationRoutes(
         tags: ['access:ml:canDeleteAnnotation'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(legacyClient);
+        const annotationsFeatureAvailable = await isAnnotationsFeatureAvailable(client);
         if (annotationsFeatureAvailable === false) {
           throw getAnnotationsFeatureUnavailableErrorMessage();
         }
 
         const annotationId = request.params.annotationId;
-        const { deleteAnnotation } = annotationServiceProvider(legacyClient);
+        const { deleteAnnotation } = annotationServiceProvider(client);
         const resp = await deleteAnnotation(annotationId);
 
         return response.ok({

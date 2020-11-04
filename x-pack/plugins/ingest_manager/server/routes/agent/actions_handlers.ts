@@ -10,8 +10,8 @@ import { RequestHandler } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
 import { PostNewAgentActionRequestSchema } from '../../types/rest_spec';
 import { ActionsService } from '../../services/agents';
-import { NewAgentAction } from '../../../common/types/models';
 import { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
+import { defaultIngestErrorHandler } from '../../errors';
 
 export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService
@@ -26,7 +26,7 @@ export const postNewAgentActionHandlerBuilder = function (
 
       const agent = await actionsService.getAgent(soClient, request.params.agentId);
 
-      const newAgentAction = request.body.action as NewAgentAction;
+      const newAgentAction = request.body.action;
 
       const savedAgentAction = await actionsService.createAgentAction(soClient, {
         created_at: new Date().toISOString(),
@@ -35,23 +35,12 @@ export const postNewAgentActionHandlerBuilder = function (
       });
 
       const body: PostNewAgentActionResponse = {
-        success: true,
         item: savedAgentAction,
       };
 
       return response.ok({ body });
-    } catch (e) {
-      if (e.isBoom) {
-        return response.customError({
-          statusCode: e.output.statusCode,
-          body: { message: e.message },
-        });
-      }
-
-      return response.customError({
-        statusCode: 500,
-        body: { message: e.message },
-      });
+    } catch (error) {
+      return defaultIngestErrorHandler({ error, response });
     }
   };
 };

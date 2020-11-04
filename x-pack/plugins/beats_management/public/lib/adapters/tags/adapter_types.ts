@@ -3,10 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  BeatTag,
-  CMBeat,
-} from '../../../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag, CMBeat } from '../../../../common/domain_types';
 
 export interface CMTagsAdapter {
   getTagsWithIds(tagIds: string[]): Promise<BeatTag[]>;

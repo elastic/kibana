@@ -11,7 +11,7 @@ import { httpServerMock, httpServiceMock, coreMock } from '../../../../../src/co
 import { LicenseType } from '../../../licensing/server/';
 import { licensingMock } from '../../../licensing/server/mocks';
 import { RequestHandler } from '../../../../../src/core/server';
-import { FeatureConfig } from '../../common';
+import { KibanaFeatureConfig } from '../../common';
 
 function createContextMock(licenseType: LicenseType = 'gold') {
   return {
@@ -24,34 +24,38 @@ describe('GET /api/features', () => {
   let routeHandler: RequestHandler<any, any, any>;
   beforeEach(() => {
     const featureRegistry = new FeatureRegistry();
-    featureRegistry.register({
+    featureRegistry.registerKibanaFeature({
       id: 'feature_1',
       name: 'Feature 1',
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: null,
     });
 
-    featureRegistry.register({
+    featureRegistry.registerKibanaFeature({
       id: 'feature_2',
       name: 'Feature 2',
       order: 2,
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: null,
     });
 
-    featureRegistry.register({
+    featureRegistry.registerKibanaFeature({
       id: 'feature_3',
       name: 'Feature 2',
       order: 1,
       app: [],
+      category: { id: 'foo', label: 'foo' },
       privileges: null,
     });
 
-    featureRegistry.register({
+    featureRegistry.registerKibanaFeature({
       id: 'licensed_feature',
       name: 'Licensed Feature',
       app: ['bar-app'],
-      validLicenses: ['gold'],
+      category: { id: 'foo', label: 'foo' },
+      minimumLicense: 'gold',
       privileges: null,
     });
 
@@ -70,7 +74,7 @@ describe('GET /api/features', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
     const [call] = mockResponse.ok.mock.calls;
-    const body = call[0]!.body as FeatureConfig[];
+    const body = call[0]!.body as KibanaFeatureConfig[];
 
     const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
     expect(features).toEqual([
@@ -99,7 +103,7 @@ describe('GET /api/features', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
     const [call] = mockResponse.ok.mock.calls;
-    const body = call[0]!.body as FeatureConfig[];
+    const body = call[0]!.body as KibanaFeatureConfig[];
 
     const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
 
@@ -129,7 +133,7 @@ describe('GET /api/features', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
     const [call] = mockResponse.ok.mock.calls;
-    const body = call[0]!.body as FeatureConfig[];
+    const body = call[0]!.body as KibanaFeatureConfig[];
 
     const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
 
@@ -159,7 +163,7 @@ describe('GET /api/features', () => {
 
     expect(mockResponse.ok).toHaveBeenCalledTimes(1);
     const [call] = mockResponse.ok.mock.calls;
-    const body = call[0]!.body as FeatureConfig[];
+    const body = call[0]!.body as KibanaFeatureConfig[];
 
     const features = body.map((feature) => ({ id: feature.id, order: feature.order }));
 

@@ -20,7 +20,7 @@
 import { findIndex } from 'lodash';
 import { IFieldType } from './types';
 import { IndexPatternField } from './index_pattern_field';
-import { OnNotification, FieldSpec } from '../types';
+import { FieldSpec, IndexPatternFieldMap } from '../types';
 import { IndexPattern } from '../index_patterns';
 import { shortenDottedString } from '../../utils';
 
@@ -35,96 +35,89 @@ export interface IIndexPatternFieldList extends Array<IndexPatternField> {
   removeAll(): void;
   replaceAll(specs: FieldSpec[]): void;
   update(field: FieldSpec): void;
+  toSpec(options?: {
+    getFormatterForField?: IndexPattern['getFormatterForField'];
+  }): IndexPatternFieldMap;
 }
 
-export type CreateIndexPatternFieldList = (
-  indexPattern: IndexPattern,
-  specs?: FieldSpec[],
-  shortDotsEnable?: boolean,
-  onNotification?: OnNotification
-) => IIndexPatternFieldList;
-
-export class FieldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
-  private byName: FieldMap = new Map();
-  private groups: Map<IndexPatternField['type'], FieldMap> = new Map();
-  private indexPattern: IndexPattern;
-  private shortDotsEnable: boolean;
-  private onNotification: OnNotification;
-  private setByName = (field: IndexPatternField) => this.byName.set(field.name, field);
-  private setByGroup = (field: IndexPatternField) => {
-    if (typeof this.groups.get(field.type) === 'undefined') {
-      this.groups.set(field.type, new Map());
+// extending the array class and using a constructor doesn't work well
+// when calling filter and similar so wrapping in a callback.
+// to be removed in the future
+export const fieldList = (
+  specs: FieldSpec[] = [],
+  shortDotsEnable = false
+): IIndexPatternFieldList => {
+  class FldList extends Array<IndexPatternField> implements IIndexPatternFieldList {
+    private byName: FieldMap = new Map();
+    private groups: Map<IndexPatternField['type'], FieldMap> = new Map();
+    private setByName = (field: IndexPatternField) => this.byName.set(field.name, field);
+    private setByGroup = (field: IndexPatternField) => {
+      if (typeof this.groups.get(field.type) === 'undefined') {
+        this.groups.set(field.type, new Map());
+      }
+      this.groups.get(field.type)!.set(field.name, field);
+    };
+    private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
+    private calcDisplayName = (name: string) =>
+      shortDotsEnable ? shortenDottedString(name) : name;
+    constructor() {
+      super();
+      specs.map((field) => this.add(field));
     }
-    this.groups.get(field.type)!.set(field.name, field);
-  };
-  private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
-  private calcDisplayName = (name: string) =>
-    this.shortDotsEnable ? shortenDottedString(name) : name;
-  constructor(
-    indexPattern: IndexPattern,
-    specs: FieldSpec[] = [],
-    shortDotsEnable = false,
-    onNotification = () => {}
-  ) {
-    super();
-    this.indexPattern = indexPattern;
-    this.shortDotsEnable = shortDotsEnable;
-    this.onNotification = onNotification;
 
-    specs.map((field) => this.add(field));
+    public readonly getAll = () => [...this.byName.values()];
+    public readonly getByName = (name: IndexPatternField['name']) => this.byName.get(name);
+    public readonly getByType = (type: IndexPatternField['type']) => [
+      ...(this.groups.get(type) || new Map()).values(),
+    ];
+    public readonly add = (field: FieldSpec) => {
+      const newField = new IndexPatternField(field, this.calcDisplayName(field.name));
+      this.push(newField);
+      this.setByName(newField);
+      this.setByGroup(newField);
+    };
+
+    public readonly remove = (field: IFieldType) => {
+      this.removeByGroup(field);
+      this.byName.delete(field.name);
+
+      const fieldIndex = findIndex(this, { name: field.name });
+      this.splice(fieldIndex, 1);
+    };
+
+    public readonly update = (field: FieldSpec) => {
+      const newField = new IndexPatternField(field, this.calcDisplayName(field.name));
+      const index = this.findIndex((f) => f.name === newField.name);
+      this.splice(index, 1, newField);
+      this.setByName(newField);
+      this.removeByGroup(newField);
+      this.setByGroup(newField);
+    };
+
+    public readonly removeAll = () => {
+      this.length = 0;
+      this.byName.clear();
+      this.groups.clear();
+    };
+
+    public readonly replaceAll = (spcs: FieldSpec[] = []) => {
+      this.removeAll();
+      spcs.forEach(this.add);
+    };
+
+    public toSpec({
+      getFormatterForField,
+    }: {
+      getFormatterForField?: IndexPattern['getFormatterForField'];
+    } = {}) {
+      return {
+        ...this.reduce<IndexPatternFieldMap>((collector, field) => {
+          collector[field.name] = field.toSpec({ getFormatterForField });
+          return collector;
+        }, {}),
+      };
+    }
   }
 
-  public readonly getAll = () => [...this.byName.values()];
-  public readonly getByName = (name: IndexPatternField['name']) => this.byName.get(name);
-  public readonly getByType = (type: IndexPatternField['type']) => [
-    ...(this.groups.get(type) || new Map()).values(),
-  ];
-  public readonly add = (field: FieldSpec) => {
-    const newField = new IndexPatternField(
-      this.indexPattern,
-      field,
-      this.calcDisplayName(field.name),
-      this.onNotification
-    );
-    this.push(newField);
-    this.setByName(newField);
-    this.setByGroup(newField);
-  };
-
-  public readonly remove = (field: IFieldType) => {
-    this.removeByGroup(field);
-    this.byName.delete(field.name);
-
-    const fieldIndex = findIndex(this, { name: field.name });
-    this.splice(fieldIndex, 1);
-  };
-
-  public readonly update = (field: FieldSpec) => {
-    const newField = new IndexPatternField(
-      this.indexPattern,
-      field,
-      this.calcDisplayName(field.name),
-      this.onNotification
-    );
-    const index = this.findIndex((f) => f.name === newField.name);
-    this.splice(index, 1, newField);
-    this.setByName(newField);
-    this.removeByGroup(newField);
-    this.setByGroup(newField);
-  };
-
-  public readonly removeAll = () => {
-    this.length = 0;
-    this.byName.clear();
-    this.groups.clear();
-  };
-
-  public readonly replaceAll = (specs: FieldSpec[]) => {
-    this.removeAll();
-    specs.forEach(this.add);
-  };
-
-  public readonly toSpec = () => {
-    return [...this.map((field) => field.toSpec())];
-  };
-}
+  return new FldList();
+};

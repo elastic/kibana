@@ -1,4 +1,4 @@
-def withPostBuildReporting(Closure closure) {
+def withPostBuildReporting(Map params, Closure closure) {
   try {
     closure()
   } finally {
@@ -9,8 +9,10 @@ def withPostBuildReporting(Closure closure) {
       print ex
     }
 
-    catchErrors {
-      runErrorReporter([pwd()] + parallelWorkspaces)
+    if (params.runErrorReporter) {
+      catchErrors {
+        runErrorReporter([pwd()] + parallelWorkspaces)
+      }
     }
 
     catchErrors {
@@ -86,6 +88,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def esPort = "61${parallelId}2"
   def esTransportPort = "61${parallelId}3"
   def ingestManagementPackageRegistryPort = "61${parallelId}4"
+  def alertingProxyPort = "61${parallelId}5"
 
   withEnv([
     "CI_GROUP=${parallelId}",
@@ -98,6 +101,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
     "KBN_NP_PLUGINS_BUILT=true",
     "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
+    "ALERTING_PROXY_PORT=${alertingProxyPort}"
   ] + additionalEnvs) {
     closure()
   }

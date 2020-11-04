@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cloneDeep from 'lodash/cloneDeep';
+import { cloneDeep } from 'lodash';
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
@@ -21,16 +21,15 @@ const mockSearchResponse = {
   search: mockTimeRange,
 };
 
-const mlClusterClientFactory = (resp: any): ILegacyScopedClusterClient => {
-  const callAs = (path: string) => {
-    return new Promise((resolve) => {
-      resolve(resp[path]);
-    }) as Promise<any>;
+const mlClusterClientFactory = (response: any): IScopedClusterClient => {
+  const callAs = {
+    fieldCaps: () => Promise.resolve({ body: response.fieldCaps }),
+    search: () => Promise.resolve({ body: response.search }),
   };
-  return {
-    callAsCurrentUser: callAs,
-    callAsInternalUser: callAs,
-  };
+  return ({
+    asCurrentUser: callAs,
+    asInternalUser: callAs,
+  } as unknown) as IScopedClusterClient;
 };
 
 function getMinimalValidJob() {
@@ -145,6 +144,7 @@ describe('ML - validateTimeRange', () => {
 
   it('invalid time field', () => {
     const mockSearchResponseInvalid = cloneDeep(mockSearchResponse);
+    // @ts-expect-error creating intentionally invalid data
     mockSearchResponseInvalid.fieldCaps = undefined;
     const duration = { start: 0, end: 1 };
     return validateTimeRange(

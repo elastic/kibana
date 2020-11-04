@@ -5,7 +5,7 @@
  */
 import { storiesOf } from '@storybook/react';
 import React from 'react';
-// @ts-ignore
+// @ts-expect-error
 import CustomPlot from './';
 
 storiesOf('shared/charts/CustomPlot', module).add(

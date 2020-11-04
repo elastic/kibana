@@ -47,16 +47,16 @@ import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/
 import {
   PLUGIN_ID,
   PLUGIN_NAME,
-  IMyStrategyRequest,
   IMyStrategyResponse,
   SERVER_SEARCH_ROUTE_PATH,
 } from '../../common';
 
 import {
   DataPublicPluginStart,
-  IndexPatternSelect,
   IndexPattern,
   IndexPatternField,
+  isCompleteResponse,
+  isErrorResponse,
 } from '../../../../src/plugins/data/public';
 
 interface SearchExamplesAppDeps {
@@ -91,6 +91,7 @@ export const SearchExamplesApp = ({
   navigation,
   data,
 }: SearchExamplesAppDeps) => {
+  const { IndexPatternSelect } = data.ui;
   const [getCool, setGetCool] = useState<boolean>(false);
   const [timeTook, setTimeTook] = useState<number | undefined>();
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
@@ -134,12 +135,9 @@ export const SearchExamplesApp = ({
           query,
         },
       },
-    };
-
-    if (strategy) {
       // Add a custom request parameter to be consumed by `MyStrategy`.
-      (request as IMyStrategyRequest).get_cool = getCool;
-    }
+      ...(strategy ? { get_cool: getCool } : {}),
+    };
 
     // Submit the search request using the `data.search` service.
     const searchSubscription$ = data.search
@@ -148,7 +146,7 @@ export const SearchExamplesApp = ({
       })
       .subscribe({
         next: (response) => {
-          if (!response.isPartial && !response.isRunning) {
+          if (isCompleteResponse(response)) {
             setTimeTook(response.rawResponse.took);
             const avgResult: number | undefined = response.rawResponse.aggregations
               ? response.rawResponse.aggregations[1].value
@@ -166,7 +164,7 @@ export const SearchExamplesApp = ({
               text: mountReactNode(message),
             });
             searchSubscription$.unsubscribe();
-          } else if (response.isPartial && !response.isRunning) {
+          } else if (isErrorResponse(response)) {
             // TODO: Make response error status clearer
             notifications.toasts.addWarning('An error has occurred');
             searchSubscription$.unsubscribe();
@@ -234,7 +232,6 @@ export const SearchExamplesApp = ({
                       <EuiFlexItem>
                         <EuiFormLabel>Index Pattern</EuiFormLabel>
                         <IndexPatternSelect
-                          savedObjectsClient={savedObjectsClient}
                           placeholder={i18n.translate(
                             'backgroundSessionExample.selectIndexPatternPlaceholder',
                             {

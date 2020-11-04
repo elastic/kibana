@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies mshta.exe making a network connection. This may indicate adversarial activity as mshta.exe is often leveraged by adversaries to execute malicious scripts and evade detection.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -19,7 +20,10 @@
   "severity": "medium",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -39,5 +43,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

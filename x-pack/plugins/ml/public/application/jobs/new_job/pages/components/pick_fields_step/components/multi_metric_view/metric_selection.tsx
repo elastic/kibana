@@ -15,7 +15,7 @@ import { AggFieldPair } from '../../../../../../../../../common/types/fields';
 import { getChartSettings, defaultChartSettings } from '../../../charts/common/settings';
 import { MetricSelector } from './metric_selector';
 import { ChartGrid } from './chart_grid';
-import { mlMessageBarService } from '../../../../../../../components/messagebar';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -109,7 +109,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         .loadFieldExampleValues(splitField)
         .then(setFieldValues)
         .catch((error) => {
-          mlMessageBarService.notify.error(error);
+          getToastNotificationService().displayErrorToast(error);
         });
     } else {
       setFieldValues([]);
@@ -138,7 +138,7 @@ export const MultiMetricDetectors: FC<Props> = ({ setIsValid }) => {
         );
         setLineChartsData(resp);
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        getToastNotificationService().displayErrorToast(error);
         setLineChartsData([]);
       }
       setLoadingData(false);

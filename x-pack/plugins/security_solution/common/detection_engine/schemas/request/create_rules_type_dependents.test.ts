@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCreateRulesSchemaMock } from './create_rules_schema.mock';
+import {
+  getCreateRulesSchemaMock,
+  getCreateThreatMatchRulesSchemaMock,
+} from './create_rules_schema.mock';
 import { CreateRulesSchema } from './create_rules_schema';
 import { createRuleValidateTypeDependents } from './create_rules_type_dependents';
 
@@ -86,5 +89,40 @@ describe('create_rules_type_dependents', () => {
     };
     const errors = createRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
+  });
+
+  test('threat_index, threat_query, and threat_mapping are required when type is "threat_match" and validates with it', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      type: 'threat_match',
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "type" is "threat_match", "threat_index" is required',
+      'when "type" is "threat_match", "threat_query" is required',
+      'when "type" is "threat_match", "threat_mapping" is required',
+    ]);
+  });
+
+  test('validates with threat_index, threat_query, and threat_mapping when type is "threat_match"', () => {
+    const schema = getCreateThreatMatchRulesSchemaMock();
+    const { threat_filters: threatFilters, ...noThreatFilters } = schema;
+    const errors = createRuleValidateTypeDependents(noThreatFilters);
+    expect(errors).toEqual([]);
+  });
+
+  test('does NOT validate when threat_mapping is an empty array', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateThreatMatchRulesSchemaMock(),
+      threat_mapping: [],
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['threat_mapping" must have at least one element']);
+  });
+
+  test('validates with threat_index, threat_query, threat_mapping, and an optional threat_filters, when type is "threat_match"', () => {
+    const schema = getCreateThreatMatchRulesSchemaMock();
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([]);
   });
 });

@@ -35,17 +35,16 @@ export function envoyproxyLogsSpecProvider(context: TutorialContext): TutorialSc
   return {
     id: 'envoyproxyLogs',
     name: i18n.translate('home.tutorials.envoyproxyLogs.nameTitle', {
-      defaultMessage: 'Envoyproxy',
+      defaultMessage: 'Envoy Proxy logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.envoyproxyLogs.shortDescription', {
-      defaultMessage: 'Collect and parse logs received from the Envoy proxy.',
+      defaultMessage: 'Collect Envoy Proxy logs.',
     }),
     longDescription: i18n.translate('home.tutorials.envoyproxyLogs.longDescription', {
       defaultMessage:
-        'This is a filebeat module for [Envoy proxy access log](https://www.envoyproxy.io/docs/envoy/v1.10.0/configuration/access_log). \
-It supports both standalone deployment and Envoy proxy deployment in Kubernetes. \
+        'This is a Filebeat module for Envoy proxy access log ( https://www.envoyproxy.io/docs/envoy/v1.10.0/configuration/access_log). It supports both standalone deployment and Envoy proxy deployment in Kubernetes. \
 [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-envoyproxy.html',
@@ -53,13 +52,18 @@ It supports both standalone deployment and Envoy proxy deployment in Kubernetes.
     }),
     euiIconType: '/plugins/home/assets/logos/envoyproxy.svg',
     artifacts: {
-      dashboards: [],
-      application: {
-        path: '/app/security',
-        label: i18n.translate('home.tutorials.envoyproxyLogs.artifacts.dashboards.linkLabel', {
-          defaultMessage: 'Security App',
-        }),
-      },
+      dashboards: [
+        {
+          id: '0c610510-5cbd-11e9-8477-077ec9664dbd',
+          linkLabel: i18n.translate(
+            'home.tutorials.envoyproxyLogs.artifacts.dashboards.linkLabel',
+            {
+              defaultMessage: 'Envoy Proxy Overview',
+            }
+          ),
+          isOverview: true,
+        },
+      ],
       exportedFields: {
         documentationUrl: '{config.docs.beats.filebeat}/exported-fields-envoyproxy.html',
       },

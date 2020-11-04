@@ -85,6 +85,12 @@ export const aggHistogram = (): FunctionDefinition => ({
         defaultMessage: 'Specifies whether to use min_doc_count for this aggregation',
       }),
     },
+    maxBars: {
+      types: ['number'],
+      help: i18n.translate('data.search.aggs.buckets.histogram.maxBars.help', {
+        defaultMessage: 'Calculate interval to get approximately this many bars',
+      }),
+    },
     has_extended_bounds: {
       types: ['boolean'],
       help: i18n.translate('data.search.aggs.buckets.histogram.hasExtendedBounds.help', {

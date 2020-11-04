@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DeprecationInfo } from 'src/legacy/core_plugins/elasticsearch';
 import { SavedObject, SavedObjectAttributes } from 'src/core/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { DeprecationInfo } from '../../../../src/core/server/elasticsearch/legacy/api_types';
 
 export enum ReindexStep {
   // Enum values are spaced out by 10 to give us room to insert steps in between.

@@ -29,6 +29,9 @@ export interface UseInstalledSecurityJobsReturn {
  * Use the corresponding helper functions to filter the job list as
  * necessary (running jobs, etc).
  *
+ * NOTE: If you need to include jobs that are not currently installed, try the
+ * {@link useInstalledSecurityJobs} hook.
+ *
  */
 export const useInstalledSecurityJobs = (): UseInstalledSecurityJobsReturn => {
   const [jobs, setJobs] = useState<MlSummaryJob[]>([]);

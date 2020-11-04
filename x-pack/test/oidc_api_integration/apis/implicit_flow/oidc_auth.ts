@@ -22,11 +22,18 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const handshakeResponse = await supertest
-          .get('/abc/xyz/handshake?one=two three')
-          .expect(302);
+          .post('/internal/security/login')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            providerType: 'oidc',
+            providerName: 'oidc',
+            currentURL:
+              'https://kibana.com/internal/security/capture-url?next=%2Fabc%2Fxyz%2Fhandshake%3Fone%3Dtwo%2520three&providerType=oidc&providerName=oidc#/workpad',
+          })
+          .expect(200);
 
         handshakeCookie = request.cookie(handshakeResponse.headers['set-cookie'][0])!;
-        stateAndNonce = getStateAndNonce(handshakeResponse.headers.location);
+        stateAndNonce = getStateAndNonce(handshakeResponse.body.location);
       });
 
       it('should return an HTML page that will parse URL fragment', async () => {
@@ -117,7 +124,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         // User should be redirected to the URL that initiated handshake.
         expect(oidcAuthenticationResponse.headers.location).to.be(
-          '/abc/xyz/handshake?one=two%20three'
+          '/abc/xyz/handshake?one=two%20three#/workpad'
         );
 
         const cookies = oidcAuthenticationResponse.headers['set-cookie'];
@@ -144,9 +151,13 @@ export default function ({ getService }: FtrProviderContext) {
           'authentication_realm',
           'lookup_realm',
           'authentication_provider',
+          'authentication_type',
         ]);
 
         expect(apiResponse.body.username).to.be('user1');
+        expect(apiResponse.body.authentication_realm).to.eql({ name: 'oidc1', type: 'oidc' });
+        expect(apiResponse.body.authentication_provider).to.eql('oidc');
+        expect(apiResponse.body.authentication_type).to.be('token');
       });
     });
   });

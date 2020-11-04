@@ -16,6 +16,16 @@ node scripts/build --release
 node scripts/build --skip-node-download --debug --no-oss
 ```
 
+# Fixing out of memory issues
+
+Building Kibana and its distributables can take a lot of memory to finish successfully. Builds do make use of child processes, which means you can increase the amount of memory available by specifying `NODE_OPTIONS="--max-old-space-size=VALUE-IN-MEGABYTES"`.
+
+```sh
+
+# Use 4GB instead of the standard 1GB for building
+NODE_OPTIONS="--max-old-space-size=4096" node scripts/build --release
+```
+
 # Structure
 
 The majority of this logic is extracted from the grunt build that has existed forever, and is designed to maintain the general structure grunt provides including tasks and config. The [build_distributables.js] file defines which tasks are run.

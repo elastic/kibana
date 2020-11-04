@@ -4,7 +4,7 @@ Enroll agent
 
 ## Request
 
-`POST /api/ingest_manager/fleet/agents/enroll`
+`POST /api/fleet/agents/enroll`
 
 ## Headers
 
@@ -25,7 +25,7 @@ Enroll agent
 ## Example
 
 ```js
-POST /api/ingest_manager/fleet/agents/enroll
+POST /api/fleet/agents/enroll
 Authorization: ApiKey VALID_API_KEY
 {
   "type": "PERMANENT",
@@ -45,7 +45,7 @@ The API returns the following:
   "item": {
     "id": "a4937110-e53e-11e9-934f-47a8e38a522c",
     "active": true,
-    "config_id": "default",
+    "policy_id": "default",
     "type": "PERMANENT",
     "enrolled_at": "2019-10-02T18:01:22.337Z",
     "user_provided_metadata": {},

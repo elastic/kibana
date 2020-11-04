@@ -62,33 +62,39 @@ const initialState: IndexPatternPrivateState = {
       id: '1',
       title: 'my-fake-index-pattern',
       timeFieldName: 'timestamp',
+      hasRestrictions: false,
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'memory',
+          displayName: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'unsupported',
+          displayName: 'unsupported',
           type: 'geo',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -98,10 +104,12 @@ const initialState: IndexPatternPrivateState = {
     '2': {
       id: '2',
       title: 'my-fake-restricted-pattern',
+      hasRestrictions: true,
       timeFieldName: 'timestamp',
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -116,6 +124,7 @@ const initialState: IndexPatternPrivateState = {
         },
         {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -137,6 +146,7 @@ const initialState: IndexPatternPrivateState = {
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -152,21 +162,25 @@ const initialState: IndexPatternPrivateState = {
       id: '3',
       title: 'my-compatible-pattern',
       timeFieldName: 'timestamp',
+      hasRestrictions: false,
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'memory',
+          displayName: 'memory',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,

@@ -5,7 +5,7 @@
  */
 
 import { get } from 'lodash';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { AggFieldNamePair, EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 
@@ -23,7 +23,7 @@ interface ProcessedResults {
   totalResults: number;
 }
 
-export function newJobLineChartProvider({ callAsCurrentUser }: ILegacyScopedClusterClient) {
+export function newJobLineChartProvider({ asCurrentUser }: IScopedClusterClient) {
   async function newJobLineChart(
     indexPatternTitle: string,
     timeField: string,
@@ -47,9 +47,9 @@ export function newJobLineChartProvider({ callAsCurrentUser }: ILegacyScopedClus
       splitFieldValue
     );
 
-    const results = await callAsCurrentUser('search', json);
+    const { body } = await asCurrentUser.search(json);
     return processSearchResults(
-      results,
+      body,
       aggFieldNamePairs.map((af) => af.field)
     );
   }
@@ -89,7 +89,7 @@ function processSearchResults(resp: any, fields: string[]): ProcessedResults {
   return {
     success: true,
     results: tempResults,
-    totalResults: resp.hits.total,
+    totalResults: resp.hits.total.value,
   };
 }
 
@@ -107,14 +107,14 @@ function getSearchJsonFromConfig(
   const json = {
     index: indexPatternTitle,
     size: 0,
-    rest_total_hits_as_int: true,
+    track_total_hits: true,
     body: {
       query: {},
       aggs: {
         times: {
           date_histogram: {
             field: timeField,
-            interval: intervalMs,
+            fixed_interval: `${intervalMs}ms`,
             min_doc_count: 0,
             extended_bounds: {
               min: start,

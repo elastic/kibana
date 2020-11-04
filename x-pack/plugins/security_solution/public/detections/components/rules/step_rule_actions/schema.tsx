@@ -12,7 +12,8 @@ import {
   AlertAction,
   ActionTypeRegistryContract,
 } from '../../../../../../triggers_actions_ui/public';
-import { FormSchema, FormData, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
+import { FormSchema, ValidationFunc, ERROR_CODE } from '../../../../shared_imports';
+import { ActionsStepRule } from '../../../pages/detection_engine/rules/types';
 import * as I18n from './translations';
 import { isUuidv4, getActionTypeName, validateMustache, validateActionParams } from './utils';
 
@@ -61,7 +62,7 @@ export const getSchema = ({
   actionTypeRegistry,
 }: {
   actionTypeRegistry: ActionTypeRegistryContract;
-}): FormSchema<FormData> => ({
+}): FormSchema<ActionsStepRule> => ({
   actions: {
     validations: [
       {

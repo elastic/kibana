@@ -10,6 +10,7 @@ import { listData } from './selectors';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
 import { EndpointAction } from './action';
 import { endpointListReducer } from './reducer';
+import { DEFAULT_POLL_INTERVAL } from '../../../common/constants';
 
 describe('EndpointList store concerns', () => {
   let store: Store<EndpointState>;
@@ -51,7 +52,17 @@ describe('EndpointList store concerns', () => {
         policyItemsLoading: false,
         endpointPackageInfo: undefined,
         nonExistingPolicies: {},
+        agentPolicies: {},
         endpointsExist: true,
+        patterns: [],
+        patternsError: undefined,
+        isAutoRefreshEnabled: true,
+        autoRefreshInterval: DEFAULT_POLL_INTERVAL,
+        agentsWithEndpointsTotal: 0,
+        endpointsTotal: 0,
+        agentsWithEndpointsTotalError: undefined,
+        endpointsTotalError: undefined,
+        queryStrategyVersion: undefined,
       });
     });
 

@@ -7,7 +7,7 @@
 import { sortBy } from 'lodash';
 
 import { RequestHandlerContext } from 'src/core/server';
-import { JsonObject } from '../../../../common/typed_json';
+import { JsonArray, JsonObject } from '../../../../common/typed_json';
 import {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
@@ -22,7 +22,7 @@ import {
   SavedSourceConfigurationFieldColumnRuntimeType,
 } from '../../sources';
 import { getBuiltinRules } from './builtin_rules';
-import { convertDocumentSourceToLogItemFields } from './convert_document_source_to_log_item_fields';
+import { convertESFieldsToLogItemFields } from './convert_document_source_to_log_item_fields';
 import {
   CompiledLogMessageFormattingRule,
   Fields,
@@ -163,8 +163,8 @@ export class InfraLogEntriesDomain {
               return {
                 columnId: column.fieldColumn.id,
                 field: column.fieldColumn.field,
-                value: doc.fields[column.fieldColumn.field],
-                highlights: doc.highlights[column.fieldColumn.field] || [],
+                value: doc.fields[column.fieldColumn.field] ?? [],
+                highlights: doc.highlights[column.fieldColumn.field] ?? [],
               };
             }
           }
@@ -252,8 +252,8 @@ export class InfraLogEntriesDomain {
   ): Promise<LogEntriesItem> {
     const document = await this.adapter.getLogItem(requestContext, id, sourceConfiguration);
     const defaultFields = [
-      { field: '_index', value: document._index },
-      { field: '_id', value: document._id },
+      { field: '_index', value: [document._index] },
+      { field: '_id', value: [document._id] },
     ];
 
     return {
@@ -264,7 +264,7 @@ export class InfraLogEntriesDomain {
         tiebreaker: document.sort[1],
       },
       fields: sortBy(
-        [...defaultFields, ...convertDocumentSourceToLogItemFields(document._source)],
+        [...defaultFields, ...convertESFieldsToLogItemFields(document.fields)],
         'field'
       ),
     };
@@ -310,10 +310,10 @@ export class InfraLogEntriesDomain {
   }
 }
 
-interface LogItemHit {
+export interface LogItemHit {
   _index: string;
   _id: string;
-  _source: JsonObject;
+  fields: { [field: string]: [value: JsonArray] };
   sort: [number, number];
 }
 
@@ -400,9 +400,9 @@ const createHighlightQueryDsl = (phrase: string, fields: string[]) => ({
 
 const getContextFromDoc = (doc: LogEntryDocument): LogEntry['context'] => {
   // Get all context fields, then test for the presence and type of the ones that go together
-  const containerId = doc.fields['container.id'];
-  const hostName = doc.fields['host.name'];
-  const logFilePath = doc.fields['log.file.path'];
+  const containerId = doc.fields['container.id']?.[0];
+  const hostName = doc.fields['host.name']?.[0];
+  const logFilePath = doc.fields['log.file.path']?.[0];
 
   if (typeof containerId === 'string') {
     return { 'container.id': containerId };

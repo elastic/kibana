@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, memo, useCallback, useEffect, useState } from 'react';
+import React, { FC, memo, useCallback, useEffect } from 'react';
 
 import {
   RuleStep,
@@ -22,9 +22,8 @@ interface StepScheduleRuleProps extends RuleStepProps {
   defaultValues?: ScheduleStepRule | null;
 }
 
-const stepScheduleDefaultValue = {
+const stepScheduleDefaultValue: ScheduleStepRule = {
   interval: '5m',
-  isNew: true,
   from: '1m',
 };
 
@@ -35,39 +34,48 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
   isReadOnlyView,
   isLoading,
   isUpdateView = false,
-  setStepData,
+  onSubmit,
   setForm,
 }) => {
   const initialState = defaultValues ?? stepScheduleDefaultValue;
-  const [myStepData, setMyStepData] = useState<ScheduleStepRule>(initialState);
 
-  const { form } = useForm({
+  const { form } = useForm<ScheduleStepRule>({
     defaultValue: initialState,
     options: { stripEmptyFields: false },
     schema,
   });
-  const { submit } = form;
 
-  const onSubmit = useCallback(async () => {
-    if (setStepData) {
-      setStepData(RuleStep.scheduleRule, null, false);
-      const { isValid: newIsValid, data } = await submit();
-      if (newIsValid) {
-        setStepData(RuleStep.scheduleRule, { ...data }, newIsValid);
-        setMyStepData({ ...data, isNew: false } as ScheduleStepRule);
-      }
+  const { getFormData, submit } = form;
+
+  const handleSubmit = useCallback(() => {
+    if (onSubmit) {
+      onSubmit();
     }
-  }, [setStepData, submit]);
+  }, [onSubmit]);
+
+  const getData = useCallback(async () => {
+    const result = await submit();
+    return result?.isValid
+      ? result
+      : {
+          isValid: false,
+          data: getFormData(),
+        };
+  }, [getFormData, submit]);
 
   useEffect(() => {
-    if (setForm) {
-      setForm(RuleStep.scheduleRule, form);
+    let didCancel = false;
+    if (setForm && !didCancel) {
+      setForm(RuleStep.scheduleRule, getData);
     }
-  }, [form, setForm]);
+    return () => {
+      didCancel = true;
+    };
+  }, [getData, setForm]);
 
-  return isReadOnlyView && myStepData != null ? (
+  return isReadOnlyView ? (
     <StepContentWrapper addPadding={addPadding}>
-      <StepRuleDescription columns={descriptionColumns} schema={schema} data={myStepData} />
+      <StepRuleDescription columns={descriptionColumns} schema={schema} data={initialState} />
     </StepContentWrapper>
   ) : (
     <>
@@ -96,7 +104,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
       </StepContentWrapper>
 
       {!isUpdateView && (
-        <NextStep dataTestSubj="schedule-continue" onClick={onSubmit} isDisabled={isLoading} />
+        <NextStep dataTestSubj="schedule-continue" onClick={handleSubmit} isDisabled={isLoading} />
       )}
     </>
   );

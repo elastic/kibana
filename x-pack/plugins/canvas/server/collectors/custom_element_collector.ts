@@ -6,6 +6,7 @@
 
 import { SearchParams } from 'elasticsearch';
 import { get } from 'lodash';
+import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
 import { collectFns } from './collector_helpers';
 import {
   TelemetryCollector,
@@ -19,7 +20,7 @@ interface CustomElementSearch {
   [CUSTOM_ELEMENT_TYPE]: TelemetryCustomElementDocument;
 }
 
-interface CustomElementTelemetry {
+export interface CustomElementTelemetry {
   custom_elements?: {
     count: number;
     elements: {
@@ -30,6 +31,18 @@ interface CustomElementTelemetry {
     functions_in_use: string[];
   };
 }
+
+export const customElementSchema: MakeSchemaFrom<CustomElementTelemetry> = {
+  custom_elements: {
+    count: { type: 'long' },
+    elements: {
+      min: { type: 'long' },
+      max: { type: 'long' },
+      avg: { type: 'float' },
+    },
+    functions_in_use: { type: 'array', items: { type: 'keyword' } },
+  },
+};
 
 function isCustomElement(maybeCustomElement: any): maybeCustomElement is TelemetryCustomElement {
   return (

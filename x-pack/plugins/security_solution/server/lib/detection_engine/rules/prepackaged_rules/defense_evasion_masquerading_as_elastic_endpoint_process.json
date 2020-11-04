@@ -1,0 +1,44 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A suspicious Endpoint Security parent process was detected. This may indicate a process hollowing or other form of code injection.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Suspicious Endpoint Security Parent Process",
+  "query": "event.category:process and event.type:(start or process_started) and process.name:(esensor.exe or \"elastic-endpoint.exe\" or \"elastic-agent.exe\") and not process.parent.executable:\"C:\\Windows\\System32\\services.exe\"",
+  "risk_score": 47,
+  "rule_id": "b41a13c6-ba45-4bab-a534-df53d0cfed6a",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

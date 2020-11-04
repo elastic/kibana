@@ -3,6 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+
 import { i18n } from '@kbn/i18n';
 import { combineLatest, Observable } from 'rxjs';
 import { map, take } from 'rxjs/operators';
@@ -26,11 +27,7 @@ import { MlPluginSetup } from '../../ml/server';
 import { ObservabilityPluginSetup } from '../../observability/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { TaskManagerSetupContract } from '../../task_manager/server';
-import {
-  APM_FEATURE,
-  APM_SERVICE_MAPS_FEATURE_NAME,
-  APM_SERVICE_MAPS_LICENSE_TYPE,
-} from './feature';
+import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './lib/alerts/register_apm_alerts';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { getInternalSavedObjectsClient } from './lib/helpers/get_internal_saved_objects_client';
@@ -40,6 +37,7 @@ import { createApmCustomLinkIndex } from './lib/settings/custom_link/create_cust
 import { createApmApi } from './routes/create_apm_api';
 import { apmIndices, apmTelemetry } from './saved_objects';
 import { createElasticCloudInstructions } from './tutorial/elastic_cloud';
+import { uiSettings } from './ui_settings';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
@@ -79,10 +77,13 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
     core.savedObjects.registerType(apmIndices);
     core.savedObjects.registerType(apmTelemetry);
 
+    core.uiSettings.register(uiSettings);
+
     if (plugins.actions && plugins.alerts) {
       registerApmAlerts({
         alerts: plugins.alerts,
         actions: plugins.actions,
+        ml: plugins.ml,
         config$: mergedConfig$,
       });
     }
@@ -100,6 +101,7 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
         usageCollector: plugins.usageCollection,
         taskManager: plugins.taskManager,
         logger: this.logger,
+        kibanaVersion: this.initContext.env.packageInfo.version,
       });
     }
 
@@ -125,11 +127,9 @@ export class APMPlugin implements Plugin<APMPluginSetup> {
       };
     });
 
-    plugins.features.registerFeature(APM_FEATURE);
-    plugins.licensing.featureUsage.register(
-      APM_SERVICE_MAPS_FEATURE_NAME,
-      APM_SERVICE_MAPS_LICENSE_TYPE
-    );
+    plugins.features.registerKibanaFeature(APM_FEATURE);
+
+    registerFeaturesUsage({ licensingPlugin: plugins.licensing });
 
     createApmApi().init(core, {
       config$: mergedConfig$,

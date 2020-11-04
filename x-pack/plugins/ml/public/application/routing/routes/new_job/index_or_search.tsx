@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
-import { NavigateToPath } from '../../../contexts/kibana';
+import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
 
 import { MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
@@ -19,6 +19,8 @@ import { checkBasicLicense } from '../../../license';
 import { loadIndexPatterns } from '../../../util/index_utils';
 import { checkGetJobsCapabilitiesResolver } from '../../../capabilities/check_capabilities';
 import { checkMlNodesAvailable } from '../../../ml_nodes_check';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
+import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 
 enum MODE {
   NEW_JOB,
@@ -30,9 +32,9 @@ interface IndexOrSearchPageProps extends PageProps {
   mode: MODE;
 }
 
-const getBreadcrumbs = (navigateToPath: NavigateToPath) => [
-  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath),
-  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath),
+const getBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
+  getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+  getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
   {
     text: i18n.translate('xpack.ml.jobsBreadcrumbs.selectIndexOrSearchLabel', {
       defaultMessage: 'Create job',
@@ -41,7 +43,10 @@ const getBreadcrumbs = (navigateToPath: NavigateToPath) => [
   },
 ];
 
-export const indexOrSearchRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const indexOrSearchRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/jobs/new_job/step/index_or_search',
   render: (props, deps) => (
     <PageWrapper
@@ -51,10 +56,13 @@ export const indexOrSearchRouteFactory = (navigateToPath: NavigateToPath): MlRou
       mode={MODE.NEW_JOB}
     />
   ),
-  breadcrumbs: getBreadcrumbs(navigateToPath),
+  breadcrumbs: getBreadcrumbs(navigateToPath, basePath),
 });
 
-export const dataVizIndexOrSearchRouteFactory = (navigateToPath: NavigateToPath): MlRoute => ({
+export const dataVizIndexOrSearchRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/datavisualizer_index_select',
   render: (props, deps) => (
     <PageWrapper
@@ -64,19 +72,31 @@ export const dataVizIndexOrSearchRouteFactory = (navigateToPath: NavigateToPath)
       mode={MODE.DATAVISUALIZER}
     />
   ),
-  breadcrumbs: getBreadcrumbs(navigateToPath),
+  breadcrumbs: getBreadcrumbs(navigateToPath, basePath),
 });
 
 const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, deps, mode }) => {
+  const {
+    services: {
+      http: { basePath },
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
+  const { redirectToMlAccessDeniedPage } = deps;
+  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
+  );
+
   const newJobResolvers = {
     ...basicResolvers(deps),
-    preConfiguredJobRedirect: () => preConfiguredJobRedirect(deps.indexPatterns),
+    preConfiguredJobRedirect: () =>
+      preConfiguredJobRedirect(deps.indexPatterns, basePath.get(), navigateToUrl),
   };
   const dataVizResolvers = {
     checkBasicLicense,
     loadIndexPatterns: () => loadIndexPatterns(deps.indexPatterns),
-    checkGetJobsCapabilities: checkGetJobsCapabilitiesResolver,
-    checkMlNodesAvailable,
+    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+    checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
   };
 
   const { context } = useResolver(

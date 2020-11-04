@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { getFlattenedObject } from '../../../../../../../src/core/public';
+export { getFlattenedObject } from '@kbn/std';
 
 export {
   AgentStatusKueryHelper,
-  agentConfigRouteService,
-  packageConfigRouteService,
+  agentPolicyRouteService,
+  packagePolicyRouteService,
   dataStreamRouteService,
   fleetSetupRouteService,
   agentRouteService,
@@ -19,9 +19,12 @@ export {
   outputRoutesService,
   settingsRoutesService,
   appRoutesService,
-  packageToPackageConfigInputs,
-  storedPackageConfigsToAgentInputs,
-  configToYaml,
+  packageToPackagePolicyInputs,
+  storedPackagePoliciesToAgentInputs,
+  fullAgentPolicyToYaml,
   isPackageLimited,
-  doesAgentConfigAlreadyIncludePackage,
+  doesAgentPolicyAlreadyIncludePackage,
+  isValidNamespace,
+  LicenseService,
+  isAgentUpgradeable,
 } from '../../../../common';

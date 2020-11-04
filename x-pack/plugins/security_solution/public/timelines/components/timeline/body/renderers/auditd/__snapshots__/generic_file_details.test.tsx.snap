@@ -3,7 +3,6 @@
 exports[`GenericFileDetails rendering it renders the default GenericFileDetails 1`] = `
 <Details>
   <AuditdGenericFileLine
-    args={null}
     contextId="contextid-123"
     fileIcon="document"
     filePath="/proc/15990/attr/current"
@@ -29,7 +28,6 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
       Object {
         "_id": "28",
         "auditd": Object {
-          "data": null,
           "result": Array [
             "success",
           ],
@@ -48,20 +46,16 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
             "how": Array [
               "/lib/systemd/systemd-journald",
             ],
-            "message_type": null,
             "object": Object {
               "primary": Array [
                 "/proc/15990/attr/current",
               ],
-              "secondary": null,
               "type": Array [
                 "file",
               ],
             },
-            "sequence": null,
           },
         },
-        "destination": null,
         "event": Object {
           "action": Array [
             "opened-file",
@@ -69,19 +63,14 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
           "category": Array [
             "audit-rule",
           ],
-          "dataset": null,
-          "id": null,
           "module": Array [
             "auditd",
           ],
-          "severity": null,
         },
         "file": Object {
-          "ctime": null,
           "device": Array [
             "00:00",
           ],
-          "extension": null,
           "gid": Array [
             "0",
           ],
@@ -94,21 +83,16 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
           "mode": Array [
             "0666",
           ],
-          "mtime": null,
           "owner": Array [
             "root",
           ],
           "path": Array [
             "/proc/15990/attr/current",
           ],
-          "size": null,
-          "target_path": null,
-          "type": null,
           "uid": Array [
             "0",
           ],
         },
-        "geo": null,
         "host": Object {
           "id": Array [
             "7c21f5ed03b04d0299569d221fe18bbc",
@@ -122,10 +106,7 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
             "zeek-london",
           ],
         },
-        "http": null,
-        "network": null,
         "process": Object {
-          "args": null,
           "executable": Array [
             "/lib/systemd/systemd-journald",
           ],
@@ -145,16 +126,12 @@ exports[`GenericFileDetails rendering it renders the default GenericFileDetails 
             "/",
           ],
         },
-        "source": null,
-        "suricata": null,
         "timestamp": "2019-03-26T22:12:18.609Z",
-        "url": null,
         "user": Object {
           "name": Array [
             "root",
           ],
         },
-        "zeek": null,
       }
     }
     timelineId="test"

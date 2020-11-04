@@ -17,7 +17,7 @@ import { getChartSettings, defaultChartSettings } from '../../../charts/common/s
 import { MetricSelector } from './metric_selector';
 import { SplitFieldSelector } from '../split_field';
 import { ChartGrid } from './chart_grid';
-import { mlMessageBarService } from '../../../../../../../components/messagebar';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -159,7 +159,7 @@ export const PopulationDetectors: FC<Props> = ({ setIsValid }) => {
 
         setLineChartsData(resp);
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        getToastNotificationService().displayErrorToast(error);
         setLineChartsData([]);
       }
       setLoadingData(false);

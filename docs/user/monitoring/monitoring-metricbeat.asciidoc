@@ -82,7 +82,7 @@ For more information, see {ref}/monitoring-settings.html[Monitoring settings in 
 and {ref}/cluster-update-settings.html[Cluster update settings].
 --
 
-. {metricbeat-ref}/metricbeat-installation.html[Install {metricbeat}] on the
+. {metricbeat-ref}/metricbeat-installation-configuration.html[Install {metricbeat}] on the
 same server as {kib}.
 
 . Enable the {kib} {xpack} module in {metricbeat}. +

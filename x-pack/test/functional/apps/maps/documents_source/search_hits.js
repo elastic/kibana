@@ -9,10 +9,24 @@ import expect from '@kbn/expect';
 export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps']);
   const inspector = getService('inspector');
+  const security = getService('security');
 
   describe('search hits', () => {
     before(async () => {
+      await security.testUser.setRoles(
+        [
+          'global_maps_all',
+          'test_logstash_reader',
+          'antimeridian_points_reader',
+          'antimeridian_shapes_reader',
+        ],
+        false
+      );
       await PageObjects.maps.loadSavedMap('document example');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     async function getRequestTimestamp() {

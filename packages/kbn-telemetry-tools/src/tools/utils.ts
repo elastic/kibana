@@ -18,7 +18,18 @@
  */
 
 import * as ts from 'typescript';
-import { pick, isObject, each, isArray, reduce, isEmpty, merge, transform, isEqual } from 'lodash';
+import {
+  pick,
+  pickBy,
+  isObject,
+  forEach,
+  isArray,
+  reduce,
+  isEmpty,
+  merge,
+  transform,
+  isEqual,
+} from 'lodash';
 import * as path from 'path';
 import glob from 'glob';
 import { readFile, writeFile } from 'fs';
@@ -67,14 +78,14 @@ export function getIdentifierDeclarationFromSource(node: ts.Node, source: ts.Sou
   const identifierName = node.getText();
   const identifierDefinition: ts.Node = (source as any).locals.get(identifierName);
   if (!identifierDefinition) {
-    throw new Error(`Unable to fine identifier in source ${identifierName}`);
+    throw new Error(`Unable to find identifier in source ${identifierName}`);
   }
   const declarations = (identifierDefinition as any).declarations as ts.Node[];
 
   const latestDeclaration: ts.Node | false | undefined =
     Array.isArray(declarations) && declarations[declarations.length - 1];
   if (!latestDeclaration) {
-    throw new Error(`Unable to fine declaration for identifier ${identifierName}`);
+    throw new Error(`Unable to find declaration for identifier ${identifierName}`);
   }
 
   return latestDeclaration;
@@ -89,33 +100,57 @@ export function getIdentifierDeclaration(node: ts.Node) {
   return getIdentifierDeclarationFromSource(node, source);
 }
 
-export function getVariableValue(node: ts.Node): string | Record<string, any> {
+export function getVariableValue(node: ts.Node, program: ts.Program): string | Record<string, any> {
   if (ts.isStringLiteral(node) || ts.isNumericLiteral(node)) {
     return node.text;
   }
 
   if (ts.isObjectLiteralExpression(node)) {
-    return serializeObject(node);
+    return serializeObject(node, program);
   }
 
-  throw Error(`Unsuppored Node: cannot get value of node (${node.getText()}) of kind ${node.kind}`);
+  if (ts.isIdentifier(node)) {
+    const declaration = getIdentifierDeclaration(node);
+    if (ts.isVariableDeclaration(declaration) && declaration.initializer) {
+      return getVariableValue(declaration.initializer, program);
+    } else {
+      // Go fetch it in another file
+      return getIdentifierValue(node, node, program, { chaseImport: true });
+    }
+  }
+
+  if (ts.isSpreadAssignment(node)) {
+    return getVariableValue(node.expression, program);
+  }
+
+  throw Error(
+    `Unsupported Node: cannot get value of node (${node.getText()}) of kind ${node.kind} [${
+      ts.SyntaxKind[node.kind]
+    }]`
+  );
 }
 
-export function serializeObject(node: ts.Node) {
+export function serializeObject(node: ts.Node, program: ts.Program) {
   if (!ts.isObjectLiteralExpression(node)) {
     throw new Error(`Expecting Object literal Expression got ${node.getText()}`);
   }
 
-  const value: Record<string, any> = {};
+  let value: Record<string, any> = {};
   for (const property of node.properties) {
     const propertyName = property.name?.getText();
+    const val = ts.isPropertyAssignment(property)
+      ? getVariableValue(property.initializer, program)
+      : getVariableValue(property, program);
+
     if (typeof propertyName === 'undefined') {
-      throw new Error(`Unable to get property name ${property.getText()}`);
-    }
-    if (ts.isPropertyAssignment(property)) {
-      value[propertyName] = getVariableValue(property.initializer);
+      if (typeof val === 'object') {
+        value = { ...value, ...val };
+      } else {
+        throw new Error(`Unable to get property name ${property.getText()}`);
+      }
     } else {
-      value[propertyName] = getVariableValue(property);
+      const cleanPropertyName = propertyName.replace(/["']/g, '');
+      value[cleanPropertyName] = val;
     }
   }
 
@@ -135,59 +170,67 @@ export function getResolvedModuleSourceFile(
   return resolvedModuleSourceFile;
 }
 
+export function getIdentifierValue(
+  node: ts.Node,
+  initializer: ts.Identifier,
+  program: ts.Program,
+  config: Optional<{ chaseImport: boolean }> = {}
+) {
+  const { chaseImport = false } = config;
+  const identifierName = initializer.getText();
+  const declaration = getIdentifierDeclaration(initializer);
+  if (ts.isImportSpecifier(declaration)) {
+    if (!chaseImport) {
+      throw new Error(
+        `Value of node ${identifierName} is imported from another file. Chasing imports is not allowed.`
+      );
+    }
+
+    const importedModuleName = getModuleSpecifier(declaration);
+
+    const source = node.getSourceFile();
+    const declarationSource = getResolvedModuleSourceFile(source, program, importedModuleName);
+    const declarationNode = getIdentifierDeclarationFromSource(initializer, declarationSource);
+    if (!ts.isVariableDeclaration(declarationNode)) {
+      throw new Error(`Expected ${identifierName} to be variable declaration.`);
+    }
+    if (!declarationNode.initializer) {
+      throw new Error(`Expected ${identifierName} to be initialized.`);
+    }
+    const serializedObject = serializeObject(declarationNode.initializer, program);
+    return serializedObject;
+  }
+
+  return getVariableValue(declaration, program);
+}
+
 export function getPropertyValue(
   node: ts.Node,
   program: ts.Program,
   config: Optional<{ chaseImport: boolean }> = {}
 ) {
-  const { chaseImport = false } = config;
-
   if (ts.isPropertyAssignment(node)) {
     const { initializer } = node;
 
     if (ts.isIdentifier(initializer)) {
-      const identifierName = initializer.getText();
-      const declaration = getIdentifierDeclaration(initializer);
-      if (ts.isImportSpecifier(declaration)) {
-        if (!chaseImport) {
-          throw new Error(
-            `Value of node ${identifierName} is imported from another file. Chasing imports is not allowed.`
-          );
-        }
-
-        const importedModuleName = getModuleSpecifier(declaration);
-
-        const source = node.getSourceFile();
-        const declarationSource = getResolvedModuleSourceFile(source, program, importedModuleName);
-        const declarationNode = getIdentifierDeclarationFromSource(initializer, declarationSource);
-        if (!ts.isVariableDeclaration(declarationNode)) {
-          throw new Error(`Expected ${identifierName} to be variable declaration.`);
-        }
-        if (!declarationNode.initializer) {
-          throw new Error(`Expected ${identifierName} to be initialized.`);
-        }
-        const serializedObject = serializeObject(declarationNode.initializer);
-        return serializedObject;
-      }
-
-      return getVariableValue(declaration);
+      return getIdentifierValue(node, initializer, program, config);
     }
 
-    return getVariableValue(initializer);
+    return getVariableValue(initializer, program);
   }
 }
 
-export function pickDeep(collection: any, identity: any, thisArg?: any) {
-  const picked: any = pick(collection, identity, thisArg);
-  const collections = pick(collection, isObject, thisArg);
+export function pickDeep(collection: any, identity: any) {
+  const picked: any = pick(collection, identity);
+  const collections = pickBy(collection, isObject);
 
-  each(collections, function (item, key) {
+  forEach(collections, function (item, key) {
     let object;
     if (isArray(item)) {
       object = reduce(
         item,
         function (result, value) {
-          const pickedDeep = pickDeep(value, identity, thisArg);
+          const pickedDeep = pickDeep(value, identity);
           if (!isEmpty(pickedDeep)) {
             result.push(pickedDeep);
           }
@@ -196,7 +239,7 @@ export function pickDeep(collection: any, identity: any, thisArg?: any) {
         [] as any[]
       );
     } else {
-      object = pickDeep(item, identity, thisArg);
+      object = pickDeep(item, identity);
     }
 
     if (!isEmpty(object)) {
@@ -221,13 +264,38 @@ export const flattenKeys = (obj: any, keyPath: any[] = []): any => {
   return { [keyPath.join('.')]: obj };
 };
 
+type ObjectDict = Record<string, any>;
 export function difference(actual: any, expected: any) {
-  function changes(obj: any, base: any) {
-    return transform(obj, function (result, value, key) {
-      if (key && !isEqual(value, base[key])) {
-        result[key] = isObject(value) && isObject(base[key]) ? changes(value, base[key]) : value;
-      }
-    });
+  function changes(obj: ObjectDict, base: ObjectDict) {
+    return transform(
+      obj,
+      function (result, value, key) {
+        if (key && /@@INDEX@@/.test(`${key}`)) {
+          // The type definition is an Index Signature, fuzzy searching for similar keys
+          const regexp = new RegExp(`^${key}`.replace(/@@INDEX@@/g, '(.+)?'));
+          const keysInBase = Object.keys(base)
+            .map((k) => {
+              const match = k.match(regexp);
+              return match && match[0];
+            })
+            .filter((s): s is string => !!s);
+
+          if (keysInBase.length === 0) {
+            // Mark this key as wrong because we couldn't find any matching keys
+            result[key] = value;
+          }
+
+          keysInBase.forEach((k) => {
+            if (!isEqual(value, base[k])) {
+              result[k] = isObject(value) && isObject(base[k]) ? changes(value, base[k]) : value;
+            }
+          });
+        } else if (key && !isEqual(value, base[key])) {
+          result[key] = isObject(value) && isObject(base[key]) ? changes(value, base[key]) : value;
+        }
+      },
+      {} as ObjectDict
+    );
   }
   return changes(actual, expected);
 }

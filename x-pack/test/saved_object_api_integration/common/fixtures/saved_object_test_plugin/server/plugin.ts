@@ -48,6 +48,7 @@ export class Plugin {
       name: 'sharedtype',
       hidden: false,
       namespaceType: 'multiple',
+      management,
       mappings,
     });
     core.savedObjects.registerType({

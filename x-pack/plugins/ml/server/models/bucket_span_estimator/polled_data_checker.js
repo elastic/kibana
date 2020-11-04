@@ -10,9 +10,9 @@
  * And a minimum bucket span
  */
 
-import get from 'lodash/get';
+import { get } from 'lodash';
 
-export function polledDataCheckerFactory({ callAsCurrentUser }) {
+export function polledDataCheckerFactory({ asCurrentUser }) {
   class PolledDataChecker {
     constructor(index, timeField, duration, query) {
       this.index = index;
@@ -56,7 +56,7 @@ export function polledDataCheckerFactory({ callAsCurrentUser }) {
             date_histogram: {
               min_doc_count: 1,
               field: this.timeField,
-              interval: `${intervalMs}ms`,
+              fixed_interval: `${intervalMs}ms`,
             },
           },
         },
@@ -65,14 +65,15 @@ export function polledDataCheckerFactory({ callAsCurrentUser }) {
       return search;
     }
 
-    performSearch(intervalMs) {
-      const body = this.createSearch(intervalMs);
+    async performSearch(intervalMs) {
+      const searchBody = this.createSearch(intervalMs);
 
-      return callAsCurrentUser('search', {
+      const { body } = await asCurrentUser.search({
         index: this.index,
         size: 0,
-        body,
+        body: searchBody,
       });
+      return body;
     }
 
     // test that the coefficient of variation of time difference between non-empty buckets is small

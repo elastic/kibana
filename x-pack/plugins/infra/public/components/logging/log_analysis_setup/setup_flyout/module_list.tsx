@@ -22,8 +22,14 @@ export const LogAnalysisModuleList: React.FC<{
   onViewModuleSetup: (module: ModuleId) => void;
 }> = ({ onViewModuleSetup }) => {
   const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
-  const { setupStatus: logEntryRateSetupStatus } = useLogEntryRateModuleContext();
-  const { setupStatus: logEntryCategoriesSetupStatus } = useLogEntryCategoriesModuleContext();
+  const {
+    setupStatus: logEntryRateSetupStatus,
+    jobIds: logEntryRateJobIds,
+  } = useLogEntryRateModuleContext();
+  const {
+    setupStatus: logEntryCategoriesSetupStatus,
+    jobIds: logEntryCategoriesJobIds,
+  } = useLogEntryCategoriesModuleContext();
 
   const viewLogEntryRateSetupFlyout = useCallback(() => {
     onViewModuleSetup('logs_ui_analysis');
@@ -37,6 +43,7 @@ export const LogAnalysisModuleList: React.FC<{
       <EuiFlexGroup>
         <EuiFlexItem>
           <LogAnalysisModuleListCard
+            jobId={logEntryRateJobIds['log-entry-rate']}
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             moduleDescription={logEntryRateModule.moduleDescription}
             moduleName={logEntryRateModule.moduleName}
@@ -46,6 +53,7 @@ export const LogAnalysisModuleList: React.FC<{
         </EuiFlexItem>
         <EuiFlexItem>
           <LogAnalysisModuleListCard
+            jobId={logEntryCategoriesJobIds['log-entry-categories-count']}
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             moduleDescription={logEntryCategoriesModule.moduleDescription}
             moduleName={logEntryCategoriesModule.moduleName}

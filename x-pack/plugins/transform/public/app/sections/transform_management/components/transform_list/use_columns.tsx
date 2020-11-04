@@ -22,24 +22,21 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 
-import { TransformId, TRANSFORM_STATE } from '../../../../../../common';
+import { TransformId } from '../../../../../../common/types/transform';
+import { TransformStats } from '../../../../../../common/types/transform_stats';
+import { TRANSFORM_STATE } from '../../../../../../common/constants';
 
-import {
-  getTransformProgress,
-  TransformListRow,
-  TransformStats,
-  TRANSFORM_LIST_COLUMN,
-} from '../../../../common';
+import { getTransformProgress, TransformListRow, TRANSFORM_LIST_COLUMN } from '../../../../common';
 import { useActions } from './use_actions';
 
-enum STATE_COLOR {
-  aborting = 'warning',
-  failed = 'danger',
-  indexing = 'primary',
-  started = 'primary',
-  stopped = 'hollow',
-  stopping = 'hollow',
-}
+const STATE_COLOR = {
+  aborting: 'warning',
+  failed: 'danger',
+  indexing: 'primary',
+  started: 'primary',
+  stopped: 'hollow',
+  stopping: 'hollow',
+} as const;
 
 export const getTaskStateBadge = (
   state: TransformStats['state'],

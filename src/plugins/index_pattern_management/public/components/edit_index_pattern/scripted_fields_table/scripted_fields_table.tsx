@@ -27,10 +27,10 @@ import {
 import { Table, Header, CallOuts, DeleteScritpedFieldConfirmationModal } from './components';
 import { ScriptedFieldItem } from './types';
 
-import { IIndexPattern } from '../../../../../../plugins/data/public';
+import { IndexPattern, DataPublicPluginStart } from '../../../../../../plugins/data/public';
 
 interface ScriptedFieldsTableProps {
-  indexPattern: IIndexPattern;
+  indexPattern: IndexPattern;
   fieldFilter?: string;
   scriptedFieldLanguageFilter?: string;
   helpers: {
@@ -39,6 +39,7 @@ interface ScriptedFieldsTableProps {
   };
   onRemoveField?: () => void;
   painlessDocLink: string;
+  saveIndexPattern: DataPublicPluginStart['indexPatterns']['updateSavedObject'];
 }
 
 interface ScriptedFieldsTableState {
@@ -68,7 +69,7 @@ export class ScriptedFieldsTable extends Component<
   }
 
   fetchFields = async () => {
-    const fields = await this.props.indexPattern.getScriptedFields();
+    const fields = await (this.props.indexPattern.getScriptedFields() as ScriptedFieldItem[]);
 
     const deprecatedLangsInUse = [];
     const deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -121,10 +122,11 @@ export class ScriptedFieldsTable extends Component<
   };
 
   deleteField = () => {
-    const { indexPattern, onRemoveField } = this.props;
+    const { indexPattern, onRemoveField, saveIndexPattern } = this.props;
     const { fieldToDelete } = this.state;
 
-    indexPattern.removeScriptedField(fieldToDelete);
+    indexPattern.removeScriptedField(fieldToDelete!.name);
+    saveIndexPattern(indexPattern);
 
     if (onRemoveField) {
       onRemoveField();

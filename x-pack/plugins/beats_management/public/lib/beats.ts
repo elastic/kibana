@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ReturnTypeBulkAction } from '../../../../legacy/plugins/beats_management/common/return_types';
-import { CMBeat } from '../../../../legacy/plugins/beats_management/common/domain_types';
+import { ReturnTypeBulkAction } from '../../common/return_types';
+import { CMBeat } from '../../common/domain_types';
 import { BeatsTagAssignment, CMBeatsAdapter } from './adapters/beats/adapter_types';
 import { ElasticsearchLib } from './elasticsearch';
 

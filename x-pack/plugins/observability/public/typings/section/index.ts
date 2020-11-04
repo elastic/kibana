@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ObservabilityApp } from '../../../typings/common';
+import { ObservabilityFetchDataPlugins } from '../fetch_overview_data';
 
 export interface ISection {
-  id: ObservabilityApp | 'alert';
+  id: ObservabilityFetchDataPlugins | 'alert';
   title: string;
   icon: string;
   description: string;

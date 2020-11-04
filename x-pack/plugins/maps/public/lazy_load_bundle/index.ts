@@ -6,8 +6,8 @@
 
 import { AnyAction } from 'redux';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { IndexPatternsService } from 'src/plugins/data/public/index_patterns';
-import { ReactElement } from 'react';
+import { IndexPatternsContract } from 'src/plugins/data/public/index_patterns';
+import { AppMountParameters } from 'kibana/public';
 import { IndexPattern } from 'src/plugins/data/public';
 import { Embeddable, IContainer } from '../../../../../src/plugins/embeddable/public';
 import { LayerDescriptor } from '../../common/descriptor_types';
@@ -29,7 +29,7 @@ interface LazyLoadedMapModules {
     renderTooltipContent?: RenderToolTipContent,
     eventHandlers?: EventHandlers
   ) => Embeddable<MapEmbeddableInput, MapEmbeddableOutput>;
-  getIndexPatternService: () => IndexPatternsService;
+  getIndexPatternService: () => IndexPatternsContract;
   getHttp: () => any;
   getMapsCapabilities: () => any;
   createMapStore: () => MapStore;
@@ -40,7 +40,7 @@ interface LazyLoadedMapModules {
     initialLayers?: LayerDescriptor[]
   ) => LayerDescriptor[];
   mergeInputWithSavedMap: any;
-  renderApp: (context: unknown, params: unknown) => ReactElement<any>;
+  renderApp: (params: AppMountParameters) => Promise<() => void>;
   createSecurityLayerDescriptors: (
     indexPatternId: string,
     indexPatternTitle: string
@@ -48,6 +48,44 @@ interface LazyLoadedMapModules {
   registerLayerWizard: (layerWizard: LayerWizard) => void;
   registerSource(entry: SourceRegistryEntry): void;
   getIndexPatternsFromIds: (indexPatternIds: string[]) => Promise<IndexPattern[]>;
+  createTileMapLayerDescriptor: ({
+    label,
+    mapType,
+    colorSchema,
+    indexPatternId,
+    geoFieldName,
+    metricAgg,
+    metricFieldName,
+  }: {
+    label: string;
+    mapType: string;
+    colorSchema: string;
+    indexPatternId?: string;
+    geoFieldName?: string;
+    metricAgg: string;
+    metricFieldName?: string;
+  }) => LayerDescriptor | null;
+  createRegionMapLayerDescriptor: ({
+    label,
+    emsLayerId,
+    leftFieldName,
+    termsFieldName,
+    colorSchema,
+    indexPatternId,
+    indexPatternTitle,
+    metricAgg,
+    metricFieldName,
+  }: {
+    label: string;
+    emsLayerId?: string;
+    leftFieldName?: string;
+    termsFieldName?: string;
+    colorSchema: string;
+    indexPatternId?: string;
+    indexPatternTitle?: string;
+    metricAgg: string;
+    metricFieldName?: string;
+  }) => LayerDescriptor | null;
 }
 
 export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
@@ -57,7 +95,6 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
 
   loadModulesPromise = new Promise(async (resolve) => {
     const {
-      // @ts-expect-error
       getMapsSavedObjectLoader,
       getQueryableUniqueIndexPatternIds,
       MapEmbeddable,
@@ -68,12 +105,13 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       addLayerWithoutDataSync,
       getInitialLayers,
       mergeInputWithSavedMap,
-      // @ts-expect-error
       renderApp,
       createSecurityLayerDescriptors,
       registerLayerWizard,
       registerSource,
       getIndexPatternsFromIds,
+      createTileMapLayerDescriptor,
+      createRegionMapLayerDescriptor,
     } = await import('./lazy');
 
     resolve({
@@ -92,6 +130,8 @@ export async function lazyLoadMapModules(): Promise<LazyLoadedMapModules> {
       registerLayerWizard,
       registerSource,
       getIndexPatternsFromIds,
+      createTileMapLayerDescriptor,
+      createRegionMapLayerDescriptor,
     });
   });
   return loadModulesPromise;

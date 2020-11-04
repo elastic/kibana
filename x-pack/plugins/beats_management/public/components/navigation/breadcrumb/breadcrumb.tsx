@@ -5,7 +5,7 @@
  */
 import React, { Component } from 'react';
 import { RouteProps } from 'react-router-dom';
-import { BASE_PATH } from '../../../../../../legacy/plugins/beats_management/common/constants';
+import { BASE_PATH } from '../../../../common/constants';
 import { BreadcrumbConsumer } from './consumer';
 import { Breadcrumb as BreadcrumbData, BreadcrumbContext } from './types';
 

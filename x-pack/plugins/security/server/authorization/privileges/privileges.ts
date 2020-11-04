@@ -6,7 +6,10 @@
 
 import { uniq } from 'lodash';
 import { SecurityLicense } from '../../../common/licensing';
-import { Feature, PluginSetupContract as FeaturesPluginSetup } from '../../../../features/server';
+import {
+  KibanaFeature,
+  PluginSetupContract as FeaturesPluginSetup,
+} from '../../../../features/server';
 import { RawKibanaPrivileges } from '../../../common/model';
 import { Actions } from '../actions';
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
@@ -28,7 +31,7 @@ export function privilegesFactory(
 
   return {
     get() {
-      const features = featuresService.getFeatures();
+      const features = featuresService.getKibanaFeatures();
       const { allowSubFeaturePrivileges } = licenseService.getFeatures();
       const basePrivilegeFeatures = features.filter(
         (feature) => !feature.excludeFromBasePrivileges
@@ -100,6 +103,7 @@ export function privilegesFactory(
             actions.space.manage,
             actions.ui.get('spaces', 'manage'),
             actions.ui.get('management', 'kibana', 'spaces'),
+            actions.ui.get('catalogue', 'spaces'),
             actions.ui.get('enterpriseSearch', 'all'),
             ...allActions,
           ],
@@ -109,7 +113,7 @@ export function privilegesFactory(
           all: [actions.login, actions.version, ...allActions],
           read: [actions.login, actions.version, ...readActions],
         },
-        reserved: features.reduce((acc: Record<string, string[]>, feature: Feature) => {
+        reserved: features.reduce((acc: Record<string, string[]>, feature: KibanaFeature) => {
           if (feature.reserved) {
             feature.reserved.privileges.forEach((reservedPrivilege) => {
               acc[reservedPrivilege.id] = [

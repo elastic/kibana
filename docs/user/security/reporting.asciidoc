@@ -24,11 +24,11 @@ to report on and the {es} indices.
 [[reporting-roles-management-ui]]
 === If you are using the `native` realm
 
-To assign roles, open the menu, then go to *Stack Management > Security > Roles*, use the <<reporting-roles-user-api, user API>>.
+To assign roles, use the *Roles* UI or <<reporting-roles-user-api, user API>>.
 This example shows how to use *Roles* page to create a user who has a custom role and the
 `reporting_user` role.
 
-. Open the menu, then go to *Stack Management > Security > Roles*.
+. Open the main menu, then click *Stack Management > Roles*.
 
 . Click *Create role*, then give the role a name, for example, `custom_reporting_user`.
 
@@ -47,11 +47,11 @@ image::user/security/images/reporting-privileges-example.png["Reporting privileg
 Reporting users typically save searches, create
 visualizations, and build dashboards. They require a space
 that provides read and write privileges in
-*Discover*, *Visualize*, and *Dashboard*.
+*Discover* and *Dashboard*.
 
 . Save your new role.
 
-. Open the menu, then go to *Stack Management > Security > Users*, add a new user, and assign the user the built-in
+. Open the main menu, then click *Stack Management > Users*, add a new user, and assign the user the built-in
 `reporting_user` role and your new custom role, `custom_reporting_user`.
 
 [float]
@@ -69,10 +69,10 @@ If you use a different pattern for the `xpack.reporting.index` setting,
 you must create a custom role with appropriate access to the index, similar
 to the following:
 
-. Open the menu, then go to *Stack Management >Security > Roles*.
+. Open the main menu, then click *Stack Management > Roles*.
 . Click *Create role*, then name the role `custom-reporting-user`.
 . Specify the custom index and assign it the `all` index privilege.
-. Open the menu, then go to *Stack Management > Security > Users* and create a new user with
+. Open the main menu, then click *Stack Management > Users* and create a new user with
 the `kibana_system` role and the `custom-reporting-user` role.
 . Configure {kib} to use the new account:
 [source,js]

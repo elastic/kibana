@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -38,10 +38,10 @@ export default ({ getService }: FtrProviderContext) => {
         items: ['104.236.210.185'],
       },
       expected: {
-        responseCode: 404,
+        responseCode: 403,
         responseBody: {
-          error: 'Not Found',
-          message: 'Not Found',
+          error: 'Forbidden',
+          message: 'Forbidden',
         },
       },
     },
@@ -54,10 +54,10 @@ export default ({ getService }: FtrProviderContext) => {
         items: ['104.236.210.185'],
       },
       expected: {
-        responseCode: 404,
+        responseCode: 403,
         responseBody: {
-          error: 'Not Found',
-          message: 'Not Found',
+          error: 'Forbidden',
+          message: 'Forbidden',
         },
       },
     },
@@ -73,7 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 400,
         responseBody: {
           error: 'Bad Request',
-          message: 'Invalid filter_id',
+          message: 'status_exception',
         },
       },
     },

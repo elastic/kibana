@@ -7,14 +7,10 @@
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeGetWorkpadRoute } from './get';
 import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import {
-  savedObjectsClientMock,
-  httpServiceMock,
-  httpServerMock,
-  loggingSystemMock,
-} from 'src/core/server/mocks';
+import { savedObjectsClientMock, httpServerMock } from 'src/core/server/mocks';
 import { workpadWithGroupAsElement } from '../../../__tests__/fixtures/workpads';
 import { CanvasWorkpad } from '../../../types';
+import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = ({
   core: {
@@ -28,14 +24,10 @@ describe('GET workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
 
   beforeEach(() => {
-    const httpService = httpServiceMock.createSetupContract();
-    const router = httpService.createRouter();
-    initializeGetWorkpadRoute({
-      router,
-      logger: loggingSystemMock.create().get(),
-    });
+    const routerDeps = getMockedRouterDeps();
+    initializeGetWorkpadRoute(routerDeps);
 
-    routeHandler = router.get.mock.calls[0][1];
+    routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
 
   it(`returns 200 when the workpad is found`, async () => {

@@ -32,9 +32,10 @@ describe('Actions Plugin', () => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
         enabled: true,
         enabledActionTypes: ['*'],
-        whitelistedHosts: ['*'],
+        allowedHosts: ['*'],
         preconfigured: {},
-        rejectUnauthorizedCertificates: true,
+        proxyRejectUnauthorizedCertificates: true,
+        rejectUnauthorized: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -186,7 +187,7 @@ describe('Actions Plugin', () => {
       const context = coreMock.createPluginInitializerContext<ActionsConfig>({
         enabled: true,
         enabledActionTypes: ['*'],
-        whitelistedHosts: ['*'],
+        allowedHosts: ['*'],
         preconfigured: {
           preconfiguredServerLog: {
             actionTypeId: '.server-log',
@@ -195,7 +196,8 @@ describe('Actions Plugin', () => {
             secrets: {},
           },
         },
-        rejectUnauthorizedCertificates: true,
+        proxyRejectUnauthorizedCertificates: true,
+        rejectUnauthorized: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -209,6 +211,7 @@ describe('Actions Plugin', () => {
         features: featuresPluginMock.createSetup(),
       };
       pluginsStart = {
+        licensing: licensingMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
       };
@@ -250,6 +253,50 @@ describe('Actions Plugin', () => {
           pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest())
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+        );
+      });
+    });
+
+    describe('isActionTypeEnabled()', () => {
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        executor: jest.fn(),
+      };
+
+      it('passes through the notifyUsage option when set to true', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(actionType);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.isActionTypeEnabled('my-action-type', { notifyUsage: true });
+        expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
+          'Connector: My action type'
+        );
+      });
+    });
+
+    describe('isActionExecutable()', () => {
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        executor: jest.fn(),
+      };
+
+      it('passes through the notifyUsage option when set to true', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(actionType);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.isActionExecutable('123', 'my-action-type', { notifyUsage: true });
+        expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
+          'Connector: My action type'
         );
       });
     });

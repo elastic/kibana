@@ -37,7 +37,11 @@ function createCoreSetupWith(esClient: ILegacyClusterClient) {
       ...coreStart,
       elasticsearch: {
         ...coreStart.elasticsearch,
-        legacy: { client: esClient, createClient: jest.fn() },
+        legacy: {
+          ...coreStart.elasticsearch.legacy,
+          client: esClient,
+          createClient: jest.fn(),
+        },
       },
     },
     {},

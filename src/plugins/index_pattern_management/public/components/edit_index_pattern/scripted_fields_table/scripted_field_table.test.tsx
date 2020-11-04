@@ -21,7 +21,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { ScriptedFieldsTable } from '../scripted_fields_table';
-import { IIndexPattern } from '../../../../../../plugins/data/common/index_patterns';
+import { IIndexPattern, IndexPattern } from '../../../../../../plugins/data/common/index_patterns';
 
 jest.mock('@elastic/eui', () => ({
   EuiTitle: 'eui-title',
@@ -46,14 +46,6 @@ jest.mock('./components/table', () => ({
   },
 }));
 
-jest.mock('ui/documentation_links', () => ({
-  documentationLinks: {
-    scriptedFields: {
-      painless: 'painlessDocs',
-    },
-  },
-}));
-
 const helpers = {
   redirectToRoute: () => {},
   getRouteHref: () => '#',
@@ -62,7 +54,7 @@ const helpers = {
 const getIndexPatternMock = (mockedFields: any = {}) => ({ ...mockedFields } as IIndexPattern);
 
 describe('ScriptedFieldsTable', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: IndexPattern;
 
   beforeEach(() => {
     indexPattern = getIndexPatternMock({
@@ -70,7 +62,7 @@ describe('ScriptedFieldsTable', () => {
         { name: 'ScriptedField', lang: 'painless', script: 'x++' },
         { name: 'JustATest', lang: 'painless', script: 'z++' },
       ],
-    });
+    }) as IndexPattern;
   });
 
   test('should render normally', async () => {
@@ -79,6 +71,7 @@ describe('ScriptedFieldsTable', () => {
         indexPattern={indexPattern}
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
+        saveIndexPattern={async () => {}}
       />
     );
 
@@ -96,6 +89,7 @@ describe('ScriptedFieldsTable', () => {
         indexPattern={indexPattern}
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
+        saveIndexPattern={async () => {}}
       />
     );
 
@@ -113,15 +107,18 @@ describe('ScriptedFieldsTable', () => {
   test('should filter based on the lang filter', async () => {
     const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable
-        indexPattern={getIndexPatternMock({
-          getScriptedFields: () => [
-            { name: 'ScriptedField', lang: 'painless', script: 'x++' },
-            { name: 'JustATest', lang: 'painless', script: 'z++' },
-            { name: 'Bad', lang: 'somethingElse', script: 'z++' },
-          ],
-        })}
+        indexPattern={
+          getIndexPatternMock({
+            getScriptedFields: () => [
+              { name: 'ScriptedField', lang: 'painless', script: 'x++' },
+              { name: 'JustATest', lang: 'painless', script: 'z++' },
+              { name: 'Bad', lang: 'somethingElse', script: 'z++' },
+            ],
+          }) as IndexPattern
+        }
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
+        saveIndexPattern={async () => {}}
       />
     );
 
@@ -139,11 +136,14 @@ describe('ScriptedFieldsTable', () => {
   test('should hide the table if there are no scripted fields', async () => {
     const component = shallow(
       <ScriptedFieldsTable
-        indexPattern={getIndexPatternMock({
-          getScriptedFields: () => [],
-        })}
+        indexPattern={
+          getIndexPatternMock({
+            getScriptedFields: () => [],
+          }) as IndexPattern
+        }
         painlessDocLink={'painlessDoc'}
         helpers={helpers}
+        saveIndexPattern={async () => {}}
       />
     );
 
@@ -161,6 +161,7 @@ describe('ScriptedFieldsTable', () => {
         indexPattern={indexPattern}
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
+        saveIndexPattern={async () => {}}
       />
     );
 
@@ -176,12 +177,15 @@ describe('ScriptedFieldsTable', () => {
     const removeScriptedField = jest.fn();
     const component = shallow<ScriptedFieldsTable>(
       <ScriptedFieldsTable
-        indexPattern={{
-          ...indexPattern,
-          removeScriptedField,
-        }}
+        indexPattern={
+          ({
+            ...indexPattern,
+            removeScriptedField,
+          } as unknown) as IndexPattern
+        }
         helpers={helpers}
         painlessDocLink={'painlessDoc'}
+        saveIndexPattern={async () => {}}
       />
     );
 

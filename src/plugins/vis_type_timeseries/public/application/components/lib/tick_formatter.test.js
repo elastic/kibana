@@ -18,7 +18,7 @@
  */
 
 import { createTickFormatter } from './tick_formatter';
-import { getFieldFormatsRegistry } from '../../../../../../test_utils/public/stub_field_formats';
+import { getFieldFormatsRegistry } from '../../../../../data/public/test_utils';
 import { setFieldFormats } from '../../../services';
 import { UI_SETTINGS } from '../../../../../data/public';
 

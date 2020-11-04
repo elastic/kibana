@@ -1,0 +1,53 @@
+{
+    "job_type": "anomaly_detector",
+    "description": "Security: Auditbeat - Looks for commands related to system process discovery from an unusual user context. This can be due to uncommon troubleshooting activity or due to a compromised account. A compromised account may be used to engage in system process discovery in order to increase their understanding of software applications running on a target host or network. This may be a precursor to selection of a persistence mechanism or a method of privilege elevation.",
+    "groups": [
+      "security",
+      "auditbeat",
+      "process"
+    ],
+    "analysis_config": {
+      "bucket_span": "15m",
+      "detectors": [
+        {
+          "detector_description": "rare by \"user.name\"",
+          "function": "rare",
+          "by_field_name": "user.name"
+        }
+      ],
+      "influencers": [
+        "process.name",
+        "host.name",
+        "process.args",
+        "user.name"
+      ]
+    },
+    "allow_lazy_open": true,
+    "analysis_limits": {
+      "model_memory_limit": "16mb"
+    },
+    "data_description": {
+      "time_field": "@timestamp"
+    },
+    "custom_settings": {
+      "created_by": "ml-module-siem-auditbeat",
+      "custom_urls": [
+        {
+          "url_name": "Host Details by process name",
+          "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        },
+        {
+          "url_name": "Host Details by user name",
+          "url_value": "security/hosts/ml-hosts/$host.name$?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        },
+        {
+          "url_name": "Hosts Overview by process name",
+          "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'process.name%20:%20%22$process.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        },
+        {
+          "url_name": "Hosts Overview by user name",
+          "url_value": "security/hosts/ml-hosts?_g=()&query=(query:'user.name%20:%20%22$user.name$%22',language:kuery)&timerange=(global:(linkTo:!(timeline),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')),timeline:(linkTo:!(global),timerange:(from:'$earliest$',kind:absolute,to:'$latest$')))"
+        }
+      ]
+    }
+  }

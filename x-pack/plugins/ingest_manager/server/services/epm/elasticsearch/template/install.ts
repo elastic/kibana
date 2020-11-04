@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { SavedObjectsClientContract } from 'src/core/server';
 import {
-  Dataset,
-  RegistryPackage,
+  RegistryDataStream,
   ElasticsearchAssetType,
   TemplateRef,
   RegistryElasticsearch,
+  InstallablePackage,
 } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
@@ -21,8 +21,7 @@ import * as Registry from '../../registry';
 import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 
 export const installTemplates = async (
-  registryPackage: RegistryPackage,
-  isUpdate: boolean,
+  installablePackage: InstallablePackage,
   callCluster: CallESAsCurrentUser,
   paths: string[],
   savedObjectsClient: SavedObjectsClientContract
@@ -36,32 +35,35 @@ export const installTemplates = async (
   // remove package installation's references to index templates
   await removeAssetsFromInstalledEsByType(
     savedObjectsClient,
-    registryPackage.name,
+    installablePackage.name,
     ElasticsearchAssetType.indexTemplate
   );
-  // build templates per dataset from yml files
-  const datasets = registryPackage.datasets;
-  if (!datasets) return [];
+  // build templates per data stream from yml files
+  const dataStreams = installablePackage.data_streams;
+  if (!dataStreams) return [];
   // get template refs to save
-  const installedTemplateRefs = datasets.map((dataset) => ({
-    id: generateTemplateName(dataset),
+  const installedTemplateRefs = dataStreams.map((dataStream) => ({
+    id: generateTemplateName(dataStream),
     type: ElasticsearchAssetType.indexTemplate,
   }));
 
   // add package installation's references to index templates
-  await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, installedTemplateRefs);
+  await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, installedTemplateRefs);
 
-  if (datasets) {
-    const installTemplatePromises = datasets.reduce<Array<Promise<TemplateRef>>>((acc, dataset) => {
-      acc.push(
-        installTemplateForDataset({
-          pkg: registryPackage,
-          callCluster,
-          dataset,
-        })
-      );
-      return acc;
-    }, []);
+  if (dataStreams) {
+    const installTemplatePromises = dataStreams.reduce<Array<Promise<TemplateRef>>>(
+      (acc, dataStream) => {
+        acc.push(
+          installTemplateForDataStream({
+            pkg: installablePackage,
+            callCluster,
+            dataStream,
+          })
+        );
+        return acc;
+      },
+      []
+    );
 
     const res = await Promise.all(installTemplatePromises);
     const installedTemplates = res.flat();
@@ -159,25 +161,25 @@ const isComponentTemplate = (path: string) => {
 };
 
 /**
- * installTemplatesForDataset installs one template for each dataset
+ * installTemplateForDataStream installs one template for each data stream
  *
- * The template is currently loaded with the pkgey-package-dataset
+ * The template is currently loaded with the pkgkey-package-data_stream
  */
 
-export async function installTemplateForDataset({
+export async function installTemplateForDataStream({
   pkg,
   callCluster,
-  dataset,
+  dataStream,
 }: {
-  pkg: RegistryPackage;
+  pkg: InstallablePackage;
   callCluster: CallESAsCurrentUser;
-  dataset: Dataset;
+  dataStream: RegistryDataStream;
 }): Promise<TemplateRef> {
-  const fields = await loadFieldsFromYaml(pkg, dataset.path);
+  const fields = await loadFieldsFromYaml(pkg, dataStream.path);
   return installTemplate({
     callCluster,
     fields,
-    dataset,
+    dataStream,
     packageVersion: pkg.version,
     packageName: pkg.name,
   });
@@ -238,7 +240,7 @@ function buildComponentTemplates(registryElasticsearch: RegistryElasticsearch | 
   return { settingsTemplate, mappingsTemplate };
 }
 
-async function installDatasetComponentTemplates(
+async function installDataStreamComponentTemplates(
   templateName: string,
   registryElasticsearch: RegistryElasticsearch | undefined,
   callCluster: CallESAsCurrentUser
@@ -278,35 +280,35 @@ async function installDatasetComponentTemplates(
 export async function installTemplate({
   callCluster,
   fields,
-  dataset,
+  dataStream,
   packageVersion,
   packageName,
 }: {
   callCluster: CallESAsCurrentUser;
   fields: Field[];
-  dataset: Dataset;
+  dataStream: RegistryDataStream;
   packageVersion: string;
   packageName: string;
 }): Promise<TemplateRef> {
   const mappings = generateMappings(processFields(fields));
-  const templateName = generateTemplateName(dataset);
+  const templateName = generateTemplateName(dataStream);
   let pipelineName;
-  if (dataset.ingest_pipeline) {
+  if (dataStream.ingest_pipeline) {
     pipelineName = getPipelineNameForInstallation({
-      pipelineName: dataset.ingest_pipeline,
-      dataset,
+      pipelineName: dataStream.ingest_pipeline,
+      dataStream,
       packageVersion,
     });
   }
 
-  const composedOfTemplates = await installDatasetComponentTemplates(
+  const composedOfTemplates = await installDataStreamComponentTemplates(
     templateName,
-    dataset.elasticsearch,
+    dataStream.elasticsearch,
     callCluster
   );
 
   const template = getTemplate({
-    type: dataset.type,
+    type: dataStream.type,
     templateName,
     mappings,
     pipelineName,

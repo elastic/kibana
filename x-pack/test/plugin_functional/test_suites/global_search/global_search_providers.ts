@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(results.length).to.be(1);
       expect(results[0].type).to.be('index-pattern');
       expect(results[0].title).to.be('logstash-*');
-      expect(results[0].score).to.be.greaterThan(1);
+      expect(results[0].score).to.be.greaterThan(0.9);
     });
 
     it('can search for visualizations', async () => {
@@ -69,6 +69,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(results.length).to.be.greaterThan(2);
       expect(results.map((r) => r.title)).to.contain('dashboard with map');
       expect(results.map((r) => r.title)).to.contain('Amazing Dashboard');
+    });
+
+    it('can search by prefix', async () => {
+      const results = await findResultsWithAPI('Amaz');
+      expect(results.length).to.be(1);
+      expect(results[0].type).to.be('dashboard');
+      expect(results[0].title).to.be('Amazing Dashboard');
     });
   });
 }

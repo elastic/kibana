@@ -5,6 +5,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { durationToNumber } from '../../../common/schema_utils';
 import { HeadlessChromiumDriver } from '../../browsers';
 import { CaptureConfig } from '../../types';
 import { LevelLogger, startTrace } from '../';
@@ -67,7 +68,7 @@ export const waitForRenderComplete = async (
 
           return Promise.all(renderedTasks).then(hackyWaitForVisualizations);
         },
-        args: [layout.selectors.renderComplete, captureConfig.loadDelay],
+        args: [layout.selectors.renderComplete, durationToNumber(captureConfig.loadDelay)],
       },
       { context: CONTEXT_WAITFORRENDER },
       logger

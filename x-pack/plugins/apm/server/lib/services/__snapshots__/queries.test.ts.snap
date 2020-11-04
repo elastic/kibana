@@ -105,6 +105,24 @@ Array [
                 "field": "transaction.duration.us",
               },
             },
+            "timeseries": Object {
+              "aggs": Object {
+                "average": Object {
+                  "avg": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
           },
           "terms": Object {
             "field": "service.name",
@@ -126,7 +144,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -138,9 +156,9 @@ Array [
   Object {
     "apm": Object {
       "events": Array [
+        "transaction",
         "metric",
         "error",
-        "transaction",
       ],
     },
     "body": Object {
@@ -176,7 +194,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -194,6 +212,31 @@ Array [
     "body": Object {
       "aggs": Object {
         "services": Object {
+          "aggs": Object {
+            "count": Object {
+              "value_count": Object {
+                "field": "transaction.duration.us",
+              },
+            },
+            "timeseries": Object {
+              "aggs": Object {
+                "count": Object {
+                  "value_count": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
+          },
           "terms": Object {
             "field": "service.name",
             "size": 500,
@@ -214,7 +257,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],
@@ -226,12 +269,51 @@ Array [
   Object {
     "apm": Object {
       "events": Array [
-        "error",
+        "transaction",
       ],
     },
     "body": Object {
       "aggs": Object {
         "services": Object {
+          "aggs": Object {
+            "outcomes": Object {
+              "aggs": Object {
+                "count": Object {
+                  "value_count": Object {
+                    "field": "transaction.duration.us",
+                  },
+                },
+              },
+              "terms": Object {
+                "field": "event.outcome",
+              },
+            },
+            "timeseries": Object {
+              "aggs": Object {
+                "outcomes": Object {
+                  "aggs": Object {
+                    "count": Object {
+                      "value_count": Object {
+                        "field": "transaction.duration.us",
+                      },
+                    },
+                  },
+                  "terms": Object {
+                    "field": "event.outcome",
+                  },
+                },
+              },
+              "date_histogram": Object {
+                "extended_bounds": Object {
+                  "max": 1528977600000,
+                  "min": 1528113600000,
+                },
+                "field": "@timestamp",
+                "fixed_interval": "43200s",
+                "min_doc_count": 0,
+              },
+            },
+          },
           "terms": Object {
             "field": "service.name",
             "size": 500,
@@ -252,7 +334,15 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
+              },
+            },
+            Object {
+              "terms": Object {
+                "event.outcome": Array [
+                  "failure",
+                  "success",
+                ],
               },
             },
           ],
@@ -264,8 +354,8 @@ Array [
   Object {
     "apm": Object {
       "events": Array [
+        "transaction",
         "metric",
-        "transaction",
         "error",
       ],
     },
@@ -299,7 +389,7 @@ Array [
             },
             Object {
               "term": Object {
-                "my.custom.ui.filter": "foo-bar",
+                "service.environment": "test",
               },
             },
           ],

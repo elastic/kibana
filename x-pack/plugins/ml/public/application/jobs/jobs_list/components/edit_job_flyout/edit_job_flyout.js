@@ -7,6 +7,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { cloneDeep, isEqual, pick } from 'lodash';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -28,8 +30,6 @@ import { loadFullJob } from '../utils';
 import { validateModelMemoryLimit, validateGroupNames, isValidCustomUrls } from '../validate_job';
 import { toastNotificationServiceProvider } from '../../../../services/toast_notification_service';
 import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import { collapseLiteralStrings } from '../../../../../../shared_imports';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 

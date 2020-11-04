@@ -5,36 +5,48 @@
  */
 
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  EuiHorizontalRule,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiFlexGrid } from '@elastic/eui';
+import { isEmpty, flatten } from 'lodash';
+import { useHistory } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
 import { useTransactionDistribution } from '../../../hooks/useTransactionDistribution';
 import { useWaterfall } from '../../../hooks/useWaterfall';
-import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { ApmHeader } from '../../shared/ApmHeader';
+import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
-import { useLocation } from '../../../hooks/useLocation';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { TransactionBreakdown } from '../../shared/TransactionBreakdown';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
+import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
-import { ErroneousTransactionsRateChart } from '../../shared/charts/ErroneousTransactionsRateChart';
+import { Correlations } from '../Correlations';
 
-export function TransactionDetails() {
-  const location = useLocation();
+interface Sample {
+  traceId: string;
+  transactionId: string;
+}
+
+type TransactionDetailsProps = RouteComponentProps<{ serviceName: string }>;
+
+export function TransactionDetails({
+  location,
+  match,
+}: TransactionDetailsProps) {
+  const { serviceName } = match.params;
   const { urlParams } = useUrlParams();
+  const history = useHistory();
   const {
     data: distributionData,
     status: distributionStatus,
@@ -44,7 +56,7 @@ export function TransactionDetails() {
   const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
     urlParams
   );
-  const { transactionName, transactionType, serviceName } = urlParams;
+  const { transactionName, transactionType } = urlParams;
 
   useTrackPageview({ app: 'apm', path: 'transaction_details' });
   useTrackPageview({ app: 'apm', path: 'transaction_details', delay: 15000 });
@@ -62,15 +74,35 @@ export function TransactionDetails() {
     return config;
   }, [transactionName, transactionType, serviceName]);
 
-  const bucketIndex = distributionData.buckets.findIndex((bucket) =>
-    bucket.samples.some(
-      (sample) =>
-        sample.transactionId === urlParams.transactionId &&
-        sample.traceId === urlParams.traceId
-    )
+  const selectedSample = flatten(
+    distributionData.buckets.map((bucket) => bucket.samples)
+  ).find(
+    (sample) =>
+      sample.transactionId === urlParams.transactionId &&
+      sample.traceId === urlParams.traceId
   );
 
-  const traceSamples = distributionData.buckets[bucketIndex]?.samples;
+  const bucketWithSample =
+    selectedSample &&
+    distributionData.buckets.find((bucket) =>
+      bucket.samples.includes(selectedSample)
+    );
+
+  const traceSamples = bucketWithSample?.samples ?? [];
+  const bucketIndex = bucketWithSample
+    ? distributionData.buckets.indexOf(bucketWithSample)
+    : -1;
+
+  const selectSampleFromBucketClick = (sample: Sample) => {
+    history.push({
+      ...history.location,
+      search: fromQuery({
+        ...toQuery(history.location.search),
+        transactionId: sample.transactionId,
+        traceId: sample.traceId,
+      }),
+    });
+  };
 
   return (
     <div>
@@ -80,27 +112,17 @@ export function TransactionDetails() {
         </EuiTitle>
       </ApmHeader>
 
+      <Correlations />
+
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localUIFiltersConfig} />
         </EuiFlexItem>
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
-            <EuiFlexGrid columns={2} gutterSize="s">
-              <EuiFlexItem>
-                <TransactionBreakdown />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ErroneousTransactionsRateChart />
-              </EuiFlexItem>
-            </EuiFlexGrid>
-
-            <EuiSpacer size="s" />
-
             <TransactionCharts
               charts={transactionChartsData}
               urlParams={urlParams}
-              location={location}
             />
           </ChartsSyncContextProvider>
 
@@ -112,6 +134,11 @@ export function TransactionDetails() {
               isLoading={distributionStatus === FETCH_STATUS.LOADING}
               urlParams={urlParams}
               bucketIndex={bucketIndex}
+              onBucketClick={(bucket) => {
+                if (!isEmpty(bucket.samples)) {
+                  selectSampleFromBucketClick(bucket.samples[0]);
+                }
+              }}
             />
           </EuiPanel>
 

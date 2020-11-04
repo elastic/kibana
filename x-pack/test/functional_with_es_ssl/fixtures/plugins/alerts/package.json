@@ -7,9 +7,6 @@
   "main": "target/test/functional_with_es_ssl/fixtures/plugins/alerts",
   "scripts": {
     "kbn": "node ../../../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && tsc"
-  },
-  "devDependencies": {
-    "typescript": "3.9.5"
+    "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
   }
 }

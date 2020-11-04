@@ -11,7 +11,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 import { FlowDirection, FlowTarget } from '../../../graphql/types';
-import * as i18nIp from '../ip_overview/translations';
+import * as i18nIp from '../details/translations';
 
 import { FlowTargetSelect } from '../flow_controls/flow_target_select';
 import { IpOverviewId } from '../../../timelines/components/field_renderers/field_renderers';
@@ -40,7 +40,7 @@ export const FlowTargetSelectConnectedComponent: React.FC<Props> = ({ flowTarget
   const history = useHistory();
   const location = useLocation();
 
-  const updateIpDetailsFlowTarget = useCallback(
+  const updateNetworkDetailsFlowTarget = useCallback(
     (newFlowTarget: FlowTarget) => {
       const newPath = getUpdatedFlowTargetPath(location, flowTarget, newFlowTarget);
       history.push(newPath);
@@ -56,7 +56,7 @@ export const FlowTargetSelectConnectedComponent: React.FC<Props> = ({ flowTarget
         selectedDirection={FlowDirection.uniDirectional}
         selectedTarget={flowTarget}
         displayTextOverride={[i18nIp.AS_SOURCE, i18nIp.AS_DESTINATION]}
-        updateFlowTargetAction={updateIpDetailsFlowTarget}
+        updateFlowTargetAction={updateNetworkDetailsFlowTarget}
       />
     </SelectTypeItem>
   );

@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import deepEqual from 'fast-deep-equal';
 import { SavedObjectsClientContract, SavedObjectsBulkCreateObject } from 'src/core/server';
 import {
   Agent,
@@ -29,16 +30,19 @@ export async function agentCheckin(
 ) {
   const updateData: Partial<AgentSOAttributes> = {};
   const { updatedErrorEvents } = await processEventsForCheckin(soClient, agent, data.events);
-  if (updatedErrorEvents) {
+  if (
+    updatedErrorEvents &&
+    !(updatedErrorEvents.length === 0 && agent.current_error_events.length === 0)
+  ) {
     updateData.current_error_events = JSON.stringify(updatedErrorEvents);
   }
-  if (data.localMetadata) {
+  if (data.localMetadata && !deepEqual(data.localMetadata, agent.local_metadata)) {
     updateData.local_metadata = data.localMetadata;
   }
-
   if (data.status !== agent.last_checkin_status) {
     updateData.last_checkin_status = data.status;
   }
+  // Update agent only if something changed
   if (Object.keys(updateData).length > 0) {
     await soClient.update<AgentSOAttributes>(AGENT_SAVED_OBJECT_TYPE, agent.id, updateData);
   }
@@ -63,7 +67,7 @@ async function processEventsForCheckin(
   const updatedErrorEvents: Array<AgentEvent | NewAgentEvent> = [...agent.current_error_events];
   for (const event of events) {
     // @ts-ignore
-    event.config_id = agent.config_id;
+    event.policy_id = agent.policy_id;
 
     if (isErrorOrState(event)) {
       // Remove any global or specific to a stream event

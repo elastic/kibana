@@ -27,6 +27,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       serverArgs: [
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
+        `--xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys=${JSON.stringify([
+          'a'.repeat(32),
+          'b'.repeat(32),
+        ])}`,
         `--plugin-path=${path.resolve(__dirname, './fixtures/api_consumer_plugin')}`,
       ],
     },

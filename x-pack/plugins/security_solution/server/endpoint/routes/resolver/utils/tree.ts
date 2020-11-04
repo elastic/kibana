@@ -6,26 +6,24 @@
 
 import _ from 'lodash';
 import {
-  ResolverEvent,
+  SafeResolverEvent,
   ResolverNodeStats,
-  ResolverRelatedEvents,
-  ResolverAncestry,
-  ResolverTree,
-  ResolverChildren,
+  SafeResolverAncestry,
+  SafeResolverTree,
+  SafeResolverChildren,
   ResolverRelatedAlerts,
 } from '../../../../../common/endpoint/types';
 import { createTree } from './node';
 
 interface Node {
   entityID: string;
-  lifecycle: ResolverEvent[];
+  lifecycle: SafeResolverEvent[];
   stats?: ResolverNodeStats;
 }
 
 export interface Options {
-  relatedEvents?: ResolverRelatedEvents;
-  ancestry?: ResolverAncestry;
-  children?: ResolverChildren;
+  ancestry?: SafeResolverAncestry;
+  children?: SafeResolverChildren;
   relatedAlerts?: ResolverRelatedAlerts;
 }
 
@@ -37,14 +35,13 @@ export interface Options {
  */
 export class Tree {
   protected cache: Map<string, Node> = new Map();
-  protected tree: ResolverTree;
+  protected tree: SafeResolverTree;
 
   constructor(protected readonly id: string, options: Options = {}) {
     const tree = createTree(this.id);
     this.tree = tree;
     this.cache.set(id, tree);
 
-    this.addRelatedEvents(options.relatedEvents);
     this.addAncestors(options.ancestry);
     this.addChildren(options.children);
     this.addRelatedAlerts(options.relatedAlerts);
@@ -55,7 +52,7 @@ export class Tree {
    *
    * @returns the origin ResolverNode
    */
-  public render(): ResolverTree {
+  public render(): SafeResolverTree {
     return this.tree;
   }
 
@@ -66,20 +63,6 @@ export class Tree {
    */
   public ids(): string[] {
     return [...this.cache.keys()];
-  }
-
-  /**
-   * Add related events for the tree's origin node. Related events cannot be added for other nodes.
-   *
-   * @param relatedEventsInfo is the related events and pagination information to add to the tree.
-   */
-  private addRelatedEvents(relatedEventsInfo: ResolverRelatedEvents | undefined) {
-    if (!relatedEventsInfo) {
-      return;
-    }
-
-    this.tree.relatedEvents.events = relatedEventsInfo.events;
-    this.tree.relatedEvents.nextEvent = relatedEventsInfo.nextEvent;
   }
 
   /**
@@ -101,7 +84,7 @@ export class Tree {
    *
    * @param ancestorInfo is the ancestors and pagination information to add to the tree.
    */
-  private addAncestors(ancestorInfo: ResolverAncestry | undefined) {
+  private addAncestors(ancestorInfo: SafeResolverAncestry | undefined) {
     if (!ancestorInfo) {
       return;
     }
@@ -132,7 +115,7 @@ export class Tree {
     }
   }
 
-  private addChildren(children: ResolverChildren | undefined) {
+  private addChildren(children: SafeResolverChildren | undefined) {
     if (!children) {
       return;
     }

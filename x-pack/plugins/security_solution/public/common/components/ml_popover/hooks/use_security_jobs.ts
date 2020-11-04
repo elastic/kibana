@@ -32,6 +32,7 @@ export interface UseSecurityJobsReturn {
  * list as necessary. E.g. installed jobs, running jobs, etc.
  *
  * NOTE: If the user is not an ml admin, jobs will be empty and isMlAdmin will be false.
+ * If you only need installed jobs, try the {@link useInstalledSecurityJobs} hook.
  *
  * @param refetchData
  */
@@ -39,7 +40,7 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
   const [jobs, setJobs] = useState<SecurityJob[]>([]);
   const [loading, setLoading] = useState(true);
   const mlCapabilities = useMlCapabilities();
-  const [siemDefaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
+  const [securitySolutionDefaultIndex] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const http = useHttp();
   const { addError } = useAppToasts();
 
@@ -54,12 +55,12 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
     async function fetchSecurityJobIdsFromGroupsData() {
       if (isMlAdmin && isLicensed) {
         try {
-          // Batch fetch all installed jobs, ML modules, and check which modules are compatible with siemDefaultIndex
+          // Batch fetch all installed jobs, ML modules, and check which modules are compatible with securitySolutionDefaultIndex
           const [jobSummaryData, modulesData, compatibleModules] = await Promise.all([
             getJobsSummary({ http, signal: abortCtrl.signal }),
             getModules({ signal: abortCtrl.signal }),
             checkRecognizer({
-              indexPatternName: siemDefaultIndex,
+              indexPatternName: securitySolutionDefaultIndex,
               signal: abortCtrl.signal,
             }),
           ]);
@@ -89,7 +90,7 @@ export const useSecurityJobs = (refetchData: boolean): UseSecurityJobsReturn => 
       isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [refetchData, isMlAdmin, isLicensed, siemDefaultIndex, addError, http]);
+  }, [refetchData, isMlAdmin, isLicensed, securitySolutionDefaultIndex, addError, http]);
 
   return { isLicensed, isMlAdmin, jobs, loading };
 };

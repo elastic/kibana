@@ -37,22 +37,31 @@ pipeline {
         deleteDir()
         gitCheckout(basedir: "${BASE_DIR}", githubNotifyFirstTimeContributor: false,
                     shallow: false, reference: "/var/lib/jenkins/.git-references/kibana.git")
+
+        // Filter when to run based on the below reasons:
+        //  - On a PRs when:
+        //    - There are changes related to the APM UI project
+        //      - only when the owners of those changes are members of the given GitHub teams
+        //  - On merges to branches when:
+        //    - There are changes related to the APM UI project
+        //  - FORCE parameter is set to true.
         script {
+          def apm_updated = false
           dir("${BASE_DIR}"){
-            def regexps =[ "^x-pack/plugins/apm/.*" ]
-            env.APM_UPDATED = isGitRegionMatch(patterns: regexps)
+            apm_updated = isGitRegionMatch(patterns: [ "^x-pack/plugins/apm/.*" ])
+          }
+          if (isPR()) {
+            def isMember = isMemberOf(user: env.CHANGE_AUTHOR, team: ['apm-ui', 'uptime'])
+            setEnvVar('RUN_APM_E2E', params.FORCE || (apm_updated && isMember))
+          } else {
+            setEnvVar('RUN_APM_E2E', params.FORCE || apm_updated)
           }
         }
       }
     }
     stage('Prepare Kibana') {
       options { skipDefaultCheckout() }
-      when {
-        anyOf {
-          expression { return params.FORCE }
-          expression { return env.APM_UPDATED != "false" }
-        }
-      }
+      when { expression { return env.RUN_APM_E2E != "false" } }
       environment {
         JENKINS_NODE_COOKIE = 'dontKillMe'
       }
@@ -70,12 +79,7 @@ pipeline {
     }
     stage('Smoke Tests'){
       options { skipDefaultCheckout() }
-      when {
-        anyOf {
-          expression { return params.FORCE }
-          expression { return env.APM_UPDATED != "false" }
-        }
-      }
+      when { expression { return env.RUN_APM_E2E != "false" } }
       steps{
         notifyTestStatus('Running smoke tests', 'PENDING')
         dir("${BASE_DIR}"){

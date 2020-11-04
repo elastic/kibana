@@ -21,5 +21,7 @@
   "env": {
     "elasticsearch_username": "admin",
     "elasticsearch_password": "changeme"
-  }
+  },
+  "viewportWidth": 1920,
+  "viewportHeight": 1080
 }

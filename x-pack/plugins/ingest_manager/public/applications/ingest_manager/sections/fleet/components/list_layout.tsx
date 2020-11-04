@@ -21,8 +21,8 @@ import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { useRouteMatch } from 'react-router-dom';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { WithHeaderLayout } from '../../../layouts';
-import { useCapabilities, useLink, useGetAgentConfigs } from '../../../hooks';
-import { useGetAgentStatus } from '../../agent_config/details_page/hooks';
+import { useCapabilities, useLink, useGetAgentPolicies } from '../../../hooks';
+import { useGetAgentStatus } from '../../agent_policy/details_page/hooks';
 import { AgentEnrollmentFlyout } from '../components';
 import { DonutChart } from './donut_chart';
 
@@ -53,7 +53,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
           titleSize="xs"
           textAlign="right"
           title={<EuiI18nNumber value={agentStatus?.total ?? 0} />}
-          description={i18n.translate('xpack.ingestManager.agentListStatus.totalLabel', {
+          description={i18n.translate('xpack.fleet.agentListStatus.totalLabel', {
             defaultMessage: 'Agents',
           })}
         />
@@ -79,7 +79,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
               <EuiI18nNumber value={agentStatus?.online ?? 0} />
             </EuiHealth>
           }
-          description={i18n.translate('xpack.ingestManager.agentListStatus.onlineLabel', {
+          description={i18n.translate('xpack.fleet.agentListStatus.onlineLabel', {
             defaultMessage: 'Online',
           })}
         />
@@ -89,7 +89,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
           textAlign="right"
           titleSize="xs"
           title={<EuiI18nNumber value={agentStatus?.offline ?? 0} />}
-          description={i18n.translate('xpack.ingestManager.agentListStatus.offlineLabel', {
+          description={i18n.translate('xpack.fleet.agentListStatus.offlineLabel', {
             defaultMessage: 'Offline',
           })}
         />
@@ -99,7 +99,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
           textAlign="right"
           titleSize="xs"
           title={<EuiI18nNumber value={agentStatus?.error ?? 0} />}
-          description={i18n.translate('xpack.ingestManager.agentListStatus.errorLabel', {
+          description={i18n.translate('xpack.fleet.agentListStatus.errorLabel', {
             defaultMessage: 'Error',
           })}
         />
@@ -112,7 +112,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
           <EuiFlexItem grow={false}>
             <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
               <FormattedMessage
-                id="xpack.ingestManager.agentList.enrollButton"
+                id="xpack.fleet.agentList.enrollButton"
                 defaultMessage="Add agent"
               />
             </EuiButton>
@@ -126,7 +126,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
       <EuiFlexItem>
         <EuiText>
           <h1>
-            <FormattedMessage id="xpack.ingestManager.fleet.pageTitle" defaultMessage="Fleet" />
+            <FormattedMessage id="xpack.fleet.agents.pageTitle" defaultMessage="Agents" />
           </h1>
         </EuiText>
       </EuiFlexItem>
@@ -134,8 +134,8 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
         <EuiText color="subdued">
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.fleet.pageSubtitle"
-              defaultMessage="Manage and deploy configuration updates to a group of agents of any size."
+              id="xpack.fleet.agents.pageSubtitle"
+              defaultMessage="Manage and deploy policy updates to a group of agents of any size."
             />
           </p>
         </EuiText>
@@ -143,12 +143,12 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
     </EuiFlexGroup>
   );
 
-  const agentConfigsRequest = useGetAgentConfigs({
+  const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
     perPage: 1000,
   });
 
-  const agentConfigs = agentConfigsRequest.data ? agentConfigsRequest.data.items : [];
+  const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
 
   const routeMatch = useRouteMatch();
 
@@ -159,19 +159,14 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
       tabs={
         ([
           {
-            name: (
-              <FormattedMessage
-                id="xpack.ingestManager.listTabs.agentTitle"
-                defaultMessage="Agents"
-              />
-            ),
+            name: <FormattedMessage id="xpack.fleet.listTabs.agentTitle" defaultMessage="Agents" />,
             isSelected: routeMatch.path === PAGE_ROUTING_PATHS.fleet_agent_list,
             href: getHref('fleet_agent_list'),
           },
           {
             name: (
               <FormattedMessage
-                id="xpack.ingestManager.listTabs.enrollmentTokensTitle"
+                id="xpack.fleet.listTabs.enrollmentTokensTitle"
                 defaultMessage="Enrollment tokens"
               />
             ),
@@ -183,7 +178,7 @@ export const ListLayout: React.FunctionComponent<{}> = ({ children }) => {
     >
       {isEnrollmentFlyoutOpen ? (
         <AgentEnrollmentFlyout
-          agentConfigs={agentConfigs}
+          agentPolicies={agentPolicies}
           onClose={() => setIsEnrollmentFlyoutOpen(false)}
         />
       ) : null}

@@ -39,6 +39,11 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await this.waitTableIsLoaded();
     }
 
+    async getCurrentSearchValue() {
+      const searchBox = await testSubjects.find('savedObjectSearchBar');
+      return await searchBox.getAttribute('value');
+    }
+
     async importFile(path: string, overwriteAll = true) {
       log.debug(`importFile(${path})`);
 
@@ -48,7 +53,13 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
 
       if (!overwriteAll) {
         log.debug(`Toggling overwriteAll`);
-        await testSubjects.click('importSavedObjectsOverwriteToggle');
+        const radio = await testSubjects.find(
+          'savedObjectsManagement-importModeControl-overwriteRadioGroup'
+        );
+        // a radio button consists of a div tag that contains an input, a div, and a label
+        // we can't click the input directly, need to go up one level and click the parent div
+        const div = await radio.findByXpath("//div[input[@id='overwriteDisabled']]");
+        await div.click();
       } else {
         log.debug(`Leaving overwriteAll alone`);
       }
@@ -120,6 +131,12 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       }
     }
 
+    async setOverriddenIndexPatternValue(oldName: string, newName: string) {
+      const select = await testSubjects.find(`managementChangeIndexSelection-${oldName}`);
+      const option = await testSubjects.findDescendant(`indexPatternOption-${newName}`, select);
+      await option.click();
+    }
+
     async clickCopyToSpaceByTitle(title: string) {
       const table = keyBy(await this.getElementsInTable(), 'title');
       // should we check if table size > 0 and log error if not?
@@ -135,6 +152,20 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
         log.debug(
           `we didn't find a menu element so should be a "copy to space" element for (${title}) to click`
         );
+        // or the action elements are on the row without the menu
+        await table[title].copySaveObjectsElement?.click();
+      }
+    }
+
+    async clickInspectByTitle(title: string) {
+      const table = keyBy(await this.getElementsInTable(), 'title');
+      if (table[title].menuElement) {
+        await table[title].menuElement?.click();
+        // Wait for context menu to render
+        const menuPanel = await find.byCssSelector('.euiContextMenuPanel');
+        const panelButton = await menuPanel.findByTestSubject('savedObjectsTableAction-inspect');
+        await panelButton.click();
+      } else {
         // or the action elements are on the row without the menu
         await table[title].copySaveObjectsElement?.click();
       }

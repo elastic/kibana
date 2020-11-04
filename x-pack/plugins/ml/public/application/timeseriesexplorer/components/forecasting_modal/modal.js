@@ -31,7 +31,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 export function Modal(props) {
   return (
     <EuiOverlayMask>
-      <EuiModal onClose={props.close} maxWidth={860}>
+      <EuiModal onClose={props.close} maxWidth={860} data-test-subj="mlModalForecast">
         <EuiModalHeader>
           <EuiModalHeaderTitle>
             <FormattedMessage

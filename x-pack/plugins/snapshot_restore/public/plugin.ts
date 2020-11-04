@@ -8,6 +8,10 @@ import { CoreSetup, PluginInitializerContext } from 'src/core/public';
 
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../src/plugins/home/public';
 import { PLUGIN } from '../common/constants';
 
 import { ClientConfigType } from './types';
@@ -20,6 +24,7 @@ import { UIM_APP_NAME } from './application/constants';
 interface PluginsDependencies {
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
+  home?: HomePublicPluginSetup;
 }
 
 export class SnapshotRestoreUIPlugin {
@@ -33,7 +38,7 @@ export class SnapshotRestoreUIPlugin {
   public setup(coreSetup: CoreSetup, plugins: PluginsDependencies): void {
     const config = this.initializerContext.config.get<ClientConfigType>();
     const { http } = coreSetup;
-    const { management, usageCollection } = plugins;
+    const { home, management, usageCollection } = plugins;
 
     // Initialize services
     this.uiMetricService.setup(usageCollection);
@@ -54,6 +59,24 @@ export class SnapshotRestoreUIPlugin {
         return await mountManagementSection(coreSetup, services, config, params);
       },
     });
+
+    if (home) {
+      home.featureCatalogue.register({
+        id: PLUGIN.id,
+        title: i18n.translate('xpack.snapshotRestore.featureCatalogueTitle', {
+          defaultMessage: 'Back up and restore',
+        }),
+        description: i18n.translate('xpack.snapshotRestore.featureCatalogueDescription', {
+          defaultMessage:
+            'Save snapshots to a backup repository, and restore to recover index and cluster state.',
+        }),
+        icon: 'storage',
+        path: '/app/management/data/snapshot_restore',
+        showOnHomePage: true,
+        category: FeatureCatalogueCategory.ADMIN,
+        order: 630,
+      });
+    }
   }
 
   public start() {}

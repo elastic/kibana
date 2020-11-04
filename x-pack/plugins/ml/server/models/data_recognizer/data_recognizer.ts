@@ -5,22 +5,19 @@
  */
 
 import fs from 'fs';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import numeral from '@elastic/numeral';
-import {
-  KibanaRequest,
-  ILegacyScopedClusterClient,
-  SavedObjectsClientContract,
-} from 'kibana/server';
+import { KibanaRequest, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { IndexPatternAttributes } from 'src/plugins/data/server';
 import { merge } from 'lodash';
-import { AnalysisLimits, CombinedJobWithStats } from '../../../common/types/anomaly_detection_jobs';
+import { AnalysisLimits } from '../../../common/types/anomaly_detection_jobs';
 import { getAuthorizationHeader } from '../../lib/request_authorization';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
 import {
   KibanaObjects,
-  ModuleDataFeed,
+  KibanaObjectConfig,
+  ModuleDatafeed,
   ModuleJob,
   Module,
   JobOverride,
@@ -45,6 +42,7 @@ import { fieldsServiceProvider } from '../fields_service';
 import { jobServiceProvider } from '../job_service';
 import { resultsServiceProvider } from '../results_service';
 import { JobExistResult, JobStat } from '../../../common/types/data_recognizer';
+import { MlJobsStatsResponse } from '../job_service/jobs';
 
 const ML_DIR = 'ml';
 const KIBANA_DIR = 'kibana';
@@ -73,10 +71,6 @@ interface RawModuleConfig {
   };
 }
 
-interface MlJobStats {
-  jobs: CombinedJobWithStats[];
-}
-
 interface Config {
   dirName: any;
   json: RawModuleConfig;
@@ -100,7 +94,7 @@ interface ObjectExistResponse {
   id: string;
   type: string;
   exists: boolean;
-  savedObject?: any;
+  savedObject?: { id: string; type: string; attributes: KibanaObjectConfig };
 }
 
 interface SaveResults {
@@ -110,9 +104,9 @@ interface SaveResults {
 }
 
 export class DataRecognizer {
-  private _callAsCurrentUser: ILegacyScopedClusterClient['callAsCurrentUser'];
-  private _callAsInternalUser: ILegacyScopedClusterClient['callAsInternalUser'];
-  private _mlClusterClient: ILegacyScopedClusterClient;
+  private _asCurrentUser: IScopedClusterClient['asCurrentUser'];
+  private _asInternalUser: IScopedClusterClient['asInternalUser'];
+  private _client: IScopedClusterClient;
   private _authorizationHeader: object;
   private _modulesDir = `${__dirname}/modules`;
   private _indexPatternName: string = '';
@@ -123,13 +117,13 @@ export class DataRecognizer {
   jobsForModelMemoryEstimation: Array<{ job: ModuleJob; query: any }> = [];
 
   constructor(
-    mlClusterClient: ILegacyScopedClusterClient,
+    mlClusterClient: IScopedClusterClient,
     private savedObjectsClient: SavedObjectsClientContract,
     request: KibanaRequest
   ) {
-    this._mlClusterClient = mlClusterClient;
-    this._callAsCurrentUser = mlClusterClient.callAsCurrentUser;
-    this._callAsInternalUser = mlClusterClient.callAsInternalUser;
+    this._client = mlClusterClient;
+    this._asCurrentUser = mlClusterClient.asCurrentUser;
+    this._asInternalUser = mlClusterClient.asInternalUser;
     this._authorizationHeader = getAuthorizationHeader(request);
   }
 
@@ -248,18 +242,17 @@ export class DataRecognizer {
 
     const index = indexPattern;
     const size = 0;
-    const body = {
+    const searchBody = {
       query: moduleConfig.query,
     };
 
-    const resp = await this._callAsCurrentUser('search', {
+    const { body } = await this._asCurrentUser.search({
       index,
-      rest_total_hits_as_int: true,
       size,
-      body,
+      body: searchBody,
     });
 
-    return resp.hits.total !== 0;
+    return body.hits.total.value > 0;
   }
 
   async listModules() {
@@ -290,7 +283,7 @@ export class DataRecognizer {
     }
 
     const jobs: ModuleJob[] = [];
-    const datafeeds: ModuleDataFeed[] = [];
+    const datafeeds: ModuleDatafeed[] = [];
     const kibana: KibanaObjects = {};
     // load all of the job configs
     await Promise.all(
@@ -517,7 +510,7 @@ export class DataRecognizer {
       // Add a wildcard at the front of each of the job IDs in the module,
       // as a prefix may have been supplied when creating the jobs in the module.
       const jobIds = module.jobs.map((job) => `*${job.id}`);
-      const { jobsExist } = jobServiceProvider(this._mlClusterClient);
+      const { jobsExist } = jobServiceProvider(this._client);
       const jobInfo = await jobsExist(jobIds);
 
       // Check if the value for any of the jobs is false.
@@ -526,16 +519,16 @@ export class DataRecognizer {
 
       if (doJobsExist === true) {
         // Get the IDs of the jobs created from the module, and their earliest / latest timestamps.
-        const jobStats: MlJobStats = await this._callAsInternalUser('ml.jobStats', {
-          jobId: jobIds,
+        const { body } = await this._asInternalUser.ml.getJobStats<MlJobsStatsResponse>({
+          job_id: jobIds.join(),
         });
         const jobStatsJobs: JobStat[] = [];
-        if (jobStats.jobs && jobStats.jobs.length > 0) {
-          const foundJobIds = jobStats.jobs.map((job) => job.job_id);
-          const { getLatestBucketTimestampByJob } = resultsServiceProvider(this._mlClusterClient);
+        if (body.jobs && body.jobs.length > 0) {
+          const foundJobIds = body.jobs.map((job) => job.job_id);
+          const { getLatestBucketTimestampByJob } = resultsServiceProvider(this._client);
           const latestBucketTimestampsByJob = await getLatestBucketTimestampByJob(foundJobIds);
 
-          jobStats.jobs.forEach((job) => {
+          body.jobs.forEach((job) => {
             const jobStat = {
               id: job.job_id,
             } as JobStat;
@@ -678,14 +671,14 @@ export class DataRecognizer {
     let results = { saved_objects: [] as any[] };
     const filteredSavedObjects = objectExistResults
       .filter((o) => o.exists === false)
-      .map((o) => o.savedObject);
+      .map((o) => o.savedObject!);
     if (filteredSavedObjects.length) {
       results = await this.savedObjectsClient.bulkCreate(
         // Add an empty migrationVersion attribute to each saved object to ensure
         // it is automatically migrated to the 7.0+ format with a references attribute.
         filteredSavedObjects.map((doc) => ({
           ...doc,
-          migrationVersion: doc.migrationVersion || {},
+          migrationVersion: {},
         }))
       );
     }
@@ -703,45 +696,45 @@ export class DataRecognizer {
           job.id = jobId;
           await this.saveJob(job);
           return { id: jobId, success: true };
-        } catch (error) {
-          return { id: jobId, success: false, error };
+        } catch ({ body }) {
+          return { id: jobId, success: false, error: body };
         }
       })
     );
   }
 
   async saveJob(job: ModuleJob) {
-    const { id: jobId, config: body } = job;
-    return this._callAsInternalUser('ml.addJob', { jobId, body });
+    return this._asInternalUser.ml.putJob({ job_id: job.id, body: job.config });
   }
 
   // save the datafeeds.
   // if any fail (e.g. it already exists), catch the error and mark the result
   // as success: false
-  async saveDatafeeds(datafeeds: ModuleDataFeed[]) {
+  async saveDatafeeds(datafeeds: ModuleDatafeed[]) {
     return await Promise.all(
       datafeeds.map(async (datafeed) => {
         try {
           await this.saveDatafeed(datafeed);
           return { id: datafeed.id, success: true, started: false };
-        } catch (error) {
-          return { id: datafeed.id, success: false, started: false, error };
+        } catch ({ body }) {
+          return { id: datafeed.id, success: false, started: false, error: body };
         }
       })
     );
   }
 
-  async saveDatafeed(datafeed: ModuleDataFeed) {
-    const { id: datafeedId, config: body } = datafeed;
-    return this._callAsInternalUser('ml.addDatafeed', {
-      datafeedId,
-      body,
-      ...this._authorizationHeader,
-    });
+  async saveDatafeed(datafeed: ModuleDatafeed) {
+    return this._asInternalUser.ml.putDatafeed(
+      {
+        datafeed_id: datafeed.id,
+        body: datafeed.config,
+      },
+      this._authorizationHeader
+    );
   }
 
   async startDatafeeds(
-    datafeeds: ModuleDataFeed[],
+    datafeeds: ModuleDatafeed[],
     start?: number,
     end?: number
   ): Promise<{ [key: string]: DatafeedResponse }> {
@@ -753,17 +746,17 @@ export class DataRecognizer {
   }
 
   async startDatafeed(
-    datafeed: ModuleDataFeed,
+    datafeed: ModuleDatafeed,
     start: number | undefined,
     end: number | undefined
   ): Promise<DatafeedResponse> {
     const result = { started: false } as DatafeedResponse;
     let opened = false;
     try {
-      const openResult = await this._callAsInternalUser('ml.openJob', {
-        jobId: datafeed.config.job_id,
+      const { body } = await this._asInternalUser.ml.openJob({
+        job_id: datafeed.config.job_id,
       });
-      opened = openResult.opened;
+      opened = body.opened;
     } catch (error) {
       // if the job is already open, a 409 will be returned.
       if (error.statusCode === 409) {
@@ -771,27 +764,27 @@ export class DataRecognizer {
       } else {
         opened = false;
         result.started = false;
-        result.error = error;
+        result.error = error.body;
       }
     }
     if (opened) {
       try {
-        const duration: { start: number; end?: number } = { start: 0 };
+        const duration: { start: string; end?: string } = { start: '0' };
         if (start !== undefined) {
-          duration.start = start;
+          duration.start = (start as unknown) as string;
         }
         if (end !== undefined) {
-          duration.end = end;
+          duration.end = (end as unknown) as string;
         }
 
-        await this._callAsInternalUser('ml.startDatafeed', {
-          datafeedId: datafeed.id,
+        await this._asInternalUser.ml.startDatafeed({
+          datafeed_id: datafeed.id,
           ...duration,
         });
         result.started = true;
-      } catch (error) {
+      } catch ({ body }) {
         result.started = false;
-        result.error = error;
+        result.error = body;
       }
     }
     return result;
@@ -994,7 +987,7 @@ export class DataRecognizer {
     timeField: string,
     query?: any
   ): Promise<{ start: number; end: number }> {
-    const fieldsService = fieldsServiceProvider(this._mlClusterClient);
+    const fieldsService = fieldsServiceProvider(this._client);
 
     const timeFieldRange = await fieldsService.getTimeFieldRange(
       this._indexPatternName,
@@ -1024,7 +1017,7 @@ export class DataRecognizer {
 
     if (estimateMML && this.jobsForModelMemoryEstimation.length > 0) {
       try {
-        const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this._mlClusterClient);
+        const calculateModelMemoryLimit = calculateModelMemoryLimitProvider(this._client);
 
         // Checks if all jobs in the module have the same time field configured
         const firstJobTimeField = this.jobsForModelMemoryEstimation[0].job.config.data_description
@@ -1073,11 +1066,13 @@ export class DataRecognizer {
           job.config.analysis_limits.model_memory_limit = modelMemoryLimit;
         }
       } catch (error) {
-        mlLog.warn(`Data recognizer could not estimate model memory limit ${error}`);
+        mlLog.warn(`Data recognizer could not estimate model memory limit ${error.body}`);
       }
     }
 
-    const { limits } = (await this._callAsInternalUser('ml.info')) as MlInfoResponse;
+    const {
+      body: { limits },
+    } = await this._asInternalUser.ml.info<MlInfoResponse>();
     const maxMml = limits.max_model_memory_limit;
 
     if (!maxMml) {
@@ -1209,6 +1204,7 @@ export class DataRecognizer {
       const job = jobs.find((j) => j.id === `${jobPrefix}${jobSpecificOverride.job_id}`);
       if (job !== undefined) {
         // delete the job_id in the override as this shouldn't be overridden
+        // @ts-expect-error
         delete jobSpecificOverride.job_id;
         merge(job.config, jobSpecificOverride);
         processArrayValues(job.config, jobSpecificOverride);
@@ -1233,6 +1229,25 @@ export class DataRecognizer {
       const overrides = Array.isArray(datafeedOverrides) ? datafeedOverrides : [datafeedOverrides];
       const { datafeeds } = moduleConfig;
 
+      // for some items in the datafeed, we should not merge.
+      // we should instead use the whole override object
+      function overwriteObjects(source: ModuleDatafeed['config'], update: DatafeedOverride) {
+        Object.entries(update).forEach(([key, val]) => {
+          if (typeof val === 'object') {
+            switch (key) {
+              case 'query':
+              case 'aggregations':
+              case 'aggs':
+              case 'script_fields':
+                source[key] = val as any;
+                break;
+              default:
+                break;
+            }
+          }
+        });
+      }
+
       // separate all the overrides.
       // the overrides which don't contain a datafeed id or a job id will be applied to all jobs in the module
       const generalOverrides: GeneralDatafeedsOverride[] = [];
@@ -1248,6 +1263,7 @@ export class DataRecognizer {
       generalOverrides.forEach((o) => {
         datafeeds.forEach(({ config }) => {
           merge(config, o);
+          overwriteObjects(config, o);
         });
       });
 
@@ -1263,6 +1279,7 @@ export class DataRecognizer {
           delete o.job_id;
           delete o.datafeed_id;
           merge(datafeed.config, o);
+          overwriteObjects(datafeed.config, o);
         }
       });
     }

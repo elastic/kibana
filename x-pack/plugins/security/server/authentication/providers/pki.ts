@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { DetailedPeerCertificate } from 'tls';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
@@ -61,7 +61,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
    * @param [state] Optional state object associated with the provider.
    */
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
+    this.logger.debug(
+      `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
+    );
 
     if (HTTPAuthorizationHeader.parseFromRequest(request) != null) {
       this.logger.debug('Cannot authenticate requests with `Authorization` header.');
@@ -105,18 +107,22 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
    * @param state State value previously stored by the provider.
    */
   public async logout(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
+    this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
-    if (!state) {
+    // Having a `null` state means that provider was specifically called to do a logout, but when
+    // session isn't defined then provider is just being probed whether or not it can perform logout.
+    if (state === undefined) {
       this.logger.debug('There is no access token to invalidate.');
       return DeauthenticationResult.notHandled();
     }
 
-    try {
-      await this.options.tokens.invalidate({ accessToken: state.accessToken });
-    } catch (err) {
-      this.logger.debug(`Failed invalidating access token: ${err.message}`);
-      return DeauthenticationResult.failed(err);
+    if (state) {
+      try {
+        await this.options.tokens.invalidate({ accessToken: state.accessToken });
+      } catch (err) {
+        this.logger.debug(`Failed invalidating access token: ${err.message}`);
+        return DeauthenticationResult.failed(err);
+      }
     }
 
     return DeauthenticationResult.redirectTo(this.options.urls.loggedOut);

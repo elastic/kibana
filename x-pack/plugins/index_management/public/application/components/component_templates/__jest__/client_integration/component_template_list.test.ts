@@ -14,11 +14,6 @@ import { API_BASE_PATH } from './helpers/constants';
 
 const { setup } = pageHelpers.componentTemplateList;
 
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
-
 describe('<ComponentTemplateList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: ComponentTemplateListTestBed;

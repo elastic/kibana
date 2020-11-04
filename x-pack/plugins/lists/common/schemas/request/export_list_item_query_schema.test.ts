@@ -28,6 +28,7 @@ describe('export_list_item_schema', () => {
 
   test('it should NOT accept an undefined for an id', () => {
     const payload = getExportListItemQuerySchemaMock();
+    // @ts-expect-error
     delete payload.list_id;
     const decoded = exportListItemQuerySchema.decode(payload);
     const checked = exactCheck(payload, decoded);

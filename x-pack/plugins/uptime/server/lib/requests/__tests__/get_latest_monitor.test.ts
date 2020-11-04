@@ -18,6 +18,11 @@ describe('getLatestMonitor', () => {
           bool: {
             filter: [
               {
+                exists: {
+                  field: 'summary',
+                },
+              },
+              {
                 range: {
                   '@timestamp': {
                     gte: 'now-1h',
@@ -32,7 +37,7 @@ describe('getLatestMonitor', () => {
           },
         },
         size: 1,
-        _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http'],
+        _source: ['url', 'monitor', 'observer', '@timestamp', 'tls.*', 'http', 'error'],
         sort: {
           '@timestamp': { order: 'desc' },
         },

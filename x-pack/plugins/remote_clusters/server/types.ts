@@ -5,12 +5,14 @@
  */
 
 import { IRouter } from 'kibana/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { CloudSetup } from '../../cloud/server';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
   cloud: CloudSetup;
+  features: FeaturesPluginSetup;
 }
 
 export interface RouteDependencies {

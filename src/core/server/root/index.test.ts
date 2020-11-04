@@ -21,11 +21,12 @@ import { rawConfigService, configService, logger, mockServer } from './index.tes
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
+import { REPO_ROOT } from '@kbn/dev-utils';
+import { getEnvOptions } from '../config/mocks';
 import { Root } from '.';
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
 
-const env = new Env('.', getEnvOptions());
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
 let mockConsoleError: jest.SpyInstance;
 

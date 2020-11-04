@@ -29,6 +29,7 @@ import {
   IGNORE_FILE_GLOBS,
   TEMPORARILY_IGNORED_PATHS,
   KEBAB_CASE_DIRECTORY_GLOBS,
+  REMOVE_EXTENSION,
 } from './casing_check_config';
 
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
@@ -143,6 +144,10 @@ async function checkForSnakeCase(log, files) {
 }
 
 export async function checkFileCasing(log, files) {
+  files = files.map((f) =>
+    matchesAnyGlob(f.getRelativePath(), REMOVE_EXTENSION) ? f.getWithoutExtension() : f
+  );
+
   await checkForKebabCase(log, files);
   await checkForSnakeCase(log, files);
 }

@@ -9,6 +9,8 @@ import { ActionsAuthorization } from './actions_authorization';
 import { actionsAuthorizationAuditLoggerMock } from './audit_logger.mock';
 import { ActionsAuthorizationAuditLogger, AuthorizationResult } from './audit_logger';
 import { ACTION_SAVED_OBJECT_TYPE, ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { AuthenticatedUser } from '../../../security/server';
+import { AuthorizationMode } from './get_authorization_mode_by_source';
 
 const request = {} as KibanaRequest;
 
@@ -19,12 +21,13 @@ const mockAuthorizationAction = (type: string, operation: string) => `${type}/${
 function mockSecurity() {
   const security = securityMock.createSetup();
   const authorization = security.authz;
+  const authentication = security.authc;
   // typescript is having trouble inferring jest's automocking
   (authorization.actions.savedObject.get as jest.MockedFunction<
     typeof authorization.actions.savedObject.get
   >).mockImplementation(mockAuthorizationAction);
   authorization.mode.useRbacForRequest.mockReturnValue(true);
-  return { authorization };
+  return { authorization, authentication };
 }
 
 beforeEach(() => {
@@ -85,7 +88,9 @@ describe('ensureAuthorized', () => {
     await actionsAuthorization.ensureAuthorized('create', 'myType');
 
     expect(authorization.actions.savedObject.get).toHaveBeenCalledWith('action', 'create');
-    expect(checkPrivileges).toHaveBeenCalledWith(mockAuthorizationAction('action', 'create'));
+    expect(checkPrivileges).toHaveBeenCalledWith({
+      kibana: mockAuthorizationAction('action', 'create'),
+    });
 
     expect(auditLogger.actionsAuthorizationSuccess).toHaveBeenCalledTimes(1);
     expect(auditLogger.actionsAuthorizationFailure).not.toHaveBeenCalled();
@@ -131,10 +136,12 @@ describe('ensureAuthorized', () => {
       ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       'create'
     );
-    expect(checkPrivileges).toHaveBeenCalledWith([
-      mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
-      mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
-    ]);
+    expect(checkPrivileges).toHaveBeenCalledWith({
+      kibana: [
+        mockAuthorizationAction(ACTION_SAVED_OBJECT_TYPE, 'get'),
+        mockAuthorizationAction(ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE, 'create'),
+      ],
+    });
 
     expect(auditLogger.actionsAuthorizationSuccess).toHaveBeenCalledTimes(1);
     expect(auditLogger.actionsAuthorizationFailure).not.toHaveBeenCalled();
@@ -184,6 +191,40 @@ describe('ensureAuthorized', () => {
       Array [
         "some-user",
         "create",
+        "myType",
+      ]
+    `);
+  });
+
+  test('exempts users from requiring privileges to execute actions when authorizationMode is Legacy', async () => {
+    const { authorization, authentication } = mockSecurity();
+    const checkPrivileges: jest.MockedFunction<ReturnType<
+      typeof authorization.checkPrivilegesDynamicallyWithRequest
+    >> = jest.fn();
+    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
+    const actionsAuthorization = new ActionsAuthorization({
+      request,
+      authorization,
+      authentication,
+      auditLogger,
+      authorizationMode: AuthorizationMode.Legacy,
+    });
+
+    authentication.getCurrentUser.mockReturnValueOnce(({
+      username: 'some-user',
+    } as unknown) as AuthenticatedUser);
+
+    await actionsAuthorization.ensureAuthorized('execute', 'myType');
+
+    expect(authorization.actions.savedObject.get).not.toHaveBeenCalled();
+    expect(checkPrivileges).not.toHaveBeenCalled();
+
+    expect(auditLogger.actionsAuthorizationSuccess).toHaveBeenCalledTimes(1);
+    expect(auditLogger.actionsAuthorizationFailure).not.toHaveBeenCalled();
+    expect(auditLogger.actionsAuthorizationSuccess.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "some-user",
+        "execute",
         "myType",
       ]
     `);

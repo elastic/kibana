@@ -5,7 +5,8 @@
  */
 
 import { AssetParts } from '../../../types';
-import { pathParts, splitPkgKey } from './index';
+import { getBufferExtractor, pathParts, splitPkgKey } from './index';
+import { untarBuffer, unzipBuffer } from './extract';
 
 const testPaths = [
   {
@@ -31,11 +32,11 @@ const testPaths = [
     },
   },
   {
-    path: 'coredns-1.0.1/dataset/stats/fields/coredns.stats.yml',
+    path: 'coredns-1.0.1/data_stream/stats/fields/coredns.stats.yml',
     assetParts: {
       dataset: 'stats',
       file: 'coredns.stats.yml',
-      path: 'coredns-1.0.1/dataset/stats/fields/coredns.stats.yml',
+      path: 'coredns-1.0.1/data_stream/stats/fields/coredns.stats.yml',
       pkgkey: 'coredns-1.0.1',
       service: '',
       type: 'fields',
@@ -78,5 +79,17 @@ describe('splitPkgKey tests', () => {
     const { pkgName, pkgVersion } = splitPkgKey('endpoint-0.13.0-alpha.1+abcd');
     expect(pkgName).toBe('endpoint');
     expect(pkgVersion).toBe('0.13.0-alpha.1+abcd');
+  });
+});
+
+describe('getBufferExtractor', () => {
+  it('returns unzipBuffer if the archive key ends in .zip', () => {
+    const extractor = getBufferExtractor('.zip');
+    expect(extractor).toBe(unzipBuffer);
+  });
+
+  it('returns untarBuffer if the key ends in anything else', () => {
+    const extractor = getBufferExtractor('.xyz');
+    expect(extractor).toBe(untarBuffer);
   });
 });

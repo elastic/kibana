@@ -4,14 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
-
-import { pipe } from 'fp-ts/lib/pipeable';
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { schema } from '@kbn/config-schema';
-
-import { throwErrors } from '../../../common/runtime_types';
+import { createValidationFunction } from '../../../common/runtime_types';
 
 import { InfraBackendLibs } from '../../lib/infra_types';
 import {
@@ -22,22 +15,16 @@ import {
 import { parseFilterQuery } from '../../utils/serialized_query';
 import { LogEntriesParams } from '../../lib/domains/log_entries_domain';
 
-const escapeHatch = schema.object({}, { unknowns: 'allow' });
-
 export const initLogEntriesRoute = ({ framework, logEntries }: InfraBackendLibs) => {
   framework.registerRoute(
     {
       method: 'post',
       path: LOG_ENTRIES_PATH,
-      validate: { body: escapeHatch },
+      validate: { body: createValidationFunction(logEntriesRequestRT) },
     },
     async (requestContext, request, response) => {
       try {
-        const payload = pipe(
-          logEntriesRequestRT.decode(request.body),
-          fold(throwErrors(Boom.badRequest), identity)
-        );
-
+        const payload = request.body;
         const {
           startTimestamp: startTimestamp,
           endTimestamp: endTimestamp,

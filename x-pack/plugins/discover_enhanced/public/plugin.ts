@@ -28,6 +28,7 @@ import {
   ACTION_EXPLORE_DATA_CHART,
   ExploreDataChartActionContext,
 } from './actions';
+import { Config } from '../common';
 
 declare module '../../../../src/plugins/ui_actions/public' {
   export interface ActionContextMapping {
@@ -55,10 +56,10 @@ export interface DiscoverEnhancedStartDependencies {
 export class DiscoverEnhancedPlugin
   implements
     Plugin<void, void, DiscoverEnhancedSetupDependencies, DiscoverEnhancedStartDependencies> {
-  public readonly config: { actions: { exploreDataInChart: { enabled: boolean } } };
+  public readonly config: Config;
 
   constructor(protected readonly context: PluginInitializerContext) {
-    this.config = context.config.get();
+    this.config = context.config.get<Config>();
   }
 
   setup(

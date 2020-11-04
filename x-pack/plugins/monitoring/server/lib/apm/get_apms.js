@@ -124,12 +124,12 @@ export async function getApms(req, apmIndexPattern, clusterUuid) {
         inner_hits: {
           name: 'earliest',
           size: 1,
-          sort: [{ 'beats_stats.timestamp': 'asc' }],
+          sort: [{ 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } }],
         },
       },
       sort: [
-        { 'beats_stats.beat.uuid': { order: 'asc' } }, // need to keep duplicate uuids grouped
-        { timestamp: { order: 'desc' } }, // need oldest timestamp to come first for rate calcs to work
+        { 'beats_stats.beat.uuid': { order: 'asc', unmapped_type: 'long' } }, // need to keep duplicate uuids grouped
+        { timestamp: { order: 'desc', unmapped_type: 'long' } }, // need oldest timestamp to come first for rate calcs to work
       ],
     },
   };

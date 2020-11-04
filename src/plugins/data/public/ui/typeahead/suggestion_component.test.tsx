@@ -44,6 +44,7 @@ describe('SuggestionComponent', () => {
         suggestion={mockSuggestion}
         innerRef={noop}
         ariaId={'suggestion-1'}
+        shouldDisplayDescription={true}
       />
     );
 
@@ -59,6 +60,7 @@ describe('SuggestionComponent', () => {
         suggestion={mockSuggestion}
         innerRef={noop}
         ariaId={'suggestion-1'}
+        shouldDisplayDescription={true}
       />
     );
 
@@ -79,6 +81,7 @@ describe('SuggestionComponent', () => {
         suggestion={mockSuggestion}
         innerRef={innerRefCallback}
         ariaId={'suggestion-1'}
+        shouldDisplayDescription={true}
       />
     );
   });
@@ -94,6 +97,7 @@ describe('SuggestionComponent', () => {
         suggestion={mockSuggestion}
         innerRef={noop}
         ariaId={'suggestion-1'}
+        shouldDisplayDescription={true}
       />
     );
 
@@ -113,6 +117,7 @@ describe('SuggestionComponent', () => {
         suggestion={mockSuggestion}
         innerRef={noop}
         ariaId={'suggestion-1'}
+        shouldDisplayDescription={true}
       />
     );
 

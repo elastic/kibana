@@ -6,9 +6,9 @@
 
 import moment from 'moment';
 import { ISavedObjectsRepository, SavedObjectsClientContract } from 'kibana/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { CollectorFetchContext, UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { PageViewParams, UptimeTelemetry, Usage } from './types';
-import { APICaller } from '../framework';
+import { ESAPICaller } from '../framework';
 import { savedObjectsAdapter } from '../../saved_objects';
 
 interface UptimeTelemetryCollector {
@@ -47,10 +47,10 @@ export class KibanaTelemetryAdapter {
             autoRefreshEnabled: {
               type: 'boolean',
             },
-            autorefreshInterval: { type: 'long' },
-            dateRangeEnd: { type: 'date' },
-            dateRangeStart: { type: 'date' },
-            monitor_frequency: { type: 'long' },
+            autorefreshInterval: { type: 'array', items: { type: 'long' } },
+            dateRangeEnd: { type: 'array', items: { type: 'date' } },
+            dateRangeStart: { type: 'array', items: { type: 'date' } },
+            monitor_frequency: { type: 'array', items: { type: 'long' } },
             monitor_name_stats: {
               avg_length: { type: 'float' },
               max_length: { type: 'long' },
@@ -69,7 +69,7 @@ export class KibanaTelemetryAdapter {
           },
         },
       },
-      fetch: async (callCluster: APICaller) => {
+      fetch: async ({ callCluster }: CollectorFetchContext) => {
         const savedObjectsClient = getSavedObjectsClient()!;
         if (savedObjectsClient) {
           await this.countNoOfUniqueMonitorAndLocations(callCluster, savedObjectsClient);
@@ -125,7 +125,7 @@ export class KibanaTelemetryAdapter {
   }
 
   public static async countNoOfUniqueMonitorAndLocations(
-    callCluster: APICaller,
+    callCluster: ESAPICaller,
     savedObjectsClient: ISavedObjectsRepository | SavedObjectsClientContract
   ) {
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);

@@ -13,19 +13,21 @@ import { APP_SEARCH_PLUGIN } from '../../../../../common/constants';
 import { SetupGuide as SetupGuideLayout } from '../../../shared/setup_guide';
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
-import GettingStarted from '../../assets/getting_started.png';
+import GettingStarted from './assets/getting_started.png';
 
 export const SetupGuide: React.FC = () => (
   <SetupGuideLayout
     productName={APP_SEARCH_PLUGIN.NAME}
     productEuiIcon="logoAppSearch"
-    standardAuthLink="https://swiftype.com/documentation/app-search/self-managed/security#standard"
-    elasticsearchNativeAuthLink="https://swiftype.com/documentation/app-search/self-managed/security#elasticsearch-native-realm"
+    standardAuthLink="https://www.elastic.co/guide/en/app-search/current/security-and-users.html#app-search-self-managed-security-and-user-management-standard"
+    elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/app-search/current/security-and-users.html#app-search-self-managed-security-and-user-management-elasticsearch-native-realm"
   >
     <SetPageChrome
-      text={i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
-        defaultMessage: 'Setup Guide',
-      })}
+      trail={[
+        i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
+          defaultMessage: 'Setup Guide',
+        }),
+      ]}
     />
     <SendTelemetry action="viewed" metric="setup_guide" />
 

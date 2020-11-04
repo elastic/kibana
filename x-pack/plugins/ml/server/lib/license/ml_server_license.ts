@@ -7,7 +7,6 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   RequestHandlerContext,
-  ILegacyScopedClusterClient,
   IScopedClusterClient,
   RequestHandler,
 } from 'kibana/server';
@@ -15,7 +14,6 @@ import {
 import { MlLicense } from '../../../common/license';
 
 type Handler = (handlerParams: {
-  legacyClient: ILegacyScopedClusterClient;
   client: IScopedClusterClient;
   request: KibanaRequest<any, any, any, any>;
   response: KibanaResponseFactory;
@@ -42,7 +40,6 @@ function guard(check: () => boolean, handler: Handler) {
     }
 
     return handler({
-      legacyClient: context.ml!.mlClient,
       client: context.core.elasticsearch.client,
       request,
       response,

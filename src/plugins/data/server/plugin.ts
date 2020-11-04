@@ -21,7 +21,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '
 import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { ConfigSchema } from '../config';
 import { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns';
-import { ISearchSetup, ISearchStart } from './search';
+import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { SearchService } from './search/search_service';
 import { QueryService } from './query/query_service';
 import { ScriptsService } from './scripts';
@@ -31,9 +31,17 @@ import { AutocompleteService } from './autocomplete';
 import { FieldFormatsService, FieldFormatsSetup, FieldFormatsStart } from './field_formats';
 import { getUiSettings } from './ui_settings';
 
+export interface DataEnhancements {
+  search: SearchEnhancements;
+}
+
 export interface DataPluginSetup {
   search: ISearchSetup;
   fieldFormats: FieldFormatsSetup;
+  /**
+   * @internal
+   */
+  __enhance: (enhancements: DataEnhancements) => void;
 }
 
 export interface DataPluginStart {
@@ -87,24 +95,31 @@ export class DataServerPlugin
 
     core.uiSettings.register(getUiSettings());
 
+    const searchSetup = this.searchService.setup(core, {
+      registerFunction: expressions.registerFunction,
+      usageCollection,
+    });
+
     return {
-      search: this.searchService.setup(core, {
-        registerFunction: expressions.registerFunction,
-        usageCollection,
-      }),
+      __enhance: (enhancements: DataEnhancements) => {
+        searchSetup.__enhance(enhancements.search);
+      },
+      search: searchSetup,
       fieldFormats: this.fieldFormats.setup(),
     };
   }
 
   public start(core: CoreStart) {
     const fieldFormats = this.fieldFormats.start();
-    return {
-      search: this.searchService.start(core, { fieldFormats }),
+    const indexPatterns = this.indexPatterns.start(core, {
       fieldFormats,
-      indexPatterns: this.indexPatterns.start(core, {
-        fieldFormats,
-        logger: this.logger.get('indexPatterns'),
-      }),
+      logger: this.logger.get('indexPatterns'),
+    });
+
+    return {
+      fieldFormats,
+      indexPatterns,
+      search: this.searchService.start(core, { fieldFormats, indexPatterns }),
     };
   }
 

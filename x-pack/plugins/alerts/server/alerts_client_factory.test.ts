@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Request } from 'hapi';
+import { Request } from '@hapi/hapi';
 import { AlertsClientFactory, AlertsClientFactoryOpts } from './alerts_client_factory';
 import { alertTypeRegistryMock } from './alert_type_registry.mock';
-import { taskManagerMock } from '../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../task_manager/server/mocks';
 import { KibanaRequest } from '../../../../src/core/server';
 import {
   savedObjectsClientMock,
@@ -20,7 +20,7 @@ import { securityMock } from '../../security/server/mocks';
 import { PluginStartContract as ActionsStartContract } from '../../actions/server';
 import { actionsMock, actionsAuthorizationMock } from '../../actions/server/mocks';
 import { featuresPluginMock } from '../../features/server/mocks';
-import { AuditLogger } from '../../security/server';
+import { LegacyAuditLogger } from '../../security/server';
 import { ALERTS_FEATURE_ID } from '../common';
 import { eventLogMock } from '../../event_log/server/mocks';
 
@@ -35,7 +35,7 @@ const features = featuresPluginMock.createStart();
 const securityPluginSetup = securityMock.createSetup();
 const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   logger: loggingSystemMock.create().get(),
-  taskManager: taskManagerMock.start(),
+  taskManager: taskManagerMock.createStart(),
   alertTypeRegistry: alertTypeRegistryMock.create(),
   getSpaceId: jest.fn(),
   getSpace: jest.fn(),
@@ -44,8 +44,10 @@ const alertsClientFactoryParams: jest.Mocked<AlertsClientFactoryOpts> = {
   actions: actionsMock.createStart(),
   features,
   eventLog: eventLogMock.createStart(),
+  kibanaVersion: '7.10.0',
 };
 const fakeRequest = ({
+  app: {},
   headers: {},
   getBasePath: () => '',
   path: '/',
@@ -83,7 +85,7 @@ test('creates an alerts client with proper constructor arguments when security i
 
   const logger = {
     log: jest.fn(),
-  } as jest.Mocked<AuditLogger>;
+  } as jest.Mocked<LegacyAuditLogger>;
   securityPluginSetup.audit.getLogger.mockReturnValue(logger);
 
   factory.create(request, savedObjectsService);
@@ -125,6 +127,7 @@ test('creates an alerts client with proper constructor arguments when security i
     createAPIKey: expect.any(Function),
     invalidateAPIKey: expect.any(Function),
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
+    kibanaVersion: '7.10.0',
   });
 });
 
@@ -168,6 +171,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
     encryptedSavedObjectsClient: alertsClientFactoryParams.encryptedSavedObjectsClient,
     getActionsClient: expect.any(Function),
     getEventLogClient: expect.any(Function),
+    kibanaVersion: '7.10.0',
   });
 });
 

@@ -19,21 +19,24 @@ import {
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { Agent, AgentConfig, AgentDetailsReassignConfigAction } from '../../../types';
+import { EuiIconTip } from '@elastic/eui';
+import { Agent, AgentPolicy, AgentDetailsReassignPolicyAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
 import { Loading, Error } from '../../../components';
 import {
   useGetOneAgent,
-  useGetOneAgentConfig,
+  useGetOneAgentPolicy,
   useLink,
   useBreadcrumbs,
   useCore,
+  useKibanaVersion,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
 import { AgentRefreshContext } from './hooks';
 import { AgentEventsTable, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+import { isAgentUpgradeable } from '../../../services';
 
 const Divider = styled.div`
   width: 0;
@@ -46,25 +49,26 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     params: { agentId, tabId = '' },
   } = useRouteMatch<{ agentId: string; tabId?: string }>();
   const { getHref } = useLink();
+  const kibanaVersion = useKibanaVersion();
   const {
     isLoading,
     isInitialRequest,
     error,
     data: agentData,
-    sendRequest: sendAgentRequest,
+    resendRequest: sendAgentRequest,
   } = useGetOneAgent(agentId, {
     pollIntervalMs: 5000,
   });
   const {
-    isLoading: isAgentConfigLoading,
-    data: agentConfigData,
-    sendRequest: sendAgentConfigRequest,
-  } = useGetOneAgentConfig(agentData?.item?.config_id);
+    isLoading: isAgentPolicyLoading,
+    data: agentPolicyData,
+    sendRequest: sendAgentPolicyRequest,
+  } = useGetOneAgentPolicy(agentData?.item?.policy_id);
 
   const {
     application: { navigateToApp },
   } = useCore();
-  const routeState = useIntraAppState<AgentDetailsReassignConfigAction>();
+  const routeState = useIntraAppState<AgentDetailsReassignPolicyAction>();
   const queryParams = new URLSearchParams(useLocation().search);
   const openReassignFlyoutOpenByDefault = queryParams.get('openReassignFlyout') === 'true';
 
@@ -85,7 +89,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             size="xs"
           >
             <FormattedMessage
-              id="xpack.ingestManager.agentDetails.viewAgentListTitle"
+              id="xpack.fleet.agentDetails.viewAgentListTitle"
               defaultMessage="View all agents"
             />
           </EuiButtonEmpty>
@@ -93,12 +97,14 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText>
             <h1>
-              {typeof agentData?.item?.local_metadata?.host === 'object' &&
-              typeof agentData?.item?.local_metadata?.host?.hostname === 'string' ? (
+              {isLoading && isInitialRequest ? (
+                <Loading />
+              ) : typeof agentData?.item?.local_metadata?.host === 'object' &&
+                typeof agentData?.item?.local_metadata?.host?.hostname === 'string' ? (
                 agentData.item.local_metadata.host.hostname
               ) : (
                 <FormattedMessage
-                  id="xpack.ingestManager.agentDetails.agentDetailsTitle"
+                  id="xpack.fleet.agentDetails.agentDetailsTitle"
                   defaultMessage="Agent '{id}'"
                   values={{
                     id: agentId,
@@ -110,8 +116,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [agentData, agentId, getHref]
+    [agentData?.item?.local_metadata?.host, agentId, getHref, isInitialRequest, isLoading]
   );
 
   const headerRightContent = useMemo(
@@ -120,28 +125,67 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
           {[
             {
-              label: i18n.translate('xpack.ingestManager.agentDetails.statusLabel', {
+              label: i18n.translate('xpack.fleet.agentDetails.statusLabel', {
                 defaultMessage: 'Status',
               }),
               content: <AgentHealth agent={agentData.item} />,
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.agentDetails.configurationLabel', {
-                defaultMessage: 'Configuration',
+              label: i18n.translate('xpack.fleet.agentDetails.policyLabel', {
+                defaultMessage: 'Policy',
               }),
-              content: isAgentConfigLoading ? (
+              content: isAgentPolicyLoading ? (
                 <Loading size="m" />
-              ) : agentConfigData?.item ? (
+              ) : agentPolicyData?.item ? (
                 <EuiLink
-                  href={getHref('configuration_details', { configId: agentData.item.config_id! })}
+                  href={getHref('policy_details', { policyId: agentData.item.policy_id! })}
                   className="eui-textBreakWord"
                 >
-                  {agentConfigData.item.name || agentData.item.config_id}
+                  {agentPolicyData.item.name || agentData.item.policy_id}
                 </EuiLink>
               ) : (
-                agentData.item.config_id || '-'
+                agentData.item.policy_id || '-'
               ),
+            },
+            { isDivider: true },
+            {
+              label: i18n.translate('xpack.fleet.agentDetails.agentVersionLabel', {
+                defaultMessage: 'Agent version',
+              }),
+              content:
+                typeof agentData.item.local_metadata.elastic === 'object' &&
+                typeof agentData.item.local_metadata.elastic.agent === 'object' &&
+                typeof agentData.item.local_metadata.elastic.agent.version === 'string' ? (
+                  <EuiFlexGroup gutterSize="s">
+                    <EuiFlexItem grow={false} className="eui-textNoWrap">
+                      {agentData.item.local_metadata.elastic.agent.version}
+                    </EuiFlexItem>
+                    {isAgentUpgradeable(agentData.item, kibanaVersion) ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiIconTip
+                          aria-label={i18n.translate(
+                            'xpack.fleet.agentDetails.upgradeAvailableTooltip',
+                            {
+                              defaultMessage: 'Upgrade available',
+                            }
+                          )}
+                          size="m"
+                          type="alert"
+                          color="warning"
+                          content={i18n.translate(
+                            'xpack.fleet.agentDetails.upgradeAvailableTooltip',
+                            {
+                              defaultMessage: 'Upgrade available',
+                            }
+                          )}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                ) : (
+                  '-'
+                ),
             },
             { isDivider: true },
             {
@@ -174,14 +218,14 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
         </EuiFlexGroup>
       ) : undefined,
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [agentConfigData, agentData, getHref, isAgentConfigLoading]
+    [agentPolicyData, agentData, getHref, isAgentPolicyLoading]
   );
 
   const headerTabs = useMemo(() => {
     return [
       {
         id: 'activity_log',
-        name: i18n.translate('xpack.ingestManager.agentDetails.subTabs.activityLogTab', {
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.activityLogTab', {
           defaultMessage: 'Activity log',
         }),
         href: getHref('fleet_agent_details', { agentId, tabId: 'activity' }),
@@ -189,7 +233,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       },
       {
         id: 'details',
-        name: i18n.translate('xpack.ingestManager.agentDetails.subTabs.detailsTab', {
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
           defaultMessage: 'Agent details',
         }),
         href: getHref('fleet_agent_details', { agentId, tabId: 'details' }),
@@ -203,7 +247,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       value={{
         refresh: () => {
           sendAgentRequest();
-          sendAgentConfigRequest();
+          sendAgentPolicyRequest();
         },
       }}
     >
@@ -218,31 +262,28 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
           <Error
             title={
               <FormattedMessage
-                id="xpack.ingestManager.agentDetails.unexceptedErrorTitle"
+                id="xpack.fleet.agentDetails.unexceptedErrorTitle"
                 defaultMessage="Error loading agent"
               />
             }
             error={error}
           />
         ) : agentData && agentData.item ? (
-          <AgentDetailsPageContent agent={agentData.item} agentConfig={agentConfigData?.item} />
+          <AgentDetailsPageContent agent={agentData.item} agentPolicy={agentPolicyData?.item} />
         ) : (
           <Error
             title={
               <FormattedMessage
-                id="xpack.ingestManager.agentDetails.agentNotFoundErrorTitle"
+                id="xpack.fleet.agentDetails.agentNotFoundErrorTitle"
                 defaultMessage="Agent not found"
               />
             }
-            error={i18n.translate(
-              'xpack.ingestManager.agentDetails.agentNotFoundErrorDescription',
-              {
-                defaultMessage: 'Cannot find agent ID {agentId}',
-                values: {
-                  agentId,
-                },
-              }
-            )}
+            error={i18n.translate('xpack.fleet.agentDetails.agentNotFoundErrorDescription', {
+              defaultMessage: 'Cannot find agent ID {agentId}',
+              values: {
+                agentId,
+              },
+            })}
           />
         )}
       </WithHeaderLayout>
@@ -252,8 +293,8 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
 const AgentDetailsPageContent: React.FunctionComponent<{
   agent: Agent;
-  agentConfig?: AgentConfig;
-}> = ({ agent, agentConfig }) => {
+  agentPolicy?: AgentPolicy;
+}> = ({ agent, agentPolicy }) => {
   useBreadcrumbs('fleet_agent_details', {
     agentHost:
       typeof agent.local_metadata.host === 'object' &&
@@ -266,7 +307,7 @@ const AgentDetailsPageContent: React.FunctionComponent<{
       <Route
         path={PAGE_ROUTING_PATHS.fleet_agent_details_details}
         render={() => {
-          return <AgentDetailsContent agent={agent} agentConfig={agentConfig} />;
+          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
       <Route

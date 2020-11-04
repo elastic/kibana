@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { LogLevel } from '../log_level';
-import { LogRecord } from '../log_record';
+import { LogLevel, LogRecord } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));

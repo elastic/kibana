@@ -11,7 +11,8 @@ import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { Alert, AlertStatus, AlertInstanceStatus, Pagination } from '../../../../types';
+import { AlertInstanceStatusValues } from '../../../../../../alerts/common';
+import { Alert, AlertInstanceSummary, AlertInstanceStatus, Pagination } from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
@@ -21,7 +22,7 @@ import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 type AlertInstancesProps = {
   alert: Alert;
   readOnly: boolean;
-  alertStatus: AlertStatus;
+  alertInstanceSummary: AlertInstanceSummary;
   requestRefresh: () => Promise<void>;
   durationEpoch?: number;
 } & Pick<AlertApis, 'muteAlertInstance' | 'unmuteAlertInstance'>;
@@ -113,7 +114,7 @@ function durationAsString(duration: Duration): string {
 export function AlertInstances({
   alert,
   readOnly,
-  alertStatus,
+  alertInstanceSummary,
   muteAlertInstance,
   unmuteAlertInstance,
   requestRefresh,
@@ -124,9 +125,12 @@ export function AlertInstances({
     size: DEFAULT_SEARCH_PAGE_SIZE,
   });
 
-  const alertInstances = Object.entries(alertStatus.instances).map(([instanceId, instance]) =>
-    alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
-  );
+  const alertInstances = Object.entries(alertInstanceSummary.instances)
+    .map(([instanceId, instance]) =>
+      alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
+    )
+    .sort((leftInstance, rightInstance) => leftInstance.sortPriority - rightInstance.sortPriority);
+
   const pageOfAlertInstances = getPage(alertInstances, pagination);
 
   const onMuteAction = async (instance: AlertInstanceListItem) => {
@@ -183,6 +187,7 @@ export interface AlertInstanceListItem {
   start?: Date;
   duration: number;
   isMuted: boolean;
+  sortPriority: number;
 }
 
 const ACTIVE_LABEL = i18n.translate(
@@ -208,11 +213,23 @@ export function alertInstanceToListItem(
       : { label: INACTIVE_LABEL, healthColor: 'subdued' };
   const start = instance?.activeStartDate ? new Date(instance.activeStartDate) : undefined;
   const duration = start ? durationEpoch - start.valueOf() : 0;
+  const sortPriority = getSortPriorityByStatus(instance?.status);
   return {
     instance: instanceId,
     status,
     start,
     duration,
     isMuted,
+    sortPriority,
   };
+}
+
+function getSortPriorityByStatus(status?: AlertInstanceStatusValues): number {
+  switch (status) {
+    case 'Active':
+      return 0;
+    case 'OK':
+      return 1;
+  }
+  return 2;
 }

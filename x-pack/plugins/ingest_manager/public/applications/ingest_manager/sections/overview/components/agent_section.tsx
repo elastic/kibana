@@ -25,15 +25,15 @@ export const OverviewAgentSection = () => {
   return (
     <EuiFlexItem component="section">
       <OverviewPanel
-        title={i18n.translate('xpack.ingestManager.overviewPageFleetPanelTitle', {
-          defaultMessage: 'Fleet',
+        title={i18n.translate('xpack.fleet.overviewPageAgentsPanelTitle', {
+          defaultMessage: 'Agents',
         })}
-        tooltip={i18n.translate('xpack.ingestManager.overviewPageFleetPanelTooltip', {
+        tooltip={i18n.translate('xpack.fleet.overviewPageFleetPanelTooltip', {
           defaultMessage:
-            'Use Fleet to enroll agents and manage their configurations from a central location.',
+            'Use Fleet to enroll agents and manage their policies from a central location.',
         })}
         linkTo={getHref('fleet_agent_list')}
-        linkToText={i18n.translate('xpack.ingestManager.overviewPageFleetPanelAction', {
+        linkToText={i18n.translate('xpack.fleet.overviewPageFleetPanelAction', {
           defaultMessage: 'View agents',
         })}
       >
@@ -44,7 +44,7 @@ export const OverviewAgentSection = () => {
             <>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewAgentTotalTitle"
+                  id="xpack.fleet.overviewAgentTotalTitle"
                   defaultMessage="Total agents"
                 />
               </EuiDescriptionListTitle>
@@ -53,7 +53,7 @@ export const OverviewAgentSection = () => {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewAgentActiveTitle"
+                  id="xpack.fleet.overviewAgentActiveTitle"
                   defaultMessage="Active"
                 />
               </EuiDescriptionListTitle>
@@ -62,7 +62,7 @@ export const OverviewAgentSection = () => {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewAgentOfflineTitle"
+                  id="xpack.fleet.overviewAgentOfflineTitle"
                   defaultMessage="Offline"
                 />
               </EuiDescriptionListTitle>
@@ -70,10 +70,7 @@ export const OverviewAgentSection = () => {
                 <EuiI18nNumber value={agentStatusRequest.data?.results?.offline ?? 0} />
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
-                <FormattedMessage
-                  id="xpack.ingestManager.overviewAgentErrorTitle"
-                  defaultMessage="Error"
-                />
+                <FormattedMessage id="xpack.fleet.overviewAgentErrorTitle" defaultMessage="Error" />
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 <EuiI18nNumber value={agentStatusRequest.data?.results?.error ?? 0} />

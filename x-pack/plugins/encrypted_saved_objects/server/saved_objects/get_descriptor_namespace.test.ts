@@ -66,5 +66,16 @@ describe('getDescriptorNamespace', () => {
         'foo-namespace'
       );
     });
+
+    it('returns the provided namespace if it is in array format', () => {
+      const mockBaseTypeRegistry = savedObjectsTypeRegistryMock.create();
+      mockBaseTypeRegistry.isSingleNamespace.mockReturnValue(true);
+      mockBaseTypeRegistry.isMultiNamespace.mockReturnValue(false);
+      mockBaseTypeRegistry.isNamespaceAgnostic.mockReturnValue(false);
+
+      expect(getDescriptorNamespace(mockBaseTypeRegistry, 'singletype', ['foo-namespace'])).toEqual(
+        'foo-namespace'
+      );
+    });
   });
 });

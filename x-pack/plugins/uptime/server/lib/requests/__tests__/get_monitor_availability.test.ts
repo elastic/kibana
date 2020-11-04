@@ -203,28 +203,32 @@ describe('monitor availability', () => {
                       },
                     },
                   },
-                ],
-                "minimum_should_match": 1,
-                "should": Array [
                   Object {
                     "bool": Object {
                       "minimum_should_match": 1,
                       "should": Array [
                         Object {
-                          "match_phrase": Object {
-                            "monitor.id": "apm-dev",
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match_phrase": Object {
+                                  "monitor.id": "apm-dev",
+                                },
+                              },
+                            ],
                           },
                         },
-                      ],
-                    },
-                  },
-                  Object {
-                    "bool": Object {
-                      "minimum_should_match": 1,
-                      "should": Array [
                         Object {
-                          "match_phrase": Object {
-                            "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                          "bool": Object {
+                            "minimum_should_match": 1,
+                            "should": Array [
+                              Object {
+                                "match_phrase": Object {
+                                  "monitor.id": "auto-http-0X8D6082B94BBE3B8A",
+                                },
+                              },
+                            ],
                           },
                         },
                       ],
@@ -795,6 +799,133 @@ describe('monitor availability', () => {
             "index": "heartbeat-8*",
           },
         ]
+      `);
+    });
+
+    it('does not overwrite filters', async () => {
+      const [callES, esMock] = setupMockEsCompositeQuery<
+        AvailabilityKey,
+        GetMonitorAvailabilityResult,
+        AvailabilityDoc
+      >(
+        [
+          {
+            bucketCriteria: [],
+          },
+        ],
+        genBucketItem
+      );
+      await getMonitorAvailability({
+        callES,
+        dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
+        range: 3,
+        rangeUnit: 's',
+        threshold: '99',
+        filters: JSON.stringify({ bool: { filter: [{ term: { 'monitor.id': 'foo' } }] } }),
+      });
+      const [, params] = esMock.callAsCurrentUser.mock.calls[0];
+      expect(params).toMatchInlineSnapshot(`
+        Object {
+          "body": Object {
+            "aggs": Object {
+              "monitors": Object {
+                "aggs": Object {
+                  "down_sum": Object {
+                    "sum": Object {
+                      "field": "summary.down",
+                      "missing": 0,
+                    },
+                  },
+                  "fields": Object {
+                    "top_hits": Object {
+                      "size": 1,
+                      "sort": Array [
+                        Object {
+                          "@timestamp": Object {
+                            "order": "desc",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  "filtered": Object {
+                    "bucket_selector": Object {
+                      "buckets_path": Object {
+                        "threshold": "ratio.value",
+                      },
+                      "script": "params.threshold < 0.99",
+                    },
+                  },
+                  "ratio": Object {
+                    "bucket_script": Object {
+                      "buckets_path": Object {
+                        "downTotal": "down_sum",
+                        "upTotal": "up_sum",
+                      },
+                      "script": "
+                        if (params.upTotal + params.downTotal > 0) {
+                          return params.upTotal / (params.upTotal + params.downTotal);
+                        } return null;",
+                    },
+                  },
+                  "up_sum": Object {
+                    "sum": Object {
+                      "field": "summary.up",
+                      "missing": 0,
+                    },
+                  },
+                },
+                "composite": Object {
+                  "size": 2000,
+                  "sources": Array [
+                    Object {
+                      "monitorId": Object {
+                        "terms": Object {
+                          "field": "monitor.id",
+                        },
+                      },
+                    },
+                    Object {
+                      "location": Object {
+                        "terms": Object {
+                          "field": "observer.geo.name",
+                          "missing_bucket": true,
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "range": Object {
+                      "@timestamp": Object {
+                        "gte": "now-3s",
+                        "lte": "now",
+                      },
+                    },
+                  },
+                  Object {
+                    "bool": Object {
+                      "filter": Array [
+                        Object {
+                          "term": Object {
+                            "monitor.id": "foo",
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 0,
+          },
+          "index": "heartbeat-8*",
+        }
       `);
     });
   });

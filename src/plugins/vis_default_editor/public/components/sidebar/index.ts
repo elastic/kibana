@@ -18,5 +18,3 @@
  */
 
 export { DefaultEditorSideBar } from './sidebar';
-export { DefaultEditorDataTab } from './data_tab';
-export { OptionTab } from './navbar';

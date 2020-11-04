@@ -30,7 +30,7 @@ Lens has a lot of UI elements – to make it easier to refer to them in issues o
 * **Config panel** Panel to the right showing configuration of the current chart, separated by layers
   * **Layer panel** One of multiple panels in the config panel, holding configuration for separate layers
     * **Dimension trigger** Chart dimension like "X axis", "Break down by" or "Slice by" in the config panel
-    * **Dimension popover** Popover shown when clicking a dimension trigger
+    * **Dimension container** Container shown when clicking a dimension trigger and contains the dimension settints
     * **Layer settings popover** Popover shown when clicking the button in the top left of a layer panel
 * **Workspace panel** Center panel containing the chart preview, title and toolbar
   * **Chart preview** Full-sized rendered chart in the center of the screen

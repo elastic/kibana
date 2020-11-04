@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { errors } from 'elasticsearch';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
@@ -173,13 +173,13 @@ describe('TokenAuthenticationProvider', () => {
       await expect(
         provider.authenticate(
           httpServerMock.createKibanaRequest({
-            path: '/s/foo/some-path # that needs to be encoded',
+            path: '/s/foo/some path that needs to be encoded',
           }),
           null
         )
       ).resolves.toEqual(
         AuthenticationResult.redirectTo(
-          '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome-path%20%23%20that%20needs%20to%20be%20encoded'
+          '/mock-server-basepath/login?next=%2Fmock-server-basepath%2Fs%2Ffoo%2Fsome%2520path%2520that%2520needs%2520to%2520be%2520encoded'
         )
       );
     });
@@ -427,8 +427,14 @@ describe('TokenAuthenticationProvider', () => {
 
       await expect(provider.logout(request)).resolves.toEqual(DeauthenticationResult.notHandled());
 
+      expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();
+    });
+
+    it('redirects to login view if state is `null`.', async () => {
+      const request = httpServerMock.createKibanaRequest();
+
       await expect(provider.logout(request, null)).resolves.toEqual(
-        DeauthenticationResult.notHandled()
+        DeauthenticationResult.redirectTo('/mock-server-basepath/login?msg=LOGGED_OUT')
       );
 
       expect(mockOptions.tokens.invalidate).not.toHaveBeenCalled();

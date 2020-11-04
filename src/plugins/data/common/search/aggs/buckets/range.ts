@@ -41,6 +41,7 @@ export interface AggParamsRange extends BaseAggParams {
   ranges?: Array<{
     from: number;
     to: number;
+    label?: string;
   }>;
 }
 
@@ -71,14 +72,16 @@ export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDepend
 
       key = keys.get(id);
       if (!key) {
-        key = new RangeKey(bucket);
+        key = new RangeKey(bucket, agg.params.ranges);
         keys.set(id, key);
       }
 
       return key;
     },
     getSerializedFormat(agg) {
-      const format = agg.params.field ? agg.params.field.format.toJSON() : {};
+      const format = agg.params.field
+        ? agg.aggConfigs.indexPattern.getFormatterForField(agg.params.field).toJSON()
+        : { id: undefined, params: undefined };
       return {
         id: 'range',
         params: {
@@ -100,7 +103,11 @@ export const getRangeBucketAgg = ({ getFieldFormatsStart }: RangeBucketAggDepend
           { from: 1000, to: 2000 },
         ],
         write(aggConfig, output) {
-          output.params.ranges = aggConfig.params.ranges;
+          output.params.ranges = (aggConfig.params as AggParamsRange).ranges?.map((range) => ({
+            to: range.to,
+            from: range.from,
+          }));
+
           output.params.keyed = true;
         },
       },

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { notFound } from 'boom';
+import { notFound } from '@hapi/boom';
 import { set } from '@elastic/safer-lodash-set';
 import { findIndex } from 'lodash';
 import { getClustersStats } from './get_clusters_stats';
@@ -119,67 +119,75 @@ export async function getClustersFromRequest(
     // add alerts data
     if (isInCodePath(codePaths, [CODE_PATH_ALERTS])) {
       const alertsClient = req.getAlertsClient();
-      if (alertsClient) {
-        for (const cluster of clusters) {
-          const verification = verifyMonitoringLicense(req.server);
-          if (!verification.enabled) {
-            // return metadata detailing that alerts is disabled because of the monitoring cluster license
-            cluster.alerts = {
-              alertsMeta: {
-                enabled: verification.enabled,
-                message: verification.message, // NOTE: this is only defined when the alert feature is disabled
-              },
-              list: {},
-            };
-            continue;
-          }
+      for (const cluster of clusters) {
+        const verification = verifyMonitoringLicense(req.server);
+        if (!verification.enabled) {
+          // return metadata detailing that alerts is disabled because of the monitoring cluster license
+          cluster.alerts = {
+            alertsMeta: {
+              enabled: verification.enabled,
+              message: verification.message, // NOTE: this is only defined when the alert feature is disabled
+            },
+            list: {},
+          };
+          continue;
+        }
 
-          // check the license type of the production cluster for alerts feature support
-          const license = cluster.license || {};
-          const prodLicenseInfo = checkLicenseForAlerts(
-            license.type,
-            license.status === 'active',
-            'production'
-          );
-          if (prodLicenseInfo.clusterAlerts.enabled) {
-            cluster.alerts = {
-              list: await fetchStatus(
-                alertsClient,
-                req.server.plugins.monitoring.info,
-                undefined,
-                cluster.cluster_uuid,
-                start,
-                end,
-                []
-              ),
-              alertsMeta: {
-                enabled: true,
-              },
-            };
-            continue;
-          }
-
+        if (!alertsClient) {
           cluster.alerts = {
             list: {},
             alertsMeta: {
-              enabled: true,
-            },
-            clusterMeta: {
               enabled: false,
-              message: i18n.translate(
-                'xpack.monitoring.clusterAlerts.unsupportedClusterAlertsDescription',
-                {
-                  defaultMessage:
-                    'Cluster [{clusterName}] license type [{licenseType}] does not support Cluster Alerts',
-                  values: {
-                    clusterName: cluster.cluster_name,
-                    licenseType: `${license.type}`,
-                  },
-                }
-              ),
             },
           };
+          continue;
         }
+
+        // check the license type of the production cluster for alerts feature support
+        const license = cluster.license || {};
+        const prodLicenseInfo = checkLicenseForAlerts(
+          license.type,
+          license.status === 'active',
+          'production'
+        );
+        if (prodLicenseInfo.clusterAlerts.enabled) {
+          cluster.alerts = {
+            list: await fetchStatus(
+              alertsClient,
+              req.server.plugins.monitoring.info,
+              undefined,
+              cluster.cluster_uuid,
+              start,
+              end,
+              []
+            ),
+            alertsMeta: {
+              enabled: true,
+            },
+          };
+          continue;
+        }
+
+        cluster.alerts = {
+          list: {},
+          alertsMeta: {
+            enabled: false,
+          },
+          clusterMeta: {
+            enabled: false,
+            message: i18n.translate(
+              'xpack.monitoring.clusterAlerts.unsupportedClusterAlertsDescription',
+              {
+                defaultMessage:
+                  'Cluster [{clusterName}] license type [{licenseType}] does not support Cluster Alerts',
+                values: {
+                  clusterName: cluster.cluster_name,
+                  licenseType: `${license.type}`,
+                },
+              }
+            ),
+          },
+        };
       }
     }
   }

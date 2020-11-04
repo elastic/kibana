@@ -17,9 +17,27 @@
  * under the License.
  */
 
-// @ts-expect-error
-export default function ({ loadTestFile }) {
+import { PluginFunctionalProviderContext } from '../../services';
+
+export default function ({
+  getPageObjects,
+  getService,
+  loadTestFile,
+}: PluginFunctionalProviderContext) {
+  const esArchiver = getService('esArchiver');
+  const PageObjects = getPageObjects(['common', 'header', 'settings']);
+
   describe('data plugin', () => {
+    before(async () => {
+      await esArchiver.loadIfNeeded(
+        '../functional/fixtures/es_archiver/getting_started/shakespeare'
+      );
+      await PageObjects.common.navigateToApp('settings');
+      await PageObjects.settings.createIndexPattern('shakespeare', '');
+    });
+
+    loadTestFile(require.resolve('./search'));
+    loadTestFile(require.resolve('./session'));
     loadTestFile(require.resolve('./index_patterns'));
   });
 }

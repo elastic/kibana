@@ -16,11 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../../es_query';
+type KueryNode = any;
 
 import { getRootPropertiesObjects, IndexMapping } from '../../../mappings';
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
+import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
 
 /**
  * Gets the types based on the type. Uses mappings to support
@@ -39,17 +41,27 @@ function getTypes(mappings: IndexMapping, type?: string | string[]) {
 }
 
 /**
- *  Get the field params based on the types and searchFields
+ *  Get the field params based on the types, searchFields, and rootSearchFields
  */
-function getFieldsForTypes(types: string[], searchFields?: string[]) {
-  if (!searchFields || !searchFields.length) {
+function getFieldsForTypes(
+  types: string[],
+  searchFields: string[] = [],
+  rootSearchFields: string[] = []
+) {
+  if (!searchFields.length && !rootSearchFields.length) {
     return {
       lenient: true,
       fields: ['*'],
     };
   }
 
-  let fields: string[] = [];
+  let fields = [...rootSearchFields];
+  fields.forEach((field) => {
+    if (field.indexOf('.') !== -1) {
+      throw new Error(`rootSearchFields entry "${field}" is invalid: cannot contain "." character`);
+    }
+  });
+
   for (const field of searchFields) {
     fields = fields.concat(types.map((prefix) => `${prefix}.${field}`));
   }
@@ -63,7 +75,7 @@ function getFieldsForTypes(types: string[], searchFields?: string[]) {
  */
 function getClauseForType(
   registry: ISavedObjectTypeRegistry,
-  namespaces: string[] = ['default'],
+  namespaces: string[] = [DEFAULT_NAMESPACE_STRING],
   type: string
 ) {
   if (namespaces.length === 0) {
@@ -72,17 +84,20 @@ function getClauseForType(
   if (registry.isMultiNamespace(type)) {
     return {
       bool: {
-        must: [{ term: { type } }, { terms: { namespaces } }],
+        must: [
+          { term: { type } },
+          { terms: { namespaces: [...namespaces, ALL_NAMESPACES_STRING] } },
+        ],
         must_not: [{ exists: { field: 'namespace' } }],
       },
     };
   } else if (registry.isSingleNamespace(type)) {
     const should: Array<Record<string, any>> = [];
-    const eligibleNamespaces = namespaces.filter((namespace) => namespace !== 'default');
+    const eligibleNamespaces = namespaces.filter((x) => x !== DEFAULT_NAMESPACE_STRING);
     if (eligibleNamespaces.length > 0) {
       should.push({ terms: { namespace: eligibleNamespaces } });
     }
-    if (namespaces.includes('default')) {
+    if (namespaces.includes(DEFAULT_NAMESPACE_STRING)) {
       should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
     }
     if (should.length === 0) {
@@ -107,21 +122,70 @@ function getClauseForType(
   };
 }
 
-interface HasReferenceQueryParams {
+export interface HasReferenceQueryParams {
   type: string;
   id: string;
 }
+
+export type SearchOperator = 'AND' | 'OR';
 
 interface QueryParams {
   mappings: IndexMapping;
   registry: ISavedObjectTypeRegistry;
   namespaces?: string[];
   type?: string | string[];
+  typeToNamespacesMap?: Map<string, string[] | undefined>;
   search?: string;
+  defaultSearchOperator?: SearchOperator;
   searchFields?: string[];
-  defaultSearchOperator?: string;
-  hasReference?: HasReferenceQueryParams;
+  rootSearchFields?: string[];
+  hasReference?: HasReferenceQueryParams | HasReferenceQueryParams[];
+  hasReferenceOperator?: SearchOperator;
   kueryNode?: KueryNode;
+}
+
+function getReferencesFilter(
+  references: HasReferenceQueryParams[],
+  operator: SearchOperator = 'OR'
+) {
+  if (operator === 'AND') {
+    return {
+      bool: {
+        must: references.map(getClauseForReference),
+      },
+    };
+  } else {
+    return {
+      bool: {
+        should: references.map(getClauseForReference),
+        minimum_should_match: 1,
+      },
+    };
+  }
+}
+
+export function getClauseForReference(reference: HasReferenceQueryParams) {
+  return {
+    nested: {
+      path: 'references',
+      query: {
+        bool: {
+          must: [
+            {
+              term: {
+                'references.id': reference.id,
+              },
+            },
+            {
+              term: {
+                'references.type': reference.type,
+              },
+            },
+          ],
+        },
+      },
+    },
+  };
 }
 
 /**
@@ -132,13 +196,23 @@ export function getQueryParams({
   registry,
   namespaces,
   type,
+  typeToNamespacesMap,
   search,
   searchFields,
+  rootSearchFields,
   defaultSearchOperator,
   hasReference,
+  hasReferenceOperator,
   kueryNode,
 }: QueryParams) {
-  const types = getTypes(mappings, type);
+  const types = getTypes(
+    mappings,
+    typeToNamespacesMap ? Array.from(typeToNamespacesMap.keys()) : type
+  );
+
+  if (hasReference && !Array.isArray(hasReference)) {
+    hasReference = [hasReference];
+  }
 
   // A de-duplicated set of namespaces makes for a more effecient query.
   //
@@ -149,45 +223,27 @@ export function getQueryParams({
   // since that is consistent with how a single-namespace search behaves in the OSS distribution. Leaving the wildcard in place
   // would result in no results being returned, as the wildcard is treated as a literal, and not _actually_ as a wildcard.
   // We had a good discussion around the tradeoffs here: https://github.com/elastic/kibana/pull/67644#discussion_r441055716
-  const normalizedNamespaces = namespaces
-    ? Array.from(
-        new Set(namespaces.map((namespace) => (namespace === '*' ? 'default' : namespace)))
-      )
-    : undefined;
+  const normalizeNamespaces = (namespacesToNormalize?: string[]) =>
+    namespacesToNormalize
+      ? Array.from(
+          new Set(namespacesToNormalize.map((x) => (x === '*' ? DEFAULT_NAMESPACE_STRING : x)))
+        )
+      : undefined;
 
   const bool: any = {
     filter: [
       ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
+      ...(hasReference && hasReference.length
+        ? [getReferencesFilter(hasReference, hasReferenceOperator)]
+        : []),
       {
         bool: {
-          must: hasReference
-            ? [
-                {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            term: {
-                              'references.id': hasReference.id,
-                            },
-                          },
-                          {
-                            term: {
-                              'references.type': hasReference.type,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                },
-              ]
-            : undefined,
-          should: types.map((shouldType) =>
-            getClauseForType(registry, normalizedNamespaces, shouldType)
-          ),
+          should: types.map((shouldType) => {
+            const normalizedNamespaces = normalizeNamespaces(
+              typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces
+            );
+            return getClauseForType(registry, normalizedNamespaces, shouldType);
+          }),
           minimum_should_match: 1,
         },
       },
@@ -199,7 +255,7 @@ export function getQueryParams({
       {
         simple_query_string: {
           query: search,
-          ...getFieldsForTypes(types, searchFields),
+          ...getFieldsForTypes(types, searchFields, rootSearchFields),
           ...(defaultSearchOperator ? { default_operator: defaultSearchOperator } : {}),
         },
       },

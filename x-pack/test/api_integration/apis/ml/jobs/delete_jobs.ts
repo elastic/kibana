@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG } from './common_jobs';
 
@@ -44,8 +44,8 @@ export default ({ getService }: FtrProviderContext) => {
       },
       // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
       },
     },
     {
@@ -56,8 +56,8 @@ export default ({ getService }: FtrProviderContext) => {
       },
       // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
       },
     },
   ];

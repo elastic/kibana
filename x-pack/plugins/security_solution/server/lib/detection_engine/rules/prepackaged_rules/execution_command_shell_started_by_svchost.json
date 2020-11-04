@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies a suspicious parent child process relationship with cmd.exe descending from svchost.exe",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -16,7 +17,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -29,12 +33,12 @@
       "technique": [
         {
           "id": "T1059",
-          "name": "Command-Line Interface",
+          "name": "Command and Scripting Interpreter",
           "reference": "https://attack.mitre.org/techniques/T1059/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

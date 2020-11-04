@@ -6,8 +6,8 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { Request } from 'hapi';
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { Request } from '@hapi/hapi';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { mlLog } from '../client/log';
 import { capabilitiesProvider } from '../lib/capabilities';
@@ -21,17 +21,16 @@ export function systemRoutes(
   { router, mlLicense }: RouteInitialization,
   { spaces, cloud, resolveMlCapabilities }: SystemRouteDeps
 ) {
-  async function getNodeCount(legacyClient: ILegacyScopedClusterClient) {
-    const filterPath = 'nodes.*.attributes';
-    const resp = await legacyClient.callAsInternalUser('nodes.info', {
-      filterPath,
+  async function getNodeCount(client: IScopedClusterClient) {
+    const { body } = await client.asInternalUser.nodes.info({
+      filter_path: 'nodes.*.attributes',
     });
 
     let count = 0;
-    if (typeof resp.nodes === 'object') {
-      Object.keys(resp.nodes).forEach((k) => {
-        if (resp.nodes[k].attributes !== undefined) {
-          const maxOpenJobs = resp.nodes[k].attributes['ml.max_open_jobs'];
+    if (typeof body.nodes === 'object') {
+      Object.keys(body.nodes).forEach((k) => {
+        if (body.nodes[k].attributes !== undefined) {
+          const maxOpenJobs = body.nodes[k].attributes['ml.max_open_jobs'];
           if (maxOpenJobs !== null && maxOpenJobs > 0) {
             count++;
           }
@@ -58,15 +57,15 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const { callAsCurrentUser, callAsInternalUser } = legacyClient;
+        const { asCurrentUser, asInternalUser } = client;
         let upgradeInProgress = false;
         try {
-          const info = await callAsInternalUser('ml.info');
+          const { body } = await asInternalUser.ml.info();
           // if ml indices are currently being migrated, upgrade_mode will be set to true
           // pass this back with the privileges to allow for the disabling of UI controls.
-          upgradeInProgress = info.upgrade_mode === true;
+          upgradeInProgress = body.upgrade_mode === true;
         } catch (error) {
           // if the ml.info check fails, it could be due to the user having insufficient privileges
           // most likely they do not have the ml_user role and therefore will be blocked from using
@@ -90,11 +89,12 @@ export function systemRoutes(
             },
           });
         } else {
-          const body = request.body;
-          const resp = await callAsCurrentUser('ml.privilegeCheck', { body });
-          resp.upgradeInProgress = upgradeInProgress;
+          const { body } = await asCurrentUser.security.hasPrivileges({ body: request.body });
           return response.ok({
-            body: resp,
+            body: {
+              ...body,
+              upgradeInProgress,
+            },
           });
         }
       } catch (error) {
@@ -115,7 +115,7 @@ export function systemRoutes(
       path: '/api/ml/ml_capabilities',
       validate: false,
     },
-    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         // if spaces is disabled force isMlEnabledInSpace to be true
         const { isMlEnabledInSpace } =
@@ -129,7 +129,7 @@ export function systemRoutes(
         }
 
         const { getCapabilities } = capabilitiesProvider(
-          legacyClient,
+          client,
           mlCapabilities,
           mlLicense,
           isMlEnabledInSpace
@@ -159,10 +159,10 @@ export function systemRoutes(
       },
     },
 
-    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         return response.ok({
-          body: await getNodeCount(legacyClient),
+          body: await getNodeCount(client),
         });
       } catch (e) {
         return response.customError(wrapError(e));
@@ -185,12 +185,12 @@ export function systemRoutes(
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
-        const info = await legacyClient.callAsInternalUser('ml.info');
+        const { body } = await client.asInternalUser.ml.info();
         const cloudId = cloud && cloud.cloudId;
         return response.ok({
-          body: { ...info, cloudId },
+          body: { ...body, cloudId },
         });
       } catch (error) {
         return response.customError(wrapError(error));
@@ -216,10 +216,11 @@ export function systemRoutes(
         tags: ['access:ml:canGetJobs'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
+        const { body } = await client.asCurrentUser.search(request.body);
         return response.ok({
-          body: await legacyClient.callAsCurrentUser('search', request.body),
+          body,
         });
       } catch (error) {
         return response.customError(wrapError(error));
@@ -240,25 +241,24 @@ export function systemRoutes(
         body: schema.object({ index: schema.string() }),
       },
       options: {
-        tags: ['access:ml:canGetJobs'],
+        tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ legacyClient, request, response }) => {
+    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const { index } = request.body;
 
         const options = {
           index: [index],
           fields: ['*'],
-          ignoreUnavailable: true,
-          allowNoIndices: true,
-          ignore: 404,
+          ignore_unavailable: true,
+          allow_no_indices: true,
         };
 
-        const fieldsResult = await legacyClient.callAsCurrentUser('fieldCaps', options);
+        const { body } = await client.asCurrentUser.fieldCaps(options);
         const result = { exists: false };
 
-        if (Array.isArray(fieldsResult.indices) && fieldsResult.indices.length !== 0) {
+        if (Array.isArray(body.indices) && body.indices.length !== 0) {
           result.exists = true;
         }
 

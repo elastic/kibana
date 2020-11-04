@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import httpProxy from 'http-proxy';
 import http from 'http';
-import getPort from 'get-port';
 import expect from '@kbn/expect';
 import { URL, format as formatUrl } from 'url';
-import { getHttpProxyServer, getProxyUrl } from '../../../../common/lib/get_proxy_server';
+import getPort from 'get-port';
+import { getHttpProxyServer } from '../../../../common/lib/get_proxy_server';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getExternalServiceSimulatorPath,
@@ -19,6 +20,7 @@ import {
 const defaultValues: Record<string, any> = {
   headers: null,
   method: 'post',
+  hasAuth: true,
 };
 
 function parsePort(url: Record<string, string>): Record<string, string | null | number> {
@@ -71,23 +73,26 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     let webhookSimulatorURL: string = '';
     let webhookServer: http.Server;
     let kibanaURL: string = '<could not determine kibana url>';
-    let proxyServer: any;
+    let proxyServer: httpProxy | undefined;
     let proxyHaveBeenCalled = false;
+
     // need to wait for kibanaServer to settle ...
     before(async () => {
       webhookServer = await getWebhookServer();
-      const availablePort = await getPort({ port: 9000 });
+      const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
       webhookServer.listen(availablePort);
       webhookSimulatorURL = `http://localhost:${availablePort}`;
 
-      proxyServer = getHttpProxyServer(webhookSimulatorURL, () => {
-        proxyHaveBeenCalled = true;
-      });
-      const proxyUrl = getProxyUrl(configService.get('kbnTestServer.serverArgs'));
-      proxyServer.listen(Number(proxyUrl.port));
-
       kibanaURL = kibanaServer.resolveUrl(
         getExternalServiceSimulatorPath(ExternalServiceSimulator.WEBHOOK)
+      );
+
+      proxyServer = await getHttpProxyServer(
+        webhookSimulatorURL,
+        configService.get('kbnTestServer.serverArgs'),
+        () => {
+          proxyHaveBeenCalled = true;
+        }
       );
     });
 
@@ -137,6 +142,77 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should remove headers when a webhook is updated', async () => {
+      const { body: createdAction } = await supertest
+        .post('/api/actions/action')
+        .set('kbn-xsrf', 'test')
+        .send({
+          name: 'A generic Webhook action',
+          actionTypeId: '.webhook',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+          },
+          config: {
+            url: webhookSimulatorURL,
+            headers: {
+              someHeader: '123',
+            },
+          },
+        })
+        .expect(200);
+
+      expect(createdAction).to.eql({
+        id: createdAction.id,
+        isPreconfigured: false,
+        name: 'A generic Webhook action',
+        actionTypeId: '.webhook',
+        config: {
+          ...defaultValues,
+          url: webhookSimulatorURL,
+          headers: {
+            someHeader: '123',
+          },
+        },
+      });
+
+      await supertest
+        .put(`/api/actions/action/${createdAction.id}`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A generic Webhook action',
+          secrets: {
+            user: 'username',
+            password: 'mypassphrase',
+          },
+          config: {
+            url: webhookSimulatorURL,
+            headers: {
+              someOtherHeader: '456',
+            },
+          },
+        })
+        .expect(200);
+
+      const { body: fetchedAction } = await supertest
+        .get(`/api/actions/action/${createdAction.id}`)
+        .expect(200);
+
+      expect(fetchedAction).to.eql({
+        id: fetchedAction.id,
+        isPreconfigured: false,
+        name: 'A generic Webhook action',
+        actionTypeId: '.webhook',
+        config: {
+          ...defaultValues,
+          url: webhookSimulatorURL,
+          headers: {
+            someOtherHeader: '456',
+          },
+        },
+      });
+    });
+
     it('should send authentication to the webhook target', async () => {
       const webhookActionId = await createWebhookAction(webhookSimulatorURL, {}, kibanaURL);
       const { body: result } = await supertest
@@ -150,7 +226,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(result.status).to.eql('ok');
-      expect(proxyHaveBeenCalled).to.equal(true);
     });
 
     it('should support the POST method against webhook target', async () => {
@@ -188,10 +263,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
+      expect(proxyHaveBeenCalled).to.equal(true);
       expect(result.status).to.eql('ok');
     });
 
-    it('should handle target webhooks that are not whitelisted', async () => {
+    it('should handle target webhooks that are not added to allowedHosts', async () => {
       const { body: result } = await supertest
         .post('/api/actions/action')
         .set('kbn-xsrf', 'test')
@@ -203,13 +279,13 @@ export default function webhookTest({ getService }: FtrProviderContext) {
             password: 'mypassphrase',
           },
           config: {
-            url: 'http://a.none.whitelisted.webhook/endpoint',
+            url: 'http://a.none.allowedHosts.webhook/endpoint',
           },
         })
         .expect(400);
 
       expect(result.error).to.eql('Bad Request');
-      expect(result.message).to.match(/is not whitelisted in the Kibana config/);
+      expect(result.message).to.match(/is not added to the Kibana config/);
     });
 
     it('should handle unreachable webhook targets', async () => {
@@ -251,7 +327,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
 
     after(() => {
       webhookServer.close();
-      proxyServer.close();
+      if (proxyServer) {
+        proxyServer.close();
+      }
     });
   });
 }

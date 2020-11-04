@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsManagement } from './management';
 
 type Management = PublicMethodsOf<SavedObjectsManagement>;
@@ -28,6 +28,7 @@ const createManagementMock = () => {
     getTitle: jest.fn(),
     getEditUrl: jest.fn(),
     getInAppUrl: jest.fn(),
+    getNamespaceType: jest.fn(),
   };
   return mocked;
 };

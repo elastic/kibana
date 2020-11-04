@@ -78,6 +78,7 @@ export interface InheritedChildInput extends IndexSignature {
   viewMode: ViewMode;
   hidePanelTitles?: boolean;
   id: string;
+  searchSessionId?: string;
 }
 
 export interface DashboardContainerOptions {
@@ -184,6 +185,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
           },
         },
       },
+      lastReloadRequestTime: new Date().getTime(),
     });
   }
 
@@ -191,14 +193,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
     E extends IEmbeddable<EEI, EEO> = IEmbeddable<EEI, EEO>
-  >(type: string, explicitInput: Partial<EEI>) {
-    if (explicitInput.id && this.input.panels[explicitInput.id]) {
-      return this.replacePanel(this.input.panels[explicitInput.id], {
+  >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
+    const idToReplace = embeddableId || explicitInput.id;
+    if (idToReplace && this.input.panels[idToReplace]) {
+      return this.replacePanel(this.input.panels[idToReplace], {
         type,
         explicitInput: {
           ...explicitInput,
-          // TS does not catch up with the typeguard above, so it needs to be explicit
-          id: explicitInput.id,
+          id: idToReplace,
         },
       });
     }
@@ -221,7 +223,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   protected getInheritedInput(id: string): InheritedChildInput {
-    const { viewMode, refreshConfig, timeRange, query, hidePanelTitles, filters } = this.input;
+    const {
+      viewMode,
+      refreshConfig,
+      timeRange,
+      query,
+      hidePanelTitles,
+      filters,
+      searchSessionId,
+    } = this.input;
     return {
       filters,
       hidePanelTitles,
@@ -230,6 +240,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       refreshConfig,
       viewMode,
       id,
+      searchSessionId,
     };
   }
 }

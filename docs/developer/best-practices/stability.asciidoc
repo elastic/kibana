@@ -52,15 +52,15 @@ storeinSessions?)
 [discrete]
 === Browser coverage
 
-Refer to the list of browsers and OS {kib} supports
+Refer to the list of browsers and OS {kib} supports:
 https://www.elastic.co/support/matrix
 
 Does the feature work efficiently on the list of supported browsers? 
 
 [discrete]
-=== Upgrade Scenarios - Migration scenarios- 
+=== Upgrade and Migration scenarios
 
-Does the feature affect old
-indices, saved objects ? - Has the feature been tested with {kib}
-aliases - Read/Write privileges of the indices before and after the
+* Does the feature affect old indices or saved objects?
+* Has the feature been tested with {kib} aliases?
+* Read/Write privileges of the indices before and after the
 upgrade?

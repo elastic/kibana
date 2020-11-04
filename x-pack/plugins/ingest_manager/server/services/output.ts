@@ -15,7 +15,7 @@ let cachedAdminUser: null | { username: string; password: string } = null;
 
 class OutputService {
   public async getDefaultOutput(soClient: SavedObjectsClientContract) {
-    return await soClient.find<Output>({
+    return await soClient.find<OutputSOAttributes>({
       type: OUTPUT_SAVED_OBJECT_TYPE,
       searchFields: ['is_default'],
       search: 'true',
@@ -27,7 +27,7 @@ class OutputService {
     const cloud = appContextService.getCloud();
     const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
     const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
-    const flagsUrl = appContextService.getConfig()!.fleet.elasticsearch.host;
+    const flagsUrl = appContextService.getConfig()!.agents.elasticsearch.host;
     const defaultUrl = 'http://localhost:9200';
     const defaultOutputUrl = cloudUrl || flagsUrl || defaultUrl;
 
@@ -35,13 +35,14 @@ class OutputService {
       const newDefaultOutput = {
         ...DEFAULT_OUTPUT,
         hosts: [defaultOutputUrl],
-        ca_sha256: appContextService.getConfig()!.fleet.elasticsearch.ca_sha256,
+        ca_sha256: appContextService.getConfig()!.agents.elasticsearch.ca_sha256,
       } as NewOutput;
 
       return await this.create(soClient, newDefaultOutput);
     }
 
     return {
+      id: outputs.saved_objects[0].id,
       ...outputs.saved_objects[0].attributes,
     };
   }
@@ -64,8 +65,8 @@ class OutputService {
     return outputs.saved_objects[0].id;
   }
 
-  public async getAdminUser(soClient: SavedObjectsClientContract) {
-    if (cachedAdminUser) {
+  public async getAdminUser(soClient: SavedObjectsClientContract, useCache = true) {
+    if (useCache && cachedAdminUser) {
       return cachedAdminUser;
     }
 

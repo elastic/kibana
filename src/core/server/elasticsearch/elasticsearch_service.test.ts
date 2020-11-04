@@ -20,13 +20,12 @@
 import { MockLegacyClusterClient, MockClusterClient } from './elasticsearch_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
+import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
-import { configServiceMock } from '../config/config_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';
-import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
 import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import { elasticsearchServiceMock } from './elasticsearch_service.mock';
@@ -40,9 +39,6 @@ let elasticsearchService: ElasticsearchService;
 const configService = configServiceMock.create();
 const setupDeps = {
   http: httpServiceMock.createInternalSetupContract(),
-};
-const startDeps = {
-  auditTrail: auditTrailServiceMock.createStartContract(),
 };
 configService.atPath.mockReturnValue(
   new BehaviorSubject({
@@ -64,7 +60,7 @@ let mockClusterClientInstance: ReturnType<typeof elasticsearchClientMock.createC
 let mockLegacyClusterClientInstance: ReturnType<typeof elasticsearchServiceMock.createLegacyCustomClusterClient>;
 
 beforeEach(() => {
-  env = Env.createDefault(getEnvOptions());
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   elasticsearchService = new ElasticsearchService(coreContext);
@@ -113,7 +109,6 @@ describe('#setup', () => {
       expect(MockLegacyClusterClient).toHaveBeenCalledWith(
         expect.objectContaining(customConfig),
         expect.objectContaining({ context: ['elasticsearch', 'some-custom-type'] }),
-        expect.any(Function),
         expect.any(Function)
       );
     });
@@ -260,14 +255,14 @@ describe('#setup', () => {
 
 describe('#start', () => {
   it('throws if called before `setup`', async () => {
-    expect(() => elasticsearchService.start(startDeps)).rejects.toMatchInlineSnapshot(
+    expect(() => elasticsearchService.start()).rejects.toMatchInlineSnapshot(
       `[Error: ElasticsearchService needs to be setup before calling start]`
     );
   });
 
   it('returns elasticsearch client as a part of the contract', async () => {
     await elasticsearchService.setup(setupDeps);
-    const startContract = await elasticsearchService.start(startDeps);
+    const startContract = await elasticsearchService.start();
     const client = startContract.client;
 
     expect(client.asInternalUser).toBe(mockClusterClientInstance.asInternalUser);
@@ -276,7 +271,7 @@ describe('#start', () => {
   describe('#createClient', () => {
     it('allows to specify config properties', async () => {
       await elasticsearchService.setup(setupDeps);
-      const startContract = await elasticsearchService.start(startDeps);
+      const startContract = await elasticsearchService.start();
 
       // reset all mocks called during setup phase
       MockClusterClient.mockClear();
@@ -295,7 +290,7 @@ describe('#start', () => {
     });
     it('creates a new client on each call', async () => {
       await elasticsearchService.setup(setupDeps);
-      const startContract = await elasticsearchService.start(startDeps);
+      const startContract = await elasticsearchService.start();
 
       // reset all mocks called during setup phase
       MockClusterClient.mockClear();
@@ -310,7 +305,7 @@ describe('#start', () => {
 
     it('falls back to elasticsearch default config values if property not specified', async () => {
       await elasticsearchService.setup(setupDeps);
-      const startContract = await elasticsearchService.start(startDeps);
+      const startContract = await elasticsearchService.start();
 
       // reset all mocks called during setup phase
       MockClusterClient.mockClear();
@@ -347,7 +342,7 @@ describe('#start', () => {
 describe('#stop', () => {
   it('stops both legacy and new clients', async () => {
     await elasticsearchService.setup(setupDeps);
-    await elasticsearchService.start(startDeps);
+    await elasticsearchService.start();
     await elasticsearchService.stop();
 
     expect(mockLegacyClusterClientInstance.close).toHaveBeenCalledTimes(1);

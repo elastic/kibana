@@ -5,21 +5,25 @@
  */
 import expect from '@kbn/expect';
 import { SearchResponse } from 'elasticsearch';
-import { entityId } from '../../../../plugins/security_solution/common/endpoint/models/event';
+import {
+  entityIDSafeVersion,
+  timestampSafeVersion,
+} from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { eventsIndexPattern } from '../../../../plugins/security_solution/common/endpoint/constants';
 import { ChildrenPaginationBuilder } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/utils/children_pagination';
 import { ChildrenQuery } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/queries/children';
 import {
-  ResolverTree,
-  ResolverEvent,
-  ResolverChildren,
+  SafeResolverTree,
+  SafeResolverEvent,
+  SafeResolverChildren,
 } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   Event,
   EndpointDocGenerator,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
-import { InsertedEvents } from '../../services/resolver';
+import { InsertedEvents, processEventsIndex } from '../../services/resolver';
+import { createAncestryArray } from './common';
 
 export default function resolverAPIIntegrationTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -38,25 +42,33 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       before(async () => {
         // Construct the following tree:
         // Origin -> infoEvent -> startEvent -> execEvent
-        origin = generator.generateEvent();
+        origin = generator.generateEvent({
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
         infoEvent = generator.generateEvent({
-          parentEntityID: origin.process.entity_id,
-          ancestry: [origin.process.entity_id],
+          parentEntityID: entityIDSafeVersion(origin),
+          ancestry: createAncestryArray([origin]),
           eventType: ['info'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         startEvent = generator.generateEvent({
-          parentEntityID: infoEvent.process.entity_id,
-          ancestry: [infoEvent.process.entity_id, origin.process.entity_id],
+          parentEntityID: entityIDSafeVersion(infoEvent),
+          ancestry: createAncestryArray([infoEvent, origin]),
           eventType: ['start'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         execEvent = generator.generateEvent({
-          parentEntityID: startEvent.process.entity_id,
-          ancestry: [startEvent.process.entity_id, infoEvent.process.entity_id],
+          parentEntityID: entityIDSafeVersion(startEvent),
+          ancestry: createAncestryArray([startEvent, infoEvent]),
           eventType: ['change'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
-        genData = await resolver.insertEvents([origin, infoEvent, startEvent, execEvent]);
+        genData = await resolver.insertEvents(
+          [origin, infoEvent, startEvent, execEvent],
+          processEventsIndex
+        );
       });
 
       after(async () => {
@@ -64,13 +76,13 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       });
 
       it('finds all the children of the origin', async () => {
-        const { body }: { body: ResolverTree } = await supertest
-          .get(`/api/endpoint/resolver/${origin.process.entity_id}?children=100`)
+        const { body }: { body: SafeResolverTree } = await supertest
+          .get(`/api/endpoint/resolver/${origin.process?.entity_id}?children=100`)
           .expect(200);
         expect(body.children.childNodes.length).to.be(3);
-        expect(body.children.childNodes[0].entityID).to.be(infoEvent.process.entity_id);
-        expect(body.children.childNodes[1].entityID).to.be(startEvent.process.entity_id);
-        expect(body.children.childNodes[2].entityID).to.be(execEvent.process.entity_id);
+        expect(body.children.childNodes[0].entityID).to.be(infoEvent.process?.entity_id);
+        expect(body.children.childNodes[1].entityID).to.be(startEvent.process?.entity_id);
+        expect(body.children.childNodes[2].entityID).to.be(execEvent.process?.entity_id);
       });
     });
 
@@ -84,27 +96,35 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       before(async () => {
         // Construct the following tree:
         // Origin -> (infoEvent, startEvent, execEvent are all for the same node)
-        origin = generator.generateEvent();
+        origin = generator.generateEvent({
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
         startEvent = generator.generateEvent({
-          parentEntityID: origin.process.entity_id,
-          ancestry: [origin.process.entity_id],
+          parentEntityID: entityIDSafeVersion(origin),
+          ancestry: createAncestryArray([origin]),
           eventType: ['start'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         infoEvent = generator.generateEvent({
-          parentEntityID: origin.process.entity_id,
-          ancestry: [origin.process.entity_id],
-          entityID: startEvent.process.entity_id,
+          parentEntityID: entityIDSafeVersion(origin),
+          ancestry: createAncestryArray([origin]),
+          entityID: entityIDSafeVersion(startEvent),
           eventType: ['info'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         execEvent = generator.generateEvent({
-          parentEntityID: origin.process.entity_id,
-          ancestry: [origin.process.entity_id],
+          parentEntityID: entityIDSafeVersion(origin),
+          ancestry: createAncestryArray([origin]),
           eventType: ['change'],
-          entityID: startEvent.process.entity_id,
+          entityID: entityIDSafeVersion(startEvent),
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
-        genData = await resolver.insertEvents([origin, infoEvent, startEvent, execEvent]);
+        genData = await resolver.insertEvents(
+          [origin, infoEvent, startEvent, execEvent],
+          processEventsIndex
+        );
       });
 
       after(async () => {
@@ -117,12 +137,12 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
           eventsIndexPattern
         );
         // [1] here gets the body portion of the array
-        const [, query] = childrenQuery.buildMSearch(origin.process.entity_id);
-        const { body } = await es.search<SearchResponse<ResolverEvent>>({ body: query });
+        const [, query] = childrenQuery.buildMSearch(entityIDSafeVersion(origin) ?? '');
+        const { body } = await es.search<SearchResponse<SafeResolverEvent>>({ body: query });
         expect(body.hits.hits.length).to.be(1);
 
         const event = body.hits.hits[0]._source;
-        expect(entityId(event)).to.be(startEvent.process.entity_id);
+        expect(entityIDSafeVersion(event)).to.be(startEvent.process?.entity_id);
         expect(event.event?.type).to.eql(['start']);
       });
     });
@@ -137,29 +157,37 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       before(async () => {
         // Construct the following tree:
         // Origin -> (infoEvent, startEvent, execEvent are all for the same node)
-        origin = generator.generateEvent();
+        origin = generator.generateEvent({
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
+        });
         startEvent = generator.generateEvent({
-          parentEntityID: origin.process.entity_id,
-          ancestry: [origin.process.entity_id],
+          parentEntityID: entityIDSafeVersion(origin),
+          ancestry: createAncestryArray([origin]),
           eventType: ['start'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         infoEvent = generator.generateEvent({
-          timestamp: startEvent['@timestamp'] + 100,
-          parentEntityID: origin.process.entity_id,
-          ancestry: [origin.process.entity_id],
-          entityID: startEvent.process.entity_id,
+          timestamp: (timestampSafeVersion(startEvent) ?? 0) + 100,
+          parentEntityID: entityIDSafeVersion(origin),
+          ancestry: createAncestryArray([origin]),
+          entityID: entityIDSafeVersion(startEvent),
           eventType: ['info'],
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
 
         execEvent = generator.generateEvent({
-          timestamp: infoEvent['@timestamp'] + 100,
-          parentEntityID: origin.process.entity_id,
-          ancestry: [origin.process.entity_id],
+          timestamp: (timestampSafeVersion(infoEvent) ?? 0) + 100,
+          parentEntityID: entityIDSafeVersion(origin),
+          ancestry: createAncestryArray([origin]),
           eventType: ['change'],
-          entityID: startEvent.process.entity_id,
+          entityID: entityIDSafeVersion(startEvent),
+          eventsDataStream: EndpointDocGenerator.createDataStreamFromIndex(processEventsIndex),
         });
-        genData = await resolver.insertEvents([origin, infoEvent, startEvent, execEvent]);
+        genData = await resolver.insertEvents(
+          [origin, infoEvent, startEvent, execEvent],
+          processEventsIndex
+        );
       });
 
       after(async () => {
@@ -167,37 +195,37 @@ export default function resolverAPIIntegrationTests({ getService }: FtrProviderC
       });
 
       it('retrieves the same node three times', async () => {
-        let { body }: { body: ResolverChildren } = await supertest
-          .get(`/api/endpoint/resolver/${origin.process.entity_id}/children?children=1`)
+        let { body }: { body: SafeResolverChildren } = await supertest
+          .get(`/api/endpoint/resolver/${origin.process?.entity_id}/children?children=1`)
           .expect(200);
         expect(body.childNodes.length).to.be(1);
         expect(body.nextChild).to.not.be(null);
-        expect(body.childNodes[0].entityID).to.be(startEvent.process.entity_id);
-        expect(body.childNodes[0].lifecycle[0].event?.type).to.eql(startEvent.event.type);
+        expect(body.childNodes[0].entityID).to.be(startEvent.process?.entity_id);
+        expect(body.childNodes[0].lifecycle[0].event?.type).to.eql(startEvent.event?.type);
 
         ({ body } = await supertest
           .get(
-            `/api/endpoint/resolver/${origin.process.entity_id}/children?children=1&afterChild=${body.nextChild}`
+            `/api/endpoint/resolver/${origin.process?.entity_id}/children?children=1&afterChild=${body.nextChild}`
           )
           .expect(200));
         expect(body.childNodes.length).to.be(1);
         expect(body.nextChild).to.not.be(null);
-        expect(body.childNodes[0].entityID).to.be(infoEvent.process.entity_id);
-        expect(body.childNodes[0].lifecycle[1].event?.type).to.eql(infoEvent.event.type);
+        expect(body.childNodes[0].entityID).to.be(infoEvent.process?.entity_id);
+        expect(body.childNodes[0].lifecycle[1].event?.type).to.eql(infoEvent.event?.type);
 
         ({ body } = await supertest
           .get(
-            `/api/endpoint/resolver/${origin.process.entity_id}/children?children=1&afterChild=${body.nextChild}`
+            `/api/endpoint/resolver/${origin.process?.entity_id}/children?children=1&afterChild=${body.nextChild}`
           )
           .expect(200));
         expect(body.childNodes.length).to.be(1);
         expect(body.nextChild).to.not.be(null);
-        expect(body.childNodes[0].entityID).to.be(infoEvent.process.entity_id);
-        expect(body.childNodes[0].lifecycle[2].event?.type).to.eql(execEvent.event.type);
+        expect(body.childNodes[0].entityID).to.be(infoEvent.process?.entity_id);
+        expect(body.childNodes[0].lifecycle[2].event?.type).to.eql(execEvent.event?.type);
 
         ({ body } = await supertest
           .get(
-            `/api/endpoint/resolver/${origin.process.entity_id}/children?children=1&afterChild=${body.nextChild}`
+            `/api/endpoint/resolver/${origin.process?.entity_id}/children?children=1&afterChild=${body.nextChild}`
           )
           .expect(200));
         expect(body.childNodes.length).to.be(0);

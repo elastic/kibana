@@ -14,12 +14,17 @@ jest.mock('../../../../../app/app_dependencies');
 describe('Transform: Transform List Actions', () => {
   test('useActions()', () => {
     const { result } = renderHook(() => useActions({ forceDisable: false }));
-    const actions: ReturnType<typeof useActions>['actions'] = result.current.actions;
+    const actions = result.current.actions;
 
-    expect(actions).toHaveLength(4);
-    expect(typeof actions[0].render).toBe('function');
-    expect(typeof actions[1].render).toBe('function');
-    expect(typeof actions[2].render).toBe('function');
-    expect(typeof actions[3].render).toBe('function');
+    // Using `any` for the callback. Somehow the EUI types don't pass
+    // on the `data-test-subj` attribute correctly. We're interested
+    // in the runtime result here anyway.
+    expect(actions.map((a: any) => a['data-test-subj'])).toStrictEqual([
+      'transformActionStart',
+      'transformActionStop',
+      'transformActionEdit',
+      'transformActionClone',
+      'transformActionDelete',
+    ]);
   });
 });

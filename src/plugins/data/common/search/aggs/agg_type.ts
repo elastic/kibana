@@ -47,6 +47,7 @@ export interface AggTypeConfig<
   getRequestAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   getResponseAggs?: ((aggConfig: TAggConfig) => TAggConfig[]) | (() => TAggConfig[] | void);
   customLabels?: boolean;
+  json?: boolean;
   decorateAggConfig?: () => any;
   postFlightRequest?: (
     resp: any,
@@ -59,6 +60,7 @@ export interface AggTypeConfig<
   getSerializedFormat?: (agg: TAggConfig) => SerializedFieldFormat;
   getValue?: (agg: TAggConfig, bucket: any) => any;
   getKey?: (bucket: any, key: any, agg: TAggConfig) => any;
+  getValueBucketPath?: (agg: TAggConfig) => string;
 }
 
 // TODO need to make a more explicit interface for this
@@ -209,6 +211,10 @@ export class AggType<
     return this.params.find((p: TParam) => p.name === name);
   };
 
+  getValueBucketPath = (agg: TAggConfig) => {
+    return agg.id;
+  };
+
   /**
    * Generic AggType Constructor
    *
@@ -232,16 +238,24 @@ export class AggType<
       this.createFilter = config.createFilter;
     }
 
+    if (config.getValueBucketPath) {
+      this.getValueBucketPath = config.getValueBucketPath;
+    }
+
     if (config.params && config.params.length && config.params[0] instanceof BaseParamType) {
       this.params = config.params as TParam[];
     } else {
-      // always append the raw JSON param
+      // always append the raw JSON param unless it is configured to false
       const params: any[] = config.params ? [...config.params] : [];
-      params.push({
-        name: 'json',
-        type: 'json',
-        advanced: true,
-      });
+
+      if (config.json !== false) {
+        params.push({
+          name: 'json',
+          type: 'json',
+          advanced: true,
+        });
+      }
+
       // always append custom label
 
       if (config.customLabels !== false) {
@@ -266,7 +280,9 @@ export class AggType<
     this.getSerializedFormat =
       config.getSerializedFormat ||
       ((agg: TAggConfig) => {
-        return agg.params.field ? agg.params.field.format.toJSON() : {};
+        return agg.params.field
+          ? agg.aggConfigs.indexPattern.getFormatterForField(agg.params.field).toJSON()
+          : {};
       });
 
     this.getValue = config.getValue || ((agg: TAggConfig, bucket: any) => {});

@@ -141,6 +141,7 @@ describe('prepackaged_rules_schema', () => {
       timelines_not_installed: 0,
       timelines_not_updated: 0,
     };
+    // @ts-expect-error
     delete payload.rules_installed;
     const decoded = prePackagedRulesAndTimelinesStatusSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

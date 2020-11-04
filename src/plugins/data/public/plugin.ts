@@ -19,13 +19,7 @@
 
 import './index.scss';
 
-import {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PackageInfo,
-} from 'src/core/public';
+import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { ConfigSchema } from '../config';
 import { Storage, IStorageWrapper, createStartServicesGetter } from '../../kibana_utils/public';
 import {
@@ -48,9 +42,7 @@ import {
 } from './index_patterns';
 import {
   setFieldFormats,
-  setHttp,
   setIndexPatterns,
-  setInjectedMetadata,
   setNotifications,
   setOverlays,
   setQueryService,
@@ -102,15 +94,13 @@ export class DataPublicPlugin
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
-  private readonly packageInfo: PackageInfo;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.searchService = new SearchService();
+    this.searchService = new SearchService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
     this.storage = new Storage(window.localStorage);
-    this.packageInfo = initializerContext.env.packageInfo;
   }
 
   public setup(
@@ -147,8 +137,7 @@ export class DataPublicPlugin
 
     const searchService = this.searchService.setup(core, {
       usageCollection,
-      packageInfo: this.packageInfo,
-      registerFunction: expressions.registerFunction,
+      expressions,
     });
 
     return {
@@ -164,11 +153,9 @@ export class DataPublicPlugin
 
   public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
-    setHttp(http);
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
-    setInjectedMetadata(core.injectedMetadata);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
@@ -181,7 +168,7 @@ export class DataPublicPlugin
       onNotification: (toastInputFields) => {
         notifications.toasts.add(toastInputFields);
       },
-      onError: notifications.toasts.addError,
+      onError: notifications.toasts.addError.bind(notifications.toasts),
       onRedirectNoIndexPattern: onRedirectNoIndexPattern(
         application.capabilities,
         application.navigateToApp,

@@ -16,7 +16,7 @@ const averagePrice = (datatable) => {
 
   return Promise.resolve({
     type: 'datatable',
-    columns: [{ name: 'average_price', type: 'number' }],
+    columns: [{ id: 'average_price', name: 'average_price', meta: { type: 'number' } }],
     rows: [{ average_price: average }],
   });
 };
@@ -26,7 +26,7 @@ const doublePrice = (datatable) => {
 
   return Promise.resolve({
     type: 'datatable',
-    columns: [{ name: 'double_price', type: 'number' }],
+    columns: [{ id: 'double_price', name: 'double_price', meta: { type: 'number' } }],
     rows: newRows,
   });
 };
@@ -34,7 +34,7 @@ const doublePrice = (datatable) => {
 const rowCount = (datatable) => {
   return Promise.resolve({
     type: 'datatable',
-    columns: [{ name: 'row_count', type: 'number' }],
+    columns: [{ id: 'row_count', name: 'row_count', meta: { type: 'number' } }],
     rows: [
       {
         row_count: datatable.rows.length,
@@ -53,10 +53,10 @@ describe('ply', () => {
       (result) => {
         expect(result.type).toBe('datatable');
         expect(result.columns).toEqual([
-          { name: 'name', type: 'string' },
-          { name: 'in_stock', type: 'boolean' },
-          { name: 'average_price', type: 'number' },
-          { name: 'row_count', type: 'number' },
+          { id: 'name', name: 'name', meta: { type: 'string' } },
+          { id: 'in_stock', name: 'in_stock', meta: { type: 'boolean' } },
+          { id: 'average_price', name: 'average_price', meta: { type: 'number' } },
+          { id: 'row_count', name: 'row_count', meta: { type: 'number' } },
         ]);
         expect(result.rows[arbitaryRowIndex]).toHaveProperty('average_price');
         expect(result.rows[arbitaryRowIndex]).toHaveProperty('row_count');
@@ -75,7 +75,7 @@ describe('ply', () => {
           expect(result).toEqual({
             type: 'datatable',
             rows: [{ row_count: testTable.rows.length }],
-            columns: [{ name: 'row_count', type: 'number' }],
+            columns: [{ id: 'row_count', name: 'row_count', meta: { type: 'number' } }],
           })
         );
       });

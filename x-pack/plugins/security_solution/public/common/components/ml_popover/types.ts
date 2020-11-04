@@ -111,7 +111,7 @@ export interface CustomURL {
 }
 
 /**
- * Representation of an ML Job as used by the SIEM App -- a composition of ModuleJob and MlSummaryJob
+ * Representation of an ML Job as used by the Security Solution App -- a composition of ModuleJob and MlSummaryJob
  * that includes necessary metadata like moduleName, defaultIndexPattern, etc.
  */
 export interface SecurityJob extends MlSummaryJob {

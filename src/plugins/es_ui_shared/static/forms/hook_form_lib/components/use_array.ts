@@ -17,25 +17,34 @@
  * under the License.
  */
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useMemo } from 'react';
 
+import { FormHook, FieldConfig } from '../types';
+import { getFieldValidityAndErrorMessage } from '../helpers';
 import { useFormContext } from '../form_context';
+import { useField, InternalFieldConfig } from '../hooks';
 
 interface Props {
   path: string;
   initialNumberOfItems?: number;
   readDefaultValueOnForm?: boolean;
-  children: (args: {
-    items: ArrayItem[];
-    addItem: () => void;
-    removeItem: (id: number) => void;
-  }) => JSX.Element;
+  validations?: FieldConfig<ArrayItem[]>['validations'];
+  children: (formFieldArray: FormArrayField) => JSX.Element;
 }
 
 export interface ArrayItem {
   id: number;
   path: string;
   isNew: boolean;
+}
+
+export interface FormArrayField {
+  items: ArrayItem[];
+  error: string | null;
+  addItem: () => void;
+  removeItem: (id: number) => void;
+  moveItem: (sourceIdx: number, destinationIdx: number) => void;
+  form: FormHook;
 }
 
 /**
@@ -56,32 +65,68 @@ export interface ArrayItem {
 export const UseArray = ({
   path,
   initialNumberOfItems,
+  validations,
   readDefaultValueOnForm = true,
   children,
 }: Props) => {
-  const didMountRef = useRef(false);
-  const form = useFormContext();
-  const defaultValues = readDefaultValueOnForm && (form.getFieldDefaultValue(path) as any[]);
+  const isMounted = useRef(false);
   const uniqueId = useRef(0);
 
-  const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
-    values.map((_, index) => ({
+  const form = useFormContext();
+  const { __getFieldDefaultValue } = form;
+
+  const getNewItemAtIndex = useCallback(
+    (index: number): ArrayItem => ({
       id: uniqueId.current++,
       path: `${path}[${index}]`,
-      isNew: false,
-    }));
+      isNew: true,
+    }),
+    [path]
+  );
 
-  const getNewItemAtIndex = (index: number): ArrayItem => ({
-    id: uniqueId.current++,
-    path: `${path}[${index}]`,
-    isNew: true,
-  });
+  const fieldDefaultValue = useMemo<ArrayItem[]>(() => {
+    const defaultValues = readDefaultValueOnForm
+      ? (__getFieldDefaultValue(path) as any[])
+      : undefined;
 
-  const initialState = defaultValues
-    ? getInitialItemsFromValues(defaultValues)
-    : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
+    const getInitialItemsFromValues = (values: any[]): ArrayItem[] =>
+      values.map((_, index) => ({
+        id: uniqueId.current++,
+        path: `${path}[${index}]`,
+        isNew: false,
+      }));
 
-  const [items, setItems] = useState<ArrayItem[]>(initialState);
+    return defaultValues
+      ? getInitialItemsFromValues(defaultValues)
+      : new Array(initialNumberOfItems).fill('').map((_, i) => getNewItemAtIndex(i));
+  }, [
+    path,
+    initialNumberOfItems,
+    readDefaultValueOnForm,
+    __getFieldDefaultValue,
+    getNewItemAtIndex,
+  ]);
+
+  // Create a new hook field with the "isIncludedInOutput" set to false so we don't use its value to build the final form data.
+  // Apart from that the field behaves like a normal field and is hooked into the form validation lifecycle.
+  const fieldConfigBase: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = {
+    defaultValue: fieldDefaultValue,
+    valueChangeDebounceTime: 0,
+    isIncludedInOutput: false,
+  };
+
+  const fieldConfig: FieldConfig<ArrayItem[]> & InternalFieldConfig<ArrayItem[]> = validations
+    ? { validations, ...fieldConfigBase }
+    : fieldConfigBase;
+
+  const field = useField(form, path, fieldConfig);
+  const { setValue, value, isChangingValue, errors } = field;
+
+  // Derived state from the field
+  const error = useMemo(() => {
+    const { errorMessage } = getFieldValidityAndErrorMessage({ isChangingValue, errors });
+    return errorMessage;
+  }, [isChangingValue, errors]);
 
   const updatePaths = useCallback(
     (_rows: ArrayItem[]) => {
@@ -96,29 +141,51 @@ export const UseArray = ({
     [path]
   );
 
-  const addItem = () => {
-    setItems((previousItems) => {
+  const addItem = useCallback(() => {
+    setValue((previousItems) => {
       const itemIndex = previousItems.length;
       return [...previousItems, getNewItemAtIndex(itemIndex)];
     });
-  };
+  }, [setValue, getNewItemAtIndex]);
 
-  const removeItem = (id: number) => {
-    setItems((previousItems) => {
-      const updatedItems = previousItems.filter((item) => item.id !== id);
-      return updatePaths(updatedItems);
-    });
-  };
+  const removeItem = useCallback(
+    (id: number) => {
+      setValue((previousItems) => {
+        const updatedItems = previousItems.filter((item) => item.id !== id);
+        return updatePaths(updatedItems);
+      });
+    },
+    [setValue, updatePaths]
+  );
+
+  const moveItem = useCallback(
+    (sourceIdx: number, destinationIdx: number) => {
+      setValue((previousItems) => {
+        const nextItems = [...previousItems];
+        const removed = nextItems.splice(sourceIdx, 1)[0];
+        nextItems.splice(destinationIdx, 0, removed);
+        return updatePaths(nextItems);
+      });
+    },
+    [setValue, updatePaths]
+  );
 
   useEffect(() => {
-    if (didMountRef.current) {
-      setItems((prev) => {
-        return updatePaths(prev);
-      });
-    } else {
-      didMountRef.current = true;
+    if (!isMounted.current) {
+      return;
     }
-  }, [path, updatePaths]);
 
-  return children({ items, addItem, removeItem });
+    setValue((prev) => {
+      return updatePaths(prev);
+    });
+  }, [path, updatePaths, setValue]);
+
+  useEffect(() => {
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  return children({ items: value, error, form, addItem, removeItem, moveItem });
 };

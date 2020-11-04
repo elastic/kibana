@@ -9,11 +9,11 @@ import { AuthenticatedUser } from '../../../../security/server';
 import { ReportingCore } from '../../core';
 import { getUserFactory } from './get_user';
 
-type ReportingUser = AuthenticatedUser | null;
 const superuserRole = 'superuser';
 
+type ReportingRequestUser = AuthenticatedUser | false;
 export type RequestHandlerUser<P, Q, B> = RequestHandler<P, Q, B> extends (...a: infer U) => infer R
-  ? (user: ReportingUser, ...a: U) => R
+  ? (user: ReportingRequestUser, ...a: U) => R
   : never;
 
 export const authorizedUserPreRoutingFactory = function authorizedUserPreRoutingFn(
@@ -23,7 +23,7 @@ export const authorizedUserPreRoutingFactory = function authorizedUserPreRouting
   const getUser = getUserFactory(setupDeps.security);
   return <P, Q, B>(handler: RequestHandlerUser<P, Q, B>): RequestHandler<P, Q, B, RouteMethod> => {
     return (context, req, res) => {
-      let user: ReportingUser = null;
+      let user: ReportingRequestUser = false;
       if (setupDeps.security && setupDeps.security.license.isEnabled()) {
         // find the authenticated user, or null if security is not enabled
         user = getUser(req);

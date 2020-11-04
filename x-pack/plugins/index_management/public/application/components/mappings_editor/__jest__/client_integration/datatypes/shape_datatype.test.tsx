@@ -3,12 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { act } from 'react-dom/test-utils';
 
 import { componentHelpers, MappingsEditorTestBed } from '../helpers';
 
 const { setup, getMappingsEditorDataFactory } = componentHelpers.mappingsEditor;
-const onChangeHandler = jest.fn();
-const getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
 
 // Parameters automatically added to the shape datatype when saved (with the default values)
 export const defaultShapeParameters = {
@@ -19,12 +18,13 @@ export const defaultShapeParameters = {
 };
 
 describe('Mappings editor: shape datatype', () => {
-  let testBed: MappingsEditorTestBed;
-
   /**
    * Variable to store the mappings data forwarded to the consumer component
    */
   let data: any;
+  let onChangeHandler: jest.Mock = jest.fn();
+  let getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
+  let testBed: MappingsEditorTestBed;
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -32,6 +32,11 @@ describe('Mappings editor: shape datatype', () => {
 
   afterAll(() => {
     jest.useRealTimers();
+  });
+
+  beforeEach(() => {
+    onChangeHandler = jest.fn();
+    getMappingsEditorData = getMappingsEditorDataFactory(onChangeHandler);
   });
 
   test('initial view and default parameters values', async () => {
@@ -45,7 +50,10 @@ describe('Mappings editor: shape datatype', () => {
 
     const updatedMappings = { ...defaultMappings };
 
-    testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    await act(async () => {
+      testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
+    });
+    testBed.component.update();
 
     const {
       component,
@@ -53,7 +61,7 @@ describe('Mappings editor: shape datatype', () => {
     } = testBed;
 
     // Open the flyout to edit the field
-    startEditField('myField');
+    await startEditField('myField');
 
     // Save the field and close the flyout
     await updateFieldAndCloseFlyout();

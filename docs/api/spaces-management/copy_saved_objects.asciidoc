@@ -24,7 +24,8 @@ You can request to overwrite any objects that already exist in the target space 
 ==== {api-path-parms-title}
 
 `space_id`::
-(Optional, string) The ID of the space that contains the saved objects you want to copy. When `space_id` is unspecified in the URL, the default space is used.
+  (Optional, string) The ID of the space that contains the saved objects you want to copy. When `space_id` is unspecified in the URL, the
+  default space is used.
 
 [role="child_attributes"]
 [[spaces-api-copy-saved-objects-request-body]]
@@ -47,10 +48,12 @@ You can request to overwrite any objects that already exist in the target space 
 =====
 
 `includeReferences`::
-  (Optional, boolean) When set to `true`, all saved objects related to the specified saved objects will also be copied into the target spaces. The default value is `false`.
+  (Optional, boolean) When set to `true`, all saved objects related to the specified saved objects will also be copied into the target
+  spaces. The default value is `false`.
 
 `overwrite`::
-  (Optional, boolean) When set to `true`, all conflicts are automatically overidden. When a saved object with a matching `type` and `id` exists in the target space, that version is replaced with the version from the source space. The default value is `false`.
+  (Optional, boolean) When set to `true`, all conflicts are automatically overidden. When a saved object with a matching `type` and `id`
+  exists in the target space, that version is replaced with the version from the source space. The default value is `false`.
 
 [role="child_attributes"]
 [[spaces-api-copy-saved-objects-response-body]]
@@ -63,13 +66,17 @@ You can request to overwrite any objects that already exist in the target space 
 [%collapsible%open]
 =====
   `success`:::
-    (boolean) The copy operation was successful. When set to `false`, some objects may have been copied. For additional information, refer to the `successCount` and `errors` properties.
+    (boolean) The copy operation was successful. When set to `false`, some objects may have been copied. For additional information, refer
+    to the `errors` and `successResults` properties.
 
   `successCount`:::
     (number) The number of objects that successfully copied.
 
   `errors`:::
     (Optional, array) The errors that occurred during the copy operation. When errors are reported, the `success` flag is set to `false`.
++
+NOTE: One object may result in multiple errors, which requires separate steps to resolve. For instance, a `missing_references` error and a
+`conflict` error.
 +
 .Properties of `errors`
 [%collapsible%open]
@@ -84,15 +91,159 @@ You can request to overwrite any objects that already exist in the target space 
 .Properties of `error`
 [%collapsible%open]
 =======
-      `type`:::::
-        (string) The type of error. For example, `unsupported_type`, `missing_references`, or `unknown`. Errors marked as `conflict` may be resolved by using the <<spaces-api-resolve-copy-saved-objects-conflicts, Resolve copy saved objects conflicts API>>.
+      `type`::::
+        (string) The type of error. For example, `conflict`, `ambiguous_conflict`, `missing_references`, `unsupported_type`, or `unknown`.
+        Errors marked as `conflict` or `ambiguous_conflict` may be resolved by using the <<spaces-api-resolve-copy-saved-objects-conflicts,
+        Resolve copy saved objects conflicts API>>.
+      `destinationId`::::
+        (Optional, string) The destination ID that was used during the copy attempt. This is only present on `conflict` error types.
+      `destinations`::::
+        (Optional, array) A list of possible object destinations with `id`, `title`, and `updatedAt` fields to describe each one. This is
+        only present on `ambiguous_conflict` error types.
 =======
 ======
+
+  `successResults`:::
+    (Optional, array) Indicates successfully copied objects, with any applicable metadata.
++
+NOTE: Objects are created when all resolvable errors are addressed, including conflict and missing references errors. For more information,
+refer to the <<spaces-api-copy-saved-objects-example,examples>>.
+
 =====
 [[spaces-api-copy-saved-objects-example]]
 ==== {api-examples-title}
 
-Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` and `sales` spaces:
+[[spaces-api-copy-saved-objects-example-1]]
+===== Successful copy (with `createNewCopies` enabled)
+
+Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
+the dashboard has a reference to a visualization, and that has a reference to an index pattern:
+
+[source,sh]
+----
+$ curl -X POST api/spaces/_copy_saved_objects
+{
+  "objects": [{
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }],
+  "spaces": ["marketing"],
+  "includeReferences": true,
+  "createNewcopies": true
+}
+----
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+----
+{
+  "marketing": {
+    "success": true,
+    "successCount": 3,
+    "successResults": [
+      {
+        "id": "my-dashboard",
+        "type": "dashboard",
+        "destinationId": "1e127098-5b80-417f-b0f1-c60c8395358f",
+        "meta": {
+          "icon": "dashboardApp",
+          "title": "Look at my dashboard"
+        }
+      },
+      {
+        "id": "my-vis",
+        "type": "visualization",
+        "destinationId": "a610ed80-1c73-4507-9e13-d3af736c8e04",
+        "meta": {
+          "icon": "visualizeApp",
+          "title": "Look at my visualization"
+        }
+      },
+      {
+        "id": "my-index-pattern",
+        "type": "index-pattern",
+        "destinationId": "bc3c9c70-bf6f-4bec-b4ce-f4189aa9e26b",
+        "meta": {
+          "icon": "indexPatternApp",
+          "title": "my-pattern-*"
+        }
+      }
+    ]
+  }
+}
+----
+
+The result indicates a successful copy, and all three objects are created. Since these objects were created as new copies, each entry in the
+`successResults` array includes a `destinationId` attribute.
+
+[[spaces-api-copy-saved-objects-example-2]]
+===== Successful copy (with `createNewCopies` disabled)
+
+Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
+the dashboard has a reference to a visualization, and that has a reference to an index pattern:
+
+[source,sh]
+----
+$ curl -X POST api/spaces/_copy_saved_objects
+{
+  "objects": [{
+    "type": "dashboard",
+    "id": "my-dashboard"
+  }],
+  "spaces": ["marketing"],
+  "includeReferences": true
+}
+----
+// KIBANA
+
+The API returns the following:
+
+[source,sh]
+----
+{
+  "marketing": {
+    "success": true,
+    "successCount": 3,
+    "successResults": [
+      {
+        "id": "my-dashboard",
+        "type": "dashboard",
+        "meta": {
+          "icon": "dashboardApp",
+          "title": "Look at my dashboard"
+        }
+      },
+      {
+        "id": "my-vis",
+        "type": "visualization",
+        "meta": {
+          "icon": "visualizeApp",
+          "title": "Look at my visualization"
+        }
+      },
+      {
+        "id": "my-index-pattern",
+        "type": "index-pattern",
+        "meta": {
+          "icon": "indexPatternApp",
+          "title": "my-pattern-*"
+        }
+      }
+    ]
+  }
+}
+----
+
+The result indicates a successful copy, and all three objects are created.
+
+[[spaces-api-copy-saved-objects-example-3]]
+===== Failed copy (with conflict errors)
+
+Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` and `sales` spaces. In
+this example, the dashboard has a reference to a visualization and a *Canvas* workpad, and the visualization has a reference to an index
+pattern:
 
 [source,sh]
 ----
@@ -115,35 +266,146 @@ The API returns the following:
 {
   "marketing": {
     "success": true,
-    "successCount": 5
+    "successCount": 4,
+    "successResults": [
+      {
+        "id": "my-dashboard",
+        "type": "dashboard",
+        "meta": {
+          "icon": "dashboardApp",
+          "title": "Look at my dashboard"
+        }
+      },
+      {
+        "id": "my-vis",
+        "type": "visualization",
+        "meta": {
+          "icon": "visualizeApp",
+          "title": "Look at my visualization"
+        }
+      },
+      {
+        "id": "my-canvas",
+        "type": "canvas-workpad",
+        "meta": {
+          "icon": "canvasApp",
+          "title": "Look at my canvas"
+        }
+      },
+      {
+        "id": "my-index-pattern",
+        "type": "index-pattern",
+        "meta": {
+          "icon": "indexPatternApp",
+          "title": "my-pattern-*"
+        }
+      }
+    ]
   },
   "sales": {
     "success": false,
-    "successCount": 4,
-    "errors": [{
-      "id": "my-index-pattern",
-      "type": "index-pattern",
-      "error": {
-        "type": "conflict"
+    "successCount": 1,
+    "errors": [
+      {
+        "id": "my-pattern",
+        "type": "index-pattern",
+        "title": "my-pattern-*",
+        "error": {
+          "type": "conflict"
+        },
+        "meta": {
+          "icon": "indexPatternApp",
+          "title": "my-pattern-*"
+        }
+      },
+      {
+        "id": "my-visualization",
+        "type": "my-vis",
+        "title": "Look at my visualization",
+        "error": {
+          "type": "conflict",
+          "destinationId": "another-vis"
+        },
+        "meta": {
+          "icon": "visualizeApp",
+          "title": "Look at my visualization"
+        }
+      },
+      {
+        "id": "my-canvas",
+        "type": "canvas-workpad",
+        "title": "Look at my canvas",
+        "error": {
+          "type": "ambiguous_conflict",
+          "destinations": [
+            {
+              "id": "another-canvas",
+              "title": "Look at another canvas",
+              "updatedAt": "2020-07-08T16:36:32.377Z"
+            },
+            {
+              "id": "yet-another-canvas",
+              "title": "Look at yet another canvas",
+              "updatedAt": "2020-07-05T12:29:54.849Z"
+            }
+          ]
+        },
+        "meta": {
+          "icon": "canvasApp",
+          "title": "Look at my canvas"
+        }
       }
-    }]
+    ],
+    "successResults": [
+      {
+        "id": "my-dashboard",
+        "type": "dashboard",
+        "meta": {
+          "icon": "dashboardApp",
+          "title": "Look at my dashboard"
+        }
+      }
+    ]
   }
 }
 ----
 
-The `marketing` space succeeds, but the `sales` space fails due to a conflict in the index pattern.
+The result indicates a successful copy for the `marketing` space, and an unsuccessful copy for the `sales` space because the index pattern,
+visualization, and *Canvas* workpad each resulted in a conflict error:
 
-Copy a visualization with the `my-viz` ID from the `marketing` space to the `default` space:
+* An index pattern with the same ID already exists, which resulted in a conflict error. To resolve the error, overwrite the existing object,
+or skip the object.
+
+* A visualization with a different ID, but the same origin already exists, which resulted in a conflict error. The `destinationId` field
+contains the `id` of the other visualization, which caused the conflict. The behavior is added to make sure that new objects that can be
+shared between spaces behave in a similar way as legacy non-shareable objects. When a shareable object is copied into a new space, it
+retains its origin so that the conflicts are encountered as expected. To resolve, overwrite the specified destination object, or skip the
+object.
+
+* Two *Canvas* workpads with different IDs, but the same origin, already exist, which resulted in a conflict error. The `destinations` array
+describes the other workpads which caused the conflict. When a shareable object is copied into a new space, then shared to another space
+where an object of the same origin exists, the conflict error occurs. To resolve, pick a destination object to overwrite, or skip the
+object.
+
+Objects are created when the error is resolved using the <<spaces-api-resolve-copy-saved-objects-conflicts-example-1,Resolve copy conflicts
+API>>.
+
+[[spaces-api-copy-saved-objects-example-4]]
+===== Failed copy (with missing reference errors)
+
+Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
+the dashboard has a reference to a visualization and a *Canvas* workpad, and the visualization has a reference to an index pattern:
 
 [source,sh]
 ----
-$ curl -X POST s/marketing/api/spaces/_copy_saved_objects
+$ curl -X POST api/spaces/_copy_saved_objects
 {
   "objects": [{
-    "type": "visualization",
-    "id": "my-viz"
+    "type": "dashboard",
+    "id": "my-dashboard"
   }],
-  "spaces": ["default"]
+  "spaces": ["marketing"],
+  "includeReferences": true
 }
 ----
 // KIBANA
@@ -153,9 +415,52 @@ The API returns the following:
 [source,sh]
 ----
 {
-  "default": {
-    "success": true,
-    "successCount": 1
+  "marketing": {
+    "success": false,
+    "successCount": 2,
+    "errors": [
+      {
+        "id": "my-vis",
+        "type": "visualization",
+        "title": "Look at my visualization",
+        "error": {
+          "type": "missing_references",
+          "references": [
+            {
+              "type": "index-pattern",
+              "id": "my-pattern-*"
+            }
+          ]
+        },
+        "meta": {
+          "icon": "visualizeApp",
+          "title": "Look at my visualization"
+        }
+      },
+    ]
+    "successResults": [
+      {
+        "id": "my-dashboard",
+        "type": "dashboard",
+        "meta": {
+          "icon": "dashboardApp",
+          "title": "Look at my dashboard"
+        }
+      },
+      {
+        "id": "my-canvas",
+        "type": "canvas-workpad",
+        "meta": {
+          "icon": "canvasApp",
+          "title": "Look at my canvas"
+        }
+      }
+    ],
   }
 }
 ----
+
+The result indicates an unsuccessful copy because the visualization resulted in a missing references error.
+
+Objects are created when the errors are resolved using the <<spaces-api-resolve-copy-saved-objects-conflicts-example-2,Resolve copy
+conflicts API>>.

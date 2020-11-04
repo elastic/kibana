@@ -9,6 +9,7 @@ import { useReducer, useCallback } from 'react';
 import {
   ServiceConnectorCaseResponse,
   ServiceConnectorCaseParams,
+  CaseConnector,
 } from '../../../../case/common/api';
 import {
   errorToToaster,
@@ -68,8 +69,7 @@ const dataFetchReducer = (state: PushToServiceState, action: Action): PushToServ
 
 interface PushToServiceRequest {
   caseId: string;
-  connectorId: string;
-  connectorName: string;
+  connector: CaseConnector;
   caseServices: CaseServices;
   updateCase: (newCase: Case) => void;
 }
@@ -78,8 +78,7 @@ export interface UsePostPushToService extends PushToServiceState {
   postPushToService: ({
     caseId,
     caseServices,
-    connectorId,
-    connectorName,
+    connector,
     updateCase,
   }: PushToServiceRequest) => void;
 }
@@ -94,28 +93,22 @@ export const usePostPushToService = (): UsePostPushToService => {
   const [, dispatchToaster] = useStateToaster();
 
   const postPushToService = useCallback(
-    async ({
-      caseId,
-      caseServices,
-      connectorId,
-      connectorName,
-      updateCase,
-    }: PushToServiceRequest) => {
+    async ({ caseId, caseServices, connector, updateCase }: PushToServiceRequest) => {
       let cancel = false;
       const abortCtrl = new AbortController();
       try {
         dispatch({ type: 'FETCH_INIT' });
         const casePushData = await getCase(caseId, true, abortCtrl.signal);
         const responseService = await pushToService(
-          connectorId,
-          formatServiceRequestData(casePushData, connectorId, caseServices),
+          connector.id,
+          formatServiceRequestData(casePushData, connector, caseServices),
           abortCtrl.signal
         );
         const responseCase = await pushCase(
           caseId,
           {
-            connector_id: connectorId,
-            connector_name: connectorName,
+            connector_id: connector.id,
+            connector_name: connector.name,
             external_id: responseService.id,
             external_title: responseService.title,
             external_url: responseService.url,
@@ -127,7 +120,7 @@ export const usePostPushToService = (): UsePostPushToService => {
           dispatch({ type: 'FETCH_SUCCESS_PUSH_CASE', payload: responseCase });
           updateCase(responseCase);
           displaySuccessToast(
-            i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connectorName),
+            i18n.SUCCESS_SEND_TO_EXTERNAL_SERVICE(connector.name),
             dispatchToaster
           );
         }
@@ -155,7 +148,7 @@ export const usePostPushToService = (): UsePostPushToService => {
 
 export const formatServiceRequestData = (
   myCase: Case,
-  connectorId: string,
+  connector: CaseConnector,
   caseServices: CaseServices
 ): ServiceConnectorCaseParams => {
   const {
@@ -168,7 +161,7 @@ export const formatServiceRequestData = (
     updatedAt,
     updatedBy,
   } = myCase;
-  const actualExternalService = caseServices[connectorId] ?? null;
+  const actualExternalService = caseServices[connector.id] ?? null;
 
   return {
     savedObjectId: caseId,
@@ -202,6 +195,7 @@ export const formatServiceRequestData = (
     description,
     externalId: actualExternalService?.externalId ?? null,
     title,
+    ...(connector.fields ?? {}),
     updatedAt,
     updatedBy:
       updatedBy != null

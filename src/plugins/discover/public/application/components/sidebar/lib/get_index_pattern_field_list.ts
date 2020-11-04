@@ -20,8 +20,8 @@ import { difference } from 'lodash';
 import { IndexPattern, IndexPatternField } from 'src/plugins/data/public';
 
 export function getIndexPatternFieldList(
-  indexPattern: IndexPattern,
-  fieldCounts: Record<string, number>
+  indexPattern?: IndexPattern,
+  fieldCounts?: Record<string, number>
 ) {
   if (!indexPattern || !fieldCounts) return [];
 
@@ -31,6 +31,7 @@ export function getIndexPatternFieldList(
 
   difference(fieldNamesInDocs, fieldNamesInIndexPattern).forEach((unknownFieldName) => {
     unknownTypes.push({
+      displayName: String(unknownFieldName),
       name: String(unknownFieldName),
       type: 'unknown',
     } as IndexPatternField);

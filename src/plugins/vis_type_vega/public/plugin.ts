@@ -28,7 +28,6 @@ import {
   setSavedObjects,
   setInjectedVars,
   setUISettings,
-  setKibanaMapFactory,
   setMapsLegacyConfig,
   setInjectedMetadata,
 } from './services';
@@ -36,10 +35,10 @@ import {
 import { createVegaFn } from './vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 import { IServiceSettings } from '../../maps_legacy/public';
-import './index.scss';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
+import { getVegaVisRenderer } from './vega_vis_renderer';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -47,7 +46,7 @@ export interface VegaVisualizationDependencies {
   plugins: {
     data: DataPublicPluginSetup;
   };
-  serviceSettings: IServiceSettings;
+  getServiceSettings: () => Promise<IServiceSettings>;
 }
 
 /** @internal */
@@ -78,11 +77,9 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
-      esShardTimeout: core.injectedMetadata.getInjectedVar('esShardTimeout') as number,
       emsTileLayerId: core.injectedMetadata.getInjectedVar('emsTileLayerId', true),
     });
     setUISettings(core.uiSettings);
-    setKibanaMapFactory(mapsLegacy.getKibanaMapFactoryProvider);
     setMapsLegacyConfig(mapsLegacy.config);
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
@@ -90,12 +87,13 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
       plugins: {
         data,
       },
-      serviceSettings: mapsLegacy.serviceSettings,
+      getServiceSettings: mapsLegacy.getServiceSettings,
     };
 
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
+    expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
 
     visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
   }

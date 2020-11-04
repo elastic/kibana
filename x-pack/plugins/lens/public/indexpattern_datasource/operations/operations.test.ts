@@ -16,21 +16,25 @@ const expectedIndexPatterns = {
     id: '1',
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
+    hasRestrictions: false,
     fields: [
       {
         name: 'timestamp',
+        displayName: 'timestamp',
         type: 'date',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'bytes',
+        displayName: 'bytes',
         type: 'number',
         aggregatable: true,
         searchable: true,
       },
       {
         name: 'source',
+        displayName: 'source',
         type: 'string',
         aggregatable: true,
         searchable: true,
@@ -46,6 +50,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'string',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -57,6 +62,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'number',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -68,6 +74,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'date',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -79,6 +86,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: '_source',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
         })
@@ -92,6 +100,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'string',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
           aggregationRestrictions: {
@@ -108,6 +117,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'number',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
           aggregationRestrictions: {
@@ -127,6 +137,7 @@ describe('getOperationTypesForField', () => {
         getOperationTypesForField({
           type: 'date',
           name: 'a',
+          displayName: 'aLabel',
           aggregatable: true,
           searchable: true,
           aggregationRestrictions: {
@@ -171,7 +182,7 @@ describe('getOperationTypesForField', () => {
       },
     };
 
-    it('should build a column for the given operation type if it is passed in', () => {
+    it('should build a column for the given field-based operation type if it is passed in', () => {
       const column = buildColumn({
         layerId: 'first',
         indexPattern: expectedIndexPatterns[1],
@@ -181,6 +192,17 @@ describe('getOperationTypesForField', () => {
         field: documentField,
       });
       expect(column.operationType).toEqual('count');
+    });
+
+    it('should build a column for the given no-input operation type if it is passed in', () => {
+      const column = buildColumn({
+        layerId: 'first',
+        indexPattern: expectedIndexPatterns[1],
+        columns: state.layers.first.columns,
+        suggestedPriority: 0,
+        op: 'filters',
+      });
+      expect(column.operationType).toEqual('filters');
     });
 
     it('should build a column for the given operation type and field if it is passed in', () => {
@@ -211,19 +233,33 @@ describe('getOperationTypesForField', () => {
       );
     });
 
-    it('should list out all field-operation tuples for different operation meta data', () => {
+    it('should list out all operation tuples', () => {
       expect(getAvailableOperationsByMetadata(expectedIndexPatterns[1])).toMatchInlineSnapshot(`
         Array [
           Object {
             "operationMetaData": Object {
+              "dataType": "date",
+              "isBucketed": true,
+              "scale": "interval",
+            },
+            "operations": Array [
+              Object {
+                "field": "timestamp",
+                "operationType": "date_histogram",
+                "type": "field",
+              },
+            ],
+          },
+          Object {
+            "operationMetaData": Object {
               "dataType": "number",
               "isBucketed": true,
-              "scale": "ordinal",
+              "scale": "interval",
             },
             "operations": Array [
               Object {
                 "field": "bytes",
-                "operationType": "terms",
+                "operationType": "range",
                 "type": "field",
               },
             ],
@@ -236,6 +272,10 @@ describe('getOperationTypesForField', () => {
             },
             "operations": Array [
               Object {
+                "operationType": "filters",
+                "type": "none",
+              },
+              Object {
                 "field": "source",
                 "operationType": "terms",
                 "type": "field",
@@ -244,14 +284,14 @@ describe('getOperationTypesForField', () => {
           },
           Object {
             "operationMetaData": Object {
-              "dataType": "date",
+              "dataType": "number",
               "isBucketed": true,
-              "scale": "interval",
+              "scale": "ordinal",
             },
             "operations": Array [
               Object {
-                "field": "timestamp",
-                "operationType": "date_histogram",
+                "field": "bytes",
+                "operationType": "terms",
                 "type": "field",
               },
             ],
@@ -275,12 +315,12 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "field": "bytes",
-                "operationType": "min",
+                "operationType": "max",
                 "type": "field",
               },
               Object {
                 "field": "bytes",
-                "operationType": "max",
+                "operationType": "min",
                 "type": "field",
               },
               Object {
@@ -296,6 +336,11 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "source",
                 "operationType": "cardinality",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "median",
                 "type": "field",
               },
             ],

@@ -4,15 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DefaultOperator } from 'elasticsearch';
+import type { DefaultOperator } from 'elasticsearch';
 
+import { HttpFetchError } from '../../../../../../src/core/public';
+import type { IndexPattern } from '../../../../../../src/plugins/data/public';
+
+import type {
+  PostTransformsPreviewRequestSchema,
+  PutTransformsRequestSchema,
+} from '../../../common/api_schemas/transforms';
+import type {
+  DateHistogramAgg,
+  HistogramAgg,
+  TermsAgg,
+} from '../../../common/types/pivot_group_by';
 import { dictionaryToArray } from '../../../common/types/common';
-import { SavedSearchQuery } from '../hooks/use_search_items';
 
-import { StepDefineExposedState } from '../sections/create_transform/components/step_define';
-import { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
-
-import { IndexPattern } from '../../../../../../src/plugins/data/public';
+import type { SavedSearchQuery } from '../hooks/use_search_items';
+import type { StepDefineExposedState } from '../sections/create_transform/components/step_define';
+import type { StepDetailsExposedState } from '../sections/create_transform/components/step_details/step_details_form';
 
 import {
   getEsAggFromAggConfig,
@@ -24,8 +34,6 @@ import {
 } from '../common';
 
 import { PivotAggsConfig } from './pivot_aggs';
-import { DateHistogramAgg, HistogramAgg, TermsAgg } from './pivot_group_by';
-import { PreviewRequestBody, CreateRequestBody } from './transform';
 
 export interface SimpleQuery {
   query_string: {
@@ -63,27 +71,24 @@ export function isDefaultQuery(query: PivotQuery): boolean {
   return isSimpleQuery(query) && query.query_string.query === '*';
 }
 
-export function getPreviewRequestBody(
+export function getPreviewTransformRequestBody(
   indexPatternTitle: IndexPattern['title'],
   query: PivotQuery,
   groupBy: PivotGroupByConfig[],
   aggs: PivotAggsConfig[]
-): PreviewRequestBody {
+): PostTransformsPreviewRequestSchema {
   const index = indexPatternTitle.split(',').map((name: string) => name.trim());
 
-  const request: PreviewRequestBody = {
+  const request: PostTransformsPreviewRequestSchema = {
     source: {
       index,
+      ...(!isDefaultQuery(query) && !isMatchAllQuery(query) ? { query } : {}),
     },
     pivot: {
       group_by: {},
       aggregations: {},
     },
   };
-
-  if (!isDefaultQuery(query) && !isMatchAllQuery(query)) {
-    request.source.query = query;
-  }
 
   groupBy.forEach((g) => {
     if (isGroupByTerms(g)) {
@@ -125,37 +130,61 @@ export function getPreviewRequestBody(
   return request;
 }
 
-export function getCreateRequestBody(
+export const getCreateTransformSettingsRequestBody = (
+  transformDetailsState: Partial<StepDetailsExposedState>
+): { settings?: PutTransformsRequestSchema['settings'] } => {
+  const settings: PutTransformsRequestSchema['settings'] = {
+    ...(transformDetailsState.transformSettingsMaxPageSearchSize
+      ? { max_page_search_size: transformDetailsState.transformSettingsMaxPageSearchSize }
+      : {}),
+    ...(transformDetailsState.transformSettingsDocsPerSecond
+      ? { docs_per_second: transformDetailsState.transformSettingsDocsPerSecond }
+      : {}),
+  };
+  return Object.keys(settings).length > 0 ? { settings } : {};
+};
+
+export const getCreateTransformRequestBody = (
   indexPatternTitle: IndexPattern['title'],
   pivotState: StepDefineExposedState,
   transformDetailsState: StepDetailsExposedState
-): CreateRequestBody {
-  const request: CreateRequestBody = {
-    ...getPreviewRequestBody(
-      indexPatternTitle,
-      getPivotQuery(pivotState.searchQuery),
-      dictionaryToArray(pivotState.groupByList),
-      dictionaryToArray(pivotState.aggList)
-    ),
-    // conditionally add optional description
-    ...(transformDetailsState.transformDescription !== ''
-      ? { description: transformDetailsState.transformDescription }
-      : {}),
-    dest: {
-      index: transformDetailsState.destinationIndex,
-    },
-    // conditionally add continuous mode config
-    ...(transformDetailsState.isContinuousModeEnabled
-      ? {
-          sync: {
-            time: {
-              field: transformDetailsState.continuousModeDateField,
-              delay: transformDetailsState.continuousModeDelay,
-            },
+): PutTransformsRequestSchema => ({
+  ...getPreviewTransformRequestBody(
+    indexPatternTitle,
+    getPivotQuery(pivotState.searchQuery),
+    dictionaryToArray(pivotState.groupByList),
+    dictionaryToArray(pivotState.aggList)
+  ),
+  // conditionally add optional description
+  ...(transformDetailsState.transformDescription !== ''
+    ? { description: transformDetailsState.transformDescription }
+    : {}),
+  // conditionally add optional frequency
+  ...(transformDetailsState.transformFrequency !== ''
+    ? { frequency: transformDetailsState.transformFrequency }
+    : {}),
+  dest: {
+    index: transformDetailsState.destinationIndex,
+  },
+  // conditionally add continuous mode config
+  ...(transformDetailsState.isContinuousModeEnabled
+    ? {
+        sync: {
+          time: {
+            field: transformDetailsState.continuousModeDateField,
+            delay: transformDetailsState.continuousModeDelay,
           },
-        }
-      : {}),
-  };
+        },
+      }
+    : {}),
+  // conditionally add additional settings
+  ...getCreateTransformSettingsRequestBody(transformDetailsState),
+});
 
-  return request;
+export function isHttpFetchError(error: any): error is HttpFetchError {
+  return (
+    error instanceof HttpFetchError &&
+    typeof error.name === 'string' &&
+    typeof error.message !== 'undefined'
+  );
 }

@@ -175,10 +175,13 @@ describe('Exception viewer helpers', () => {
 
     test('it returns formatted description list with a description if one specified', () => {
       const payload = getExceptionListItemSchemaMock();
-      payload._tags = [];
       payload.description = 'Im a description';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
         {
           description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',
@@ -198,10 +201,13 @@ describe('Exception viewer helpers', () => {
 
     test('it returns just user and date created if no other fields specified', () => {
       const payload = getExceptionListItemSchemaMock();
-      payload._tags = [];
       payload.description = '';
       const result = getDescriptionListContent(payload);
       const expected: DescriptionListItem[] = [
+        {
+          description: 'Linux',
+          title: 'OS',
+        },
         {
           description: 'April 20th 2020 @ 15:25:31',
           title: 'Date created',

@@ -12,7 +12,7 @@ import { getThreadCountChart } from './by_agent/java/thread_count';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../public/utils/testHelpers';
+} from '../../utils/test_helpers';
 import { SERVICE_NODE_NAME_MISSING } from '../../../common/service_nodes';
 
 describe('metrics queries', () => {

@@ -6,7 +6,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient } from 'kibana/server';
-import { ResolverRelatedAlerts, ResolverEvent } from '../../../../../common/endpoint/types';
+import { ResolverRelatedAlerts, SafeResolverEvent } from '../../../../../common/endpoint/types';
 import { createRelatedAlerts } from './node';
 import { AlertsQuery } from '../queries/alerts';
 import { PaginationBuilder } from './pagination';
@@ -14,26 +14,38 @@ import { QueryInfo } from '../queries/multi_searcher';
 import { SingleQueryHandler } from './fetch';
 
 /**
+ * Parameters for RelatedAlertsQueryHandler
+ */
+export interface RelatedAlertsParams {
+  limit: number;
+  entityID: string;
+  indexPattern: string;
+  after?: string;
+  legacyEndpointID?: string;
+  filter?: string;
+}
+
+/**
  * Requests related alerts for the given node.
  */
 export class RelatedAlertsQueryHandler implements SingleQueryHandler<ResolverRelatedAlerts> {
   private relatedAlerts: ResolverRelatedAlerts | undefined;
   private readonly query: AlertsQuery;
-  constructor(
-    private readonly limit: number,
-    private readonly entityID: string,
-    after: string | undefined,
-    indexPattern: string,
-    legacyEndpointID: string | undefined
-  ) {
+  private readonly limit: number;
+  private readonly entityID: string;
+
+  constructor(options: RelatedAlertsParams) {
+    this.limit = options.limit;
+    this.entityID = options.entityID;
     this.query = new AlertsQuery(
-      PaginationBuilder.createBuilder(limit, after),
-      indexPattern,
-      legacyEndpointID
+      PaginationBuilder.createBuilder(this.limit, options.after),
+      options.indexPattern,
+      options.legacyEndpointID,
+      options.filter
     );
   }
 
-  private handleResponse = (response: SearchResponse<ResolverEvent>) => {
+  private handleResponse = (response: SearchResponse<SafeResolverEvent>) => {
     const results = this.query.formatResponse(response);
     this.relatedAlerts = createRelatedAlerts(
       this.entityID,

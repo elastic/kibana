@@ -18,7 +18,8 @@
  */
 
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
-import { UI_SETTINGS } from '../../../common';
+import { IndexPattern, UI_SETTINGS } from '../../../common';
+import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
   AggTypesRegistry,
@@ -27,6 +28,7 @@ import {
   getCalculateAutoTimeExpression,
 } from './';
 import { AggsCommonSetup, AggsCommonStart } from './types';
+import { getDateMetaByDatatableColumn } from './utils/time_column_meta';
 
 /** @internal */
 export const aggsRequiredUiSettings = [
@@ -48,7 +50,9 @@ export interface AggsCommonSetupDependencies {
 
 /** @internal */
 export interface AggsCommonStartDependencies {
-  getConfig: <T = any>(key: string) => T;
+  getConfig: GetConfigFn;
+  getIndexPattern(id: string): Promise<IndexPattern>;
+  isDefaultTimezone: () => boolean;
 }
 
 /**
@@ -76,11 +80,22 @@ export class AggsCommonService {
     };
   }
 
-  public start({ getConfig }: AggsCommonStartDependencies): AggsCommonStart {
+  public start({
+    getConfig,
+    getIndexPattern,
+    isDefaultTimezone,
+  }: AggsCommonStartDependencies): AggsCommonStart {
     const aggTypesStart = this.aggTypesRegistry.start();
+    const calculateAutoTimeExpression = getCalculateAutoTimeExpression(getConfig);
 
     return {
-      calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
+      calculateAutoTimeExpression,
+      getDateMetaByDatatableColumn: getDateMetaByDatatableColumn({
+        calculateAutoTimeExpression,
+        getIndexPattern,
+        getConfig,
+        isDefaultTimezone,
+      }),
       createAggConfigs: (indexPattern, configStates = [], schemas) => {
         return new AggConfigs(indexPattern, configStates, {
           typesRegistry: aggTypesStart,

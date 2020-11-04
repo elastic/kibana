@@ -224,9 +224,13 @@ export const GO_TO_DOCUMENTATION = i18n.translate(
 );
 
 export const CONNECTORS = i18n.translate('xpack.securitySolution.case.caseView.connectors', {
-  defaultMessage: 'External incident management system',
+  defaultMessage: 'External Incident Management System',
 });
 
 export const EDIT_CONNECTOR = i18n.translate('xpack.securitySolution.case.caseView.editConnector', {
   defaultMessage: 'Change external incident management system',
+});
+
+export const NO_CONNECTOR = i18n.translate('xpack.securitySolution.case.common.noConnector', {
+  defaultMessage: 'No connector selected',
 });

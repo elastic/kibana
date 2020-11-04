@@ -3,17 +3,20 @@
 exports[`ExplorerNoInfluencersFound snapshot 1`] = `
 <EuiEmptyPrompt
   actions={
-    <EuiButton
-      color="primary"
-      fill={true}
-      href="ml#/jobs"
+    <Link
+      to="/jobs"
     >
-      <FormattedMessage
-        defaultMessage="Create job"
-        id="xpack.ml.explorer.createNewJobLinkText"
-        values={Object {}}
-      />
-    </EuiButton>
+      <EuiButton
+        color="primary"
+        fill={true}
+      >
+        <FormattedMessage
+          defaultMessage="Create job"
+          id="xpack.ml.explorer.createNewJobLinkText"
+          values={Object {}}
+        />
+      </EuiButton>
+    </Link>
   }
   data-test-subj="mlNoJobsFound"
   iconType="alert"

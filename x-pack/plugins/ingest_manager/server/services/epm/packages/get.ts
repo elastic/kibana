@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObjectsClientContract } from 'src/core/server';
+import { SavedObjectsClientContract, SavedObjectsFindOptions } from 'src/core/server';
 import { isPackageLimited } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { Installation, InstallationStatus, PackageInfo, KibanaAssetType } from '../../../types';
@@ -50,15 +50,15 @@ export async function getPackages(
   return packageList;
 }
 
-// Get package names for packages which cannot have more than one package config on an agent config
-// Assume packages only export one config template for now
+// Get package names for packages which cannot have more than one package policy on an agent policy
+// Assume packages only export one policy template for now
 export async function getLimitedPackages(options: {
   savedObjectsClient: SavedObjectsClientContract;
 }): Promise<string[]> {
   const { savedObjectsClient } = options;
   const allPackages = await getPackages({ savedObjectsClient, experimental: true });
   const installedPackages = allPackages.filter(
-    (pkg) => (pkg.status = InstallationStatus.installed)
+    (pkg) => pkg.status === InstallationStatus.installed
   );
   const installedPackagesInfo = await Promise.all(
     installedPackages.map((pkgInstall) => {
@@ -72,8 +72,12 @@ export async function getLimitedPackages(options: {
   return installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
 }
 
-export async function getPackageSavedObjects(savedObjectsClient: SavedObjectsClientContract) {
+export async function getPackageSavedObjects(
+  savedObjectsClient: SavedObjectsClientContract,
+  options?: Omit<SavedObjectsFindOptions, 'type'>
+) {
   return savedObjectsClient.find<Installation>({
+    ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
   });
 }
@@ -82,11 +86,18 @@ export async function getPackageKeysByStatus(
   savedObjectsClient: SavedObjectsClientContract,
   status: InstallationStatus
 ) {
-  const allPackages = await getPackages({ savedObjectsClient });
+  const allPackages = await getPackages({ savedObjectsClient, experimental: true });
   return allPackages.reduce<Array<{ pkgName: string; pkgVersion: string }>>((acc, pkg) => {
     if (pkg.status === status) {
-      acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
+      if (pkg.status === InstallationStatus.installed) {
+        // if we're looking for installed packages grab the version from the saved object because `getPackages` will
+        // return the latest package information from the registry
+        acc.push({ pkgName: pkg.name, pkgVersion: pkg.savedObject.attributes.version });
+      } else {
+        acc.push({ pkgName: pkg.name, pkgVersion: pkg.version });
+      }
     }
+
     return acc;
   }, []);
 }
@@ -97,11 +108,14 @@ export async function getPackageInfo(options: {
   pkgVersion: string;
 }): Promise<PackageInfo> {
   const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const [item, savedObject, latestPackage, assets] = await Promise.all([
-    Registry.fetchInfo(pkgName, pkgVersion),
+  const [
+    savedObject,
+    latestPackage,
+    { paths: assets, registryPackageInfo: item },
+  ] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
-    Registry.getArchiveInfo(pkgName, pkgVersion),
+    Registry.loadRegistryPackage(pkgName, pkgVersion),
   ]);
 
   // add properties that aren't (or aren't yet) on Registry response

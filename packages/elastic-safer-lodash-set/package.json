@@ -4,19 +4,10 @@
   "description": "A safer version of the lodash set and setWith functions",
   "main": "index.js",
   "types": "index.d.ts",
-  "dependencies": {},
-  "devDependencies": {
-    "dependency-check": "^4.1.0",
-    "tape": "^5.0.1",
-    "tsd": "^0.13.1"
-  },
-  "peerDependencies": {
-    "lodash": "4.x"
-  },
   "scripts": {
-    "lint": "dependency-check --no-dev package.json set.js setWith.js fp/*.js",
-    "test": "npm run lint && tape test/*.js && npm run test:types",
-    "test:types": "./scripts/tsd.sh",
+    "lint": "../../node_modules/.bin/dependency-check --missing ../../package.json ./packages/elastic-safer-lodash-set/set.js ./packages/elastic-safer-lodash-set/setWith.js ./packages/elastic-safer-lodash-set/fp/*.js",
+    "test": "npm run lint && ../../node_modules/.bin/tape test/*.js && npm run test:types",
+    "test:types": "../../node_modules/.bin/tsc --noEmit",
     "update": "./scripts/update.sh",
     "save_state": "./scripts/save_state.sh"
   },
@@ -42,8 +33,5 @@
     "ignore": [
       "/lodash/"
     ]
-  },
-  "tsd": {
-    "directory": "test"
   }
 }

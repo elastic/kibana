@@ -6,12 +6,12 @@
 
 import {
   ResolverTree,
-  ResolverEvent,
   ResolverNodeStats,
   ResolverLifecycleNode,
   ResolverChildNode,
+  SafeResolverEvent,
 } from '../../../common/endpoint/types';
-import { uniquePidForProcess } from './process_event';
+import * as eventModel from '../../../common/endpoint/models/event';
 
 /**
  * ResolverTree is a type returned by the server.
@@ -29,7 +29,7 @@ function lifecycleNodes(tree: ResolverTree): ResolverLifecycleNode[] {
  * All the process events
  */
 export function lifecycleEvents(tree: ResolverTree) {
-  const events: ResolverEvent[] = [...tree.lifecycle];
+  const events: SafeResolverEvent[] = [...tree.lifecycle];
   for (const { lifecycle } of tree.children.childNodes) {
     events.push(...lifecycle);
   }
@@ -66,7 +66,7 @@ export function mock({
   /**
    * Events represented by the ResolverTree.
    */
-  events: ResolverEvent[];
+  events: SafeResolverEvent[];
   children?: ResolverChildNode[];
   /**
    * Optionally provide cursors for the 'children' and 'ancestry' edges.
@@ -77,8 +77,12 @@ export function mock({
     return null;
   }
   const first = events[0];
+  const entityID = eventModel.entityIDSafeVersion(first);
+  if (!entityID) {
+    throw new Error('first mock event must include an entityID.');
+  }
   return {
-    entityID: uniquePidForProcess(first),
+    entityID,
     // Required
     children: {
       childNodes: children,

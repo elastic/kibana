@@ -38,9 +38,6 @@ import { WindowsEvents, MacEvents, LinuxEvents } from './policy_forms/events';
 import { MalwareProtections } from './policy_forms/protections/malware';
 import { useToasts } from '../../../../common/lib/kibana';
 import { AppAction } from '../../../../common/store/actions';
-import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
-import { PageViewHeaderTitle } from '../../../../common/components/endpoint/page_view';
-import { ManagementPageView } from '../../../components/management_page_view';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath } from '../../../common/routing';
@@ -48,6 +45,9 @@ import { useFormatUrl } from '../../../../common/components/link_to';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { MANAGEMENT_APP_ID } from '../../../common/constants';
 import { PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
+import { WrapperPage } from '../../../../common/components/wrapper_page';
+import { HeaderPage } from '../../../../common/components/header_page';
+import { AdvancedPolicyForms } from './policy_advanced';
 
 export const PolicyDetails = React.memo(() => {
   const dispatch = useDispatch<(action: AppAction) => void>();
@@ -55,7 +55,7 @@ export const PolicyDetails = React.memo(() => {
     services: {
       application: { navigateToApp },
     },
-  } = useKibana();
+  } = useKibana<{ application: ApplicationStart }>();
   const toasts = useToasts();
   const { formatUrl } = useFormatUrl(SecurityPageName.administration);
   const { state: locationRouteState } = useLocation<PolicyDetailsRouteState>();
@@ -70,6 +70,7 @@ export const PolicyDetails = React.memo(() => {
   // Local state
   const [showConfirm, setShowConfirm] = useState<boolean>(false);
   const [routeState, setRouteState] = useState<PolicyDetailsRouteState>();
+  const [showAdvancedPolicy, setShowAdvancedPolicy] = useState<boolean>(false);
   const policyName = policyItem?.name ?? '';
   const hostListRouterPath = getEndpointListPath({ name: 'endpointList' });
 
@@ -109,8 +110,6 @@ export const PolicyDetails = React.memo(() => {
     }
   }, [navigateToApp, toasts, policyName, policyUpdateStatus, routeState]);
 
-  const handleBackToListOnClick = useNavigateByRouterEventHandler(hostListRouterPath);
-
   const navigateToAppArguments = useMemo((): Parameters<ApplicationStart['navigateToApp']> => {
     return routeState?.onCancelNavigateTo ?? [MANAGEMENT_APP_ID, { path: hostListRouterPath }];
   }, [hostListRouterPath, routeState?.onCancelNavigateTo]);
@@ -131,6 +130,10 @@ export const PolicyDetails = React.memo(() => {
     setShowConfirm(false);
   }, []);
 
+  const handleAdvancedPolicyClick = useCallback(() => {
+    setShowAdvancedPolicy(!showAdvancedPolicy);
+  }, [showAdvancedPolicy]);
+
   useEffect(() => {
     if (!routeState && locationRouteState) {
       setRouteState(locationRouteState);
@@ -142,7 +145,7 @@ export const PolicyDetails = React.memo(() => {
   // Else, if we have an error, then show error on the page.
   if (!policyItem) {
     return (
-      <ManagementPageView viewType="details">
+      <WrapperPage noTimeline>
         {isPolicyLoading ? (
           <EuiLoadingSpinner size="xl" />
         ) : policyApiError ? (
@@ -151,27 +154,9 @@ export const PolicyDetails = React.memo(() => {
           </EuiCallOut>
         ) : null}
         <SpyRoute pageName={SecurityPageName.administration} />
-      </ManagementPageView>
+      </WrapperPage>
     );
   }
-
-  const headerLeftContent = (
-    <div>
-      {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-      <EuiButtonEmpty
-        iconType="arrowLeft"
-        contentProps={{ style: { paddingLeft: '0' } }}
-        onClick={handleBackToListOnClick}
-        href={formatUrl(hostListRouterPath)}
-      >
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.details.backToListTitle"
-          defaultMessage="Back to endpoint hosts"
-        />
-      </EuiButtonEmpty>
-      <PageViewHeaderTitle className="eui-textTruncate">{policyItem.name}</PageViewHeaderTitle>
-    </div>
-  );
 
   const headerRightContent = (
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -222,12 +207,22 @@ export const PolicyDetails = React.memo(() => {
           onConfirm={handleSaveConfirmation}
         />
       )}
-      <ManagementPageView
-        viewType="details"
-        data-test-subj="policyDetailsPage"
-        headerLeft={headerLeftContent}
-        headerRight={headerRightContent}
-      >
+      <WrapperPage noTimeline data-test-subj="policyDetailsPage">
+        <HeaderPage
+          hideSourcerer={true}
+          title={policyItem.name}
+          backOptions={{
+            text: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {
+              defaultMessage: 'Back to endpoint hosts',
+            }),
+            href: formatUrl(hostListRouterPath),
+            pageId: SecurityPageName.administration,
+            dataTestSubj: 'policyDetailsBackLink',
+          }}
+        >
+          {headerRightContent}
+        </HeaderPage>
+
         <EuiText size="xs" color="subdued">
           <h4>
             <FormattedMessage
@@ -236,9 +231,11 @@ export const PolicyDetails = React.memo(() => {
             />
           </h4>
         </EuiText>
+
         <EuiSpacer size="xs" />
         <MalwareProtections />
         <EuiSpacer size="l" />
+
         <EuiText size="xs" color="subdued">
           <h4>
             <FormattedMessage
@@ -247,13 +244,27 @@ export const PolicyDetails = React.memo(() => {
             />
           </h4>
         </EuiText>
+
         <EuiSpacer size="xs" />
         <WindowsEvents />
         <EuiSpacer size="l" />
         <MacEvents />
         <EuiSpacer size="l" />
         <LinuxEvents />
-      </ManagementPageView>
+
+        <EuiSpacer size="l" />
+        <EuiButtonEmpty data-test-subj="advancedPolicyButton" onClick={handleAdvancedPolicyClick}>
+          <FormattedMessage
+            id="xpack.securitySolution.endpoint.policy.advanced.show"
+            defaultMessage="{action} advanced settings"
+            values={{ action: showAdvancedPolicy ? 'Hide' : 'Show' }}
+          />
+        </EuiButtonEmpty>
+
+        <EuiSpacer size="l" />
+        {showAdvancedPolicy && <AdvancedPolicyForms />}
+      </WrapperPage>
+
       <SpyRoute pageName={SecurityPageName.administration} />
     </>
   );
@@ -306,7 +317,7 @@ const ConfirmUpdate = React.memo<{
             >
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policy.details.updateConfirm.warningMessage"
-                defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent configuration."
+                defaultMessage="Saving these changes will apply updates to all endpoints assigned to this agent policy."
               />
             </EuiCallOut>
             <EuiSpacer size="xl" />

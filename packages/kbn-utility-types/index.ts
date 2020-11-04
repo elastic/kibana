@@ -98,3 +98,22 @@ export type PublicKeys<T> = keyof T;
  * Returns an object with public keys only.
  */
 export type PublicContract<T> = Pick<T, PublicKeys<T>>;
+
+/**
+ * Returns public method names
+ */
+export type MethodKeysOf<T> = {
+  [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never;
+}[keyof T];
+
+/**
+ *  Returns an object with public methods only.
+ */
+export type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
+
+/**
+ *  Makes an object with readonly properties mutable.
+ */
+export type Writable<T> = {
+  -readonly [K in keyof T]: T[K];
+};

@@ -4,18 +4,21 @@
   "server": true,
   "ui": true,
   "requiredPlugins": [
-    "home",
     "licensing",
-    "management"
+    "management",
+    "features"
   ],
   "optionalPlugins": [
+    "cloud",
     "usageCollection",
-    "indexManagement"
+    "indexManagement",
+    "home"
   ],
   "configPath": ["xpack", "ilm"],
   "requiredBundles": [
     "indexManagement",
     "kibanaReact",
-    "esUiShared"
+    "esUiShared",
+    "home"
   ]
 }

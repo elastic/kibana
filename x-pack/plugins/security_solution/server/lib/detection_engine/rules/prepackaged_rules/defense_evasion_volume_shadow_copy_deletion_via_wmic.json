@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies use of wmic.exe for shadow copy deletion on endpoints. This commonly occurs in tandem with ransomware or other destructive attacks.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -16,7 +17,10 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
   ],
   "threat": [
     {
@@ -36,5 +40,5 @@
     }
   ],
   "type": "query",
-  "version": 3
+  "version": 5
 }

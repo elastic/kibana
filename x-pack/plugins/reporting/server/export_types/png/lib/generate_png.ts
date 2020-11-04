@@ -10,7 +10,8 @@ import { map } from 'rxjs/operators';
 import { ReportingCore } from '../../../';
 import { LevelLogger } from '../../../lib';
 import { LayoutParams, PreserveLayout } from '../../../lib/layouts';
-import { ConditionalHeaders, ScreenshotResults } from '../../../types';
+import { ScreenshotResults } from '../../../lib/screenshots';
+import { ConditionalHeaders } from '../../common';
 
 export async function generatePngObservableFactory(reporting: ReportingCore) {
   const getScreenshots = await reporting.getScreenshotsObservable();
@@ -18,7 +19,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
   return function generatePngObservable(
     logger: LevelLogger,
     url: string,
-    browserTimezone: string,
+    browserTimezone: string | undefined,
     conditionalHeaders: ConditionalHeaders,
     layoutParams: LayoutParams
   ): Rx.Observable<{ base64: string | null; warnings: string[] }> {
@@ -27,7 +28,7 @@ export async function generatePngObservableFactory(reporting: ReportingCore) {
     if (!layoutParams || !layoutParams.dimensions) {
       throw new Error(`LayoutParams.Dimensions is undefined.`);
     }
-    const layout = new PreserveLayout(layoutParams.dimensions);
+    const layout = new PreserveLayout(layoutParams.dimensions, layoutParams.selectors);
     if (apmLayout) apmLayout.end();
 
     const apmScreenshots = apmTrans?.startSpan('screenshots_pipeline', 'setup');

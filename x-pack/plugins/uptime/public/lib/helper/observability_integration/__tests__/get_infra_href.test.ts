@@ -79,6 +79,7 @@ describe('getInfraHref', () => {
   });
 
   it('getInfraContainerHref returns undefined when summaryPings are undefined', () => {
+    // @ts-expect-error
     delete summary.state.summaryPings;
     expect(getInfraContainerHref(summary, '')).toBeUndefined();
   });
@@ -125,6 +126,7 @@ describe('getInfraHref', () => {
   });
 
   it('getInfraKubernetesHref returns undefined when summaryPings are undefined', () => {
+    // @ts-expect-error
     delete summary.state.summaryPings;
     expect(getInfraKubernetesHref(summary, '')).toBeUndefined();
   });
@@ -183,6 +185,7 @@ describe('getInfraHref', () => {
   });
 
   it('getInfraIpHref returns undefined if summaryPings are undefined', () => {
+    // @ts-expect-error
     delete summary.state.summaryPings;
     expect(getInfraIpHref(summary, 'foo')).toBeUndefined();
   });

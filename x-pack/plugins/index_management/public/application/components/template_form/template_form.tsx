@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiButton } from '@elastic/eui';
@@ -15,6 +15,7 @@ import {
   SimulateTemplateFlyoutContent,
   SimulateTemplateProps,
   simulateTemplateFlyoutProps,
+  SimulateTemplateFilters,
 } from '../index_templates';
 import { StepLogisticsContainer, StepComponentContainer, StepReviewContainer } from './steps';
 import {
@@ -98,6 +99,11 @@ export const TemplateForm = ({
 }: Props) => {
   const [wizardContent, setWizardContent] = useState<Forms.Content<WizardContent> | null>(null);
   const { addContent: addContentToGlobalFlyout, closeFlyout } = useGlobalFlyout();
+  const simulateTemplateFilters = useRef<SimulateTemplateFilters>({
+    mappings: true,
+    settings: true,
+    aliases: true,
+  });
 
   const indexTemplate = defaultValue ?? {
     name: '',
@@ -111,7 +117,7 @@ export const TemplateForm = ({
   };
 
   const {
-    template: { settings, mappings, aliases },
+    template: { settings, mappings, aliases } = {},
     composedOf,
     _kbnMeta,
     ...logistics
@@ -164,17 +170,19 @@ export const TemplateForm = ({
   const cleanupTemplateObject = (template: TemplateDeserialized) => {
     const outputTemplate = { ...template };
 
-    if (outputTemplate.template.settings === undefined) {
-      delete outputTemplate.template.settings;
-    }
-    if (outputTemplate.template.mappings === undefined) {
-      delete outputTemplate.template.mappings;
-    }
-    if (outputTemplate.template.aliases === undefined) {
-      delete outputTemplate.template.aliases;
-    }
-    if (Object.keys(outputTemplate.template).length === 0) {
-      delete outputTemplate.template;
+    if (outputTemplate.template) {
+      if (outputTemplate.template.settings === undefined) {
+        delete outputTemplate.template.settings;
+      }
+      if (outputTemplate.template.mappings === undefined) {
+        delete outputTemplate.template.mappings;
+      }
+      if (outputTemplate.template.aliases === undefined) {
+        delete outputTemplate.template.aliases;
+      }
+      if (Object.keys(outputTemplate.template).length === 0) {
+        delete outputTemplate.template;
+      }
     }
 
     return outputTemplate;
@@ -185,8 +193,8 @@ export const TemplateForm = ({
       wizardData: WizardContent
     ): TemplateDeserialized => {
       const outputTemplate = {
-        ...initialTemplate,
         ...wizardData.logistics,
+        _kbnMeta: initialTemplate._kbnMeta,
         composedOf: wizardData.components,
         template: {
           settings: wizardData.settings,
@@ -234,6 +242,10 @@ export const TemplateForm = ({
     return template;
   }, [buildTemplateObject, indexTemplate, wizardContent]);
 
+  const onSimulateTemplateFiltersChange = useCallback((filters: SimulateTemplateFilters) => {
+    simulateTemplateFilters.current = filters;
+  }, []);
+
   const showPreviewFlyout = () => {
     addContentToGlobalFlyout<SimulateTemplateProps>({
       id: 'simulateTemplate',
@@ -241,6 +253,8 @@ export const TemplateForm = ({
       props: {
         getTemplate: getSimulateTemplate,
         onClose: closeFlyout,
+        filters: simulateTemplateFilters.current,
+        onFiltersChange: onSimulateTemplateFiltersChange,
       },
       flyoutProps: simulateTemplateFlyoutProps,
     });

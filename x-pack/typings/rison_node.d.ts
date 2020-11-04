@@ -23,4 +23,7 @@ declare module 'rison-node' {
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
   export const encode_object: <Input extends RisonObject>(input: Input) => string;
+
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  export const encode_array: <Input extends RisonArray>(input: Input) => string;
 }

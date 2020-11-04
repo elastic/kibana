@@ -6,7 +6,7 @@
 
 import { AppLocation, Immutable } from '../../../../common/endpoint/types';
 
-interface UserChangedUrl {
+export interface UserChangedUrl {
   readonly type: 'userChangedUrl';
   readonly payload: Immutable<AppLocation>;
 }

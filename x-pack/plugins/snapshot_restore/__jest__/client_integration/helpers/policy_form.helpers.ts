@@ -56,4 +56,6 @@ export type PolicyFormTestSubjects =
   | 'showAdvancedCronLink'
   | 'snapshotNameInput'
   | 'dataStreamBadge'
+  | 'repositoryNotFoundWarning'
+  | 'repositorySelect'
   | 'submitButton';

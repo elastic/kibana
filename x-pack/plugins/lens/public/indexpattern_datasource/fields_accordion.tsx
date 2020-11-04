@@ -45,8 +45,9 @@ export interface FieldsAccordionProps {
   paginatedFields: IndexPatternField[];
   fieldProps: FieldItemSharedProps;
   renderCallout: JSX.Element;
-  exists: boolean;
+  exists: (field: IndexPatternField) => boolean;
   showExistenceFetchError?: boolean;
+  hideDetails?: boolean;
 }
 
 export const InnerFieldsAccordion = function InnerFieldsAccordion({
@@ -61,13 +62,20 @@ export const InnerFieldsAccordion = function InnerFieldsAccordion({
   fieldProps,
   renderCallout,
   exists,
+  hideDetails,
   showExistenceFetchError,
 }: FieldsAccordionProps) {
   const renderField = useCallback(
-    (field: IndexPatternField) => {
-      return <FieldItem {...fieldProps} key={field.name} field={field} exists={!!exists} />;
-    },
-    [fieldProps, exists]
+    (field: IndexPatternField) => (
+      <FieldItem
+        {...fieldProps}
+        key={field.name}
+        field={field}
+        exists={exists(field)}
+        hideDetails={hideDetails}
+      />
+    ),
+    [fieldProps, exists, hideDetails]
   );
 
   return (

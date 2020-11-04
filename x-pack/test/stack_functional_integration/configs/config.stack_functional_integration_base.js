@@ -6,26 +6,31 @@
 
 import { resolve } from 'path';
 import buildState from './build_state';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog, REPO_ROOT } from '@kbn/dev-utils';
 import chalk from 'chalk';
 import { esTestConfig, kbnTestConfig } from '@kbn/test';
 
 const reportName = 'Stack Functional Integration Tests';
-const testsFolder = '../test/functional/apps';
+const testsFolder = '../apps';
 const log = new ToolingLog({
   level: 'info',
   writeTo: process.stdout,
 });
+log.info(`REPO_ROOT = ${REPO_ROOT}`);
 log.info(`WORKSPACE in config file ${process.env.WORKSPACE}`);
-const stateFilePath = process.env.WORKSPACE
-  ? `${process.env.WORKSPACE}/qa/envvars.sh`
-  : '../../../../../integration-test/qa/envvars.sh';
+
+const INTEGRATION_TEST_ROOT = process.env.WORKSPACE || resolve(REPO_ROOT, '../integration-test');
+log.info(`INTEGRATION_TEST_ROOT = ${INTEGRATION_TEST_ROOT}`);
+
+const stateFilePath = resolve(INTEGRATION_TEST_ROOT, 'qa/envvars.sh');
+log.info(`stateFilePath = ${stateFilePath}`);
 
 const prepend = (testFile) => require.resolve(`${testsFolder}/${testFile}`);
 
 export default async ({ readConfigFile }) => {
   const defaultConfigs = await readConfigFile(require.resolve('../../functional/config'));
   const { tests, ...provisionedConfigs } = buildState(resolve(__dirname, stateFilePath));
+  process.env.stack_functional_integration = true;
 
   const servers = {
     kibana: kbnTestConfig.getUrlParts(),
@@ -43,6 +48,14 @@ export default async ({ readConfigFile }) => {
     // If we need to do things like disable animations, we can do it in configure_start_kibana.sh, in the provisioner...which lives in the integration-test private repo
     uiSettings: {},
     security: { disableTestUser: true },
+    // choose where screenshots should be saved
+    screenshots: {
+      directory: resolve(INTEGRATION_TEST_ROOT, 'test/screenshots'),
+    },
+    // choose where esArchiver should load archives from
+    esArchiver: {
+      directory: resolve(INTEGRATION_TEST_ROOT, 'test/es_archives'),
+    },
   };
   return settings;
 };
@@ -55,7 +68,7 @@ function truncate(testPath) {
   return dropKibanaPath(testPath);
 }
 function highLight(testPath) {
-  const dropTestsPath = splitRight(/^.+test[\\/]functional[\\/]apps[\\/](.*)[\\/]/gm);
+  const dropTestsPath = splitRight(/^.+apps[\\/](.*)[\\/]/gm);
   const cleaned = dropTestsPath(testPath);
   const colored = chalk.greenBright.bold(cleaned);
   return testPath.replace(cleaned, colored);

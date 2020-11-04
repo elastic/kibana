@@ -15,7 +15,7 @@ Or, you might create API keys to automate ingestion of new data from
 remote sources, without a live user interaction.
 
 You can create API keys from the {kib} Console. To view and invalidate 
-API keys, open the menu, then go to *Stack Management > Security > API Keys*.
+API keys, open the main menu, then click *Stack Management > API Keys*.
 
 [role="screenshot"]
 image:user/security/api-keys/images/api-keys.png["API Keys UI"]
@@ -39,8 +39,8 @@ or contact your system administrator.
 === Security privileges
 
 You must have the `manage_security`, `manage_api_key`, or the `manage_own_api_key` 
-cluster privileges to use API keys in {kib}. To manage roles, open the menu, then go to 
-*Stack Management > Security > Roles*, or use the <<role-management-api, {kib} Role Management API>>. 
+cluster privileges to use API keys in {kib}. To manage roles, open the main menu, then click 
+*Stack Management > Roles*, or use the <<role-management-api, {kib} Role Management API>>. 
 
 
 [float]
@@ -53,7 +53,7 @@ to authenticate to a <<api, Kibana API>>.
 [source,js]
 POST /_security/api_key
 {
-  "name": "kibana_api_key",
+  "name": "kibana_api_key"
 }
 
 This creates an API key with the
@@ -72,9 +72,9 @@ The response should look something like this:
   "api_key" : "FD6P5UA4QCWlZZQhYF3YGw"
 }
 
-Now, you can use the API key to request {kib} roles. You will need
-to base64-encode the `id` and `api_key` provided in the response
-and add it to your request as an authorization header. For example:
+Now, you can use the API key to request {kib} roles. You'll need to send a request with a 
+`Authorization` header with a value having the prefix `ApiKey` followed by the credentials, 
+where credentials is the base64 encoding of `id` and `api_key` joined by a colon. For example:
 
 [source,js]
 curl --location --request GET 'http://localhost:5601/api/security/role' \

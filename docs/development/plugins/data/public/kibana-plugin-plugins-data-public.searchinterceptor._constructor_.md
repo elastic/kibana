@@ -4,12 +4,12 @@
 
 ## SearchInterceptor.(constructor)
 
-This class should be instantiated with a `requestTimeout` corresponding with how many ms after requests are initiated that they should automatically cancel.
+Constructs a new instance of the `SearchInterceptor` class
 
 <b>Signature:</b>
 
 ```typescript
-constructor(deps: SearchInterceptorDeps, requestTimeout?: number | undefined);
+constructor(deps: SearchInterceptorDeps);
 ```
 
 ## Parameters
@@ -17,5 +17,4 @@ constructor(deps: SearchInterceptorDeps, requestTimeout?: number | undefined);
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  deps | <code>SearchInterceptorDeps</code> |  |
-|  requestTimeout | <code>number &#124; undefined</code> |  |
 

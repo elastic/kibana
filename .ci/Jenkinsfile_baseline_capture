@@ -11,14 +11,14 @@ kibanaPipeline(timeoutMinutes: 120) {
           'CI_PARALLEL_PROCESS_NUMBER=1'
         ]) {
           parallel([
-            'oss-visualRegression': {
-              workers.ci(name: 'oss-visualRegression', size: 's-highmem', ramDisk: true) {
-                kibanaPipeline.functionalTestProcess('oss-visualRegression', './test/scripts/jenkins_visual_regression.sh')()
+            'oss-baseline': {
+              workers.ci(name: 'oss-baseline', size: 'l', ramDisk: true, runErrorReporter: false) {
+                kibanaPipeline.functionalTestProcess('oss-baseline', './test/scripts/jenkins_baseline.sh')()
               }
             },
-            'xpack-visualRegression': {
-              workers.ci(name: 'xpack-visualRegression', size: 's-highmem', ramDisk: true) {
-                kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh')()
+            'xpack-baseline': {
+              workers.ci(name: 'xpack-baseline', size: 'l', ramDisk: true, runErrorReporter: false) {
+                kibanaPipeline.functionalTestProcess('xpack-baseline', './test/scripts/jenkins_xpack_baseline.sh')()
               }
             },
           ])

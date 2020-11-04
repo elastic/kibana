@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertsClient } from './alerts_client';
 
 type Schema = PublicMethodsOf<AlertsClient>;
@@ -25,7 +25,7 @@ const createAlertsClientMock = () => {
     muteInstance: jest.fn(),
     unmuteInstance: jest.fn(),
     listAlertTypes: jest.fn(),
-    getAlertStatus: jest.fn(),
+    getAlertInstanceSummary: jest.fn(),
   };
   return mocked;
 };

@@ -9,7 +9,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -31,7 +31,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -53,7 +53,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -75,7 +75,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -85,6 +85,36 @@ Array [
         "value": Object {
           "locale": Object {
             "type": "keyword",
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "src/fixtures/telemetry_collectors/indexed_interface_with_not_matching_schema.ts",
+    Object {
+      "collectorName": "indexed_interface_with_not_matching_schema",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "@@INDEX@@": Object {
+            "count_1": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+            "count_2": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "something": Object {
+            "count_1": Object {
+              "type": "long",
+            },
           },
         },
       },
@@ -97,7 +127,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -113,41 +143,27 @@ Array [
     },
   ],
   Array [
-    "src/fixtures/telemetry_collectors/working_collector.ts",
+    "src/fixtures/telemetry_collectors/schema_defined_with_spreads_collector.ts",
     Object {
-      "collectorName": "my_working_collector",
+      "collectorName": "schema_defined_with_spreads",
       "fetch": Object {
         "typeDescriptor": Object {
           "flat": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
-          },
-          "my_array": Object {
-            "total": Object {
-              "kind": 140,
-              "type": "NumberKeyword",
-            },
-            "type": Object {
-              "kind": 128,
-              "type": "BooleanKeyword",
-            },
           },
           "my_objects": Object {
             "total": Object {
-              "kind": 140,
+              "kind": 143,
               "type": "NumberKeyword",
             },
             "type": Object {
-              "kind": 128,
+              "kind": 131,
               "type": "BooleanKeyword",
             },
           },
           "my_str": Object {
-            "kind": 143,
-            "type": "StringKeyword",
-          },
-          "my_str_array": Object {
-            "kind": 143,
+            "kind": 146,
             "type": "StringKeyword",
           },
         },
@@ -158,17 +174,105 @@ Array [
           "flat": Object {
             "type": "keyword",
           },
-          "my_array": Object {
+          "my_objects": Object {
             "total": Object {
-              "type": "number",
+              "type": "long",
             },
             "type": Object {
               "type": "boolean",
             },
           },
+          "my_str": Object {
+            "type": "text",
+          },
+        },
+      },
+    },
+  ],
+  Array [
+    "src/fixtures/telemetry_collectors/working_collector.ts",
+    Object {
+      "collectorName": "my_working_collector",
+      "fetch": Object {
+        "typeDescriptor": Object {
+          "flat": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+          "my_array": Object {
+            "items": Object {
+              "total": Object {
+                "kind": 143,
+                "type": "NumberKeyword",
+              },
+              "type": Object {
+                "kind": 131,
+                "type": "BooleanKeyword",
+              },
+            },
+          },
+          "my_index_signature_prop": Object {
+            "@@INDEX@@": Object {
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+          },
           "my_objects": Object {
             "total": Object {
-              "type": "number",
+              "kind": 143,
+              "type": "NumberKeyword",
+            },
+            "type": Object {
+              "kind": 131,
+              "type": "BooleanKeyword",
+            },
+          },
+          "my_str": Object {
+            "kind": 146,
+            "type": "StringKeyword",
+          },
+          "my_str_array": Object {
+            "items": Object {
+              "kind": 146,
+              "type": "StringKeyword",
+            },
+          },
+        },
+        "typeName": "Usage",
+      },
+      "schema": Object {
+        "value": Object {
+          "flat": Object {
+            "type": "keyword",
+          },
+          "my_array": Object {
+            "items": Object {
+              "total": Object {
+                "type": "long",
+              },
+              "type": Object {
+                "type": "boolean",
+              },
+            },
+            "type": "array",
+          },
+          "my_index_signature_prop": Object {
+            "avg": Object {
+              "type": "float",
+            },
+            "count": Object {
+              "type": "long",
+            },
+            "max": Object {
+              "type": "long",
+            },
+            "min": Object {
+              "type": "long",
+            },
+          },
+          "my_objects": Object {
+            "total": Object {
+              "type": "long",
             },
             "type": Object {
               "type": "boolean",
@@ -178,7 +282,10 @@ Array [
             "type": "text",
           },
           "my_str_array": Object {
-            "type": "keyword",
+            "items": Object {
+              "type": "keyword",
+            },
+            "type": "array",
           },
         },
       },

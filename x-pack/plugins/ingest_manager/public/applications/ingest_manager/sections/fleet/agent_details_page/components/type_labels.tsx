@@ -12,28 +12,25 @@ import { AgentEvent } from '../../../../types';
 export const TYPE_LABEL: { [key in AgentEvent['type']]: JSX.Element } = {
   STATE: (
     <EuiBadge color="hollow">
-      <FormattedMessage id="xpack.ingestManager.agentEventType.stateLabel" defaultMessage="State" />
+      <FormattedMessage id="xpack.fleet.agentEventType.stateLabel" defaultMessage="State" />
     </EuiBadge>
   ),
   ERROR: (
     <EuiBadge color="danger">
-      <FormattedMessage id="xpack.ingestManager.agentEventType.errorLabel" defaultMessage="Error" />
+      <FormattedMessage id="xpack.fleet.agentEventType.errorLabel" defaultMessage="Error" />
     </EuiBadge>
   ),
   ACTION_RESULT: (
     <EuiBadge color="secondary">
       <FormattedMessage
-        id="xpack.ingestManager.agentEventType.actionResultLabel"
+        id="xpack.fleet.agentEventType.actionResultLabel"
         defaultMessage="Action result"
       />
     </EuiBadge>
   ),
   ACTION: (
     <EuiBadge color="primary">
-      <FormattedMessage
-        id="xpack.ingestManager.agentEventType.actionLabel"
-        defaultMessage="Action"
-      />
+      <FormattedMessage id="xpack.fleet.agentEventType.actionLabel" defaultMessage="Action" />
     </EuiBadge>
   ),
 };
@@ -41,16 +38,13 @@ export const TYPE_LABEL: { [key in AgentEvent['type']]: JSX.Element } = {
 export const SUBTYPE_LABEL: { [key in AgentEvent['subtype']]: JSX.Element } = {
   RUNNING: (
     <EuiBadge color="hollow">
-      <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.runningLabel"
-        defaultMessage="Running"
-      />
+      <FormattedMessage id="xpack.fleet.agentEventSubtype.runningLabel" defaultMessage="Running" />
     </EuiBadge>
   ),
   STARTING: (
     <EuiBadge color="hollow">
       <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.startingLabel"
+        id="xpack.fleet.agentEventSubtype.startingLabel"
         defaultMessage="Starting"
       />
     </EuiBadge>
@@ -58,47 +52,38 @@ export const SUBTYPE_LABEL: { [key in AgentEvent['subtype']]: JSX.Element } = {
   IN_PROGRESS: (
     <EuiBadge color="hollow">
       <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.inProgressLabel"
+        id="xpack.fleet.agentEventSubtype.inProgressLabel"
         defaultMessage="In progress"
       />
     </EuiBadge>
   ),
   CONFIG: (
     <EuiBadge color="hollow">
-      <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.configLabel"
-        defaultMessage="Config"
-      />
+      <FormattedMessage id="xpack.fleet.agentEventSubtype.policyLabel" defaultMessage="Policy" />
     </EuiBadge>
   ),
   FAILED: (
     <EuiBadge color="hollow">
-      <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.failedLabel"
-        defaultMessage="Failed"
-      />
+      <FormattedMessage id="xpack.fleet.agentEventSubtype.failedLabel" defaultMessage="Failed" />
     </EuiBadge>
   ),
   STOPPING: (
     <EuiBadge color="hollow">
       <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.stoppingLabel"
+        id="xpack.fleet.agentEventSubtype.stoppingLabel"
         defaultMessage="Stopping"
       />
     </EuiBadge>
   ),
   STOPPED: (
     <EuiBadge color="hollow">
-      <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.stoppedLabel"
-        defaultMessage="Stopped"
-      />
+      <FormattedMessage id="xpack.fleet.agentEventSubtype.stoppedLabel" defaultMessage="Stopped" />
     </EuiBadge>
   ),
   DEGRADED: (
     <EuiBadge color="hollow">
       <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.degradedLabel"
+        id="xpack.fleet.agentEventSubtype.degradedLabel"
         defaultMessage="Degraded"
       />
     </EuiBadge>
@@ -106,7 +91,7 @@ export const SUBTYPE_LABEL: { [key in AgentEvent['subtype']]: JSX.Element } = {
   DATA_DUMP: (
     <EuiBadge color="hollow">
       <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.dataDumpLabel"
+        id="xpack.fleet.agentEventSubtype.dataDumpLabel"
         defaultMessage="Data dump"
       />
     </EuiBadge>
@@ -114,17 +99,22 @@ export const SUBTYPE_LABEL: { [key in AgentEvent['subtype']]: JSX.Element } = {
   ACKNOWLEDGED: (
     <EuiBadge color="hollow">
       <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.acknowledgedLabel"
+        id="xpack.fleet.agentEventSubtype.acknowledgedLabel"
         defaultMessage="Acknowledged"
+      />
+    </EuiBadge>
+  ),
+  UPDATING: (
+    <EuiBadge color="hollow">
+      <FormattedMessage
+        id="xpack.fleet.agentEventSubtype.updatingLabel"
+        defaultMessage="Updating"
       />
     </EuiBadge>
   ),
   UNKNOWN: (
     <EuiBadge color="hollow">
-      <FormattedMessage
-        id="xpack.ingestManager.agentEventSubtype.unknownLabel"
-        defaultMessage="Unknown"
-      />
+      <FormattedMessage id="xpack.fleet.agentEventSubtype.unknownLabel" defaultMessage="Unknown" />
     </EuiBadge>
   ),
 };

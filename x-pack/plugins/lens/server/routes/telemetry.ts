@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { CoreSetup } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { BASE_API_URL } from '../../common';
@@ -15,7 +15,7 @@ export async function initLensUsageRoute(setup: CoreSetup) {
   const router = setup.http.createRouter();
   router.post(
     {
-      path: `${BASE_API_URL}/telemetry`,
+      path: `${BASE_API_URL}/stats`,
       validate: {
         body: schema.object({
           events: schema.mapOf(schema.string(), schema.mapOf(schema.string(), schema.number())),

@@ -5,31 +5,17 @@
  */
 
 export { createSavedSearchesLoader } from '../../../../src/plugins/discover/public';
-export {
-  XJsonMode,
-  collapseLiteralStrings,
-  expandLiteralStrings,
-  UseRequestConfig,
-  useRequest,
-} from '../../../../src/plugins/es_ui_shared/public';
+export { XJsonMode } from '@kbn/ace';
+export { UseRequestConfig, useRequest } from '../../../../src/plugins/es_ui_shared/public';
 
 export {
-  getFieldType,
-  getErrorMessage,
-  extractErrorMessage,
-  formatHumanReadableDateTimeSeconds,
-  getDataGridSchemaFromKibanaFieldType,
-  getFieldsFromKibanaIndexPattern,
-  multiColumnSortFactory,
-  showDataGridColumnChartErrorMessageToast,
-  useDataGrid,
-  useRenderCellValue,
-  ChartData,
-  DataGrid,
+  getMlSharedImports,
+  GetMlSharedImportsReturnType,
+  UseIndexDataReturnType,
   EsSorting,
   RenderCellValue,
-  SearchResponse7,
-  UseDataGridReturnType,
-  UseIndexDataReturnType,
-  INDEX_STATUS,
 } from '../../ml/public';
+
+import { XJson } from '../../../../src/plugins/es_ui_shared/public';
+const { expandLiteralStrings, collapseLiteralStrings } = XJson;
+export { expandLiteralStrings, collapseLiteralStrings };

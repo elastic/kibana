@@ -76,7 +76,7 @@ function TileMapOptions(props: TileMapOptionsProps) {
         <BasicOptions {...props} />
 
         <SwitchOption
-          disabled={!vis.type.visConfig.canDesaturate}
+          disabled={!vis.type.visConfig?.canDesaturate}
           label={i18n.translate('tileMap.visParams.desaturateTilesLabel', {
             defaultMessage: 'Desaturate tiles',
           })}

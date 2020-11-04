@@ -1,7 +1,7 @@
 <input
   input-focus
   aria-label="{{ ::'timelion.intervals.customIntervalAriaLabel' | i18n: { defaultMessage: 'Custom interval' } }}"
-  class="kuiTextInput timInterval__input"
+  class="timInterval__input"
   ng-show="interval === 'other'"
   ng-class="{ 'timInterval__input--compact': interval === 'other' }"
   ng-model="otherInterval"

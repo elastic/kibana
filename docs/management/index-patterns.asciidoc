@@ -7,7 +7,7 @@ you want to work with.
 Once you create an index pattern, you're ready to:
 
 * Interactively explore your data in <<discover, Discover>>.
-* Analyze your data in charts, tables, gauges, tag clouds, and more in <<visualize, Visualize>>.
+* Analyze your data in charts, tables, gauges, tag clouds, and more in <<dashboard, Dashboard>>.
 * Show off your data in a <<canvas, Canvas>> workpad.
 * If your data includes geo data, visualize it with <<maps, Maps>>.
 
@@ -25,8 +25,8 @@ image::images/management-index-read-only-badge.png[Example of Index Pattern Mana
 [[settings-create-pattern]]
 === Create an index pattern
 
-When you don't have an index pattern, {kib} prompts you to create one. Or, you can open the menu, 
-then go to *Stack Management > {kib} > Index Patterns* to go directly to the *Index Patterns* UI.
+When you don't have an index pattern, {kib} prompts you to create one. Or, you can open the main menu, 
+then click *Stack Management > Index Patterns*.
 
 [role="screenshot"]
 image:management/index-patterns/images/rollup-index-pattern.png["Menu with rollup index pattern"]

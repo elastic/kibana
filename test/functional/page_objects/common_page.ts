@@ -117,10 +117,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         } else {
           log.debug(`navigateToUrl ${appUrl}`);
           await browser.get(appUrl, insertTimestamp);
-          // accept alert if it pops up
-          const alert = await browser.getAlert();
-          await alert?.accept();
         }
+
+        // accept alert if it pops up
+        const alert = await browser.getAlert();
+        await alert?.accept();
 
         const currentUrl = shouldLoginIfPrompted
           ? await this.loginIfPrompted(appUrl, insertTimestamp)
@@ -332,16 +333,22 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       });
     }
 
-    async clickConfirmOnModal() {
+    async clickConfirmOnModal(ensureHidden = true) {
       log.debug('Clicking modal confirm');
       // make sure this data-test-subj 'confirmModalTitleText' exists because we're going to wait for it to be gone later
       await testSubjects.exists('confirmModalTitleText');
       await testSubjects.click('confirmModalConfirmButton');
-      await this.ensureModalOverlayHidden();
+      if (ensureHidden) {
+        await this.ensureModalOverlayHidden();
+      }
     }
 
     async pressEnterKey() {
       await browser.pressKeys(browser.keys.ENTER);
+    }
+
+    async pressTabKey() {
+      await browser.pressKeys(browser.keys.TAB);
     }
 
     // Pause the browser at a certain place for debugging
@@ -428,7 +435,7 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       }
     }
 
-    async getBodyText() {
+    async getJsonBodyText() {
       if (await find.existsByCssSelector('a[id=rawdata-tab]', defaultFindTimeout)) {
         // Firefox has 3 tabs and requires navigation to see Raw output
         await find.clickByCssSelector('a[id=rawdata-tab]');
@@ -441,6 +448,11 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
         const jsonElement = await find.byCssSelector('body div#json');
         return await jsonElement.getVisibleText();
       }
+    }
+
+    async getBodyText() {
+      const body = await find.byCssSelector('body');
+      return await body.getVisibleText();
     }
 
     /**
@@ -489,6 +501,20 @@ export function CommonPageProvider({ getService, getPageObjects }: FtrProviderCo
       log.debug(`Setting the path '${path}' on the file input`);
       const input = await find.byCssSelector('.euiFilePicker__input');
       await input.type(path);
+    }
+
+    async scrollKibanaBodyTop() {
+      await browser.setScrollToById('kibana-body', 0, 0);
+    }
+
+    /**
+     * Dismiss Banner if available.
+     */
+    async dismissBanner() {
+      if (await testSubjects.exists('global-banner-item')) {
+        const button = await find.byButtonText('Dismiss');
+        await button.click();
+      }
     }
   }
 

@@ -7,7 +7,10 @@
 import { map } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { transformActionParams } from './transform_action_params';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
+import {
+  PluginStartContract as ActionsPluginStartContract,
+  asSavedObjectExecutionSource,
+} from '../../../actions/server';
 import { IEventLogger, IEvent, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { EVENT_LOG_ACTIONS } from '../plugin';
 import {
@@ -16,6 +19,7 @@ import {
   AlertInstanceContext,
   AlertType,
   AlertTypeParams,
+  RawAlert,
 } from '../types';
 
 interface CreateExecutionHandlerOptions {
@@ -25,7 +29,7 @@ interface CreateExecutionHandlerOptions {
   actionsPlugin: ActionsPluginStartContract;
   actions: AlertAction[];
   spaceId: string;
-  apiKey: string | null;
+  apiKey: RawAlert['apiKey'];
   alertType: AlertType;
   logger: Logger;
   eventLogger: IEventLogger;
@@ -82,7 +86,9 @@ export function createExecutionHandler({
     const alertLabel = `${alertType.id}:${alertId}: '${alertName}'`;
 
     for (const action of actions) {
-      if (!actionsPlugin.isActionExecutable(action.id, action.actionTypeId)) {
+      if (
+        !actionsPlugin.isActionExecutable(action.id, action.actionTypeId, { notifyUsage: true })
+      ) {
         logger.warn(
           `Alert "${alertId}" skipped scheduling action "${action.id}" because it is disabled`
         );
@@ -96,7 +102,11 @@ export function createExecutionHandler({
         id: action.id,
         params: action.params,
         spaceId,
-        apiKey,
+        apiKey: apiKey ?? null,
+        source: asSavedObjectExecutionSource({
+          id: alertId,
+          type: 'alert',
+        }),
       });
 
       const namespace = spaceId === 'default' ? {} : { namespace: spaceId };

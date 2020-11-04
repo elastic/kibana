@@ -20,7 +20,7 @@
 import React, { Fragment } from 'react';
 import { DurationFormat } from 'src/plugins/data/common';
 
-import { EuiFieldNumber, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -51,6 +51,7 @@ interface DurationFormatEditorFormatParams {
   outputPrecision: number;
   inputFormat: string;
   outputFormat: string;
+  showSuffix?: boolean;
 }
 
 export class DurationFormatEditor extends DefaultFormatEditor<
@@ -146,26 +147,44 @@ export class DurationFormatEditor extends DefaultFormatEditor<
           />
         </EuiFormRow>
         {!(format as DurationFormat).isHuman() ? (
-          <EuiFormRow
-            label={
-              <FormattedMessage
-                id="indexPatternManagement.duration.decimalPlacesLabel"
-                defaultMessage="Decimal places"
-              />
-            }
-            isInvalid={!!error}
-            error={hasDecimalError ? error : null}
-          >
-            <EuiFieldNumber
-              value={formatParams.outputPrecision}
-              min={0}
-              max={20}
-              onChange={(e) => {
-                this.onChange({ outputPrecision: e.target.value ? Number(e.target.value) : null });
-              }}
+          <>
+            <EuiFormRow
+              label={
+                <FormattedMessage
+                  id="indexPatternManagement.duration.decimalPlacesLabel"
+                  defaultMessage="Decimal places"
+                />
+              }
               isInvalid={!!error}
-            />
-          </EuiFormRow>
+              error={hasDecimalError ? error : null}
+            >
+              <EuiFieldNumber
+                value={formatParams.outputPrecision}
+                min={0}
+                max={20}
+                onChange={(e) => {
+                  this.onChange({
+                    outputPrecision: e.target.value ? Number(e.target.value) : null,
+                  });
+                }}
+                isInvalid={!!error}
+              />
+            </EuiFormRow>
+            <EuiFormRow>
+              <EuiSwitch
+                label={
+                  <FormattedMessage
+                    id="indexPatternManagement.duration.showSuffixLabel"
+                    defaultMessage="Show suffix"
+                  />
+                }
+                checked={Boolean(formatParams.showSuffix)}
+                onChange={(e) => {
+                  this.onChange({ showSuffix: !formatParams.showSuffix });
+                }}
+              />
+            </EuiFormRow>
+          </>
         ) : null}
         <FormatEditorSamples samples={samples} />
       </Fragment>

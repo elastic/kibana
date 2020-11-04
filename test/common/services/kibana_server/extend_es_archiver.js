@@ -33,9 +33,15 @@ export function extendEsArchiver({ esArchiver, kibanaServer, retry, defaults }) 
       // esArchiver methods return a stats object, with information about the indexes created
       const stats = await originalMethod.apply(esArchiver, args);
 
+      const statsKeys = Object.keys(stats);
+      const kibanaKeys = statsKeys.filter(
+        // this also matches stats keys like '.kibana_1' and '.kibana_2,.kibana_1'
+        (key) => key.includes(KIBANA_INDEX) && (stats[key].created || stats[key].deleted)
+      );
+
       // if the kibana index was created by the esArchiver then update the uiSettings
       // with the defaults to make sure that they are always in place initially
-      if (stats[KIBANA_INDEX] && (stats[KIBANA_INDEX].created || stats[KIBANA_INDEX].deleted)) {
+      if (kibanaKeys.length > 0) {
         await retry.try(async () => {
           await kibanaServer.uiSettings.update(defaults);
         });

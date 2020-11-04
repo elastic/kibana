@@ -36,6 +36,7 @@ const ConfigSchemaProps = {
   port: schema.nullable(portSchema()),
   secure: schema.nullable(schema.boolean()),
   from: schema.string(),
+  hasAuth: schema.boolean({ defaultValue: true }),
 };
 
 const ConfigSchema = schema.object(ConfigSchemaProps);
@@ -66,16 +67,16 @@ function validateConfig(
       return '[port] is required if [service] is not provided';
     }
 
-    if (!configurationUtilities.isWhitelistedHostname(config.host)) {
-      return `[host] value '${config.host}' is not in the whitelistedHosts configuration`;
+    if (!configurationUtilities.isHostnameAllowed(config.host)) {
+      return `[host] value '${config.host}' is not in the allowedHosts configuration`;
     }
   } else {
     const host = getServiceNameHost(config.service);
     if (host == null) {
       return `[service] value '${config.service}' is not valid`;
     }
-    if (!configurationUtilities.isWhitelistedHostname(host)) {
-      return `[service] value '${config.service}' resolves to host '${host}' which is not in the whitelistedHosts configuration`;
+    if (!configurationUtilities.isHostnameAllowed(host)) {
+      return `[service] value '${config.service}' resolves to host '${host}' which is not in the allowedHosts configuration`;
     }
   }
 }
@@ -185,6 +186,7 @@ async function executor(
       message: params.message,
     },
     proxySettings: execOptions.proxySettings,
+    hasAuth: config.hasAuth,
   };
 
   let result;

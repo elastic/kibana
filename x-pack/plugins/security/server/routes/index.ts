@@ -3,11 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { Feature } from '../../../features/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { KibanaFeature } from '../../../features/server';
 import {
-  CoreSetup,
   HttpResources,
+  IBasePath,
   ILegacyClusterClient,
   IRouter,
   Logger,
@@ -23,29 +23,33 @@ import { defineApiKeysRoutes } from './api_keys';
 import { defineIndicesRoutes } from './indices';
 import { defineUsersRoutes } from './users';
 import { defineRoleMappingRoutes } from './role_mapping';
+import { defineSessionManagementRoutes } from './session_management';
 import { defineViewRoutes } from './views';
 import { SecurityFeatureUsageServiceStart } from '../feature_usage';
+import { Session } from '../session_management';
 
 /**
  * Describes parameters used to define HTTP routes.
  */
 export interface RouteDefinitionParams {
   router: IRouter;
-  basePath: CoreSetup['http']['basePath'];
+  basePath: IBasePath;
   httpResources: HttpResources;
   logger: Logger;
   clusterClient: ILegacyClusterClient;
   config: ConfigType;
   authc: Authentication;
   authz: AuthorizationServiceSetup;
+  session: PublicMethodsOf<Session>;
   license: SecurityLicense;
-  getFeatures: () => Promise<Feature[]>;
+  getFeatures: () => Promise<KibanaFeature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
   defineAuthenticationRoutes(params);
   defineAuthorizationRoutes(params);
+  defineSessionManagementRoutes(params);
   defineApiKeysRoutes(params);
   defineIndicesRoutes(params);
   defineUsersRoutes(params);

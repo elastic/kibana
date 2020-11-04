@@ -21,6 +21,7 @@ import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
+  createCollectorFetchContextMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerUiMetricUsageCollector } from './';
@@ -36,7 +37,7 @@ describe('telemetry_ui_metric', () => {
 
   const getUsageCollector = jest.fn();
   const registerType = jest.fn();
-  const callCluster = jest.fn();
+  const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeAll(() =>
     registerUiMetricUsageCollector(usageCollectionMock, registerType, getUsageCollector)
@@ -47,7 +48,7 @@ describe('telemetry_ui_metric', () => {
   });
 
   test('if no savedObjectClient initialised, return undefined', async () => {
-    expect(await collector.fetch(callCluster)).toBeUndefined();
+    expect(await collector.fetch(mockedFetchContext)).toBeUndefined();
   });
 
   test('when savedObjectClient is initialised, return something', async () => {
@@ -61,7 +62,7 @@ describe('telemetry_ui_metric', () => {
     );
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
-    expect(await collector.fetch(callCluster)).toStrictEqual({});
+    expect(await collector.fetch(mockedFetchContext)).toStrictEqual({});
     expect(savedObjectClient.bulkCreate).not.toHaveBeenCalled();
   });
 
@@ -73,6 +74,11 @@ describe('telemetry_ui_metric', () => {
           { id: 'testAppName:testKeyName1', attributes: { count: 3 } },
           { id: 'testAppName:testKeyName2', attributes: { count: 5 } },
           { id: 'testAppName2:testKeyName3', attributes: { count: 1 } },
+          {
+            id:
+              'kibana-user_agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
+            attributes: { count: 1 },
+          },
         ],
         total: 3,
       } as any;
@@ -80,12 +86,18 @@ describe('telemetry_ui_metric', () => {
 
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
-    expect(await collector.fetch(callCluster)).toStrictEqual({
+    expect(await collector.fetch(mockedFetchContext)).toStrictEqual({
       testAppName: [
         { key: 'testKeyName1', value: 3 },
         { key: 'testKeyName2', value: 5 },
       ],
       testAppName2: [{ key: 'testKeyName3', value: 1 }],
+      'kibana-user_agent': [
+        {
+          key: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:80.0) Gecko/20100101 Firefox/80.0',
+          value: 1,
+        },
+      ],
     });
   });
 });

@@ -55,6 +55,7 @@ exports[`ConfirmDeleteModal renders as expected 1`] = `
           labelType="label"
         >
           <EuiFieldText
+            data-test-subj="deleteSpaceInput"
             disabled={false}
             name="confirmDeleteSpaceInput"
             onChange={[Function]}

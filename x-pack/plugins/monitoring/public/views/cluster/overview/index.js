@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { uiRoutes } from '../../../angular/helpers/routes';
@@ -12,6 +12,7 @@ import template from './index.html';
 import { MonitoringViewBaseController } from '../../';
 import { Overview } from '../../../components/cluster/overview';
 import { SetupModeRenderer } from '../../../components/renderers';
+import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { CODE_PATH_ALL } from '../../../../common/constants';
 
 const CODE_PATHS = [CODE_PATH_ALL];
@@ -25,6 +26,7 @@ uiRoutes.when('/overview', {
       return routeInit({ codePaths: CODE_PATHS });
     },
   },
+  controllerAs: 'monitoringClusterOverview',
   controller: class extends MonitoringViewBaseController {
     constructor($injector, $scope) {
       const monitoringClusters = $injector.get('monitoringClusters');
@@ -34,6 +36,9 @@ uiRoutes.when('/overview', {
       super({
         title: i18n.translate('xpack.monitoring.cluster.overviewTitle', {
           defaultMessage: 'Overview',
+        }),
+        pageTitle: i18n.translate('xpack.monitoring.cluster.overview.pageTitle', {
+          defaultMessage: 'Cluster overview',
         }),
         defaultData: {},
         getPageData: async () => {
@@ -50,7 +55,10 @@ uiRoutes.when('/overview', {
         alerts: {
           shouldFetch: true,
         },
+        telemetryPageViewTitle: 'cluster_overview',
       });
+
+      this.init = () => this.renderReact(null);
 
       $scope.$watch(
         () => this.data,
@@ -64,7 +72,7 @@ uiRoutes.when('/overview', {
               scope={$scope}
               injector={$injector}
               render={({ setupMode, flyoutComponent, bottomBarComponent }) => (
-                <Fragment>
+                <SetupModeContext.Provider value={{ setupModeSupported: true }}>
                   {flyoutComponent}
                   <Overview
                     cluster={data}
@@ -73,7 +81,7 @@ uiRoutes.when('/overview', {
                     showLicenseExpiration={showLicenseExpiration}
                   />
                   {bottomBarComponent}
-                </Fragment>
+                </SetupModeContext.Provider>
               )}
             />
           );

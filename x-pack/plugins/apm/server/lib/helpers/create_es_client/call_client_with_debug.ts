@@ -34,7 +34,7 @@ export async function callClientWithDebug({
   let res: any;
   let esError = null;
   try {
-    res = apiCaller(operationName, params);
+    res = await apiCaller(operationName, params);
   } catch (e) {
     // catch error and throw after outputting debug info
     esError = e;

@@ -15,17 +15,19 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { $ElementType } from 'utility-types';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { getAlertingCapabilities } from '../../alerting/get_alert_capabilities';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { EuiTabLink } from '../../shared/EuiTabLink';
-import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
-import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
 import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
+import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
+import { ServiceInventoryLink } from '../../shared/Links/apm/service_inventory_link';
+import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceMap } from '../ServiceMap';
-import { ServiceOverview } from '../ServiceOverview';
+import { ServiceInventory } from '../service_inventory';
 import { TraceOverview } from '../TraceOverview';
+import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 
 function getHomeTabs({
   serviceMapEnabled = true,
@@ -35,13 +37,13 @@ function getHomeTabs({
   const homeTabs = [
     {
       link: (
-        <ServiceOverviewLink>
+        <ServiceInventoryLink>
           {i18n.translate('xpack.apm.home.servicesTabLabel', {
             defaultMessage: 'Services',
           })}
-        </ServiceOverviewLink>
+        </ServiceInventoryLink>
       ),
-      render: () => <ServiceOverview />,
+      render: () => <ServiceInventory />,
       name: 'services',
     },
     {
@@ -83,12 +85,20 @@ interface Props {
 }
 
 export function Home({ tab }: Props) {
-  const { config, core } = useApmPluginContext();
-  const canAccessML = !!core.application.capabilities.ml?.canAccessML;
+  const { config, core, plugins } = useApmPluginContext();
+  const capabilities = core.application.capabilities;
+  const canAccessML = !!capabilities.ml?.canAccessML;
   const homeTabs = getHomeTabs(config);
   const selectedTab = homeTabs.find(
     (homeTab) => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;
+
+  const {
+    isAlertingAvailable,
+    canReadAlerts,
+    canSaveAlerts,
+    canReadAnomalies,
+  } = getAlertingCapabilities(plugins, core.application.capabilities);
 
   return (
     <div>
@@ -106,6 +116,15 @@ export function Home({ tab }: Props) {
               </EuiButtonEmpty>
             </SettingsLink>
           </EuiFlexItem>
+          {isAlertingAvailable && (
+            <EuiFlexItem grow={false}>
+              <AlertingPopoverAndFlyout
+                canReadAlerts={canReadAlerts}
+                canSaveAlerts={canSaveAlerts}
+                canReadAnomalies={canReadAnomalies}
+              />
+            </EuiFlexItem>
+          )}
           {canAccessML && (
             <EuiFlexItem grow={false}>
               <AnomalyDetectionSetupLink />

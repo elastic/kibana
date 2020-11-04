@@ -20,7 +20,6 @@
 import { ExpressionsServerSetup, ExpressionsServerStart } from '.';
 import { plugin as pluginInitializer } from '.';
 import { coreMock } from '../../../core/server/mocks';
-import { bfetchPluginMock } from '../../bfetch/server/mocks';
 
 export type Setup = jest.Mocked<ExpressionsServerSetup>;
 export type Start = jest.Mocked<ExpressionsServerStart>;
@@ -38,10 +37,6 @@ const createSetupContract = (): Setup => {
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
     run: jest.fn(),
-    __LEGACY: {
-      register: jest.fn(),
-      registries: jest.fn(),
-    },
   };
   return setupContract;
 };
@@ -51,11 +46,8 @@ const createStartContract = (): Start => {
     execute: jest.fn(),
     fork: jest.fn(),
     getFunction: jest.fn(),
-    getFunctions: jest.fn(),
     getRenderer: jest.fn(),
-    getRenderers: jest.fn(),
     getType: jest.fn(),
-    getTypes: jest.fn(),
     run: jest.fn(),
   };
 
@@ -67,9 +59,7 @@ const createPlugin = async () => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
-  const setup = await plugin.setup(coreSetup, {
-    bfetch: bfetchPluginMock.createSetupContract(),
-  });
+  const setup = await plugin.setup(coreSetup);
 
   return {
     pluginInitializerContext,
@@ -77,10 +67,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () =>
-      await plugin.start(coreStart, {
-        bfetch: bfetchPluginMock.createStartContract(),
-      }),
+    doStart: async () => await plugin.start(coreStart),
   };
 };
 

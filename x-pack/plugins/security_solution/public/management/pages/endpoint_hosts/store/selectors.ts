@@ -8,16 +8,22 @@
 import querystring from 'querystring';
 import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
+import { decode } from 'rison-node';
 import {
   Immutable,
   HostPolicyResponseAppliedAction,
   HostPolicyResponseConfiguration,
   HostPolicyResponseActionStatus,
+  MetadataQueryStrategyVersions,
 } from '../../../../../common/endpoint/types';
 import { EndpointState, EndpointIndexUIQueryParams } from '../types';
-import { MANAGEMENT_ROUTING_ENDPOINTS_PATH } from '../../../common/constants';
-
-const PAGE_SIZES = Object.freeze([10, 20, 50]);
+import { extractListPaginationParams } from '../../../common/routing';
+import {
+  MANAGEMENT_DEFAULT_PAGE,
+  MANAGEMENT_DEFAULT_PAGE_SIZE,
+  MANAGEMENT_ROUTING_ENDPOINTS_PATH,
+} from '../../../common/constants';
+import { Query } from '../../../../../../../../src/plugins/data/common/query/types';
 
 export const listData = (state: Immutable<EndpointState>) => state.hosts;
 
@@ -45,16 +51,48 @@ export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selec
 
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
 
+export const isAutoRefreshEnabled = (state: Immutable<EndpointState>) => state.isAutoRefreshEnabled;
+
+export const autoRefreshInterval = (state: Immutable<EndpointState>) => state.autoRefreshInterval;
+
+export const areEndpointsEnrolling = (state: Immutable<EndpointState>) => {
+  return state.agentsWithEndpointsTotal > state.endpointsTotal;
+};
+
+export const agentsWithEndpointsTotalError = (state: Immutable<EndpointState>) =>
+  state.agentsWithEndpointsTotalError;
+
+export const endpointsTotalError = (state: Immutable<EndpointState>) => state.endpointsTotalError;
+const queryStrategyVersion = (state: Immutable<EndpointState>) => state.queryStrategyVersion;
+
 export const endpointPackageVersion = createSelector(
   endpointPackageInfo,
   (info) => info?.version ?? undefined
 );
+
+export const isTransformEnabled = createSelector(
+  queryStrategyVersion,
+  (version) => version !== MetadataQueryStrategyVersions.VERSION_1
+);
+
+/**
+ * Returns the index patterns for the SearchBar to use for autosuggest
+ */
+export const patterns = (state: Immutable<EndpointState>) => state.patterns;
+
+export const patternsError = (state: Immutable<EndpointState>) => state.patternsError;
 
 /**
  * Returns the full policy response from the endpoint after a user modifies a policy.
  */
 const detailsPolicyAppliedResponse = (state: Immutable<EndpointState>) =>
   state.policyResponse && state.policyResponse.Endpoint.policy.applied;
+
+/**
+ * Returns the policy response timestamp from the endpoint after a user modifies a policy.
+ */
+export const policyResponseTimestamp = (state: Immutable<EndpointState>) =>
+  state.policyResponse && state.policyResponse['@timestamp'];
 
 /**
  * Returns the response configurations from the endpoint after a user modifies a policy.
@@ -125,16 +163,20 @@ export const uiQueryParams: (
 ) => Immutable<EndpointIndexUIQueryParams> = createSelector(
   (state: Immutable<EndpointState>) => state.location,
   (location: Immutable<EndpointState>['location']) => {
-    const data: EndpointIndexUIQueryParams = { page_index: '0', page_size: '10' };
+    const data: EndpointIndexUIQueryParams = {
+      page_index: String(MANAGEMENT_DEFAULT_PAGE),
+      page_size: String(MANAGEMENT_DEFAULT_PAGE_SIZE),
+    };
+
     if (location) {
       // Removes the `?` from the beginning of query string if it exists
       const query = querystring.parse(location.search.slice(1));
+      const paginationParams = extractListPaginationParams(query);
 
       const keys: Array<keyof EndpointIndexUIQueryParams> = [
         'selected_endpoint',
-        'page_size',
-        'page_index',
         'show',
+        'admin_query',
       ];
 
       for (const key of keys) {
@@ -156,17 +198,10 @@ export const uiQueryParams: (
         }
       }
 
-      // Check if page size is an expected size, otherwise default to 10
-      if (!PAGE_SIZES.includes(Number(data.page_size))) {
-        data.page_size = '10';
-      }
-
-      // Check if page index is a valid positive integer, otherwise default to 0
-      const pageIndexAsNumber = Number(data.page_index);
-      if (!Number.isFinite(pageIndexAsNumber) || pageIndexAsNumber < 0) {
-        data.page_index = '0';
-      }
+      data.page_size = String(paginationParams.page_size);
+      data.page_index = String(paginationParams.page_index);
     }
+
     return data;
   }
 );
@@ -205,8 +240,39 @@ export const nonExistingPolicies: (
 ) => Immutable<EndpointState['nonExistingPolicies']> = (state) => state.nonExistingPolicies;
 
 /**
+ * returns the list of known existing agent policies
+ */
+export const agentPolicies: (
+  state: Immutable<EndpointState>
+) => Immutable<EndpointState['agentPolicies']> = (state) => state.agentPolicies;
+
+/**
  * Return boolean that indicates whether endpoints exist
  * @param state
  */
 export const endpointsExist: (state: Immutable<EndpointState>) => boolean = (state) =>
   state.endpointsExist;
+
+/**
+ * Returns query text from query bar
+ */
+export const searchBarQuery: (state: Immutable<EndpointState>) => Query = createSelector(
+  uiQueryParams,
+  ({ admin_query: adminQuery }) => {
+    const decodedQuery: Query = { query: '', language: 'kuery' };
+    if (adminQuery) {
+      const urlDecodedQuery = (decode(adminQuery) as unknown) as Query;
+      if (urlDecodedQuery && typeof urlDecodedQuery.query === 'string') {
+        decodedQuery.query = urlDecodedQuery.query;
+      }
+      if (
+        urlDecodedQuery &&
+        typeof urlDecodedQuery.language === 'string' &&
+        (urlDecodedQuery.language === 'kuery' || urlDecodedQuery.language === 'lucene')
+      ) {
+        decodedQuery.language = urlDecodedQuery.language;
+      }
+    }
+    return decodedQuery;
+  }
+);

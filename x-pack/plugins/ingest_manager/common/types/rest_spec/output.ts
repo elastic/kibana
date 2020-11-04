@@ -7,7 +7,6 @@ import { Output } from '../models';
 
 export interface GetOneOutputResponse {
   item: Output;
-  success: boolean;
 }
 
 export interface GetOneOutputRequest {
@@ -23,12 +22,13 @@ export interface PutOutputRequest {
   body: {
     hosts?: string[];
     ca_sha256?: string;
+    config?: Record<string, any>;
+    config_yaml?: string;
   };
 }
 
 export interface PutOutputResponse {
   item: Output;
-  success: boolean;
 }
 
 export interface GetOutputsResponse {
@@ -36,5 +36,4 @@ export interface GetOutputsResponse {
   total: number;
   page: number;
   perPage: number;
-  success: boolean;
 }

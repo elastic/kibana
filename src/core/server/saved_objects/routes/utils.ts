@@ -19,11 +19,7 @@
 
 import { Readable } from 'stream';
 import { SavedObject, SavedObjectsExportResultDetails } from 'src/core/server';
-import {
-  createSplitStream,
-  createMapStream,
-  createFilterStream,
-} from '../../../../legacy/utils/streams';
+import { createSplitStream, createMapStream, createFilterStream } from '../../utils/streams';
 
 export function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   return ndJsonStream

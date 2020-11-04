@@ -64,7 +64,7 @@ describe('send_email module', () => {
   });
 
   test('handles unauthenticated email using not secure host/port', async () => {
-    const sendEmailOptions = getSendEmailOptions(
+    const sendEmailOptions = getSendEmailOptionsNoAuth(
       {
         transport: {
           host: 'example.com',
@@ -73,12 +73,10 @@ describe('send_email module', () => {
       },
       {
         proxyUrl: 'https://example.com',
-        rejectUnauthorizedCertificates: false,
+        proxyRejectUnauthorizedCertificates: false,
       }
     );
-    delete sendEmailOptions.transport.service;
-    delete sendEmailOptions.transport.user;
-    delete sendEmailOptions.transport.password;
+
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
     expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
@@ -123,8 +121,11 @@ describe('send_email module', () => {
         port: 1025,
       },
     });
+    // @ts-expect-error
     delete sendEmailOptions.transport.service;
+    // @ts-expect-error
     delete sendEmailOptions.transport.user;
+    // @ts-expect-error
     delete sendEmailOptions.transport.password;
     const result = await sendEmail(mockLogger, sendEmailOptions);
     expect(result).toBe(sendMailMockResult);
@@ -134,6 +135,9 @@ describe('send_email module', () => {
           "host": "example.com",
           "port": 1025,
           "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": undefined,
+          },
         },
       ]
     `);
@@ -166,8 +170,11 @@ describe('send_email module', () => {
         secure: true,
       },
     });
+    // @ts-expect-error
     delete sendEmailOptions.transport.service;
+    // @ts-expect-error
     delete sendEmailOptions.transport.user;
+    // @ts-expect-error
     delete sendEmailOptions.transport.password;
 
     const result = await sendEmail(mockLogger, sendEmailOptions);
@@ -236,5 +243,31 @@ function getSendEmailOptions(
       password: 'changeme',
     },
     proxySettings,
+    hasAuth: true,
+  };
+}
+
+function getSendEmailOptionsNoAuth(
+  { content = {}, routing = {}, transport = {} } = {},
+  proxySettings?: ProxySettings
+) {
+  return {
+    content: {
+      ...content,
+      message: 'a message',
+      subject: 'a subject',
+    },
+    routing: {
+      ...routing,
+      from: 'fred@example.com',
+      to: ['jim@example.com'],
+      cc: ['bob@example.com', 'robert@example.com'],
+      bcc: [],
+    },
+    transport: {
+      ...transport,
+    },
+    proxySettings,
+    hasAuth: false,
   };
 }

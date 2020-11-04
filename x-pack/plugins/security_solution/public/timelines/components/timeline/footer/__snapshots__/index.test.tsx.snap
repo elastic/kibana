@@ -27,8 +27,8 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
       >
         <EventsCount
           closePopover={[Function]}
-          documentType="events match the search criteria"
-          footerText="events match the search criteria"
+          documentType="events"
+          footerText="events"
           isOpen={false}
           items={
             Array [
@@ -73,10 +73,12 @@ exports[`Footer Timeline Component rendering it renders the default timeline foo
       grow={false}
     >
       <PagingControl
+        activePage={0}
         data-test-subj="paging-control"
-        hasNextPage={true}
         isLoading={false}
-        loadMore={[Function]}
+        onPageClick={[Function]}
+        totalCount={15546}
+        totalPages={7773}
       />
     </EuiFlexItem>
     <EuiFlexItem

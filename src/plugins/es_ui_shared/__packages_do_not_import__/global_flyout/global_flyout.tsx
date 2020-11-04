@@ -160,7 +160,7 @@ export const useGlobalFlyout = () => {
         Array.from(getContents()).forEach(removeContent);
       }
     };
-  }, [removeContent]);
+  }, [removeContent, getContents]);
 
   return { ...ctx, addContent };
 };

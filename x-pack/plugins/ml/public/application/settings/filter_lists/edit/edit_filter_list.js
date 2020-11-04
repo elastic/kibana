@@ -34,6 +34,7 @@ import { ItemsGrid } from '../../../components/items_grid';
 import { NavigationMenu } from '../../../components/navigation_menu';
 import { isValidFilterListId, saveFilterList } from './utils';
 import { ml } from '../../../services/ml_api_service';
+import { ML_PAGES } from '../../../../../common/constants/ml_url_generator';
 
 const DEFAULT_ITEMS_PER_PAGE = 50;
 
@@ -65,10 +66,6 @@ function getActivePage(activePageState, itemsPerPage, numMatchingItems) {
     activePage = Math.max(Math.ceil(numMatchingItems / itemsPerPage) - 1, 0); // Sets to 0 for 0 matches.
   }
   return activePage;
-}
-
-function returnToFiltersList() {
-  window.location.href = `#/settings/filter_lists`;
 }
 
 export class EditFilterListUI extends Component {
@@ -104,6 +101,16 @@ export class EditFilterListUI extends Component {
       this.setState({ newFilterId: '' });
     }
   }
+
+  returnToFiltersList = async () => {
+    const {
+      services: {
+        http: { basePath },
+        application: { navigateToUrl },
+      },
+    } = this.props.kibana;
+    await navigateToUrl(`${basePath.get()}/app/ml/${ML_PAGES.FILTER_LISTS_MANAGE}`, true);
+  };
 
   loadFilterList = (filterId) => {
     ml.filters
@@ -279,7 +286,7 @@ export class EditFilterListUI extends Component {
     saveFilterList(filterId, description, items, loadedFilter)
       .then((savedFilter) => {
         this.setLoadedFilterState(savedFilter);
-        returnToFiltersList();
+        this.returnToFiltersList();
       })
       .catch((resp) => {
         console.log(`Error saving filter ${filterId}:`, resp);
@@ -316,7 +323,7 @@ export class EditFilterListUI extends Component {
     return (
       <Fragment>
         <NavigationMenu tabId="settings" />
-        <EuiPage className="ml-edit-filter-lists">
+        <EuiPage className="ml-edit-filter-lists" data-test-subj="mlPageFilterListEdit">
           <EuiPageBody>
             <EuiPageContent
               className="ml-edit-filter-lists-content"
@@ -355,7 +362,10 @@ export class EditFilterListUI extends Component {
               />
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={returnToFiltersList}>
+                  <EuiButtonEmpty
+                    data-test-subj={'mlFilterListCancelButton'}
+                    onClick={() => this.returnToFiltersList()}
+                  >
                     <FormattedMessage
                       id="xpack.ml.settings.filterLists.editFilterList.cancelButtonLabel"
                       defaultMessage="Cancel"
@@ -371,6 +381,7 @@ export class EditFilterListUI extends Component {
                       canCreateFilter === false
                     }
                     fill
+                    data-test-subj={'mlFilterListSaveButton'}
                   >
                     <FormattedMessage
                       id="xpack.ml.settings.filterLists.editFilterList.saveButtonLabel"

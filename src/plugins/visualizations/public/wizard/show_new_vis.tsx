@@ -37,6 +37,7 @@ export interface ShowNewVisModalParams {
   onClose?: () => void;
   originatingApp?: string;
   outsideVisualizeApp?: boolean;
+  createByValue?: boolean;
 }
 
 /**

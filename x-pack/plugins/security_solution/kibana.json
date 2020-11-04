@@ -11,12 +11,11 @@
     "dataEnhanced",
     "embeddable",
     "features",
-    "home",
     "taskManager",
     "inspector",
     "licensing",
     "maps",
-    "triggers_actions_ui",
+    "triggersActionsUi",
     "uiActions"
   ],
   "optionalPlugins": [
@@ -27,9 +26,12 @@
     "security",
     "spaces",
     "usageCollection",
-    "lists"
+    "lists",
+    "home",
+    "telemetry",
+    "telemetryManagementSection"
   ],
   "server": true,
   "ui": true,
-  "requiredBundles": ["esUiShared", "ingestManager", "kibanaUtils", "kibanaReact", "lists"]
+  "requiredBundles": ["esUiShared", "ingestManager", "kibanaUtils", "kibanaReact", "lists", "ml"]
 }

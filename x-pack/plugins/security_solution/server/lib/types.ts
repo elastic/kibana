@@ -8,40 +8,21 @@ import { AuthenticatedUser } from '../../../security/common/model';
 import { RequestHandlerContext } from '../../../../../src/core/server';
 export { ConfigType as Configuration } from '../config';
 
-import { Authentications } from './authentications';
-import { Events } from './events';
 import { FrameworkAdapter, FrameworkRequest } from './framework';
 import { Hosts } from './hosts';
 import { IndexFields } from './index_fields';
-import { IpDetails } from './ip_details';
-import { KpiHosts } from './kpi_hosts';
-import { KpiNetwork } from './kpi_network';
-import { Network } from './network';
-import { Overview } from './overview';
 import { SourceStatus } from './source_status';
 import { Sources } from './sources';
-import { UncommonProcesses } from './uncommon_processes';
 import { Note } from './note/saved_object';
 import { PinnedEvent } from './pinned_event/saved_object';
 import { Timeline } from './timeline/saved_object';
-import { TLS } from './tls';
-import { MatrixHistogram } from './matrix_histogram';
+import { TotalValue, BaseHit, Explanation } from '../../common/detection_engine/types';
 
 export * from './hosts';
 
 export interface AppDomainLibs {
-  authentications: Authentications;
-  events: Events;
   fields: IndexFields;
   hosts: Hosts;
-  ipDetails: IpDetails;
-  matrixHistogram: MatrixHistogram;
-  network: Network;
-  kpiNetwork: KpiNetwork;
-  overview: Overview;
-  uncommonProcesses: UncommonProcesses;
-  kpiHosts: KpiHosts;
-  tls: TLS;
 }
 
 export interface AppBackendLibs extends AppDomainLibs {
@@ -59,10 +40,34 @@ export interface SiemContext {
   user: AuthenticatedUser | null;
 }
 
-export interface TotalValue {
-  value: number;
-  relation: string;
+export interface ShardsResponse {
+  total: number;
+  successful: number;
+  failed: number;
+  skipped: number;
+  failures?: ShardError[];
 }
+
+/**
+ * This type is being very conservative with the partials to not expect anything to
+ * be guaranteed on the type as we don't have regular and proper types of ShardError.
+ * Once we do, remove this type for the regular ShardError type from the elastic library.
+ */
+export type ShardError = Partial<{
+  shard: number;
+  index: string;
+  node: string;
+  reason: Partial<{
+    type: string;
+    reason: string;
+    index_uuid: string;
+    index: string;
+    caused_by: Partial<{
+      type: string;
+      reason: string;
+    }>;
+  }>;
+}>;
 
 export interface SearchResponse<T> {
   took: number;
@@ -72,38 +77,23 @@ export interface SearchResponse<T> {
   hits: {
     total: TotalValue | number;
     max_score: number;
-    hits: Array<{
-      _index: string;
-      _type: string;
-      _id: string;
-      _score: number;
-      _source: T;
-      _version?: number;
-      _explanation?: Explanation;
-      fields?: string[];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      highlight?: any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      inner_hits?: any;
-      matched_queries?: string[];
-      sort?: string[];
-    }>;
+    hits: Array<
+      BaseHit<T> & {
+        _type: string;
+        _score: number;
+        _version?: number;
+        _explanation?: Explanation;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        highlight?: any;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        inner_hits?: any;
+        matched_queries?: string[];
+        sort?: string[];
+      }
+    >;
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   aggregations?: any;
-}
-
-export interface ShardsResponse {
-  total: number;
-  successful: number;
-  failed: number;
-  skipped: number;
-}
-
-export interface Explanation {
-  value: number;
-  description: string;
-  details: Explanation[];
 }
 
 export type SearchHit = SearchResponse<object>['hits']['hits'][0];

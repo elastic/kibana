@@ -42,7 +42,7 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
                 <span
                   className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                     size="m"
@@ -50,7 +50,7 @@ exports[`Storyshots renderers/TimeFilter default 1`] = `
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
-                    <div
+                    <span
                       data-euiicon-type="clock"
                     />
                   </span>
@@ -128,7 +128,7 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                 <span
                   className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                     size="m"
@@ -136,7 +136,7 @@ exports[`Storyshots renderers/TimeFilter with absolute time bounds 1`] = `
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
-                    <div
+                    <span
                       data-euiicon-type="clock"
                     />
                   </span>
@@ -254,7 +254,7 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
                 <span
                   className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                     size="m"
@@ -262,7 +262,7 @@ exports[`Storyshots renderers/TimeFilter with commonlyUsedRanges 1`] = `
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
-                    <div
+                    <span
                       data-euiicon-type="clock"
                     />
                   </span>
@@ -340,7 +340,7 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
                 <span
                   className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                     size="m"
@@ -348,7 +348,7 @@ exports[`Storyshots renderers/TimeFilter with dateFormat 1`] = `
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
-                    <div
+                    <span
                       data-euiicon-type="clock"
                     />
                   </span>
@@ -426,7 +426,7 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                 <span
                   className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
-                  <div
+                  <span
                     className="euiButtonContent__icon"
                     data-euiicon-type="arrowDown"
                     size="m"
@@ -434,7 +434,7 @@ exports[`Storyshots renderers/TimeFilter with relative time bounds 1`] = `
                   <span
                     className="euiButtonEmpty__text euiQuickSelectPopover__buttonText"
                   >
-                    <div
+                    <span
                       data-euiicon-type="clock"
                     />
                   </span>

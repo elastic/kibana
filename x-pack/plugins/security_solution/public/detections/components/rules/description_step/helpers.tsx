@@ -21,10 +21,12 @@ import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
 
+import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
+import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types';
+import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { RuleType } from '../../../../../common/detection_engine/types';
+import { Threshold, Type } from '../../../../../common/detection_engine/schemas/common/schemas';
 import { esFilters } from '../../../../../../../../src/plugins/data/public';
 
 import { tacticsOptions, techniquesOptions } from '../../../mitre/mitre_tactics_techniques';
@@ -33,7 +35,6 @@ import * as i18n from './translations';
 import { BuildQueryBarDescription, BuildThreatDescription, ListItems } from './types';
 import { SeverityBadge } from '../severity_badge';
 import ListTreeIcon from './assets/list_tree_icon.svg';
-import { assertUnreachable } from '../../../../common/lib/helpers';
 import { AboutStepRiskScore, AboutStepSeverity } from '../../../pages/detection_engine/rules/types';
 import { defaultToEmptyTag } from '../../../../common/components/empty_value';
 
@@ -50,6 +51,10 @@ const EuiBadgeWrap = (styled(EuiBadge)`
   }
 ` as unknown) as typeof EuiBadge;
 
+const Query = styled.div`
+  white-space: pre-wrap;
+`;
+
 export const buildQueryBarDescription = ({
   field,
   filters,
@@ -57,6 +62,7 @@ export const buildQueryBarDescription = ({
   query,
   savedId,
   indexPatterns,
+  queryLabel,
 }: BuildQueryBarDescription): ListItems[] => {
   let items: ListItems[] = [];
   if (!isEmpty(filters)) {
@@ -90,8 +96,8 @@ export const buildQueryBarDescription = ({
     items = [
       ...items,
       {
-        title: <>{i18n.QUERY_LABEL} </>,
-        description: <>{query} </>,
+        title: <>{queryLabel ?? i18n.QUERY_LABEL}</>,
+        description: <Query>{query}</Query>,
       },
     ];
   }
@@ -357,7 +363,7 @@ export const buildNoteDescription = (label: string, note: string): ListItems[] =
   return [];
 };
 
-export const buildRuleTypeDescription = (label: string, ruleType: RuleType): ListItems[] => {
+export const buildRuleTypeDescription = (label: string, ruleType: Type): ListItems[] => {
   switch (ruleType) {
     case 'machine_learning': {
       return [
@@ -384,6 +390,22 @@ export const buildRuleTypeDescription = (label: string, ruleType: RuleType): Lis
         },
       ];
     }
+    case 'eql': {
+      return [
+        {
+          title: label,
+          description: i18n.EQL_TYPE_DESCRIPTION,
+        },
+      ];
+    }
+    case 'threat_match': {
+      return [
+        {
+          title: label,
+          description: i18n.THREAT_MATCH_TYPE_DESCRIPTION,
+        },
+      ];
+    }
     default:
       return assertUnreachable(ruleType);
   }
@@ -401,3 +423,40 @@ export const buildThresholdDescription = (label: string, threshold: Threshold): 
     ),
   },
 ];
+
+export const buildThreatMappingDescription = (
+  title: string,
+  threatMapping: ThreatMapping
+): ListItems[] => {
+  const description = threatMapping.reduce<string>(
+    (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
+      const matches = threatMap.entries.reduce<string>(
+        (accumItems, item, itemsIndex, { length: threatMapLength }) => {
+          if (threatMapLength === 1) {
+            return `${item.field} ${MATCHES} ${item.value}`;
+          } else if (itemsIndex === 0) {
+            return `(${item.field} ${MATCHES} ${item.value})`;
+          } else {
+            return `${accumItems} ${AND} (${item.field} ${MATCHES} ${item.value})`;
+          }
+        },
+        ''
+      );
+
+      if (threatMappingLength === 1) {
+        return `${matches}`;
+      } else if (threatMapIndex === 0) {
+        return `(${matches})`;
+      } else {
+        return `${accumThreatMaps} ${OR} (${matches})`;
+      }
+    },
+    ''
+  );
+  return [
+    {
+      title,
+      description,
+    },
+  ];
+};

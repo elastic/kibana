@@ -28,6 +28,7 @@ const responseErrors = {
   isRequestEntityTooLarge: (statusCode: number) => statusCode === 413,
   isNotFound: (statusCode: number) => statusCode === 404,
   isBadRequest: (statusCode: number) => statusCode === 400,
+  isTooManyRequests: (statusCode: number) => statusCode === 429,
 };
 const { ConnectionError, NoLivingConnectionsError, TimeoutError } = esErrors;
 const SCRIPT_CONTEXT_DISABLED_REGEX = /(?:cannot execute scripts using \[)([a-z]*)(?:\] context)/;
@@ -74,6 +75,10 @@ export function decorateEsError(error: EsErrors) {
 
   if (responseErrors.isNotFound(error.statusCode)) {
     return SavedObjectsErrorHelpers.createGenericNotFoundError();
+  }
+
+  if (responseErrors.isTooManyRequests(error.statusCode)) {
+    return SavedObjectsErrorHelpers.decorateTooManyRequestsError(error, reason);
   }
 
   if (responseErrors.isBadRequest(error.statusCode)) {

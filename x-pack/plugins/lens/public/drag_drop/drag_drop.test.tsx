@@ -15,7 +15,7 @@ describe('DragDrop', () => {
   test('renders if nothing is being dragged', () => {
     const component = render(
       <DragDrop value="hello" draggable label="dragging">
-        Hello!
+        <button>Hello!</button>
       </DragDrop>
     );
 
@@ -24,7 +24,11 @@ describe('DragDrop', () => {
 
   test('dragover calls preventDefault if droppable is true', () => {
     const preventDefault = jest.fn();
-    const component = mount(<DragDrop droppable>Hello!</DragDrop>);
+    const component = mount(
+      <DragDrop droppable>
+        <button>Hello!</button>
+      </DragDrop>
+    );
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragover', { preventDefault });
 
@@ -33,7 +37,11 @@ describe('DragDrop', () => {
 
   test('dragover does not call preventDefault if droppable is false', () => {
     const preventDefault = jest.fn();
-    const component = mount(<DragDrop>Hello!</DragDrop>);
+    const component = mount(
+      <DragDrop>
+        <button>Hello!</button>
+      </DragDrop>
+    );
 
     component.find('[data-test-subj="lnsDragDrop"]').simulate('dragover', { preventDefault });
 
@@ -49,9 +57,9 @@ describe('DragDrop', () => {
     const value = {};
 
     const component = mount(
-      <ChildDragDropProvider dragging={undefined} setDragging={setDragging}>
+      <ChildDragDropProvider dragging={value} setDragging={setDragging}>
         <DragDrop value={value} draggable={true} label="drag label">
-          Hello!
+          <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
     );
@@ -74,7 +82,7 @@ describe('DragDrop', () => {
     const component = mount(
       <ChildDragDropProvider dragging="hola" setDragging={setDragging}>
         <DragDrop onDrop={onDrop} droppable={true} value={value}>
-          Hello!
+          <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
     );
@@ -98,7 +106,7 @@ describe('DragDrop', () => {
     const component = mount(
       <ChildDragDropProvider dragging="hola" setDragging={setDragging}>
         <DragDrop onDrop={onDrop} droppable={false} value={{}}>
-          Hello!
+          <button>Hello!</button>
         </DragDrop>
       </ChildDragDropProvider>
     );
@@ -121,10 +129,69 @@ describe('DragDrop', () => {
         }}
         droppable
       >
-        Hello!
+        <button>Hello!</button>
       </DragDrop>
     );
 
     expect(component).toMatchSnapshot();
+  });
+
+  test('items that have droppable=false get special styling when another item is dragged', () => {
+    const component = mount(
+      <ChildDragDropProvider dragging={'ignored'} setDragging={() => {}}>
+        <DragDrop value="ignored" draggable={true} label="a">
+          <button>Hello!</button>
+        </DragDrop>
+        <DragDrop onDrop={(x: unknown) => {}} droppable={false}>
+          <button>Hello!</button>
+        </DragDrop>
+      </ChildDragDropProvider>
+    );
+
+    expect(component.find('[data-test-subj="lnsDragDrop"]').at(1)).toMatchSnapshot();
+  });
+
+  test('additional styles are reflected in the className until drop', () => {
+    let dragging: string | undefined;
+    const getAdditionalClasses = jest.fn().mockReturnValue('additional');
+    const component = mount(
+      <ChildDragDropProvider
+        dragging={dragging}
+        setDragging={() => {
+          dragging = 'hello';
+        }}
+      >
+        <DragDrop value="ignored" draggable={true} label="a">
+          <button>Hello!</button>
+        </DragDrop>
+        <DragDrop
+          onDrop={(x: unknown) => {}}
+          droppable
+          getAdditionalClassesOnEnter={getAdditionalClasses}
+        >
+          <button>Hello!</button>
+        </DragDrop>
+      </ChildDragDropProvider>
+    );
+
+    const dataTransfer = {
+      setData: jest.fn(),
+      getData: jest.fn(),
+    };
+    component
+      .find('[data-test-subj="lnsDragDrop"]')
+      .first()
+      .simulate('dragstart', { dataTransfer });
+    jest.runAllTimers();
+
+    component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('dragover');
+    expect(component.find('.additional')).toHaveLength(1);
+
+    component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('dragleave');
+    expect(component.find('.additional')).toHaveLength(0);
+
+    component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('dragover');
+    component.find('[data-test-subj="lnsDragDrop"]').at(1).simulate('drop');
+    expect(component.find('.additional')).toHaveLength(0);
   });
 });

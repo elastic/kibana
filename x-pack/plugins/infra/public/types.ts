@@ -25,9 +25,9 @@ export type InfraClientStartExports = void;
 
 export interface InfraClientSetupDeps {
   dataEnhanced: DataEnhancedSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   observability: ObservabilityPluginSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
 
@@ -36,7 +36,7 @@ export interface InfraClientStartDeps {
   dataEnhanced: DataEnhancedStart;
   observability: ObservabilityPluginStart;
   spaces: SpacesPluginStart;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionStart;
 }
 

@@ -28,6 +28,7 @@ import {
   convertIntervalToEsInterval,
   EsInterval,
 } from './calc_es_interval';
+import { autoInterval } from '../../_interval_options';
 
 interface TimeBucketsInterval extends moment.Duration {
   // TODO double-check whether all of these are needed
@@ -189,8 +190,8 @@ export class TimeBuckets {
       interval = input.val;
     }
 
-    if (!interval || interval === 'auto') {
-      this._i = 'auto';
+    if (!interval || interval === autoInterval) {
+      this._i = autoInterval;
       return;
     }
 
@@ -262,17 +263,15 @@ export class TimeBuckets {
       }
 
       const maxLength: number = this._timeBucketConfig['histogram:maxBars'];
-      const approxLen = Number(duration) / Number(interval);
+      const minInterval = calcAutoIntervalLessThan(maxLength, Number(duration));
 
       let scaled;
 
-      if (approxLen > maxLength) {
-        scaled = calcAutoIntervalLessThan(maxLength, Number(duration));
+      if (interval < minInterval) {
+        scaled = minInterval;
       } else {
         return interval;
       }
-
-      if (+scaled === +interval) return interval;
 
       interval = decorateInterval(interval);
       return Object.assign(scaled, {

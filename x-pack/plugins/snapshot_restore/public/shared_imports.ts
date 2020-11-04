@@ -14,6 +14,7 @@ export {
   sendRequest,
   SendRequestConfig,
   SendRequestResponse,
+  UseRequestResponse,
   useAuthorizationContext,
   useRequest,
   UseRequestConfig,

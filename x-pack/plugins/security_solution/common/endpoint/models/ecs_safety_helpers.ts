@@ -46,12 +46,12 @@ export function values<T>(valueOrCollection: ECSField<T>): T[] {
   if (Array.isArray(valueOrCollection)) {
     const nonNullValues: T[] = [];
     for (const value of valueOrCollection) {
-      if (value !== null) {
+      if (value !== null && value !== undefined) {
         nonNullValues.push(value);
       }
     }
     return nonNullValues;
-  } else if (valueOrCollection !== null) {
+  } else if (valueOrCollection !== null && valueOrCollection !== undefined) {
     // if there is a single non-null value, wrap it in an array and return it.
     return [valueOrCollection];
   } else {

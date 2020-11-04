@@ -11,11 +11,7 @@
 
 import { sum, round } from 'lodash';
 import theme from '@elastic/eui/dist/eui_theme_light.json';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../../../../helpers/setup_request';
+import { Setup, SetupTimeRange } from '../../../../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../../../../helpers/metrics';
 import { ChartBase } from '../../../types';
 import { getMetricsProjection } from '../../../../../projections/metrics';
@@ -36,15 +32,15 @@ export async function fetchAndTransformGcMetrics({
   chartBase,
   fieldName,
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
   chartBase: ChartBase;
   fieldName: typeof METRIC_JAVA_GC_COUNT | typeof METRIC_JAVA_GC_TIME;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
-  const { bucketSize } = getBucketSize(start, end, 'auto');
+  const { bucketSize } = getBucketSize(start, end);
 
   const projection = getMetricsProjection({
     setup,
@@ -74,8 +70,12 @@ export async function fetchAndTransformGcMetrics({
             field: `${LABEL_NAME}`,
           },
           aggs: {
-            over_time: {
-              date_histogram: getMetricsDateHistogramParams(start, end),
+            timeseries: {
+              date_histogram: getMetricsDateHistogramParams(
+                start,
+                end,
+                config['xpack.apm.metricsInterval']
+              ),
               aggs: {
                 // get the max value
                 max: {
@@ -119,7 +119,7 @@ export async function fetchAndTransformGcMetrics({
 
   const series = aggregations.per_pool.buckets.map((poolBucket, i) => {
     const label = poolBucket.key as string;
-    const timeseriesData = poolBucket.over_time;
+    const timeseriesData = poolBucket.timeseries;
 
     const data = timeseriesData.buckets.map((bucket) => {
       // derivative/value will be undefined for the first hit and if the `max` value is null

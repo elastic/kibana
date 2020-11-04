@@ -22,6 +22,7 @@ import {
   EMS_SPRITES_PATH,
   INDEX_SETTINGS_API_PATH,
   FONTS_API_PATH,
+  API_ROOT_PATH,
 } from '../common/constants';
 import { EMSClient } from '@elastic/ems-client';
 import fetch from 'node-fetch';
@@ -30,8 +31,7 @@ import { getIndexPatternSettings } from './lib/get_index_pattern_settings';
 import { schema } from '@kbn/config-schema';
 import fs from 'fs';
 import path from 'path';
-
-const ROOT = `/${GIS_API_PATH}`;
+import { initMVTRoutes } from './mvt/mvt_routes';
 
 export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   let emsClient;
@@ -69,7 +69,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_FILES_API_PATH}/${EMS_FILES_DEFAULT_JSON_PATH}`,
+      path: `${API_ROOT_PATH}/${EMS_FILES_API_PATH}/${EMS_FILES_DEFAULT_JSON_PATH}`,
       validate: {
         query: schema.object({
           id: schema.maybe(schema.string()),
@@ -109,7 +109,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}`,
+      path: `${API_ROOT_PATH}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_TILE_PATH}`,
       validate: false,
     },
     async (context, request, response) => {
@@ -145,7 +145,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_CATALOGUE_PATH}`,
+      path: `${API_ROOT_PATH}/${EMS_CATALOGUE_PATH}`,
       validate: false,
     },
     async (context, request, { ok, badRequest }) => {
@@ -181,7 +181,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_FILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
+      path: `${API_ROOT_PATH}/${EMS_FILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
       validate: false,
     },
     async (context, request, { ok, badRequest }) => {
@@ -189,18 +189,28 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
         return badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
 
-      const file = await emsClient.getDefaultFileManifest();
-      const layers = file.layers.map((layer) => {
-        const newLayer = { ...layer };
-        const id = encodeURIComponent(layer.layer_id);
+      const file = await emsClient.getDefaultFileManifest(); //need raw manifest
+      const fileLayers = await emsClient.getFileLayers();
+
+      const layers = file.layers.map((layerJson) => {
+        const newLayerJson = { ...layerJson };
+        const id = encodeURIComponent(layerJson.layer_id);
+
+        const fileLayer = fileLayers.find((fileLayer) => fileLayer.getId() === layerJson.layer_id);
+        const defaultFormat = layerJson.formats.find(
+          (format) => format.type === fileLayer.getDefaultFormatType()
+        );
+
         const newUrl = `${EMS_FILES_DEFAULT_JSON_PATH}?id=${id}`;
-        newLayer.formats = [
+
+        //Only proxy default-format. Others are unused in Maps-app
+        newLayerJson.formats = [
           {
-            ...layer.formats[0],
+            ...defaultFormat,
             url: newUrl,
           },
         ];
-        return newLayer;
+        return newLayerJson;
       });
       //rewrite
       return ok({
@@ -213,7 +223,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_TILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
+      path: `${API_ROOT_PATH}/${EMS_TILES_CATALOGUE_PATH}/{emsVersion}/manifest`,
       validate: false,
     },
     async (context, request, { ok, badRequest }) => {
@@ -257,7 +267,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_STYLE_PATH}`,
+      path: `${API_ROOT_PATH}/${EMS_TILES_API_PATH}/${EMS_TILES_RASTER_STYLE_PATH}`,
       validate: {
         query: schema.object({
           id: schema.maybe(schema.string()),
@@ -293,7 +303,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_STYLE_PATH}`,
+      path: `${API_ROOT_PATH}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_STYLE_PATH}`,
       validate: {
         query: schema.object({
           id: schema.string(),
@@ -341,7 +351,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_SOURCE_PATH}`,
+      path: `${API_ROOT_PATH}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_SOURCE_PATH}`,
       validate: {
         query: schema.object({
           id: schema.string(),
@@ -379,7 +389,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}`,
+      path: `${API_ROOT_PATH}/${EMS_TILES_API_PATH}/${EMS_TILES_VECTOR_TILE_PATH}`,
       validate: {
         query: schema.object({
           id: schema.string(),
@@ -417,7 +427,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
+      path: `${API_ROOT_PATH}/${EMS_TILES_API_PATH}/${EMS_GLYPHS_PATH}/{fontstack}/{range}`,
       validate: {
         params: schema.object({
           fontstack: schema.string(),
@@ -439,7 +449,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
 
   router.get(
     {
-      path: `${ROOT}/${EMS_TILES_API_PATH}/${EMS_SPRITES_PATH}/{id}/sprite{scaling?}.{extension}`,
+      path: `${API_ROOT_PATH}/${EMS_TILES_API_PATH}/${EMS_SPRITES_PATH}/{id}/sprite{scaling?}.{extension}`,
       validate: {
         query: schema.object({
           elastic_tile_service_tos: schema.maybe(schema.string()),
@@ -591,4 +601,6 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       return response.badRequest(`Cannot connect to EMS`);
     }
   }
+
+  initMVTRoutes({ router, logger });
 }

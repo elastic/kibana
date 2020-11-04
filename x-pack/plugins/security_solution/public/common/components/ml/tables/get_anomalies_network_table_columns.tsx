@@ -14,7 +14,7 @@ import { Anomaly, AnomaliesByNetwork } from '../types';
 import { getRowItemDraggable } from '../../tables/helpers';
 import { EntityDraggable } from '../entity_draggable';
 import { createCompoundNetworkKey } from './create_compound_key';
-import { IPDetailsLink } from '../../links';
+import { NetworkDetailsLink } from '../../links';
 
 import * as i18n from './translations';
 import { getEntries } from '../get_entries';
@@ -46,7 +46,7 @@ export const getAnomaliesNetworkTableColumns = (
         rowItem: ip,
         attrName: anomaliesByNetwork.type,
         idPrefix: `anomalies-network-table-ip-${createCompoundNetworkKey(anomaliesByNetwork)}`,
-        render: (item) => <IPDetailsLink ip={item} flowTarget={flowTarget} />,
+        render: (item) => <NetworkDetailsLink ip={item} flowTarget={flowTarget} />,
       }),
   },
   {

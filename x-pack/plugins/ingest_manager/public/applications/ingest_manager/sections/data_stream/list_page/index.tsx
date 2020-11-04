@@ -31,8 +31,8 @@ const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
           <EuiText>
             <h1>
               <FormattedMessage
-                id="xpack.ingestManager.dataStreamList.pageTitle"
-                defaultMessage="Datasets"
+                id="xpack.fleet.dataStreamList.pageTitle"
+                defaultMessage="Data streams"
               />
             </h1>
           </EuiText>
@@ -41,7 +41,7 @@ const DataStreamListPageLayout: React.FunctionComponent = ({ children }) => (
           <EuiText color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.ingestManager.dataStreamList.pageSubtitle"
+                id="xpack.fleet.dataStreamList.pageSubtitle"
                 defaultMessage="Manage the data created by your agents."
               />
             </p>
@@ -64,9 +64,9 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   const { pagination, pageSizeOptions } = usePagination();
 
   // Fetch data streams
-  const { isLoading, data: dataStreamsData, sendRequest } = useGetDataStreams();
+  const { isLoading, data: dataStreamsData, resendRequest } = useGetDataStreams();
 
-  // Some configs retrieved, set up table props
+  // Some policies retrieved, set up table props
   const columns = useMemo(() => {
     const cols: Array<
       EuiTableFieldDataColumnType<DataStream> | EuiTableActionsColumnType<DataStream>
@@ -75,21 +75,21 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         field: 'dataset',
         sortable: true,
         width: '25%',
-        name: i18n.translate('xpack.ingestManager.dataStreamList.datasetColumnTitle', {
+        name: i18n.translate('xpack.fleet.dataStreamList.datasetColumnTitle', {
           defaultMessage: 'Dataset',
         }),
       },
       {
         field: 'type',
         sortable: true,
-        name: i18n.translate('xpack.ingestManager.dataStreamList.typeColumnTitle', {
+        name: i18n.translate('xpack.fleet.dataStreamList.typeColumnTitle', {
           defaultMessage: 'Type',
         }),
       },
       {
         field: 'namespace',
         sortable: true,
-        name: i18n.translate('xpack.ingestManager.dataStreamList.namespaceColumnTitle', {
+        name: i18n.translate('xpack.fleet.dataStreamList.namespaceColumnTitle', {
           defaultMessage: 'Namespace',
         }),
         render: (namespace: string) => {
@@ -99,7 +99,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'package',
         sortable: true,
-        name: i18n.translate('xpack.ingestManager.dataStreamList.integrationColumnTitle', {
+        name: i18n.translate('xpack.fleet.dataStreamList.integrationColumnTitle', {
           defaultMessage: 'Integration',
         }),
         render(pkg: DataStream['package'], datastream: DataStream) {
@@ -125,7 +125,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         sortable: true,
         width: '25%',
         dataType: 'date',
-        name: i18n.translate('xpack.ingestManager.dataStreamList.lastActivityColumnTitle', {
+        name: i18n.translate('xpack.fleet.dataStreamList.lastActivityColumnTitle', {
           defaultMessage: 'Last activity',
         }),
         render: (date: DataStream['last_activity']) => {
@@ -140,7 +140,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       {
         field: 'size_in_bytes',
         sortable: true,
-        name: i18n.translate('xpack.ingestManager.dataStreamList.sizeColumnTitle', {
+        name: i18n.translate('xpack.fleet.dataStreamList.sizeColumnTitle', {
           defaultMessage: 'Size',
         }),
         render: (size: DataStream['size_in_bytes']) => {
@@ -153,7 +153,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         },
       },
       {
-        name: i18n.translate('xpack.ingestManager.dataStreamList.actionsColumnTitle', {
+        name: i18n.translate('xpack.fleet.dataStreamList.actionsColumnTitle', {
           defaultMessage: 'Actions',
         }),
         actions: [
@@ -172,8 +172,8 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         title={
           <h2>
             <FormattedMessage
-              id="xpack.ingestManager.dataStreamList.noDataStreamsPrompt"
-              defaultMessage="No datasets"
+              id="xpack.fleet.dataStreamList.noDataStreamsPrompt"
+              defaultMessage="No data streams"
             />
           </h2>
         }
@@ -182,7 +182,12 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
     []
   );
 
-  const filterOptions: { [key: string]: string[] } = {
+  const filterOptions: {
+    [key: string]: Array<{
+      value: string;
+      name: string;
+    }>;
+  } = {
     dataset: [],
     type: [],
     namespace: [],
@@ -190,21 +195,37 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   };
 
   if (dataStreamsData && dataStreamsData.data_streams.length) {
+    const dataValues: {
+      [key: string]: string[];
+    } = {
+      dataset: [],
+      type: [],
+      namespace: [],
+      package: [],
+    };
     dataStreamsData.data_streams.forEach((stream) => {
       const { dataset, type, namespace, package: pkg } = stream;
-      if (!filterOptions.dataset.includes(dataset)) {
-        filterOptions.dataset.push(dataset);
+      if (!dataValues.dataset.includes(dataset)) {
+        dataValues.dataset.push(dataset);
       }
-      if (!filterOptions.type.includes(type)) {
-        filterOptions.type.push(type);
+      if (!dataValues.type.includes(type)) {
+        dataValues.type.push(type);
       }
-      if (!filterOptions.namespace.includes(namespace)) {
-        filterOptions.namespace.push(namespace);
+      if (!dataValues.namespace.includes(namespace)) {
+        dataValues.namespace.push(namespace);
       }
-      if (!filterOptions.package.includes(pkg)) {
-        filterOptions.package.push(pkg);
+      if (!dataValues.package.includes(pkg)) {
+        dataValues.package.push(pkg);
       }
     });
+    for (const field in dataValues) {
+      if (filterOptions[field]) {
+        filterOptions[field] = dataValues[field].sort().map((option) => ({
+          value: option,
+          name: option,
+        }));
+      }
+    }
   }
 
   return (
@@ -215,15 +236,15 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
         message={
           isLoading ? (
             <FormattedMessage
-              id="xpack.ingestManager.dataStreamList.loadingDataStreamsMessage"
-              defaultMessage="Loading datasets…"
+              id="xpack.fleet.dataStreamList.loadingDataStreamsMessage"
+              defaultMessage="Loading data streams…"
             />
           ) : dataStreamsData && !dataStreamsData.data_streams.length ? (
             emptyPrompt
           ) : (
             <FormattedMessage
-              id="xpack.ingestManager.dataStreamList.noFilteredDataStreamsMessage"
-              defaultMessage="No matching datasets found"
+              id="xpack.fleet.dataStreamList.noFilteredDataStreamsMessage"
+              defaultMessage="No matching data streams found"
             />
           )
         }
@@ -241,71 +262,60 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
               key="reloadButton"
               color="primary"
               iconType="refresh"
-              onClick={() => sendRequest()}
+              onClick={() => resendRequest()}
             >
               <FormattedMessage
-                id="xpack.ingestManager.dataStreamList.reloadDataStreamsButtonText"
+                id="xpack.fleet.dataStreamList.reloadDataStreamsButtonText"
                 defaultMessage="Reload"
               />
             </EuiButton>,
           ],
           box: {
-            placeholder: i18n.translate(
-              'xpack.ingestManager.dataStreamList.searchPlaceholderTitle',
-              {
-                defaultMessage: 'Filter datasets',
-              }
-            ),
+            placeholder: i18n.translate('xpack.fleet.dataStreamList.searchPlaceholderTitle', {
+              defaultMessage: 'Filter data streams',
+            }),
             incremental: true,
           },
           filters: [
             {
               type: 'field_value_selection',
               field: 'dataset',
-              name: i18n.translate('xpack.ingestManager.dataStreamList.datasetColumnTitle', {
+              name: i18n.translate('xpack.fleet.dataStreamList.datasetColumnTitle', {
                 defaultMessage: 'Dataset',
               }),
               multiSelect: 'or',
-              options: filterOptions.dataset.map((option) => ({
-                value: option,
-                name: option,
-              })),
+              operator: 'exact',
+              options: filterOptions.dataset,
             },
             {
               type: 'field_value_selection',
               field: 'type',
-              name: i18n.translate('xpack.ingestManager.dataStreamList.typeColumnTitle', {
+              name: i18n.translate('xpack.fleet.dataStreamList.typeColumnTitle', {
                 defaultMessage: 'Type',
               }),
               multiSelect: 'or',
-              options: filterOptions.type.map((option) => ({
-                value: option,
-                name: option,
-              })),
+              operator: 'exact',
+              options: filterOptions.type,
             },
             {
               type: 'field_value_selection',
               field: 'namespace',
-              name: i18n.translate('xpack.ingestManager.dataStreamList.namespaceColumnTitle', {
+              name: i18n.translate('xpack.fleet.dataStreamList.namespaceColumnTitle', {
                 defaultMessage: 'Namespace',
               }),
               multiSelect: 'or',
-              options: filterOptions.namespace.map((option) => ({
-                value: option,
-                name: option,
-              })),
+              operator: 'exact',
+              options: filterOptions.namespace,
             },
             {
               type: 'field_value_selection',
               field: 'package',
-              name: i18n.translate('xpack.ingestManager.dataStreamList.integrationColumnTitle', {
+              name: i18n.translate('xpack.fleet.dataStreamList.integrationColumnTitle', {
                 defaultMessage: 'Integration',
               }),
               multiSelect: 'or',
-              options: filterOptions.package.map((option) => ({
-                value: option,
-                name: option,
-              })),
+              operator: 'exact',
+              options: filterOptions.package,
             },
           ],
         }}

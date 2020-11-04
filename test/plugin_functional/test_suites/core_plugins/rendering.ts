@@ -51,11 +51,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       window.__RENDERING_SESSION__.push(window.location.pathname);
     });
   };
-  const getLegacyMode = () =>
-    browser.execute(() => {
-      return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
-        .legacyMode;
-    });
+
   const getUserSettings = () =>
     browser.execute(() => {
       return JSON.parse(document.querySelector('kbn-injected-metadata')!.getAttribute('data')!)
@@ -73,13 +69,11 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('renders "core" application', async () => {
       await navigateTo('/render/core');
 
-      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
+      const [loadingMessage, userSettings] = await Promise.all([
         findLoadingMessage(),
-        getLegacyMode(),
         getUserSettings(),
       ]);
 
-      expect(legacyMode).to.be(false);
       expect(userSettings).to.not.be.empty();
 
       await find.waitForElementStale(loadingMessage);
@@ -90,13 +84,11 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     it('renders "core" application without user settings', async () => {
       await navigateTo('/render/core?includeUserSettings=false');
 
-      const [loadingMessage, legacyMode, userSettings] = await Promise.all([
+      const [loadingMessage, userSettings] = await Promise.all([
         findLoadingMessage(),
-        getLegacyMode(),
         getUserSettings(),
       ]);
 
-      expect(legacyMode).to.be(false);
       expect(userSettings).to.be.empty();
 
       await find.waitForElementStale(loadingMessage);

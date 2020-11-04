@@ -42,6 +42,7 @@ import { FilterBarProvider } from './filter_bar';
 import { FlyoutProvider } from './flyout';
 import { GlobalNavProvider } from './global_nav';
 import { InspectorProvider } from './inspector';
+import { ManagementMenuProvider } from './management';
 import { QueryBarProvider } from './query_bar';
 import { RemoteProvider } from './remote';
 import { RenderableProvider } from './renderable';
@@ -56,6 +57,7 @@ import {
 import { ListingTableProvider } from './listing_table';
 import { SavedQueryManagementComponentProvider } from './saved_query_management_component';
 import { KibanaSupertestProvider } from './supertest';
+import { MenuToggleProvider } from './menu_toggle';
 
 export const services = {
   ...commonServiceProviders,
@@ -91,4 +93,6 @@ export const services = {
   savedQueryManagementComponent: SavedQueryManagementComponentProvider,
   elasticChart: ElasticChartProvider,
   supertest: KibanaSupertestProvider,
+  managementMenu: ManagementMenuProvider,
+  MenuToggle: MenuToggleProvider,
 };

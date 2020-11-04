@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies certutil.exe making a network connection. Adversaries could abuse certutil.exe to download a certificate, or malware, from a remote URL.",
+  "from": "now-9m",
   "index": [
     "winlogbeat-*",
     "logs-endpoint.events.*"
@@ -16,7 +17,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Windows"
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Command and Control"
   ],
   "threat": [
     {
@@ -29,12 +33,12 @@
       "technique": [
         {
           "id": "T1105",
-          "name": "Remote File Copy",
+          "name": "Ingress Tool Transfer",
           "reference": "https://attack.mitre.org/techniques/T1105/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 4
 }

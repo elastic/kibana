@@ -4,48 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILegacyScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { validateJob, ValidateJobPayload } from './job_validation';
 import { JobValidationMessage } from '../../../common/constants/messages';
 
-const mlClusterClient = ({
-  // mock callAsCurrentUser
-  callAsCurrentUser: (method: string) => {
-    return new Promise((resolve) => {
-      if (method === 'fieldCaps') {
-        resolve({ fields: [] });
-        return;
-      } else if (method === 'ml.info') {
-        resolve({
+const callAs = {
+  fieldCaps: () => Promise.resolve({ body: { fields: [] } }),
+  ml: {
+    info: () =>
+      Promise.resolve({
+        body: {
           limits: {
             effective_max_model_memory_limit: '100MB',
             max_model_memory_limit: '1GB',
           },
-        });
-      }
-      resolve({});
-    }) as Promise<any>;
+        },
+      }),
   },
+  search: () => Promise.resolve({ body: { hits: { total: { value: 0, relation: 'eq' } } } }),
+};
 
-  // mock callAsInternalUser
-  callAsInternalUser: (method: string) => {
-    return new Promise((resolve) => {
-      if (method === 'fieldCaps') {
-        resolve({ fields: [] });
-        return;
-      } else if (method === 'ml.info') {
-        resolve({
-          limits: {
-            effective_max_model_memory_limit: '100MB',
-            max_model_memory_limit: '1GB',
-          },
-        });
-      }
-      resolve({});
-    }) as Promise<any>;
-  },
-} as unknown) as ILegacyScopedClusterClient;
+const mlClusterClient = ({
+  asCurrentUser: callAs,
+  asInternalUser: callAs,
+} as unknown) as IScopedClusterClient;
 
 // Note: The tests cast `payload` as any
 // so we can simulate possible runtime payloads

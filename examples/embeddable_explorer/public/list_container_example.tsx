@@ -29,11 +29,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  EmbeddableInput,
-  EmbeddableRenderer,
-  ViewMode,
-} from '../../../src/plugins/embeddable/public';
+import { EmbeddableRenderer, ViewMode } from '../../../src/plugins/embeddable/public';
 import {
   HELLO_WORLD_EMBEDDABLE,
   MULTI_TASK_TODO_EMBEDDABLE,
@@ -41,6 +37,9 @@ import {
   ListContainerFactory,
   SearchableListContainerFactory,
 } from '../../embeddable_examples/public';
+import { SearchableContainerInput } from '../../embeddable_examples/public/searchable_list_container/searchable_list_container';
+import { TodoInput } from '../../embeddable_examples/public/todo';
+import { MultiTaskTodoInput } from '../../embeddable_examples/public/multi_task_todo';
 
 interface Props {
   listContainerEmbeddableFactory: ListContainerFactory;
@@ -51,7 +50,7 @@ export function ListContainerExample({
   listContainerEmbeddableFactory,
   searchableListContainerEmbeddableFactory,
 }: Props) {
-  const listInput: EmbeddableInput = {
+  const listInput: SearchableContainerInput = {
     id: 'hello',
     title: 'My todo list',
     viewMode: ViewMode.VIEW,
@@ -69,7 +68,7 @@ export function ListContainerExample({
           task: 'Goes out on Wednesdays!',
           icon: 'broom',
           title: 'Take out the trash',
-        },
+        } as TodoInput,
       },
       '3': {
         type: TODO_EMBEDDABLE,
@@ -77,12 +76,12 @@ export function ListContainerExample({
           id: '3',
           icon: 'broom',
           title: 'Vaccum the floor',
-        },
+        } as TodoInput,
       },
     },
   };
 
-  const searchableInput: EmbeddableInput = {
+  const searchableInput: SearchableContainerInput = {
     id: '1',
     title: 'My searchable todo list',
     viewMode: ViewMode.VIEW,
@@ -101,7 +100,7 @@ export function ListContainerExample({
           task: 'Goes out on Wednesdays!',
           icon: 'broom',
           title: 'Take out the trash',
-        },
+        } as TodoInput,
       },
       '3': {
         type: MULTI_TASK_TODO_EMBEDDABLE,
@@ -110,7 +109,7 @@ export function ListContainerExample({
           icon: 'searchProfilerApp',
           title: 'Learn more',
           tasks: ['Go to school', 'Watch planet earth', 'Read the encyclopedia'],
-        },
+        } as MultiTaskTodoInput,
       },
     },
   };

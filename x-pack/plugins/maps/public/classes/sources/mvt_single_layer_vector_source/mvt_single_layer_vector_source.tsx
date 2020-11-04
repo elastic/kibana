@@ -36,7 +36,8 @@ export const sourceTitle = i18n.translate(
   }
 );
 
-export class MVTSingleLayerVectorSource extends AbstractSource
+export class MVTSingleLayerVectorSource
+  extends AbstractSource
   implements ITiledSingleLayerVectorSource {
   static createDescriptor({
     urlTemplate,
@@ -178,7 +179,7 @@ export class MVTSingleLayerVectorSource extends AbstractSource
 
   getBoundsForFilters(
     boundsFilters: BoundsFilters,
-    registerCancelCallback: (requestToken: symbol, callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void
   ): MapExtent | null {
     return null;
   }
@@ -191,7 +192,19 @@ export class MVTSingleLayerVectorSource extends AbstractSource
     return false;
   }
 
-  async filterAndFormatPropertiesToHtml(
+  isBoundsAware() {
+    return false;
+  }
+
+  getSourceTooltipContent() {
+    return { tooltipContent: null, areResultsTrimmed: false };
+  }
+
+  async getLeftJoinFields() {
+    return [];
+  }
+
+  async getTooltipProperties(
     properties: GeoJsonProperties,
     featureId?: string | number
   ): Promise<ITooltipProperty[]> {

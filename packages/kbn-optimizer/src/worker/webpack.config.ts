@@ -23,7 +23,6 @@ import { stringifyRequest } from 'loader-utils';
 import webpack from 'webpack';
 // @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
-// @ts-expect-error
 import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
@@ -64,6 +63,14 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
 
     optimization: {
       noEmitOnErrors: true,
+      splitChunks: {
+        maxAsyncRequests: 10,
+        cacheGroups: {
+          default: {
+            reuseExistingChunk: false,
+          },
+        },
+      },
     },
 
     externals: [UiSharedDeps.externals],
@@ -79,7 +86,6 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
       // or which have require() statements that should be ignored because the file is
       // already bundled with all its necessary depedencies
       noParse: [
-        /[\/\\]node_modules[\/\\]elasticsearch-browser[\/\\]/,
         /[\/\\]node_modules[\/\\]lodash[\/\\]index\.js$/,
         /[\/\\]node_modules[\/\\]vega[\/\\]build[\/\\]vega\.js$/,
       ],
@@ -201,6 +207,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             loader: 'babel-loader',
             options: {
               babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
               presets: IS_CODE_COVERAGE
                 ? [ISTANBUL_PRESET_PATH, BABEL_PRESET_PATH]
                 : [BABEL_PRESET_PATH],
@@ -217,7 +224,7 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     },
 
     resolve: {
-      extensions: ['.js', '.ts', '.tsx', 'json'],
+      extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'main'],
       alias: {
         tinymath: require.resolve('tinymath/lib/tinymath.es5.js'),

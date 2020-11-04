@@ -73,7 +73,6 @@ export const LogEntryCategoriesResultsContent: React.FunctionComponent<LogEntryC
 
   const showLoadDataErrorNotification = useCallback(
     (error: Error) => {
-      // eslint-disable-next-line no-unused-expressions
       services.notifications?.toasts.addError(error, {
         title: loadDataErrorTitle,
       });

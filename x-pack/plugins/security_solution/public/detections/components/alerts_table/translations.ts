@@ -48,7 +48,7 @@ export const LOADING_ALERTS = i18n.translate(
 export const TOTAL_COUNT_OF_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.totalCountOfAlertsTitle',
   {
-    defaultMessage: 'alerts match the search criteria',
+    defaultMessage: 'alerts',
   }
 );
 
@@ -112,6 +112,13 @@ export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle',
   {
     defaultMessage: 'Investigate in timeline',
+  }
+);
+
+export const ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineAriaLabel',
+  {
+    defaultMessage: 'Send alert to timeline',
   }
 );
 

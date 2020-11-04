@@ -19,7 +19,7 @@
 
 import { mockLoggingSystem } from './config_deprecation.test.mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('configuration deprecations', () => {
   let root: ReturnType<typeof kbnTestServer.createRoot>;

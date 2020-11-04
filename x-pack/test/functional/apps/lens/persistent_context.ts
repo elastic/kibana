@@ -12,8 +12,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const filterBar = getService('filterBar');
   const appsMenu = getService('appsMenu');
+  const security = getService('security');
 
   describe('lens query context', () => {
+    before(async () => {
+      await security.testUser.setRoles(
+        ['global_discover_read', 'global_visualize_read', 'test_logstash_reader'],
+        false
+      );
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     it('should carry over time range and pinned filters to discover', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
@@ -47,6 +59,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('keep time range and pinned filters after refresh', async () => {
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const timeRange = await PageObjects.timePicker.getTimeConfig();
+      expect(timeRange.start).to.equal('Sep 7, 2015 @ 06:31:44.000');
+      expect(timeRange.end).to.equal('Sep 19, 2025 @ 06:31:44.000');
+      await filterBar.hasFilter('ip', '97.220.3.248', false, true);
+    });
+
+    it('keeps selected index pattern after refresh', async () => {
+      await PageObjects.lens.switchDataPanelIndexPattern('otherpattern');
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      expect(await PageObjects.lens.getDataPanelIndexPattern()).to.equal('otherpattern');
+    });
+
+    it('keeps time range and pinned filters after refreshing directly after saving', async () => {
+      // restore defaults so visualization becomes saveable
+      await security.testUser.restoreDefaults();
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
+        operation: 'date_histogram',
+        field: '@timestamp',
+      });
+
+      await PageObjects.lens.configureDimension({
+        dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+        operation: 'avg',
+        field: 'bytes',
+      });
+      await PageObjects.lens.save('persistentcontext');
       await browser.refresh();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const timeRange = await PageObjects.timePicker.getTimeConfig();

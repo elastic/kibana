@@ -17,11 +17,13 @@
  * under the License.
  */
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { esKuery, KueryNode } from '../../../../../../plugins/data/server';
+// @ts-expect-error no ts
+import { esKuery } from '../../../es_query';
+type KueryNode = any;
 
 import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
-import { getQueryParams } from './query_params';
+import { ALL_NAMESPACES_STRING } from '../utils';
+import { getQueryParams, getClauseForReference } from './query_params';
 
 const registry = typeRegistryMock.create();
 
@@ -49,6 +51,41 @@ const ALL_TYPE_SUBSETS = ALL_TYPES.reduce(
   .filter((x) => x.length) // exclude empty set
   .map((x) => (x.length === 1 ? x[0] : x)); // if a subset is a single string, destructure it
 
+const createTypeClause = (type: string, namespaces?: string[]) => {
+  if (registry.isMultiNamespace(type)) {
+    const array = [...(namespaces ?? ['default']), ALL_NAMESPACES_STRING];
+    return {
+      bool: {
+        must: expect.arrayContaining([{ terms: { namespaces: array } }]),
+        must_not: [{ exists: { field: 'namespace' } }],
+      },
+    };
+  } else if (registry.isSingleNamespace(type)) {
+    const nonDefaultNamespaces = namespaces?.filter((n) => n !== 'default') ?? [];
+    const should: any = [];
+    if (nonDefaultNamespaces.length > 0) {
+      should.push({ terms: { namespace: nonDefaultNamespaces } });
+    }
+    if (namespaces?.includes('default')) {
+      should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
+    }
+    return {
+      bool: {
+        must: [{ term: { type } }],
+        should: expect.arrayContaining(should),
+        minimum_should_match: 1,
+        must_not: [{ exists: { field: 'namespaces' } }],
+      },
+    };
+  }
+  // isNamespaceAgnostic
+  return {
+    bool: expect.objectContaining({
+      must_not: [{ exists: { field: 'namespace' } }, { exists: { field: 'namespaces' } }],
+    }),
+  };
+};
+
 /**
  * Note: these tests cases are defined in the order they appear in the source code, for readability's sake
  */
@@ -56,7 +93,7 @@ describe('#getQueryParams', () => {
   const mappings = MAPPINGS;
   type Result = ReturnType<typeof getQueryParams>;
 
-  describe('kueryNode filter clause (query.bool.filter[...]', () => {
+  describe('kueryNode filter clause', () => {
     const expectResult = (result: Result, expected: any) => {
       expect(result.query.bool.filter).toEqual(expect.arrayContaining([expected]));
     };
@@ -113,12 +150,17 @@ describe('#getQueryParams', () => {
     });
   });
 
-  describe('reference filter clause (query.bool.filter[bool.must])', () => {
+  describe('reference filter clause', () => {
     describe('`hasReference` parameter', () => {
-      const expectResult = (result: Result, expected: any) => {
-        expect(result.query.bool.filter).toEqual(
-          expect.arrayContaining([{ bool: expect.objectContaining({ must: expected }) }])
-        );
+      const getReferencesFilter = (result: any) => {
+        const filters = result.query.bool.filter;
+        return filters.find((filter: any) => {
+          const clauses = filter.bool?.must ?? filter.bool?.should;
+          if (!clauses) {
+            return false;
+          }
+          return clauses[0].nested?.path === 'references' ?? false;
+        });
       };
 
       it('does not include the clause when `hasReference` is not specified', () => {
@@ -127,36 +169,96 @@ describe('#getQueryParams', () => {
           registry,
           hasReference: undefined,
         });
-        expectResult(result, undefined);
+
+        expect(getReferencesFilter(result)).toBeUndefined();
       });
 
-      it('creates a clause with query for specified reference', () => {
+      it('creates a should clause for specified reference when operator is `OR`', () => {
+        const hasReference = { id: 'foo', type: 'bar' };
+        const result = getQueryParams({
+          mappings,
+          registry,
+          hasReference,
+          hasReferenceOperator: 'OR',
+        });
+        expect(getReferencesFilter(result)).toEqual({
+          bool: {
+            should: [getClauseForReference(hasReference)],
+            minimum_should_match: 1,
+          },
+        });
+      });
+
+      it('creates a must clause for specified reference when operator is `AND`', () => {
+        const hasReference = { id: 'foo', type: 'bar' };
+        const result = getQueryParams({
+          mappings,
+          registry,
+          hasReference,
+          hasReferenceOperator: 'AND',
+        });
+        expect(getReferencesFilter(result)).toEqual({
+          bool: {
+            must: [getClauseForReference(hasReference)],
+          },
+        });
+      });
+
+      it('handles multiple references when operator is `OR`', () => {
+        const hasReference = [
+          { id: 'foo', type: 'bar' },
+          { id: 'hello', type: 'dolly' },
+        ];
+        const result = getQueryParams({
+          mappings,
+          registry,
+          hasReference,
+          hasReferenceOperator: 'OR',
+        });
+        expect(getReferencesFilter(result)).toEqual({
+          bool: {
+            should: hasReference.map(getClauseForReference),
+            minimum_should_match: 1,
+          },
+        });
+      });
+
+      it('handles multiple references when operator is `AND`', () => {
+        const hasReference = [
+          { id: 'foo', type: 'bar' },
+          { id: 'hello', type: 'dolly' },
+        ];
+        const result = getQueryParams({
+          mappings,
+          registry,
+          hasReference,
+          hasReferenceOperator: 'AND',
+        });
+        expect(getReferencesFilter(result)).toEqual({
+          bool: {
+            must: hasReference.map(getClauseForReference),
+          },
+        });
+      });
+
+      it('defaults to `OR` when operator is not specified', () => {
         const hasReference = { id: 'foo', type: 'bar' };
         const result = getQueryParams({
           mappings,
           registry,
           hasReference,
         });
-        expectResult(result, [
-          {
-            nested: {
-              path: 'references',
-              query: {
-                bool: {
-                  must: [
-                    { term: { 'references.id': hasReference.id } },
-                    { term: { 'references.type': hasReference.type } },
-                  ],
-                },
-              },
-            },
+        expect(getReferencesFilter(result)).toEqual({
+          bool: {
+            should: [getClauseForReference(hasReference)],
+            minimum_should_match: 1,
           },
-        ]);
+        });
       });
     });
   });
 
-  describe('type filter clauses (query.bool.filter[bool.should])', () => {
+  describe('type filter clauses', () => {
     describe('`type` parameter', () => {
       const expectResult = (result: Result, ...types: string[]) => {
         expect(result.query.bool.filter).toEqual(
@@ -197,40 +299,6 @@ describe('#getQueryParams', () => {
     });
 
     describe('`namespaces` parameter', () => {
-      const createTypeClause = (type: string, namespaces?: string[]) => {
-        if (registry.isMultiNamespace(type)) {
-          return {
-            bool: {
-              must: expect.arrayContaining([{ terms: { namespaces: namespaces ?? ['default'] } }]),
-              must_not: [{ exists: { field: 'namespace' } }],
-            },
-          };
-        } else if (registry.isSingleNamespace(type)) {
-          const nonDefaultNamespaces = namespaces?.filter((n) => n !== 'default') ?? [];
-          const should: any = [];
-          if (nonDefaultNamespaces.length > 0) {
-            should.push({ terms: { namespace: nonDefaultNamespaces } });
-          }
-          if (namespaces?.includes('default')) {
-            should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
-          }
-          return {
-            bool: {
-              must: [{ term: { type } }],
-              should: expect.arrayContaining(should),
-              minimum_should_match: 1,
-              must_not: [{ exists: { field: 'namespaces' } }],
-            },
-          };
-        }
-        // isNamespaceAgnostic
-        return {
-          bool: expect.objectContaining({
-            must_not: [{ exists: { field: 'namespace' } }, { exists: { field: 'namespaces' } }],
-          }),
-        };
-      };
-
       const expectResult = (result: Result, ...typeClauses: any) => {
         expect(result.query.bool.filter).toEqual(
           expect.arrayContaining([
@@ -280,6 +348,37 @@ describe('#getQueryParams', () => {
         test(['default']);
       });
     });
+
+    describe('`typeToNamespacesMap` parameter', () => {
+      const expectResult = (result: Result, ...typeClauses: any) => {
+        expect(result.query.bool.filter).toEqual(
+          expect.arrayContaining([
+            { bool: expect.objectContaining({ should: typeClauses, minimum_should_match: 1 }) },
+          ])
+        );
+      };
+
+      it('supersedes `type` and `namespaces` parameters', () => {
+        const result = getQueryParams({
+          mappings,
+          registry,
+          type: ['pending', 'saved', 'shared', 'global'],
+          namespaces: ['foo', 'bar', 'default'],
+          typeToNamespacesMap: new Map([
+            ['pending', ['foo']], // 'pending' is only authorized in the 'foo' namespace
+            // 'saved' is not authorized in any namespaces
+            ['shared', ['bar', 'default']], // 'shared' is only authorized in the 'bar' and 'default' namespaces
+            ['global', ['foo', 'bar', 'default']], // 'global' is authorized in all namespaces (which are ignored anyway)
+          ]),
+        });
+        expectResult(
+          result,
+          createTypeClause('pending', ['foo']),
+          createTypeClause('shared', ['bar', 'default']),
+          createTypeClause('global')
+        );
+      });
+    });
   });
 
   describe('search clause (query.bool.must.simple_query_string)', () => {
@@ -309,13 +408,19 @@ describe('#getQueryParams', () => {
       });
     });
 
-    describe('`searchFields` parameter', () => {
+    describe('`searchFields` and `rootSearchFields` parameters', () => {
       const getExpectedFields = (searchFields: string[], typeOrTypes: string | string[]) => {
         const types = Array.isArray(typeOrTypes) ? typeOrTypes : [typeOrTypes];
         return searchFields.map((x) => types.map((y) => `${y}.${x}`)).flat();
       };
 
-      const test = (searchFields: string[]) => {
+      const test = ({
+        searchFields,
+        rootSearchFields,
+      }: {
+        searchFields?: string[];
+        rootSearchFields?: string[];
+      }) => {
         for (const typeOrTypes of ALL_TYPE_SUBSETS) {
           const result = getQueryParams({
             mappings,
@@ -323,8 +428,12 @@ describe('#getQueryParams', () => {
             type: typeOrTypes,
             search,
             searchFields,
+            rootSearchFields,
           });
-          const fields = getExpectedFields(searchFields, typeOrTypes);
+          let fields = rootSearchFields || [];
+          if (searchFields) {
+            fields = fields.concat(getExpectedFields(searchFields, typeOrTypes));
+          }
           expectResult(result, expect.objectContaining({ fields }));
         }
         // also test with no specified type/s
@@ -334,31 +443,63 @@ describe('#getQueryParams', () => {
           type: undefined,
           search,
           searchFields,
+          rootSearchFields,
         });
-        const fields = getExpectedFields(searchFields, ALL_TYPES);
+        let fields = rootSearchFields || [];
+        if (searchFields) {
+          fields = fields.concat(getExpectedFields(searchFields, ALL_TYPES));
+        }
         expectResult(result, expect.objectContaining({ fields }));
       };
 
-      it('includes lenient flag and all fields when `searchFields` is not specified', () => {
+      it('throws an error if a raw search field contains a "." character', () => {
+        expect(() =>
+          getQueryParams({
+            mappings,
+            registry,
+            type: undefined,
+            search,
+            searchFields: undefined,
+            rootSearchFields: ['foo', 'bar.baz'],
+          })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"rootSearchFields entry \\"bar.baz\\" is invalid: cannot contain \\".\\" character"`
+        );
+      });
+
+      it('includes lenient flag and all fields when `searchFields` and `rootSearchFields` are not specified', () => {
         const result = getQueryParams({
           mappings,
           registry,
           search,
           searchFields: undefined,
+          rootSearchFields: undefined,
         });
         expectResult(result, expect.objectContaining({ lenient: true, fields: ['*'] }));
       });
 
       it('includes specified search fields for appropriate type/s', () => {
-        test(['title']);
+        test({ searchFields: ['title'] });
       });
 
       it('supports boosting', () => {
-        test(['title^3']);
+        test({ searchFields: ['title^3'] });
       });
 
-      it('supports multiple fields', () => {
-        test(['title, title.raw']);
+      it('supports multiple search fields', () => {
+        test({ searchFields: ['title, title.raw'] });
+      });
+
+      it('includes specified raw search fields', () => {
+        test({ rootSearchFields: ['_id'] });
+      });
+
+      it('supports multiple raw search fields', () => {
+        test({ rootSearchFields: ['_id', 'originId'] });
+      });
+
+      it('supports search fields and raw search fields', () => {
+        test({ searchFields: ['title'], rootSearchFields: ['_id'] });
       });
     });
 

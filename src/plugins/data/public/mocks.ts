@@ -61,7 +61,7 @@ const createStartContract = (): Start => {
     query: queryStartMock,
     ui: {
       IndexPatternSelect: jest.fn(),
-      SearchBar: jest.fn(),
+      SearchBar: jest.fn().mockReturnValue(null),
     },
     indexPatterns: ({
       createField: jest.fn(() => {}),
@@ -78,7 +78,7 @@ const createStartContract = (): Start => {
   };
 };
 
-export { createSearchSourceMock } from './search/mocks';
+export { createSearchSourceMock } from '../common/search/search_source/mocks';
 export { getCalculateAutoTimeExpression } from '../common/search/aggs';
 
 export const dataPluginMock = {

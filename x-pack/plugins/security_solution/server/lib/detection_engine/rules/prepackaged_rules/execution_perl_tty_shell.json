@@ -3,6 +3,7 @@
     "Elastic"
   ],
   "description": "Identifies when a terminal (tty) is spawned via Perl. Attackers may upgrade a simple reverse shell to a fully interactive tty after obtaining initial access to a host.",
+  "from": "now-9m",
   "index": [
     "auditbeat-*",
     "logs-endpoint.events.*"
@@ -16,7 +17,10 @@
   "severity": "high",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Execution"
   ],
   "threat": [
     {
@@ -29,12 +33,12 @@
       "technique": [
         {
           "id": "T1059",
-          "name": "Command-Line Interface",
+          "name": "Command and Scripting Interpreter",
           "reference": "https://attack.mitre.org/techniques/T1059/"
         }
       ]
     }
   ],
   "type": "query",
-  "version": 2
+  "version": 4
 }

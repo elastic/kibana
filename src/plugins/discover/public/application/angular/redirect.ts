@@ -24,10 +24,10 @@ getAngularModule().config(($routeProvider: any) => {
       const path = window.location.hash.substr(1);
       getUrlTracker().restorePreviousUrl();
       $rootScope.$applyAsync(() => {
-        const { kibanaLegacy } = getServices();
-        const { navigated } = kibanaLegacy.navigateToLegacyKibanaUrl(path);
+        const { urlForwarding } = getServices();
+        const { navigated } = urlForwarding.navigateToLegacyKibanaUrl(path);
         if (!navigated) {
-          kibanaLegacy.navigateToDefaultApp();
+          urlForwarding.navigateToDefaultApp();
         }
       });
       // prevent angular from completing the navigation

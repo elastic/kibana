@@ -11,7 +11,7 @@ import { getTransaction } from './get_transaction';
 import {
   SearchParamsMock,
   inspectSearchParams,
-} from '../../../public/utils/testHelpers';
+} from '../../utils/test_helpers';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { loggerMock } from '../../../../../../src/core/server/logging/logger.mock';
 
@@ -54,8 +54,8 @@ describe('transaction queries', () => {
         transactionName: undefined,
         transactionType: undefined,
         setup,
+        searchAggregatedTransactions: false,
         logger: loggerMock.create(),
-        uiFilters: {},
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -68,8 +68,8 @@ describe('transaction queries', () => {
         transactionName: 'bar',
         transactionType: undefined,
         setup,
+        searchAggregatedTransactions: false,
         logger: loggerMock.create(),
-        uiFilters: {},
       })
     );
     expect(mock.params).toMatchSnapshot();
@@ -82,8 +82,8 @@ describe('transaction queries', () => {
         transactionName: 'bar',
         transactionType: 'baz',
         setup,
+        searchAggregatedTransactions: false,
         logger: loggerMock.create(),
-        uiFilters: {},
       })
     );
 
@@ -99,6 +99,7 @@ describe('transaction queries', () => {
         traceId: 'qux',
         transactionId: 'quz',
         setup,
+        searchAggregatedTransactions: false,
       })
     );
 

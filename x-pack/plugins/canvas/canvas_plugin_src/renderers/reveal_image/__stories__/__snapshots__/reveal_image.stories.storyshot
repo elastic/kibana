@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots renderers/revealImage default 1`] = `
+<div
+  style={
+    Object {
+      "height": "200px",
+      "width": "200px",
+    }
+  }
+>
+   
+</div>
+`;

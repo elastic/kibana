@@ -13,8 +13,7 @@
 // Returned response contains a results property containing the requested aggregation.
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import each from 'lodash/each';
-import get from 'lodash/get';
+import { each, get } from 'lodash';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
@@ -32,13 +31,13 @@ export interface MetricData extends ResultResponse {
 
 export interface FieldDefinition {
   /**
-   * Partition field name.
+   * Field name.
    */
   name: string | number;
   /**
-   * Partitions field distinct values.
+   * Field distinct values.
    */
-  values: any[];
+  values: Array<{ value: any; maxRecordScore?: number }>;
 }
 
 type FieldTypes = 'partition_field' | 'over_field' | 'by_field';
@@ -70,7 +69,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       timeFieldName: string,
       earliestMs: number,
       latestMs: number,
-      interval: string
+      intervalMs: number
     ): Observable<MetricData> {
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, entity fields,
@@ -136,7 +135,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
           byTime: {
             date_histogram: {
               field: timeFieldName,
-              interval,
+              fixed_interval: `${intervalMs}ms`,
               min_doc_count: 0,
             },
           },
@@ -202,7 +201,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       criteriaFields: any[],
       earliestMs: number,
       latestMs: number,
-      interval: string,
+      intervalMs: number,
       aggType?: { min: any; max: any }
     ): Observable<ModelPlotOutput> {
       const obj: ModelPlotOutput = {
@@ -291,7 +290,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
               times: {
                 date_histogram: {
                   field: 'timestamp',
-                  interval,
+                  fixed_interval: `${intervalMs}ms`,
                   min_doc_count: 0,
                 },
                 aggs: {
@@ -403,7 +402,6 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       return mlApiServices.results
         .anomalySearch$({
           index: ML_RESULTS_INDEX_PATTERN,
-          rest_total_hits_as_int: true,
           size: maxResults !== undefined ? maxResults : 100,
           body: {
             query: {
@@ -428,7 +426,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
         })
         .pipe(
           map((resp) => {
-            if (resp.hits.total !== 0) {
+            if (resp.hits.total.value > 0) {
               each(resp.hits.hits, (hit: any) => {
                 obj.records.push(hit._source);
               });
@@ -446,7 +444,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       jobIds: string[] | undefined,
       earliestMs: number,
       latestMs: number,
-      interval: string,
+      intervalMs: number,
       maxJobs: number,
       maxEvents: number
     ): Observable<ScheduledEventsByBucket> {
@@ -518,7 +516,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
                   times: {
                     date_histogram: {
                       field: 'timestamp',
-                      interval,
+                      fixed_interval: `${intervalMs}ms`,
                       min_doc_count: 1,
                     },
                     aggs: {

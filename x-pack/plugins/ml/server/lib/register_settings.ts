@@ -7,7 +7,13 @@
 import { CoreSetup } from 'kibana/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
-import { FILE_DATA_VISUALIZER_MAX_FILE_SIZE } from '../../common/constants/settings';
+import {
+  FILE_DATA_VISUALIZER_MAX_FILE_SIZE,
+  ANOMALY_DETECTION_DEFAULT_TIME_RANGE,
+  ANOMALY_DETECTION_ENABLE_TIME_RANGE,
+  DEFAULT_AD_RESULTS_TIME_FILTER,
+  DEFAULT_ENABLE_AD_RESULTS_TIME_FILTER,
+} from '../../common/constants/settings';
 import { MAX_FILE_SIZE } from '../../common/constants/file_datavisualizer';
 
 export function registerKibanaSettings(coreSetup: CoreSetup) {
@@ -29,6 +35,41 @@ export function registerKibanaSettings(coreSetup: CoreSetup) {
           defaultMessage: 'Should be a valid data size. e.g. 200MB, 1GB',
         }),
       },
+    },
+    [ANOMALY_DETECTION_ENABLE_TIME_RANGE]: {
+      name: i18n.translate('xpack.ml.advancedSettings.enableAnomalyDetectionDefaultTimeRangeName', {
+        defaultMessage: 'Enable time filter defaults for anomaly detection results',
+      }),
+      value: DEFAULT_ENABLE_AD_RESULTS_TIME_FILTER,
+      schema: schema.boolean(),
+      description: i18n.translate(
+        'xpack.ml.advancedSettings.enableAnomalyDetectionDefaultTimeRangeDesc',
+        {
+          defaultMessage:
+            'Use the default time filter in the Single Metric Viewer and Anomaly Explorer. If not enabled, the results for the full time range of the job are displayed.',
+        }
+      ),
+      category: ['Machine Learning'],
+    },
+    [ANOMALY_DETECTION_DEFAULT_TIME_RANGE]: {
+      name: i18n.translate('xpack.ml.advancedSettings.anomalyDetectionDefaultTimeRangeName', {
+        defaultMessage: 'Time filter defaults for anomaly detection results',
+      }),
+      type: 'json',
+      value: JSON.stringify(DEFAULT_AD_RESULTS_TIME_FILTER, null, 2),
+      description: i18n.translate(
+        'xpack.ml.advancedSettings.anomalyDetectionDefaultTimeRangeDesc',
+        {
+          defaultMessage:
+            'The time filter selection to use when viewing anomaly detection job results.',
+        }
+      ),
+      schema: schema.object({
+        from: schema.string(),
+        to: schema.string(),
+      }),
+      requiresPageReload: true,
+      category: ['Machine Learning'],
     },
   });
 }

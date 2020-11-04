@@ -19,10 +19,11 @@
 
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
+import { mapToObject } from '@kbn/std';
+
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger } from '../logging';
-
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { InternalHttpServiceSetup } from '../http';
@@ -33,9 +34,9 @@ import {
   InternalUiSettingsServiceStart,
   UiSettingsParams,
 } from './types';
-import { mapToObject } from '../../utils/';
 import { uiSettingsType } from './saved_objects';
 import { registerRoutes } from './routes';
+import { getCoreSettings } from './settings';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -60,6 +61,8 @@ export class UiSettingsService
 
     savedObjects.registerType(uiSettingsType);
     registerRoutes(http.createRouter(''));
+    this.register(getCoreSettings());
+
     const config = await this.config$.pipe(first()).toPromise();
     this.overrides = config.overrides;
 

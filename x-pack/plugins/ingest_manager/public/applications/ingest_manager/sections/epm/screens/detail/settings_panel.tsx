@@ -10,8 +10,8 @@ import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
 import { InstallStatus, PackageInfo } from '../../../../types';
-import { useGetPackageConfigs } from '../../../../hooks';
-import { PACKAGE_CONFIG_SAVED_OBJECT_TYPE } from '../../../../constants';
+import { useGetPackagePolicies } from '../../../../hooks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../../constants';
 import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallationButton } from './installation_button';
 import { UpdateIcon } from '../../components/icons';
@@ -27,7 +27,7 @@ const UpdatesAvailableMsgContainer = styled.span`
 
 const NoteLabel = () => (
   <FormattedMessage
-    id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteLabel"
+    id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteLabel"
     defaultMessage="Note:"
   />
 );
@@ -35,7 +35,7 @@ const UpdatesAvailableMsg = () => (
   <UpdatesAvailableMsgContainer>
     <UpdateIcon size="l" />
     <FormattedMessage
-      id="xpack.ingestManager.integrations.settings.versionInfo.updatesAvailable"
+      id="xpack.fleet.integrations.settings.versionInfo.updatesAvailable"
       defaultMessage="Updates are available"
     />
   </UpdatesAvailableMsgContainer>
@@ -46,13 +46,13 @@ export const SettingsPanel = (
 ) => {
   const { name, title, removable, latestVersion, version } = props;
   const getPackageInstallStatus = useGetPackageInstallStatus();
-  const { data: packageConfigsData } = useGetPackageConfigs({
+  const { data: packagePoliciesData } = useGetPackagePolicies({
     perPage: 0,
     page: 1,
-    kuery: `${PACKAGE_CONFIG_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
+    kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${props.name}`,
   });
   const { status: installationStatus, version: installedVersion } = getPackageInstallStatus(name);
-  const packageHasUsages = !!packageConfigsData?.total;
+  const packageHasUsages = !!packagePoliciesData?.total;
   const updateAvailable = installedVersion && installedVersion < latestVersion ? true : false;
   const isViewingOldPackage = version < latestVersion;
   // hide install/remove options if the user has version of the package is installed
@@ -67,7 +67,7 @@ export const SettingsPanel = (
       <EuiTitle>
         <h3>
           <FormattedMessage
-            id="xpack.ingestManager.integrations.settings.packageSettingsTitle"
+            id="xpack.fleet.integrations.settings.packageSettingsTitle"
             defaultMessage="Settings"
           />
         </h3>
@@ -78,7 +78,7 @@ export const SettingsPanel = (
           <EuiTitle>
             <h4>
               <FormattedMessage
-                id="xpack.ingestManager.integrations.settings.packageVersionTitle"
+                id="xpack.fleet.integrations.settings.packageVersionTitle"
                 defaultMessage="{title} version"
                 values={{
                   title,
@@ -92,7 +92,7 @@ export const SettingsPanel = (
               <tr>
                 <SettingsTitleCell>
                   <FormattedMessage
-                    id="xpack.ingestManager.integrations.settings.versionInfo.installedVersion"
+                    id="xpack.fleet.integrations.settings.versionInfo.installedVersion"
                     defaultMessage="Installed version"
                   />
                 </SettingsTitleCell>
@@ -106,7 +106,7 @@ export const SettingsPanel = (
               <tr>
                 <SettingsTitleCell>
                   <FormattedMessage
-                    id="xpack.ingestManager.integrations.settings.versionInfo.latestVersion"
+                    id="xpack.fleet.integrations.settings.versionInfo.latestVersion"
                     defaultMessage="Latest version"
                   />
                 </SettingsTitleCell>
@@ -139,7 +139,7 @@ export const SettingsPanel = (
               <EuiTitle>
                 <h4>
                   <FormattedMessage
-                    id="xpack.ingestManager.integrations.settings.packageInstallTitle"
+                    id="xpack.fleet.integrations.settings.packageInstallTitle"
                     defaultMessage="Install {title}"
                     values={{
                       title,
@@ -150,7 +150,7 @@ export const SettingsPanel = (
               <EuiSpacer size="s" />
               <p>
                 <FormattedMessage
-                  id="xpack.ingestManager.integrations.settings.packageInstallDescription"
+                  id="xpack.fleet.integrations.settings.packageInstallDescription"
                   defaultMessage="Install this integration to setup Kibana and Elasticsearch assets designed for {title} data."
                   values={{
                     title,
@@ -163,7 +163,7 @@ export const SettingsPanel = (
               <EuiTitle>
                 <h4>
                   <FormattedMessage
-                    id="xpack.ingestManager.integrations.settings.packageUninstallTitle"
+                    id="xpack.fleet.integrations.settings.packageUninstallTitle"
                     defaultMessage="Uninstall {title}"
                     values={{
                       title,
@@ -174,7 +174,7 @@ export const SettingsPanel = (
               <EuiSpacer size="s" />
               <p>
                 <FormattedMessage
-                  id="xpack.ingestManager.integrations.settings.packageUninstallDescription"
+                  id="xpack.fleet.integrations.settings.packageUninstallDescription"
                   defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
                 />
               </p>
@@ -185,7 +185,7 @@ export const SettingsPanel = (
               <p>
                 <InstallationButton
                   {...props}
-                  disabled={!packageConfigsData || removable === false ? true : packageHasUsages}
+                  disabled={!packagePoliciesData || removable === false ? true : packageHasUsages}
                 />
               </p>
             </EuiFlexItem>
@@ -193,8 +193,8 @@ export const SettingsPanel = (
           {packageHasUsages && removable === true && (
             <p>
               <FormattedMessage
-                id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
-                defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent configurations."
+                id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
+                defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
                 values={{
                   title,
                   strongNote: (
@@ -209,7 +209,7 @@ export const SettingsPanel = (
           {removable === false && (
             <p>
               <FormattedMessage
-                id="xpack.ingestManager.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail"
+                id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail"
                 defaultMessage="{strongNote} The {title} integration is installed by default and cannot be removed."
                 values={{
                   title,

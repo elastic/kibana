@@ -12,6 +12,9 @@ Get a list of field objects for an index pattern that may contain wildcards
 getFieldsForWildcard(options: {
         pattern: string | string[];
         metaFields?: string[];
+        fieldCapsOptions?: {
+            allow_no_indices: boolean;
+        };
     }): Promise<FieldDescriptor[]>;
 ```
 
@@ -19,7 +22,7 @@ getFieldsForWildcard(options: {
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  options | <code>{</code><br/><code>        pattern: string &#124; string[];</code><br/><code>        metaFields?: string[];</code><br/><code>    }</code> |  |
+|  options | <code>{</code><br/><code>        pattern: string &#124; string[];</code><br/><code>        metaFields?: string[];</code><br/><code>        fieldCapsOptions?: {</code><br/><code>            allow_no_indices: boolean;</code><br/><code>        };</code><br/><code>    }</code> |  |
 
 <b>Returns:</b>
 

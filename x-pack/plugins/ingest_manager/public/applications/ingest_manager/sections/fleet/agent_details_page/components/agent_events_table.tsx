@@ -50,13 +50,13 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
     [key: string]: JSX.Element;
   }>({});
 
-  const { isLoading, data, sendRequest } = useGetOneAgentEvents(agent.id, {
+  const { isLoading, data, resendRequest } = useGetOneAgentEvents(agent.id, {
     page: pagination.currentPage,
     perPage: pagination.pageSize,
     kuery: search && search.trim() !== '' ? search.trim() : undefined,
   });
 
-  const refresh = () => sendRequest();
+  const refresh = () => resendRequest();
 
   const total = data ? data.total : 0;
   const list = data ? data.list : [];
@@ -78,7 +78,7 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
             <EuiText size="s">
               <strong>
                 <FormattedMessage
-                  id="xpack.ingestManager.agentEventsList.messageDetailsTitle"
+                  id="xpack.fleet.agentEventsList.messageDetailsTitle"
                   defaultMessage="Message"
                 />
               </strong>
@@ -92,7 +92,7 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
               <EuiText size="s">
                 <strong>
                   <FormattedMessage
-                    id="xpack.ingestManager.agentEventsList.payloadDetailsTitle"
+                    id="xpack.fleet.agentEventsList.payloadDetailsTitle"
                     defaultMessage="Payload"
                   />
                 </strong>
@@ -113,7 +113,7 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
   const columns = [
     {
       field: 'timestamp',
-      name: i18n.translate('xpack.ingestManager.agentEventsList.timestampColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentEventsList.timestampColumnTitle', {
         defaultMessage: 'Timestamp',
       }),
       render: (timestamp: string) => (
@@ -132,7 +132,7 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
     },
     {
       field: 'type',
-      name: i18n.translate('xpack.ingestManager.agentEventsList.typeColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentEventsList.typeColumnTitle', {
         defaultMessage: 'Type',
       }),
       width: '10%',
@@ -141,7 +141,7 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
     },
     {
       field: 'subtype',
-      name: i18n.translate('xpack.ingestManager.agentEventsList.subtypeColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentEventsList.subtypeColumnTitle', {
         defaultMessage: 'Subtype',
       }),
       width: '13%',
@@ -150,7 +150,7 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
     },
     {
       field: 'message',
-      name: i18n.translate('xpack.ingestManager.agentEventsList.messageColumnTitle', {
+      name: i18n.translate('xpack.fleet.agentEventsList.messageColumnTitle', {
         defaultMessage: 'Message',
       }),
       render: (value: string) => (
@@ -168,10 +168,10 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
           onClick={() => toggleDetails(agentEvent)}
           aria-label={
             itemIdToExpandedRowMap[agentEvent.id]
-              ? i18n.translate('xpack.ingestManager.agentEventsList.collapseDetailsAriaLabel', {
+              ? i18n.translate('xpack.fleet.agentEventsList.collapseDetailsAriaLabel', {
                   defaultMessage: 'Hide details',
                 })
-              : i18n.translate('xpack.ingestManager.agentEventsList.expandDetailsAriaLabel', {
+              : i18n.translate('xpack.fleet.agentEventsList.expandDetailsAriaLabel', {
                   defaultMessage: 'Show details',
                 })
           }
@@ -203,16 +203,15 @@ export const AgentEventsTable: React.FunctionComponent<{ agent: Agent }> = ({ ag
             value={search}
             onChange={setSearch}
             fieldPrefix={AGENT_EVENT_SAVED_OBJECT_TYPE}
-            placeholder={i18n.translate(
-              'xpack.ingestManager.agentEventsList.searchPlaceholderText',
-              { defaultMessage: 'Search for activity logs' }
-            )}
+            placeholder={i18n.translate('xpack.fleet.agentEventsList.searchPlaceholderText', {
+              defaultMessage: 'Search for activity logs',
+            })}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={null}>
           <EuiButton iconType="refresh" onClick={onClickRefresh}>
             <FormattedMessage
-              id="xpack.ingestManager.agentEventsList.refreshButton"
+              id="xpack.fleet.agentEventsList.refreshButton"
               defaultMessage="Refresh"
             />
           </EuiButton>

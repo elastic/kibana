@@ -6,10 +6,12 @@
 import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { DocLinksStart } from 'kibana/public';
+import { coreMock } from 'src/core/public/mocks';
 import EmailParamsFields from './email_params';
 
 describe('EmailParamsFields renders', () => {
   test('all params fields is rendered', () => {
+    const mocks = coreMock.createSetup();
     const actionParams = {
       cc: [],
       bcc: [],
@@ -17,6 +19,7 @@ describe('EmailParamsFields renders', () => {
       subject: 'test',
       message: 'test message',
     };
+
     const wrapper = mountWithIntl(
       <EmailParamsFields
         actionParams={actionParams}
@@ -24,8 +27,11 @@ describe('EmailParamsFields renders', () => {
         editAction={() => {}}
         index={0}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
       />
     );
+
     expect(wrapper.find('[data-test-subj="toEmailAddressInput"]').length > 0).toBeTruthy();
     expect(
       wrapper.find('[data-test-subj="toEmailAddressInput"]').first().prop('selectedOptions')

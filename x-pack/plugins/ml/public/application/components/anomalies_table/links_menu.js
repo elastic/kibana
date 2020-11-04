@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import cloneDeep from 'lodash/cloneDeep';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import rison from 'rison-node';
 import PropTypes from 'prop-types';
@@ -26,9 +26,10 @@ import { getFieldTypeFromMapping } from '../../services/mapping_service';
 import { ml } from '../../services/ml_api_service';
 import { mlJobService } from '../../services/job_service';
 import { getUrlForRecord, openCustomUrlWindow } from '../../util/custom_url_utils';
-import { formatHumanReadableDateTimeSeconds } from '../../util/date_utils';
+import { formatHumanReadableDateTimeSeconds } from '../../../../common/util/date_utils';
 import { getIndexPatternIdFromName } from '../../util/index_utils';
 import { replaceStringTokens } from '../../util/string_utils';
+import { ML_APP_URL_GENERATOR, ML_PAGES } from '../../../../common/constants/ml_url_generator';
 /*
  * Component for rendering the links menu inside a cell in the anomalies table.
  */
@@ -142,7 +143,16 @@ class LinksMenuUI extends Component {
     }
   };
 
-  viewSeries = () => {
+  viewSeries = async () => {
+    const {
+      services: {
+        share: {
+          urlGenerators: { getUrlGenerator },
+        },
+      },
+    } = this.props.kibana;
+    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+
     const record = this.props.anomaly.source;
     const bounds = this.props.bounds;
     const from = bounds.min.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
@@ -171,44 +181,34 @@ class LinksMenuUI extends Component {
       entityCondition[record.by_field_name] = record.by_field_value;
     }
 
-    // Use rison to build the URL .
-    const _g = rison.encode({
-      ml: {
+    const singleMetricViewerLink = await mlUrlGenerator.createUrl({
+      excludeBasePath: false,
+      page: ML_PAGES.SINGLE_METRIC_VIEWER,
+      pageState: {
         jobIds: [record.job_id],
-      },
-      refreshInterval: {
-        display: 'Off',
-        pause: false,
-        value: 0,
-      },
-      time: {
-        from: from,
-        to: to,
-        mode: 'absolute',
-      },
-    });
-
-    const _a = rison.encode({
-      mlTimeSeriesExplorer: {
+        refreshInterval: {
+          display: 'Off',
+          pause: true,
+          value: 0,
+        },
+        timeRange: {
+          from: from,
+          to: to,
+          mode: 'absolute',
+        },
         zoom: {
           from: zoomFrom,
           to: zoomTo,
         },
         detectorIndex: record.detector_index,
         entities: entityCondition,
-      },
-      query: {
         query_string: {
           analyze_wildcard: true,
           query: '*',
         },
       },
     });
-
-    // Need to encode the _a parameter in case any entities contain unsafe characters such as '+'.
-    let path = '#/timeseriesexplorer';
-    path += `?_g=${_g}&_a=${encodeURIComponent(_a)}`;
-    window.open(path, '_blank');
+    window.open(singleMetricViewerLink, '_blank');
   };
 
   viewExamples = () => {
@@ -302,7 +302,7 @@ class LinksMenuUI extends Component {
           const _g = rison.encode({
             refreshInterval: {
               display: 'Off',
-              pause: false,
+              pause: true,
               value: 0,
             },
             time: {
@@ -390,6 +390,7 @@ class LinksMenuUI extends Component {
           defaultMessage: 'Select action for anomaly at {time}',
           values: { time: formatHumanReadableDateTimeSeconds(anomaly.time) },
         })}
+        data-test-subj="mlAnomaliesListRowActionsButton"
       />
     );
 
@@ -404,6 +405,7 @@ class LinksMenuUI extends Component {
               this.closePopover();
               this.openCustomUrl(customUrl);
             }}
+            data-test-subj={`mlAnomaliesListRowActionCustomUrlButton_${index}`}
           >
             {customUrl.url_name}
           </EuiContextMenuItem>
@@ -415,11 +417,12 @@ class LinksMenuUI extends Component {
       items.push(
         <EuiContextMenuItem
           key="view_series"
-          icon="stats"
+          icon="visLine"
           onClick={() => {
             this.closePopover();
             this.viewSeries();
           }}
+          data-test-subj="mlAnomaliesListRowActionViewSeriesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.viewSeriesLabel"
@@ -438,6 +441,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.viewExamples();
           }}
+          data-test-subj="mlAnomaliesListRowActionViewExamplesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.viewExamplesLabel"
@@ -456,6 +460,7 @@ class LinksMenuUI extends Component {
             this.closePopover();
             this.props.showRuleEditorFlyout(anomaly);
           }}
+          data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.configureRulesLabel"
@@ -473,7 +478,7 @@ class LinksMenuUI extends Component {
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel items={items} />
+        <EuiContextMenuPanel items={items} data-test-subj="mlAnomaliesListRowActionsMenu" />
       </EuiPopover>
     );
   }

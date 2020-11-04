@@ -162,22 +162,22 @@ describe('resolved args reducer', () => {
         resolvedArgs: {
           'element-1': {
             expressionContext: {
-              '1': {
+              1: {
                 state: 'ready',
                 value: 'test-1',
                 error: null,
               },
-              '2': {
+              2: {
                 state: 'ready',
                 value: 'test-2',
                 error: null,
               },
-              '3': {
+              3: {
                 state: 'ready',
                 value: 'test-3',
                 error: null,
               },
-              '4': {
+              4: {
                 state: 'ready',
                 value: 'test-4',
                 error: null,

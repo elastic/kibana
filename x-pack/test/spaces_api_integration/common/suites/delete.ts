@@ -5,7 +5,7 @@
  */
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
-import { getUrlPrefix } from '../lib/space_test_utils';
+import { getTestScenariosForSpace } from '../lib/space_test_utils';
 import { MULTI_NAMESPACE_SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { DescribeFn, TestDefinitionAuthentication } from '../lib/types';
 
@@ -130,7 +130,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
 
     expect(buckets).to.eql(expectedBuckets);
 
-    // There were seven multi-namespace objects.
+    // There were eleven multi-namespace objects.
     // Since Space 2 was deleted, any multi-namespace objects that existed in that space
     // are updated to remove it, and of those, any that don't exist in any space are deleted.
     const multiNamespaceResponse = await es.search({
@@ -138,16 +138,13 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
       body: { query: { terms: { type: ['sharedtype'] } } },
     });
     const docs: [Record<string, any>] = multiNamespaceResponse.hits.hits;
-    expect(docs).length(6); // just six results, since spaces_2_only got deleted
-    Object.values(CASES).forEach(({ id, existingNamespaces }) => {
-      const remainingNamespaces = existingNamespaces.filter((x) => x !== 'space_2');
-      const doc = docs.find((x) => x._id === `sharedtype:${id}`);
-      if (remainingNamespaces.length > 0) {
-        expect(doc?._source?.namespaces).to.eql(remainingNamespaces);
-      } else {
-        expect(doc).to.be(undefined);
-      }
+    expect(docs).length(10); // just ten results, since spaces_2_only got deleted
+    docs.forEach((doc) => () => {
+      const containsSpace2 = doc?._source?.namespaces.includes('space_2');
+      expect(containsSpace2).to.eql(false);
     });
+    const space2OnlyObjExists = docs.some((x) => x._id === CASES.SPACE_2_ONLY);
+    expect(space2OnlyObjExists).to.eql(false);
   };
 
   const expectNotFound = (resp: { [key: string]: any }) => {
@@ -179,7 +176,7 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
     { user = {}, spaceId, tests }: DeleteTestDefinition
   ) => {
     describeFn(description, () => {
-      before(async () => {
+      beforeEach(async () => {
         await esArchiver.load('saved_objects/spaces');
 
         // since we want to verify that we only delete the right things
@@ -192,33 +189,35 @@ export function deleteTestSuiteFactory(es: any, esArchiver: any, supertest: Supe
           .auth(user.username, user.password)
           .expect(200);
       });
-      after(() => esArchiver.unload('saved_objects/spaces'));
+      afterEach(() => esArchiver.unload('saved_objects/spaces'));
 
-      it(`should return ${tests.exists.statusCode}`, async () => {
-        return supertest
-          .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/space_2`)
-          .auth(user.username, user.password)
-          .expect(tests.exists.statusCode)
-          .then(tests.exists.response);
-      });
-
-      describe(`when the space is reserved`, () => {
-        it(`should return ${tests.reservedSpace.statusCode}`, async () => {
+      getTestScenariosForSpace(spaceId).forEach(({ urlPrefix, scenario }) => {
+        it(`should return ${tests.exists.statusCode} ${scenario}`, async () => {
           return supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/default`)
+            .delete(`${urlPrefix}/api/spaces/space/space_2`)
             .auth(user.username, user.password)
-            .expect(tests.reservedSpace.statusCode)
-            .then(tests.reservedSpace.response);
+            .expect(tests.exists.statusCode)
+            .then(tests.exists.response);
         });
-      });
 
-      describe(`when the space doesn't exist`, () => {
-        it(`should return ${tests.doesntExist.statusCode}`, async () => {
-          return supertest
-            .delete(`${getUrlPrefix(spaceId)}/api/spaces/space/space_3`)
-            .auth(user.username, user.password)
-            .expect(tests.doesntExist.statusCode)
-            .then(tests.doesntExist.response);
+        describe(`when the space is reserved`, () => {
+          it(`should return ${tests.reservedSpace.statusCode} ${scenario}`, async () => {
+            return supertest
+              .delete(`${urlPrefix}/api/spaces/space/default`)
+              .auth(user.username, user.password)
+              .expect(tests.reservedSpace.statusCode)
+              .then(tests.reservedSpace.response);
+          });
+        });
+
+        describe(`when the space doesn't exist`, () => {
+          it(`should return ${tests.doesntExist.statusCode} ${scenario}`, async () => {
+            return supertest
+              .delete(`${urlPrefix}/api/spaces/space/space_3`)
+              .auth(user.username, user.password)
+              .expect(tests.doesntExist.statusCode)
+              .then(tests.doesntExist.response);
+          });
         });
       });
     });

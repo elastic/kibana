@@ -14,10 +14,11 @@ export const help: FunctionHelp<FunctionFactory<typeof location>> = {
     defaultMessage:
       'Find your current location using the {geolocationAPI} of the browser. ' +
       'Performance can vary, but is fairly accurate. ' +
-      'See {url}.',
+      'See {url}. Don’t use {locationFn} if you plan to generate PDFs as this function requires user input.',
     values: {
       geolocationAPI: 'Geolocation API',
       url: 'https://developer.mozilla.org/en-US/docs/Web/API/Navigator/geolocation',
+      locationFn: '`location`',
     },
   }),
   args: {},

@@ -72,4 +72,15 @@ $euiSizeML: $euiSize * 1.25; // 20px - between medium and large ¯\_(ツ)_/¯
       }
     }
   }
+
+  &__subNav {
+    padding-left: $euiSizeML;
+
+    // Extends the click area of links more to the left, so that second tiers
+    // of subnavigation links still have the same hitbox as first tier links
+    .enterpriseSearchNavLinks__item {
+      margin-left: -$euiSizeML;
+      padding-left: $euiSizeXXL;
+    }
+  }
 }

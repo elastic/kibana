@@ -38,10 +38,6 @@ module.exports = {
         'src/plugins/data/public/expressions/interpreter'
       ),
       'kbn/interpreter': path.resolve(KIBANA_ROOT, 'packages/kbn-interpreter/target/common'),
-      'types/interpreter': path.resolve(
-        KIBANA_ROOT,
-        'src/legacy/core_plugins/interpreter/public/types'
-      ),
       tinymath: path.resolve(KIBANA_ROOT, 'node_modules/tinymath/lib/tinymath.es5.js'),
       core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/core_app/images'),
     },

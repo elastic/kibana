@@ -32,15 +32,15 @@ export const OverviewIntegrationSection: React.FC = () => {
   return (
     <EuiFlexItem component="section">
       <OverviewPanel
-        title={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelTitle', {
+        title={i18n.translate('xpack.fleet.overviewPageIntegrationsPanelTitle', {
           defaultMessage: 'Integrations',
         })}
-        tooltip={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelTooltip', {
+        tooltip={i18n.translate('xpack.fleet.overviewPageIntegrationsPanelTooltip', {
           defaultMessage:
-            'Browse and install integrations for the Elastic Stack. Add integrations to your agent configurations to start sending data.',
+            'Browse and install integrations for the Elastic Stack. Add integrations to your agent policies to start sending data.',
         })}
         linkTo={getHref('integrations_all')}
-        linkToText={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelAction', {
+        linkToText={i18n.translate('xpack.fleet.overviewPageIntegrationsPanelAction', {
           defaultMessage: 'View integrations',
         })}
       >
@@ -51,7 +51,7 @@ export const OverviewIntegrationSection: React.FC = () => {
             <>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewIntegrationsTotalTitle"
+                  id="xpack.fleet.overviewIntegrationsTotalTitle"
                   defaultMessage="Total available"
                 />
               </EuiDescriptionListTitle>
@@ -60,7 +60,7 @@ export const OverviewIntegrationSection: React.FC = () => {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewIntegrationsInstalledTitle"
+                  id="xpack.fleet.overviewIntegrationsInstalledTitle"
                   defaultMessage="Installed"
                 />
               </EuiDescriptionListTitle>
@@ -69,7 +69,7 @@ export const OverviewIntegrationSection: React.FC = () => {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewIntegrationsUpdatesAvailableTitle"
+                  id="xpack.fleet.overviewIntegrationsUpdatesAvailableTitle"
                   defaultMessage="Updates available"
                 />
               </EuiDescriptionListTitle>

@@ -34,7 +34,7 @@ export type ExpressionFunctionVar = ExpressionFunctionDefinition<
 export const variable: ExpressionFunctionVar = {
   name: 'var',
   help: i18n.translate('expressions.functions.var.help', {
-    defaultMessage: 'Updates kibana global context',
+    defaultMessage: 'Updates the Kibana global context.',
   }),
   args: {
     name: {
@@ -42,7 +42,7 @@ export const variable: ExpressionFunctionVar = {
       aliases: ['_'],
       required: true,
       help: i18n.translate('expressions.functions.var.name.help', {
-        defaultMessage: 'Specify name of the variable',
+        defaultMessage: 'Specify the name of the variable.',
       }),
     },
   },

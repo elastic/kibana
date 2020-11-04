@@ -7,7 +7,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { FlowTarget, GetIpOverviewQuery, HostEcsFields } from '../../../graphql/types';
 import { TestProviders } from '../../../common/mock';
 import '../../../common/mock/match_media';
 import { getEmptyValue } from '../../../common/components/empty_value';
@@ -23,10 +22,10 @@ import {
   DEFAULT_MORE_MAX_HEIGHT,
   MoreContainer,
 } from './field_renderers';
-import { mockData } from '../../../network/components/ip_overview/mock';
+import { mockData } from '../../../network/components/details/mock';
 import { useMountAppended } from '../../../common/utils/use_mount_appended';
-
-type AutonomousSystem = GetIpOverviewQuery.AutonomousSystem;
+import { AutonomousSystem, FlowTarget } from '../../../../common/search_strategy';
+import { HostEcs } from '../../../../common/ecs/host';
 
 describe('Field Renderers', () => {
   const mount = useMountAppended();
@@ -98,15 +97,15 @@ describe('Field Renderers', () => {
   });
 
   describe('#hostIdRenderer', () => {
-    const emptyIdHost: Partial<HostEcsFields> = {
+    const emptyIdHost: Partial<HostEcs> = {
       name: ['test'],
-      id: null,
+      id: undefined,
       ip: ['10.10.10.10'],
     };
-    const emptyIpHost: Partial<HostEcsFields> = {
+    const emptyIpHost: Partial<HostEcs> = {
       name: ['test'],
       id: ['test'],
-      ip: null,
+      ip: undefined,
     };
     test('it renders correctly against snapshot', () => {
       const wrapper = shallow(hostNameRenderer(mockData.complete.host, '10.10.10.10'));
@@ -136,18 +135,18 @@ describe('Field Renderers', () => {
   });
 
   describe('#hostNameRenderer', () => {
-    const emptyIdHost: Partial<HostEcsFields> = {
+    const emptyIdHost: Partial<HostEcs> = {
       name: ['test'],
-      id: null,
+      id: undefined,
       ip: ['10.10.10.10'],
     };
-    const emptyIpHost: Partial<HostEcsFields> = {
+    const emptyIpHost: Partial<HostEcs> = {
       name: ['test'],
       id: ['test'],
-      ip: null,
+      ip: undefined,
     };
-    const emptyNameHost: Partial<HostEcsFields> = {
-      name: null,
+    const emptyNameHost: Partial<HostEcs> = {
+      name: undefined,
       id: ['test'],
       ip: ['10.10.10.10'],
     };

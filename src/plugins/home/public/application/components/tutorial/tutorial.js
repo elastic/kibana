@@ -201,26 +201,18 @@ class TutorialUi extends React.Component {
    * @return {Promise<string>}
    */
   fetchEsHitsStatus = async (esHitsCheckConfig) => {
-    const searchHeader = JSON.stringify({ index: esHitsCheckConfig.index });
-    const searchBody = JSON.stringify({ query: esHitsCheckConfig.query, size: 1 });
-    const response = await fetch(this.props.addBasePath('/elasticsearch/_msearch'), {
-      method: 'post',
-      body: `${searchHeader}\n${searchBody}\n`,
-      headers: {
-        accept: 'application/json',
-        'content-type': 'application/x-ndjson',
-        'kbn-xsrf': 'kibana',
-      },
-      credentials: 'same-origin',
-    });
-
-    if (response.status > 300) {
+    const { http } = getServices();
+    try {
+      const response = await http.post('/api/home/hits_status', {
+        body: JSON.stringify({
+          index: esHitsCheckConfig.index,
+          query: esHitsCheckConfig.query,
+        }),
+      });
+      return response.count > 0 ? StatusCheckStates.HAS_DATA : StatusCheckStates.NO_DATA;
+    } catch (e) {
       return StatusCheckStates.ERROR;
     }
-
-    const results = await response.json();
-    const numHits = _.get(results, 'responses.[0].hits.hits.length', 0);
-    return numHits === 0 ? StatusCheckStates.NO_DATA : StatusCheckStates.HAS_DATA;
   };
 
   renderInstructionSetsToggle = () => {
@@ -253,6 +245,9 @@ class TutorialUi extends React.Component {
               idSelected={this.state.visibleInstructions}
               onChange={this.setVisibleInstructions}
               color="primary"
+              legend={i18n.translate('home.tutorial.selectionLegend', {
+                defaultMessage: 'Deployment type',
+              })}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

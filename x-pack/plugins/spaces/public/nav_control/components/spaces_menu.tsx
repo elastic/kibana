@@ -184,6 +184,7 @@ class SpacesMenuUI extends Component<Props, State> {
     return (
       <EuiContextMenuItem
         key={space.id}
+        data-test-subj={`${space.id}-gotoSpace`}
         icon={icon}
         href={addSpaceIdToPath(this.props.serverBasePath, space.id, ENTER_SPACE_PATH)}
         toolTipTitle={space.description && space.name}

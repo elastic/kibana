@@ -8,39 +8,18 @@ import { pick, transform, uniq } from 'lodash';
 import { ILegacyClusterClient, KibanaRequest } from '../../../../../src/core/server';
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
-import { HasPrivilegesResponse, HasPrivilegesResponseApplication } from './types';
+import {
+  HasPrivilegesResponse,
+  HasPrivilegesResponseApplication,
+  CheckPrivilegesPayload,
+  CheckPrivileges,
+  CheckPrivilegesResponse,
+} from './types';
 import { validateEsPrivilegeResponse } from './validate_es_response';
 
 interface CheckPrivilegesActions {
   login: string;
   version: string;
-}
-
-export interface CheckPrivilegesResponse {
-  hasAllRequested: boolean;
-  username: string;
-  privileges: Array<{
-    /**
-     * If this attribute is undefined, this element is a privilege for the global resource.
-     */
-    resource?: string;
-    privilege: string;
-    authorized: boolean;
-  }>;
-}
-
-export type CheckPrivilegesWithRequest = (request: KibanaRequest) => CheckPrivileges;
-
-export interface CheckPrivileges {
-  atSpace(
-    spaceId: string,
-    privilegeOrPrivileges: string | string[]
-  ): Promise<CheckPrivilegesResponse>;
-  atSpaces(
-    spaceIds: string[],
-    privilegeOrPrivileges: string | string[]
-  ): Promise<CheckPrivilegesResponse>;
-  globally(privilegeOrPrivileges: string | string[]): Promise<CheckPrivilegesResponse>;
 }
 
 export function checkPrivilegesWithRequestFactory(
@@ -59,17 +38,26 @@ export function checkPrivilegesWithRequestFactory(
   return function checkPrivilegesWithRequest(request: KibanaRequest): CheckPrivileges {
     const checkPrivilegesAtResources = async (
       resources: string[],
-      privilegeOrPrivileges: string | string[]
+      privileges: CheckPrivilegesPayload
     ): Promise<CheckPrivilegesResponse> => {
-      const privileges = Array.isArray(privilegeOrPrivileges)
-        ? privilegeOrPrivileges
-        : [privilegeOrPrivileges];
-      const allApplicationPrivileges = uniq([actions.version, actions.login, ...privileges]);
+      const kibanaPrivileges = Array.isArray(privileges.kibana)
+        ? privileges.kibana
+        : privileges.kibana
+        ? [privileges.kibana]
+        : [];
+      const allApplicationPrivileges = uniq([actions.version, actions.login, ...kibanaPrivileges]);
 
       const hasPrivilegesResponse = (await clusterClient
         .asScoped(request)
         .callAsCurrentUser('shield.hasPrivileges', {
           body: {
+            cluster: privileges.elasticsearch?.cluster,
+            index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
+              ([names, indexPrivileges]) => ({
+                names,
+                privileges: indexPrivileges,
+              })
+            ),
             applications: [
               { application: applicationName, resources, privileges: allApplicationPrivileges },
             ],
@@ -85,6 +73,27 @@ export function checkPrivilegesWithRequestFactory(
 
       const applicationPrivilegesResponse = hasPrivilegesResponse.application[applicationName];
 
+      const clusterPrivilegesResponse = hasPrivilegesResponse.cluster ?? {};
+
+      const clusterPrivileges = Object.entries(clusterPrivilegesResponse).map(
+        ([privilege, authorized]) => ({
+          privilege,
+          authorized,
+        })
+      );
+
+      const indexPrivileges = Object.entries(hasPrivilegesResponse.index ?? {}).reduce<
+        CheckPrivilegesResponse['privileges']['elasticsearch']['index']
+      >((acc, [index, indexResponse]) => {
+        return {
+          ...acc,
+          [index]: Object.entries(indexResponse).map(([privilege, authorized]) => ({
+            privilege,
+            authorized,
+          })),
+        };
+      }, {});
+
       if (hasIncompatibleVersion(applicationPrivilegesResponse)) {
         throw new Error(
           'Multiple versions of Kibana are running against the same Elasticsearch cluster, unable to authorize user.'
@@ -93,7 +102,7 @@ export function checkPrivilegesWithRequestFactory(
 
       // we need to filter out the non requested privileges from the response
       const resourcePrivileges = transform(applicationPrivilegesResponse, (result, value, key) => {
-        result[key!] = pick(value, privileges);
+        result[key!] = pick(value, privileges.kibana ?? []);
       }) as HasPrivilegesResponseApplication;
       const privilegeArray = Object.entries(resourcePrivileges)
         .map(([key, val]) => {
@@ -111,23 +120,29 @@ export function checkPrivilegesWithRequestFactory(
       return {
         hasAllRequested: hasPrivilegesResponse.has_all_requested,
         username: hasPrivilegesResponse.username,
-        privileges: privilegeArray,
+        privileges: {
+          kibana: privilegeArray,
+          elasticsearch: {
+            cluster: clusterPrivileges,
+            index: indexPrivileges,
+          },
+        },
       };
     };
 
     return {
-      async atSpace(spaceId: string, privilegeOrPrivileges: string | string[]) {
+      async atSpace(spaceId: string, privileges: CheckPrivilegesPayload) {
         const spaceResource = ResourceSerializer.serializeSpaceResource(spaceId);
-        return await checkPrivilegesAtResources([spaceResource], privilegeOrPrivileges);
+        return await checkPrivilegesAtResources([spaceResource], privileges);
       },
-      async atSpaces(spaceIds: string[], privilegeOrPrivileges: string | string[]) {
+      async atSpaces(spaceIds: string[], privileges: CheckPrivilegesPayload) {
         const spaceResources = spaceIds.map((spaceId) =>
           ResourceSerializer.serializeSpaceResource(spaceId)
         );
-        return await checkPrivilegesAtResources(spaceResources, privilegeOrPrivileges);
+        return await checkPrivilegesAtResources(spaceResources, privileges);
       },
-      async globally(privilegeOrPrivileges: string | string[]) {
-        return await checkPrivilegesAtResources([GLOBAL_RESOURCE], privilegeOrPrivileges);
+      async globally(privileges: CheckPrivilegesPayload) {
+        return await checkPrivilegesAtResources([GLOBAL_RESOURCE], privileges);
       },
     };
   };
