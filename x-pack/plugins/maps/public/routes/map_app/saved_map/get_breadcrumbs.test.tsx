@@ -20,7 +20,7 @@ test('should get breadcrumbs "Maps / mymap"', () => {
   expect(breadcrumbs[1].text).toBe('mymap');
 });
 
-test('should get breadcrumbs "Dashboard / Maps / mymap" with originatingApp', () => {
+test('should get breadcrumbs "Dashboard / mymap" with originatingApp', () => {
   const breadcrumbs = getBreadcrumbs({
     title: 'mymap',
     getHasUnsavedChanges,
@@ -29,8 +29,7 @@ test('should get breadcrumbs "Dashboard / Maps / mymap" with originatingApp', ()
       return 'Dashboard';
     },
   });
-  expect(breadcrumbs.length).toBe(3);
+  expect(breadcrumbs.length).toBe(2);
   expect(breadcrumbs[0].text).toBe('Dashboard');
-  expect(breadcrumbs[1].text).toBe('Maps');
-  expect(breadcrumbs[2].text).toBe('mymap');
+  expect(breadcrumbs[1].text).toBe('mymap');
 });

@@ -39,24 +39,24 @@ export function getBreadcrumbs({
       },
       text: getAppNameFromId(originatingApp),
     });
-  }
-
-  breadcrumbs.push({
-    text: getAppTitle(),
-    onClick: async () => {
-      if (getHasUnsavedChanges()) {
-        const confirmed = await getCoreOverlays().openConfirm(unsavedChangesWarning, {
-          title: unsavedChangesTitle,
-          'data-test-subj': 'appLeaveConfirmModal',
-        });
-        if (confirmed) {
+  } else {
+    breadcrumbs.push({
+      text: getAppTitle(),
+      onClick: async () => {
+        if (getHasUnsavedChanges()) {
+          const confirmed = await getCoreOverlays().openConfirm(unsavedChangesWarning, {
+            title: unsavedChangesTitle,
+            'data-test-subj': 'appLeaveConfirmModal',
+          });
+          if (confirmed) {
+            goToSpecifiedPath('/');
+          }
+        } else {
           goToSpecifiedPath('/');
         }
-      } else {
-        goToSpecifiedPath('/');
-      }
-    },
-  });
+      },
+    });
+  }
 
   breadcrumbs.push({ text: title });
 
