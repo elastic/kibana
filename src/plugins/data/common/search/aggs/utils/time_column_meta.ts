@@ -56,7 +56,7 @@ export const getDateMetaByDatatableColumn = ({
       ? calculateAutoTimeExpression(appliedTimeRange)
       : params.interval;
 
-  if (!interval) {
+  if (!interval || interval === 'auto') {
     throw new Error('time interval could not be determined');
   }
 
