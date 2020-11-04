@@ -12,7 +12,7 @@
     "kbn:bootstrap": "yarn build",
     "watch": "yarn build --watch"
   },
-  "dependencies": {
+  "devDependencies": {
     "@kbn/dev-utils": "link:../kbn-dev-utils"
   }
 }
