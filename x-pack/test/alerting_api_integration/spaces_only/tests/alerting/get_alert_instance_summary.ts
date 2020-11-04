@@ -173,6 +173,42 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
       });
     });
 
+    it('handles muted instances that are active', async () => {
+      const pattern = {
+        instanceA: [true, true, true, true],
+      };
+
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            alertTypeId: 'test.patternFiring',
+            params: { pattern },
+            schedule: { interval: '1s' },
+          })
+        )
+        .expect(200);
+      objectRemover.add(Spaces.space1.id, createdAlert.id, 'alert', 'alerts');
+      await alertUtils.muteInstance(createdAlert.id, 'instanceA');
+
+      await waitForEvents(createdAlert.id, ['active-instance']);
+      const response = await supertest.get(
+        `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
+      );
+
+      const actualInstances = response.body.instances;
+      const expectedInstances = {
+        instanceA: {
+          status: 'Active',
+          muted: true,
+          actionGroupId: 'default',
+          activeStartDate: actualInstances.instanceA.activeStartDate,
+        },
+      };
+      expect(actualInstances).to.eql(expectedInstances);
+    });
+
     it('handles alert errors', async () => {
       const dateNow = Date.now();
       const { body: createdAlert } = await supertest
@@ -226,6 +262,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         instanceA: {
           status: 'Active',
           muted: false,
+          actionGroupId: 'default',
           activeStartDate: actualInstances.instanceA.activeStartDate,
         },
         instanceB: {
@@ -235,6 +272,7 @@ export default function createGetAlertInstanceSummaryTests({ getService }: FtrPr
         instanceC: {
           status: 'Active',
           muted: true,
+          actionGroupId: 'default',
           activeStartDate: actualInstances.instanceC.activeStartDate,
         },
         instanceD: {

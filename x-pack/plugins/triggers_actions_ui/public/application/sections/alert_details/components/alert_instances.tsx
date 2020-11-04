@@ -57,7 +57,8 @@ export const alertInstancesTableColumns = (
     render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
       return (
         <EuiHealth color={value.healthColor}>
-          {value.label} {value.actionGroup ? `(${value.actionGroup})` : null}
+          {value.label}
+          {value.actionGroup ? ` (${value.actionGroup})` : null}
         </EuiHealth>
       );
     },
