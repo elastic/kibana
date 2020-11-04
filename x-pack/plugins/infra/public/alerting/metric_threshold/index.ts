@@ -17,6 +17,9 @@ export function createMetricThresholdAlertType(): AlertTypeModel {
     name: i18n.translate('xpack.infra.metrics.alertFlyout.alertName', {
       defaultMessage: 'Metric threshold',
     }),
+    description: i18n.translate('xpack.infra.metrics.alertFlyout.alertDescription', {
+      defaultMessage: 'Alert when the metrics aggregation exceeds the threshold.',
+    }),
     iconClass: 'bell',
     alertParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,

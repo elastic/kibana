@@ -164,6 +164,11 @@ Content is fetched from the remote (https://feeds.elastic.co and https://feeds-s
 |WARNING: Missing README.
 
 
+|{kib-repo}blob/{branch}/src/plugins/saved_objects_tagging_oss/README.md[savedObjectsTaggingOss]
+|Bridge plugin for consumption of the saved object tagging feature from
+oss plugins.
+
+
 |{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
 |securityOss is responsible for educating users about Elastic's free security features,
 so they can properly protect the data within their clusters.
@@ -468,6 +473,10 @@ Elastic.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/runtime_fields/README.md[runtimeFields]
 |Welcome to the home of the runtime field editor and everything related to runtime fields!
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/saved_objects_tagging/README.md[savedObjectsTagging]
+|Add tagging capability to saved objects
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler/README.md[searchprofiler]
