@@ -46,7 +46,12 @@ export const ActionsPopoverComponent = ({
           iconType="arrowDown"
           iconSide="right"
         >
-          Integrations
+          {i18n.translate(
+            'xpack.uptime.monitorList.observabilityInvestigateColumn.popoverIconButton.label',
+            {
+              defaultMessage: 'Investigate',
+            }
+          )}
         </EuiButton>
       }
       closePopover={() => togglePopoverIsVisible({ id: popoverId, open: false })}

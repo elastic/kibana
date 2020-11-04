@@ -1,43 +1,35 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`MonitorStatusRow component renders status row when status is down 1`] = `
-<Fragment>
-  <EuiHealth
-    color="#bd271e"
+<span>
+  <EuiBadge
+    color="danger"
   >
-    <FormattedMessage
-      defaultMessage="Down in {locations}"
-      id="xpack.uptime.monitorList.drawer.locations.statusDown"
-      values={
-        Object {
-          "locations": "Berlin, Islamabad, London",
-        }
-      }
-    />
-  </EuiHealth>
+    Down
+  </EuiBadge>
+  <EuiSpacer
+    size="s"
+  />
+  Berlin, Islamabad, London
   <EuiSpacer
     size="xs"
   />
-</Fragment>
+</span>
 `;
 
 exports[`MonitorStatusRow component renders status row when status is up 1`] = `
-<Fragment>
-  <EuiHealth
-    color="#bd271e"
+<span>
+  <EuiBadge
+    color="danger"
   >
-    <FormattedMessage
-      defaultMessage="Down in {locations}"
-      id="xpack.uptime.monitorList.drawer.locations.statusDown"
-      values={
-        Object {
-          "locations": "Berlin, Islamabad, London",
-        }
-      }
-    />
-  </EuiHealth>
+    Up
+  </EuiBadge>
+  <EuiSpacer
+    size="s"
+  />
+  Berlin, Islamabad, London
   <EuiSpacer
     size="xs"
   />
-</Fragment>
+</span>
 `;

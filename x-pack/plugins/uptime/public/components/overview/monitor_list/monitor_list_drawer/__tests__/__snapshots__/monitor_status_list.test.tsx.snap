@@ -2,18 +2,24 @@
 
 exports[`MonitorStatusList component renders checks 1`] = `
 <Fragment>
-  <MonitorStatusRow
-    locationNames={
-      Set {
-        "Unnamed-location",
+  <EuiFlexGroup
+    style={
+      Object {
+        "maxWidth": 1000,
       }
     }
-    status="down"
-  />
-  <MonitorStatusRow
-    locationNames={Set {}}
-    status="up"
-  />
+  >
+    <EuiFlexItem>
+      <MonitorStatusRow
+        locationNames={
+          Set {
+            "Unnamed-location",
+          }
+        }
+        status="down"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
   <EuiSpacer
     size="s"
   />
@@ -38,18 +44,24 @@ exports[`MonitorStatusList component renders checks 1`] = `
 
 exports[`MonitorStatusList component renders null in place of child status with missing ip 1`] = `
 <Fragment>
-  <MonitorStatusRow
-    locationNames={
-      Set {
-        "Unnamed-location",
+  <EuiFlexGroup
+    style={
+      Object {
+        "maxWidth": 1000,
       }
     }
-    status="down"
-  />
-  <MonitorStatusRow
-    locationNames={Set {}}
-    status="up"
-  />
+  >
+    <EuiFlexItem>
+      <MonitorStatusRow
+        locationNames={
+          Set {
+            "Unnamed-location",
+          }
+        }
+        status="down"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
   <EuiSpacer
     size="s"
   />
