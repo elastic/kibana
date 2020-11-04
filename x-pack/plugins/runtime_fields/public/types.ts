@@ -11,6 +11,7 @@ import { OpenRuntimeFieldEditorProps } from './load_editor';
 export interface LoadEditorResponse {
   openEditor(props: OpenRuntimeFieldEditorProps): void;
 }
+
 export interface PluginSetup {
   loadEditor(): Promise<LoadEditorResponse>;
 }

@@ -7,11 +7,20 @@
 import { CoreSetup } from 'src/core/public';
 import { coreMock } from 'src/core/public/mocks';
 
+jest.mock('../../../../src/plugins/kibana_react/public', () => {
+  const original = jest.requireActual('../../../../src/plugins/kibana_react/public');
+
+  return {
+    ...original,
+    toMountPoint: (node: React.ReactNode) => node,
+  };
+});
+
 import { StartPlugins, PluginStart } from './types';
+import { RuntimeFieldEditorFlyoutContent } from './components';
 import { RuntimeFieldsPlugin } from './plugin';
 
 describe('RuntimeFieldsPlugin', () => {
-  const noop = () => {};
   let coreSetup: CoreSetup<StartPlugins, PluginStart>;
   let plugin: RuntimeFieldsPlugin;
 
@@ -33,6 +42,8 @@ describe('RuntimeFieldsPlugin', () => {
 
   test('should call core.overlays.openFlyout when opening the editor', async () => {
     const openFlyout = jest.fn();
+    const onSaveSpy = jest.fn();
+
     const mockCore = {
       overlays: {
         openFlyout,
@@ -43,8 +54,19 @@ describe('RuntimeFieldsPlugin', () => {
     const setupApi = await plugin.setup(coreSetup, {});
     const { openEditor } = await setupApi.loadEditor();
 
-    openEditor({ onSave: noop });
+    openEditor({ onSave: onSaveSpy });
 
     expect(openFlyout).toHaveBeenCalled();
+
+    const [[arg]] = openFlyout.mock.calls;
+    expect(arg.props.children.type).toBe(RuntimeFieldEditorFlyoutContent);
+
+    // We force call the "onSave" prop from the <RuntimeFieldEditorFlyoutContent /> component
+    // and make sure that the the spy is being called.
+    // Note: we are testing implementation details, if we change or rename the "onSave" prop on
+    // the component, we will need to update this test accordingly.
+    expect(arg.props.children.props.onSave).toBeDefined();
+    arg.props.children.props.onSave();
+    expect(onSaveSpy).toHaveBeenCalled();
   });
 });
