@@ -252,7 +252,9 @@ export const AlertForm = ({
       {alertTypeModel?.description && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiText color="subdued">{alertTypeModel.description}</EuiText>
+            <EuiText color="subdued" data-test-subj="alertDescription">
+              {alertTypeModel.description}
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
@@ -262,6 +264,7 @@ export const AlertForm = ({
             <EuiLink
               external
               target="_blank"
+              data-test-subj="alertDocumentationLink"
               href={
                 typeof alertTypeModel.documentationUrl === 'function'
                   ? alertTypeModel.documentationUrl(docLinks)

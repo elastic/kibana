@@ -31,8 +31,8 @@ describe('alert_form', () => {
     id: 'my-alert-type',
     iconClass: 'test',
     name: 'test-alert',
-    description: 'test',
-    documentationUrl: null,
+    description: 'Alert when testing',
+    documentationUrl: 'https://localhost.local/docs',
     validate: (): ValidationResult => {
       return { errors: {} };
     },
@@ -183,6 +183,22 @@ describe('alert_form', () => {
         '[data-test-subj=".server-log-ActionTypeSelectOption"]'
       );
       expect(alertTypeSelectOptions.exists()).toBeFalsy();
+    });
+
+    it('renders alert type description', async () => {
+      await setup();
+      wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
+      const alertDescription = wrapper.find('[data-test-subj="alertDescription"]');
+      expect(alertDescription.exists()).toBeTruthy();
+      expect(alertDescription.first().text()).toBe('Alert when testing');
+    });
+
+    it('renders alert type documentation link', async () => {
+      await setup();
+      wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
+      const alertDocumentationLink = wrapper.find('[data-test-subj="alertDocumentationLink"]');
+      expect(alertDocumentationLink.exists()).toBeTruthy();
+      expect(alertDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
     });
   });
 
@@ -426,6 +442,20 @@ describe('alert_form', () => {
       throttleField.at(1).simulate('change', { target: { value: newThrottle } });
       const throttleFieldAfterUpdate = wrapper.find('[data-test-subj="throttleInput"]');
       expect(throttleFieldAfterUpdate.at(1).prop('value')).toEqual(newThrottle);
+    });
+
+    it('renders alert type description', async () => {
+      await setup();
+      const alertDescription = wrapper.find('[data-test-subj="alertDescription"]');
+      expect(alertDescription.exists()).toBeTruthy();
+      expect(alertDescription.first().text()).toBe('Alert when testing');
+    });
+
+    it('renders alert type documentation link', async () => {
+      await setup();
+      const alertDocumentationLink = wrapper.find('[data-test-subj="alertDocumentationLink"]');
+      expect(alertDocumentationLink.exists()).toBeTruthy();
+      expect(alertDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
     });
   });
 });
