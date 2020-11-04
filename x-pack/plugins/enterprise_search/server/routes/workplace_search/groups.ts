@@ -244,13 +244,3 @@ export function registerBoostsGroupRoute({
     }
   );
 }
-
-export function registerGroupRoutes(dependencies: IRouteDependencies) {
-  registerGroupsRoute(dependencies);
-  registerSearchGroupsRoute(dependencies);
-  registerGroupRoute(dependencies);
-  registerGroupUsersRoute(dependencies);
-  registerShareGroupRoute(dependencies);
-  registerAssignGroupRoute(dependencies);
-  registerBoostsGroupRoute(dependencies);
-}

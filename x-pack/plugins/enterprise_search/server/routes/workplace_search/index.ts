@@ -7,9 +7,23 @@
 import { IRouteDependencies } from '../../plugin';
 
 import { registerOverviewRoute } from './overview';
-import { registerGroupRoutes } from './groups';
+import {
+  registerGroupsRoute,
+  registerSearchGroupsRoute,
+  registerGroupRoute,
+  registerGroupUsersRoute,
+  registerShareGroupRoute,
+  registerAssignGroupRoute,
+  registerBoostsGroupRoute,
+} from './groups';
 
 export const registerWorkplaceSearchRoutes = (dependencies: IRouteDependencies) => {
   registerOverviewRoute(dependencies);
-  registerGroupRoutes(dependencies);
+  registerGroupsRoute(dependencies);
+  registerSearchGroupsRoute(dependencies);
+  registerGroupRoute(dependencies);
+  registerGroupUsersRoute(dependencies);
+  registerShareGroupRoute(dependencies);
+  registerAssignGroupRoute(dependencies);
+  registerBoostsGroupRoute(dependencies);
 };
