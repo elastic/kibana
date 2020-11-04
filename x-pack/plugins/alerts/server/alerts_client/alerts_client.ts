@@ -13,7 +13,6 @@ import {
   SavedObjectReference,
   SavedObject,
   PluginInitializerContext,
-  SavedObjectsFindResult,
 } from 'src/core/server';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
@@ -28,10 +27,7 @@ import {
   SanitizedAlert,
   AlertTaskState,
   AlertInstanceSummary,
-  AlertsHealth,
   AlertExecutionStatusValues,
-  AlertExecutionStatusErrorReasons,
-  HealthStatus,
 } from '../types';
 import { validateAlertTypeParams, alertExecutionStatusFromRaw } from '../lib';
 import {
