@@ -246,6 +246,7 @@ function getNumericalFields(fields: Field[]): Field[] {
   return fields.filter(
     (f) =>
       f.type === ES_FIELD_TYPES.LONG ||
+      f.type === ES_FIELD_TYPES.UNSIGNED_LONG ||
       f.type === ES_FIELD_TYPES.INTEGER ||
       f.type === ES_FIELD_TYPES.SHORT ||
       f.type === ES_FIELD_TYPES.BYTE ||
