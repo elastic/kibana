@@ -5,16 +5,11 @@
  */
 
 import '../../../../__mocks__/kea.mock';
+import { mockTelemetryActions } from '../../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
-
-jest.mock('../../../../shared/telemetry', () => ({
-  sendTelemetry: jest.fn(),
-  SendAppSearchTelemetry: jest.fn(),
-}));
-import { sendTelemetry } from '../../../../shared/telemetry';
 
 import { EmptyState } from './';
 
@@ -31,7 +26,6 @@ describe('EmptyState', () => {
     const button = prompt.find(EuiButton);
 
     button.simulate('click');
-    expect(sendTelemetry).toHaveBeenCalled();
-    (sendTelemetry as jest.Mock).mockClear();
+    expect(mockTelemetryActions.sendAppSearchTelemetry).toHaveBeenCalled();
   });
 });
