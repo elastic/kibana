@@ -249,7 +249,11 @@ export class IndexPatternsService {
     try {
       const fields = await this.getFieldsForIndexPattern(indexPattern);
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
-      indexPattern.fields.replaceAll([...fields, ...scripted]);
+      indexPattern.resetFieldAttributes();
+      const fieldsWithSavedAttrs = Object.values(
+        this.fieldArrayToMap(fields, indexPattern.fieldAttributes)
+      );
+      indexPattern.fields.replaceAll([...fieldsWithSavedAttrs, ...scripted]);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -279,7 +283,7 @@ export class IndexPatternsService {
   ) => {
     const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
-      const newFields = await this.getFieldsForWildcard(options);
+      const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
       return this.fieldArrayToMap([...newFields, ...scriptdFields]);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
@@ -333,6 +337,7 @@ export class IndexPatternsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedAttributes = attributes ? JSON.parse(attributes) : {};
 
     return {
       id,
@@ -341,10 +346,11 @@ export class IndexPatternsService {
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
-      fields: this.fieldArrayToMap(parsedFields, attributes?.fields),
+      fields: this.fieldArrayToMap(parsedFields, parsedAttributes?.fields),
       typeMeta: parsedTypeMeta,
       type,
       fieldFormats: parsedFieldFormatMap,
+      fieldAttributes: parsedAttributes?.fields,
     };
   };
 
@@ -403,7 +409,9 @@ export class IndexPatternsService {
     spec.fieldFormats = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
-    spec.attributes = savedObject.attributes.attributes;
+    spec.fieldAttributes = savedObject.attributes.attributes
+      ? JSON.parse(savedObject.attributes.attributes)
+      : {};
 
     const indexPattern = await this.create(spec, true);
     indexPatternCache.set(id, indexPattern);

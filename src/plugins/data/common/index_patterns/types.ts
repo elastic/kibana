@@ -48,7 +48,7 @@ export interface IndexPatternAttributes {
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
-  attributes?: IndexPatternAttrs;
+  attributes?: string;
 }
 
 /**
@@ -189,7 +189,7 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
-  attributes?: IndexPatternAttrs;
+  fieldAttributes?: IndexPatternAttrs['fields'];
 }
 
 export interface SourceFilter {
