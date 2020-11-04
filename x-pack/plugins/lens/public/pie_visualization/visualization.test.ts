@@ -4,14 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pieVisualization } from './visualization';
+import { getPieVisualization } from './visualization';
 import { PieVisualizationState } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { DatasourcePublicAPI, FramePublicAPI } from '../types';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
 
 jest.mock('../id_generator');
 
 const LAYER_ID = 'l1';
+
+const pieVisualization = getPieVisualization({
+  paletteService: chartPluginMock.createPaletteRegistry(),
+});
 
 function exampleState(): PieVisualizationState {
   return {
