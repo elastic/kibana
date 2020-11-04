@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { Datatable } from 'src/plugins/expressions';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
   Visualization,
@@ -49,6 +50,7 @@ export function getSuggestions({
   visualizationState,
   field,
   visualizeTriggerFieldContext,
+  activeData,
 }: {
   datasourceMap: Record<string, Datasource>;
   datasourceStates: Record<
@@ -64,6 +66,7 @@ export function getSuggestions({
   visualizationState: unknown;
   field?: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
+  activeData?: Record<string, Datatable>;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
     ([datasourceId]) => datasourceStates[datasourceId] && !datasourceStates[datasourceId].isLoading
@@ -84,7 +87,8 @@ export function getSuggestions({
         dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(datasourceState, field);
       } else {
         dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
-          datasourceState
+          datasourceState,
+          activeData
         );
       }
       return dataSourceSuggestions.map((suggestion) => ({ ...suggestion, datasourceId }));

@@ -171,20 +171,15 @@ export interface Datasource<T = unknown, P = unknown> {
 
   toExpression: (state: T, layerId: string) => Ast | string | null;
 
-  getDatasourceSuggestionsForField: (
-    state: T,
-    field: unknown,
-    activeData?: Record<string, KibanaDatatable>
-  ) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsForField: (state: T, field: unknown) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsForVisualizeField: (
     state: T,
     indexPatternId: string,
-    fieldName: string,
-    activeData?: Record<string, KibanaDatatable>
+    fieldName: string
   ) => Array<DatasourceSuggestion<T>>;
   getDatasourceSuggestionsFromCurrentState: (
     state: T,
-    activeData?: Record<string, KibanaDatatable>
+    activeData?: Record<string, Datatable>
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
@@ -237,6 +232,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   columnId: string;
   onRemove?: (accessor: string) => void;
   state: T;
+  activeData?: Record<string, Datatable>;
 };
 
 // The only way a visualization has to restrict the query building
@@ -244,20 +240,18 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   setState: StateSetter<T>;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
-  activeData?: Record<string, KibanaDatatable>;
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
   dragDropContext: DragContextState;
   onClick: () => void;
-  activeData?: Record<string, KibanaDatatable>;
 };
 
 export interface DatasourceLayerPanelProps<T> {
   layerId: string;
   state: T;
   setState: StateSetter<T>;
-  activeData?: Record<string, KibanaDatatable>;
+  activeData?: Record<string, Datatable>;
 }
 
 export interface DraggedOperation {
@@ -281,7 +275,7 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   columnId: string;
   state: T;
   setState: StateSetter<T>;
-  activeData?: Record<string, KibanaDatatable>;
+  activeData?: Record<string, Datatable>; // TODO wire up
   dragDropContext: DragContextState;
   isReorder?: boolean;
 };
@@ -442,7 +436,7 @@ export interface FramePublicAPI {
    * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
    * If accessing, make sure to check whether expected columns actually exist.
    */
-  activeData?: Record<string, KibanaDatatable>;
+  activeData?: Record<string, Datatable>; // TODO wire up
 
   dateRange: DateRange;
   query: Query;

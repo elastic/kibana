@@ -311,6 +311,7 @@ function getTopSuggestion(
     activeVisualizationId: props.visualizationId,
     visualizationState: props.visualizationState,
     subVisualizationId,
+    activeData: props.framePublicAPI.activeData,
   });
   const suggestions = unfilteredSuggestions.filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations

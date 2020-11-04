@@ -27,7 +27,7 @@ export const mergeTables: ExpressionFunctionDefinition<
   ExpressionValueSearchContext | null,
   MergeTables,
   LensMultiTable,
-  ExecutionContext<unknown, LensInspectorAdapters>
+  ExecutionContext<LensInspectorAdapters>
 > = {
   name: 'lens_merge_tables',
   type: 'lens_multitable',
