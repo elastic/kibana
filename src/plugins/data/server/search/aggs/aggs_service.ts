@@ -19,11 +19,7 @@
 
 import { pick } from 'lodash';
 
-import {
-  UiSettingsServiceStart,
-  SavedObjectsClientContract,
-  ElasticsearchClient,
-} from 'src/core/server';
+import { UiSettingsServiceStart, SavedObjectsClientContract } from 'src/core/server';
 import { ExpressionsServiceSetup } from 'src/plugins/expressions/common';
 import {
   AggsCommonService,
@@ -69,10 +65,7 @@ export class AggsService {
 
   public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
     return {
-      asScopedToClient: async (
-        savedObjectsClient: SavedObjectsClientContract,
-        elasticsearchClient: ElasticsearchClient
-      ) => {
+      asScopedToClient: async (savedObjectsClient: SavedObjectsClientContract) => {
         const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
         const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 
@@ -89,9 +82,8 @@ export class AggsService {
           types,
         } = this.aggsCommonService.start({
           getConfig,
-          getIndexPattern: (
-            await indexPatterns.indexPatternsServiceFactory(savedObjectsClient, elasticsearchClient)
-          ).get,
+          getIndexPattern: (await indexPatterns.indexPatternsServiceFactory(savedObjectsClient))
+            .get,
           isDefaultTimezone,
         });
 

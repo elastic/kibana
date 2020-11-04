@@ -36,34 +36,12 @@ export class IndexPatternsTestPlugin
   public setup(core: CoreSetup<IndexPatternsTestStartDeps>) {
     const router = core.http.createRouter();
 
-    router.post(
-      {
-        path: '/api/index-patterns-plugin/create',
-        validate: {
-          body: schema.object({}, { unknowns: 'allow' }),
-        },
-      },
-      async (context, req, res) => {
-        const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
-        const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
-        );
-        const ids = await service.createAndSave(req.body);
-        return res.ok({ body: ids });
-      }
-    );
-
     router.get(
       { path: '/api/index-patterns-plugin/get-all', validate: false },
       async (context, req, res) => {
-        const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
+        const [{ savedObjects }, { data }] = await core.getStartServices();
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
-        );
+        const service = await data.indexPatterns.indexPatternsServiceFactory(savedObjectsClient);
         const ids = await service.getIds();
         return res.ok({ body: ids });
       }
@@ -80,12 +58,9 @@ export class IndexPatternsTestPlugin
       },
       async (context, req, res) => {
         const id = (req.params as Record<string, string>).id;
-        const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
+        const [{ savedObjects }, { data }] = await core.getStartServices();
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
-        );
+        const service = await data.indexPatterns.indexPatternsServiceFactory(savedObjectsClient);
         const ip = await service.get(id);
         return res.ok({ body: ip.toSpec() });
       }
@@ -101,13 +76,10 @@ export class IndexPatternsTestPlugin
         },
       },
       async (context, req, res) => {
-        const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
+        const [{ savedObjects }, { data }] = await core.getStartServices();
         const id = (req.params as Record<string, string>).id;
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
-        );
+        const service = await data.indexPatterns.indexPatternsServiceFactory(savedObjectsClient);
         const ip = await service.get(id);
         await service.updateSavedObject(ip);
         return res.ok();
@@ -124,13 +96,10 @@ export class IndexPatternsTestPlugin
         },
       },
       async (context, req, res) => {
-        const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
+        const [{ savedObjects }, { data }] = await core.getStartServices();
         const id = (req.params as Record<string, string>).id;
         const savedObjectsClient = savedObjects.getScopedClient(req);
-        const service = await data.indexPatterns.indexPatternsServiceFactory(
-          savedObjectsClient,
-          elasticsearch.client.asScoped(req).asCurrentUser
-        );
+        const service = await data.indexPatterns.indexPatternsServiceFactory(savedObjectsClient);
         await service.delete(id);
         return res.ok();
       }

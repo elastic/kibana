@@ -25,30 +25,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
   // skipping the tests as it deletes index patterns created by other test causing unexpected failures
   // https://github.com/elastic/kibana/issues/79886
-  describe('index patterns', function () {
+  describe.skip('index patterns', function () {
     let indexPatternId = '';
-
-    it('can create an index pattern', async () => {
-      const title = 'shakes*';
-      const fieldFormats = { bytes: { id: 'bytes' } };
-      const body = await (
-        await supertest
-          .post('/api/index-patterns-plugin/create')
-          .set('kbn-xsrf', 'anything')
-          .send({ title, fieldFormats })
-          .expect(200)
-      ).body;
-
-      indexPatternId = body.id;
-      expect(body.id).not.empty();
-      expect(body.title).to.equal(title);
-      expect(body.fields.length).to.equal(15);
-      expect(body.fieldFormatMap).to.eql(fieldFormats);
-    });
 
     it('can get all ids', async () => {
       const body = await (await supertest.get('/api/index-patterns-plugin/get-all').expect(200))
         .body;
+      indexPatternId = body[0];
       expect(body.length > 0).to.equal(true);
     });
 

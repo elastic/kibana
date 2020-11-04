@@ -28,7 +28,6 @@
 
 |  Function | Description |
 |  --- | --- |
-|  [getCapabilitiesForRollupIndices(indices)](./kibana-plugin-plugins-data-server.getcapabilitiesforrollupindices.md) |  |
 |  [getDefaultSearchParams(uiSettingsClient)](./kibana-plugin-plugins-data-server.getdefaultsearchparams.md) |  |
 |  [getShardTimeout(config)](./kibana-plugin-plugins-data-server.getshardtimeout.md) |  |
 |  [getTime(indexPattern, timeRange, options)](./kibana-plugin-plugins-data-server.gettime.md) |  |
@@ -59,6 +58,7 @@
 |  [PluginSetup](./kibana-plugin-plugins-data-server.pluginsetup.md) |  |
 |  [PluginStart](./kibana-plugin-plugins-data-server.pluginstart.md) |  |
 |  [RefreshInterval](./kibana-plugin-plugins-data-server.refreshinterval.md) |  |
+|  [SearchStrategyDependencies](./kibana-plugin-plugins-data-server.searchstrategydependencies.md) |  |
 |  [SearchUsage](./kibana-plugin-plugins-data-server.searchusage.md) |  |
 |  [TabbedAggColumn](./kibana-plugin-plugins-data-server.tabbedaggcolumn.md) | \* |
 |  [TabbedTable](./kibana-plugin-plugins-data-server.tabbedtable.md) | \* |
@@ -77,7 +77,6 @@
 |  [esQuery](./kibana-plugin-plugins-data-server.esquery.md) |  |
 |  [fieldFormats](./kibana-plugin-plugins-data-server.fieldformats.md) |  |
 |  [indexPatterns](./kibana-plugin-plugins-data-server.indexpatterns.md) |  |
-|  [mergeCapabilitiesWithFields](./kibana-plugin-plugins-data-server.mergecapabilitieswithfields.md) |  |
 |  [search](./kibana-plugin-plugins-data-server.search.md) |  |
 |  [UI\_SETTINGS](./kibana-plugin-plugins-data-server.ui_settings.md) |  |
 
