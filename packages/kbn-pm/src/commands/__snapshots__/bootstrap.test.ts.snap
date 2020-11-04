@@ -6,28 +6,22 @@ Array [
     Map {
       "kibana" => Project {
         "allDependencies": Object {
-          "bar": "1.0.0",
+          "bar": "link:packages/bar",
         },
         "devDependencies": Object {},
-        "isWorkspaceProject": false,
-        "isWorkspaceRoot": true,
+        "isSinglePackageJsonProject": true,
         "json": Object {
           "dependencies": Object {
-            "bar": "1.0.0",
+            "bar": "link:packages/bar",
           },
           "name": "kibana",
           "version": "1.0.0",
-          "workspaces": Object {
-            "packages": Array [
-              "packages/*",
-            ],
-          },
         },
         "nodeModulesLocation": "<repoRoot>/packages/kbn-pm/src/commands/node_modules",
         "packageJsonLocation": "<repoRoot>/packages/kbn-pm/src/commands/package.json",
         "path": "<repoRoot>/packages/kbn-pm/src/commands",
         "productionDependencies": Object {
-          "bar": "1.0.0",
+          "bar": "link:packages/bar",
         },
         "scripts": Object {},
         "targetLocation": "<repoRoot>/packages/kbn-pm/src/commands/target",
@@ -36,8 +30,7 @@ Array [
       "bar" => Project {
         "allDependencies": Object {},
         "devDependencies": Object {},
-        "isWorkspaceProject": false,
-        "isWorkspaceRoot": false,
+        "isSinglePackageJsonProject": false,
         "json": Object {
           "name": "bar",
           "scripts": Object {
@@ -61,8 +54,7 @@ Array [
         Project {
           "allDependencies": Object {},
           "devDependencies": Object {},
-          "isWorkspaceProject": false,
-          "isWorkspaceRoot": false,
+          "isSinglePackageJsonProject": false,
           "json": Object {
             "name": "bar",
             "scripts": Object {
@@ -96,8 +88,7 @@ Array [
       "pkg": Project {
         "allDependencies": Object {},
         "devDependencies": Object {},
-        "isWorkspaceProject": false,
-        "isWorkspaceRoot": false,
+        "isSinglePackageJsonProject": false,
         "json": Object {
           "name": "bar",
           "scripts": Object {
@@ -145,14 +136,6 @@ exports[`handles dependencies of dependencies: install in dir 1`] = `
 Array [
   Array [
     "<repoRoot>/packages/kbn-pm/src/commands",
-    Array [],
-  ],
-  Array [
-    "<repoRoot>/packages/kbn-pm/src/commands/packages/bar",
-    Array [],
-  ],
-  Array [
-    "<repoRoot>/packages/kbn-pm/src/commands/packages/foo",
     Array [],
   ],
 ]

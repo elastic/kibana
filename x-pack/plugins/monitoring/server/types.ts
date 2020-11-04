@@ -34,14 +34,14 @@ export interface MonitoringElasticsearchConfig {
 }
 
 export interface PluginsSetup {
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
   telemetryCollectionManager?: TelemetryCollectionManagerPluginSetup;
   usageCollection?: UsageCollectionSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetupContract;
-  alerts: AlertingPluginSetupContract;
+  alerts?: AlertingPluginSetupContract;
   infra: InfraPluginSetup;
-  cloud: CloudSetup;
+  cloud?: CloudSetup;
 }
 
 export interface PluginsStart {
@@ -56,7 +56,7 @@ export interface MonitoringCoreConfig {
 export interface RouteDependencies {
   router: IRouter;
   licenseService: MonitoringLicenseService;
-  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface MonitoringCore {
@@ -91,7 +91,7 @@ export interface LegacyRequest {
     };
     newPlatform: {
       setup: {
-        plugins: PluginsStart;
+        plugins: PluginsSetup;
       };
     };
     plugins: {

@@ -15,7 +15,7 @@ import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel'
 import { Visualization, OperationMetadata, VisualizationType } from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
 import { isHorizontalChart } from './state_helpers';
-import { toExpression, toPreviewExpression } from './to_expression';
+import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
@@ -154,15 +154,28 @@ export const xyVisualization: Visualization<State> = {
     );
   },
 
-  getConfiguration(props) {
-    const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
+  getConfiguration({ state, frame, layerId }) {
+    const layer = state.layers.find((l) => l.layerId === layerId);
+    if (!layer) {
+      return { groups: [] };
+    }
+
+    const datasource = frame.datasourceLayers[layer.layerId];
+
+    const sortedAccessors = getSortedAccessors(datasource, layer);
+
+    const isHorizontal = isHorizontalChart(state.layers);
     return {
       groups: [
         {
           groupId: 'x',
-          groupLabel: i18n.translate('xpack.lens.xyChart.xAxisLabel', {
-            defaultMessage: 'X-axis',
-          }),
+          groupLabel: isHorizontal
+            ? i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
+                defaultMessage: 'Vertical axis',
+              })
+            : i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
+                defaultMessage: 'Horizontal axis',
+              }),
           accessors: layer.xAccessor ? [layer.xAccessor] : [],
           filterOperations: isBucketed,
           suggestedPriority: 1,
@@ -172,10 +185,14 @@ export const xyVisualization: Visualization<State> = {
         },
         {
           groupId: 'y',
-          groupLabel: i18n.translate('xpack.lens.xyChart.yAxisLabel', {
-            defaultMessage: 'Y-axis',
-          }),
-          accessors: layer.accessors,
+          groupLabel: isHorizontal
+            ? i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
+                defaultMessage: 'Horizontal axis',
+              })
+            : i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
+                defaultMessage: 'Vertical axis',
+              }),
+          accessors: sortedAccessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
           required: true,

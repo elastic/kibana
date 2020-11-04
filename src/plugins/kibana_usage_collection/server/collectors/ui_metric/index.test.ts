@@ -21,6 +21,7 @@ import { savedObjectsRepositoryMock } from '../../../../../core/server/mocks';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
+  createCollectorFetchContextMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerUiMetricUsageCollector } from './';
@@ -36,7 +37,7 @@ describe('telemetry_ui_metric', () => {
 
   const getUsageCollector = jest.fn();
   const registerType = jest.fn();
-  const callCluster = jest.fn();
+  const mockedFetchContext = createCollectorFetchContextMock();
 
   beforeAll(() =>
     registerUiMetricUsageCollector(usageCollectionMock, registerType, getUsageCollector)
@@ -47,7 +48,7 @@ describe('telemetry_ui_metric', () => {
   });
 
   test('if no savedObjectClient initialised, return undefined', async () => {
-    expect(await collector.fetch(callCluster)).toBeUndefined();
+    expect(await collector.fetch(mockedFetchContext)).toBeUndefined();
   });
 
   test('when savedObjectClient is initialised, return something', async () => {
@@ -61,7 +62,7 @@ describe('telemetry_ui_metric', () => {
     );
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
-    expect(await collector.fetch(callCluster)).toStrictEqual({});
+    expect(await collector.fetch(mockedFetchContext)).toStrictEqual({});
     expect(savedObjectClient.bulkCreate).not.toHaveBeenCalled();
   });
 
@@ -85,7 +86,7 @@ describe('telemetry_ui_metric', () => {
 
     getUsageCollector.mockImplementation(() => savedObjectClient);
 
-    expect(await collector.fetch(callCluster)).toStrictEqual({
+    expect(await collector.fetch(mockedFetchContext)).toStrictEqual({
       testAppName: [
         { key: 'testKeyName1', value: 3 },
         { key: 'testKeyName2', value: 5 },

@@ -25,6 +25,8 @@ import {
   EmbeddableFactoryDefinition,
   IContainer,
   EmbeddableFactory,
+  EmbeddableStart,
+  AttributeService,
 } from '../../../../src/plugins/embeddable/public';
 import {
   BookEmbeddable,
@@ -38,11 +40,10 @@ import {
   SavedObjectsClientContract,
   SimpleSavedObject,
 } from '../../../../src/core/public';
-import { DashboardStart, AttributeService } from '../../../../src/plugins/dashboard/public';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
 
 interface StartServices {
-  getAttributeService: DashboardStart['getAttributeService'];
+  getAttributeService: EmbeddableStart['getAttributeService'];
   openModal: OverlayStart['openModal'];
   savedObjectsClient: SavedObjectsClientContract;
   overlays: OverlayStart;
@@ -132,16 +133,12 @@ export class BookEmbeddableFactoryDefinition
     return { ...savedObject.attributes };
   }
 
-  private async saveMethod(
-    type: string,
-    attributes: BookSavedObjectAttributes,
-    savedObjectId?: string
-  ) {
+  private async saveMethod(attributes: BookSavedObjectAttributes, savedObjectId?: string) {
     const { savedObjectsClient } = await this.getStartServices();
     if (savedObjectId) {
-      return savedObjectsClient.update(type, savedObjectId, attributes);
+      return savedObjectsClient.update(this.type, savedObjectId, attributes);
     }
-    return savedObjectsClient.create(type, attributes);
+    return savedObjectsClient.create(this.type, attributes);
   }
 
   private async checkForDuplicateTitleMethod(props: OnSaveProps): Promise<true> {

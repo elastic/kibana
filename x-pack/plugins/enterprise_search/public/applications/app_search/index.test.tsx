@@ -112,18 +112,14 @@ describe('AppSearchNav', () => {
     setMockValues({ myRole: { canViewSettings: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as/settings/account'
-    );
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/settings/account');
   });
 
   it('renders the Credentials link', () => {
     setMockValues({ myRole: { canViewAccountCredentials: true } });
     const wrapper = shallow(<AppSearchNav />);
 
-    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual(
-      'http://localhost:3002/as/credentials'
-    );
+    expect(wrapper.find(SideNavLink).last().prop('to')).toEqual('/credentials');
   });
 
   it('renders the Role Mappings link', () => {

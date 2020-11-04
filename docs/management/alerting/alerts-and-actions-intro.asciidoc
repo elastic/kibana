@@ -6,8 +6,8 @@ beta[]
 
 The *Alerts and Actions* UI lets you <<alert-management, see and control all the alerts>> in a space, and provides tools to <<connector-management, create and manage connectors>> so that alerts can trigger actions like notification, indexing, and ticketing.
 
-To manage alerting and connectors, open the menu,
-then go to *Stack Management > Alerts and Insights > Alerts and Actions*.
+To manage alerting and connectors, open the main menu,
+then click *Stack Management > Alerts and Insights > Alerts and Actions*.
 
 [role="screenshot"]
 image:management/alerting/images/alerts-and-actions-ui.png[Example alert listing in the Alerts and Actions UI]
@@ -24,3 +24,8 @@ The *Alerts and Actions* UI only shows alerts and connectors for the current spa
 can be managed through the <<watcher-ui, Watcher UI>>. See
 <<alerting-concepts-differences>> for more information.
 ============================================================================
+
+[float]
+=== Required permissions
+
+Access to alerts and actions is granted based on your privileges to alerting-enabled features. See <<alerting-security, Alerting Security>> for more information.

@@ -26,8 +26,11 @@ const detectorSchema = schema.object({
   over_field_name: schema.maybe(schema.string()),
   partition_field_name: schema.maybe(schema.string()),
   detector_description: schema.maybe(schema.string()),
+  exclude_frequent: schema.maybe(schema.string()),
+  use_null: schema.maybe(schema.boolean()),
   /** Custom rules */
   custom_rules: customRulesSchema,
+  detector_index: schema.maybe(schema.number()),
 });
 
 const customUrlSchema = {

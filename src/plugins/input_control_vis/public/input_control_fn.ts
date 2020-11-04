@@ -19,7 +19,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, KibanaDatatable, Render } from '../../expressions/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 
 interface Arguments {
   visConfig: string;
@@ -34,7 +34,7 @@ interface RenderValue {
 
 export const createInputControlVisFn = (): ExpressionFunctionDefinition<
   'input_control_vis',
-  KibanaDatatable,
+  Datatable,
   Arguments,
   Render<RenderValue>
 > => ({

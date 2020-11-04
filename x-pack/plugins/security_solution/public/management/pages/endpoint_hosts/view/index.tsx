@@ -261,11 +261,11 @@ export const EndpointList = () => {
 
     return [
       {
-        field: 'metadata.host',
+        field: 'metadata',
         name: i18n.translate('xpack.securitySolution.endpoint.list.hostname', {
           defaultMessage: 'Hostname',
         }),
-        render: ({ hostname, id }: HostInfo['metadata']['host']) => {
+        render: ({ host: { hostname }, agent: { id } }: HostInfo['metadata']) => {
           const toRoutePath = getEndpointDetailsPath(
             {
               ...queryParams,
@@ -276,7 +276,7 @@ export const EndpointList = () => {
           );
           const toRouteUrl = formatUrl(toRoutePath);
           return (
-            <EuiToolTip content={hostname} anchorClassName="eui-fullWidth">
+            <EuiToolTip content={hostname} anchorClassName="eui-textTruncate">
               <EndpointListNavLink
                 name={hostname}
                 href={toRouteUrl}
@@ -320,7 +320,7 @@ export const EndpointList = () => {
         // eslint-disable-next-line react/display-name
         render: (policy: HostInfo['metadata']['Endpoint']['policy']['applied']) => {
           return (
-            <EuiToolTip content={policy.name} anchorClassName="eui-fullWidth">
+            <EuiToolTip content={policy.name} anchorClassName="eui-textTruncate">
               <EndpointPolicyLink
                 policyId={policy.id}
                 className="eui-textTruncate"
@@ -342,7 +342,7 @@ export const EndpointList = () => {
           const toRoutePath = getEndpointDetailsPath({
             name: 'endpointPolicyResponse',
             ...queryParams,
-            selected_endpoint: item.metadata.host.id,
+            selected_endpoint: item.metadata.agent.id,
           });
           const toRouteUrl = formatUrl(toRoutePath);
           return (
@@ -561,7 +561,7 @@ export const EndpointList = () => {
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      beta={true}
+      beta={false}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"

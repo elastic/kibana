@@ -28,7 +28,6 @@ import {
 } from '../../../shared_imports';
 import { usePostCase } from '../../containers/use_post_case';
 import { schema, FormProps } from './schema';
-import { InsertTimelinePopover } from '../../../timelines/components/timeline/insert_timeline_popover';
 import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { MarkdownEditorForm } from '../../../common/components/markdown_editor/eui_form';
 import { useGetTags } from '../../containers/use_get_tags';
@@ -136,10 +135,7 @@ export const Create = React.memo(() => {
     setFieldValue,
   ]);
 
-  const { handleCursorChange, handleOnTimelineChange } = useInsertTimeline(
-    description,
-    onDescriptionChange
-  );
+  const { handleCursorChange } = useInsertTimeline(description, onDescriptionChange);
 
   const handleTimelineClick = useTimelineClick();
 
@@ -221,20 +217,13 @@ export const Create = React.memo(() => {
                 isDisabled: isLoading,
                 onClickTimeline: handleTimelineClick,
                 onCursorPositionUpdate: handleCursorChange,
-                topRightContent: (
-                  <InsertTimelinePopover
-                    hideUntitled={true}
-                    isDisabled={isLoading}
-                    onTimelineChange={handleOnTimelineChange}
-                  />
-                ),
               }}
             />
           </Container>
         </>
       ),
     }),
-    [isLoading, options, handleCursorChange, handleTimelineClick, handleOnTimelineChange]
+    [isLoading, options, handleCursorChange, handleTimelineClick]
   );
 
   const secondStep = useMemo(

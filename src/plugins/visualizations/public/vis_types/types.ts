@@ -20,6 +20,7 @@
 import { IconType } from '@elastic/eui';
 import React from 'react';
 import { Adapters } from 'src/plugins/inspector';
+import { VisEditorConstructor } from 'src/plugins/visualize/public';
 import { ISchemas } from 'src/plugins/vis_default_editor/public';
 import { TriggerContextMapping } from '../../../ui_actions/public';
 import { Vis, VisToExpressionAst, VisualizationControllerConstructor } from '../types';
@@ -69,12 +70,14 @@ export interface VisType<TVisParams = unknown> {
 
   readonly options: VisTypeOptions;
 
-  // TODO: The following types still need to be refined properly.
-
   /**
    * The editor that should be used to edit visualizations of this type.
+   * If this is not specified the default visualize editor will be used (and should be configured via schemas)
+   * and editorConfig.
    */
-  readonly editor?: any;
+  readonly editor?: VisEditorConstructor;
+
+  // TODO: The following types still need to be refined properly.
   readonly editorConfig: Record<string, any>;
   readonly visConfig: Record<string, any>;
 }

@@ -14,6 +14,7 @@ import { CoreStart, CoreSetup } from 'kibana/public';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
   ExpressionRendererEvent,
+  ExpressionRenderError,
   ReactExpressionRendererType,
 } from '../../../../../../../src/plugins/expressions/public';
 import { Action } from '../state_management';
@@ -41,6 +42,7 @@ import {
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
 import { LensInspectorAdapters } from '../../types';
+import { getOriginalRequestErrorMessage } from '../../error_helper';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -359,7 +361,8 @@ export const InnerVisualizationWrapper = ({
         reload$={autoRefreshFetch$}
         onEvent={onEvent}
         onData$={onData$}
-        renderError={(errorMessage?: string | null) => {
+        renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
+          const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
           return (
             <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
               <EuiFlexItem>
@@ -371,7 +374,7 @@ export const InnerVisualizationWrapper = ({
                   defaultMessage="An error occurred when loading data."
                 />
               </EuiFlexItem>
-              {errorMessage ? (
+              {visibleErrorMessage ? (
                 <EuiFlexItem className="eui-textBreakAll" grow={false}>
                   <EuiButtonEmpty
                     onClick={() => {
@@ -386,7 +389,7 @@ export const InnerVisualizationWrapper = ({
                     })}
                   </EuiButtonEmpty>
 
-                  {localState.expandError ? errorMessage : null}
+                  {localState.expandError ? visibleErrorMessage : null}
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>

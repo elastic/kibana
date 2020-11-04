@@ -6,14 +6,15 @@
 
 import { CoreStart } from '../../../../src/core/public';
 import { LensPluginStartDependencies } from './plugin';
-import { AttributeService } from '../../../../src/plugins/dashboard/public';
+import { AttributeService } from '../../../../src/plugins/embeddable/public';
 import {
   LensSavedObjectAttributes,
   LensByValueInput,
   LensByReferenceInput,
 } from './editor_frame_service/embeddable/embeddable';
-import { SavedObjectIndexStore, DOC_TYPE } from './persistence';
+import { SavedObjectIndexStore } from './persistence';
 import { checkForDuplicateTitle, OnSaveProps } from '../../../../src/plugins/saved_objects/public';
+import { DOC_TYPE } from '../common';
 
 export type LensAttributeService = AttributeService<
   LensSavedObjectAttributes,
@@ -26,16 +27,12 @@ export function getLensAttributeService(
   startDependencies: LensPluginStartDependencies
 ): LensAttributeService {
   const savedObjectStore = new SavedObjectIndexStore(core.savedObjects.client);
-  return startDependencies.dashboard.getAttributeService<
+  return startDependencies.embeddable.getAttributeService<
     LensSavedObjectAttributes,
     LensByValueInput,
     LensByReferenceInput
   >(DOC_TYPE, {
-    saveMethod: async (
-      type: string,
-      attributes: LensSavedObjectAttributes,
-      savedObjectId?: string
-    ) => {
+    saveMethod: async (attributes: LensSavedObjectAttributes, savedObjectId?: string) => {
       const savedDoc = await savedObjectStore.save({
         ...attributes,
         savedObjectId,

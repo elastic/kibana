@@ -36,7 +36,7 @@
  * under the License.
  */
 
-import { ILegacyClusterClient } from 'kibana/server';
+import { ILegacyClusterClient, SavedObjectsServiceStart } from 'kibana/server';
 import { TelemetryCollectionManagerPluginSetup } from 'src/plugins/telemetry_collection_manager/server';
 import { IClusterClient } from '../../../../../src/core/server';
 import { getLocalStats } from './get_local_stats';
@@ -46,11 +46,13 @@ import { getLocalLicense } from './get_local_license';
 export function registerCollection(
   telemetryCollectionManager: TelemetryCollectionManagerPluginSetup,
   esCluster: ILegacyClusterClient,
-  esClientGetter: () => IClusterClient | undefined
+  esClientGetter: () => IClusterClient | undefined,
+  soServiceGetter: () => SavedObjectsServiceStart | undefined
 ) {
   telemetryCollectionManager.setCollection({
     esCluster,
     esClientGetter,
+    soServiceGetter,
     title: 'local',
     priority: 0,
     statsGetter: getLocalStats,

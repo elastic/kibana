@@ -4,17 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger } from 'kibana/server';
-import { ApiResponse, TransportRequestPromise } from '@elastic/elasticsearch/lib/Transport';
+import type { Logger } from 'kibana/server';
+import type { ApiResponse } from '@elastic/elasticsearch';
 
-import {
-  getAsyncOptions,
-  getDefaultSearchParams,
-  ISearchStrategy,
-  toSnakeCase,
-  shimAbortSignal,
-} from '../../../../../src/plugins/data/server';
-import { EqlSearchStrategyRequest, EqlSearchStrategyResponse } from '../../common/search/types';
+import { search } from '../../../../../src/plugins/data/server';
+import { doPartialSearch } from '../../common/search/es_search/es_search_rxjs_utils';
+import { getAsyncOptions, getDefaultSearchParams } from './get_default_search_params';
+
+import type { ISearchStrategy, IEsRawSearchResponse } from '../../../../../src/plugins/data/server';
+import type {
+  EqlSearchStrategyRequest,
+  EqlSearchStrategyResponse,
+} from '../../common/search/types';
 
 export const eqlSearchStrategyProvider = (
   logger: Logger
@@ -26,48 +27,44 @@ export const eqlSearchStrategyProvider = (
         id,
       });
     },
-    search: async (context, request, options) => {
+
+    search: (request, options, context) => {
       logger.debug(`_eql/search ${JSON.stringify(request.params) || request.id}`);
-      let promise: TransportRequestPromise<ApiResponse>;
-      const eqlClient = context.core.elasticsearch.client.asCurrentUser.eql;
-      const uiSettingsClient = await context.core.uiSettings.client;
+
+      const { utils } = search.esSearch;
       const asyncOptions = getAsyncOptions();
-      const searchOptions = toSnakeCase({ ...request.options });
+      const requestOptions = utils.toSnakeCase({ ...request.options });
+      const client = context.core.elasticsearch.client.asCurrentUser.eql;
 
-      if (request.id) {
-        promise = eqlClient.get(
-          {
-            id: request.id,
-            ...toSnakeCase(asyncOptions),
-          },
-          searchOptions
-        );
-      } else {
-        const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
-          uiSettingsClient
-        );
-        const searchParams = toSnakeCase({
-          ignoreThrottled,
-          ignoreUnavailable,
-          ...asyncOptions,
-          ...request.params,
-        });
+      return doPartialSearch<ApiResponse<IEsRawSearchResponse>>(
+        async () => {
+          const { ignoreThrottled, ignoreUnavailable } = await getDefaultSearchParams(
+            context.core.uiSettings.client
+          );
 
-        promise = eqlClient.search(
-          searchParams as EqlSearchStrategyRequest['params'],
-          searchOptions
-        );
-      }
-
-      const rawResponse = await shimAbortSignal(promise, options?.abortSignal);
-      const { id, is_partial: isPartial, is_running: isRunning } = rawResponse.body;
-
-      return {
-        id,
-        isPartial,
-        isRunning,
-        rawResponse,
-      };
+          return client.search(
+            utils.toSnakeCase({
+              ignoreThrottled,
+              ignoreUnavailable,
+              ...asyncOptions,
+              ...request.params,
+            }) as EqlSearchStrategyRequest['params'],
+            requestOptions
+          );
+        },
+        (id) =>
+          client.get(
+            {
+              id: id!,
+              ...utils.toSnakeCase(asyncOptions),
+            },
+            requestOptions
+          ),
+        (response) => !response.body.is_running,
+        (response) => response.body.id,
+        request.id,
+        options
+      ).pipe(utils.toKibanaSearchResponse());
     },
   };
 };

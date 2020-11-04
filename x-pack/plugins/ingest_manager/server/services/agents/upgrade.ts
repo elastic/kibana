@@ -9,6 +9,8 @@ import { AgentSOAttributes, AgentAction, AgentActionSOAttributes } from '../../t
 import { AGENT_ACTION_SAVED_OBJECT_TYPE, AGENT_SAVED_OBJECT_TYPE } from '../../constants';
 import { bulkCreateAgentActions, createAgentAction } from './actions';
 import { getAgents, listAllAgents } from './crud';
+import { isAgentUpgradeable } from '../../../common/services';
+import { appContextService } from '../app_context';
 
 export async function sendUpgradeAgentAction({
   soClient,
@@ -62,14 +64,17 @@ export async function sendUpgradeAgentsActions(
         agentIds: string[];
         sourceUri: string | undefined;
         version: string;
+        force?: boolean;
       }
     | {
         kuery: string;
         sourceUri: string | undefined;
         version: string;
+        force?: boolean;
       }
 ) {
-  // Filter out agents currently unenrolling, agents unenrolled
+  const kibanaVersion = appContextService.getKibanaVersion();
+  // Filter out agents currently unenrolling, agents unenrolled, and agents not upgradeable
   const agents =
     'agentIds' in options
       ? await getAgents(soClient, options.agentIds)
@@ -79,9 +84,9 @@ export async function sendUpgradeAgentsActions(
             showInactive: false,
           })
         ).agents;
-  const agentsToUpdate = agents.filter(
-    (agent) => !agent.unenrollment_started_at && !agent.unenrolled_at
-  );
+  const agentsToUpdate = options.force
+    ? agents
+    : agents.filter((agent) => isAgentUpgradeable(agent, kibanaVersion));
   const now = new Date().toISOString();
   const data = {
     version: options.version,

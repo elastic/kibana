@@ -63,5 +63,10 @@ exports.externals = {
   '@elastic/eui/dist/eui_theme_dark.json': '__kbnSharedDeps__.Theme.euiDarkVars',
   lodash: '__kbnSharedDeps__.Lodash',
   'lodash/fp': '__kbnSharedDeps__.LodashFp',
+
+  /**
+   * runtime deps which don't need to be copied across all bundles
+   */
+  tslib: '__kbnSharedDeps__.TsLib',
 };
 exports.publicPathLoader = require.resolve('./public_path_loader');

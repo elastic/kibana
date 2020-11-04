@@ -7,9 +7,9 @@
 import { i18n } from '@kbn/i18n';
 import {
   ExecutionContext,
+  Datatable,
   ExpressionFunctionDefinition,
   ExpressionValueSearchContext,
-  KibanaDatatable,
 } from 'src/plugins/expressions/public';
 import { search } from '../../../../../src/plugins/data/public';
 const { toAbsoluteDates } = search.aggs;
@@ -19,7 +19,7 @@ import { LensInspectorAdapters } from './types';
 
 interface MergeTables {
   layerIds: string[];
-  tables: KibanaDatatable[];
+  tables: Datatable[];
 }
 
 export const mergeTables: ExpressionFunctionDefinition<
@@ -42,7 +42,7 @@ export const mergeTables: ExpressionFunctionDefinition<
       multi: true,
     },
     tables: {
-      types: ['kibana_datatable'],
+      types: ['datatable'],
       help: '',
       multi: true,
     },
@@ -52,7 +52,7 @@ export const mergeTables: ExpressionFunctionDefinition<
     if (!context.inspectorAdapters.tables) {
       context.inspectorAdapters.tables = {};
     }
-    const resultTables: Record<string, KibanaDatatable> = {};
+    const resultTables: Record<string, Datatable> = {};
     tables.forEach((table, index) => {
       resultTables[layerIds[index]] = table;
       // adapter is always defined at that point because we make sure by the beginning of the function

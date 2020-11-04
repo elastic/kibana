@@ -152,7 +152,7 @@ export const GroupSourcePrioritization: React.FC = () => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiTableRowCell>
-            <EuiTableRowCell align="right">
+            <EuiTableRowCell align="right" style={{ padding: 0 }}>
               <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceAround">
                 <EuiFlexItem grow={false}>
                   <EuiRange
@@ -166,7 +166,7 @@ export const GroupSourcePrioritization: React.FC = () => {
                     }
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} style={{ paddingRight: 1 }}>
+                <EuiFlexItem grow={false} style={{ paddingLeft: 10 }}>
                   <div style={{ margin: 0 }} className="input-container--range__count">
                     {activeSourcePriorities[id]}
                   </div>

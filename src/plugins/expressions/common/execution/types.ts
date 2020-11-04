@@ -26,11 +26,11 @@ import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext<Input = unknown, InspectorAdapters extends Adapters = Adapters> {
+export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters> {
   /**
-   * Get initial input with which execution started.
+   * Get search context of the expression.
    */
-  getInitialInput: () => Input;
+  getSearchContext: () => ExecutionContextSearch;
 
   /**
    * Context variables that can be consumed using `var` and `var_set` functions.
@@ -55,7 +55,7 @@ export interface ExecutionContext<Input = unknown, InspectorAdapters extends Ada
   /**
    * Search context in which expression should operate.
    */
-  search?: ExecutionContextSearch;
+  getSearchSessionId: () => string | undefined;
 
   /**
    * Allows to fetch saved objects from ElasticSearch. In browser `getSavedObject`

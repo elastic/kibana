@@ -26,14 +26,14 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
         <EuiText>
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText"
-              defaultMessage="{notePrefix} a newer version of this module is {availableAsIntegrationLink} in Ingest Manager Beta.
+              id="xpack.fleet.homeIntegration.tutorialModule.noticeText"
+              defaultMessage="{notePrefix} a newer version of this module is {availableAsIntegrationLink} in Fleet Beta.
               To learn more about agent policies and the new Elastic Agent, read our {blogPostLink}."
               values={{
                 notePrefix: (
                   <strong>
                     <FormattedMessage
-                      id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText.notePrefix"
+                      id="xpack.fleet.homeIntegration.tutorialModule.noticeText.notePrefix"
                       defaultMessage="Note:"
                     />
                   </strong>
@@ -45,7 +45,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
                     })}
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText.integrationLink"
+                      id="xpack.fleet.homeIntegration.tutorialModule.noticeText.integrationLink"
                       defaultMessage="available as an Integration"
                     />
                   </EuiLink>
@@ -57,7 +57,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
                     target="_blank"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.homeIntegration.tutorialModule.noticeText.blogPostLink"
+                      id="xpack.fleet.homeIntegration.tutorialModule.noticeText.blogPostLink"
                       defaultMessage="announcement blog post"
                     />
                   </EuiLink>

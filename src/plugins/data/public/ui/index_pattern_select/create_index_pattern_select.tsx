@@ -25,7 +25,7 @@ import { IndexPatternSelect, IndexPatternSelectProps } from './';
 
 // Takes in stateful runtime dependencies and pre-wires them to the component
 export function createIndexPatternSelect(savedObjectsClient: SavedObjectsClientContract) {
-  return (props: Omit<IndexPatternSelectProps, 'savedObjectsClient'>) => (
+  return (props: IndexPatternSelectProps) => (
     <IndexPatternSelect {...props} savedObjectsClient={savedObjectsClient} />
   );
 }

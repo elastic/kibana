@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { useRouteMatch, Switch, Route, useLocation, useHistory } from 'react-router-dom';
 import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import { i18n } from '@kbn/i18n';
+import { installationStatuses } from '../../../../../../../common/constants';
 import { PAGE_ROUTING_PATHS } from '../../../../constants';
 import { useLink, useGetCategories, useGetPackages, useBreadcrumbs } from '../../../../hooks';
 import { WithHeaderLayout } from '../../../../layouts';
@@ -30,7 +31,7 @@ export function EPMHomePage() {
         ([
           {
             id: 'all_packages',
-            name: i18n.translate('xpack.ingestManager.epmList.allTabText', {
+            name: i18n.translate('xpack.fleet.epmList.allTabText', {
               defaultMessage: 'All integrations',
             }),
             href: getHref('integrations_all'),
@@ -38,7 +39,7 @@ export function EPMHomePage() {
           },
           {
             id: 'installed_packages',
-            name: i18n.translate('xpack.ingestManager.epmList.installedTabText', {
+            name: i18n.translate('xpack.fleet.epmList.installedTabText', {
               defaultMessage: 'Installed integrations',
             }),
             href: getHref('integrations_installed'),
@@ -66,13 +67,13 @@ function InstalledPackages() {
   });
   const [selectedCategory, setSelectedCategory] = useState('');
 
-  const title = i18n.translate('xpack.ingestManager.epmList.installedTitle', {
+  const title = i18n.translate('xpack.fleet.epmList.installedTitle', {
     defaultMessage: 'Installed integrations',
   });
 
   const allInstalledPackages =
     allPackages && allPackages.response
-      ? allPackages.response.filter((pkg) => pkg.status === 'installed')
+      ? allPackages.response.filter((pkg) => pkg.status === installationStatuses.Installed)
       : [];
 
   const updatablePackages = allInstalledPackages.filter(
@@ -82,14 +83,14 @@ function InstalledPackages() {
   const categories = [
     {
       id: '',
-      title: i18n.translate('xpack.ingestManager.epmList.allFilterLinkText', {
+      title: i18n.translate('xpack.fleet.epmList.allFilterLinkText', {
         defaultMessage: 'All',
       }),
       count: allInstalledPackages.length,
     },
     {
       id: 'updates_available',
-      title: i18n.translate('xpack.ingestManager.epmList.updatesAvailableFilterLinkText', {
+      title: i18n.translate('xpack.fleet.epmList.updatesAvailableFilterLinkText', {
         defaultMessage: 'Updates available',
       }),
       count: updatablePackages.length,
@@ -128,14 +129,14 @@ function AvailablePackages() {
   const packages =
     categoryPackagesRes && categoryPackagesRes.response ? categoryPackagesRes.response : [];
 
-  const title = i18n.translate('xpack.ingestManager.epmList.allTitle', {
+  const title = i18n.translate('xpack.fleet.epmList.allTitle', {
     defaultMessage: 'Browse by category',
   });
 
   const categories = [
     {
       id: '',
-      title: i18n.translate('xpack.ingestManager.epmList.allPackagesFilterLinkText', {
+      title: i18n.translate('xpack.fleet.epmList.allPackagesFilterLinkText', {
         defaultMessage: 'All',
       }),
       count: allPackagesRes?.response?.length || 0,

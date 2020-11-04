@@ -90,4 +90,8 @@ describe('Color Palette', () => {
   it('should create new darker colors when input is greater than 72', () => {
     expect(createColorPalette(num3)[72]).not.toEqual(seedColors[0]);
   });
+
+  it('should create new colors and convert them correctly', () => {
+    expect(createColorPalette(num3)[72]).toEqual('#404ABF');
+  });
 });

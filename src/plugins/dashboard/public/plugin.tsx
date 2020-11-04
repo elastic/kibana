@@ -39,8 +39,6 @@ import {
   CONTEXT_MENU_TRIGGER,
   EmbeddableSetup,
   EmbeddableStart,
-  SavedObjectEmbeddableInput,
-  EmbeddableInput,
   PANEL_NOTIFICATION_TRIGGER,
 } from '../../embeddable/public';
 import { DataPublicPluginSetup, DataPublicPluginStart, esFilters } from '../../data/public';
@@ -53,7 +51,6 @@ import {
   getSavedObjectFinder,
   SavedObjectLoader,
   SavedObjectsStart,
-  showSaveModal,
 } from '../../saved_objects/public';
 import {
   ExitFullScreenButton as ExitFullScreenButtonUi,
@@ -66,6 +63,7 @@ import {
   KibanaLegacyStart,
 } from '../../kibana_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 import {
@@ -103,11 +101,6 @@ import { DashboardConstants } from './dashboard_constants';
 import { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 import { PlaceholderEmbeddableFactory } from './application/embeddable/placeholder';
 import { UrlGeneratorState } from '../../share/public';
-import { AttributeService } from '.';
-import {
-  AttributeServiceOptions,
-  ATTRIBUTE_SERVICE_KEY,
-} from './attribute_service/attribute_service';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -143,6 +136,7 @@ interface StartDependencies {
   share?: SharePluginStart;
   uiActions: UiActionsStart;
   savedObjects: SavedObjectsStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export type DashboardSetup = void;
@@ -156,16 +150,6 @@ export interface DashboardStart {
   dashboardUrlGenerator?: DashboardUrlGenerator;
   dashboardFeatureFlagConfig: DashboardFeatureFlagConfig;
   DashboardContainerByValueRenderer: ReturnType<typeof createDashboardContainerByValueRenderer>;
-  getAttributeService: <
-    A extends { title: string },
-    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
-      [ATTRIBUTE_SERVICE_KEY]: A;
-    },
-    R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
-  >(
-    type: string,
-    options: AttributeServiceOptions<A>
-  ) => AttributeService<A, V, R>;
 }
 
 declare module '../../../plugins/ui_actions/public' {
@@ -317,6 +301,7 @@ export class DashboardPlugin
           kibanaLegacy: { dashboardConfig },
           urlForwarding: { navigateToDefaultApp, navigateToLegacyKibanaUrl },
           savedObjects,
+          savedObjectsTaggingOss,
         } = pluginsStart;
 
         const deps: RenderDeps = {
@@ -345,6 +330,7 @@ export class DashboardPlugin
           scopedHistory: () => this.currentHistory!,
           setHeaderActionMenu: params.setHeaderActionMenu,
           savedObjects,
+          savedObjectsTagging: savedObjectsTaggingOss?.getTaggingApi(),
           restorePreviousUrl,
         };
         // make sure the index pattern list is up to date
@@ -430,11 +416,7 @@ export class DashboardPlugin
 
   public start(core: CoreStart, plugins: StartDependencies): DashboardStart {
     const { notifications } = core;
-    const {
-      uiActions,
-      data: { indexPatterns, search },
-      embeddable,
-    } = plugins;
+    const { uiActions } = plugins;
 
     const SavedObjectFinder = getSavedObjectFinder(core.savedObjects, core.uiSettings);
 
@@ -452,24 +434,22 @@ export class DashboardPlugin
     uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
     if (this.dashboardFeatureFlagConfig?.allowByValueEmbeddables) {
-      const addToLibraryAction = new AddToLibraryAction();
+      const addToLibraryAction = new AddToLibraryAction({ toasts: notifications.toasts });
       uiActions.registerAction(addToLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, addToLibraryAction.id);
-      const unlinkFromLibraryAction = new UnlinkFromLibraryAction();
+
+      const unlinkFromLibraryAction = new UnlinkFromLibraryAction({ toasts: notifications.toasts });
       uiActions.registerAction(unlinkFromLibraryAction);
       uiActions.attachAction(CONTEXT_MENU_TRIGGER, unlinkFromLibraryAction.id);
 
-      const libraryNotificationAction = new LibraryNotificationAction();
+      const libraryNotificationAction = new LibraryNotificationAction(unlinkFromLibraryAction);
       uiActions.registerAction(libraryNotificationAction);
       uiActions.attachAction(PANEL_NOTIFICATION_TRIGGER, libraryNotificationAction.id);
     }
 
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
-      indexPatterns,
-      search,
-      chrome: core.chrome,
-      overlays: core.overlays,
+      savedObjects: plugins.savedObjects,
     });
     const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE
@@ -483,15 +463,6 @@ export class DashboardPlugin
       DashboardContainerByValueRenderer: createDashboardContainerByValueRenderer({
         factory: dashboardContainerFactory,
       }),
-      getAttributeService: (type: string, options) =>
-        new AttributeService(
-          type,
-          showSaveModal,
-          core.i18n.Context,
-          core.notifications.toasts,
-          options,
-          embeddable.getEmbeddableFactory
-        ),
     };
   }
 

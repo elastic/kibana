@@ -11,6 +11,8 @@ import {
   AGENT_POLICY_ROLLOUT_RATE_LIMIT_REQUEST_PER_INTERVAL,
   AGENT_POLLING_REQUEST_TIMEOUT_MS,
 } from '../common';
+
+export { default as apm } from 'elastic-apm-node';
 export { AgentService, ESIndexPatternService, getRegistryUrl, PackageService } from './services';
 export {
   IngestManagerSetupContract,
@@ -25,13 +27,13 @@ export const config: PluginConfigDescriptor = {
     agents: true,
   },
   deprecations: ({ renameFromRoot }) => [
-    renameFromRoot('xpack.ingestManager.fleet', 'xpack.fleet.agents'),
     renameFromRoot('xpack.ingestManager', 'xpack.fleet'),
+    renameFromRoot('xpack.fleet.fleet', 'xpack.fleet.agents'),
   ],
   schema: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    registryUrl: schema.maybe(schema.uri()),
-    registryProxyUrl: schema.maybe(schema.uri()),
+    registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+    registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
     agents: schema.object({
       enabled: schema.boolean({ defaultValue: true }),
       tlsCheckDisabled: schema.boolean({ defaultValue: false }),

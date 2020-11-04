@@ -26,6 +26,7 @@ import {
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
+  AttributeService,
 } from '../../../embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import {
@@ -50,7 +51,6 @@ import { createVisEmbeddableFromObject } from './create_vis_embeddable_from_obje
 import { StartServicesGetter } from '../../../kibana_utils/public';
 import { VisualizationsStartDeps } from '../plugin';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import { AttributeService } from '../../../dashboard/public';
 import { checkForDuplicateTitle } from '../../../saved_objects/public';
 
 interface VisualizationAttributes extends SavedObjectAttributes {
@@ -126,7 +126,7 @@ export class VisualizeEmbeddableFactory
     if (!this.attributeService) {
       this.attributeService = await this.deps
         .start()
-        .plugins.dashboard.getAttributeService<
+        .plugins.embeddable.getAttributeService<
           VisualizeSavedObjectAttributes,
           VisualizeByValueInput,
           VisualizeByReferenceInput
@@ -187,10 +187,7 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  private async saveMethod(
-    type: string,
-    attributes: VisualizeSavedObjectAttributes
-  ): Promise<{ id: string }> {
+  private async saveMethod(attributes: VisualizeSavedObjectAttributes): Promise<{ id: string }> {
     try {
       const { title, savedVis } = attributes;
       const visObj = attributes.vis;

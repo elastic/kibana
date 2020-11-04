@@ -32,6 +32,8 @@ import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
 import { EngineOverview } from './components/engine_overview';
+import { Settings } from './components/settings';
+import { Credentials } from './components/credentials';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -75,6 +77,12 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
               <Route exact path={ENGINES_PATH}>
                 <EngineOverview />
               </Route>
+              <Route exact path={SETTINGS_PATH}>
+                <Settings />
+              </Route>
+              <Route exact path={CREDENTIALS_PATH}>
+                <Credentials />
+              </Route>
               <Route>
                 <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>
@@ -99,14 +107,14 @@ export const AppSearchNav: React.FC = () => {
         })}
       </SideNavLink>
       {canViewSettings && (
-        <SideNavLink isExternal to={getAppSearchUrl(SETTINGS_PATH)}>
+        <SideNavLink to={SETTINGS_PATH}>
           {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
-            defaultMessage: 'Account Settings',
+            defaultMessage: 'Settings',
           })}
         </SideNavLink>
       )}
       {canViewAccountCredentials && (
-        <SideNavLink isExternal to={getAppSearchUrl(CREDENTIALS_PATH)}>
+        <SideNavLink to={CREDENTIALS_PATH}>
           {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
             defaultMessage: 'Credentials',
           })}

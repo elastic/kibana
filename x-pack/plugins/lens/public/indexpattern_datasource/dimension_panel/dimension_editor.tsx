@@ -16,7 +16,8 @@ import {
   EuiListGroupItemProps,
   EuiFormLabel,
 } from '@elastic/eui';
-import { IndexPatternDimensionEditorProps, OperationSupportMatrix } from './dimension_panel';
+import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import { OperationSupportMatrix } from './operation_support';
 import { IndexPatternColumn, OperationType } from '../indexpattern';
 import {
   operationDefinitionMap,
@@ -24,7 +25,7 @@ import {
   buildColumn,
   changeField,
 } from '../operations';
-import { deleteColumn, changeColumn, updateColumnParam } from '../state_helpers';
+import { deleteColumn, changeColumn, updateColumnParam, mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField, fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
@@ -264,7 +265,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
         <EuiListGroup
           className={sideNavItems.length > 3 ? 'lnsIndexPatternDimensionEditor__columns' : ''}
           gutterSize="none"
-          listItems={sideNavItems}
+          listItems={
+            // add a padding item containing a non breakable space if the number of operations is not even
+            // otherwise the column layout will break within an element
+            sideNavItems.length % 2 === 1 ? [...sideNavItems, { label: '\u00a0' }] : sideNavItems
+          }
           maxWidth={false}
         />
       </div>
@@ -390,12 +395,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
             <LabelInput
               value={selectedColumn.label}
               onChange={(value) => {
-                setState({
-                  ...state,
-                  layers: {
-                    ...state.layers,
-                    [layerId]: {
-                      ...state.layers[layerId],
+                setState(
+                  mergeLayer({
+                    state,
+                    layerId,
+                    newLayer: {
                       columns: {
                         ...state.layers[layerId].columns,
                         [columnId]: {
@@ -405,8 +409,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         },
                       },
                     },
-                  },
-                });
+                  })
+                );
               }}
             />
           )}
@@ -416,22 +420,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
               fieldMap={fieldMap}
               layer={state.layers[props.layerId]}
               columnId={props.columnId}
-              setColumns={(columnOrder) => {
-                setState({
-                  ...state,
-                  layers: {
-                    ...state.layers,
-                    [props.layerId]: {
-                      ...state.layers[props.layerId],
-                      columnOrder,
-                    },
-                  },
-                });
-              }}
+              setColumns={(columnOrder) =>
+                setState(mergeLayer({ state, layerId, newLayer: { columnOrder } }))
+              }
             />
           )}
 
-          {selectedColumn && selectedColumn.dataType === 'number' ? (
+          {selectedColumn &&
+          (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
             <FormatSelector
               selectedColumn={selectedColumn}
               onChange={(newFormat) => {

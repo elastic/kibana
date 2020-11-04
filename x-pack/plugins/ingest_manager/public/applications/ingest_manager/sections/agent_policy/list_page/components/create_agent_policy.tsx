@@ -21,6 +21,7 @@ import {
   EuiFlyoutProps,
   EuiSpacer,
 } from '@elastic/eui';
+import { dataTypes } from '../../../../../../../common';
 import { NewAgentPolicy, AgentPolicy } from '../../../../types';
 import { useCapabilities, useCore, sendCreateAgentPolicy } from '../../../../hooks';
 import { AgentPolicyForm, agentPolicyFormValidation } from '../../components';
@@ -44,7 +45,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
     description: '',
     namespace: 'default',
     is_default: undefined,
-    monitoring_enabled: ['logs', 'metrics'],
+    monitoring_enabled: Object.values(dataTypes),
   });
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
@@ -66,7 +67,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
       <EuiTitle size="m">
         <h2 id="CreateAgentPolicyFlyoutTitle">
           <FormattedMessage
-            id="xpack.ingestManager.createAgentPolicy.flyoutTitle"
+            id="xpack.fleet.createAgentPolicy.flyoutTitle"
             defaultMessage="Create agent policy"
           />
         </h2>
@@ -75,7 +76,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
       <EuiText size="s">
         <p>
           <FormattedMessage
-            id="xpack.ingestManager.createAgentPolicy.flyoutTitleDescription"
+            id="xpack.fleet.createAgentPolicy.flyoutTitleDescription"
             defaultMessage="Agent policies are used to manage settings across a group of agents. You can add integrations to your agent policy to specify what data your agents collect. When you edit an agent policy, you can use Fleet to deploy updates to a specified group of agents."
           />
         </p>
@@ -101,7 +102,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty onClick={() => onClose()} flush="left">
             <FormattedMessage
-              id="xpack.ingestManager.createAgentPolicy.cancelButtonLabel"
+              id="xpack.fleet.createAgentPolicy.cancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
@@ -118,31 +119,25 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
                 setIsLoading(false);
                 if (data) {
                   notifications.toasts.addSuccess(
-                    i18n.translate(
-                      'xpack.ingestManager.createAgentPolicy.successNotificationTitle',
-                      {
-                        defaultMessage: "Agent policy '{name}' created",
-                        values: { name: agentPolicy.name },
-                      }
-                    )
+                    i18n.translate('xpack.fleet.createAgentPolicy.successNotificationTitle', {
+                      defaultMessage: "Agent policy '{name}' created",
+                      values: { name: agentPolicy.name },
+                    })
                   );
                   onClose(data.item);
                 } else {
                   notifications.toasts.addDanger(
                     error
                       ? error.message
-                      : i18n.translate(
-                          'xpack.ingestManager.createAgentPolicy.errorNotificationTitle',
-                          {
-                            defaultMessage: 'Unable to create agent policy',
-                          }
-                        )
+                      : i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
+                          defaultMessage: 'Unable to create agent policy',
+                        })
                   );
                 }
               } catch (e) {
                 setIsLoading(false);
                 notifications.toasts.addDanger(
-                  i18n.translate('xpack.ingestManager.createAgentPolicy.errorNotificationTitle', {
+                  i18n.translate('xpack.fleet.createAgentPolicy.errorNotificationTitle', {
                     defaultMessage: 'Unable to create agent policy',
                   })
                 );
@@ -150,7 +145,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
             }}
           >
             <FormattedMessage
-              id="xpack.ingestManager.createAgentPolicy.submitButtonLabel"
+              id="xpack.fleet.createAgentPolicy.submitButtonLabel"
               defaultMessage="Create agent policy"
             />
           </EuiButton>

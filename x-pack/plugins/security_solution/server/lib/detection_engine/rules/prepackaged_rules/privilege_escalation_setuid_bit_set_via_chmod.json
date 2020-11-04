@@ -18,7 +18,10 @@
   "severity": "low",
   "tags": [
     "Elastic",
-    "Linux"
+    "Host",
+    "Linux",
+    "Threat Detection",
+    "Privilege Escalation"
   ],
   "threat": [
     {

@@ -36,8 +36,8 @@ describe('alert_edit', () => {
       toastNotifications: mockedCoreSetup.notifications.toasts,
       http: mockedCoreSetup.http,
       uiSettings: mockedCoreSetup.uiSettings,
-      actionTypeRegistry: actionTypeRegistry as any,
-      alertTypeRegistry: alertTypeRegistry as any,
+      actionTypeRegistry,
+      alertTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       capabilities,
     };
@@ -51,6 +51,7 @@ describe('alert_edit', () => {
       id: 'my-alert-type',
       iconClass: 'test',
       name: 'test-alert',
+      description: 'test',
       validate: (): ValidationResult => {
         return { errors: {} };
       },

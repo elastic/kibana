@@ -10,6 +10,7 @@ exports[`control_panel ControlPanel should render grid selection correctly 1`] =
   >
     <EuiText
       color="subdued"
+      data-test-subj="trustedAppsListViewCountLabel"
       size="xs"
     >
       0 trusted applications
@@ -36,6 +37,7 @@ exports[`control_panel ControlPanel should render list selection correctly 1`] =
   >
     <EuiText
       color="subdued"
+      data-test-subj="trustedAppsListViewCountLabel"
       size="xs"
     >
       0 trusted applications
@@ -62,6 +64,7 @@ exports[`control_panel ControlPanel should render plural count correctly 1`] = `
   >
     <EuiText
       color="subdued"
+      data-test-subj="trustedAppsListViewCountLabel"
       size="xs"
     >
       100 trusted applications
@@ -88,6 +91,7 @@ exports[`control_panel ControlPanel should render singular count correctly 1`] =
   >
     <EuiText
       color="subdued"
+      data-test-subj="trustedAppsListViewCountLabel"
       size="xs"
     >
       1 trusted application

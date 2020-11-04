@@ -27,7 +27,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         <EuiTitle size="m">
           <h2 id="AlphaMessagingFlyoutTitle">
             <FormattedMessage
-              id="xpack.ingestManager.alphaMessaging.flyoutTitle"
+              id="xpack.fleet.alphaMessaging.flyoutTitle"
               defaultMessage="About this release"
             />
           </h2>
@@ -37,14 +37,13 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
         <EuiText size="m">
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.alphaMessaging.introText"
-              defaultMessage="Ingest Manager is under active development and is not intended for use in production environments. This beta release is designed for users to test and offer feedback about Ingest
-            Manager and the new Elastic Agent. This plugin is not subject to the support SLA."
+              id="xpack.fleet.alphaMessaging.introText"
+              defaultMessage="Fleet is under active development and is not intended for use in production environments. This beta release is designed for users to test and offer feedback about Fleet and the new Elastic Agent. This plugin is not subject to the support SLA."
             />
           </p>
           <p>
             <FormattedMessage
-              id="xpack.ingestManager.alphaMessaging.feedbackText"
+              id="xpack.fleet.alphaMessaging.feedbackText"
               defaultMessage="Read our {docsLink} or go to our {forumLink} for questions or feedback."
               values={{
                 docsLink: (
@@ -54,7 +53,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
                     target="_blank"
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.alphaMessaging.docsLink"
+                      id="xpack.fleet.alphaMessaging.docsLink"
                       defaultMessage="documentation"
                     />
                   </EuiLink>
@@ -62,7 +61,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
                 forumLink: (
                   <EuiLink href="https://ela.st/ingest-manager-forum" external target="_blank">
                     <FormattedMessage
-                      id="xpack.ingestManager.alphaMessaging.forumLink"
+                      id="xpack.fleet.alphaMessaging.forumLink"
                       defaultMessage="Discuss forum"
                     />
                   </EuiLink>
@@ -75,7 +74,7 @@ export const AlphaFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
       <EuiFlyoutFooter>
         <EuiButtonEmpty onClick={onClose} flush="left">
           <FormattedMessage
-            id="xpack.ingestManager.alphaMessging.closeFlyoutLabel"
+            id="xpack.fleet.alphaMessging.closeFlyoutLabel"
             defaultMessage="Close"
           />
         </EuiButtonEmpty>

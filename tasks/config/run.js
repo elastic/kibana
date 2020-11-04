@@ -69,17 +69,6 @@ module.exports = function () {
     }),
 
     // used by the test tasks
-    //    runs the check_lockfile_symlinks script to ensure manifests with non-dev dependencies have adjacent lockfile symlinks
-    checkLockfileSymlinks: scriptWithGithubChecks({
-      title: 'Check lockfile symlinks',
-      cmd: NODE,
-      args: [
-        'scripts/check_lockfile_symlinks',
-        '--quiet', // only log errors, not warnings
-      ],
-    }),
-
-    // used by the test tasks
     //    runs the check_published_api_changes script to ensure API changes are explictily accepted
     checkDocApiChanges: scriptWithGithubChecks({
       title: 'Check core API changes',
@@ -176,7 +165,11 @@ module.exports = function () {
         '--config',
         'test/server_integration/http/ssl_redirect/config.js',
         '--config',
-        'test/server_integration/http/cache/config.js',
+        'test/server_integration/http/platform/config.ts',
+        '--config',
+        'test/server_integration/http/ssl_with_p12/config.js',
+        '--config',
+        'test/server_integration/http/ssl_with_p12_intermediate/config.js',
         '--bail',
         '--debug',
         '--kibana-install-dir',

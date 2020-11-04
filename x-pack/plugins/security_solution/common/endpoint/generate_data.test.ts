@@ -26,6 +26,53 @@ interface Node {
   parent_entity_id?: string;
 }
 
+describe('data generator data streams', () => {
+  // these tests cast the result of the generate methods so that we can specifically compare the `data_stream` fields
+  it('creates a generator with default data streams', () => {
+    const generator = new EndpointDocGenerator('seed');
+    expect(generator.generateHostMetadata().data_stream).toEqual({
+      type: 'metrics',
+      dataset: 'endpoint.metadata',
+      namespace: 'default',
+    });
+    expect(generator.generatePolicyResponse().data_stream).toEqual({
+      type: 'metrics',
+      dataset: 'endpoint.policy',
+      namespace: 'default',
+    });
+    expect(generator.generateEvent().data_stream).toEqual({
+      type: 'logs',
+      dataset: 'endpoint.events.process',
+      namespace: 'default',
+    });
+    expect(generator.generateAlert().data_stream).toEqual({
+      type: 'logs',
+      dataset: 'endpoint.alerts',
+      namespace: 'default',
+    });
+  });
+
+  it('creates a generator with custom data streams', () => {
+    const metadataDataStream = { type: 'meta', dataset: 'dataset', namespace: 'name' };
+    const policyDataStream = { type: 'policy', dataset: 'fake', namespace: 'something' };
+    const eventsDataStream = { type: 'events', dataset: 'events stuff', namespace: 'name' };
+    const alertsDataStream = { type: 'alerts', dataset: 'alerts stuff', namespace: 'name' };
+    const generator = new EndpointDocGenerator('seed');
+    expect(generator.generateHostMetadata(0, metadataDataStream).data_stream).toStrictEqual(
+      metadataDataStream
+    );
+    expect(generator.generatePolicyResponse({ policyDataStream }).data_stream).toStrictEqual(
+      policyDataStream
+    );
+    expect(generator.generateEvent({ eventsDataStream }).data_stream).toStrictEqual(
+      eventsDataStream
+    );
+    expect(generator.generateAlert({ alertsDataStream }).data_stream).toStrictEqual(
+      alertsDataStream
+    );
+  });
+});
+
 describe('data generator', () => {
   let generator: EndpointDocGenerator;
   beforeEach(() => {
@@ -69,7 +116,7 @@ describe('data generator', () => {
 
   it('creates policy response documents', () => {
     const timestamp = new Date().getTime();
-    const hostPolicyResponse = generator.generatePolicyResponse(timestamp);
+    const hostPolicyResponse = generator.generatePolicyResponse({ ts: timestamp });
     expect(hostPolicyResponse['@timestamp']).toEqual(timestamp);
     expect(hostPolicyResponse.event.created).toEqual(timestamp);
     expect(hostPolicyResponse.Endpoint).not.toBeNull();
@@ -80,7 +127,7 @@ describe('data generator', () => {
 
   it('creates alert event documents', () => {
     const timestamp = new Date().getTime();
-    const alert = generator.generateAlert(timestamp);
+    const alert = generator.generateAlert({ ts: timestamp });
     expect(alert['@timestamp']).toEqual(timestamp);
     expect(alert.event?.action).not.toBeNull();
     expect(alert.Endpoint).not.toBeNull();

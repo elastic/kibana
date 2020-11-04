@@ -45,12 +45,10 @@ export type ReqFacade = FakeRequest & {
 };
 
 export class AbstractSearchStrategy {
-  public searchStrategyName!: string;
   public indexType?: string;
   public additionalParams: any;
 
-  constructor(name: string, type?: string, additionalParams: any = {}) {
-    this.searchStrategyName = name;
+  constructor(type?: string, additionalParams: any = {}) {
     this.indexType = type;
     this.additionalParams = additionalParams;
   }
@@ -60,20 +58,21 @@ export class AbstractSearchStrategy {
     const requests: any[] = [];
     bodies.forEach((body) => {
       requests.push(
-        deps.data.search.search(
-          req.requestContext,
-          {
-            params: {
-              ...body,
-              ...this.additionalParams,
+        deps.data.search
+          .search(
+            {
+              params: {
+                ...body,
+                ...this.additionalParams,
+              },
+              indexType: this.indexType,
             },
-            indexType: this.indexType,
-          },
-          {
-            ...options,
-            strategy: this.searchStrategyName,
-          }
-        )
+            {
+              ...options,
+            },
+            req.requestContext
+          )
+          .toPromise()
       );
     });
     return Promise.all(requests);
@@ -84,7 +83,7 @@ export class AbstractSearchStrategy {
 
     return await indexPatternsService!.getFieldsForWildcard({
       pattern: indexPattern,
-      fieldCapsOptions: { allowNoIndices: true },
+      fieldCapsOptions: { allow_no_indices: true },
     });
   }
 

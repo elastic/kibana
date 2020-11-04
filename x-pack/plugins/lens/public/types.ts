@@ -11,7 +11,7 @@ import { SavedObjectReference } from 'kibana/public';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
-  KibanaDatatable,
+  Datatable,
   SerializedFieldFormat,
 } from '../../../../src/plugins/expressions/public';
 import { DragContextState } from './drag_drop';
@@ -188,6 +188,10 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+  /**
+   * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
+   */
+  uniqueLabels: (state: T) => Record<string, string>;
 }
 
 /**
@@ -279,6 +283,7 @@ export type DatasourceDimensionDropProps<T> = SharedDimensionProps & {
   setState: StateSetter<T>;
   activeData?: Record<string, KibanaDatatable>;
   dragDropContext: DragContextState;
+  isReorder?: boolean;
 };
 
 export type DatasourceDimensionDropHandlerProps<T> = DatasourceDimensionDropProps<T> & {
@@ -316,7 +321,7 @@ export interface OperationMetadata {
 
 export interface LensMultiTable {
   type: 'lens_multitable';
-  tables: Record<string, KibanaDatatable>;
+  tables: Record<string, Datatable>;
   dateRange?: {
     fromDate: Date;
     toDate: Date;
