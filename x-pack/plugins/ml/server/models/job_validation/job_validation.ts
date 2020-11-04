@@ -100,6 +100,14 @@ export async function validateJob(
           ...(await validateModelMemoryLimit(client, mlClient, job, duration))
         );
       }
+
+      // if datafeed has aggregation, require job config to include a valid summary_doc_field_name
+      const datafeedAggConfig = job.datafeed_config?.aggregations ?? job.datafeed_config?.aggs;
+      if (datafeedAggConfig !== undefined) {
+        if (!job.analysis_config?.summary_count_field_name) {
+          validationMessages.push({ id: 'missing_summary_count_field_name' });
+        }
+      }
     } else {
       validationMessages = basicValidation.messages;
       validationMessages.push({ id: 'skipped_extended_tests' });
