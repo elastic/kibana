@@ -10,14 +10,16 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiText,
+  EuiTextColor,
   EuiTitle,
   EuiForm,
   EuiSpacer,
   EuiFieldText,
+  EuiFieldSearch,
   EuiFlexGrid,
   EuiFormRow,
   EuiComboBox,
-  EuiTextColor,
   EuiFieldNumber,
   EuiSelect,
   EuiIconTip,
@@ -25,7 +27,7 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
-  EuiBadge,
+  EuiNotificationBadge,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -57,6 +59,7 @@ import { ActionForm } from '../action_connector_form';
 import { ALERTS_FEATURE_ID } from '../../../../../alerts/common';
 import { hasAllPrivilege, hasShowActionsCapability } from '../../lib/capabilities';
 import { SolutionFilter } from './solution_filter';
+import './alert_form.scss';
 
 const ENTER_KEY = 13;
 
@@ -305,22 +308,21 @@ export const AlertForm = ({
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([solution, items], groupIndex) => (
       <Fragment key={`group${groupIndex}`}>
-        <EuiTitle data-test-subj={`alertType${groupIndex}Group`} size="xxs">
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiTextColor color="subdued">
-                {(kibanaFeatures
-                  ? getProducerFeatureName(solution, kibanaFeatures)
-                  : capitalize(solution)) ?? capitalize(solution)}
-              </EuiTextColor>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="default">{items.length}</EuiBadge>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+        <EuiTitle
+          data-test-subj={`alertType${groupIndex}Group`}
+          size="xxxs"
+          textTransform="uppercase"
+          className="triggersActionsUI__alertTypeNodeHeading"
+        >
+          <EuiTextColor color="subdued">
+            {(kibanaFeatures
+              ? getProducerFeatureName(solution, kibanaFeatures)
+              : capitalize(solution)) ?? capitalize(solution)}
+            &nbsp;({items.length})
+          </EuiTextColor>
         </EuiTitle>
         <EuiHorizontalRule size="full" margin="xs" />
-        <EuiListGroup flush={true} gutterSize="s" maxWidth={false}>
+        <EuiListGroup flush={true} gutterSize="m" maxWidth={false} size="s">
           {items
             .sort((a, b) => a.name.toString().localeCompare(b.name.toString()))
             .map((item, index) => (
@@ -328,12 +330,14 @@ export const AlertForm = ({
                 <EuiListGroupItem
                   data-test-subj={`${item.id}-SelectOption`}
                   label={
-                    <EuiDescriptionList>
-                      <EuiDescriptionListTitle>{item.name}</EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription>
-                        {item.alertTypeItem.description}
-                      </EuiDescriptionListDescription>
-                    </EuiDescriptionList>
+                    <div>
+                      <EuiText>
+                        <h4>{item.name}</h4>
+                      </EuiText>
+                      <EuiText color="subdued" size="s">
+                        <p>{item.alertTypeItem.description}</p>
+                      </EuiText>
+                    </div>
                   }
                   onClick={() => {
                     setAlertProperty('alertTypeId', item.id);
@@ -344,10 +348,10 @@ export const AlertForm = ({
                     }
                   }}
                 />
-                <EuiHorizontalRule size="full" margin="xs" />
               </Fragment>
             ))}
         </EuiListGroup>
+        <EuiSpacer />
       </Fragment>
     ));
 
@@ -637,7 +641,7 @@ export const AlertForm = ({
                 <h5>
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.alertForm.alertTypeSelectLabel"
-                    defaultMessage="Alert type"
+                    defaultMessage="Select alert type"
                   />
                 </h5>
               </EuiTitle>
@@ -645,10 +649,9 @@ export const AlertForm = ({
           >
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiFieldText
+                <EuiFieldSearch
                   fullWidth
                   data-test-subj="alertSearchField"
-                  prepend={<EuiIcon type="search" />}
                   onChange={(e) => setInputText(e.target.value)}
                   onKeyUp={(e) => {
                     if (e.keyCode === ENTER_KEY) {
