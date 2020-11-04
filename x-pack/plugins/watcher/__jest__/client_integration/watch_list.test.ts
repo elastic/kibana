@@ -6,15 +6,9 @@
 
 import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
-import {
-  setupEnvironment,
-  pageHelpers,
-  nextTick,
-  getRandomString,
-  findTestSubject,
-} from './helpers';
+import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
 import { WatchListTestBed } from './helpers/watch_list.helpers';
-import { ROUTES } from '../../common/constants';
+import { ROUTES, REFRESH_INTERVALS } from '../../common/constants';
 
 const { API_ROOT } = ROUTES;
 
@@ -24,13 +18,21 @@ describe('<WatchList />', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: WatchListTestBed;
 
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
   afterAll(() => {
+    jest.useRealTimers();
     server.restore();
   });
 
   describe('on component mount', () => {
     beforeEach(async () => {
-      testBed = await setup();
+      await act(async () => {
+        testBed = await setup();
+      });
+      testBed.component.update();
     });
 
     describe('watches', () => {
@@ -40,12 +42,12 @@ describe('<WatchList />', () => {
         });
 
         test('should display an empty prompt', async () => {
-          const { component, exists } = await setup();
-
           await act(async () => {
-            await nextTick();
-            component.update();
+            testBed = await setup();
           });
+          const { component, exists } = testBed;
+
+          component.update();
 
           expect(exists('emptyPrompt')).toBe(true);
           expect(exists('emptyPrompt.createWatchButton')).toBe(true);
@@ -76,12 +78,64 @@ describe('<WatchList />', () => {
         beforeEach(async () => {
           httpRequestsMockHelpers.setLoadWatchesResponse({ watches });
 
-          testBed = await setup();
+          await act(async () => {
+            testBed = await setup();
+          });
+
+          testBed.component.update();
+        });
+
+        test('should retain the search query', async () => {
+          const { find, component, table } = testBed;
+
+          const searchInput = find('watchesTableContainer').find('.euiFieldSearch');
+
+          searchInput.instance().value = watch1.name;
+          searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+
+          component.update();
+
+          const { tableCellsValues } = table.getMetaData('watchesTable');
+
+          expect(tableCellsValues.length).toEqual(1);
+          const row = tableCellsValues[0];
+          const { name, id, watchStatus } = watch1;
+
+          const getExpectedValue = (value: any) => (typeof value === 'undefined' ? '' : value);
+
+          expect(row).toEqual([
+            '',
+            id,
+            getExpectedValue(name),
+            watchStatus.state,
+            getExpectedValue(watchStatus.comment),
+            getExpectedValue(watchStatus.lastMetCondition),
+            getExpectedValue(watchStatus.lastChecked),
+            '',
+          ]);
 
           await act(async () => {
-            await nextTick();
-            testBed.component.update();
+            // Advance timers to simulate another request
+            jest.advanceTimersByTime(REFRESH_INTERVALS.WATCH_LIST);
           });
+
+          component.update();
+
+          const { tableCellsValues: updatedTableCellsValues } = table.getMetaData('watchesTable');
+
+          expect(updatedTableCellsValues.length).toEqual(1);
+          const updatedRow = updatedTableCellsValues[0];
+
+          expect(updatedRow).toEqual([
+            '',
+            id,
+            getExpectedValue(name),
+            watchStatus.state,
+            getExpectedValue(watchStatus.comment),
+            getExpectedValue(watchStatus.lastMetCondition),
+            getExpectedValue(watchStatus.lastChecked),
+            '',
+          ]);
         });
 
         test('should set the correct app title', () => {
@@ -208,9 +262,9 @@ describe('<WatchList />', () => {
 
             await act(async () => {
               confirmButton!.click();
-              await nextTick();
-              component.update();
             });
+
+            component.update();
 
             const latestRequest = server.requests[server.requests.length - 1];
 
