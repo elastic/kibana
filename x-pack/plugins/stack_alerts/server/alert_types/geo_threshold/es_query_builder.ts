@@ -21,7 +21,7 @@ const MAX_TOP_LEVEL_QUERY_SIZE = 0;
 const MAX_SHAPES_QUERY_SIZE = 10000;
 const MAX_BUCKETS_LIMIT = 65535;
 
-const getEsFormattedQuery = (query: Query, indexPattern: IIndexPattern) => {
+const getEsFormattedQuery = (query: Query, indexPattern?: IIndexPattern) => {
   let esFormattedQuery;
 
   const queryLanguage = query.language;
@@ -42,7 +42,7 @@ export async function getShapesFilters(
   log: Logger,
   alertId: string,
   boundaryNameField?: string,
-  boundaryIndexQuery?: object
+  boundaryIndexQuery?: Query
 ) {
   const filters: Record<string, unknown> = {};
   const shapesIdsNamesMap: Record<string, unknown> = {};
@@ -54,6 +54,7 @@ export async function getShapesFilters(
       ...(boundaryIndexQuery ? { query: getEsFormattedQuery(boundaryIndexQuery) } : {}),
     },
   });
+
   boundaryData.hits.hits.forEach(({ _index, _id }) => {
     filters[_id] = {
       geo_shape: {
@@ -97,7 +98,7 @@ export async function executeEsQueryFactory(
     geoField: string;
     boundaryIndexTitle: string;
     boundaryNameField?: string;
-    indexQuery?: object;
+    indexQuery?: Query;
   },
   { callCluster }: { callCluster: ILegacyScopedClusterClient['callAsCurrentUser'] },
   log: Logger,
@@ -109,8 +110,8 @@ export async function executeEsQueryFactory(
   ): Promise<SearchResponse<unknown> | undefined> => {
     let esFormattedQuery;
     if (indexQuery) {
-      const gteEpochDateTime = new Date(gteDateTime).getTime();
-      const ltEpochDateTime = new Date(ltDateTime).getTime();
+      const gteEpochDateTime = gteDateTime ? new Date(gteDateTime).getTime() : null;
+      const ltEpochDateTime = ltDateTime ? new Date(ltDateTime).getTime() : null;
       const dateRangeUpdatedQuery =
         indexQuery.language === 'kuery'
           ? `(${dateField} >= "${gteEpochDateTime}" and ${dateField} < "${ltEpochDateTime}") and (${indexQuery.query})`

@@ -15,6 +15,7 @@ import {
   ActionVariable,
   AlertTypeState,
 } from '../../../../alerts/server';
+import { Query } from '../../../../../../src/plugins/data/common/query';
 
 export const GEO_THRESHOLD_ID = '.geo-threshold';
 export type TrackingEvent = 'entered' | 'exited';
@@ -172,8 +173,8 @@ export interface GeoThresholdParams {
   boundaryGeoField: string;
   boundaryNameField?: string;
   delayOffsetWithUnits?: string;
-  indexQuery?: object;
-  boundaryIndexQuery?: object;
+  indexQuery?: Query;
+  boundaryIndexQuery?: Query;
 }
 
 export function getAlertType(
