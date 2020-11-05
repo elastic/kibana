@@ -16,28 +16,23 @@ import {
 } from './remote_clusters_edit.helpers';
 
 describe('Edit Remote cluster', () => {
-  let server;
-  let httpRequestsMockHelpers;
   let component;
   let find;
   let exists;
-  let waitFor;
 
-  beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
-  });
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   afterAll(() => {
     server.restore();
   });
 
-  beforeEach(async () => {
-    httpRequestsMockHelpers.setLoadRemoteClustersResponse([REMOTE_CLUSTER_EDIT]);
+  httpRequestsMockHelpers.setLoadRemoteClustersResponse([REMOTE_CLUSTER_EDIT]);
 
+  beforeEach(async () => {
     await act(async () => {
-      ({ component, find, exists, waitFor } = setup());
-      await waitFor('remoteClusterForm');
+      ({ component, find, exists } = setup());
     });
+    component.update();
   });
 
   test('should have the title of the page set correctly', () => {
@@ -59,8 +54,9 @@ describe('Edit Remote cluster', () => {
 
     await act(async () => {
       addRemoteClusterTestBed = setupRemoteClustersAdd();
-      addRemoteClusterTestBed.waitFor('remoteClusterAddPage');
     });
+
+    addRemoteClusterTestBed.component.update();
 
     const formEdit = component.find(RemoteClusterForm);
     const formAdd = addRemoteClusterTestBed.component.find(RemoteClusterForm);
