@@ -62,15 +62,32 @@ let kibanaCommonConfig: MapsLegacyConfig;
 export const setKibanaCommonConfig = (config: MapsLegacyConfig) => (kibanaCommonConfig = config);
 export const getKibanaCommonConfig = () => kibanaCommonConfig;
 
+let emsSettings: EMSSettings;
+export const setEMSSettings = (value: EMSSettings) => {
+  emsSettings = value;
+};
+
 export const getIsEmsEnabled = () => getKibanaCommonConfig().includeElasticMapsService;
-export const getEmsFontLibraryUrl = () => getKibanaCommonConfig().emsFontLibraryUrl;
 export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
-export const getEmsFileApiUrl = () => getKibanaCommonConfig().emsFileApiUrl;
-export const getEmsTileApiUrl = () => getKibanaCommonConfig().emsTileApiUrl;
-export const getEmsLandingPageUrl = () => getKibanaCommonConfig().emsLandingPageUrl;
 export const getProxyElasticMapsServiceInMaps = () =>
   getKibanaCommonConfig().proxyElasticMapsServiceInMaps;
 export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
 export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
+
+export const getEmsFontLibraryUrl = () => {
+  return emsSettings.getEMSFontLibraryUrl();
+};
+
+export const getEmsFileApiUrl = () => {
+  return emsSettings.getEMSFileApiUrl();
+};
+
+export const getEmsTileApiUrl = () => {
+  return emsSettings.getEMSTileApiUrl();
+};
+
+export const getEmsLandingPageUrl = () => {
+  return emsSettings.getEMSLandingPageUrl();
+};
 
 export const getShareService = () => pluginsStart.share;

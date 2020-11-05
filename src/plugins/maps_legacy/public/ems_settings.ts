@@ -49,6 +49,10 @@ export class EMSSettings {
     return this._config.emsUrl!.replace(/\/$/, '');
   }
 
+  isOnPrem(): boolean {
+    return !!this._isEMSUrlSet();
+  }
+
   isConfigValid(): boolean {
     const badConfig =
       this._isEMSUrlSet() &&
