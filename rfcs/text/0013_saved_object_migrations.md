@@ -218,7 +218,22 @@ Note:
    2. Clone the legacy index into a new index which has writes enabled. Use a fixed index name i.e `.kibana_pre6.5.0_001` or `.kibana_task_manager_pre7.4.0_001`. `POST /.kibana/_clone/.kibana_pre6.5.0_001?wait_for_active_shards=all {"settings": {"index.blocks.write": false}}`. Ignore errors if the clone already exists. Ignore errors if the legacy source doesn't exist.
    3. Wait for the cloning to complete `GET /_cluster/health/.kibana_pre6.5.0_001?wait_for_status=green&timeout=60s` If cloning doesn’t complete within the 60s timeout, log a warning for visibility and poll again.
    4. Apply the `convertToAlias` script if defined `POST /.kibana_pre6.5.0_001/_update_by_query?conflicts=proceed {"script": {...}}`. The `convertToAlias` script will have to be idempotent, preferably setting `ctx.op="noop"` on subsequent runs to avoid unecessary writes.
-   5. Delete the legacy index `DELETE /.kibana`. Ignore index doesn't exist errors.
+   5. Delete the legacy index and replace it with an alias of the same name
+      ```
+      POST /_aliases
+      {
+        "actions" : [
+            { "add":  { "index": ".kibana_pre6.5.0_001", "alias": ".kibana" } },
+            { "remove_index": { "index": ".kibana" } }
+        ]
+      }
+      ```.
+      Unlike the delete index API, the `remove_index` action will fail if
+      provided with an _alias_. Ignore "The provided expression [.kibana]
+      matches an alias, specify the corresponding concrete indices instead."
+      or "index_not_found_exception" errors. These actions are applied
+      atomically so that other Kibana instances will always see either a
+      `.kibana` index or an alias, but never neither.
    6. Use the cloned `.kibana_pre6.5.0_001` as the source for the rest of the migration algorithm.
 3. If `.kibana_current` and `.kibana_7.10.0` both exists and are pointing to the same index this version's migration has already been completed.
    1. Because the same version can have plugins enabled at any point in time,
@@ -243,18 +258,12 @@ Note:
    1. Ignore any version conflict errors.
    2. If a document transform throws an exception, add the document to a failure list and continue trying to transform all other documents. If any failures occured, log the complete list of documents that failed to transform. Fail the migration.
 9.  Mark the migration as complete by doing a single atomic operation (requires https://github.com/elastic/elasticsearch/pull/58100) that:
-   3. Checks that `.kibana-current` alias is still pointing to the source index
-   4. Points the `.kibana-7.10.0`  and `.kibana_current` aliases to the target index.
+   3. Checks that `.kibana_current` alias is still pointing to the source index
+   4. Points the `.kibana_7.10.0`  and `.kibana_current` aliases to the target index.
    5. If this fails with a "required alias [.kibana_current] does not exist" error fetch `.kibana_current` again:
       1. If `.kibana_current` is _not_ pointing to our target index fail the migration.
       2. If `.kibana_current` is pointing to our target index the migration has succeeded and we can proceed to step (9).
 10. Start serving traffic.
-
-Unlike the existing migration algorithm, we won't create an alias that points
-to the reindexed target. So after migrating a v6 `.kibana` we'll have
-`.kibana_pre6.5_001` but there will be no `.kibana` alias or index. This is
-because we have no way to ensure that when we try to delete the old 
-_index_, we don't accidently delete the newly cloned index with the same _alias_. Should this happen we'd completely loose the data in the legacy index.
 
 This algorithm shares a weakness with our existing migration algorithm
 (since v7.4). When the task manager index gets reindexed a reindex script is
