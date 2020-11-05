@@ -37,7 +37,7 @@ export const API_URL_REQUIRED = i18n.translate(
 export const API_URL_INVALID = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.servicenow.invalidApiUrlTextField',
   {
-    defaultMessage: 'URL is invalid.',
+    defaultMessage: 'URL is invalid. URL must start with https://',
   }
 );
 

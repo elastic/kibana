@@ -126,7 +126,7 @@ describe('webhook connector validation', () => {
 
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
-        url: ['URL is invalid.'],
+        url: ['URL is invalid. URL must start with http:// or https://'],
         method: [],
         user: [],
         password: [],
