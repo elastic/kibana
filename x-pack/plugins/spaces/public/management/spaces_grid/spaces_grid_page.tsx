@@ -112,7 +112,6 @@ export class SpacesGridPage extends Component<Props, State> {
           items={this.state.spaces}
           tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
             defaultMessage: 'Kibana spaces',
-            values: { count: this.state.spaces.length },
           })}
           rowHeader="name"
           columns={this.getColumnConfig()}

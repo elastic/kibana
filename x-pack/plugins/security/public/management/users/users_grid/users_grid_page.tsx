@@ -262,7 +262,6 @@ export class UsersGridPage extends Component<Props, State> {
                 itemId="username"
                 tableCaption={i18n.translate('xpack.security.management.users.tableCaption', {
                   defaultMessage: 'Users',
-                  values: { count: this.state.visibleUsers.length },
                 })}
                 rowHeader="username"
                 columns={columns}
