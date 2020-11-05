@@ -94,7 +94,7 @@ export class DocLinksService {
           max: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-max-aggregation.html`,
           median: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-percentile-aggregation.html`,
           min: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-min-aggregation.html`,
-          moving_avg: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-movavg-aggregation.html`,
+          moving_avg: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-movfn-aggregation.html`,
           percentile_ranks: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-percentile-rank-aggregation.html`,
           serial_diff: `${ELASTICSEARCH_DOCS}search-aggregations-pipeline-serialdiff-aggregation.html`,
           std_dev: `${ELASTICSEARCH_DOCS}search-aggregations-metrics-extendedstats-aggregation.html`,

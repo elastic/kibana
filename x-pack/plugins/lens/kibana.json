@@ -6,6 +6,7 @@
   "ui": true,
   "requiredPlugins": [
     "data",
+    "charts",
     "expressions",
     "navigation",
     "urlForwarding",
