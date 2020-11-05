@@ -4,8 +4,10 @@
 <titleabbrev>7.10</titleabbrev>
 ++++
 
+coming[7.10.0]
+
 This page discusses the breaking changes that you need to be aware of when migrating
-your application to Kibana 7.10.
+your application to {kib} 7.10.
 
 * <<user-facing-changes-7-10, Breaking changes for users>>
 * <<general-plugin-API-changes-7-10, Breaking changes for plugin developers>>
