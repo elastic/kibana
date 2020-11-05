@@ -51,9 +51,12 @@ export class MockRouter {
 
   public callRoute = async (request: TMockRouterRequest) => {
     const routerCalls = this.router[this.method].mock.calls as any[];
-    const route = routerCalls.find(([router]: any) => router.path === this.path);
-    const [, handler] = route;
+    if (!routerCalls.length) throw new Error('No routes registered.');
 
+    const route = routerCalls.find(([router]: any) => router.path === this.path);
+    if (!route) throw new Error('No matching registered routes found - check method/path keys');
+
+    const [, handler] = route;
     const context = {} as jest.Mocked<RequestHandlerContext>;
     await handler(context, httpServerMock.createKibanaRequest(request as any), this.response);
   };
