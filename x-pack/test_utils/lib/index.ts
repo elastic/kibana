@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { nextTick, getRandomString, getRandomNumber } from './utils';
+export { nextTick, getRandomString, getRandomNumber, removeExternalLinkText } from './utils';

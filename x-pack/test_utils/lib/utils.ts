@@ -16,3 +16,6 @@ export const getRandomNumber = (range: { min: number; max: number } = { min: 1, 
 
 export const getRandomString = (options = {}) =>
   `${chance.string({ pool: CHARS_POOL, ...options })}-${Date.now()}`;
+
+export const removeExternalLinkText = (str: string) =>
+  str.replace(/\(opens in a new tab or window\)/g, '');

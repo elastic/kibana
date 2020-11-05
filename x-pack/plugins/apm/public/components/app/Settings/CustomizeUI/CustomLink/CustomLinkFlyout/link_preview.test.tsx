@@ -12,6 +12,7 @@ import {
   act,
   waitFor,
 } from '@testing-library/react';
+import { removeExternalLinkText } from '../../../../../../../../../test_utils';
 import * as apmApi from '../../../../../../services/rest/createCallApmApi';
 
 describe('LinkPreview', () => {
@@ -53,7 +54,9 @@ describe('LinkPreview', () => {
       );
       expect(getElementValue(container, 'preview-label')).toEqual('foo');
       expect(
-        (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+        removeExternalLinkText(
+          (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+        )
       ).toEqual('https://baz.co');
     });
   });
@@ -69,7 +72,9 @@ describe('LinkPreview', () => {
       );
       expect(getElementValue(container, 'preview-label')).toEqual('foo');
       expect(
-        (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+        removeExternalLinkText(
+          (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+        )
       ).toEqual('https://baz.co?service.name={{invalid}');
       expect(getByTestId(container, 'preview-warning')).toBeInTheDocument();
     });
@@ -85,7 +90,9 @@ describe('LinkPreview', () => {
     await waitFor(() => expect(callApmApiSpy).toHaveBeenCalled());
     expect(getElementValue(container, 'preview-label')).toEqual('foo');
     expect(
-      (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+      removeExternalLinkText(
+        (getByTestId(container, 'preview-link') as HTMLAnchorElement).text
+      )
     ).toEqual('https://baz.co?transaction=foo');
   });
 });
