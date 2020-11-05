@@ -20,7 +20,7 @@ export const initDurationAnomalyAlertType: AlertTypeInitializer = ({
   id: CLIENT_ALERT_TYPES.DURATION_ANOMALY,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/duration-anomaly-alert.html`;
+    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/uptime/${docLinks.DOC_LINK_VERSION}/uptime-alerting.html`;
   },
   alertParamsExpression: (params: unknown) => (
     <DurationAnomalyAlert core={core} plugins={plugins} params={params} />
