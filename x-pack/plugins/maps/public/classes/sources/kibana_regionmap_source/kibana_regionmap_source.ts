@@ -4,29 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { AbstractVectorSource } from '../vector_source';
-import { getKibanaRegionList } from '../../../meta';
 import { i18n } from '@kbn/i18n';
+import { AbstractVectorSource, GeoJsonWithMeta } from '../vector_source';
+import { getKibanaRegionList } from '../../../meta';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
-import { FIELD_ORIGIN, SOURCE_TYPES } from '../../../../common/constants';
+import { FIELD_ORIGIN, FORMAT_TYPE, SOURCE_TYPES } from '../../../../common/constants';
 import { KibanaRegionField } from '../../fields/kibana_region_field';
 import { registerSource } from '../source_registry';
+import { KibanaRegionmapSourceDescriptor } from '../../../../common/descriptor_types/source_descriptor_types';
+import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
+import { IField } from '../../fields/field';
+import { LayerConfig } from '../../../../../../../src/plugins/region_map/config';
 
 export const sourceTitle = i18n.translate('xpack.maps.source.kbnRegionMapTitle', {
   defaultMessage: 'Configured GeoJSON',
 });
 
 export class KibanaRegionmapSource extends AbstractVectorSource {
-  static type = SOURCE_TYPES.REGIONMAP_FILE;
+  readonly _descriptor: KibanaRegionmapSourceDescriptor;
 
-  static createDescriptor({ name }) {
+  static createDescriptor({ name }: { name: string }): KibanaRegionmapSourceDescriptor {
     return {
-      type: KibanaRegionmapSource.type,
-      name: name,
+      type: SOURCE_TYPES.REGIONMAP_FILE,
+      name,
     };
   }
 
-  createField({ fieldName }) {
+  constructor(descriptor: KibanaRegionmapSourceDescriptor, inspectorAdapters?: Adapters) {
+    super(descriptor, inspectorAdapters);
+    this._descriptor = descriptor;
+  }
+
+  createField({ fieldName }: { fieldName: string }): KibanaRegionField {
     return new KibanaRegionField({
       fieldName,
       source: this,
@@ -49,10 +58,12 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     ];
   }
 
-  async getVectorFileMeta() {
-    const regionList = getKibanaRegionList();
-    const meta = regionList.find((source) => source.name === this._descriptor.name);
-    if (!meta) {
+  async getVectorFileMeta(): Promise<LayerConfig> {
+    const regionList: LayerConfig[] = getKibanaRegionList();
+    const layerConfig: LayerConfig | undefined = regionList.find(
+      (regionConfig: LayerConfig) => regionConfig.name === this._descriptor.name
+    );
+    if (!layerConfig) {
       throw new Error(
         i18n.translate('xpack.maps.source.kbnRegionMap.noConfigErrorMessage', {
           defaultMessage: `Unable to find map.regionmap configuration for {name}`,
@@ -62,13 +73,13 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
         })
       );
     }
-    return meta;
+    return layerConfig;
   }
 
-  async getGeoJsonWithMeta() {
+  async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     const vectorFileMeta = await this.getVectorFileMeta();
     const featureCollection = await AbstractVectorSource.getGeoJson({
-      format: vectorFileMeta.format.type,
+      format: vectorFileMeta.format.type as FORMAT_TYPE,
       featureCollectionPath: vectorFileMeta.meta.feature_collection_path,
       fetchUrl: vectorFileMeta.url,
     });
@@ -78,12 +89,16 @@ export class KibanaRegionmapSource extends AbstractVectorSource {
     };
   }
 
-  async getLeftJoinFields() {
-    const vectorFileMeta = await this.getVectorFileMeta();
-    return vectorFileMeta.fields.map((f) => this.createField({ fieldName: f.name }));
+  async getLeftJoinFields(): Promise<IField[]> {
+    const vectorFileMeta: LayerConfig = await this.getVectorFileMeta();
+    return vectorFileMeta.fields.map(
+      (field): KibanaRegionField => {
+        return this.createField({ fieldName: field.name });
+      }
+    );
   }
 
-  async getDisplayName() {
+  async getDisplayName(): Promise<string> {
     return this._descriptor.name;
   }
 

@@ -11,49 +11,17 @@ import {
 } from 'src/core/server';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import * as Registry from '../../registry';
-import {
-  AssetType,
-  KibanaAssetType,
-  AssetReference,
-  AssetParts,
-  KibanaSavedObjectType,
-} from '../../../../types';
+import { AssetType, KibanaAssetType, AssetReference } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
-import { indexPatternTypes } from '../index_pattern/install';
 
 type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset>> & {
-  type: KibanaSavedObjectType;
+  type: AssetType;
 };
 export type ArchiveAsset = Pick<
   SavedObject,
   'id' | 'attributes' | 'migrationVersion' | 'references'
 > & {
-  type: KibanaSavedObjectType;
-};
-
-// KibanaSavedObjectTypes are used to ensure saved objects being created for a given
-// KibanaAssetType have the correct type
-const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectType> = {
-  [KibanaAssetType.dashboard]: KibanaSavedObjectType.dashboard,
-  [KibanaAssetType.indexPattern]: KibanaSavedObjectType.indexPattern,
-  [KibanaAssetType.map]: KibanaSavedObjectType.map,
-  [KibanaAssetType.search]: KibanaSavedObjectType.search,
-  [KibanaAssetType.visualization]: KibanaSavedObjectType.visualization,
-};
-
-// Define how each asset type will be installed
-const AssetInstallers: Record<
-  KibanaAssetType,
-  (args: {
-    savedObjectsClient: SavedObjectsClientContract;
-    kibanaAssets: ArchiveAsset[];
-  }) => Promise<Array<SavedObject<unknown>>>
-> = {
-  [KibanaAssetType.dashboard]: installKibanaSavedObjects,
-  [KibanaAssetType.indexPattern]: installKibanaIndexPatterns,
-  [KibanaAssetType.map]: installKibanaSavedObjects,
-  [KibanaAssetType.search]: installKibanaSavedObjects,
-  [KibanaAssetType.visualization]: installKibanaSavedObjects,
+  type: AssetType;
 };
 
 export async function getKibanaAsset(key: string): Promise<ArchiveAsset> {
@@ -79,22 +47,16 @@ export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectTo
 export async function installKibanaAssets(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
-  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>;
+  kibanaAssets: ArchiveAsset[];
 }): Promise<SavedObject[]> {
   const { savedObjectsClient, kibanaAssets } = options;
 
   // install the assets
   const kibanaAssetTypes = Object.values(KibanaAssetType);
   const installedAssets = await Promise.all(
-    kibanaAssetTypes.map((assetType) => {
-      if (kibanaAssets[assetType]) {
-        return AssetInstallers[assetType]({
-          savedObjectsClient,
-          kibanaAssets: kibanaAssets[assetType],
-        });
-      }
-      return [];
-    })
+    kibanaAssetTypes.map((assetType) =>
+      installKibanaSavedObjects({ savedObjectsClient, assetType, kibanaAssets })
+    )
   );
   return installedAssets.flat();
 }
@@ -112,50 +74,25 @@ export const deleteKibanaInstalledRefs = async (
     installed_kibana: installedAssetsToSave,
   });
 };
-export async function getKibanaAssets(
-  paths: string[]
-): Promise<Record<KibanaAssetType, ArchiveAsset[]>> {
-  const kibanaAssetTypes = Object.values(KibanaAssetType);
-  const isKibanaAssetType = (path: string) => {
-    const parts = Registry.pathParts(path);
-
-    return parts.service === 'kibana' && (kibanaAssetTypes as string[]).includes(parts.type);
-  };
-
-  const filteredPaths = paths
-    .filter(isKibanaAssetType)
-    .map<[string, AssetParts]>((path) => [path, Registry.pathParts(path)]);
-
-  const assetArrays: Array<Promise<ArchiveAsset[]>> = [];
-  for (const assetType of kibanaAssetTypes) {
-    const matching = filteredPaths.filter(([path, parts]) => parts.type === assetType);
-
-    assetArrays.push(Promise.all(matching.map(([path]) => path).map(getKibanaAsset)));
-  }
-
-  const resolvedAssets = await Promise.all(assetArrays);
-
-  const result = {} as Record<KibanaAssetType, ArchiveAsset[]>;
-
-  for (const [index, assetType] of kibanaAssetTypes.entries()) {
-    const expectedType = KibanaSavedObjectTypeMapping[assetType];
-    const properlyTypedAssets = resolvedAssets[index].filter(({ type }) => type === expectedType);
-
-    result[assetType] = properlyTypedAssets;
-  }
-
-  return result;
+export async function getKibanaAssets(paths: string[]) {
+  const isKibanaAssetType = (path: string) => Registry.pathParts(path).type in KibanaAssetType;
+  const filteredPaths = paths.filter(isKibanaAssetType);
+  const kibanaAssets = await Promise.all(filteredPaths.map((path) => getKibanaAsset(path)));
+  return kibanaAssets;
 }
-
 async function installKibanaSavedObjects({
   savedObjectsClient,
+  assetType,
   kibanaAssets,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
+  assetType: KibanaAssetType;
   kibanaAssets: ArchiveAsset[];
 }) {
+  const isSameType = (asset: ArchiveAsset) => assetType === asset.type;
+  const filteredKibanaAssets = kibanaAssets.filter((asset) => isSameType(asset));
   const toBeSavedObjects = await Promise.all(
-    kibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
+    filteredKibanaAssets.map((asset) => createSavedObjectKibanaAsset(asset))
   );
 
   if (toBeSavedObjects.length === 0) {
@@ -168,23 +105,8 @@ async function installKibanaSavedObjects({
   }
 }
 
-async function installKibanaIndexPatterns({
-  savedObjectsClient,
-  kibanaAssets,
-}: {
-  savedObjectsClient: SavedObjectsClientContract;
-  kibanaAssets: ArchiveAsset[];
-}) {
-  // Filter out any reserved index patterns
-  const reservedPatterns = indexPatternTypes.map((pattern) => `${pattern}-*`);
-
-  const nonReservedPatterns = kibanaAssets.filter((asset) => !reservedPatterns.includes(asset.id));
-
-  return installKibanaSavedObjects({ savedObjectsClient, kibanaAssets: nonReservedPatterns });
-}
-
 export function toAssetReference({ id, type }: SavedObject) {
-  const reference: AssetReference = { id, type: type as KibanaSavedObjectType };
+  const reference: AssetReference = { id, type: type as KibanaAssetType };
 
   return reference;
 }
