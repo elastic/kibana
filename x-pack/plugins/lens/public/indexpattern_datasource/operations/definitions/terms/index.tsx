@@ -4,11 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { IndexPatternColumn } from '../../../indexpattern';
 import { updateColumnParam } from '../../../state_helpers';
 import { DataType } from '../../../../types';
@@ -37,6 +40,7 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
     orderDirection: 'asc' | 'desc';
     otherBucket?: boolean;
+    missingBucket?: boolean;
   };
 }
 
@@ -87,6 +91,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           : { type: 'alphabetical' },
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
         otherBucket: !indexPattern.hasRestrictions,
+        missingBucket: false,
       },
     };
   },
@@ -106,8 +111,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
           defaultMessage: 'Other',
         }),
-        missingBucket: false,
-        missingBucketLabel: 'Missing',
+        missingBucket: column.params.otherBucket && column.params.missingBucket,
+        missingBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.missingLabel', {
+          defaultMessage: 'Missing',
+        }),
       },
     };
   },
@@ -135,9 +142,12 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     }
     return currentColumn;
   },
-  paramEditor: ({ state, setState, currentColumn, layerId }) => {
+  paramEditor: function ParamEditor({ state, setState, currentColumn, layerId }) {
     const indexPattern = currentColumn && state.indexPatterns[state.layers[layerId].indexPatternId];
     const hasRestrictions = indexPattern.hasRestrictions;
+
+    const [popoverOpen, setPopoverOpen] = useState(false);
+
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
@@ -196,18 +206,31 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           />
         </EuiFormRow>
         {!hasRestrictions && (
-          <EuiFormRow
-            label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketLabel', {
-              defaultMessage: 'Other values',
-            })}
-            display="columnCompressed"
-            fullWidth
-          >
-            <>
-              <EuiSpacer size="s" />
+          <EuiText textAlign="right">
+            <EuiPopover
+              ownFocus
+              button={
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="arrowDown"
+                  iconSide="right"
+                  onClick={() => {
+                    setPopoverOpen(true);
+                  }}
+                >
+                  {i18n.translate('xpack.lens.indexPattern.terms.advancedSettings', {
+                    defaultMessage: 'Advanced',
+                  })}
+                </EuiButtonEmpty>
+              }
+              isOpen={popoverOpen}
+              closePopover={() => {
+                setPopoverOpen(false);
+              }}
+            >
               <EuiSwitch
                 label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
-                  defaultMessage: 'Show separately',
+                  defaultMessage: 'Group other values as "Other"',
                 })}
                 compressed
                 data-test-subj="indexPattern-terms-other-bucket"
@@ -224,8 +247,30 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                   )
                 }
               />
-            </>
-          </EuiFormRow>
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
+                  defaultMessage: 'Include missing values',
+                })}
+                compressed
+                disabled={!currentColumn.params.otherBucket}
+                data-test-subj="indexPattern-terms-missing-bucket"
+                checked={Boolean(currentColumn.params.missingBucket)}
+                onChange={(e: EuiSwitchEvent) =>
+                  setState(
+                    updateColumnParam({
+                      state,
+                      layerId,
+                      currentColumn,
+                      paramName: 'missingBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+            </EuiPopover>
+            <EuiSpacer size="s" />
+          </EuiText>
         )}
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {

@@ -92,6 +92,26 @@ describe('terms', () => {
         })
       );
     });
+
+    it('should not enable missing bucket if other bucket is not set', () => {
+      const termsColumn = state.layers.first.columns.col1 as TermsIndexPatternColumn;
+      const esAggsConfig = termsOperation.toEsAggsConfig(
+        {
+          ...termsColumn,
+          params: { ...termsColumn.params, otherBucket: false, missingBucket: true },
+        },
+        'col1',
+        {} as IndexPattern
+      );
+      expect(esAggsConfig).toEqual(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            otherBucket: false,
+            missingBucket: false,
+          }),
+        })
+      );
+    });
   });
 
   describe('onFieldChange', () => {
@@ -426,6 +446,54 @@ describe('terms', () => {
       expect(instance.find('[data-test-subj="indexPattern-terms-other-bucket"]').length).toEqual(0);
     });
 
+    it('should disable missing bucket setting as long as other bucket is not set', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
+          layerId="first"
+        />
+      );
+
+      const select = instance
+        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select.prop('disabled')).toEqual(true);
+    });
+
+    it('should enable missing bucket setting as long as other bucket is set', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={
+            {
+              ...state.layers.first.columns.col1,
+              params: {
+                ...state.layers.first.columns.col1.params,
+                otherBucket: true,
+              },
+            } as TermsIndexPatternColumn
+          }
+          layerId="first"
+        />
+      );
+
+      const select = instance
+        .find('[data-test-subj="indexPattern-terms-missing-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select.prop('disabled')).toEqual(false);
+    });
+
     it('should update state when clicking other bucket toggle', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(
@@ -439,7 +507,10 @@ describe('terms', () => {
         />
       );
 
-      instance.find(EuiSwitch).prop('onChange')!({
+      instance
+        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
+        .find(EuiSwitch)
+        .prop('onChange')!({
         target: {
           checked: true,
         },
