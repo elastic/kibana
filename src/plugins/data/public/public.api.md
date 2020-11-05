@@ -1806,6 +1806,8 @@ export interface QuerySuggestionGetFnArgs {
     selectionStart: number;
     // (undocumented)
     signal?: AbortSignal;
+    // (undocumented)
+    useTimeRange?: boolean;
 }
 
 // Warning: (ae-missing-release-tag) "QuerySuggestionTypes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
