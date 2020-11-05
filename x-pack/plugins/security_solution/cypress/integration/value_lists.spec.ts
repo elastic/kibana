@@ -7,6 +7,7 @@
 import {
   loginAndWaitForPageWithoutDateRange,
   loginWithRoleAndWaitForPageWithoutDateRange,
+  ROLES,
 } from '../tasks/login';
 import { DETECTIONS_URL } from '../urls/navigation';
 import {
@@ -28,7 +29,6 @@ import {
   exportValueList,
 } from '../tasks/lists';
 import { VALUE_LISTS_TABLE, VALUE_LISTS_ROW, VALUE_LISTS_MODAL_ACTIVATOR } from '../screens/lists';
-import { esArchiverLoadEmptyKibana } from '../tasks/es_archiver';
 
 describe('value lists', () => {
   describe('management modal', () => {
@@ -228,14 +228,12 @@ describe('value lists', () => {
   describe('user with restricted access role', () => {
     beforeEach(() => {
       // log in with t1 analyst
-      loginWithRoleAndWaitForPageWithoutDateRange('t1_analyst', DETECTIONS_URL);
+      loginWithRoleAndWaitForPageWithoutDateRange(ROLES.t1_analyst, DETECTIONS_URL);
       goToManageAlertsDetectionRules();
     });
 
     it('Does not allow a t1 analyst user to upload a value list', () => {
-      cy.get(VALUE_LISTS_MODAL_ACTIVATOR).each((collapsedItemActionBtn) => {
-        cy.wrap(collapsedItemActionBtn).should('have.attr', 'disabled');
-      });
+      cy.get(VALUE_LISTS_MODAL_ACTIVATOR).should('have.attr', 'disabled');
     });
   });
 });

@@ -42,6 +42,16 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  */
 const LOGIN_API_ENDPOINT = '/internal/security/login';
 
+export const ROLES = {
+  t1_analyst: 't1_analyst',
+  t2_analyst: 't2_analyst',
+  hunter: 'hunter',
+  rule_author: 'rule_author',
+  soc_manager: 'soc_manager',
+  detections_admin: 'detections_admin',
+  platform_engineer: 'platform_engineer',
+};
+
 export const loginWithRole = async (role: string) => {
   cy.exec(
     `bash ./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh ./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`
