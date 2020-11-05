@@ -16,6 +16,8 @@ import { ValuesRangeInput } from './values_range_input';
 import { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
 import { IndexPatternPrivateState, IndexPattern } from '../../../types';
+import { EuiSwitch } from '@elastic/eui';
+import { EuiSwitchEvent } from '@elastic/eui';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,
@@ -348,6 +350,65 @@ describe('terms', () => {
   });
 
   describe('param editor', () => {
+    it('should render current other bucket value', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
+          layerId="first"
+        />
+      );
+
+      const select = instance
+        .find('[data-test-subj="indexPattern-terms-other-bucket"]')
+        .find(EuiSwitch);
+
+      expect(select.prop('checked')).toEqual(false);
+    });
+
+    it('should update state when clicking other bucket toggle', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={state}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
+          layerId="first"
+        />
+      );
+
+      instance.find(EuiSwitch).prop('onChange')!({
+        target: {
+          checked: true,
+        },
+      } as EuiSwitchEvent);
+
+      expect(setStateSpy).toHaveBeenCalledWith({
+        ...state,
+        layers: {
+          first: {
+            ...state.layers.first,
+            columns: {
+              ...state.layers.first.columns,
+              col1: {
+                ...state.layers.first.columns.col1,
+                params: {
+                  ...(state.layers.first.columns.col1 as TermsIndexPatternColumn).params,
+                  otherBucket: true,
+                },
+              },
+            },
+          },
+        },
+      });
+    });
+
     it('should render current order by value and options', () => {
       const setStateSpy = jest.fn();
       const instance = shallow(

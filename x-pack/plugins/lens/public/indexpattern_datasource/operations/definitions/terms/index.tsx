@@ -6,7 +6,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
+import { EuiSwitchEvent } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { IndexPatternColumn } from '../../../indexpattern';
 import { updateColumnParam } from '../../../state_helpers';
 import { DataType } from '../../../../types';
@@ -34,6 +36,7 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     size: number;
     orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
     orderDirection: 'asc' | 'desc';
+    otherBucket?: boolean;
   };
 }
 
@@ -82,6 +85,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           ? { type: 'column', columnId: existingMetricColumn }
           : { type: 'alphabetical' },
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
+        otherBucket: true,
       },
     };
   },
@@ -97,7 +101,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           column.params.orderBy.type === 'alphabetical' ? '_key' : column.params.orderBy.columnId,
         order: column.params.orderDirection,
         size: column.params.size,
-        otherBucket: false,
+        otherBucket: Boolean(column.params.otherBucket),
         otherBucketLabel: 'Other',
         missingBucket: false,
         missingBucketLabel: 'Missing',
@@ -185,6 +189,36 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               );
             }}
           />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketLabel', {
+            defaultMessage: 'Other values',
+          })}
+          display="columnCompressed"
+          fullWidth
+        >
+          <>
+            <EuiSpacer size="s" />
+            <EuiSwitch
+              label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
+                defaultMessage: 'Show separately',
+              })}
+              compressed
+              data-test-subj="indexPattern-terms-other-bucket"
+              checked={Boolean(currentColumn.params.otherBucket)}
+              onChange={(e: EuiSwitchEvent) =>
+                setState(
+                  updateColumnParam({
+                    state,
+                    layerId,
+                    currentColumn,
+                    paramName: 'otherBucket',
+                    value: e.target.checked,
+                  })
+                )
+              }
+            />
+          </>
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
