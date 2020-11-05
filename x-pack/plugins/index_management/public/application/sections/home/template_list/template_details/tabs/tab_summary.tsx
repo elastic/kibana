@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -53,15 +53,12 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
 
   const numIndexPatterns = indexPatterns.length;
 
-  const [ilmPolicyLink, setIlmPolicyLink] = useState<string | undefined>();
-  useUrlGenerator({
+  const ilmPolicyLink = useUrlGenerator({
     urlGeneratorId: ILM_URL_GENERATOR_ID,
     urlGeneratorState: {
       page: ILM_PAGES_POLICY_EDIT,
       policyName: ilmPolicy?.name,
     },
-    // we don't want to setIlmPolicyLink if there is no ilmPolicy
-    setLinkCallback: ilmPolicy ? setIlmPolicyLink : () => {},
   });
 
   return (
@@ -166,7 +163,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                   />
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
-                  {ilmPolicyLink ? (
+                  {ilmPolicy?.name && ilmPolicyLink ? (
                     <EuiLink href={ilmPolicyLink}>{ilmPolicy!.name}</EuiLink>
                   ) : (
                     ilmPolicy?.name || i18nTexts.none

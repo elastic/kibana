@@ -87,15 +87,12 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
 
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
-  const [ilmPolicyLink, setIlmPolicyLink] = useState<string | undefined>();
-  useUrlGenerator({
+  const ilmPolicyLink = useUrlGenerator({
     urlGeneratorId: ILM_URL_GENERATOR_ID,
     urlGeneratorState: {
       page: ILM_PAGES_POLICY_EDIT,
       policyName: dataStream?.ilmPolicyName,
     },
-    // we don't want to setIlmPolicyLink if there is no ilmPolicy
-    setLinkCallback: dataStream && dataStream.ilmPolicyName ? setIlmPolicyLink : () => {},
   });
   const { history } = useAppContext();
 
@@ -219,22 +216,23 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
           defaultMessage: `The index lifecycle policy that manages the data stream's data`,
         }),
-        content: ilmPolicyLink ? (
-          <EuiLink
-            data-test-subj={'ilmPolicyLink'}
-            {...reactRouterNavigate(history, ilmPolicyLink)}
-          >
-            {ilmPolicyName}
-          </EuiLink>
-        ) : (
-          ilmPolicyName || (
-            <em>
-              {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage', {
-                defaultMessage: `None`,
-              })}
-            </em>
-          )
-        ),
+        content:
+          ilmPolicyName && ilmPolicyLink ? (
+            <EuiLink
+              data-test-subj={'ilmPolicyLink'}
+              {...reactRouterNavigate(history, ilmPolicyLink)}
+            >
+              {ilmPolicyName}
+            </EuiLink>
+          ) : (
+            ilmPolicyName || (
+              <em>
+                {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage', {
+                  defaultMessage: `None`,
+                })}
+              </em>
+            )
+          ),
       },
     ];
 

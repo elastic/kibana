@@ -17,54 +17,31 @@ import { PLUGIN } from '../common/constants';
 
 export const ILM_URL_GENERATOR_ID = 'ILM_URL_GENERATOR_ID';
 
-export enum ILM_PAGES {
-  LIST = 'policies_list',
-  EDIT = 'policy_edit',
-  CREATE = 'policy_create',
-}
-
-export interface IlmPoliciesListUrlGeneratorState {
-  page: ILM_PAGES.LIST;
+export interface IlmUrlGeneratorState {
+  page: 'policies_list' | 'policy_edit' | 'policy_create';
+  policyName?: string;
   absolute?: boolean;
 }
-
-export interface IlmPolicyEditUrlGeneratorState {
-  page: ILM_PAGES.EDIT;
-  policyName: string;
-  absolute?: boolean;
-}
-
-export interface IlmPolicyCreateUrlGeneratorState {
-  page: ILM_PAGES.CREATE;
-  absolute?: boolean;
-}
-
-export type IlmUrlGeneratorState =
-  | IlmPoliciesListUrlGeneratorState
-  | IlmPolicyEditUrlGeneratorState
-  | IlmPolicyCreateUrlGeneratorState;
-
-export class IlmUrlGenerator implements UrlGeneratorsDefinition<typeof ILM_URL_GENERATOR_ID> {
-  constructor(private readonly getAppBasePath: (absolute?: boolean) => Promise<string>) {}
-
-  public readonly id = ILM_URL_GENERATOR_ID;
-
-  public readonly createUrl = async (state: IlmUrlGeneratorState): Promise<string> => {
-    switch (state.page) {
-      case ILM_PAGES.CREATE: {
-        return `${await this.getAppBasePath(!!state.absolute)}${getPolicyCreatePath()}`;
+export const createIlmUrlGenerator = (
+  getAppBasePath: (absolute?: boolean) => Promise<string>
+): UrlGeneratorsDefinition<typeof ILM_URL_GENERATOR_ID> => {
+  return {
+    id: ILM_URL_GENERATOR_ID,
+    createUrl: async (state: IlmUrlGeneratorState): Promise<string> => {
+      switch (state.page) {
+        case 'policy_create': {
+          return `${await getAppBasePath(!!state.absolute)}${getPolicyCreatePath()}`;
+        }
+        case 'policy_edit': {
+          return `${await getAppBasePath(!!state.absolute)}${getPolicyEditPath(state.policyName!)}`;
+        }
+        case 'policies_list': {
+          return `${await getAppBasePath(!!state.absolute)}${getPoliciesListPath()}`;
+        }
       }
-      case ILM_PAGES.EDIT: {
-        return `${await this.getAppBasePath(!!state.absolute)}${getPolicyEditPath(
-          state.policyName
-        )}`;
-      }
-      case ILM_PAGES.LIST: {
-        return `${await this.getAppBasePath(!!state.absolute)}${getPoliciesListPath()}`;
-      }
-    }
+    },
   };
-}
+};
 
 export const registerUrlGenerator = (
   coreSetup: CoreSetup,
@@ -79,5 +56,5 @@ export const registerUrlGenerator = (
     });
   };
 
-  share.urlGenerators.registerUrlGenerator(new IlmUrlGenerator(getAppBasePath));
+  share.urlGenerators.registerUrlGenerator(createIlmUrlGenerator(getAppBasePath));
 };

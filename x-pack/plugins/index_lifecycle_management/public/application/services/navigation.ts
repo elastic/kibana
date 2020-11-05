@@ -15,9 +15,9 @@ export const getPolicyEditPath = (policyName: string): string => {
 };
 
 export const getPolicyCreatePath = () => {
-  return `/policies/edit`;
+  return ROUTES.create;
 };
 
 export const getPoliciesListPath = () => {
-  return '/policies';
+  return ROUTES.list;
 };
