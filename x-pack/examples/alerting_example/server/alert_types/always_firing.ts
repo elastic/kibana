@@ -5,25 +5,33 @@
  */
 
 import uuid from 'uuid';
-import { range } from 'lodash';
+import { range, random, pick } from 'lodash';
 import { AlertType } from '../../../../plugins/alerts/server';
 import { DEFAULT_INSTANCES_TO_GENERATE, ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
+
+const ACTION_GROUPS = [
+  { id: 'small', name: 'small', tshirtSize: 1 },
+  { id: 'medium', name: 'medium', tshirtSize: 2 },
+  { id: 'large', name: 'large', tshirtSize: 3 },
+];
 
 export const alertType: AlertType = {
   id: 'example.always-firing',
   name: 'Always firing',
-  actionGroups: [{ id: 'default', name: 'default' }],
-  defaultActionGroupId: 'default',
+  actionGroups: ACTION_GROUPS.map((actionGroup) => pick(actionGroup, ['id', 'name'])),
+  defaultActionGroupId: 'small',
   async executor({ services, params: { instances = DEFAULT_INSTANCES_TO_GENERATE }, state }) {
     const count = (state.count ?? 0) + 1;
 
     range(instances)
-      .map(() => ({ id: uuid.v4() }))
-      .forEach((instance: { id: string }) => {
+      .map(() => ({ id: uuid.v4(), tshirtSize: random(1, 3) }))
+      .forEach((instance: { id: string; tshirtSize: number }) => {
         services
           .alertInstanceFactory(instance.id)
           .replaceState({ triggerdOnCycle: count })
-          .scheduleActions('default');
+          .scheduleActions(
+            ACTION_GROUPS.find((actionGroup) => actionGroup.tshirtSize === instance.tshirtSize)!.id
+          );
       });
 
     return {

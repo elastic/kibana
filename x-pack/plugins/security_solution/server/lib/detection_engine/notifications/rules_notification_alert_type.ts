@@ -7,11 +7,11 @@
 import { Logger } from 'src/core/server';
 import { schema } from '@kbn/config-schema';
 import { NOTIFICATIONS_ID, SERVER_APP_ID } from '../../../../common/constants';
+import { siemRuleActionGroups } from '../../../../common';
 
 import { NotificationAlertTypeDefinition } from './types';
 import { getSignalsCount } from './get_signals_count';
 import { RuleAlertAttributes } from '../signals/types';
-import { siemRuleActionGroups } from '../signals/siem_rule_action_groups';
 import { scheduleNotificationActions } from './schedule_notification_actions';
 import { getNotificationResultsLink } from './utils';
 import { parseScheduleDates } from '../../../../common/detection_engine/parse_schedule_dates';
