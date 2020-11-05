@@ -21,6 +21,13 @@ import { PainlessCompletionResult, PainlessContext, Field } from '../types';
 
 import { PainlessCompletionService } from './services';
 
+import {
+  isDeclaringField,
+  isConstructorInstance,
+  isAccessingProperty,
+  showStaticSuggestions,
+} from './utils';
+
 export class PainlessWorker {
   async provideAutocompleteSuggestions(
     currentLineChars: string,
@@ -28,35 +35,27 @@ export class PainlessWorker {
     fields?: Field[]
   ): Promise<PainlessCompletionResult> {
     const completionService = new PainlessCompletionService(context);
-    // Array of the active line words, e.g., [boolean, isInCircle]
+    // Array of the active line words, e.g., [boolean, isTrue, =, true]
     const words = currentLineChars.replace('\t', '').split(' ');
     // What the user is currently typing
     const activeTyping = words[words.length - 1];
 
-    // If the active typing contains dot notation, we assume we need to access the object's properties
-    const isProperty = activeTyping.split('.').length === 2;
-    // If the preceding word is a type, e.g., "boolean", we assume the user is declaring a variable and skip autocomplete
-    const hasDeclaredType =
-      words.length === 2 && completionService.getPrimitives().includes(words[0]);
-    // If the preceding word contains the "new" keyword, we only provide constructor autocompletion
-    const isConstructor = words[words.length - 2] === 'new';
-    // If the user appears to be accessing a document field
-    const isField = activeTyping === `doc['`;
+    const primitives = completionService.getPrimitives();
 
     let autocompleteSuggestions: PainlessCompletionResult = {
       isIncomplete: false,
       suggestions: [],
     };
 
-    if (isConstructor) {
+    if (isConstructorInstance(words)) {
       autocompleteSuggestions = completionService.getConstructorSuggestions();
-    } else if (fields && isField) {
+    } else if (fields && isDeclaringField(activeTyping)) {
       autocompleteSuggestions = completionService.getFieldSuggestions(fields);
-    } else if (isProperty) {
+    } else if (isAccessingProperty(activeTyping)) {
       const className = activeTyping.substring(0, activeTyping.length - 1).split('.')[0];
-      autocompleteSuggestions = completionService.getPropertySuggestions(className);
-    } else if (!hasDeclaredType) {
-      autocompleteSuggestions = completionService.getStaticSuggestions();
+      autocompleteSuggestions = completionService.getClassMemberSuggestions(className);
+    } else if (showStaticSuggestions(activeTyping, words, primitives)) {
+      autocompleteSuggestions = completionService.getStaticSuggestions(Boolean(fields?.length));
     }
 
     return Promise.resolve(autocompleteSuggestions);
