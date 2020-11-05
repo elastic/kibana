@@ -85,7 +85,7 @@ beforeEach(async () => {
 });
 
 test('Unlink is incompatible with Error Embeddables', async () => {
-  const action = new UnlinkFromLibraryAction({ toasts: coreStart.notifications.toasts });
+  const action = new UnlinkFromLibraryAction();
   const errorEmbeddable = new ErrorEmbeddable(
     'Wow what an awful error',
     { id: ' 404' },

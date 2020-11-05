@@ -87,7 +87,7 @@ beforeEach(async () => {
 });
 
 test('Add to library is incompatible with Error Embeddables', async () => {
-  const action = new AddToLibraryAction({ toasts: coreStart.notifications.toasts });
+  const action = new AddToLibraryAction();
   const errorEmbeddable = new ErrorEmbeddable(
     'Wow what an awful error',
     { id: ' 404' },

@@ -81,7 +81,7 @@ beforeEach(async () => {
 });
 
 test('Notification is incompatible with Error Embeddables', async () => {
-  const action = new LibraryNotificationAction(unlinkAction);
+  const action = new LibraryNotificationAction();
   const errorEmbeddable = new ErrorEmbeddable(
     'Wow what an awful error',
     { id: ' 404' },
