@@ -5,7 +5,7 @@
  */
 
 import { set } from '@elastic/safer-lodash-set/fp';
-import { getOr, isEmpty } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import React, { memo, useEffect, useCallback, useMemo } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
@@ -308,24 +308,12 @@ const makeMapStateToProps = () => {
   const getSavedQuerySelector = savedQuerySelector();
   return (state: State, { id }: SiemSearchBarProps) => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
-    const queries = !isEmpty(inputsRange.linkTo)
-      ? [
-          ...getQueriesSelector(inputsRange),
-          ...inputsRange.linkTo.reduce<inputsModel.GlobalGraphqlQuery[]>((acc, linkToId) => {
-            const linkToIdInputsRange: InputsRange = getOr({}, `inputs.${linkToId}`, state);
-            return [
-              ...acc,
-              ...getQueriesSelector(linkToIdInputsRange),
-            ] as inputsModel.GlobalGraphqlQuery[];
-          }, []),
-        ]
-      : (getQueriesSelector(inputsRange) as inputsModel.GlobalGraphqlQuery[]);
     return {
       end: getEndSelector(inputsRange),
       fromStr: getFromStrSelector(inputsRange),
       filterQuery: getFilterQuerySelector(inputsRange),
       isLoading: getIsLoadingSelector(inputsRange),
-      queries,
+      queries: getQueriesSelector(state, id),
       savedQuery: getSavedQuerySelector(inputsRange),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),

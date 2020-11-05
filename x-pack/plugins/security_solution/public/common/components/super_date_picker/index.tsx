@@ -142,7 +142,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
       [id, fromStr, duration, policy, toStr]
     );
 
-    const refetchQuery = (newQueries: inputsModel.GlobalGraphqlQuery[]) => {
+    const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
       newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
     };
 
@@ -292,18 +292,6 @@ export const makeMapStateToProps = () => {
   const getToStrSelector = toStrSelector();
   return (state: State, { id }: OwnProps) => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
-    const queries = !isEmpty(inputsRange.linkTo)
-      ? [
-          ...(getQueriesSelector(inputsRange) as inputsModel.GlobalGraphqlQuery[]),
-          ...inputsRange.linkTo.reduce<inputsModel.GlobalGraphqlQuery[]>((acc, linkToId) => {
-            const linkToIdInputsRange: InputsRange = getOr({}, `inputs.${linkToId}`, state);
-            return [
-              ...acc,
-              ...getQueriesSelector(linkToIdInputsRange),
-            ] as inputsModel.GlobalGraphqlQuery[];
-          }, []),
-        ]
-      : (getQueriesSelector(inputsRange) as inputsModel.GlobalGraphqlQuery[]);
 
     return {
       duration: getDurationSelector(inputsRange),
@@ -313,7 +301,7 @@ export const makeMapStateToProps = () => {
       kind: getKindSelector(inputsRange),
       kqlQuery: getKqlQuerySelector(inputsRange) as inputsModel.GlobalKqlQuery,
       policy: getPolicySelector(inputsRange),
-      queries,
+      queries: getQueriesSelector(state, id),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
     };
