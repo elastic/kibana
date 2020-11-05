@@ -71,12 +71,12 @@
 
 import { setWith } from '@elastic/safer-lodash-set';
 import { uniqueId, uniq, extend, pick, difference, omit, isObject, keys, isFunction } from 'lodash';
+import { map } from 'rxjs/operators';
 import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../kibana_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { IEsSearchRequest, IEsSearchResponse, ISearchOptions } from '../../search';
-import type { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
+import { ISearchGeneric, ISearchOptions } from '../..';
 import type { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
 import { FetchHandlers, RequestFailure, getSearchParamsFromRequest, SearchRequest } from './fetch';
 
@@ -102,15 +102,7 @@ export const searchSourceRequiredUiSettings = [
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
-  // Types are nearly identical to ISearchGeneric, except we are making
-  // search options required here and returning a promise instead of observable.
-  search: <
-    SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-  >(
-    request: SearchStrategyRequest,
-    options: ISearchOptions
-  ) => Promise<SearchStrategyResponse>;
+  search: ISearchGeneric;
 }
 
 /** @public **/
@@ -144,7 +136,7 @@ export class SearchSource {
   }
 
   /**
-   * sets value to a single search source feild
+   * sets value to a single search source field
    * @param field: field name
    * @param value: value for the field
    */
@@ -319,9 +311,9 @@ export class SearchSource {
       getConfig,
     });
 
-    return search({ params, indexType: searchRequest.indexType }, options).then(({ rawResponse }) =>
-      onResponse(searchRequest, rawResponse)
-    );
+    return search({ params, indexType: searchRequest.indexType }, options)
+      .pipe(map(({ rawResponse }) => onResponse(searchRequest, rawResponse)))
+      .toPromise();
   }
 
   /**
