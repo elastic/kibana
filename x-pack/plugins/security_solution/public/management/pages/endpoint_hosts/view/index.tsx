@@ -63,6 +63,8 @@ import { useKibana } from '../../../../../../../../src/plugins/kibana_react/publ
 import { APP_ID } from '../../../../../common/constants';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 
+const MAX_PAGINATED_ITEM = 9999;
+
 const EndpointListNavLink = memo<{
   name: string;
   href: string;
@@ -637,6 +639,14 @@ export const EndpointList = () => {
               values={{ totalItemCount }}
             />
           </EuiText>
+          {totalItemCount > MAX_PAGINATED_ITEM && (
+            <EuiCallOut size="s" color="warning">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.list.maxItem"
+                defaultMessage="we are only showing the first 10k. Changeme."
+              />
+            </EuiCallOut>
+          )}
           <EuiHorizontalRule margin="xs" />
         </>
       )}
