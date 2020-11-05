@@ -30,7 +30,6 @@ import {
   TutorialDirectoryHeaderLink,
   TutorialModuleNotice,
 } from './applications/ingest_manager/components/home_integration';
-import { registerPackagePolicyComponent } from './applications/ingest_manager/sections/agent_policy/create_package_policy_page/components/custom_package_policy';
 import { createExtensionRegistrationCallback } from './applications/ingest_manager/services';
 import {
   UIExtensionRegistrationCallback,
@@ -48,7 +47,6 @@ export interface IngestManagerSetup {}
  * Describes public IngestManager plugin contract returned at the `start` stage.
  */
 export interface IngestManagerStart {
-  registerPackagePolicyComponent: typeof registerPackagePolicyComponent;
   registerExtension: UIExtensionRegistrationCallback;
   isInitialized: () => Promise<true>;
 }
@@ -169,7 +167,6 @@ export class IngestManagerPlugin
 
         return successPromise;
       },
-      registerPackagePolicyComponent,
 
       registerExtension: createExtensionRegistrationCallback(this.extensions),
     };

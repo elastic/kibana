@@ -24,22 +24,6 @@ export interface CustomConfigurePackagePolicyProps {
  */
 export type CustomConfigurePackagePolicyContent = React.FC<CustomConfigurePackagePolicyProps>;
 
-type AllowedPackageKey = 'endpoint';
-const PackagePolicyMapping: {
-  [key: string]: CustomConfigurePackagePolicyContent;
-} = {};
-
-/**
- * Plugins can call this function from the start lifecycle to
- * register a custom component in the Ingest package policy.
- */
-export function registerPackagePolicyComponent(
-  key: AllowedPackageKey,
-  value: CustomConfigurePackagePolicyContent
-) {
-  PackagePolicyMapping[key] = value;
-}
-
 const EmptyPackagePolicy: CustomConfigurePackagePolicyContent = () => (
   <EuiEmptyPrompt
     iconType="checkInCircleFilled"

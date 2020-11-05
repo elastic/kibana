@@ -19,10 +19,7 @@ import {
   EuiContextMenuPanelProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  CustomConfigurePackagePolicyProps,
-  pagePathGetters,
-} from '../../../../../../../ingest_manager/public';
+import { pagePathGetters } from '../../../../../../../ingest_manager/public';
 import { getPolicyDetailPath, getTrustedAppsListPath } from '../../../../common/routing';
 import { MANAGEMENT_APP_ID } from '../../../../common/constants';
 import {
@@ -38,11 +35,7 @@ import { IntegrationPolicyEditExtensionComponent } from '../../../../../../../in
  * for use in the Ingest app create / edit package policy
  */
 export const EndpointPolicyEditExtension = memo<IntegrationPolicyEditExtensionComponent>(
-  ({
-    from,
-    packagePolicyId,
-    packagePolicy: { policy_id: agentPolicyId },
-  }: CustomConfigurePackagePolicyProps) => {
+  ({ from, packagePolicyId, packagePolicy: { policy_id: agentPolicyId } }) => {
     return (
       <>
         <EuiSpacer size="m" />

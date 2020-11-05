@@ -7,7 +7,6 @@
 import React, { memo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { CustomConfigurePackagePolicyProps } from '../../../../../../../ingest_manager/public';
 import { IntegrationPolicyCreateExtensionComponent } from '../../../../../../../ingest_manager/common/types/ui_extensions';
 
 /**
@@ -15,11 +14,7 @@ import { IntegrationPolicyCreateExtensionComponent } from '../../../../../../../
  * for use in the Ingest app create / edit package policy
  */
 export const EndpointPolicyCreateExtension = memo<IntegrationPolicyCreateExtensionComponent>(
-  ({
-    from,
-    packagePolicyId,
-    packagePolicy: { policy_id: agentPolicyId },
-  }: CustomConfigurePackagePolicyProps) => {
+  ({ from, packagePolicyId, packagePolicy: { policy_id: agentPolicyId } }) => {
     return (
       <>
         <EuiSpacer size="m" />

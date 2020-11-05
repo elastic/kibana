@@ -5,10 +5,6 @@
  */
 
 import {
-  IngestManagerStart,
-  registerPackagePolicyComponent,
-} from '../../../../../ingest_manager/public';
-import {
   dataPluginMock,
   Start as DataPublicStartMock,
 } from '../../../../../../../src/plugins/data/public/mocks';
@@ -61,7 +57,7 @@ export const depsStartMock: () => DepsStartMock = () => {
     data: dataMock,
     ingestManager: {
       isInitialized: () => Promise.resolve(true),
-      registerPackagePolicyComponent,
+      registerExtension: jest.fn(),
     },
   };
 };
