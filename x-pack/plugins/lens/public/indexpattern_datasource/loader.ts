@@ -112,6 +112,7 @@ export async function loadIndexPatterns({
             ])
           ),
         fields: newFields,
+        fieldsMap: _.keyBy(newFields, 'name'),
         hasRestrictions: !!typeMeta?.aggs,
       };
 
