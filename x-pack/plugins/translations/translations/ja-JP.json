@@ -4920,7 +4920,6 @@
     "xpack.apm.fetcher.error.title": "リソースの取得中にエラーが発生しました",
     "xpack.apm.fetcher.error.url": "URL",
     "xpack.apm.filter.environment.allLabel": "すべて",
-    "xpack.apm.filter.environment.label": "環境",
     "xpack.apm.filter.environment.notDefinedLabel": "未定義",
     "xpack.apm.filter.environment.selectEnvironmentLabel": "環境を選択",
     "xpack.apm.formatters.hoursTimeUnitLabel": "h",
