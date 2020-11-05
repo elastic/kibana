@@ -54,6 +54,7 @@ import { StartContract as FileUploadStartContract } from '../../file_upload/publ
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/public';
+import { EMSSettings } from './ems_settings';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -109,7 +110,8 @@ export class MapsPlugin
     setMapAppConfig(config);
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
 
-    setEMSSettings(plugins.mapsLegacy.emsSettings);
+    const emsSettings = new EMSSettings(plugins.mapsLegacy.config);
+    setEMSSettings(emsSettings);
 
     // register url generators
     const getStartServices = async () => {

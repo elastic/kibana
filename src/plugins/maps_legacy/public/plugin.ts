@@ -61,13 +61,6 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
 
   public setup(core: CoreSetup, plugins: MapsLegacySetupDependencies) {
     const config = this._initializerContext.config.get<MapsLegacyConfig>();
-    const emsSettings = new EMSSettings(config);
-
-    if (!emsSettings.isConfigValid()) {
-      throw new Error(
-        'Should not set emsUrl when `includeElasticMapsService` or `proxyElasticMapsServiceInMaps` are overridden'
-      );
-    }
     const kibanaVersion = this._initializerContext.env.packageInfo.version;
 
     bindSetupCoreAndPlugins(core, config, kibanaVersion);
@@ -80,7 +73,6 @@ export class MapsLegacyPlugin implements Plugin<MapsLegacyPluginSetup, MapsLegac
       getPrecision,
       config,
       getBaseMapsVis,
-      emsSettings,
     };
   }
 
