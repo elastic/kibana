@@ -311,6 +311,7 @@ export class JobValidator {
       this.duplicateDetectors.valid &&
       this.categorizerMissingPerPartition.valid &&
       this.categorizerVaryingPerPartitionField.valid &&
+      this.summaryCountField.valid &&
       !this.validating &&
       (this._jobCreator.type !== JOB_TYPE.CATEGORIZATION ||
         (this._jobCreator.type === JOB_TYPE.CATEGORIZATION && this.categorizationField))

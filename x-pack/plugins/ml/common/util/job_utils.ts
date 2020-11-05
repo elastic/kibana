@@ -567,7 +567,7 @@ export function basicJobAndDatafeedValidation(job: Job, datafeed: Datafeed): Val
     const datafeedAggConfig = datafeed.aggregations ?? datafeed?.aggs;
     if (datafeedAggConfig !== undefined && !job.analysis_config?.summary_count_field_name) {
       valid = false;
-      messages.push({ id: '`missing_summary_count_field_name`' });
+      messages.push({ id: 'missing_summary_count_field_name' });
     }
   }
 
