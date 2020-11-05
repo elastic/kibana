@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiAccordion, EuiDescriptionList, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiAccordion, EuiDescriptionList, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
@@ -35,14 +35,13 @@ export const PingHeaders = ({ headers }: Props) => {
           </EuiText>
         }
       >
-        <EuiPanel style={{ backgroundColor: 'transparent' }} hasShadow={false}>
-          <EuiDescriptionList
-            titleProps={{ style: { width: '30%' } }}
-            compressed={true}
-            type="responsiveColumn"
-            listItems={headersList}
-          />
-        </EuiPanel>
+        <EuiSpacer size="s" />
+        <EuiDescriptionList
+          titleProps={{ style: { width: '30%', paddingLeft: 30 } }}
+          compressed={true}
+          type="responsiveColumn"
+          listItems={headersList}
+        />
       </EuiAccordion>
     </>
   );
