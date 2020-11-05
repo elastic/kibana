@@ -8,7 +8,7 @@ fields are displayed in Kibana, regardless of how they are stored in {es}.
 
 . Open the main menu, and click *Stack Management > Index Patterns*.
 . Click the index pattern that contains the field you want to format.
-. Find the field you want to format and click the edit icon (image:management/index-patterns/images/edit_icon.png[])
+. Find the field you want to format and click the edit icon (image:management/index-patterns/images/edit_icon.png[]).
 . Select a format and fill in the details.
 
 [role="screenshot"]
