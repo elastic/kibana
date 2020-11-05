@@ -21,6 +21,7 @@ import { MlServerLimits } from '../types/ml_server_info';
 import { JobValidationMessage, JobValidationMessageId } from '../constants/messages';
 import { ES_AGGREGATION, ML_JOB_AGGREGATION } from '../constants/aggregation_types';
 import { MLCATEGORY } from '../constants/field_types';
+import { getDatafeedAggregations } from './datafeed_utils';
 
 export interface ValidationResults {
   valid: boolean;
@@ -564,8 +565,9 @@ export function basicJobAndDatafeedValidation(job: Job, datafeed: Datafeed): Val
   let valid = true;
 
   if (datafeed && job) {
-    const datafeedAggConfig = datafeed.aggregations ?? datafeed?.aggs;
-    if (datafeedAggConfig !== undefined && !job.analysis_config?.summary_count_field_name) {
+    const datafeedAggregations = getDatafeedAggregations(datafeed);
+
+    if (datafeedAggregations !== undefined && !job.analysis_config?.summary_count_field_name) {
       valid = false;
       messages.push({ id: 'missing_summary_count_field_name' });
     }

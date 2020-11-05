@@ -12,6 +12,7 @@ import { initCardinalityFieldsCache } from './fields_aggs_cache';
 import { DatafeedOverride } from '../../../common/types/modules';
 import { AggCardinality } from '../../../common/types/fields';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
 /**
  * Service for carrying out queries to obtain data
@@ -46,7 +47,8 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       fields: fieldNames,
     });
     const aggregatableFields: string[] = [];
-    const datafeedAggConfig = datafeedConfig?.aggregations ?? datafeedConfig?.aggs;
+    const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
+
     fieldNames.forEach((fieldName) => {
       if (
         typeof datafeedConfig?.script_fields === 'object' &&
@@ -55,8 +57,8 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
         aggregatableFields.push(fieldName);
       }
       if (
-        datafeedAggConfig !== undefined &&
-        isValidAggregationField(datafeedAggConfig, fieldName)
+        datafeedAggregations !== undefined &&
+        isValidAggregationField(datafeedAggregations, fieldName)
       ) {
         aggregatableFields.push(fieldName);
       }

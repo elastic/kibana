@@ -27,6 +27,7 @@ import { validateTimeRange, isValidTimeField } from './validate_time_range';
 import { validateJobSchema } from '../../routes/schemas/job_validation_schema';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 import type { MlClient } from '../../lib/ml_client';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
 export type ValidateJobPayload = TypeOf<typeof validateJobSchema>;
 
@@ -102,8 +103,8 @@ export async function validateJob(
       }
 
       // if datafeed has aggregation, require job config to include a valid summary_doc_field_name
-      const datafeedAggConfig = job.datafeed_config?.aggregations ?? job.datafeed_config?.aggs;
-      if (datafeedAggConfig !== undefined && !job.analysis_config?.summary_count_field_name) {
+      const datafeedAggregations = getDatafeedAggregations(job.datafeed_config);
+      if (datafeedAggregations !== undefined && !job.analysis_config?.summary_count_field_name) {
         validationMessages.push({ id: 'missing_summary_count_field_name' });
       }
     } else {

@@ -17,6 +17,7 @@ import {
 } from '../../lib/query_utils';
 import { AggCardinality } from '../../../common/types/fields';
 import { DatafeedOverride } from '../../../common/types/modules';
+import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
@@ -599,11 +600,11 @@ export class DataVisualizer {
     const index = indexPatternTitle;
     const size = 0;
     const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
-    const datafeedAggConfig = datafeedConfig?.aggregations ?? datafeedConfig?.aggs;
+    const datafeedAggregations = getDatafeedAggregations(datafeedConfig);
 
     // Value count aggregation faster way of checking if field exists than using
     // filter aggregation with exists query.
-    const aggs: Aggs = datafeedAggConfig !== undefined ? { ...datafeedAggConfig } : {};
+    const aggs: Aggs = datafeedAggregations !== undefined ? { ...datafeedAggregations } : {};
 
     aggregatableFields.forEach((field, i) => {
       const safeFieldName = getSafeAggregationName(field, i);
