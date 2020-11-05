@@ -85,7 +85,6 @@ export function useTableSettings<TypeOfItem>(
       setTableSettings({ ...tableSettings, pageIndex: pageStart / size });
     }
     return {
-      pageOfItems: list.slice(pageStart, pageStart + size),
       totalItemCount: listLength,
     };
   };
@@ -108,13 +107,7 @@ export function useTableSettings<TypeOfItem>(
 
   const { pageIndex, pageSize, sortField, sortDirection } = tableSettings;
 
-  const { pageOfItems, totalItemCount } = getPageOfItems(
-    items,
-    pageIndex,
-    pageSize,
-    sortField,
-    sortDirection
-  );
+  const { totalItemCount } = getPageOfItems(items, pageIndex, pageSize, sortField, sortDirection);
 
   const pagination = {
     pageIndex,
@@ -125,10 +118,10 @@ export function useTableSettings<TypeOfItem>(
 
   const sorting = {
     sort: {
-      field: sortField,
+      field: sortField as string,
       direction: sortDirection,
     },
   };
 
-  return { onTableChange, pageOfItems, pagination, sorting };
+  return { onTableChange, pagination, sorting };
 }

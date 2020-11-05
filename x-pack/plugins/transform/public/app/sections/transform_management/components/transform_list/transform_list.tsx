@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSearchBar,
-  EuiSpacer,
   EuiPopover,
   EuiTitle,
   EuiSearchBarProps,
@@ -47,7 +46,7 @@ import { StopActionName } from '../action_stop';
 import { ItemIdToExpandedRowMap } from './common';
 import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
-import { TransformSearchBar, filterTransforms } from './transform_search_bar';
+import { filterTransforms } from './transform_search_bar';
 import { useTableSettings } from './use_table_settings';
 
 function getItemIdToExpandedRowMap(
