@@ -18,8 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
 
-  // Failing: See https://github.com/elastic/kibana/issues/82207
-  describe.skip('Network DNS', () => {
+  describe('Network DNS', () => {
     describe('With packetbeat', () => {
       before(() => esArchiver.load('packetbeat/dns'));
       after(() => esArchiver.unload('packetbeat/dns'));
@@ -59,7 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(networkDns.edges.length).to.be(10);
         expect(networkDns.totalCount).to.be(44);
         expect(networkDns.edges.map((i: NetworkDnsEdges) => i.node.dnsName).join(',')).to.be(
-          'aaplimg.com,adgrx.com,akadns.net,akamaiedge.net,amazonaws.com,cbsistatic.com,cdn-apple.com,connman.net,crowbird.com,d1oxlq5h9kq8q5.cloudfront.net'
+          'aaplimg.com,adgrx.com,akadns.net,akamaiedge.net,amazonaws.com,cbsistatic.com,cdn-apple.com,connman.net,d1oxlq5h9kq8q5.cloudfront.net,d3epxf4t8a32oh.cloudfront.net'
         );
         expect(networkDns.pageInfo.fakeTotalCount).to.equal(30);
       });
