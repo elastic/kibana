@@ -12,6 +12,7 @@ import {
   RULES_TABLE,
   SHOWING_RULES_TEXT,
 } from '../screens/alerts_detection_rules';
+
 import {
   goToManageAlertsDetectionRules,
   waitForAlertsIndexToBeCreated,
