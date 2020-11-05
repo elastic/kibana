@@ -149,8 +149,11 @@ export class InfraServerPlugin {
     core.http.registerRouteHandlerContext(
       'infra',
       (context, request): InfraRequestHandlerContext => {
-        const mlSystem = plugins.ml?.mlSystemProvider(request);
-        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request);
+        const mlSystem = plugins.ml?.mlSystemProvider(request, context.core.savedObjects.client);
+        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
+          request,
+          context.core.savedObjects.client
+        );
         const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
 
         return {

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { cloneDeep, pick, throttle } from 'lodash';
+import { pick, throttle, cloneDeep } from 'lodash';
 import { resolve as resolveUrl } from 'url';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -144,6 +144,23 @@ const API_BASE_URL = '/api/saved_objects/';
  */
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
+interface ObjectTypeAndId {
+  id: string;
+  type: string;
+}
+
+const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
+  const objects: ObjectTypeAndId[] = [];
+  const inserted = new Set<string>();
+  queue.forEach(({ id, type }) => {
+    if (!inserted.has(`${type}|${id}`)) {
+      objects.push({ id, type });
+      inserted.add(`${type}|${id}`);
+    }
+  });
+  return objects;
+};
+
 /**
  * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
  * use Elasticsearch for storing plugin state. The client-side
@@ -160,31 +177,34 @@ export class SavedObjectsClient {
    * Throttled processing of get requests into bulk requests at 100ms interval
    */
   private processBatchQueue = throttle(
-    () => {
-      const queue = cloneDeep(this.batchQueue);
+    async () => {
+      const queue = [...this.batchQueue];
       this.batchQueue = [];
 
-      this.bulkGet(queue)
-        .then(({ savedObjects }) => {
-          queue.forEach((queueItem) => {
-            const foundObject = savedObjects.find((savedObject) => {
-              return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
-            });
+      try {
+        const objectsToFetch = getObjectsToFetch(queue);
+        const { saved_objects: savedObjects } = await this.performBulkGet(objectsToFetch);
 
-            if (!foundObject) {
-              return queueItem.resolve(
-                this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
-              );
-            }
+        queue.forEach((queueItem) => {
+          const foundObject = savedObjects.find((savedObject) => {
+            return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
+          });
 
-            queueItem.resolve(foundObject);
-          });
-        })
-        .catch((err) => {
-          queue.forEach((queueItem) => {
-            queueItem.reject(err);
-          });
+          if (foundObject) {
+            // multiple calls may have been requested the same object.
+            // we need to clone to avoid sharing references between the instances
+            queueItem.resolve(this.createSavedObject(cloneDeep(foundObject)));
+          } else {
+            queueItem.resolve(
+              this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
+            );
+          }
         });
+      } catch (err) {
+        queue.forEach((queueItem) => {
+          queueItem.reject(err);
+        });
+      }
     },
     BATCH_INTERVAL,
     { leading: false }
@@ -383,14 +403,8 @@ export class SavedObjectsClient {
    * ])
    */
   public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
-    const path = this.getPath(['_bulk_get']);
     const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
-
-    const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
-      method: 'POST',
-      body: JSON.stringify(filteredObjects),
-    });
-    return request.then((resp) => {
+    return this.performBulkGet(filteredObjects).then((resp) => {
       resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
@@ -398,6 +412,15 @@ export class SavedObjectsClient {
       >({ saved_objects: 'savedObjects' }, resp) as SavedObjectsBatchResponse;
     });
   };
+
+  private async performBulkGet(objects: ObjectTypeAndId[]) {
+    const path = this.getPath(['_bulk_get']);
+    const request: ReturnType<SavedObjectsApi['bulkGet']> = this.savedObjectsFetch(path, {
+      method: 'POST',
+      body: JSON.stringify(objects),
+    });
+    return request;
+  }
 
   /**
    * Updates an object

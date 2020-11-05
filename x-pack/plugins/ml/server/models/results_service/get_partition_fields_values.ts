@@ -5,13 +5,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import { PartitionFieldsType } from '../../../common/types/anomalies';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { CriteriaField } from './results_service';
 import { FieldConfig, FieldsConfig } from '../../routes/schemas/results_service_schema';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
+import type { MlClient } from '../../lib/ml_client';
 
 type SearchTerm =
   | {
@@ -128,7 +127,7 @@ function getFieldObject(fieldType: PartitionFieldsType, aggs: any) {
     : {};
 }
 
-export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClusterClient) =>
+export const getPartitionFieldsValuesFactory = (mlClient: MlClient) =>
   /**
    * Gets the record of partition fields with possible values that fit the provided queries.
    * @param jobId - Job ID
@@ -146,7 +145,7 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
     latestMs: number,
     fieldsConfig: FieldsConfig = {}
   ) {
-    const { body: jobsResponse } = await asInternalUser.ml.getJobs({ job_id: jobId });
+    const { body: jobsResponse } = await mlClient.getJobs({ job_id: jobId });
     if (jobsResponse.count === 0 || jobsResponse.jobs === undefined) {
       throw Boom.notFound(`Job with the id "${jobId}" not found`);
     }
@@ -220,11 +219,13 @@ export const getPartitionFieldsValuesFactory = ({ asInternalUser }: IScopedClust
       },
     };
 
-    const { body } = await asInternalUser.search({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: requestBody,
-    });
+    const { body } = await mlClient.anomalySearch(
+      {
+        size: 0,
+        body: requestBody,
+      },
+      [jobId]
+    );
 
     return PARTITION_FIELDS.reduce((acc, key) => {
       return {
