@@ -37,7 +37,7 @@ interface Props {
   isPopoverOpen: boolean;
   closePopover: () => void;
   popoverPosition: EuiPopoverProps['anchorPosition'];
-  openNewOverlay(): void;
+  openNewOverlay?: () => void;
 }
 
 export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
@@ -162,7 +162,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     };
 
     const openNewOverlayMenuItem: SectionLinkProps = {
-      label: i18n.translate('xpack.infra.nodeContextMenu.createAlertLink', {
+      label: i18n.translate('xpack.infra.nodeContextMenu.openNewOverlay', {
         defaultMessage: '**** [NEW] Overlay ***',
       }),
       style: { color: theme?.eui.euiLinkColor || '#006BB4', fontWeight: 500, padding: 0 },
