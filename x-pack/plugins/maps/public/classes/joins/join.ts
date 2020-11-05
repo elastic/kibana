@@ -5,18 +5,16 @@
  */
 
 import { Feature, GeoJsonProperties } from 'geojson';
-import { IESTermSource } from '../sources/es_term_source';
+import { ESTermSource } from '../sources/es_term_source';
 import { JoinDescriptor } from '../../../common/descriptor_types';
 import { ITooltipProperty } from '../tooltips/tooltip_property';
 import { IField } from '../fields/field';
-import { BucketProperties } from '../../../common/elasticsearch_util';
-
-export type PropertiesMap = Map<string, BucketProperties>;
+import { PropertiesMap } from '../../../common/elasticsearch_util';
 
 export interface IJoin {
   destroy: () => void;
 
-  getRightJoinSource: () => IESTermSource;
+  getRightJoinSource: () => ESTermSource;
 
   toDescriptor: () => JoinDescriptor;
 
