@@ -73,7 +73,7 @@ export class VisTypeXyPlugin
     if (core.uiSettings.get(NEW_CHART_UI, false)) {
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
-      setColorsService(charts.colors);
+      setColorsService(charts.legacyColors);
 
       [createVisTypeXyVisFn].forEach(expressions.registerFunction);
       expressions.registerRenderer(xyVisRenderer);
