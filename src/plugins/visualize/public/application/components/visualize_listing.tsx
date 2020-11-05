@@ -20,6 +20,7 @@
 import './visualize_listing.scss';
 
 import React, { useCallback, useRef, useMemo, useEffect } from 'react';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 import useMount from 'react-use/lib/useMount';
@@ -144,6 +145,7 @@ export const VisualizeListing = () => {
     [savedObjects.client, toastNotifications]
   );
 
+<<<<<<< HEAD
   const searchFilters = useMemo(() => {
     return savedObjectsTagging
       ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
@@ -180,5 +182,54 @@ export const VisualizeListing = () => {
       toastNotifications={toastNotifications}
       searchFilters={searchFilters}
     />
+=======
+  const calloutMessage = (
+    <>
+      Building a dashboard? Create new content directly from the{' '}
+      <a href="#">Dashboard application</a> using a new integrated workflow.
+    </>
+  );
+
+  return (
+    <>
+      <div
+        style={{
+          maxWidth: 1000,
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          width: '100%',
+          paddingTop: 16,
+          paddingLeft: 16,
+          paddingRight: 16,
+        }}
+      >
+        <EuiCallOut size="s" title={calloutMessage} iconType="iInCircle" />
+      </div>
+      <TableListView
+        headingId="visualizeListingHeading"
+        // we allow users to create visualizations even if they can't save them
+        // for data exploration purposes
+        createItem={createNewVis}
+        findItems={fetchItems}
+        deleteItems={visualizeCapabilities.delete ? deleteItems : undefined}
+        editItem={visualizeCapabilities.save ? editItem : undefined}
+        tableColumns={tableColumns}
+        listingLimit={listingLimit}
+        initialPageSize={savedObjectsPublic.settings.getPerPage()}
+        initialFilter={''}
+        noItemsFragment={noItemsFragment}
+        entityName={i18n.translate('visualize.listing.table.entityName', {
+          defaultMessage: 'visualization',
+        })}
+        entityNamePlural={i18n.translate('visualize.listing.table.entityNamePlural', {
+          defaultMessage: 'visualizations',
+        })}
+        tableListTitle={i18n.translate('visualize.listing.table.listTitle', {
+          defaultMessage: 'Visualizations',
+        })}
+        toastNotifications={toastNotifications}
+      />
+    </>
+>>>>>>> wip
   );
 };
