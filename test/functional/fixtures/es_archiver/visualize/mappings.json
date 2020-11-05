@@ -93,6 +93,10 @@
             },
             "title": {
               "type": "text"
+            },
+            "attributes": {
+              "type": "object",
+              "enabled": false
             }
           }
         },
