@@ -91,7 +91,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     toStr,
     updateReduxTime,
   }) => {
-    // const [isQuickSelection, setIsQuickSelection] = useState(true);
     const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
       []
     );
@@ -123,7 +122,8 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
 
     const onRefreshChange = useCallback(
       ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
-        const isQuickSelection = fromStr?.includes('now') || toStr?.includes('now');
+        const isQuickSelection =
+          (fromStr != null && fromStr.includes('now')) || (toStr != null && toStr.includes('now'));
         if (duration !== refreshInterval) {
           setDuration({ id, duration: refreshInterval });
         }
@@ -138,8 +138,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           refetchQuery(queries);
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id, fromStr, duration, policy, toStr]
+      [fromStr, toStr, duration, policy, setDuration, id, stopAutoReload, startAutoReload, queries]
     );
 
     const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
@@ -173,8 +172,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           setRecentlyUsedRanges(newRecentlyUsedRanges);
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [recentlyUsedRanges, kqlQuery]
+      [updateReduxTime, id, kqlQuery, timelineId, recentlyUsedRanges]
     );
 
     const endDate = toStr != null ? toStr : new Date(end).toISOString();
