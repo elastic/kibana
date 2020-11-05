@@ -14,6 +14,7 @@ interface EditPolicyContextValue {
   policy: SerializedPolicy;
   existingPolicies: PolicyFromES[];
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  policyName?: string;
 }
 
 const EditPolicyContext = createContext<EditPolicyContextValue>(null as any);

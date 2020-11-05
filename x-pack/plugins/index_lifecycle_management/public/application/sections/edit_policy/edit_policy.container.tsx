@@ -47,6 +47,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('editPolicy');
   }, [breadcrumbService]);
+
   if (isLoading) {
     return (
       <EuiEmptyPrompt
@@ -94,7 +95,8 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   return (
     <EditPolicyContextProvider
       value={{
-        isNewPolicy: Boolean(existingPolicy?.policy),
+        isNewPolicy: !existingPolicy?.policy,
+        policyName,
         policy: existingPolicy?.policy ?? defaultPolicy,
         existingPolicies: policies,
         getUrlForApp,

@@ -7,11 +7,6 @@
 import { DeletePhase, SerializedDeletePhase } from '../../../../common/types';
 import { serializedPhaseInitialization } from '../../constants';
 import { isNumber, splitSizeAndUnits } from './policy_serialization';
-import {
-  numberRequiredMessage,
-  PhaseValidationErrors,
-  positiveNumberRequiredMessage,
-} from './policy_validation';
 
 const deletePhaseInitialization: DeletePhase = {
   phaseEnabled: false,
@@ -68,21 +63,4 @@ export const deletePhaseToES = (
   }
 
   return esPhase;
-};
-
-export const validateDeletePhase = (phase: DeletePhase): PhaseValidationErrors<DeletePhase> => {
-  if (!phase.phaseEnabled) {
-    return {};
-  }
-
-  const phaseErrors = {} as PhaseValidationErrors<DeletePhase>;
-
-  // min age needs to be a positive number
-  if (!isNumber(phase.selectedMinimumAge)) {
-    phaseErrors.selectedMinimumAge = [numberRequiredMessage];
-  } else if (parseInt(phase.selectedMinimumAge, 10) < 0) {
-    phaseErrors.selectedMinimumAge = [positiveNumberRequiredMessage];
-  }
-
-  return { ...phaseErrors };
 };

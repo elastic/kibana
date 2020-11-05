@@ -5,6 +5,7 @@
  */
 
 import React, { Fragment, useEffect, useState, useMemo } from 'react';
+import { get } from 'lodash';
 
 import { RouteComponentProps } from 'react-router-dom';
 
@@ -29,7 +30,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { useForm, Form, UseField, TextField } from '../../../shared_imports';
+import { useForm, Form, UseField, TextField, useFormData } from '../../../shared_imports';
 
 import { toasts } from '../../services/notification';
 
@@ -55,27 +56,40 @@ export interface Props {
   history: RouteComponentProps['history'];
 }
 
+const policyNamePath = 'name';
+
 export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const [isShowingPolicyJsonFlyout, setIsShowingPolicyJsonFlyout] = useState(false);
-  const { isNewPolicy, policy: currentPolicy, existingPolicies } = useEditPolicyContext();
+  const {
+    isNewPolicy,
+    policy: currentPolicy,
+    existingPolicies,
+    policyName,
+  } = useEditPolicyContext();
 
   const serializer = useMemo(() => {
     return createSerializer(isNewPolicy ? undefined : currentPolicy);
   }, [isNewPolicy, currentPolicy]);
 
+  const [saveAsNew, setSaveAsNew] = useState(isNewPolicy);
+  const originalPolicyName: string = isNewPolicy ? '' : policyName!;
+
   const { form } = useForm({
     schema,
-    defaultValue: currentPolicy,
+    defaultValue: {
+      ...currentPolicy,
+      name: originalPolicyName,
+    },
     deserializer,
     serializer,
   });
 
-  const [saveAsNew, setSaveAsNew] = useState(isNewPolicy);
-  const originalPolicyName: string = isNewPolicy ? '' : currentPolicy.name;
+  const [formData] = useFormData({ form, watch: policyNamePath });
+  const currentPolicyName = get(formData, policyNamePath);
 
   const policyNameValidations = useMemo(
     () =>
@@ -101,7 +115,10 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
         })
       );
     } else {
-      const success = await savePolicy(policy, isNewPolicy || saveAsNew);
+      const success = await savePolicy(
+        { ...policy, name: saveAsNew ? currentPolicyName : originalPolicyName },
+        isNewPolicy || saveAsNew
+      );
       if (success) {
         backToPolicyList();
       }
@@ -215,7 +232,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
                   fullWidth
                 >
                   <UseField<string, FormInternal>
-                    path="name"
+                    path={policyNamePath}
                     config={{
                       label: i18n.translate('xpack.indexLifecycleMgmt.editPolicy.policyNameLabel', {
                         defaultMessage: 'Policy name',
@@ -315,7 +332,7 @@ export const EditPolicy: React.FunctionComponent<Props> = ({ history }) => {
 
               {isShowingPolicyJsonFlyout ? (
                 <PolicyJsonFlyout
-                  policyName={currentPolicy.name || ''}
+                  policyName={currentPolicyName}
                   close={() => setIsShowingPolicyJsonFlyout(false)}
                 />
               ) : null}
