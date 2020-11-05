@@ -47,7 +47,7 @@ function OrderParamEditor({
       label={label}
       fullWidth={true}
       isInvalid={showValidation ? !isValid : false}
-      compressed
+      display="rowCompressed"
     >
       <EuiSelect
         options={aggParam.options}

@@ -19,6 +19,14 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
   const queryBar = getService('queryBar');
   const comboBox = getService('comboBox');
   const renderable = getService('renderable');
+  const browser = getService('browser');
+  const MenuToggle = getService('MenuToggle');
+
+  const setViewPopoverToggle = new MenuToggle({
+    name: 'SetView Popover',
+    menuTestSubject: 'mapSetViewForm',
+    toggleButtonTestSubject: 'toggleSetViewVisibilityButton',
+  });
 
   function escapeLayerName(layerName: string) {
     return layerName.split(' ').join('_');
@@ -233,41 +241,11 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       return buttons.length;
     }
 
-    async isSetViewPopoverOpen() {
-      return await testSubjects.exists('mapSetViewForm', { timeout: 500 });
-    }
-
-    async openSetViewPopover() {
-      const isOpen = await this.isSetViewPopoverOpen();
-      if (!isOpen) {
-        await retry.try(async () => {
-          await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await this.isSetViewPopoverOpen();
-          if (!isOpenAfterClick) {
-            throw new Error('set view popover not opened');
-          }
-        });
-      }
-    }
-
-    async closeSetViewPopover() {
-      const isOpen = await this.isSetViewPopoverOpen();
-      if (isOpen) {
-        await retry.try(async () => {
-          await testSubjects.click('toggleSetViewVisibilityButton');
-          const isOpenAfterClick = await this.isSetViewPopoverOpen();
-          if (isOpenAfterClick) {
-            throw new Error('set view popover not closed');
-          }
-        });
-      }
-    }
-
     async setView(lat: number, lon: number, zoom: number) {
       log.debug(
         `Set view lat: ${lat.toString()}, lon: ${lon.toString()}, zoom: ${zoom.toString()}`
       );
-      await this.openSetViewPopover();
+      await setViewPopoverToggle.open();
       await testSubjects.setValue('latitudeInput', lat.toString());
       await testSubjects.setValue('longitudeInput', lon.toString());
       await testSubjects.setValue('zoomInput', zoom.toString());
@@ -277,11 +255,20 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
 
     async getView() {
       log.debug('Get view');
-      await this.openSetViewPopover();
-      const lat = await testSubjects.getAttribute('latitudeInput', 'value');
-      const lon = await testSubjects.getAttribute('longitudeInput', 'value');
-      const zoom = await testSubjects.getAttribute('zoomInput', 'value');
-      await this.closeSetViewPopover();
+      await setViewPopoverToggle.open();
+      // this method is regularly called within a retry, so we need to reduce the timeouts
+      // of the retries done within the getAttribute method in order to ensure that they fail
+      // early enough to retry getView()
+      const getAttributeOptions = {
+        tryTimeout: 5000,
+        findTimeout: 1000,
+      };
+
+      const lat = await testSubjects.getAttribute('latitudeInput', 'value', getAttributeOptions);
+      const lon = await testSubjects.getAttribute('longitudeInput', 'value', getAttributeOptions);
+      const zoom = await testSubjects.getAttribute('zoomInput', 'value', getAttributeOptions);
+
+      await setViewPopoverToggle.close();
       return {
         lat: parseFloat(lat),
         lon: parseFloat(lon),
@@ -691,6 +678,13 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
         });
       }
       await testSubjects.click('mapSettingSubmitButton');
+    }
+
+    async refreshAndClearUnsavedChangesWarning() {
+      await browser.refresh();
+      // accept alert if it pops up
+      const alert = await browser.getAlert();
+      await alert?.accept();
     }
   }
   return new GisPage();

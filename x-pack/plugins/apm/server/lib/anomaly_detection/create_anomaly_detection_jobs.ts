@@ -7,7 +7,7 @@
 import { Logger } from 'kibana/server';
 import uuid from 'uuid/v4';
 import { snakeCase } from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { ProcessorEvent } from '../../../common/processor_event';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { PromiseReturnType } from '../../../../observability/typings/common';

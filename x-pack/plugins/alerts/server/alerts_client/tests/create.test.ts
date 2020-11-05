@@ -6,7 +6,7 @@
 import { schema } from '@kbn/config-schema';
 import { AlertsClient, ConstructorOptions, CreateOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
@@ -16,7 +16,7 @@ import { ActionsAuthorization, ActionsClient } from '../../../../actions/server'
 import { TaskStatus } from '../../../../task_manager/server';
 import { getBeforeSetup, setGlobalDate } from './lib';
 
-const taskManager = taskManagerMock.start();
+const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
@@ -352,6 +352,9 @@ describe('create()', () => {
                                                                             "params": Object {
                                                                               "alertId": "1",
                                                                               "spaceId": "default",
+                                                                            },
+                                                                            "schedule": Object {
+                                                                              "interval": "10s",
                                                                             },
                                                                             "scope": Array [
                                                                               "alerting",

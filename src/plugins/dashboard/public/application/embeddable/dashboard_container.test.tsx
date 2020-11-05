@@ -134,3 +134,25 @@ test('Container view mode change propagates to new children', async () => {
 
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
 });
+
+test('searchSessionId propagates to children', async () => {
+  const searchSessionId1 = 'searchSessionId1';
+  const container = new DashboardContainer(
+    getSampleDashboardInput({ searchSessionId: searchSessionId1 }),
+    options
+  );
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Bob',
+  });
+
+  expect(embeddable.getInput().searchSessionId).toBe(searchSessionId1);
+
+  const searchSessionId2 = 'searchSessionId2';
+  container.updateInput({ searchSessionId: searchSessionId2 });
+
+  expect(embeddable.getInput().searchSessionId).toBe(searchSessionId2);
+});

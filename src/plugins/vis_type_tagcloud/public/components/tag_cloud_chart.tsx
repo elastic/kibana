@@ -45,7 +45,9 @@ export const TagCloudChart = ({
   const visController = useRef<any>(null);
 
   useEffect(() => {
-    visController.current = new TagCloudVisualization(chartDiv.current, colors, fireEvent);
+    if (chartDiv.current) {
+      visController.current = new TagCloudVisualization(chartDiv.current, colors, fireEvent);
+    }
     return () => {
       visController.current.destroy();
       visController.current = null;
@@ -62,10 +64,10 @@ export const TagCloudChart = ({
     () =>
       throttle(() => {
         if (visController.current) {
-          visController.current.render().then(renderComplete);
+          visController.current.render(visData, visParams).then(renderComplete);
         }
       }, 300),
-    [renderComplete]
+    [renderComplete, visData, visParams]
   );
 
   return (
