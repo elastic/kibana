@@ -184,6 +184,7 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
+  getErrorMessages: (state: T) => Array<{ shortMessage: string; longMessage: string }> | undefined;
   /**
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
    */
@@ -582,6 +583,14 @@ export interface Visualization<T = unknown> {
     state: T,
     datasourceLayers: Record<string, DatasourcePublicAPI>
   ) => Ast | string | null;
+  /**
+   * The frame will call this function on all visualizations at few stages (pre-build/build error) in order
+   * to provide more context to the error and show it to the user
+   */
+  getErrorMessages: (
+    state: T,
+    frame: FramePublicAPI
+  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
 }
 
 export interface LensFilterEvent {
