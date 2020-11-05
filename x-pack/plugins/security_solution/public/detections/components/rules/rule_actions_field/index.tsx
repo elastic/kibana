@@ -21,11 +21,10 @@ import {
 import { AlertAction } from '../../../../../../alerts/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { FORM_ERRORS_TITLE } from './translations';
-import { siemRuleActionGroups } from '../../../../../common';
 
 type ThrottleSelectField = typeof SelectField;
 
-const DEFAULT_ACTION_GROUP = siemRuleActionGroups[0];
+const DEFAULT_ACTION_GROUP_ID = 'default';
 const DEFAULT_ACTION_MESSAGE =
   'Rule {{context.rule.name}} generated {{state.signals_count}} alerts';
 
@@ -53,19 +52,12 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
     [field.value]
   );
 
-  const setActionPropByIndex = (prop: 'id' | 'group', value: string, index: number) => {
-    const updatedActions = [...(actions as Array<Partial<AlertAction>>)];
-    updatedActions[index] = deepMerge(updatedActions[index], { [prop]: value });
-    field.setValue(updatedActions);
-  };
   const setActionIdByIndex = useCallback(
-    (id: string, index: number) => setActionPropByIndex('id', id, index),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [field.setValue, actions]
-  );
-
-  const setActionGroupIdByIndex = useCallback(
-    (group: string, index: number) => setActionPropByIndex('group', group, index),
+    (id: string, index: number) => {
+      const updatedActions = [...(actions as Array<Partial<AlertAction>>)];
+      updatedActions[index] = deepMerge(updatedActions[index], { id });
+      field.setValue(updatedActions);
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [field.setValue, actions]
   );
@@ -126,9 +118,7 @@ export const RuleActionsField: ThrottleSelectField = ({ field, messageVariables 
         docLinks={docLinks}
         capabilities={capabilities}
         messageVariables={messageVariables}
-        defaultActionGroupId={DEFAULT_ACTION_GROUP.id}
-        actionGroups={siemRuleActionGroups}
-        setActionGroupIdByIndex={setActionGroupIdByIndex}
+        defaultActionGroupId={DEFAULT_ACTION_GROUP_ID}
         setActionIdByIndex={setActionIdByIndex}
         setAlertProperty={setAlertProperty}
         setActionParamsProperty={setActionParamsProperty}

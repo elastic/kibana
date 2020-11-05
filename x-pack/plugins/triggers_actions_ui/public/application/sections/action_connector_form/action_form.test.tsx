@@ -112,6 +112,8 @@ describe('action_form', () => {
   };
 
   describe('action_form in alert', () => {
+    let wrapper: ReactWrapper<any>;
+
     async function setup(customActions?: AlertAction[]) {
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
       loadAllActions.mockResolvedValueOnce([
@@ -215,7 +217,7 @@ describe('action_form', () => {
         mutedInstanceIds: [],
       } as unknown) as Alert;
 
-      const wrapper = mountWithIntl(
+      wrapper = mountWithIntl(
         <ActionForm
           actions={initialAlert.actions}
           messageVariables={[
@@ -225,10 +227,6 @@ describe('action_form', () => {
           defaultActionGroupId={'default'}
           setActionIdByIndex={(id: string, index: number) => {
             initialAlert.actions[index].id = id;
-          }}
-          actionGroups={[{ id: 'default', name: 'Default' }]}
-          setActionGroupIdByIndex={(group: string, index: number) => {
-            initialAlert.actions[index].group = group;
           }}
           setAlertProperty={(_updatedActions: AlertAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
@@ -299,16 +297,13 @@ describe('action_form', () => {
         await nextTick();
         wrapper.update();
       });
-
-      return wrapper;
     }
 
     it('renders available action cards', async () => {
-      const wrapper = await setup();
+      await setup();
       const actionOption = wrapper.find(
         `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
       );
-      wrapper.debug();
       expect(actionOption.exists()).toBeTruthy();
       expect(
         wrapper
@@ -319,7 +314,7 @@ describe('action_form', () => {
     });
 
     it('does not render action types disabled by config', async () => {
-      const wrapper = await setup();
+      await setup();
       const actionOption = wrapper.find(
         '[data-test-subj="disabled-by-config-ActionTypeSelectOption"]'
       );
@@ -327,72 +322,52 @@ describe('action_form', () => {
     });
 
     it('render action types which is preconfigured only (disabled by config and with preconfigured connectors)', async () => {
-      const wrapper = await setup();
+      await setup();
       const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
       expect(actionOption.exists()).toBeTruthy();
     });
 
-    it('renders available action groups for the selected action type', async () => {
-      const wrapper = await setup();
-      const actionOption = wrapper.find(
-        `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
-      );
-      actionOption.first().simulate('click');
-      const actionGroupsSelect = wrapper.find(
-        `[data-test-subj="addNewActionConnectorActionGroup-0"]`
-      );
-      expect((actionGroupsSelect.first().props() as any).options).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "data-test-subj": "addNewActionConnectorActionGroup-0-option-default",
-            "inputDisplay": "Default",
-            "value": "default",
-          },
-        ]
-      `);
-    });
-
     it('renders available connectors for the selected action type', async () => {
-      const wrapper = await setup();
+      await setup();
       const actionOption = wrapper.find(
         `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
       );
       actionOption.first().simulate('click');
       const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}"]`);
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "id": "test",
-                  "key": "test",
-                  "label": "Test connector ",
-                },
-                Object {
-                  "id": "test2",
-                  "key": "test2",
-                  "label": "Test connector 2 (preconfigured)",
-                },
-              ]
-            `);
+      Array [
+        Object {
+          "id": "test",
+          "key": "test",
+          "label": "Test connector ",
+        },
+        Object {
+          "id": "test2",
+          "key": "test2",
+          "label": "Test connector 2 (preconfigured)",
+        },
+      ]
+      `);
     });
 
     it('renders only preconfigured connectors for the selected preconfigured action type', async () => {
-      const wrapper = await setup();
+      await setup();
       const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
       actionOption.first().simulate('click');
       const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured"]');
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "id": "test3",
-                  "key": "test3",
-                  "label": "Preconfigured Only (preconfigured)",
-                },
-              ]
-            `);
+      Array [
+        Object {
+          "id": "test3",
+          "key": "test3",
+          "label": "Preconfigured Only (preconfigured)",
+        },
+      ]
+      `);
     });
 
     it('does not render "Add connector" button for preconfigured only action type', async () => {
-      const wrapper = await setup();
+      await setup();
       const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
       actionOption.first().simulate('click');
       const preconfigPannel = wrapper.find('[data-test-subj="alertActionAccordion-default"]');
@@ -403,7 +378,7 @@ describe('action_form', () => {
     });
 
     it('renders action types disabled by license', async () => {
-      const wrapper = await setup();
+      await setup();
       const actionOption = wrapper.find(
         '[data-test-subj="disabled-by-license-ActionTypeSelectOption"]'
       );
@@ -416,7 +391,7 @@ describe('action_form', () => {
     });
 
     it(`shouldn't render action types without params component`, async () => {
-      const wrapper = await setup();
+      await setup();
       const actionOption = wrapper.find(
         `[data-test-subj="${actionTypeWithoutParams.id}-ActionTypeSelectOption"]`
       );

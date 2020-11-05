@@ -43,7 +43,7 @@ import {
   createSearchAfterReturnTypeFromResponse,
 } from './utils';
 import { signalParamsSchema } from './signal_params_schema';
-import { siemRuleActionGroups } from '../../../../common';
+import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { findThresholdSignals } from './find_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';

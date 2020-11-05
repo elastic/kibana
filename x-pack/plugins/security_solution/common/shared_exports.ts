@@ -7,7 +7,6 @@
 export { NonEmptyString } from './detection_engine/schemas/types/non_empty_string';
 export { DefaultArray } from './detection_engine/schemas/types/default_array';
 export { DefaultUuid } from './detection_engine/schemas/types/default_uuid';
-export { siemRuleActionGroups } from './detection_engine/signals/siem_rule_action_groups';
 export { DefaultStringArray } from './detection_engine/schemas/types/default_string_array';
 export {
   DefaultVersionNumber,

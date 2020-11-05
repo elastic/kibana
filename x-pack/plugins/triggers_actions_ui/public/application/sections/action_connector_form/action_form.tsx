@@ -102,7 +102,7 @@ export const ActionForm = ({
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
-  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
+  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(actions.length === 0);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [isLoadingConnectors, setIsLoadingConnectors] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
@@ -341,7 +341,7 @@ export const ActionForm = ({
                 singleSelection={{ asPlainText: true }}
                 options={optionsList}
                 id={`selectActionConnector-${actionItem.id}`}
-                data-test-subj={`selectActionConnector-${actionItem.actionTypeId}`}
+                data-test-subj={`selectActionConnector-${index}`}
                 selectedOptions={getSelectedOptions(actionItem.id)}
                 onChange={(selectedOptions) => {
                   setActionIdByIndex(selectedOptions[0].id ?? '', index);
