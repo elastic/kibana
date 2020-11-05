@@ -34,6 +34,7 @@ import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 export class DiskUsageAlert extends BaseAlert {
   public type = ALERT_DISK_USAGE;
   public label = ALERT_DETAILS[ALERT_DISK_USAGE].label;
+  public description = ALERT_DETAILS[ALERT_DISK_USAGE].description;
 
   protected defaultParams = {
     threshold: 80,

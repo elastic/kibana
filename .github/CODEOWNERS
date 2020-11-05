@@ -60,7 +60,7 @@
 /src/plugins/expressions/ @elastic/kibana-app-arch
 /src/plugins/inspector/ @elastic/kibana-app-arch
 /src/plugins/kibana_react/ @elastic/kibana-app-arch
-/src/plugins/kibana_react/public/code_editor @elastic/kibana-canvas
+/src/plugins/kibana_react/public/code_editor @elastic/kibana-presentation
 /src/plugins/kibana_utils/ @elastic/kibana-app-arch
 /src/plugins/navigation/ @elastic/kibana-app-arch
 /src/plugins/share/ @elastic/kibana-app-arch
@@ -104,19 +104,19 @@
 /x-pack/legacy/plugins/beats_management/  @elastic/beats
 #CC# /x-pack/plugins/beats_management/ @elastic/beats
 
-# Canvas
-/src/plugins/dashboard/ @elastic/kibana-canvas
-/src/plugins/input_control_vis/ @elastic/kibana-canvas
-/src/plugins/vis_type_markdown/ @elastic/kibana-canvas
-/x-pack/plugins/canvas/  @elastic/kibana-canvas
-/x-pack/plugins/dashboard_enhanced/ @elastic/kibana-canvas
-/x-pack/test/functional/apps/canvas/  @elastic/kibana-canvas
-#CC# /src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-canvas
-#CC# /src/legacy/core_plugins/input_control_vis @elastic/kibana-canvas
-#CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-canvas
-#CC# /x-pack/legacy/plugins/canvas/ @elastic/kibana-canvas
-#CC# /x-pack/plugins/dashboard_mode @elastic/kibana-canvas
-#CC# /x-pack/legacy/plugins/dashboard_mode/ @elastic/kibana-canvas
+# Presentation
+/src/plugins/dashboard/ @elastic/kibana-presentation
+/src/plugins/input_control_vis/ @elastic/kibana-presentation
+/src/plugins/vis_type_markdown/ @elastic/kibana-presentation
+/x-pack/plugins/canvas/  @elastic/kibana-presentation
+/x-pack/plugins/dashboard_enhanced/ @elastic/kibana-presentation
+/x-pack/test/functional/apps/canvas/  @elastic/kibana-presentation
+#CC# /src/legacy/core_plugins/kibana/public/dashboard/ @elastic/kibana-presentation
+#CC# /src/legacy/core_plugins/input_control_vis @elastic/kibana-presentation
+#CC# /src/plugins/kibana_react/public/code_editor/ @elastic/kibana-presentation
+#CC# /x-pack/legacy/plugins/canvas/ @elastic/kibana-presentation
+#CC# /x-pack/plugins/dashboard_mode @elastic/kibana-presentation
+#CC# /x-pack/legacy/plugins/dashboard_mode/ @elastic/kibana-presentation
 
 # Core UI
 # Exclude tutorials folder for now because they are not owned by Kibana app and most will move out soon

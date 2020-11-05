@@ -170,7 +170,7 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
       const spacesClient = await this.getSpacesClient;
 
       try {
-        const availableSpaces = await spacesClient.getAll('findSavedObjects');
+        const availableSpaces = await spacesClient.getAll({ purpose: 'findSavedObjects' });
         if (namespaces.includes(ALL_SPACES_ID)) {
           namespaces = availableSpaces.map((space) => space.id);
         } else {
