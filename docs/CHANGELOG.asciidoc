@@ -63,6 +63,7 @@ Alerting::
 * Adds a Test Connector tab in the Connectors list {kibana-pull}77365[#77365]
 * Adds a "Test Connector" button on the Connectors List to make discovery of the Test tab easier {kibana-pull}78746[#78746]
 * The high-level search API SearchSource is now available on the server {kibana-pull}78383[#78383]
+* Adds Role Based Access-Control to the Alerting & Action plugins based on Kibana Feature Controls {kibana-pull}67157[#67157]
 APM::
 * Metrics-powered UI {kibana-pull}73953[#73953]
 * Uses platform history {kibana-pull}74328[#74328]
@@ -296,6 +297,9 @@ Alerting::
 * Fixes sorting of Alert Instance in Details page {kibana-pull}80103[#80103]
 * Fixes migration issue for case specific actions, by extending email action migrator checks {kibana-pull}81673[#81673]
 * Fixes docs in trigger alerting UI {kibana-pull}75363[#75363]
+* Populates alert instances view with event log data {kibana-pull}68437[#68437}
+* Displays a banner to users when some alerts have failures, added alert statuses column and filters {kibana-pull}79038[#79038]
+* Formalizes alert status and add status fields to alert saved object {kibana-pull}75553[#75553]
 APM::
 * Uses core.chrome to set window title {kibana-pull}73232[#73232]
 * Chart units don't update when toggling the chart legends {kibana-pull}74931[#74931]
@@ -409,6 +413,7 @@ Maps::
 * Fixes refreshing the page causes loss of unsaved change {kibana-pull}81226[#81226]
 * Fixes top-level Map page is called 'Kibana' {kibana-pull}81238[#81238]
 * Fixes auto-refresh not auto fitting to bounds {kibana-pull}81251[#81251]
+* Adds layer type preview icons {kibana-pull}78650[#78650]
 Metrics::
 * Fixes inventory footer misalignment {kibana-pull}74707[#74707]
 * Displays No Data context.values as [NO DATA] {kibana-pull}78038[#78038]
@@ -918,6 +923,7 @@ Maps::
 * Fixes fit to data for Point to Point layer {kibana-pull}73563[#73563]
 * Fixes #fit to bounds for ES document layers with joins {kibana-pull}73985[#73985]
 * Removes no longer required div wrapper around ValidatedDualRange {kibana-pull}70188[#70188]
+* Adds full precision GeoJSON version for TopoJSON only datastes link:[191]
 Metrics::
 * Fixes asynchronicity and error handling in Snapshot API {kibana-pull}70503[#70503]
 * Fixes evaluating rate-aggregated alerts when there's no normalized value {kibana-pull}73545[#73545]
