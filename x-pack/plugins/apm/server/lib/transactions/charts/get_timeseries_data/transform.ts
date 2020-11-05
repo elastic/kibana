@@ -58,12 +58,10 @@ export function getTpmBuckets({
   const buckets = transactionResultBuckets.map(
     ({ key: resultKey, timeseries }) => {
       const dataPoints = timeseries.buckets.map((bucket) => {
-        // calculate request/minute. Avoid up-scaling numbers if bucketSize is below 60s (1 minute).
-        // Eg. 1 request during a 10 second window should be displayed as "1 rpm" instead of "6 rpm".
-        const tmpValue = bucket.count.value * (60 / Math.max(60, bucketSize));
         return {
           x: bucket.key,
-          y: tmpValue,
+          // divide by minutes
+          y: bucket.count.value / (bucketSize / 60),
         };
       });
 
