@@ -62,6 +62,7 @@ export interface ILayer {
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
+  isTimeAware(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
   getMbLayerIds(): string[];
@@ -225,6 +226,10 @@ export class AbstractLayer implements ILayer {
 
   async isFittable(): Promise<boolean> {
     return (await this.supportsFitToBounds()) && this.isVisible();
+  }
+
+  async isTimeAware(): Promise<boolean> {
+    return false;
   }
 
   async getDisplayName(source?: ISource): Promise<string> {

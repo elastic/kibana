@@ -49,7 +49,12 @@ export class TOCEntryButton extends Component<Props, State> {
     this._isMounted = false;
   }
 
-  async _loadIsTimeAware() {}
+  async _loadIsTimeAware() {
+    const isTimeAware = await this.props.layer.isTimeAware();
+    if (this._isMounted) {
+      this.setState({ isTimeAware });
+    }
+  }
 
   getIconAndTooltipContent(): IconAndTooltipContent {
     let icon;
@@ -101,6 +106,14 @@ export class TOCEntryButton extends Component<Props, State> {
           icon: <EuiIcon color="subdued" type="filter" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingSearchMsg', {
             defaultMessage: 'Results narrowed by search bar',
+          }),
+        });
+      }
+      if (this.state.isTimeAware) {
+        footnotes.push({
+          icon: <EuiIcon color="subdued" type="clock" size="s" />,
+          message: i18n.translate('xpack.maps.layer.isUsingTimeFilter', {
+            defaultMessage: 'Results narrowed by time filter',
           }),
         });
       }

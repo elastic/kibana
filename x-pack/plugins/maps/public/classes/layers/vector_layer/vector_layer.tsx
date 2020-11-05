@@ -315,6 +315,20 @@ export class VectorLayer extends AbstractLayer {
     return indexPatternIds;
   }
 
+  async isTimeAware(): Promise<boolean> {
+    const isSourceTimeAware = await this.getSource().isTimeAware();
+    if (isSourceTimeAware) {
+      return true;
+    }
+
+    const joinPromises = this.getValidJoins().map(async (join) => {
+      return await join.getRightJoinSource().isTimeAware();
+    });
+    return (await Promise.all(joinPromises)).some((isJoinTimeAware: boolean) => {
+      return isJoinTimeAware;
+    });
+  }
+
   async _syncJoin({
     join,
     startLoading,
