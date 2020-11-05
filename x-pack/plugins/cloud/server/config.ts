@@ -24,7 +24,6 @@ const configSchema = schema.object({
   resetPasswordUrl: schema.maybe(schema.string()),
   deploymentUrl: schema.maybe(schema.string()),
   accountUrl: schema.maybe(schema.string()),
-  securityUrl: schema.maybe(schema.string()),
 });
 
 export type CloudConfigType = TypeOf<typeof configSchema>;
@@ -35,7 +34,6 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     resetPasswordUrl: true,
     deploymentUrl: true,
     accountUrl: true,
-    securityUrl: true,
   },
   schema: configSchema,
 };

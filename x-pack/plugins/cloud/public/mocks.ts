@@ -10,7 +10,6 @@ function createSetupMock() {
     isCloudEnabled: true,
     resetPasswordUrl: 'reset-password-url',
     accountUrl: 'account-url',
-    securityUrl: 'security-url',
   };
 }
 

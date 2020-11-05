@@ -17,7 +17,6 @@ export interface CloudConfigType {
   resetPasswordUrl?: string;
   deploymentUrl?: string;
   accountUrl?: string;
-  securityUrl?: string;
 }
 
 interface CloudSetupDependencies {
@@ -34,7 +33,6 @@ export interface CloudSetup {
   isCloudEnabled: boolean;
   resetPasswordUrl?: string;
   accountUrl?: string;
-  securityUrl?: string;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {

@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { sortBy } from 'lodash';
 import { Observable, Subscription, BehaviorSubject, ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { CoreStart } from 'src/core/public';
 
 import ReactDOM from 'react-dom';
@@ -69,7 +70,8 @@ export class SecurityNavControlService {
     );
 
     return {
-      getUserMenuLinks$: () => this.userMenuLinks$.pipe(takeUntil(this.stop$)),
+      getUserMenuLinks$: () =>
+        this.userMenuLinks$.pipe(map(this.sortUserMenuLinks), takeUntil(this.stop$)),
       setUserMenuLinks: (userMenuLink: UserMenuLink[]) => {
         this.userMenuLinks$.next(userMenuLink);
       },
@@ -82,6 +84,7 @@ export class SecurityNavControlService {
       this.securityFeaturesSubscription = undefined;
     }
     this.navControlRegistered = false;
+    this.stop$.next();
   }
 
   private registerSecurityNavControl(
@@ -111,5 +114,9 @@ export class SecurityNavControlService {
     });
 
     this.navControlRegistered = true;
+  }
+
+  private sortUserMenuLinks(userMenuLinks: ReadonlyMap<string, UserMenuLink>) {
+    return sortBy([...userMenuLinks.values()], 'order');
   }
 }
