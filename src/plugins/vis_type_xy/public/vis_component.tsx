@@ -49,14 +49,7 @@ import {
   getLegendActions,
   getColorPicker,
 } from './utils';
-import {
-  XYAxis,
-  XYEndzones,
-  XYCurrentTime,
-  XYSettings,
-  XYThresholdLine,
-  SplitChartWarning,
-} from './components';
+import { XYAxis, XYEndzones, XYCurrentTime, XYSettings, XYThresholdLine } from './components';
 import { getConfig } from './config';
 import { getThemeService, getColorsService, getDataActions } from './services';
 import { ChartType } from '../common';
@@ -209,12 +202,6 @@ const VisComponent = (props: VisComponentProps) => {
     },
     [allSeries, getSeriesName, props.uiState?.get]
   );
-
-  if (visParams.dimensions.splitRow || visParams.dimensions.splitRow) {
-    // TODO: Replace with small multiples implementation
-    // https://github.com/elastic/elastic-charts/issues/735
-    return <SplitChartWarning />;
-  }
 
   return (
     <div className="xyChart__container" data-test-subj="visTypeXyChart">

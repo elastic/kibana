@@ -43,10 +43,6 @@ interface DefaultEditorAggAddProps {
   addSchema(schema: Schema): void;
 }
 
-const maxTooltipText = i18n.translate('visDefaultEditor.aggAdd.maxBuckets', {
-  defaultMessage: 'Max buckets reached',
-});
-
 function DefaultEditorAggAdd({
   group = [],
   groupName,
@@ -82,6 +78,10 @@ function DefaultEditorAggAdd({
   const isSchemaDisabled = (schema: Schema, maxedCount: boolean): boolean => {
     return schema.disabled ?? maxedCount;
   };
+  const maxTooltipText = i18n.translate('visDefaultEditor.aggAdd.maxBuckets', {
+    defaultMessage: 'Max {groupNameLabel} count reached',
+    values: { groupNameLabel },
+  });
 
   return (
     <EuiFlexGroup justifyContent="center" responsive={false}>
@@ -120,7 +120,7 @@ function DefaultEditorAggAdd({
                   data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
                   disabled={isPopoverOpen && isSchemaDisabled(schema, maxedCount)}
                   onClick={() => onSelectSchema(schema)}
-                  toolTipContent={maxedCount ? maxTooltipText : schema.tooltip}
+                  toolTipContent={schema.tooltip ?? (maxedCount ? maxTooltipText : undefined)}
                 >
                   {schema.title}
                 </EuiContextMenuItem>

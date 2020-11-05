@@ -23,7 +23,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { ExpressionRenderDefinition } from '../../expressions/public';
 import { VisualizationContainer } from '../../visualizations/public';
 import { XyVisType } from '../common';
-import { VisParams } from './types';
+import { SplitChartWarning } from './components';
 
 import { VisComponentType } from './vis_component';
 import { RenderValue, visName } from './xy_vis_fn';
@@ -31,16 +31,7 @@ import { RenderValue, visName } from './xy_vis_fn';
 // @ts-ignore
 const VisComponent = lazy<VisComponentType>(() => import('./vis_component'));
 
-function shouldShowNoResultsMessage(
-  visParams: VisParams,
-  visData: any,
-  visType: XyVisType
-): boolean {
-  if (visParams.dimensions.splitRow || visParams.dimensions.splitRow) {
-    // render SplitChartWarning
-    return false;
-  }
-
+function shouldShowNoResultsMessage(visData: any, visType: XyVisType): boolean {
   if (['goal', 'gauge'].includes(visType)) {
     return false;
   }
@@ -56,20 +47,23 @@ export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
   displayName: 'XY visualization',
   reuseDomNode: true,
   render: (domNode, { visData, visConfig, visType }, handlers) => {
-    const showNoResult = shouldShowNoResultsMessage(visConfig, visData, visType);
+    const showNoResult = shouldShowNoResultsMessage(visData, visType);
+    const isSplitChart = Boolean(visConfig.dimensions.splitRow || visConfig.dimensions.splitRow);
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
-
     render(
-      <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-        <VisComponent
-          visParams={visConfig}
-          visData={visData}
-          renderComplete={handlers.done}
-          fireEvent={handlers.event}
-          uiState={handlers.uiState}
-        />
-      </VisualizationContainer>,
+      <>
+        {isSplitChart && <SplitChartWarning />}
+        <VisualizationContainer handlers={handlers} showNoResult={showNoResult || isSplitChart}>
+          <VisComponent
+            visParams={visConfig}
+            visData={visData}
+            renderComplete={handlers.done}
+            fireEvent={handlers.event}
+            uiState={handlers.uiState}
+          />
+        </VisualizationContainer>
+      </>,
       domNode
     );
   },

@@ -34,4 +34,4 @@ export type ChartType = $Values<typeof ChartType>;
  */
 export type XyVisType = ChartType | 'horizontal_bar';
 
-export const NEW_CHART_UI = 'visualization.visualize:newChartUi';
+export const CHARTS_LIBRARY = 'visualization.visualize:chartsLibrary';

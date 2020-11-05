@@ -119,13 +119,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     // TODO: Remove when vislib is removed
-    describe('newChartUi', function () {
+    // https://github.com/elastic/kibana/issues/56143
+    describe('new charts library', function () {
       this.tags('ciGroup6');
 
       before(async () => {
         await loadLogstash();
         await kibanaServer.uiSettings.update({
-          'visualization.visualize:newChartUi': true,
+          'visualization.visualize:chartsLibrary': true,
         });
         await browser.refresh();
       });
@@ -133,7 +134,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       after(async () => {
         await unloadLogstash();
         await kibanaServer.uiSettings.update({
-          'visualization.visualize:newChartUi': false,
+          'visualization.visualize:chartsLibrary': false,
         });
         await browser.refresh();
       });

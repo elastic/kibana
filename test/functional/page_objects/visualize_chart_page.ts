@@ -41,18 +41,18 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     /**
-     * Is newChartUi advanced setting enabled
+     * Is chartsLibrary advanced setting enabled
      */
     public async isNewChartUiEnabled(): Promise<boolean> {
       const enabled =
-        Boolean(await kibanaServer.uiSettings.get('visualization.visualize:newChartUi')) ?? false;
+        Boolean(await kibanaServer.uiSettings.get('visualization.visualize:chartsLibrary')) ?? false;
       log.debug(`-- isNewChartUiEnabled = ${enabled}`);
 
       return enabled;
     }
 
     /**
-     * Is newChartUi enabled and an area, line or histogram chart is available
+     * Is chartsLibrary enabled and an area, line or histogram chart is available
      */
     private async isVisTypeXYChart(): Promise<boolean> {
       const enabled = await this.isNewChartUiEnabled();

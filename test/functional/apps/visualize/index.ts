@@ -43,19 +43,19 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     // TODO: Remove when vislib is removed
-    describe('newChartUi', function () {
+    describe('chartsLibrary', function () {
       this.tags('ciGroup7');
 
       before(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization.visualize:newChartUi': true,
+          'visualization.visualize:chartsLibrary': true,
         });
         await browser.refresh();
       });
 
       after(async () => {
         await kibanaServer.uiSettings.update({
-          'visualization.visualize:newChartUi': false,
+          'visualization.visualize:chartsLibrary': false,
         });
         await browser.refresh();
       });

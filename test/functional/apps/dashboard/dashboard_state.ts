@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       if (isNewChartUiEnabled) {
         await kibanaServer.uiSettings.update({
-          'visualization.visualize:newChartUi': true,
+          'visualization.visualize:chartsLibrary': true,
         });
         await browser.refresh();
       }
@@ -73,12 +73,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const visName = await PageObjects.visChart.getExpectedValue(
         AREA_CHART_VIS_NAME,
-        `${AREA_CHART_VIS_NAME} - newChartUi`
+        `${AREA_CHART_VIS_NAME} - chartsLibrary`
       );
       await dashboardAddPanel.addVisualization(visName);
       const dashboarName = await PageObjects.visChart.getExpectedValue(
         'Overridden colors',
-        'Overridden colors - newChartUi'
+        'Overridden colors - chartsLibrary'
       );
       await PageObjects.dashboard.saveDashboard(dashboarName);
 

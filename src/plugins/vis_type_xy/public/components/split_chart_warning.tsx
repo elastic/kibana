@@ -19,57 +19,37 @@
 
 import React, { FC } from 'react';
 
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent,
-  EuiPageContentHeader,
-  EuiPageContentHeaderSection,
-  EuiPageContentBody,
-  EuiTitle,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiLink, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export const SplitChartWarning: FC = () => {
   return (
-    <EuiPage style={{ width: '100%', height: '100%' }}>
-      <EuiPageBody component="div">
-        <EuiPageContent verticalPosition="center" horizontalPosition="center">
-          <EuiPageContentHeader>
-            <EuiPageContentHeaderSection>
-              <EuiTitle>
-                <h2>
-                  {i18n.translate('visTypeXy.splitChartWarning.title', {
-                    defaultMessage: 'Warning',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiPageContentHeaderSection>
-          </EuiPageContentHeader>
-          <EuiPageContentBody>
-            <FormattedMessage
-              id="visTypeXy.splitChartWarning.content"
-              defaultMessage="Split chart aggregations are not supported with new chart ui enabled. Please disable the {link} advanced setting to enable split chart support."
-              values={{
-                link: (
-                  <EuiLink
-                    href="/app/management/kibana/settings/new%20chart%20ui"
-                    target="_blank"
-                    external
-                  >
-                    <FormattedMessage
-                      id="visTypeXy.splitChartWarning.link"
-                      defaultMessage="New chart ui"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <EuiCallOut
+      title={i18n.translate('visTypeXy.splitChartWarning.title', {
+        defaultMessage: 'Warning',
+      })}
+      color="warning"
+      iconType="help"
+    >
+      <FormattedMessage
+        id="visTypeXy.splitChartWarning.content"
+        defaultMessage="Split chart aggregation is not supported with the new charts library. Please disable the {link} advanced setting to enable split chart aggregation."
+        values={{
+          link: (
+            <EuiLink
+              href="/app/management/kibana/settings/charts%20library"
+              target="_blank"
+              external
+            >
+              <FormattedMessage
+                id="visTypeXy.splitChartWarning.link"
+                defaultMessage="Charts library"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiCallOut>
   );
 };

@@ -33,7 +33,7 @@ import {
   setUISettings,
 } from './services';
 import { visTypesDefinitions } from './vis_types';
-import { NEW_CHART_UI } from '../common';
+import { CHARTS_LIBRARY } from '../common';
 import { xyVisRenderer } from './vis_renderer';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -70,7 +70,7 @@ export class VisTypeXyPlugin
     core: VisTypeXyCoreSetup,
     { expressions, visualizations, charts }: VisTypeXyPluginSetupDependencies
   ) {
-    if (core.uiSettings.get(NEW_CHART_UI, false)) {
+    if (core.uiSettings.get(CHARTS_LIBRARY, false)) {
       setUISettings(core.uiSettings);
       setThemeService(charts.theme);
       setColorsService(charts.legacyColors);

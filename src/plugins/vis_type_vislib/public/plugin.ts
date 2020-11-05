@@ -24,7 +24,7 @@ import { VisualizationsSetup } from '../../visualizations/public';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { KibanaLegacyStart } from '../../kibana_legacy/public';
-import { NEW_CHART_UI } from '../../vis_type_xy/public';
+import { CHARTS_LIBRARY } from '../../vis_type_xy/public';
 
 import { createVisTypeVislibVisFn } from './vis_type_vislib_vis_fn';
 import { createPieVisFn } from './pie_fn';
@@ -61,7 +61,7 @@ export class VisTypeVislibPlugin
     core: VisTypeVislibCoreSetup,
     { expressions, visualizations, charts }: VisTypeVislibPluginSetupDependencies
   ) {
-    if (core.uiSettings.get(NEW_CHART_UI)) {
+    if (core.uiSettings.get(CHARTS_LIBRARY)) {
       // Register only non-replaced vis types
       convertedTypeDefinitions.forEach(visualizations.createBaseVisualization);
       visualizations.createBaseVisualization(pieVisTypeDefinition);

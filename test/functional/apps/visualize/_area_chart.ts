@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getVizName = async () =>
     await PageObjects.visChart.getExpectedValue(
       'Visualization AreaChart Name Test',
-      'Visualization AreaChart Name Test - New chart UI'
+      'Visualization AreaChart Name Test - Charts library'
     );
 
   describe('area charts', function indexPatternCreation() {
