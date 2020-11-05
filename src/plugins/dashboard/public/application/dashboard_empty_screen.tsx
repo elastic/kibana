@@ -136,7 +136,7 @@ export function DashboardEmptyScreen({
   );
   const viewMode = page(constants.fillDashboardTitle, true);
   const editMode = (
-    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget">
+    <div data-test-subj="emptyDashboardWidget" className="dshEmptyWidget testClass">
       {enterViewModeParagraph}
       <EuiSpacer size="l" />
       {linkToVisualizeParagraph}

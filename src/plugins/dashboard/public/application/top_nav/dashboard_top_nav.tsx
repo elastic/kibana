@@ -21,23 +21,12 @@ import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import {
-  EmbeddableFactoryNotFoundError,
-  isErrorEmbeddable,
-  openAddPanelFlyout,
-  ViewMode,
-} from '../../../../embeddable/public';
+import { ViewMode } from '../../../../embeddable/public';
 import { useKibana } from '../../../../kibana_react/public';
-import {
-  getSavedObjectFinder,
-  SavedObjectSaveOpts,
-  SaveResult,
-  showSaveModal,
-} from '../../../../saved_objects/public';
+import { SavedObjectSaveOpts, SaveResult, showSaveModal } from '../../../../saved_objects/public';
 import { NavAction } from '../../types';
-import { DashboardEmptyScreen } from '../dashboard_empty_screen';
 import { saveDashboard } from '../lib';
 import { DashboardAppServices, DashboardSaveOptions, DashboardTopNavProps } from '../types';
 import { getTopNavConfig } from './get_top_nav_config';
@@ -50,7 +39,6 @@ export function DashboardTopNav({
   refreshDashboardContainer,
   dashboardStateManager,
   redirectToDashboard,
-  dashboardContainer,
   lastDashboardId,
   updateViewMode,
   addFromLibrary,
@@ -64,7 +52,6 @@ export function DashboardTopNav({
     core,
     overlays,
     chrome,
-    embeddable,
     navigation,
     setHeaderActionMenu,
     savedObjectsTagging,
@@ -127,8 +114,6 @@ export function DashboardTopNav({
             revertChangesAndExitEditMode();
           }
         });
-
-      // updateNavBar();
     },
     [
       timefilter,
@@ -293,7 +278,7 @@ export function DashboardTopNav({
         [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
         [TopNavIds.SAVE]: runSave,
         [TopNavIds.CLONE]: runClone,
-        [TopNavIds.ADD_EXISTING]: () => addFromLibrary,
+        [TopNavIds.ADD_EXISTING]: addFromLibrary,
         [TopNavIds.VISUALIZE]: createNew,
         [TopNavIds.OPTIONS]: (anchorElement) => {
           showOptionsPopover({

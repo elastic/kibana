@@ -107,7 +107,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
 
-  public emptyScreen: React.ReactNode;
+  public renderEmptyScreen?: () => React.ReactNode;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
@@ -229,11 +229,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     ReactDOM.render(
       <I18nProvider>
         <KibanaContextProvider services={this.options}>
-          <DashboardViewport
-            renderEmpty={() => this.emptyScreen}
-            container={this}
-            PanelComponent={this.embeddablePanel}
-          />
+          <DashboardViewport container={this} PanelComponent={this.embeddablePanel} />
         </KibanaContextProvider>
       </I18nProvider>,
       dom

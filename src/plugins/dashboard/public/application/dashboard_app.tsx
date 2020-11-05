@@ -330,7 +330,7 @@ export function DashboardApp({
     embeddable,
     data,
     uiSettings,
-    savedObjects,
+    // savedObjects,
     savedDashboards,
     initializerContext,
     indexPatterns,
@@ -384,7 +384,7 @@ export function DashboardApp({
         getFactory: embeddable.getEmbeddableFactory,
         notifications: core.notifications,
         overlays: core.overlays,
-        SavedObjectFinder: getSavedObjectFinder(savedObjects, uiSettings),
+        SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
       });
     }
   }, [
@@ -392,8 +392,8 @@ export function DashboardApp({
     embeddable.getEmbeddableFactory,
     state.dashboardContainer,
     core.notifications,
+    core.savedObjects,
     core.overlays,
-    savedObjects,
     uiSettings,
   ]);
 
@@ -612,17 +612,19 @@ export function DashboardApp({
       refreshDashboardContainer();
     });
 
-    const isEditMode = dashboardContainer.getInput().viewMode !== ViewMode.VIEW;
-    dashboardContainer.emptyScreen = (
-      <DashboardEmptyScreen
-        isReadonlyMode={dashboardContainer.getInput().dashboardCapabilities?.hideWriteControls}
-        onLinkClick={isEditMode ? addFromLibrary : () => updateViewMode(ViewMode.EDIT)}
-        onVisualizeClick={createNew}
-        showLinkToVisualize={isEditMode}
-        uiSettings={uiSettings}
-        http={core.http}
-      />
-    );
+    dashboardContainer.renderEmptyScreen = () => {
+      const isEditMode = dashboardContainer.getInput().viewMode !== ViewMode.VIEW;
+      return (
+        <DashboardEmptyScreen
+          isReadonlyMode={dashboardContainer.getInput().dashboardCapabilities?.hideWriteControls}
+          onLinkClick={isEditMode ? addFromLibrary : () => updateViewMode(ViewMode.EDIT)}
+          onVisualizeClick={createNew}
+          showLinkToVisualize={isEditMode}
+          uiSettings={uiSettings}
+          http={core.http}
+        />
+      );
+    };
     dashboardContainer.render(document.getElementById('dashboardViewport')!);
 
     return () => {

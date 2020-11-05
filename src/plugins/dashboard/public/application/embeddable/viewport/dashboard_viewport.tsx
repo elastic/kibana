@@ -27,7 +27,6 @@ import { context } from '../../../../../kibana_react/public';
 export interface DashboardViewportProps {
   container: DashboardContainer;
   PanelComponent: EmbeddableStart['EmbeddablePanel'];
-  renderEmpty?: () => React.ReactNode;
 }
 
 interface State {
@@ -140,7 +139,7 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
             toggleChrome={!isEmbeddedExternally}
           />
         )}
-        {this.props.container.emptyScreen}
+        {this.props.container.renderEmptyScreen?.()}
       </div>
     );
   }

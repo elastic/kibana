@@ -34,7 +34,6 @@ import {
   TimefilterContract,
 } from '../../../data/public';
 import { EmbeddableStart, ViewMode } from '../../../embeddable/public';
-import { KibanaLegacyStart } from '../../../kibana_legacy/public';
 import { NavigationPublicPluginStart } from '../../../navigation/public';
 import { SavedObjectLoader, SavedObjectsStart } from '../../../saved_objects/public';
 import { SharePluginStart } from '../../../share/public';
