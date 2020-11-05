@@ -5,6 +5,7 @@
  */
 
 import { ISearchStrategy, PluginStart } from '../../../../../../src/plugins/data/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/common';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -16,7 +17,7 @@ import { SecuritySolutionFactory } from './factory/types';
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
-  const es = data.search.getSearchStrategy('es');
+  const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
   return {
     search: async (context, request, options) => {
