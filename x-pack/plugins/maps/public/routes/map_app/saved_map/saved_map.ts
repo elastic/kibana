@@ -46,6 +46,7 @@ export class SavedMap {
   private readonly _embeddableId?: string;
   private _initialLayerListConfig: LayerDescriptor[] = [];
   private _mapEmbeddableInput?: MapEmbeddableInput;
+  private readonly _onSaveCallback?: () => void;
   private _originatingApp?: string;
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
@@ -53,16 +54,19 @@ export class SavedMap {
   constructor({
     mapEmbeddableInput,
     embeddableId,
+    onSaveCallback,
     originatingApp,
     stateTransfer,
   }: {
     mapEmbeddableInput?: MapEmbeddableInput;
     embeddableId?: string;
+    onSaveCallback?: () => void;
     originatingApp?: string;
     stateTransfer?: EmbeddableStateTransfer;
   }) {
     this._mapEmbeddableInput = mapEmbeddableInput;
     this._embeddableId = embeddableId;
+    this._onSaveCallback = onSaveCallback;
     this._originatingApp = originatingApp;
     this._stateTransfer = stateTransfer;
     this._store = createMapStore();
@@ -297,6 +301,11 @@ export class SavedMap {
     getCoreChrome().docTitle.change(newTitle);
     this.setBreadcrumbs();
     goToSpecifiedPath(`/map/${this.getSavedObjectId()}${window.location.hash}`);
+
+    if (this._onSaveCallback) {
+      this._onSaveCallback();
+    }
+
     return;
   }
 

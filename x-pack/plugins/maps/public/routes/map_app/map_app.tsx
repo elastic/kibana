@@ -55,6 +55,8 @@ import {
 
 interface Props {
   savedMap: SavedMap;
+  // saveCounter used to trigger MapApp render after SaveMap.save
+  saveCounter: number;
   onAppLeave: AppMountParameters['onAppLeave'];
   filters: Filter[];
   isFullScreen: boolean;

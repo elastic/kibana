@@ -23,6 +23,7 @@ interface Props {
 
 interface State {
   savedMap: SavedMap;
+  saveCounter: number;
 }
 
 // react-router-dom.route "render" method may be called multiple times for the same route.
@@ -30,17 +31,37 @@ interface State {
 // MapAppContainer exists to wrap MapApp in a component so that a single instance of SavedMap
 // exists per route regardless of how many times render method is called.
 export class MapAppContainer extends Component<Props, State> {
+  private _isMounted: boolean = false;
+
   constructor(props: Props) {
     super(props);
     this.state = {
       savedMap: new SavedMap({
         mapEmbeddableInput: props.mapEmbeddableInput,
-        embeddableId: this.props.embeddableId,
-        originatingApp: this.props.originatingApp,
-        stateTransfer: this.props.stateTransfer,
+        embeddableId: props.embeddableId,
+        originatingApp: props.originatingApp,
+        stateTransfer: props.stateTransfer,
+        onSaveCallback: this.updateSaveCounter,
       }),
+      saveCounter: 0,
     };
   }
+
+  componentDidMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  updateSaveCounter = () => {
+    if (this._isMounted) {
+      this.setState((prevState) => {
+        return { saveCounter: prevState.saveCounter + 1 };
+      });
+    }
+  };
 
   render() {
     return (
@@ -49,6 +70,7 @@ export class MapAppContainer extends Component<Props, State> {
           savedMap={this.state.savedMap}
           onAppLeave={this.props.onAppLeave}
           setHeaderActionMenu={this.props.setHeaderActionMenu}
+          saveCounter={this.state.saveCounter}
         />
       </Provider>
     );
