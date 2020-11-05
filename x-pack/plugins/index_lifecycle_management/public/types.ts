@@ -10,6 +10,8 @@ import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 import { CloudSetup } from '../../cloud/public';
 
+import { BreadcrumbService } from './application/services/breadcrumbs';
+
 export interface PluginsDependencies {
   usageCollection?: UsageCollectionSetup;
   management: ManagementSetup;
@@ -25,5 +27,6 @@ export interface ClientConfigType {
 }
 
 export interface AppServicesContext {
+  breadcrumbService: BreadcrumbService;
   cloud?: CloudSetup;
 }

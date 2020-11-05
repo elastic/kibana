@@ -12,14 +12,9 @@ import {
 import * as Registry from '../../registry';
 import { loadFieldsFromYaml, Fields, Field } from '../../fields/field';
 import { getPackageKeysByStatus } from '../../packages/get';
-import { dataTypes } from '../../../../../common/constants';
+import { dataTypes, installationStatuses } from '../../../../../common/constants';
 import { ValueOf } from '../../../../../common/types';
-import {
-  InstallationStatus,
-  RegistryPackage,
-  CallESAsCurrentUser,
-  DataType,
-} from '../../../../types';
+import { RegistryPackage, CallESAsCurrentUser, DataType } from '../../../../types';
 import { appContextService } from '../../../../services';
 
 interface FieldFormatMap {
@@ -87,7 +82,7 @@ export async function installIndexPatterns(
   // get all user installed packages
   const installedPackages = await getPackageKeysByStatus(
     savedObjectsClient,
-    InstallationStatus.installed
+    installationStatuses.Installed
   );
   // TODO: move to install package
   // cache all installed packages if they don't exist
