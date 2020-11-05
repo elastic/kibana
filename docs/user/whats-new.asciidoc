@@ -59,23 +59,22 @@ image::user/images/navigational-search.png[New home and landing page]
 
 [float]
 [[lens-generally-available]]
-=== Lens generally available
+=== Lens is generally available
 
 To further our commitment to the ongoing journey of making {kib} an incredible
-visual data analytics experience for everyone, regardless of technical background,
-*Lens* is generally available. Now users whose companies limit the use of
+visual data analytics experience for everyone, regardless of technical background, we've made
+*Lens* generally available. Now users whose companies limit the use of
 beta software or services in production can leverage the visualization and analytics
 capabilities that *Lens* provides.
 
 *Lens* also introduces two new chart types.
 Depending on the type of data you are visualizing, *Lens* can now build
 percentage bar charts and percentage area charts.
-For more information, refer to the {kibana-ref}/dashboard.html#lens[documentation].
-
 
 [role="screenshot"]
 image::user/images/lens-whats-new.png[Percentage bar chart in Lens]
 
+For more information, refer to the {kibana-ref}/dashboard.html#lens[documentation].
 
 [float]
 [[drilldowns-to-urls]]
@@ -115,15 +114,15 @@ tile rendering enables you to work with more data at faster speeds.
 
 [float]
 [[vega-generally-available]]
-=== Vega generally available
+=== Vega is generally available
 
 *Vega*, an advanced editor you use to create custom panels in dashboards, is production ready.
 Now users whose companies limit the use of beta software or services in production can leverage the full visualization customization capabilities that Vega provides.
-For information about Vega, refer to the {kibana-ref}/dashboard.html#vega[documentation].
 
 [role="screenshot"]
 image::user/images/vega-new.png[Percentage bar chart in Lens]
 
+For information about Vega, refer to the {kibana-ref}/dashboard.html#vega[documentation].
 
 [float]
 [[alerts-new-connectors]]
