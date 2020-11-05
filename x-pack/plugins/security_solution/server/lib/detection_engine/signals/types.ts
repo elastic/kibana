@@ -14,7 +14,7 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerts/server';
-import { SearchResponse } from '../../types';
+import { BaseSearchResponse, SearchResponse, TermAggregationBucket } from '../../types';
 import {
   EqlSearchResponse,
   BaseHit,
@@ -233,4 +233,8 @@ export interface SearchAfterAndBulkCreateReturnType {
   lastLookBackDate: Date | null | undefined;
   createdSignalsCount: number;
   errors: string[];
+}
+
+export interface ThresholdAggregationBucket extends TermAggregationBucket {
+  top_threshold_hits: BaseSearchResponse<SignalSource>;
 }

@@ -14,7 +14,7 @@ import { AlertServices } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
 import { singleBulkCreate, SingleBulkCreateResponse } from './single_bulk_create';
-import { SignalSearchResponse, SignalSourceHit } from './types';
+import { SignalSearchResponse, SignalSourceHit, ThresholdAggregationBucket } from './types';
 import { BuildRuleMessage } from './rule_messages';
 
 // used to generate constant Threshold Signals ID when run with the same params
@@ -125,7 +125,7 @@ const getTransformedHits = (
   startedAt: Date,
   threshold: Threshold,
   ruleId: string,
-  signalQueryFields: Record<string, string>
+  filter: unknown
 ) => {
   if (isEmpty(threshold.field)) {
     const totalResults =
@@ -138,7 +138,8 @@ const getTransformedHits = (
     const source = {
       '@timestamp': new Date().toISOString(),
       threshold_count: totalResults,
-      ...signalQueryFields,
+      // TODO: how to get signal query fields for this case???
+      // ...signalQueryFields,
     };
 
     return [
@@ -154,24 +155,30 @@ const getTransformedHits = (
     return [];
   }
 
-  return results.aggregations.threshold.buckets.map(
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    ({ key, doc_count }: { key: string; doc_count: number }) => {
-      const source = {
-        '@timestamp': new Date().toISOString(),
-        threshold_count: doc_count,
-        ...signalQueryFields,
-      };
+  return results.aggregations.threshold.buckets
+    .map(
+      ({ key, doc_count: docCount, top_threshold_hits: topHits }: ThresholdAggregationBucket) => {
+        const hit = topHits.hits.hits[0];
+        if (hit == null) {
+          return null;
+        }
 
-      set(source, threshold.field, key);
+        const source = {
+          '@timestamp': new Date().toISOString(), // TODO: use timestamp of latest event?
+          threshold_count: docCount,
+          ...getThresholdSignalQueryFields(hit, filter),
+        };
 
-      return {
-        _index: inputIndex,
-        _id: uuidv5(`${ruleId}${startedAt}${threshold.field}${key}`, NAMESPACE_ID),
-        _source: source,
-      };
-    }
-  );
+        set(source, threshold.field, key);
+
+        return {
+          _index: inputIndex,
+          _id: uuidv5(`${ruleId}${startedAt}${threshold.field}${key}`, NAMESPACE_ID),
+          _source: source,
+        };
+      }
+    )
+    .filter((bucket: ThresholdAggregationBucket) => bucket != null);
 };
 
 export const transformThresholdResultsToEcs = (
@@ -182,14 +189,13 @@ export const transformThresholdResultsToEcs = (
   threshold: Threshold,
   ruleId: string
 ): SignalSearchResponse => {
-  const signalQueryFields = getThresholdSignalQueryFields(results.hits.hits[0], filter);
   const transformedHits = getTransformedHits(
     results,
     inputIndex,
     startedAt,
     threshold,
     ruleId,
-    signalQueryFields
+    filter
   );
   const thresholdResults = {
     ...results,

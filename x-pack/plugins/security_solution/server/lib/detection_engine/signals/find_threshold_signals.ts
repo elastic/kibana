@@ -52,6 +52,22 @@ export const findThresholdSignals = async ({
               field: threshold.field,
               min_doc_count: threshold.value,
             },
+            aggs: {
+              // Get the most recent hit per bucket
+              top_threshold_hits: {
+                top_hits: {
+                  sort: [
+                    {
+                      '@timestamp': {
+                        // TODO: custom timestamp fields???
+                        order: 'desc',
+                      },
+                    },
+                  ],
+                  size: 1,
+                },
+              },
+            },
           },
         }
       : {};
@@ -66,7 +82,7 @@ export const findThresholdSignals = async ({
     services,
     logger,
     filter,
-    pageSize: 1,
+    pageSize: 0,
     buildRuleMessage,
   });
 };
