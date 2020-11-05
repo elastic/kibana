@@ -42,6 +42,7 @@ export type StatefulSearchBarProps = SearchBarOwnProps & {
   useDefaultBehaviors?: boolean;
   savedQueryId?: string;
   onSavedQueryIdChange?: (savedQueryId?: string) => void;
+  onFilterAdded?: () => void;
 };
 
 // Respond to user changing the filters
@@ -49,6 +50,14 @@ const defaultFiltersUpdated = (queryService: QueryStart) => {
   return (filters: Filter[]) => {
     queryService.filterManager.setFilters(filters);
   };
+};
+
+const defaultOnFilterAdded = (props: StatefulSearchBarProps, queryService: QueryStart) => {
+  const onFilterUpdated = defaultFiltersUpdated(queryService);
+  if (props.onFilterAdded) {
+    props.onFilterAdded();
+  }
+  return onFilterUpdated;
 };
 
 // Respond to user changing the refresh settings
@@ -191,6 +200,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           filters={filters}
           query={query}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
+          onFilterAdded={defaultOnFilterAdded(props, data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
           onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}

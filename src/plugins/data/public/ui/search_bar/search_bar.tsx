@@ -75,6 +75,8 @@ export interface SearchBarOwnProps {
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
   // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
+  // User has added a filter
+  onFilterAdded?: (filters: Filter[]) => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
@@ -432,6 +434,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
+              onFilterAdded={this.props.onFilterAdded}
             />
           </div>
         </div>

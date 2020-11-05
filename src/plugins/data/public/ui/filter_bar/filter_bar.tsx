@@ -45,6 +45,7 @@ interface Props {
   className: string;
   indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
+  onFilterAdded?: (filters: Filter[]) => void;
 }
 
 function FilterBarUI(props: Props) {
@@ -129,7 +130,11 @@ function FilterBarUI(props: Props) {
   function onAdd(filter: Filter) {
     setIsAddFilterPopoverOpen(false);
     const filters = [...props.filters, filter];
-    onFiltersUpdated(filters);
+    if (props.onFilterAdded) {
+      props.onFilterAdded(filters);
+    } else {
+      onFiltersUpdated(filters);
+    }
   }
 
   function onRemove(i: number) {
