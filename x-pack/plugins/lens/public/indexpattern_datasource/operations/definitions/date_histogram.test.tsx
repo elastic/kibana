@@ -66,6 +66,16 @@ describe('date_histogram', () => {
               searchable: true,
             },
           ],
+          fieldsMap: {
+            timestamp: {
+              name: 'timestamp',
+              displayName: 'timestampLabel',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+            },
+          },
         },
         2: {
           id: '2',
@@ -81,6 +91,16 @@ describe('date_histogram', () => {
               searchable: true,
             },
           ],
+          fieldsMap: {
+            other_timestamp: {
+              name: 'other_timestamp',
+              displayName: 'other_timestamp',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+            },
+          },
         },
       },
       layers: {
@@ -267,6 +287,22 @@ describe('date_histogram', () => {
               },
             },
           ],
+          fieldsMap: {
+            timestamp: {
+              name: 'timestamp',
+              displayName: 'timestamp',
+              aggregatable: true,
+              searchable: true,
+              type: 'date',
+              aggregationRestrictions: {
+                date_histogram: {
+                  agg: 'date_histogram',
+                  time_zone: 'UTC',
+                  calendar_interval: '42w',
+                },
+              },
+            },
+          },
         }
       );
       expect(esAggsConfig).toEqual(
@@ -356,6 +392,22 @@ describe('date_histogram', () => {
               },
             },
           ],
+          fieldsMap: {
+            dateField: {
+              name: 'dateField',
+              displayName: 'dateField',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+              aggregationRestrictions: {
+                date_histogram: {
+                  agg: 'date_histogram',
+                  time_zone: 'CET',
+                  calendar_interval: 'w',
+                },
+              },
+            },
+          },
         }
       );
       expect(transferedColumn).toEqual(
@@ -393,6 +445,15 @@ describe('date_histogram', () => {
               searchable: true,
             },
           ],
+          fieldsMap: {
+            dateField: {
+              name: 'dateField',
+              displayName: 'dateField',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+            },
+          },
         }
       );
       expect(transferedColumn).toEqual(
@@ -609,6 +670,18 @@ describe('date_histogram', () => {
                     },
                   },
                 ],
+                fieldsMap: {
+                  [state.indexPatterns[1].fields[0].name]: {
+                    ...state.indexPatterns[1].fields[0],
+                    aggregationRestrictions: {
+                      date_histogram: {
+                        agg: 'date_histogram',
+                        time_zone: 'UTC',
+                        calendar_interval: '1h',
+                      },
+                    },
+                  },
+                },
               },
             },
           }}

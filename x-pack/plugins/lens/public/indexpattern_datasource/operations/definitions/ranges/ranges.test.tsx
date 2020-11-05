@@ -96,6 +96,9 @@ describe('ranges', () => {
           title: 'my_index_pattern',
           hasRestrictions: false,
           fields: [{ name: sourceField, type: 'number', displayName: sourceField }],
+          fieldsMap: {
+            [sourceField]: { name: sourceField, type: 'number', displayName: sourceField },
+          },
         },
       },
       existingFields: {},
