@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
+import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { NewPackagePolicy } from '../../../../types';
@@ -18,13 +18,7 @@ export interface CustomConfigurePackagePolicyProps {
   packagePolicyId?: string;
 }
 
-/**
- * Custom content type that external plugins can provide to Ingest's
- * package policy UI.
- */
-export type CustomConfigurePackagePolicyContent = React.FC<CustomConfigurePackagePolicyProps>;
-
-const EmptyPackagePolicy: CustomConfigurePackagePolicyContent = () => (
+const EmptyPackagePolicy = memo(() => (
   <EuiEmptyPrompt
     iconType="checkInCircleFilled"
     iconColor="secondary"
@@ -39,9 +33,9 @@ const EmptyPackagePolicy: CustomConfigurePackagePolicyContent = () => (
       </EuiText>
     }
   />
-);
+));
 
-export const CustomPackagePolicy = (props: CustomConfigurePackagePolicyProps) => {
+export const CustomPackagePolicy = memo<CustomConfigurePackagePolicyProps>((props) => {
   const ExtensionView = useUIExtension(
     props.packageName,
     'integration-policy',
@@ -53,6 +47,6 @@ export const CustomPackagePolicy = (props: CustomConfigurePackagePolicyProps) =>
       <ExtensionView {...props} />
     </ExtensionWrapper>
   ) : (
-    <EmptyPackagePolicy {...props} />
+    <EmptyPackagePolicy />
   );
-};
+});
