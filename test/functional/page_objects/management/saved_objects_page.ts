@@ -90,6 +90,14 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await testSubjects.existOrFail('importSavedObjectsFailedWarning', { timeout: 20000 });
     }
 
+    async checkImportError() {
+      await testSubjects.existOrFail('importSavedObjectsErrorText', { timeout: 20000 });
+    }
+
+    async getImportErrorText() {
+      return await testSubjects.getVisibleText('importSavedObjectsErrorText');
+    }
+
     async clickImportDone() {
       await testSubjects.click('importSavedObjectsDoneBtn');
       await this.waitTableIsLoaded();
