@@ -43,6 +43,10 @@ interface DefaultEditorAggAddProps {
   addSchema(schema: Schema): void;
 }
 
+const maxTooltipText = i18n.translate('visDefaultEditor.aggAdd.maxBuckets', {
+  defaultMessage: 'Max buckets reached',
+});
+
 function DefaultEditorAggAdd({
   group = [],
   groupName,
@@ -71,10 +75,12 @@ function DefaultEditorAggAdd({
     groupName === AggGroupNames.Buckets
       ? i18n.translate('visDefaultEditor.aggAdd.bucketLabel', { defaultMessage: 'bucket' })
       : i18n.translate('visDefaultEditor.aggAdd.metricLabel', { defaultMessage: 'metric' });
-
-  const isSchemaDisabled = (schema: Schema): boolean => {
+  const isMaxedCount = (schema: Schema): boolean => {
     const count = group.filter((agg) => agg.schema === schema.name).length;
     return count >= schema.max;
+  };
+  const isSchemaDisabled = (schema: Schema, maxedCount: boolean): boolean => {
+    return schema.disabled ?? maxedCount;
   };
 
   return (
@@ -105,16 +111,21 @@ function DefaultEditorAggAdd({
             )}
           </EuiPopoverTitle>
           <EuiContextMenuPanel
-            items={schemas.map((schema) => (
-              <EuiContextMenuItem
-                key={`${schema.name}_${schema.title}`}
-                data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
-                disabled={isPopoverOpen && isSchemaDisabled(schema)}
-                onClick={() => onSelectSchema(schema)}
-              >
-                {schema.title}
-              </EuiContextMenuItem>
-            ))}
+            items={schemas.map((schema) => {
+              const maxedCount = isMaxedCount(schema);
+
+              return (
+                <EuiContextMenuItem
+                  key={`${schema.name}_${schema.title}`}
+                  data-test-subj={`visEditorAdd_${groupName}_${schema.title}`}
+                  disabled={isPopoverOpen && isSchemaDisabled(schema, maxedCount)}
+                  onClick={() => onSelectSchema(schema)}
+                  toolTipContent={maxedCount ? maxTooltipText : schema.tooltip}
+                >
+                  {schema.title}
+                </EuiContextMenuItem>
+              );
+            })}
           />
         </EuiPopover>
       </EuiFlexItem>
