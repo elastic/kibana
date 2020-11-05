@@ -3,12 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import {
-  PackageInfo,
-  InstallationStatus,
-  NewPackagePolicy,
-  RegistryPolicyTemplate,
-} from '../../../../types';
+import { installationStatuses } from '../../../../../../../common/constants';
+import { PackageInfo, NewPackagePolicy, RegistryPolicyTemplate } from '../../../../types';
 import { validatePackagePolicy, validationHasErrors } from './validate_package_policy';
 
 describe('Ingest Manager - validatePackagePolicy()', () => {
@@ -31,7 +27,7 @@ describe('Ingest Manager - validatePackagePolicy()', () => {
         'index-pattern': [],
       },
     },
-    status: InstallationStatus.notInstalled,
+    status: installationStatuses.NotInstalled,
     data_streams: [
       {
         dataset: 'foo',

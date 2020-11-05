@@ -13,7 +13,7 @@ import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
-import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
   IndexPatternDatasource,
@@ -59,6 +59,7 @@ export interface LensPluginStartDependencies {
   uiActions: UiActionsStart;
   dashboard: DashboardStart;
   embeddable: EmbeddableStart;
+  charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }
 export class LensPlugin {
@@ -104,6 +105,7 @@ export class LensPlugin {
       {
         data,
         embeddable,
+        charts,
         expressions,
       },
       this.attributeService
