@@ -109,3 +109,20 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
     </li>
   );
 };
+
+/**
+ * Side navigation non-link item
+ */
+
+interface ISideNavItemProps {
+  className?: string;
+}
+
+export const SideNavItem: React.FC<ISideNavItemProps> = ({ children, className, ...rest }) => {
+  const classes = classNames('enterpriseSearchNavLinks__item', className);
+  return (
+    <li {...rest} className={classes}>
+      {children}
+    </li>
+  );
+};

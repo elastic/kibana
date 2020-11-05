@@ -75,7 +75,7 @@ export function PackageListGrid({ isLoading, controls, title, list }: ListProps)
         <EuiSearchBar
           query={query || undefined}
           box={{
-            placeholder: i18n.translate('xpack.ingestManager.epmList.searchPackagesPlaceholder', {
+            placeholder: i18n.translate('xpack.fleet.epmList.searchPackagesPlaceholder', {
               defaultMessage: 'Search for integrations',
             }),
             incremental: true,
@@ -127,7 +127,7 @@ function GridColumn({ list }: GridColumnProps) {
           <EuiText>
             <p>
               <FormattedMessage
-                id="xpack.ingestManager.epmList.noPackagesFoundPlaceholder"
+                id="xpack.fleet.epmList.noPackagesFoundPlaceholder"
                 defaultMessage="No packages found"
               />
             </p>

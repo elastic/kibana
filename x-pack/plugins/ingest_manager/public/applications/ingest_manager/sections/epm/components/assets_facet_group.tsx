@@ -79,7 +79,7 @@ export function AssetsFacetGroup({ assets }: { assets: AssetsGroupedByServiceByT
                   <EuiText>
                     <h4>
                       <FormattedMessage
-                        id="xpack.ingestManager.epm.assetGroupTitle"
+                        id="xpack.fleet.epm.assetGroupTitle"
                         defaultMessage="{assetType} assets"
                         values={{
                           assetType: ServiceTitleMap[service],
