@@ -44,7 +44,7 @@ describe('Alerts detection rules', () => {
     cy.clock().invoke('restore');
   });
 
-  xit('Sorts by activated rules', () => {
+  it('Sorts by activated rules', () => {
     loginAndWaitForPageWithoutDateRange(DETECTIONS_URL);
     waitForAlertsPanelToBeLoaded();
     waitForAlertsIndexToBeCreated();
