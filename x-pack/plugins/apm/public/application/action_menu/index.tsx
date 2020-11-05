@@ -20,13 +20,16 @@ import {
   ApmPluginContext,
 } from '../../context/ApmPluginContext';
 import { LicenseProvider } from '../../context/LicenseContext';
+import { ServiceNameContext } from '../../context/service_name_context';
 import { UrlParamsProvider } from '../../context/UrlParamsContext';
 import { useApmPluginContext } from '../../hooks/useApmPluginContext';
+import { useServiceName } from '../../hooks/use_service_name';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 
 export function ActionMenu() {
   const { core, plugins } = useApmPluginContext();
+  const serviceName = useServiceName();
   const { search } = window.location;
   const { application, http } = core;
   const { basePath } = http;
@@ -64,6 +67,7 @@ export function ActionMenu() {
           canReadAlerts={canReadAlerts}
           canSaveAlerts={canSaveAlerts}
           canReadAnomalies={canReadAnomalies}
+          includeTransactionDuration={serviceName !== undefined}
         />
       )}
       {canAccessML && <AnomalyDetectionSetupLink />}
@@ -86,7 +90,8 @@ export function ActionMenu() {
  * Alerts and ML links require a lot of context so include what we need here.
  */
 export function getActionMenuMountPoint(
-  apmPluginContextValue: ApmPluginContextValue
+  apmPluginContextValue: ApmPluginContextValue,
+  serviceName?: string
 ) {
   const { appMountParameters, core, plugins } = apmPluginContextValue;
 
@@ -96,20 +101,22 @@ export function getActionMenuMountPoint(
         <ApmPluginContext.Provider value={apmPluginContextValue}>
           <UrlParamsProvider>
             <LicenseProvider>
-              <AlertsContextProvider
-                value={{
-                  actionTypeRegistry:
-                    plugins.triggersActionsUi.actionTypeRegistry,
-                  alertTypeRegistry:
-                    plugins.triggersActionsUi.alertTypeRegistry,
-                  capabilities: core.application.capabilities,
-                  docLinks: core.docLinks,
-                  http: core.http,
-                  toastNotifications: core.notifications.toasts,
-                }}
-              >
-                <ActionMenu />
-              </AlertsContextProvider>
+              <ServiceNameContext.Provider value={serviceName}>
+                <AlertsContextProvider
+                  value={{
+                    actionTypeRegistry:
+                      plugins.triggersActionsUi.actionTypeRegistry,
+                    alertTypeRegistry:
+                      plugins.triggersActionsUi.alertTypeRegistry,
+                    capabilities: core.application.capabilities,
+                    docLinks: core.docLinks,
+                    http: core.http,
+                    toastNotifications: core.notifications.toasts,
+                  }}
+                >
+                  <ActionMenu />
+                </AlertsContextProvider>
+              </ServiceNameContext.Provider>
             </LicenseProvider>
           </UrlParamsProvider>
         </ApmPluginContext.Provider>

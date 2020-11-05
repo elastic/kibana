@@ -18,11 +18,12 @@ import { ServiceNameContext } from '../context/service_name_context';
  * a separate context.
  */
 export function useServiceName() {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceNameFromPathParams = useParams<{ serviceName?: string }>()
+    .serviceName;
   const serviceNameFromContext = useContext(ServiceNameContext);
 
-  if (serviceName) {
-    return serviceName;
+  if (serviceNameFromPathParams) {
+    return serviceNameFromPathParams;
   } else {
     return serviceNameFromContext;
   }

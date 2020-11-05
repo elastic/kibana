@@ -7,6 +7,7 @@
 import { EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { useActionMenu } from '../../../hooks/use_action_menu';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { ServiceDetailTabs } from './ServiceDetailTabs';
 
@@ -16,6 +17,8 @@ interface Props extends RouteComponentProps<{ serviceName: string }> {
 
 export function ServiceDetails({ match, tab }: Props) {
   const { serviceName } = match.params;
+
+  useActionMenu(serviceName);
 
   return (
     <div>

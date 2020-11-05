@@ -32,6 +32,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { Correlations } from '../Correlations';
+import { useActionMenu } from '../../../hooks/use_action_menu';
 
 interface Sample {
   traceId: string;
@@ -60,6 +61,8 @@ export function TransactionDetails({
 
   useTrackPageview({ app: 'apm', path: 'transaction_details' });
   useTrackPageview({ app: 'apm', path: 'transaction_details', delay: 15000 });
+
+  useActionMenu(serviceName);
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {

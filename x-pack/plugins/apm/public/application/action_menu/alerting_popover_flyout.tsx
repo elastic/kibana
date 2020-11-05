@@ -50,6 +50,7 @@ interface Props {
   canReadAlerts: boolean;
   canSaveAlerts: boolean;
   canReadAnomalies: boolean;
+  includeTransactionDuration: boolean;
 }
 
 export function AlertingPopoverAndFlyout({
@@ -57,6 +58,7 @@ export function AlertingPopoverAndFlyout({
   canSaveAlerts,
   canReadAlerts,
   canReadAnomalies,
+  includeTransactionDuration,
 }: Props) {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [alertType, setAlertType] = useState<AlertType | null>(null);
@@ -116,13 +118,17 @@ export function AlertingPopoverAndFlyout({
       title: transactionDurationLabel,
       items: [
         // threshold alerts
-        {
-          name: createThresholdAlertLabel,
-          onClick: () => {
-            setAlertType(AlertType.TransactionDuration);
-            setPopoverOpen(false);
-          },
-        },
+        ...(includeTransactionDuration
+          ? [
+              {
+                name: createThresholdAlertLabel,
+                onClick: () => {
+                  setAlertType(AlertType.TransactionDuration);
+                  setPopoverOpen(false);
+                },
+              },
+            ]
+          : []),
 
         // anomaly alerts
         ...(canReadAnomalies

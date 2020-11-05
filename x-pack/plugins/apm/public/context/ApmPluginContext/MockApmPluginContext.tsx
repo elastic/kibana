@@ -93,7 +93,13 @@ const mockPlugin = {
     },
   },
 };
+
+const mockAppMountParameters = {
+  setHeaderActionMenu: () => {},
+};
+
 export const mockApmPluginContextValue = {
+  appMountParameters: mockAppMountParameters,
   config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,

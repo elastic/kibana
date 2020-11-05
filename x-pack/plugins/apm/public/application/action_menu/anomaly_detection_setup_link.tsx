@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiHeaderLink, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiHeaderLink,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -37,15 +42,16 @@ export function AnomalyDetectionSetupLink() {
   return (
     <EuiHeaderLink
       color="primary"
-      iconType="inspect"
       href={getAPMHref({ basePath, path: '/settings/anomaly-detection' })}
       style={{ whiteSpace: 'nowrap' }}
     >
-      {ANOMALY_DETECTION_LINK_LABEL}
-      <span style={{ marginLeft: units.half }}>
-        {canGetJobs && hasValidLicense && (
-          <MissingJobsAlert environment={environment} />
-        )}
+      {canGetJobs && hasValidLicense ? (
+        <MissingJobsAlert environment={environment} />
+      ) : (
+        <EuiIcon type="inspect" color="primary" />
+      )}
+      <span style={{ marginInlineStart: units.half }}>
+        {ANOMALY_DETECTION_LINK_LABEL}
       </span>
     </EuiHeaderLink>
   );
@@ -59,8 +65,10 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
     { preservePreviousData: false, showToastOnError: false }
   );
 
+  const defaultIcon = <EuiIcon type="inspect" color="primary" />;
+
   if (status !== FETCH_STATUS.SUCCESS) {
-    return null;
+    return defaultIcon;
   }
 
   const isEnvironmentSelected =
@@ -68,7 +76,7 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
 
   // there are jobs for at least one environment
   if (!isEnvironmentSelected && data.jobs.length > 0) {
-    return null;
+    return defaultIcon;
   }
 
   // there are jobs for the selected environment
@@ -76,7 +84,7 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
     isEnvironmentSelected &&
     data.jobs.some((job) => environment === job.environment)
   ) {
-    return null;
+    return defaultIcon;
   }
 
   return (

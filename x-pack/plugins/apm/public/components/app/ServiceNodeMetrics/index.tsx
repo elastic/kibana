@@ -27,6 +27,7 @@ import { useAgentName } from '../../../hooks/useAgentName';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';
 import { useUrlParams } from '../../../hooks/useUrlParams';
+import { useActionMenu } from '../../../hooks/use_action_menu';
 import { px, truncate, unit } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { MetricsChart } from '../../shared/charts/MetricsChart';
@@ -53,6 +54,8 @@ export function ServiceNodeMetrics({ match }: ServiceNodeMetricsProps) {
   const { agentName } = useAgentName();
   const { data } = useServiceMetricCharts(urlParams, agentName);
   const { start, end } = urlParams;
+
+  useActionMenu(serviceName);
 
   const { data: { host, containerId } = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {

@@ -8,6 +8,7 @@ import { EuiTabs, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { $ElementType } from 'utility-types';
+import { useActionMenu } from '../../../hooks/use_action_menu';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
@@ -61,6 +62,8 @@ export function Home({ tab }: Props) {
   const selectedTab = homeTabs.find(
     (homeTab) => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;
+
+  useActionMenu();
 
   return (
     <div>
