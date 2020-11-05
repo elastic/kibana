@@ -26,7 +26,7 @@ export const PingHeaders = ({ headers }: Props) => {
       <EuiAccordion
         id="responseHeaderAccord"
         buttonContent={
-          <EuiText size="xs">
+          <EuiText size="s">
             <h3>
               {i18n.translate('xpack.uptime.pingList.headers.title', {
                 defaultMessage: 'Response headers',
@@ -35,8 +35,13 @@ export const PingHeaders = ({ headers }: Props) => {
           </EuiText>
         }
       >
-        <EuiPanel>
-          <EuiDescriptionList compressed={true} type="responsiveColumn" listItems={headersList} />
+        <EuiPanel style={{ backgroundColor: 'transparent' }} hasShadow={false}>
+          <EuiDescriptionList
+            titleProps={{ style: { width: '30%' } }}
+            compressed={true}
+            type="responsiveColumn"
+            listItems={headersList}
+          />
         </EuiPanel>
       </EuiAccordion>
     </>

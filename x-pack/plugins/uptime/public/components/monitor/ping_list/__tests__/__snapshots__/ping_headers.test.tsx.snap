@@ -9,7 +9,7 @@ exports[`Ping Headers shallow renders expected elements for valid props 1`] = `
     arrowDisplay="left"
     buttonContent={
       <EuiText
-        size="xs"
+        size="s"
       >
         <h3>
           Response headers
@@ -22,7 +22,14 @@ exports[`Ping Headers shallow renders expected elements for valid props 1`] = `
     isLoadingMessage={false}
     paddingSize="none"
   >
-    <EuiPanel>
+    <EuiPanel
+      hasShadow={false}
+      style={
+        Object {
+          "backgroundColor": "transparent",
+        }
+      }
+    >
       <EuiDescriptionList
         compressed={true}
         listItems={
@@ -76,6 +83,13 @@ exports[`Ping Headers shallow renders expected elements for valid props 1`] = `
               "title": "X-Xss-Protection",
             },
           ]
+        }
+        titleProps={
+          Object {
+            "style": Object {
+              "width": "30%",
+            },
+          }
         }
         type="responsiveColumn"
       />
