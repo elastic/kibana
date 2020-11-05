@@ -25,6 +25,7 @@ import {
   Settings,
   agentPolicyStatuses,
   storedPackagePoliciesToAgentInputs,
+  dataTypes,
 } from '../../common';
 import { AgentPolicyNameExistsError } from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
@@ -538,8 +539,8 @@ class AgentPolicyService {
               monitoring: {
                 use_output: defaultOutput.name,
                 enabled: true,
-                logs: agentPolicy.monitoring_enabled.indexOf('logs') >= 0,
-                metrics: agentPolicy.monitoring_enabled.indexOf('metrics') >= 0,
+                logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
+                metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
               },
             },
           }
