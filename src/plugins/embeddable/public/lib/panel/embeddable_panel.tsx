@@ -49,7 +49,7 @@ import { EditPanelAction } from '../actions';
 import { CustomizePanelModal } from './panel_header/panel_actions/customize_title/customize_panel_modal';
 import { EmbeddableStart } from '../../plugin';
 import { EmbeddableErrorLabel } from './embeddable_error_label';
-import { EmbeddableStateTransfer } from '..';
+import { EmbeddableStateTransfer, ErrorEmbeddable } from '..';
 
 const sortByOrderField = (
   { order: orderA }: { order?: number },
@@ -83,6 +83,7 @@ interface State {
   notifications: Array<Action<EmbeddableContext>>;
   loading?: boolean;
   error?: EmbeddableError;
+  errorEmbeddable?: ErrorEmbeddable;
 }
 
 export class EmbeddablePanel extends React.Component<Props, State> {
@@ -184,6 +185,9 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (this.parentSubscription) {
       this.parentSubscription.unsubscribe();
     }
+    if (this.state.errorEmbeddable) {
+      this.state.errorEmbeddable.destroy();
+    }
     this.props.embeddable.destroy();
   }
 
@@ -241,12 +245,21 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   public componentDidMount() {
     if (this.embeddableRoot.current) {
       this.subscription.add(
-        this.props.embeddable.getOutput$().subscribe((output: EmbeddableOutput) => {
-          this.setState({
-            error: output.error,
-            loading: output.loading,
-          });
-        })
+        this.props.embeddable.getOutput$().subscribe(
+          (output: EmbeddableOutput) => {
+            this.setState({
+              error: output.error,
+              loading: output.loading,
+            });
+          },
+          (error) => {
+            if (this.embeddableRoot.current) {
+              const errorEmbeddable = new ErrorEmbeddable(error, { id: this.props.embeddable.id });
+              errorEmbeddable.render(this.embeddableRoot.current);
+              this.setState({ errorEmbeddable });
+            }
+          }
+        )
       );
       this.props.embeddable.render(this.embeddableRoot.current);
     }
