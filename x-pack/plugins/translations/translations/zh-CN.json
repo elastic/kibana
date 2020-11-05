@@ -15215,7 +15215,6 @@
     "xpack.observability.featureCatalogueTitle": "可观测性",
     "xpack.observability.home.addData": "添加数据",
     "xpack.observability.home.breadcrumb": "概览",
-    "xpack.observability.home.feedback": "提供反馈",
     "xpack.observability.home.getStatedButton": "开始使用",
     "xpack.observability.home.sectionsubtitle": "通过根据需要将日志、指标和跟踪都置于单个堆栈上，来监测、分析和响应环境中任何位置发生的事件。",
     "xpack.observability.home.sectionTitle": "整个生态系统的统一可见性",
