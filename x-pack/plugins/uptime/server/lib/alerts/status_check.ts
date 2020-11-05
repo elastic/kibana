@@ -170,6 +170,21 @@ export const getStatusMessage = (
   return statusMessage + availabilityMessage;
 };
 
+const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
+  const normalizeText = (txt: string) => {
+    // replace url and name special characters with -
+    return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
+  };
+  const urlText = normalizeText(monitorInfo.url?.full || '');
+
+  const monName = normalizeText(monitorInfo.monitor.name || '');
+
+  if (monName) {
+    return `${monName}_${urlText}_${monIdByLoc}`;
+  }
+  return `${urlText}_${monIdByLoc}`;
+};
+
 export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =>
   uptimeAlertWrapper({
     id: 'xpack.uptime.alerts.monitorStatus',
@@ -301,9 +316,9 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         for (const monitorLoc of downMonitorsByLocation) {
           const monitorInfo = monitorLoc.monitorInfo;
 
-          const urlText = monitorInfo.url?.full?.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
-
-          const alertInstance = alertInstanceFactory(urlText + '-' + monitorLoc.location);
+          const alertInstance = alertInstanceFactory(
+            getInstanceId(monitorInfo, monitorLoc.location)
+          );
 
           const monitorSummary = getMonitorSummary(monitorInfo);
           const statusMessage = getStatusMessage(monitorInfo);
@@ -346,10 +361,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
         const monitorSummary = getMonitorSummary(monitorInfo);
         const statusMessage = getStatusMessage(downMonInfo!, availMonInfo!, availability);
 
-        // replace url special characters with -
-        const urlText = monitorInfo.url?.full?.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();
-
-        const alertInstance = alertInstanceFactory(urlText + '-' + monIdByLoc);
+        const alertInstance = alertInstanceFactory(getInstanceId(monitorInfo, monIdByLoc));
 
         alertInstance.replaceState({
           ...updateState(state, true),
