@@ -7,7 +7,7 @@
 import Boom from '@hapi/boom';
 import { IScopedClusterClient } from 'kibana/server';
 import { TypeOf } from '@kbn/config-schema';
-import { AnalysisConfig } from '../../common/types/anomaly_detection_jobs';
+import { AnalysisConfig, Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import {
@@ -19,7 +19,6 @@ import {
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
 import { validateJob, validateCardinality } from '../models/job_validation';
-import { DatafeedOverride } from '../../common/types/modules';
 import type { MlClient } from '../lib/ml_client';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
@@ -54,7 +53,7 @@ export function jobValidationRoutes(
       earliestMs,
       latestMs,
       undefined,
-      datafeedConfig as DatafeedOverride
+      datafeedConfig as Datafeed
     );
   }
 

@@ -9,10 +9,10 @@ import { IScopedClusterClient } from 'kibana/server';
 import { duration } from 'moment';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { initCardinalityFieldsCache } from './fields_aggs_cache';
-import { DatafeedOverride } from '../../../common/types/modules';
 import { AggCardinality } from '../../../common/types/fields';
 import { isValidAggregationField } from '../../../common/util/validation_utils';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Service for carrying out queries to obtain data
@@ -40,7 +40,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
   async function getAggregatableFields(
     index: string | string[],
     fieldNames: string[],
-    datafeedConfig?: DatafeedOverride
+    datafeedConfig?: Datafeed
   ): Promise<string[]> {
     const { body } = await asCurrentUser.fieldCaps({
       index,
@@ -87,7 +87,7 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    datafeedConfig?: DatafeedOverride
+    datafeedConfig?: Datafeed
   ): Promise<{ [key: string]: number }> {
     const aggregatableFields = await getAggregatableFields(index, fieldNames, datafeedConfig);
 

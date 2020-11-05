@@ -32,11 +32,7 @@ import {
   FieldHistogramRequestConfig,
   FieldRequestConfig,
 } from '../../datavisualizer/index_based/common';
-import {
-  DatafeedOverride,
-  DataRecognizerConfigResponse,
-  Module,
-} from '../../../../common/types/modules';
+import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 
 export interface MlInfoResponse {
@@ -640,7 +636,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       earliestMs,
       latestMs,
     }: {
-      datafeedConfig: DatafeedOverride;
+      datafeedConfig?: Datafeed;
       analysisConfig: AnalysisConfig;
       indexPattern: string;
       query: any;

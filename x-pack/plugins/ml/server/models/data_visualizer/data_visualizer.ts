@@ -16,8 +16,8 @@ import {
   getSamplerAggregationsResponsePath,
 } from '../../lib/query_utils';
 import { AggCardinality } from '../../../common/types/fields';
-import { DatafeedOverride } from '../../../common/types/modules';
 import { getDatafeedAggregations } from '../../../common/util/datafeed_utils';
+import { Datafeed } from '../../../common/types/anomaly_detection_jobs';
 
 const SAMPLER_TOP_TERMS_THRESHOLD = 100000;
 const SAMPLER_TOP_TERMS_SHARD_SIZE = 5000;
@@ -595,7 +595,7 @@ export class DataVisualizer {
     timeFieldName: string,
     earliestMs?: number,
     latestMs?: number,
-    datafeedConfig?: DatafeedOverride
+    datafeedConfig?: Datafeed
   ) {
     const index = indexPatternTitle;
     const size = 0;

@@ -7,10 +7,9 @@
 import numeral from '@elastic/numeral';
 import { IScopedClusterClient } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
-import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
+import { AnalysisConfig, Datafeed } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
-import { DatafeedOverride } from '../../../common/types/modules';
 import type { MlClient } from '../../lib/ml_client';
 
 export interface ModelMemoryEstimationResult {
@@ -48,7 +47,7 @@ const cardinalityCheckProvider = (client: IScopedClusterClient) => {
     timeFieldName: string,
     earliestMs: number,
     latestMs: number,
-    datafeedConfig?: DatafeedOverride
+    datafeedConfig?: Datafeed
   ): Promise<{
     overallCardinality: { [key: string]: number };
     maxBucketCardinality: { [key: string]: number };
@@ -146,7 +145,7 @@ export function calculateModelMemoryLimitProvider(
     earliestMs: number,
     latestMs: number,
     allowMMLGreaterThanMax = false,
-    datafeedConfig?: DatafeedOverride
+    datafeedConfig?: Datafeed
   ): Promise<ModelMemoryEstimationResult> {
     const { body: info } = await mlClient.info<MlInfoResponse>();
     const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();

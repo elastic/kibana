@@ -16,11 +16,11 @@ import { map } from 'rxjs/operators';
 import { each, get } from 'lodash';
 import { Dictionary } from '../../../../common/types/common';
 import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
-import { JobId } from '../../../../common/types/anomaly_detection_jobs';
+import { Datafeed, JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 import { CriteriaField } from './index';
-import type { DatafeedOverride } from '../../../../common/types/modules';
 import { findAggField } from '../../../../common/util/validation_utils';
+import { getDatafeedAggregations } from '../../../../common/util/datafeed_utils';
 
 interface ResultResponse {
   success: boolean;
@@ -71,10 +71,10 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       earliestMs: number,
       latestMs: number,
       intervalMs: number,
-      dataFeedConfig?: DatafeedOverride
+      datafeedConfig?: Datafeed
     ): Observable<MetricData> {
-      const scriptFields = dataFeedConfig?.script_fields;
-      const aggFields = dataFeedConfig?.aggs ?? dataFeedConfig?.aggregations;
+      const scriptFields = datafeedConfig?.script_fields;
+      const aggFields = getDatafeedAggregations(datafeedConfig);
 
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, entity fields,
