@@ -8,7 +8,7 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import { GroupLogic } from '../group_logic';
-import { NAV } from '../constants';
+import { NAV } from '../../../constants';
 
 import { SideNavLink } from '../../../../shared/layout';
 
@@ -23,7 +23,7 @@ export const GroupSubNav: React.FC = () => {
 
   return (
     <>
-      <SideNavLink to={getGroupPath(id)}>{NAV.OVERVIEW}</SideNavLink>
+      <SideNavLink to={getGroupPath(id)}>{NAV.GROUP_OVERVIEW}</SideNavLink>
       <SideNavLink to={getGroupSourcePrioritizationPath(id)}>
         {NAV.SOURCE_PRIORITIZATION}
       </SideNavLink>
