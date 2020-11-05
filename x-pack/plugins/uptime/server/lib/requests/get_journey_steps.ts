@@ -35,7 +35,7 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
           ],
         },
       },
-      sort: [{ '@timestamp': { order: 'asc' } }],
+      sort: [{ 'synthetics.step.index': { order: 'asc' } }, { '@timestamp': { order: 'asc' } }],
       _source: {
         excludes: ['synthetics.blob'],
       },
