@@ -94,6 +94,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch('shakespeare');
       await PageObjects.visChart.waitForVisualization();
+
+      // Remove refresh click when vislib is removed
+      // https://github.com/elastic/kibana/issues/56143
       await PageObjects.visualize.clickRefresh();
 
       const expectedChartValues = [111396];

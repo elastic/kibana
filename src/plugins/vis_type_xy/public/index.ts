@@ -22,6 +22,7 @@ import { VisTypeXyPlugin as Plugin } from './plugin';
 export { VisTypeXyPluginSetup } from './plugin';
 
 // TODO: Remove when vis_type_vislib is removed
+// https://github.com/elastic/kibana/issues/56143
 export {
   CategoryAxis,
   ThresholdLine,

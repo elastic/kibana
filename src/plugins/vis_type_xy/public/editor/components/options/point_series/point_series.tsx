@@ -35,6 +35,8 @@ export function PointSeriesOptions(
   props: ValidationVisOptionsProps<
     VisParams,
     {
+      // TODO: Remove when vis_type_vislib is removed
+      // https://github.com/elastic/kibana/issues/56143
       showElasticChartsOptions: boolean;
     }
   >

@@ -53,7 +53,9 @@ export interface CategoryAxis {
   type: AxisType;
   /**
    * Used only for heatmap, here for consistent types when used in vis_type_vislib
+   *
    * remove with vis_type_vislib
+   * https://github.com/elastic/kibana/issues/56143
    */
   style: Partial<Style>;
 }

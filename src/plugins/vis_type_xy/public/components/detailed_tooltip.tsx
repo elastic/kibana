@@ -84,7 +84,6 @@ const getTooltipData = (
 const renderData = ({ label, value }: TooltipData, index: number) =>
   label && value ? (
     <tr key={label + value + index}>
-      {/* {console.log(getTooltipData(aspects, v))} */}
       <td className="detailedTooltip__label">
         <div className="detailedTooltip__labelContainer">{label}</div>
       </td>

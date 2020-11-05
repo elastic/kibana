@@ -52,12 +52,12 @@ export function getConfig(table: Datatable, params: VisParams): VisConfig {
   const fallbackGroupId = params.seriesParams.find(({ valueAxis }) =>
     params.valueAxes.some(({ id }) => valueAxis === id)
   )?.valueAxis;
-  // TODO get formatter for each value axis
   const yAxes = params.valueAxes
     .map((a) => getAxis<YScaleType>(a, params.grid, aspects.y[0]))
     .map(({ groupId, ...rest }) => ({
       ...rest,
-      // TODO remove when allowed to display unassigned axes
+      // TODO: refactor when disallowiing unassigned axes
+      // https://github.com/elastic/kibana/issues/82752
       groupId: params.seriesParams.some(({ valueAxis }) => valueAxis === groupId)
         ? groupId
         : fallbackGroupId,

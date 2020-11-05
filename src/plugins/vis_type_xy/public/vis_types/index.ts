@@ -31,6 +31,7 @@ export const visTypesDefinitions = [
 ];
 
 // TODO: Remove when vis_type_vislib is removed
+// https://github.com/elastic/kibana/issues/56143
 export const xyVisTypes: Record<
   string,
   (showElasticChartsOptions?: boolean) => XyVisTypeDefinition

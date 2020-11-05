@@ -34,9 +34,7 @@ import {
 import { Dimension, Scale, ThresholdLine } from './param';
 
 export interface Column {
-  // -1 value can be in a fake X aspect
   id: string | null;
-  // id: string | -1;
   name: string;
 }
 
