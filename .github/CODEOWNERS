@@ -306,6 +306,8 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 #CC# /x-pack/legacy/plugins/task_manager @elastic/kibana-alerting-services
 #CC# /x-pack/legacy/plugins/triggers_actions_ui/ @elastic/kibana-alerting-services
 #CC# /x-pack/plugins/stack_alerts @elastic/kibana-alerting-services
+/docs/user/alerting/ @elastic/kibana-alerting-services
+/docs/management/alerting/ @elastic/kibana-alerting-services
 
 # Enterprise Search
 # Shared
