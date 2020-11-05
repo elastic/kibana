@@ -47,7 +47,6 @@ const savedVis: Document = {
   visualizationType: '',
 };
 const defaultSaveMethod = (
-  type: string,
   testAttributes: LensSavedObjectAttributes,
   savedObjectId?: string
 ): Promise<{ id: string }> => {
@@ -172,6 +171,7 @@ describe('embeddable', () => {
       timeRange,
       query,
       filters,
+      searchSessionId: 'searchSessionId',
     });
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
@@ -182,7 +182,13 @@ describe('embeddable', () => {
     const query: Query = { language: 'kquery', query: '' };
     const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
 
-    const input = { savedObjectId: '123', timeRange, query, filters } as LensEmbeddableInput;
+    const input = {
+      savedObjectId: '123',
+      timeRange,
+      query,
+      filters,
+      searchSessionId: 'searchSessionId',
+    } as LensEmbeddableInput;
 
     const embeddable = new Embeddable(
       {
@@ -214,6 +220,8 @@ describe('embeddable', () => {
         filters,
       })
     );
+
+    expect(expressionRenderer.mock.calls[0][0].searchSessionId).toBe(input.searchSessionId);
   });
 
   it('should merge external context with query and filters of the saved object', async () => {

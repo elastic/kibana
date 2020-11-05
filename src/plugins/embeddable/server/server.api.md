@@ -7,14 +7,13 @@
 import { CoreSetup } from 'kibana/server';
 import { CoreStart } from 'kibana/server';
 import { Plugin } from 'kibana/server';
-import { SavedObjectReference as SavedObjectReference_2 } from 'kibana/server';
 
-// Warning: (ae-forgotten-export) The symbol "EmbeddableInput" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "EmbeddableStateWithType" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "PersistableStateDefinition" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "EmbeddableRegistryDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface EmbeddableRegistryDefinition<P extends EmbeddableInput = EmbeddableInput> extends PersistableStateDefinition<P> {
+export interface EmbeddableRegistryDefinition<P extends EmbeddableStateWithType = EmbeddableStateWithType> extends PersistableStateDefinition<P> {
     // (undocumented)
     id: string;
 }

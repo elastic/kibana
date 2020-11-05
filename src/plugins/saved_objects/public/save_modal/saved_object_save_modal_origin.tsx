@@ -30,7 +30,7 @@ interface SaveModalDocumentInfo {
   description?: string;
 }
 
-interface OriginSaveModalProps {
+export interface OriginSaveModalProps {
   originatingApp?: string;
   getAppNameFromId?: (appId: string) => string | undefined;
   originatingAppName?: string;
@@ -38,6 +38,7 @@ interface OriginSaveModalProps {
   documentInfo: SaveModalDocumentInfo;
   objectType: string;
   onClose: () => void;
+  options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   onSave: (props: OnSaveProps & { returnToOrigin: boolean }) => void;
 }
 
@@ -53,8 +54,11 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
   });
 
   const getReturnToOriginSwitch = (state: SaveModalState) => {
+    const sourceOptions =
+      typeof props.options === 'function' ? props.options(state) : props.options;
+
     if (!props.originatingApp) {
-      return;
+      return sourceOptions;
     }
     const origin = props.getAppNameFromId
       ? props.getAppNameFromId(props.originatingApp) || props.originatingApp
@@ -67,6 +71,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
       const originVerb = !documentInfo.id || state.copyOnSave ? addLabel : returnLabel;
       return (
         <Fragment>
+          {sourceOptions}
           <EuiFormRow>
             <EuiSwitch
               data-test-subj="returnToOriginModeSwitch"
@@ -89,6 +94,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
       );
     } else {
       setReturnToOriginMode(false);
+      return sourceOptions;
     }
   };
 

@@ -1,5 +1,4 @@
 @import '@elastic/eui/src/global_styling/variables/header';
-@import '@elastic/eui/src/components/nav_drawer/variables';
 
 /**
  * This is a very brittle way of preventing the editor and other content from disappearing
@@ -13,7 +12,7 @@ $bottomBarHeight: $euiSize * 3;
 
 .painlessLabLeftPane {
   padding-top: $euiSizeM;
-  background-color: $euiColorEmptyShade;
+  background-color: $euiFormBackgroundColor;
 }
 
 .painlessLabRightPane {
@@ -50,17 +49,4 @@ $headerOffset: $euiHeaderHeightCompensation * 3;
 .painlessLabPanelsContainer {
   // The panels container should adopt the height of the main container
   height: 100%;
-}
-
-/**
- * 1. Hack EUI so the bottom bar doesn't obscure the nav drawer flyout, but is also not obscured
- *    by the main content area.
- */
-.painlessLab__bottomBar {
-  z-index: 5; /* 1 */
-  left: $euiNavDrawerWidthCollapsed;
-}
-
-.painlessLab__bottomBar-isNavDrawerLocked {
-  left: $euiNavDrawerWidthExpanded;
 }
