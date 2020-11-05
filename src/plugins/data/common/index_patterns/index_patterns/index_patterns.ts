@@ -98,11 +98,13 @@ export class IndexPatternsService {
    * Refresh cache of index pattern ids and titles
    */
   private async refreshSavedObjectsCache() {
-    this.savedObjectsCache = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+    const so = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
       type: 'index-pattern',
       fields: ['title'],
       perPage: 10000,
     });
+    console.log('refreshSavedObjectsCache', so);
+    this.savedObjectsCache = so;
   }
 
   /**
@@ -110,6 +112,7 @@ export class IndexPatternsService {
    * @param refresh Force refresh of index pattern list
    */
   getIds = async (refresh: boolean = false) => {
+    console.log('getIds');
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }
