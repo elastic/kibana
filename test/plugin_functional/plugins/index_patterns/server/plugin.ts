@@ -64,7 +64,7 @@ export class IndexPatternsTestPlugin
           savedObjectsClient,
           elasticsearch.client.asScoped(req).asCurrentUser
         );
-        const ids = await service.getIds();
+        const ids = await service.getIds(true);
         return res.ok({ body: ids });
       }
     );

@@ -46,7 +46,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(body.fieldFormatMap).to.eql(fieldFormats);
     });
 
-    it.skip('can get all ids', async () => {
+    it('can get all ids', async () => {
       const response = await supertest.get('/api/index-patterns-plugin/get-all');
       // console.log('***************************', response.body);
       expect(response.status).to.equal(200);
