@@ -143,7 +143,21 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             analyzed_fields: {
-              includes: ['g1', 'g2', 'g4', 'p1', 'p3', 'p4', 'stab', 'tau3', 'tau4'],
+              includes: [
+                'g1',
+                'g2',
+                'g3',
+                'g4',
+                'p1',
+                'p2',
+                'p3',
+                'p4',
+                'stab',
+                'tau1',
+                'tau2',
+                'tau3',
+                'tau4',
+              ],
               excludes: [],
             },
             model_memory_limit: '20mb',
@@ -184,8 +198,13 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should display the total feature importance in the results view', async () => {
           await ml.dataFrameAnalyticsResults.assertTotalFeatureImportanceEvaluatePanelExists();
+        });
+
+        it('should display the feature importance decision path in the data grid', async () => {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
+          await ml.dataFrameAnalyticsResults.openFeatureImportanceDecisionPathPopover();
+          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathElementsExists();
         });
       });
     }

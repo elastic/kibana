@@ -5,12 +5,14 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from 'test/functional/services/lib/web_element_wrapper';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function MachineLearningDataFrameAnalyticsResultsProvider({
   getService,
 }: FtrProviderContext) {
+  const retry = getService('retry');
   const testSubjects = getService('testSubjects');
 
   return {
@@ -66,11 +68,47 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
       await testSubjects.existOrFail('mlTotalFeatureImportanceChart', { timeout: 5000 });
     },
 
-    // TODO: add support for button
-    async getFeatureImportanceDecisionPathPopover() {
+    async assertFeatureImportanceDecisionPathElementsExists() {
+      await testSubjects.existOrFail('mlDFADecisionPathPopoverTab-decision_path_chart', {
+        timeout: 5000,
+      });
+      await testSubjects.existOrFail('mlDFADecisionPathPopoverTab-decision_path_json', {
+        timeout: 5000,
+      });
+    },
+
+    async openFeatureImportanceDecisionPathPopover() {
       this.assertResultsTableNotEmpty();
-      const firstClickableCell = await testSubjects.find('dataGridRowCell');
-      await firstClickableCell.doubleClick();
+
+      const featureImportanceCell = await this.getFirstFeatureImportanceCell();
+      const interactionButton = await featureImportanceCell.findByTagName('button');
+
+      // simulate hover and wait for button to appear
+      await featureImportanceCell.moveMouseTo();
+      await this.waitForInteractionButtonToDisplay(interactionButton);
+
+      // open popover
+      await interactionButton.click();
+      await testSubjects.existOrFail('mlDFADecisionPathPopover');
+    },
+
+    async getFirstFeatureImportanceCell(): Promise<WebElementWrapper> {
+      // get first row of the data grid
+      const firstDataGridRow = await testSubjects.find(
+        'mlExplorationDataGrid loaded > dataGridRow'
+      );
+      // find the feature importance cell in that row
+      const featureImportanceCell = await firstDataGridRow.findByCssSelector(
+        '[data-test-subj="dataGridRowCell"][class*="featureImportance"]'
+      );
+      return featureImportanceCell;
+    },
+
+    async waitForInteractionButtonToDisplay(interactionButton: WebElementWrapper) {
+      await retry.tryForTime(5000, async () => {
+        const buttonVisible = await interactionButton.isDisplayed();
+        expect(buttonVisible).to.equal(true, 'Expected data grid cell button to be visible');
+      });
     },
   };
 }
