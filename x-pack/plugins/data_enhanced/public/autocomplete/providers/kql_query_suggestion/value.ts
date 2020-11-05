@@ -27,7 +27,7 @@ const wrapAsSuggestions = (start: number, end: number, query: string, values: st
 
 export const setupGetValueSuggestions: KqlQuerySuggestionProvider = () => {
   return async (
-    { indexPatterns, boolFilter, signal },
+    { indexPatterns, boolFilter, useTimeRange, signal },
     { start, end, prefix, suffix, fieldName, nestedPath }
   ): Promise<QuerySuggestion[]> => {
     const fullFieldName = nestedPath ? `${nestedPath}.${fieldName}` : fieldName;
@@ -49,6 +49,7 @@ export const setupGetValueSuggestions: KqlQuerySuggestionProvider = () => {
           field,
           query,
           boolFilter,
+          useTimeRange,
           signal,
         }).then((valueSuggestions) => {
           const quotedValues = valueSuggestions.map((value) =>
