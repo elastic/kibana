@@ -52,13 +52,15 @@ export function getAlertPanelsByCategory(
           const firingStates = foundAlert.states.filter(
             (state) => state.firing && stateFilter(state.state)
           );
-          firingAlertsInCategory.push({
-            alert: foundAlert.alert,
-            firingStates,
-            alertName,
-            panelIndex,
-          });
-          categoryFiringAlertCount += firingStates.length;
+          if (firingStates.length > 0) {
+            firingAlertsInCategory.push({
+              alert: foundAlert.alert,
+              firingStates,
+              alertName,
+              panelIndex,
+            });
+            categoryFiringAlertCount += firingStates.length;
+          }
         }
       }
 

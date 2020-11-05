@@ -22,7 +22,7 @@ import { KibanaMetric } from '../metrics';
  *  - requests
  *  - response times
  */
-export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
+export async function getKibanas(req, kbnIndexPattern, { clusterUuid }, alertStatus) {
   checkParam(kbnIndexPattern, 'kbnIndexPattern in getKibanas');
 
   const config = req.server.config();
@@ -63,7 +63,7 @@ export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
   };
 
   const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
-  return callWithRequest(req, 'search', params).then((resp) => {
+  const instances = await callWithRequest(req, 'search', params).then((resp) => {
     const instances = get(resp, 'hits.hits', []);
 
     return instances.map((hit) => {
@@ -73,4 +73,27 @@ export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
       };
     });
   });
+
+  // For some alerts (maybe only missing monitoring data), we want to show the nodes
+  // which we are missing data if they do not normally show up, so we can show the alert
+  for (const status of Object.values(alertStatus)) {
+    for (const { firing, state } of status.states) {
+      if (!firing || !state.stackProductUuid) {
+        continue;
+      }
+      const instance = instances.find(
+        (instance) => instance.kibana.uuid === state.stackProductUuid
+      );
+      if (!instance) {
+        instances.push({
+          kibana: {
+            name: state.stackProductName,
+            uuid: state.stackProductUuid,
+          },
+        });
+      }
+    }
+  }
+
+  return instances;
 }

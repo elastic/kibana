@@ -97,11 +97,11 @@ export async function fetchMissingMonitoringData(
   const endMs = nowInMs;
 
   const nameFields = [
-    'source_node.name',
     'kibana_stats.kibana.name',
     'logstash_stats.logstash.host',
     'beats_stats.beat.name',
     'beat_stats.beat.type',
+    'source_node.name',
   ];
   const subAggs = {
     most_recent: {

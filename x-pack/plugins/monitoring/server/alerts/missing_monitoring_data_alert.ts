@@ -138,6 +138,7 @@ export class MissingMonitoringDataAlert extends BaseAlert {
       now,
       now - limit - LIMIT_BUFFER
     );
+    // console.log(JSON.stringify(missingData))
     return missingData.map((missing) => {
       return {
         instanceKey: `${missing.clusterUuid}:${missing.stackProduct}:${missing.stackProductUuid}`,

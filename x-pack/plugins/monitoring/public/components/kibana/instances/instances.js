@@ -90,11 +90,12 @@ const getColumns = (setupMode, alerts) => {
       field: 'isOnline',
       width: '175px',
       sortable: true,
-      render: () => {
+      render: (_field, instance) => {
         return (
           <AlertsStatus
             showBadge={true}
             alerts={alerts}
+            stateFilter={(state) => state.stackProductUuid === instance.kibana.uuid}
             nextStepsFilter={(nextStep) => {
               if (nextStep.text.includes('Kibana instances')) {
                 return false;

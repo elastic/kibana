@@ -79,6 +79,9 @@ describe('fetchMissingMonitoringData', () => {
                 {
                   uuid: 'kibanaUuid1',
                   nameSource: {
+                    source_node: {
+                      name: 'nodeName1',
+                    },
                     kibana_stats: {
                       kibana: {
                         name: 'kibanaName1',
