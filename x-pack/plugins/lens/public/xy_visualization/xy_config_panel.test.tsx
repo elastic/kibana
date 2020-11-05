@@ -135,7 +135,7 @@ describe('XY Config panels', () => {
       expect(component.find(EuiButtonGroup).prop('idSelected')).toEqual('value_labels_inside');
     });
 
-    it('should show the popover, but hide the fitting field if there is no area, line series', () => {
+    it('should disable the popover for stacked bar charts', () => {
       const state = testState();
       const component = shallow(
         <XyToolbar
@@ -148,10 +148,26 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(component.exists('[data-test-subj="lnsMissingValuesSelect"]')).toEqual(false);
+      expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
     });
 
-    it('should show the popover, but disabled the display field if there is histogram series', () => {
+    it('should disable the popover for percentage area charts', () => {
+      const state = testState();
+      const component = shallow(
+        <XyToolbar
+          frame={frame}
+          setState={jest.fn()}
+          state={{
+            ...state,
+            layers: [{ ...state.layers[0], seriesType: 'area_percentage_stacked' }],
+          }}
+        />
+      );
+
+      expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
+    });
+
+    it('should disabled the popover if there is histogram series', () => {
       // make it detect an histogram series
       frame.datasourceLayers.first.getOperationForColumnId = jest.fn().mockReturnValueOnce({
         isBucketed: true,
@@ -169,13 +185,7 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(
-        component
-          .find(ToolbarPopover)
-          .at(0)
-          .find('[data-test-subj="lnsValueLabelsDisplay"]')
-          .prop('isDisabled')
-      ).toEqual(true);
+      expect(component.find(ToolbarPopover).prop('isDisabled')).toEqual(true);
     });
 
     it('should show the popover and display field enabled for bar and horizontal_bar series', () => {
@@ -193,13 +203,7 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(
-        component
-          .find(ToolbarPopover)
-          .at(0)
-          .find('[data-test-subj="lnsValueLabelsDisplay"]')
-          .prop('isDisabled')
-      ).toEqual(false);
+      expect(component.exists('[data-test-subj="lnsValueLabelsDisplay"]')).toEqual(true);
     });
 
     it('should hide the fitting option for bar series', () => {
@@ -219,7 +223,7 @@ describe('XY Config panels', () => {
       expect(component.exists('[data-test-subj="lnsMissingValuesSelect"]')).toEqual(false);
     });
 
-    it('should disable the display option for area and line series', () => {
+    it('should hide in the popover the display option for area and line series', () => {
       const state = testState();
       const component = shallow(
         <XyToolbar
@@ -233,13 +237,7 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(
-        component
-          .find(ToolbarPopover)
-          .at(0)
-          .find('[data-test-subj="lnsValueLabelsDisplay"]')
-          .prop('isDisabled')
-      ).toEqual(true);
+      expect(component.exists('[data-test-subj="lnsValueLabelsDisplay"]')).toEqual(false);
     });
 
     it('should keep the display option for bar series with multiple layers', () => {
@@ -270,13 +268,7 @@ describe('XY Config panels', () => {
         />
       );
 
-      expect(
-        component
-          .find(ToolbarPopover)
-          .at(0)
-          .find('[data-test-subj="lnsValueLabelsDisplay"]')
-          .prop('isDisabled')
-      ).toEqual(false);
+      expect(component.exists('[data-test-subj="lnsValueLabelsDisplay"]')).toEqual(true);
     });
 
     it('should disable the popover if there is no right axis', () => {

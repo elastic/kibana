@@ -86,8 +86,6 @@ const legendOptions: Array<{ id: string; value: 'auto' | 'show' | 'hide'; label:
   },
 ];
 
-// TODO: inside/outside logic requires some more work on the elastic-chart side
-// as for now limit to a show/hide logic
 const valueLabelsOptions: Array<{
   id: string;
   value: 'hide' | 'inside' | 'outside';
@@ -161,6 +159,10 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
 
   const hasBarNotStacked = state?.layers.some(({ seriesType }) =>
     ['bar', 'bar_horizontal'].includes(seriesType)
+  );
+
+  const isAreaPercentage = state?.layers.some(
+    ({ seriesType }) => seriesType === 'area_percentage_stacked'
   );
 
   const isHistogramSeries = Boolean(
@@ -237,100 +239,100 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
 
   const valueLabelsVisibilityMode = state?.valueLabels || 'hide';
 
-  const isValueLabelsDisabled = hasNonBarSeries || !hasBarNotStacked || isHistogramSeries;
+  const isValueLabelsEnabled = !hasNonBarSeries && hasBarNotStacked && !isHistogramSeries;
+  const isFittingEnabled = hasNonBarSeries;
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="none" responsive={false}>
-          <ToolbarPopover
-            title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
-              defaultMessage: 'Values',
-            })}
-            type="values"
-            groupPosition="left"
-            buttonDataTestSubj="lnsMissingValuesButton"
+          <TooltipWrapper
+            tooltipContent={
+              isAreaPercentage
+                ? i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
+                    defaultMessage:
+                      'This setting may be modified on area and stacked area charts, but not percentage area charts.',
+                  })
+                : i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
+                    defaultMessage:
+                      'This setting may be modified on categorical bar charts, but not histograms',
+                  })
+            }
+            condition={!isValueLabelsEnabled && !isFittingEnabled}
           >
-            <EuiFormRow
-              display="columnCompressed"
-              label={
-                <TooltipWrapper
-                  tooltipContent={i18n.translate(
-                    'xpack.lens.xyChart.valuesStackedDisabledHelpText',
-                    {
-                      defaultMessage:
-                        'This setting can only be used on categorical, un-stacked bar charts',
-                    }
-                  )}
-                  condition={isValueLabelsDisabled}
-                >
-                  <span>
-                    {i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-                      defaultMessage: 'Labels',
-                    })}{' '}
-                    {isValueLabelsDisabled ? (
-                      <EuiIcon
-                        type="questionInCircle"
-                        color="subdued"
-                        size="s"
-                        className="eui-alignTop"
-                      />
-                    ) : null}
-                  </span>
-                </TooltipWrapper>
-              }
+            <ToolbarPopover
+              title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
+                defaultMessage: 'Values',
+              })}
+              type="values"
+              groupPosition="left"
+              buttonDataTestSubj="lnsValuesButton"
+              isDisabled={!isValueLabelsEnabled && !isFittingEnabled}
             >
-              <EuiButtonGroup
-                isFullWidth
-                legend={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
-                  defaultMessage: 'Labels',
-                })}
-                isDisabled={isValueLabelsDisabled}
-                data-test-subj="lnsValueLabelsDisplay"
-                name="valueLabelsDisplay"
-                buttonSize="compressed"
-                options={valueLabelsOptions}
-                idSelected={
-                  valueLabelsOptions.find(({ value }) => value === valueLabelsVisibilityMode)!.id
-                }
-                onChange={(modeId) => {
-                  const newMode = valueLabelsOptions.find(({ id }) => id === modeId)!.value;
-                  setState({ ...state, valueLabels: newMode });
-                }}
-              />
-            </EuiFormRow>
-            {hasNonBarSeries ? (
-              <EuiFormRow
-                display="columnCompressed"
-                label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
-                  defaultMessage: 'Missing values',
-                })}
-              >
-                <EuiSuperSelect
-                  data-test-subj="lnsMissingValuesSelect"
-                  compressed
-                  options={fittingFunctionDefinitions.map(({ id, title, description }) => {
-                    return {
-                      value: id,
-                      dropdownDisplay: (
-                        <>
-                          <strong>{title}</strong>
-                          <EuiText size="xs" color="subdued">
-                            <p>{description}</p>
-                          </EuiText>
-                        </>
-                      ),
-                      inputDisplay: title,
-                    };
+              {isValueLabelsEnabled ? (
+                <EuiFormRow
+                  display="columnCompressed"
+                  label={
+                    <span>
+                      {i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
+                        defaultMessage: 'Labels',
+                      })}
+                    </span>
+                  }
+                >
+                  <EuiButtonGroup
+                    isFullWidth
+                    legend={i18n.translate('xpack.lens.shared.chartValueLabelVisibilityLabel', {
+                      defaultMessage: 'Labels',
+                    })}
+                    data-test-subj="lnsValueLabelsDisplay"
+                    name="valueLabelsDisplay"
+                    buttonSize="compressed"
+                    options={valueLabelsOptions}
+                    idSelected={
+                      valueLabelsOptions.find(({ value }) => value === valueLabelsVisibilityMode)!
+                        .id
+                    }
+                    onChange={(modeId) => {
+                      const newMode = valueLabelsOptions.find(({ id }) => id === modeId)!.value;
+                      setState({ ...state, valueLabels: newMode });
+                    }}
+                  />
+                </EuiFormRow>
+              ) : null}
+              {isFittingEnabled ? (
+                <EuiFormRow
+                  display="columnCompressed"
+                  label={i18n.translate('xpack.lens.xyChart.missingValuesLabel', {
+                    defaultMessage: 'Missing values',
                   })}
-                  valueOfSelected={state?.fittingFunction || 'None'}
-                  onChange={(value) => setState({ ...state, fittingFunction: value })}
-                  itemLayoutAlign="top"
-                  hasDividers
-                />
-              </EuiFormRow>
-            ) : null}
-          </ToolbarPopover>
+                >
+                  <EuiSuperSelect
+                    data-test-subj="lnsMissingValuesSelect"
+                    compressed
+                    options={fittingFunctionDefinitions.map(({ id, title, description }) => {
+                      return {
+                        value: id,
+                        dropdownDisplay: (
+                          <>
+                            <strong>{title}</strong>
+                            <EuiText size="xs" color="subdued">
+                              <p>{description}</p>
+                            </EuiText>
+                          </>
+                        ),
+                        inputDisplay: title,
+                      };
+                    })}
+                    valueOfSelected={state?.fittingFunction || 'None'}
+                    onChange={(value) => setState({ ...state, fittingFunction: value })}
+                    itemLayoutAlign="top"
+                    hasDividers
+                  />
+                </EuiFormRow>
+              ) : null}
+            </ToolbarPopover>
+          </TooltipWrapper>
           <LegendSettingsPopover
             legendOptions={legendOptions}
             mode={legendMode}
