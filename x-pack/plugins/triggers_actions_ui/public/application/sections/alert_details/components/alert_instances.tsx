@@ -58,7 +58,7 @@ export const alertInstancesTableColumns = (
       return (
         <EuiHealth color={value.healthColor}>
           {value.label}
-          {value.actionGroup ? ` (${value.actionGroup})` : null}
+          {value.actionGroup ? ` (${value.actionGroup})` : ``}
         </EuiHealth>
       );
     },
@@ -214,12 +214,12 @@ const INACTIVE_LABEL = i18n.translate(
   { defaultMessage: 'OK' }
 );
 
-function getActionGroupName(alertType: AlertType, actionGroupId?: string): string {
+function getActionGroupName(alertType: AlertType, actionGroupId?: string): string | undefined {
   actionGroupId = actionGroupId || alertType.defaultActionGroupId;
   const actionGroup = alertType?.actionGroups?.find(
     (group: ActionGroup) => group.id === actionGroupId
   );
-  return actionGroup ? actionGroup.name : 'Unknown';
+  return actionGroup?.name;
 }
 
 export function alertInstanceToListItem(

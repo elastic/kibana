@@ -40,12 +40,12 @@ describe('alert_instances', () => {
         first_instance: {
           status: 'OK',
           muted: false,
-          actionGroupId: 'testActionGroup1',
+          actionGroupId: 'default',
         },
         second_instance: {
           status: 'Active',
           muted: false,
-          actionGroupId: 'test action group 2',
+          actionGroupId: 'action group id unknown',
         },
       },
     });
