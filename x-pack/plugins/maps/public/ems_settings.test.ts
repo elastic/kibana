@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+jest.mock('./licensed_features', () => ({}));
+
 import { EMSSettings, IEMSConfig } from './ems_settings';
 import {
   DEFAULT_EMS_FILE_API_URL,
@@ -23,6 +25,11 @@ describe('EMSSettings', () => {
     emsFontLibraryUrl: DEFAULT_EMS_FONT_LIBRARY_URL,
     isEMSEnabled: true,
   };
+
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('./licensed_features').getIsEnterprisePlus = () => true;
+  });
 
   describe('isEMSEnabled/isOnPrem', () => {
     test('should validate defaults', () => {
@@ -63,6 +70,24 @@ describe('EMSSettings', () => {
       });
       expect(emsSettings.isEMSEnabled()).toBe(true);
       expect(emsSettings.isOnPrem()).toBe(true);
+    });
+
+    describe('when license is turned off', () => {
+      beforeEach(() => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        require('./licensed_features').getIsEnterprisePlus = () => false;
+      });
+
+      test('should not be enabled', () => {
+        const emsSettings = new EMSSettings({
+          ...mockConfig,
+          ...{
+            emsUrl: 'https://localhost:8080',
+          },
+        });
+        expect(emsSettings.isEMSEnabled()).toBe(false);
+        expect(emsSettings.isOnPrem()).toBe(true);
+      });
     });
   });
 

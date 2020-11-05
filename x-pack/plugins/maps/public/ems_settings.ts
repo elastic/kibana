@@ -10,6 +10,7 @@ import {
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
 } from '../../../../src/plugins/maps_legacy/public';
+import { getIsEnterprisePlus } from './licensed_features';
 
 export interface IEMSConfig {
   emsUrl?: string;
@@ -37,11 +38,14 @@ export class EMSSettings {
   }
 
   isOnPrem(): boolean {
-    return !!this._isEMSUrlSet();
+    return this._isEMSUrlSet();
   }
 
   isEMSEnabled(): boolean {
-    return !!this._config.includeElasticMapsService || this._isEMSUrlSet();
+    if (this._isEMSUrlSet()) {
+      return getIsEnterprisePlus();
+    }
+    return !!this._config.includeElasticMapsService;
   }
 
   getEMSFileApiUrl(): string {
