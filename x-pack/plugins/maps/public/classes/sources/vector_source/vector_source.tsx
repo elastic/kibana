@@ -61,7 +61,6 @@ export interface IVectorSource extends ISource {
   getLeftJoinFields(): Promise<IField[]>;
   getSyncMeta(): VectorSourceSyncMeta | null;
   getFieldNames(): string[];
-  getApplyGlobalQuery(): boolean;
   createField({ fieldName }: { fieldName: string }): IField;
   canFormatFeatureProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;

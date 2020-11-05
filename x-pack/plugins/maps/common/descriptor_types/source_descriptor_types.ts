@@ -18,7 +18,6 @@ export type AttributionDescriptor = {
 export type AbstractSourceDescriptor = {
   id?: string;
   type: string;
-  applyGlobalQuery?: boolean;
 };
 
 export type EMSTMSSourceDescriptor = AbstractSourceDescriptor & {
@@ -37,6 +36,8 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   id: string;
   indexPatternId: string;
   geoField?: string;
+  applyGlobalQuery: boolean;
+  applyGlobalTime: boolean;
 };
 
 export type AggDescriptor = {

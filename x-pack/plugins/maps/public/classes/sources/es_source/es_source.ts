@@ -82,8 +82,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       type: isValidStringConfig(descriptor.type) ? descriptor.type! : '',
       indexPatternId: descriptor.indexPatternId!,
       applyGlobalQuery:
-        // backfill old _.get usage
-        typeof descriptor.applyGlobalQuery !== 'undefined' ? !!descriptor.applyGlobalQuery : true,
+        typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
+      applyGlobalTime:
+        typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
     };
   }
 
@@ -94,6 +95,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
 
   getId(): string {
     return this._descriptor.id;
+  }
+
+  getApplyGlobalQuery(): boolean {
+    return this._descriptor.applyGlobalQuery;
   }
 
   isFieldAware(): boolean {

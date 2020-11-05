@@ -135,7 +135,7 @@ export class AbstractSource implements ISource {
   }
 
   getApplyGlobalQuery(): boolean {
-    return !!this._descriptor.applyGlobalQuery;
+    return false;
   }
 
   getIndexPatternIds(): string[] {
