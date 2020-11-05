@@ -24,12 +24,12 @@ export const alertType: AlertType = {
     const count = (state.count ?? 0) + 1;
 
     range(instances)
-      .map(() => ({ id: uuid.v4(), tshirtSize: ACTION_GROUPS[random(0, 2)] }))
+      .map(() => ({ id: uuid.v4(), tshirtSize: ACTION_GROUPS[random(0, 2)].id! }))
       .forEach((instance: { id: string; tshirtSize: string }) => {
         services
           .alertInstanceFactory(instance.id)
           .replaceState({ triggerdOnCycle: count })
-          .scheduleActions(tshirtSize);
+          .scheduleActions(instance.tshirtSize);
       });
 
     return {
