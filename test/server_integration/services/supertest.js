@@ -21,14 +21,14 @@ import { format as formatUrl } from 'url';
 
 import supertestAsPromised from 'supertest-as-promised';
 
-export function createKibanaSupertestProvider({ certificateAuthorities, options } = {}) {
+export function createKibanaSupertestProvider({ certificateAuthorities, kibanaUrl } = {}) {
   return function ({ getService }) {
     const config = getService('config');
-    const kibanaServerUrl = options ? formatUrl(options) : formatUrl(config.get('servers.kibana'));
+    kibanaUrl = kibanaUrl ?? formatUrl(config.get('servers.kibana'));
 
     return certificateAuthorities
-      ? supertestAsPromised.agent(kibanaServerUrl, { ca: certificateAuthorities })
-      : supertestAsPromised(kibanaServerUrl);
+      ? supertestAsPromised.agent(kibanaUrl, { ca: certificateAuthorities })
+      : supertestAsPromised(kibanaUrl);
   };
 }
 
