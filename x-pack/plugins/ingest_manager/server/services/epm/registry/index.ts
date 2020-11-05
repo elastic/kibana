@@ -242,12 +242,10 @@ export function getAsset(key: string) {
 }
 
 export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByType {
-  const kibanaAssetTypes = Object.values<string>(KibanaAssetType);
-
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
     const parts = pathParts(path.replace(/^\/package\//, ''));
-    if (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) {
+    if (parts.type in KibanaAssetType) {
       if (!map[parts.service]) map[parts.service] = {};
       if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
       map[parts.service][parts.type].push(parts);

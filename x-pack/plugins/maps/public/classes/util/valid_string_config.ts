@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DEFAULT_FILTER_BY_MAP_BOUNDS = true;
+/**
+ * Validate user-generated data (e.g. descriptors). Possibly dirty or of wrong type.
+ * @param value
+ */
+export function isValidStringConfig(value: any): boolean {
+  return typeof value === 'string' && value !== '';
+}
