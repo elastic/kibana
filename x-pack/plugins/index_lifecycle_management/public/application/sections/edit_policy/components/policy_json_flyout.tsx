@@ -7,7 +7,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -22,7 +21,10 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
+import { SerializedPolicy } from '../../../../../common/types';
+
 import { useFormContext, useFormData } from '../../../../shared_imports';
+
 import { FormInternal } from '../types';
 
 interface Props {
