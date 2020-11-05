@@ -80,7 +80,7 @@ export function MachineLearningProvider(context: FtrProviderContext) {
   const settings = MachineLearningSettingsProvider(context);
   const settingsCalendar = MachineLearningSettingsCalendarProvider(context, commonUI);
   const settingsFilterList = MachineLearningSettingsFilterListProvider(context, commonUI);
-  const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context);
+  const singleMetricViewer = MachineLearningSingleMetricViewerProvider(context, commonUI);
   const testExecution = MachineLearningTestExecutionProvider(context);
   const testResources = MachineLearningTestResourcesProvider(context);
 
