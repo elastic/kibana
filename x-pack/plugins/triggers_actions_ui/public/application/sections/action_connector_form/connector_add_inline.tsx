@@ -90,7 +90,7 @@ export const AddConnectorInline = ({
         }
         extraAction={
           <EuiButtonIcon
-            iconType="cross"
+            iconType="minusInCircle"
             color="danger"
             className="actAccordionActionForm__extraAction"
             aria-label={i18n.translate(
