@@ -7,7 +7,7 @@
 import { getXyVisualization } from './visualization';
 import { Position } from '@elastic/charts';
 import { Operation } from '../types';
-import { State, SeriesType } from './types';
+import { State, SeriesType, LayerConfig } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../editor_frame_service/mocks';
 import { LensIconChartBar } from '../assets/chart_bar';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
@@ -420,7 +420,7 @@ describe('xy_visualization', () => {
     });
 
     describe('color assignment', () => {
-      it('should pass custom y color in accessor config', () => {
+      function callConfig(layerConfigOverride: Partial<LayerConfig>) {
         const baseState = exampleState();
         const options = xyVisualization.getConfiguration({
           state: {
@@ -429,58 +429,64 @@ describe('xy_visualization', () => {
               {
                 ...baseState.layers[0],
                 splitAccessor: undefined,
-                yConfig: [
-                  {
-                    forAccessor: 'b',
-                    color: 'red',
-                  },
-                ],
+                ...layerConfigOverride,
               },
             ],
           },
           frame,
           layerId: 'first',
         }).groups;
-        const accessorConfig = options
-          .find(({ groupId }) => groupId === 'y')
-          ?.accessors.find((accessor) => typeof accessor !== 'string' && accessor.columnId === 'b');
-        if (typeof accessorConfig === 'string') {
+        return options;
+      }
+
+      function callConfigForYConfigs(layerConfigOverride: Partial<LayerConfig>) {
+        return callConfig(layerConfigOverride).find(({ groupId }) => groupId === 'y');
+      }
+
+      function callConfigForBreakdownConfigs(layerConfigOverride: Partial<LayerConfig>) {
+        return callConfig(layerConfigOverride).find(({ groupId }) => groupId === 'breakdown');
+      }
+
+      function callConfigAndFindYConfig(
+        layerConfigOverride: Partial<LayerConfig>,
+        assertionAccessor: string
+      ) {
+        const accessorConfig = callConfigForYConfigs(layerConfigOverride)?.accessors.find(
+          (accessor) => typeof accessor !== 'string' && accessor.columnId === assertionAccessor
+        );
+        if (!accessorConfig || typeof accessorConfig === 'string') {
           throw new Error('could not find accessor');
         }
-        expect(accessorConfig?.triggerIcon).toEqual('color');
-        expect(accessorConfig?.color).toEqual('red');
+        return accessorConfig;
+      }
+
+      it('should pass custom y color in accessor config', () => {
+        const accessorConfig = callConfigAndFindYConfig(
+          {
+            yConfig: [
+              {
+                forAccessor: 'b',
+                color: 'red',
+              },
+            ],
+          },
+          'b'
+        );
+        expect(accessorConfig.triggerIcon).toEqual('color');
+        expect(accessorConfig.color).toEqual('red');
       });
 
       it('should query palette to fill in colors for other dimensions', () => {
         const palette = paletteServiceMock.get('default');
         (palette.getColor as jest.Mock).mockClear();
-        const baseState = exampleState();
-        const options = xyVisualization.getConfiguration({
-          state: {
-            ...baseState,
-            layers: [
-              {
-                ...baseState.layers[0],
-                splitAccessor: undefined,
-              },
-            ],
-          },
-          frame,
-          layerId: 'first',
-        }).groups;
-        const accessorConfig = options
-          .find(({ groupId }) => groupId === 'y')
-          ?.accessors.find((accessor) => typeof accessor !== 'string' && accessor.columnId === 'c');
-        if (typeof accessorConfig === 'string') {
-          throw new Error('could not find accessor');
-        }
-        expect(accessorConfig?.triggerIcon).toEqual('color');
+        const accessorConfig = callConfigAndFindYConfig({}, 'c');
+        expect(accessorConfig.triggerIcon).toEqual('color');
         // black is the color returned from the palette mock
-        expect(accessorConfig?.color).toEqual('black');
+        expect(accessorConfig.color).toEqual('black');
         expect(palette.getColor).toHaveBeenCalledWith(
           [
             {
-              name: '',
+              name: 'c',
               // rank 1 because it's the second y metric
               rankAtDepth: 1,
               totalSeriesAtDepth: 2,
@@ -492,27 +498,63 @@ describe('xy_visualization', () => {
       });
 
       it('should pass name of current series along', () => {
-        throw new Error('not implemented');
+        (frame.datasourceLayers.first.getOperationForColumnId as jest.Mock).mockReturnValue({
+          label: 'Overwritten label',
+        });
+        const palette = paletteServiceMock.get('default');
+        (palette.getColor as jest.Mock).mockClear();
+        callConfigAndFindYConfig({}, 'c');
+        expect(palette.getColor).toHaveBeenCalledWith(
+          [
+            expect.objectContaining({
+              name: 'Overwritten label',
+            }),
+          ],
+          expect.anything(),
+          undefined
+        );
       });
 
       it('should use custom palette if layer contains palette', () => {
-        throw new Error('not implemented');
+        const palette = paletteServiceMock.get('mock');
+        callConfigAndFindYConfig(
+          {
+            palette: { type: 'palette', name: 'mock', params: {} },
+          },
+          'c'
+        );
+        expect(palette.getColor).toHaveBeenCalled();
       });
 
       it('should not show any indicator as long as there is no data', () => {
-        throw new Error('not implemented');
+        frame.activeData = undefined;
+        const yConfigs = callConfigForYConfigs({});
+        expect(yConfigs!.accessors.length).toEqual(2);
+        yConfigs!.accessors.forEach((accessor) => {
+          expect(typeof accessor).toBe('string');
+        });
       });
 
       it('should show disable icon for splitted series', () => {
-        throw new Error('not implemented');
+        const accessorConfig = callConfigAndFindYConfig(
+          {
+            splitAccessor: 'd',
+          },
+          'b'
+        );
+        expect(accessorConfig.triggerIcon).toEqual('disabled');
       });
 
       it('should show current palette for break down by dimension', () => {
-        throw new Error('not implemented');
-      });
-
-      it('should show current custom palette for break down by dimension', () => {
-        throw new Error('not implemented');
+        const palette = paletteServiceMock.get('mock');
+        const customColors = ['yellow', 'green'];
+        (palette.getColors as jest.Mock).mockReturnValue(customColors);
+        const breakdownConfig = callConfigForBreakdownConfigs({
+          palette: { type: 'palette', name: 'mock', params: {} },
+          splitAccessor: 'd',
+        });
+        const accessorConfig = breakdownConfig!.accessors[0];
+        expect(typeof accessorConfig !== 'string' && accessorConfig.palette).toEqual(customColors);
       });
     });
   });

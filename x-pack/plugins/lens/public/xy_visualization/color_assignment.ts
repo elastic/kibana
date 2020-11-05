@@ -39,7 +39,7 @@ export function getColorAssignments(
         return { numberOfSeries: layer.accessors.length, splits: [] };
       }
       const splitAccessor = layer.splitAccessor;
-      const column = data.tables[layer.layerId].columns.find(({ id }) => id === splitAccessor);
+      const column = data.tables[layer.layerId]?.columns.find(({ id }) => id === splitAccessor);
       const splits =
         !column || !data.tables[layer.layerId]
           ? []

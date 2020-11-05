@@ -5,6 +5,7 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { DatasourcePublicAPI } from '../types';
 import { SeriesType, visualizationTypes, LayerConfig, YConfig } from './types';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
@@ -36,4 +37,16 @@ export const getSeriesColor = (layer: LayerConfig, accessor: string) => {
   return (
     layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
   );
+};
+
+export const getColumnToLabelMap = (layer: LayerConfig, datasource: DatasourcePublicAPI) => {
+  const columnToLabel: Record<string, string> = {};
+
+  layer.accessors.concat(layer.splitAccessor ? [layer.splitAccessor] : []).forEach((accessor) => {
+    const operation = datasource.getOperationForColumnId(accessor);
+    if (operation?.label) {
+      columnToLabel[accessor] = operation.label;
+    }
+  });
+  return columnToLabel;
 };

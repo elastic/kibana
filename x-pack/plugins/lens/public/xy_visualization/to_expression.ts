@@ -9,6 +9,7 @@ import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
 import { State, LayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
+import { getColumnToLabelMap } from './state_helpers';
 
 interface ValidLayer extends LayerConfig {
   xAccessor: NonNullable<LayerConfig['xAccessor']>;
@@ -198,17 +199,7 @@ export const buildExpression = (
             },
           ],
           layers: validLayers.map((layer) => {
-            const columnToLabel: Record<string, string> = {};
-
-            const datasource = datasourceLayers[layer.layerId];
-            layer.accessors
-              .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
-              .forEach((accessor) => {
-                const operation = datasource.getOperationForColumnId(accessor);
-                if (operation?.label) {
-                  columnToLabel[accessor] = operation.label;
-                }
-              });
+            const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
 
             const xAxisOperation =
               datasourceLayers &&

@@ -16,7 +16,7 @@ import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
 import { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
-import { isHorizontalChart } from './state_helpers';
+import { getColumnToLabelMap, isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
@@ -173,7 +173,8 @@ export const getXyVisualization = ({
 
     const datasource = frame.datasourceLayers[layer.layerId];
 
-    let sortedAccessors: AccessorConfig[] = getSortedAccessors(datasource, layer);
+    const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
+    let mappedAccessors: AccessorConfig[] = sortedAccessors;
 
     if (frame.activeData) {
       const colorAssignments = getColorAssignments(
@@ -183,7 +184,7 @@ export const getXyVisualization = ({
       );
       const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
       const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
-      sortedAccessors = sortedAccessors.map((accessor) => {
+      mappedAccessors = sortedAccessors.map((accessor) => {
         const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
         if (layerContainsSplits) {
           return {
@@ -191,15 +192,18 @@ export const getXyVisualization = ({
             triggerIcon: 'disabled',
           };
         }
-        // TODO this should be the actual series name (same logic as the chart)
-        const rank = colorAssignments[currentPalette.name].getRank(layer, '', accessor as string);
+        const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
+        const rank = colorAssignments[currentPalette.name].getRank(
+          layer,
+          columnToLabel[accessor] || accessor,
+          accessor
+        );
         const customColor =
           currentYConfig?.color ||
           paletteService.get(currentPalette.name).getColor(
             [
               {
-                // TODO this should be the actual series name (same logic as the chart)
-                name: '',
+                name: columnToLabel[accessor] || accessor,
                 rankAtDepth: rank,
                 totalSeriesAtDepth: totalSeriesCount,
               },
@@ -230,7 +234,7 @@ export const getXyVisualization = ({
         {
           groupId: 'y',
           groupLabel: getAxisName('y', { isHorizontal }),
-          accessors: sortedAccessors,
+          accessors: mappedAccessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
           required: true,

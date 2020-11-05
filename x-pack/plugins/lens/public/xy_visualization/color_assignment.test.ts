@@ -128,6 +128,31 @@ describe('color_assignment', () => {
       expect(assignments.palette2.totalSeriesCount).toEqual(2 * 3);
       expect(formatMock).toHaveBeenCalledWith(complexObject);
     });
+
+    it('should handle missing tables', () => {
+      const assignments = getColorAssignments(layers, { ...data, tables: {} }, formatFactory);
+      // if there is no data, just assume a single split
+      expect(assignments.palette1.totalSeriesCount).toEqual(2);
+    });
+
+    it('should handle missing columns', () => {
+      const assignments = getColorAssignments(
+        layers,
+        {
+          ...data,
+          tables: {
+            ...data.tables,
+            '1': {
+              ...data.tables['1'],
+              columns: [],
+            },
+          },
+        },
+        formatFactory
+      );
+      // if the split column is missing, just assume a single split
+      expect(assignments.palette1.totalSeriesCount).toEqual(2);
+    });
   });
 
   describe('getRank', () => {
@@ -179,8 +204,29 @@ describe('color_assignment', () => {
       expect(assignments.palette1.getRank(layers[0], 'formatted', 'y1')).toEqual(2);
     });
 
-    it('should handle missing tables and columns', () => {
-      throw new Error('not implemented');
+    it('should handle missing tables', () => {
+      const assignments = getColorAssignments(layers, { ...data, tables: {} }, formatFactory);
+      // if there is no data, assume it is the first splitted series. One series in front - 0/y1
+      expect(assignments.palette1.getRank(layers[0], '2', 'y2')).toEqual(1);
+    });
+
+    it('should handle missing columns', () => {
+      const assignments = getColorAssignments(
+        layers,
+        {
+          ...data,
+          tables: {
+            ...data.tables,
+            '1': {
+              ...data.tables['1'],
+              columns: [],
+            },
+          },
+        },
+        formatFactory
+      );
+      // if the split column is missing, assume it is the first splitted series. One series in front - 0/y1
+      expect(assignments.palette1.getRank(layers[0], '2', 'y2')).toEqual(1);
     });
   });
 });

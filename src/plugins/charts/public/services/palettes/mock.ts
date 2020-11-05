@@ -61,7 +61,7 @@ export const getPaletteRegistry = () => {
   };
 
   return {
-    get: (name: string) => (name === 'default' ? mockPalette1 : mockPalette2),
+    get: (name: string) => (name !== 'default' ? mockPalette2 : mockPalette1),
     getAll: () => [mockPalette1, mockPalette2],
   };
 };
