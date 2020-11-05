@@ -33,11 +33,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
+  const security = getService('security');
 
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        // delete .kibana index and then wait for Kibana to re-create it
+        // await esArchiver.load('empty_kibana');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await esArchiver.load('management');
@@ -223,6 +224,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('.json file', () => {
+      before(async function () {
+        // There must be some saved objects in difference indices which can cause failures when
+        // run against Kibana with security enabled like on Cloud
+        await security.testUser.setRoles(['kibana_admin', 'superuser'], false);
+      });
+      after(async function () {
+        await security.testUser.restoreDefaults();
+      });
+
       beforeEach(async function () {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
@@ -471,16 +481,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('should display an explicit error message when importing a file bigger than allowed', async () => {
-        await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_too_big.ndjson')
-        );
+      describe('when bigger than savedObjects.maxImportPayloadBytes (not Cloud)', function () {
+        // see --savedObjects.maxImportPayloadBytes in config file
+        this.tags(['skipCloud']);
+        it('should display an explicit error message when importing a file bigger than allowed', async () => {
+          await PageObjects.savedObjects.importFile(
+            path.join(__dirname, 'exports', '_import_too_big.ndjson')
+          );
 
-        await PageObjects.savedObjects.checkImportError();
+          await PageObjects.savedObjects.checkImportError();
 
-        const errorText = await PageObjects.savedObjects.getImportErrorText();
+          const errorText = await PageObjects.savedObjects.getImportErrorText();
 
-        expect(errorText).to.contain(`Payload content length greater than maximum allowed`);
+          expect(errorText).to.contain(`Payload content length greater than maximum allowed`);
+        });
       });
 
       it('should display an explicit error message when importing an invalid file', async () => {
