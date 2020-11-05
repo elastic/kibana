@@ -7,7 +7,6 @@
 // testsList :: {} -> list
 export default (envObj) => {
   const xs = [];
-  xs.push('alerts');
   // one of these 2 needs to create the default index pattern
   if (envObj.PRODUCTS.includes('logstash')) {
     xs.push('management');
@@ -56,6 +55,7 @@ export default (envObj) => {
       xs.push('monitoring');
     }
     if (envObj.VM === 'centos7_rpm') {
+      xs.push('alerts');
       // monitoring is last because we switch to the elastic superuser here
       xs.push('monitoring/_monitoring_metricbeat');
     }
