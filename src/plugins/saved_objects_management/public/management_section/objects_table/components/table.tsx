@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { IBasePath } from 'src/core/public';
+import { ApplicationStart, IBasePath } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import {
   EuiSearchBar,
@@ -57,7 +57,7 @@ export interface TableProps {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
   };
   filterOptions: any[];
-  canDelete: boolean;
+  capabilities: ApplicationStart['capabilities'];
   onDelete: () => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
   onExport: (includeReferencesDeep: boolean) => void;
@@ -156,6 +156,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       isSearching,
       filterOptions,
       selectionConfig: selection,
+      capabilities,
       onDelete,
       onActionRefresh,
       selectedSavedObjects,
@@ -285,6 +286,7 @@ export class Table extends PureComponent<TableProps, TableState> {
             'data-test-subj': 'savedObjectsTableAction-relationships',
           },
           ...actionRegistry.getAll().map((action) => {
+            action.setActionContext({ capabilities });
             return {
               ...action.euiAction,
               'data-test-subj': `savedObjectsTableAction-${action.id}`,
@@ -354,9 +356,11 @@ export class Table extends PureComponent<TableProps, TableState> {
               iconType="trash"
               color="danger"
               onClick={onDelete}
-              isDisabled={selectedSavedObjects.length === 0 || !this.props.canDelete}
+              isDisabled={
+                selectedSavedObjects.length === 0 || !capabilities.savedObjectsManagement.delete
+              }
               title={
-                this.props.canDelete
+                capabilities.savedObjectsManagement.delete
                   ? undefined
                   : i18n.translate('savedObjectsManagement.objectsTable.table.deleteButtonTitle', {
                       defaultMessage: 'Unable to delete saved objects',
