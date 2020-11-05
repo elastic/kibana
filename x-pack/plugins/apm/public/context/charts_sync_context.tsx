@@ -5,10 +5,11 @@
  */
 
 import React, { ReactNode, useMemo, useState } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
 import { fromQuery, toQuery } from '../components/shared/Links/url_helpers';
 import { useFetcher } from '../hooks/useFetcher';
 import { useUrlParams } from '../hooks/useUrlParams';
+import { useServiceName } from '../hooks/use_service_name';
 
 export const LegacyChartsSyncContext = React.createContext<{
   hoverX: number | null;
@@ -24,7 +25,7 @@ export function LegacyChartsSyncContextProvider({
 }) {
   const history = useHistory();
   const [time, setTime] = useState<number | null>(null);
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end } = urlParams;

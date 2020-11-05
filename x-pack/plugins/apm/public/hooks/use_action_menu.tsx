@@ -6,16 +6,15 @@
 
 import { useEffect } from 'react';
 import { getActionMenuMountPoint } from '../application/action_menu';
-import { APMRouteDefinition } from '../application/routes';
 import { useApmPluginContext } from './useApmPluginContext';
 
-export function useActionMenu(routes: APMRouteDefinition[]) {
+export function useActionMenu() {
   const apmPluginContextValue = useApmPluginContext();
   const { setHeaderActionMenu } = apmPluginContextValue.appMountParameters;
 
   useEffect(() => {
     setHeaderActionMenu((el) =>
-      getActionMenuMountPoint(apmPluginContextValue, routes)(el)
+      getActionMenuMountPoint(apmPluginContextValue)(el)
     );
   });
 }

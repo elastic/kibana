@@ -3,12 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { useParams } from 'react-router-dom';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
+import { useServiceName } from './use_service_name';
 
 export function useAgentName() {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
 

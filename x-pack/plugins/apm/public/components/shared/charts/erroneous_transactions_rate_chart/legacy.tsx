@@ -8,11 +8,11 @@ import theme from '@elastic/eui/dist/eui_theme_light.json';
 import { i18n } from '@kbn/i18n';
 import { max } from 'lodash';
 import React, { useCallback } from 'react';
-import { useParams } from 'react-router-dom';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useLegacyChartsSync as useChartsSync } from '../../../../hooks/use_charts_sync';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
+import { useLegacyChartsSync as useChartsSync } from '../../../../hooks/use_charts_sync';
+import { useServiceName } from '../../../../hooks/use_service_name';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 // @ts-expect-error
 import CustomPlot from '../CustomPlot';
@@ -28,7 +28,7 @@ const tickFormatY = (y?: number | null) => {
  * This will be removed with #70290.
  */
 export function ErroneousTransactionsRateChart() {
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { urlParams, uiFilters } = useUrlParams();
   const syncedChartsProps = useChartsSync();
 

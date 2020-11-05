@@ -7,7 +7,7 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Route, Router } from 'react-router-dom';
+import { Router } from 'react-router-dom';
 import {
   RedirectAppLinks,
   toMountPoint,
@@ -22,7 +22,6 @@ import {
 import { LicenseProvider } from '../../context/LicenseContext';
 import { UrlParamsProvider } from '../../context/UrlParamsContext';
 import { useApmPluginContext } from '../../hooks/useApmPluginContext';
-import { APMRouteDefinition } from '../routes';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 
@@ -87,16 +86,12 @@ export function ActionMenu() {
  * Alerts and ML links require a lot of context so include what we need here.
  */
 export function getActionMenuMountPoint(
-  apmPluginContextValue: ApmPluginContextValue,
-  routes: APMRouteDefinition[]
+  apmPluginContextValue: ApmPluginContextValue
 ) {
   const { appMountParameters, core, plugins } = apmPluginContextValue;
 
   return toMountPoint(
     <Router history={appMountParameters.history}>
-      {/* {routes.map((route, index) => (
-        <Route key={index} {...route} />
-      ))} */}
       <RedirectAppLinks application={core.application}>
         <ApmPluginContext.Provider value={apmPluginContextValue}>
           <UrlParamsProvider>

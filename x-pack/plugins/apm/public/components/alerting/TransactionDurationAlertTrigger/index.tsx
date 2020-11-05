@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { EuiSelect } from '@elastic/eui';
-import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { map } from 'lodash';
 import React from 'react';
@@ -22,6 +21,7 @@ import {
   TransactionTypeField,
   IsAboveField,
 } from '../fields';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 interface AlertParams {
   windowSize: number;
@@ -64,7 +64,7 @@ export function TransactionDurationAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
   const transactionTypes = useServiceTransactionTypes(urlParams);
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
 

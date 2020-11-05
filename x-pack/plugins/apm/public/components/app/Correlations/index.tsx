@@ -6,17 +6,17 @@
 
 import React from 'react';
 import url from 'url';
-import { useParams } from 'react-router-dom';
 import { useLocation } from 'react-router-dom';
 import { EuiTitle, EuiListGroup } from '@elastic/eui';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 const SESSION_STORAGE_KEY = 'apm.debug.show_correlations';
 
 export function Correlations() {
   const location = useLocation();
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { urlParams, uiFilters } = useUrlParams();
   const { core } = useApmPluginContext();
   const { transactionName, transactionType, start, end } = urlParams;

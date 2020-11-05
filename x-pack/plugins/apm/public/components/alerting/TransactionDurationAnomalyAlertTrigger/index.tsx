@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ANOMALY_SEVERITY } from '../../../../../ml/common';
@@ -24,6 +23,7 @@ import {
   ServiceField,
   TransactionTypeField,
 } from '../fields';
+import { useServiceName } from '../../../hooks/use_service_name';
 
 interface Params {
   windowSize: number;
@@ -48,7 +48,7 @@ export function TransactionDurationAnomalyAlertTrigger(props: Props) {
   const { setAlertParams, alertParams, setAlertProperty } = props;
   const { urlParams } = useUrlParams();
   const transactionTypes = useServiceTransactionTypes(urlParams);
-  const { serviceName } = useParams<{ serviceName?: string }>();
+  const serviceName = useServiceName();
   const { start, end, transactionType } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });
 
