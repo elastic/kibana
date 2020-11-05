@@ -8,7 +8,7 @@ import React, { lazy, Suspense, FunctionComponent } from 'react';
 import ReactDOM from 'react-dom';
 import { Router, useHistory } from 'react-router-dom';
 import { History } from 'history';
-import { useAsync } from 'react-use';
+import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
 import {
   EuiAvatar,

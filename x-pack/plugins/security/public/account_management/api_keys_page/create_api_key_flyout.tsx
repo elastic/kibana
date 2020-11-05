@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, FunctionComponent } from 'react';
+import React, { FunctionComponent } from 'react';
 import {
   EuiCallOut,
   EuiFieldNumber,
@@ -59,7 +59,6 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
     },
     [services.http]
   );
-  const nameInput = useRef<HTMLInputElement>(null);
 
   return (
     <FormFlyout
@@ -74,7 +73,6 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
         }
       )}
       isLoading={form.isSubmitting}
-      initialFocus={nameInput}
       onSubmit={eventHandlers.onSubmit}
       onClose={onClose}
       size="s"
@@ -113,7 +111,6 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
             name="name"
             defaultValue={form.values.name}
             isInvalid={!!form.errors.name}
-            inputRef={nameInput}
             fullWidth
           />
         </EuiFormRow>
@@ -209,7 +206,12 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
               isInvalid={!!form.errors.expiration}
             >
               <EuiFieldNumber
-                append="days"
+                append={i18n.translate(
+                  'xpack.security.accountManagement.createApiKey.expirationUnit',
+                  {
+                    defaultMessage: 'days',
+                  }
+                )}
                 name="expiration"
                 defaultValue={form.values.expiration}
                 isInvalid={!!form.errors.expiration}

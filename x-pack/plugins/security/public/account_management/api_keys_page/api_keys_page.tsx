@@ -6,7 +6,8 @@
 
 import React, { FunctionComponent, useState } from 'react';
 import { Route, useHistory } from 'react-router-dom';
-import { useAsyncFn, useMount } from 'react-use';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import useMount from 'react-use/lib/useMount';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';

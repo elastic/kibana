@@ -12,7 +12,7 @@ import {
   ChangeEventHandler,
   ReactEventHandler,
 } from 'react';
-import { useAsyncFn } from 'react-use';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
 
 export interface FormOptions<Values, Result> extends SubmitHandlerOptions<Result> {
   validate: ValidateFunction<Values>;

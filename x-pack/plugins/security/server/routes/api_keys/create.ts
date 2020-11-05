@@ -7,7 +7,6 @@
 import { schema } from '@kbn/config-schema';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { wrapIntoCustomErrorResponse } from '../../errors';
-import { elasticsearchRoleSchema } from '../authorization/roles/model/put_payload';
 import { RouteDefinitionParams } from '..';
 
 export function defineCreateApiKeyRoutes({ router, authc }: RouteDefinitionParams) {
@@ -18,9 +17,13 @@ export function defineCreateApiKeyRoutes({ router, authc }: RouteDefinitionParam
         body: schema.object({
           name: schema.string(),
           expiration: schema.maybe(schema.string()),
-          role_descriptors: schema.recordOf(schema.string(), elasticsearchRoleSchema, {
-            defaultValue: {},
-          }),
+          role_descriptors: schema.recordOf(
+            schema.string(),
+            schema.object({}, { unknowns: 'allow' }),
+            {
+              defaultValue: {},
+            }
+          ),
         }),
       },
     },
