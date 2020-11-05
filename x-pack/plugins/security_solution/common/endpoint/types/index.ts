@@ -78,6 +78,15 @@ export interface EventStats {
 }
 
 /**
+ * A node in a resolver graph.
+ */
+export interface ResolverNode {
+  // TODO should we also add id and parent fields to help the UI?
+  data: unknown;
+  stats: EventStats;
+}
+
+/**
  * Statistical information for a node in a resolver tree.
  */
 export interface ResolverNodeStats {

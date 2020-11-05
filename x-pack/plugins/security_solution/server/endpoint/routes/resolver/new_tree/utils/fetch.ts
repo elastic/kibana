@@ -5,16 +5,11 @@
  */
 import _ from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
-import { EventStats } from '../../../../../../common/endpoint/types';
+import { ResolverNode } from '../../../../../../common/endpoint/types';
 import { DescendantsQuery } from '../queries/descendants';
 import { Schema, NodeID } from './index';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { StatsQuery } from '../queries/stats';
-
-interface StatsNode {
-  node: unknown;
-  stats: EventStats;
-}
 
 /**
  * The query parameters passed in from the request. These define the limits for the ES requests for retrieving the
@@ -58,7 +53,10 @@ export class Fetcher {
     return this.applyStatsToTree(tree, options);
   }
 
-  private async applyStatsToTree(treeNodes: unknown[], options: TreeOptions): Promise<StatsNode[]> {
+  private async applyStatsToTree(
+    treeNodes: unknown[],
+    options: TreeOptions
+  ): Promise<ResolverNode[]> {
     const statsIDs: NodeID[] = [];
     for (const node of treeNodes) {
       const id = getIDField(node, options.schema);
@@ -74,12 +72,12 @@ export class Fetcher {
     });
 
     const eventStats = await query.search(this.client, statsIDs);
-    const statsNodes: StatsNode[] = [];
+    const statsNodes: ResolverNode[] = [];
     for (const node of treeNodes) {
       const id = getIDField(node, options.schema);
       const stats = id !== undefined ? eventStats[id] : undefined;
       statsNodes.push({
-        node,
+        data: node,
         stats: stats ?? { total: 0, byCategory: {} },
       });
     }

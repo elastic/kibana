@@ -55,7 +55,6 @@ export class StatsQuery {
                 '@timestamp': {
                   gte: this.timerange.from,
                   lte: this.timerange.to,
-                  // TODO this is what the search_strategy uses, need to double check
                   format: 'strict_date_optional_time',
                 },
               },
@@ -114,6 +113,10 @@ export class StatsQuery {
   }
 
   async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<Record<string, EventStats>> {
+    if (nodes.length <= 0) {
+      return {};
+    }
+
     // leaving unknown here because we don't actually need the hits part of the body
     const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
       body: this.query(nodes),

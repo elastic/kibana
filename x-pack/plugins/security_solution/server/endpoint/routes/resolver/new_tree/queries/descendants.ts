@@ -121,7 +121,6 @@ export class DescendantsQuery {
                 '@timestamp': {
                   gte: this.timerange.from,
                   lte: this.timerange.to,
-                  // TODO this is what the search_strategy uses, need to double check
                   format: 'strict_date_optional_time',
                 },
               },
@@ -159,6 +158,10 @@ export class DescendantsQuery {
   }
 
   async search(client: IScopedClusterClient, nodes: NodeID[], limit: number): Promise<unknown[]> {
+    if (nodes.length <= 0) {
+      return [];
+    }
+
     let response: ApiResponse<SearchResponse<unknown>>;
     if (this.schema.ancestry) {
       response = await client.asCurrentUser.search({
