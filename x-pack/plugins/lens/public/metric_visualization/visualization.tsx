@@ -115,4 +115,9 @@ export const metricVisualization: Visualization<State> = {
   removeDimension({ prevState }) {
     return { ...prevState, accessor: undefined };
   },
+
+  getErrorMessages(state, frame) {
+    // Is it possible to break it?
+    return undefined;
+  },
 };
