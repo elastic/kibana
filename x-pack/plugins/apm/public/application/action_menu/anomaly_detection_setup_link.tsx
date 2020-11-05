@@ -3,7 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiHeaderLink, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiHeaderLink,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import {
@@ -61,6 +66,10 @@ export function MissingJobsAlert({ environment }: { environment?: string }) {
   );
 
   const defaultIcon = <EuiIcon type="inspect" color="primary" />;
+
+  if (status === FETCH_STATUS.LOADING) {
+    return <EuiLoadingSpinner />;
+  }
 
   if (status !== FETCH_STATUS.SUCCESS) {
     return defaultIcon;
