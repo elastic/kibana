@@ -56,7 +56,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           saml: {
             saml_fallback: { order: 1, realm: 'saml1' },
             saml_override: { order: 2, realm: 'saml1', session: { lifespan: '1m' } },
-            saml_disable: { order: 3, realm: 'saml1', session: { lifespan: null } },
+            saml_disable: { order: 3, realm: 'saml1', session: { lifespan: 0 } },
           },
         })}`,
       ],

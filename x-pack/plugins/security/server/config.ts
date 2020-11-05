@@ -343,15 +343,17 @@ function getSessionConfig(session: RawConfigType['session'], providers: Provider
       // provider doesn't override session config and we should fall back to the global one instead.
       const providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
 
+      const [idleTimeout, lifespan] = [
+        [session.idleTimeout, providerSessionConfig?.idleTimeout],
+        [session.lifespan, providerSessionConfig?.lifespan],
+      ].map(([globalTimeout, providerTimeout]) => {
+        const timeout = providerTimeout === undefined ? globalTimeout ?? null : providerTimeout;
+        return timeout && timeout.asMilliseconds() > 0 ? timeout : null;
+      });
+
       return {
-        idleTimeout:
-          providerSessionConfig?.idleTimeout === undefined
-            ? session.idleTimeout ?? null
-            : providerSessionConfig?.idleTimeout,
-        lifespan:
-          providerSessionConfig?.lifespan === undefined
-            ? session.lifespan ?? null
-            : providerSessionConfig?.lifespan,
+        idleTimeout,
+        lifespan,
       };
     },
   };

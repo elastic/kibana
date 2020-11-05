@@ -109,7 +109,7 @@ You are unable to set this setting to `false` for `basic` and `token` authentica
 
 | [[xpack-security-provider-session-idleTimeout]] `xpack.security.authc.providers.<provider-type>.`
 `<provider-name>.session.idleTimeout` {ess-icon}
-| Ensures that user sessions will expire after a period of inactivity. By default, this setting is equal to <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>>.
+| Ensures that user sessions will expire after a period of inactivity. Setting this to `0` will prevent sessions from expiring because of inactivity. By default, this setting is equal to <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>>.
 
 2+a|
 [TIP]
@@ -119,7 +119,8 @@ The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h',
 
 | [[xpack-security-provider-session-lifespan]] `xpack.security.authc.providers.<provider-type>.`
 `<provider-name>.session.lifespan` {ess-icon}
-| Ensures that user sessions will expire after the defined time period. This behavior also known as an "absolute timeout". By default, this setting is equal to <<xpack-session-lifespan, `xpack.security.session.lifespan`>>.
+| Ensures that user sessions will expire after the defined time period. This behavior also known as an "absolute timeout". If
+this is set to `0`, user sessions could stay active indefinitely. By default, this setting is equal to <<xpack-session-lifespan, `xpack.security.session.lifespan`>>.
 
 2+a|
 [TIP]
@@ -230,7 +231,7 @@ You can configure the following settings in the `kibana.yml` file.
 
 |[[xpack-session-idleTimeout]] `xpack.security.session.idleTimeout` {ess-icon}
   | Ensures that user sessions will expire after a period of inactivity. This and <<xpack-session-lifespan,`xpack.security.session.lifespan`>> are both
-highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. By default, this setting is not set.
+highly recommended. You can also specify this setting for <<xpack-security-provider-session-idleTimeout, every provider separately>>. Setting this to `0` will prevent sessions from expiring because of inactivity. By default, this setting is not set.
 
 2+a|
 [TIP]
@@ -240,7 +241,7 @@ The format is a string of `<count>[ms\|s\|m\|h\|d\|w\|M\|Y]` (e.g. '20m', '24h',
 
 |[[xpack-session-lifespan]] `xpack.security.session.lifespan` {ess-icon}
   | Ensures that user sessions will expire after the defined time period. This behavior also known as an "absolute timeout". If
-this is _not_ set, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
+this is _not_ set or set to `0`, user sessions could stay active indefinitely. This and <<xpack-session-idleTimeout, `xpack.security.session.idleTimeout`>> are both highly
 recommended. You can also specify this setting for <<xpack-security-provider-session-lifespan, every provider separately>>. By default, this setting is not set.
 
 2+a|

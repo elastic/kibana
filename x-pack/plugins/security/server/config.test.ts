@@ -1332,6 +1332,30 @@ describe('createConfig()', () => {
         `);
     });
 
+    it('correctly handles explicitly disabled global settings', async () => {
+      expect(
+        createMockConfig({
+          session: { idleTimeout: null, lifespan: null },
+        }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+
+      expect(
+        createMockConfig({
+          session: { idleTimeout: 0, lifespan: 0 },
+        }).session.getExpirationTimeouts({ type: 'basic', name: 'basic1' })
+      ).toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+    });
+
     it('falls back to the global settings if provider does not override them', async () => {
       expect(
         createMockConfig({ session: { idleTimeout: 123 } }).session.getExpirationTimeouts({
@@ -1564,6 +1588,38 @@ describe('createConfig()', () => {
         Object {
           "idleTimeout": "PT5M32.211S",
           "lifespan": "PT11M5.544S",
+        }
+      `);
+    });
+
+    it('uses provider overrides if disabled (both idle timeout and lifespan)', async () => {
+      const config = createMockConfig({
+        authc: {
+          providers: {
+            basic: { basic1: { order: 0, session: { idleTimeout: null, lifespan: null } } },
+            saml: {
+              saml1: {
+                order: 1,
+                realm: 'saml-realm',
+                session: { idleTimeout: 0, lifespan: 0 },
+              },
+            },
+          },
+        },
+        session: { idleTimeout: 123, lifespan: 456 },
+      });
+      expect(config.session.getExpirationTimeouts({ type: 'basic', name: 'basic1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
+        }
+      `);
+      expect(config.session.getExpirationTimeouts({ type: 'saml', name: 'saml1' }))
+        .toMatchInlineSnapshot(`
+        Object {
+          "idleTimeout": null,
+          "lifespan": null,
         }
       `);
     });
