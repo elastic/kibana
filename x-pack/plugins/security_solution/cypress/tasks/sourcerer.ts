@@ -41,11 +41,13 @@ export const clickOutOfSelector = () => {
   return cy.get(SOURCERER_POPOVER_TITLE).first().click();
 };
 
+const getScopedSelectors = (sourcererScope?: string): { input: string; options: string } =>
+  sourcererScope != null && sourcererScope === 'timeline'
+    ? { input: SOURCERER_TIMELINE.sourcererInput, options: SOURCERER_TIMELINE.sourcererOptions }
+    : { input: SOURCERER_INPUT, options: SOURCERER_OPTIONS };
+
 export const isSourcererSelection = (patternName: string, sourcererScope?: string) => {
-  const input =
-    sourcererScope != null && sourcererScope === 'timeline'
-      ? SOURCERER_TIMELINE.sourcererInput
-      : SOURCERER_INPUT;
+  const { input } = getScopedSelectors(sourcererScope);
   return cy.get(input).find(`span[title="${patternName}"]`).should('exist');
 };
 
@@ -54,18 +56,12 @@ export const isHostsStatValue = (value: string) => {
 };
 
 export const isNotSourcererSelection = (patternName: string, sourcererScope?: string) => {
-  const input =
-    sourcererScope != null && sourcererScope === 'timeline'
-      ? SOURCERER_TIMELINE.sourcererInput
-      : SOURCERER_INPUT;
+  const { input } = getScopedSelectors(sourcererScope);
   return cy.get(input).find(`span[title="${patternName}"]`).should('not.exist');
 };
 
 export const isSourcererOptions = (patternNames: string[], sourcererScope?: string) => {
-  const { input, options } =
-    sourcererScope != null && sourcererScope === 'timeline'
-      ? { input: SOURCERER_TIMELINE.sourcererInput, options: SOURCERER_TIMELINE.sourcererOptions }
-      : { input: SOURCERER_INPUT, options: SOURCERER_OPTIONS };
+  const { input, options } = getScopedSelectors(sourcererScope);
   cy.get(input).click();
   return patternNames.every((patternName) => {
     return cy
@@ -77,10 +73,7 @@ export const isSourcererOptions = (patternNames: string[], sourcererScope?: stri
 };
 
 export const selectSourcererOption = (patternName: string, sourcererScope?: string) => {
-  const { input, options } =
-    sourcererScope != null && sourcererScope === 'timeline'
-      ? { input: SOURCERER_TIMELINE.sourcererInput, options: SOURCERER_TIMELINE.sourcererOptions }
-      : { input: SOURCERER_INPUT, options: SOURCERER_OPTIONS };
+  const { input, options } = getScopedSelectors(sourcererScope);
   cy.get(input).click();
   cy.get(options).find(`button.euiFilterSelectItem[title="${patternName}"]`).click();
   clickOutOfSelector();
@@ -88,20 +81,14 @@ export const selectSourcererOption = (patternName: string, sourcererScope?: stri
 };
 
 export const deselectSourcererOption = (patternName: string, sourcererScope?: string) => {
-  const input =
-    sourcererScope != null && sourcererScope === 'timeline'
-      ? SOURCERER_TIMELINE.sourcererInput
-      : SOURCERER_INPUT;
+  const { input } = getScopedSelectors(sourcererScope);
   cy.get(input).find(`span[title="${patternName}"] button`).click();
   clickOutOfSelector();
   return cy.get(SOURCERER_SAVE_BUTTON).click({ force: true });
 };
 
 export const deselectSourcererOptions = (patternNames: string[], sourcererScope?: string) => {
-  const input =
-    sourcererScope != null && sourcererScope === 'timeline'
-      ? SOURCERER_TIMELINE.sourcererInput
-      : SOURCERER_INPUT;
+  const { input } = getScopedSelectors(sourcererScope);
   patternNames.forEach((patternName) =>
     cy.get(input).find(`span[title="${patternName}"] button`).click()
   );
