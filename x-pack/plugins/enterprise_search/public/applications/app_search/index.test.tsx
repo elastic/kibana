@@ -17,6 +17,7 @@ import { Layout, SideNav, SideNavLink } from '../shared/layout';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { EngineOverview } from './components/engine_overview';
+import { EngineRouter } from './components/engine';
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
 describe('AppSearch', () => {
@@ -54,9 +55,10 @@ describe('AppSearchConfigured', () => {
   it('renders with layout', () => {
     const wrapper = shallow(<AppSearchConfigured />);
 
-    expect(wrapper.find(Layout)).toHaveLength(1);
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toBeFalsy();
+    expect(wrapper.find(Layout)).toHaveLength(2);
+    expect(wrapper.find(Layout).last().prop('readOnlyMode')).toBeFalsy();
     expect(wrapper.find(EngineOverview)).toHaveLength(1);
+    expect(wrapper.find(EngineRouter)).toHaveLength(1);
   });
 
   it('initializes app data with passed props', () => {
@@ -91,7 +93,7 @@ describe('AppSearchConfigured', () => {
 
     const wrapper = shallow(<AppSearchConfigured />);
 
-    expect(wrapper.find(Layout).prop('readOnlyMode')).toEqual(true);
+    expect(wrapper.find(Layout).first().prop('readOnlyMode')).toEqual(true);
   });
 
   describe('ability checks', () => {
@@ -106,6 +108,13 @@ describe('AppSearchNav', () => {
 
     expect(wrapper.find(SideNav)).toHaveLength(1);
     expect(wrapper.find(SideNavLink).prop('to')).toEqual('/engines');
+  });
+
+  it('renders an Engine subnav if passed', () => {
+    const wrapper = shallow(<AppSearchNav subNav={<div data-test-subj="subnav">Testing</div>} />);
+    const link = wrapper.find(SideNavLink).dive();
+
+    expect(link.find('[data-test-subj="subnav"]')).toHaveLength(1);
   });
 
   it('renders the Settings link', () => {
