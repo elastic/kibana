@@ -6,6 +6,7 @@
 
 import { mergeMap } from 'rxjs/operators';
 import { ISearchStrategy, PluginStart } from '../../../../../../src/plugins/data/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../data_enhanced/common';
 import {
   TimelineFactoryQueryTypes,
   TimelineStrategyResponseType,
@@ -17,7 +18,7 @@ import { SecuritySolutionTimelineFactory } from './factory/types';
 export const securitySolutionTimelineSearchStrategyProvider = <T extends TimelineFactoryQueryTypes>(
   data: PluginStart
 ): ISearchStrategy<TimelineStrategyRequestType<T>, TimelineStrategyResponseType<T>> => {
-  const es = data.search.getSearchStrategy('es');
+  const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
   return {
     search: (request, options, deps) => {
