@@ -115,7 +115,7 @@ function getScaleType(
     return ECScaleType.Sqrt;
   }
 
-  return type ? type : undefined;
+  return type;
 }
 
 function getScale<S extends XScaleType | YScaleType>(

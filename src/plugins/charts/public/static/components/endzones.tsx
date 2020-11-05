@@ -29,7 +29,6 @@ import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
 import darkEuiTheme from '@elastic/eui/dist/eui_theme_dark.json';
-import { isUndefined } from 'lodash';
 
 interface EndzonesProps {
   isDarkMode: boolean;
@@ -168,8 +167,8 @@ export const renderEndzoneTooltip = (
   const formattedValue = formatter ? formatter(headerDataValue) : headerDataValue;
 
   if (
-    (!isUndefined(domainStart) && headerDataValue < domainStart) ||
-    (!isUndefined(domainEnd) && !isUndefined(xInterval) && headerDataValue + xInterval > domainEnd)
+    (domainStart !== undefined && headerDataValue < domainStart) ||
+    (domainEnd !== undefined && xInterval !== undefined && headerDataValue + xInterval > domainEnd)
   ) {
     return (
       <>

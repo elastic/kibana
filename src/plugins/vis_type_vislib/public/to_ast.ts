@@ -22,9 +22,10 @@ import moment from 'moment';
 import { VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
 import type { Dimensions, DateHistogramParams, HistogramParams } from '../../vis_type_xy/public';
+import { BUCKET_TYPES } from '../../data/public';
 
 import { vislibVisName, VisTypeVislibExpressionFunctionDefinition } from './vis_type_vislib_vis_fn';
-import { BasicVislibParams } from './types';
+import { BasicVislibParams, VislibChartType } from './types';
 import { getEsaggsFn } from './to_ast_esaggs';
 
 export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis, params) => {
@@ -43,7 +44,7 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
 
   if (dimensions.x) {
     const xAgg = responseAggs[dimensions.x.accessor] as any;
-    if (xAgg.type.name === 'date_histogram') {
+    if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
       (dimensions.x.params as DateHistogramParams).date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
       (dimensions.x.params as DateHistogramParams).intervalESUnit = esUnit;
@@ -53,7 +54,7 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
         .asMilliseconds();
       (dimensions.x.params as DateHistogramParams).format = xAgg.buckets.getScaledDateFormat();
       (dimensions.x.params as DateHistogramParams).bounds = xAgg.buckets.getBounds();
-    } else if (xAgg.type.name === 'histogram') {
+    } else if (xAgg.type.name === BUCKET_TYPES.HISTOGRAM) {
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
       await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, vis.data.searchSource, {
@@ -88,7 +89,7 @@ export const toExpressionAst: VisToExpressionAst<BasicVislibParams> = async (vis
   const visTypeVislib = buildExpressionFunction<VisTypeVislibExpressionFunctionDefinition>(
     vislibVisName,
     {
-      type: vis.type.name,
+      type: vis.type.name as Exclude<VislibChartType, 'pie'>,
       visConfig: configStr,
     }
   );

@@ -32,6 +32,8 @@ import {
 import { Accessor } from '@elastic/charts/dist/utils/accessor';
 
 import { DatatableRow } from '../../../expressions/public';
+import { BUCKET_TYPES } from '../../../data/public';
+
 import { ChartType } from '../../common';
 import { SeriesParam, VisConfig, FakeParams, Aspect } from '../types';
 
@@ -56,7 +58,7 @@ const getXAccessor = (xAspect: Aspect): Accessor | AccessorFn => {
     return () => (xAspect.params as FakeParams)?.defaultValue;
   }
 
-  if (!(xAspect.aggType === 'date_range' && xAspect.formatter)) {
+  if (!(xAspect.aggType === BUCKET_TYPES.DATE_RANGE && xAspect.formatter)) {
     return xAspect.accessor;
   }
 

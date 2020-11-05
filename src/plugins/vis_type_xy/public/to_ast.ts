@@ -21,6 +21,7 @@ import moment from 'moment';
 
 import { VisToExpressionAst, getVisSchemas } from '../../visualizations/public';
 import { buildExpression, buildExpressionFunction } from '../../expressions/public';
+import { BUCKET_TYPES } from '../../data/public';
 
 import { DateHistogramParams, Dimensions, HistogramParams, VisParams } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './xy_vis_fn';
@@ -43,7 +44,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   if (dimensions.x) {
     const xAgg = responseAggs[dimensions.x.accessor] as any;
-    if (xAgg.type.name === 'date_histogram') {
+    if (xAgg.type.name === BUCKET_TYPES.DATE_HISTOGRAM) {
       (dimensions.x.params as DateHistogramParams).date = true;
       const { esUnit, esValue } = xAgg.buckets.getInterval();
       (dimensions.x.params as DateHistogramParams).intervalESUnit = esUnit;
@@ -52,7 +53,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
         .duration(esValue, esUnit)
         .asMilliseconds();
       (dimensions.x.params as DateHistogramParams).format = xAgg.buckets.getScaledDateFormat();
-    } else if (xAgg.type.name === 'histogram') {
+    } else if (xAgg.type.name === BUCKET_TYPES.HISTOGRAM) {
       const intervalParam = xAgg.type.paramByName('interval');
       const output = { params: {} as any };
       await intervalParam.modifyAggConfigOnSearchRequestStart(xAgg, vis.data.searchSource, {
