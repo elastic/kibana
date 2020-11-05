@@ -279,6 +279,7 @@ export const AlertForm = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
+      <EuiHorizontalRule />
       {AlertParamsExpressionComponent ? (
         <Suspense fallback={<CenterJustifiedSpinner />}>
           <AlertParamsExpressionComponent
