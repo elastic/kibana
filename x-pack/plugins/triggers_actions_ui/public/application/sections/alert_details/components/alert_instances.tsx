@@ -7,7 +7,7 @@
 import React, { Fragment, useState } from 'react';
 import moment, { Duration } from 'moment';
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
+import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch, EuiToolTip } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
@@ -40,6 +40,13 @@ export const alertInstancesTableColumns = (
     sortable: false,
     truncateText: true,
     'data-test-subj': 'alertInstancesTableCell-instance',
+    render: (value: string) => {
+      return (
+        <EuiToolTip anchorClassName={'eui-textTruncate'} content={value}>
+          <span>{value}</span>
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'status',
