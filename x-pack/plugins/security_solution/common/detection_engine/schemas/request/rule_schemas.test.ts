@@ -1,0 +1,1129 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { fullCreateSchema, FullCreateSchema, SavedQueryCreateSchema } from './rule_schemas';
+import { exactCheck } from '../../../exact_check';
+import { pipe } from 'fp-ts/lib/pipeable';
+import { foldLeftRight, getPaths } from '../../../test_utils';
+import { left } from 'fp-ts/lib/Either';
+import {
+  getCreateSavedQuerySchemaMock,
+  getCreateThreatMatchSchemaMock,
+  getFullCreateSchemaMock,
+} from './rule_schemas.mock';
+import { DEFAULT_MAX_SIGNALS } from '../../../constants';
+import { getListArrayMock } from '../types/lists.mock';
+
+describe('create rules schema', () => {
+  test('empty objects do not validate', () => {
+    const payload = {};
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(message.errors.length).toBeGreaterThan(0);
+    expect(message.schema).toEqual({});
+  });
+
+  test('made up values do not validate', () => {
+    const payload: FullCreateSchema & { madeUp: string } = {
+      ...getFullCreateSchemaMock(),
+      madeUp: 'hi',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id] does not validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(message.errors.length).toBeGreaterThan(0);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description] does not validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+      description: 'some description',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(message.errors.length).toBeGreaterThan(0);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from] does not validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(message.errors.length).toBeGreaterThan(0);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to] does not validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(message.errors.length).toBeGreaterThan(0);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name] does not validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(message.errors.length).toBeGreaterThan(0);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name, severity] does not validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(message.errors.length).toBeGreaterThan(0);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name, severity, type] does not validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name, severity, type, interval] does not validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name, severity, type, interval, index] does not validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+      interval: '5m',
+      index: ['index-1'],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, name, severity, type, query, index, interval] does validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      name: 'some-name',
+      severity: 'low',
+      type: 'query',
+      query: 'some query',
+      index: ['index-1'],
+      interval: '5m',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language] does not validate', () => {
+    const payload = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "risk_score"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
+    const payload: FullCreateSchema = {
+      rule_id: 'rule-1',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
+    const payload: FullCreateSchema = {
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      query: 'some query',
+      language: 'kuery',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does validate', () => {
+    const payload: FullCreateSchema = {
+      rule_id: 'rule-1',
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      risk_score: 50,
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
+    const payload: FullCreateSchema = {
+      author: [],
+      severity_mapping: [],
+      risk_score_mapping: [],
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('You can send in an empty array to threat', () => {
+    const payload: FullCreateSchema = {
+      ...getFullCreateSchemaMock(),
+      threat: [],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
+    const payload: FullCreateSchema = {
+      rule_id: 'rule-1',
+      output_index: '.siem-signals',
+      risk_score: 50,
+      description: 'some description',
+      from: 'now-5m',
+      to: 'now',
+      index: ['index-1'],
+      name: 'some-name',
+      severity: 'low',
+      interval: '5m',
+      type: 'query',
+      threat: [
+        {
+          framework: 'someFramework',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
+          },
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          ],
+        },
+      ],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('allows references to be sent as valid', () => {
+    const payload: FullCreateSchema = {
+      ...getFullCreateSchemaMock(),
+      references: ['index-1'],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('references cannot be numbers', () => {
+    const payload: Omit<FullCreateSchema, 'references'> & { references: number[] } = {
+      ...getFullCreateSchemaMock(),
+      references: [5],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "references"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('indexes cannot be numbers', () => {
+    const payload: Omit<FullCreateSchema, 'index'> & { index: number[] } = {
+      ...getFullCreateSchemaMock(),
+      index: [5],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('saved_query type can have filters with it', () => {
+    const payload: SavedQueryCreateSchema = {
+      ...getCreateSavedQuerySchemaMock(),
+      filters: [],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('filters cannot be a string', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      filters: 'some string',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "some string" supplied to "filters"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('language validates with kuery', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      language: 'kuery',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('language validates with lucene', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      language: 'lucene',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('language does not validate with something made up', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      language: 'something-made-up',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "something-made-up" supplied to "language"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('max_signals cannot be negative', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      max_signals: -1,
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "max_signals"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('max_signals cannot be zero', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      max_signals: 0,
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to "max_signals"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('max_signals can be 1', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      max_signals: 1,
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('You can optionally send in an array of tags', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      tags: ['tag_1', 'tag_2'],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('You cannot send in an array of tags that are numbers', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      tags: [0, 1, 2],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "tags"',
+      'Invalid value "1" supplied to "tags"',
+      'Invalid value "2" supplied to "tags"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot send in an array of threat that are missing "framework"', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      threat: [
+        {
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
+          },
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          ],
+        },
+      ],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "threat,framework"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot send in an array of threat that are missing "tactic"', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      threat: [
+        {
+          framework: 'fake',
+          technique: [
+            {
+              id: 'techniqueId',
+              name: 'techniqueName',
+              reference: 'techniqueRef',
+            },
+          ],
+        },
+      ],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "threat,tactic"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot send in an array of threat that are missing "technique"', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      threat: [
+        {
+          framework: 'fake',
+          tactic: {
+            id: 'fakeId',
+            name: 'fakeName',
+            reference: 'fakeRef',
+          },
+        },
+      ],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "threat,technique"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You can optionally send in an array of false positives', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      false_positives: ['false_1', 'false_2'],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('You cannot send in an array of false positives that are numbers', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      false_positives: [5, 4],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "5" supplied to "false_positives"',
+      'Invalid value "4" supplied to "false_positives"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot set the immutable to a number when trying to create a rule', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      immutable: 5,
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['invalid keys "immutable"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot set the risk_score to 101', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      risk_score: 101,
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "101" supplied to "risk_score"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot set the risk_score to -1', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      risk_score: -1,
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to "risk_score"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You can set the risk_score to 0', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      risk_score: 0,
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('You can set the risk_score to 100', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      risk_score: 100,
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('You can set meta to any object you want', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      meta: {
+        somethingMadeUp: { somethingElse: true },
+      },
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('You cannot create meta as a string', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      meta: 'should not work',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "should not work" supplied to "meta"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You can omit the query string when filters are present', () => {
+    const { query, ...noQuery } = getFullCreateSchemaMock();
+    const payload = {
+      ...noQuery,
+      filters: [],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('validates with timeline_id and timeline_title', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      timeline_id: 'timeline-id',
+      timeline_title: 'timeline-title',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      severity: 'junk',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to "severity"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot send in an array of actions that are missing "group"', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,group"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot send in an array of actions that are missing "id"', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,id"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot send in an array of actions that are missing "action_type_id"', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      actions: [{ group: 'group', id: 'id', params: {} }],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,action_type_id"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot send in an array of actions that are missing "params"', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,params"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('You cannot send in an array of actions that are including "actionTypeId"', () => {
+    const payload = {
+      ...getFullCreateSchemaMock(),
+      actions: [
+        {
+          group: 'group',
+          id: 'id',
+          actionTypeId: 'actionTypeId',
+          params: {},
+        },
+      ],
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "undefined" supplied to "actions,action_type_id"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  describe('note', () => {
+    test('You can set note to a string', () => {
+      const payload = {
+        ...getFullCreateSchemaMock(),
+        note: '# documentation markdown here',
+      };
+
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('You can set note to an empty string', () => {
+      const payload = {
+        ...getFullCreateSchemaMock(),
+        note: '',
+      };
+
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('You cannot create note as an object', () => {
+      const payload = {
+        ...getFullCreateSchemaMock(),
+        note: {
+          somethingHere: 'something else',
+        },
+      };
+
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "{"somethingHere":"something else"}" supplied to "note"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('empty name is not valid', () => {
+      const payload = {
+        ...getFullCreateSchemaMock(),
+        name: '',
+      };
+
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "name"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('empty description is not valid', () => {
+      const payload = {
+        ...getFullCreateSchemaMock(),
+        description: '',
+      };
+
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "" supplied to "description"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
+      const payload = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        risk_score: 50,
+        note: '# some markdown',
+      };
+
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+  });
+
+  test('machine_learning type does validate', () => {
+    const payload = {
+      type: 'machine_learning',
+      anomaly_threshold: 50,
+      machine_learning_job_id: 'linux_anomalous_network_activity_ecs',
+      false_positives: [],
+      references: [],
+      risk_score: 50,
+      threat: [],
+      name: 'ss',
+      description: 'ss',
+      severity: 'low',
+      tags: [],
+      interval: '5m',
+      from: 'now-360s',
+      to: 'now',
+      meta: { from: '1m' },
+      actions: [],
+      enabled: true,
+      throttle: 'no_actions',
+      rule_id: 'rule-1',
+    };
+
+    const decoded = fullCreateSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  describe('exception_list', () => {
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and exceptions_list] does validate', () => {
+      const payload = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        note: '# some markdown',
+        exceptions_list: getListArrayMock(),
+      };
+
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note, and empty exceptions_list] does validate', () => {
+      const payload = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        note: '# some markdown',
+        exceptions_list: [],
+      };
+
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+
+    test('rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and invalid exceptions_list] does NOT validate', () => {
+      const payload = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        note: '# some markdown',
+        exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
+      };
+
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "exceptions_list,list_id"',
+        'Invalid value "undefined" supplied to "exceptions_list,type"',
+        'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
+    test('[rule_id, description, from, to, index, name, severity, interval, type, filters, risk_score, note, and non-existent exceptions_list] does validate with empty exceptions_list', () => {
+      const payload = {
+        rule_id: 'rule-1',
+        description: 'some description',
+        from: 'now-5m',
+        to: 'now',
+        index: ['index-1'],
+        name: 'some-name',
+        severity: 'low',
+        interval: '5m',
+        type: 'query',
+        filters: [],
+        risk_score: 50,
+        note: '# some markdown',
+      };
+
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+  });
+
+  describe('threat_mapping', () => {
+    test('You can set a threat query, index, mapping, filters when creating a rule', () => {
+      const payload = getCreateThreatMatchSchemaMock();
+      const decoded = fullCreateSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(payload);
+    });
+  });
+});

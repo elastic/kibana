@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { FullCreateSchema } from './rule_schemas';
+import { QueryCreateSchema, SavedQueryCreateSchema, ThreatMatchCreateSchema } from './rule_schemas';
 
-export const getFullCreateSchemaMock = (ruleId = 'rule-1'): FullCreateSchema => ({
+export const getFullCreateSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -17,7 +17,19 @@ export const getFullCreateSchemaMock = (ruleId = 'rule-1'): FullCreateSchema => 
   rule_id: ruleId,
 });
 
-export const getFullCreateThreatMatchSchemaMock = (ruleId = 'rule-1'): FullCreateSchema => ({
+export const getCreateSavedQuerySchemaMock = (ruleId = 'rule-1'): SavedQueryCreateSchema => ({
+  description: 'Detecting root and admin users',
+  name: 'Query with a rule id',
+  query: 'user.name: root or user.name: admin',
+  severity: 'high',
+  type: 'saved_query',
+  saved_id: 'some id',
+  risk_score: 55,
+  language: 'kuery',
+  rule_id: ruleId,
+});
+
+export const getCreateThreatMatchSchemaMock = (ruleId = 'rule-1'): ThreatMatchCreateSchema => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',

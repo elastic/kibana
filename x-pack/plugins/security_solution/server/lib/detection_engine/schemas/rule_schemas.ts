@@ -6,7 +6,7 @@
 
 import * as t from 'io-ts';
 
-import { listArrayOrUndefined } from '../../../../common/detection_engine/schemas/types/lists';
+import { listArray } from '../../../../common/detection_engine/schemas/types/lists';
 import {
   threat_mapping,
   threat_index,
@@ -35,10 +35,10 @@ import {
   machine_learning_job_id,
   max_signals,
   risk_score,
-  riskScoreMappingOrUndefined,
+  risk_score_mapping,
   ruleNameOverrideOrUndefined,
   severity,
-  severityMappingOrUndefined,
+  severity_mapping,
   tags,
   timestampOverrideOrUndefined,
   threat,
@@ -52,6 +52,10 @@ import {
   anomaly_threshold,
   actionsCamel,
   throttleOrNull,
+  createdByOrNull,
+  updatedByOrNull,
+  created_at,
+  updated_at,
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { SIGNALS_ID, SERVER_APP_ID } from '../../../../common/constants';
 
@@ -74,16 +78,16 @@ export const baseRuleParams = t.exact(
     // maxSignals not used in ML rules but probably should be used
     maxSignals: max_signals,
     riskScore: risk_score,
-    riskScoreMapping: riskScoreMappingOrUndefined,
+    riskScoreMapping: risk_score_mapping,
     ruleNameOverride: ruleNameOverrideOrUndefined,
     severity,
-    severityMapping: severityMappingOrUndefined,
+    severityMapping: severity_mapping,
     timestampOverride: timestampOverrideOrUndefined,
     threat,
     to,
     references,
     version,
-    exceptionsList: listArrayOrUndefined,
+    exceptionsList: listArray,
   })
 );
 export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
@@ -126,7 +130,7 @@ const savedQuerySpecificRuleParams = t.type({
   type: t.literal('saved_query'),
   // Having language, query, and filters possibly defined adds more code confusion and probably user confusion
   // if the saved object gets deleted for some reason
-  language: t.union([nonEqlLanguages, t.undefined]),
+  language: nonEqlLanguages,
   index: indexOrUndefined,
   query: queryOrUndefined,
   filters: filtersOrUndefined,
@@ -176,3 +180,15 @@ export const internalRuleCreate = t.type({
   throttle: throttleOrNull,
 });
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
+
+export const internalRuleResponse = t.intersection([
+  internalRuleCreate,
+  t.type({
+    id: t.string,
+    createdBy: createdByOrNull,
+    updatedBy: updatedByOrNull,
+    createdAt: created_at,
+    updatedAt: updated_at,
+  }),
+]);
+export type InternalRuleResponse = t.TypeOf<typeof internalRuleResponse>;

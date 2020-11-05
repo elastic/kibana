@@ -449,6 +449,10 @@ export const created_at = IsoDateString;
 export const updated_at = IsoDateString;
 export const updated_by = t.string;
 export const created_by = t.string;
+export const updatedByOrNull = t.union([updated_by, t.null]);
+export type UpdatedByOrNull = t.TypeOf<typeof updatedByOrNull>;
+export const createdByOrNull = t.union([created_by, t.null]);
+export type CreatedByOrNull = t.TypeOf<typeof createdByOrNull>;
 
 export const version = PositiveIntegerGreaterThanZero;
 export type Version = t.TypeOf<typeof version>;
