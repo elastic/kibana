@@ -182,6 +182,7 @@ export class SecurityNavControl extends Component<Props, State> {
         repositionOnScroll
         closePopover={this.closeMenu}
         panelPaddingSize="none"
+        buffer={0}
       >
         <div data-test-subj="userMenu">
           <EuiContextMenu className="chrNavControl__userMenu" initialPanelId={0} panels={panels} />
