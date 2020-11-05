@@ -35,7 +35,11 @@ describe('terms', () => {
   beforeEach(() => {
     state = {
       indexPatternRefs: [],
-      indexPatterns: {},
+      indexPatterns: {
+        '1': {
+          hasRestrictions: false,
+        } as IndexPattern,
+      },
       existingFields: {},
       currentIndexPatternId: '1',
       isFirstExistenceFetch: false,
@@ -229,6 +233,40 @@ describe('terms', () => {
       expect(termsColumn.dataType).toEqual('boolean');
     });
 
+    it('should set other bucket to true by default', () => {
+      const termsColumn = termsOperation.buildColumn({
+        layerId: 'first',
+        suggestedPriority: undefined,
+        indexPattern: createMockedIndexPattern(),
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+        columns: {},
+      });
+      expect(termsColumn.params.otherBucket).toEqual(true);
+    });
+
+    it('should set other bucket to false if index pattern has restrictions', () => {
+      const termsColumn = termsOperation.buildColumn({
+        layerId: 'first',
+        suggestedPriority: undefined,
+        indexPattern: { ...createMockedIndexPattern(), hasRestrictions: true },
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+        columns: {},
+      });
+      expect(termsColumn.params.otherBucket).toEqual(false);
+    });
+
     it('should use existing metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
         layerId: 'first',
@@ -370,6 +408,22 @@ describe('terms', () => {
         .find(EuiSwitch);
 
       expect(select.prop('checked')).toEqual(false);
+    });
+
+    it('should hide other bucket setting for rollups', () => {
+      const setStateSpy = jest.fn();
+      const instance = shallow(
+        <InlineOptions
+          {...defaultProps}
+          state={{ ...state, indexPatterns: { '1': { hasRestrictions: true } as IndexPattern } }}
+          setState={setStateSpy}
+          columnId="col1"
+          currentColumn={state.layers.first.columns.col1 as TermsIndexPatternColumn}
+          layerId="first"
+        />
+      );
+
+      expect(instance.find('[data-test-subj="indexPattern-terms-other-bucket"]').length).toEqual(0);
     });
 
     it('should update state when clicking other bucket toggle', () => {

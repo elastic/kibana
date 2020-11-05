@@ -63,10 +63,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       newField &&
         supportedTypes.has(newField.type) &&
         newField.aggregatable &&
-        (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
+        !newIndexPattern.hasRestrictions
     );
   },
-  buildColumn({ suggestedPriority, columns, field }) {
+  buildColumn({ suggestedPriority, columns, field, indexPattern }) {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
@@ -85,7 +85,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
           ? { type: 'column', columnId: existingMetricColumn }
           : { type: 'alphabetical' },
         orderDirection: existingMetricColumn ? 'desc' : 'asc',
-        otherBucket: true,
+        otherBucket: !indexPattern.hasRestrictions,
       },
     };
   },
@@ -102,7 +102,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         order: column.params.orderDirection,
         size: column.params.size,
         otherBucket: Boolean(column.params.otherBucket),
-        otherBucketLabel: 'Other',
+        otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
+          defaultMessage: 'Other',
+        }),
         missingBucket: false,
         missingBucketLabel: 'Missing',
       },
@@ -133,6 +135,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     return currentColumn;
   },
   paramEditor: ({ state, setState, currentColumn, layerId }) => {
+    const indexPattern = currentColumn && state.indexPatterns[state.layers[layerId].indexPatternId];
+    const hasRestrictions = indexPattern.hasRestrictions;
     const SEPARATOR = '$$$';
     function toValue(orderBy: TermsIndexPatternColumn['params']['orderBy']) {
       if (orderBy.type === 'alphabetical') {
@@ -190,36 +194,38 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
             }}
           />
         </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketLabel', {
-            defaultMessage: 'Other values',
-          })}
-          display="columnCompressed"
-          fullWidth
-        >
-          <>
-            <EuiSpacer size="s" />
-            <EuiSwitch
-              label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
-                defaultMessage: 'Show separately',
-              })}
-              compressed
-              data-test-subj="indexPattern-terms-other-bucket"
-              checked={Boolean(currentColumn.params.otherBucket)}
-              onChange={(e: EuiSwitchEvent) =>
-                setState(
-                  updateColumnParam({
-                    state,
-                    layerId,
-                    currentColumn,
-                    paramName: 'otherBucket',
-                    value: e.target.checked,
-                  })
-                )
-              }
-            />
-          </>
-        </EuiFormRow>
+        {!hasRestrictions && (
+          <EuiFormRow
+            label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketLabel', {
+              defaultMessage: 'Other values',
+            })}
+            display="columnCompressed"
+            fullWidth
+          >
+            <>
+              <EuiSpacer size="s" />
+              <EuiSwitch
+                label={i18n.translate('xpack.lens.indexPattern.terms.otherBucketDescription', {
+                  defaultMessage: 'Show separately',
+                })}
+                compressed
+                data-test-subj="indexPattern-terms-other-bucket"
+                checked={Boolean(currentColumn.params.otherBucket)}
+                onChange={(e: EuiSwitchEvent) =>
+                  setState(
+                    updateColumnParam({
+                      state,
+                      layerId,
+                      currentColumn,
+                      paramName: 'otherBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+            </>
+          </EuiFormRow>
+        )}
         <EuiFormRow
           label={i18n.translate('xpack.lens.indexPattern.terms.orderBy', {
             defaultMessage: 'Order by',
