@@ -10,8 +10,8 @@ export enum ELogRetentionOptions {
 }
 
 export interface ILogRetention {
-  [ELogRetentionOptions.Analytics]?: ILogRetentionSettings;
-  [ELogRetentionOptions.API]?: ILogRetentionSettings;
+  [ELogRetentionOptions.Analytics]: ILogRetentionSettings;
+  [ELogRetentionOptions.API]: ILogRetentionSettings;
 }
 
 export interface ILogRetentionPolicy {

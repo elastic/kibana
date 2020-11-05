@@ -45,18 +45,7 @@ export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRete
     logRetention: [
       null,
       {
-        updateLogRetention: (previousValue, { logRetention }) => {
-          return {
-            [ELogRetentionOptions.Analytics]: {
-              ...previousValue?.[ELogRetentionOptions.Analytics],
-              ...logRetention[ELogRetentionOptions.Analytics],
-            },
-            [ELogRetentionOptions.API]: {
-              ...previousValue?.[ELogRetentionOptions.API],
-              ...logRetention[ELogRetentionOptions.API],
-            },
-          };
-        },
+        updateLogRetention: (_, { logRetention }) => logRetention,
       },
     ],
     isLogRetentionUpdating: [

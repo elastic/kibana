@@ -148,41 +148,37 @@ describe('LogRetentionLogic', () => {
 
     describe('updateLogRetention', () => {
       describe('logRetention', () => {
-        it('updates the logRetention values that are passed, and defaults the others that are not set', () => {
+        it('updates the logRetention values that are passed', () => {
           mount({
             logRetention: {},
           });
 
           LogRetentionLogic.actions.updateLogRetention({
-            api: { enabled: true },
+            api: {
+              disabledAt: null,
+              enabled: true,
+              retentionPolicy: null,
+            },
+            analytics: {
+              disabledAt: null,
+              enabled: true,
+              retentionPolicy: null,
+            },
           });
 
           expect(LogRetentionLogic.values).toEqual({
             ...DEFAULT_VALUES,
             logRetention: {
-              api: { enabled: true },
-              analytics: {}, // This is defaulted to {}
-            },
-          });
-        });
-
-        it('updates the logRetention values that are passed, and retains that values that are already set', () => {
-          mount({
-            logRetention: {
-              api: { enabled: true },
-              analytics: { enabled: true },
-            },
-          });
-
-          LogRetentionLogic.actions.updateLogRetention({
-            api: { enabled: false },
-          });
-
-          expect(LogRetentionLogic.values).toEqual({
-            ...DEFAULT_VALUES,
-            logRetention: {
-              api: { enabled: false },
-              analytics: { enabled: true },
+              api: {
+                disabledAt: null,
+                enabled: true,
+                retentionPolicy: null,
+              },
+              analytics: {
+                disabledAt: null,
+                enabled: true,
+                retentionPolicy: null,
+              },
             },
           });
         });
