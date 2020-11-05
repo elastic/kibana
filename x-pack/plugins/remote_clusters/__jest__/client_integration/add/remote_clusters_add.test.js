@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { act } from 'react-dom/test-utils';
 
-import { nextTick, setupEnvironment } from '../helpers';
+import { setupEnvironment } from '../helpers';
 import { NON_ALPHA_NUMERIC_CHARS, ACCENTED_CHARS } from './special_characters';
 import { setup } from './remote_clusters_add.helpers';
 
@@ -15,6 +16,7 @@ describe('Create Remote cluster', () => {
     let actions;
     let form;
     let server;
+    let component;
 
     beforeAll(() => {
       ({ server } = setupEnvironment());
@@ -24,8 +26,11 @@ describe('Create Remote cluster', () => {
       server.restore();
     });
 
-    beforeEach(() => {
-      ({ form, exists, find, actions } = setup());
+    beforeEach(async () => {
+      await act(async () => {
+        ({ form, exists, find, actions, component } = setup());
+      });
+      component.update();
     });
 
     test('should have the title of the page set correctly', () => {
@@ -45,7 +50,11 @@ describe('Create Remote cluster', () => {
         false
       );
 
-      form.toggleEuiSwitch('remoteClusterFormSkipUnavailableFormToggle');
+      act(() => {
+        form.toggleEuiSwitch('remoteClusterFormSkipUnavailableFormToggle');
+      });
+
+      component.update();
 
       expect(find('remoteClusterFormSkipUnavailableFormToggle').props()['aria-checked']).toBe(true);
     });
@@ -56,16 +65,20 @@ describe('Create Remote cluster', () => {
       // By default it should be set to "false"
       expect(find('remoteClusterFormConnectionModeToggle').props()['aria-checked']).toBe(false);
 
-      form.toggleEuiSwitch('remoteClusterFormConnectionModeToggle');
+      act(() => {
+        form.toggleEuiSwitch('remoteClusterFormConnectionModeToggle');
+      });
+
+      component.update();
 
       expect(find('remoteClusterFormConnectionModeToggle').props()['aria-checked']).toBe(true);
     });
 
-    test('should display errors and disable the save button when clicking "save" without filling the form', () => {
+    test('should display errors and disable the save button when clicking "save" without filling the form', async () => {
       expect(exists('remoteClusterFormGlobalError')).toBe(false);
       expect(find('remoteClusterFormSaveButton').props().disabled).toBe(false);
 
-      actions.clickSaveForm();
+      await actions.clickSaveForm();
 
       expect(exists('remoteClusterFormGlobalError')).toBe(true);
       expect(form.getErrorsMessages()).toEqual([
@@ -83,19 +96,22 @@ describe('Create Remote cluster', () => {
       let form;
 
       beforeEach(async () => {
-        ({ component, form, actions } = setup());
+        await act(async () => {
+          ({ component, form, actions } = setup());
+        });
 
-        await nextTick();
         component.update();
       });
 
-      test('should not allow spaces', () => {
+      test('should not allow spaces', async () => {
         form.setInputValue('remoteClusterFormNameInput', 'with space');
-        actions.clickSaveForm();
+
+        await actions.clickSaveForm();
+
         expect(form.getErrorsMessages()).toContain('Spaces are not allowed in the name.');
       });
 
-      test('should only allow alpha-numeric characters, "-" (dash) and "_" (underscore)', () => {
+      test('should only allow alpha-numeric characters, "-" (dash) and "_" (underscore)', async () => {
         const expectInvalidChar = (char) => {
           if (char === '-' || char === '_') {
             return;
@@ -103,6 +119,7 @@ describe('Create Remote cluster', () => {
 
           try {
             form.setInputValue('remoteClusterFormNameInput', `with${char}`);
+
             expect(form.getErrorsMessages()).toContain(
               `Remove the character ${char} from the name.`
             );
@@ -111,7 +128,7 @@ describe('Create Remote cluster', () => {
           }
         };
 
-        actions.clickSaveForm(); // display form errors
+        await actions.clickSaveForm(); // display form errors
 
         [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS].forEach(expectInvalidChar);
       });
@@ -120,13 +137,20 @@ describe('Create Remote cluster', () => {
     describe('seeds', () => {
       let actions;
       let form;
+      let component;
 
       beforeEach(async () => {
-        ({ form, actions } = setup());
+        await act(async () => {
+          ({ form, actions, component } = setup());
+        });
+
+        component.update();
+
+        form.setInputValue('remoteClusterFormNameInput', 'remote_cluster_test');
       });
 
-      test('should only allow alpha-numeric characters and "-" (dash) in the node "host" part', () => {
-        actions.clickSaveForm(); // display form errors
+      test('should only allow alpha-numeric characters and "-" (dash) in the node "host" part', async () => {
+        await actions.clickSaveForm(); // display form errors
 
         const notInArray = (array) => (value) => array.indexOf(value) < 0;
 
@@ -142,8 +166,8 @@ describe('Create Remote cluster', () => {
           .forEach(expectInvalidChar);
       });
 
-      test('should require a numeric "port" to be set', () => {
-        actions.clickSaveForm();
+      test('should require a numeric "port" to be set', async () => {
+        await actions.clickSaveForm();
 
         form.setComboBoxValue('remoteClusterFormSeedsInput', '192.168.1.1');
         expect(form.getErrorsMessages()).toContain('A port is required.');
@@ -156,16 +180,25 @@ describe('Create Remote cluster', () => {
     describe('proxy address', () => {
       let actions;
       let form;
+      let component;
 
       beforeEach(async () => {
-        ({ form, actions } = setup());
+        await act(async () => {
+          ({ form, actions, component } = setup());
+        });
 
-        // Enable "proxy" mode
-        form.toggleEuiSwitch('remoteClusterFormConnectionModeToggle');
+        component.update();
+
+        act(() => {
+          // Enable "proxy" mode
+          form.toggleEuiSwitch('remoteClusterFormConnectionModeToggle');
+        });
+
+        component.update();
       });
 
-      test('should only allow alpha-numeric characters and "-" (dash) in the proxy address "host" part', () => {
-        actions.clickSaveForm(); // display form errors
+      test('should only allow alpha-numeric characters and "-" (dash) in the proxy address "host" part', async () => {
+        await actions.clickSaveForm(); // display form errors
 
         const notInArray = (array) => (value) => array.indexOf(value) < 0;
 
@@ -181,8 +214,8 @@ describe('Create Remote cluster', () => {
           .forEach(expectInvalidChar);
       });
 
-      test('should require a numeric "port" to be set', () => {
-        actions.clickSaveForm();
+      test('should require a numeric "port" to be set', async () => {
+        await actions.clickSaveForm();
 
         form.setInputValue('remoteClusterFormProxyAddressInput', '192.168.1.1');
         expect(form.getErrorsMessages()).toContain('A port is required.');
