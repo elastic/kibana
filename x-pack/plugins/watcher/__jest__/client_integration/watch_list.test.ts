@@ -8,7 +8,7 @@ import { act } from 'react-dom/test-utils';
 import * as fixtures from '../../test/fixtures';
 import { setupEnvironment, pageHelpers, getRandomString, findTestSubject } from './helpers';
 import { WatchListTestBed } from './helpers/watch_list.helpers';
-import { ROUTES, REFRESH_INTERVALS } from '../../common/constants';
+import { ROUTES } from '../../common/constants';
 
 const { API_ROOT } = ROUTES;
 
@@ -28,26 +28,19 @@ describe('<WatchList />', () => {
   });
 
   describe('on component mount', () => {
-    beforeEach(async () => {
-      await act(async () => {
-        testBed = await setup();
-      });
-      testBed.component.update();
-    });
-
     describe('watches', () => {
       describe('when there are no watches', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           httpRequestsMockHelpers.setLoadWatchesResponse({ watches: [] });
-        });
 
-        test('should display an empty prompt', async () => {
           await act(async () => {
             testBed = await setup();
           });
-          const { component, exists } = testBed;
+          testBed.component.update();
+        });
 
-          component.update();
+        test('should display an empty prompt', async () => {
+          const { exists } = testBed;
 
           expect(exists('emptyPrompt')).toBe(true);
           expect(exists('emptyPrompt.createWatchButton')).toBe(true);
@@ -86,16 +79,9 @@ describe('<WatchList />', () => {
         });
 
         test('should retain the search query', async () => {
-          const { find, component, table } = testBed;
+          const { table, actions } = testBed;
 
-          const searchInput = find('watchesTableContainer').find('.euiFieldSearch');
-
-          // Enter the name of "watch1" in the search box
-          // @ts-ignore
-          searchInput.instance().value = watch1.name;
-          searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
-
-          component.update();
+          actions.searchWatches(watch1.name);
 
           const { tableCellsValues } = table.getMetaData('watchesTable');
 
@@ -104,25 +90,20 @@ describe('<WatchList />', () => {
           const row = tableCellsValues[0];
           const { name, id, watchStatus } = watch1;
 
-          const getExpectedValue = (value: any) => (typeof value === 'undefined' ? '' : value);
-
-          expect(row).toEqual([
-            '',
+          const expectedRow = [
+            '', // checkbox
             id,
-            getExpectedValue(name),
+            name,
             watchStatus.state,
-            getExpectedValue(watchStatus.comment),
-            getExpectedValue(watchStatus.lastMetCondition),
-            getExpectedValue(watchStatus.lastChecked),
-            '',
-          ]);
+            '', // comment
+            '', // lastMetCondition
+            '', // lastChecked
+            '', // actions
+          ];
 
-          await act(async () => {
-            // Advance timers to simulate another request
-            jest.advanceTimersByTime(REFRESH_INTERVALS.WATCH_LIST);
-          });
+          expect(row).toEqual(expectedRow);
 
-          component.update();
+          await actions.advanceTimeToTableRefresh();
 
           const { tableCellsValues: updatedTableCellsValues } = table.getMetaData('watchesTable');
 
@@ -130,16 +111,7 @@ describe('<WatchList />', () => {
           expect(updatedTableCellsValues.length).toEqual(1);
           const updatedRow = updatedTableCellsValues[0];
 
-          expect(updatedRow).toEqual([
-            '',
-            id,
-            getExpectedValue(name),
-            watchStatus.state,
-            getExpectedValue(watchStatus.comment),
-            getExpectedValue(watchStatus.lastMetCondition),
-            getExpectedValue(watchStatus.lastChecked),
-            '',
-          ]);
+          expect(updatedRow).toEqual(expectedRow);
         });
 
         test('should set the correct app title', () => {
@@ -243,7 +215,7 @@ describe('<WatchList />', () => {
           });
 
           test('should send the correct HTTP request to delete watch', async () => {
-            const { component, actions, table } = testBed;
+            const { actions, table } = testBed;
             const { rows } = table.getMetaData('watchesTable');
 
             const watchId = rows[0].columns[2].value;
@@ -267,8 +239,6 @@ describe('<WatchList />', () => {
             await act(async () => {
               confirmButton!.click();
             });
-
-            component.update();
 
             const latestRequest = server.requests[server.requests.length - 1];
 
