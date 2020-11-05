@@ -137,7 +137,6 @@ export class SecurityNavControl extends Component<Props, State> {
           defaultMessage="Log out"
         />
       ),
-      className: 'securityNavControlComponent__logoutLink',
       icon: <EuiIcon type="exit" size="m" />,
       href: logoutUrl,
       'data-test-subj': 'logoutLink',
@@ -185,11 +184,7 @@ export class SecurityNavControl extends Component<Props, State> {
         panelPaddingSize="none"
       >
         <div data-test-subj="userMenu">
-          <EuiContextMenu
-            className="securityNavControlComponent__userMenu"
-            initialPanelId={0}
-            panels={panels}
-          />
+          <EuiContextMenu className="chrNavControl__userMenu" initialPanelId={0} panels={panels} />
         </div>
       </EuiPopover>
     );
