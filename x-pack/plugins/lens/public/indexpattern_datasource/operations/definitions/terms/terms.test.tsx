@@ -71,8 +71,9 @@ describe('terms', () => {
 
   describe('toEsAggsConfig', () => {
     it('should reflect params correctly', () => {
+      const termsColumn = state.layers.first.columns.col1 as TermsIndexPatternColumn;
       const esAggsConfig = termsOperation.toEsAggsConfig(
-        state.layers.first.columns.col1 as TermsIndexPatternColumn,
+        { ...termsColumn, params: { ...termsColumn.params, otherBucket: true } },
         'col1',
         {} as IndexPattern
       );
@@ -82,6 +83,7 @@ describe('terms', () => {
             orderBy: '_key',
             field: 'category',
             size: 3,
+            otherBucket: true,
           }),
         })
       );
