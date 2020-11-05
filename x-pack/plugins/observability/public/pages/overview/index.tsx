@@ -3,17 +3,18 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { useTrackPageview, UXHasDataResponse } from '../..';
-import { EmptySection } from '../../components/app/empty_section';
+import { Alert } from '../../../../alerts/common';
+import { useTrackPageview } from '../..';
+import { EmptySections } from '../../components/app/empty_sections';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { NewsFeed } from '../../components/app/news_feed';
 import { Resources } from '../../components/app/resources';
 import { AlertsSection } from '../../components/app/section/alerts';
 import { DatePicker } from '../../components/shared/data_picker';
-import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
+import { useFetcher } from '../../hooks/use_fetcher';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeRange } from '../../hooks/use_time_range';
@@ -22,7 +23,6 @@ import { getNewsFeed } from '../../services/get_news_feed';
 import { getObservabilityAlerts } from '../../services/get_observability_alerts';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { DataSections } from './data_sections';
-import { getEmptySections } from './empty_section';
 import { LoadingObservability } from './loading_observability';
 
 interface Props {
@@ -39,22 +39,14 @@ export function OverviewPage({ routeParams }: Props) {
   useTrackPageview({ app: 'observability', path: 'overview' });
   useTrackPageview({ app: 'observability', path: 'overview', delay: 15000 });
   const { core } = usePluginContext();
+  const theme = useContext(ThemeContext);
 
-  const { rangeFrom, rangeTo, absStart, absEnd } = useTimeRange({
-    rangeFrom: routeParams.query.rangeFrom,
-    rangeTo: routeParams.query.rangeTo,
-  });
+  const { rangeFrom, rangeTo, absStart, absEnd } = useTimeRange();
 
   const relativeTime = { start: rangeFrom, end: rangeTo };
   const absoluteTime = { start: absStart, end: absEnd };
 
-  const { data: alerts = [], status: alertStatus } = useFetcher(() => {
-    return getObservabilityAlerts({ core });
-  }, [core]);
-
   const { data: newsFeed } = useFetcher(() => getNewsFeed({ core }), [core]);
-
-  const theme = useContext(ThemeContext);
 
   const { hasData, hasAnyData } = useHasData();
 
@@ -62,27 +54,13 @@ export function OverviewPage({ routeParams }: Props) {
     return <LoadingObservability />;
   }
 
+  const alerts = (hasData.alert?.hasData as Alert[]) || [];
+
   const { refreshInterval = 10000, refreshPaused = true } = routeParams.query;
 
   const bucketSize = calculateBucketSize({
     start: absoluteTime.start,
     end: absoluteTime.end,
-  });
-
-  const appEmptySections = getEmptySections({ core }).filter(({ id }) => {
-    if (id === 'alert') {
-      return (
-        alertStatus === FETCH_STATUS.FAILURE ||
-        (alertStatus === FETCH_STATUS.SUCCESS && alerts.length === 0)
-      );
-    } else {
-      const app = hasData[id];
-      if (app) {
-        const _hasData = id === 'ux' ? (app.hasData as UXHasDataResponse)?.hasData : app.hasData;
-        return app.status === FETCH_STATUS.FAILURE || !_hasData;
-      }
-    }
-    return false;
   });
 
   return (
@@ -113,42 +91,9 @@ export function OverviewPage({ routeParams }: Props) {
       <EuiFlexGroup>
         <EuiFlexItem grow={6}>
           {/* Data sections */}
-          {hasAnyData && (
-            <DataSections
-              hasData={hasData}
-              absoluteTime={absoluteTime}
-              relativeTime={relativeTime}
-              bucketSize={bucketSize?.intervalString!}
-            />
-          )}
+          {hasAnyData && <DataSections bucketSize={bucketSize?.intervalString!} />}
 
-          {/* Empty sections */}
-          {!!appEmptySections.length && (
-            <EuiFlexItem>
-              <EuiSpacer size="s" />
-              <EuiFlexGrid
-                columns={
-                  // when more than 2 empty sections are available show them on 2 columns, otherwise 1
-                  appEmptySections.length > 2 ? 2 : 1
-                }
-                gutterSize="s"
-              >
-                {appEmptySections.map((app) => {
-                  return (
-                    <EuiFlexItem
-                      key={app.id}
-                      style={{
-                        border: `1px dashed ${theme.eui.euiBorderColor}`,
-                        borderRadius: '4px',
-                      }}
-                    >
-                      <EmptySection section={app} />
-                    </EuiFlexItem>
-                  );
-                })}
-              </EuiFlexGrid>
-            </EuiFlexItem>
-          )}
+          <EmptySections />
         </EuiFlexItem>
 
         {/* Alert section */}

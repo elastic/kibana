@@ -4,37 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
+import { Alert } from '../../../alerts/common';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
-import { useRouteParams } from '../hooks/use_route_params';
+import { usePluginContext } from '../hooks/use_plugin_context';
 import { useTimeRange } from '../hooks/use_time_range';
+import { getObservabilityAlerts } from '../services/get_observability_alerts';
 import { ObservabilityFetchDataPlugins, UXHasDataResponse } from '../typings/fetch_overview_data';
 
+type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
+
 export type HasDataMap = Record<
-  ObservabilityFetchDataPlugins,
-  { status: FETCH_STATUS; hasData?: boolean | UXHasDataResponse }
+  DataContextApps,
+  { status: FETCH_STATUS; hasData?: boolean | UXHasDataResponse | Alert[] }
 >;
 
 export interface HasDataContextValue {
   hasData: Partial<HasDataMap>;
   hasAnyData: boolean;
   isAllRequestsComplete: boolean;
+  onRefreshTimeRange: () => void;
+  forceUpdate: string;
 }
 
 export const HasDataContext = createContext({} as HasDataContextValue);
 
-const apps: ObservabilityFetchDataPlugins[] = [
-  'apm',
-  'uptime',
-  'infra_logs',
-  'infra_metrics',
-  'ux',
-];
+const apps: DataContextApps[] = ['apm', 'uptime', 'infra_logs', 'infra_metrics', 'ux', 'alert'];
 
 export function HasDataContextProvider({ children }: { children: React.ReactNode }) {
-  const { rangeFrom, rangeTo } = useRouteParams('/overview').query;
-  const { absStart, absEnd } = useTimeRange({ rangeFrom, rangeTo });
+  const { core } = usePluginContext();
+  const [forceUpdate, setForceUpdate] = useState('');
+  const { absStart, absEnd } = useTimeRange();
 
   const [hasData, setHasData] = useState<HasDataContextValue['hasData']>({});
 
@@ -42,17 +44,19 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     () => {
       apps.forEach(async (app) => {
         try {
-          const params =
-            app === 'ux' ? { absoluteTime: { start: absStart, end: absEnd } } : undefined;
+          if (app !== 'alert') {
+            const params =
+              app === 'ux' ? { absoluteTime: { start: absStart, end: absEnd } } : undefined;
 
-          const result = await getDataHandler(app)?.hasData(params);
-          setHasData((prevState) => ({
-            ...prevState,
-            [app]: {
-              hasData: result,
-              status: FETCH_STATUS.SUCCESS,
-            },
-          }));
+            const result = await getDataHandler(app)?.hasData(params);
+            setHasData((prevState) => ({
+              ...prevState,
+              [app]: {
+                hasData: result,
+                status: FETCH_STATUS.SUCCESS,
+              },
+            }));
+          }
         } catch (e) {
           setHasData((prevState) => ({
             ...prevState,
@@ -68,6 +72,31 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
     []
   );
 
+  useEffect(() => {
+    async function fetchAlerts() {
+      try {
+        const alerts = await getObservabilityAlerts({ core });
+        setHasData((prevState) => ({
+          ...prevState,
+          alert: {
+            hasData: alerts,
+            status: FETCH_STATUS.SUCCESS,
+          },
+        }));
+      } catch (e) {
+        setHasData((prevState) => ({
+          ...prevState,
+          alert: {
+            hasData: undefined,
+            status: FETCH_STATUS.FAILURE,
+          },
+        }));
+      }
+    }
+
+    fetchAlerts();
+  }, [forceUpdate, core]);
+
   const isAllRequestsComplete = apps.every((app) => {
     const appStatus = hasData[app]?.status;
     return appStatus !== undefined && appStatus !== FETCH_STATUS.LOADING;
@@ -79,7 +108,15 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
   return (
     <HasDataContext.Provider
-      value={{ hasData, hasAnyData, isAllRequestsComplete }}
+      value={{
+        hasData,
+        hasAnyData,
+        isAllRequestsComplete,
+        forceUpdate,
+        onRefreshTimeRange: () => {
+          setForceUpdate(uniqueId());
+        },
+      }}
       children={children}
     />
   );

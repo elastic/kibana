@@ -24,34 +24,45 @@ import { SectionContainer } from '../';
 import { getDataHandler } from '../../../../data_handler';
 import { useChartTheme } from '../../../../hooks/use_chart_theme';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
+import { useHasData } from '../../../../hooks/use_has_data';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { Series } from '../../../../typings';
 import { ChartContainer } from '../../chart_container';
 import { StyledStat } from '../../styled_stat';
 import { onBrushEnd } from '../helper';
 
 interface Props {
-  absoluteTime: { start?: number; end?: number };
-  relativeTime: { start: string; end: string };
   bucketSize?: string;
 }
 
-export function UptimeSection({ absoluteTime, relativeTime, bucketSize }: Props) {
+export function UptimeSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
+  const chartTheme = useChartTheme();
   const history = useHistory();
+  const { forceUpdate, hasData } = useHasData();
+  const { rangeFrom, rangeTo, absStart, absEnd } = useTimeRange();
 
-  const { start, end } = absoluteTime;
-  const { data, status } = useFetcher(() => {
-    if (start && end && bucketSize) {
-      return getDataHandler('uptime')?.fetchData({
-        absoluteTime: { start, end },
-        relativeTime,
-        bucketSize,
-      });
-    }
-  }, [start, end, bucketSize, relativeTime]);
+  const { data, status } = useFetcher(
+    () => {
+      if (bucketSize) {
+        return getDataHandler('uptime')?.fetchData({
+          absoluteTime: { start: absStart, end: absEnd },
+          relativeTime: { start: rangeFrom, end: rangeTo },
+          bucketSize,
+        });
+      }
+    },
+    // Absolute times shouldn't be used here, since it would refetch on every render
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [bucketSize, rangeFrom, rangeTo, forceUpdate]
+  );
 
-  const min = moment.utc(absoluteTime.start).valueOf();
-  const max = moment.utc(absoluteTime.end).valueOf();
+  if (!hasData.uptime?.hasData) {
+    return null;
+  }
+
+  const min = moment.utc(absStart).valueOf();
+  const max = moment.utc(absEnd).valueOf();
 
   const formatter = niceTimeFormatter([min, max]);
 
@@ -112,7 +123,7 @@ export function UptimeSection({ absoluteTime, relativeTime, bucketSize }: Props)
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
-          theme={useChartTheme()}
+          theme={chartTheme}
           showLegend={false}
           legendPosition={Position.Right}
           xDomain={{ min, max }}

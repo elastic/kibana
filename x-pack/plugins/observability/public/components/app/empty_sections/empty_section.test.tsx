@@ -6,7 +6,7 @@
 import React from 'react';
 import { ISection } from '../../../typings/section';
 import { render } from '../../../utils/test_helper';
-import { EmptySection } from './';
+import { EmptySection } from './empty_section';
 
 describe('EmptySection', () => {
   it('renders without action button', () => {

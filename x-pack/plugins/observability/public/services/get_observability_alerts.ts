@@ -21,6 +21,6 @@ export async function getObservabilityAlerts({ core }: { core: CoreStart }) {
     return data.filter(({ consumer }) => allowedConsumers.includes(consumer));
   } catch (e) {
     console.error('Error while fetching alerts', e);
-    return [];
+    throw e;
   }
 }
