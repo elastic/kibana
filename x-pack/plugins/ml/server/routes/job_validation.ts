@@ -19,20 +19,25 @@ import {
 import { estimateBucketSpanFactory } from '../models/bucket_span_estimator';
 import { calculateModelMemoryLimitProvider } from '../models/calculate_model_memory_limit';
 import { validateJob, validateCardinality } from '../models/job_validation';
+import type { MlClient } from '../lib/ml_client';
 
 type CalculateModelMemoryLimitPayload = TypeOf<typeof modelMemoryLimitSchema>;
 
 /**
  * Routes for job validation
  */
-export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, version: string) {
+export function jobValidationRoutes(
+  { router, mlLicense, routeGuard }: RouteInitialization,
+  version: string
+) {
   function calculateModelMemoryLimit(
     client: IScopedClusterClient,
+    mlClient: MlClient,
     payload: CalculateModelMemoryLimitPayload
   ) {
     const { analysisConfig, indexPattern, query, timeFieldName, earliestMs, latestMs } = payload;
 
-    return calculateModelMemoryLimitProvider(client)(
+    return calculateModelMemoryLimitProvider(client, mlClient)(
       analysisConfig as AnalysisConfig,
       indexPattern,
       query,
@@ -61,7 +66,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         let errorResp;
         const resp = await estimateBucketSpanFactory(client)(request.body)
@@ -109,9 +114,9 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
-        const resp = await calculateModelMemoryLimit(client, request.body);
+        const resp = await calculateModelMemoryLimit(client, mlClient, request.body);
 
         return response.ok({
           body: resp,
@@ -141,7 +146,7 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const resp = await validateCardinality(client, request.body);
 
@@ -173,11 +178,12 @@ export function jobValidationRoutes({ router, mlLicense }: RouteInitialization, 
         tags: ['access:ml:canCreateJob'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         // version corresponds to the version used in documentation links.
         const resp = await validateJob(
           client,
+          mlClient,
           request.body,
           version,
           mlLicense.isSecurityEnabled() === false

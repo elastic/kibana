@@ -15,8 +15,6 @@ export * from './errors';
 export * from './expression_form_handlers';
 export * from './fetch';
 export * from './fonts';
-// @ts-expect-error missing local definition
-export * from './get_colors_from_palette';
 export * from './get_field_type';
 // @ts-expect-error missing local definition
 export * from './get_legend_config';

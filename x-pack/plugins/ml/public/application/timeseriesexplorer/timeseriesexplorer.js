@@ -47,12 +47,10 @@ import {
 import { AnnotationFlyout } from '../components/annotations/annotation_flyout';
 import { AnnotationsTable } from '../components/annotations/annotations_table';
 import { AnomaliesTable } from '../components/anomalies_table/anomalies_table';
-import { MlTooltipComponent } from '../components/chart_tooltip';
 import { ForecastingModal } from './components/forecasting_modal/forecasting_modal';
 import { LoadingIndicator } from '../components/loading_indicator/loading_indicator';
 import { SelectInterval } from '../components/controls/select_interval/select_interval';
 import { SelectSeverity } from '../components/controls/select_severity/select_severity';
-import { TimeseriesChart } from './components/timeseries_chart/timeseries_chart';
 import { TimeseriesexplorerNoChartData } from './components/timeseriesexplorer_no_chart_data';
 import { TimeSeriesExplorerPage } from './timeseriesexplorer_page';
 
@@ -83,6 +81,7 @@ import {
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { getControlsForDetector } from './get_controls_for_detector';
 import { SeriesControls } from './components/series_controls';
+import { TimeSeriesChartWithTooltips } from './components/timeseries_chart/timeseries_chart_with_tooltip';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -175,6 +174,7 @@ export class TimeSeriesExplorer extends React.Component {
         this.resizeRef.current !== null ? this.resizeRef.current.offsetWidth - containerPadding : 0,
     });
   };
+  unmounted = false;
 
   /**
    * Subject for listening brush time range selection.
@@ -877,6 +877,7 @@ export class TimeSeriesExplorer extends React.Component {
   componentWillUnmount() {
     this.subscriptions.unsubscribe();
     this.resizeChecker.destroy();
+    this.unmounted = true;
   }
 
   render() {
@@ -957,7 +958,6 @@ export class TimeSeriesExplorer extends React.Component {
       isEqual(this.previousChartProps.focusForecastData, chartProps.focusForecastData) &&
       isEqual(this.previousChartProps.focusChartData, chartProps.focusChartData) &&
       isEqual(this.previousChartProps.focusAnnotationData, chartProps.focusAnnotationData) &&
-      this.previousShowAnnotations === showAnnotations &&
       this.previousShowForecast === showForecast &&
       this.previousShowModelBounds === showModelBounds &&
       this.props.previousRefresh === lastRefresh
@@ -966,7 +966,6 @@ export class TimeSeriesExplorer extends React.Component {
     }
 
     this.previousChartProps = chartProps;
-    this.previousShowAnnotations = showAnnotations;
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
 
@@ -1134,23 +1133,19 @@ export class TimeSeriesExplorer extends React.Component {
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
-                <div className="ml-timeseries-chart" data-test-subj="mlSingleMetricViewerChart">
-                  <MlTooltipComponent>
-                    {(tooltipService) => (
-                      <TimeseriesChart
-                        {...chartProps}
-                        bounds={bounds}
-                        detectorIndex={selectedDetectorIndex}
-                        renderFocusChartOnly={renderFocusChartOnly}
-                        selectedJob={selectedJob}
-                        showAnnotations={showAnnotations}
-                        showForecast={showForecast}
-                        showModelBounds={showModelBounds}
-                        tooltipService={tooltipService}
-                      />
-                    )}
-                  </MlTooltipComponent>
-                </div>
+                <TimeSeriesChartWithTooltips
+                  chartProps={chartProps}
+                  contextAggregationInterval={contextAggregationInterval}
+                  bounds={bounds}
+                  detectorIndex={selectedDetectorIndex}
+                  renderFocusChartOnly={renderFocusChartOnly}
+                  selectedJob={selectedJob}
+                  selectedEntities={this.props.selectedEntities}
+                  showAnnotations={showAnnotations}
+                  showForecast={showForecast}
+                  showModelBounds={showModelBounds}
+                  lastRefresh={lastRefresh}
+                />
                 {focusAnnotationError !== undefined && (
                   <>
                     <EuiTitle

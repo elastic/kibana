@@ -24,7 +24,7 @@ jest.mock('../../../services/ml_api_service', () => {
   return {
     ml: {
       annotations: {
-        getAnnotations: jest.fn().mockReturnValue(mockAnnotations$),
+        getAnnotations$: jest.fn().mockReturnValue(mockAnnotations$),
       },
     },
   };
