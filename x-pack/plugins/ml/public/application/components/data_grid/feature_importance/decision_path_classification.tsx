@@ -98,6 +98,7 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
       </EuiTitle>
       {options !== undefined && (
         <EuiSuperSelect
+          data-test-subj="mlDFADecisionPathClassNameSelect"
           compressed={true}
           options={options}
           valueOfSelected={currentClass}

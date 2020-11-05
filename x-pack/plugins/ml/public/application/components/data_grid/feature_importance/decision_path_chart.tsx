@@ -116,57 +116,59 @@ export const DecisionPathChart = ({
   const tickFormatter = useCallback((d) => formatSingleValue(d, '').toString(), []);
 
   return (
-    <Chart
-      size={{ height: DECISION_PATH_MARGIN + decisionPathData.length * DECISION_PATH_ROW_HEIGHT }}
-    >
-      <Settings theme={theme} rotation={90} />
-      {baselineData && (
-        <LineAnnotation
-          id="xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline"
-          domainType={AnnotationDomainTypes.YDomain}
-          dataValues={baselineData}
-          style={baselineStyle}
-          marker={AnnotationBaselineMarker}
-        />
-      )}
+    <div data-test-subj="mlDFADecisionPathChart">
+      <Chart
+        size={{ height: DECISION_PATH_MARGIN + decisionPathData.length * DECISION_PATH_ROW_HEIGHT }}
+      >
+        <Settings theme={theme} rotation={90} />
+        {baselineData && (
+          <LineAnnotation
+            id="xpack.ml.dataframe.analytics.explorationResults.decisionPathBaseline"
+            domainType={AnnotationDomainTypes.YDomain}
+            dataValues={baselineData}
+            style={baselineStyle}
+            marker={AnnotationBaselineMarker}
+          />
+        )}
 
-      <Axis
-        id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxis'}
-        tickFormat={tickFormatter}
-        title={i18n.translate(
-          'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxisTitle',
-          {
-            defaultMessage: "Prediction for '{predictionFieldName}'",
-            values: { predictionFieldName },
+        <Axis
+          id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxis'}
+          tickFormat={tickFormatter}
+          title={i18n.translate(
+            'xpack.ml.dataframe.analytics.explorationResults.decisionPathXAxisTitle',
+            {
+              defaultMessage: "Prediction for '{predictionFieldName}'",
+              values: { predictionFieldName },
+            }
+          )}
+          showGridLines={false}
+          position={Position.Top}
+          showOverlappingTicks
+          domain={
+            minDomain && maxDomain
+              ? {
+                  min: minDomain,
+                  max: maxDomain,
+                }
+              : undefined
           }
-        )}
-        showGridLines={false}
-        position={Position.Top}
-        showOverlappingTicks
-        domain={
-          minDomain && maxDomain
-            ? {
-                min: minDomain,
-                max: maxDomain,
-              }
-            : undefined
-        }
-      />
-      <Axis showGridLines={true} id="left" position={Position.Left} />
-      <LineSeries
-        id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathLine'}
-        name={i18n.translate(
-          'xpack.ml.dataframe.analytics.explorationResults.decisionPathLineTitle',
-          {
-            defaultMessage: 'Prediction',
-          }
-        )}
-        xScaleType={ScaleType.Ordinal}
-        yScaleType={ScaleType.Linear}
-        xAccessor={0}
-        yAccessors={[2]}
-        data={decisionPathData}
-      />
-    </Chart>
+        />
+        <Axis showGridLines={true} id="left" position={Position.Left} />
+        <LineSeries
+          id={'xpack.ml.dataframe.analytics.explorationResults.decisionPathLine'}
+          name={i18n.translate(
+            'xpack.ml.dataframe.analytics.explorationResults.decisionPathLineTitle',
+            {
+              defaultMessage: 'Prediction',
+            }
+          )}
+          xScaleType={ScaleType.Ordinal}
+          yScaleType={ScaleType.Linear}
+          xAccessor={0}
+          yAccessors={[2]}
+          data={decisionPathData}
+        />
+      </Chart>
+    </div>
   );
 };
