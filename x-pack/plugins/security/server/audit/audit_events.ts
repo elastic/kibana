@@ -175,6 +175,7 @@ export enum SavedObjectAction {
   FIND = 'saved_object_find',
   ADD_TO_SPACES = 'saved_object_add_to_spaces',
   DELETE_FROM_SPACES = 'saved_object_delete_from_spaces',
+  REMOVE_REFERENCES = 'saved_object_remove_references',
 }
 
 const eventVerbs = {
@@ -185,6 +186,11 @@ const eventVerbs = {
   saved_object_find: ['access', 'accessing', 'accessed'],
   saved_object_add_to_spaces: ['update', 'updating', 'updated'],
   saved_object_delete_from_spaces: ['update', 'updating', 'updated'],
+  saved_object_remove_references: [
+    'remove references to',
+    'removing references to',
+    'removed references to',
+  ],
 };
 
 const eventTypes = {
@@ -195,6 +201,7 @@ const eventTypes = {
   saved_object_find: EventType.ACCESS,
   saved_object_add_to_spaces: EventType.CHANGE,
   saved_object_delete_from_spaces: EventType.CHANGE,
+  saved_object_remove_references: EventType.CHANGE,
 };
 
 export interface SavedObjectParams {
