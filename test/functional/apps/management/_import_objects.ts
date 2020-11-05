@@ -33,12 +33,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
   const testSubjects = getService('testSubjects');
   const log = getService('log');
-  const security = getService('security');
 
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        // await esArchiver.load('empty_kibana');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await esArchiver.load('management');
@@ -224,15 +222,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('.json file', () => {
-      before(async function () {
-        // There must be some saved objects in difference indices which can cause failures when
-        // run against Kibana with security enabled like on Cloud
-        await security.testUser.setRoles(['kibana_admin', 'superuser'], false);
-      });
-      after(async function () {
-        await security.testUser.restoreDefaults();
-      });
-
       beforeEach(async function () {
         // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
