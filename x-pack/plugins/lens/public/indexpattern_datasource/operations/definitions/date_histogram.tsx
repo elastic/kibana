@@ -114,7 +114,7 @@ export const dateHistogramOperation: OperationDefinition<
 
     return column;
   },
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
       label: field.displayName,

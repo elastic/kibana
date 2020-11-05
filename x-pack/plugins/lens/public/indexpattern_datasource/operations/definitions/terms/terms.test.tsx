@@ -105,7 +105,7 @@ describe('terms', () => {
       const indexPattern = createMockedIndexPattern();
       const newDateField = indexPattern.fields.find((i) => i.name === 'dest')!;
 
-      const column = termsOperation.onFieldChange(oldColumn, indexPattern, newDateField);
+      const column = termsOperation.onFieldChange(oldColumn, newDateField);
       expect(column).toHaveProperty('sourceField', 'dest');
       expect(column).toHaveProperty('params.size', 5);
       expect(column).toHaveProperty('params.orderBy.type', 'alphabetical');

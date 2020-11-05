@@ -12,14 +12,14 @@ import {
   deleteColumn,
   updateLayerIndexPattern,
 } from './layer_helpers';
-import { operationDefinitionMap, OperationType } from './operations';
+import { operationDefinitionMap, OperationType } from '../operations';
 import { TermsIndexPatternColumn } from './definitions/terms';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 import { AvgIndexPatternColumn } from './definitions/metrics';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from '../types';
 import { documentField } from '../document_field';
 
-jest.mock('./operations');
+jest.mock('../operations');
 
 const indexPattern = {
   id: '1',
@@ -684,7 +684,7 @@ describe('state_helpers', () => {
 
       expect(operationDefinitionMap.terms.onOtherColumnChanged).toHaveBeenCalledWith(termsColumn, {
         col1: termsColumn,
-        col2: {
+        col2: expect.objectContaining({
           label: 'Average of bytes',
           dataType: 'number',
           isBucketed: false,
@@ -692,7 +692,7 @@ describe('state_helpers', () => {
           // Private
           operationType: 'avg',
           sourceField: 'bytes',
-        },
+        }),
       });
     });
   });

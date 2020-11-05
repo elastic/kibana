@@ -78,7 +78,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       missing: 0,
     },
   }),
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
       label: ofName(field.displayName),

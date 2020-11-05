@@ -135,32 +135,25 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
   const selectedColumn: IndexPatternColumn | null = layer.columns[columnId] || null;
   const currentIndexPattern = state.indexPatterns[layer.indexPatternId];
 
-  if (!selectedColumn) {
-    const newLayer = insertNewColumn({
-      layer,
-      columnId,
-      indexPattern: currentIndexPattern,
-      op: operationsForNewField[0],
-      field: droppedItem.field,
-    });
-    trackUiEvent('drop_onto_dimension');
-    const hasData = Object.values(state.layers).some(({ columns }) => columns.length);
-    trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
-    setState(mergeLayer({ state, layerId, newLayer }));
-    return;
-  }
+  const newLayer = selectedColumn
+    ? replaceColumn({
+        layer,
+        columnId,
+        indexPattern: currentIndexPattern,
+        op: operationsForNewField[0],
+        field: droppedItem.field,
+      })
+    : insertNewColumn({
+        layer,
+        columnId,
+        indexPattern: currentIndexPattern,
+        op: operationsForNewField[0],
+        field: droppedItem.field,
+      });
 
   trackUiEvent('drop_onto_dimension');
   const hasData = Object.values(state.layers).some(({ columns }) => columns.length);
   trackUiEvent(hasData ? 'drop_non_empty' : 'drop_empty');
-
-  const newLayer = replaceColumn({
-    layer,
-    columnId,
-    indexPattern: currentIndexPattern,
-    op: operationsForNewField[0],
-    field: droppedItem.field,
-  });
   setState(mergeLayer({ state, layerId, newLayer }));
 
   return true;

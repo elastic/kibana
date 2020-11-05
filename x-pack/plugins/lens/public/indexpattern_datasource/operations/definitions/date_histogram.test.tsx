@@ -290,7 +290,7 @@ describe('date_histogram', () => {
       const indexPattern = createMockedIndexPattern();
       const newDateField = indexPattern.fields.find((i) => i.name === 'start_date')!;
 
-      const column = dateHistogramOperation.onFieldChange(oldColumn, indexPattern, newDateField);
+      const column = dateHistogramOperation.onFieldChange(oldColumn, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');
       expect(column).toHaveProperty('params.interval', 'd');
       expect(column.label).toContain('start_date');
@@ -310,7 +310,7 @@ describe('date_histogram', () => {
       const indexPattern = createMockedIndexPattern();
       const newDateField = indexPattern.fields.find((i) => i.name === 'start_date')!;
 
-      const column = dateHistogramOperation.onFieldChange(oldColumn, indexPattern, newDateField);
+      const column = dateHistogramOperation.onFieldChange(oldColumn, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');
       expect(column).toHaveProperty('params.interval', 'auto');
       expect(column.label).toContain('start_date');

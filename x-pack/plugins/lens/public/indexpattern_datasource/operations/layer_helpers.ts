@@ -231,8 +231,8 @@ function separateBucketColumns(layer: IndexPatternLayer) {
   return partition(layer.columnOrder, (columnId) => layer.columns[columnId]?.isBucketed);
 }
 
-export function getMetricOperationType(field: IndexPatternField) {
-  const match = operationDefinitions.sort(getSortScoreByPriority).find((definition) => {
+export function getMetricOperationTypes(field: IndexPatternField) {
+  return operationDefinitions.sort(getSortScoreByPriority).filter((definition) => {
     if (definition.input !== 'field') return;
     const metadata = definition.getPossibleOperationForField(field);
     if (!metadata) return;
@@ -240,7 +240,6 @@ export function getMetricOperationType(field: IndexPatternField) {
       !metadata.isBucketed && (metadata.dataType === 'number' || metadata.dataType === 'document')
     );
   });
-  return match?.type;
 }
 
 export function updateColumnParam<C extends IndexPatternColumn>({

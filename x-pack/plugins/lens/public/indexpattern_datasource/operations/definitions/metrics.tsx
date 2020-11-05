@@ -62,7 +62,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       params:
         previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
     }),
-    onFieldChange: (oldColumn, indexPattern, field) => {
+    onFieldChange: (oldColumn, field) => {
       return {
         ...oldColumn,
         label: ofName(field.displayName),

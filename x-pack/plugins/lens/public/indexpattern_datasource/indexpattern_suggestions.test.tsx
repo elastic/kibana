@@ -731,9 +731,9 @@ describe('IndexPattern Data Source suggestions', () => {
               layers: {
                 previousLayer: initialState.layers.previousLayer,
                 currentLayer: expect.objectContaining({
-                  columnOrder: ['id1', 'colb'],
+                  columnOrder: ['cola', 'colb'],
                   columns: {
-                    id1: expect.objectContaining({
+                    cola: expect.objectContaining({
                       operationType: 'date_histogram',
                       sourceField: 'start_date',
                     }),
