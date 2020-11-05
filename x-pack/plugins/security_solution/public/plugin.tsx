@@ -7,7 +7,6 @@
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { pluck } from 'rxjs/operators';
-import React, { lazy, memo, useEffect, useState } from 'react';
 import {
   PluginSetup,
   PluginStart,
@@ -61,7 +60,8 @@ import {
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
 import { getCaseConnectorUI } from './common/lib/connectors';
-import { IntegrationPolicyEditExtensionComponent } from '../../ingest_manager/common/types/ui_extensions';
+import { LazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
+import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -333,48 +333,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     if (plugins.ingestManager) {
       const { registerExtension } = plugins.ingestManager;
 
-      const LazyConfigureEndpointPackagePolicy = lazy<IntegrationPolicyEditExtensionComponent>(
-        async () => {
-          const { ConfigureEndpointPackagePolicy } = await import(
-            './management/pages/policy/view/ingest_manager_integration/configure_package_policy'
-          );
-          return {
-            // FIXME: remove casting once old UI component registration is removed
-            default: (ConfigureEndpointPackagePolicy as unknown) as IntegrationPolicyEditExtensionComponent,
-          };
-        }
-      );
-
       registerExtension({
         integration: 'endpoint',
         type: 'integration-policy',
         view: 'edit',
-        component: LazyConfigureEndpointPackagePolicy,
+        component: LazyEndpointPolicyEditExtension,
       });
 
-      // This will be removed as soon as support for the above extension is implemented in Fleet
-      // @ts-ignore
-      plugins.ingestManager.registerPackagePolicyComponent(
-        'endpoint',
-        // eslint-disable-next-line react/display-name
-        memo((props) => {
-          const [Show, setShow] = useState();
-
-          useEffect(() => {
-            import(
-              './management/pages/policy/view/ingest_manager_integration/configure_package_policy'
-            ).then((response) => {
-              // @ts-ignore
-              setShow(() => response.ConfigureEndpointPackagePolicy);
-            });
-          }, []);
-
-          return (
-            // @ts-ignore
-            <>{Show && <Show {...props} />}</>
-          );
-        })
-      );
+      registerExtension({
+        integration: 'endpoint',
+        type: 'integration-policy',
+        view: 'create',
+        component: LazyEndpointPolicyCreateExtension,
+      });
     }
 
     return {};

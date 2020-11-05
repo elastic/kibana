@@ -5,7 +5,7 @@
  */
 
 import { ComponentType, LazyExoticComponent } from 'react';
-import { PackagePolicy } from './models';
+import { NewPackagePolicy, PackagePolicy } from './models';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
@@ -34,8 +34,8 @@ export type IntegrationPolicyEditExtensionComponent = ComponentType<{
   onChange: (opts: {
     /** is current form state is valid */
     isValid: boolean;
-    /** The updated Integration Policy */
-    updatedPolicy: PackagePolicy;
+    /** The updated Integration Policy to be merged back and included in the API call */
+    updatedPolicy: NewPackagePolicy;
   }) => void;
 }>;
 
@@ -45,6 +45,33 @@ export interface IntegrationPolicyEditExtension {
   type: 'integration-policy';
   view: 'edit';
   component: LazyExoticComponent<IntegrationPolicyEditExtensionComponent>;
+}
+
+/**
+ * UI Component Extension is used on the pages displaying the ability to Create an
+ * Integration Policy
+ */
+export type IntegrationPolicyCreateExtensionComponent = ComponentType<{
+  /** The current integration policy being created */
+  currentPolicy: NewPackagePolicy;
+  /**
+   * A callback that should be executed anytime a change to the Integration Policy needs to
+   * be reported back to the Fleet Policy Edit page
+   */
+  onChange: (opts: {
+    /** is current form state is valid */
+    isValid: boolean;
+    /** The updated Integration Policy to be merged back and included in the API call */
+    updatedPolicy: NewPackagePolicy;
+  }) => void;
+}>;
+
+/** Extension point registration contract for Integration Policy Create views */
+export interface IntegrationPolicyCreateExtension {
+  integration: string;
+  type: 'integration-policy';
+  view: 'create';
+  component: LazyExoticComponent<IntegrationPolicyCreateExtensionComponent>;
 }
 
 /**
@@ -61,4 +88,7 @@ export interface IntegrationCustomExtension {
 }
 
 /** Fleet UI Extension Point */
-export type UIExtensionPoint = IntegrationPolicyEditExtension | IntegrationCustomExtension;
+export type UIExtensionPoint =
+  | IntegrationPolicyEditExtension
+  | IntegrationCustomExtension
+  | IntegrationPolicyCreateExtension;

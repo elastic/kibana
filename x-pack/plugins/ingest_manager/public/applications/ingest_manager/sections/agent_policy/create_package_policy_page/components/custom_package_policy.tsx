@@ -8,6 +8,8 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { NewPackagePolicy } from '../../../../types';
 import { CreatePackagePolicyFrom } from '../types';
+import { useUIExtension } from '../../../../hooks/use_ui_extension';
+import { ExtensionWrapper } from '../../../../components/extension_wrapper';
 
 export interface CustomConfigurePackagePolicyProps {
   packageName: string;
@@ -56,6 +58,17 @@ const EmptyPackagePolicy: CustomConfigurePackagePolicyContent = () => (
 );
 
 export const CustomPackagePolicy = (props: CustomConfigurePackagePolicyProps) => {
-  const CustomPackagePolicyContent = PackagePolicyMapping[props.packageName] || EmptyPackagePolicy;
-  return <CustomPackagePolicyContent {...props} />;
+  const ExtensionView = useUIExtension(
+    props.packageName,
+    'integration-policy',
+    props.from === 'edit' ? 'edit' : 'create'
+  );
+
+  return ExtensionView ? (
+    <ExtensionWrapper>
+      <ExtensionView {...props} />
+    </ExtensionWrapper>
+  ) : (
+    <EmptyPackagePolicy {...props} />
+  );
 };
