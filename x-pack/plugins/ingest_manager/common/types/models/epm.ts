@@ -7,11 +7,17 @@
 // Follow pattern from https://github.com/elastic/kibana/pull/52447
 // TODO: Update when https://github.com/elastic/kibana/issues/53021 is closed
 import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/core/public';
+import {
+  agentAssetTypes,
+  dataTypes,
+  defaultPackages,
+  installationStatuses,
+  requiredPackages,
+} from '../../constants';
+import { ValueOf } from '../../types';
 
-export enum InstallationStatus {
-  installed = 'installed',
-  notInstalled = 'not_installed',
-}
+export type InstallationStatus = typeof installationStatuses;
+
 export enum InstallStatus {
   installed = 'installed',
   notInstalled = 'not_installed',
@@ -26,7 +32,8 @@ export type EpmPackageInstallStatus = 'installed' | 'installing';
 
 export type DetailViewPanelName = 'overview' | 'usages' | 'settings';
 export type ServiceName = 'kibana' | 'elasticsearch';
-export type AssetType = KibanaAssetType | ElasticsearchAssetType | AgentAssetType;
+export type AgentAssetType = typeof agentAssetTypes;
+export type AssetType = KibanaAssetType | ElasticsearchAssetType | ValueOf<AgentAssetType>;
 
 export enum KibanaAssetType {
   dashboard = 'dashboard',
@@ -44,14 +51,7 @@ export enum ElasticsearchAssetType {
   transform = 'transform',
 }
 
-export enum DataType {
-  logs = 'logs',
-  metrics = 'metrics',
-}
-
-export enum AgentAssetType {
-  input = 'input',
-}
+export type DataType = typeof dataTypes;
 
 export type RegistryRelease = 'ga' | 'beta' | 'experimental';
 
@@ -237,7 +237,7 @@ interface PackageAdditions {
 export type PackageList = PackageListItem[];
 
 export type PackageListItem = Installable<RegistrySearchResult>;
-export type PackagesGroupedByStatus = Record<InstallationStatus, PackageList>;
+export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
 export type PackageInfo = Installable<
   // remove the properties we'll be altering/replacing from the base type
   Omit<RegistryPackage, keyof PackageAdditions> &
@@ -260,12 +260,12 @@ export interface Installation extends SavedObjectAttributes {
 export type Installable<T> = Installed<T> | NotInstalled<T>;
 
 export type Installed<T = {}> = T & {
-  status: InstallationStatus.installed;
+  status: InstallationStatus['Installed'];
   savedObject: SavedObject<Installation>;
 };
 
 export type NotInstalled<T = {}> = T & {
-  status: InstallationStatus.notInstalled;
+  status: InstallationStatus['NotInstalled'];
 };
 
 export type AssetReference = KibanaAssetReference | EsAssetReference;
@@ -277,10 +277,9 @@ export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
   type: ElasticsearchAssetType;
 };
 
-export enum DefaultPackages {
-  system = 'system',
-  endpoint = 'endpoint',
-}
+export type RequiredPackage = typeof requiredPackages;
+
+export type DefaultPackages = typeof defaultPackages;
 
 export interface IndexTemplateMappings {
   properties: any;
