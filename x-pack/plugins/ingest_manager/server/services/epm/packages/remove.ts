@@ -12,9 +12,6 @@ import {
   AssetType,
   CallESAsCurrentUser,
   ElasticsearchAssetType,
-  EsAssetReference,
-  KibanaAssetReference,
-  Installation,
 } from '../../../types';
 import { getInstallation, savedObjectTypes } from './index';
 import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
@@ -49,7 +46,7 @@ export async function removeInstallation(options: {
 
   // Delete the installed assets
   const installedAssets = [...installation.installed_kibana, ...installation.installed_es];
-  await deleteAssets(installation, savedObjectsClient, callCluster);
+  await deleteAssets(installedAssets, savedObjectsClient, callCluster);
 
   // Delete the manager saved object with references to the asset objects
   // could also update with [] or some other state
@@ -67,20 +64,17 @@ export async function removeInstallation(options: {
   // successful delete's in SO client return {}. return something more useful
   return installedAssets;
 }
-
-function deleteKibanaAssets(
-  installedObjects: KibanaAssetReference[],
-  savedObjectsClient: SavedObjectsClientContract
+async function deleteAssets(
+  installedObjects: AssetReference[],
+  savedObjectsClient: SavedObjectsClientContract,
+  callCluster: CallESAsCurrentUser
 ) {
-  return installedObjects.map(async ({ id, type }) => {
-    return savedObjectsClient.delete(type, id);
-  });
-}
-
-function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallESAsCurrentUser) {
-  return installedObjects.map(async ({ id, type }) => {
+  const logger = appContextService.getLogger();
+  const deletePromises = installedObjects.map(async ({ id, type }) => {
     const assetType = type as AssetType;
-    if (assetType === ElasticsearchAssetType.ingestPipeline) {
+    if (savedObjectTypes.includes(assetType)) {
+      return savedObjectsClient.delete(assetType, id);
+    } else if (assetType === ElasticsearchAssetType.ingestPipeline) {
       return deletePipeline(callCluster, id);
     } else if (assetType === ElasticsearchAssetType.indexTemplate) {
       return deleteTemplate(callCluster, id);
@@ -88,22 +82,8 @@ function deleteESAssets(installedObjects: EsAssetReference[], callCluster: CallE
       return deleteTransforms(callCluster, [id]);
     }
   });
-}
-
-async function deleteAssets(
-  { installed_es: installedEs, installed_kibana: installedKibana }: Installation,
-  savedObjectsClient: SavedObjectsClientContract,
-  callCluster: CallESAsCurrentUser
-) {
-  const logger = appContextService.getLogger();
-
-  const deletePromises: Array<Promise<unknown>> = [
-    ...deleteESAssets(installedEs, callCluster),
-    ...deleteKibanaAssets(installedKibana, savedObjectsClient),
-  ];
-
   try {
-    await Promise.all(deletePromises);
+    await Promise.all([...deletePromises]);
   } catch (err) {
     logger.error(err);
   }

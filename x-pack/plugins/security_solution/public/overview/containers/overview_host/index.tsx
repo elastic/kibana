@@ -61,7 +61,6 @@ export const useHostOverview = ({
           defaultIndex: indexNames,
           factoryQueryType: HostsQueries.overview,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -148,7 +147,6 @@ export const useHostOverview = ({
         defaultIndex: indexNames,
         factoryQueryType: HostsQueries.overview,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

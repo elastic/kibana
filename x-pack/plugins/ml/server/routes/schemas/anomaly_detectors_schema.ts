@@ -82,6 +82,10 @@ export const analysisConfigSchema = schema.object({
   detectors: schema.arrayOf(detectorSchema),
   influencers: schema.arrayOf(schema.maybe(schema.string())),
   categorization_field_name: schema.maybe(schema.string()),
+  categorization_analyzer: schema.maybe(schema.any()),
+  categorization_filters: schema.maybe(schema.arrayOf(schema.string())),
+  latency: schema.maybe(schema.number()),
+  multivariate_by_fields: schema.maybe(schema.boolean()),
   per_partition_categorization: schema.maybe(
     schema.object({
       enabled: schema.boolean(),
