@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { Direction, EuiBasicTableProps, EuiTableSortingType } from '@elastic/eui';
+import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { get } from 'lodash';
 
@@ -46,9 +46,8 @@ interface AnalyticsBasicTableSettings<T> {
 
 interface UseTableSettingsReturnValue<T> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
-  pageOfItems: T[];
-  pagination: EuiBasicTableProps<T>['pagination'];
-  sorting: EuiTableSortingType<any>;
+  pagination: Pagination;
+  sorting: { sort: PropertySort };
 }
 
 export function useTableSettings<TypeOfItem>(

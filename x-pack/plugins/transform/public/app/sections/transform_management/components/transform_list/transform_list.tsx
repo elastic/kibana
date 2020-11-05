@@ -9,8 +9,7 @@ import React, { MouseEventHandler, FC, useContext, useEffect, useState } from 'r
 import { i18n } from '@kbn/i18n';
 
 import {
-  EuiBasicTable,
-  EuiBasicTableProps,
+  EuiInMemoryTable,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCallOut,
@@ -21,6 +20,7 @@ import {
   EuiSpacer,
   EuiPopover,
   EuiTitle,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 
 import { TransformId } from '../../../../../../common/types/transform';
@@ -81,6 +81,7 @@ export const TransformList: FC<Props> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { refresh } = useRefreshTransformList({ isLoading: setIsLoading });
 
+  const [searchError, setSearchError] = useState<any>(undefined);
   const [searchQueryText, setSearchQueryText] = useState<string>('');
   const [filteredTransforms, setFilteredTransforms] = useState<TransformListRow[]>([]);
   const [expandedRowItemIds, setExpandedRowItemIds] = useState<TransformId[]>([]);
@@ -129,7 +130,7 @@ export const TransformList: FC<Props> = ({
     // eslint-disable-next-line
   }, [searchQueryText, transforms]); // missing dependency updateFilteredItems
 
-  const { onTableChange, pageOfItems, pagination, sorting } = useTableSettings<TransformListRow>(
+  const { onTableChange, pagination, sorting } = useTableSettings<TransformListRow>(
     TRANSFORM_LIST_COLUMN.ID,
     filteredTransforms
   );
@@ -269,6 +270,26 @@ export const TransformList: FC<Props> = ({
     onSelectionChange: (selected: TransformListRow[]) => setTransformSelection(selected),
   };
 
+  const handleSearchOnChange: EuiSearchBarProps['onChange'] = (search) => {
+    if (search.error !== null) {
+      setSearchError(search.error.message);
+      return false;
+    }
+
+    setSearchError(undefined);
+    setSearchQueryText(search.queryText);
+    return true;
+  };
+
+  const search = {
+    toolsLeft: transformSelection.length > 0 ? renderToolsLeft() : undefined,
+    toolsRight,
+    onChange: handleSearchOnChange,
+    box: {
+      incremental: true,
+    },
+  };
+
   return (
     <div data-test-subj="transformListTableContainer">
       {/* Bulk Action Modals */}
@@ -277,38 +298,30 @@ export const TransformList: FC<Props> = ({
 
       {/* Single Action Modals */}
       {singleActionModals}
-      <EuiFlexGroup alignItems="center">
-        {transformSelection.length > 0 ? (
-          <EuiFlexItem grow={false}>{renderToolsLeft()}</EuiFlexItem>
-        ) : null}
-        <EuiFlexItem>
-          <TransformSearchBar
-            searchQueryText={searchQueryText}
-            setSearchQueryText={setSearchQueryText}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>{toolsRight}</EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="l" />
-      <EuiBasicTable<TransformListRow>
+
+      <EuiInMemoryTable<TransformListRow>
+        allowNeutralSort={false}
+        className="transform__TransformTable"
         columns={columns}
+        error={searchError}
         hasActions={false}
         isExpandable={true}
         isSelectable={false}
-        items={pageOfItems as TransformListRow[]}
+        items={filteredTransforms}
         itemId={TRANSFORM_LIST_COLUMN.ID}
         itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         loading={isLoading || transformsLoading}
-        onChange={onTableChange as EuiBasicTableProps<TransformListRow>['onChange']}
-        selection={selection}
-        pagination={pagination!}
-        sorting={sorting}
-        data-test-subj={`transformListTable ${
-          isLoading || transformsLoading ? 'loading' : 'loaded'
-        }`}
+        onTableChange={onTableChange}
+        pagination={pagination}
         rowProps={(item) => ({
           'data-test-subj': `transformListRow row-${item.id}`,
         })}
+        selection={selection}
+        sorting={sorting}
+        search={search}
+        data-test-subj={`transformListTable ${
+          isLoading || transformsLoading ? 'loading' : 'loaded'
+        }`}
       />
     </div>
   );
