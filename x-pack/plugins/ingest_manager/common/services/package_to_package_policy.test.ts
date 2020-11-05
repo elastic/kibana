@@ -25,7 +25,7 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
         dashboard: [],
         visualization: [],
         search: [],
-        index_pattern: [],
+        'index-pattern': [],
         map: [],
       },
     },

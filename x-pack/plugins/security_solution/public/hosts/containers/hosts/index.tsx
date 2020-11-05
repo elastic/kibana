@@ -83,7 +83,6 @@ export const useAllHost = ({
           docValueFields: docValueFields ?? [],
           factoryQueryType: HostsQueries.hosts,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           pagination: generateTablePaginationOptions(activePage, limit),
           timerange: {
             interval: '12h',
@@ -200,7 +199,6 @@ export const useAllHost = ({
         docValueFields: docValueFields ?? [],
         factoryQueryType: HostsQueries.hosts,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',

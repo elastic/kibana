@@ -184,16 +184,6 @@ export default function (providerContext: FtrProviderContext) {
           resSearch = err;
         }
         expect(resSearch.response.data.statusCode).equal(404);
-        let resIndexPattern;
-        try {
-          resIndexPattern = await kibanaServer.savedObjects.get({
-            type: 'index-pattern',
-            id: 'test-*',
-          });
-        } catch (err) {
-          resIndexPattern = err;
-        }
-        expect(resIndexPattern.response.data.statusCode).equal(404);
       });
       it('should have removed the fields from the index patterns', async () => {
         // The reason there is an expect inside the try and inside the catch in this test case is to guard against two
@@ -355,7 +345,6 @@ const expectAssetsInstalled = ({
     expect(res.statusCode).equal(200);
   });
   it('should have installed the kibana assets', async function () {
-    // These are installed from Fleet along with every package
     const resIndexPatternLogs = await kibanaServer.savedObjects.get({
       type: 'index-pattern',
       id: 'logs-*',
@@ -366,8 +355,6 @@ const expectAssetsInstalled = ({
       id: 'metrics-*',
     });
     expect(resIndexPatternMetrics.id).equal('metrics-*');
-
-    // These are the assets from the package
     const resDashboard = await kibanaServer.savedObjects.get({
       type: 'dashboard',
       id: 'sample_dashboard',
@@ -388,22 +375,6 @@ const expectAssetsInstalled = ({
       id: 'sample_search',
     });
     expect(resSearch.id).equal('sample_search');
-    const resIndexPattern = await kibanaServer.savedObjects.get({
-      type: 'index-pattern',
-      id: 'test-*',
-    });
-    expect(resIndexPattern.id).equal('test-*');
-
-    let resInvalidTypeIndexPattern;
-    try {
-      resInvalidTypeIndexPattern = await kibanaServer.savedObjects.get({
-        type: 'invalid-type',
-        id: 'invalid',
-      });
-    } catch (err) {
-      resInvalidTypeIndexPattern = err;
-    }
-    expect(resInvalidTypeIndexPattern.response.data.statusCode).equal(404);
   });
   it('should create an index pattern with the package fields', async () => {
     const resIndexPatternLogs = await kibanaServer.savedObjects.get({
@@ -443,10 +414,6 @@ const expectAssetsInstalled = ({
         {
           id: 'sample_dashboard2',
           type: 'dashboard',
-        },
-        {
-          id: 'test-*',
-          type: 'index-pattern',
         },
         {
           id: 'sample_search',
