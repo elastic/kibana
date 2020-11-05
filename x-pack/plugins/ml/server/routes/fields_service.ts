@@ -28,7 +28,7 @@ function getTimeFieldRange(client: IScopedClusterClient, payload: any) {
 /**
  * Routes for fields service
  */
-export function fieldsService({ router, mlLicense }: RouteInitialization) {
+export function fieldsService({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup FieldsService
    *
@@ -50,7 +50,7 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.fullLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const resp = await getCardinalityOfFields(client, request.body);
 
@@ -85,7 +85,7 @@ export function fieldsService({ router, mlLicense }: RouteInitialization) {
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async ({ client, request, response }) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const resp = await getTimeFieldRange(client, request.body);
 

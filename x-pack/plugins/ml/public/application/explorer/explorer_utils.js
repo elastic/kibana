@@ -392,7 +392,7 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
 
   return new Promise((resolve) => {
     ml.annotations
-      .getAnnotations({
+      .getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
