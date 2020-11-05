@@ -4,5 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Layout } from './layout';
-export { SideNav, SideNavLink, SideNavItem } from './side_nav';
+.appSearchNavEngineLabel {
+  padding-top: $euiSizeS;
+  padding-bottom: $euiSizeS;
+
+  .euiText {
+    font-weight: $euiFontWeightMedium;
+  }
+  .euiBadge {
+    margin-top: $euiSizeXS;
+  }
+}

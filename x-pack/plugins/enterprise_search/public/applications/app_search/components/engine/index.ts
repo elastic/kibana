@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Layout } from './layout';
-export { SideNav, SideNavLink, SideNavItem } from './side_nav';
+export { EngineRouter, EngineNav } from './engine_nav';
