@@ -36,7 +36,7 @@ import {
   createObservableMonitor,
 } from './polling';
 import { TaskPool } from './task_pool';
-import { TaskManagerRunner, TaskRunner } from './task_runner';
+import { TaskManagerRunner, TaskRunner } from './task_running';
 import { TaskStore, OwnershipClaimingOpts, ClaimOwnershipResult } from './task_store';
 import { identifyEsError } from './lib/identify_es_error';
 import { BufferedTaskStore } from './buffered_task_store';

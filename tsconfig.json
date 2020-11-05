@@ -7,14 +7,17 @@
   "exclude": [
     "src/**/__fixtures__/**/*",
     "src/core/**/*",
+    "src/plugins/dev_tools/**/*",
     "src/plugins/inspector/**/*",
     "src/plugins/kibana_legacy/**/*",
     "src/plugins/kibana_react/**/*",
     "src/plugins/kibana_usage_collection/**/*",
     "src/plugins/kibana_utils/**/*",
     "src/plugins/newsfeed/**/*",
-    "src/plugins/telemetry_collection_manager/**/*",
+    "src/plugins/security_oss/**/*",
+    "src/plugins/share/**/*",
     "src/plugins/telemetry/**/*",
+    "src/plugins/telemetry_collection_manager/**/*",
     "src/plugins/url_forwarding/**/*",
     "src/plugins/usage_collection/**/*",
     "src/test_utils/**/*"
@@ -26,13 +29,16 @@
   ],
   "references": [
     { "path": "./src/core/tsconfig.json" },
+    { "path": "./src/plugins/dev_tools/tsconfig.json" },
     { "path": "./src/plugins/inspector/tsconfig.json" },
     { "path": "./src/plugins/kibana_react/tsconfig.json" },
     { "path": "./src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "./src/plugins/kibana_utils/tsconfig.json" },
     { "path": "./src/plugins/newsfeed/tsconfig.json" },
-    { "path": "./src/plugins/telemetry_collection_manager/tsconfig.json" },
+    { "path": "./src/plugins/security_oss/tsconfig.json" },
+    { "path": "./src/plugins/share/tsconfig.json" },
     { "path": "./src/plugins/telemetry/tsconfig.json" },
+    { "path": "./src/plugins/telemetry_collection_manager/tsconfig.json" },
     { "path": "./src/plugins/usage_collection/tsconfig.json" },
     { "path": "./src/test_utils/tsconfig.json" }
   ]

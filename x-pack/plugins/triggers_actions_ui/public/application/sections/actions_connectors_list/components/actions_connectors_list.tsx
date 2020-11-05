@@ -20,6 +20,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useAppDependencies } from '../../../app_context';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
@@ -56,7 +57,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
   const [selectedItems, setSelectedItems] = useState<ActionConnectorTableItem[]>([]);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(false);
-  const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [editConnectorProps, setEditConnectorProps] = useState<{
     initialConnector?: ActionConnector;
@@ -134,7 +134,6 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
 
   async function editItem(actionConnector: ActionConnector, tab: EditConectorTabs) {
     setEditConnectorProps({ initialConnector: actionConnector, tab });
-    setEditFlyoutVisibility(true);
   }
 
   const actionsTableColumns = [
@@ -367,11 +366,14 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
           docLinks,
         }}
       >
-        <ConnectorAddFlyout
-          addFlyoutVisible={addFlyoutVisible}
-          setAddFlyoutVisibility={setAddFlyoutVisibility}
-          onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
-        />
+        {addFlyoutVisible ? (
+          <ConnectorAddFlyout
+            onClose={() => {
+              setAddFlyoutVisibility(false);
+            }}
+            onTestConnector={(connector) => editItem(connector, EditConectorTabs.Test)}
+          />
+        ) : null}
         {editConnectorProps.initialConnector ? (
           <ConnectorEditFlyout
             key={`${editConnectorProps.initialConnector.id}${
@@ -379,8 +381,9 @@ export const ActionsConnectorsList: React.FunctionComponent = () => {
             }`}
             initialConnector={editConnectorProps.initialConnector}
             tab={editConnectorProps.tab}
-            editFlyoutVisible={editFlyoutVisible}
-            setEditFlyoutVisibility={setEditFlyoutVisibility}
+            onClose={() => {
+              setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
+            }}
           />
         ) : null}
       </ActionsConnectorsContextProvider>
