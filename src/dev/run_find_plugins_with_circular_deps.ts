@@ -123,7 +123,6 @@ run(
       default: {
         debug: false,
       },
-      allowUnexpected: false,
       help: `
         --debug            Run the script in debug mode which enables detailed path logs for circular dependencies
       `,

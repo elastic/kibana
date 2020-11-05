@@ -12,6 +12,7 @@ def check() {
     kibanaPipeline.scriptTask('Check i18n', 'test/scripts/checks/i18n.sh'),
     kibanaPipeline.scriptTask('Check File Casing', 'test/scripts/checks/file_casing.sh'),
     kibanaPipeline.scriptTask('Check Licenses', 'test/scripts/checks/licenses.sh'),
+    kibanaPipeline.scriptTask('Check Plugins With Circular Dependencies', 'test/scripts/checks/plugins_with_circular_deps.sh'),
     kibanaPipeline.scriptTask('Verify NOTICE', 'test/scripts/checks/verify_notice.sh'),
     kibanaPipeline.scriptTask('Test Projects', 'test/scripts/checks/test_projects.sh'),
     kibanaPipeline.scriptTask('Test Hardening', 'test/scripts/checks/test_hardening.sh'),
