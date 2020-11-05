@@ -116,7 +116,7 @@ export class SecurityNavControlService {
     this.navControlRegistered = true;
   }
 
-  private sortUserMenuLinks(userMenuLinks: ReadonlyMap<string, UserMenuLink>) {
+  private sortUserMenuLinks(userMenuLinks: ReadonlyMap<string, UserMenuLink[]>) {
     return sortBy([...userMenuLinks.values()], 'order');
   }
 }
