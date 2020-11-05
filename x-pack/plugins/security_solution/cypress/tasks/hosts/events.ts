@@ -8,6 +8,7 @@ import { drag, drop } from '../common';
 import {
   CLOSE_MODAL,
   EVENTS_VIEWER_FIELDS_BUTTON,
+  EVENTS_VIEWER_PAGINATION,
   FIELDS_BROWSER_CONTAINER,
   HOST_GEO_CITY_NAME_CHECKBOX,
   HOST_GEO_COUNTRY_NAME_CHECKBOX,
@@ -56,6 +57,7 @@ export const opensInspectQueryModal = () => {
 export const waitsForEventsToBeLoaded = () => {
   cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', '0');
   cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(EVENTS_VIEWER_PAGINATION).should('exist');
 };
 
 export const dragAndDropColumn = ({

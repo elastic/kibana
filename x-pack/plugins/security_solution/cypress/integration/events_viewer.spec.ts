@@ -162,7 +162,7 @@ describe('Events Viewer', () => {
         'message@timestamphost.nameevent.moduleevent.datasetevent.actionuser.namesource.ipdestination.ip';
 
       cy.get(HEADERS_GROUP).invoke('text').should('equal', originalColumnOrder);
-      dragAndDropColumn({ column: 0, newPosition: 1 });
+      dragAndDropColumn({ column: 0, newPosition: 0 });
       cy.get(HEADERS_GROUP).invoke('text').should('equal', expectedOrderAfterDragAndDrop);
     });
   });
