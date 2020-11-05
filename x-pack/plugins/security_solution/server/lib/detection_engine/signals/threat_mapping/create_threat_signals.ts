@@ -50,7 +50,7 @@ export const createThreatSignals = async ({
   concurrentSearches,
   itemsPerSearch,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
-  logger.debug(buildRuleMessage('Indicator matching starting'));
+  logger.debug(buildRuleMessage('Indicator matching rule starting'));
   const perPage = concurrentSearches * itemsPerSearch;
 
   let results: SearchAfterAndBulkCreateReturnType = {
@@ -70,7 +70,7 @@ export const createThreatSignals = async ({
     language: threatLanguage,
     index: threatIndex,
   });
-  logger.debug(buildRuleMessage(`Total indicator items are ${threatListCount}`));
+  logger.debug(buildRuleMessage(`Total indicator items: ${threatListCount}`));
 
   let threatList = await getThreatList({
     callCluster: services.callCluster,
@@ -88,14 +88,13 @@ export const createThreatSignals = async ({
     perPage,
   });
 
-  const chunks = chunk(itemsPerSearch, threatList.hits.hits);
-  logger.debug(
-    buildRuleMessage(
-      `${chunks.length} concurrent indicator searches are starting. Each search has ${itemsPerSearch} indicator items`
-    )
-  );
-
   while (threatList.hits.hits.length !== 0) {
+    const chunks = chunk(itemsPerSearch, threatList.hits.hits);
+    logger.debug(
+      buildRuleMessage(
+        `${chunks.length} concurrent indicator searches are starting. Each search can have up to ${itemsPerSearch} indicator items per search`
+      )
+    );
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
@@ -171,6 +170,6 @@ export const createThreatSignals = async ({
     });
   }
 
-  logger.debug(buildRuleMessage('Indicator Matching completed'));
+  logger.debug(buildRuleMessage('Indicator matching rule has completed'));
   return results;
 };

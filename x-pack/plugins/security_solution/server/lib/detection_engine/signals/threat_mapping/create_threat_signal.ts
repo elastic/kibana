@@ -9,7 +9,6 @@ import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
 import { CreateThreatSignalOptions } from './types';
-import { combineResults } from './utils';
 import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
@@ -77,7 +76,7 @@ export const createThreatSignal = async ({
         `${threatFilter.query.bool.should.length} indicator items are being checked for existence of matches`
       )
     );
-    const newResult = await searchAfterAndBulkCreate({
+    const result = await searchAfterAndBulkCreate({
       gap,
       previousStartedAt,
       listClient,
@@ -104,16 +103,15 @@ export const createThreatSignal = async ({
       throttle,
       buildRuleMessage,
     });
-    const results = combineResults(currentResult, newResult);
     logger.debug(
       buildRuleMessage(
         `${
           threatFilter.query.bool.should.length
-        } items have completed match checks and the total time to search was ${
-          newResult.searchAfterTimes.length !== 0 ? newResult.searchAfterTimes : '(unknown) '
+        } items have completed match checks and the total times to search were ${
+          result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
         }ms`
       )
     );
-    return results;
+    return result;
   }
 };
