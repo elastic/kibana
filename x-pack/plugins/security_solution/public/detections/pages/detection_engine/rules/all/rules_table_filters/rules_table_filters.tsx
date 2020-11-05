@@ -12,8 +12,6 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperDatePicker,
-  OnRefreshChangeProps,
 } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 
@@ -27,11 +25,6 @@ interface RulesTableFiltersProps {
   onFilterChanged: (filterOptions: Partial<FilterOptions>) => void;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
-  isLoading: boolean;
-  isRefreshPaused: boolean;
-  refreshInterval: number;
-  onRefresh: () => void;
-  onIntervalChange: (arg: OnRefreshChangeProps) => void;
 }
 
 /**
@@ -44,11 +37,6 @@ const RulesTableFiltersComponent = ({
   onFilterChanged,
   rulesCustomInstalled,
   rulesInstalled,
-  isRefreshPaused,
-  refreshInterval,
-  isLoading,
-  onRefresh,
-  onIntervalChange,
 }: RulesTableFiltersProps) => {
   const [filter, setFilter] = useState<string>('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -86,8 +74,6 @@ const RulesTableFiltersComponent = ({
     },
     [selectedTags]
   );
-
-  const NOOP = useCallback(() => {}, []);
 
   return (
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
@@ -135,19 +121,6 @@ const RulesTableFiltersComponent = ({
             </>
           </EuiFilterButton>
         </EuiFilterGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} style={{ maxWidth: 200 }}>
-        <EuiSuperDatePicker
-          isLoading={isLoading}
-          isPaused={isRefreshPaused}
-          isDisabled={isLoading}
-          onTimeChange={NOOP}
-          onRefresh={onRefresh}
-          onRefreshChange={onIntervalChange}
-          refreshInterval={refreshInterval}
-          isAutoRefreshOnly
-          data-test-subj="allRulesFilterAutoRefresh"
-        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -22,8 +22,7 @@ export interface State {
   selectedRuleIds: string[];
   lastUpdated: number;
   showIdleModal: boolean;
-  isRefreshPaused: boolean;
-  intervalValue: number;
+  isRefreshOn: boolean;
 }
 
 export type Action =
@@ -40,8 +39,7 @@ export type Action =
   | { type: 'failure' }
   | { type: 'setLastRefreshDate' }
   | { type: 'setShowIdleModal'; show: boolean }
-  | { type: 'setAutoRefreshPaused'; paused: boolean }
-  | { type: 'setAutoRefreshInterval'; interval: number };
+  | { type: 'setAutoRefreshOn'; on: boolean };
 
 export const allRulesReducer = (
   tableRef: React.MutableRefObject<EuiBasicTable<unknown> | undefined>
@@ -141,20 +139,13 @@ export const allRulesReducer = (
       return {
         ...state,
         showIdleModal: action.show,
-        isRefreshPaused: action.show,
+        isRefreshOn: !action.show,
       };
     }
-    case 'setAutoRefreshPaused': {
+    case 'setAutoRefreshOn': {
       return {
         ...state,
-        isRefreshPaused: action.paused,
-      };
-    }
-    case 'setAutoRefreshInterval': {
-      return {
-        ...state,
-        intervalValue: action.interval,
-        isRefreshPaused: action.interval < 1 ? true : state.isRefreshPaused,
+        isRefreshOn: action.on,
       };
     }
     default:

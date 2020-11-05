@@ -13,12 +13,12 @@ import {
   EuiProgress,
   EuiOverlayMask,
   EuiConfirmModal,
-  OnRefreshChangeProps,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
 import { debounce } from 'lodash/fp';
+import styled from 'styled-components';
 
 import {
   useRules,
@@ -31,7 +31,7 @@ import {
   RulesSortingFields,
 } from '../../../../containers/detection_engine/rules';
 import { HeaderSection } from '../../../../../common/components/header_section';
-import { useKibana } from '../../../../../common/lib/kibana';
+import { useKibana, useUiSetting$ } from '../../../../../common/lib/kibana';
 import { useStateToaster } from '../../../../../common/components/toasters';
 import { Loader } from '../../../../../common/components/loader';
 import { Panel } from '../../../../../common/components/panel';
@@ -54,7 +54,13 @@ import { useFormatUrl } from '../../../../../common/components/link_to';
 import { isBoolean } from '../../../../../common/utils/privileges';
 import { AllRulesUtilityBar } from './utility_bar';
 import { LastUpdatedAt } from '../../../../../common/components/last_updated';
-import { APP_ID } from '../../../../../../common/constants';
+import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
+
+// Added min-width to fix some jitter that occurs
+// between "Updating..." and "Updated 3 seconds ago"
+const MyLastUpdatedAt = styled(LastUpdatedAt)`
+  min-width: 190px;
+`;
 
 const INITIAL_SORT_FIELD = 'enabled';
 const initialState: State = {
@@ -75,8 +81,7 @@ const initialState: State = {
   selectedRuleIds: [],
   lastUpdated: 0,
   showIdleModal: false,
-  isRefreshPaused: true,
-  intervalValue: 0,
+  isRefreshOn: true,
 };
 
 interface AllRulesProps {
@@ -133,6 +138,18 @@ export const AllRules = React.memo<AllRulesProps>(
   }) => {
     const [initLoading, setInitLoading] = useState(true);
     const tableRef = useRef<EuiBasicTable>();
+    const {
+      services: {
+        application: {
+          capabilities: { actions },
+        },
+      },
+    } = useKibana();
+    const [defaultAutoRefreshSetting] = useUiSetting$<{
+      on: boolean;
+      value: number;
+      idleTimeout: number;
+    }>(DEFAULT_RULES_TABLE_REFRESH_SETTING);
     const [
       {
         exportRuleIds,
@@ -144,26 +161,20 @@ export const AllRules = React.memo<AllRulesProps>(
         selectedRuleIds,
         lastUpdated,
         showIdleModal,
-        isRefreshPaused,
-        intervalValue,
+        isRefreshOn,
       },
       dispatch,
-    ] = useReducer(allRulesReducer(tableRef), { ...initialState, lastUpdated: Date.now() });
+    ] = useReducer(allRulesReducer(tableRef), {
+      ...initialState,
+      lastUpdated: Date.now(),
+      isRefreshOn: defaultAutoRefreshSetting.on,
+    });
     const { loading: isLoadingRulesStatuses, rulesStatuses } = useRulesStatuses(rules);
     const history = useHistory();
     const [, dispatchToaster] = useStateToaster();
     const mlCapabilities = useMlCapabilities();
     const [allRulesTab, setAllRulesTab] = useState(AllRulesTabs.rules);
     const { formatUrl } = useFormatUrl(SecurityPageName.detections);
-
-    // Auto rules info refresh refs
-    const idleTimeoutId = useRef<NodeJS.Timeout | null>(null);
-
-    const handleClearIdleTimeout = useCallback(() => {
-      if (idleTimeoutId.current != null) {
-        clearTimeout(idleTimeoutId.current);
-      }
-    }, []);
 
     // TODO: Refactor license check + hasMlAdminPermissions to common check
     const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -183,23 +194,16 @@ export const AllRules = React.memo<AllRulesProps>(
       });
     }, []);
 
-    const setAutoRefreshPaused = useCallback((paused: boolean) => {
-      dispatch({
-        type: 'setAutoRefreshPaused',
-        paused,
-      });
-    }, []);
-
-    const setAutoRefreshInterval = useCallback((interval: number) => {
-      dispatch({
-        type: 'setAutoRefreshInterval',
-        interval,
-      });
-    }, []);
-
     const setLastRefreshDate = useCallback(() => {
       dispatch({
         type: 'setLastRefreshDate',
+      });
+    }, []);
+
+    const setAutoRefreshOn = useCallback((on: boolean) => {
+      dispatch({
+        type: 'setAutoRefreshOn',
+        on,
       });
     }, []);
 
@@ -225,14 +229,6 @@ export const AllRules = React.memo<AllRulesProps>(
       rulesNotInstalled,
       rulesNotUpdated
     );
-    const {
-      services: {
-        application: {
-          capabilities: { actions },
-        },
-        storage,
-      },
-    } = useKibana();
 
     const hasActionsPrivileges = useMemo(() => (isBoolean(actions.show) ? actions.show : true), [
       actions,
@@ -371,83 +367,63 @@ export const AllRules = React.memo<AllRulesProps>(
       return false;
     }, [loadingRuleIds, loadingRulesAction]);
 
-    const handleResetIdleTimer = useCallback((): void => {
-      handleClearIdleTimeout();
-
-      if (!isRefreshPaused) {
-        idleTimeoutId.current = setTimeout(() => {
-          setShowIdleModal(true);
-        }, 2700000);
+    const handleRefreshData = useCallback((): void => {
+      if (reFetchRulesData != null && !isLoadingAnActionOnRule) {
+        reFetchRulesData(true);
+        setLastRefreshDate();
       }
-    }, [setShowIdleModal, handleClearIdleTimeout, isRefreshPaused]);
+    }, [reFetchRulesData, isLoadingAnActionOnRule, setLastRefreshDate]);
+
+    const handleResetIdleTimer = useCallback((): void => {
+      if (isRefreshOn) {
+        setShowIdleModal(true);
+        setAutoRefreshOn(false);
+      }
+    }, [setShowIdleModal, setAutoRefreshOn, isRefreshOn]);
+
+    const debounceResetIdleTimer = useMemo(() => {
+      return debounce(defaultAutoRefreshSetting.idleTimeout, handleResetIdleTimer);
+    }, [handleResetIdleTimer, defaultAutoRefreshSetting.idleTimeout]);
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        if (isRefreshOn) {
+          handleRefreshData();
+        }
+      }, defaultAutoRefreshSetting.value);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }, [isRefreshOn, handleRefreshData, defaultAutoRefreshSetting.value]);
 
     const handleIdleModalContinue = useCallback((): void => {
       setShowIdleModal(false);
-    }, [setShowIdleModal]);
+      handleRefreshData();
+      setAutoRefreshOn(true);
+    }, [setShowIdleModal, setAutoRefreshOn, handleRefreshData]);
 
-    const handleRefreshData = useCallback(
-      (forceRefresh = false): void => {
-        if (
-          reFetchRulesData != null &&
-          !isLoadingAnActionOnRule &&
-          (!isRefreshPaused || forceRefresh)
-        ) {
-          reFetchRulesData(true);
-          setLastRefreshDate();
+    const handleAutoRefreshSwitch = useCallback(
+      (refreshOn: boolean) => {
+        if (refreshOn) {
+          handleRefreshData();
         }
+        setAutoRefreshOn(refreshOn);
       },
-      [reFetchRulesData, isLoadingAnActionOnRule, isRefreshPaused, setLastRefreshDate]
+      [setAutoRefreshOn, handleRefreshData]
     );
-
-    const setLocalStorage = useCallback(
-      (paused: boolean, newInterval: number) => {
-        storage.set(`${APP_ID}.detections.allRules.timeRefresh`, [paused, newInterval]);
-      },
-      [storage]
-    );
-
-    const debounceSetLocalStorage = useMemo(() => debounce(500, setLocalStorage), [
-      setLocalStorage,
-    ]);
-
-    const handleRefreshDataInterval = useCallback(
-      ({ isPaused, refreshInterval: interval }: OnRefreshChangeProps) => {
-        setAutoRefreshPaused(isPaused);
-        setAutoRefreshInterval(interval);
-
-        // refresh data when refresh interval is activated
-        if (interval > 0) {
-          debounceSetLocalStorage(isPaused, interval);
-        }
-      },
-      [debounceSetLocalStorage, setAutoRefreshInterval, setAutoRefreshPaused]
-    );
-
-    // on initial render, want to check if user has any interval info
-    useEffect((): void => {
-      if (initLoading) {
-        const [isStoredRefreshPaused, storedRefreshInterval] = storage.get(
-          `${APP_ID}.detections.allRules.timeRefresh`
-        ) ?? [true, 0];
-        setAutoRefreshPaused(isStoredRefreshPaused);
-        setAutoRefreshInterval(storedRefreshInterval);
-      }
-    }, [initLoading, setAutoRefreshInterval, setAutoRefreshPaused, storage]);
 
     useEffect(() => {
-      handleResetIdleTimer();
+      debounceResetIdleTimer();
 
-      const fetchSuggestions = debounce(500, handleResetIdleTimer);
-
-      window.addEventListener('mousemove', fetchSuggestions, { passive: true });
-      window.addEventListener('keydown', fetchSuggestions);
+      window.addEventListener('mousemove', debounceResetIdleTimer, { passive: true });
+      window.addEventListener('keydown', debounceResetIdleTimer);
 
       return () => {
-        handleClearIdleTimeout();
-        window.removeEventListener('mousemove', fetchSuggestions);
-        window.removeEventListener('keydown', fetchSuggestions);
+        window.removeEventListener('mousemove', debounceResetIdleTimer);
+        window.removeEventListener('keydown', debounceResetIdleTimer);
       };
-    }, [handleClearIdleTimeout, handleResetIdleTimer]);
+    }, [handleResetIdleTimer, debounceResetIdleTimer]);
 
     const shouldShowRulesTable = useMemo(
       (): boolean => showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading,
@@ -529,7 +505,7 @@ export const AllRules = React.memo<AllRulesProps>(
               growLeftSplit={false}
               title={i18n.ALL_RULES}
               subtitle={
-                <LastUpdatedAt
+                <MyLastUpdatedAt
                   showUpdating={loading || isLoadingRules || isLoadingRulesStatuses}
                   updatedAt={lastUpdated}
                 />
@@ -539,11 +515,6 @@ export const AllRules = React.memo<AllRulesProps>(
                 onFilterChanged={onFilterChangedCallback}
                 rulesCustomInstalled={rulesCustomInstalled}
                 rulesInstalled={rulesInstalled}
-                isRefreshPaused={isRefreshPaused}
-                refreshInterval={intervalValue}
-                isLoading={loading || isLoadingRules || isLoadingRulesStatuses}
-                onRefresh={handleRefreshData}
-                onIntervalChange={handleRefreshDataInterval}
               />
             </HeaderSection>
 
@@ -582,6 +553,8 @@ export const AllRules = React.memo<AllRulesProps>(
                   numberSelectedRules={selectedRuleIds.length}
                   onGetBatchItemsPopoverContent={getBatchItemsPopoverContent}
                   onRefresh={handleRefreshData}
+                  isAutoRefreshOn={isRefreshOn}
+                  onRefreshSwitch={handleAutoRefreshSwitch}
                 />
                 <AllRulesTables
                   selectedTab={allRulesTab}

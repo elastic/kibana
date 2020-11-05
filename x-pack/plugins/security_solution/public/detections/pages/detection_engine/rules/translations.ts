@@ -576,30 +576,16 @@ export const REFRESH_PROMPT_BODY = i18n.translate(
   }
 );
 
-export const REFRESH_RULE_POPOVER_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverTitle',
+export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverDescription',
   {
-    defaultMessage: 'Auto refresh',
+    defaultMessage: 'Automatically refresh table',
   }
 );
 
-export const REFRESH_RULE_POPOVER_LEGEND = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLegend',
+export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLabel',
   {
-    defaultMessage: 'Refresh rules every',
-  }
-);
-
-export const REFRESH_ON = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.refreshRuleOn',
-  {
-    defaultMessage: 'on',
-  }
-);
-
-export const REFRESH_OFF = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.refreshRuleOff',
-  {
-    defaultMessage: 'off',
+    defaultMessage: 'Refresh settings',
   }
 );

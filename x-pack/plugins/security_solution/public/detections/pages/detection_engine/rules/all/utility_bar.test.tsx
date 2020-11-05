@@ -8,6 +8,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { ThemeProvider } from 'styled-components';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
+import { waitFor } from '@testing-library/react';
 
 import { AllRulesUtilityBar } from './utility_bar';
 
@@ -21,6 +22,8 @@ describe('AllRules', () => {
           paginationTotal={4}
           numberSelectedRules={1}
           onGetBatchItemsPopoverContent={jest.fn()}
+          isAutoRefreshOn={true}
+          onRefreshSwitch={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -40,6 +43,8 @@ describe('AllRules', () => {
           paginationTotal={4}
           numberSelectedRules={1}
           onGetBatchItemsPopoverContent={jest.fn()}
+          isAutoRefreshOn={true}
+          onRefreshSwitch={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -56,6 +61,8 @@ describe('AllRules', () => {
           paginationTotal={4}
           numberSelectedRules={1}
           onGetBatchItemsPopoverContent={jest.fn()}
+          isAutoRefreshOn={true}
+          onRefreshSwitch={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -73,6 +80,8 @@ describe('AllRules', () => {
           paginationTotal={4}
           numberSelectedRules={1}
           onGetBatchItemsPopoverContent={jest.fn()}
+          isAutoRefreshOn={true}
+          onRefreshSwitch={jest.fn()}
         />
       </ThemeProvider>
     );
@@ -80,5 +89,28 @@ describe('AllRules', () => {
     wrapper.find('[data-test-subj="refreshRulesAction"] button').at(0).simulate('click');
 
     expect(mockRefresh).toHaveBeenCalled();
+  });
+
+  it('invokes onRefreshSwitch when auto refresh switch is clicked', async () => {
+    const mockSwitch = jest.fn();
+    const wrapper = mount(
+      <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
+        <AllRulesUtilityBar
+          userHasNoPermissions={false}
+          onRefresh={jest.fn()}
+          paginationTotal={4}
+          numberSelectedRules={1}
+          onGetBatchItemsPopoverContent={jest.fn()}
+          isAutoRefreshOn={true}
+          onRefreshSwitch={mockSwitch}
+        />
+      </ThemeProvider>
+    );
+
+    await waitFor(() => {
+      wrapper.find('[data-test-subj="refreshSettings"] button').first().simulate('click');
+      wrapper.find('[data-test-subj="refreshSettingsSwitch"] button').first().simulate('click');
+      expect(mockSwitch).toHaveBeenCalledTimes(1);
+    });
   });
 });

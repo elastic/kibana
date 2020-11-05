@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiContextMenuPanel } from '@elastic/eui';
+import { EuiContextMenuPanel, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import React, { useCallback } from 'react';
 
 import {
@@ -20,8 +20,10 @@ interface AllRulesUtilityBarProps {
   userHasNoPermissions: boolean;
   numberSelectedRules: number;
   paginationTotal: number;
+  isAutoRefreshOn: boolean;
   onRefresh: (refreshRule: boolean) => void;
   onGetBatchItemsPopoverContent: (closePopover: () => void) => JSX.Element[];
+  onRefreshSwitch: (checked: boolean) => void;
 }
 
 export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
@@ -31,12 +33,40 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
     paginationTotal,
     numberSelectedRules,
     onGetBatchItemsPopoverContent,
+    isAutoRefreshOn,
+    onRefreshSwitch,
   }) => {
     const handleGetBatchItemsPopoverContent = useCallback(
       (closePopover: () => void) => (
         <EuiContextMenuPanel items={onGetBatchItemsPopoverContent(closePopover)} />
       ),
       [onGetBatchItemsPopoverContent]
+    );
+
+    const handleAutoRefreshSwitch = useCallback(
+      (closePopover: () => void) => (e: EuiSwitchEvent) => {
+        onRefreshSwitch(e.target.checked);
+        closePopover();
+      },
+      [onRefreshSwitch]
+    );
+
+    const handleGetRefreshSettingsPopoverContent = useCallback(
+      (closePopover: () => void) => (
+        <EuiContextMenuPanel
+          items={[
+            <EuiSwitch
+              key="allRulesAutoRefreshSwitch"
+              label={i18n.REFRESH_RULE_POPOVER_DESCRIPTION}
+              checked={isAutoRefreshOn}
+              onChange={handleAutoRefreshSwitch(closePopover)}
+              compressed
+              data-test-subj="refreshSettingsSwitch"
+            />,
+          ]}
+        />
+      ),
+      [isAutoRefreshOn, handleAutoRefreshSwitch]
     );
 
     return (
@@ -69,6 +99,14 @@ export const AllRulesUtilityBar = React.memo<AllRulesUtilityBarProps>(
               onClick={onRefresh}
             >
               {i18n.REFRESH}
+            </UtilityBarAction>
+            <UtilityBarAction
+              dataTestSubj="refreshSettings"
+              iconSide="right"
+              iconType="arrowDown"
+              popoverContent={handleGetRefreshSettingsPopoverContent}
+            >
+              {i18n.REFRESH_RULE_POPOVER_LABEL}
             </UtilityBarAction>
           </UtilityBarGroup>
         </UtilityBarSection>

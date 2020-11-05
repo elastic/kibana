@@ -26,8 +26,7 @@ const initialState: State = {
   selectedRuleIds: [],
   lastUpdated: 0,
   showIdleModal: false,
-  isRefreshPaused: true,
-  intervalValue: 0,
+  isRefreshOn: false,
 };
 
 describe('allRulesReducer', () => {
@@ -228,68 +227,43 @@ describe('allRulesReducer', () => {
 
   describe('#setShowIdleModal', () => {
     test('should hide idle modal and restart refresh if "show" is false', () => {
-      const { showIdleModal, isRefreshPaused } = reducer(initialState, {
+      const { showIdleModal, isRefreshOn } = reducer(initialState, {
         type: 'setShowIdleModal',
         show: false,
       });
 
       expect(showIdleModal).toBeFalsy();
-      expect(isRefreshPaused).toBeFalsy();
+      expect(isRefreshOn).toBeTruthy();
     });
 
     test('should show idle modal and pause refresh if "show" is true', () => {
-      const { showIdleModal, isRefreshPaused } = reducer(initialState, {
+      const { showIdleModal, isRefreshOn } = reducer(initialState, {
         type: 'setShowIdleModal',
         show: true,
       });
 
       expect(showIdleModal).toBeTruthy();
-      expect(isRefreshPaused).toBeTruthy();
+      expect(isRefreshOn).toBeFalsy();
     });
   });
 
-  describe('#setAutoRefreshPaused', () => {
+  describe('#setAutoRefreshOn', () => {
     test('should pause auto refresh if "paused" is true', () => {
-      const { isRefreshPaused } = reducer(initialState, {
-        type: 'setAutoRefreshPaused',
-        paused: true,
+      const { isRefreshOn } = reducer(initialState, {
+        type: 'setAutoRefreshOn',
+        on: true,
       });
 
-      expect(isRefreshPaused).toBeTruthy();
+      expect(isRefreshOn).toBeTruthy();
     });
 
     test('should resume auto refresh if "paused" is false', () => {
-      const { isRefreshPaused } = reducer(initialState, {
-        type: 'setAutoRefreshPaused',
-        paused: false,
+      const { isRefreshOn } = reducer(initialState, {
+        type: 'setAutoRefreshOn',
+        on: false,
       });
 
-      expect(isRefreshPaused).toBeFalsy();
-    });
-  });
-
-  describe('#setAutoRefreshInterval', () => {
-    test('should pause auto refresh if interval is 0', () => {
-      const { isRefreshPaused, intervalValue } = reducer(
-        { ...initialState, isRefreshPaused: false },
-        {
-          type: 'setAutoRefreshInterval',
-          interval: 0,
-        }
-      );
-
-      expect(isRefreshPaused).toBeTruthy();
-      expect(intervalValue).toEqual(0);
-    });
-
-    test('should update auto refresh interval', () => {
-      const { isRefreshPaused, intervalValue } = reducer(initialState, {
-        type: 'setAutoRefreshInterval',
-        interval: 30000,
-      });
-
-      expect(isRefreshPaused).toEqual(initialState.isRefreshPaused);
-      expect(intervalValue).toEqual(30000);
+      expect(isRefreshOn).toBeFalsy();
     });
   });
 });

@@ -25,9 +25,6 @@ import {
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
   NEXT_BTN,
-  RULE_AUTO_REFRESH_BUTTON,
-  RULE_AUTO_REFRESH_INPUT,
-  ALL_RULES_PANEL,
   ASYNC_LOADING_PROGRESS,
   RULE_AUTO_REFRESH_IDLE_MODAL,
   RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE,
@@ -128,12 +125,6 @@ export const waitForRulesToBeLoaded = () => {
   cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
 };
 
-export const setAllRulesAutoRefreshIntervalInSeconds = (interval: number) => {
-  cy.get(RULE_AUTO_REFRESH_BUTTON).eq(1).should('exist').click({ force: true, multiple: true });
-  cy.get(RULE_AUTO_REFRESH_INPUT).type('{selectall}').type(`${interval}{enter}`);
-  cy.get(ALL_RULES_PANEL).first().click({ force: true, multiple: true });
-};
-
 // when using, ensure you've called cy.clock prior in test
 export const checkAutoRefresh = (ms: number, condition: string) => {
   cy.get(ASYNC_LOADING_PROGRESS).should('not.be.visible');
@@ -155,7 +146,6 @@ export const checkAllRulesIdleModal = (condition: string) => {
 };
 
 export const resetAllRulesIdleModalTimeout = () => {
-  cy.clock(Date.now(), ['setTimeout']);
   cy.tick(2000000);
   cy.window().trigger('mousemove', { force: true });
   cy.tick(700000);

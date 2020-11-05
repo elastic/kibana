@@ -18,11 +18,6 @@ describe('RulesTableFilters', () => {
           onFilterChanged={jest.fn()}
           rulesCustomInstalled={null}
           rulesInstalled={null}
-          isLoading={false}
-          isRefreshPaused={true}
-          refreshInterval={0}
-          onRefresh={jest.fn()}
-          onIntervalChange={jest.fn()}
         />
       );
 
@@ -42,11 +37,6 @@ describe('RulesTableFilters', () => {
           onFilterChanged={jest.fn()}
           rulesCustomInstalled={10}
           rulesInstalled={9}
-          isLoading={false}
-          isRefreshPaused={true}
-          refreshInterval={0}
-          onRefresh={jest.fn()}
-          onIntervalChange={jest.fn()}
         />
       );
 
