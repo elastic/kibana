@@ -80,9 +80,9 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     const scope = React.useMemo(() => this.buildEditorScope(context), [context]);
     return (
       <UrlDrilldownCollectConfig
+        variables={['test']}
         config={config}
         onConfig={onConfig}
-        scope={scope}
         syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
         variablesHelpDocsLink={this.deps.getVariablesHelpDocsLink()}
       />
