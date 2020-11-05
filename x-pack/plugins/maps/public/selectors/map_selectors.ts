@@ -34,6 +34,7 @@ import {
 import { extractFeaturesFromFilters } from '../../common/elasticsearch_util';
 import { MapStoreState } from '../reducers/store';
 import {
+  AbstractSourceDescriptor,
   DataRequestDescriptor,
   DrawState,
   Goto,
@@ -94,7 +95,13 @@ export function createLayerInstance(
   }
 }
 
-function createSourceInstance(sourceDescriptor: any, inspectorAdapters?: Adapters): ISource {
+function createSourceInstance(
+  sourceDescriptor: AbstractSourceDescriptor | null,
+  inspectorAdapters?: Adapters
+): ISource {
+  if (sourceDescriptor === null) {
+    throw new Error('Source-descriptor should be initialized');
+  }
   const source = getSourceByType(sourceDescriptor.type);
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
