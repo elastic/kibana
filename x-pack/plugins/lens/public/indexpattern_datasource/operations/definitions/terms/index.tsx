@@ -63,7 +63,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       newField &&
         supportedTypes.has(newField.type) &&
         newField.aggregatable &&
-        !newIndexPattern.hasRestrictions
+        (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms) &&
+        (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
   buildColumn({ suggestedPriority, columns, field, indexPattern }) {
