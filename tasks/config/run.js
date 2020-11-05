@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
-
 const { version } = require('../../package.json');
 const KIBANA_INSTALL_DIR =
   process.env.KIBANA_INSTALL_DIR ||
@@ -239,9 +237,5 @@ module.exports = function () {
       'test:jest_integration'
     ),
     test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
-
-    ...getFunctionalTestGroupRunConfigs({
-      kibanaInstallDir: KIBANA_INSTALL_DIR,
-    }),
   };
 };
