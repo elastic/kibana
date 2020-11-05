@@ -29,8 +29,7 @@ describe('getObservabilityAlerts', () => {
       },
     } as unknown) as CoreStart;
 
-    const alerts = await getObservabilityAlerts({ core });
-    expect(alerts).toEqual([]);
+    expect(getObservabilityAlerts({ core })).rejects.toThrow('Boom');
   });
 
   it('Returns empty array when api return undefined', async () => {
@@ -55,26 +54,11 @@ describe('getObservabilityAlerts', () => {
         get: async () => {
           return {
             data: [
-              {
-                id: 1,
-                consumer: 'siem',
-              },
-              {
-                id: 2,
-                consumer: 'kibana',
-              },
-              {
-                id: 3,
-                consumer: 'index',
-              },
-              {
-                id: 4,
-                consumer: 'foo',
-              },
-              {
-                id: 5,
-                consumer: 'bar',
-              },
+              { id: 1, consumer: 'siem' },
+              { id: 2, consumer: 'kibana' },
+              { id: 3, consumer: 'index' },
+              { id: 4, consumer: 'foo' },
+              { id: 5, consumer: 'bar' },
             ],
           };
         },
@@ -91,30 +75,12 @@ describe('getObservabilityAlerts', () => {
         get: async () => {
           return {
             data: [
-              {
-                id: 1,
-                consumer: 'siem',
-              },
-              {
-                id: 2,
-                consumer: 'apm',
-              },
-              {
-                id: 3,
-                consumer: 'uptime',
-              },
-              {
-                id: 4,
-                consumer: 'logs',
-              },
-              {
-                id: 5,
-                consumer: 'metrics',
-              },
-              {
-                id: 6,
-                consumer: 'alerts',
-              },
+              { id: 1, consumer: 'siem' },
+              { id: 2, consumer: 'apm' },
+              { id: 3, consumer: 'uptime' },
+              { id: 4, consumer: 'logs' },
+              { id: 5, consumer: 'metrics' },
+              { id: 6, consumer: 'alerts' },
             ],
           };
         },

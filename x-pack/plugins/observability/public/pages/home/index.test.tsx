@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { HasDataContextValue } from '../../context/has_data_context';
 import * as hasData from '../../hooks/use_has_data';
 import { render } from '../../utils/test_helper';
 import { HomePage } from './';
@@ -24,21 +25,30 @@ describe('Home page', () => {
   it('renders loading component while requests are not returned', () => {
     jest
       .spyOn(hasData, 'useHasData')
-      .mockImplementation(() => ({ hasData: {}, hasAnyData: false, isAllRequestsComplete: false }));
+      .mockImplementation(
+        () =>
+          ({ hasData: {}, hasAnyData: false, isAllRequestsComplete: false } as HasDataContextValue)
+      );
     const { getByText } = render(<HomePage />);
     expect(getByText('Loading Observability')).toBeInTheDocument();
   });
   it('renders landing page', () => {
     jest
       .spyOn(hasData, 'useHasData')
-      .mockImplementation(() => ({ hasData: {}, hasAnyData: false, isAllRequestsComplete: true }));
+      .mockImplementation(
+        () =>
+          ({ hasData: {}, hasAnyData: false, isAllRequestsComplete: true } as HasDataContextValue)
+      );
     render(<HomePage />);
     expect(mockHistoryPush).toHaveBeenCalledWith({ pathname: '/landing' });
   });
   it('renders overview page', () => {
     jest
       .spyOn(hasData, 'useHasData')
-      .mockImplementation(() => ({ hasData: {}, hasAnyData: true, isAllRequestsComplete: false }));
+      .mockImplementation(
+        () =>
+          ({ hasData: {}, hasAnyData: true, isAllRequestsComplete: false } as HasDataContextValue)
+      );
     render(<HomePage />);
     expect(mockHistoryPush).toHaveBeenCalledWith({ pathname: '/overview' });
   });

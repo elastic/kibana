@@ -22,7 +22,7 @@ export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasData } = useHasData();
   const { rangeFrom, rangeTo, absStart, absEnd } = useTimeRange();
   const uxHasDataResponse = (hasData.ux?.hasData as UXHasDataResponse) || {};
-  const { serviceName } = uxHasDataResponse;
+  const serviceName = uxHasDataResponse.serviceName as string;
 
   const { data, status } = useFetcher(
     () => {
@@ -30,7 +30,7 @@ export function UXSection({ bucketSize }: Props) {
         return getDataHandler('ux')?.fetchData({
           absoluteTime: { start: absStart, end: absEnd },
           relativeTime: { start: rangeFrom, end: rangeTo },
-          serviceName: serviceName as string,
+          serviceName,
           bucketSize,
         });
       }

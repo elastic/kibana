@@ -6,8 +6,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
-import { Alert } from '../../../../alerts/common';
 import { useTrackPageview } from '../..';
+import { Alert } from '../../../../alerts/common';
 import { EmptySections } from '../../components/app/empty_sections';
 import { WithHeaderLayout } from '../../components/app/layout/with_header';
 import { NewsFeed } from '../../components/app/news_feed';
@@ -20,7 +20,6 @@ import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { RouteParams } from '../../routes';
 import { getNewsFeed } from '../../services/get_news_feed';
-import { getObservabilityAlerts } from '../../services/get_observability_alerts';
 import { getBucketSize } from '../../utils/get_bucket_size';
 import { DataSections } from './data_sections';
 import { LoadingObservability } from './loading_observability';

@@ -10,6 +10,12 @@ import { CoreStart } from 'kibana/public';
 import { ObservabilityPluginSetupDeps } from '../plugin';
 import * as kibanaUISettings from './use_kibana_ui_settings';
 
+jest.mock('react-router-dom', () => ({
+  useLocation: () => ({
+    pathname: '/observability/overview/',
+  }),
+}));
+
 describe('useTimeRange', () => {
   beforeAll(() => {
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
@@ -34,26 +40,13 @@ describe('useTimeRange', () => {
       to: '2020-10-08T06:00:00.000Z',
     }));
   });
-  describe('when range from and to are provided', () => {
-    it('returns the same ranges and its absolute time', () => {
-      const rangeFrom = '2020-10-08T07:00:00.000Z';
-      const rangeTo = '2020-10-08T08:00:00.000Z';
-      const timeRange = useTimeRange({ rangeFrom, rangeTo });
-      expect(timeRange).toEqual({
-        rangeFrom,
-        rangeTo,
-        absStart: new Date(rangeFrom).valueOf(),
-        absEnd: new Date(rangeTo).valueOf(),
-      });
-    });
-  });
 
   describe('when range from and to are not provided', () => {
     describe('when data plugin has time set', () => {
       it('returns ranges and absolute times from data plugin', () => {
         const rangeFrom = '2020-10-08T06:00:00.000Z';
         const rangeTo = '2020-10-08T07:00:00.000Z';
-        const timeRange = useTimeRange({});
+        const timeRange = useTimeRange();
         expect(timeRange).toEqual({
           rangeFrom,
           rangeTo,
@@ -85,7 +78,7 @@ describe('useTimeRange', () => {
       it('returns ranges and absolute times from kibana default settings', () => {
         const rangeFrom = '2020-10-08T05:00:00.000Z';
         const rangeTo = '2020-10-08T06:00:00.000Z';
-        const timeRange = useTimeRange({});
+        const timeRange = useTimeRange();
         expect(timeRange).toEqual({
           rangeFrom,
           rangeTo,
