@@ -252,30 +252,26 @@ export const AlertForm = ({
       {alertTypeModel?.description && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiText color="subdued" data-test-subj="alertDescription">
-              {alertTypeModel.description}
+            <EuiText color="subdued" size="s" data-test-subj="alertDescription">
+              {alertTypeModel.description}&nbsp;
+              {alertTypeModel?.documentationUrl && (
+                <EuiLink
+                  external
+                  target="_blank"
+                  data-test-subj="alertDocumentationLink"
+                  href={
+                    typeof alertTypeModel.documentationUrl === 'function'
+                      ? alertTypeModel.documentationUrl(docLinks)
+                      : alertTypeModel.documentationUrl
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertForm.documentationLabel"
+                    defaultMessage="Documentation"
+                  />
+                </EuiLink>
+              )}
             </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {alertTypeModel?.documentationUrl && (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiLink
-              external
-              target="_blank"
-              data-test-subj="alertDocumentationLink"
-              href={
-                typeof alertTypeModel.documentationUrl === 'function'
-                  ? alertTypeModel.documentationUrl(docLinks)
-                  : alertTypeModel.documentationUrl
-              }
-            >
-              <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertForm.documentationLabel"
-                defaultMessage="Documentation"
-              />
-            </EuiLink>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
