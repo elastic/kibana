@@ -166,20 +166,8 @@ export const TimelineComponent: React.FC<Props> = ({
         filters,
         kqlQuery,
         kqlMode,
-        start,
-        end,
       }),
-    [
-      browserFields,
-      dataProviders,
-      esQueryConfig,
-      start,
-      end,
-      filters,
-      indexPattern,
-      kqlMode,
-      kqlQuery,
-    ]
+    [browserFields, dataProviders, esQueryConfig, filters, indexPattern, kqlMode, kqlQuery]
   );
 
   const canQueryTimeline = useMemo(
