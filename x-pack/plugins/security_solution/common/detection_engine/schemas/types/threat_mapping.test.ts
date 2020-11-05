@@ -5,6 +5,8 @@
  */
 
 import {
+  concurrent_searches,
+  items_per_search,
   ThreatMapping,
   threatMappingEntries,
   ThreatMappingEntries,
@@ -170,6 +172,50 @@ describe('threat_mapping', () => {
 
     expect(getPaths(left(message.errors))).toEqual([
       'Invalid value "5" supplied to "entries,field"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should not validate concurrent_searches if it is < 0', () => {
+    const payload = -1;
+    const decoded = concurrent_searches.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should not validate concurrent_searches if it is 0', () => {
+    const payload = 0;
+    const decoded = concurrent_searches.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should not validate items_per_search if it is 0', () => {
+    const payload = 0;
+    const decoded = items_per_search.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "0" supplied to "PositiveIntegerGreaterThanZero"',
+    ]);
+    expect(message.schema).toEqual({});
+  });
+
+  test('it should not validate items_per_search if it < 0', () => {
+    const payload = -1;
+    const decoded = items_per_search.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual([
+      'Invalid value "-1" supplied to "PositiveIntegerGreaterThanZero"',
     ]);
     expect(message.schema).toEqual({});
   });
