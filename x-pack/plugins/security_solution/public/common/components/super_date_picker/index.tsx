@@ -91,17 +91,18 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     toStr,
     updateReduxTime,
   }) => {
-    const [isQuickSelection, setIsQuickSelection] = useState(true);
+    // const [isQuickSelection, setIsQuickSelection] = useState(true);
     const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
       []
     );
     const onRefresh = useCallback(
       ({ start: newStart, end: newEnd }: OnRefreshProps): void => {
+        const isQuickSelection = newStart.includes('now') || newEnd.includes('now');
         const { kqlHaveBeenUpdated } = updateReduxTime({
           end: newEnd,
           id,
           isInvalid: false,
-          isQuickSelection: kind === 'absolute' ? false : isQuickSelection,
+          isQuickSelection,
           kql: kqlQuery,
           start: newStart,
           timelineId,
@@ -117,11 +118,12 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           refetchQuery(queries);
         }
       },
-      [end, id, isQuickSelection, kind, kqlQuery, queries, start, timelineId, updateReduxTime]
+      [end, id, kqlQuery, queries, start, timelineId, updateReduxTime]
     );
 
     const onRefreshChange = useCallback(
       ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
+        const isQuickSelection = fromStr?.includes('now') || toStr?.includes('now');
         if (duration !== refreshInterval) {
           setDuration({ id, duration: refreshInterval });
         }
@@ -137,7 +139,7 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
         }
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id, isQuickSelection, duration, policy, toStr]
+      [id, fromStr, duration, policy, toStr]
     );
 
     const refetchQuery = (newQueries: inputsModel.GlobalGraphqlQuery[]) => {
@@ -145,18 +147,14 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     };
 
     const onTimeChange = useCallback(
-      ({
-        start: newStart,
-        end: newEnd,
-        isQuickSelection: newIsQuickSelection,
-        isInvalid,
-      }: OnTimeChangeProps) => {
+      ({ start: newStart, end: newEnd, isInvalid }: OnTimeChangeProps) => {
+        const isQuickSelection = newStart.includes('now') || newEnd.includes('now');
         if (!isInvalid) {
           updateReduxTime({
             end: newEnd,
             id,
             isInvalid,
-            isQuickSelection: newIsQuickSelection,
+            isQuickSelection,
             kql: kqlQuery,
             start: newStart,
             timelineId,
@@ -173,7 +171,6 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           ];
 
           setRecentlyUsedRanges(newRecentlyUsedRanges);
-          setIsQuickSelection(newIsQuickSelection);
         }
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -295,6 +292,19 @@ export const makeMapStateToProps = () => {
   const getToStrSelector = toStrSelector();
   return (state: State, { id }: OwnProps) => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
+    const queries = !isEmpty(inputsRange.linkTo)
+      ? [
+          ...(getQueriesSelector(inputsRange) as inputsModel.GlobalGraphqlQuery[]),
+          ...inputsRange.linkTo.reduce<inputsModel.GlobalGraphqlQuery[]>((acc, linkToId) => {
+            const linkToIdInputsRange: InputsRange = getOr({}, `inputs.${linkToId}`, state);
+            return [
+              ...acc,
+              ...getQueriesSelector(linkToIdInputsRange),
+            ] as inputsModel.GlobalGraphqlQuery[];
+          }, []),
+        ]
+      : (getQueriesSelector(inputsRange) as inputsModel.GlobalGraphqlQuery[]);
+
     return {
       duration: getDurationSelector(inputsRange),
       end: getEndSelector(inputsRange),
@@ -303,7 +313,7 @@ export const makeMapStateToProps = () => {
       kind: getKindSelector(inputsRange),
       kqlQuery: getKqlQuerySelector(inputsRange) as inputsModel.GlobalKqlQuery,
       policy: getPolicySelector(inputsRange),
-      queries: getQueriesSelector(inputsRange) as inputsModel.GlobalGraphqlQuery[],
+      queries,
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
     };
