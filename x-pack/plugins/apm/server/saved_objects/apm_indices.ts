@@ -32,4 +32,9 @@ export const apmIndices: SavedObjectsType = {
       },
     },
   },
+  management: {
+    importableAndExportable: true,
+    icon: 'apmApp',
+    getTitle: () => 'APM Settings - Indices',
+  },
 };
