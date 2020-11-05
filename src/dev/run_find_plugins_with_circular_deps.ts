@@ -26,6 +26,10 @@ interface Options {
   debug?: boolean;
 }
 
+interface CircularDepList {
+  [key: string]: string;
+}
+
 const allowedList = {
   'src/plugins/data': 'src/plugins/visualizations',
   'src/plugins/home': 'src/plugins/discover',
@@ -40,7 +44,7 @@ const allowedList = {
 run(
   async ({ flags, log }) => {
     const { debug = false } = flags as Options;
-    const foundList: any = {};
+    const foundList: CircularDepList = {};
     const depTree = await parseDependencyTree(['{src,x-pack}/plugins/**/*'], {
       include: /(src|x-pack)\/plugins\/.*/,
     });
@@ -80,10 +84,10 @@ run(
     }
 
     // Always log the result of comparing the found list with the allowed list
-    const diffObject = (first: any, second: any) =>
+    const diffObject = (first: CircularDepList, second: CircularDepList) =>
       fromPairs(differenceWith(toPairs(first), toPairs(second), isEqual));
 
-    const printList = (list: any) => {
+    const printList = (list: CircularDepList) => {
       return Object.keys(list).reduce((listStr, key) => {
         return listStr ? `${listStr}\n${key} -> ${list[key]}` : `${key} -> ${list[key]}`;
       }, '');
