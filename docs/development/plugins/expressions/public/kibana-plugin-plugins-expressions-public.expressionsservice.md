@@ -15,7 +15,7 @@ so that JSDoc appears in developers IDE when they use those `plugins.expressions
 <b>Signature:</b>
 
 ```typescript
-export declare class ExpressionsService implements PersistableState<ExpressionAstExpression> 
+export declare class ExpressionsService implements PersistableStateService<ExpressionAstExpression> 
 ```
 
 ## Constructors

@@ -376,10 +376,11 @@ export interface EmbeddableEditorState {
 }
 
 // Warning: (ae-forgotten-export) The symbol "PersistableState" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "EmbeddableStateWithType" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "EmbeddableFactory" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public
-export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = EmbeddableInput, TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput, TEmbeddable extends IEmbeddable<TEmbeddableInput, TEmbeddableOutput> = IEmbeddable<TEmbeddableInput, TEmbeddableOutput>, TSavedObjectAttributes extends SavedObjectAttributes_2 = SavedObjectAttributes_2> extends PersistableState<EmbeddableInput> {
+export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = EmbeddableInput, TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput, TEmbeddable extends IEmbeddable<TEmbeddableInput, TEmbeddableOutput> = IEmbeddable<TEmbeddableInput, TEmbeddableOutput>, TSavedObjectAttributes extends SavedObjectAttributes_2 = SavedObjectAttributes_2> extends PersistableState<EmbeddableStateWithType> {
     canCreateNew(): boolean;
     create(initialInput: TEmbeddableInput, parent?: IContainer): Promise<TEmbeddable | ErrorEmbeddable | undefined>;
     createFromSavedObject(savedObjectId: string, input: Partial<TEmbeddableInput>, parent?: IContainer): Promise<TEmbeddable | ErrorEmbeddable>;
@@ -399,7 +400,7 @@ export interface EmbeddableFactory<TEmbeddableInput extends EmbeddableInput = Em
 // Warning: (ae-missing-release-tag) "EmbeddableFactoryDefinition" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export type EmbeddableFactoryDefinition<I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<I, O> = IEmbeddable<I, O>, T extends SavedObjectAttributes = SavedObjectAttributes> = Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> & Partial<Pick<EmbeddableFactory<I, O, E, T>, 'createFromSavedObject' | 'isContainerType' | 'getExplicitInput' | 'savedObjectMetaData' | 'canCreateNew' | 'getDefaultInput' | 'telemetry' | 'extract' | 'inject'>>;
+export type EmbeddableFactoryDefinition<I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable<I, O> = IEmbeddable<I, O>, T extends SavedObjectAttributes = SavedObjectAttributes> = Pick<EmbeddableFactory<I, O, E, T>, 'create' | 'type' | 'isEditable' | 'getDisplayName'> & Partial<Pick<EmbeddableFactory<I, O, E, T>, 'createFromSavedObject' | 'isContainerType' | 'getExplicitInput' | 'savedObjectMetaData' | 'canCreateNew' | 'getDefaultInput' | 'telemetry' | 'extract' | 'inject' | 'migrations'>>;
 
 // Warning: (ae-missing-release-tag) "EmbeddableFactoryNotFoundError" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
@@ -559,10 +560,11 @@ export interface EmbeddableSetupDependencies {
     uiActions: UiActionsSetup;
 }
 
+// Warning: (ae-forgotten-export) The symbol "PersistableStateService" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "EmbeddableStart" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export interface EmbeddableStart extends PersistableState<EmbeddableInput> {
+export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> {
     // (undocumented)
     EmbeddablePanel: EmbeddablePanelHOC;
     // (undocumented)
