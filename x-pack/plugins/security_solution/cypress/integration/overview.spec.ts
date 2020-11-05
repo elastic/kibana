@@ -11,8 +11,7 @@ import { loginAndWaitForPage } from '../tasks/login';
 
 import { OVERVIEW_URL } from '../urls/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/81848
-describe.skip('Overview Page', () => {
+describe('Overview Page', () => {
   it('Host stats render with correct values', () => {
     cy.stubSearchStrategyApi('overview_search_strategy');
     loginAndWaitForPage(OVERVIEW_URL);
