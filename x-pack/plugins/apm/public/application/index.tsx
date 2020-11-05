@@ -45,6 +45,7 @@ function App() {
   const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
   useBreadcrumbs(routes);
+
   return (
     <ThemeProvider
       theme={(outerTheme?: DefaultTheme) => ({
