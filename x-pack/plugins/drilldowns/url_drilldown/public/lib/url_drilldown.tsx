@@ -12,13 +12,11 @@ import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
   IEmbeddable,
-} from '../../../../../../src/plugins/embeddable/public';
-import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
-import {
-  ROW_CLICK_TRIGGER,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/ui_actions/public';
+} from '../../../../../../src/plugins/embeddable/public';
+import { ROW_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
+import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownGlobalScope,

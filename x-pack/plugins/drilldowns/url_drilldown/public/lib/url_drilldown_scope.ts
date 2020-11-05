@@ -17,14 +17,14 @@ import {
   isRowClickTriggerContext,
   isContextMenuTriggerContext,
   RangeSelectContext,
+  SELECT_RANGE_TRIGGER,
   ValueClickContext,
+  VALUE_CLICK_TRIGGER,
   EmbeddableOutput,
 } from '../../../../../../src/plugins/embeddable/public';
 import type { ActionContext, ActionFactoryContext } from './url_drilldown';
 import {
-  SELECT_RANGE_TRIGGER,
   RowClickContext,
-  VALUE_CLICK_TRIGGER,
   ROW_CLICK_TRIGGER,
 } from '../../../../../../src/plugins/ui_actions/public';
 

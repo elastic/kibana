@@ -48,7 +48,7 @@ import {
   setUiSettings,
 } from './services';
 import { createSearchBar } from './ui/search_bar/create_search_bar';
-import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../../embeddables/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '../../embeddable/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
   createFilterAction,

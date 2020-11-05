@@ -4,12 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  TriggerContextMapping,
-  APPLY_FILTER_TRIGGER,
-} from '../../../../../../../src/plugins/ui_actions/public';
+import { TriggerContextMapping } from '../../../../../../../src/plugins/ui_actions/public';
 import { DashboardUrlGeneratorState } from '../../../../../../../src/plugins/dashboard/public';
 import {
+  APPLY_FILTER_TRIGGER,
   esFilters,
   isFilters,
   isQuery,

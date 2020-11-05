@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import {
-  ActionByType,
-  APPLY_FILTER_TRIGGER,
-  createAction,
-  UiActionsStart,
-} from '../../../../plugins/ui_actions/public';
+import { ActionByType, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromValueClickAction } from './filters/create_filters_from_value_click';
 import type { Filter } from '../../common/es_query/filters';
 import type { ValueClickContext } from '../../../embeddable/public';

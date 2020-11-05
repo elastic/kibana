@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import {
-  ActionByType,
-  APPLY_FILTER_TRIGGER,
-  createAction,
-  UiActionsStart,
-} from '../../../../plugins/ui_actions/public';
+import { ActionByType, createAction, UiActionsStart } from '../../../../plugins/ui_actions/public';
+import { APPLY_FILTER_TRIGGER } from '../triggers';
 import { createFiltersFromRangeSelectAction } from './filters/create_filters_from_range_select';
 import type { RangeSelectContext } from '../../../embeddable/public';
 
