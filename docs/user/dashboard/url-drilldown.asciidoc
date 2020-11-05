@@ -43,7 +43,7 @@ a|Format dates. Supports relative dates expressions (for example,  "now-15d"). R
 
 Example:
 
-`{{ date event.from “YYYY MM DD”}}` +
+`{{date event.from “YYYY MM DD”}}` +
 `{{date “now-15”}}`
 
 |formatNumber
