@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export declare class Executor<Context extends Record<string, unknown> = Record<string, unknown>> implements PersistableState<ExpressionAstExpression> 
+export declare class Executor<Context extends Record<string, unknown> = Record<string, unknown>> implements PersistableStateService<ExpressionAstExpression> 
 ```
 
 ## Constructors
@@ -39,6 +39,7 @@ export declare class Executor<Context extends Record<string, unknown> = Record<s
 |  [getType(name)](./kibana-plugin-plugins-expressions-public.executor.gettype.md) |  |  |
 |  [getTypes()](./kibana-plugin-plugins-expressions-public.executor.gettypes.md) |  |  |
 |  [inject(ast, references)](./kibana-plugin-plugins-expressions-public.executor.inject.md) |  |  |
+|  [migrate(ast, version)](./kibana-plugin-plugins-expressions-public.executor.migrate.md) |  |  |
 |  [registerFunction(functionDefinition)](./kibana-plugin-plugins-expressions-public.executor.registerfunction.md) |  |  |
 |  [registerType(typeDefinition)](./kibana-plugin-plugins-expressions-public.executor.registertype.md) |  |  |
 |  [run(ast, input, params)](./kibana-plugin-plugins-expressions-public.executor.run.md) |  | Execute expression and return result. |

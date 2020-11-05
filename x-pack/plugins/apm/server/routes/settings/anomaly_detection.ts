@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { isActivePlatinumLicense } from '../../../common/service_map';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
 import { createRoute } from '../create_route';

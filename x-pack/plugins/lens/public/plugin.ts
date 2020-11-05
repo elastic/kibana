@@ -13,7 +13,7 @@ import { VisualizationsSetup } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
-import { ChartsPluginSetup } from '../../../../src/plugins/charts/public';
+import { ChartsPluginSetup, ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { EditorFrameService } from './editor_frame_service';
 import {
   IndexPatternDatasource,
@@ -27,6 +27,7 @@ import {
 } from './datatable_visualization';
 import { PieVisualization, PieVisualizationPluginSetupPlugins } from './pie_visualization';
 import { AppNavLinkStatus } from '../../../../src/core/public';
+import type { SavedObjectTaggingPluginStart } from '../../saved_objects_tagging/public';
 
 import {
   UiActionsStart,
@@ -58,6 +59,8 @@ export interface LensPluginStartDependencies {
   uiActions: UiActionsStart;
   dashboard: DashboardStart;
   embeddable: EmbeddableStart;
+  charts: ChartsPluginStart;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }
 export class LensPlugin {
   private datatableVisualization: DatatableVisualization;
@@ -102,6 +105,7 @@ export class LensPlugin {
       {
         data,
         embeddable,
+        charts,
         expressions,
       },
       this.attributeService

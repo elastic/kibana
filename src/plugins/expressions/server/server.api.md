@@ -169,11 +169,11 @@ export interface ExecutionState<Output = ExpressionValue> extends ExecutorState 
     state: 'not-started' | 'pending' | 'result' | 'error';
 }
 
-// Warning: (ae-forgotten-export) The symbol "PersistableState" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "PersistableStateService" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "Executor" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
-export class Executor<Context extends Record<string, unknown> = Record<string, unknown>> implements PersistableState<ExpressionAstExpression> {
+export class Executor<Context extends Record<string, unknown> = Record<string, unknown>> implements PersistableStateService<ExpressionAstExpression> {
     constructor(state?: ExecutorState<Context>);
     // (undocumented)
     get context(): Record<string, unknown>;
@@ -204,6 +204,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
     //
     // (undocumented)
     inject(ast: ExpressionAstExpression, references: SavedObjectReference[]): ExpressionAstExpression;
+    // Warning: (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    migrate(ast: SerializableState, version: string): ExpressionAstExpression;
     // (undocumented)
     registerFunction(functionDefinition: AnyExpressionFunctionDefinition | (() => AnyExpressionFunctionDefinition)): void;
     // (undocumented)
@@ -293,6 +297,7 @@ export interface ExpressionAstFunctionBuilder<FnDef extends AnyExpressionFunctio
 // @public (undocumented)
 export type ExpressionAstNode = ExpressionAstExpression | ExpressionAstFunction | ExpressionAstArgument;
 
+// Warning: (ae-forgotten-export) The symbol "PersistableState" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "ExpressionFunction" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
 //
 // @public (undocumented)
@@ -314,6 +319,10 @@ export class ExpressionFunction implements PersistableState<ExpressionAstFunctio
     // (undocumented)
     inject: (state: ExpressionAstFunction['arguments'], references: SavedObjectReference[]) => ExpressionAstFunction['arguments'];
     inputTypes: string[] | undefined;
+    // (undocumented)
+    migrations: {
+        [key: string]: (state: SerializableState) => SerializableState;
+    };
     name: string;
     // (undocumented)
     telemetry: (state: ExpressionAstFunction['arguments'], telemetryData: Record<string, any>) => Record<string, any>;
@@ -351,6 +360,10 @@ export interface ExpressionFunctionDefinitions {
     //
     // (undocumented)
     cumulative_sum: ExpressionFunctionCumulativeSum;
+    // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionDerivative" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    derivative: ExpressionFunctionDerivative;
     // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionFont" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -361,6 +374,10 @@ export interface ExpressionFunctionDefinitions {
     //
     // (undocumented)
     kibana_context: ExpressionFunctionKibanaContext;
+    // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionMovingAverage" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    moving_average: ExpressionFunctionMovingAverage;
     // Warning: (ae-forgotten-export) The symbol "ExpressionFunctionTheme" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -939,7 +956,6 @@ export type UnmappedTypeStrings = 'date' | 'filter';
 //
 // src/plugins/expressions/common/ast/types.ts:40:3 - (ae-forgotten-export) The symbol "ExpressionAstFunctionDebug" needs to be exported by the entry point index.d.ts
 // src/plugins/expressions/common/expression_types/specs/error.ts:31:5 - (ae-forgotten-export) The symbol "ErrorLike" needs to be exported by the entry point index.d.ts
-// src/plugins/expressions/common/expression_types/specs/error.ts:32:5 - (ae-forgotten-export) The symbol "SerializableState" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

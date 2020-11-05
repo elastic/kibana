@@ -19,7 +19,7 @@
 import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { MockedKeys } from '../typings';
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
@@ -72,7 +72,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
     },
     path: { data: '/tmp' },
     savedObjects: {
-      maxImportPayloadBytes: new ByteSizeValue(10485760),
+      maxImportPayloadBytes: new ByteSizeValue(26214400),
     },
   };
 
