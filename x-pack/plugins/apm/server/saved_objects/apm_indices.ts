@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsType } from 'src/core/server';
+import { i18n } from '@kbn/i18n';
 
 export const apmIndices: SavedObjectsType = {
   name: 'apm-indices',
@@ -35,6 +36,9 @@ export const apmIndices: SavedObjectsType = {
   management: {
     importableAndExportable: true,
     icon: 'apmApp',
-    getTitle: () => 'APM Settings - Indices',
+    getTitle: () =>
+      i18n.translate('xpack.apm.apmSettings.index', {
+        defaultMessage: 'APM Settings - Index',
+      }),
   },
 };
