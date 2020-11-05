@@ -43,5 +43,6 @@ export type EmbeddableFactoryDefinition<
         | 'telemetry'
         | 'extract'
         | 'inject'
+        | 'migrations'
       >
     >;
