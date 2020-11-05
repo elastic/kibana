@@ -5,11 +5,11 @@
  */
 
 import { useState } from 'react';
-import { Direction, EuiBasicTableProps, EuiTableSortingType } from '@elastic/eui';
+import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 import { sortBy, get } from 'lodash';
 
-const PAGE_SIZE = 10;
-const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const PAGE_SIZE = 2;
+const PAGE_SIZE_OPTIONS = [2, 10, 25, 50];
 
 const jobPropertyMap = {
   ID: 'id',
@@ -48,8 +48,8 @@ interface AnalyticsBasicTableSettings<T> {
 interface UseTableSettingsReturnValue<T> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
   pageOfItems: T[];
-  pagination: EuiBasicTableProps<T>['pagination'];
-  sorting: EuiTableSortingType<any>;
+  pagination: Pagination;
+  sorting: { sort: PropertySort };
 }
 
 export function useTableSettings<TypeOfItem>(
@@ -127,7 +127,7 @@ export function useTableSettings<TypeOfItem>(
 
   const sorting = {
     sort: {
-      field: sortField,
+      field: sortField as string,
       direction: sortDirection,
     },
   };
