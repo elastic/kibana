@@ -65,7 +65,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
         prepend={i18n.translate(
           'xpack.apm.ux.localFilters.titles.webApplication',
           {
-            defaultMessage: 'Web Application',
+            defaultMessage: 'Web application',
           }
         )}
         isLoading={loading}

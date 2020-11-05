@@ -12,7 +12,7 @@ import { AlertsContextValue } from '../../../../../triggers_actions_ui/public/ap
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { InventoryMetricConditions } from '../../../../server/lib/alerting/inventory_metric_threshold/types';
 import React from 'react';
-import { Expressions, AlertContextMeta, ExpressionRow } from './expression';
+import { Expressions, AlertContextMeta, ExpressionRow, defaultExpression } from './expression';
 import { act } from 'react-dom/test-utils';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Comparator } from '../../../../server/lib/alerting/metric_threshold/types';
@@ -105,6 +105,7 @@ describe('Expression', () => {
         threshold: [],
         timeSize: 1,
         timeUnit: 'm',
+        customMetric: defaultExpression.customMetric,
       },
     ]);
   });
@@ -155,6 +156,7 @@ describe('ExpressionRow', () => {
         alertsContextMetadata={{
           customMetrics: [],
         }}
+        fields={[{ name: 'some.system.field', type: 'bzzz' }]}
       />
     );
 
