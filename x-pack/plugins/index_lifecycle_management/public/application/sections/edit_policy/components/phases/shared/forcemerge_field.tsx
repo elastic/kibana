@@ -21,11 +21,11 @@ interface Props {
 }
 
 export const Forcemerge: React.FunctionComponent<Props> = ({ phase }) => {
-  const { originalPolicy } = useEditPolicyContext();
+  const { policy } = useEditPolicyContext();
 
   const initialToggleValue = useMemo<boolean>(() => {
-    return Boolean(originalPolicy.phases[phase]?.actions?.forcemerge);
-  }, [originalPolicy, phase]);
+    return Boolean(policy.phases[phase]?.actions?.forcemerge);
+  }, [policy, phase]);
 
   return (
     <DescribedFormField

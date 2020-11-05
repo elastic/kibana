@@ -22,22 +22,15 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
-import { SerializedPolicy } from '../../../../../common/types';
-
 import { useFormContext, useFormData } from '../../../../shared_imports';
 import { FormInternal } from '../types';
 
 interface Props {
-  legacyPolicy: SerializedPolicy;
   close: () => void;
   policyName: string;
 }
 
-export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
-  policyName,
-  close,
-  legacyPolicy,
-}) => {
+export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({ policyName, close }) => {
   /**
    * policy === undefined: we are checking validity
    * policy === null: we have determined the policy is invalid
@@ -51,20 +44,11 @@ export const PolicyJsonFlyout: React.FunctionComponent<Props> = ({
   const updatePolicy = useCallback(async () => {
     setPolicy(undefined);
     if (await validateForm()) {
-      const p = getFormData() as SerializedPolicy;
-      setPolicy({
-        ...legacyPolicy,
-        phases: {
-          ...legacyPolicy.phases,
-          hot: p.phases.hot,
-          warm: p.phases.warm,
-          cold: p.phases.cold,
-        },
-      });
+      setPolicy(getFormData() as SerializedPolicy);
     } else {
       setPolicy(null);
     }
-  }, [setPolicy, getFormData, legacyPolicy, validateForm]);
+  }, [setPolicy, getFormData, validateForm]);
 
   useEffect(() => {
     updatePolicy();

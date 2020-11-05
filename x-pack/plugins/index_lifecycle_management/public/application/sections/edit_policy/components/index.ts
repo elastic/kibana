@@ -11,7 +11,6 @@ export { MinAgeInput } from './min_age_input_legacy';
 export { OptionalLabel } from './optional_label';
 export { PhaseErrorMessage } from './phase_error_message';
 export { PolicyJsonFlyout } from './policy_json_flyout';
-export { SnapshotPolicies } from './snapshot_policies';
 export { DescribedFormField } from './described_form_field';
 
 export * from './phases';

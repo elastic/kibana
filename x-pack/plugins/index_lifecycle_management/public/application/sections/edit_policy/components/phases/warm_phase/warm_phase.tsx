@@ -54,7 +54,7 @@ const formFieldPaths = {
 };
 
 export const WarmPhase: FunctionComponent = () => {
-  const { originalPolicy } = useEditPolicyContext();
+  const { policy } = useEditPolicyContext();
   const form = useFormContext();
   const [formData] = useFormData({
     watch: [useRolloverPath, formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
@@ -161,9 +161,7 @@ export const WarmPhase: FunctionComponent = () => {
                   'xpack.indexLifecycleMgmt.editPolicy.warmPhase.numberOfReplicas.switchLabel',
                   { defaultMessage: 'Set replicas' }
                 ),
-                initialValue: Boolean(
-                  originalPolicy.phases.warm?.actions?.allocate?.number_of_replicas
-                ),
+                initialValue: Boolean(policy.phases.warm?.actions?.allocate?.number_of_replicas),
               }}
               fullWidth
             >
@@ -203,7 +201,7 @@ export const WarmPhase: FunctionComponent = () => {
                 'data-test-subj': 'shrinkSwitch',
                 label: i18nTexts.shrinkLabel,
                 'aria-label': i18nTexts.shrinkLabel,
-                initialValue: Boolean(originalPolicy.phases.warm?.actions?.shrink),
+                initialValue: Boolean(policy.phases.warm?.actions?.shrink),
               }}
               fullWidth
             >

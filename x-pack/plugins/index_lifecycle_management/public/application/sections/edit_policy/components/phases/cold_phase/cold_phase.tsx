@@ -43,7 +43,7 @@ const formFieldPaths = {
 };
 
 export const ColdPhase: FunctionComponent = () => {
-  const { originalPolicy } = useEditPolicyContext();
+  const { policy } = useEditPolicyContext();
   const form = useFormContext();
 
   const [formData] = useFormData({
@@ -128,9 +128,7 @@ export const ColdPhase: FunctionComponent = () => {
                   'xpack.indexLifecycleMgmt.editPolicy.coldPhase.numberOfReplicas.switchLabel',
                   { defaultMessage: 'Set replicas' }
                 ),
-                initialValue: Boolean(
-                  originalPolicy.phases.cold?.actions?.allocate?.number_of_replicas
-                ),
+                initialValue: Boolean(policy.phases.cold?.actions?.allocate?.number_of_replicas),
               }}
               fullWidth
             >

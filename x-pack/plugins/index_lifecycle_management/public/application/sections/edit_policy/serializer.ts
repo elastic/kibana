@@ -165,5 +165,17 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     }
   }
 
+  /**
+   * DELETE PHASE SERIALIZATION
+   */
+  if (policy.phases.delete) {
+    if (policy.phases.delete.min_age) {
+      policy.phases.delete.min_age = `${policy.phases.delete.min_age}${_meta.delete.minAgeUnit}`;
+    }
+    // if (policy.phases.delete.actions?.wait_for_snapshot?.length) {
+    //   policy.phases.delete.actions.wait_for_snapshot =
+    // }
+  }
+
   return policy;
 };

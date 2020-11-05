@@ -15,11 +15,9 @@ import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../../constants';
 import { toasts } from '../notification';
 
 export const savePolicy = async (
-  readSerializedPolicy: () => SerializedPolicy,
+  serializedPolicy: SerializedPolicy,
   isNew: boolean
 ): Promise<boolean> => {
-  const serializedPolicy = readSerializedPolicy();
-
   try {
     await savePolicyApi(serializedPolicy);
   } catch (err) {
