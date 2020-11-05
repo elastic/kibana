@@ -3,100 +3,221 @@
 
 [partintro]
 --
+**_Tell {kib} where to find your data, then search and filter it for hidden insights and relationships._**
 
-When you know what your data includes, you can create visualizations
-that best display that data and build better dashboards.
-*Discover* enables you to explore your data, find
-hidden insights and relationships, and get answers to your questions.
+You’ve added your data, and now you’re ready to dig in. You have questions about your data.
+What events were logged most recently? What pages on your website contain a
+specific word or phrase? What processes on your server take longer than 500 milliseconds to respond?
+This tutorial shows you how to use {kib} *Discover* to quickly search large amounts of
+data and understand what’s going on at any given time.
 
-With *Discover*, you can:
+You’ll learn to:
 
-* Access every document in every index that matches your selected index pattern
-* Search your data and filter the search results
-* Get field-level details about the documents that match your search
-* View the events that occurred just before and after a document
+- **Select** data for your exploration, including setting a time range,
+searching with the {kib} query language, and limiting results with filtering options.
+- **Explore** the details of your data, view individual documents, and create tables
+that summarize the contents of the data.
+- **Present** your findings in reports and visualizations.
+
+At the end of this tutorial, you’ll be ready to start exploring with your own
+data in *Discover*.
 
 [role="screenshot"]
 image::images/Discover-Start.png[Discover]
 
 
 [float]
-[[select-pattern]]
-=== Set up your index pattern
+=== Prerequisites
 
-The first thing to do in *Discover* is to select an <<index-patterns, index pattern>>, which
-defines the data you want to explore and visualize.
-If you haven't yet created an index pattern, you can add a <<add-sample-data, sample data set>>,
-which has a pre-built index pattern.
+- If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
+- You must have data in {es}.  This guide uses the
+<<gs-get-data-into-kibana,ecommerce sample data set>>, but you can use your own data.
+- You should have an understanding of {ref}/documents-indices.html[{es} documents and indices].
 
-[float]
-=== Set a time filter
-
-By default, *Discover* shows data for the last 15 minutes.
-If you have a time-based index, and no data displays,
-you might need to increase the time range. Using the <<set-time-filter, time filter>>,
-you can specify a common or recently-used time range, a relative time
-from now, or an absolute time range.
 
 [float]
-=== Search your data
+[[whats-you-goal-in-discover]]
+=== What’s your goal?
 
-Now that you have your data and set the time span, you can start asking your questions.
-You can search your data using the <<kuery-query, Kibana Query language>>,
-which offers a simplified query syntax.
-For example, if
-you search for `day_of_week : Friday`, you'll get a list of all documents
-in which `day_of_week` is set to `Friday`. If you prefer
-<<lucene-query, Lucene query syntax>>, you can access it from the KQL menu.
+Most users have one of two goals in mind when exploring their data:
+
+- **Get an overview of what is happening.**
+For example, you might want to look at the logs captured in your {es} cluster to
+get information on the health and performance of your cloud-deployed software over time.
+You can save your findings for later use when making decisions about maintenance and improvements.
+
+- **Find an answer to a specific question.** Consider if you are looking at
+Github statistics and are interested in the number of pull requests that went
+into a patch release and who contributed to the release. You want to visualize
+this data and present it to your coworkers.
+
+What is your goal?  The answer to this question will lead your explorations.
+
 
 [float]
-=== Filter your search results
+[[find-the-data-you-want-to-use]]
+=== Step 1. Find the data you want to use
 
-Next, you'll want narrow your search results to a more manageable data set.
-When you click on a name in the field list, you'll see
-the top five values for the field, the number of documents that contain the field,
-and the percentage of documents that contain each value. From this view, you can
-use the (+) magnifier icon to quickly find all
-documents that have that value, or (-) to exclude all
-documents with that value. For more filter options, see <<field-filter, filtering by field>>.
+Tell {kib} where to find your data, then set a time range for your exploration.
 
+. Open the main menu, and select **Discover**.
++
+With **Discover**, you can perform ad-hoc analysis of your data in real-time.
+It’s where you’ll find hidden insights and relationships and emerging trends in your data.
+
+. Select the data you want to work with by choosing an <<index-patterns,index pattern>>.
++
+{kib} requires an index pattern to tell it which Elasticsearch indices you want to work with.
+To view the ecommerce sample data, make sure the index pattern is set to **kibana_sample_data_ecommerce**.
++
 [role="screenshot"]
-image::images/filter-field.png[height=317]
+image::images/discover-index-pattern.png[How to set the index pattern in Discover]
 
+. Adjust the time range to *Last 7 days*.
++
+NOTE: The range selection is based on the default time field in your data.
+If you are using the sample data, this value was set when you added the data.
+If you  are using your own data, and it does not have a time field, the range selection is not available.
+
+. Optional. To view the count of documents for a given time,
+click and drag the mouse over the histogram, and then click *Refresh*.
 
 [float]
-=== Add and remove fields
+[[explore-fields-in-your-data]]
+=== Step 2. Explore the fields in your data
 
-The sortable documents table
-lists the documents that match your search.
+The sortable documents table lists the documents that match your search.
 By default, the table includes columns for the time field and the document `_source`.
-To zero in on a specific field, click *add* next to the field name.
-For example, if you add the `currency`, `customer_last_name`, and `day_of_week` fields,
-the document table includes columns for those three fields.
+You’ll modify this table to display your fields of interest.  For this guide,
+the goal is to dig into the ecommerce data and find fields that
+help determine when and where to target your ads.
+
+. In the side navigation, scan through the list of **Available fields** to see
+what’s in your data. You can also search for a field by name using the
+**Search** field at the top of the list.
+
+. Find the `manufacturer` field, and then click it to view its top five values.
++
+[role="screenshot"]
+image:images/filter-field.png[Fields list that displays the top five search results]
+
+. Click the add icon to toggle the field into the document table.
+
+. Add `geoip.country_iso_code` and `day of week` so your document table looks like this:
++
+[role="screenshot"]
+image:images/document-table.png[Document table with fields for manufacturer, geo.country_iso_code, and day_of_week]
+
+. To rearrange the table columns to suit your needs, hover the mouse over a
+column header for move and sort controls.
 
 [float]
-=== Examine document contents
+[[search-and-filter-in-discover]]
+=== Step 3. Search and filter your data
 
-From the documents table, you can expand a document to
-examine its field data in either table or JSON format.
-The table view provides yet another filtering option&mdash;filtering for whether the field
-is present.  See <<document-data, Viewing document data>> for details.
+One of the unique capabilities of **Discover** is the ability to combine free text search with filtering based on structured data.
+
+. Enter your search terms in the **Search** field.
++
+To search all fields, enter a simple string. To search particular fields and
+build more complex queries, use the <<kuery-query,Kibana Query language>>.
+As you type, KQL prompts you with the fields you can search and the operators
+you can use to build a structured query.
++
+To search the ecommerce data for documents where the country matches US.
++
+.. Type `g` and then select `geoip.country_iso_code`.
+.. Select *equals some value* and *US*, and then click *Update*.
+.. For a more complex search, try:
++
+`geoip.country_iso_code : US and products.taxless_price >= 75`
+
+. To zero in on a subset of documents, add filters.
++
+Whereas the query defines the set of documents you are interested in,
+filters enable you to zero in on different subsets of those documents.
+You can filter results to include or exclude specific fields,
+filter by data type, filter for a value in a range, and more.
+
+.. Click **Add filter**.
+.. Set Field to `day_of_week`, Operator to `is not`, and value to `Wednesday`.
+.. Save the filter.
+
+. Continue your exploration by adding and removing filters.
++
+To remove a filter,
+click the close icon (x) next to its name in the filter bar.
 
 [float]
-=== View a document in context
+[[look-inside-a-document]]
+=== Step 4.  Look inside a document
 
-Suppose you're troubleshooting your data, and you've narrowed down your results to a single document.
-Now you want to to see the events that occurred just before and after the
-document that you are looking at. You can do that by expanding the document and
-clicking <<document-context, View surrounding documents>>.
+Now dive into an individual document and view the details of that event.
+
+. In the document table, expand any document.
++
+[role="screenshot"]
+image:images/document-table-expanded.png[Table view with document expanded]
+
+. Scan through the fields and their values.
++
+To apply filters and toggle a field into the table, hover over a field name for the controls.
+
+. To view documents that occurred closest in time this event, click View surrounding documents.
+
+. To view document data as a separate page, click View single document.
++
+You can bookmark and share the link for direct access to a particular document.
 
 [float]
-=== Save and share your search
+[[save-your-search]]
+=== Step 5.  Save your search for later use
 
-Finally, its time to save and share your data.  You can export your data as a CSV file
-or create a direct link to share.  The *Save* and *Share* actions are in the menu bar.
+Save your search so you can repeat it later or use it in visualizations and dashboards.
+Saving a search saves both the query you created and the additional filters you added.
+
+. In the toolbar, click **Save**.
+
+. Give your search a title, and then click **Save**.
+
+[float]
+[[share-findings-in-a-report]]
+=== Step 6. Share your findings in a report
+
+Want to share your findings with your peers? Export your data into a spreadsheet.
+
+. In the toolbar, click **Share**, then **CSV Reports**.
+
+. Click Generate **CSV**.
++
+Your report is available in **Stack Management > Reporting**.
+
+[float]
+=== Step 7. Visualize your findings
+If a field can be {ref}/search-aggregations.html[aggregated], you can quickly
+visualize it from **Discover**.
+
+. In the side navigation, click  `day_of_week` and then click **Visualize**.
++
+{kib} creates a visualization best suited for this field.
++
+[role="screenshot"]
+image:images/visualize-from-discover.png[Visualization that opens from Discover based on your data]
+
+. Customize the visualization and then save it  for use in a dashboard.
+
+[float]
+=== What’s next?
+
+There’s much more you can do with your data.
 
 
+* <<kuery-query,Learn more about KQL>>.  This page has examples for you to follow.
+
+* <<kibana-discover-settings, Configure Discover>> to better meet your needs.
+In Advanced Settings, you can configure the number of documents to show, configure the context view, and more.
+
+* <<dashboard,Create a dashboard>> with even more awesome visualizations, like treemaps, metrics, and tables.
 
 
 --
@@ -106,11 +227,3 @@ include::{kib-repo-dir}/management/index-patterns.asciidoc[]
 include::{kib-repo-dir}/discover/set-time-filter.asciidoc[]
 
 include::{kib-repo-dir}/discover/search.asciidoc[]
-
-include::{kib-repo-dir}/discover/field-filter.asciidoc[]
-
-include::{kib-repo-dir}/discover/document-data.asciidoc[]
-
-include::{kib-repo-dir}/discover/context.asciidoc[]
-
-include::{kib-repo-dir}/discover/viewing-field-stats.asciidoc[]
