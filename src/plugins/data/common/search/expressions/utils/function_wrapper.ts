@@ -17,32 +17,18 @@
  * under the License.
  */
 
-import { ExpressionValueBoxed } from '../types';
-import { ExecutionContextSearch } from '../../execution/types';
+import { mapValues } from 'lodash';
+import { AnyExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
 
-export type ExpressionValueSearchContext = ExpressionValueBoxed<
-  'kibana_context',
-  ExecutionContextSearch
->;
-
-// TODO: These two are exported for legacy reasons - remove them eventually.
-export type KIBANA_CONTEXT_NAME = 'kibana_context';
-export type KibanaContext = ExpressionValueSearchContext;
-
-export const kibanaContext = {
-  name: 'kibana_context',
-  from: {
-    null: () => {
-      return {
-        type: 'kibana_context',
-      };
-    },
-  },
-  to: {
-    null: () => {
-      return {
-        type: 'null',
-      };
-    },
-  },
+/**
+ * Takes a function spec and passes in default args,
+ * overriding with any provided args.
+ */
+export const functionWrapper = (spec: AnyExpressionFunctionDefinition) => {
+  const defaultArgs = mapValues(spec.args, (argSpec) => argSpec.default);
+  return (
+    context: object | null,
+    args: Record<string, any> = {},
+    handlers: ExecutionContext = {} as ExecutionContext
+  ) => spec.fn(context, { ...defaultArgs, ...args }, handlers);
 };

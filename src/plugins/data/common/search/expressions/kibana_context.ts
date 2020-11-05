@@ -16,11 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../../expression_functions';
-import { KibanaContext } from '../../expression_types';
-import { Query, uniqFilters } from '../../../../data/common';
+import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Query, uniqFilters } from '../../query';
+import { KibanaContext } from './kibana_context_type';
 
 interface Arguments {
   q?: string | null;
@@ -49,7 +50,7 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
   name: 'kibana_context',
   type: 'kibana_context',
   inputTypes: ['kibana_context', 'null'],
-  help: i18n.translate('expressions.functions.kibana_context.help', {
+  help: i18n.translate('data.search.functions.kibana_context.help', {
     defaultMessage: 'Updates kibana global context',
   }),
   args: {
@@ -57,28 +58,28 @@ export const kibanaContextFunction: ExpressionFunctionKibanaContext = {
       types: ['string', 'null'],
       aliases: ['query', '_'],
       default: null,
-      help: i18n.translate('expressions.functions.kibana_context.q.help', {
+      help: i18n.translate('data.search.functions.kibana_context.q.help', {
         defaultMessage: 'Specify Kibana free form text query',
       }),
     },
     filters: {
       types: ['string', 'null'],
       default: '"[]"',
-      help: i18n.translate('expressions.functions.kibana_context.filters.help', {
+      help: i18n.translate('data.search.functions.kibana_context.filters.help', {
         defaultMessage: 'Specify Kibana generic filters',
       }),
     },
     timeRange: {
       types: ['string', 'null'],
       default: null,
-      help: i18n.translate('expressions.functions.kibana_context.timeRange.help', {
+      help: i18n.translate('data.search.functions.kibana_context.timeRange.help', {
         defaultMessage: 'Specify Kibana time range filter',
       }),
     },
     savedSearchId: {
       types: ['string', 'null'],
       default: null,
-      help: i18n.translate('expressions.functions.kibana_context.savedSearchId.help', {
+      help: i18n.translate('data.search.functions.kibana_context.savedSearchId.help', {
         defaultMessage: 'Specify saved search ID to be used for queries and filters',
       }),
     },

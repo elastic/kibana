@@ -17,9 +17,8 @@
  * under the License.
  */
 
-import { ExpressionType } from '../expression_types';
+import { ExpressionType, SerializableState } from '../expression_types';
 import { Adapters, DataAdapter, RequestAdapter } from '../../../inspector/common';
-import { TimeRange, Query, Filter } from '../../../data/common';
 import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
 
 /**
@@ -30,7 +29,7 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
   /**
    * Get search context of the expression.
    */
-  getSearchContext: () => ExecutionContextSearch;
+  getSearchContext: () => SerializableState;
 
   /**
    * Context variables that can be consumed using `var` and `var_set` functions.
@@ -78,10 +77,4 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
 export interface DefaultInspectorAdapters extends Adapters {
   requests: RequestAdapter;
   data: DataAdapter;
-}
-
-export interface ExecutionContextSearch {
-  filters?: Filter[];
-  query?: Query | Query[];
-  timeRange?: TimeRange;
 }

@@ -19,16 +19,11 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import {
-  ExecutionContext,
-  ExpressionFunctionDefinition,
-  KibanaContext,
-  Render,
-} from '../../expressions/public';
+import { ExecutionContext, ExpressionFunctionDefinition, Render } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
 import { VegaInspectorAdapters } from './vega_inspector/index';
-import { TimeRange, Query } from '../../data/public';
+import { KibanaContext, TimeRange, Query } from '../../data/public';
 import { VegaParser } from './data_model/vega_parser';
 
 type Input = KibanaContext | null;
