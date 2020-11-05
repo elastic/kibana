@@ -25,7 +25,7 @@ import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, DescribedFormField } from '../../';
 
-import { MinAgeInputField, DataTierAllocationField, SetPriorityInput } from '../shared';
+import { MinAgeInputField, DataTierAllocationField, SetPriorityInput } from '../shared_fields';
 
 const i18nTexts = {
   dataTierAllocation: {

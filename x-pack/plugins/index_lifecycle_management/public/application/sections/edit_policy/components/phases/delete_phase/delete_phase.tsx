@@ -18,7 +18,7 @@ import {
 
 import { ActiveBadge, LearnMoreLink, OptionalLabel, PhaseErrorMessage } from '../../index';
 
-import { MinAgeInputField, SnapshotPoliciesField } from '../shared';
+import { MinAgeInputField, SnapshotPoliciesField } from '../shared_fields';
 
 const formFieldPaths = {
   enabled: '_meta.delete.enabled',

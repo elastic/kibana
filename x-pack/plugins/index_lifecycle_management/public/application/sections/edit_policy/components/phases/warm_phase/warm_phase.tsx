@@ -27,13 +27,13 @@ import {
 
 import { Phases } from '../../../../../../../common/types';
 
-import { useRolloverPath, MinAgeInputField, Forcemerge, SetPriorityInput } from '../shared';
+import { useRolloverPath, MinAgeInputField, Forcemerge, SetPriorityInput } from '../shared_fields';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, DescribedFormField } from '../../';
 
-import { DataTierAllocationField } from '../shared';
+import { DataTierAllocationField } from '../shared_fields';
 
 const i18nTexts = {
   shrinkLabel: i18n.translate('xpack.indexLifecycleMgmt.warmPhase.shrinkIndexLabel', {

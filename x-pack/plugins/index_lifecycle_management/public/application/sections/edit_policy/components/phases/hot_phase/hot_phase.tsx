@@ -35,7 +35,7 @@ import { ROLLOVER_FORM_PATHS } from '../../../constants';
 
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../';
 
-import { Forcemerge, SetPriorityInput, useRolloverPath } from '../shared';
+import { Forcemerge, SetPriorityInput, useRolloverPath } from '../shared_fields';
 
 import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
