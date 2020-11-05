@@ -10,7 +10,7 @@ import {
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
-} from '../common/ems_defaults';
+} from '../../../../src/plugins/maps_legacy/common';
 
 describe('EMSSettings', () => {
   const mockConfig: IEMSConfig = {
@@ -21,6 +21,7 @@ describe('EMSSettings', () => {
     emsTileApiUrl: DEFAULT_EMS_TILE_API_URL,
     emsLandingPageUrl: DEFAULT_EMS_LANDING_PAGE_URL,
     emsFontLibraryUrl: DEFAULT_EMS_FONT_LIBRARY_URL,
+    isEMSEnabled: true,
   };
 
   describe('isConfigValid', () => {

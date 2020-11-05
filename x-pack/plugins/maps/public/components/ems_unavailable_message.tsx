@@ -5,15 +5,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-// @ts-ignore
-import { getIsEmsEnabled } from '../kibana_services';
+import { getEMSSettings } from '../kibana_services';
 
 export function getEmsUnavailableMessage(): string {
-  const isEmsEnabled = getIsEmsEnabled();
+  const isEmsEnabled = getEMSSettings().isEMSEnabled();
   if (isEmsEnabled) {
     return i18n.translate('xpack.maps.source.ems.noAccessDescription', {
       defaultMessage:
-        'Kibana is unable to access Elastic Maps Service. Contact your system administrator',
+        'Kibana is unable to access Elastic Maps Service. Contact your system administrator.',
     });
   }
 

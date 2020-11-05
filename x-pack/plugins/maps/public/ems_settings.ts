@@ -40,10 +40,13 @@ export class EMSSettings {
     return !!this._isEMSUrlSet();
   }
 
+  isEMSEnabled() {
+    return !!this._config.includeElasticMapsService;
+  }
+
   isConfigValid(): boolean {
     const badConfig =
-      this._isEMSUrlSet() &&
-      (!this._config.includeElasticMapsService || this._config.proxyElasticMapsServiceInMaps);
+      this._isEMSUrlSet() && (!this.isEMSEnabled() || this._config.proxyElasticMapsServiceInMaps);
     return !badConfig;
   }
 

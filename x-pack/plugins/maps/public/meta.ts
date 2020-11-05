@@ -37,7 +37,7 @@ export function getKibanaTileMap(): unknown {
 }
 
 export async function getEmsFileLayers(): Promise<FileLayer[]> {
-  if (!getIsEmsEnabled()) {
+  if (!getEMSSettings().isEMSEnabled()) {
     return [];
   }
 
@@ -45,7 +45,7 @@ export async function getEmsFileLayers(): Promise<FileLayer[]> {
 }
 
 export async function getEmsTmsServices(): Promise<TMSService[]> {
-  if (!getIsEmsEnabled()) {
+  if (!getEMSSettings().isEMSEnabled()) {
     return [];
   }
 
@@ -98,7 +98,7 @@ export function getEMSClient(): EMSClient {
 }
 
 export function getGlyphUrl(): string {
-  if (!getIsEmsEnabled()) {
+  if (!getEMSSettings().isEMSEnabled()) {
     return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
 
