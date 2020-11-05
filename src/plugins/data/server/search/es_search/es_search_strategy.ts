@@ -36,7 +36,7 @@ export const esSearchStrategyProvider = (
   logger: Logger,
   usage?: SearchUsage
 ): ISearchStrategy => ({
-  search: (request, { abortSignal }, context) => {
+  search: (request, { abortSignal }, { esClient, uiSettingsClient }) => {
     // Only default index pattern type is supported here.
     // See data_enhanced for other type support.
     if (request.indexType) {
@@ -46,12 +46,12 @@ export const esSearchStrategyProvider = (
     return doSearch<ApiResponse<IEsRawSearchResponse>>(async () => {
       const config = await config$.pipe(first()).toPromise();
       const params = toSnakeCase({
-        ...(await getDefaultSearchParams(context.core.uiSettings.client)),
+        ...(await getDefaultSearchParams(uiSettingsClient)),
         ...getShardTimeout(config),
         ...request.params,
       });
 
-      return context.core.elasticsearch.client.asCurrentUser.search(params);
+      return esClient.asCurrentUser.search(params);
     }, abortSignal).pipe(
       toKibanaSearchResponse(),
       trackSearchStatus(logger, usage),
