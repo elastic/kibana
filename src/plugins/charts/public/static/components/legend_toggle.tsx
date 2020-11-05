@@ -21,10 +21,10 @@ import React, { memo, useMemo } from 'react';
 import classNames from 'classnames';
 
 import { i18n } from '@kbn/i18n';
-import { htmlIdGenerator, EuiIcon } from '@elastic/eui';
+import { htmlIdGenerator, EuiButtonIcon } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 
-import './_legend_toggle.scss';
+import './legend_toggle.scss';
 
 interface LegendToggleProps {
   onClick: () => void;
@@ -36,29 +36,26 @@ const LegendToggleComponent = ({ onClick, showLegend, legendPosition }: LegendTo
   const legendId = useMemo(() => htmlIdGenerator()('legend'), []);
 
   return (
-    <button
+    <EuiButtonIcon
       type="button"
+      iconType="list"
+      color="subdued"
       onClick={onClick}
-      className={classNames(
-        'legend__toggle kbn-resetFocusState',
-        `legend__toggle--position-${legendPosition}`,
-        {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          'legend__toggle--isOpen': showLegend,
-        }
-      )}
+      className={classNames('echLegend__toggle', `echLegend__toggle--position-${legendPosition}`, {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'echLegend__toggle--isOpen': showLegend,
+      })}
       aria-label={i18n.translate('charts.legend.toggleLegendButtonAriaLabel', {
         defaultMessage: 'Toggle legend',
       })}
       aria-expanded={showLegend}
       aria-controls={legendId}
+      isSelected={showLegend}
       data-test-subj="vislibToggleLegend"
       title={i18n.translate('charts.legend.toggleLegendButtonTitle', {
         defaultMessage: 'Toggle legend',
       })}
-    >
-      <EuiIcon color="text" type="list" />
-    </button>
+    />
   );
 };
 
