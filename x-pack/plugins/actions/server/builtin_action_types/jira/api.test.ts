@@ -5,7 +5,7 @@
  */
 
 import { Logger } from '../../../../../../src/core/server';
-import { externalServiceMock, mapping, apiParams, jiraCommonFields } from './mocks';
+import { externalServiceMock, mapping, apiParams } from './mocks';
 import { ExternalService } from './types';
 import { api } from './api';
 let mockedLogger: jest.Mocked<Logger>;
@@ -379,16 +379,6 @@ describe('api', () => {
           defaultValue: { name: 'Medium', id: '3' },
         },
       });
-    });
-  });
-
-  describe('commonFields', () => {
-    test('it returns the fields correctly', async () => {
-      const res = await api.commonFields({
-        externalService,
-        params: {},
-      });
-      expect(res).toEqual(jiraCommonFields);
     });
   });
 

@@ -36,7 +36,7 @@ export const serviceNowCommonFields = [
 ];
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
-    getCommonFields: jest.fn().mockImplementation(() => Promise.resolve(serviceNowCommonFields)),
+    getFields: jest.fn().mockImplementation(() => Promise.resolve(serviceNowCommonFields)),
     getIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({
         short_description: 'title from servicenow',

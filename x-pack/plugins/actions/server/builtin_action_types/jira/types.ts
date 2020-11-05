@@ -95,13 +95,18 @@ export interface ExternalServiceFields {
   schema: FieldsSchema;
   searchable: boolean;
 }
-export type GetCommonFieldsResponse = ExternalServiceFields[];
 
 export type GetIssueTypesResponse = Array<{ id: string; name: string }>;
+
+export interface FieldSchema {
+  type: string;
+  items?: string;
+}
 export type GetFieldsByIssueTypeResponse = Record<
   string,
-  { allowedValues: Array<{}>; defaultValue: {} }
+  { allowedValues: Array<{}>; defaultValue: {}; required: boolean; schema: FieldSchema }
 >;
+export type GetCommonFieldsResponse = GetFieldsByIssueTypeResponse;
 
 export type GetIssuesResponse = Array<{ id: string; key: string; title: string }>;
 export interface GetIssueResponse {
@@ -113,7 +118,7 @@ export interface GetIssueResponse {
 export interface ExternalService {
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
-  getCommonFields: () => Promise<GetCommonFieldsResponse>;
+  getFields: () => Promise<GetCommonFieldsResponse>;
   getCapabilities: () => Promise<ExternalServiceParams>;
   getFieldsByIssueType: (issueTypeId: string) => Promise<GetFieldsByIssueTypeResponse>;
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
@@ -201,7 +206,7 @@ export interface GetIssueHandlerArgs {
 }
 
 export interface ExternalServiceApi {
-  commonFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
+  getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   issueTypes: (args: GetIssueTypesHandlerArgs) => Promise<GetIssueTypesResponse>;

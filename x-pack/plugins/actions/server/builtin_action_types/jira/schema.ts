@@ -67,7 +67,7 @@ export const ExecutorSubActionGetIssueParamsSchema = schema.object({ id: schema.
 
 export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
-    subAction: schema.literal('commonFields'),
+    subAction: schema.literal('getFields'),
     subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
   }),
   schema.object({

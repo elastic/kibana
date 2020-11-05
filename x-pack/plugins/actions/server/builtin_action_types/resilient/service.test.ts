@@ -584,12 +584,12 @@ describe('IBM Resilient service', () => {
     });
   });
 
-  describe('getCommonFields', () => {
+  describe('getFields', () => {
     test('it should call request with correct arguments', async () => {
       requestMock.mockImplementation(() => ({
         data: resilientFields,
       }));
-      await service.getCommonFields();
+      await service.getFields();
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
@@ -601,7 +601,7 @@ describe('IBM Resilient service', () => {
       requestMock.mockImplementation(() => ({
         data: resilientFields,
       }));
-      const res = await service.getCommonFields();
+      const res = await service.getFields();
       expect(res).toEqual(resilientFields);
     });
 
@@ -609,7 +609,7 @@ describe('IBM Resilient service', () => {
       requestMock.mockImplementation(() => {
         throw new Error('An error has occurred');
       });
-      await expect(service.getCommonFields()).rejects.toThrow(
+      await expect(service.getFields()).rejects.toThrow(
         'Unable to get fields. Error: An error has occurred'
       );
     });

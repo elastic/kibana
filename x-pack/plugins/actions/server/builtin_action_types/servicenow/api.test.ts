@@ -621,9 +621,9 @@ describe('api', () => {
     });
   });
 
-  describe('commonFields', () => {
+  describe('getFields', () => {
     test('it returns the fields correctly', async () => {
-      const res = await api.commonFields({
+      const res = await api.getFields({
         externalService,
         params: {},
       });

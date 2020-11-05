@@ -129,15 +129,15 @@ const pushToServiceHandler = async ({
   return res;
 };
 
-const getCommonFieldsHandler = async ({
+const getFieldsHandler = async ({
   externalService,
 }: GetCommonFieldsHandlerArgs): Promise<GetCommonFieldsResponse> => {
-  const res = await externalService.getCommonFields();
+  const res = await externalService.getFields();
   return res;
 };
 
 export const api: ExternalServiceApi = {
-  commonFields: getCommonFieldsHandler,
+  getFields: getFieldsHandler,
   getIncident: getIncidentHandler,
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,

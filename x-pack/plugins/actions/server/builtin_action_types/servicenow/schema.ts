@@ -28,7 +28,7 @@ export const ExternalIncidentServiceSecretConfigurationSchema = schema.object(
 );
 
 export const ExecutorSubActionSchema = schema.oneOf([
-  schema.literal('commonFields'),
+  schema.literal('getFields'),
   schema.literal('getIncident'),
   schema.literal('pushToService'),
   schema.literal('handshake'),
@@ -58,7 +58,7 @@ export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
 
 export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
-    subAction: schema.literal('commonFields'),
+    subAction: schema.literal('getFields'),
     subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
   }),
   schema.object({

@@ -65,7 +65,7 @@ export function getActionType(
 }
 
 // action executor
-const supportedSubActions: string[] = ['commonFields', 'pushToService'];
+const supportedSubActions: string[] = ['getFields', 'pushToService'];
 async function executor(
   { logger }: { logger: Logger },
   execOptions: ActionTypeExecutorOptions<
@@ -119,11 +119,11 @@ async function executor(
     logger.debug(`response push to service for incident id: ${data.id}`);
   }
 
-  if (subAction === 'commonFields') {
-    const commonFieldsParams = subActionParams as ExecutorSubActionCommonFieldsParams;
-    data = await api.commonFields({
+  if (subAction === 'getFields') {
+    const getFieldsParams = subActionParams as ExecutorSubActionCommonFieldsParams;
+    data = await api.getFields({
       externalService,
-      params: commonFieldsParams,
+      params: getFieldsParams,
     });
   }
 

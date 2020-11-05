@@ -101,7 +101,7 @@ export type GetSeverityResponse = Array<{ id: string; name: string }>;
 export interface ExternalService {
   createComment: (params: CreateCommentParams) => Promise<ExternalServiceCommentResponse>;
   createIncident: (params: CreateIncidentParams) => Promise<ExternalServiceIncidentResponse>;
-  getCommonFields: () => Promise<GetCommonFieldsResponse>;
+  getFields: () => Promise<GetCommonFieldsResponse>;
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   getIncidentTypes: () => Promise<GetIncidentTypesResponse>;
   getSeverity: () => Promise<GetSeverityResponse>;
@@ -166,7 +166,7 @@ export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
 }
 
 export interface ExternalServiceApi {
-  commonFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
+  getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;

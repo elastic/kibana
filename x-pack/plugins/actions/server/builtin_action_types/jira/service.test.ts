@@ -11,7 +11,6 @@ import * as utils from '../lib/axios_utils';
 import { ExternalService } from './types';
 import { Logger } from '../../../../../../src/core/server';
 import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { jiraCommonFields, jiraFields } from './mocks';
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 interface ResponseError extends Error {
@@ -58,8 +57,10 @@ const fieldsResponse = {
             id: '10006',
             name: 'Task',
             fields: {
-              summary: { fieldId: 'summary' },
+              summary: { required: true, schema: { type: 'string' }, fieldId: 'summary' },
               priority: {
+                required: false,
+                schema: { type: 'string' },
                 fieldId: 'priority',
                 allowedValues: [
                   {
@@ -766,6 +767,8 @@ describe('Jira service', () => {
 
         expect(res).toEqual({
           priority: {
+            required: false,
+            schema: { type: 'string' },
             allowedValues: [
               { id: '1', name: 'Highest' },
               { id: '2', name: 'High' },
@@ -775,7 +778,12 @@ describe('Jira service', () => {
             ],
             defaultValue: { id: '3', name: 'Medium' },
           },
-          summary: { allowedValues: [], defaultValue: {} },
+          summary: {
+            required: true,
+            schema: { type: 'string' },
+            allowedValues: [],
+            defaultValue: {},
+          },
         });
       });
 
@@ -838,8 +846,10 @@ describe('Jira service', () => {
         requestMock.mockImplementationOnce(() => ({
           data: {
             values: [
-              { fieldId: 'summary' },
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
               {
+                required: false,
+                schema: { type: 'string' },
                 fieldId: 'priority',
                 allowedValues: [
                   {
@@ -860,10 +870,17 @@ describe('Jira service', () => {
 
         expect(res).toEqual({
           priority: {
+            required: false,
+            schema: { type: 'string' },
             allowedValues: [{ id: '3', name: 'Medium' }],
             defaultValue: { id: '3', name: 'Medium' },
           },
-          summary: { allowedValues: [], defaultValue: {} },
+          summary: {
+            required: true,
+            schema: { type: 'string' },
+            allowedValues: [],
+            defaultValue: {},
+          },
         });
       });
 
@@ -882,8 +899,10 @@ describe('Jira service', () => {
         requestMock.mockImplementationOnce(() => ({
           data: {
             values: [
-              { fieldId: 'summary' },
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
               {
+                required: true,
+                schema: { type: 'string' },
                 fieldId: 'priority',
                 allowedValues: [
                   {
@@ -1027,10 +1046,9 @@ describe('Jira service', () => {
     });
   });
 
-  describe('getCommonFields', () => {
+  describe('getFields', () => {
     const callMocks = () => {
       requestMock
-        .mockImplementationOnce(() => ({ data: jiraFields }))
         .mockImplementationOnce(() => ({
           data: {
             capabilities: {
@@ -1069,9 +1087,11 @@ describe('Jira service', () => {
         .mockImplementationOnce(() => ({
           data: {
             values: [
-              { fieldId: 'summary' },
-              { fieldId: 'description' },
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+              { required: true, schema: { type: 'string' }, fieldId: 'description' },
               {
+                required: false,
+                schema: { type: 'string' },
                 fieldId: 'priority',
                 allowedValues: [
                   {
@@ -1089,7 +1109,10 @@ describe('Jira service', () => {
         }))
         .mockImplementationOnce(() => ({
           data: {
-            values: [{ fieldId: 'summary' }, { fieldId: 'description' }],
+            values: [
+              { required: true, schema: { type: 'string' }, fieldId: 'summary' },
+              { required: true, schema: { type: 'string' }, fieldId: 'description' },
+            ],
           },
         }));
     };
@@ -1098,9 +1121,8 @@ describe('Jira service', () => {
     });
     test('it should call request with correct arguments', async () => {
       callMocks();
-      await service.getCommonFields();
+      await service.getFields();
       const callUrls = [
-        'https://siem-kibana.atlassian.net/rest/api/2/field',
         'https://siem-kibana.atlassian.net/rest/capabilities',
         'https://siem-kibana.atlassian.net/rest/api/2/issue/createmeta/CK/issuetypes',
         'https://siem-kibana.atlassian.net/rest/capabilities',
@@ -1114,8 +1136,21 @@ describe('Jira service', () => {
     });
     test('it returns common fields correctly', async () => {
       callMocks();
-      const res = await service.getCommonFields();
-      expect(res).toEqual(jiraCommonFields);
+      const res = await service.getFields();
+      expect(res).toEqual({
+        description: {
+          allowedValues: [],
+          defaultValue: {},
+          required: true,
+          schema: { type: 'string' },
+        },
+        summary: {
+          allowedValues: [],
+          defaultValue: {},
+          required: true,
+          schema: { type: 'string' },
+        },
+      });
     });
 
     test('it should throw an error', async () => {
@@ -1124,8 +1159,8 @@ describe('Jira service', () => {
         error.response = { data: { errors: { summary: 'Required field' } } };
         throw error;
       });
-      await expect(service.getCommonFields()).rejects.toThrow(
-        '[Action][Jira]: Unable to get fields. Error: An error has occurred Reason: Required field'
+      await expect(service.getFields()).rejects.toThrow(
+        '[Action][Jira]: Unable to get capabilities. Error: An error has occurred. Reason: Required field'
       );
     });
   });

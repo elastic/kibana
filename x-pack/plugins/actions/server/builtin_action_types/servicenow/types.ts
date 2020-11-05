@@ -66,7 +66,7 @@ export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
 export type ExternalServiceParams = Record<string, unknown>;
 
 export interface ExternalService {
-  getCommonFields: () => Promise<GetCommonFieldsResponse>;
+  getFields: () => Promise<GetCommonFieldsResponse>;
   getIncident: (id: string) => Promise<ExternalServiceParams | undefined>;
   createIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParams) => Promise<ExternalServiceIncidentResponse>;
@@ -127,7 +127,7 @@ export interface GetCommonFieldsHandlerArgs {
 }
 
 export interface ExternalServiceApi {
-  commonFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
+  getFields: (args: GetCommonFieldsHandlerArgs) => Promise<GetCommonFieldsResponse>;
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<void>;

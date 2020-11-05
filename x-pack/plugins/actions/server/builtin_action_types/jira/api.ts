@@ -40,8 +40,8 @@ const getIssueTypesHandler = async ({ externalService }: GetIssueTypesHandlerArg
   return res;
 };
 
-const getCommonFieldsHandler = async ({ externalService }: GetCommonFieldsHandlerArgs) => {
-  const res = await externalService.getCommonFields();
+const getFieldsHandler = async ({ externalService }: GetCommonFieldsHandlerArgs) => {
+  const res = await externalService.getFields();
   return res;
 };
 
@@ -163,7 +163,7 @@ const pushToServiceHandler = async ({
 };
 
 export const api: ExternalServiceApi = {
-  commonFields: getCommonFieldsHandler,
+  getFields: getFieldsHandler,
   handshake: handshakeHandler,
   pushToService: pushToServiceHandler,
   getIncident: getIncidentHandler,

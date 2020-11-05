@@ -236,12 +236,12 @@ describe('ServiceNow service', () => {
     });
   });
 
-  describe('getCommonFields', () => {
+  describe('getFields', () => {
     test('it should call request with correct arguments', async () => {
       requestMock.mockImplementation(() => ({
         data: { result: serviceNowCommonFields },
       }));
-      await service.getCommonFields();
+      await service.getFields();
 
       expect(requestMock).toHaveBeenCalledWith({
         axios,
@@ -254,7 +254,7 @@ describe('ServiceNow service', () => {
       requestMock.mockImplementation(() => ({
         data: { result: serviceNowCommonFields },
       }));
-      const res = await service.getCommonFields();
+      const res = await service.getFields();
       expect(res).toEqual(serviceNowCommonFields);
     });
 
@@ -262,7 +262,7 @@ describe('ServiceNow service', () => {
       requestMock.mockImplementation(() => {
         throw new Error('An error has occurred');
       });
-      await expect(service.getCommonFields()).rejects.toThrow(
+      await expect(service.getFields()).rejects.toThrow(
         'Unable to get common fields. Error: An error has occurred'
       );
     });

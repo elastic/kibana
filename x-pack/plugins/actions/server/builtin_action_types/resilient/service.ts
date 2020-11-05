@@ -303,7 +303,7 @@ export const createExternalService = (
     }
   };
 
-  const getCommonFields = async () => {
+  const getFields = async () => {
     try {
       const res = await request({
         axios: axiosInstance,
@@ -320,7 +320,7 @@ export const createExternalService = (
   return {
     createComment,
     createIncident,
-    getCommonFields,
+    getFields,
     getIncident,
     getIncidentTypes,
     getSeverity,

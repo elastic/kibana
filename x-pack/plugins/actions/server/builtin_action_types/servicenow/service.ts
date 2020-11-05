@@ -128,7 +128,7 @@ export const createExternalService = (
     }
   };
 
-  const getCommonFields = async () => {
+  const getFields = async () => {
     try {
       const res = await request({
         axios: axiosInstance,
@@ -148,7 +148,7 @@ export const createExternalService = (
   return {
     createIncident,
     findIncidents,
-    getCommonFields,
+    getFields,
     getIncident,
     updateIncident,
   };

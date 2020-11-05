@@ -276,7 +276,7 @@ export const resilientFields = [
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
-    getCommonFields: jest.fn().mockImplementation(() => Promise.resolve(resilientFields)),
+    getFields: jest.fn().mockImplementation(() => Promise.resolve(resilientFields)),
     getIncident: jest.fn().mockImplementation(() =>
       Promise.resolve({
         id: '1',

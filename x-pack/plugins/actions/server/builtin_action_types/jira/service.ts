@@ -21,6 +21,9 @@ import {
   ExternalServiceCommentResponse,
   ExternalServiceIncidentResponse,
   ExternalServiceFields,
+  FieldSchema,
+  GetFieldsByIssueTypeResponse,
+  GetCommonFieldsResponse,
 } from './types';
 
 import * as i18n from './translations';
@@ -47,7 +50,6 @@ export const createExternalService = (
     throw Error(`[Action]${i18n.NAME}: Wrong configuration.`);
   }
 
-  const fieldsUrl = `${url}/${BASE_URL}/field`;
   const incidentUrl = `${url}/${BASE_URL}/issue`;
   const capabilitiesUrl = `${url}/${CAPABILITIES_URL}`;
   const commentUrl = `${incidentUrl}/{issueId}/comment`;
@@ -129,14 +131,21 @@ export const createExternalService = (
     issueTypes.map((type) => ({ id: type.id, name: type.name }));
 
   const normalizeFields = (fields: {
-    [key: string]: { allowedValues?: Array<{}>; defaultValue?: {} };
+    [key: string]: {
+      allowedValues?: Array<{}>;
+      defaultValue?: {};
+      required: boolean;
+      schema: FieldSchema;
+    };
   }) =>
     Object.keys(fields ?? {}).reduce((fieldsAcc, fieldKey) => {
       return {
         ...fieldsAcc,
         [fieldKey]: {
+          required: fields[fieldKey]?.required,
           allowedValues: fields[fieldKey]?.allowedValues ?? [],
           defaultValue: fields[fieldKey]?.defaultValue ?? {},
+          schema: fields[fieldKey]?.schema,
         },
       };
     }, {});
@@ -151,28 +160,6 @@ export const createExternalService = (
     key: issue.key,
     title: issue.fields?.summary ?? null,
   });
-
-  const getFields = async (): Promise<ExternalServiceFields[]> => {
-    try {
-      const res = await request({
-        axios: axiosInstance,
-        url: fieldsUrl,
-        logger,
-        proxySettings,
-      });
-
-      return res.data;
-    } catch (error) {
-      throw new Error(
-        getErrorMessage(
-          i18n.NAME,
-          `Unable to get fields. Error: ${error.message} Reason: ${createErrorMessage(
-            error.response?.data
-          )}`
-        )
-      );
-    }
-  };
 
   const getIncident = async (id: string) => {
     try {
@@ -400,6 +387,7 @@ export const createExternalService = (
         });
 
         const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
+
         return normalizeFields(fields);
       } else {
         const res = await request({
@@ -431,19 +419,24 @@ export const createExternalService = (
     }
   };
 
-  const getCommonFields = async () => {
+  const getFields = async () => {
     try {
-      const [fields, issueTypes] = await Promise.all([getFields(), getIssueTypes()]);
-      const fieldTypes = await Promise.all(
+      const issueTypes = await getIssueTypes();
+      const fieldsPerIssueType = await Promise.all(
         issueTypes.map((issueType) => getFieldsByIssueType(issueType.id))
       );
-      const commonFields = fieldTypes.reduce((acc: string[], fieldTypesByIssue) => {
-        const newKeys = Object.keys(fieldTypesByIssue);
-        return acc.length === 0
-          ? [...newKeys]
-          : acc.reduce((add: string[], key) => (newKeys.includes(key) ? [...add, key] : add), []);
-      }, []);
-      return fields.filter((f) => commonFields.includes(f.id));
+      return fieldsPerIssueType.reduce((acc: GetCommonFieldsResponse, fieldTypesByIssue) => {
+        const currentListOfFields = Object.keys(acc);
+        return currentListOfFields.length === 0
+          ? fieldTypesByIssue
+          : currentListOfFields.reduce(
+              (add: GetCommonFieldsResponse, field) =>
+                Object.keys(fieldTypesByIssue).includes(field)
+                  ? { ...add, [field]: acc[field] }
+                  : add,
+              {}
+            );
+      }, {});
     } catch (error) {
       // errors that happen here would be thrown in the contained async calls
       throw error;
@@ -502,7 +495,7 @@ export const createExternalService = (
   };
 
   return {
-    getCommonFields,
+    getFields,
     getIncident,
     createIncident,
     updateIncident,

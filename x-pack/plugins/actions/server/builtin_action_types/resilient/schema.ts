@@ -60,7 +60,7 @@ export const ExecutorSubActionGetSeverityParamsSchema = schema.object({});
 
 export const ExecutorParamsSchema = schema.oneOf([
   schema.object({
-    subAction: schema.literal('commonFields'),
+    subAction: schema.literal('getFields'),
     subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
   }),
   schema.object({
