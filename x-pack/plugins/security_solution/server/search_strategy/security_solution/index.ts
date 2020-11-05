@@ -20,7 +20,7 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
   const es = data.search.getSearchStrategy('es');
 
   return {
-    search: (request, options, context) => {
+    search: (request, options, deps) => {
       if (request.factoryQueryType == null) {
         throw new Error('factoryQueryType is required');
       }
@@ -28,12 +28,12 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
         securitySolutionFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
       return es
-        .search({ ...request, params: dsl }, options, context)
+        .search({ ...request, params: dsl }, options, deps)
         .pipe(mergeMap((esSearchRes) => queryFactory.parse(request, esSearchRes)));
     },
-    cancel: async (context, id) => {
+    cancel: async (id, options, deps) => {
       if (es.cancel) {
-        es.cancel(context, id);
+        return es.cancel(id, options, deps);
       }
     },
   };
