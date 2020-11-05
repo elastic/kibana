@@ -616,9 +616,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
         createdActionId = createdAction.id;
         const params = {
-          subAction: 'update',
+          subAction: 'addComment',
           subActionParams: {
-            comment: { comment: 'a comment', type: 'user' },
+            comment: { comment: 'a comment', context: { type: 'user', savedObjectId: null } },
           },
         };
 
@@ -632,7 +632,7 @@ export default ({ getService }: FtrProviderContext): void => {
           status: 'error',
           actionId: createdActionId,
           message:
-            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subActionParams.id]: expected value of type [string] but got [undefined]\n- [2.subAction]: expected value to equal [addComment]',
+            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.caseId]: expected value of type [string] but got [undefined]',
           retry: false,
         });
       });
@@ -650,7 +650,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         createdActionId = createdAction.id;
         const params = {
-          subAction: 'update',
+          subAction: 'addComment',
           subActionParams: {
             caseId: '123',
           },
@@ -666,12 +666,12 @@ export default ({ getService }: FtrProviderContext): void => {
           status: 'error',
           actionId: createdActionId,
           message:
-            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subActionParams.id]: expected value of type [string] but got [undefined]\n- [2.subAction]: expected value to equal [addComment]',
+            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment.comment]: expected value of type [string] but got [undefined]',
           retry: false,
         });
       });
 
-      it('should respond with a 400 Bad Request when adding a comment to a case without comment type', async () => {
+      it('should respond with a 400 Bad Request when adding a comment to a case without context', async () => {
         const { body: createdAction } = await supertest
           .post('/api/actions/action')
           .set('kbn-xsrf', 'foo')
@@ -702,6 +702,76 @@ export default ({ getService }: FtrProviderContext): void => {
           actionId: createdActionId,
           message:
             'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subActionParams.id]: expected value of type [string] but got [undefined]\n- [2.subAction]: expected value to equal [addComment]',
+          retry: false,
+        });
+      });
+
+      it('should respond with a 400 Bad Request when adding a comment to a case without type as user and savedObjectId !== null', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const params = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: '123',
+            comment: { comment: 'a comment', context: { type: 'user', savedObjectId: 'id' } },
+          },
+        };
+
+        const caseConnector = await supertest
+          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({ params })
+          .expect(200);
+
+        expect(caseConnector.body).to.eql({
+          status: 'error',
+          actionId: createdActionId,
+          message:
+            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment.context.type]: types that failed validation:\n - [subActionParams.comment.context.type.0]: expected value to equal [alert]',
+          retry: false,
+        });
+      });
+
+      it('should respond with a 400 Bad Request when adding a comment to a case without type as alert and savedObjectId === null', async () => {
+        const { body: createdAction } = await supertest
+          .post('/api/actions/action')
+          .set('kbn-xsrf', 'foo')
+          .send({
+            name: 'A case connector',
+            actionTypeId: '.case',
+            config: {},
+          })
+          .expect(200);
+
+        createdActionId = createdAction.id;
+        const params = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: '123',
+            comment: { comment: 'a comment', context: { type: 'alert', savedObjectId: null } },
+          },
+        };
+
+        const caseConnector = await supertest
+          .post(`/api/actions/action/${createdActionId}/_execute`)
+          .set('kbn-xsrf', 'foo')
+          .send({ params })
+          .expect(200);
+
+        expect(caseConnector.body).to.eql({
+          status: 'error',
+          actionId: createdActionId,
+          message:
+            'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [create]\n- [1.subAction]: expected value to equal [update]\n- [2.subActionParams.comment.context.type]: expected value to equal [user]',
           retry: false,
         });
       });
