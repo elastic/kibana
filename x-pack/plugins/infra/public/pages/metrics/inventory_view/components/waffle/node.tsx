@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { first } from 'lodash';
+import { ConditionalToolTip } from './conditional_tooltip';
 import { euiStyled } from '../../../../../../../observability/public';
 import {
   InfraWaffleMapBounds,
@@ -20,8 +21,11 @@ import { colorFromValue } from '../../lib/color_from_value';
 import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { NodeContextPopover } from '../node_details/overlay';
 
+import { NodeContextMenu } from './node_context_menu';
+
 const initialState = {
   isPopoverOpen: false,
+  isOverlayOpen: false,
 };
 
 type State = Readonly<typeof initialState>;
@@ -53,35 +57,46 @@ export const Node = class extends React.PureComponent<Props, State> {
     });
     return (
       <>
-        <NodeContainer
-          data-test-subj="nodeContainer"
-          style={{ width: squareSize || 0, height: squareSize || 0 }}
-          onClick={this.togglePopover}
+        <NodeContextMenu
+          node={node}
+          nodeType={nodeType}
+          isPopoverOpen={isPopoverOpen}
+          closePopover={this.closePopover}
+          options={options}
+          currentTime={currentTime}
+          popoverPosition="downCenter"
+          openNewOverlay={this.toggleNewOverlay}
         >
-          <SquareOuter color={color}>
-            <SquareInner color={color}>
-              {valueMode ? (
-                <ValueInner aria-label={nodeAriaLabel}>
-                  <Label color={color}>{node.name}</Label>
-                  <Value color={color}>{value}</Value>
-                </ValueInner>
-              ) : (
-                ellipsisMode && (
+          <NodeContainer
+            data-test-subj="nodeContainer"
+            style={{ width: squareSize || 0, height: squareSize || 0 }}
+            onClick={this.togglePopover}
+          >
+            <SquareOuter color={color}>
+              <SquareInner color={color}>
+                {valueMode ? (
                   <ValueInner aria-label={nodeAriaLabel}>
-                    <Label color={color}>...</Label>
+                    <Label color={color}>{node.name}</Label>
+                    <Value color={color}>{value}</Value>
                   </ValueInner>
-                )
-              )}
-            </SquareInner>
-          </SquareOuter>
-        </NodeContainer>
+                ) : (
+                  ellipsisMode && (
+                    <ValueInner aria-label={nodeAriaLabel}>
+                      <Label color={color}>...</Label>
+                    </ValueInner>
+                  )
+                )}
+              </SquareInner>
+            </SquareOuter>
+          </NodeContainer>
+        </NodeContextMenu>
         <NodeContextPopover
           node={node}
           nodeType={nodeType}
-          isOpen={isPopoverOpen}
+          isOpen={this.state.isOverlayOpen}
           options={options}
           currentTime={currentTime}
-          onClose={this.closePopover}
+          onClose={this.toggleNewOverlay}
         />
       </>
     );
@@ -89,6 +104,13 @@ export const Node = class extends React.PureComponent<Props, State> {
 
   private togglePopover = () => {
     this.setState((prevState) => ({ isPopoverOpen: !prevState.isPopoverOpen }));
+  };
+
+  private toggleNewOverlay = () => {
+    this.setState((prevState) => ({
+      isPopoverOpen: !prevState.isOverlayOpen === true ? false : prevState.isPopoverOpen,
+      isOverlayOpen: !prevState.isOverlayOpen,
+    }));
   };
 
   private closePopover = () => {
