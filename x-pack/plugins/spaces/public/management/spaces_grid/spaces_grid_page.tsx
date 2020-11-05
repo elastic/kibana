@@ -110,6 +110,11 @@ export class SpacesGridPage extends Component<Props, State> {
         <EuiInMemoryTable
           itemId={'id'}
           items={this.state.spaces}
+          tableCaption={i18n.translate('xpack.spaces.management.spacesGridPage.tableCaption', {
+            defaultMessage: 'List of {count} spaces.',
+            values: { count: this.state.spaces.length },
+          })}
+          rowHeader="name"
           columns={this.getColumnConfig()}
           hasActions
           pagination={true}
