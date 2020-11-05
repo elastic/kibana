@@ -10,8 +10,5 @@
   "scripts": {
     "kbn": "node ../../../../scripts/kbn.js",
     "build": "rm -rf './target' && tsc"
-  },
-  "devDependencies": {
-    "typescript": "4.0.2"
   }
 }
