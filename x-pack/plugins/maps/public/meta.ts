@@ -21,12 +21,9 @@ import {
   getIsEmsEnabled,
   getRegionmapLayers,
   getTilemap,
-  getEmsFileApiUrl,
-  getEmsTileApiUrl,
-  getEmsLandingPageUrl,
-  getEmsFontLibraryUrl,
   getProxyElasticMapsServiceInMaps,
   getKibanaVersion,
+  getEMSSettings,
 } from './kibana_services';
 import { getLicenseId } from './licensed_features';
 import { LayerConfig } from '../../../../src/plugins/region_map/config';
@@ -65,18 +62,19 @@ let emsClient: EMSClient | null = null;
 let latestLicenseId: string | undefined;
 export function getEMSClient(): EMSClient {
   if (!emsClient) {
+    const emsSettings = getEMSSettings();
     const proxyElasticMapsServiceInMaps = getProxyElasticMapsServiceInMaps();
     const proxyPath = '';
     const tileApiUrl = proxyElasticMapsServiceInMaps
       ? relativeToAbsolute(
           getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}`)
         )
-      : getEmsTileApiUrl();
+      : emsSettings.getEMSTileApiUrl();
     const fileApiUrl = proxyElasticMapsServiceInMaps
       ? relativeToAbsolute(
           getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_FILES_CATALOGUE_PATH}`)
         )
-      : getEmsFileApiUrl();
+      : emsSettings.getEMSFileApiUrl();
 
     emsClient = new EMSClient({
       language: i18n.getLocale(),
@@ -84,7 +82,7 @@ export function getEMSClient(): EMSClient {
       appName: EMS_APP_NAME,
       tileApiUrl,
       fileApiUrl,
-      landingPageUrl: getEmsLandingPageUrl(),
+      landingPageUrl: emsSettings.getEMSLandingPageUrl(),
       fetchFunction(url: string) {
         return fetch(url);
       },
@@ -103,13 +101,15 @@ export function getGlyphUrl(): string {
   if (!getIsEmsEnabled()) {
     return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
+
+  const emsSettings = getEMSSettings();
   return getProxyElasticMapsServiceInMaps()
     ? relativeToAbsolute(
         getHttp().basePath.prepend(
           `/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`
         )
       ) + `/{fontstack}/{range}`
-    : getEmsFontLibraryUrl();
+    : emsSettings.getEMSFontLibraryUrl();
 }
 
 export function isRetina(): boolean {

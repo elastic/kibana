@@ -9,6 +9,7 @@ import { CoreStart } from 'kibana/public';
 import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
+import { EMSSettings } from './ems_settings';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);
@@ -66,28 +67,16 @@ let emsSettings: EMSSettings;
 export const setEMSSettings = (value: EMSSettings) => {
   emsSettings = value;
 };
+export const getEMSSettings = () => {
+  return emsSettings;
+};
 
 export const getIsEmsEnabled = () => getKibanaCommonConfig().includeElasticMapsService;
+
 export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
 export const getProxyElasticMapsServiceInMaps = () =>
   getKibanaCommonConfig().proxyElasticMapsServiceInMaps;
 export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
 export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
-
-export const getEmsFontLibraryUrl = () => {
-  return emsSettings.getEMSFontLibraryUrl();
-};
-
-export const getEmsFileApiUrl = () => {
-  return emsSettings.getEMSFileApiUrl();
-};
-
-export const getEmsTileApiUrl = () => {
-  return emsSettings.getEMSTileApiUrl();
-};
-
-export const getEmsLandingPageUrl = () => {
-  return emsSettings.getEMSLandingPageUrl();
-};
 
 export const getShareService = () => pluginsStart.share;

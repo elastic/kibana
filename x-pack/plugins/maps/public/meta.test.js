@@ -13,10 +13,6 @@ describe('default use without proxy', () => {
   beforeEach(() => {
     require('./kibana_services').getProxyElasticMapsServiceInMaps = () => false;
     require('./kibana_services').getIsEmsEnabled = () => true;
-    require('./kibana_services').getEmsTileLayerId = () => '123';
-    require('./kibana_services').getEmsFileApiUrl = () => 'https://file-api';
-    require('./kibana_services').getEmsTileApiUrl = () => 'https://tile-api';
-    require('./kibana_services').getEmsLandingPageUrl = () => 'http://test.com';
     require('./licensed_features').getLicenseId = () => {
       return 'foobarlicenseid';
     };
@@ -35,7 +31,6 @@ describe('getGlyphUrl', () => {
     const EMS_FONTS_URL_MOCK = 'ems/fonts';
     beforeAll(() => {
       require('./kibana_services').getIsEmsEnabled = () => true;
-      require('./kibana_services').getEmsFontLibraryUrl = () => EMS_FONTS_URL_MOCK;
       require('./kibana_services').getHttp = () => ({
         basePath: {
           prepend: (url) => url, // No need to actually prepend a dev basepath for test
