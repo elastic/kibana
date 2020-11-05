@@ -24,13 +24,36 @@ describe('EMSSettings', () => {
     isEMSEnabled: true,
   };
 
-  describe('isConfigValid', () => {
+  describe('isEMSEnabled/isOnPrem', () => {
     test('should validate defaults', () => {
       const emsSettings = new EMSSettings(mockConfig);
-      expect(emsSettings.isConfigValid()).toBe(true);
+      expect(emsSettings.isEMSEnabled()).toBe(true);
+      expect(emsSettings.isOnPrem()).toBe(false);
+    });
+
+    test('should validate if on-prem is turned on', () => {
+      const emsSettings = new EMSSettings({
+        ...mockConfig,
+        ...{
+          emsUrl: 'https://localhost:8080',
+        },
+      });
+      expect(emsSettings.isEMSEnabled()).toBe(true);
+      expect(emsSettings.isOnPrem()).toBe(true);
     });
 
     test('should not validate if ems turned off', () => {
+      const emsSettings = new EMSSettings({
+        ...mockConfig,
+        ...{
+          includeElasticMapsService: false,
+        },
+      });
+      expect(emsSettings.isEMSEnabled()).toBe(false);
+      expect(emsSettings.isOnPrem()).toBe(false);
+    });
+
+    test('should work if ems is turned off, but on-prem is turned on', () => {
       const emsSettings = new EMSSettings({
         ...mockConfig,
         ...{
@@ -38,18 +61,8 @@ describe('EMSSettings', () => {
           includeElasticMapsService: false,
         },
       });
-      expect(emsSettings.isConfigValid()).toBe(false);
-    });
-
-    test('should not validate if proxying is turned on', () => {
-      const emsSettings = new EMSSettings({
-        ...mockConfig,
-        ...{
-          emsUrl: 'https://localhost:8080',
-          proxyElasticMapsServiceInMaps: true,
-        },
-      });
-      expect(emsSettings.isConfigValid()).toBe(false);
+      expect(emsSettings.isEMSEnabled()).toBe(true);
+      expect(emsSettings.isOnPrem()).toBe(true);
     });
   });
 

@@ -29,7 +29,7 @@ export class EMSSettings {
   }
 
   _isEMSUrlSet() {
-    return this._config.emsUrl && this._config.emsUrl.length > 0;
+    return !!this._config.emsUrl;
   }
 
   _getEMSRoot() {
@@ -40,14 +40,8 @@ export class EMSSettings {
     return !!this._isEMSUrlSet();
   }
 
-  isEMSEnabled() {
-    return !!this._config.includeElasticMapsService;
-  }
-
-  isConfigValid(): boolean {
-    const badConfig =
-      this._isEMSUrlSet() && (!this.isEMSEnabled() || this._config.proxyElasticMapsServiceInMaps);
-    return !badConfig;
+  isEMSEnabled(): boolean {
+    return !!this._config.includeElasticMapsService || this._isEMSUrlSet();
   }
 
   getEMSFileApiUrl(): string {
