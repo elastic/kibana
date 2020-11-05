@@ -54,31 +54,33 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     /**
      * Is newChartUi enabled and an area, line or histogram chart is available
      */
-    private async isVisTypeXYChart() {
+    private async isVisTypeXYChart(): Promise<boolean> {
       const enabled = await this.isNewChartUiEnabled();
 
-      if (enabled) {
-        // check if enabled but not a line, area or histogram chart
-        if (await find.existsByCssSelector('.visLib__chart', 1)) {
-          const chart = await find.byCssSelector('.visLib__chart');
-          const chartType = await chart.getAttribute('data-vislib-chart-type');
+      if (!enabled) {
+        log.debug(`-- isVisTypeXYChart = false`);
+        return false;
+      }
 
-          if (!['line', 'area', 'histogram'].includes(chartType)) {
-            log.debug(`-- isVisTypeXYChart = false`);
-            return false;
-          }
-        }
+      // check if enabled but not a line, area or histogram chart
+      if (await find.existsByCssSelector('.visLib__chart', 1)) {
+        const chart = await find.byCssSelector('.visLib__chart');
+        const chartType = await chart.getAttribute('data-vislib-chart-type');
 
-        if (!(await elasticChart.hasChart(elasticChartSelector, 1))) {
-          // not be a vislib chart type
+        if (!['line', 'area', 'histogram'].includes(chartType)) {
           log.debug(`-- isVisTypeXYChart = false`);
           return false;
         }
       }
 
-      log.debug(`-- isVisTypeXYChart = ${enabled}`);
+      if (!(await elasticChart.hasChart(elasticChartSelector, 1))) {
+        // not be a vislib chart type
+        log.debug(`-- isVisTypeXYChart = false`);
+        return false;
+      }
 
-      return enabled;
+      log.debug(`-- isVisTypeXYChart = true`);
+      return true;
     }
 
     /**

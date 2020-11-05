@@ -24,7 +24,7 @@ import { buildExpression, buildExpressionFunction } from '../../expressions/publ
 
 import { DateHistogramParams, Dimensions, HistogramParams, VisParams } from './types';
 import { visName, VisTypeXyExpressionFunctionDefinition } from './xy_vis_fn';
-import { ChartType } from '../common';
+import { XyVisType } from '../common';
 import { getEsaggsFn } from './to_ast_esaggs';
 
 export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params) => {
@@ -84,7 +84,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = async (vis, params
 
   const configStr = JSON.stringify(visConfig).replace(/\\/g, `\\\\`).replace(/'/g, `\\'`);
   const visTypeXy = buildExpressionFunction<VisTypeXyExpressionFunctionDefinition>(visName, {
-    type: vis.type.name as ChartType,
+    type: vis.type.name as XyVisType,
     visConfig: configStr,
   });
 

@@ -34,7 +34,7 @@ export function getEsaggsFn(vis: Vis<VisParams>) {
     index: vis.data.indexPattern!.id!,
     metricsAtAllLevels: vis.isHierarchical(),
     partialRows: false,
-    aggConfigs: JSON.stringify(vis.data.aggs!.aggs),
+    aggConfigs: JSON.stringify(vis.data.aggs?.aggs),
     includeFormatHints: false,
   });
 }

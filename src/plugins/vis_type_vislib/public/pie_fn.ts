@@ -33,7 +33,7 @@ interface Arguments {
   visConfig: string;
 }
 
-interface RenderValue {
+export interface PieRenderValue {
   visType: Extract<VislibChartType, 'pie'>;
   visData: unknown;
   visConfig: PieVisParams;
@@ -43,7 +43,7 @@ export type VisTypeVislibPieExpressionFunctionDefinition = ExpressionFunctionDef
   typeof vislibPieName,
   Datatable,
   Arguments,
-  Render<RenderValue>
+  Render<PieRenderValue>
 >;
 
 export const createPieVisFn = (): VisTypeVislibPieExpressionFunctionDefinition => ({

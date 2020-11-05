@@ -43,7 +43,7 @@ declare global {
     /**
      * Flag used to enable debugState on elastic charts
      */
-    _ecDebugStateFlag?: boolean;
+    _echDebugStateFlag?: boolean;
   }
 }
 
@@ -127,9 +127,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
 
   return (
     <Settings
-      // @ts-ignore
-      enableVislibSeriesSort
-      debugState={window._ecDebugStateFlag ?? false}
+      debugState={window._echDebugStateFlag ?? false}
       xDomain={adjustedXDomain}
       rotation={rotation}
       theme={[themeOverrides, theme]}

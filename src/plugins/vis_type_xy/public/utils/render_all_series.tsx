@@ -52,24 +52,24 @@ const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType =>
 };
 
 const getXAccessor = (xAspect: Aspect): Accessor | AccessorFn => {
-  if (xAspect.accessor) {
-    if (xAspect.aggType === 'date_range' && xAspect.formatter) {
-      const formatter = xAspect.formatter;
-      const accessor = xAspect.accessor;
-      return (d) => {
-        const v = d[accessor];
-        if (!v) {
-          return;
-        }
-        const f = formatter(v);
-        return f;
-      };
-    }
+  if (!xAspect.accessor) {
+    return () => (xAspect.params as FakeParams)?.defaultValue;
+  }
 
+  if (!(xAspect.aggType === 'date_range' && xAspect.formatter)) {
     return xAspect.accessor;
   }
 
-  return () => (xAspect.params as FakeParams)?.defaultValue;
+  const formatter = xAspect.formatter;
+  const accessor = xAspect.accessor;
+  return (d) => {
+    const v = d[accessor];
+    if (!v) {
+      return;
+    }
+    const f = formatter(v);
+    return f;
+  };
 };
 
 /**

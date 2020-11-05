@@ -22,18 +22,26 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import { ExpressionRenderDefinition } from '../../expressions/public';
 import { VisualizationContainer } from '../../visualizations/public';
+import { XyVisType } from '../common';
 import { VisParams } from './types';
 
 import { VisComponentType } from './vis_component';
 import { RenderValue, visName } from './xy_vis_fn';
 
-function shouldShowNoResultsMessage(visParams: VisParams, visData: any, visType: string): boolean {
+// @ts-ignore
+const VisComponent = lazy<VisComponentType>(() => import('./vis_component'));
+
+function shouldShowNoResultsMessage(
+  visParams: VisParams,
+  visData: any,
+  visType: XyVisType
+): boolean {
   if (visParams.dimensions.splitRow || visParams.dimensions.splitRow) {
     // render SplitChartWarning
     return false;
   }
 
-  if (['goal', 'gauge'].includes(visType as string)) {
+  if (['goal', 'gauge'].includes(visType)) {
     return false;
   }
 
@@ -42,9 +50,6 @@ function shouldShowNoResultsMessage(visParams: VisParams, visData: any, visType:
 
   return Boolean(isZeroHits);
 }
-
-// @ts-ignore
-const VisComponent = lazy<VisComponentType>(() => import('./vis_component'));
 
 export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
   name: visName,

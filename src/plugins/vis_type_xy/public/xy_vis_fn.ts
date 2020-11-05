@@ -21,18 +21,18 @@ import { i18n } from '@kbn/i18n';
 
 import { ExpressionFunctionDefinition, Datatable, Render } from '../../expressions/public';
 
-import { ChartType } from '../common';
+import { ChartType, XyVisType } from '../common';
 import { VisParams } from './types';
 
 export const visName = 'xy_vis';
 
 interface Arguments {
-  type: ChartType;
+  type: XyVisType;
   visConfig: string;
 }
 export interface RenderValue {
   visData: Datatable;
-  visType: string;
+  visType: ChartType;
   visConfig: VisParams;
 }
 
@@ -49,8 +49,8 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
   context: {
     types: ['datatable'],
   },
-  help: i18n.translate('visTypeXy.functions.vislib.help', {
-    defaultMessage: 'Vislib visualization',
+  help: i18n.translate('visTypeXy.functions.help', {
+    defaultMessage: 'XY visualization',
   }),
   args: {
     type: {
@@ -66,15 +66,16 @@ export const createVisTypeXyVisFn = (): VisTypeXyExpressionFunctionDefinition =>
   },
   fn(context, args) {
     const visConfig = JSON.parse(args.visConfig) as VisParams;
+    const visType = visConfig.type;
 
     return {
       type: 'render',
       as: visName,
       value: {
         context,
-        visData: context,
-        visType: args.type,
+        visType,
         visConfig,
+        visData: context,
         params: {
           listenOnChange: true,
         },

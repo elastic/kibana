@@ -28,13 +28,13 @@ import { BasicVislibParams, VislibChartType } from './types';
 export const vislibVisName = 'vislib_vis';
 
 interface Arguments {
-  type: string;
+  type: Exclude<VislibChartType, 'pie'>;
   visConfig: string;
 }
 
 export interface VislibRenderValue {
-  visData: any;
-  visType: Omit<VislibChartType, 'pie'>;
+  visType: Exclude<VislibChartType, 'pie'>;
+  visData: unknown;
   visConfig: BasicVislibParams;
 }
 
@@ -65,7 +65,7 @@ export const createVisTypeVislibVisFn = (): VisTypeVislibExpressionFunctionDefin
     },
   },
   fn(context, args) {
-    const visType = args.type as VislibChartType;
+    const visType = args.type as Exclude<VislibChartType, 'pie'>;
     const visConfig = JSON.parse(args.visConfig) as BasicVislibParams;
     const visData = vislibSeriesResponseHandler(context, visConfig.dimensions);
 

@@ -16,10 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { FC, useMemo } from 'react';
+import React, { FC } from 'react';
 import moment, { unitOfTime } from 'moment';
 
-import { TooltipValue, RectAnnotation, RectAnnotationDatum } from '@elastic/charts';
+import {
+  TooltipValue,
+  RectAnnotation,
+  RectAnnotationDatum,
+  RectAnnotationStyle,
+} from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer } from '@elastic/eui';
 import lightEuiTheme from '@elastic/eui/dist/eui_theme_light.json';
@@ -47,15 +52,12 @@ export const Endzones: FC<EndzonesProps> = ({
   groupId,
   hideTooltips = true,
 }) => {
-  const rectAnnotationStyle = useMemo(
-    () => ({
-      stroke: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
-      strokeWidth: 0,
-      opacity: isDarkMode ? 0.6 : 0.2,
-      fill: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
-    }),
-    [isDarkMode]
-  );
+  const rectAnnotationStyle: Partial<RectAnnotationStyle> = {
+    stroke: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
+    strokeWidth: 0,
+    opacity: isDarkMode ? 0.6 : 0.2,
+    fill: isDarkMode ? darkEuiTheme.euiColorLightShade : lightEuiTheme.euiColorDarkShade,
+  };
 
   const rectAnnotations: RectAnnotationDatum[] = [];
   if (domainStart !== domainMin) {

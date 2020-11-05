@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`vislib vis toExpressionAst function should match basic snapshot 1`] = `
+exports[`xy vis toExpressionAst function should match basic snapshot 1`] = `
 Object {
   "addArgument": [Function],
   "arguments": Object {

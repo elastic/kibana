@@ -38,7 +38,7 @@ jest.mock('./to_ast_esaggs', () => ({
   getEsaggsFn: jest.fn(),
 }));
 
-describe('vislib vis toExpressionAst function', () => {
+describe('xy vis toExpressionAst function', () => {
   let vis: Vis<VisParams>;
 
   const params = {

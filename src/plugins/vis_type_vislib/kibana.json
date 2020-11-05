@@ -4,6 +4,5 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["charts", "data", "expressions", "visualizations", "kibanaLegacy"],
-  "optionalPlugins": ["visTypeXy"],
   "requiredBundles": ["kibanaUtils", "visDefaultEditor", "visTypeXy"]
 }

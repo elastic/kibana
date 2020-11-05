@@ -28,7 +28,7 @@ declare global {
     /**
      * Flag used to enable debugState on elastic charts
      */
-    _ecDebugStateFlag?: boolean;
+    _echDebugStateFlag?: boolean;
   }
 }
 
@@ -104,7 +104,7 @@ export function ElasticChartProvider({ getService }: FtrProviderContext) {
 
     /**
      * used to get chart data from `@elastic/charts`
-     * requires `window._ecDebugStateFlag` to be true
+     * requires `window._echDebugStateFlag` to be true
      */
     public async getChartDebugData(dataTestSubj?: string): Promise<DebugState | null> {
       const chart = await this.getChart(dataTestSubj);
@@ -126,7 +126,7 @@ export function ElasticChartProvider({ getService }: FtrProviderContext) {
      */
     public async setNewChartUiDebugFlag(value = true) {
       await browser.execute<[boolean], void>((v) => {
-        window._ecDebugStateFlag = v;
+        window._echDebugStateFlag = v;
       }, value);
     }
   }
