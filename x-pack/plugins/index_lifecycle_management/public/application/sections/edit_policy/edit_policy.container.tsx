@@ -4,10 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+
+import { useKibana } from '../../../shared_imports';
+
 import { useLoadPoliciesList } from '../../services/api';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
@@ -34,7 +37,14 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   getUrlForApp,
   history,
 }) => {
+  const {
+    services: { breadcrumbService },
+  } = useKibana();
   const { error, isLoading, data: policies, resendRequest } = useLoadPoliciesList(false);
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs('editPolicy');
+  }, [breadcrumbService]);
   if (isLoading) {
     return (
       <EuiEmptyPrompt
