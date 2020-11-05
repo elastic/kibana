@@ -42,6 +42,30 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  */
 const LOGIN_API_ENDPOINT = '/internal/security/login';
 
+export const loginWithRole = async (role: string) => {
+  cy.exec(
+    `bash ./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh ./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`
+  );
+  cy.exec(
+    `bash ./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_user.sh ./server/lib/detection_engine/scripts/roles_users/${role}/detections_user.json`
+  );
+  cy.log(`base url: http://localhost:5620${LOGIN_API_ENDPOINT}`);
+  cy.request({
+    body: {
+      providerType: 'basic',
+      providerName: 'basic',
+      currentURL: '/',
+      params: {
+        username: role,
+        password: 'changeme',
+      },
+    },
+    headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
+    method: 'POST',
+    url: `http://${role}:changeme@localhost:5620${LOGIN_API_ENDPOINT}`,
+  });
+};
+
 /**
  * Authenticates with Kibana using, if specified, credentials specified by
  * environment variables. The credentials in `kibana.dev.yml` will be used
@@ -142,6 +166,13 @@ export const loginAndWaitForPageWithoutDateRange = (url: string) => {
   login();
   cy.viewport('macbook-15');
   cy.visit(url);
+  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
+};
+
+export const loginWithRoleAndWaitForPageWithoutDateRange = async (role: string, url: string) => {
+  loginWithRole(role);
+  cy.viewport('macbook-15');
+  cy.visit(`http://${role}:changeme@localhost:5620/${url}`);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
