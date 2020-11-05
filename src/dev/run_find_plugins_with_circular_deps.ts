@@ -30,7 +30,7 @@ interface CircularDepList {
   [key: string]: string;
 }
 
-const allowedList = {
+const allowedList: CircularDepList = {
   'src/plugins/data': 'src/plugins/visualizations',
   'src/plugins/home': 'src/plugins/discover',
   'src/plugins/ui_actions': 'src/plugins/embeddable',
