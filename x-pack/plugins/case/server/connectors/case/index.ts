@@ -8,7 +8,7 @@ import { curry } from 'lodash';
 
 import { KibanaRequest } from 'kibana/server';
 import { ActionTypeExecutorResult } from '../../../../actions/common';
-import { CasePatchRequest, CasePostRequest } from '../../../common/api';
+import { CasePatchRequest, CasePostRequest, CommentRequest } from '../../../common/api';
 import { createCaseClient } from '../../client';
 import { CaseExecutorParamsSchema, CaseConfigurationSchema } from './schema';
 import {
@@ -85,7 +85,7 @@ async function executor(
 
   if (subAction === 'addComment') {
     const { caseId, comment } = subActionParams as ExecutorSubActionAddCommentParams;
-    data = await caseClient.addComment({ caseId, comment });
+    data = await caseClient.addComment({ caseId, comment: comment as CommentRequest });
   }
 
   return { status: 'ok', data: data ?? {}, actionId };

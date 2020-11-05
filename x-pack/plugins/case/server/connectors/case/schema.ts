@@ -11,7 +11,15 @@ export const CaseConfigurationSchema = schema.object({});
 
 const CommentProps = {
   comment: schema.string(),
-  type: schema.oneOf([schema.literal('alert'), schema.literal('user')]),
+  context: schema.object({
+    type: schema.conditional(
+      schema.siblingRef('savedObjectId'),
+      null,
+      schema.literal('user'),
+      schema.oneOf([schema.literal('alert')])
+    ),
+    savedObjectId: schema.nullable(schema.string()),
+  }),
 };
 
 const JiraFieldsSchema = schema.object({

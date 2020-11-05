@@ -27,7 +27,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 
 const initialCommentValue: CommentRequest = {
   comment: '',
-  type: CommentType.user,
+  context: { type: CommentType.user, savedObjectId: null },
 };
 
 export interface AddCommentRefObject {
@@ -82,7 +82,10 @@ export const AddComment = React.memo(
           if (onCommentSaving != null) {
             onCommentSaving();
           }
-          postComment({ ...data, type: CommentType.user }, onCommentPosted);
+          postComment(
+            { ...data, context: { type: CommentType.user, savedObjectId: null } },
+            onCommentPosted
+          );
           reset();
         }
       }, [onCommentPosted, onCommentSaving, postComment, reset, submit]);

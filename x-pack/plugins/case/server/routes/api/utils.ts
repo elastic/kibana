@@ -65,7 +65,7 @@ interface NewCommentArgs extends CommentRequest {
 
 export const transformNewComment = ({
   comment,
-  type,
+  context,
   createdDate,
   email,
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -73,7 +73,7 @@ export const transformNewComment = ({
   username,
 }: NewCommentArgs): CommentAttributes => ({
   comment,
-  type,
+  context,
   created_at: createdDate,
   created_by: { email, full_name, username },
   pushed_at: null,

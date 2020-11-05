@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send({ comment: 'unique', type: 'user' })
+        .send({ comment: 'unique', context: { type: 'user', savedObjectId: null } })
         .expect(200);
 
       const { body: caseComments } = await supertest

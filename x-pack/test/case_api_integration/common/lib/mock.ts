@@ -24,9 +24,12 @@ export const postCaseReq: CasePostRequest = {
   },
 };
 
-export const postCommentReq: { comment: string; type: string } = {
+export const postCommentReq: {
+  comment: string;
+  context: { type: string; savedObjectId: string | null };
+} = {
   comment: 'This is a cool comment',
-  type: 'user',
+  context: { type: 'user', savedObjectId: null },
 };
 
 export const postCaseResp = (

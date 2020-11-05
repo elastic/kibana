@@ -8,9 +8,20 @@ import * as rt from 'io-ts';
 
 import { UserRT } from '../user';
 
+const ContextTypeUserRt = rt.type({
+  type: rt.literal('user'),
+  savedObjectId: rt.null,
+});
+
+const ContextTypeRestRt = rt.type({
+  // When we have more types we can change it to rt.union.
+  type: rt.literal('alert'),
+  savedObjectId: rt.string,
+});
+
 const CommentBasicRt = rt.type({
   comment: rt.string,
-  type: rt.union([rt.literal('alert'), rt.literal('user')]),
+  context: rt.union([ContextTypeUserRt, ContextTypeRestRt]),
 });
 
 export const CommentAttributesRt = rt.intersection([

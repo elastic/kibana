@@ -133,7 +133,10 @@ interface UnsanitizedComment {
 
 interface SanitizedComment {
   comment: string;
-  type: CommentType;
+  context: {
+    type: CommentType;
+    savedObjectId: string | null;
+  };
 }
 
 export const commentsMigrations = {
@@ -144,7 +147,10 @@ export const commentsMigrations = {
       ...doc,
       attributes: {
         ...doc.attributes,
-        type: CommentType.user,
+        context: {
+          type: CommentType.user,
+          savedObjectId: null,
+        },
       },
       references: doc.references || [],
     };

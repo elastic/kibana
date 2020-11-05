@@ -69,7 +69,7 @@ const defaultPostCommment = {
 
 const sampleData: CommentRequest = {
   comment: 'what a cool comment',
-  type: CommentType.user,
+  context: { type: CommentType.user, savedObjectId: null },
 };
 
 describe('AddComment ', () => {

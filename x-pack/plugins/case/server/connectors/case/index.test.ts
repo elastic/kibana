@@ -619,7 +619,25 @@ describe('case connector', () => {
           subAction: 'addComment',
           subActionParams: {
             caseId: 'case-id',
-            comment: { comment: 'a comment', type: CommentType.user },
+            comment: {
+              comment: 'a comment',
+              context: { type: CommentType.user, savedObjectId: null },
+            },
+          },
+        };
+
+        expect(validateParams(caseActionType, params)).toEqual(params);
+      });
+
+      it('succeeds when type is an alert and has a savedObjectId', () => {
+        const params: Record<string, unknown> = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: 'case-id',
+            comment: {
+              comment: 'a comment',
+              context: { type: CommentType.alert, savedObjectId: 'id' },
+            },
           },
         };
 
@@ -629,6 +647,40 @@ describe('case connector', () => {
       it('fails when params is not valid', () => {
         const params: Record<string, unknown> = {
           subAction: 'addComment',
+        };
+
+        expect(() => {
+          validateParams(caseActionType, params);
+        }).toThrow();
+      });
+
+      it('fails when type is user and savedObjectID !== null', () => {
+        const params: Record<string, unknown> = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: 'case-id',
+            comment: {
+              comment: 'a comment',
+              context: { type: CommentType.user, savedObjectId: 'id' },
+            },
+          },
+        };
+
+        expect(() => {
+          validateParams(caseActionType, params);
+        }).toThrow();
+      });
+
+      it('fails when type is alert and savedObjectID === null', () => {
+        const params: Record<string, unknown> = {
+          subAction: 'addComment',
+          subActionParams: {
+            caseId: 'case-id',
+            comment: {
+              comment: 'a comment',
+              context: { type: CommentType.alert, savedObjectId: null },
+            },
+          },
         };
 
         expect(() => {
@@ -842,7 +894,7 @@ describe('case connector', () => {
           comments: [
             {
               comment: 'a comment',
-              type: CommentType.user as const,
+              context: { type: CommentType.user, savedObjectId: null } as const,
               created_at: '2020-10-23T21:54:48.952Z',
               created_by: {
                 email: 'd00d@awesome.com',
@@ -866,7 +918,10 @@ describe('case connector', () => {
           subAction: 'addComment',
           subActionParams: {
             caseId: 'case-id',
-            comment: { comment: 'a comment', type: CommentType.user },
+            comment: {
+              comment: 'a comment',
+              context: { type: CommentType.user, savedObjectId: null },
+            },
           },
         };
 
@@ -883,7 +938,10 @@ describe('case connector', () => {
         expect(result).toEqual({ actionId, status: 'ok', data: commentReturn });
         expect(mockCaseClient.addComment).toHaveBeenCalledWith({
           caseId: 'case-id',
-          comment: { comment: 'a comment', type: CommentType.user },
+          comment: {
+            comment: 'a comment',
+            context: { type: CommentType.user, savedObjectId: null },
+          },
         });
       });
     });

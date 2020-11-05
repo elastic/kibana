@@ -729,7 +729,7 @@ export default ({ getService }: FtrProviderContext): void => {
           subAction: 'addComment',
           subActionParams: {
             caseId: caseRes.body.id,
-            comment: { comment: 'a comment', type: 'user' },
+            comment: { comment: 'a comment', context: { type: 'user', savedObjectId: null } },
           },
         };
 

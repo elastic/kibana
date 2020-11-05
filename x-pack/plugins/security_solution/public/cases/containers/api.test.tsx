@@ -404,7 +404,7 @@ describe('Case Configuration API', () => {
     });
     const data = {
       comment: 'comment',
-      type: CommentType.user,
+      context: { type: CommentType.user as const, savedObjectId: null },
     };
 
     test('check url, method, signal', async () => {

@@ -37,7 +37,34 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
-        type: CommentType.user,
+        context: { type: CommentType.user, savedObjectId: null },
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(200);
+    expect(response.payload.comments[response.payload.comments.length - 1].id).toEqual(
+      'mock-comment'
+    );
+  });
+
+  it(`Posts a new comment of type alert`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_COMMENTS_URL,
+      method: 'post',
+      params: {
+        case_id: 'mock-id-1',
+      },
+      body: {
+        comment: 'Wow, good luck catching that bad meanie!',
+        context: { type: CommentType.alert, savedObjectId: 'id' },
       },
     });
 
@@ -64,7 +91,7 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
-        type: CommentType.user,
+        context: { type: CommentType.user, savedObjectId: null },
       },
     });
 
@@ -104,6 +131,56 @@ describe('POST comment', () => {
     expect(response.payload.isBoom).toEqual(true);
   });
 
+  it(`Returns an error if type is user and savedObjectId !== null`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_COMMENTS_URL,
+      method: 'post',
+      params: {
+        case_id: 'mock-id-1',
+      },
+      body: {
+        comment: 'Wow, good luck catching that bad meanie!',
+        context: { type: CommentType.user, savedObjectId: 'id' },
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(400);
+    expect(response.payload.isBoom).toEqual(true);
+  });
+
+  it(`Returns an error if type is alert and savedObjectId === null`, async () => {
+    const request = httpServerMock.createKibanaRequest({
+      path: CASE_COMMENTS_URL,
+      method: 'post',
+      params: {
+        case_id: 'mock-id-1',
+      },
+      body: {
+        comment: 'Wow, good luck catching that bad meanie!',
+        context: { type: CommentType.alert, savedObjectId: null },
+      },
+    });
+
+    const theContext = await createRouteContext(
+      createMockSavedObjectsRepository({
+        caseSavedObject: mockCases,
+        caseCommentSavedObject: mockCaseComments,
+      })
+    );
+
+    const response = await routeHandler(theContext, request, kibanaResponseFactory);
+    expect(response.status).toEqual(400);
+    expect(response.payload.isBoom).toEqual(true);
+  });
+
   it(`Allow user to create comments without authentications`, async () => {
     routeHandler = await createRoute(initPostCommentApi, 'post', true);
 
@@ -115,7 +192,7 @@ describe('POST comment', () => {
       },
       body: {
         comment: 'Wow, good luck catching that bad meanie!',
-        type: CommentType.user,
+        context: { type: CommentType.user, savedObjectId: null },
       },
     });
 
@@ -131,7 +208,7 @@ describe('POST comment', () => {
     expect(response.status).toEqual(200);
     expect(response.payload.comments[response.payload.comments.length - 1]).toEqual({
       comment: 'Wow, good luck catching that bad meanie!',
-      type: CommentType.user,
+      context: { type: CommentType.user, savedObjectId: null },
       created_at: '2019-11-25T21:54:48.952Z',
       created_by: {
         email: null,
