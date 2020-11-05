@@ -337,6 +337,3 @@ export const ActionTypeForm = ({
     </Fragment>
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export { ActionTypeForm as default };

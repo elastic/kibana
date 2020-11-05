@@ -271,165 +271,165 @@ export const ActionForm = ({
       });
   }
 
-  const alertActionsList =
-    actionTypesIndex &&
-    actions.map((actionItem: AlertAction, index: number) => {
-      const actionConnector = connectors.find((field) => field.id === actionItem.id);
-      // connectors doesn't exists
-      if (!actionConnector) {
-        return (
-          <AddConnectorInline
-            actionTypesIndex={actionTypesIndex}
-            actionItem={actionItem}
-            index={index}
-            actionTypeRegistry={actionTypeRegistry}
-            defaultActionGroupId={defaultActionGroupId}
-            capabilities={capabilities}
-            emptyActionsIds={emptyActionsIds}
-            onDeleteConnector={() => {
-              const updatedActions = actions.filter((_item: AlertAction, i: number) => i !== index);
-              setAlertProperty(updatedActions);
-              setIsAddActionPanelOpen(
-                updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
-              );
-              setActiveActionItem(undefined);
-            }}
-            onAddConnector={() => {
-              setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-              setAddModalVisibility(true);
-            }}
-          />
-        );
-      }
-
-      const actionParamsErrors: ActionTypeFormProps['actionParamsErrors'] = actionTypeRegistry
-        .get(actionItem.actionTypeId)
-        ?.validateParams(actionItem.params);
-
-      return (
-        <ActionTypeForm
-          actionItem={actionItem}
-          actionConnector={actionConnector}
-          actionParamsErrors={actionParamsErrors}
-          index={index}
-          setActionParamsProperty={setActionParamsProperty}
-          actionTypesIndex={actionTypesIndex}
-          connectors={connectors}
-          http={http}
-          toastNotifications={toastNotifications}
-          docLinks={docLinks}
-          capabilities={capabilities}
-          actionTypeRegistry={actionTypeRegistry}
-          defaultActionGroupId={defaultActionGroupId}
-          defaultActionMessage={defaultActionMessage}
-          messageVariables={messageVariables}
-          actionGroups={actionGroups}
-          setActionGroupIdByIndex={setActionGroupIdByIndex}
-          onAddConnector={() => {
-            setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-            setAddModalVisibility(true);
-          }}
-          onConnectorSelected={(id: string) => {
-            setActionIdByIndex(id, index);
-          }}
-          onDeleteAction={() => {
-            const updatedActions = actions.filter((_item: AlertAction, i: number) => i !== index);
-            setAlertProperty(updatedActions);
-            setIsAddActionPanelOpen(
-              updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
-            );
-            setActiveActionItem(undefined);
-          }}
-        />
-      );
-    });
-
-  return (
+  return isLoadingConnectors ? (
+    <SectionLoading>
+      <FormattedMessage
+        id="xpack.triggersActionsUI.sections.alertForm.loadingConnectorsDescription"
+        defaultMessage="Loading connectors…"
+      />
+    </SectionLoading>
+  ) : (
     <Fragment>
-      {isLoadingConnectors ? (
-        <SectionLoading>
+      <EuiTitle size="s">
+        <h4>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertForm.loadingConnectorsDescription"
-            defaultMessage="Loading connectors…"
+            defaultMessage="Actions"
+            id="xpack.triggersActionsUI.sections.alertForm.actionSectionsTitle"
           />
-        </SectionLoading>
-      ) : (
-        <Fragment>
-          <EuiTitle size="s">
-            <h4>
-              <FormattedMessage
-                defaultMessage="Actions"
-                id="xpack.triggersActionsUI.sections.alertForm.actionSectionsTitle"
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      {actionTypesIndex &&
+        actions.map((actionItem: AlertAction, index: number) => {
+          const actionConnector = connectors.find((field) => field.id === actionItem.id);
+          // connectors doesn't exists
+          if (!actionConnector) {
+            return (
+              <AddConnectorInline
+                actionTypesIndex={actionTypesIndex}
+                actionItem={actionItem}
+                index={index}
+                key={`action-form-action-at-${index}`}
+                actionTypeRegistry={actionTypeRegistry}
+                defaultActionGroupId={defaultActionGroupId}
+                capabilities={capabilities}
+                emptyActionsIds={emptyActionsIds}
+                onDeleteConnector={() => {
+                  const updatedActions = actions.filter(
+                    (_item: AlertAction, i: number) => i !== index
+                  );
+                  setAlertProperty(updatedActions);
+                  setIsAddActionPanelOpen(
+                    updatedActions.filter((item: AlertAction) => item.id !== actionItem.id)
+                      .length === 0
+                  );
+                  setActiveActionItem(undefined);
+                }}
+                onAddConnector={() => {
+                  setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                  setAddModalVisibility(true);
+                }}
               />
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="m" />
-          {alertActionsList}
-          <EuiSpacer size="m" />
-          {isAddActionPanelOpen ? (
-            <Fragment>
-              <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h5>
-                      <FormattedMessage
-                        defaultMessage="Select an action type"
-                        id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
-                      />
-                    </h5>
-                  </EuiTitle>
-                </EuiFlexItem>
-                {hasDisabledByLicenseActionTypes && (
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h5>
-                        <EuiLink
-                          href={VIEW_LICENSE_OPTIONS_LINK}
-                          target="_blank"
-                          external
-                          className="actActionForm__getMoreActionsLink"
-                        >
-                          <FormattedMessage
-                            defaultMessage="Get more actions"
-                            id="xpack.triggersActionsUI.sections.actionForm.getMoreActionsTitle"
-                          />
-                        </EuiLink>
-                      </h5>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
-              <EuiSpacer />
-              <EuiFlexGroup gutterSize="m" wrap>
-                {isLoadingActionTypes ? (
-                  <SectionLoading>
-                    <FormattedMessage
-                      id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
-                      defaultMessage="Loading action types…"
-                    />
-                  </SectionLoading>
-                ) : (
-                  actionTypeNodes
-                )}
-              </EuiFlexGroup>
-            </Fragment>
-          ) : (
-            <EuiFlexGroup>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  data-test-subj="addAlertActionButton"
-                  onClick={() => setIsAddActionPanelOpen(true)}
-                >
+            );
+          }
+
+          const actionParamsErrors: ActionTypeFormProps['actionParamsErrors'] = actionTypeRegistry
+            .get(actionItem.actionTypeId)
+            ?.validateParams(actionItem.params);
+
+          return (
+            <ActionTypeForm
+              actionItem={actionItem}
+              actionConnector={actionConnector}
+              actionParamsErrors={actionParamsErrors}
+              index={index}
+              setActionParamsProperty={setActionParamsProperty}
+              actionTypesIndex={actionTypesIndex}
+              connectors={connectors}
+              http={http}
+              toastNotifications={toastNotifications}
+              docLinks={docLinks}
+              capabilities={capabilities}
+              actionTypeRegistry={actionTypeRegistry}
+              defaultActionGroupId={defaultActionGroupId}
+              defaultActionMessage={defaultActionMessage}
+              messageVariables={messageVariables}
+              actionGroups={actionGroups}
+              setActionGroupIdByIndex={setActionGroupIdByIndex}
+              onAddConnector={() => {
+                setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+                setAddModalVisibility(true);
+              }}
+              onConnectorSelected={(id: string) => {
+                setActionIdByIndex(id, index);
+              }}
+              onDeleteAction={() => {
+                const updatedActions = actions.filter(
+                  (_item: AlertAction, i: number) => i !== index
+                );
+                setAlertProperty(updatedActions);
+                setIsAddActionPanelOpen(
+                  updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length ===
+                    0
+                );
+                setActiveActionItem(undefined);
+              }}
+            />
+          );
+        })}
+      <EuiSpacer size="m" />
+      {isAddActionPanelOpen ? (
+        <Fragment>
+          <EuiFlexGroup id="alertActionTypeTitle" justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h5>
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
-                    defaultMessage="Add action"
+                    defaultMessage="Select an action type"
+                    id="xpack.triggersActionsUI.sections.alertForm.selectAlertActionTypeTitle"
                   />
-                </EuiButton>
+                </h5>
+              </EuiTitle>
+            </EuiFlexItem>
+            {hasDisabledByLicenseActionTypes && (
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h5>
+                    <EuiLink
+                      href={VIEW_LICENSE_OPTIONS_LINK}
+                      target="_blank"
+                      external
+                      className="actActionForm__getMoreActionsLink"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Get more actions"
+                        id="xpack.triggersActionsUI.sections.actionForm.getMoreActionsTitle"
+                      />
+                    </EuiLink>
+                  </h5>
+                </EuiTitle>
               </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
+            )}
+          </EuiFlexGroup>
+          <EuiSpacer />
+          <EuiFlexGroup gutterSize="m" wrap>
+            {isLoadingActionTypes ? (
+              <SectionLoading>
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.alertForm.loadingActionTypesDescription"
+                  defaultMessage="Loading action types…"
+                />
+              </SectionLoading>
+            ) : (
+              actionTypeNodes
+            )}
+          </EuiFlexGroup>
         </Fragment>
+      ) : (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              data-test-subj="addAlertActionButton"
+              onClick={() => setIsAddActionPanelOpen(true)}
+            >
+              <FormattedMessage
+                id="xpack.triggersActionsUI.sections.alertForm.addActionButtonLabel"
+                defaultMessage="Add action"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
       {actionTypesIndex && activeActionItem && addModalVisible ? (
         <ConnectorAddModal

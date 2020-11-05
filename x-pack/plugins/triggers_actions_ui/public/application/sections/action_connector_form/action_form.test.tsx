@@ -307,7 +307,6 @@ describe('action_form', () => {
       const actionOption = wrapper.find(
         `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
       );
-      wrapper.debug();
       expect(actionOption.exists()).toBeTruthy();
       expect(
         wrapper
