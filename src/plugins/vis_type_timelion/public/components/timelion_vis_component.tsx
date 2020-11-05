@@ -63,20 +63,14 @@ function TimelionVisComponent({
         yaxis.tickFormatter = (val: number) => val.toFixed(yaxis.tickDecimals);
       }
 
+      yaxis.domain = {};
+
       if (yaxis.max) {
-        yaxis.domain = {
-          max: yaxis.max,
-        };
+        yaxis.domain.max = yaxis.max;
       }
 
       if (yaxis.min) {
-        if (yaxis.domain) {
-          yaxis.domain.min = yaxis.min;
-        } else {
-          yaxis.domain = {
-            min: yaxis.min,
-          };
-        }
+        yaxis.domain.min = yaxis.min;
       }
     });
   };
@@ -89,7 +83,7 @@ function TimelionVisComponent({
         newSeries.color = colors[colorIndex];
       }
 
-      if (newSeries._global && newSeries._global.yaxes) {
+      if (newSeries._global?.yaxes) {
         updateYAxes(newSeries._global.yaxes);
       }
 
@@ -103,7 +97,7 @@ function TimelionVisComponent({
     setOptions(buildOptions(interval, kibana.services.timefilter, kibana.services.uiSettings));
   }, [interval, kibana.services.timefilter, kibana.services.uiSettings]);
 
-  // temp solution
+  // temp solution, will be changed after fix https://github.com/elastic/elastic-charts/issues/878
   const getLegendPosition = useCallback(() => {
     const chartGlobal = chart[0]._global;
     if (chartGlobal && chartGlobal.legend) {
@@ -192,7 +186,7 @@ function TimelionVisComponent({
           showOverlappingTicks
           tickFormat={options.xaxis.tickFormatter}
         />
-        {chart[0]._global && chart[0]._global.yaxes ? (
+        {chart[0]._global?.yaxes ? (
           chart[0]._global.yaxes.map((axis: IAxis, index: number) => {
             return (
               <Axis

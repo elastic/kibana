@@ -20,12 +20,7 @@
 import React from 'react';
 import { AreaSeries, ScaleType, CurveType } from '@elastic/charts';
 
-interface AreaSeriesComponentProps {
-  data: any;
-  index: number;
-}
-
-export function AreaSeriesComponent({ data, index }: AreaSeriesComponentProps) {
+export function AreaSeriesComponent({ data, index }: { data: any; index: number }) {
   const lines = data.lines || {};
   const points = data.points || {};
   const styles = {
@@ -33,18 +28,18 @@ export function AreaSeriesComponent({ data, index }: AreaSeriesComponentProps) {
       line: {
         stroke: data.color,
         strokeWidth: Number(lines.lineWidth) || 3,
-        visible: lines.show === undefined ? true : lines.show,
+        visible: lines.show ?? true,
       },
       area: {
         fill: data.color,
-        opacity: !lines.fill || lines.fill <= 0 ? 0 : lines.fill,
-        visible: lines.show === undefined ? true : lines.show,
+        opacity: !lines.fill || lines.fill < 0 ? 0 : lines.fill,
+        visible: lines.show ?? true,
       },
       point: {
         fill: points.fillColor,
         opacity: !points.fill || points.fill < 0 ? 1 : points.fill,
         radius: points.radius || 3,
-        stroke: data.color || '#000',
+        stroke: data.color,
         strokeWidth: points.lineWidth || 2,
         visible: Boolean(points.show),
       },
@@ -54,7 +49,8 @@ export function AreaSeriesComponent({ data, index }: AreaSeriesComponentProps) {
 
   return (
     <AreaSeries
-      id={data.label}
+      id={index + data.label}
+      name={data.label}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor={0}

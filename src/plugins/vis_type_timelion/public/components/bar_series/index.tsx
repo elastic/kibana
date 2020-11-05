@@ -20,22 +20,17 @@
 import React from 'react';
 import { BarSeries, ScaleType } from '@elastic/charts';
 
-interface BarSeriesComponentProps {
-  data: any;
-  index: number;
-}
-
-export function BarSeriesComponent({ data, index }: BarSeriesComponentProps) {
+export function BarSeriesComponent({ data, index }: { data: any; index: number }) {
   const bars = data.bars || {};
   const styles = {
     barSeriesStyle: {
       rectBorder: {
-        stroke: data.color || '#000',
+        stroke: data.color,
         strokeWidth: parseInt(bars.lineWidth || '0', 10),
-        visible: bars.show === undefined ? true : !!bars.show,
+        visible: bars.show ?? true,
       },
       rect: {
-        fill: data.color || '#000',
+        fill: data.color,
         opacity: !bars.fill || bars.fill < 0 ? 1 : bars.fill,
       },
     },
@@ -43,7 +38,8 @@ export function BarSeriesComponent({ data, index }: BarSeriesComponentProps) {
 
   return (
     <BarSeries
-      id={data.label}
+      id={index + data.label}
+      name={data.label}
       xScaleType={ScaleType.Time}
       yScaleType={ScaleType.Linear}
       xAccessor={0}
