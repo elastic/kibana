@@ -88,6 +88,28 @@ export const panelNotificationTrigger: Trigger<'PANEL_NOTIFICATION_TRIGGER'> = {
   }),
 };
 
+export const SELECT_RANGE_TRIGGER = 'SELECT_RANGE_TRIGGER';
+export const selectRangeTrigger: Trigger<'SELECT_RANGE_TRIGGER'> = {
+  id: SELECT_RANGE_TRIGGER,
+  title: i18n.translate('embeddableApi.selectRangeTrigger.title', {
+    defaultMessage: 'Range selection',
+  }),
+  description: i18n.translate('embeddableApi.selectRangeTrigger.description', {
+    defaultMessage: 'A range of values on the visualization',
+  }),
+};
+
+export const VALUE_CLICK_TRIGGER = 'VALUE_CLICK_TRIGGER';
+export const valueClickTrigger: Trigger<'VALUE_CLICK_TRIGGER'> = {
+  id: VALUE_CLICK_TRIGGER,
+  title: i18n.translate('embeddableApi.valueClickTrigger.title', {
+    defaultMessage: 'Single click',
+  }),
+  description: i18n.translate('embeddableApi.valueClickTrigger.description', {
+    defaultMessage: 'A data point click on the visualization',
+  }),
+};
+
 export const isValueClickTriggerContext = (
   context: ChartActionContext
 ): context is ValueClickContext => context.data && 'data' in context.data;
