@@ -15,13 +15,8 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiKeyPadMenuItem,
-  EuiAccordion,
-  EuiButtonIcon,
-  EuiEmptyPrompt,
   EuiToolTip,
   EuiLink,
-  EuiCallOut,
-  EuiText,
 } from '@elastic/eui';
 import { HttpSetup, ToastsSetup, ApplicationStart, DocLinksStart } from 'kibana/public';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
@@ -37,10 +32,10 @@ import {
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
 import { ActionTypeForm, ActionTypeFormProps } from './action_type_form';
+import { AddConnectorInline } from './connector_add_inline';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
-import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionGroup } from '../../../../../alerts/common';
 
 export interface ActionAccordionFormProps {
@@ -87,8 +82,6 @@ export const ActionForm = ({
   capabilities,
   docLinks,
 }: ActionAccordionFormProps) => {
-  const canSave = hasSaveActionsCapability(capabilities);
-
   const [addModalVisible, setAddModalVisibility] = useState<boolean>(false);
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
@@ -185,127 +178,6 @@ export const ActionForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actions, connectors]);
-
-  const getAddConnectorsForm = (actionItem: AlertAction, index: number) => {
-    const actionTypeName = actionTypesIndex
-      ? actionTypesIndex[actionItem.actionTypeId].name
-      : actionItem.actionTypeId;
-    const actionTypeRegistered = actionTypeRegistry.get(actionItem.actionTypeId);
-    if (!actionTypeRegistered || actionItem.group !== defaultActionGroupId) return null;
-
-    const noConnectorsLabel = (
-      <FormattedMessage
-        id="xpack.triggersActionsUI.sections.alertForm.emptyConnectorsLabel"
-        defaultMessage="No {actionTypeName} connectors"
-        values={{
-          actionTypeName,
-        }}
-      />
-    );
-    return (
-      <Fragment key={index}>
-        <EuiAccordion
-          initialIsOpen={true}
-          id={index.toString()}
-          className="actAccordionActionForm"
-          buttonContentClassName="actAccordionActionForm__button"
-          data-test-subj={`alertActionAccordion-${index}`}
-          buttonContent={
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={actionTypeRegistered.iconClass} size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText>
-                  <div>
-                    <FormattedMessage
-                      defaultMessage="{actionConnectorName}"
-                      id="xpack.triggersActionsUI.sections.alertForm.newAlertActionTypeEditTitle"
-                      values={{
-                        actionConnectorName: actionTypeRegistered.actionTypeTitle,
-                      }}
-                    />
-                  </div>
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          }
-          extraAction={
-            <EuiButtonIcon
-              iconType="cross"
-              color="danger"
-              className="actAccordionActionForm__extraAction"
-              aria-label={i18n.translate(
-                'xpack.triggersActionsUI.sections.alertForm.accordion.deleteIconAriaLabel',
-                {
-                  defaultMessage: 'Delete',
-                }
-              )}
-              onClick={() => {
-                const updatedActions = actions.filter(
-                  (_item: AlertAction, i: number) => i !== index
-                );
-                setAlertProperty(updatedActions);
-                setIsAddActionPanelOpen(
-                  updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length ===
-                    0
-                );
-                setActiveActionItem(undefined);
-              }}
-            />
-          }
-          paddingSize="l"
-        >
-          {canSave ? (
-            <EuiEmptyPrompt
-              title={
-                emptyActionsIds.find((emptyId: string) => actionItem.id === emptyId) ? (
-                  noConnectorsLabel
-                ) : (
-                  <EuiCallOut
-                    title={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertForm.unableToLoadConnectorTitle',
-                      {
-                        defaultMessage: 'Unable to load connector.',
-                      }
-                    )}
-                    color="warning"
-                  />
-                )
-              }
-              actions={[
-                <EuiButton
-                  color="primary"
-                  fill
-                  size="s"
-                  data-test-subj="createActionConnectorButton"
-                  onClick={() => {
-                    setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
-                    setAddModalVisibility(true);
-                  }}
-                >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertForm.addConnectorButtonLabel"
-                    defaultMessage="Create a connector"
-                  />
-                </EuiButton>,
-              ]}
-            />
-          ) : (
-            <EuiCallOut title={noConnectorsLabel}>
-              <p>
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.alertForm.unauthorizedToCreateForEmptyConnectors"
-                  defaultMessage="Only authorized users can configure a connector. Contact your administrator."
-                />
-              </p>
-            </EuiCallOut>
-          )}
-        </EuiAccordion>
-        <EuiSpacer size="xs" />
-      </Fragment>
-    );
-  };
 
   function addActionType(actionTypeModel: ActionTypeModel) {
     if (!defaultActionGroupId) {
@@ -405,7 +277,29 @@ export const ActionForm = ({
       const actionConnector = connectors.find((field) => field.id === actionItem.id);
       // connectors doesn't exists
       if (!actionConnector) {
-        return getAddConnectorsForm(actionItem, index);
+        return (
+          <AddConnectorInline
+            actionTypesIndex={actionTypesIndex}
+            actionItem={actionItem}
+            index={index}
+            actionTypeRegistry={actionTypeRegistry}
+            defaultActionGroupId={defaultActionGroupId}
+            capabilities={capabilities}
+            emptyActionsIds={emptyActionsIds}
+            onDeleteConnector={() => {
+              const updatedActions = actions.filter((_item: AlertAction, i: number) => i !== index);
+              setAlertProperty(updatedActions);
+              setIsAddActionPanelOpen(
+                updatedActions.filter((item: AlertAction) => item.id !== actionItem.id).length === 0
+              );
+              setActiveActionItem(undefined);
+            }}
+            onAddConnector={() => {
+              setActiveActionItem({ actionTypeId: actionItem.actionTypeId, index });
+              setAddModalVisibility(true);
+            }}
+          />
+        );
       }
 
       const actionParamsErrors: ActionTypeFormProps['actionParamsErrors'] = actionTypeRegistry
