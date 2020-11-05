@@ -60,5 +60,17 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
         `DFA results table should have at least one row (got '${resultTableRows.length}')`
       );
     },
+
+    async assertTotalFeatureImportanceEvaluatePanelExists() {
+      await testSubjects.existOrFail('mlDFExpandableSection-FeatureImportanceSummary');
+      await testSubjects.existOrFail('mlTotalFeatureImportanceChart', { timeout: 5000 });
+    },
+
+    // TODO: add support for button
+    async getFeatureImportanceDecisionPathPopover() {
+      this.assertResultsTableNotEmpty();
+      const firstClickableCell = await testSubjects.find('dataGridRowCell');
+      await firstClickableCell.doubleClick();
+    },
   };
 }
