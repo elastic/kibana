@@ -5,13 +5,12 @@
  */
 
 import React from 'react';
-import { useValues } from 'kea';
+import { useActions } from 'kea';
 import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { sendTelemetry } from '../../../shared/telemetry';
-import { HttpLogic } from '../../../shared/http';
+import { TelemetryLogic } from '../../../shared/telemetry';
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
 import { getEngineRoute } from '../../routes';
 
@@ -42,15 +41,13 @@ export const EngineTable: React.FC<IEngineTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex, onPaginate },
 }) => {
-  const { http } = useValues(HttpLogic);
+  const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   const engineLinkProps = (name: string) => ({
     href: getAppSearchUrl(getEngineRoute(name)),
     target: '_blank',
     onClick: () =>
-      sendTelemetry({
-        http,
-        product: 'app_search',
+      sendAppSearchTelemetry({
         action: 'clicked',
         metric: 'engine_table_link',
       }),

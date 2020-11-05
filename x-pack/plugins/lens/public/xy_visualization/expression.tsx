@@ -42,11 +42,16 @@ import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import {
+  ChartsPluginSetup,
+  PaletteRegistry,
+  SeriesLayer,
+} from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
+import { getColorAssignments } from './color_assignment';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -66,6 +71,7 @@ export interface XYRender {
 
 type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
   histogramBarTarget: number;
@@ -165,6 +171,7 @@ export const xyChart: ExpressionFunctionDefinition<
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: PaletteRegistry;
   histogramBarTarget: number;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -194,6 +201,7 @@ export const getXyChartRenderer = (dependencies: {
           {...config}
           formatFactory={formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
+          paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
           histogramBarTarget={dependencies.histogramBarTarget}
           onClickValue={onClickValue}
@@ -241,6 +249,7 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartsThemeService,
+  paletteService,
   histogramBarTarget,
   onClickValue,
   onSelectRange,
@@ -386,6 +395,8 @@ export function XYChart({
     };
     return style;
   };
+
+  const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
 
   return (
     <Chart>
@@ -540,6 +551,7 @@ export function XYChart({
             yScaleType,
             xScaleType,
             isHistogram,
+            palette,
           } = layer;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
@@ -610,7 +622,33 @@ export function XYChart({
             data: rows,
             xScaleType: xAccessor ? xScaleType : 'ordinal',
             yScaleType,
-            color: () => getSeriesColor(layer, accessor),
+            color: ({ yAccessor, seriesKeys }) => {
+              const overwriteColor = getSeriesColor(layer, accessor);
+              if (overwriteColor !== null) {
+                return overwriteColor;
+              }
+              const colorAssignment = colorAssignments[palette.name];
+              const seriesLayers: SeriesLayer[] = [
+                {
+                  name: splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
+                  totalSeriesAtDepth: colorAssignment.totalSeriesCount,
+                  rankAtDepth: colorAssignment.getRank(
+                    layer,
+                    String(seriesKeys[0]),
+                    String(yAccessor)
+                  ),
+                },
+              ];
+              return paletteService.get(palette.name).getColor(
+                seriesLayers,
+                {
+                  maxDepth: 1,
+                  behindText: false,
+                  totalSeries: colorAssignment.totalSeriesCount,
+                },
+                palette.params
+              );
+            },
             groupId: yAxesConfiguration.find((axisConfiguration) =>
               axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
             )?.groupId,

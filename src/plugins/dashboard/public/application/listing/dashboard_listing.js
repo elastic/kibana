@@ -43,6 +43,7 @@ export class DashboardListing extends React.Component {
       <I18nProvider>
         <TableListView
           headingId="dashboardListingHeading"
+          rowHeader="title"
           createItem={this.props.hideWriteControls ? null : this.props.createItem}
           findItems={this.props.findItems}
           deleteItems={this.props.hideWriteControls ? null : this.props.deleteItems}
@@ -59,6 +60,9 @@ export class DashboardListing extends React.Component {
             defaultMessage: 'dashboards',
           })}
           tableListTitle={i18n.translate('dashboard.listing.dashboardsTitle', {
+            defaultMessage: 'Dashboards',
+          })}
+          tableCaption={i18n.translate('dashboard.listing.dashboardsTitle', {
             defaultMessage: 'Dashboards',
           })}
           toastNotifications={this.props.core.notifications.toasts}
