@@ -154,15 +154,21 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       placementMethod,
       placementArgs
     );
+
     this.updateInput({
       panels: {
         ...this.input.panels,
         [placeholderPanelState.explicitInput.id]: placeholderPanelState,
       },
     });
-    newStateComplete.then((newPanelState: Partial<PanelState>) =>
-      this.replacePanel(placeholderPanelState, newPanelState)
-    );
+
+    // wait until the placeholder is ready, then replace it with new panel
+    // this is useful as sometimes panels can load faster than the placeholder one (i.e. by value embeddables)
+    this.untilEmbeddableLoaded(originalPanelState.explicitInput.id)
+      .then(() => newStateComplete)
+      .then((newPanelState: Partial<PanelState>) =>
+        this.replacePanel(placeholderPanelState, newPanelState)
+      );
   }
 
   public replacePanel(

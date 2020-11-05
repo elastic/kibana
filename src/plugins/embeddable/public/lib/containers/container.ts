@@ -335,6 +335,12 @@ export abstract class Container<
     return embeddable;
   }
 
+  private panelHasChanged(currentPanel: PanelState, prevPanel: PanelState) {
+    if (currentPanel.type !== prevPanel.type) {
+      return true;
+    }
+  }
+
   private maybeUpdateChildren(
     currentPanels: TContainerInput['panels'],
     prevPanels: TContainerInput['panels']
@@ -349,7 +355,7 @@ export abstract class Container<
       }
       // In case of type change, remove and add a panel with the same id
       if (currentPanels[id] && prevPanels[id]) {
-        if (currentPanels[id].type !== prevPanels[id].type) {
+        if (this.panelHasChanged(currentPanels[id], prevPanels[id])) {
           this.onPanelRemoved(id);
           this.onPanelAdded(currentPanels[id]);
         }
