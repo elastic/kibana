@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Payload } from 'boom';
+import { Payload } from '@hapi/boom';
 import {
   SavedObjectsImportSuccess,
   SavedObjectsImportError,

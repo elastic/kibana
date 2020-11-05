@@ -8,6 +8,13 @@ the index patterns that retrieve your data from {es}.
 image::images/management-index-patterns.png[]
 
 [float]
+=== Required permissions
+
+The `Index Pattern Management` {kib} privilege is required to access the *Index patterns* UI.
+
+To add the privilege, open the menu, then click *Stack Management > Roles*.
+
+[float]
 === Create an index pattern
 
 An index pattern is the glue that connects {kib} to your {es} data. Create an
@@ -114,12 +121,8 @@ WARNING: Computing data on the fly with scripted fields can be very resource int
 {kib} performance. Keep in mind that there's no built-in validation of a scripted field. If your scripts are
 buggy, you'll get exceptions whenever you try to view the dynamically generated data.
 
-When you define a scripted field in {kib}, you have a choice of scripting languages. In 5.0 and later, the default
-options are {ref}/modules-scripting-expression.html[Lucene expressions] and {ref}/modules-scripting-painless.html[Painless].
-While you can use other scripting languages if you enable dynamic scripting for them in {es}, this is not recommended
-because they cannot be sufficiently {ref}/modules-scripting-security.html[sandboxed].
-
-WARNING: In 5.0 and later, Groovy, JavaScript, and Python scripting are deprecated and unsupported.
+When you define a scripted field in {kib}, you have a choice of the {ref}/modules-scripting-expression.html[Lucene expressions] or the 
+{ref}/modules-scripting-painless.html[Painless] scripting language.
 
 You can reference any single value numeric field in your expressions, for example:
 

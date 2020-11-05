@@ -39,6 +39,11 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await this.waitTableIsLoaded();
     }
 
+    async getCurrentSearchValue() {
+      const searchBox = await testSubjects.find('savedObjectSearchBar');
+      return await searchBox.getAttribute('value');
+    }
+
     async importFile(path: string, overwriteAll = true) {
       log.debug(`importFile(${path})`);
 
@@ -85,6 +90,14 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
       await testSubjects.existOrFail('importSavedObjectsFailedWarning', { timeout: 20000 });
     }
 
+    async checkImportError() {
+      await testSubjects.existOrFail('importSavedObjectsErrorText', { timeout: 20000 });
+    }
+
+    async getImportErrorText() {
+      return await testSubjects.getVisibleText('importSavedObjectsErrorText');
+    }
+
     async clickImportDone() {
       await testSubjects.click('importSavedObjectsDoneBtn');
       await this.waitTableIsLoaded();
@@ -124,6 +137,12 @@ export function SavedObjectsPageProvider({ getService, getPageObjects }: FtrProv
         // or the action elements are on the row without the menu
         await table[title].relationshipsElement?.click();
       }
+    }
+
+    async setOverriddenIndexPatternValue(oldName: string, newName: string) {
+      const select = await testSubjects.find(`managementChangeIndexSelection-${oldName}`);
+      const option = await testSubjects.findDescendant(`indexPatternOption-${newName}`, select);
+      await option.click();
     }
 
     async clickCopyToSpaceByTitle(title: string) {

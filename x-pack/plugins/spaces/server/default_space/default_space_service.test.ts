@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import * as Rx from 'rxjs';
+import type { Writable } from '@kbn/utility-types';
 import {
   DefaultSpaceService,
   RETRY_SCALE_DURATION,
