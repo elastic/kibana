@@ -14,7 +14,6 @@ import {
   registerShareGroupRoute,
   registerAssignGroupRoute,
   registerBoostsGroupRoute,
-  registerWSGroupRoutes,
 } from './groups';
 
 describe('groups routes', () => {
@@ -28,7 +27,7 @@ describe('groups routes', () => {
     it('creates a request handler', () => {
       mockRouter = new MockRouter({ method: 'get', payload: 'query' });
 
-      registerWSGroupRoutes({
+      registerGroupsRoute({
         ...mockDependencies,
         router: mockRouter.router,
       });
