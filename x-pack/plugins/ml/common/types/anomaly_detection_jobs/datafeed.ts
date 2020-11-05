@@ -19,9 +19,7 @@ export interface Datafeed {
   job_id: JobId;
   query: object;
   query_delay?: string;
-  script_fields?: {
-    [key: string]: any;
-  };
+  script_fields?: Record<string, any>;
   scroll_size?: number;
   delayed_data_check_config?: object;
   indices_options?: IndicesOptions;
@@ -32,16 +30,17 @@ export interface ChunkingConfig {
   time_span?: string;
 }
 
-export interface Aggregation {
-  [key: string]: {
+export type Aggregation = Record<
+  string,
+  {
     date_histogram: {
       field: string;
       fixed_interval: string;
     };
     aggregations?: { [key: string]: any };
     aggs?: { [key: string]: any };
-  };
-}
+  }
+>;
 
 interface IndicesOptions {
   expand_wildcards?: 'all' | 'open' | 'closed' | 'hidden' | 'none';

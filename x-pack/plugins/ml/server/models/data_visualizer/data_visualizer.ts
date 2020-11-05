@@ -611,17 +611,17 @@ export class DataVisualizer {
         filter: { exists: { field } },
       };
 
-      let cardinalField: AggCardinality;
+      let cardinalityField: AggCardinality;
       if (datafeedConfig?.script_fields?.hasOwnProperty(field)) {
-        cardinalField = aggs[`${safeFieldName}_cardinality`] = {
+        cardinalityField = aggs[`${safeFieldName}_cardinality`] = {
           cardinality: { script: datafeedConfig?.script_fields[field].script },
         };
       } else {
-        cardinalField = {
+        cardinalityField = {
           cardinality: { field },
         };
       }
-      aggs[`${safeFieldName}_cardinality`] = cardinalField;
+      aggs[`${safeFieldName}_cardinality`] = cardinalityField;
     });
 
     const searchBody = {

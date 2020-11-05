@@ -559,6 +559,26 @@ export function basicDatafeedValidation(datafeed: Datafeed): ValidationResults {
   };
 }
 
+export function basicJobAndDatafeedValidation(job: Job, datafeed: Datafeed): ValidationResults {
+  const messages: ValidationResults['messages'] = [];
+  let valid = true;
+
+  if (datafeed && job) {
+    const datafeedAggConfig = datafeed.aggregations ?? datafeed?.aggs;
+    if (datafeedAggConfig !== undefined && !job.analysis_config?.summary_count_field_name) {
+      valid = false;
+      messages.push({ id: '`missing_summary_count_field_name`' });
+    }
+  }
+
+  return {
+    messages,
+    valid,
+    contains: (id) => messages.some((m) => id === m.id),
+    find: (id) => messages.find((m) => id === m.id),
+  };
+}
+
 export function validateModelMemoryLimit(job: Job, limits: MlServerLimits): ValidationResults {
   const messages: ValidationResults['messages'] = [];
   let valid = true;

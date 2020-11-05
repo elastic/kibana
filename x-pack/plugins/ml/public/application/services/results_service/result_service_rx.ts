@@ -20,7 +20,6 @@ import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 import { CriteriaField } from './index';
 import type { DatafeedOverride } from '../../../../common/types/modules';
-import type { Aggregation } from '../../../../common/types/anomaly_detection_jobs/datafeed';
 import { findAggField } from '../../../../common/util/validation_utils';
 
 interface ResultResponse {
@@ -74,8 +73,8 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       intervalMs: number,
       dataFeedConfig?: DatafeedOverride
     ): Observable<MetricData> {
-      const scriptFields: any | undefined = dataFeedConfig?.script_fields;
-      const aggFields: Aggregation | undefined = dataFeedConfig?.aggregations;
+      const scriptFields = dataFeedConfig?.script_fields;
+      const aggFields = dataFeedConfig?.aggs ?? dataFeedConfig?.aggregations;
 
       // Build the criteria to use in the bool filter part of the request.
       // Add criteria for the time range, entity fields,
