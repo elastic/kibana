@@ -17,26 +17,8 @@
  * under the License.
  */
 
-import { SavedObjectReference } from '../../../../core/types';
-import { EmbeddableStateWithType } from '../types';
-import { MigrateFunctionsObject } from '../../../kibana_utils/common';
-
-export const telemetryBaseEmbeddableInput = (
-  state: EmbeddableStateWithType,
-  telemetryData: Record<string, any>
-) => {
-  return telemetryData;
-};
-
-export const extractBaseEmbeddableInput = (state: EmbeddableStateWithType) => {
-  return { state, references: [] as SavedObjectReference[] };
-};
-
-export const injectBaseEmbeddableInput = (
-  state: EmbeddableStateWithType,
-  references: SavedObjectReference[]
-) => {
-  return state;
-};
-
-export const baseEmbeddableMigrations: MigrateFunctionsObject = {};
+export * from './extract';
+export * from './inject';
+export * from './migrate';
+export * from './migrate_base_input';
+export * from './telemetry';
