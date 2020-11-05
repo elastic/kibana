@@ -19,9 +19,10 @@
 
 import { uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition, ExecutionContext } from 'src/plugins/expressions/common';
+import { Adapters } from 'src/plugins/inspector/common';
 import { Query, uniqFilters } from '../../query';
-import { KibanaContext } from './kibana_context_type';
+import { ExecutionContextSearch, KibanaContext } from './kibana_context_type';
 
 interface Arguments {
   q?: string | null;
@@ -34,7 +35,8 @@ export type ExpressionFunctionKibanaContext = ExpressionFunctionDefinition<
   'kibana_context',
   KibanaContext | null,
   Arguments,
-  Promise<KibanaContext>
+  Promise<KibanaContext>,
+  ExecutionContext<Adapters, ExecutionContextSearch>
 >;
 
 const getParsedValue = (data: any, defaultValue: any) =>

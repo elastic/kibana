@@ -25,11 +25,14 @@ import { SavedObject, SavedObjectAttributes } from '../../../../core/public';
  * `ExecutionContext` is an object available to all functions during a single execution;
  * it provides various methods to perform side-effects.
  */
-export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters> {
+export interface ExecutionContext<
+  InspectorAdapters extends Adapters = Adapters,
+  ExecutionContextSearch extends SerializableState = SerializableState
+> {
   /**
    * Get search context of the expression.
    */
-  getSearchContext: () => SerializableState;
+  getSearchContext: () => ExecutionContextSearch;
 
   /**
    * Context variables that can be consumed using `var` and `var_set` functions.

@@ -19,6 +19,7 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { ExecutionContextSearch } from '../../data/public';
 import { ExecutionContext, ExpressionFunctionDefinition, Render } from '../../expressions/public';
 import { VegaVisualizationDependencies } from './plugin';
 import { createVegaRequestHandler } from './vega_request_handler';
@@ -46,7 +47,7 @@ export type VegaExpressionFunctionDefinition = ExpressionFunctionDefinition<
   Input,
   Arguments,
   Output,
-  ExecutionContext<VegaInspectorAdapters>
+  ExecutionContext<VegaInspectorAdapters, ExecutionContextSearch>
 >;
 
 export const createVegaFn = (
