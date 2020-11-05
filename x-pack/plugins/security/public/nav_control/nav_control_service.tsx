@@ -35,7 +35,7 @@ export interface SecurityNavControlServiceStart {
   /**
    * Registers the provided user menu links to be displayed in the user menu in the global nav
    */
-  setUserMenuLinks: (newUserMenuLink: UserMenuLink[]) => void;
+  addUserMenuLinks: (newUserMenuLink: UserMenuLink[]) => void;
 }
 
 export class SecurityNavControlService {
@@ -72,7 +72,7 @@ export class SecurityNavControlService {
     return {
       getUserMenuLinks$: () =>
         this.userMenuLinks$.pipe(map(this.sortUserMenuLinks), takeUntil(this.stop$)),
-      setUserMenuLinks: (userMenuLink: UserMenuLink[]) => {
+      addUserMenuLinks: (userMenuLink: UserMenuLink[]) => {
         this.userMenuLinks$.next(userMenuLink);
       },
     };

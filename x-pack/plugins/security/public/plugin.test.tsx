@@ -100,7 +100,7 @@ describe('Security Plugin', () => {
       ).toEqual({
         navControlService: {
           getUserMenuLinks$: expect.any(Function),
-          setUserMenuLinks: expect.any(Function),
+          addUserMenuLinks: expect.any(Function),
         },
       });
     });

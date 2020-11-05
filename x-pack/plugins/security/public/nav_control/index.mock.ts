@@ -9,6 +9,6 @@ import { SecurityNavControlServiceStart } from '.';
 export const navControlServiceMock = {
   createStart: (): jest.Mocked<SecurityNavControlServiceStart> => ({
     getUserMenuLinks$: jest.fn(),
-    setUserMenuLinks: jest.fn(),
+    addUserMenuLinks: jest.fn(),
   }),
 };

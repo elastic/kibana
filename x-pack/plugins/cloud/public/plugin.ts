@@ -77,7 +77,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
 
     if (security && this.isCloudEnabled) {
       const userMenuLinks = createUserMenuLinks(this.config);
-      security.navControlService.setUserMenuLinks(userMenuLinks);
+      security.navControlService.addUserMenuLinks(userMenuLinks);
     }
   }
 }
