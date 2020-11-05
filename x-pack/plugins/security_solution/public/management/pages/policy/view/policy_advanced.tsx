@@ -53,6 +53,7 @@ export const AdvancedPolicyForms = React.memo(() => {
           const configPath = advancedField.key.split('.');
           return (
             <PolicyAdvanced
+              data-test-subj={advancedField}
               key={index}
               configPath={configPath}
               firstSupportedVersion={advancedField.first_supported_version}

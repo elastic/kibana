@@ -56,11 +56,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('and the show advanced settings button is clicked', async () => {
         await testSubjects.missingOrFail('advancedPolicyPanel');
 
-        const advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
+        let advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
         await advancedPolicyButton.click();
 
         await testSubjects.existOrFail('advancedPolicyPanel');
 
+        advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
         await advancedPolicyButton.click();
         await testSubjects.missingOrFail('advancedPolicyPanel');
       });
@@ -110,7 +111,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyLinuxEvent_file'),
           pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyMacEvent_file'),
         ]);
+
+        // const advancedPolicyField = await pageObjects.policy.findAdvancedPolicyField();
+        // await advancedPolicyField.clearValue();
+        // await advancedPolicyField.click();
+        // await advancedPolicyField.type('true');
         await pageObjects.policy.confirmAndSave();
+
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
 
         const agentFullPolicy = await policyTestResources.getFullAgentPolicy(
