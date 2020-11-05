@@ -10,9 +10,9 @@ import {
   AGENT_SAVED_OBJECT_TYPE,
   AGENT_EVENT_SAVED_OBJECT_TYPE,
 } from './../../../../ingest_manager/common/constants/agent';
-import { Agent, DefaultPackages as FleetDefaultPackages } from '../../../../ingest_manager/common';
+import { Agent, defaultPackages as FleetDefaultPackages } from '../../../../ingest_manager/common';
 
-export const FLEET_ENDPOINT_PACKAGE_CONSTANT = FleetDefaultPackages.endpoint;
+export const FLEET_ENDPOINT_PACKAGE_CONSTANT = FleetDefaultPackages.Endpoint;
 
 export const getFleetSavedObjectsMetadata = async (savedObjectsClient: ISavedObjectsRepository) =>
   savedObjectsClient.find<Agent>({

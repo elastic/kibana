@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOr } from 'lodash/fp';
-
 import { IEsSearchResponse } from '../../../../../../../../../../src/plugins/data/common';
 import {
   NetworkKpiQueries,
@@ -29,7 +27,7 @@ export const networkKpiTlsHandshakes: SecuritySolutionFactory<NetworkKpiQueries.
     return {
       ...response,
       inspect,
-      tlsHandshakes: getOr(null, 'hits.total.value', response.rawResponse),
+      tlsHandshakes: response.rawResponse.hits.total,
     };
   },
 };
