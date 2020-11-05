@@ -8,8 +8,6 @@ import React, { useEffect } from 'react';
 import { Route, Redirect, Switch } from 'react-router-dom';
 import { useActions, useValues } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { getAppSearchUrl } from '../shared/enterprise_search_url';
 import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
@@ -36,6 +34,7 @@ import { NotFound } from '../shared/not_found';
 import { EnginesOverview, ENGINES_TITLE } from './components/engines';
 import { Settings, SETTINGS_TITLE } from './components/settings';
 import { Credentials, CREDENTIALS_TITLE } from './components/credentials';
+import { ROLE_MAPPINGS_TITLE } from './components/role_mappings';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -121,9 +120,7 @@ export const AppSearchNav: React.FC<IAppSearchNavProps> = ({ subNav }) => {
       )}
       {canViewRoleMappings && (
         <SideNavLink isExternal to={getAppSearchUrl(ROLE_MAPPINGS_PATH)}>
-          {i18n.translate('xpack.enterpriseSearch.appSearch.nav.roleMappings', {
-            defaultMessage: 'Role Mappings',
-          })}
+          {ROLE_MAPPINGS_TITLE}
         </SideNavLink>
       )}
     </SideNav>
