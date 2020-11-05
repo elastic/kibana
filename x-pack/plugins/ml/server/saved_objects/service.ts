@@ -18,13 +18,17 @@ type JobObjectFilter = { [k in keyof JobObject]?: string };
 
 export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFactory>;
 
-export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsClientContract) {
+export function jobSavedObjectServiceFactory(
+  savedObjectsClient: SavedObjectsClientContract,
+  isMlReady: () => Promise<void>
+) {
   async function _getJobObjects(
     jobType?: JobType,
     jobId?: string,
     datafeedId?: string,
     currentSpaceOnly: boolean = true
   ) {
+    await isMlReady();
     const filterObject: JobObjectFilter = {};
 
     if (jobType !== undefined) {
@@ -51,6 +55,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
   }
 
   async function _createJob(jobType: JobType, jobId: string, datafeedId?: string) {
+    await isMlReady();
     try {
       await _deleteJob(jobType, jobId);
     } catch (error) {
@@ -65,6 +70,7 @@ export function jobSavedObjectServiceFactory(savedObjectsClient: SavedObjectsCli
   }
 
   async function _bulkCreateJobs(jobs: JobObject[], namespaces?: string[]) {
+    await isMlReady();
     return await savedObjectsClient.bulkCreate<JobObject>(
       jobs.map((j) => ({
         type: ML_SAVED_OBJECT_TYPE,

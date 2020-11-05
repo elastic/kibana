@@ -40,7 +40,10 @@ export function jobSavedObjectsInitializationFactory(core: CoreStart) {
       }
       mlLog.info('Initializing job saved objects');
       const savedObjectsClient = getInternalSavedObjectsClient(core);
-      const jobSavedObjectService = jobSavedObjectServiceFactory(savedObjectsClient);
+      const jobSavedObjectService = jobSavedObjectServiceFactory(
+        savedObjectsClient,
+        () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
+      );
       const { initSavedObjects } = repairFactory(client, jobSavedObjectService);
       await initSavedObjects();
       mlLog.info('Job saved objects initialized for * space');

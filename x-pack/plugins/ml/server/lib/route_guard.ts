@@ -32,10 +32,16 @@ type GetMlSavedObjectClient = (request: KibanaRequest) => SavedObjectsClientCont
 export class RouteGuard {
   private _mlLicense: MlLicense;
   private _getMlSavedObjectClient: GetMlSavedObjectClient;
+  private _isMlReady: () => Promise<void>;
 
-  constructor(mlLicense: MlLicense, getSavedObject: GetMlSavedObjectClient) {
+  constructor(
+    mlLicense: MlLicense,
+    getSavedObject: GetMlSavedObjectClient,
+    isMlReady: () => Promise<void>
+  ) {
     this._mlLicense = mlLicense;
     this._getMlSavedObjectClient = getSavedObject;
+    this._isMlReady = isMlReady;
   }
 
   public fullLicenseAPIGuard(handler: Handler) {
@@ -62,7 +68,10 @@ export class RouteGuard {
         });
       }
 
-      const jobSavedObjectService = jobSavedObjectServiceFactory(mlSavedObjectClient);
+      const jobSavedObjectService = jobSavedObjectServiceFactory(
+        mlSavedObjectClient,
+        this._isMlReady
+      );
       const client = context.core.elasticsearch.client;
 
       return handler({

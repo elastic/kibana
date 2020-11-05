@@ -63,11 +63,14 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
   private savedObjectsStart: SavedObjectsServiceStart | null = null;
+  private isMlReadyPromise: Promise<void>;
+  private isMlReady: () => void = () => {};
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.version = ctx.env.packageInfo.branch;
     this.mlLicense = new MlLicense();
+    this.isMlReadyPromise = new Promise((resolve) => (this.isMlReady = resolve));
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
@@ -131,7 +134,11 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
-      routeGuard: new RouteGuard(this.mlLicense, getMlSavedObjectsClient),
+      routeGuard: new RouteGuard(
+        this.mlLicense,
+        getMlSavedObjectsClient,
+        () => this.isMlReadyPromise
+      ),
       mlLicense: this.mlLicense,
     };
 
@@ -176,12 +183,13 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         plugins.spaces,
         plugins.cloud,
         resolveMlCapabilities,
-        () => this.clusterClient
+        () => this.clusterClient,
+        () => this.isMlReadyPromise
       ),
     };
   }
 
-  public async start(coreStart: CoreStart): Promise<MlPluginStart> {
+  public start(coreStart: CoreStart): MlPluginStart {
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
     this.savedObjectsStart = coreStart.savedObjects;
@@ -189,7 +197,9 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     // check whether the job saved objects exist
     // and create them if needed.
     const { initializeJobs } = jobSavedObjectsInitializationFactory(coreStart);
-    await initializeJobs();
+    initializeJobs().then(() => {
+      this.isMlReady();
+    });
   }
 
   public stop() {

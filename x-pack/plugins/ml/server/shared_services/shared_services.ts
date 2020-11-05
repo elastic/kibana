@@ -62,7 +62,8 @@ export function createSharedServices(
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup,
   resolveMlCapabilities: ResolveMlCapabilities,
-  getClusterClient: () => IClusterClient | null
+  getClusterClient: () => IClusterClient | null,
+  isMlReady: () => Promise<void>
 ): SharedServices {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
 
@@ -73,7 +74,8 @@ export function createSharedServices(
     const getRequestItems = getRequestItemsProvider(
       resolveMlCapabilities,
       getClusterClient,
-      savedObjectsClient
+      savedObjectsClient,
+      isMlReady
     );
     const { hasMlCapabilities, scopedClient, mlClient } = getRequestItems(request);
     const asyncGuards: Array<Promise<void>> = [];
@@ -111,7 +113,8 @@ export function createSharedServices(
 function getRequestItemsProvider(
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  isMlReady: () => Promise<void>
 ) {
   return (request: KibanaRequest) => {
     const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
@@ -122,7 +125,7 @@ function getRequestItemsProvider(
     // will not receive a real request object when being called from an alert.
     // instead a dummy request object will be supplied
     const clusterClient = getClusterClient();
-    const jobSavedObjectService = jobSavedObjectServiceFactory(savedObjectsClient);
+    const jobSavedObjectService = jobSavedObjectServiceFactory(savedObjectsClient, isMlReady);
 
     if (clusterClient === null) {
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
