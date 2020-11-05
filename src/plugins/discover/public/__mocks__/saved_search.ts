@@ -17,7 +17,9 @@
  * under the License.
  */
 
-export const savedSearchMock: any = {
+import { SavedSearch } from '../saved_searches';
+
+export const savedSearchMock = ({
   id: 'the-saved-search-id',
   type: 'search',
   attributes: {
@@ -36,4 +38,4 @@ export const savedSearchMock: any = {
   ],
   migrationVersion: { search: '7.5.0' },
   error: undefined,
-};
+} as unknown) as SavedSearch;
