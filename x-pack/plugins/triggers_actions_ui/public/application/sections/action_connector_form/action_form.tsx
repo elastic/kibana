@@ -55,9 +55,9 @@ import { ActionGroup } from '../../../../../alerts/common';
 interface ActionAccordionFormProps {
   actions: AlertAction[];
   defaultActionGroupId: string;
-  actionGroups: ActionGroup[];
+  actionGroups?: ActionGroup[];
   setActionIdByIndex: (id: string, index: number) => void;
-  setActionGroupIdByIndex: (group: string, index: number) => void;
+  setActionGroupIdByIndex?: (group: string, index: number) => void;
   setAlertProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
@@ -102,7 +102,7 @@ export const ActionForm = ({
   const [activeActionItem, setActiveActionItem] = useState<ActiveActionConnectorState | undefined>(
     undefined
   );
-  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(actions.length === 0);
+  const [isAddActionPanelOpen, setIsAddActionPanelOpen] = useState<boolean>(true);
   const [connectors, setConnectors] = useState<ActionConnector[]>([]);
   const [isLoadingConnectors, setIsLoadingConnectors] = useState<boolean>(false);
   const [isLoadingActionTypes, setIsLoadingActionTypes] = useState<boolean>(false);
@@ -262,45 +262,49 @@ export const ActionForm = ({
       connectors.filter((connector) => connector.isPreconfigured)
     );
 
-    const defaultActionGroup = actionGroups.find(({ id }) => id === defaultActionGroupId)!;
+    const defaultActionGroup = actionGroups?.find(({ id }) => id === defaultActionGroupId);
     const selectedActionGroup =
-      actionGroups.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
+      actionGroups?.find(({ id }) => id === actionItem.group) ?? defaultActionGroup;
 
     const accordionContent = checkEnabledResult.isEnabled ? (
       <Fragment>
-        <EuiFlexGroup component="div">
-          <EuiFlexItem grow={true}>
-            <EuiFormControlLayout
-              fullWidth
-              prepend={
-                <EuiFormLabel
-                  htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+        {actionGroups && selectedActionGroup && setActionGroupIdByIndex && (
+          <Fragment>
+            <EuiFlexGroup component="div">
+              <EuiFlexItem grow={true}>
+                <EuiFormControlLayout
+                  fullWidth
+                  prepend={
+                    <EuiFormLabel
+                      htmlFor={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+                    >
+                      <FormattedMessage
+                        id="xpack.triggersActionsUI.sections.alertForm.actionRunWhenInActionGroup"
+                        defaultMessage="Run When"
+                      />
+                    </EuiFormLabel>
+                  }
                 >
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertForm.actionRunWhenInActionGroup"
-                    defaultMessage="Run When"
+                  <EuiSuperSelect
+                    fullWidth
+                    id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
+                    data-test-subj={`addNewActionConnectorActionGroup-${index}`}
+                    options={actionGroups.map(({ id: value, name }) => ({
+                      value,
+                      inputDisplay: name,
+                      'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
+                    }))}
+                    valueOfSelected={selectedActionGroup.id}
+                    onChange={(group) => {
+                      setActionGroupIdByIndex(group, index);
+                    }}
                   />
-                </EuiFormLabel>
-              }
-            >
-              <EuiSuperSelect
-                fullWidth
-                id={`addNewActionConnectorActionGroup-${actionItem.actionTypeId}`}
-                data-test-subj={`addNewActionConnectorActionGroup-${index}`}
-                options={actionGroups.map(({ id: value, name }) => ({
-                  value,
-                  inputDisplay: name,
-                  'data-test-subj': `addNewActionConnectorActionGroup-${index}-option-${value}`,
-                }))}
-                valueOfSelected={selectedActionGroup.id}
-                onChange={(group) => {
-                  setActionGroupIdByIndex(group, index);
-                }}
-              />
-            </EuiFormControlLayout>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
+                </EuiFormControlLayout>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+          </Fragment>
+        )}
         <EuiFlexGroup component="div">
           <EuiFlexItem>
             <EuiFormRow
@@ -341,7 +345,7 @@ export const ActionForm = ({
                 singleSelection={{ asPlainText: true }}
                 options={optionsList}
                 id={`selectActionConnector-${actionItem.id}`}
-                data-test-subj={`selectActionConnector-${index}`}
+                data-test-subj={`selectActionConnector-${actionItem.actionTypeId}`}
                 selectedOptions={getSelectedOptions(actionItem.id)}
                 onChange={(selectedOptions) => {
                   setActionIdByIndex(selectedOptions[0].id ?? '', index);
@@ -410,9 +414,11 @@ export const ActionForm = ({
                           }}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge>{selectedActionGroup.name}</EuiBadge>
-                      </EuiFlexItem>
+                      {selectedActionGroup && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge>{selectedActionGroup.name}</EuiBadge>
+                        </EuiFlexItem>
+                      )}
                       <EuiFlexItem grow={false}>
                         {checkEnabledResult.isEnabled === false && (
                           <Fragment>
