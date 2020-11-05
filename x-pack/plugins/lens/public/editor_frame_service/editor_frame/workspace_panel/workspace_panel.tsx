@@ -9,7 +9,16 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Ast } from '@kbn/interpreter/common';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiButtonEmpty, EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTextColor,
+  EuiButtonEmpty,
+  EuiLink,
+  EuiTitle,
+} from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
 import {
@@ -43,6 +52,7 @@ import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
 import { LensInspectorAdapters } from '../../types';
 import { getOriginalRequestErrorMessage } from '../../error_helper';
+import { validateDatasourceAndVisualization } from '../state_helpers';
 
 export interface WorkspacePanelProps {
   activeVisualizationId: string | null;
@@ -67,7 +77,7 @@ export interface WorkspacePanelProps {
 }
 
 interface WorkspaceState {
-  expressionBuildError: string | undefined;
+  expressionBuildError?: Array<{ shortMessage: string; longMessage: string }>;
   expandError: boolean;
 }
 
@@ -125,26 +135,58 @@ export function WorkspacePanel({
   );
 
   const [localState, setLocalState] = useState<WorkspaceState>({
-    expressionBuildError: undefined as string | undefined,
+    expressionBuildError: undefined,
     expandError: false,
   });
 
   const activeVisualization = activeVisualizationId
     ? visualizationMap[activeVisualizationId]
     : null;
+
+  // Note: mind to all these eslint disable lines: the frameAPI will change too frequently
+  // and to prevent race conditions it is ok to leave them there.
+
+  const configurationValidationError = useMemo(
+    () =>
+      validateDatasourceAndVisualization(
+        activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+        activeDatasourceId && datasourceStates[activeDatasourceId]?.state,
+        activeVisualization,
+        visualizationState,
+        framePublicAPI
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeVisualization, visualizationState, activeDatasourceId, datasourceMap, datasourceStates]
+  );
+
   const expression = useMemo(
     () => {
-      try {
-        return buildExpression({
-          visualization: activeVisualization,
-          visualizationState,
-          datasourceMap,
-          datasourceStates,
-          datasourceLayers: framePublicAPI.datasourceLayers,
-        });
-      } catch (e) {
-        // Most likely an error in the expression provided by a datasource or visualization
-        setLocalState((s) => ({ ...s, expressionBuildError: e.toString() }));
+      if (!configurationValidationError) {
+        try {
+          return buildExpression({
+            visualization: activeVisualization,
+            visualizationState,
+            datasourceMap,
+            datasourceStates,
+            datasourceLayers: framePublicAPI.datasourceLayers,
+          });
+        } catch (e) {
+          const buildMessages = activeVisualization?.getErrorMessages(
+            visualizationState,
+            framePublicAPI
+          );
+          const defaultMessage = {
+            shortMessage: i18n.translate('xpack.lens.editorFrame.buildExpressionError', {
+              defaultMessage: 'An unexpected error occurred while preparing the chart',
+            }),
+            longMessage: e.toString(),
+          };
+          // Most likely an error in the expression provided by a datasource or visualization
+          setLocalState((s) => ({
+            ...s,
+            expressionBuildError: buildMessages ?? [defaultMessage],
+          }));
+        }
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -258,7 +300,7 @@ export function WorkspacePanel({
         dispatch={dispatch}
         onEvent={onEvent}
         setLocalState={setLocalState}
-        localState={localState}
+        localState={{ ...localState, configurationValidationError }}
         ExpressionRendererComponent={ExpressionRendererComponent}
       />
     );
@@ -308,7 +350,9 @@ export const InnerVisualizationWrapper = ({
   onEvent: (event: ExpressionRendererEvent) => void;
   dispatch: (action: Action) => void;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
-  localState: WorkspaceState;
+  localState: WorkspaceState & {
+    configurationValidationError?: Array<{ shortMessage: string; longMessage: string }>;
+  };
   ExpressionRendererComponent: ReactExpressionRendererType;
 }) => {
   const autoRefreshFetch$ = useMemo(() => timefilter.getAutoRefreshFetch$(), [timefilter]);
@@ -342,6 +386,66 @@ export const InnerVisualizationWrapper = ({
     [dispatch]
   );
 
+  if (localState.configurationValidationError) {
+    let showExtraErrors = null;
+    if (localState.configurationValidationError.length > 1) {
+      if (localState.expandError) {
+        showExtraErrors = localState.configurationValidationError
+          .slice(1)
+          .map(({ longMessage }) => (
+            <EuiFlexItem key={longMessage} className="eui-textBreakAll">
+              {longMessage}
+            </EuiFlexItem>
+          ));
+      } else {
+        showExtraErrors = (
+          <EuiFlexItem data-test-subj="configuration-failure-more-errors">
+            <EuiButtonEmpty
+              onClick={() => {
+                setLocalState((prevState: WorkspaceState) => ({
+                  ...prevState,
+                  expandError: !prevState.expandError,
+                }));
+              }}
+            >
+              {i18n.translate('xpack.lens.editorFrame.configurationFailureMoreErrors', {
+                defaultMessage: ` +{errors} {errors, plural, one {error} other {errors}}`,
+                values: { errors: localState.configurationValidationError.length - 1 },
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        );
+      }
+    }
+
+    return (
+      <EuiFlexGroup
+        style={{ maxWidth: '100%' }}
+        direction="column"
+        alignItems="center"
+        data-test-subj="configuration-failure"
+      >
+        <EuiFlexItem>
+          <EuiIcon type="alert" size="xl" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiTitle size="s">
+            <EuiTextColor color="danger">
+              <FormattedMessage
+                id="xpack.lens.editorFrame.configurationFailure"
+                defaultMessage="Invalid configuration"
+              />
+            </EuiTextColor>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem className="eui-textBreakAll">
+          {localState.configurationValidationError[0].longMessage}
+        </EuiFlexItem>
+        {showExtraErrors}
+      </EuiFlexGroup>
+    );
+  }
+
   if (localState.expressionBuildError) {
     return (
       <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
@@ -354,10 +458,11 @@ export const InnerVisualizationWrapper = ({
             defaultMessage="An error occurred in the expression"
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{localState.expressionBuildError}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{localState.expressionBuildError[0].longMessage}</EuiFlexItem>
       </EuiFlexGroup>
     );
   }
+
   return (
     <div className="lnsExpressionRenderer">
       <ExpressionRendererComponent
@@ -370,6 +475,7 @@ export const InnerVisualizationWrapper = ({
         onData$={onData$}
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
+
           return (
             <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
               <EuiFlexItem>
