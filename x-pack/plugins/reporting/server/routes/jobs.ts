@@ -5,7 +5,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { ReportingCore } from '../';
 import { API_BASE_URL } from '../../common/constants';
 import { authorizedUserPreRoutingFactory } from './lib/authorized_user_pre_routing';

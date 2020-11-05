@@ -16,6 +16,7 @@ import {
   IndexPattern,
 } from 'src/plugins/data/public';
 import { ExecutionContextSearch } from 'src/plugins/expressions';
+import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter/common';
@@ -50,7 +51,9 @@ export type LensByValueInput = {
 } & EmbeddableInput;
 
 export type LensByReferenceInput = SavedObjectEmbeddableInput & EmbeddableInput;
-export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
+export type LensEmbeddableInput = (LensByValueInput | LensByReferenceInput) & {
+  palette?: PaletteOutput;
+};
 
 export interface LensEmbeddableOutput extends EmbeddableOutput {
   indexPatterns?: IIndexPattern[];
@@ -172,11 +175,14 @@ export class Embeddable
     if (!this.savedVis || !this.isInitialized) {
       return;
     }
+    const input = this.getInput();
     render(
       <ExpressionWrapper
         ExpressionRenderer={this.expressionRenderer}
         expression={this.expression || null}
         searchContext={this.getMergedSearchContext()}
+        variables={input.palette ? { theme: { palette: input.palette } } : {}}
+        searchSessionId={this.input.searchSessionId}
         handleEvent={this.handleEvent}
       />,
       domNode

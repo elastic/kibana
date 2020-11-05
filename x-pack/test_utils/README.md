@@ -98,10 +98,50 @@ type TestSubjects = 'indicesTable' | 'createIndexButton' | 'pageTitle';
 export const setup = registerTestBed<TestSubjects>(MyComponent);
 ```
 
+## Best practices
+
+In order to prevent flakiness in component integration tests, please consider the following best practices: 
+
+- **Use** `jest.useFakeTimers()`.
+  
+  The code under a test might be using `setTimeout()` calls. This is bad for deterministic tests. In order to avoid it, we need to use mocked timers from jest. For that we declare at the top of each component integration test the following:
+​
+  ```js
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+  ​
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+  ```
+
+- **Do not use** using `nextTick()`, `waitFor`, or `waitForFunc` helpers in tests. These helpers use `setTimeout` underneath and add latency in the tests, especially on CI where a timeout (even of a few ms) can trigger a timeout error. These helpers will eventually be deprecated once existing tests has been updated.
+
+- **Do not declare** `component.update()` inside `act()`. Each `act()` call should contain a chunk of actions that updates the internal state(s). The `component.update()` that re-renders the internal DOM needs to be called outside, before asserting against the updated DOM.
+
+- Be **synchronous** as much as possible.
+​
+  Hooks are delicate when it comes to state updates. Sometimes calling `act()` synchronously works, sometimes it doesn't. The reasoning behind this isn't clear yet. The best approach is to try synchronously first and if it fails, because of an `act()` error, then use the async version.
+
+  ```js
+  // First try this
+  act(() => {
+    find('someTestSubject').simulate('click');
+  });
+  component.update();
+  ​
+  // If there is a "missing `act()` error", then change it to
+  await act(async () => {
+    find('someTestSubject').simulate('click');
+  });
+  component.update();
+  ```
+
 ## Chrome extension
 
-There is a small Chrome extension that you can install in order to track the test subject on the current page. As it is meant to be used 
-during development, the extension is only active when navigating a `localhost` URL.
+There is a small Chrome extension that you can install in order to track the test subjects on the current page. As it is meant to be used 
+during development, the extension is only active when navigating to a `localhost` URL.
 
 You will find the "Test subjects finder" extension in the `x-pack/test_utils/chrome_extension` folder.
 
@@ -158,7 +198,7 @@ describe('<RemoteClusterList />', () => {
 });
 ```
 
-**@returns** An object with the following **properties** and **helpers** for the testing
+**@returns** An object with the following **properties** and **helpers** for testing
 
 #### `component`
 

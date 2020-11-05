@@ -16,7 +16,6 @@ const features: KibanaFeatureConfig[] = [
   {
     id: 'feature-1',
     name: 'Feature 1',
-    icon: 'spacesApp',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,
@@ -24,7 +23,6 @@ const features: KibanaFeatureConfig[] = [
   {
     id: 'feature-2',
     name: 'Feature 2',
-    icon: 'spacesApp',
     app: [],
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,
@@ -235,7 +233,6 @@ describe('EnabledFeatures', () => {
             {
               id: 'feature-3',
               name: 'Feature 3',
-              icon: 'spacesApp',
               app: [],
               category: DEFAULT_APP_CATEGORIES.management,
               privileges: null,

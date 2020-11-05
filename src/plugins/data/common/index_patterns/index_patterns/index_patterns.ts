@@ -18,6 +18,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { PublicMethodsOf } from '@kbn/utility-types';
 import { SavedObjectsClientCommon } from '../..';
 
 import { createIndexPatternCache } from '.';
@@ -435,7 +436,6 @@ export class IndexPatternsService {
 
     const indexPattern = new IndexPattern({
       spec,
-      savedObjectsClient: this.savedObjectsClient,
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
       metaFields,

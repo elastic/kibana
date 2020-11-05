@@ -17,14 +17,14 @@ import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 import { useLink, useGetPackages } from '../../../hooks';
 import { Loading } from '../../fleet/components';
-import { InstallationStatus } from '../../../types';
+import { installationStatuses } from '../../../../../../common/constants';
 
 export const OverviewIntegrationSection: React.FC = () => {
   const { getHref } = useLink();
   const packagesRequest = useGetPackages();
   const res = packagesRequest.data?.response;
   const total = res?.length ?? 0;
-  const installed = res?.filter((p) => p.status === InstallationStatus.installed)?.length ?? 0;
+  const installed = res?.filter((p) => p.status === installationStatuses.Installed)?.length ?? 0;
   const updatablePackages =
     res?.filter(
       (item) => 'savedObject' in item && item.version > item.savedObject.attributes.version
@@ -32,15 +32,15 @@ export const OverviewIntegrationSection: React.FC = () => {
   return (
     <EuiFlexItem component="section">
       <OverviewPanel
-        title={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelTitle', {
+        title={i18n.translate('xpack.fleet.overviewPageIntegrationsPanelTitle', {
           defaultMessage: 'Integrations',
         })}
-        tooltip={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelTooltip', {
+        tooltip={i18n.translate('xpack.fleet.overviewPageIntegrationsPanelTooltip', {
           defaultMessage:
             'Browse and install integrations for the Elastic Stack. Add integrations to your agent policies to start sending data.',
         })}
         linkTo={getHref('integrations_all')}
-        linkToText={i18n.translate('xpack.ingestManager.overviewPageIntegrationsPanelAction', {
+        linkToText={i18n.translate('xpack.fleet.overviewPageIntegrationsPanelAction', {
           defaultMessage: 'View integrations',
         })}
       >
@@ -51,7 +51,7 @@ export const OverviewIntegrationSection: React.FC = () => {
             <>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewIntegrationsTotalTitle"
+                  id="xpack.fleet.overviewIntegrationsTotalTitle"
                   defaultMessage="Total available"
                 />
               </EuiDescriptionListTitle>
@@ -60,7 +60,7 @@ export const OverviewIntegrationSection: React.FC = () => {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewIntegrationsInstalledTitle"
+                  id="xpack.fleet.overviewIntegrationsInstalledTitle"
                   defaultMessage="Installed"
                 />
               </EuiDescriptionListTitle>
@@ -69,7 +69,7 @@ export const OverviewIntegrationSection: React.FC = () => {
               </EuiDescriptionListDescription>
               <EuiDescriptionListTitle>
                 <FormattedMessage
-                  id="xpack.ingestManager.overviewIntegrationsUpdatesAvailableTitle"
+                  id="xpack.fleet.overviewIntegrationsUpdatesAvailableTitle"
                   defaultMessage="Updates available"
                 />
               </EuiDescriptionListTitle>

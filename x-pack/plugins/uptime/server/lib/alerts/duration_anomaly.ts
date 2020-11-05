@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { updateState } from './common';
@@ -36,11 +36,15 @@ export const getAnomalySummary = (anomaly: AnomaliesTableRecord, monitorInfo: Pi
 
 const getAnomalies = async (
   plugins: UptimeCorePlugins,
+  savedObjectsClient: SavedObjectsClientContract,
   params: Record<any, any>,
   lastCheckedAt: string
 ) => {
   const fakeRequest = {} as KibanaRequest;
-  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(fakeRequest);
+  const { getAnomaliesTableData } = plugins.ml.resultsServiceProvider(
+    fakeRequest,
+    savedObjectsClient
+  );
 
   return await getAnomaliesTableData(
     [getMLJobId(params.monitorId)],
@@ -85,7 +89,8 @@ export const durationAnomalyAlertFactory: UptimeAlertTypeFactory = (_server, _li
       params,
     } = options;
 
-    const { anomalies } = (await getAnomalies(plugins, params, state.lastCheckedAt)) ?? {};
+    const { anomalies } =
+      (await getAnomalies(plugins, savedObjectsClient, params, state.lastCheckedAt)) ?? {};
 
     const foundAnomalies = anomalies?.length > 0;
 
