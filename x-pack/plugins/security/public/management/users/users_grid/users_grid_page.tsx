@@ -261,7 +261,7 @@ export class UsersGridPage extends Component<Props, State> {
               <EuiInMemoryTable
                 itemId="username"
                 tableCaption={i18n.translate('xpack.security.management.users.tableCaption', {
-                  defaultMessage: 'List of {count} users.',
+                  defaultMessage: 'Users',
                   values: { count: this.state.visibleUsers.length },
                 })}
                 rowHeader="username"
