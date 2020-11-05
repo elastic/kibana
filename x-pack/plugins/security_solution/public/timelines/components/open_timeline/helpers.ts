@@ -58,6 +58,10 @@ import { IS_OPERATOR } from '../timeline/data_providers/data_provider';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 import { sourcererActions } from '../../../common/store/sourcerer';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
+import {
+  DEFAULT_FROM_MOMENT,
+  DEFAULT_TO_MOMENT,
+} from '../../../common/utils/default_date_settings';
 
 export const OPEN_TIMELINE_CLASS_NAME = 'open-timeline';
 
@@ -340,13 +344,26 @@ export const queryTimelineById = <TCache>({
           duplicate,
           timelineType
         );
+
+        const overrideDaterange =
+          timeline.status === TimelineStatus.immutable
+            ? {
+                ...timeline.dateRange,
+                start: DEFAULT_FROM_MOMENT.toISOString(),
+                end: DEFAULT_TO_MOMENT.toISOString(),
+              }
+            : timeline.dateRange;
+
         if (onOpenTimeline != null) {
-          onOpenTimeline(timeline);
+          onOpenTimeline({ ...timeline, dateRange: overrideDaterange });
         } else if (updateTimeline) {
-          const { from, to } = normalizeTimeRange({
-            from: getOr(null, 'dateRange.start', timeline),
-            to: getOr(null, 'dateRange.end', timeline),
-          });
+          const { from, to } =
+            timeline.status === TimelineStatus.immutable
+              ? { from: overrideDaterange.start, to: overrideDaterange.end }
+              : normalizeTimeRange({
+                  from: getOr(null, 'dateRange.start', timeline),
+                  to: getOr(null, 'dateRange.end', timeline),
+                });
           updateTimeline({
             duplicate,
             from,
@@ -356,6 +373,7 @@ export const queryTimelineById = <TCache>({
               ...timeline,
               graphEventId,
               show: openTimeline,
+              dateRange: { start: from, end: to },
             },
             to,
           })();

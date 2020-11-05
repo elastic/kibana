@@ -3,8 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { cloneDeep, omit } from 'lodash/fp';
+import { cloneDeep, getOr, omit } from 'lodash/fp';
 import { Dispatch } from 'redux';
+import ApolloClient from 'apollo-client';
 
 import {
   mockTimelineResults,
@@ -30,6 +31,9 @@ import {
   isUntitled,
   omitTypenameInTimeline,
   dispatchUpdateTimeline,
+  queryTimelineById,
+  QueryTimelineById,
+  formatTimelineResultToModel,
 } from './helpers';
 import { OpenTimelineResult, DispatchUpdateTimeline } from './types';
 import { KueryFilterQueryKind } from '../../../common/store/model';
@@ -46,6 +50,15 @@ jest.mock('uuid', () => {
   return {
     v1: jest.fn(() => 'uuid.v1()'),
     v4: jest.fn(() => 'uuid.v4()'),
+  };
+});
+
+jest.mock('../../../common/utils/default_date_settings', () => {
+  const actual = jest.requireActual('../../../common/utils/default_date_settings');
+  return {
+    ...actual,
+    DEFAULT_FROM_MOMENT: new Date('2020-10-27T11:37:31.655Z'),
+    DEFAULT_TO_MOMENT: new Date('2020-10-28T11:37:31.655Z'),
   };
 });
 
@@ -901,6 +914,763 @@ describe('helpers', () => {
         status: TimelineStatus.draft,
         width: 1100,
         id: 'savedObject-1',
+      });
+    });
+  });
+
+  describe('queryTimelineById', () => {
+    describe('open a timeline', () => {
+      const updateIsLoading = jest.fn();
+      const selectedTimeline = {
+        data: {
+          getOneTimeline: {
+            savedObjectId: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
+            columns: [
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: '@timestamp',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'message',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'event.category',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'event.action',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'host.name',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'source.ip',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'destination.ip',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'user.name',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+            ],
+            dataProviders: [],
+            dateRange: {
+              start: '2020-11-01T14:30:59.935Z',
+              end: '2020-11-03T14:31:11.417Z',
+              __typename: 'DateRangePickerResult',
+            },
+            description: '',
+            eventType: 'all',
+            eventIdToNoteIds: [],
+            excludedRowRendererIds: [],
+            favorite: [],
+            filters: [],
+            kqlMode: 'filter',
+            kqlQuery: { filterQuery: null, __typename: 'SerializedFilterQueryResult' },
+            indexNames: [
+              'auditbeat-*',
+              'endgame-*',
+              'filebeat-*',
+              'logs-*',
+              'packetbeat-*',
+              'winlogbeat-*',
+              '.siem-signals-angelachuang-default',
+            ],
+            notes: [],
+            noteIds: [],
+            pinnedEventIds: [],
+            pinnedEventsSaveObject: [],
+            status: TimelineStatus.active,
+            title: 'my timeline',
+            timelineType: TimelineType.default,
+            templateTimelineId: null,
+            templateTimelineVersion: null,
+            savedQueryId: null,
+            sort: {
+              columnId: '@timestamp',
+              sortDirection: 'desc',
+              __typename: 'SortTimelineResult',
+            },
+            created: 1604497127973,
+            createdBy: 'angela',
+            updated: 1604500278364,
+            updatedBy: 'angela',
+            version: 'WzQ4NSwxXQ==',
+            __typename: 'TimelineResult',
+          },
+        },
+        loading: false,
+        networkStatus: 7,
+        stale: false,
+      };
+      const apolloClient = {
+        query: (jest.fn().mockResolvedValue(selectedTimeline) as unknown) as ApolloClient<{}>,
+      };
+      const onOpenTimeline = jest.fn();
+      const args = {
+        apolloClient,
+        duplicate: false,
+        graphEventId: '',
+        timelineId: '',
+        timelineType: TimelineType.default,
+        onOpenTimeline,
+        openTimeline: true,
+        updateIsLoading,
+        updateTimeline: jest.fn(),
+      };
+
+      beforeAll(async () => {
+        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+      });
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      test('dispatch updateIsLoading to true', () => {
+        expect(updateIsLoading.mock.calls[0][0]).toEqual({
+          id: TimelineId.active,
+          isLoading: true,
+        });
+      });
+
+      test('get timeline by Id', () => {
+        expect(apolloClient.query).toHaveBeenCalled();
+      });
+
+      test('Do not override daterange if TimelineStatus is active', () => {
+        const { timeline } = formatTimelineResultToModel(
+          omitTypenameInTimeline(getOr({}, 'data.getOneTimeline', selectedTimeline)),
+          args.duplicate,
+          args.timelineType
+        );
+        expect(onOpenTimeline).toBeCalledWith({
+          ...timeline,
+        });
+      });
+
+      test('dispatch updateIsLoading to false', () => {
+        expect(updateIsLoading.mock.calls[1][0]).toEqual({
+          id: TimelineId.active,
+          isLoading: false,
+        });
+      });
+    });
+
+    describe('update a timeline', () => {
+      const updateIsLoading = jest.fn();
+      const updateTimeline = jest.fn();
+      const selectedTimeline = {
+        data: {
+          getOneTimeline: {
+            savedObjectId: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
+            columns: [
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: '@timestamp',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'message',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'event.category',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'event.action',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'host.name',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'source.ip',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'destination.ip',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'user.name',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+            ],
+            dataProviders: [],
+            dateRange: {
+              start: '2020-11-01T14:30:59.935Z',
+              end: '2020-11-03T14:31:11.417Z',
+              __typename: 'DateRangePickerResult',
+            },
+            description: '',
+            eventType: 'all',
+            eventIdToNoteIds: [],
+            excludedRowRendererIds: [],
+            favorite: [],
+            filters: [],
+            kqlMode: 'filter',
+            kqlQuery: { filterQuery: null, __typename: 'SerializedFilterQueryResult' },
+            indexNames: [
+              'auditbeat-*',
+              'endgame-*',
+              'filebeat-*',
+              'logs-*',
+              'packetbeat-*',
+              'winlogbeat-*',
+              '.siem-signals-angelachuang-default',
+            ],
+            notes: [],
+            noteIds: [],
+            pinnedEventIds: [],
+            pinnedEventsSaveObject: [],
+            status: TimelineStatus.active,
+            title: 'my timeline',
+            timelineType: TimelineType.default,
+            templateTimelineId: null,
+            templateTimelineVersion: null,
+            savedQueryId: null,
+            sort: {
+              columnId: '@timestamp',
+              sortDirection: 'desc',
+              __typename: 'SortTimelineResult',
+            },
+            created: 1604497127973,
+            createdBy: 'angela',
+            updated: 1604500278364,
+            updatedBy: 'angela',
+            version: 'WzQ4NSwxXQ==',
+            __typename: 'TimelineResult',
+          },
+        },
+        loading: false,
+        networkStatus: 7,
+        stale: false,
+      };
+      const apolloClient = {
+        query: (jest.fn().mockResolvedValue(selectedTimeline) as unknown) as ApolloClient<{}>,
+      };
+      const args = {
+        apolloClient,
+        duplicate: false,
+        graphEventId: '',
+        timelineId: '',
+        timelineType: TimelineType.default,
+        openTimeline: true,
+        updateIsLoading,
+        updateTimeline,
+      };
+
+      beforeAll(async () => {
+        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+      });
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      test('dispatch updateIsLoading to true', () => {
+        expect(updateIsLoading.mock.calls[0][0]).toEqual({
+          id: TimelineId.active,
+          isLoading: true,
+        });
+      });
+
+      test('get timeline by Id', () => {
+        expect(apolloClient.query).toHaveBeenCalled();
+      });
+
+      test('should not override daterange if TimelineStatus is active', () => {
+        const { timeline } = formatTimelineResultToModel(
+          omitTypenameInTimeline(getOr({}, 'data.getOneTimeline', selectedTimeline)),
+          args.duplicate,
+          args.timelineType
+        );
+        expect(updateTimeline).toBeCalledWith({
+          timeline: {
+            ...timeline,
+            graphEventId: '',
+            show: true,
+            dateRange: {
+              start: '2020-07-07T08:20:18.966Z',
+              end: '2020-07-08T08:20:18.966Z',
+            },
+          },
+          duplicate: false,
+          from: '2020-07-07T08:20:18.966Z',
+          to: '2020-07-08T08:20:18.966Z',
+          notes: [],
+          id: TimelineId.active,
+        });
+      });
+
+      test('dispatch updateIsLoading to false', () => {
+        expect(updateIsLoading.mock.calls[1][0]).toEqual({
+          id: TimelineId.active,
+          isLoading: false,
+        });
+      });
+    });
+
+    describe('open an immutable template', () => {
+      const updateIsLoading = jest.fn();
+      const template = {
+        data: {
+          getOneTimeline: {
+            savedObjectId: '0c70a200-1de0-11eb-885c-6fc13fca1850',
+            columns: [
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: '@timestamp',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'signal.rule.description',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'event.action',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'process.name',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: true,
+                category: 'process',
+                columnHeaderType: 'not-filtered',
+                description: 'The working directory of the process.',
+                example: '/home/alice',
+                indexes: null,
+                id: 'process.working_directory',
+                name: null,
+                searchable: null,
+                type: 'string',
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: true,
+                category: 'process',
+                columnHeaderType: 'not-filtered',
+                description:
+                  'Array of process arguments, starting with the absolute path to\nthe executable.\n\nMay be filtered to protect sensitive information.',
+                example: '["/usr/bin/ssh","-l","user","10.0.0.16"]',
+                indexes: null,
+                id: 'process.args',
+                name: null,
+                searchable: null,
+                type: 'string',
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: null,
+                category: null,
+                columnHeaderType: 'not-filtered',
+                description: null,
+                example: null,
+                indexes: null,
+                id: 'process.pid',
+                name: null,
+                searchable: null,
+                type: null,
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: true,
+                category: 'process',
+                columnHeaderType: 'not-filtered',
+                description: 'Absolute path to the process executable.',
+                example: '/usr/bin/ssh',
+                indexes: null,
+                id: 'process.parent.executable',
+                name: null,
+                searchable: null,
+                type: 'string',
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: true,
+                category: 'process',
+                columnHeaderType: 'not-filtered',
+                description:
+                  'Array of process arguments.\n\nMay be filtered to protect sensitive information.',
+                example: '["ssh","-l","user","10.0.0.16"]',
+                indexes: null,
+                id: 'process.parent.args',
+                name: null,
+                searchable: null,
+                type: 'string',
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: true,
+                category: 'process',
+                columnHeaderType: 'not-filtered',
+                description: 'Process id.',
+                example: '4242',
+                indexes: null,
+                id: 'process.parent.pid',
+                name: null,
+                searchable: null,
+                type: 'number',
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: true,
+                category: 'user',
+                columnHeaderType: 'not-filtered',
+                description: 'Short name or login of the user.',
+                example: 'albert',
+                indexes: null,
+                id: 'user.name',
+                name: null,
+                searchable: null,
+                type: 'string',
+                __typename: 'ColumnHeaderResult',
+              },
+              {
+                aggregatable: true,
+                category: 'host',
+                columnHeaderType: 'not-filtered',
+                description:
+                  'Name of the host.\n\nIt can contain what `hostname` returns on Unix systems, the fully qualified\ndomain name, or a name specified by the user. The sender decides which value\nto use.',
+                example: null,
+                indexes: null,
+                id: 'host.name',
+                name: null,
+                searchable: null,
+                type: 'string',
+                __typename: 'ColumnHeaderResult',
+              },
+            ],
+            dataProviders: [
+              {
+                id: 'timeline-1-8622010a-61fb-490d-b162-beac9c36a853',
+                name: '{process.name}',
+                enabled: true,
+                excluded: false,
+                kqlQuery: '',
+                type: 'template',
+                queryMatch: {
+                  field: 'process.name',
+                  displayField: null,
+                  value: '{process.name}',
+                  displayValue: null,
+                  operator: ':',
+                  __typename: 'QueryMatchResult',
+                },
+                and: [],
+                __typename: 'DataProviderResult',
+              },
+              {
+                id: 'timeline-1-4685da24-35c1-43f3-892d-1f926dbf5568',
+                name: '{event.type}',
+                enabled: true,
+                excluded: false,
+                kqlQuery: '',
+                type: 'template',
+                queryMatch: {
+                  field: 'event.type',
+                  displayField: null,
+                  value: '{event.type}',
+                  displayValue: null,
+                  operator: ':*',
+                  __typename: 'QueryMatchResult',
+                },
+                and: [],
+                __typename: 'DataProviderResult',
+              },
+            ],
+            dateRange: {
+              start: '2020-10-27T14:22:11.809Z',
+              end: '2020-11-03T14:22:11.809Z',
+              __typename: 'DateRangePickerResult',
+            },
+            description: '',
+            eventType: 'all',
+            eventIdToNoteIds: [],
+            excludedRowRendererIds: [],
+            favorite: [],
+            filters: [],
+            kqlMode: 'filter',
+            kqlQuery: {
+              filterQuery: {
+                kuery: { kind: 'kuery', expression: '', __typename: 'KueryFilterQueryResult' },
+                serializedQuery: '',
+                __typename: 'SerializedKueryQueryResult',
+              },
+              __typename: 'SerializedFilterQueryResult',
+            },
+            indexNames: [],
+            notes: [],
+            noteIds: [],
+            pinnedEventIds: [],
+            pinnedEventsSaveObject: [],
+            status: TimelineStatus.immutable,
+            title: 'Generic Process Timeline',
+            timelineType: 'template',
+            templateTimelineId: 'cd55e52b-7bce-4887-88e2-f1ece4c75447',
+            templateTimelineVersion: 1,
+            savedQueryId: null,
+            sort: {
+              columnId: '@timestamp',
+              sortDirection: 'desc',
+              __typename: 'SortTimelineResult',
+            },
+            created: 1604413368243,
+            createdBy: 'angela',
+            updated: 1604413368243,
+            updatedBy: 'angela',
+            version: 'WzQwMywxXQ==',
+            __typename: 'TimelineResult',
+          },
+        },
+        loading: false,
+        networkStatus: 7,
+        stale: false,
+      };
+      const apolloClient = {
+        query: (jest.fn().mockResolvedValue(template) as unknown) as ApolloClient<{}>,
+      };
+      const onOpenTimeline = jest.fn();
+      const args = {
+        apolloClient,
+        duplicate: false,
+        graphEventId: '',
+        timelineId: '',
+        timelineType: TimelineType.template,
+        onOpenTimeline,
+        openTimeline: true,
+        updateIsLoading,
+        updateTimeline: jest.fn(),
+      };
+
+      beforeAll(async () => {
+        await queryTimelineById<{}>((args as unknown) as QueryTimelineById<{}>);
+      });
+
+      afterAll(() => {
+        jest.clearAllMocks();
+      });
+
+      test('dispatch updateIsLoading to true', () => {
+        expect(updateIsLoading.mock.calls[0][0]).toEqual({
+          id: TimelineId.active,
+          isLoading: true,
+        });
+      });
+
+      test('get timeline by Id', () => {
+        expect(apolloClient.query).toHaveBeenCalled();
+      });
+
+      test('override daterange if TimelineStatus is immutable', () => {
+        const { timeline } = formatTimelineResultToModel(
+          omitTypenameInTimeline(getOr({}, 'data.getOneTimeline', template)),
+          args.duplicate,
+          args.timelineType
+        );
+        expect(onOpenTimeline).toBeCalledWith({
+          ...timeline,
+          dateRange: {
+            end: '2020-10-28T11:37:31.655Z',
+            start: '2020-10-27T11:37:31.655Z',
+          },
+        });
+      });
+
+      test('dispatch updateIsLoading to false', () => {
+        expect(updateIsLoading.mock.calls[1][0]).toEqual({
+          id: TimelineId.active,
+          isLoading: false,
+        });
       });
     });
   });
