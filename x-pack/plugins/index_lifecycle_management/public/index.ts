@@ -13,4 +13,4 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
   return new IndexLifecycleManagementPlugin(initializerContext);
 };
 
-export { ILM_URL_GENERATOR_ID, ILM_PAGES, IlmUrlGeneratorState } from './url_generator';
+export { ILM_URL_GENERATOR_ID, IlmUrlGeneratorState } from './url_generator';
