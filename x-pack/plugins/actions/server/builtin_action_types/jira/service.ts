@@ -8,22 +8,20 @@ import axios from 'axios';
 
 import { Logger } from '../../../../../../src/core/server';
 import {
-  ExternalServiceCredentials,
-  ExternalService,
+  CreateCommentParams,
   CreateIncidentParams,
-  UpdateIncidentParams,
+  ExternalService,
+  ExternalServiceCommentResponse,
+  ExternalServiceCredentials,
+  ExternalServiceIncidentResponse,
+  Fields,
+  FieldSchema,
+  GetCommonFieldsResponse,
+  Incident,
   JiraPublicConfigurationType,
   JiraSecretConfigurationType,
-  Fields,
-  CreateCommentParams,
-  Incident,
   ResponseError,
-  ExternalServiceCommentResponse,
-  ExternalServiceIncidentResponse,
-  ExternalServiceFields,
-  FieldSchema,
-  GetFieldsByIssueTypeResponse,
-  GetCommonFieldsResponse,
+  UpdateIncidentParams,
 } from './types';
 
 import * as i18n from './translations';

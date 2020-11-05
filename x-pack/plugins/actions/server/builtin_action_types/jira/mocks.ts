@@ -73,7 +73,20 @@ const createMock = (): jest.Mocked<ExternalService> => {
       key: 'RJ-107',
       title: 'Test title',
     })),
-    getFields: jest.fn().mockImplementation(() => jiraCommonFields),
+    getFields: jest.fn().mockImplementation(() => ({
+      description: {
+        allowedValues: [],
+        defaultValue: {},
+        required: true,
+        schema: { type: 'string' },
+      },
+      summary: {
+        allowedValues: [],
+        defaultValue: {},
+        required: true,
+        schema: { type: 'string' },
+      },
+    })),
   };
 
   service.createComment.mockImplementationOnce(() =>
