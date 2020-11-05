@@ -78,10 +78,19 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
+      let readStream: Readable;
+      try {
+        readStream = await createSavedObjectsStreamFromNdJson(file);
+      } catch (e) {
+        return res.badRequest({
+          body: e,
+        });
+      }
+
       const result = await resolveSavedObjectsImportErrors({
         typeRegistry: context.core.savedObjects.typeRegistry,
         savedObjectsClient: context.core.savedObjects.client,
-        readStream: createSavedObjectsStreamFromNdJson(file),
+        readStream,
         retries: req.body.retries,
         objectLimit: maxImportExportSize,
         createNewCopies: req.query.createNewCopies,
