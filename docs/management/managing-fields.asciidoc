@@ -1,18 +1,10 @@
 [[managing-fields]]
-== Field formatting
+== Field management
 
 Whenever possible,
 {kib} uses the same field type for display as {es}.  However, a few field types
 {es} supports are not available in {kib}. Use field formatters to customize how your
 fields are displayed in Kibana, regardless of how they are stored in {es}.
-
-. Open the main menu, and click *Stack Management > Index Patterns*.
-. Click the index pattern that contains the field you want to format.
-. Find the field you want to format and click the edit icon (image:management/index-patterns/images/edit_icon.png[]).
-. Select a format and fill in the details.
-
-[role="screenshot"]
-image:management/index-patterns/images/edit-field-format.png["Edit field format"]
 
 Kibana provides these field formatters:
 
@@ -20,6 +12,17 @@ Kibana provides these field formatters:
 * <<field-formatters-date, Dates>>
 * <<field-formatters-geopoint, Geopoints>>
 * <<field-formatters-numeric, Numbers>>
+
+To format a field:
+
+. Open the main menu, and click *Stack Management > Index Patterns*.
+. Click the index pattern that contains the field you want to format.
+. Find the field you want to format and click the edit icon (image:management/index-patterns/images/edit_icon.png[]).
+. Select a format and fill in the details.
++
+[role="screenshot"]
+image:management/index-patterns/images/edit-field-format.png["Edit field format"]
+
 
 
 [[field-formatters-string]]
