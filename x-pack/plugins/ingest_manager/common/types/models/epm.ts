@@ -10,6 +10,7 @@ import { SavedObject, SavedObjectAttributes, SavedObjectReference } from 'src/co
 import {
   agentAssetTypes,
   dataTypes,
+  defaultPackages,
   installationStatuses,
   requiredPackages,
 } from '../../constants';
@@ -278,10 +279,7 @@ export type EsAssetReference = Pick<SavedObjectReference, 'id'> & {
 
 export type RequiredPackage = typeof requiredPackages;
 
-export enum DefaultPackages {
-  system = 'system',
-  endpoint = 'endpoint',
-}
+export type DefaultPackages = typeof defaultPackages;
 
 export interface IndexTemplateMappings {
   properties: any;
