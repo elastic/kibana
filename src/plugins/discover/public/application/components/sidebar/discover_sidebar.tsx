@@ -22,6 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -73,6 +74,12 @@ export interface DiscoverSidebarProps {
    * Callback function to select another index pattern
    */
   setIndexPattern: (id: string) => void;
+  /**
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
+   */
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverSidebar({
@@ -85,12 +92,12 @@ export function DiscoverSidebar({
   onRemoveField,
   selectedIndexPattern,
   setIndexPattern,
+  trackUiMetric,
 }: DiscoverSidebarProps) {
   const [showFields, setShowFields] = useState(false);
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
-
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
@@ -193,6 +200,7 @@ export function DiscoverSidebar({
                         onAddFilter={onAddFilter}
                         getDetails={getDetailsByField}
                         selected={true}
+                        trackUiMetric={trackUiMetric}
                       />
                     </li>
                   );
@@ -266,6 +274,7 @@ export function DiscoverSidebar({
                         onRemoveField={onRemoveField}
                         onAddFilter={onAddFilter}
                         getDetails={getDetailsByField}
+                        trackUiMetric={trackUiMetric}
                       />
                     </li>
                   );
@@ -295,6 +304,7 @@ export function DiscoverSidebar({
                     onRemoveField={onRemoveField}
                     onAddFilter={onAddFilter}
                     getDetails={getDetailsByField}
+                    trackUiMetric={trackUiMetric}
                   />
                 </li>
               );

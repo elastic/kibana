@@ -99,6 +99,7 @@ function getCompProps() {
     selectedIndexPattern: indexPattern,
     setIndexPattern: jest.fn(),
     state: {},
+    trackUiMetric: jest.fn(),
   };
 }
 

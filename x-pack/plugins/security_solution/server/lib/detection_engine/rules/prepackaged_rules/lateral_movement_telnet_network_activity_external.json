@@ -11,10 +11,10 @@
     "auditbeat-*",
     "logs-endpoint.events.*"
   ],
-  "language": "kuery",
+  "language": "eql",
   "license": "Elastic License",
   "name": "Connection to External Network via Telnet",
-  "query": "event.category:network and event.type:(connection or start) and process.name:telnet and not destination.ip:(127.0.0.0/8 or 10.0.0.0/8 or 172.16.0.0/12 or 192.168.0.0/16 or \"FE80::/10\" or \"::1/128\")",
+  "query": "sequence by process.entity_id\n  [process where process.name == \"telnet\" and event.type == \"start\"]\n  [network where process.name == \"telnet\" and\n    not cidrmatch(destination.ip, \"127.0.0.0/8\", \"10.0.0.0/8\", \"172.16.0.0/12\",\n                                  \"192.168.0.0/16\", \"FE80::/10\", \"::1/128\")]\n",
   "risk_score": 47,
   "rule_id": "e19e64ee-130e-4c07-961f-8a339f0b8362",
   "severity": "medium",
@@ -42,6 +42,6 @@
       ]
     }
   ],
-  "type": "query",
+  "type": "eql",
   "version": 4
 }
