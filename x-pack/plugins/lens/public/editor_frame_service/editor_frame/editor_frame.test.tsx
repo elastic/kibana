@@ -23,6 +23,7 @@ import { DragDrop } from '../../drag_drop';
 import { FrameLayout } from './frame_layout';
 import { uiActionsPluginMock } from '../../../../../../src/plugins/ui_actions/public/mocks';
 import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { chartPluginMock } from '../../../../../../src/plugins/charts/public/mocks';
 import { expressionsPluginMock } from '../../../../../../src/plugins/expressions/public/mocks';
 
 function generateSuggestion(state = {}): DatasourceSuggestion {
@@ -55,7 +56,9 @@ function getDefaultProps() {
       uiActions: uiActionsPluginMock.createStartContract(),
       data: dataPluginMock.createStartContract(),
       expressions: expressionsPluginMock.createStartContract(),
+      charts: chartPluginMock.createStartContract(),
     },
+    palettes: chartPluginMock.createPaletteRegistry(),
     showNoDataPopover: jest.fn(),
   };
 }
@@ -233,10 +236,11 @@ describe('editor_frame', () => {
     });
 
     it('should pass the public frame api into visualization initialize', async () => {
+      const defaultProps = getDefaultProps();
       await act(async () => {
         mount(
           <EditorFrame
-            {...getDefaultProps()}
+            {...defaultProps}
             visualizationMap={{
               testVis: mockVisualization,
             }}
@@ -259,6 +263,7 @@ describe('editor_frame', () => {
         query: { query: '', language: 'lucene' },
         filters: [],
         dateRange: { fromDate: 'now-7d', toDate: 'now' },
+        availablePalettes: defaultProps.palettes,
       });
     });
 
@@ -963,6 +968,7 @@ describe('editor_frame', () => {
         expect.objectContaining({
           datasourceLayers: expect.objectContaining({ first: mockDatasource.publicAPIMock }),
         }),
+        undefined,
         undefined
       );
       expect(mockVisualization2.getConfiguration).toHaveBeenCalledWith(
@@ -1303,8 +1309,8 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
-                  if (dragging !== 'draggedField') {
-                    setDragging('draggedField');
+                  if (!dragging || dragging.id !== 'draggedField') {
+                    setDragging({ id: 'draggedField' });
                   }
                 },
               },
@@ -1400,8 +1406,8 @@ describe('editor_frame', () => {
                 getDatasourceSuggestionsFromCurrentState: () => [generateSuggestion()],
                 getDatasourceSuggestionsForVisualizeField: () => [generateSuggestion()],
                 renderDataPanel: (_element, { dragDropContext: { setDragging, dragging } }) => {
-                  if (dragging !== 'draggedField') {
-                    setDragging('draggedField');
+                  if (!dragging || dragging.id !== 'draggedField') {
+                    setDragging({ id: 'draggedField' });
                   }
                 },
               },

@@ -12,11 +12,14 @@ import { init as initHttp } from './application/services/http';
 import { init as initDocumentation } from './application/services/documentation';
 import { init as initUiMetric } from './application/services/ui_metric';
 import { init as initNotification } from './application/services/notification';
+import { BreadcrumbService } from './application/services/breadcrumbs';
 import { addAllExtensions } from './extend_index_management';
 import { PluginsDependencies, ClientConfigType } from './types';
 
 export class IndexLifecycleManagementPlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
+
+  private breadcrumbService = new BreadcrumbService();
 
   public setup(coreSetup: CoreSetup, plugins: PluginsDependencies) {
     const {
@@ -42,7 +45,7 @@ export class IndexLifecycleManagementPlugin {
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,
-        mount: async ({ element, history }) => {
+        mount: async ({ element, history, setBreadcrumbs }) => {
           const [coreStart] = await getStartServices();
           const {
             chrome: { docTitle },
@@ -52,6 +55,7 @@ export class IndexLifecycleManagementPlugin {
           } = coreStart;
 
           docTitle.change(PLUGIN.TITLE);
+          this.breadcrumbService.setup(setBreadcrumbs);
 
           // Initialize additional services.
           initDocumentation(
@@ -66,6 +70,7 @@ export class IndexLifecycleManagementPlugin {
             history,
             navigateToApp,
             getUrlForApp,
+            this.breadcrumbService,
             cloud
           );
 
