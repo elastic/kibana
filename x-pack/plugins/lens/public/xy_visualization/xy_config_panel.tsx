@@ -250,12 +250,10 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
             tooltipContent={
               isAreaPercentage
                 ? i18n.translate('xpack.lens.xyChart.valuesPercentageDisabledHelpText', {
-                    defaultMessage:
-                      'This setting may be modified on area and stacked area charts, but not percentage area charts.',
+                    defaultMessage: 'This setting cannot be changed on percentage area charts.',
                   })
                 : i18n.translate('xpack.lens.xyChart.valuesStackedDisabledHelpText', {
-                    defaultMessage:
-                      'This setting may be modified on categorical bar charts, but not histograms',
+                    defaultMessage: 'This setting cannot be changed on histograms.',
                   })
             }
             condition={!isValueLabelsEnabled && !isFittingEnabled}
