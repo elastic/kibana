@@ -129,11 +129,6 @@ const setPolicyName = async (rendered: ReactWrapper, policyName: string) => {
   });
   rendered.update();
 };
-const setPhaseAfterLegacy = (rendered: ReactWrapper, phase: string, after: string | number) => {
-  const afterInput = rendered.find(`input#${phase}-selectedMinimumAge`);
-  afterInput.simulate('change', { target: { value: after } });
-  rendered.update();
-};
 const setPhaseAfter = async (rendered: ReactWrapper, phase: string, after: string | number) => {
   const afterInput = findTestSubject(rendered, `${phase}-selectedMinimumAge`);
   await act(async () => {
