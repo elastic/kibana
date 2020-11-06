@@ -13,9 +13,9 @@ describe('getHealth()', () => {
   test('return true if some of alerts has a decryption error', async () => {
     const lastExecutionDateError = new Date().toISOString();
     const lastExecutionDate = new Date().toISOString();
-    savedObjectsRepository.find.mockResolvedValue({
-      total: 2,
-      per_page: 10,
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 1,
       page: 1,
       saved_objects: [
         {
@@ -55,6 +55,27 @@ describe('getHealth()', () => {
             },
           ],
         },
+      ],
+    });
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      total: 0,
+      per_page: 10,
+      page: 1,
+      saved_objects: [],
+    });
+
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      total: 0,
+      per_page: 10,
+      page: 1,
+      saved_objects: [],
+    });
+
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 1,
+      page: 1,
+      saved_objects: [
         {
           id: '2',
           type: 'alert',
@@ -91,15 +112,22 @@ describe('getHealth()', () => {
         timestamp: lastExecutionDateError,
       },
     });
-    expect(savedObjectsRepository.find).toHaveBeenCalledTimes(2);
+    expect(savedObjectsRepository.find).toHaveBeenCalledTimes(4);
   });
 
   test('return false if no alerts with a decryption error', async () => {
     const lastExecutionDateError = new Date().toISOString();
     const lastExecutionDate = new Date().toISOString();
-    savedObjectsRepository.find.mockResolvedValue({
-      total: 2,
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      total: 0,
       per_page: 10,
+      page: 1,
+      saved_objects: [],
+    });
+
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 1,
       page: 1,
       saved_objects: [
         {
@@ -139,6 +167,20 @@ describe('getHealth()', () => {
             },
           ],
         },
+      ],
+    });
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      total: 0,
+      per_page: 10,
+      page: 1,
+      saved_objects: [],
+    });
+
+    savedObjectsRepository.find.mockResolvedValueOnce({
+      total: 1,
+      per_page: 1,
+      page: 1,
+      saved_objects: [
         {
           id: '2',
           type: 'alert',
