@@ -11,3 +11,7 @@ export type TSpacerSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 export interface ISourcePriority {
   [id: string]: number;
 }
+
+export interface IComponentLoader {
+  text?: string;
+}
