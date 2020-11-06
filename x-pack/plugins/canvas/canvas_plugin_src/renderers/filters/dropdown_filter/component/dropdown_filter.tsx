@@ -62,7 +62,12 @@ export const DropdownFilter: FunctionComponent<Props> = ({
   return (
     <div className="canvasDropdownFilter">
       {/* eslint-disable-next-line jsx-a11y/no-onchange */}
-      <select className="canvasDropdownFilter__select" value={value} onChange={changeHandler}>
+      <select
+        className="canvasDropdownFilter__select"
+        value={value}
+        onChange={changeHandler}
+        data-test-subj="canvasDropdownFilter__select"
+      >
         {dropdownOptions}
       </select>
       <EuiIcon className="canvasDropdownFilter__icon" type="arrowDown" />
