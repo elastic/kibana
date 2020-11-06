@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DEFAULT_FILTER_BY_MAP_BOUNDS = true;
+export const ILM_URL_GENERATOR_ID = 'ILM_URL_GENERATOR_ID';
+export const ILM_PAGES_POLICY_EDIT = 'policy_edit';
