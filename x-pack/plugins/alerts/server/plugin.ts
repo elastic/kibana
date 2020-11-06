@@ -217,11 +217,7 @@ export class AlertingPlugin {
       );
     });
 
-    initializeAlertingHealth(
-      this.logger,
-      plugins.taskManager,
-      this.createSOInternalRepositoryContext(core)
-    );
+    initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
 
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
 
@@ -336,15 +332,6 @@ export class AlertingPlugin {
         getFrameworkHealth: async () =>
           await getHealth(savedObjects.createInternalRepository(['alert'])),
       };
-    };
-  };
-
-  private createSOInternalRepositoryContext = async (core: CoreSetup) => {
-    const [{ savedObjects }] = await core.getStartServices();
-    return {
-      createInternalRepository: () => {
-        return savedObjects.createInternalRepository(['alert']);
-      },
     };
   };
 

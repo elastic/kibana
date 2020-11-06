@@ -4,13 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ISavedObjectsRepository, Logger } from 'kibana/server';
+import { CoreStart, ISavedObjectsRepository, Logger } from 'kibana/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '../../../task_manager/server';
 import { AlertsConfig } from '../config';
+import { AlertingPluginsStart } from '../plugin';
 import { HealthStatus } from '../types';
 import { getHealth } from './get_health';
 
@@ -21,42 +22,15 @@ export const HEALTH_TASK_ID = `Alerting-${HEALTH_TASK_TYPE}`;
 export function initializeAlertingHealth(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  internalSavedObjectsRepository: Promise<{
-    createInternalRepository: () => ISavedObjectsRepository;
-  }>
+  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
 ) {
-  registerAlertingHealthCheckTask(logger, taskManager, internalSavedObjectsRepository);
+  registerAlertingHealthCheckTask(logger, taskManager, coreStartServices);
 }
 
-export function scheduleAlertingHealthCheck(
+export async function scheduleAlertingHealthCheck(
   logger: Logger,
   config: Promise<AlertsConfig>,
-  taskManager?: TaskManagerStartContract
-) {
-  if (taskManager) {
-    scheduleTasks(logger, taskManager, config);
-  }
-}
-
-function registerAlertingHealthCheckTask(
-  logger: Logger,
-  taskManager: TaskManagerSetupContract,
-  internalSavedObjectsRepository: Promise<{
-    createInternalRepository: () => ISavedObjectsRepository;
-  }>
-) {
-  taskManager.registerTaskDefinitions({
-    [HEALTH_TASK_TYPE]: {
-      title: 'Alerting framework health check task',
-      createTaskRunner: healthCheckTaskRunner(logger, internalSavedObjectsRepository),
-    },
-  });
-}
-
-async function scheduleTasks(
-  logger: Logger,
-  taskManager: TaskManagerStartContract,
-  config: Promise<AlertsConfig>
+  taskManager: TaskManagerStartContract
 ) {
   try {
     const interval = (await config).healthCheck.interval;
@@ -74,19 +48,31 @@ async function scheduleTasks(
   }
 }
 
+function registerAlertingHealthCheckTask(
+  logger: Logger,
+  taskManager: TaskManagerSetupContract,
+  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
+) {
+  taskManager.registerTaskDefinitions({
+    [HEALTH_TASK_TYPE]: {
+      title: 'Alerting framework health check task',
+      createTaskRunner: healthCheckTaskRunner(logger, coreStartServices),
+    },
+  });
+}
+
 export function healthCheckTaskRunner(
   logger: Logger,
-  internalSavedObjectsRepository: Promise<{
-    createInternalRepository: () => ISavedObjectsRepository;
-  }>
+  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>
 ) {
   return ({ taskInstance }: RunContext) => {
     const { state } = taskInstance;
     return {
       async run() {
-        const repository = await (await internalSavedObjectsRepository).createInternalRepository();
         try {
-          const alertingHealthStatus = await getHealth(repository);
+          const alertingHealthStatus = await getHealth(
+            (await coreStartServices)[0].savedObjects.createInternalRepository(['alert'])
+          );
           return {
             state: {
               runs: (state.runs || 0) + 1,
