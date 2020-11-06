@@ -197,7 +197,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     // check whether the job saved objects exist
     // and create them if needed.
     const { initializeJobs } = jobSavedObjectsInitializationFactory(coreStart);
-    initializeJobs().then(() => {
+    initializeJobs().finally(() => {
       this.isMlReady();
     });
   }
