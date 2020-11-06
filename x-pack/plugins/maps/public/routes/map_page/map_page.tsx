@@ -9,7 +9,7 @@ import { Provider } from 'react-redux';
 import { AppMountParameters } from 'kibana/public';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapApp } from './map_app';
-import { SavedMap } from './saved_map';
+import { SavedMap, getInitialLayersFromUrlParam } from './saved_map';
 import { MapEmbeddableInput } from '../../embeddable/types';
 
 interface Props {
@@ -37,6 +37,7 @@ export class MapPage extends Component<Props, State> {
     super(props);
     this.state = {
       savedMap: new SavedMap({
+        defaultLayers: getInitialLayersFromUrlParam(),
         mapEmbeddableInput: props.mapEmbeddableInput,
         embeddableId: props.embeddableId,
         originatingApp: props.originatingApp,

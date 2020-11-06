@@ -103,27 +103,21 @@ export class MapEmbeddable
     );
 
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
-    this.initializeSaveMap();
+    this._initializeSaveMap();
     this._subscription = this.getInput$().subscribe((input) => this.onContainerStateChanged(input));
   }
 
-  private async initializeSaveMap() {
-    const overrides = {
-      isLayerTOCOpen: this.input.isLayerTOCOpen,
-      openTOCDetails: this.input.openTOCDetails,
-      mapCenter: this.input.mapCenter,
-      hiddenLayers: this.input.hiddenLayers,
-    };
-    await this._savedMap.loadAttributes(overrides);
-    this.initializeStore();
-    this.initializeOutput();
+  private async _initializeSaveMap() {
+    await this._savedMap.whenReady();
+    this._initializeStore();
+    this._initializeOutput();
     this._isInitialized = true;
     if (this._domNode) {
       this.render(this._domNode);
     }
   }
 
-  private async initializeStore() {
+  private async _initializeStore() {
     const store = this._savedMap.getStore();
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
@@ -162,7 +156,7 @@ export class MapEmbeddable
     });
   }
 
-  private async initializeOutput() {
+  private async _initializeOutput() {
     const savedMapTitle = this._savedMap.getAttributes()?.title
       ? this._savedMap.getAttributes().title
       : '';
@@ -175,7 +169,7 @@ export class MapEmbeddable
       title,
       editPath: `/${MAP_PATH}/${savedObjectId}`,
       editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
-      indexPatterns: await this.getIndexPatterns(),
+      indexPatterns: await this._getIndexPatterns(),
     });
   }
 
@@ -306,7 +300,7 @@ export class MapEmbeddable
 
   setLayerList(layerList: LayerDescriptor[]) {
     this._savedMap.getStore().dispatch<any>(replaceLayerList(layerList));
-    this.getIndexPatterns().then((indexPatterns) => {
+    this._getIndexPatterns().then((indexPatterns) => {
       this.updateOutput({
         ...this.getOutput(),
         indexPatterns,
@@ -314,7 +308,7 @@ export class MapEmbeddable
     });
   }
 
-  private async getIndexPatterns() {
+  private async _getIndexPatterns() {
     const queryableIndexPatternIds = getQueryableUniqueIndexPatternIds(
       this._savedMap.getStore().getState()
     );

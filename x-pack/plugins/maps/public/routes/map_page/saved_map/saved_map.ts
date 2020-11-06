@@ -43,6 +43,7 @@ import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 
 export class SavedMap {
   private _attributes: MapSavedObjectAttributes | null = null;
+  private readonly _defaultLayers: LayerDescriptor[];
   private readonly _embeddableId?: string;
   private _initialLayerListConfig: LayerDescriptor[] = [];
   private _mapEmbeddableInput?: MapEmbeddableInput;
@@ -52,18 +53,21 @@ export class SavedMap {
   private readonly _store: MapStore;
 
   constructor({
+    defaultLayers = [],
     mapEmbeddableInput,
     embeddableId,
     onSaveCallback,
     originatingApp,
     stateTransfer,
   }: {
+    defaultLayers: LayerDescriptor[];
     mapEmbeddableInput?: MapEmbeddableInput;
     embeddableId?: string;
     onSaveCallback?: () => void;
     originatingApp?: string;
     stateTransfer?: EmbeddableStateTransfer;
   }) {
+    this._defaultLayers = defaultLayers;
     this._mapEmbeddableInput = mapEmbeddableInput;
     this._embeddableId = embeddableId;
     this._onSaveCallback = onSaveCallback;
@@ -76,13 +80,7 @@ export class SavedMap {
     return this._store;
   }
 
-  async loadAttributes(overrides?: {
-    isLayerTOCOpen?: boolean;
-    openTOCDetails?: string[];
-    mapCenter?: MapCenterAndZoom;
-    hiddenLayers?: string[];
-    defaultLayers?: LayerDescriptor[];
-  }) {
+  async whenReady() {
     if (!this._mapEmbeddableInput) {
       this._attributes = {
         title: i18n.translate('xpack.maps.newMapTitle', {
@@ -102,8 +100,8 @@ export class SavedMap {
     }
 
     let isLayerTOCOpen = DEFAULT_IS_LAYER_TOC_OPEN;
-    if (overrides && overrides.isLayerTOCOpen !== undefined) {
-      isLayerTOCOpen = overrides.isLayerTOCOpen;
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.isLayerTOCOpen !== undefined) {
+      isLayerTOCOpen = this._mapEmbeddableInput.isLayerTOCOpen;
     } else if (this._attributes?.uiStateJSON) {
       const uiState = JSON.parse(this._attributes.uiStateJSON);
       if ('isLayerTOCOpen' in uiState) {
@@ -113,8 +111,8 @@ export class SavedMap {
     this._store.dispatch(setIsLayerTOCOpen(isLayerTOCOpen));
 
     let openTOCDetails = [];
-    if (overrides && overrides.openTOCDetails !== undefined) {
-      openTOCDetails = overrides.openTOCDetails;
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.openTOCDetails !== undefined) {
+      openTOCDetails = this._mapEmbeddableInput.openTOCDetails;
     } else if (this._attributes?.uiStateJSON) {
       const uiState = JSON.parse(this._attributes.uiStateJSON);
       if ('openTOCDetails' in uiState) {
@@ -123,12 +121,12 @@ export class SavedMap {
     }
     this._store.dispatch(setOpenTOCDetails(openTOCDetails));
 
-    if (overrides && overrides.mapCenter !== undefined) {
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.mapCenter !== undefined) {
       this._store.dispatch(
         setGotoWithCenter({
-          lat: overrides.mapCenter.lat,
-          lon: overrides.mapCenter.lon,
-          zoom: overrides.mapCenter.zoom,
+          lat: this._mapEmbeddableInput.mapCenter.lat,
+          lon: this._mapEmbeddableInput.mapCenter.lon,
+          zoom: this._mapEmbeddableInput.mapCenter.zoom,
         })
       );
     } else if (this._attributes?.mapStateJSON) {
@@ -142,22 +140,17 @@ export class SavedMap {
       );
     }
 
-    const layerList = getInitialLayers(
-      this._attributes.layerListJSON,
-      overrides && overrides.defaultLayers !== undefined ? overrides.defaultLayers : []
-    );
+    const layerList = getInitialLayers(this._attributes.layerListJSON, this._defaultLayers);
     this._store.dispatch<any>(replaceLayerList(layerList));
-    if (overrides && overrides.hiddenLayers !== undefined) {
-      this._store.dispatch<any>(setHiddenLayers(overrides.hiddenLayers));
+    if (this._mapEmbeddableInput && this._mapEmbeddableInput.hiddenLayers !== undefined) {
+      this._store.dispatch<any>(setHiddenLayers(this._mapEmbeddableInput.hiddenLayers));
     }
     this._initialLayerListConfig = copyPersistentState(layerList);
-
-    return this._attributes;
   }
 
   hasUnsavedChanges = () => {
     if (!this._attributes) {
-      throw new Error('Invalid usage, must await loadAttributes before calling hasUnsavedChanges');
+      throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
 
     const savedLayerList = this._attributes.layerListJSON
@@ -184,7 +177,7 @@ export class SavedMap {
 
   setBreadcrumbs() {
     if (!this._attributes) {
-      throw new Error('Invalid usage, must await loadAttributes before calling hasUnsavedChanges');
+      throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
 
     const breadcrumbs = getBreadcrumbs({
@@ -225,7 +218,7 @@ export class SavedMap {
 
   public getAttributes(): MapSavedObjectAttributes {
     if (!this._attributes) {
-      throw new Error('Invalid usage, must await loadAttributes before calling getAttributes');
+      throw new Error('Invalid usage, must await whenReady before calling getAttributes');
     }
 
     return this._attributes;
@@ -242,7 +235,7 @@ export class SavedMap {
     saveByReference: boolean;
   }) {
     if (!this._attributes) {
-      throw new Error('Invalid usage, must await loadAttributes before calling save');
+      throw new Error('Invalid usage, must await whenReady before calling save');
     }
 
     const prevTitle = this._attributes.title;
