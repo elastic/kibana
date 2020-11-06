@@ -200,7 +200,7 @@ function getExistingLayerSuggestionsForField(
     }
   }
 
-  if (!usableAsBucketOperation && operations.length > 0) {
+  if (!usableAsBucketOperation && operations.length > 0 && !fieldInUse) {
     const [metricOperation] = getMetricOperationTypes(field);
     if (metricOperation) {
       const layerWithNewMetric = insertNewColumn({

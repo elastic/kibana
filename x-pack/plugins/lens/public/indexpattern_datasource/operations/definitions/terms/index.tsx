@@ -111,7 +111,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;

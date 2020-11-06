@@ -133,7 +133,7 @@ describe('terms', () => {
       const indexPattern = createMockedIndexPattern();
       const newStringField = indexPattern.fields.find((i) => i.name === 'source')!;
 
-      const column = termsOperation.onFieldChange(oldColumn, indexPattern, newStringField);
+      const column = termsOperation.onFieldChange(oldColumn, newStringField);
       expect(column).toHaveProperty('dataType', 'string');
       expect(column).toHaveProperty('sourceField', 'source');
       expect(column.params.format).toBeUndefined();

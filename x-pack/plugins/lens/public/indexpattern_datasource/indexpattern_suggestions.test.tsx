@@ -12,6 +12,7 @@ import {
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
+import { documentField } from './document_field';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -65,6 +66,7 @@ const expectedIndexPatterns = {
         aggregatable: true,
         searchable: true,
       },
+      documentField,
     ],
   },
   2: {
@@ -126,6 +128,7 @@ const expectedIndexPatterns = {
           },
         },
       },
+      documentField,
     ],
   },
 };
@@ -933,6 +936,45 @@ describe('IndexPattern Data Source suggestions', () => {
             }),
           })
         );
+      });
+
+      it('skips duplicates when the field is already in use', () => {
+        const initialState = stateWithNonEmptyTables();
+        const suggestions = getDatasourceSuggestionsForField(initialState, '1', {
+          name: 'bytes',
+          displayName: 'bytes',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        });
+
+        expect(suggestions).not.toContain(expect.objectContaining({ changeType: 'extended' }));
+      });
+
+      it('skips duplicates when the document-specific field is already in use', () => {
+        const initialState = stateWithNonEmptyTables();
+        const modifiedState: IndexPatternPrivateState = {
+          ...initialState,
+          layers: {
+            ...initialState.layers,
+            currentLayer: {
+              ...initialState.layers.currentLayer,
+              columns: {
+                ...initialState.layers.currentLayer.columns,
+                colb: {
+                  label: 'Count of records',
+                  dataType: 'document',
+                  isBucketed: false,
+
+                  operationType: 'count',
+                  sourceField: 'Records',
+                },
+              },
+            },
+          },
+        };
+        const suggestions = getDatasourceSuggestionsForField(modifiedState, '1', documentField);
+        expect(suggestions).not.toContain(expect.objectContaining({ changeType: 'extended' }));
       });
     });
 
