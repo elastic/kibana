@@ -18,6 +18,8 @@ export {
   RunContext,
 } from './task';
 
+export { isUnrecoverableError, throwUnrecoverableError } from './task_running';
+
 export {
   TaskManagerPlugin as TaskManager,
   TaskManagerSetupContract,
