@@ -762,7 +762,7 @@ describe('createConfig()', () => {
     expect(loggingSystemMock.collect(logger).warn).toMatchInlineSnapshot(`
                         Array [
                           Array [
-                            "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml",
+                            "Generating a random key for xpack.security.encryptionKey. To prevent sessions from being invalidated on restart, please set xpack.security.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key",
                           ],
                         ]
                 `);

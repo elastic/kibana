@@ -322,7 +322,7 @@ test('throws an error when passing isESOUsingEphemeralEncryptionKey with value o
   await expect(
     customActionExecutor.execute(executeParams)
   ).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+    `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key"`
   );
 });
 

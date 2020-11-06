@@ -35,7 +35,7 @@ export function createConfig$(
           i18n.translate('xpack.reporting.serverConfig.randomEncryptionKey', {
             defaultMessage:
               'Generating a random key for xpack.reporting.encryptionKey. To prevent sessions from being invalidated on ' +
-              'restart, please set xpack.reporting.encryptionKey in kibana.yml',
+              'restart, please set xpack.reporting.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key',
           })
         );
         encryptionKey = crypto.randomBytes(16).toString('hex');

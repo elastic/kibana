@@ -151,7 +151,7 @@ export class AlertingPlugin {
 
     if (this.isESOUsingEphemeralEncryptionKey) {
       this.logger.warn(
-        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key.'
       );
     }
 
@@ -251,7 +251,7 @@ export class AlertingPlugin {
     const getAlertsClientWithRequest = (request: KibanaRequest) => {
       if (isESOUsingEphemeralEncryptionKey === true) {
         throw new Error(
-          `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml`
+          `Unable to create alerts client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key`
         );
       }
       return alertsClientFactory!.create(request, core.savedObjects);

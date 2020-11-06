@@ -143,12 +143,12 @@ export interface IngestManagerStartContract {
 
 export class IngestManagerPlugin
   implements
-    Plugin<
-      IngestManagerSetupContract,
-      IngestManagerStartContract,
-      IngestManagerSetupDeps,
-      IngestManagerStartDeps
-    > {
+  Plugin<
+  IngestManagerSetupContract,
+  IngestManagerStartContract,
+  IngestManagerSetupDeps,
+  IngestManagerStartDeps
+  > {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
@@ -241,7 +241,7 @@ export class IngestManagerPlugin
         if (isESOUsingEphemeralEncryptionKey) {
           if (this.logger) {
             this.logger.warn(
-              'Fleet APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml.'
+              'Fleet APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key.'
             );
           }
         } else {
