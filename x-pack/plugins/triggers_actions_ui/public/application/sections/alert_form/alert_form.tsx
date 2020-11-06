@@ -9,7 +9,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
   EuiTextColor,
   EuiTitle,
   EuiForm,
