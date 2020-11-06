@@ -200,7 +200,7 @@ export class IndexPatternsService {
       return true;
     }
 
-    return Object.values(specs).every((spec) => {
+    const isFieldRefreshRequired = Object.values(specs).every((spec) => {
       // See https://github.com/elastic/kibana/pull/8421
       const hasFieldCaps = 'aggregatable' in spec && 'searchable' in spec;
 
@@ -209,6 +209,11 @@ export class IndexPatternsService {
 
       return !hasFieldCaps || !hasDocValuesFlag;
     });
+    if (isFieldRefreshRequired) {
+      // eslint-disable-next-line no-console
+      console.log('isFieldRefreshRequired == true for specs', JSON.stringify(specs));
+    }
+    return isFieldRefreshRequired;
   }
 
   /**
@@ -380,15 +385,23 @@ export class IndexPatternsService {
             params: typeMeta && typeMeta.params,
           })
         : spec.fields;
+      if (isFieldRefreshRequired) {
+        // eslint-disable-next-line no-console
+        console.log('fields fetched', JSON.stringify(spec.fields));
+      }
     } catch (err) {
       isSaveRequired = false;
       if (err instanceof IndexPatternMissingIndices) {
+        // eslint-disable-next-line no-console
+        console.error('index pattern missing', JSON.stringify(err));
         this.onNotification({
           title: (err as any).message,
           color: 'danger',
           iconType: 'alert',
         });
       } else {
+        // eslint-disable-next-line no-console
+        console.error('fields fetching not possible', JSON.stringify(err));
         this.onError(err, {
           title: i18n.translate('data.indexPatterns.fetchFieldErrorTitle', {
             defaultMessage: 'Error fetching fields for index pattern {title} (ID: {id})',
@@ -406,6 +419,8 @@ export class IndexPatternsService {
     indexPatternCache.set(id, indexPattern);
     if (isSaveRequired) {
       try {
+        // eslint-disable-next-line no-console
+        console.error('updateSavedObject starts', JSON.stringify(spec.fields));
         this.updateSavedObject(indexPattern);
       } catch (err) {
         this.onError(err, {
@@ -420,7 +435,10 @@ export class IndexPatternsService {
         });
       }
     }
-
+    if (isFieldRefreshRequired) {
+      // eslint-disable-next-line no-console
+      console.error('resetOriginalSavedObjectBode', JSON.stringify(spec.fields));
+    }
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
   };
@@ -517,6 +535,8 @@ export class IndexPatternsService {
       .then((resp) => {
         indexPattern.id = resp.id;
         indexPattern.version = resp.version;
+        // eslint-disable-next-line no-console
+        console.error('index pattern saved successfully');
       })
       .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
