@@ -744,6 +744,55 @@ describe('ranges', () => {
           /^Bytes format:/
         );
       });
+
+      it('should not reset formatters when switching between custom ranges and auto histogram', () => {
+        const setStateSpy = jest.fn();
+
+        // Add an extra range
+        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
+          from: DEFAULT_INTERVAL,
+          to: 2 * DEFAULT_INTERVAL,
+          label: '',
+        });
+
+        state.indexPatterns['1'].fieldFormatMap = {
+          MyField: { id: 'custom', params: {} },
+        };
+
+        // now set a format on the range operation
+        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.format = {
+          id: 'custom',
+          params: { decimals: 0 },
+        };
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        expect(instance.find(RangePopover)).toHaveLength(2);
+
+        // This series of act closures are made to make it work properly the update flush
+        act(() => {
+          instance
+            .find('[data-test-subj="lns-customBucketContainer-remove"]')
+            .last()
+            .prop('onClick')!({} as ReactMouseEvent);
+        });
+
+        act(() => {
+          instance.update();
+          expect(instance.find(RangePopover).find(EuiText).prop('children')).toMatch(
+            /^Custom format:/
+          );
+        });
+      });
     });
   });
 });
