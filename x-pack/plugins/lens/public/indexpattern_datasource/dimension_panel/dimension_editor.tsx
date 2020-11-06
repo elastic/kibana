@@ -29,7 +29,7 @@ import { deleteColumn, changeColumn, updateColumnParam, mergeLayer } from '../st
 import { FieldSelect } from './field_select';
 import { hasField, fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import { IndexPattern, IndexPatternField } from '../types';
+import { IndexPattern } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 
