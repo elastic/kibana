@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { isErrorEmbeddable, IContainer } from '../../embeddable_plugin';
+import { isErrorEmbeddable, IContainer, ErrorEmbeddable } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardPanelState } from '../embeddable';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
 import {
@@ -84,6 +84,16 @@ beforeEach(async () => {
   } else {
     embeddable = contactCardEmbeddable;
   }
+});
+
+test('Clone is incompatible with Error Embeddables', async () => {
+  const action = new ClonePanelAction(coreStart);
+  const errorEmbeddable = new ErrorEmbeddable(
+    'Wow what an awful error',
+    { id: ' 404' },
+    embeddable.getRoot() as IContainer
+  );
+  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
 });
 
 test('Clone adds a new embeddable', async () => {

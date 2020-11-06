@@ -21,7 +21,14 @@ import { ChartsPlugin } from './plugin';
 
 export const plugin = () => new ChartsPlugin();
 
-export type ChartsPluginSetup = ReturnType<ChartsPlugin['setup']>;
-export type ChartsPluginStart = ReturnType<ChartsPlugin['start']>;
+export { ChartsPluginSetup, ChartsPluginStart } from './plugin';
 
 export * from './static';
+export * from './services/palettes/types';
+export {
+  PaletteOutput,
+  CustomPaletteArguments,
+  CustomPaletteState,
+  SystemPaletteArguments,
+  paletteIds,
+} from '../common';
