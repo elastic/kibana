@@ -27,10 +27,11 @@ import { ValuesType } from 'utility-types';
 import { useTheme } from '../../../../../../observability/public';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
+import type { TransactionDistributionAPIResponse } from '../../../../../server/lib/transactions/distribution';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
+import type { DistributionBucket } from '../../../../../server/lib/transactions/distribution/get_buckets';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { unit } from '../../../../style/variables';
 import { ChartContainer } from '../../../shared/charts/chart_container';
 import { EmptyMessage } from '../../../shared/EmptyMessage';
@@ -109,21 +110,20 @@ const getFormatYLong = (transactionType: string | undefined) => (t: number) => {
 interface Props {
   distribution?: TransactionDistributionAPIResponse;
   urlParams: IUrlParams;
-  isLoading: boolean;
+  fetchStatus: FETCH_STATUS;
   bucketIndex: number;
   onBucketClick: (
     bucket: ValuesType<TransactionDistributionAPIResponse['buckets']>
   ) => void;
 }
 
-export function TransactionDistribution(props: Props) {
-  const {
-    distribution,
-    urlParams: { transactionType },
-    isLoading,
-    bucketIndex,
-    onBucketClick,
-  } = props;
+export function TransactionDistribution({
+  distribution,
+  urlParams: { transactionType },
+  fetchStatus,
+  bucketIndex,
+  onBucketClick,
+}: Props) {
   const theme = useTheme();
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
@@ -135,8 +135,12 @@ export function TransactionDistribution(props: Props) {
   const formatYLong = useCallback(getFormatYLong(transactionType), [
     transactionType,
   ]);
+
   // no data in response
-  if ((!distribution || distribution.noHits) && !isLoading) {
+  if (
+    (!distribution || distribution.noHits) &&
+    fetchStatus !== FETCH_STATUS.LOADING
+  ) {
     return (
       <EmptyMessage
         heading={i18n.translate('xpack.apm.transactionDetails.notFoundLabel', {
@@ -209,7 +213,8 @@ export function TransactionDistribution(props: Props) {
       </EuiTitle>
       <ChartContainer
         height={unit * 10}
-        isLoading={isLoading && (!distribution || distribution.noHits)}
+        hasData={!!(distribution && !distribution.noHits)}
+        status={fetchStatus}
       >
         <Chart>
           <Settings
@@ -247,9 +252,7 @@ export function TransactionDistribution(props: Props) {
             tickFormat={(value: number) => formatYShort(value)}
           />
           <HistogramBarSeries
-            tickFormat={(value: number) => {
-              return `${value}`;
-            }}
+            tickFormat={(value: string) => value}
             minBarHeight={2}
             id="transactionDurationDistribution"
             name={(series: XYChartSeriesIdentifier) => {

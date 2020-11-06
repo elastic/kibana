@@ -14,12 +14,12 @@ import {
   ScaleType,
   Settings,
 } from '@elastic/charts';
-import { isEmpty } from 'lodash';
 import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { TimeSeries } from '../../../../../typings/timeseries';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useChartsSync as useChartsSync2 } from '../../../../hooks/use_charts_sync';
 import { unit } from '../../../../style/variables';
@@ -30,14 +30,11 @@ import { onBrushEnd } from '../../charts/helper/helper';
 const XY_HEIGHT = unit * 16;
 
 interface Props {
-  isLoading: boolean;
+  fetchStatus: FETCH_STATUS;
   timeseries?: TimeSeries[];
 }
 
-export function TransactionBreakdownGraph({
-  isLoading,
-  timeseries = [],
-}: Props) {
+export function TransactionBreakdownGraph({ fetchStatus, timeseries }: Props) {
   const history = useHistory();
   const chartRef = React.createRef<Chart>();
   const { event, setEvent } = useChartsSync2();
@@ -56,7 +53,11 @@ export function TransactionBreakdownGraph({
   const xFormatter = niceTimeFormatter([min, max]);
 
   return (
-    <ChartContainer height={XY_HEIGHT} isLoading={isLoading}>
+    <ChartContainer
+      height={XY_HEIGHT}
+      hasData={!!timeseries}
+      status={fetchStatus}
+    >
       <Chart ref={chartRef} id="timeSpentBySpan">
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}
@@ -87,10 +88,7 @@ export function TransactionBreakdownGraph({
 
         <Annotations />
 
-        {isEmpty(timeseries) ? (
-          // When timeseries is empty, loads an AreaSeries chart to show the default empty message.
-          <AreaSeries id="empty_chart" data={[]} />
-        ) : (
+        {timeseries?.length ? (
           timeseries.map((serie) => {
             return (
               <AreaSeries
@@ -108,6 +106,9 @@ export function TransactionBreakdownGraph({
               />
             );
           })
+        ) : (
+          // When timeseries is empty, loads an AreaSeries chart to show the default empty message.
+          <AreaSeries id="empty_chart" data={[]} />
         )}
       </Chart>
     </ChartContainer>

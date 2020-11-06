@@ -4,14 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTitle } from '@elastic/eui';
-import { EuiPanel } from '@elastic/eui';
-
+import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/useFetcher';
 import { useTheme } from '../../../../hooks/useTheme';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
@@ -74,11 +72,7 @@ export function TransactionErrorRateChart({ showAnnotations = true }: Props) {
       <LineChart
         id="errorRate"
         showAnnotations={showAnnotations}
-        isLoading={
-          (status === FETCH_STATUS.LOADING ||
-            status === FETCH_STATUS.PENDING) &&
-          !data
-        }
+        fetchStatus={status}
         timeseries={[
           {
             data: errorRates,

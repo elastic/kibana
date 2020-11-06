@@ -25,11 +25,12 @@ import { Coordinate } from '../../../../../typings/timeseries';
 import { ChartsSyncContextProvider } from '../../../../context/charts_sync_context';
 import { LicenseContext } from '../../../../context/LicenseContext';
 import { IUrlParams } from '../../../../context/UrlParamsContext/types';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { ITransactionChartData } from '../../../../selectors/chartSelectors';
 import { isValidCoordinateValue } from '../../../../utils/isValidCoordinateValue';
-import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 import { TransactionBreakdown } from '../../TransactionBreakdown';
 import { LineChart } from '../line_chart';
+import { TransactionErrorRateChart } from '../transaction_error_rate_chart/';
 import { getResponseTimeTickFormatter } from './helper';
 import { MLHeader } from './ml_header';
 import { useFormatter } from './use_formatter';
@@ -37,13 +38,13 @@ import { useFormatter } from './use_formatter';
 interface TransactionChartProps {
   charts: ITransactionChartData;
   urlParams: IUrlParams;
-  isLoading: boolean;
+  fetchStatus: FETCH_STATUS;
 }
 
 export function TransactionCharts({
   charts,
   urlParams,
-  isLoading,
+  fetchStatus,
 }: TransactionChartProps) {
   const getTPMFormatter = (t: number) => {
     return `${asDecimal(t)} ${tpmUnit(urlParams.transactionType)}`;
@@ -81,7 +82,7 @@ export function TransactionCharts({
                 </LicenseContext.Consumer>
               </EuiFlexGroup>
               <LineChart
-                isLoading={isLoading && !responseTimeSeries}
+                fetchStatus={fetchStatus}
                 id="transactionDuration"
                 timeseries={responseTimeSeries || []}
                 yLabelFormat={getResponseTimeTickFormatter(formatter)}
@@ -100,7 +101,7 @@ export function TransactionCharts({
                 <span>{tpmLabel(transactionType)}</span>
               </EuiTitle>
               <LineChart
-                isLoading={isLoading && !tpmSeries}
+                fetchStatus={fetchStatus}
                 id="requestPerMinutes"
                 timeseries={tpmSeries || []}
                 yLabelFormat={getTPMTooltipFormatter}

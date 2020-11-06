@@ -20,16 +20,17 @@ import moment from 'moment';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { TimeSeries } from '../../../../../typings/timeseries';
+import { FETCH_STATUS } from '../../../../hooks/useFetcher';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { useChartsSync } from '../../../../hooks/use_charts_sync';
 import { unit } from '../../../../style/variables';
+import { Annotations } from '../annotations';
 import { ChartContainer } from '../chart_container';
 import { onBrushEnd } from '../helper/helper';
-import { Annotations } from '../annotations';
 
 interface Props {
   id: string;
-  isLoading: boolean;
+  fetchStatus: FETCH_STATUS;
   onToggleLegend?: LegendItemListener;
   timeseries: TimeSeries[];
   /**
@@ -47,7 +48,7 @@ const XY_HEIGHT = unit * 16;
 
 export function LineChart({
   id,
-  isLoading,
+  fetchStatus,
   onToggleLegend,
   timeseries,
   yLabelFormat,
@@ -87,7 +88,7 @@ export function LineChart({
     );
 
   return (
-    <ChartContainer isLoading={isLoading} height={XY_HEIGHT}>
+    <ChartContainer status={fetchStatus} hasData={!isEmpty} height={XY_HEIGHT}>
       <Chart ref={chartRef} id={id}>
         <Settings
           onBrushEnd={({ x }) => onBrushEnd({ x, history })}

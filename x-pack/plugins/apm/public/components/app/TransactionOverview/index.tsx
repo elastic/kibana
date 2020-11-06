@@ -22,6 +22,7 @@ import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
+import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
@@ -32,12 +33,10 @@ import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
+import { Correlations } from '../Correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
-import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { UserExperienceCallout } from './user_experience_callout';
-import { Correlations } from '../Correlations';
-import { FETCH_STATUS } from '../../../hooks/useFetcher';
 
 function getRedirectLocation({
   urlParams,
@@ -139,10 +138,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
             </>
           )}
           <TransactionCharts
-            isLoading={
-              transactionChartsStatus === FETCH_STATUS.LOADING ||
-              transactionChartsStatus === FETCH_STATUS.PENDING
-            }
+            fetchStatus={transactionChartsStatus}
             charts={transactionCharts}
             urlParams={urlParams}
           />

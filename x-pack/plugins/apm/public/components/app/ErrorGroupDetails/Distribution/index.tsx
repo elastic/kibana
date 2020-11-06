@@ -89,13 +89,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
             showOverlappingTicks
             tickFormat={xFormatter}
           />
-          <Axis
-            id="y-axis"
-            position={Position.Left}
-            ticks={2}
-            showGridLines
-            tickFormat={(value) => `${value} occ.`}
-          />
+          <Axis id="y-axis" position={Position.Left} ticks={2} showGridLines />
           <HistogramBarSeries
             minBarHeight={2}
             id="errorOccurrences"
@@ -104,7 +98,7 @@ export function ErrorDistribution({ distribution, title }: Props) {
             yScaleType={ScaleType.Linear}
             xAccessor="x0"
             yAccessors={['y']}
-            data={distribution.noHits ? [] : buckets}
+            data={buckets}
             color={theme.eui.euiColorVis1}
           />
         </Chart>

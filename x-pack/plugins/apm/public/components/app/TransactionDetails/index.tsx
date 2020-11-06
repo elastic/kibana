@@ -125,10 +125,7 @@ export function TransactionDetails({
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
             <TransactionCharts
-              isLoading={
-                transactionChartsStatus === FETCH_STATUS.LOADING ||
-                transactionChartsStatus === FETCH_STATUS.PENDING
-              }
+              fetchStatus={transactionChartsStatus}
               charts={transactionChartsData}
               urlParams={urlParams}
             />
@@ -139,7 +136,7 @@ export function TransactionDetails({
           <EuiPanel>
             <TransactionDistribution
               distribution={distributionData}
-              isLoading={distributionStatus === FETCH_STATUS.LOADING}
+              fetchStatus={distributionStatus}
               urlParams={urlParams}
               bucketIndex={bucketIndex}
               onBucketClick={(bucket) => {
