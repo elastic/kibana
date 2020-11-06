@@ -18,28 +18,30 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiCallOut } from '@elastic/eui';
 import React from 'react';
 
+import './disabled_lab_visualization.scss';
+
 export function DisabledLabVisualization({ title }: { title: string }) {
+  const calloutTitle = (
+    <FormattedMessage
+      id="visualizations.disabledLabVisualizationTitle"
+      defaultMessage="{title} is a lab visualization."
+      values={{ title }}
+    />
+  );
   return (
-    <div className="visDisabledLabVisualization">
-      <div
-        className="kuiVerticalRhythm visDisabledLabVisualization__icon kuiIcon fa-flask"
-        aria-hidden="true"
+    <EuiCallOut
+      className="visDisabledLabVisualization"
+      size="s"
+      title={calloutTitle}
+      iconType="beaker"
+    >
+      <FormattedMessage
+        id="visualizations.disabledLabVisualizationMessage"
+        defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
       />
-      <div className="kuiVerticalRhythm">
-        <FormattedMessage
-          id="visualizations.disabledLabVisualizationTitle"
-          defaultMessage="{title} is a lab visualization."
-          values={{ title: <em className="visDisabledLabVisualization__title">{title}</em> }}
-        />
-      </div>
-      <div className="kuiVerticalRhythm">
-        <FormattedMessage
-          id="visualizations.disabledLabVisualizationMessage"
-          defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
-        />
-      </div>
-    </div>
+    </EuiCallOut>
   );
 }
