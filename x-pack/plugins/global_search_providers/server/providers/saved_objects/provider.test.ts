@@ -5,6 +5,7 @@
  */
 
 import { EMPTY } from 'rxjs';
+import { toArray } from 'rxjs/operators';
 import { TestScheduler } from 'rxjs/testing';
 import {
   SavedObjectsFindResponse,
@@ -114,8 +115,8 @@ describe('savedObjectsResultProvider', () => {
     expect(provider.id).toBe('savedObjects');
   });
 
-  it('calls `savedObjectClient.find` with the correct parameters', () => {
-    provider.find('term', defaultOption, context);
+  it('calls `savedObjectClient.find` with the correct parameters', async () => {
+    await provider.find('term', defaultOption, context).toPromise();
 
     expect(context.core.savedObjects.client.find).toHaveBeenCalledTimes(1);
     expect(context.core.savedObjects.client.find).toHaveBeenCalledWith({
@@ -126,6 +127,13 @@ describe('savedObjectsResultProvider', () => {
       searchFields: ['title', 'description'],
       type: ['typeA', 'typeB'],
     });
+  });
+
+  it('does not call `savedObjectClient.find` if `term` is empty', async () => {
+    const results = await provider.find('', defaultOption, context).pipe(toArray()).toPromise();
+
+    expect(context.core.savedObjects.client.find).not.toHaveBeenCalled();
+    expect(results).toEqual([[]]);
   });
 
   it('converts the saved objects to results', async () => {

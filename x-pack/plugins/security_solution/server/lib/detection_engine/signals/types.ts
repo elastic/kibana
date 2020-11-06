@@ -14,9 +14,14 @@ import {
   AlertExecutorOptions,
   AlertServices,
 } from '../../../../../alerts/server';
-import { RuleAlertAction } from '../../../../common/detection_engine/types';
+import { SearchResponse } from '../../types';
+import {
+  EqlSearchResponse,
+  BaseHit,
+  RuleAlertAction,
+  SearchTypes,
+} from '../../../../common/detection_engine/types';
 import { RuleTypeParams, RefreshTypes } from '../types';
-import { SearchResponse, EqlSearchResponse, BaseHit } from '../../types';
 import { ListClient } from '../../../../../lists/server';
 import { Logger } from '../../../../../../../src/core/server';
 import { ExceptionListItemSchema } from '../../../../../lists/common/schemas';
@@ -40,17 +45,6 @@ export interface SignalsStatusParams {
   query: object | undefined | null;
   status: Status;
 }
-
-export type SearchTypes =
-  | string
-  | string[]
-  | number
-  | number[]
-  | boolean
-  | boolean[]
-  | object
-  | object[]
-  | undefined;
 
 export interface SignalSource {
   [key: string]: SearchTypes;

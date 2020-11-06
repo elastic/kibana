@@ -103,6 +103,9 @@ export const getEventIdToDataMapping = (
     };
   }, {});
 
+export const isEventBuildingBlockType = (event: Ecs): boolean =>
+  !isEmpty(event.signal?.rule?.building_block_type);
+
 /** Return eventType raw or signal */
 export const getEventType = (event: Ecs): Omit<TimelineEventsType, 'all'> => {
   if (!isEmpty(event.signal?.rule?.id)) {

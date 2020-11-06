@@ -1,0 +1,62 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "A suspicious Zoom child process was detected, which may indicate an attempt to run unnoticed. Verify process details such as command line, network connections, file writes and associated file signature details as well.",
+  "false_positives": [
+    "New Zoom Executable"
+  ],
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "name": "Suspicious Zoom Child Process",
+  "query": "event.category:process and event.type:(start or process_started) and process.parent.name:Zoom.exe and not process.name:(Zoom.exe or WerFault.exe or airhost.exe or CptControl.exe or CptHost.exe or cpthost.exe or CptInstall.exe or CptService.exe or Installer.exe or zCrashReport.exe or Zoom_launcher.exe or zTscoder.exe or plugin_Launcher.exe or mDNSResponder.exe or zDevHelper.exe or APcptControl.exe or CrashSender*.exe or aomhost64.exe or Magnify.exe or m_plugin_launcher.exe or com.zoom.us.zTranscode.exe or RoomConnector.exe or tabtip.exe or Explorer.exe or chrome.exe or firefox.exe or iexplore.exe or outlook.exe or lync.exe or ApplicationFrameHost.exe or ZoomAirhostInstaller.exe or narrator.exe or NVDA.exe or Magnify.exe or Outlook.exe or m_plugin_launcher.exe or mphost.exe or APcptControl.exe or winword.exe or excel.exe or powerpnt.exe or ONENOTE.EXE or wpp.exe or debug_message.exe or zAssistant.exe or msiexec.exe or msedge.exe or dwm.exe or vcredist_x86.exe or Controller.exe or Installer.exe or CptInstall.exe or Zoom_launcher.exe or ShellExperienceHost.exe or wps.exe)",
+  "risk_score": 47,
+  "rule_id": "97aba1ef-6034-4bd3-8c1a-1e0996b27afa",
+  "severity": "medium",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1036",
+          "name": "Masquerading",
+          "reference": "https://attack.mitre.org/techniques/T1036/"
+        }
+      ]
+    },
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1055",
+          "name": "Process Injection",
+          "reference": "https://attack.mitre.org/techniques/T1055/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

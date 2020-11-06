@@ -7,10 +7,15 @@ import React, { memo, useState, useMemo } from 'react';
 import { EuiPortal, EuiContextMenuItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { Agent } from '../../../../types';
-import { useCapabilities } from '../../../../hooks';
+import { useCapabilities, useKibanaVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
-import { AgentUnenrollAgentModal, AgentReassignAgentPolicyFlyout } from '../../components';
+import {
+  AgentUnenrollAgentModal,
+  AgentReassignAgentPolicyFlyout,
+  AgentUpgradeAgentModal,
+} from '../../components';
 import { useAgentRefresh } from '../hooks';
+import { isAgentUpgradeable } from '../../../../services';
 
 export const AgentDetailsActionMenu: React.FunctionComponent<{
   agent: Agent;
@@ -18,9 +23,11 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
   onCancelReassign?: () => void;
 }> = memo(({ agent, assignFlyoutOpenByDefault = false, onCancelReassign }) => {
   const hasWriteCapabilites = useCapabilities().write;
+  const kibanaVersion = useKibanaVersion();
   const refreshAgent = useAgentRefresh();
   const [isReassignFlyoutOpen, setIsReassignFlyoutOpen] = useState(assignFlyoutOpenByDefault);
   const [isUnenrollModalOpen, setIsUnenrollModalOpen] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
   const isUnenrolling = agent.status === 'unenrolling';
 
   const onClose = useMemo(() => {
@@ -51,12 +58,25 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           />
         </EuiPortal>
       )}
+      {isUpgradeModalOpen && (
+        <EuiPortal>
+          <AgentUpgradeAgentModal
+            agents={[agent]}
+            agentCount={1}
+            version={kibanaVersion}
+            onClose={() => {
+              setIsUpgradeModalOpen(false);
+              refreshAgent();
+            }}
+          />
+        </EuiPortal>
+      )}
       <ContextMenuActions
         button={{
           props: { iconType: 'arrowDown', iconSide: 'right' },
           children: (
             <FormattedMessage
-              id="xpack.ingestManager.agentDetails.actionsButton"
+              id="xpack.fleet.agentDetails.actionsButton"
               defaultMessage="Actions"
             />
           ),
@@ -71,7 +91,7 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
             key="reassignPolicy"
           >
             <FormattedMessage
-              id="xpack.ingestManager.agentList.reassignActionText"
+              id="xpack.fleet.agentList.reassignActionText"
               defaultMessage="Assign to new policy"
             />
           </EuiContextMenuItem>,
@@ -84,15 +104,27 @@ export const AgentDetailsActionMenu: React.FunctionComponent<{
           >
             {isUnenrolling ? (
               <FormattedMessage
-                id="xpack.ingestManager.agentList.forceUnenrollOneButton"
+                id="xpack.fleet.agentList.forceUnenrollOneButton"
                 defaultMessage="Force unenroll"
               />
             ) : (
               <FormattedMessage
-                id="xpack.ingestManager.agentList.unenrollOneButton"
+                id="xpack.fleet.agentList.unenrollOneButton"
                 defaultMessage="Unenroll agent"
               />
             )}
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem
+            icon="refresh"
+            disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+            onClick={() => {
+              setIsUpgradeModalOpen(true);
+            }}
+          >
+            <FormattedMessage
+              id="xpack.fleet.agentList.upgradeOneButton"
+              defaultMessage="Upgrade agent"
+            />
           </EuiContextMenuItem>,
         ]}
       />

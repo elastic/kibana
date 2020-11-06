@@ -25,7 +25,7 @@ export interface DataTypeDefinition {
 export interface ParameterDefinition {
   title?: string;
   description?: JSX.Element | string;
-  fieldConfig: FieldConfig<any, any>;
+  fieldConfig: FieldConfig<any>;
   schema?: any;
   props?: { [key: string]: ParameterDefinition };
   documentation?: {

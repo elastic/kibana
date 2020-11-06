@@ -34,6 +34,7 @@ import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/act
 import {
   IErrorObject,
   ActionTypeModel,
+  ActionTypeRegistryContract,
   AlertAction,
   ActionTypeIndex,
   ActionConnector,
@@ -42,10 +43,9 @@ import {
 } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { ConnectorAddModal } from './connector_add_modal';
-import { TypeRegistry } from '../../type_registry';
 import { actionTypeCompare } from '../../lib/action_type_compare';
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
-import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
+import { VIEW_LICENSE_OPTIONS_LINK, DEFAULT_HIDDEN_ACTION_TYPES } from '../../../common/constants';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 
 interface ActionAccordionFormProps {
@@ -55,13 +55,14 @@ interface ActionAccordionFormProps {
   setAlertProperty: (actions: AlertAction[]) => void;
   setActionParamsProperty: (key: string, value: any, index: number) => void;
   http: HttpSetup;
-  actionTypeRegistry: TypeRegistry<ActionTypeModel>;
+  actionTypeRegistry: ActionTypeRegistryContract;
   toastNotifications: ToastsSetup;
   docLinks: DocLinksStart;
   actionTypes?: ActionType[];
   messageVariables?: ActionVariable[];
   defaultActionMessage?: string;
   setHasActionsDisabled?: (value: boolean) => void;
+  setHasActionsWithBrokenConnector?: (value: boolean) => void;
   capabilities: ApplicationStart['capabilities'];
 }
 
@@ -83,6 +84,7 @@ export const ActionForm = ({
   defaultActionMessage,
   toastNotifications,
   setHasActionsDisabled,
+  setHasActionsWithBrokenConnector,
   capabilities,
   docLinks,
 }: ActionAccordionFormProps) => {
@@ -170,6 +172,16 @@ export const ActionForm = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [connectors, actionTypesIndex]);
+
+  useEffect(() => {
+    const hasActionWithBrokenConnector = actions.some(
+      (action) => !connectors.find((connector) => connector.id === action.id)
+    );
+    if (setHasActionsWithBrokenConnector) {
+      setHasActionsWithBrokenConnector(hasActionWithBrokenConnector);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [actions, connectors]);
 
   const preconfiguredMessage = i18n.translate(
     'xpack.triggersActionsUI.sections.actionForm.preconfiguredTitleMessage',
@@ -267,7 +279,7 @@ export const ActionForm = ({
                     }}
                   >
                     <FormattedMessage
-                      defaultMessage="Add new"
+                      defaultMessage="Add connector"
                       id="xpack.triggersActionsUI.sections.alertForm.addNewConnectorEmptyButton"
                     />
                   </EuiButtonEmpty>
@@ -567,6 +579,11 @@ export const ActionForm = ({
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
+      /**
+       * TODO: Remove when cases connector is available across Kibana. Issue: https://github.com/elastic/kibana/issues/82502.
+       * If actionTypes are set, hidden connectors are filtered out. Otherwise, they are not.
+       */
+      .filter(({ id }) => actionTypes ?? !DEFAULT_HIDDEN_ACTION_TYPES.includes(id))
       .filter((item) => actionTypesIndex[item.id])
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>

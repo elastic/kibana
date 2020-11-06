@@ -88,6 +88,7 @@ export const TopNSeries = injectI18n(function (props) {
       seriesBody = (
         <SeriesConfig
           fields={props.fields}
+          panel={props.panel}
           model={props.model}
           onChange={props.onChange}
           indexPatternForQuery={props.indexPatternForQuery}

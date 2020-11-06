@@ -222,10 +222,10 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
 
         const fetchedJob = await getDFAJob(analyticsId);
         // Description should not have changed
@@ -243,10 +243,10 @@ export default ({ getService }: FtrProviderContext) => {
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS)
           .send(requestBody)
-          .expect(404);
+          .expect(403);
 
-        expect(body.error).to.eql('Not Found');
-        expect(body.message).to.eql('Not Found');
+        expect(body.error).to.eql('Forbidden');
+        expect(body.message).to.eql('Forbidden');
 
         const fetchedJob = await getDFAJob(analyticsId);
         // Description should not have changed
@@ -258,7 +258,7 @@ export default ({ getService }: FtrProviderContext) => {
           description: 'Not found',
         };
         const id = `${jobId}_invalid`;
-        const message = 'resource_not_found_exception';
+        const message = `No known job with id '${id}'`;
 
         const { body } = await supertest
           .post(`/api/ml/data_frame/analytics/${id}/_update`)

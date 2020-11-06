@@ -25,6 +25,8 @@ import {
   EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiEmptyPrompt,
+  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -81,6 +83,7 @@ interface AlertFormProps {
   errors: IErrorObject;
   canChangeTrigger?: boolean; // to hide Change trigger button
   setHasActionsDisabled?: (value: boolean) => void;
+  setHasActionsWithBrokenConnector?: (value: boolean) => void;
   operation: string;
 }
 
@@ -90,6 +93,7 @@ export const AlertForm = ({
   dispatch,
   errors,
   setHasActionsDisabled,
+  setHasActionsWithBrokenConnector,
   operation,
 }: AlertFormProps) => {
   const alertsContext = useAlertsContext();
@@ -103,9 +107,7 @@ export const AlertForm = ({
   } = alertsContext;
   const canShowActions = hasShowActionsCapability(capabilities);
 
-  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(
-    alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null
-  );
+  const [alertTypeModel, setAlertTypeModel] = useState<AlertTypeModel | null>(null);
 
   const [alertTypesIndex, setAlertTypesIndex] = useState<AlertTypeIndex | undefined>(undefined);
   const [alertInterval, setAlertInterval] = useState<number | undefined>(
@@ -146,6 +148,10 @@ export const AlertForm = ({
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
+  }, [alert, alertTypeRegistry]);
 
   const setAlertProperty = (key: string, value: any) => {
     dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
@@ -243,6 +249,33 @@ export const AlertForm = ({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
+      {alertTypeModel?.description && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText color="subdued" size="s" data-test-subj="alertDescription">
+              {alertTypeModel.description}&nbsp;
+              {alertTypeModel?.documentationUrl && (
+                <EuiLink
+                  external
+                  target="_blank"
+                  data-test-subj="alertDocumentationLink"
+                  href={
+                    typeof alertTypeModel.documentationUrl === 'function'
+                      ? alertTypeModel.documentationUrl(docLinks)
+                      : alertTypeModel.documentationUrl
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertForm.documentationLabel"
+                    defaultMessage="Documentation"
+                  />
+                </EuiLink>
+              )}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <EuiHorizontalRule />
       {AlertParamsExpressionComponent ? (
         <Suspense fallback={<CenterJustifiedSpinner />}>
           <AlertParamsExpressionComponent
@@ -260,6 +293,7 @@ export const AlertForm = ({
         <ActionForm
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
+          setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
           messageVariables={
             alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
               ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).sort((a, b) =>
@@ -396,7 +430,7 @@ export const AlertForm = ({
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
-            compressed
+            display="rowCompressed"
             label={labelForAlertChecked}
             isInvalid={errors.interval.length > 0}
             error={errors.interval}

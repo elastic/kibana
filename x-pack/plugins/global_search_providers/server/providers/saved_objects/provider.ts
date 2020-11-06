@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { from, combineLatest } from 'rxjs';
+import { from, combineLatest, of } from 'rxjs';
 import { map, takeUntil, first } from 'rxjs/operators';
 import { GlobalSearchResultProvider } from '../../../../global_search/server';
 import { mapToResults } from './map_object_to_result';
@@ -13,6 +13,10 @@ export const createSavedObjectsResultProvider = (): GlobalSearchResultProvider =
   return {
     id: 'savedObjects',
     find: (term, { aborted$, maxResults, preference }, { core }) => {
+      if (!term) {
+        return of([]);
+      }
+
       const {
         capabilities,
         savedObjects: { client, typeRegistry },

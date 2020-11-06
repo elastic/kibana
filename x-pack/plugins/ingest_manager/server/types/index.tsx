@@ -52,9 +52,11 @@ export {
   KibanaAssetReference,
   ElasticsearchAssetType,
   RegistryPackage,
+  InstallablePackage,
   AssetType,
   Installable,
   KibanaAssetType,
+  KibanaSavedObjectType,
   AssetParts,
   AssetsGroupedByServiceByType,
   CategoryId,
@@ -68,9 +70,12 @@ export {
   Settings,
   SettingsSOAttributes,
   InstallType,
+  InstallSource,
   // Agent Request types
   PostAgentEnrollRequest,
   PostAgentCheckinRequest,
+  DataType,
+  dataTypes,
 } from '../../common';
 
 export type CallESAsCurrentUser = LegacyScopedClusterClient['callAsCurrentUser'];

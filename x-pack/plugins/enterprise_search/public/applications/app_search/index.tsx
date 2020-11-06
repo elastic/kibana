@@ -18,6 +18,7 @@ import { IInitialAppData } from '../../../common/types';
 
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
+import { EngineNav, EngineRouter } from './components/engine';
 
 import {
   ROOT_PATH,
@@ -26,12 +27,15 @@ import {
   CREDENTIALS_PATH,
   ROLE_MAPPINGS_PATH,
   ENGINES_PATH,
+  ENGINE_PATH,
 } from './routes';
 
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from '../shared/not_found';
 import { EngineOverview } from './components/engine_overview';
+import { Settings } from './components/settings';
+import { Credentials } from './components/credentials';
 
 export const AppSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
@@ -63,6 +67,11 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
       <Route exact path={SETUP_GUIDE_PATH}>
         <SetupGuide />
       </Route>
+      <Route path={ENGINE_PATH}>
+        <Layout navigation={<AppSearchNav subNav={<EngineNav />} />} readOnlyMode={readOnlyMode}>
+          <EngineRouter />
+        </Layout>
+      </Route>
       <Route>
         <Layout navigation={<AppSearchNav />} readOnlyMode={readOnlyMode}>
           {errorConnecting ? (
@@ -75,6 +84,12 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
               <Route exact path={ENGINES_PATH}>
                 <EngineOverview />
               </Route>
+              <Route exact path={SETTINGS_PATH}>
+                <Settings />
+              </Route>
+              <Route exact path={CREDENTIALS_PATH}>
+                <Credentials />
+              </Route>
               <Route>
                 <NotFound product={APP_SEARCH_PLUGIN} />
               </Route>
@@ -86,27 +101,31 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
   );
 };
 
-export const AppSearchNav: React.FC = () => {
+interface IAppSearchNavProps {
+  subNav?: React.ReactNode;
+}
+
+export const AppSearchNav: React.FC<IAppSearchNavProps> = ({ subNav }) => {
   const {
     myRole: { canViewSettings, canViewAccountCredentials, canViewRoleMappings },
   } = useValues(AppLogic);
 
   return (
     <SideNav product={APP_SEARCH_PLUGIN}>
-      <SideNavLink to={ENGINES_PATH} isRoot>
+      <SideNavLink to={ENGINES_PATH} subNav={subNav} isRoot>
         {i18n.translate('xpack.enterpriseSearch.appSearch.nav.engines', {
           defaultMessage: 'Engines',
         })}
       </SideNavLink>
       {canViewSettings && (
-        <SideNavLink isExternal to={getAppSearchUrl(SETTINGS_PATH)}>
+        <SideNavLink to={SETTINGS_PATH}>
           {i18n.translate('xpack.enterpriseSearch.appSearch.nav.settings', {
-            defaultMessage: 'Account Settings',
+            defaultMessage: 'Settings',
           })}
         </SideNavLink>
       )}
       {canViewAccountCredentials && (
-        <SideNavLink isExternal to={getAppSearchUrl(CREDENTIALS_PATH)}>
+        <SideNavLink to={CREDENTIALS_PATH}>
           {i18n.translate('xpack.enterpriseSearch.appSearch.nav.credentials', {
             defaultMessage: 'Credentials',
           })}

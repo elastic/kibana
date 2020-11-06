@@ -165,7 +165,9 @@ export const alertsDefaultModel: SubsetTimelineModel = {
 export const requiredFieldsForActions = [
   '@timestamp',
   'signal.status',
+  'signal.group.id',
   'signal.original_time',
+  'signal.rule.building_block_type',
   'signal.rule.filters',
   'signal.rule.from',
   'signal.rule.language',
@@ -177,7 +179,6 @@ export const requiredFieldsForActions = [
   'signal.rule.type',
   'signal.original_event.kind',
   'signal.original_event.module',
-
   // Endpoint exception fields
   'file.path',
   'file.Ext.code_signature.subject_name',

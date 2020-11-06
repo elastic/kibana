@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { HOST_STATS, NETWORK_STATS } from '../screens/overview';
+import { HOST_STATS, NETWORK_STATS, OVERVIEW_EMPTY_PAGE } from '../screens/overview';
 
 import { expandHostStats, expandNetworkStats } from '../tasks/overview';
 import { loginAndWaitForPage } from '../tasks/login';
@@ -12,13 +12,9 @@ import { loginAndWaitForPage } from '../tasks/login';
 import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Overview Page', () => {
-  before(() => {
-    cy.stubSecurityApi('overview');
+  it('Host stats render with correct values', () => {
     cy.stubSearchStrategyApi('overview_search_strategy');
     loginAndWaitForPage(OVERVIEW_URL);
-  });
-
-  it('Host stats render with correct values', () => {
     expandHostStats();
 
     HOST_STATS.forEach((stat) => {
@@ -27,10 +23,25 @@ describe('Overview Page', () => {
   });
 
   it('Network stats render with correct values', () => {
+    cy.stubSearchStrategyApi('overview_search_strategy');
+    loginAndWaitForPage(OVERVIEW_URL);
     expandNetworkStats();
 
     NETWORK_STATS.forEach((stat) => {
       cy.get(stat.domId).invoke('text').should('eq', stat.value);
+    });
+  });
+
+  describe('with no data', () => {
+    before(() => {
+      cy.server();
+      cy.fixture('empty_instance').as('emptyInstance');
+      loginAndWaitForPage(OVERVIEW_URL);
+      cy.route('POST', '**/internal/search/securitySolutionIndexFields', '@emptyInstance');
+    });
+
+    it('Splash screen should be here', () => {
+      cy.get(OVERVIEW_EMPTY_PAGE).should('be.visible');
     });
   });
 });

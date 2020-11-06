@@ -35,13 +35,17 @@ export interface ReactExpressionRendererProps extends IExpressionLoaderParams {
   className?: string;
   dataAttrs?: string[];
   expression: string | ExpressionAstExpression;
-  renderError?: (error?: string | null) => React.ReactElement | React.ReactElement[];
+  renderError?: (
+    message?: string | null,
+    error?: ExpressionRenderError | null
+  ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
   onEvent?: (event: ExpressionRendererEvent) => void;
   /**
    * An observable which can be used to re-run the expression without destroying the component
    */
   reload$?: Observable<unknown>;
+  debounce?: number;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -68,6 +72,7 @@ export const ReactExpressionRenderer = ({
   expression,
   onEvent,
   reload$,
+  debounce,
   ...expressionLoaderOptions
 }: ReactExpressionRendererProps) => {
   const mountpoint: React.MutableRefObject<null | HTMLDivElement> = useRef(null);
@@ -82,12 +87,28 @@ export const ReactExpressionRenderer = ({
   const errorRenderHandlerRef: React.MutableRefObject<null | IInterpreterRenderHandlers> = useRef(
     null
   );
+  const [debouncedExpression, setDebouncedExpression] = useState(expression);
+  useEffect(() => {
+    if (debounce === undefined) {
+      return;
+    }
+    const handler = setTimeout(() => {
+      setDebouncedExpression(expression);
+    }, debounce);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [expression, debounce]);
+
+  const activeExpression = debounce !== undefined ? debouncedExpression : expression;
+  const waitingForDebounceToComplete = debounce !== undefined && expression !== debouncedExpression;
 
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()
   useEffect(() => {
     const subs: Subscription[] = [];
-    expressionLoaderRef.current = new ExpressionLoader(mountpoint.current!, expression, {
+    expressionLoaderRef.current = new ExpressionLoader(mountpoint.current!, activeExpression, {
       ...expressionLoaderOptions,
       // react component wrapper provides different
       // error handling api which is easier to work with from react
@@ -143,21 +164,21 @@ export const ReactExpressionRenderer = ({
   useEffect(() => {
     const subscription = reload$?.subscribe(() => {
       if (expressionLoaderRef.current) {
-        expressionLoaderRef.current.update(expression, expressionLoaderOptions);
+        expressionLoaderRef.current.update(activeExpression, expressionLoaderOptions);
       }
     });
     return () => subscription?.unsubscribe();
-  }, [reload$, expression, ...Object.values(expressionLoaderOptions)]);
+  }, [reload$, activeExpression, ...Object.values(expressionLoaderOptions)]);
 
   // Re-fetch data automatically when the inputs change
   useShallowCompareEffect(
     () => {
       if (expressionLoaderRef.current) {
-        expressionLoaderRef.current.update(expression, expressionLoaderOptions);
+        expressionLoaderRef.current.update(activeExpression, expressionLoaderOptions);
       }
     },
     // when expression is changed by reference and when any other loaderOption is changed by reference
-    [{ expression, ...expressionLoaderOptions }]
+    [{ activeExpression, ...expressionLoaderOptions }]
   );
 
   /* eslint-enable react-hooks/exhaustive-deps */
@@ -185,8 +206,13 @@ export const ReactExpressionRenderer = ({
   return (
     <div {...dataAttrs} className={classes}>
       {state.isEmpty && <EuiLoadingChart mono size="l" />}
-      {state.isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
-      {!state.isLoading && state.error && renderError && renderError(state.error.message)}
+      {(state.isLoading || waitingForDebounceToComplete) && (
+        <EuiProgress size="xs" color="accent" position="absolute" />
+      )}
+      {!state.isLoading &&
+        state.error &&
+        renderError &&
+        renderError(state.error.message, state.error)}
       <div
         className="expExpressionRenderer__expression"
         style={expressionStyles}

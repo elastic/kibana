@@ -24,8 +24,8 @@ Then(`it displays top pages in the suggestion popover`, () => {
     listOfUrls.should('have.length', 5);
 
     const actualUrlsText = [
-      'http://opbeans-node:3000/dashboardPage views: 17Page load duration: 109 ms',
-      'http://opbeans-node:3000/ordersPage views: 14Page load duration: 72 ms',
+      'http://opbeans-node:3000/dashboardTotal page views: 17Page load duration: 109 ms (median)',
+      'http://opbeans-node:3000/ordersTotal page views: 14Page load duration: 72 ms (median)',
     ];
 
     cy.get('li.euiSelectableListItem')
@@ -55,7 +55,7 @@ Then(`it should filter results based on query`, () => {
     listOfUrls.should('have.length', 1);
 
     const actualUrlsText = [
-      'http://opbeans-node:3000/customersPage views: 10Page load duration: 76 ms ',
+      'http://opbeans-node:3000/customersTotal page views: 10Page load duration: 76 ms (median)',
     ];
 
     cy.get('li.euiSelectableListItem')

@@ -30,13 +30,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
 import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { ML_APP_URL_GENERATOR } from '../../../../common/constants/ml_url_generator';
-import { PLUGIN_ID } from '../../../../common/constants/app';
 import { addItemToRecentlyAccessed } from '../../util/recently_accessed';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
-    'This selection contains too many buckets to be displayed.' +
-    'The dashboard is best viewed over a shorter time range.',
+    'This selection contains too many buckets to be displayed. You should shorten the time range of the view or narrow the selection in the timeline.',
 });
 const textViewButton = i18n.translate(
   'xpack.ml.explorer.charts.openInSingleMetricViewerButtonLabel',
@@ -55,21 +53,12 @@ function getChartId(series) {
 }
 
 // Wrapper for a single explorer chart
-function ExplorerChartContainer({
-  series,
-  severity,
-  tooManyBuckets,
-  wrapLabel,
-  navigateToApp,
-  mlUrlGenerator,
-}) {
+function ExplorerChartContainer({ series, severity, tooManyBuckets, wrapLabel, mlUrlGenerator }) {
   const redirectToSingleMetricViewer = useCallback(async () => {
     const singleMetricViewerLink = await getExploreSeriesLink(mlUrlGenerator, series);
     addItemToRecentlyAccessed('timeseriesexplorer', series.jobId, singleMetricViewerLink);
 
-    await navigateToApp(PLUGIN_ID, {
-      path: singleMetricViewerLink,
-    });
+    window.open(singleMetricViewerLink, '_blank');
   }, [mlUrlGenerator]);
 
   const { detectorLabel, entityFields } = series;

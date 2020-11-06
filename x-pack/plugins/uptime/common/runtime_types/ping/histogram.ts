@@ -26,7 +26,7 @@ export interface GetPingHistogramParams {
 
 export interface HistogramResult {
   histogram: HistogramDataPoint[];
-  interval: string;
+  minInterval: number;
 }
 
 export interface HistogramQueryResult {

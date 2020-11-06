@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from '../../../../../src/core/server';
 import { enhancedEsSearchStrategyProvider } from './es_search_strategy';
 import { BehaviorSubject } from 'rxjs';
+import { SearchStrategyDependencies } from '../../../../../src/plugins/data/server/search';
 
 const mockAsyncResponse = {
   body: {
@@ -40,26 +40,20 @@ describe('ES search strategy', () => {
   const mockLogger: any = {
     debug: () => {},
   };
-  const mockContext = {
-    core: {
-      uiSettings: {
-        client: {
-          get: jest.fn(),
+  const mockDeps = ({
+    uiSettingsClient: {
+      get: jest.fn(),
+    },
+    esClient: {
+      asCurrentUser: {
+        asyncSearch: {
+          get: mockGetCaller,
+          submit: mockSubmitCaller,
         },
-      },
-      elasticsearch: {
-        client: {
-          asCurrentUser: {
-            asyncSearch: {
-              get: mockGetCaller,
-              submit: mockSubmitCaller,
-            },
-            transport: { request: mockApiCaller },
-          },
-        },
+        transport: { request: mockApiCaller },
       },
     },
-  };
+  } as unknown) as SearchStrategyDependencies;
   const mockConfig$ = new BehaviorSubject<any>({
     elasticsearch: {
       shardTimeout: {
@@ -86,7 +80,7 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*', body: { query: {} } };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+    await esSearch.search({ params }, {}, mockDeps).toPromise();
 
     expect(mockSubmitCaller).toBeCalled();
     const request = mockSubmitCaller.mock.calls[0][0];
@@ -100,7 +94,7 @@ describe('ES search strategy', () => {
     const params = { index: 'logstash-*', body: { query: {} } };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { id: 'foo', params });
+    await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
     expect(mockGetCaller).toBeCalled();
     const request = mockGetCaller.mock.calls[0][0];
@@ -115,10 +109,16 @@ describe('ES search strategy', () => {
     const params = { index: 'foo-程', body: {} };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, {
-      indexType: 'rollup',
-      params,
-    });
+    await esSearch
+      .search(
+        {
+          indexType: 'rollup',
+          params,
+        },
+        {},
+        mockDeps
+      )
+      .toPromise();
 
     expect(mockApiCaller).toBeCalled();
     const { method, path } = mockApiCaller.mock.calls[0][0];
@@ -132,7 +132,7 @@ describe('ES search strategy', () => {
     const params = { index: 'foo-*', body: {} };
     const esSearch = await enhancedEsSearchStrategyProvider(mockConfig$, mockLogger);
 
-    await esSearch.search((mockContext as unknown) as RequestHandlerContext, { params });
+    await esSearch.search({ params }, {}, mockDeps).toPromise();
 
     expect(mockSubmitCaller).toBeCalled();
     const request = mockSubmitCaller.mock.calls[0][0];

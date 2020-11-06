@@ -118,6 +118,25 @@ export function getDatasourceSuggestionsForField(
   }
 }
 
+// Called when the user navigates from Discover to Lens (Visualize button)
+export function getDatasourceSuggestionsForVisualizeField(
+  state: IndexPatternPrivateState,
+  indexPatternId: string,
+  fieldName: string
+): IndexPatternSugestion[] {
+  const layers = Object.keys(state.layers);
+  const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
+  // Identify the field by the indexPatternId and the fieldName
+  const indexPattern = state.indexPatterns[indexPatternId];
+  const field = indexPattern.fields.find((fld) => fld.name === fieldName);
+
+  if (layerIds.length !== 0 || !field) return [];
+  const newId = generateId();
+  return getEmptyLayerSuggestionsForField(state, newId, indexPatternId, field).concat(
+    getEmptyLayerSuggestionsForField({ ...state, layers: {} }, newId, indexPatternId, field)
+  );
+}
+
 function getBucketOperation(field: IndexPatternField) {
   // We allow numeric bucket types in some cases, but it's generally not the right suggestion,
   // so we eliminate it here.
@@ -436,6 +455,10 @@ export function getDatasourceSuggestionsFromCurrentState(
           ({ name }) => name === indexPattern.timeFieldName
         );
 
+        const hasNumericDimension =
+          buckets.length === 1 &&
+          buckets.some((columnId) => layer.columns[columnId].dataType === 'number');
+
         const suggestions: Array<DatasourceSuggestion<IndexPatternPrivateState>> = [];
         if (metrics.length === 0) {
           // intermediary chart without metric, don't try to suggest reduced versions
@@ -463,7 +486,9 @@ export function getDatasourceSuggestionsFromCurrentState(
         } else {
           suggestions.push(...createSimplifiedTableSuggestions(state, layerId));
 
-          if (!timeDimension && timeField) {
+          // base range intervals are of number dataType.
+          // Custom range/intervals have a different dataType so they still receive the Over Time suggestion
+          if (!timeDimension && timeField && !hasNumericDimension) {
             // suggest current configuration over time if there is a default time field
             // and no time dimension yet
             suggestions.push(createSuggestionWithDefaultDateHistogram(state, layerId, timeField));
@@ -473,7 +498,6 @@ export function getDatasourceSuggestionsFromCurrentState(
             suggestions.push(createChangedNestingSuggestion(state, layerId));
           }
         }
-
         return suggestions;
       })
   );
@@ -635,9 +659,13 @@ function createSuggestionWithDefaultDateHistogram(
     field: timeField,
     suggestedPriority: undefined,
   });
+
   const updatedLayer = {
     indexPatternId: layer.indexPatternId,
-    columns: { ...layer.columns, [newId]: timeColumn },
+    columns: {
+      ...layer.columns,
+      [newId]: timeColumn,
+    },
     columnOrder: [...buckets, newId, ...metrics],
   };
   return buildSuggestion({

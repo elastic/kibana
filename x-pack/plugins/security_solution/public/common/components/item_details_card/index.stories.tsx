@@ -14,14 +14,14 @@ addDecorator((storyFn) => (
   <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
 ));
 
-storiesOf('Components|ItemDetailsCard', module).add('default', () => {
+storiesOf('Components/ItemDetailsCard', module).add('default', () => {
   return (
     <ItemDetailsCard>
       <ItemDetailsPropertySummary name={'property 1'} value={'value 1'} />
       <ItemDetailsPropertySummary name={'property 2'} value={'value 2'} />
       <ItemDetailsPropertySummary name={'property 3'} value={'value 3'} />
 
-      {'content text'}
+      {'content text '}
       <strong>{'content node'}</strong>
 
       <ItemDetailsAction size="s" color="primary">

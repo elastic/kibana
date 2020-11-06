@@ -41,7 +41,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
       <EuiCallOut
         title={
           <FormattedMessage
-            id="xpack.ingestManager.policyDetails.ErrorGettingFullAgentPolicy"
+            id="xpack.fleet.policyDetails.ErrorGettingFullAgentPolicy"
             defaultMessage="Error loading agent policy"
           />
         }
@@ -51,7 +51,9 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
         {error.message}
       </EuiCallOut>
     ) : (
-      <EuiCodeBlock language="yaml" isCopyable fontSize="m">
+      // Property 'whiteSpace' does not exist on type 'IntrinsicAttributes & CommonProps & OwnProps & HTMLAttributes<HTMLElement> & { children?: ReactNode; }'.
+      // @ts-expect-error linter complains whiteSpace isn't available but docs show it on EuiCodeBlockImpl
+      <EuiCodeBlock language="yaml" isCopyable fontSize="m" whiteSpace="pre">
         {fullAgentPolicyToYaml(yamlData!.item)}
       </EuiCodeBlock>
     );
@@ -67,13 +69,13 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
             <h2 id="IngestManagerAgentPolicyYamlFlyoutTitle">
               {agentPolicyData?.item ? (
                 <FormattedMessage
-                  id="xpack.ingestManager.policyDetails.yamlflyoutTitleWithName"
+                  id="xpack.fleet.policyDetails.yamlflyoutTitleWithName"
                   defaultMessage="'{name}' agent policy"
                   values={{ name: agentPolicyData.item.name }}
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.ingestManager.policyDetails.yamlflyoutTitleWithoutName"
+                  id="xpack.fleet.policyDetails.yamlflyoutTitleWithoutName"
                   defaultMessage="Agent policy"
                 />
               )}
@@ -86,7 +88,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={onClose} flush="left">
                 <FormattedMessage
-                  id="xpack.ingestManager.policyDetails.yamlFlyoutCloseButtonLabel"
+                  id="xpack.fleet.policyDetails.yamlFlyoutCloseButtonLabel"
                   defaultMessage="Close"
                 />
               </EuiButtonEmpty>
@@ -98,7 +100,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
                 isDisabled={Boolean(isLoadingYaml && !yamlData)}
               >
                 <FormattedMessage
-                  id="xpack.ingestManager.policyDetails.yamlDownloadButtonLabel"
+                  id="xpack.fleet.policyDetails.yamlDownloadButtonLabel"
                   defaultMessage="Download policy"
                 />
               </EuiButton>

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
-import { isEmpty } from 'lodash/fp';
 import React from 'react';
 
 import {
@@ -25,6 +25,7 @@ import {
   ValidationFunc,
 } from '../../../../shared_imports';
 import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
+import { debounceAsync, eqlValidator } from '../eql_query_bar/validators';
 import {
   CUSTOM_QUERY_REQUIRED,
   INVALID_CUSTOM_QUERY,
@@ -36,6 +37,7 @@ import {
 
 export const schema: FormSchema<DefineStepRule> = {
   index: {
+    fieldsToValidateOnChange: ['index', 'queryBar'],
     type: FIELD_TYPES.COMBO_BOX,
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fiedIndexPatternsLabel',
@@ -69,12 +71,6 @@ export const schema: FormSchema<DefineStepRule> = {
     ],
   },
   queryBar: {
-    label: i18n.translate(
-      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldQuerBarLabel',
-      {
-        defaultMessage: 'Custom query',
-      }
-    ),
     validations: [
       {
         validator: (
@@ -119,6 +115,9 @@ export const schema: FormSchema<DefineStepRule> = {
             }
           }
         },
+      },
+      {
+        validator: debounceAsync(eqlValidator, 300),
       },
     ],
   },
@@ -236,7 +235,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatIndexPatternsLabel',
       {
-        defaultMessage: 'Threat index patterns',
+        defaultMessage: 'Indicator index patterns',
       }
     ),
     helpText: <EuiText size="xs">{THREAT_MATCH_INDEX_HELPER_TEXT}</EuiText>,
@@ -266,7 +265,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatMappingLabel',
       {
-        defaultMessage: 'Threat Mapping',
+        defaultMessage: 'Indicator mapping',
       }
     ),
     validations: [
@@ -302,7 +301,7 @@ export const schema: FormSchema<DefineStepRule> = {
     label: i18n.translate(
       'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.fieldThreatQueryBarLabel',
       {
-        defaultMessage: 'Threat index query',
+        defaultMessage: 'Indicator index query',
       }
     ),
     validations: [

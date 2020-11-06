@@ -18,7 +18,6 @@ import {
 } from '../common/constants';
 import {
   getHttp,
-  getLicenseId,
   getIsEmsEnabled,
   getRegionmapLayers,
   getTilemap,
@@ -29,8 +28,10 @@ import {
   getProxyElasticMapsServiceInMaps,
   getKibanaVersion,
 } from './kibana_services';
+import { getLicenseId } from './licensed_features';
+import { LayerConfig } from '../../../../src/plugins/region_map/config';
 
-export function getKibanaRegionList(): unknown[] {
+export function getKibanaRegionList(): LayerConfig[] {
   return getRegionmapLayers();
 }
 

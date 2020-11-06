@@ -335,6 +335,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         isAffectedByGlobalFilter: !!filters.length,
         isAffectedByTimeFilter: true,
         hideDetails: fieldInfoUnavailable,
+        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noAvailableDataLabel', {
+          defaultMessage: `There are no available fields that contain data.`,
+        }),
       },
       EmptyFields: {
         fields: groupedFields.emptyFields,
@@ -347,6 +350,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         title: i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
           defaultMessage: 'Empty fields',
         }),
+        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noEmptyDataLabel', {
+          defaultMessage: `There are no empty fields.`,
+        }),
       },
       MetaFields: {
         fields: groupedFields.metaFields,
@@ -358,6 +364,9 @@ export const InnerIndexPatternDataPanel = function InnerIndexPatternDataPanel({
         hideDetails: false,
         title: i18n.translate('xpack.lens.indexPattern.metaFieldsLabel', {
           defaultMessage: 'Meta fields',
+        }),
+        defaultNoFieldsMessage: i18n.translate('xpack.lens.indexPatterns.noMetaDataLabel', {
+          defaultMessage: `There are no meta fields.`,
         }),
       },
     };

@@ -33,7 +33,7 @@ const createSingleTestCases = (spaceId: string) => {
     { ...CASES.DEFAULT_AND_SPACE_1, namespaces, ...fail404(spaceId === SPACE_2_ID) },
     { ...CASES.DEFAULT_AND_SPACE_2, namespaces, ...fail404(spaceId === SPACE_1_ID) },
     { ...CASES.SPACE_1_AND_SPACE_2, namespaces, ...fail404(spaceId === DEFAULT_SPACE_ID) },
-    { ...CASES.ALL_SPACES, namespaces },
+    { ...CASES.EACH_SPACE, namespaces },
     { ...CASES.DOES_NOT_EXIST, namespaces, ...fail404() },
   ];
 };
@@ -56,7 +56,7 @@ const createMultiTestCases = () => {
     { id, namespaces: [DEFAULT_SPACE_ID], ...fail404() }, // this object's namespaces no longer contains DEFAULT_SPACE_ID
     { id, namespaces: [SPACE_1_ID], ...fail404() }, // this object's namespaces does contain SPACE_1_ID
   ];
-  id = CASES.ALL_SPACES.id;
+  id = CASES.EACH_SPACE.id;
   const three = [
     { id, namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID, nonExistentSpaceId] },
     // this saved object will not be found in the context of the current namespace ('default')
@@ -64,7 +64,15 @@ const createMultiTestCases = () => {
     { id, namespaces: [SPACE_1_ID], ...fail404() }, // this object's namespaces no longer contains SPACE_1_ID
     { id, namespaces: [SPACE_2_ID], ...fail404() }, // this object's namespaces does contain SPACE_2_ID
   ];
-  return { one, two, three };
+  id = CASES.ALL_SPACES.id;
+  const four = [
+    { id, namespaces: [DEFAULT_SPACE_ID, SPACE_1_ID, nonExistentSpaceId] },
+    // this saved object will still be found in the context of the current namespace ('default')
+    { id, namespaces: ['*'] },
+    // this object no longer exists
+    { id, namespaces: ['*'], ...fail404() },
+  ];
+  return { one, two, three, four };
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -83,6 +91,7 @@ export default function ({ getService }: TestInvoker) {
       one: createTestDefinitions(testCases.one, false),
       two: createTestDefinitions(testCases.two, false),
       three: createTestDefinitions(testCases.three, false),
+      four: createTestDefinitions(testCases.four, false),
     };
   };
 
@@ -91,9 +100,10 @@ export default function ({ getService }: TestInvoker) {
       const tests = createSingleTests(spaceId);
       addTests(`targeting the ${spaceId} space`, { spaceId, tests });
     });
-    const { one, two, three } = createMultiTests();
+    const { one, two, three, four } = createMultiTests();
     addTests('for a saved object in the default space', { tests: one });
     addTests('for a saved object in the default and space_1 spaces', { tests: two });
     addTests('for a saved object in the default, space_1, and space_2 spaces', { tests: three });
+    addTests('for a saved object in all spaces', { tests: four });
   });
 }

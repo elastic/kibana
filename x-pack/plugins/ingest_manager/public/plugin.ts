@@ -23,7 +23,8 @@ import { BASE_PATH } from './applications/ingest_manager/constants';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
-import { setHttpClient, licenseService } from './applications/ingest_manager/hooks';
+import { licenseService } from './applications/ingest_manager/hooks/use_license';
+import { setHttpClient } from './applications/ingest_manager/hooks/use_request/use_request';
 import {
   TutorialDirectoryNotice,
   TutorialDirectoryHeaderLink,
@@ -60,13 +61,16 @@ export class IngestManagerPlugin
   implements
     Plugin<IngestManagerSetup, IngestManagerStart, IngestManagerSetupDeps, IngestManagerStartDeps> {
   private config: IngestManagerConfigType;
+  private kibanaVersion: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<IngestManagerConfigType>();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
     const config = this.config;
+    const kibanaVersion = this.kibanaVersion;
 
     // Set up http client
     setHttpClient(core.http);
@@ -78,7 +82,7 @@ export class IngestManagerPlugin
     core.application.register({
       id: PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
-      title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Fleet' }),
+      title: i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' }),
       order: 9020,
       euiIconType: 'logoElastic',
       async mount(params: AppMountParameters) {
@@ -88,7 +92,7 @@ export class IngestManagerPlugin
           IngestManagerStart
         ];
         const { renderApp, teardownIngestManager } = await import('./applications/ingest_manager');
-        const unmount = renderApp(coreStart, params, deps, startDeps, config);
+        const unmount = renderApp(coreStart, params, deps, startDeps, config, kibanaVersion);
 
         return () => {
           unmount();
@@ -105,10 +109,10 @@ export class IngestManagerPlugin
 
       deps.home.featureCatalogue.register({
         id: 'ingestManager',
-        title: i18n.translate('xpack.ingestManager.featureCatalogueTitle', {
+        title: i18n.translate('xpack.fleet.featureCatalogueTitle', {
           defaultMessage: 'Add Elastic Agent',
         }),
-        description: i18n.translate('xpack.ingestManager.featureCatalogueDescription', {
+        description: i18n.translate('xpack.fleet.featureCatalogueDescription', {
           defaultMessage: 'Add and manage your fleet of Elastic Agents and integrations.',
         }),
         icon: 'indexManagementApp',

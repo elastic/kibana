@@ -4,19 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { schema } from '@kbn/config-schema';
-
-export enum OutputType {
-  Elasticsearch = 'elasticsearch',
-}
+import { outputType } from '../../../common/constants';
 
 const OutputBaseSchema = {
   name: schema.string(),
-  type: schema.oneOf([schema.literal(OutputType.Elasticsearch)]),
+  type: schema.oneOf([schema.literal(outputType.Elasticsearch)]),
   hosts: schema.maybe(schema.arrayOf(schema.string())),
   api_key: schema.maybe(schema.string()),
   fleet_enroll_username: schema.maybe(schema.string()),
   fleet_enroll_password: schema.maybe(schema.string()),
   config: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+  config_yaml: schema.maybe(schema.string()),
 };
 
 export const NewOutputSchema = schema.object({

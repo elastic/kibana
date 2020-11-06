@@ -36,7 +36,22 @@ module.exports = function (serviceName = name) {
 
   apmConfig = loadConfiguration(process.argv, ROOT_DIR, isKibanaDistributable);
   const conf = apmConfig.getConfig(serviceName);
-  require('elastic-apm-node').start(conf);
+  const apm = require('elastic-apm-node');
+
+  // Filter out all user PII
+  apm.addFilter((payload) => {
+    try {
+      if (payload.context && payload.context.user && typeof payload.context.user === 'object') {
+        Object.keys(payload.context.user).forEach((key) => {
+          payload.context.user[key] = '[REDACTED]';
+        });
+      }
+    } finally {
+      return payload;
+    }
+  });
+
+  apm.start(conf);
 };
 
 module.exports.getConfig = (serviceName) => {
@@ -50,4 +65,3 @@ module.exports.getConfig = (serviceName) => {
   }
   return {};
 };
-module.exports.isKibanaDistributable = isKibanaDistributable;

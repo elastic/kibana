@@ -23,6 +23,7 @@ import { checkLicense } from '../common/check_license';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
+  HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { ConfigSchema } from '../config';
@@ -38,6 +39,7 @@ export interface GraphPluginStartDependencies {
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
+  home?: HomePublicPluginStart;
 }
 
 export class GraphPlugin
@@ -56,6 +58,9 @@ export class GraphPlugin
       home.featureCatalogue.register({
         id: 'graph',
         title: 'Graph',
+        subtitle: i18n.translate('xpack.graph.pluginSubtitle', {
+          defaultMessage: 'Reveal patterns and relationships.',
+        }),
         description: i18n.translate('xpack.graph.pluginDescription', {
           defaultMessage: 'Surface and analyze relevant relationships in your Elasticsearch data.',
         }),
@@ -63,6 +68,8 @@ export class GraphPlugin
         path: '/app/graph',
         showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
+        solutionId: 'kibana',
+        order: 600,
       });
     }
 
@@ -108,13 +115,16 @@ export class GraphPlugin
     });
   }
 
-  start(core: CoreStart) {
+  start(core: CoreStart, { home }: GraphPluginStartDependencies) {
     if (this.licensing === null) {
       throw new Error('Start called before setup');
     }
     this.licensing.license$.subscribe((license) => {
       const licenseInformation = checkLicense(license);
       toggleNavLink(licenseInformation, core.chrome.navLinks);
+      if (home && !licenseInformation.enableAppLink) {
+        home.featureCatalogue.removeFeature('graph');
+      }
     });
   }
 

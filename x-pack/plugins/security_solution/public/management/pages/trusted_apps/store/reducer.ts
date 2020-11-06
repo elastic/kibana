@@ -152,6 +152,7 @@ export const initialTrustedAppsPageState = (): TrustedAppsListPageState => ({
     page_index: MANAGEMENT_DEFAULT_PAGE,
     page_size: MANAGEMENT_DEFAULT_PAGE_SIZE,
     show: undefined,
+    view_type: 'grid',
   },
   active: false,
 });

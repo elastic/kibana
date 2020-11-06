@@ -5,7 +5,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ModuleDescriptor, ModuleSourceConfiguration } from '../../infra_ml_module_types';
+import { HttpHandler } from 'src/core/public';
+import { ModuleDescriptor, SetUpModuleArgs } from '../../infra_ml_module_types';
 import { cleanUpJobsAndDatafeeds } from '../../infra_ml_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';
@@ -14,7 +15,6 @@ import {
   metricsHostsJobTypes,
   getJobId,
   MetricsHostsJobType,
-  DatasetFilter,
   bucketSpan,
 } from '../../../../../common/infra_ml';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
@@ -48,24 +48,28 @@ const getJobIds = (spaceId: string, sourceId: string) =>
     {} as Record<MetricsHostsJobType, string>
   );
 
-const getJobSummary = async (spaceId: string, sourceId: string) => {
-  const response = await callJobsSummaryAPI(spaceId, sourceId, metricsHostsJobTypes);
+const getJobSummary = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
+  const response = await callJobsSummaryAPI(
+    { spaceId, sourceId, jobTypes: metricsHostsJobTypes },
+    fetch
+  );
   const jobIds = Object.values(getJobIds(spaceId, sourceId));
 
   return response.filter((jobSummary) => jobIds.includes(jobSummary.id));
 };
 
-const getModuleDefinition = async () => {
-  return await callGetMlModuleAPI(moduleId);
+const getModuleDefinition = async (fetch: HttpHandler) => {
+  return await callGetMlModuleAPI(moduleId, fetch);
 };
 
-const setUpModule = async (
-  start: number | undefined,
-  end: number | undefined,
-  datasetFilter: DatasetFilter,
-  { spaceId, sourceId, indices, timestampField }: ModuleSourceConfiguration,
-  partitionField?: string
-) => {
+const setUpModule = async (setUpModuleArgs: SetUpModuleArgs, fetch: HttpHandler) => {
+  const {
+    start,
+    end,
+    moduleSourceConfiguration: { spaceId, sourceId, indices, timestampField },
+    partitionField,
+  } = setUpModuleArgs;
+
   const indexNamePattern = indices.join(',');
   const jobIds: JobType[] = ['hosts_memory_usage', 'hosts_network_in', 'hosts_network_out'];
 
@@ -128,14 +132,17 @@ const setUpModule = async (
   });
 
   return callSetupMlModuleAPI(
-    moduleId,
-    start,
-    end,
-    spaceId,
-    sourceId,
-    indexNamePattern,
-    jobOverrides,
-    datafeedOverrides
+    {
+      moduleId,
+      start,
+      end,
+      spaceId,
+      sourceId,
+      indexPattern: indexNamePattern,
+      jobOverrides,
+      datafeedOverrides,
+    },
+    fetch
   );
 };
 
@@ -159,8 +166,8 @@ const getDefaultJobConfigs = (jobId: JobType): { datafeed: any; job: any } => {
   }
 };
 
-const cleanUpModule = async (spaceId: string, sourceId: string) => {
-  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, metricsHostsJobTypes);
+const cleanUpModule = async (spaceId: string, sourceId: string, fetch: HttpHandler) => {
+  return await cleanUpJobsAndDatafeeds(spaceId, sourceId, metricsHostsJobTypes, fetch);
 };
 
 export const metricHostsModule: ModuleDescriptor<MetricsHostsJobType> = {

@@ -18,7 +18,9 @@ interface Props {
 }
 
 const Container = styled.div`
-  min-height: calc(100vh - ${(props) => props.theme.eui.euiHeaderChildSize});
+  min-height: calc(
+    100vh - ${(props) => parseFloat(props.theme.eui.euiHeaderHeightCompensation) * 2}px
+  );
   background: ${(props) => props.theme.eui.euiColorEmptyShade};
   display: flex;
   flex-direction: column;
@@ -41,7 +43,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
   children,
 }) => {
   const { getHref } = useLink();
-  const { fleet } = useConfig();
+  const { agents } = useConfig();
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
 
   return (
@@ -61,35 +63,35 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                 <EuiTabs display="condensed">
                   <EuiTab isSelected={section === 'overview'} href={getHref('overview')}>
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.overviewLinkText"
+                      id="xpack.fleet.appNavigation.overviewLinkText"
                       defaultMessage="Overview"
                     />
                   </EuiTab>
                   <EuiTab isSelected={section === 'epm'} href={getHref('integrations_all')}>
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.epmLinkText"
+                      id="xpack.fleet.appNavigation.epmLinkText"
                       defaultMessage="Integrations"
                     />
                   </EuiTab>
                   <EuiTab isSelected={section === 'agent_policy'} href={getHref('policies_list')}>
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.policiesLinkText"
+                      id="xpack.fleet.appNavigation.policiesLinkText"
                       defaultMessage="Policies"
                     />
                   </EuiTab>
                   <EuiTab
                     isSelected={section === 'fleet'}
                     href={getHref('fleet')}
-                    disabled={!fleet?.enabled}
+                    disabled={!agents?.enabled}
                   >
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.agentsLinkText"
+                      id="xpack.fleet.appNavigation.agentsLinkText"
                       defaultMessage="Agents"
                     />
                   </EuiTab>
                   <EuiTab isSelected={section === 'data_stream'} href={getHref('data_streams')}>
                     <FormattedMessage
-                      id="xpack.ingestManager.appNavigation.dataStreamsLinkText"
+                      id="xpack.fleet.appNavigation.dataStreamsLinkText"
                       defaultMessage="Data streams"
                     />
                   </EuiTab>
@@ -104,7 +106,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                       target="_blank"
                     >
                       <FormattedMessage
-                        id="xpack.ingestManager.appNavigation.sendFeedbackButton"
+                        id="xpack.fleet.appNavigation.sendFeedbackButton"
                         defaultMessage="Send feedback"
                       />
                     </EuiButtonEmpty>
@@ -113,7 +115,7 @@ export const DefaultLayout: React.FunctionComponent<Props> = ({
                     <EuiFlexItem>
                       <EuiButtonEmpty iconType="gear" onClick={() => setIsSettingsFlyoutOpen(true)}>
                         <FormattedMessage
-                          id="xpack.ingestManager.appNavigation.settingsButton"
+                          id="xpack.fleet.appNavigation.settingsButton"
                           defaultMessage="Settings"
                         />
                       </EuiButtonEmpty>

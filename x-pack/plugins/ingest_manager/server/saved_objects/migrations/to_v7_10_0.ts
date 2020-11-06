@@ -14,6 +14,7 @@ import {
   EnrollmentAPIKey,
   Settings,
   AgentAction,
+  Installation,
 } from '../../types';
 
 export const migrateAgentToV7100: SavedObjectMigrationFn<
@@ -133,4 +134,13 @@ export const migrateAgentActionToV7100 = (
       }
     }
   );
+};
+
+export const migrateInstallationToV7100: SavedObjectMigrationFn<
+  Exclude<Installation, 'install_source'>,
+  Installation
+> = (installationDoc) => {
+  installationDoc.attributes.install_source = 'registry';
+
+  return installationDoc;
 };

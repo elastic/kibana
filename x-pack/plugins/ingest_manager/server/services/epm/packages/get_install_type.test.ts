@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObject } from 'src/core/server';
-import { ElasticsearchAssetType, Installation, KibanaAssetType } from '../../../types';
+import { ElasticsearchAssetType, Installation, KibanaSavedObjectType } from '../../../types';
 import { getInstallType } from './install';
 
 const mockInstallation: SavedObject<Installation> = {
@@ -13,7 +13,7 @@ const mockInstallation: SavedObject<Installation> = {
   type: 'epm-packages',
   attributes: {
     id: 'test-pkg',
-    installed_kibana: [{ type: KibanaAssetType.dashboard, id: 'dashboard-1' }],
+    installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
     es_index_patterns: { pattern: 'pattern-name' },
     name: 'test packagek',
@@ -21,6 +21,7 @@ const mockInstallation: SavedObject<Installation> = {
     install_status: 'installed',
     install_version: '1.0.0',
     install_started_at: new Date().toISOString(),
+    install_source: 'registry',
   },
 };
 const mockInstallationUpdateFail: SavedObject<Installation> = {
@@ -29,7 +30,7 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
   type: 'epm-packages',
   attributes: {
     id: 'test-pkg',
-    installed_kibana: [{ type: KibanaAssetType.dashboard, id: 'dashboard-1' }],
+    installed_kibana: [{ type: KibanaSavedObjectType.dashboard, id: 'dashboard-1' }],
     installed_es: [{ type: ElasticsearchAssetType.ingestPipeline, id: 'pipeline' }],
     es_index_patterns: { pattern: 'pattern-name' },
     name: 'test packagek',
@@ -37,6 +38,7 @@ const mockInstallationUpdateFail: SavedObject<Installation> = {
     install_status: 'installing',
     install_version: '1.0.1',
     install_started_at: new Date().toISOString(),
+    install_source: 'registry',
   },
 };
 

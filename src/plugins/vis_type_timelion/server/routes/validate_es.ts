@@ -19,8 +19,6 @@
 
 import _ from 'lodash';
 import { IRouter, CoreSetup } from 'kibana/server';
-import { ES_SEARCH_STRATEGY } from '../../../data/server';
-import { TimelionPluginStartDeps } from '../plugin';
 
 export function validateEsRoute(router: IRouter, core: CoreSetup) {
   router.get(
@@ -30,7 +28,6 @@ export function validateEsRoute(router: IRouter, core: CoreSetup) {
     },
     async function (context, request, response) {
       const uiSettings = await context.core.uiSettings.client.getAll();
-      const deps = (await core.getStartServices())[1] as TimelionPluginStartDeps;
 
       const timefield = uiSettings['timelion:es.timefield'];
 
@@ -57,10 +54,7 @@ export function validateEsRoute(router: IRouter, core: CoreSetup) {
 
       let resp;
       try {
-        resp = await deps.data.search.search(context, body, {
-          strategy: ES_SEARCH_STRATEGY,
-        });
-        resp = resp.rawResponse;
+        resp = (await context.search!.search(body, {}).toPromise()).rawResponse;
       } catch (errResp) {
         resp = errResp;
       }

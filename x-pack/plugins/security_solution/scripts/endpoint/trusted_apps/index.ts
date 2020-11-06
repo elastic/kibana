@@ -23,7 +23,7 @@ export const cli = async () => {
     default: {
       count: 10,
     },
-  });
+  }) as RunOptions;
   logger.write(`${separator}
 Loading ${options.count} Trusted App Entries`);
   await run(options);
@@ -34,7 +34,10 @@ ${separator}`);
 export const run: (options?: RunOptions) => Promise<ExceptionListItemSchema[]> = async ({
   count = 10,
 }: RunOptions = {}) => {
-  const kbnClient = new KbnClient(logger, { url: 'http://elastic:changeme@localhost:5601' });
+  const kbnClient = new KbnClient({
+    log: logger,
+    url: 'http://elastic:changeme@localhost:5601',
+  });
 
   // touch the Trusted Apps List so it can be created
   await kbnClient.request({
@@ -67,7 +70,7 @@ const generateTrustedAppEntry: (options?: GenerateTrustedAppEntryOptions) => obj
   return {
     list_id: ENDPOINT_TRUSTED_APPS_LIST_ID,
     item_id: `generator_endpoint_trusted_apps_${generateUUID()}`,
-    _tags: ['endpoint', `os:${os}`],
+    os_types: [os],
     tags: ['user added string for a tag', 'malware'],
     type: 'simple',
     description: 'This is a sample agnostic endpoint trusted app entry',

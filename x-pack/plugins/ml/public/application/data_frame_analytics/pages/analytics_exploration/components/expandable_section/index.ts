@@ -4,4 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ExpandableSection, ExpandableSectionProps } from './expandable_section';
+export {
+  ExpandableSection,
+  ExpandableSectionProps,
+  HEADER_ITEMS_LOADING,
+} from './expandable_section';
+export { ExpandableSectionAnalytics } from './expandable_section_analytics';
+export { ExpandableSectionResults } from './expandable_section_results';

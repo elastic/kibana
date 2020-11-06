@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { SavedObjectsClientContract } from 'src/core/server';
 import {
   RegistryDataStream,
-  RegistryPackage,
   ElasticsearchAssetType,
   TemplateRef,
   RegistryElasticsearch,
+  InstallablePackage,
 } from '../../../../types';
 import { CallESAsCurrentUser } from '../../../../types';
 import { Field, loadFieldsFromYaml, processFields } from '../../fields/field';
@@ -21,7 +21,7 @@ import * as Registry from '../../registry';
 import { removeAssetsFromInstalledEsByType, saveInstalledEsRefs } from '../../packages/install';
 
 export const installTemplates = async (
-  registryPackage: RegistryPackage,
+  installablePackage: InstallablePackage,
   callCluster: CallESAsCurrentUser,
   paths: string[],
   savedObjectsClient: SavedObjectsClientContract
@@ -35,11 +35,11 @@ export const installTemplates = async (
   // remove package installation's references to index templates
   await removeAssetsFromInstalledEsByType(
     savedObjectsClient,
-    registryPackage.name,
+    installablePackage.name,
     ElasticsearchAssetType.indexTemplate
   );
   // build templates per data stream from yml files
-  const dataStreams = registryPackage.data_streams;
+  const dataStreams = installablePackage.data_streams;
   if (!dataStreams) return [];
   // get template refs to save
   const installedTemplateRefs = dataStreams.map((dataStream) => ({
@@ -48,14 +48,14 @@ export const installTemplates = async (
   }));
 
   // add package installation's references to index templates
-  await saveInstalledEsRefs(savedObjectsClient, registryPackage.name, installedTemplateRefs);
+  await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, installedTemplateRefs);
 
   if (dataStreams) {
     const installTemplatePromises = dataStreams.reduce<Array<Promise<TemplateRef>>>(
       (acc, dataStream) => {
         acc.push(
           installTemplateForDataStream({
-            pkg: registryPackage,
+            pkg: installablePackage,
             callCluster,
             dataStream,
           })
@@ -171,7 +171,7 @@ export async function installTemplateForDataStream({
   callCluster,
   dataStream,
 }: {
-  pkg: RegistryPackage;
+  pkg: InstallablePackage;
   callCluster: CallESAsCurrentUser;
   dataStream: RegistryDataStream;
 }): Promise<TemplateRef> {

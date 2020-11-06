@@ -4,34 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RegistryPackage } from '../../../types';
+import { InstallablePackage } from '../../../types';
 import { getAssets } from './assets';
+import { getArchiveFilelist } from '../registry/cache';
+
+jest.mock('../registry/cache', () => {
+  return {
+    getArchiveFilelist: jest.fn(),
+  };
+});
+
+const mockedGetArchiveFilelist = getArchiveFilelist as jest.Mock;
+mockedGetArchiveFilelist.mockImplementation(() => [
+  'coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
+  'coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
+]);
 
 const tests = [
   {
     package: {
-      assets: [
-        '/package/coredns/1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-        '/package/coredns/1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
-      ],
-      path: '/package/coredns/1.0.1',
+      name: 'coredns',
+      version: '1.0.1',
     },
     dataset: 'log',
     filter: (path: string) => {
       return true;
     },
     expected: [
-      '/package/coredns/1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-      '/package/coredns/1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
+      'coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
+      'coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
     ],
   },
   {
     package: {
-      assets: [
-        '/package/coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-        '/package/coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
-      ],
-      path: '/package/coredns/1.0.1',
+      name: 'coredns',
+      version: '1.0.1',
     },
     // Non existant dataset
     dataset: 'foo',
@@ -42,10 +49,8 @@ const tests = [
   },
   {
     package: {
-      assets: [
-        '/package/coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-plaintext.json',
-        '/package/coredns-1.0.1/data_stream/log/elasticsearch/ingest-pipeline/pipeline-json.json',
-      ],
+      name: 'coredns',
+      version: '1.0.1',
     },
     // Filter which does not exist
     filter: (path: string) => {
@@ -57,8 +62,8 @@ const tests = [
 
 test('testGetAssets', () => {
   for (const value of tests) {
-    // as needed to pretent it is a RegistryPackage
-    const assets = getAssets(value.package as RegistryPackage, value.filter, value.dataset);
+    // as needed to pretend it is an InstallablePackage
+    const assets = getAssets(value.package as InstallablePackage, value.filter, value.dataset);
     expect(assets).toStrictEqual(value.expected);
   }
 });

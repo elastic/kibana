@@ -56,19 +56,23 @@ export const useNetworkKpiUniqueFlows = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [networkKpiUniqueFlowsRequest, setNetworkKpiUniqueFlowsRequest] = useState<
-    NetworkKpiUniqueFlowsRequestOptions
-  >({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkKpiQueries.uniqueFlows,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    networkKpiUniqueFlowsRequest,
+    setNetworkKpiUniqueFlowsRequest,
+  ] = useState<NetworkKpiUniqueFlowsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkKpiQueries.uniqueFlows,
+          filterQuery: createFilter(filterQuery),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [networkKpiUniqueFlowsResponse, setNetworkKpiUniqueFlowsResponse] = useState<
     NetworkKpiUniqueFlowsArgs
@@ -84,7 +88,11 @@ export const useNetworkKpiUniqueFlows = ({
   });
 
   const networkKpiUniqueFlowsSearch = useCallback(
-    (request: NetworkKpiUniqueFlowsRequestOptions) => {
+    (request: NetworkKpiUniqueFlowsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -144,8 +152,9 @@ export const useNetworkKpiUniqueFlows = ({
   useEffect(() => {
     setNetworkKpiUniqueFlowsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.uniqueFlows,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',

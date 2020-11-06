@@ -6,12 +6,12 @@
 
 import { SavedObject } from 'src/core/server';
 import {
-  AssetType,
-  Installable,
-  Installation,
-  InstallationStatus,
-  KibanaAssetType,
-} from '../../../types';
+  RequiredPackage,
+  requiredPackages,
+  ValueOf,
+  installationStatuses,
+} from '../../../../common';
+import { AssetType, Installable, Installation, KibanaAssetType } from '../../../types';
 
 export { bulkInstallPackages, isBulkInstallError } from './bulk_install_packages';
 export {
@@ -27,21 +27,16 @@ export {
 
 export {
   BulkInstallResponse,
-  handleInstallPackageFailure,
-  installPackage,
   IBulkInstallPackageError,
+  handleInstallPackageFailure,
+  installPackageFromRegistry,
+  installPackageByUpload,
   ensureInstalledPackage,
 } from './install';
 export { removeInstallation } from './remove';
 
-type RequiredPackage = 'system' | 'endpoint';
-const requiredPackages: Record<RequiredPackage, boolean> = {
-  system: true,
-  endpoint: true,
-};
-
-export function isRequiredPackage(value: string): value is RequiredPackage {
-  return value in requiredPackages;
+export function isRequiredPackage(value: string): value is ValueOf<RequiredPackage> {
+  return Object.values(requiredPackages).some((required) => value === required);
 }
 
 export class PackageNotInstalledError extends Error {
@@ -60,11 +55,11 @@ export function createInstallableFrom<T>(
   return savedObject
     ? {
         ...from,
-        status: InstallationStatus.installed,
+        status: installationStatuses.Installed,
         savedObject,
       }
     : {
         ...from,
-        status: InstallationStatus.notInstalled,
+        status: installationStatuses.NotInstalled,
       };
 }

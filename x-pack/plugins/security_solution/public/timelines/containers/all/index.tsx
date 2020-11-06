@@ -93,6 +93,7 @@ export const getAllTimeline = memoizeOne(
       updated: timeline.updated,
       updatedBy: timeline.updatedBy,
       timelineType: timeline.timelineType ?? TimelineType.default,
+      templateTimelineId: timeline.templateTimelineId,
     }))
 );
 

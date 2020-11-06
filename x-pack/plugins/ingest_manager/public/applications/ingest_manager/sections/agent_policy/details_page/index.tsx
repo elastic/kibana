@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Redirect, useRouteMatch, Switch, Route, useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedDate } from '@kbn/i18n/react';
@@ -22,7 +22,13 @@ import { Props as EuiTabProps } from '@elastic/eui/src/components/tabs/tab';
 import styled from 'styled-components';
 import { AgentPolicy, AgentPolicyDetailsDeployAgentAction } from '../../../types';
 import { PAGE_ROUTING_PATHS } from '../../../constants';
-import { useGetOneAgentPolicy, useLink, useBreadcrumbs, useCore } from '../../../hooks';
+import {
+  useGetOneAgentPolicy,
+  useLink,
+  useBreadcrumbs,
+  useCore,
+  useFleetStatus,
+} from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentPolicyRefreshContext, useGetAgentStatus, AgentStatusRefreshContext } from './hooks';
@@ -55,6 +61,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
   const agentStatus = agentStatusRequest.data?.results;
   const queryParams = new URLSearchParams(useLocation().search);
   const openEnrollmentFlyoutOpenByDefault = queryParams.get('openEnrollmentFlyout') === 'true';
+  const { isReady: isFleetReady } = useFleetStatus();
 
   const headerLeftContent = useMemo(
     () => (
@@ -67,7 +74,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             size="xs"
           >
             <FormattedMessage
-              id="xpack.ingestManager.policyDetails.viewAgentListTitle"
+              id="xpack.fleet.policyDetails.viewAgentListTitle"
               defaultMessage="View all agent policies"
             />
           </EuiButtonEmpty>
@@ -75,14 +82,18 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         <EuiFlexItem>
           <EuiText className="eui-textBreakWord">
             <h1>
-              {(agentPolicy && agentPolicy.name) || (
-                <FormattedMessage
-                  id="xpack.ingestManager.policyDetails.policyDetailsTitle"
-                  defaultMessage="Policy '{id}'"
-                  values={{
-                    id: policyId,
-                  }}
-                />
+              {isLoading ? (
+                <Loading />
+              ) : (
+                (agentPolicy && agentPolicy.name) || (
+                  <FormattedMessage
+                    id="xpack.fleet.policyDetails.policyDetailsTitle"
+                    defaultMessage="Policy '{id}'"
+                    values={{
+                      id: policyId,
+                    }}
+                  />
+                )
               )}
             </h1>
           </EuiText>
@@ -98,14 +109,8 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         ) : null}
       </EuiFlexGroup>
     ),
-    [getHref, agentPolicy, policyId]
+    [getHref, isLoading, agentPolicy, policyId]
   );
-
-  const enrollmentCancelClickHandler = useCallback(() => {
-    if (routeState && routeState.onDoneNavigateTo) {
-      navigateToApp(routeState.onDoneNavigateTo[0], routeState.onDoneNavigateTo[1]);
-    }
-  }, [routeState, navigateToApp]);
 
   const headerRightContent = useMemo(
     () =>
@@ -113,14 +118,14 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         <EuiFlexGroup justifyContent={'flexEnd'} direction="row">
           {[
             {
-              label: i18n.translate('xpack.ingestManager.policyDetails.summary.revision', {
+              label: i18n.translate('xpack.fleet.policyDetails.summary.revision', {
                 defaultMessage: 'Revision',
               }),
               content: agentPolicy?.revision ?? 0,
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.policyDetails.summary.integrations', {
+              label: i18n.translate('xpack.fleet.policyDetails.summary.integrations', {
                 defaultMessage: 'Integrations',
               }),
               content: (
@@ -136,7 +141,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.policyDetails.summary.usedBy', {
+              label: i18n.translate('xpack.fleet.policyDetails.summary.usedBy', {
                 defaultMessage: 'Used by',
               }),
               content: (
@@ -148,7 +153,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
             },
             { isDivider: true },
             {
-              label: i18n.translate('xpack.ingestManager.policyDetails.summary.lastUpdated', {
+              label: i18n.translate('xpack.fleet.policyDetails.summary.lastUpdated', {
                 defaultMessage: 'Last updated on',
               }),
               content:
@@ -173,8 +178,12 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
                   }}
                   enrollmentFlyoutOpenByDefault={openEnrollmentFlyoutOpenByDefault}
                   onCancelEnrollment={
-                    routeState && routeState.onDoneNavigateTo
-                      ? enrollmentCancelClickHandler
+                    routeState && routeState.onDoneNavigateTo && isFleetReady
+                      ? () =>
+                          navigateToApp(
+                            routeState.onDoneNavigateTo![0],
+                            routeState.onDoneNavigateTo![1]
+                          )
                       : undefined
                   }
                 />
@@ -208,7 +217,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
     return [
       {
         id: 'integrations',
-        name: i18n.translate('xpack.ingestManager.policyDetails.subTabs.packagePoliciesTabText', {
+        name: i18n.translate('xpack.fleet.policyDetails.subTabs.packagePoliciesTabText', {
           defaultMessage: 'Integrations',
         }),
         href: getHref('policy_details', { policyId, tabId: 'integrations' }),
@@ -216,7 +225,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
       },
       {
         id: 'settings',
-        name: i18n.translate('xpack.ingestManager.policyDetails.subTabs.settingsTabText', {
+        name: i18n.translate('xpack.fleet.policyDetails.subTabs.settingsTabText', {
           defaultMessage: 'Settings',
         }),
         href: getHref('policy_details', { policyId, tabId: 'settings' }),
@@ -239,7 +248,7 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         <Error
           title={
             <FormattedMessage
-              id="xpack.ingestManager.policyDetails.unexceptedErrorTitle"
+              id="xpack.fleet.policyDetails.unexceptedErrorTitle"
               defaultMessage="An error happened while loading the agent policy"
             />
           }
@@ -253,11 +262,11 @@ export const AgentPolicyDetailsPage: React.FunctionComponent = () => {
         <Error
           title={
             <FormattedMessage
-              id="xpack.ingestManager.policyDetails.unexceptedErrorTitle"
+              id="xpack.fleet.policyDetails.unexceptedErrorTitle"
               defaultMessage="An error happened while loading the agent policy"
             />
           }
-          error={i18n.translate('xpack.ingestManager.policyDetails.policyNotFoundErrorTitle', {
+          error={i18n.translate('xpack.fleet.policyDetails.policyNotFoundErrorTitle', {
             defaultMessage: "Policy '{id}' not found",
             values: {
               id: policyId,

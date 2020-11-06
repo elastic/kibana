@@ -8,6 +8,47 @@ import { mockEndpointEvent } from './endpoint_event';
 import { ResolverTree, SafeResolverEvent } from '../../../common/endpoint/types';
 import * as eventModel from '../../../common/endpoint/models/event';
 
+export function mockTreeWithOneNodeAndTwoPagesOfRelatedEvents({
+  originID,
+}: {
+  originID: string;
+}): ResolverTree {
+  const originEvent: SafeResolverEvent = mockEndpointEvent({
+    entityID: originID,
+    processName: 'c',
+    parentEntityID: undefined,
+    timestamp: 1600863932318,
+  });
+  const events = [];
+  // page size is currently 25
+  const eventsToGenerate = 30;
+  for (let i = 0; i < eventsToGenerate; i++) {
+    const newEvent = mockEndpointEvent({
+      entityID: originID,
+      eventID: `test-${i}`,
+      eventType: 'access',
+      eventCategory: 'registry',
+      timestamp: 1600863932318,
+    });
+    events.push(newEvent);
+  }
+  return {
+    entityID: originID,
+    children: {
+      childNodes: [],
+      nextChild: null,
+    },
+    ancestry: {
+      nextAncestor: null,
+      ancestors: [],
+    },
+    lifecycle: [originEvent],
+    relatedEvents: { events, nextEvent: null },
+    relatedAlerts: { alerts: [], nextAlert: null },
+    stats: { events: { total: eventsToGenerate, byCategory: {} }, totalAlerts: 0 },
+  };
+}
+
 export function mockTreeWith2AncestorsAndNoChildren({
   originID,
   firstAncestorID,
@@ -174,7 +215,8 @@ export function mockTreeWithNoAncestorsAnd2Children({
   const secondChild: SafeResolverEvent = mockEndpointEvent({
     pid: 2,
     entityID: secondChildID,
-    processName: 'e',
+    processName:
+      'really_really_really_really_really_really_really_really_really_really_really_really_really_really_long_node_name',
     parentEntityID: originID,
     timestamp: 1600863932318,
   });
@@ -347,5 +389,31 @@ export function mockTreeWithNoAncestorsAndTwoChildrenAndRelatedEventsOnOrigin({
       eventCategory: 'registry',
     }),
   ];
+  // Add one additional event for each category
+  const categories: string[] = [
+    'authentication',
+    'database',
+    'driver',
+    'file',
+    'host',
+    'iam',
+    'intrusion_detection',
+    'malware',
+    'network',
+    'package',
+    'process',
+    'web',
+  ];
+  for (const category of categories) {
+    relatedEvents.push(
+      mockEndpointEvent({
+        entityID: originID,
+        parentEntityID,
+        eventID: `${relatedEvents.length}`,
+        eventType: 'access',
+        eventCategory: category,
+      })
+    );
+  }
   return withRelatedEventsOnOrigin(baseTree, relatedEvents);
 }

@@ -117,6 +117,7 @@ describe('state selectors', () => {
       newAlert: { data: null, loading: false },
       anomalyAlertDeletion: { data: null, loading: false },
     },
+    journeys: {},
   };
 
   it('selects base path from state', () => {

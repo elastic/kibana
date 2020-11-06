@@ -19,6 +19,7 @@ export type OnSubmitHandler = (processor: ProcessorFormOnSubmitArg) => void;
 export type OnFormUpdateHandler = (form: OnFormUpdateArg<any>) => void;
 
 export interface Fields {
+  type: string;
   fields: { [key: string]: any };
 }
 
@@ -57,8 +58,28 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
     return { ...processor, options } as ProcessorInternal;
   }, [processor, unsavedFormState]);
 
+  const formSerializer = useCallback(
+    (formState) => {
+      return {
+        type: formState.type,
+        fields: formState.customOptions
+          ? {
+              ...formState.customOptions,
+            }
+          : {
+              ...formState.fields,
+              // The description field is not editable in processor forms currently. We re-add it here or it will be
+              // stripped.
+              description: processor ? processor.options.description : undefined,
+            },
+      };
+    },
+    [processor]
+  );
+
   const { form } = useForm({
     defaultValue: { fields: getProcessor().options },
+    serializer: formSerializer,
   });
   const { subscribe } = form;
 
@@ -67,8 +88,7 @@ export const ProcessorFormContainer: FunctionComponent<Props> = ({
       const { isValid, data } = await form.submit();
 
       if (isValid) {
-        const { type, customOptions, fields } = data as FormData;
-        const options = customOptions ? customOptions : fields;
+        const { type, fields: options } = data as FormData;
 
         unsavedFormState.current = options;
 

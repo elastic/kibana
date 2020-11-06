@@ -76,7 +76,7 @@ export async function executeAction({
   http: HttpSetup;
   params: Record<string, unknown>;
 }): Promise<ActionTypeExecutorResult<unknown>> {
-  return await http.post(`${BASE_ACTION_API_PATH}/action/${id}/_execute`, {
+  return http.post(`${BASE_ACTION_API_PATH}/action/${id}/_execute`, {
     body: JSON.stringify({ params }),
   });
 }

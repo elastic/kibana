@@ -73,27 +73,37 @@ export const useNetworkUsers = ({
   const defaultIndex = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
   const [loading, setLoading] = useState(false);
 
-  const [networkUsersRequest, setNetworkUsersRequest] = useState<NetworkUsersRequestOptions>({
-    defaultIndex,
-    factoryQueryType: NetworkQueries.users,
-    filterQuery: createFilter(filterQuery),
-    flowTarget,
-    ip,
-    pagination: generateTablePaginationOptions(activePage, limit),
-    sort,
-    timerange: {
-      interval: '12h',
-      from: startDate ? startDate : '',
-      to: endDate ? endDate : new Date(Date.now()).toISOString(),
-    },
-  });
+  const [networkUsersRequest, setNetworkUsersRequest] = useState<NetworkUsersRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex,
+          factoryQueryType: NetworkQueries.users,
+          filterQuery: createFilter(filterQuery),
+          flowTarget,
+          ip,
+          pagination: generateTablePaginationOptions(activePage, limit),
+          sort,
+          timerange: {
+            interval: '12h',
+            from: startDate ? startDate : '',
+            to: endDate ? endDate : new Date(Date.now()).toISOString(),
+          },
+        }
+      : null
+  );
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
-      setNetworkUsersRequest((prevRequest) => ({
-        ...prevRequest,
-        pagination: generateTablePaginationOptions(newActivePage, limit),
-      }));
+      setNetworkUsersRequest((prevRequest) => {
+        if (!prevRequest) {
+          return prevRequest;
+        }
+
+        return {
+          ...prevRequest,
+          pagination: generateTablePaginationOptions(newActivePage, limit),
+        };
+      });
     },
     [limit]
   );
@@ -117,7 +127,11 @@ export const useNetworkUsers = ({
   });
 
   const networkUsersSearch = useCallback(
-    (request: NetworkUsersRequestOptions) => {
+    (request: NetworkUsersRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -176,9 +190,12 @@ export const useNetworkUsers = ({
   useEffect(() => {
     setNetworkUsersRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
+        ip,
         defaultIndex,
+        factoryQueryType: NetworkQueries.users,
         filterQuery: createFilter(filterQuery),
+        flowTarget,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
         timerange: {
@@ -192,7 +209,18 @@ export const useNetworkUsers = ({
       }
       return prevRequest;
     });
-  }, [activePage, defaultIndex, endDate, filterQuery, limit, startDate, sort, skip]);
+  }, [
+    activePage,
+    defaultIndex,
+    endDate,
+    filterQuery,
+    limit,
+    startDate,
+    sort,
+    skip,
+    ip,
+    flowTarget,
+  ]);
 
   useEffect(() => {
     networkUsersSearch(networkUsersRequest);

@@ -27,9 +27,11 @@ export const SetupGuide: React.FC = () => {
       elasticsearchNativeAuthLink="https://www.elastic.co/guide/en/workplace-search/current/workplace-search-security.html#elasticsearch-native-realm"
     >
       <SetPageChrome
-        text={i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
-          defaultMessage: 'Setup Guide',
-        })}
+        trail={[
+          i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
+            defaultMessage: 'Setup Guide',
+          }),
+        ]}
       />
       <SendTelemetry action="viewed" metric="setup_guide" />
 

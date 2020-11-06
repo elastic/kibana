@@ -14,7 +14,12 @@ Machine learning jobs are created per environment, and are based on a service's 
 Because jobs are created at the environment level,
 you can add new services to your existing environments without the need for additional machine learning jobs.
 
-After a machine learning job is created, results are shown in two places:
+Results from machine learning jobs are shown in multiple places throughout the APM app:
+
+* The **Services overview** provides a quick-glance view of the general health of all of your services.
++
+[role="screenshot"]
+image::apm/images/service-quick-health.png[Example view of anomaly scores on response times in the APM app]
 
 * The transaction duration chart will show the expected bounds and add an annotation when the anomaly score is 75 or above.
 +

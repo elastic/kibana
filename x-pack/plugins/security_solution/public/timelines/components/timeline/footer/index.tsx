@@ -178,13 +178,23 @@ interface PagingControlProps {
   activePage: number;
   isLoading: boolean;
   onPageClick: OnChangePage;
+  totalCount: number;
   totalPages: number;
 }
+
+const TimelinePaginationContainer = styled.div<{ hideLastPage: boolean }>`
+  ul.euiPagination__list {
+    li.euiPagination__item:last-child {
+      ${({ hideLastPage }) => `${hideLastPage ? 'display:none' : ''}`};
+    }
+  }
+`;
 
 export const PagingControlComponent: React.FC<PagingControlProps> = ({
   activePage,
   isLoading,
   onPageClick,
+  totalCount,
   totalPages,
 }) => {
   if (isLoading) {
@@ -196,12 +206,14 @@ export const PagingControlComponent: React.FC<PagingControlProps> = ({
   }
 
   return (
-    <EuiPagination
-      data-test-subj="timeline-pagination"
-      pageCount={totalPages}
-      activePage={activePage}
-      onPageClick={onPageClick}
-    />
+    <TimelinePaginationContainer hideLastPage={totalCount > 9999}>
+      <EuiPagination
+        data-test-subj="timeline-pagination"
+        pageCount={totalPages}
+        activePage={activePage}
+        onPageClick={onPageClick}
+      />
+    </TimelinePaginationContainer>
   );
 };
 
@@ -222,7 +234,6 @@ interface FooterProps {
   itemsPerPageOptions: number[];
   onChangeItemsPerPage: OnChangeItemsPerPage;
   onChangePage: OnChangePage;
-  serverSideEventCount: number;
   totalCount: number;
 }
 
@@ -239,7 +250,6 @@ export const FooterComponent = ({
   itemsPerPageOptions,
   onChangeItemsPerPage,
   onChangePage,
-  serverSideEventCount,
   totalCount,
 }: FooterProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -339,7 +349,7 @@ export const FooterComponent = ({
               items={rowItems}
               itemsCount={itemsCount}
               onClick={onButtonClick}
-              serverSideEventCount={serverSideEventCount}
+              serverSideEventCount={totalCount}
             />
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -367,6 +377,7 @@ export const FooterComponent = ({
           ) : (
             <PagingControl
               data-test-subj="paging-control"
+              totalCount={totalCount}
               totalPages={totalPages}
               activePage={activePage}
               onPageClick={handleChangePageClick}

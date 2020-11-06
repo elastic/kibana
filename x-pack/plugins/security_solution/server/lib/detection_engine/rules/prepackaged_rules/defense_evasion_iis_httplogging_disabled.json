@@ -1,0 +1,45 @@
+{
+  "author": [
+    "Elastic"
+  ],
+  "description": "Identifies when Internet Information Services (IIS) HTTP Logging is disabled on a server. An attacker with IIS server access via a webshell or other mechanism can disable HTTP Logging as an effective anti-forensics measure.",
+  "from": "now-9m",
+  "index": [
+    "winlogbeat-*",
+    "logs-endpoint.events.*"
+  ],
+  "language": "kuery",
+  "license": "Elastic License",
+  "max_signals": 33,
+  "name": "IIS HTTP Logging Disabled",
+  "query": "event.category:process and event.type:(start or process_started) and (process.name:appcmd.exe or process.pe.original_file_name:appcmd.exe or winlog.event_data.OriginalFileName:appcmd.exe) and process.args:/dontLog\\:\\\"True\\\" and not process.parent.name:iissetup.exe",
+  "risk_score": 73,
+  "rule_id": "ebf1adea-ccf2-4943-8b96-7ab11ca173a5",
+  "severity": "high",
+  "tags": [
+    "Elastic",
+    "Host",
+    "Windows",
+    "Threat Detection",
+    "Defense Evasion"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0005",
+        "name": "Defense Evasion",
+        "reference": "https://attack.mitre.org/tactics/TA0005/"
+      },
+      "technique": [
+        {
+          "id": "T1070",
+          "name": "Indicator Removal on Host",
+          "reference": "https://attack.mitre.org/techniques/T1070/"
+        }
+      ]
+    }
+  ],
+  "type": "query",
+  "version": 1
+}

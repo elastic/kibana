@@ -17,12 +17,19 @@
  * under the License.
  */
 
-import { KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import { Observable } from 'rxjs';
+import {
+  IScopedClusterClient,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  KibanaRequest,
+} from 'src/core/server';
 import {
   ISearchOptions,
   ISearchStartSearchSource,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
+  ISearchClient,
 } from '../../common/search';
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
@@ -30,6 +37,12 @@ import { IEsSearchRequest, IEsSearchResponse } from './es_search';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
+}
+
+export interface SearchStrategyDependencies {
+  savedObjectsClient: SavedObjectsClientContract;
+  esClient: IScopedClusterClient;
+  uiSettingsClient: IUiSettingsClient;
 }
 
 export interface ISearchSetup {
@@ -57,28 +70,6 @@ export interface ISearchSetup {
   __enhance: (enhancements: SearchEnhancements) => void;
 }
 
-export interface ISearchStart<
-  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
-> {
-  aggs: AggsStart;
-  /**
-   * Get other registered search strategies. For example, if a new strategy needs to use the
-   * already-registered ES search strategy, it can use this function to accomplish that.
-   */
-  getSearchStrategy: (
-    name: string
-  ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
-  search: (
-    context: RequestHandlerContext,
-    request: SearchStrategyRequest,
-    options: ISearchOptions
-  ) => Promise<SearchStrategyResponse>;
-  searchSource: {
-    asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
-  };
-}
-
 /**
  * Search strategy interface contains a search method that takes in a request and returns a promise
  * that resolves to a response.
@@ -88,9 +79,28 @@ export interface ISearchStrategy<
   SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
 > {
   search: (
-    context: RequestHandlerContext,
     request: SearchStrategyRequest,
-    options?: ISearchOptions
-  ) => Promise<SearchStrategyResponse>;
-  cancel?: (context: RequestHandlerContext, id: string) => Promise<void>;
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => Observable<SearchStrategyResponse>;
+  cancel?: (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => Promise<void>;
+}
+
+export interface ISearchStart<
+  SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+> {
+  aggs: AggsStart;
+  /**
+   * Get other registered search strategies by name (or, by default, the Elasticsearch strategy).
+   * For example, if a new strategy needs to use the already-registered ES search strategy, it can
+   * use this function to accomplish that.
+   */
+  getSearchStrategy: (
+    name?: string // Name of the search strategy (defaults to the Elasticsearch strategy)
+  ) => ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>;
+  asScoped: (request: KibanaRequest) => ISearchClient;
+  searchSource: {
+    asScoped: (request: KibanaRequest) => Promise<ISearchStartSearchSource>;
+  };
 }

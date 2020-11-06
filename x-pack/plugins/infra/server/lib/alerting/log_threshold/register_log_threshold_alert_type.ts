@@ -13,6 +13,13 @@ import {
 import { InfraBackendLibs } from '../../infra_types';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 
+const timestampActionVariableDescription = i18n.translate(
+  'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',
+  {
+    defaultMessage: 'UTC timestamp of when the alert was triggered',
+  }
+);
+
 const documentCountActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.documentCountActionVariableDescription',
   {
@@ -85,6 +92,7 @@ export async function registerLogThresholdAlertType(
     executor: createLogThresholdExecutor(libs),
     actionVariables: {
       context: [
+        { name: 'timestamp', description: timestampActionVariableDescription },
         { name: 'matchingDocuments', description: documentCountActionVariableDescription },
         { name: 'conditions', description: conditionsActionVariableDescription },
         { name: 'group', description: groupByActionVariableDescription },

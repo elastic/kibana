@@ -18,7 +18,12 @@ import {
 } from 'kibana/server';
 
 import { AuthenticatedUser, SecurityPluginSetup } from '../../../security/server';
-import { CaseAttributes, CommentAttributes, SavedObjectFindOptions, User } from '../../common/api';
+import {
+  ESCaseAttributes,
+  CommentAttributes,
+  SavedObjectFindOptions,
+  User,
+} from '../../common/api';
 import { CASE_SAVED_OBJECT, CASE_COMMENT_SAVED_OBJECT } from '../saved_object_types';
 import { readReporters } from './reporters/read_reporters';
 import { readTags } from './tags/read_tags';
@@ -55,7 +60,7 @@ interface GetCommentArgs extends ClientArgs {
 }
 
 interface PostCaseArgs extends ClientArgs {
-  attributes: CaseAttributes;
+  attributes: ESCaseAttributes;
 }
 
 interface PostCommentArgs extends ClientArgs {
@@ -65,7 +70,7 @@ interface PostCommentArgs extends ClientArgs {
 
 interface PatchCase {
   caseId: string;
-  updatedAttributes: Partial<CaseAttributes & PushedArgs>;
+  updatedAttributes: Partial<ESCaseAttributes & PushedArgs>;
   version?: string;
 }
 type PatchCaseArgs = PatchCase & ClientArgs;
@@ -91,7 +96,7 @@ interface PatchComments extends ClientArgs {
 
 interface GetUserArgs {
   request: KibanaRequest;
-  response: KibanaResponseFactory;
+  response?: KibanaResponseFactory;
 }
 
 interface CaseServiceDeps {
@@ -100,18 +105,18 @@ interface CaseServiceDeps {
 export interface CaseServiceSetup {
   deleteCase(args: GetCaseArgs): Promise<{}>;
   deleteComment(args: GetCommentArgs): Promise<{}>;
-  findCases(args: FindCasesArgs): Promise<SavedObjectsFindResponse<CaseAttributes>>;
+  findCases(args: FindCasesArgs): Promise<SavedObjectsFindResponse<ESCaseAttributes>>;
   getAllCaseComments(args: FindCommentsArgs): Promise<SavedObjectsFindResponse<CommentAttributes>>;
-  getCase(args: GetCaseArgs): Promise<SavedObject<CaseAttributes>>;
-  getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<CaseAttributes>>;
+  getCase(args: GetCaseArgs): Promise<SavedObject<ESCaseAttributes>>;
+  getCases(args: GetCasesArgs): Promise<SavedObjectsBulkResponse<ESCaseAttributes>>;
   getComment(args: GetCommentArgs): Promise<SavedObject<CommentAttributes>>;
   getTags(args: ClientArgs): Promise<string[]>;
   getReporters(args: ClientArgs): Promise<User[]>;
   getUser(args: GetUserArgs): Promise<AuthenticatedUser | User>;
-  postNewCase(args: PostCaseArgs): Promise<SavedObject<CaseAttributes>>;
+  postNewCase(args: PostCaseArgs): Promise<SavedObject<ESCaseAttributes>>;
   postNewComment(args: PostCommentArgs): Promise<SavedObject<CommentAttributes>>;
-  patchCase(args: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<CaseAttributes>>;
-  patchCases(args: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<CaseAttributes>>;
+  patchCase(args: PatchCaseArgs): Promise<SavedObjectsUpdateResponse<ESCaseAttributes>>;
+  patchCases(args: PatchCasesArgs): Promise<SavedObjectsBulkUpdateResponse<ESCaseAttributes>>;
   patchComment(args: UpdateCommentArgs): Promise<SavedObjectsUpdateResponse<CommentAttributes>>;
   patchComments(args: PatchComments): Promise<SavedObjectsBulkUpdateResponse<CommentAttributes>>;
 }

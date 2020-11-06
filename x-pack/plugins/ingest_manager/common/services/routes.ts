@@ -9,7 +9,7 @@ import {
   PACKAGE_POLICY_API_ROUTES,
   AGENT_POLICY_API_ROUTES,
   DATA_STREAM_API_ROUTES,
-  FLEET_SETUP_API_ROUTES,
+  AGENTS_SETUP_API_ROUTES,
   AGENT_API_ROUTES,
   ENROLLMENT_API_KEY_ROUTES,
   SETUP_API_ROUTE,
@@ -121,8 +121,8 @@ export const dataStreamRouteService = {
 };
 
 export const fleetSetupRouteService = {
-  getFleetSetupPath: () => FLEET_SETUP_API_ROUTES.INFO_PATTERN,
-  postFleetSetupPath: () => FLEET_SETUP_API_ROUTES.CREATE_PATTERN,
+  getFleetSetupPath: () => AGENTS_SETUP_API_ROUTES.INFO_PATTERN,
+  postFleetSetupPath: () => AGENTS_SETUP_API_ROUTES.CREATE_PATTERN,
 };
 
 export const agentRouteService = {
@@ -135,6 +135,9 @@ export const agentRouteService = {
   getReassignPath: (agentId: string) =>
     AGENT_API_ROUTES.REASSIGN_PATTERN.replace('{agentId}', agentId),
   getBulkReassignPath: () => AGENT_API_ROUTES.BULK_REASSIGN_PATTERN,
+  getUpgradePath: (agentId: string) =>
+    AGENT_API_ROUTES.UPGRADE_PATTERN.replace('{agentId}', agentId),
+  getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
 };

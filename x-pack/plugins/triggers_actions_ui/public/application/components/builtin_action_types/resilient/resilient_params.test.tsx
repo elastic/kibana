@@ -86,7 +86,7 @@ describe('ResilientParamsFields renders', () => {
         errors={{ title: [] }}
         editAction={() => {}}
         index={0}
-        messageVariables={[]}
+        messageVariables={[{ name: 'alertId', description: '' }]}
         docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
         toastNotifications={mocks.notifications.toasts}
         http={mocks.http}
@@ -100,6 +100,27 @@ describe('ResilientParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="titleInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="commentsTextArea"]').length > 0).toBeTruthy();
+
+    // ensure savedObjectIdInput isnt rendered
+    expect(wrapper.find('[data-test-subj="savedObjectIdInput"]').length === 0).toBeTruthy();
+  });
+
+  test('the savedObjectId fields is rendered if we cant find an alertId in the messageVariables', () => {
+    const wrapper = mountWithIntl(
+      <ResilientParamsFields
+        actionParams={actionParams}
+        errors={{ title: [] }}
+        editAction={() => {}}
+        index={0}
+        messageVariables={[]}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
+        actionConnector={connector}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="savedObjectIdInput"]').length > 0).toBeTruthy();
   });
 
   test('it shows loading when loading incident types', () => {

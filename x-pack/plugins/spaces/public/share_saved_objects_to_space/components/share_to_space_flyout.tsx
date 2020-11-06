@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiEmptyPrompt,
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
@@ -24,7 +23,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { ToastsStart } from 'src/core/public';
 import { SavedObjectsManagementRecord } from '../../../../../../src/plugins/saved_objects_management/public';
-import { Space } from '../../../common/model/space';
+import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../../common/constants';
+import { GetSpaceResult } from '../../../common/model/types';
 import { SpacesManager } from '../../spaces_manager';
 import { ShareToSpaceForm } from './share_to_space_form';
 import { ShareOptions, SpaceTarget } from '../types';
@@ -45,6 +45,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
   const { onClose, onObjectUpdated, savedObject, spacesManager, toastNotifications } = props;
   const { namespaces: currentNamespaces = [] } = savedObject;
   const [shareOptions, setShareOptions] = useState<ShareOptions>({ selectedSpaceIds: [] });
+  const [canShareToAllSpaces, setCanShareToAllSpaces] = useState<boolean>(false);
   const [showMakeCopy, setShowMakeCopy] = useState<boolean>(false);
 
   const [{ isLoading, spaces }, setSpacesState] = useState<{
@@ -52,20 +53,23 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
     spaces: SpaceTarget[];
   }>({ isLoading: true, spaces: [] });
   useEffect(() => {
-    const getSpaces = spacesManager.getSpaces('shareSavedObjectsIntoSpace');
+    const getSpaces = spacesManager.getSpaces({ includeAuthorizedPurposes: true });
     const getActiveSpace = spacesManager.getActiveSpace();
-    Promise.all([getSpaces, getActiveSpace])
-      .then(([allSpaces, activeSpace]) => {
-        const createSpaceTarget = (space: Space): SpaceTarget => ({
+    const getPermissions = spacesManager.getShareSavedObjectPermissions(savedObject.type);
+    Promise.all([getSpaces, getActiveSpace, getPermissions])
+      .then(([allSpaces, activeSpace, permissions]) => {
+        setShareOptions({
+          selectedSpaceIds: currentNamespaces.filter((spaceId) => spaceId !== activeSpace.id),
+        });
+        setCanShareToAllSpaces(permissions.shareToAllSpaces);
+        const createSpaceTarget = (space: GetSpaceResult): SpaceTarget => ({
           ...space,
           isActiveSpace: space.id === activeSpace.id,
+          isPartiallyAuthorized: space.authorizedPurposes?.shareSavedObjectsIntoSpace === false,
         });
         setSpacesState({
           isLoading: false,
           spaces: allSpaces.map((space) => createSpaceTarget(space)),
-        });
-        setShareOptions({
-          selectedSpaceIds: currentNamespaces.filter((spaceId) => spaceId !== activeSpace.id),
         });
       })
       .catch((e) => {
@@ -75,25 +79,50 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
           }),
         });
       });
-  }, [currentNamespaces, spacesManager, toastNotifications]);
+  }, [currentNamespaces, spacesManager, savedObject, toastNotifications]);
 
   const getSelectionChanges = () => {
     const activeSpace = spaces.find((space) => space.isActiveSpace);
     if (!activeSpace) {
-      return { changed: false, spacesToAdd: [], spacesToRemove: [] };
+      return { isSelectionChanged: false, spacesToAdd: [], spacesToRemove: [] };
     }
     const initialSelection = currentNamespaces.filter(
-      (spaceId) => spaceId !== activeSpace.id && spaceId !== '?'
+      (spaceId) => spaceId !== activeSpace.id && spaceId !== UNKNOWN_SPACE
     );
     const { selectedSpaceIds } = shareOptions;
-    const changed = !arraysAreEqual(initialSelection, selectedSpaceIds);
-    const spacesToAdd = selectedSpaceIds.filter((spaceId) => !initialSelection.includes(spaceId));
-    const spacesToRemove = initialSelection.filter(
-      (spaceId) => !selectedSpaceIds.includes(spaceId)
+    const filteredSelection = selectedSpaceIds.filter((x) => x !== UNKNOWN_SPACE);
+    const isSharedToAllSpaces =
+      !initialSelection.includes(ALL_SPACES_ID) && filteredSelection.includes(ALL_SPACES_ID);
+    const isUnsharedFromAllSpaces =
+      initialSelection.includes(ALL_SPACES_ID) && !filteredSelection.includes(ALL_SPACES_ID);
+    const selectedSpacesChanged =
+      !filteredSelection.includes(ALL_SPACES_ID) &&
+      !arraysAreEqual(initialSelection, filteredSelection);
+    const isSelectionChanged =
+      isSharedToAllSpaces ||
+      isUnsharedFromAllSpaces ||
+      (!isSharedToAllSpaces && !isUnsharedFromAllSpaces && selectedSpacesChanged);
+
+    const selectedSpacesToAdd = filteredSelection.filter(
+      (spaceId) => !initialSelection.includes(spaceId)
     );
-    return { changed, spacesToAdd, spacesToRemove };
+    const selectedSpacesToRemove = initialSelection.filter(
+      (spaceId) => !filteredSelection.includes(spaceId)
+    );
+
+    const spacesToAdd = isSharedToAllSpaces
+      ? [ALL_SPACES_ID]
+      : isUnsharedFromAllSpaces
+      ? [activeSpace.id, ...selectedSpacesToAdd]
+      : selectedSpacesToAdd;
+    const spacesToRemove = isUnsharedFromAllSpaces
+      ? [ALL_SPACES_ID]
+      : isSharedToAllSpaces
+      ? [activeSpace.id, ...initialSelection]
+      : selectedSpacesToRemove;
+    return { isSelectionChanged, spacesToAdd, spacesToRemove };
   };
-  const { changed: isSelectionChanged, spacesToAdd, spacesToRemove } = getSelectionChanges();
+  const { isSelectionChanged, spacesToAdd, spacesToRemove } = getSelectionChanges();
 
   const [shareInProgress, setShareInProgress] = useState(false);
 
@@ -109,32 +138,28 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
           : i18n.translate('xpack.spaces.management.shareToSpace.shareEditSuccessTitle', {
               defaultMessage: 'Object was updated',
             });
+      const isSharedToAllSpaces = spacesToAdd.includes(ALL_SPACES_ID);
       if (spacesToAdd.length > 0) {
         await spacesManager.shareSavedObjectAdd({ type, id }, spacesToAdd);
-        const spaceNames = spacesToAdd.map(
-          (spaceId) => spaces.find((space) => space.id === spaceId)!.name
-        );
-        const spaceCount = spaceNames.length;
+        const spaceTargets = isSharedToAllSpaces ? 'all' : `${spacesToAdd.length}`;
         const text =
-          spaceCount === 1
+          !isSharedToAllSpaces && spacesToAdd.length === 1
             ? i18n.translate('xpack.spaces.management.shareToSpace.shareAddSuccessTextSingular', {
                 defaultMessage: `'{object}' was added to 1 space.`,
                 values: { object: meta.title },
               })
             : i18n.translate('xpack.spaces.management.shareToSpace.shareAddSuccessTextPlural', {
-                defaultMessage: `'{object}' was added to {spaceCount} spaces.`,
-                values: { object: meta.title, spaceCount },
+                defaultMessage: `'{object}' was added to {spaceTargets} spaces.`,
+                values: { object: meta.title, spaceTargets },
               });
         toastNotifications.addSuccess({ title, text });
       }
       if (spacesToRemove.length > 0) {
         await spacesManager.shareSavedObjectRemove({ type, id }, spacesToRemove);
-        const spaceNames = spacesToRemove.map(
-          (spaceId) => spaces.find((space) => space.id === spaceId)!.name
-        );
-        const spaceCount = spaceNames.length;
+        const isUnsharedFromAllSpaces = spacesToRemove.includes(ALL_SPACES_ID);
+        const spaceTargets = isUnsharedFromAllSpaces ? 'all' : `${spacesToRemove.length}`;
         const text =
-          spaceCount === 1
+          !isUnsharedFromAllSpaces && spacesToRemove.length === 1
             ? i18n.translate(
                 'xpack.spaces.management.shareToSpace.shareRemoveSuccessTextSingular',
                 {
@@ -143,10 +168,12 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
                 }
               )
             : i18n.translate('xpack.spaces.management.shareToSpace.shareRemoveSuccessTextPlural', {
-                defaultMessage: `'{object}' was removed from {spaceCount} spaces.`,
-                values: { object: meta.title, spaceCount },
+                defaultMessage: `'{object}' was removed from {spaceTargets} spaces.`,
+                values: { object: meta.title, spaceTargets },
               });
-        toastNotifications.addSuccess({ title, text });
+        if (!isSharedToAllSpaces) {
+          toastNotifications.addSuccess({ title, text });
+        }
       }
       onObjectUpdated();
       onClose();
@@ -166,32 +193,9 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
       return <EuiLoadingSpinner />;
     }
 
-    // Step 1a: assets loaded, but no spaces are available for share.
-    // The `spaces` array includes the current space, so at minimum it will have a length of 1.
-    if (spaces.length < 2) {
-      return (
-        <EuiEmptyPrompt
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.spaces.management.shareToSpace.noSpacesBody"
-                defaultMessage="There are no eligible spaces to share into."
-              />
-            </p>
-          }
-          title={
-            <h3>
-              <FormattedMessage
-                id="xpack.spaces.management.shareToSpace.noSpacesTitle"
-                defaultMessage="No spaces available"
-              />
-            </h3>
-          }
-        />
-      );
-    }
-
-    const showShareWarning = currentNamespaces.length === 1;
+    const activeSpace = spaces.find((x) => x.isActiveSpace)!;
+    const showShareWarning =
+      spaces.length > 1 && arraysAreEqual(currentNamespaces, [activeSpace.id]);
     // Step 2: Share has not been initiated yet; User must fill out form to continue.
     return (
       <ShareToSpaceForm
@@ -199,6 +203,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
         shareOptions={shareOptions}
         onUpdate={setShareOptions}
         showShareWarning={showShareWarning}
+        canShareToAllSpaces={canShareToAllSpaces}
         makeCopy={() => setShowMakeCopy(true)}
       />
     );
@@ -216,7 +221,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
   }
 
   return (
-    <EuiFlyout onClose={onClose} maxWidth={460} data-test-subj="share-to-space-flyout">
+    <EuiFlyout onClose={onClose} maxWidth={500} data-test-subj="share-to-space-flyout">
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
@@ -274,7 +279,7 @@ export const ShareSavedObjectsToSpaceFlyout = (props: Props) => {
             >
               <FormattedMessage
                 id="xpack.spaces.management.shareToSpace.shareToSpacesButton"
-                defaultMessage="Share"
+                defaultMessage="Save &amp; close"
               />
             </EuiButton>
           </EuiFlexItem>

@@ -15,6 +15,7 @@ import {
   LogsFetchDataResponse,
   MetricsFetchDataResponse,
   UptimeFetchDataResponse,
+  UxFetchDataResponse,
 } from './typings';
 
 const params = {
@@ -273,6 +274,62 @@ describe('registerDataHandler', () => {
       expect(hasData).toBeTruthy();
     });
   });
+  describe('Ux', () => {
+    registerDataHandler({
+      appName: 'ux',
+      fetchData: async () => {
+        return {
+          title: 'User Experience',
+          appLink: '/ux',
+          coreWebVitals: {
+            cls: '0.01',
+            fid: 5,
+            lcp: 1464.3333333333333,
+            tbt: 232.92166666666665,
+            fcp: 1154.8,
+            coreVitalPages: 100,
+            lcpRanks: [73, 16, 11],
+            fidRanks: [85, 4, 11],
+            clsRanks: [88, 7, 5],
+          },
+        };
+      },
+      hasData: async () => ({ hasData: true, serviceName: 'elastic-co-frontend' }),
+    });
+
+    it('registered data handler', () => {
+      const dataHandler = getDataHandler('ux');
+      expect(dataHandler?.fetchData).toBeDefined();
+      expect(dataHandler?.hasData).toBeDefined();
+    });
+
+    it('returns data when fetchData is called', async () => {
+      const dataHandler = getDataHandler('ux');
+      const response = await dataHandler?.fetchData(params);
+      expect(response).toEqual({
+        title: 'User Experience',
+        appLink: '/ux',
+        coreWebVitals: {
+          cls: '0.01',
+          fid: 5,
+          lcp: 1464.3333333333333,
+          tbt: 232.92166666666665,
+          fcp: 1154.8,
+          coreVitalPages: 100,
+          lcpRanks: [73, 16, 11],
+          fidRanks: [85, 4, 11],
+          clsRanks: [88, 7, 5],
+        },
+      });
+    });
+
+    it('returns true when hasData is called', async () => {
+      const dataHandler = getDataHandler('ux');
+      const hasData = await dataHandler?.hasData();
+      expect(hasData).toBeTruthy();
+    });
+  });
+
   describe('Metrics', () => {
     registerDataHandler({
       appName: 'infra_metrics',
@@ -396,6 +453,7 @@ describe('registerDataHandler', () => {
       unregisterDataHandler({ appName: 'infra_logs' });
       unregisterDataHandler({ appName: 'infra_metrics' });
       unregisterDataHandler({ appName: 'uptime' });
+      unregisterDataHandler({ appName: 'ux' });
 
       registerDataHandler({
         appName: 'apm',
@@ -425,11 +483,19 @@ describe('registerDataHandler', () => {
           throw new Error('BOOM');
         },
       });
-      expect(await fetchHasData()).toEqual({
+      registerDataHandler({
+        appName: 'ux',
+        fetchData: async () => (({} as unknown) as UxFetchDataResponse),
+        hasData: async () => {
+          throw new Error('BOOM');
+        },
+      });
+      expect(await fetchHasData({ end: 1601632271769, start: 1601631371769 })).toEqual({
         apm: false,
         uptime: false,
         infra_logs: false,
         infra_metrics: false,
+        ux: false,
       });
     });
     it('returns true when has data and false when an exception happens', async () => {
@@ -437,6 +503,7 @@ describe('registerDataHandler', () => {
       unregisterDataHandler({ appName: 'infra_logs' });
       unregisterDataHandler({ appName: 'infra_metrics' });
       unregisterDataHandler({ appName: 'uptime' });
+      unregisterDataHandler({ appName: 'ux' });
 
       registerDataHandler({
         appName: 'apm',
@@ -462,11 +529,19 @@ describe('registerDataHandler', () => {
           throw new Error('BOOM');
         },
       });
-      expect(await fetchHasData()).toEqual({
+      registerDataHandler({
+        appName: 'ux',
+        fetchData: async () => (({} as unknown) as UxFetchDataResponse),
+        hasData: async () => {
+          throw new Error('BOOM');
+        },
+      });
+      expect(await fetchHasData({ end: 1601632271769, start: 1601631371769 })).toEqual({
         apm: true,
         uptime: false,
         infra_logs: true,
         infra_metrics: false,
+        ux: false,
       });
     });
     it('returns true when has data', async () => {
@@ -474,6 +549,7 @@ describe('registerDataHandler', () => {
       unregisterDataHandler({ appName: 'infra_logs' });
       unregisterDataHandler({ appName: 'infra_metrics' });
       unregisterDataHandler({ appName: 'uptime' });
+      unregisterDataHandler({ appName: 'ux' });
 
       registerDataHandler({
         appName: 'apm',
@@ -495,11 +571,23 @@ describe('registerDataHandler', () => {
         fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
         hasData: async () => true,
       });
-      expect(await fetchHasData()).toEqual({
+      registerDataHandler({
+        appName: 'ux',
+        fetchData: async () => (({} as unknown) as UxFetchDataResponse),
+        hasData: async () => ({
+          hasData: true,
+          serviceName: 'elastic-co',
+        }),
+      });
+      expect(await fetchHasData({ end: 1601632271769, start: 1601631371769 })).toEqual({
         apm: true,
         uptime: true,
         infra_logs: true,
         infra_metrics: true,
+        ux: {
+          hasData: true,
+          serviceName: 'elastic-co',
+        },
       });
     });
     it('returns false when has no data', async () => {
@@ -507,6 +595,7 @@ describe('registerDataHandler', () => {
       unregisterDataHandler({ appName: 'infra_logs' });
       unregisterDataHandler({ appName: 'infra_metrics' });
       unregisterDataHandler({ appName: 'uptime' });
+      unregisterDataHandler({ appName: 'ux' });
 
       registerDataHandler({
         appName: 'apm',
@@ -528,11 +617,17 @@ describe('registerDataHandler', () => {
         fetchData: async () => (({} as unknown) as UptimeFetchDataResponse),
         hasData: async () => false,
       });
-      expect(await fetchHasData()).toEqual({
+      registerDataHandler({
+        appName: 'ux',
+        fetchData: async () => (({} as unknown) as UxFetchDataResponse),
+        hasData: async () => false,
+      });
+      expect(await fetchHasData({ end: 1601632271769, start: 1601631371769 })).toEqual({
         apm: false,
         uptime: false,
         infra_logs: false,
         infra_metrics: false,
+        ux: false,
       });
     });
     it('returns false when has data was not registered', async () => {
@@ -540,12 +635,14 @@ describe('registerDataHandler', () => {
       unregisterDataHandler({ appName: 'infra_logs' });
       unregisterDataHandler({ appName: 'infra_metrics' });
       unregisterDataHandler({ appName: 'uptime' });
+      unregisterDataHandler({ appName: 'ux' });
 
-      expect(await fetchHasData()).toEqual({
+      expect(await fetchHasData({ end: 1601632271769, start: 1601631371769 })).toEqual({
         apm: false,
         uptime: false,
         infra_logs: false,
         infra_metrics: false,
+        ux: false,
       });
     });
   });

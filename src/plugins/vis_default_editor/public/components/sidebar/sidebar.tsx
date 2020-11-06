@@ -18,7 +18,7 @@
  */
 
 import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
-import { get, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
@@ -71,7 +71,7 @@ function DefaultEditorSideBar({
   ]);
   const metricSchemas = (vis.type.schemas.metrics || []).map((s: Schema) => s.name);
   const metricAggs = useMemo(
-    () => responseAggs.filter((agg) => metricSchemas.includes(get(agg, 'schema'))),
+    () => responseAggs.filter((agg) => agg.schema && metricSchemas.includes(agg.schema)),
     [responseAggs, metricSchemas]
   );
   const hasHistogramAgg = useMemo(() => responseAggs.some((agg) => agg.type.name === 'histogram'), [

@@ -212,7 +212,7 @@ exports[`Storyshots arguments/SeriesStyle/components simple: no series 1`] = `
           onMouseOut={[Function]}
           onMouseOver={[Function]}
         >
-          <div
+          <span
             aria-label="Info"
             color="warning"
             data-euiicon-type="alert"

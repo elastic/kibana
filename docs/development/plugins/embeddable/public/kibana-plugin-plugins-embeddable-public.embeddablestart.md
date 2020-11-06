@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface EmbeddableStart extends PersistableState<EmbeddableInput> 
+export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> 
 ```
 
 ## Properties
@@ -15,6 +15,7 @@ export interface EmbeddableStart extends PersistableState<EmbeddableInput>
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [EmbeddablePanel](./kibana-plugin-plugins-embeddable-public.embeddablestart.embeddablepanel.md) | <code>EmbeddablePanelHOC</code> |  |
+|  [getAttributeService](./kibana-plugin-plugins-embeddable-public.embeddablestart.getattributeservice.md) | <code>&lt;A extends {</code><br/><code>        title: string;</code><br/><code>    }, V extends EmbeddableInput &amp; {</code><br/><code>        [ATTRIBUTE_SERVICE_KEY]: A;</code><br/><code>    } = EmbeddableInput &amp; {</code><br/><code>        [ATTRIBUTE_SERVICE_KEY]: A;</code><br/><code>    }, R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput&gt;(type: string, options: AttributeServiceOptions&lt;A&gt;) =&gt; AttributeService&lt;A, V, R&gt;</code> |  |
 |  [getEmbeddableFactories](./kibana-plugin-plugins-embeddable-public.embeddablestart.getembeddablefactories.md) | <code>() =&gt; IterableIterator&lt;EmbeddableFactory&gt;</code> |  |
 |  [getEmbeddableFactory](./kibana-plugin-plugins-embeddable-public.embeddablestart.getembeddablefactory.md) | <code>&lt;I extends EmbeddableInput = EmbeddableInput, O extends EmbeddableOutput = EmbeddableOutput, E extends IEmbeddable&lt;I, O&gt; = IEmbeddable&lt;I, O&gt;&gt;(embeddableFactoryId: string) =&gt; EmbeddableFactory&lt;I, O, E&gt; &#124; undefined</code> |  |
 |  [getEmbeddablePanel](./kibana-plugin-plugins-embeddable-public.embeddablestart.getembeddablepanel.md) | <code>(stateTransfer?: EmbeddableStateTransfer) =&gt; EmbeddablePanelHOC</code> |  |

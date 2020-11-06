@@ -281,7 +281,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
           <EuiSpacer />
         </Fragment>
       ) : null}
-      <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
@@ -314,7 +313,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         isOpen={indexPopoverOpen}
         closePopover={closeIndexPopover}
         ownFocus
-        withTitle
         anchorPosition="downLeft"
         zIndex={8000}
         display="block"

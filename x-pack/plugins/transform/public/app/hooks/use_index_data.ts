@@ -12,13 +12,10 @@ import {
   isEsSearchResponse,
   isFieldHistogramsResponseSchema,
 } from '../../../common/api_schemas/type_guards';
-
-import { getErrorMessage } from '../../../common/utils/errors';
-
 import type { EsSorting, UseIndexDataReturnType } from '../../shared_imports';
 
+import { getErrorMessage } from '../../../common/utils/errors';
 import { isDefaultQuery, matchAllQuery, PivotQuery } from '../common';
-
 import { SearchItems } from './use_search_items';
 import { useApi } from './use_api';
 
@@ -38,6 +35,7 @@ export const useIndexData = (
       showDataGridColumnChartErrorMessageToast,
       useDataGrid,
       useRenderCellValue,
+      getProcessedFields,
       INDEX_STATUS,
     },
   } = useAppDependencies();
@@ -86,6 +84,8 @@ export const useIndexData = (
     const esSearchRequest = {
       index: indexPattern.title,
       body: {
+        fields: ['*'],
+        _source: false,
         // Instead of using the default query (`*`), fall back to a more efficient `match_all` query.
         query: isDefaultQuery(query) ? matchAllQuery : query,
         from: pagination.pageIndex * pagination.pageSize,
@@ -102,7 +102,7 @@ export const useIndexData = (
       return;
     }
 
-    const docs = resp.hits.hits.map((d) => d._source);
+    const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields));
 
     setRowCount(resp.hits.total.value);
     setTableItems(docs);

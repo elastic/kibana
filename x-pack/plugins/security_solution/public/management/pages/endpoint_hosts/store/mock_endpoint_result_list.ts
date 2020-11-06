@@ -164,7 +164,7 @@ const endpointListApiPathHandlerMocks = ({
   if (endpointsResults) {
     endpointsResults.forEach((host) => {
       // @ts-expect-error
-      apiHandlers[`/api/endpoint/metadata/${host.metadata.host.id}`] = () => host;
+      apiHandlers[`/api/endpoint/metadata/${host.metadata.agent.id}`] = () => host;
     });
   }
 

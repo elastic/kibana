@@ -9,3 +9,4 @@ export * from './agent_reassign_policy_flyout';
 export * from './agent_enrollment_flyout';
 export * from './agent_health';
 export * from './agent_unenroll_modal';
+export * from './agent_upgrade_modal';

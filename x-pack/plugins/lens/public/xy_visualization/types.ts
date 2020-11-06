@@ -6,6 +6,7 @@
 
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { ArgumentType, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
 import { LensIconChartArea } from '../assets/chart_area';
 import { LensIconChartAreaStacked } from '../assets/chart_area_stacked';
@@ -335,6 +336,11 @@ export const layerConfig: ExpressionFunctionDefinition<
       types: ['string'],
       help: 'JSON key-value pairs of column ID to label',
     },
+    palette: {
+      default: `{theme "palette" default={system_palette name="default"} }`,
+      help: '',
+      types: ['palette'],
+    },
   },
   fn: function fn(input: unknown, args: LayerArgs) {
     return {
@@ -372,6 +378,7 @@ export interface LayerConfig {
   yConfig?: YConfig[];
   seriesType: SeriesType;
   splitAccessor?: string;
+  palette?: PaletteOutput;
 }
 
 export type LayerArgs = LayerConfig & {
@@ -379,6 +386,8 @@ export type LayerArgs = LayerConfig & {
   yScaleType: 'time' | 'linear' | 'log' | 'sqrt';
   xScaleType: 'time' | 'linear' | 'ordinal';
   isHistogram: boolean;
+  // palette will always be set on the expression
+  palette: PaletteOutput;
 };
 
 // Arguments to XY chart expression, with computed properties
@@ -426,6 +435,9 @@ export const visualizationTypes: VisualizationType[] = [
     id: 'bar_horizontal',
     icon: LensIconChartBarHorizontal,
     label: i18n.translate('xpack.lens.xyVisualization.barHorizontalLabel', {
+      defaultMessage: 'H. Bar',
+    }),
+    fullLabel: i18n.translate('xpack.lens.xyVisualization.barHorizontalFullLabel', {
       defaultMessage: 'Horizontal bar',
     }),
   },
@@ -440,22 +452,31 @@ export const visualizationTypes: VisualizationType[] = [
     id: 'bar_percentage_stacked',
     icon: LensIconChartBarPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarLabel', {
-      defaultMessage: 'Bar percentage',
+      defaultMessage: 'Percentage bar',
     }),
   },
   {
     id: 'bar_horizontal_stacked',
     icon: LensIconChartBarHorizontalStacked,
     label: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalLabel', {
-      defaultMessage: 'Stacked horizontal bar',
+      defaultMessage: 'H. Stacked bar',
+    }),
+    fullLabel: i18n.translate('xpack.lens.xyVisualization.stackedBarHorizontalFullLabel', {
+      defaultMessage: 'Horizontal stacked bar',
     }),
   },
   {
     id: 'bar_horizontal_percentage_stacked',
     icon: LensIconChartBarHorizontalPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageBarHorizontalLabel', {
-      defaultMessage: 'Horizontal bar percentage',
+      defaultMessage: 'H. Percentage bar',
     }),
+    fullLabel: i18n.translate(
+      'xpack.lens.xyVisualization.stackedPercentageBarHorizontalFullLabel',
+      {
+        defaultMessage: 'Horizontal percentage bar',
+      }
+    ),
   },
   {
     id: 'area',
@@ -475,7 +496,7 @@ export const visualizationTypes: VisualizationType[] = [
     id: 'area_percentage_stacked',
     icon: LensIconChartAreaPercentage,
     label: i18n.translate('xpack.lens.xyVisualization.stackedPercentageAreaLabel', {
-      defaultMessage: 'Area percentage',
+      defaultMessage: 'Percentage area',
     }),
   },
   {

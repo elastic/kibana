@@ -10,17 +10,14 @@
 
 import React, { memo, useMemo, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiSpacer, EuiText, EuiDescriptionList, EuiTextColor, EuiTitle } from '@elastic/eui';
 import styled from 'styled-components';
 import { useSelector } from 'react-redux';
-import { FormattedMessage } from 'react-intl';
 import { StyledPanel } from '../styles';
-import {
-  BoldCode,
-  StyledTime,
-  GeneratedText,
-  noTimestampRetrievedText,
-} from './panel_content_utilities';
+import { BoldCode, StyledTime } from './styles';
+import { GeneratedText } from '../generated_text';
+import { CopyablePanelField } from './copyable_panel_field';
 import { Breadcrumbs } from './breadcrumbs';
 import * as eventModel from '../../../../common/endpoint/models/event';
 import * as selectors from '../../store/selectors';
@@ -96,11 +93,16 @@ const EventDetailContents = memo(function ({
   processEvent: SafeResolverEvent | null;
 }) {
   const timestamp = eventModel.timestampSafeVersion(event);
-  const formattedDate = useFormattedDate(timestamp) || noTimestampRetrievedText;
+  const formattedDate =
+    useFormattedDate(timestamp) ||
+    i18n.translate('xpack.securitySolution.enpdoint.resolver.panelutils.noTimestampRetrieved', {
+      defaultMessage: 'No timestamp retrieved',
+    });
+
   const nodeName = processEvent ? eventModel.processNameSafeVersion(processEvent) : null;
 
   return (
-    <StyledPanel>
+    <StyledPanel data-test-subj="resolver:panel:event-detail">
       <EventDetailBreadcrumbs
         nodeID={nodeID}
         nodeName={nodeName}
@@ -154,10 +156,20 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
       const section = {
         // Group the fields by their top-level namespace
         namespace: <GeneratedText>{key}</GeneratedText>,
-        descriptions: deepObjectEntries(value).map(([path, fieldValue]) => ({
-          title: <GeneratedText>{path.join('.')}</GeneratedText>,
-          description: <GeneratedText>{String(fieldValue)}</GeneratedText>,
-        })),
+        descriptions: deepObjectEntries(value).map(([path, fieldValue]) => {
+          // The field name is the 'namespace' key as well as the rest of the path, joined with '.'
+          const fieldName = [key, ...path].join('.');
+
+          return {
+            title: <GeneratedText>{fieldName}</GeneratedText>,
+            description: (
+              <CopyablePanelField
+                textToCopy={String(fieldValue)}
+                content={<GeneratedText>{String(fieldValue)}</GeneratedText>}
+              />
+            ),
+          };
+        }),
       };
       returnValue.push(section);
     }
@@ -181,7 +193,10 @@ function EventDetailFields({ event }: { event: SafeResolverEvent }) {
             <StyledDescriptionList
               type="column"
               align="left"
-              titleProps={{ className: 'desc-title' }}
+              titleProps={{
+                className: 'desc-title',
+                'data-test-subj': 'resolver:panel:event-detail:event-field-title',
+              }}
               compressed
               listItems={descriptions}
             />

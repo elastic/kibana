@@ -26,12 +26,17 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
-  RequestHandlerContext,
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
 import { first } from 'rxjs/operators';
-import { ISearchSetup, ISearchStart, ISearchStrategy, SearchEnhancements } from './types';
+import {
+  ISearchSetup,
+  ISearchStart,
+  ISearchStrategy,
+  SearchEnhancements,
+  SearchStrategyDependencies,
+} from './types';
 
 import { AggsService, AggsSetupDependencies } from './aggs';
 
@@ -49,10 +54,11 @@ import {
   IKibanaSearchResponse,
   IEsSearchRequest,
   IEsSearchResponse,
-  ISearchOptions,
   SearchSourceDependencies,
   SearchSourceService,
   searchSourceRequiredUiSettings,
+  ISearchOptions,
+  ISearchClient,
 } from '../../common/search';
 import {
   getShardDelayBucketAgg,
@@ -60,6 +66,12 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
+
+declare module 'src/core/server' {
+  interface RequestHandlerContext {
+    search?: ISearchClient;
+  }
+}
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -103,8 +115,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       getStartServices: core.getStartServices,
       globalConfig$: this.initializerContext.config.legacy.globalConfig$,
     };
-    registerSearchRoute(router, routeDependencies);
+    registerSearchRoute(router);
     registerMsearchRoute(router, routeDependencies);
+
+    core.http.registerRouteHandlerContext('search', async (context, request) => {
+      const [coreStart] = await core.getStartServices();
+      return this.asScopedProvider(coreStart)(request);
+    });
 
     this.registerSearchStrategy(
       ES_SEARCH_STRATEGY,
@@ -144,25 +161,24 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       usage,
     };
   }
+
   public start(
-    { elasticsearch, savedObjects, uiSettings }: CoreStart,
+    core: CoreStart,
     { fieldFormats, indexPatterns }: SearchServiceStartDependencies
   ): ISearchStart {
+    const { elasticsearch, savedObjects, uiSettings } = core;
+    const asScoped = this.asScopedProvider(core);
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings }),
+      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
       getSearchStrategy: this.getSearchStrategy,
-      search: (
-        context: RequestHandlerContext,
-        searchRequest: IKibanaSearchRequest,
-        options: Record<string, any>
-      ) => {
-        return this.search(context, searchRequest, options);
-      },
+      asScoped,
       searchSource: {
         asScoped: async (request: KibanaRequest) => {
           const esClient = elasticsearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
-          const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(request);
+          const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(
+            savedObjectsClient
+          );
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
 
           // cache ui settings, only including items which are explicitly needed by SearchSource
@@ -173,28 +189,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
-            search: (searchRequest, options) => {
-              /**
-               * Unless we want all SearchSource users to provide both a KibanaRequest
-               * (needed for index patterns) AND the RequestHandlerContext (needed for
-               * low-level search), we need to fake the context as it can be derived
-               * from the request object anyway. This will pose problems for folks who
-               * are registering custom search strategies as they are only getting a
-               * subset of the entire context. Ideally low-level search should be
-               * refactored to only require the needed dependencies: esClient & uiSettings.
-               */
-              const fakeRequestHandlerContext = {
-                core: {
-                  elasticsearch: {
-                    client: esClient,
-                  },
-                  uiSettings: {
-                    client: uiSettingsClient,
-                  },
-                },
-              } as RequestHandlerContext;
-              return this.search(fakeRequestHandlerContext, searchRequest, options);
-            },
+            search: asScoped(request).search,
             // onResponse isn't used on the server, so we just return the original value
             onResponse: (req, res) => res,
             legacy: {
@@ -232,20 +227,28 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    context: RequestHandlerContext,
     searchRequest: SearchStrategyRequest,
-    options: ISearchOptions
-  ): Promise<SearchStrategyResponse> => {
-    return this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
-      options.strategy || this.defaultSearchStrategyName
-    ).search(context, searchRequest, options);
+    options: ISearchOptions,
+    deps: SearchStrategyDependencies
+  ) => {
+    const strategy = this.getSearchStrategy<SearchStrategyRequest, SearchStrategyResponse>(
+      options.strategy
+    );
+
+    return strategy.search(searchRequest, options, deps);
+  };
+
+  private cancel = (id: string, options: ISearchOptions, deps: SearchStrategyDependencies) => {
+    const strategy = this.getSearchStrategy(options.strategy);
+
+    return strategy.cancel ? strategy.cancel(id, options, deps) : Promise.resolve();
   };
 
   private getSearchStrategy = <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
     SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
   >(
-    name: string
+    name: string = this.defaultSearchStrategyName
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
     this.logger.debug(`Get strategy ${name}`);
     const strategy = this.searchStrategies[name];
@@ -253,5 +256,20 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       throw new Error(`Search strategy ${name} not found`);
     }
     return strategy;
+  };
+
+  private asScopedProvider = ({ elasticsearch, savedObjects, uiSettings }: CoreStart) => {
+    return (request: KibanaRequest): ISearchClient => {
+      const savedObjectsClient = savedObjects.getScopedClient(request);
+      const deps = {
+        savedObjectsClient,
+        esClient: elasticsearch.client.asScoped(request),
+        uiSettingsClient: uiSettings.asScopedToClient(savedObjectsClient),
+      };
+      return {
+        search: (searchRequest, options = {}) => this.search(searchRequest, options, deps),
+        cancel: (id, options = {}) => this.cancel(id, options, deps),
+      };
+    };
   };
 }

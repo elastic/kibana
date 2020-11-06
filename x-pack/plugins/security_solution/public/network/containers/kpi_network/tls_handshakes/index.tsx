@@ -56,19 +56,23 @@ export const useNetworkKpiTlsHandshakes = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [networkKpiTlsHandshakesRequest, setNetworkKpiTlsHandshakesRequest] = useState<
-    NetworkKpiTlsHandshakesRequestOptions
-  >({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkKpiQueries.tlsHandshakes,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    networkKpiTlsHandshakesRequest,
+    setNetworkKpiTlsHandshakesRequest,
+  ] = useState<NetworkKpiTlsHandshakesRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkKpiQueries.tlsHandshakes,
+          filterQuery: createFilter(filterQuery),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [networkKpiTlsHandshakesResponse, setNetworkKpiTlsHandshakesResponse] = useState<
     NetworkKpiTlsHandshakesArgs
@@ -84,7 +88,10 @@ export const useNetworkKpiTlsHandshakes = ({
   });
 
   const networkKpiTlsHandshakesSearch = useCallback(
-    (request: NetworkKpiTlsHandshakesRequestOptions) => {
+    (request: NetworkKpiTlsHandshakesRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -144,8 +151,9 @@ export const useNetworkKpiTlsHandshakes = ({
   useEffect(() => {
     setNetworkKpiTlsHandshakesRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.tlsHandshakes,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',

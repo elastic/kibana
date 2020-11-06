@@ -124,6 +124,54 @@ describe('KibanaRequest', () => {
       });
     });
   });
+
+  describe('route options', () => {
+    describe('authRequired', () => {
+      it('returns false if a route configured with "authRequired": false', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        registerAuth((req, res, t) => t.authenticated());
+        const router = createRouter('/');
+        router.get(
+          { path: '/', validate: false, options: { authRequired: false } },
+          (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener).get('/').expect(200, {
+          authRequired: false,
+        });
+      });
+      it('returns "optional" if a route configured with "authRequired": optional', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        registerAuth((req, res, t) => t.authenticated());
+        const router = createRouter('/');
+        router.get(
+          { path: '/', validate: false, options: { authRequired: 'optional' } },
+          (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener).get('/').expect(200, {
+          authRequired: 'optional',
+        });
+      });
+      it('returns true if a route configured with "authRequired": true', async () => {
+        const { server: innerServer, createRouter, registerAuth } = await server.setup(setupDeps);
+        registerAuth((req, res, t) => t.authenticated());
+        const router = createRouter('/');
+        router.get(
+          { path: '/', validate: false, options: { authRequired: true } },
+          (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
+        );
+        await server.start();
+
+        await supertest(innerServer.listener).get('/').expect(200, {
+          authRequired: true,
+        });
+      });
+    });
+  });
+
   describe('events', () => {
     describe('aborted$', () => {
       it('emits once and completes when request aborted', async (done) => {
@@ -313,7 +361,6 @@ describe('KibanaRequest', () => {
       expect(resp3.body).toEqual({ requestId: 'gamma' });
     });
   });
-
   describe('request uuid', () => {
     it('generates a UUID', async () => {
       const { server: innerServer, createRouter } = await server.setup(setupDeps);

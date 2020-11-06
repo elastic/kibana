@@ -15,6 +15,7 @@ import {
   EuiPageBody,
   EuiPageContent,
   EuiPageHeader,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -39,6 +40,7 @@ interface State {
   loading: boolean;
   searchTerm: string;
   spaces: Space[];
+  error?: Error;
 }
 
 export class SpaceSelector extends Component<Props, State> {
@@ -71,12 +73,20 @@ export class SpaceSelector extends Component<Props, State> {
     this.setState({ loading: true });
     const { spacesManager } = this.props;
 
-    spacesManager.getSpaces().then((spaces) => {
-      this.setState({
-        loading: false,
-        spaces,
+    spacesManager
+      .getSpaces()
+      .then((spaces) => {
+        this.setState({
+          loading: false,
+          spaces,
+        });
+      })
+      .catch((err) => {
+        this.setState({
+          loading: false,
+          error: err,
+        });
       });
-    });
   }
 
   public render() {
@@ -135,19 +145,36 @@ export class SpaceSelector extends Component<Props, State> {
               <SpaceCards spaces={filteredSpaces} serverBasePath={this.props.serverBasePath} />
             )}
 
-            {!this.state.loading && filteredSpaces.length === 0 && (
+            {!this.state.loading && !this.state.error && filteredSpaces.length === 0 && (
               <Fragment>
                 <EuiSpacer />
-                <EuiText
-                  color="subdued"
-                  // @ts-ignore
-                  textAlign="center"
-                >
+                <EuiText color="subdued" textAlign="center">
                   <FormattedMessage
                     id="xpack.spaces.spaceSelector.noSpacesMatchSearchCriteriaDescription"
                     defaultMessage="No spaces match search criteria"
                   />
                 </EuiText>
+              </Fragment>
+            )}
+
+            {!this.state.loading && this.state.error && (
+              <Fragment>
+                <EuiSpacer />
+                <EuiPanel className="spcSpaceSelector__errorPanel">
+                  <EuiText color="danger" style={{ textAlign: 'center' }}>
+                    <FormattedMessage
+                      id="xpack.spaces.spaceSelector.errorLoadingSpacesDescription"
+                      defaultMessage="Error loading spaces ({message})"
+                      values={{ message: this.state.error.message }}
+                    />
+                  </EuiText>
+                  <EuiText style={{ textAlign: 'center' }}>
+                    <FormattedMessage
+                      id="xpack.spaces.spaceSelector.contactSysAdminDescription"
+                      defaultMessage="Contact your system administrator."
+                    />
+                  </EuiText>
+                </EuiPanel>
               </Fragment>
             )}
           </EuiPageContent>
@@ -163,7 +190,6 @@ export class SpaceSelector extends Component<Props, State> {
     return (
       <EuiFlexItem className="spcSpaceSelector__searchHolder">
         {
-          // @ts-ignore onSearch doesn't exist on EuiFieldSearch
           <EuiFieldSearch
             className="spcSpaceSelector__searchField"
             placeholder={i18n.translate('xpack.spaces.spaceSelector.findSpacePlaceholder', {

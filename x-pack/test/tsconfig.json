@@ -3,23 +3,22 @@
   "compilerOptions": {
     // overhead is too significant
     "incremental": false,
-    "types": [
-      "mocha",
-      "node",
-      "flot"
-    ]
+    "types": ["mocha", "node", "flot"]
   },
-  "include": [
-    "**/*",
-    "../typings/**/*"
-  ],
-  "exclude": [
-    "../typings/jest.d.ts"
-  ],
+  "include": ["**/*", "../typings/**/*"],
+  "exclude": ["../typings/jest.d.ts"],
   "references": [
     { "path": "../../src/core/tsconfig.json" },
-    { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
     { "path": "../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../plugins/licensing/tsconfig.json" }
+    { "path": "../../src/plugins/kibana_usage_collection/tsconfig.json" },
+    { "path": "../../src/plugins/kibana_utils/tsconfig.json" },
+    { "path": "../../src/plugins/newsfeed/tsconfig.json" },
+    { "path": "../../src/plugins/share/tsconfig.json" },
+    { "path": "../../src/plugins/telemetry_collection_manager/tsconfig.json" },
+    { "path": "../../src/plugins/telemetry/tsconfig.json" },
+    { "path": "../../src/plugins/usage_collection/tsconfig.json" },
+    { "path": "../plugins/global_search/tsconfig.json" },
+    { "path": "../plugins/licensing/tsconfig.json" },
+    { "path": "../plugins/telemetry_collection_xpack/tsconfig.json" }
   ]
 }

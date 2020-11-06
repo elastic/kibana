@@ -13,7 +13,7 @@ import { EuiIcon, EuiTitle, EuiText, EuiLink as EuiLinkExternal } from '@elastic
 import { EuiLink } from '../react_router_helpers';
 
 import { ENTERPRISE_SEARCH_PLUGIN } from '../../../../common/constants';
-import { stripTrailingSlash } from '../../../../common/strip_trailing_slash';
+import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
 import { NavContext, INavContext } from './layout';
 
@@ -106,6 +106,23 @@ export const SideNavLink: React.FC<ISideNavLinkProps> = ({
         </EuiLink>
       )}
       {subNav && <ul className="enterpriseSearchNavLinks__subNav">{subNav}</ul>}
+    </li>
+  );
+};
+
+/**
+ * Side navigation non-link item
+ */
+
+interface ISideNavItemProps {
+  className?: string;
+}
+
+export const SideNavItem: React.FC<ISideNavItemProps> = ({ children, className, ...rest }) => {
+  const classes = classNames('enterpriseSearchNavLinks__item', className);
+  return (
+    <li {...rest} className={classes}>
+      {children}
     </li>
   );
 };

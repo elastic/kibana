@@ -9,7 +9,7 @@ import { mount } from 'enzyme';
 import { I18nProvider } from '@kbn/i18n/react';
 
 /**
- * This helper wraps a component with react-intl's <I18nProvider> which
+ * This helper wraps a component with @kbn/i18n's <I18nProvider> which
  * fixes "Could not find required `intl` object" console errors when running tests
  *
  * Example usage (should be the same as mount()):

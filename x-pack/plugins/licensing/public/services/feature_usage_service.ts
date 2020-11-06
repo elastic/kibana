@@ -5,7 +5,7 @@
  */
 
 import { isDate } from 'lodash';
-import type { HttpSetup, HttpStart } from 'src/core/public';
+import type { HttpStart } from 'src/core/public';
 import { LicenseType } from '../../common/types';
 
 /** @public */
@@ -13,7 +13,7 @@ export interface FeatureUsageServiceSetup {
   /**
    * Register a feature to be able to notify of it's usages using the {@link FeatureUsageServiceStart | service start contract}.
    */
-  register(featureName: string, licenseType: LicenseType): Promise<void>;
+  register(featureName: string, licenseType: LicenseType): void;
 }
 
 /** @public */
@@ -27,10 +27,6 @@ export interface FeatureUsageServiceStart {
   notifyUsage(featureName: string, usedAt?: Date | number): Promise<void>;
 }
 
-interface SetupDeps {
-  http: HttpSetup;
-}
-
 interface StartDeps {
   http: HttpStart;
 }
@@ -39,29 +35,33 @@ interface StartDeps {
  * @internal
  */
 export class FeatureUsageService {
-  public setup({ http }: SetupDeps): FeatureUsageServiceSetup {
+  private readonly registrations: Array<{ featureName: string; licenseType: LicenseType }> = [];
+
+  public setup(): FeatureUsageServiceSetup {
     return {
       register: async (featureName, licenseType) => {
-        // Skip registration if on logged-out page
-        // NOTE: this only works because the login page does a full-page refresh after logging in
-        // If this is ever changed, this code will need to buffer registrations and call them after the user logs in.
-        if (http.anonymousPaths.isAnonymous(window.location.pathname)) return;
-
-        await http.post('/internal/licensing/feature_usage/register', {
-          body: JSON.stringify({
-            featureName,
-            licenseType,
-          }),
-        });
+        this.registrations.push({ featureName, licenseType });
       },
     };
   }
 
   public start({ http }: StartDeps): FeatureUsageServiceStart {
+    // Skip registration if on logged-out page
+    // NOTE: this only works because the login page does a full-page refresh after logging in
+    // If this is ever changed, this code will need to buffer registrations and call them after the user logs in.
+    const registrationPromise =
+      http.anonymousPaths.isAnonymous(window.location.pathname) || this.registrations.length === 0
+        ? Promise.resolve()
+        : http.post('/internal/licensing/feature_usage/register', {
+            body: JSON.stringify(this.registrations),
+          });
+
     return {
       notifyUsage: async (featureName, usedAt = Date.now()) => {
         // Skip notification if on logged-out page
         if (http.anonymousPaths.isAnonymous(window.location.pathname)) return;
+        // Wait for registrations to complete
+        await registrationPromise;
 
         const lastUsed = isDate(usedAt) ? usedAt.getTime() : usedAt;
         await http.post('/internal/licensing/feature_usage/notify', {

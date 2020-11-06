@@ -6,16 +6,7 @@
 
 import { AssetParts } from '../../../types';
 import { getBufferExtractor, pathParts, splitPkgKey } from './index';
-import { getArchiveLocation } from './cache';
 import { untarBuffer, unzipBuffer } from './extract';
-
-jest.mock('./cache', () => {
-  return {
-    getArchiveLocation: jest.fn(),
-  };
-});
-
-const mockedGetArchiveLocation = getArchiveLocation as jest.Mock;
 
 const testPaths = [
   {
@@ -91,20 +82,38 @@ describe('splitPkgKey tests', () => {
   });
 });
 
-describe('getBufferExtractor', () => {
-  it('throws if the archive has not been downloaded/cached yet', () => {
-    expect(() => getBufferExtractor('missing', '1.2.3')).toThrow('no archive location');
-  });
-
-  it('returns unzipBuffer if the archive key ends in .zip', () => {
-    mockedGetArchiveLocation.mockImplementation(() => '.zip');
-    const extractor = getBufferExtractor('will-use-mocked-key', 'a.b.c');
+describe('getBufferExtractor called with { archivePath }', () => {
+  it('returns unzipBuffer if `archivePath` ends in .zip', () => {
+    const extractor = getBufferExtractor({ archivePath: '.zip' });
     expect(extractor).toBe(unzipBuffer);
   });
 
-  it('returns untarBuffer if the key ends in anything else', () => {
-    mockedGetArchiveLocation.mockImplementation(() => 'xyz');
-    const extractor = getBufferExtractor('will-use-mocked-key', 'a.b.c');
+  it('returns untarBuffer if `archivePath` ends in .gz', () => {
+    const extractor = getBufferExtractor({ archivePath: '.gz' });
     expect(extractor).toBe(untarBuffer);
+    const extractor2 = getBufferExtractor({ archivePath: '.tar.gz' });
+    expect(extractor2).toBe(untarBuffer);
+  });
+
+  it('returns `undefined` if `archivePath` ends in anything else', () => {
+    const extractor = getBufferExtractor({ archivePath: '.xyz' });
+    expect(extractor).toEqual(undefined);
+  });
+});
+
+describe('getBufferExtractor called with { contentType }', () => {
+  it('returns unzipBuffer if `contentType` is `application/zip`', () => {
+    const extractor = getBufferExtractor({ contentType: 'application/zip' });
+    expect(extractor).toBe(unzipBuffer);
+  });
+
+  it('returns untarBuffer if `contentType` is `application/gzip`', () => {
+    const extractor = getBufferExtractor({ contentType: 'application/gzip' });
+    expect(extractor).toBe(untarBuffer);
+  });
+
+  it('returns `undefined` if `contentType` ends in anything else', () => {
+    const extractor = getBufferExtractor({ contentType: '.xyz' });
+    expect(extractor).toEqual(undefined);
   });
 });

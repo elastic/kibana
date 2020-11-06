@@ -35,20 +35,22 @@ export default ({ getService }: FtrProviderContext): void => {
       await actionsRemover.removeAll();
     });
 
-    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title']`, async () => {
+    it(`on new case, user action: 'create' should be called with actionFields: ['description', 'status', 'tags', 'title', 'connector']`, async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
 
       const { body } = await supertest
         .get(`${CASES_URL}/${postedCase.id}/user_actions`)
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
+
       expect(body.length).to.eql(1);
 
-      expect(body[0].action_field).to.eql(['description', 'status', 'tags', 'title']);
+      expect(body[0].action_field).to.eql(['description', 'status', 'tags', 'title', 'connector']);
       expect(body[0].action).to.eql('create');
       expect(body[0].old_value).to.eql(null);
       expect(body[0].new_value).to.eql(JSON.stringify(postCaseReq));
@@ -58,7 +60,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -78,6 +82,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
+
       expect(body.length).to.eql(2);
       expect(body[1].action_field).to.eql(['status']);
       expect(body[1].action).to.eql('update');
@@ -85,12 +90,20 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(body[1].new_value).to.eql('closed');
     });
 
-    it(`on update case connector, user action: 'update' should be called with actionFields: ['connector_id']`, async () => {
+    it(`on update case connector, user action: 'update' should be called with actionFields: ['connector']`, async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
-      const newConnectorId = '12345';
+        .send(postCaseReq)
+        .expect(200);
+
+      const newConnector = {
+        id: '123',
+        name: 'Connector',
+        type: '.jira',
+        fields: { issueType: 'Task', priority: 'High', parent: null },
+      };
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -99,7 +112,7 @@ export default ({ getService }: FtrProviderContext): void => {
             {
               id: postedCase.id,
               version: postedCase.version,
-              connector_id: newConnectorId,
+              connector: newConnector,
             },
           ],
         })
@@ -110,18 +123,23 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
+
       expect(body.length).to.eql(2);
-      expect(body[1].action_field).to.eql(['connector_id']);
+      expect(body[1].action_field).to.eql(['connector']);
       expect(body[1].action).to.eql('update');
-      expect(body[1].old_value).to.eql('none');
-      expect(body[1].new_value).to.eql(newConnectorId);
+      expect(body[1].old_value).to.eql(`{"id":"none","name":"none","type":".none","fields":null}`);
+      expect(body[1].new_value).to.eql(
+        `{"id":"123","name":"Connector","type":".jira","fields":{"issueType":"Task","priority":"High","parent":null}}`
+      );
     });
 
     it(`on update tags, user action: 'add' and 'delete' should be called with actionFields: ['tags']`, async () => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -141,6 +159,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
+
       expect(body.length).to.eql(3);
       expect(body[1].action_field).to.eql(['tags']);
       expect(body[1].action).to.eql('add');
@@ -156,7 +175,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
+
       const newTitle = 'Such a great title';
       await supertest
         .patch(CASES_URL)
@@ -177,6 +198,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
+
       expect(body.length).to.eql(2);
       expect(body[1].action_field).to.eql(['title']);
       expect(body[1].action).to.eql('update');
@@ -188,7 +210,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
+
       const newDesc = 'Such a great description';
       await supertest
         .patch(CASES_URL)
@@ -209,6 +233,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
+
       expect(body.length).to.eql(2);
       expect(body[1].action_field).to.eql(['description']);
       expect(body[1].action).to.eql('update');
@@ -220,19 +245,22 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
+
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
 
       const { body } = await supertest
         .get(`${CASES_URL}/${postedCase.id}/user_actions`)
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
-      expect(body.length).to.eql(2);
 
+      expect(body.length).to.eql(2);
       expect(body[1].action_field).to.eql(['comment']);
       expect(body[1].action).to.eql('create');
       expect(body[1].old_value).to.eql(null);
@@ -243,11 +271,15 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
+
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
+
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
       await supertest.patch(`${CASES_URL}/${postedCase.id}/comments`).set('kbn-xsrf', 'true').send({
         id: patchedCase.comments[0].id,
@@ -260,8 +292,8 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
-      expect(body.length).to.eql(3);
 
+      expect(body.length).to.eql(3);
       expect(body[2].action_field).to.eql(['comment']);
       expect(body[2].action).to.eql('update');
       expect(body[2].old_value).to.eql(postCommentReq.comment);
@@ -280,20 +312,35 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: configure } = await supertest
         .post(CASE_CONFIGURE_URL)
         .set('kbn-xsrf', 'true')
-        .send(getConfiguration(connector.id))
+        .send(
+          getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+          })
+        )
         .expect(200);
 
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send({
+          ...postCaseReq,
+          connector: getConfiguration({
+            id: connector.id,
+            name: connector.name,
+            type: connector.actionTypeId,
+            fields: { urgency: null, impact: null, severity: null },
+          }).connector,
+        })
+        .expect(200);
 
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/_push`)
         .set('kbn-xsrf', 'true')
         .send({
-          connector_id: configure.connector_id,
-          connector_name: configure.connector_name,
+          connector_id: configure.connector.id,
+          connector_name: configure.connector.name,
           external_id: 'external_id',
           external_title: 'external_title',
           external_url: 'external_url',
@@ -305,13 +352,13 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send()
         .expect(200);
-      expect(body.length).to.eql(2);
 
+      expect(body.length).to.eql(2);
       expect(body[1].action_field).to.eql(['pushed']);
       expect(body[1].action).to.eql('push-to-service');
       expect(body[1].old_value).to.eql(null);
       const newValue = JSON.parse(body[1].new_value);
-      expect(newValue.connector_id).to.eql(configure.connector_id);
+      expect(newValue.connector_id).to.eql(configure.connector.id);
       expect(newValue.pushed_by).to.eql(defaultUser);
     });
   });

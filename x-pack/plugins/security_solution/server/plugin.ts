@@ -18,10 +18,15 @@ import {
   SavedObjectsClient,
   DEFAULT_APP_CATEGORIES,
 } from '../../../../src/core/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { DataPluginSetup, DataPluginStart } from '../../../../src/plugins/data/server/plugin';
+import {
+  PluginSetup as DataPluginSetup,
+  PluginStart as DataPluginStart,
+} from '../../../../src/plugins/data/server';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { PluginSetupContract as AlertingSetup } from '../../alerts/server';
+import {
+  PluginSetupContract as AlertingSetup,
+  PluginStartContract as AlertPluginStartContract,
+} from '../../alerts/server';
 import { SecurityPluginSetup as SecuritySetup } from '../../security/server';
 import { PluginSetupContract as FeaturesSetup } from '../../features/server';
 import { MlPluginSetup as MlSetup } from '../../ml/server';
@@ -86,6 +91,7 @@ export interface SetupPlugins {
 }
 
 export interface StartPlugins {
+  alerts: AlertPluginStartContract;
   data: DataPluginStart;
   ingestManager?: IngestManagerStartContract;
   taskManager?: TaskManagerStartContract;
@@ -111,8 +117,10 @@ const securitySubPlugins = [
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private readonly logger: Logger;
   private readonly config$: Observable<ConfigType>;
+  private config?: ConfigType;
   private context: PluginInitializerContext;
   private appClientFactory: AppClientFactory;
+  private setupPlugins?: SetupPlugins;
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryEventsSender: TelemetryEventsSender;
 
@@ -135,8 +143,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
   public async setup(core: CoreSetup<StartPlugins, PluginStart>, plugins: SetupPlugins) {
     this.logger.debug('plugin setup');
+    this.setupPlugins = plugins;
 
     const config = await this.config$.pipe(first()).toPromise();
+    this.config = config;
     const globalConfig = await this.context.config.legacy.globalConfig$.pipe(first()).toPromise();
 
     initSavedObjects(core.savedObjects);
@@ -188,9 +198,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         defaultMessage: 'Security',
       }),
       order: 1100,
-      icon: 'logoSecurity',
       category: DEFAULT_APP_CATEGORIES.security,
-      navLinkId: APP_ID,
       app: [...securitySubPlugins, 'kibana'],
       catalogue: ['securitySolution'],
       management: {
@@ -226,7 +234,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
           catalogue: ['securitySolution'],
           api: ['securitySolution', 'lists-read'],
           savedObject: {
-            all: ['alert'],
+            all: [],
             read: [
               'config',
               'cases',
@@ -237,7 +245,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
             ],
           },
           alerting: {
-            all: [SIGNALS_ID, NOTIFICATIONS_ID],
+            read: [SIGNALS_ID, NOTIFICATIONS_ID],
           },
           management: {
             insightsAndAlerting: ['triggersActions'],
@@ -337,6 +345,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.endpointAppContextService.start({
       agentService: plugins.ingestManager?.agentService,
       packageService: plugins.ingestManager?.packageService,
+      appClientFactory: this.appClientFactory,
+      security: this.setupPlugins!.security!,
+      alerts: plugins.alerts,
+      config: this.config!,
       logger: this.logger,
       manifestManager,
       registerIngestCallback,

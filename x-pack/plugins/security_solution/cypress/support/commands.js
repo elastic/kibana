@@ -39,13 +39,16 @@ Cypress.Commands.add('stubSecurityApi', function (dataFileName) {
   cy.route('POST', 'api/solutions/security/graphql', `@${dataFileName}JSON`);
 });
 
-Cypress.Commands.add('stubSearchStrategyApi', function (dataFileName) {
+Cypress.Commands.add('stubSearchStrategyApi', function (
+  dataFileName,
+  searchStrategyName = 'securitySolutionSearchStrategy'
+) {
   cy.on('window:before:load', (win) => {
     win.fetch = null;
   });
   cy.server();
   cy.fixture(dataFileName).as(`${dataFileName}JSON`);
-  cy.route('POST', 'internal/search/securitySolutionSearchStrategy', `@${dataFileName}JSON`);
+  cy.route('POST', `internal/search/${searchStrategyName}`, `@${dataFileName}JSON`);
 });
 
 Cypress.Commands.add(
@@ -65,3 +68,36 @@ Cypress.Commands.add(
     });
   }
 );
+
+const waitUntil = (subject, fn, options = {}) => {
+  const { interval = 200, timeout = 5000 } = options;
+  let attempts = Math.floor(timeout / interval);
+
+  const completeOrRetry = (result) => {
+    if (result) {
+      return result;
+    }
+    if (attempts < 1) {
+      throw new Error(`Timed out while retrying, last result was: {${result}}`);
+    }
+    cy.wait(interval, { log: false }).then(() => {
+      attempts--;
+      // eslint-disable-next-line no-use-before-define
+      return evaluate();
+    });
+  };
+
+  const evaluate = () => {
+    const result = fn(subject);
+
+    if (result && result.then) {
+      return result.then(completeOrRetry);
+    } else {
+      return completeOrRetry(result);
+    }
+  };
+
+  return evaluate();
+};
+
+Cypress.Commands.add('waitUntil', { prevSubject: 'optional' }, waitUntil);

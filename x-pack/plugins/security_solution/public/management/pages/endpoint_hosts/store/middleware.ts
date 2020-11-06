@@ -314,7 +314,7 @@ export const endpointMiddlewareFactory: ImmutableMiddlewareFactory<EndpointState
       // call the policy response api
       try {
         const policyResponse = await coreStart.http.get(`/api/endpoint/policy_response`, {
-          query: { hostId: selectedEndpoint },
+          query: { agentId: selectedEndpoint },
         });
         dispatch({
           type: 'serverReturnedEndpointPolicyResponse',

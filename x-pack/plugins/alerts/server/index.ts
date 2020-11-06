@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertsClient as AlertsClientClass } from './alerts_client';
 import { PluginInitializerContext } from '../../../../src/core/server';
 import { AlertingPlugin } from './plugin';
@@ -11,6 +11,7 @@ import { AlertingPlugin } from './plugin';
 export type AlertsClient = PublicMethodsOf<AlertsClientClass>;
 
 export {
+  ActionVariable,
   AlertType,
   ActionGroup,
   AlertingPlugin,

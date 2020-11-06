@@ -41,6 +41,9 @@ import {
   ALERT_CLUSTER_HEALTH,
   ALERT_CPU_USAGE,
   ALERT_DISK_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_MEMORY_USAGE,
   ALERT_NODES_CHANGED,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_MISSING_MONITORING_DATA,
@@ -49,6 +52,7 @@ import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
 import { SetupModeFeature } from '../../../../common/enums';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 
 const calculateShards = (shards) => {
   const total = get(shards, 'total', 0);
@@ -160,6 +164,9 @@ const OVERVIEW_PANEL_ALERTS = [ALERT_CLUSTER_HEALTH, ALERT_LICENSE_EXPIRATION];
 const NODES_PANEL_ALERTS = [
   ALERT_CPU_USAGE,
   ALERT_DISK_USAGE,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_MEMORY_USAGE,
   ALERT_NODES_CHANGED,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   ALERT_MISSING_MONITORING_DATA,
@@ -171,6 +178,7 @@ export function ElasticsearchPanel(props) {
   const indices = clusterStats.indices;
   const setupMode = props.setupMode;
   const alerts = props.alerts;
+  const setupModeContext = React.useContext(SetupModeContext);
 
   const goToElasticsearch = () => getSafeForExternalLink('#/elasticsearch');
   const goToNodes = () => getSafeForExternalLink('#/elasticsearch/nodes');
@@ -229,7 +237,7 @@ export function ElasticsearchPanel(props) {
   };
 
   let nodesAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS)) {
+  if (shouldShowAlertBadge(alerts, NODES_PANEL_ALERTS, setupModeContext)) {
     const alertsList = NODES_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     nodesAlertStatus = (
       <EuiFlexItem grow={false}>
@@ -239,7 +247,7 @@ export function ElasticsearchPanel(props) {
   }
 
   let overviewAlertStatus = null;
-  if (shouldShowAlertBadge(alerts, OVERVIEW_PANEL_ALERTS)) {
+  if (shouldShowAlertBadge(alerts, OVERVIEW_PANEL_ALERTS, setupModeContext)) {
     const alertsList = OVERVIEW_PANEL_ALERTS.map((alertType) => alerts[alertType]);
     overviewAlertStatus = (
       <EuiFlexItem grow={false}>

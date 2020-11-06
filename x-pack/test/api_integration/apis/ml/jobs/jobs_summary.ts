@@ -160,8 +160,8 @@ export default ({ getService }: FtrProviderContext) => {
       requestBody: {},
       // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
       },
     },
   ];

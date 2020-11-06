@@ -53,6 +53,16 @@ exports[`Home component should render services 1`] = `
         },
       },
       "plugins": Object {
+        "data": Object {
+          "query": Object {
+            "timefilter": Object {
+              "timefilter": Object {
+                "getTime": [Function],
+                "setTime": [Function],
+              },
+            },
+          },
+        },
         "ml": Object {
           "urlGenerator": MlUrlGenerator {
             "createUrl": [Function],
@@ -126,6 +136,16 @@ exports[`Home component should render traces 1`] = `
         },
       },
       "plugins": Object {
+        "data": Object {
+          "query": Object {
+            "timefilter": Object {
+              "timefilter": Object {
+                "getTime": [Function],
+                "setTime": [Function],
+              },
+            },
+          },
+        },
         "ml": Object {
           "urlGenerator": MlUrlGenerator {
             "createUrl": [Function],

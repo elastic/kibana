@@ -25,8 +25,6 @@ import {
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
 
-const ID = 'timelineEventsLastEventTimeQuery';
-
 export interface UseTimelineLastEventTimeArgs {
   lastSeen: string | null;
   refetch: inputsModel.Refetch;
@@ -56,12 +54,11 @@ export const useTimelineLastEventTime = ({
     defaultIndex: indexNames,
     docValueFields,
     factoryQueryType: TimelineEventsQueries.lastEventTime,
-    id: ID,
     indexKey,
     details,
   });
 
-  const [TimelineLastEventTimeResponse, setTimelineLastEventTimeResponse] = useState<
+  const [timelineLastEventTimeResponse, setTimelineLastEventTimeResponse] = useState<
     UseTimelineLastEventTimeArgs
   >({
     lastSeen: null,
@@ -151,5 +148,5 @@ export const useTimelineLastEventTime = ({
     timelineLastEventTimeSearch(TimelineLastEventTimeRequest);
   }, [TimelineLastEventTimeRequest, timelineLastEventTimeSearch]);
 
-  return [loading, TimelineLastEventTimeResponse];
+  return [loading, timelineLastEventTimeResponse];
 };

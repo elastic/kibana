@@ -19,6 +19,7 @@ import { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 
 export interface Props {
   activeTab: TestPipelineFlyoutTab;
+  setActiveTab: (tab: TestPipelineFlyoutTab) => void;
   onClose: () => void;
   processors: DeserializeResult;
 }
@@ -28,9 +29,14 @@ export interface TestPipelineConfig {
   verbose?: boolean;
 }
 
+export interface TestPipelineFlyoutForm {
+  documents: string | Document[];
+}
+
 export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
   onClose,
   activeTab,
+  setActiveTab,
   processors,
 }) => {
   const { services } = useKibana();
@@ -46,13 +52,11 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     config: { documents: cachedDocuments, verbose: cachedVerbose },
   } = testPipelineData;
 
-  const { form } = useForm({
+  const { form } = useForm<TestPipelineFlyoutForm>({
     defaultValue: {
       documents: cachedDocuments || '',
     },
   });
-
-  const [selectedTab, setSelectedTab] = useState<TestPipelineFlyoutTab>(activeTab);
 
   const [isRunningTest, setIsRunningTest] = useState<boolean>(false);
   const [testingError, setTestingError] = useState<any>(null);
@@ -151,7 +155,7 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
     });
 
     if (isSuccessful) {
-      setSelectedTab('output');
+      setActiveTab('output');
     }
   };
 
@@ -180,8 +184,8 @@ export const TestPipelineFlyout: React.FunctionComponent<Props> = ({
       testOutput={testOutput}
       form={form}
       validateAndTestPipeline={validateAndTestPipeline}
-      selectedTab={selectedTab}
-      setSelectedTab={setSelectedTab}
+      selectedTab={activeTab}
+      setSelectedTab={setActiveTab}
       testingError={testingError}
       onClose={onClose}
     />

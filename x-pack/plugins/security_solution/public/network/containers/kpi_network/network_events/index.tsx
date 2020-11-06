@@ -56,19 +56,23 @@ export const useNetworkKpiNetworkEvents = ({
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const [loading, setLoading] = useState(false);
-  const [networkKpiNetworkEventsRequest, setNetworkKpiNetworkEventsRequest] = useState<
-    NetworkKpiNetworkEventsRequestOptions
-  >({
-    defaultIndex: indexNames,
-    factoryQueryType: NetworkKpiQueries.networkEvents,
-    filterQuery: createFilter(filterQuery),
-    id: ID,
-    timerange: {
-      interval: '12h',
-      from: startDate,
-      to: endDate,
-    },
-  });
+  const [
+    networkKpiNetworkEventsRequest,
+    setNetworkKpiNetworkEventsRequest,
+  ] = useState<NetworkKpiNetworkEventsRequestOptions | null>(
+    !skip
+      ? {
+          defaultIndex: indexNames,
+          factoryQueryType: NetworkKpiQueries.networkEvents,
+          filterQuery: createFilter(filterQuery),
+          timerange: {
+            interval: '12h',
+            from: startDate,
+            to: endDate,
+          },
+        }
+      : null
+  );
 
   const [networkKpiNetworkEventsResponse, setNetworkKpiNetworkEventsResponse] = useState<
     NetworkKpiNetworkEventsArgs
@@ -84,7 +88,11 @@ export const useNetworkKpiNetworkEvents = ({
   });
 
   const networkKpiNetworkEventsSearch = useCallback(
-    (request: NetworkKpiNetworkEventsRequestOptions) => {
+    (request: NetworkKpiNetworkEventsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -144,8 +152,9 @@ export const useNetworkKpiNetworkEvents = ({
   useEffect(() => {
     setNetworkKpiNetworkEventsRequest((prevRequest) => {
       const myRequest = {
-        ...prevRequest,
+        ...(prevRequest ?? {}),
         defaultIndex: indexNames,
+        factoryQueryType: NetworkKpiQueries.networkEvents,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',

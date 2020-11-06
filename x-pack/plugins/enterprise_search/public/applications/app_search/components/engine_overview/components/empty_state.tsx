@@ -5,12 +5,11 @@
  */
 
 import React from 'react';
-import { useValues } from 'kea';
+import { useActions } from 'kea';
 import { EuiPageContent, EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { sendTelemetry } from '../../../../shared/telemetry';
-import { HttpLogic } from '../../../../shared/http';
+import { TelemetryLogic } from '../../../../shared/telemetry';
 import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { CREATE_ENGINES_PATH } from '../../../routes';
@@ -20,15 +19,13 @@ import { EngineOverviewHeader } from './header';
 import './empty_state.scss';
 
 export const EmptyState: React.FC = () => {
-  const { http } = useValues(HttpLogic);
+  const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   const buttonProps = {
     href: getAppSearchUrl(CREATE_ENGINES_PATH),
     target: '_blank',
     onClick: () =>
-      sendTelemetry({
-        http,
-        product: 'app_search',
+      sendAppSearchTelemetry({
         action: 'clicked',
         metric: 'create_first_engine_button',
       }),
@@ -36,7 +33,7 @@ export const EmptyState: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome isRoot />
+      <SetPageChrome />
       <EngineOverviewHeader />
       <EuiPageContent className="emptyState">
         <EuiEmptyPrompt

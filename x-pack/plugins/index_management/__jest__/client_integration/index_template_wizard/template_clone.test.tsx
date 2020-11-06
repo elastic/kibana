@@ -112,7 +112,7 @@ describe('<TemplateClone />', () => {
         name: `${templateToClone.name}-copy`,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
       };
-      // @ts-expect-error
+
       delete expected.template; // As no settings, mappings or aliases have been defined, no "template" param is sent
 
       expect(JSON.parse(JSON.parse(latestRequest.requestBody).body)).toEqual(expected);

@@ -34,3 +34,51 @@ select.form-control {
 .fullWidth {
   width: 100%;
 }
+
+.timDropdownWarning {
+  margin-bottom: $euiSize;
+  padding: $euiSizeXS $euiSizeS;
+  color: $euiColorDarkestShade;
+  border-left: solid 2px $euiColorDanger;
+  font-size: $euiSizeM;
+}
+
+.timFormCheckbox {
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+  position: relative;
+}
+
+.timFormCheckbox__input {
+  appearance: none;
+  background-color: $euiColorLightestShade;
+  border: 1px solid $euiColorLightShade;
+  border-radius: $euiSizeXS;
+  width: $euiSize;
+  height: $euiSize;
+  font-size: $euiSizeM;
+  transition: background-color .1s linear;
+}
+
+.timFormCheckbox__input:checked {
+  border-color: $euiColorPrimary;
+  background-color: $euiColorPrimary;
+}
+
+.timFormCheckbox__icon {
+  position: absolute;
+  top: 0;
+  left: 2px;
+}
+
+.timFormTextarea {
+  padding: $euiSizeXS $euiSizeM;
+  font-size: $euiSize;
+  line-height: 1.5;
+  color: $euiColorDarkestShade;
+  background-color: $euiFormBackgroundColor;
+  border: 1px solid $euiColorLightShade;
+  border-radius: $euiSizeXS;
+  transition: border-color .1s linear;
+}

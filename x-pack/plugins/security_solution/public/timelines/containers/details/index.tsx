@@ -49,7 +49,11 @@ export const useTimelineEventsDetails = ({
   );
 
   const timelineDetailsSearch = useCallback(
-    (request: TimelineEventsDetailsRequestOptions) => {
+    (request: TimelineEventsDetailsRequestOptions | null) => {
+      if (request == null) {
+        return;
+      }
+
       let didCancel = false;
       const asyncSearch = async () => {
         abortCtrl.current = new AbortController();
@@ -113,9 +117,7 @@ export const useTimelineEventsDetails = ({
   }, [docValueFields, eventId, indexName, skip]);
 
   useEffect(() => {
-    if (timelineDetailsRequest) {
-      timelineDetailsSearch(timelineDetailsRequest);
-    }
+    timelineDetailsSearch(timelineDetailsRequest);
   }, [timelineDetailsRequest, timelineDetailsSearch]);
 
   return [loading, timelineDetailsResponse];

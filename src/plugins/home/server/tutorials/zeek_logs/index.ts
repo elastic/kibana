@@ -31,7 +31,7 @@ import {
 
 export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'zeek';
-  const platforms = ['OSX', 'DEB', 'RPM'] as const;
+  const platforms = ['OSX', 'DEB', 'RPM', 'WINDOWS'] as const;
   return {
     id: 'zeekLogs',
     name: i18n.translate('home.tutorials.zeekLogs.nameTitle', {
@@ -40,13 +40,13 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.zeekLogs.shortDescription', {
-      defaultMessage: 'Collect the logs created by Zeek/Bro.',
+      defaultMessage: 'Collect Zeek network security monitoring logs.',
     }),
     longDescription: i18n.translate('home.tutorials.zeekLogs.longDescription', {
       defaultMessage:
-        'The `zeek` Filebeat module collects the logs from \
-[Zeek](https://www.zeek.org//documentation/index.html). \
-[Learn more]({learnMoreLink}).',
+        'This is a module for Zeek, which used to be called Bro. It parses logs \
+        that are in the [Zeek JSON format](https://www.zeek.org/manual/release/logs/index.html). \
+        [Learn more]({learnMoreLink}).',
       values: {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-zeek.html',
       },
@@ -57,7 +57,7 @@ export function zeekLogsSpecProvider(context: TutorialContext): TutorialSchema {
         {
           id: '7cbb5410-3700-11e9-aa6d-ff445a78330c',
           linkLabel: i18n.translate('home.tutorials.zeekLogs.artifacts.dashboards.linkLabel', {
-            defaultMessage: 'Zeek logs dashboard',
+            defaultMessage: 'Zeek Overview',
           }),
           isOverview: true,
         },

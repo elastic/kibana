@@ -15,56 +15,38 @@ interface Props {
 const Status = {
   Online: (
     <EuiHealth color="success">
-      <FormattedMessage
-        id="xpack.ingestManager.agentHealth.onlineStatusText"
-        defaultMessage="Online"
-      />
+      <FormattedMessage id="xpack.fleet.agentHealth.onlineStatusText" defaultMessage="Online" />
     </EuiHealth>
   ),
   Offline: (
     <EuiHealth color="subdued">
-      <FormattedMessage
-        id="xpack.ingestManager.agentHealth.offlineStatusText"
-        defaultMessage="Offline"
-      />
+      <FormattedMessage id="xpack.fleet.agentHealth.offlineStatusText" defaultMessage="Offline" />
     </EuiHealth>
   ),
   Inactive: (
     <EuiHealth color="subdued">
-      <FormattedMessage
-        id="xpack.ingestManager.agentHealth.inactiveStatusText"
-        defaultMessage="Inactive"
-      />
+      <FormattedMessage id="xpack.fleet.agentHealth.inactiveStatusText" defaultMessage="Inactive" />
     </EuiHealth>
   ),
   Warning: (
     <EuiHealth color="warning">
-      <FormattedMessage
-        id="xpack.ingestManager.agentHealth.warningStatusText"
-        defaultMessage="Error"
-      />
+      <FormattedMessage id="xpack.fleet.agentHealth.warningStatusText" defaultMessage="Error" />
     </EuiHealth>
   ),
   Error: (
     <EuiHealth color="danger">
-      <FormattedMessage
-        id="xpack.ingestManager.agentHealth.errorStatusText"
-        defaultMessage="Error"
-      />
+      <FormattedMessage id="xpack.fleet.agentHealth.errorStatusText" defaultMessage="Error" />
     </EuiHealth>
   ),
   Degraded: (
     <EuiHealth color="danger">
-      <FormattedMessage
-        id="xpack.ingestManager.agentHealth.degradedStatusText"
-        defaultMessage="Degraded"
-      />
+      <FormattedMessage id="xpack.fleet.agentHealth.degradedStatusText" defaultMessage="Degraded" />
     </EuiHealth>
   ),
   Enrolling: (
     <EuiHealth color="warning">
       <FormattedMessage
-        id="xpack.ingestManager.agentHealth.enrollingStatusText"
+        id="xpack.fleet.agentHealth.enrollingStatusText"
         defaultMessage="Enrolling"
       />
     </EuiHealth>
@@ -72,9 +54,14 @@ const Status = {
   Unenrolling: (
     <EuiHealth color="warning">
       <FormattedMessage
-        id="xpack.ingestManager.agentHealth.unenrollingStatusText"
+        id="xpack.fleet.agentHealth.unenrollingStatusText"
         defaultMessage="Unenrolling"
       />
+    </EuiHealth>
+  ),
+  Upgrading: (
+    <EuiHealth color="warning">
+      <FormattedMessage id="xpack.fleet.agentHealth.updatingStatusText" defaultMessage="Updating" />
     </EuiHealth>
   ),
 };
@@ -95,6 +82,8 @@ function getStatusComponent(agent: Agent): React.ReactElement {
       return Status.Unenrolling;
     case 'enrolling':
       return Status.Enrolling;
+    case 'updating':
+      return Status.Upgrading;
     default:
       return Status.Online;
   }
@@ -111,7 +100,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent }) => {
         msLastCheckIn ? (
           <>
             <FormattedMessage
-              id="xpack.ingestManager.agentHealth.checkInTooltipText"
+              id="xpack.fleet.agentHealth.checkInTooltipText"
               defaultMessage="Last checked in {lastCheckIn}"
               values={{
                 lastCheckIn: <FormattedRelative value={msLastCheckIn} />,
@@ -123,7 +112,7 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent }) => {
           </>
         ) : (
           <FormattedMessage
-            id="xpack.ingestManager.agentHealth.noCheckInTooltipText"
+            id="xpack.fleet.agentHealth.noCheckInTooltipText"
             defaultMessage="Never checked in"
           />
         )
