@@ -46,10 +46,12 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
   variablesHelpDocsLink,
 }) => {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+  const [showUrlError, setShowUrlError] = React.useState(false);
   const urlTemplate = config.url.template ?? '';
 
   function updateUrlTemplate(newUrlTemplate: string) {
     if (config.url.template !== newUrlTemplate) {
+      setShowUrlError(true);
       onConfig({
         ...config,
         url: {
@@ -60,7 +62,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
     }
   }
   const isEmpty = !urlTemplate;
-  const isInvalid = !isEmpty;
+  const isInvalid = showUrlError && isEmpty;
   const variablesDropdown = (
     <AddVariableButton
       variables={variables}
@@ -83,7 +85,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
     <>
       <EuiFormRow
         fullWidth
-        isInvalid={!urlTemplate}
+        isInvalid={isInvalid}
         className={'uaeUrlDrilldownCollectConfig__urlTemplateFormRow'}
         label={txtUrlTemplateLabel}
         helpText={
@@ -103,6 +105,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
           value={urlTemplate}
           placeholder={txtUrlTemplatePlaceholder}
           onChange={(event) => updateUrlTemplate(event.target.value)}
+          onBlur={() => setShowUrlError(true)}
           rows={3}
           inputRef={textAreaRef}
         />
