@@ -122,7 +122,7 @@ describe('Detection rules, machine learning', () => {
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', machineLearningRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
       getDetails(SEVERITY_DETAILS).should('have.text', machineLearningRule.severity);
-      getDetails(RISK_SCORE_DETAILS).should('equal', machineLearningRule.riskScore);
+      getDetails(RISK_SCORE_DETAILS).should('have.text', machineLearningRule.riskScore);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
         expect(removeExternalLinkText(details.text())).equal(expectedUrls);
       });
