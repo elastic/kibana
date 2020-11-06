@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 
 import { EuiPopover, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -177,6 +177,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
             layer={this.props.layer}
             displayName={this.props.displayName}
             escapedDisplayName={this.props.escapedDisplayName}
+            onClick={this._togglePopover}
           />
         }
         isOpen={this.state.isPopoverOpen}

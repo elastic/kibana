@@ -21,13 +21,19 @@ interface IconAndTooltipContent {
   footnotes: Footnote[];
 }
 
-interface Props {
-  displayName: string;
-  escapedDisplayName: string;
+export interface StateProps {
   isUsingSearch: boolean;
-  layer: ILayer;
   zoom: number;
 }
+
+export interface OwnProps {
+  displayName: string;
+  escapedDisplayName: string;
+  layer: ILayer;
+  onClick: () => void;
+}
+
+type Props = StateProps & OwnProps;
 
 interface State {
   isTimeAware: boolean;
@@ -162,7 +168,7 @@ export class TOCEntryButton extends Component<Props, State> {
           size="xs"
           flush="left"
           color="text"
-          onClick={this._togglePopover}
+          onClick={this.props.onClick}
           data-test-subj={`layerTocActionsPanelToggleButton${this.props.escapedDisplayName}`}
         >
           <span className="mapTocEntry__layerNameIcon">{icon}</span>

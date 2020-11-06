@@ -209,9 +209,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   ): Promise<ISearchSource> {
     const indexPattern = await this.getIndexPattern();
     const isTimeAware = await this.isTimeAware();
-    const applyGlobalQuery =
-      typeof searchFilters.applyGlobalQuery === 'boolean' ? searchFilters.applyGlobalQuery : true;
-    const globalFilters: Filter[] = applyGlobalQuery ? searchFilters.filters : [];
+    const globalFilters: Filter[] = searchFilters.applyGlobalQuery ? searchFilters.filters : [];
     const allFilters: Filter[] = [...globalFilters];
     if (this.isFilterByMapBounds() && 'buffer' in searchFilters && searchFilters.buffer) {
       // buffer can be empty
@@ -243,7 +241,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', limit);
     searchSource.setField('filter', allFilters);
-    if (applyGlobalQuery) {
+    if (searchFilters.applyGlobalQuery) {
       searchSource.setField('query', searchFilters.query);
     }
 

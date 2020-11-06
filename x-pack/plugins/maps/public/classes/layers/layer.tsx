@@ -10,7 +10,6 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
 import uuid from 'uuid/v4';
-import { i18n } from '@kbn/i18n';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import {
@@ -92,6 +91,7 @@ export interface ILayer {
   getJoinsDisabledReason(): string | null;
   isFittable(): Promise<boolean>;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
+  getCustomIconAndTooltipContent(): CustomIconAndTooltipContent;
 }
 
 export type CustomIconAndTooltipContent = {
