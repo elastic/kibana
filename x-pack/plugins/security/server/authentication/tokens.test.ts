@@ -7,6 +7,7 @@
 import { errors } from 'elasticsearch';
 
 import { elasticsearchServiceMock, loggingSystemMock } from '../../../../../src/core/server/mocks';
+import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 
 import {
   ILegacyClusterClient,
@@ -78,13 +79,15 @@ describe('Tokens', () => {
     });
 
     it('returns token pair if refresh API call succeeds', async () => {
+      const authentication = mockAuthenticatedUser();
       const tokenPair = { accessToken: 'access-token', refreshToken: 'refresh-token' };
       mockClusterClient.callAsInternalUser.mockResolvedValue({
         access_token: tokenPair.accessToken,
         refresh_token: tokenPair.refreshToken,
+        authentication,
       });
 
-      await expect(tokens.refresh(refreshToken)).resolves.toEqual(tokenPair);
+      await expect(tokens.refresh(refreshToken)).resolves.toEqual({ authentication, ...tokenPair });
 
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {
