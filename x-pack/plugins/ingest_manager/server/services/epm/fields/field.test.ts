@@ -547,4 +547,51 @@ describe('processFields', () => {
     ];
     expect(processFields(nested)).toEqual(nestedExpected);
   });
+
+  test('ignores redefinitions of a field', () => {
+    const fields = [
+      {
+        name: 'a',
+        type: 'text',
+      },
+      {
+        name: 'a',
+        type: 'number',
+      },
+      {
+        name: 'b.c',
+        type: 'number',
+      },
+      {
+        name: 'b',
+        type: 'group',
+        fields: [
+          {
+            name: 'c',
+            type: 'text',
+          },
+        ],
+      },
+    ];
+
+    const fieldsExpected = [
+      {
+        name: 'a',
+        // should preserve the field that was parsed first which had type: text
+        type: 'text',
+      },
+      {
+        name: 'b',
+        type: 'group',
+        fields: [
+          {
+            name: 'c',
+            // should preserve the field that was parsed first which had type: number
+            type: 'number',
+          },
+        ],
+      },
+    ];
+    expect(processFields(fields)).toEqual(fieldsExpected);
+  });
 });
