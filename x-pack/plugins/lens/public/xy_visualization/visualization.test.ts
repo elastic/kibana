@@ -15,6 +15,7 @@ import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks'
 function exampleState(): State {
   return {
     legend: { position: Position.Bottom, isVisible: true },
+    valueLabels: 'hide',
     preferredSeriesType: 'bar',
     layers: [
       {
@@ -150,6 +151,7 @@ describe('xy_visualization', () => {
           },
           "preferredSeriesType": "bar_stacked",
           "title": "Empty XY chart",
+          "valueLabels": "hide",
         }
       `);
     });

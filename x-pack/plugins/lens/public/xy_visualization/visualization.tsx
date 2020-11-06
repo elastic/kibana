@@ -145,6 +145,7 @@ export const getXyVisualization = ({
       state || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
+        valueLabels: 'hide',
         preferredSeriesType: defaultSeriesType,
         layers: [
           {
