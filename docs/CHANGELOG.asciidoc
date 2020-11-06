@@ -297,7 +297,7 @@ Alerting::
 * Fixes sorting of Alert Instance in Details page {kibana-pull}80103[#80103]
 * Fixes migration issue for case specific actions, by extending email action migrator checks {kibana-pull}81673[#81673]
 * Fixes docs in trigger alerting UI {kibana-pull}75363[#75363]
-* Populates alert instances view with event log data {kibana-pull}68437[#68437}
+* Populates alert instances view with event log data {kibana-pull}68437[#68437]
 * Displays a banner to users when some alerts have failures, added alert statuses column and filters {kibana-pull}79038[#79038]
 * Formalizes alert status and add status fields to alert saved object {kibana-pull}75553[#75553]
 APM::
