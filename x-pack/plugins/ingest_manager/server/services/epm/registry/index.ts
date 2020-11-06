@@ -26,14 +26,14 @@ import {
   setArchiveFilelist,
   deleteArchiveFilelist,
 } from './cache';
-import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
+import { ArchiveEntry, getBufferExtractor } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError } from '../../../errors';
 
-export { ArchiveEntry } from './extract';
+export { ArchiveEntry, getBufferExtractor } from './extract';
 
 export interface SearchParams {
   category?: CategoryId;
@@ -139,7 +139,10 @@ export async function unpackRegistryPackageToCache(
 ): Promise<string[]> {
   const paths: string[] = [];
   const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
-  const bufferExtractor = getBufferExtractor(archivePath);
+  const bufferExtractor = getBufferExtractor({ archivePath });
+  if (!bufferExtractor) {
+    throw new Error('Unknown compression format. Please use .zip or .gz');
+  }
   await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
     const { path, buffer } = entry;
     const { file } = pathParts(path);
@@ -199,13 +202,6 @@ export function pathParts(path: string): AssetParts {
   } as AssetParts;
 }
 
-export function getBufferExtractor(archivePath: string) {
-  const isZip = archivePath.endsWith('.zip');
-  const bufferExtractor = isZip ? unzipBuffer : untarBuffer;
-
-  return bufferExtractor;
-}
-
 export async function ensureCachedArchiveInfo(
   name: string,
   version: string,
@@ -242,10 +238,12 @@ export function getAsset(key: string) {
 }
 
 export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByType {
+  const kibanaAssetTypes = Object.values<string>(KibanaAssetType);
+
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
     const parts = pathParts(path.replace(/^\/package\//, ''));
-    if (parts.type in KibanaAssetType) {
+    if (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) {
       if (!map[parts.service]) map[parts.service] = {};
       if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
       map[parts.service][parts.type].push(parts);

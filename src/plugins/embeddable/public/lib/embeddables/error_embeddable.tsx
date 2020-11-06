@@ -30,7 +30,7 @@ export const ERROR_EMBEDDABLE_TYPE = 'error';
 export function isErrorEmbeddable<TEmbeddable extends IEmbeddable>(
   embeddable: TEmbeddable | ErrorEmbeddable
 ): embeddable is ErrorEmbeddable {
-  return (embeddable as ErrorEmbeddable).error !== undefined;
+  return Boolean(embeddable.fatalError || (embeddable as ErrorEmbeddable).error !== undefined);
 }
 
 export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutput> {
