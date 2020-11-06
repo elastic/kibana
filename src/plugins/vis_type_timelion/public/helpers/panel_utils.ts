@@ -18,6 +18,7 @@
  */
 
 import moment, { Moment } from 'moment-timezone';
+import { Position } from '@elastic/charts';
 
 import { TimefilterContract } from 'src/plugins/data/public';
 import { IUiSettingsClient } from 'kibana/public';
@@ -45,7 +46,7 @@ export interface Axis {
     min?: number;
     max?: number;
   };
-  position: 'top' | 'bottom' | 'left' | 'right' | undefined;
+  position?: Position;
   axisLabel: string;
 }
 

@@ -35,6 +35,8 @@ import { TimelionVisDependencies } from '../plugin';
 
 import './index.scss';
 
+const GRID_LINE_STROKE = 'rgba(125,125,125,0.3)';
+
 interface TimelionVisComponentProps {
   fireEvent: IInterpreterRenderHandlers['event'];
   interval: string;
@@ -196,7 +198,7 @@ function TimelionVisComponent({
                 position={axis.position}
                 tickFormat={axis.tickFormatter}
                 gridLine={{
-                  stroke: 'rgba(125,125,125,0.3)',
+                  stroke: GRID_LINE_STROKE,
                   visible: true,
                 }}
                 domain={axis.domain as YDomainRange}
@@ -208,7 +210,7 @@ function TimelionVisComponent({
             id="left"
             position={Position.Left}
             gridLine={{
-              stroke: 'rgba(125,125,125,0.3)',
+              stroke: GRID_LINE_STROKE,
               visible: true,
             }}
           />
