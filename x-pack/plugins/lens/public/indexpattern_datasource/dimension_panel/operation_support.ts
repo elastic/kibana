@@ -37,16 +37,17 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
 
   filteredOperationsByMetadata.forEach(({ operations }) => {
     operations.forEach((operation) => {
+      // replace spread operator by regular push as it's performance wise faster
       if (operation.type === 'field') {
-        supportedOperationsByField[operation.field] = [
-          ...(supportedOperationsByField[operation.field] ?? []),
-          operation.operationType,
-        ];
+        if (!supportedOperationsByField[operation.field]) {
+          supportedOperationsByField[operation.field] = [];
+        }
+        supportedOperationsByField[operation.field]?.push(operation.operationType);
 
-        supportedFieldsByOperation[operation.operationType] = [
-          ...(supportedFieldsByOperation[operation.operationType] ?? []),
-          operation.field,
-        ];
+        if (!supportedFieldsByOperation[operation.operationType]) {
+          supportedFieldsByOperation[operation.operationType] = [];
+        }
+        supportedFieldsByOperation[operation.operationType]?.push(operation.field);
       } else if (operation.type === 'none') {
         supportedOperationsWithoutField.push(operation.operationType);
       }

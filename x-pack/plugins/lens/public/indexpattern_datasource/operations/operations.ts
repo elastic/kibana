@@ -146,8 +146,8 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
 
   operationDefinitions.sort(getSortScoreByPriority).forEach((operationDefinition) => {
     if (operationDefinition.input === 'field') {
-      indexPattern.fields.forEach((field) => {
-        addToMap(
+      return indexPattern.fields.forEach((field) => {
+        return addToMap(
           {
             type: 'field',
             operationType: operationDefinition.type,
@@ -156,8 +156,9 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
           operationDefinition.getPossibleOperationForField(field)
         );
       });
-    } else if (operationDefinition.input === 'none') {
-      addToMap(
+    }
+    if (operationDefinition.input === 'none') {
+      return addToMap(
         {
           type: 'none',
           operationType: operationDefinition.type,
