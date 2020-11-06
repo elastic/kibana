@@ -194,8 +194,6 @@ const getInputSubscription = (props: {
 }) => {
   const { dashboardContainer, dashboardStateManager, filterManager } = props;
   return dashboardContainer.getInput$().subscribe(() => {
-    // let dirty = false;
-
     // This has to be first because handleDashboardContainerChanges causes
     // appState.save which will cause refreshDashboardContainer to be called.
 
@@ -216,11 +214,6 @@ const getInputSubscription = (props: {
     }
 
     dashboardStateManager.handleDashboardContainerChanges(dashboardContainer);
-    // $scope.$evalAsync(() => {
-    //   if (dirty) {
-    //     updateState();
-    //   }
-    // });
   });
 };
 

@@ -50,7 +50,6 @@ export function DashboardTopNav({
 }: DashboardTopNavProps) {
   const {
     core,
-    overlays,
     chrome,
     navigation,
     setHeaderActionMenu,
@@ -89,8 +88,8 @@ export function DashboardTopNav({
         redirectToDashboard({ id: savedDashboard.id });
       }
 
-      overlays
-        ?.openConfirm(
+      core.overlays
+        .openConfirm(
           i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesDescription', {
             defaultMessage: `Once you discard your changes, there's no getting them back.`,
           }),
@@ -117,10 +116,10 @@ export function DashboardTopNav({
     },
     [
       timefilter,
+      core.overlays,
       updateViewMode,
       savedDashboard.id,
       redirectToDashboard,
-      overlays?.openConfirm,
       dashboardStateManager,
     ]
   );
