@@ -6,7 +6,7 @@
 import './filter_popover.scss';
 
 import React, { MouseEventHandler, useState } from 'react';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { EuiPopover, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterValue, defaultLabel, isQueryValid } from '.';

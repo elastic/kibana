@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useRef } from 'react';
-import { useWindowSize } from 'react-use';
+import useWindowSize from 'react-use/lib/useWindowSize';
 
 export function useRefDimensions() {
   const ref = useRef<HTMLDivElement>(null);

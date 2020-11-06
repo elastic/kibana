@@ -7,7 +7,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner, EuiSpacer, EuiButton, EuiCallOut } from '@elastic/eui';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 import { GroupByExpression } from '../../../common/group_by_expression/group_by_expression';
 import {
   ForLastExpression,

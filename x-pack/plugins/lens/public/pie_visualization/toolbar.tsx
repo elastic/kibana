@@ -6,7 +6,7 @@
 
 import './toolbar.scss';
 import React, { useState } from 'react';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
