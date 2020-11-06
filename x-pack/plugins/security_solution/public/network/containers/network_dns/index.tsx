@@ -79,7 +79,6 @@ export const useNetworkDns = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkQueries.dns,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           isPtrIncluded,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
@@ -197,7 +196,6 @@ export const useNetworkDns = ({
         isPtrIncluded,
         factoryQueryType: NetworkQueries.dns,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
         timerange: {
