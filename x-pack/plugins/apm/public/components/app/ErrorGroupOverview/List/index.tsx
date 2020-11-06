@@ -107,7 +107,7 @@ function ErrorGroupList({ items, serviceName }: Props) {
               query={
                 {
                   ...urlParams,
-                  kuery: `error.exception.type:${type}`,
+                  kuery: `error.exception.type:"${type}"`,
                 } as APMQueryParams
               }
             >
