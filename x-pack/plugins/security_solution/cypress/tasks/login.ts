@@ -194,7 +194,15 @@ export const loginAndWaitForPageWithoutDateRange = (url: string) => {
 export const loginWithRoleAndWaitForPageWithoutDateRange = async (role: string, url: string) => {
   loginWithRole(role);
   cy.viewport('macbook-15');
-  cy.visit(`http://${role}:changeme@localhost:5620/${url}`);
+  const theUrl = Url.format({
+    auth: `${role}:changeme`,
+    username: role,
+    password: 'changeme',
+    protocol: Cypress.env('protocol'),
+    hostname: Cypress.env('hostname'),
+    port: Cypress.env('configport'),
+  } as UrlObject);
+  cy.visit(`${theUrl}/${url}`);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
