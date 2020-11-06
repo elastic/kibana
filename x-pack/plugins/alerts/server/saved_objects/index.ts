@@ -43,8 +43,8 @@ export function setupSavedObjects(
   });
 
   savedObjects.registerType({
-    name: 'invalidate_pending_api_key',
-    hidden: false,
+    name: 'api_key_pending_invalidation',
+    hidden: true,
     namespaceType: 'single',
     mappings: {
       properties: {

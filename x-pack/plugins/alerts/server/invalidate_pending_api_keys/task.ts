@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, ISavedObjectsRepository } from 'kibana/server';
+import { Logger, CoreStart } from 'kibana/server';
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../security/server';
 import {
   RunContext,
@@ -13,6 +13,7 @@ import {
 } from '../../../task_manager/server';
 import { InvalidateAPIKeyResult } from '../alerts_client';
 import { AlertsConfig } from '../config';
+import { AlertingPluginsStart } from '../plugin';
 import { InvalidatePendingApiKey } from '../types';
 
 const TASK_TYPE = 'alerts_invalidate_api_keys';
@@ -38,52 +39,24 @@ const invalidateAPIKey = async (
   };
 };
 
-export function initializeAlertsInvalidateApiKeys(
+export function initializeApiKeyInvalidator(
   logger: Logger,
-  internalSavedObjectsRepository: Promise<{
-    createInternalRepository: () => ISavedObjectsRepository;
-  }>,
+  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
   taskManager: TaskManagerSetupContract,
   securityPluginSetup?: SecurityPluginSetup
 ) {
-  registerAlertsInvalidateApiKeysTask(
+  registerApiKeyInvalitorTaskDefinition(
     logger,
-    internalSavedObjectsRepository,
+    coreStartServices,
     taskManager,
     securityPluginSetup
   );
 }
 
-export function scheduleAlertsInvalidateApiKeys(
+export async function scheduleApiKeyInvalidatorTask(
   logger: Logger,
   config: Promise<AlertsConfig>,
-  taskManager?: TaskManagerStartContract
-) {
-  if (taskManager) {
-    scheduleTasks(logger, taskManager, config);
-  }
-}
-
-function registerAlertsInvalidateApiKeysTask(
-  logger: Logger,
-  internalSavedObjectsRepository: Promise<{
-    createInternalRepository: () => ISavedObjectsRepository;
-  }>,
-  taskManager: TaskManagerSetupContract,
-  securityPluginSetup?: SecurityPluginSetup
-) {
-  taskManager.registerTaskDefinitions({
-    [TASK_TYPE]: {
-      title: 'Invalidate Alerts API Keys',
-      createTaskRunner: taskRunner(logger, internalSavedObjectsRepository, securityPluginSetup),
-    },
-  });
-}
-
-async function scheduleTasks(
-  logger: Logger,
-  taskManager: TaskManagerStartContract,
-  config: Promise<AlertsConfig>
+  taskManager: TaskManagerStartContract
 ) {
   const interval = (await config).invalidateApiKeysTask.interval;
   try {
@@ -101,11 +74,23 @@ async function scheduleTasks(
   }
 }
 
+function registerApiKeyInvalitorTaskDefinition(
+  logger: Logger,
+  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
+  taskManager: TaskManagerSetupContract,
+  securityPluginSetup?: SecurityPluginSetup
+) {
+  taskManager.registerTaskDefinitions({
+    [TASK_TYPE]: {
+      title: 'Invalidate alert API Keys',
+      createTaskRunner: taskRunner(logger, coreStartServices, securityPluginSetup),
+    },
+  });
+}
+
 function taskRunner(
   logger: Logger,
-  internalSavedObjectsRepository: Promise<{
-    createInternalRepository: () => ISavedObjectsRepository;
-  }>,
+  coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
   securityPluginSetup?: SecurityPluginSetup
 ) {
   return ({ taskInstance }: RunContext) => {
@@ -114,28 +99,40 @@ function taskRunner(
       async run() {
         let totalInvalidated = 0;
         try {
-          const repository = (await internalSavedObjectsRepository).createInternalRepository();
-          const apiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
-            type: 'invalidate_pending_api_key',
+          const [{ savedObjects }] = await coreStartServices;
+          const repository = savedObjects.createInternalRepository();
+          const totalApiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
+            type: 'api_key_pending_invalidation',
+            page: 1,
+            perPage: 0,
           });
-          apiKeysToInvalidate.saved_objects.forEach(async (obj) => {
-            const response = await invalidateAPIKey(
-              { id: obj.attributes.apiKeyId },
-              securityPluginSetup
-            );
-            if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-              logger.error(`Failed to invalidate API Key [id="${obj.attributes.apiKeyId}"]`);
-            } else {
-              try {
-                await repository.delete('invalidate_pending_api_key', obj.id);
-                totalInvalidated++;
-              } catch (err) {
-                logger.error(
-                  `Failed to cleanup api key "${obj.attributes.apiKeyId}". Error: ${err.message}`
-                );
+          let perPageLimit = Math.min(totalApiKeysToInvalidate.total, 100);
+          while (perPageLimit <= totalApiKeysToInvalidate.total) {
+            const apiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
+              type: 'api_key_pending_invalidation',
+              page: 1,
+              perPage: totalApiKeysToInvalidate.total,
+            });
+            apiKeysToInvalidate.saved_objects.forEach(async (obj) => {
+              const response = await invalidateAPIKey(
+                { id: obj.attributes.apiKeyId },
+                securityPluginSetup
+              );
+              if (response.apiKeysEnabled === true && response.result.error_count > 0) {
+                logger.error(`Failed to invalidate API Key [id="${obj.attributes.apiKeyId}"]`);
+              } else {
+                try {
+                  await repository.delete('api_key_pending_invalidation', obj.id);
+                  totalInvalidated++;
+                } catch (err) {
+                  logger.error(
+                    `Failed to cleanup api key "${obj.attributes.apiKeyId}". Error: ${err.message}`
+                  );
+                }
               }
-            }
-          });
+            });
+            perPageLimit += 100;
+          }
           return {
             state: {
               runs: (state.runs || 0) + 1,

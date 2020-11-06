@@ -62,11 +62,11 @@ import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
-import {
-  initializeAlertsInvalidateApiKeys,
-  scheduleAlertsInvalidateApiKeys,
-} from './invalidate_pending_api_keys/task';
 import { AlertsConfig } from './config';
+import {
+  initializeApiKeyInvalidator,
+  scheduleApiKeyInvalidatorTask,
+} from './invalidate_pending_api_keys/task';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -193,9 +193,9 @@ export class AlertingPlugin {
       });
     }
 
-    initializeAlertsInvalidateApiKeys(
+    initializeApiKeyInvalidator(
       this.logger,
-      this.createSOInternalRepositoryContext(core),
+      core.getStartServices(),
       plugins.taskManager,
       this.security
     );
@@ -290,22 +290,13 @@ export class AlertingPlugin {
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
 
-    scheduleAlertsInvalidateApiKeys(this.telemetryLogger, this.config, plugins.taskManager);
+    scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest,
     };
   }
-
-  private createSOInternalRepositoryContext = async (core: CoreSetup) => {
-    const [{ savedObjects }] = await core.getStartServices();
-    return {
-      createInternalRepository: () => {
-        return savedObjects.createInternalRepository(['alert', 'invalidate_pending_api_key']);
-      },
-    };
-  };
 
   private createRouteHandlerContext = (
     core: CoreSetup

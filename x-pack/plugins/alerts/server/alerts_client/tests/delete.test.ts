@@ -95,7 +95,7 @@ describe('delete()', () => {
   test('successfully removes an alert', async () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
       },
@@ -105,9 +105,12 @@ describe('delete()', () => {
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith('invalidate_pending_api_key', {
-      apiKeyId: '123',
-    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'api_key_pending_invalidation',
+      {
+        apiKeyId: '123',
+      }
+    );
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
@@ -118,7 +121,7 @@ describe('delete()', () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValue(new Error('Fail'));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
       },
@@ -152,7 +155,7 @@ describe('delete()', () => {
   test(`doesn't invalidate API key when apiKey is null`, async () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
       },
@@ -173,18 +176,21 @@ describe('delete()', () => {
   test('swallows error when invalidate API key throws', async () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
     await alertsClient.delete({ id: '1' });
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith('invalidate_pending_api_key', {
-      apiKeyId: '123',
-    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'api_key_pending_invalidation',
+      {
+        apiKeyId: '123',
+      }
+    );
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to mark for invalidating API Key: Fail'
+      'Failed to mark for API key [id="123"] for invalidation: Fail'
     );
   });
 
   test('swallows error when getDecryptedAsInternalUser throws an error', async () => {
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
       },

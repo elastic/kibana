@@ -162,7 +162,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '234',
       },
@@ -385,7 +385,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '234',
       },
@@ -393,7 +393,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '234',
       },
@@ -555,7 +555,7 @@ describe('update()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '234',
       },
@@ -828,7 +828,7 @@ describe('update()', () => {
       },
     });
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
-      'Failed to mark for invalidating API Key: Fail'
+      'Failed to mark for API key [id="123"] for invalidation: Fail'
     );
   });
 

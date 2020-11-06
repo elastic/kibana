@@ -13,7 +13,6 @@ import {
   SavedObjectReference,
   SavedObject,
   PluginInitializerContext,
-  ISavedObjectsRepository,
 } from 'src/core/server';
 import { esKuery } from '../../../../../src/plugins/data/server';
 import { ActionsClient, ActionsAuthorization } from '../../../actions/server';
@@ -48,7 +47,7 @@ import { IEvent } from '../../../event_log/server';
 import { parseDuration } from '../../common/parse_duration';
 import { retryIfConflicts } from '../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../saved_objects';
-import { addToInvalidateApiKeys } from '../invalidate_pending_api_keys/add_to_invalidate_api_keys';
+import { markApiKeyForInvalidation } from '../invalidate_pending_api_keys/mark_api_key_for_invalidation';
 
 export interface RegistryAlertTypeWithAuth extends RegistryAlertType {
   authorizedConsumers: string[];
@@ -258,10 +257,10 @@ export class AlertsClient {
       );
     } catch (e) {
       // Avoid unused API key
-      addToInvalidateApiKeys(
+      markApiKeyForInvalidation(
         { apiKey: rawAlert.apiKey },
         this.logger,
-        (this.unsecuredSavedObjectsClient as unknown) as ISavedObjectsRepository
+        this.unsecuredSavedObjectsClient
       );
       throw e;
     }
@@ -487,10 +486,10 @@ export class AlertsClient {
     await Promise.all([
       taskIdToRemove ? deleteTaskIfItExists(this.taskManager, taskIdToRemove) : null,
       apiKeyToInvalidate
-        ? addToInvalidateApiKeys(
+        ? markApiKeyForInvalidation(
             { apiKey: apiKeyToInvalidate },
             this.logger,
-            (this.unsecuredSavedObjectsClient as unknown) as ISavedObjectsRepository
+            this.unsecuredSavedObjectsClient
           )
         : null,
     ]);
@@ -531,10 +530,10 @@ export class AlertsClient {
 
     await Promise.all([
       alertSavedObject.attributes.apiKey
-        ? addToInvalidateApiKeys(
+        ? markApiKeyForInvalidation(
             { apiKey: alertSavedObject.attributes.apiKey },
             this.logger,
-            (this.unsecuredSavedObjectsClient as unknown) as ISavedObjectsRepository
+            this.unsecuredSavedObjectsClient
           )
         : null,
       (async () => {
@@ -600,10 +599,10 @@ export class AlertsClient {
       );
     } catch (e) {
       // Avoid unused API key
-      addToInvalidateApiKeys(
+      markApiKeyForInvalidation(
         { apiKey: createAttributes.apiKey },
         this.logger,
-        (this.unsecuredSavedObjectsClient as unknown) as ISavedObjectsRepository
+        this.unsecuredSavedObjectsClient
       );
       throw e;
     }
@@ -684,19 +683,19 @@ export class AlertsClient {
       await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
     } catch (e) {
       // Avoid unused API key
-      addToInvalidateApiKeys(
+      markApiKeyForInvalidation(
         { apiKey: updateAttributes.apiKey },
         this.logger,
-        (this.unsecuredSavedObjectsClient as unknown) as ISavedObjectsRepository
+        this.unsecuredSavedObjectsClient
       );
       throw e;
     }
 
     if (apiKeyToInvalidate) {
-      await addToInvalidateApiKeys(
+      await markApiKeyForInvalidation(
         { apiKey: apiKeyToInvalidate },
         this.logger,
-        (this.unsecuredSavedObjectsClient as unknown) as ISavedObjectsRepository
+        this.unsecuredSavedObjectsClient
       );
     }
   }
@@ -757,10 +756,10 @@ export class AlertsClient {
         await this.unsecuredSavedObjectsClient.update('alert', id, updateAttributes, { version });
       } catch (e) {
         // Avoid unused API key
-        addToInvalidateApiKeys(
+        markApiKeyForInvalidation(
           { apiKey: updateAttributes.apiKey },
           this.logger,
-          (this.unsecuredSavedObjectsClient as unknown) as ISavedObjectsRepository
+          this.unsecuredSavedObjectsClient
         );
         throw e;
       }
@@ -773,10 +772,10 @@ export class AlertsClient {
         scheduledTaskId: scheduledTask.id,
       });
       if (apiKeyToInvalidate) {
-        await addToInvalidateApiKeys(
+        await markApiKeyForInvalidation(
           { apiKey: apiKeyToInvalidate },
           this.logger,
-          (this.unsecuredSavedObjectsClient as unknown) as ISavedObjectsRepository
+          this.unsecuredSavedObjectsClient
         );
       }
     }
@@ -839,10 +838,10 @@ export class AlertsClient {
           ? deleteTaskIfItExists(this.taskManager, attributes.scheduledTaskId)
           : null,
         apiKeyToInvalidate
-          ? await addToInvalidateApiKeys(
+          ? await markApiKeyForInvalidation(
               { apiKey: apiKeyToInvalidate },
               this.logger,
-              (this.unsecuredSavedObjectsClient as unknown) as ISavedObjectsRepository
+              this.unsecuredSavedObjectsClient
             )
           : null,
       ]);

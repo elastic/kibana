@@ -158,7 +158,7 @@ describe('enable()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '123',
       },
@@ -171,7 +171,7 @@ describe('enable()', () => {
       namespace: 'default',
     });
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalledWith(
-      'invalidate_pending_api_key',
+      'api_key_pending_invalidation',
       {
         apiKeyId: '123',
       }
@@ -238,7 +238,7 @@ describe('enable()', () => {
     });
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '123',
       },
@@ -250,9 +250,12 @@ describe('enable()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith('invalidate_pending_api_key', {
-      apiKeyId: '123',
-    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'api_key_pending_invalidation',
+      {
+        apiKeyId: '123',
+      }
+    );
   });
 
   test(`doesn't enable already enabled alerts`, async () => {
@@ -342,7 +345,7 @@ describe('enable()', () => {
     unsecuredSavedObjectsClient.update.mockRejectedValueOnce(new Error('Fail to update'));
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
-      type: 'invalidate_pending_api_key',
+      type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '123',
       },
@@ -354,9 +357,12 @@ describe('enable()', () => {
     );
     expect(alertsClientParams.getUserName).toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith('invalidate_pending_api_key', {
-      apiKeyId: '123',
-    });
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      'api_key_pending_invalidation',
+      {
+        apiKeyId: '123',
+      }
+    );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });

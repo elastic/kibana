@@ -198,9 +198,9 @@ export function defineRoutes(
     ): Promise<IKibanaResponse<any>> => {
       try {
         const [{ savedObjects }] = await core.getStartServices();
-        const repository = savedObjects.createInternalRepository(['invalidate_pending_api_key']);
+        const repository = savedObjects.createInternalRepository(['api_key_pending_invalidation']);
         const apiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
-          type: 'invalidate_pending_api_key',
+          type: 'api_key_pending_invalidation',
         });
         return res.ok({
           body: { apiKeysToInvalidate },
