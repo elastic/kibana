@@ -27,7 +27,7 @@ import {
   urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '../../../../ui_actions_enhanced/public';
-import { getContextScope, getEventScope } from './url_drilldown_scope';
+import { getContextScope, getEventScope, getEventVariableList } from './url_drilldown_scope';
 import { txtUrlDrilldownDisplayName } from './i18n';
 
 interface UrlDrilldownDeps {
@@ -141,11 +141,10 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   private getVariableList = (context: ActionFactoryContext): string[] => {
-    const variables = getFlattenedObject({
-      ...this.deps.getGlobalScope(),
-      context: getContextScope(context),
-    });
-    const variableList = Object.keys(variables).sort();
-    return variableList;
+    return [
+      ...getEventVariableList(context).sort(),
+      ...Object.keys(getFlattenedObject(getContextScope(context))).sort(),
+      ...Object.keys(getFlattenedObject(this.deps.getGlobalScope())).sort(),
+    ];
   };
 }

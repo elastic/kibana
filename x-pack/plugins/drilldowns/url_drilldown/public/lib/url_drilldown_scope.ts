@@ -215,48 +215,19 @@ function getEventScopeFromRowClickTriggerContext({
   return scope;
 }
 
-/**
- * @remarks
- * Difference between `event` and `context` variables, is that real `context` variables are available during drilldown creation (e.g. embeddable panel)
- * `event` variables are mapped from trigger context. Since there is no trigger context during drilldown creation, we have to provide some _mock_ variables for validating and previewing the URL
- */
-export function getMockEventScope(context: ActionFactoryContext): UrlDrilldownEventScope {
+export function getEventVariableList(context: ActionFactoryContext): string[] {
   const [trigger] = context.triggers;
 
-  if (trigger === SELECT_RANGE_TRIGGER) {
-    return {
-      key: 'event.key',
-      from: new Date(Date.now() - 15 * 60 * 1000).toISOString(), // 15 minutes ago
-      to: new Date().toISOString(),
-    };
+  switch (trigger) {
+    case SELECT_RANGE_TRIGGER:
+      return ['event.key', 'event.from', 'event.to'];
+    case VALUE_CLICK_TRIGGER:
+      return ['event.key', 'event.value', 'event.negate', 'event.points'];
+    case ROW_CLICK_TRIGGER:
+      return ['event.rowIndex', 'event.values', 'event.keys', 'event.columnNames'];
   }
 
-  if (trigger === VALUE_CLICK_TRIGGER) {
-    // number of mock points to generate
-    // should be larger or equal of any possible data points length emitted by VALUE_CLICK_TRIGGER
-    const nPoints = 4;
-    const points = new Array(nPoints).fill(0).map((_, index) => ({
-      key: `event.points.${index}.key`,
-      value: `event.points.${index}.value`,
-    }));
-    return {
-      key: `event.key`,
-      value: `event.value`,
-      negate: false,
-      points,
-    };
-  }
-
-  if (trigger === ROW_CLICK_TRIGGER) {
-    return {
-      rowIndex: 123,
-      values: [0, 1, 2, 3],
-      keys: ['0', '1', '2', '3'],
-      columnNames: ['0', '1', '2', '3'],
-    };
-  }
-
-  return {};
+  return [];
 }
 
 type Primitive = string | number | boolean | null;
