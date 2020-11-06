@@ -44,7 +44,6 @@ export type StatefulSearchBarProps = SearchBarOwnProps & {
   useDefaultBehaviors?: boolean;
   savedQueryId?: string;
   onSavedQueryIdChange?: (savedQueryId?: string) => void;
-  onFilterAdded?: () => void;
 };
 
 // Respond to user changing the filters

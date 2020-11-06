@@ -72,6 +72,7 @@ import {
 
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -94,6 +95,7 @@ export class DataPublicPlugin
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
+  private usageCollection: UsageCollectionSetup | undefined;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
@@ -111,6 +113,8 @@ export class DataPublicPlugin
 
     expressions.registerFunction(esaggs);
     expressions.registerFunction(indexPatternLoad);
+
+    this.usageCollection = usageCollection;
 
     const queryService = this.queryService.setup({
       uiSettings: core.uiSettings,
@@ -151,10 +155,7 @@ export class DataPublicPlugin
     };
   }
 
-  public start(
-    core: CoreStart,
-    { uiActions, usageCollection }: DataStartDependencies
-  ): DataPublicPluginStart {
+  public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setNotifications(notifications);
     setOverlays(overlays);
@@ -211,7 +212,7 @@ export class DataPublicPlugin
       core,
       data: dataServices,
       storage: this.storage,
-      trackUiMetric: usageCollection?.reportUiStats.bind(usageCollection, 'data_plugin'),
+      trackUiMetric: this.usageCollection?.reportUiStats.bind(this.usageCollection, 'data_plugin'),
     });
 
     return {

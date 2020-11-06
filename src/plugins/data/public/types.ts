@@ -43,7 +43,6 @@ export interface DataSetupDependencies {
 
 export interface DataStartDependencies {
   uiActions: UiActionsStart;
-  usageCollection?: UsageCollectionSetup;
 }
 
 /**
