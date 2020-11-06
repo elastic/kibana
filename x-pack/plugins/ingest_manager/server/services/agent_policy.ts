@@ -18,13 +18,14 @@ import {
   AgentPolicy,
   AgentPolicySOAttributes,
   FullAgentPolicy,
-  AgentPolicyStatus,
   ListWithKuery,
 } from '../types';
 import {
   DeleteAgentPolicyResponse,
   Settings,
+  agentPolicyStatuses,
   storedPackagePoliciesToAgentInputs,
+  dataTypes,
 } from '../../common';
 import { AgentPolicyNameExistsError } from '../errors';
 import { createAgentPolicyAction, listAgents } from './agents';
@@ -61,8 +62,8 @@ class AgentPolicyService {
     }
 
     if (
-      oldAgentPolicy.status === AgentPolicyStatus.Inactive &&
-      agentPolicy.status !== AgentPolicyStatus.Active
+      oldAgentPolicy.status === agentPolicyStatuses.Inactive &&
+      agentPolicy.status !== agentPolicyStatuses.Active
     ) {
       throw new Error(
         `Agent policy ${id} cannot be updated because it is ${oldAgentPolicy.status}`
@@ -538,8 +539,8 @@ class AgentPolicyService {
               monitoring: {
                 use_output: defaultOutput.name,
                 enabled: true,
-                logs: agentPolicy.monitoring_enabled.indexOf('logs') >= 0,
-                metrics: agentPolicy.monitoring_enabled.indexOf('metrics') >= 0,
+                logs: agentPolicy.monitoring_enabled.includes(dataTypes.Logs),
+                metrics: agentPolicy.monitoring_enabled.includes(dataTypes.Metrics),
               },
             },
           }

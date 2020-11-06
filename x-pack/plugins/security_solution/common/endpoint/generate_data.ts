@@ -29,11 +29,10 @@ import {
   GetPackagesResponse,
 } from '../../../ingest_manager/common/types/rest_spec';
 import {
-  AgentPolicyStatus,
   EsAssetReference,
-  InstallationStatus,
   KibanaAssetReference,
 } from '../../../ingest_manager/common/types/models';
+import { agentPolicyStatuses } from '../../../ingest_manager/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 
 export type Event = AlertEvent | SafeEndpointEvent;
@@ -1235,7 +1234,7 @@ export class EndpointDocGenerator {
     return {
       id: this.seededUUIDv4(),
       name: 'Agent Policy',
-      status: AgentPolicyStatus.Active,
+      status: agentPolicyStatuses.Active,
       description: 'Some description',
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
@@ -1267,7 +1266,7 @@ export class EndpointDocGenerator {
           type: 'image/svg+xml',
         },
       ],
-      status: 'installed' as InstallationStatus,
+      status: 'installed',
       savedObject: {
         type: 'epm-packages',
         id: 'endpoint',
