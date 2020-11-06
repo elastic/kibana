@@ -112,10 +112,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           pageObjects.endpointPageUtils.clickOnEuiCheckbox('policyMacEvent_file'),
         ]);
 
-        // const advancedPolicyField = await pageObjects.policy.findAdvancedPolicyField();
-        // await advancedPolicyField.clearValue();
-        // await advancedPolicyField.click();
-        // await advancedPolicyField.type('true');
+        const advancedPolicyButton = await pageObjects.policy.findAdvancedPolicyButton();
+        await advancedPolicyButton.click();
+
+        const advancedPolicyField = await pageObjects.policy.findAdvancedPolicyField();
+        await advancedPolicyField.clearValue();
+        await advancedPolicyField.click();
+        await advancedPolicyField.type('true');
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
@@ -210,6 +213,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               linux: {
                 events: { file: false, network: true, process: true },
                 logging: { file: 'info' },
+                advanced: { agent: { connection_delay: 'true' } },
               },
               mac: {
                 events: { file: false, network: true, process: true },

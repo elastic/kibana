@@ -53,7 +53,6 @@ export const AdvancedPolicyForms = React.memo(() => {
           const configPath = advancedField.key.split('.');
           return (
             <PolicyAdvanced
-              data-test-subj={advancedField}
               key={index}
               configPath={configPath}
               firstSupportedVersion={advancedField.first_supported_version}
@@ -115,7 +114,12 @@ const PolicyAdvanced = React.memo(
             </EuiText>
           }
         >
-          <EuiFieldText fullWidth value={value as string} onChange={onChange} />
+          <EuiFieldText
+            data-test-subj={configPath.join('.')}
+            fullWidth
+            value={value as string}
+            onChange={onChange}
+          />
         </EuiFormRow>
       </>
     );
