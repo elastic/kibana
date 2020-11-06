@@ -18,6 +18,8 @@
  */
 
 import $ from 'jquery';
+import React from 'react';
+import { render, unmountComponentAtNode } from 'react-dom';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { vega, vegaLite } from '../lib/vega';
@@ -28,6 +30,8 @@ import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../data/public';
 
 import { getEnableExternalUrls } from '../services';
+import { VisualizationNoResults } from '../../../visualizations/public';
+import { NO_HITS_RETURNED_ERROR_MESSAGE } from '../data_model/no_hits_returned_error';
 
 vega.scheme('elastic', euiPaletteColorBlind());
 
@@ -79,7 +83,9 @@ export class VegaBaseView {
     this._initialized = true;
 
     try {
-      this._$parentEl.empty().addClass(`vgaVis`).css('flex-direction', this._parser.containerDir);
+      const vegaVisDiv = this._$parentEl[0];
+      unmountComponentAtNode(vegaVisDiv);
+      this._$parentEl.addClass(`vgaVis`).css('flex-direction', this._parser.containerDir);
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
       for (const warn of this._parser.warnings) {
@@ -87,7 +93,9 @@ export class VegaBaseView {
       }
 
       if (this._parser.error) {
-        this._addMessage('err', this._parser.error);
+        this._parser.error === NO_HITS_RETURNED_ERROR_MESSAGE
+          ? render(<VisualizationNoResults />, vegaVisDiv)
+          : this._addMessage('err', this._parser.error);
         return;
       }
 
