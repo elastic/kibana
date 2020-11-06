@@ -68,9 +68,9 @@ export const filterDuplicateRules = (
  * @param ruleId The rule id
  * @param signals The candidate new signals
  */
-export const filterDuplicateSignals = (ruleId: string, signals: SignalHit[]) => {
+export const filterDuplicateSignals = (ruleId: string, signals: BaseSignalHit[]) => {
   return signals.filter(
-    (doc) => !doc.signal.ancestors.some((ancestor) => ancestor.rule === ruleId)
+    (doc) => !doc._source.signal?.ancestors.some((ancestor) => ancestor.rule === ruleId)
   );
 };
 
