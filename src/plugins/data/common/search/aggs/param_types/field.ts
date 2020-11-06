@@ -90,10 +90,11 @@ export class FieldParamType extends BaseParamType {
             'data.search.aggs.paramTypes.field.invalidSavedFieldParameterErrorMessage',
             {
               defaultMessage:
-                'Saved field "{fieldParameter}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
+                'Saved field "{fieldParameter}" of index pattern "{indexPatternTitle}" is invalid for use with the "{aggType}" aggregation. Please select a new field.',
               values: {
                 fieldParameter: fieldName,
                 aggType: aggConfig?.type?.title,
+                indexPatternTitle: aggConfig.getIndexPattern().title,
               },
             }
           )

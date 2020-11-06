@@ -117,7 +117,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
               browserFields,
               config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
               dataProviders,
-              end: activeTimelineTo,
               filters: activeTimelineFilters,
               indexPattern,
               kqlMode,
@@ -125,7 +124,6 @@ const StatefulTopNComponent: React.FC<Props> = ({
                 language: 'kuery',
                 query: activeTimelineKqlQueryExpression ?? '',
               },
-              start: activeTimelineFrom,
             })?.filterQuery
           : undefined
       }
