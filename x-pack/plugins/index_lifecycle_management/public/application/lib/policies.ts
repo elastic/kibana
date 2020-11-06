@@ -3,16 +3,41 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { SerializedPolicy } from '../../../../common/types';
-import { savePolicy as savePolicyApi } from '../api';
-import { showApiError } from '../api_errors';
-import { getUiMetricsForPhases, trackUiMetric } from '../ui_metric';
-import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../../constants';
-import { toasts } from '../notification';
+import { PolicyFromES, SerializedPolicy } from '../../../common/types';
+
+import { toasts } from '../services/notification';
+import { savePolicy as savePolicyApi } from '../services/api';
+import { getUiMetricsForPhases, trackUiMetric } from '../services/ui_metric';
+import { showApiError } from '../services/api_errors';
+import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../constants';
+
+export const splitSizeAndUnits = (field: string): { size: string; units: string } => {
+  let size = '';
+  let units = '';
+
+  const result = /(\d+)(\w+)/.exec(field);
+  if (result) {
+    size = result[1];
+    units = result[2];
+  }
+
+  return {
+    size,
+    units,
+  };
+};
+
+export const getPolicyByName = (
+  policies: PolicyFromES[] | null | undefined,
+  policyName: string = ''
+): PolicyFromES | undefined => {
+  if (policies && policies.length > 0) {
+    return policies.find((policy: PolicyFromES) => policy.name === policyName);
+  }
+};
 
 export const savePolicy = async (
   serializedPolicy: SerializedPolicy,

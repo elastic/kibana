@@ -8,7 +8,7 @@ import { produce } from 'immer';
 
 import { SerializedPolicy } from '../../../../common/types';
 
-import { splitSizeAndUnits } from '../../services/policies/policy_serialization';
+import { splitSizeAndUnits } from '../../lib/policies';
 
 import { determineDataTierAllocationType } from '../../lib';
 

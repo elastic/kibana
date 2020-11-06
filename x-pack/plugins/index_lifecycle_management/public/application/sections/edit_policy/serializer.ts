@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isNumber } from 'lodash';
 
 import { SerializedPolicy, SerializedActionWithAllocation } from '../../../../common/types';
 
 import { FormInternal, DataAllocationMetaFields } from './types';
-import { isNumber } from '../../services/policies/policy_serialization';
 
 const serializeAllocateAction = (
   { dataTierAllocationType, allocationNodeAttribute }: DataAllocationMetaFields,

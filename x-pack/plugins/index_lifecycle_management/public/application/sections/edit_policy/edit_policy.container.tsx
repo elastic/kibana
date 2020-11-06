@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../shared_imports';
 
 import { useLoadPoliciesList } from '../../services/api';
-import { getPolicyByName } from '../../services/policies/policy_serialization';
+import { getPolicyByName } from '../../lib/policies';
 import { defaultPolicy } from '../../constants';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
