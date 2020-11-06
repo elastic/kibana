@@ -31,6 +31,7 @@ import {
 } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { DiscoverField } from './discover_field';
 import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
@@ -98,6 +99,12 @@ export interface DiscoverSidebarProps {
    * Change current state of fieldFilter
    */
   setFieldFilter: (next: FieldFilterState) => void;
+  /**
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
+   */
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverSidebar({
@@ -110,6 +117,7 @@ export function DiscoverSidebar({
   onRemoveField,
   selectedIndexPattern,
   setIndexPattern,
+  trackUiMetric,
   mobile = false,
   useFlyout = false,
   fieldFilter,
@@ -117,7 +125,6 @@ export function DiscoverSidebar({
 }: DiscoverSidebarProps) {
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const services = useMemo(() => getServices(), []);
-
   useEffect(() => {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
@@ -275,6 +282,7 @@ export function DiscoverSidebar({
                                     selected={true}
                                     useShortDots={useShortDots}
                                     mobile={mobile}
+                                    trackUiMetric={trackUiMetric}
                                   />
                                 </li>
                               );
@@ -335,6 +343,7 @@ export function DiscoverSidebar({
                                     getDetails={getDetailsByField}
                                     useShortDots={useShortDots}
                                     mobile={mobile}
+                                    trackUiMetric={trackUiMetric}
                                   />
                                 </li>
                               );
@@ -363,6 +372,7 @@ export function DiscoverSidebar({
                                 getDetails={getDetailsByField}
                                 useShortDots={useShortDots}
                                 mobile={mobile}
+                                trackUiMetric={trackUiMetric}
                               />
                             </li>
                           );

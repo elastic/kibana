@@ -76,7 +76,7 @@ describe('#ensureValidProjectDependency', () => {
       'packages/foo'
     );
 
-    expect(() => root.ensureValidProjectDependency(foo, false)).not.toThrow();
+    expect(() => root.ensureValidProjectDependency(foo)).not.toThrow();
   });
 
   test('using link:, but with wrong path', () => {
@@ -96,7 +96,7 @@ describe('#ensureValidProjectDependency', () => {
       'packages/foo'
     );
 
-    expect(() => root.ensureValidProjectDependency(foo, false)).toThrowErrorMatchingSnapshot();
+    expect(() => root.ensureValidProjectDependency(foo)).toThrowErrorMatchingSnapshot();
   });
 
   test('using version instead of link:', () => {
@@ -116,60 +116,7 @@ describe('#ensureValidProjectDependency', () => {
       'packages/foo'
     );
 
-    expect(() => root.ensureValidProjectDependency(foo, false)).toThrowErrorMatchingSnapshot();
-  });
-
-  test('using version in workspace', () => {
-    const root = createProjectWith({
-      dependencies: {
-        foo: '1.0.0',
-      },
-    });
-
-    const foo = createProjectWith(
-      {
-        name: 'foo',
-        version: '1.0.0',
-      },
-      'packages/foo'
-    );
-
-    expect(() => root.ensureValidProjectDependency(foo, true)).not.toThrow();
-  });
-
-  test('using wrong version in workspace', () => {
-    const root = createProjectWith({
-      dependencies: {
-        foo: '1.0.0',
-      },
-    });
-
-    const foo = createProjectWith(
-      {
-        name: 'foo',
-        version: '2.0.0',
-      },
-      'packages/foo'
-    );
-
-    expect(() => root.ensureValidProjectDependency(foo, true)).toThrowErrorMatchingSnapshot();
-  });
-
-  test('using link: in workspace', () => {
-    const root = createProjectWith({
-      dependencies: {
-        foo: 'link:packages/foo',
-      },
-    });
-
-    const foo = createProjectWith(
-      {
-        name: 'foo',
-      },
-      'packages/foo'
-    );
-
-    expect(() => root.ensureValidProjectDependency(foo, true)).toThrowErrorMatchingSnapshot();
+    expect(() => root.ensureValidProjectDependency(foo)).toThrowErrorMatchingSnapshot();
   });
 });
 

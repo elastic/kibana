@@ -38,13 +38,13 @@ import {
   Query,
   IndexPatternAttributes,
   DataPublicPluginStart,
+  AggConfigs,
 } from '../../../../data/public';
 import { Chart } from '../angular/helpers/point_series';
 import { AppState } from '../angular/discover_state';
 import { SavedSearch } from '../../saved_searches';
 
 import { SavedObject } from '../../../../../core/types';
-import { Vis } from '../../../../visualizations/public';
 import { TopNavMenuData } from '../../../../navigation/public';
 import { DiscoverSidebarResponsive } from './sidebar';
 
@@ -66,14 +66,16 @@ export interface DiscoverLegacyProps {
   onSkipBottomButtonClick: () => void;
   onSort: (sort: string[][]) => void;
   opts: {
-    savedSearch: SavedSearch;
+    chartAggConfigs?: AggConfigs;
     config: IUiSettingsClient;
-    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
-    timefield: string;
-    sampleSize: number;
-    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
-    setAppState: (state: Partial<AppState>) => void;
     data: DataPublicPluginStart;
+    fixedScroll: (el: HTMLElement) => void;
+    indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
+    sampleSize: number;
+    savedSearch: SavedSearch;
+    setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+    timefield: string;
+    setAppState: (state: Partial<AppState>) => void;
   };
   resetQuery: () => void;
   resultState: string;
@@ -87,7 +89,6 @@ export interface DiscoverLegacyProps {
   topNavMenu: TopNavMenuData[];
   updateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   updateSavedQueryId: (savedQueryId?: string) => void;
-  vis?: Vis;
 }
 
 export function DiscoverLegacy({
@@ -119,13 +120,13 @@ export function DiscoverLegacy({
   topNavMenu,
   updateQuery,
   updateSavedQueryId,
-  vis,
 }: DiscoverLegacyProps) {
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const { TopNavMenu } = getServices().navigation.ui;
+  const { trackUiMetric } = getServices();
   const { savedSearch, indexPatternList } = opts;
-  const bucketAggConfig = vis?.data?.aggs?.aggs[1];
+  const bucketAggConfig = opts.chartAggConfigs?.aggs[1];
   const bucketInterval =
     bucketAggConfig && search.aggs.isDateHistogramBucketAggConfig(bucketAggConfig)
       ? bucketAggConfig.buckets?.getInterval()
@@ -166,6 +167,7 @@ export function DiscoverLegacy({
             setIndexPattern={setIndexPattern}
             legacy={true}
             sidebarClassName={sidebarClassName}
+            trackUiMetric={trackUiMetric}
           />
           <EuiHideFor sizes={['xs', 's']}>
             <EuiButtonIcon
@@ -236,7 +238,7 @@ export function DiscoverLegacy({
                     })}
                     className="dscTimechart"
                   >
-                    {vis && rows.length !== 0 && (
+                    {opts.chartAggConfigs && rows.length !== 0 && (
                       <div className="dscHistogram" data-test-subj="discoverChart">
                         <DiscoverHistogram
                           chartData={histogramData}

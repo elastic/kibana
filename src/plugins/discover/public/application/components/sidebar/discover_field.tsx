@@ -19,6 +19,7 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
 import { FieldDetails } from './types';
@@ -62,6 +63,12 @@ export interface DiscoverFieldProps {
    */
   useShortDots?: boolean;
   /**
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
+   */
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
+  /**
    * Shows Add button at all times and not only on focus
    */
   mobile?: boolean;
@@ -76,6 +83,7 @@ export function DiscoverField({
   getDetails,
   selected,
   useShortDots,
+  trackUiMetric,
   mobile,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
@@ -229,6 +237,7 @@ export function DiscoverField({
           field={field}
           details={getDetails(field)}
           onAddFilter={onAddFilter}
+          trackUiMetric={trackUiMetric}
         />
       )}
     </EuiPopover>
