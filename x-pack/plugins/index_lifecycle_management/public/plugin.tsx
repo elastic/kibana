@@ -23,7 +23,6 @@ export class IndexLifecycleManagementPlugin {
   private breadcrumbService = new BreadcrumbService();
 
   public setup(coreSetup: CoreSetup, plugins: SetupDependencies) {
-
     const {
       ui: { enabled: isIndexLifecycleManagementUiEnabled },
     } = this.initializerContext.config.get<ClientConfigType>();
