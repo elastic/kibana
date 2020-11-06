@@ -177,6 +177,7 @@ export function SuggestionPanel({
       visualizationMap,
       activeVisualizationId: currentVisualizationId,
       visualizationState: currentVisualizationState,
+      activeData: frame.activeData,
     })
       .map((suggestion) => ({
         ...suggestion,

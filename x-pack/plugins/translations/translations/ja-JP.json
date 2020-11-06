@@ -10760,7 +10760,6 @@
     "xpack.lens.fittingFunctionsTitle.lookahead": "次へ",
     "xpack.lens.fittingFunctionsTitle.none": "非表示",
     "xpack.lens.fittingFunctionsTitle.zero": "ゼロ",
-    "xpack.lens.functions.mergeTables.help": "いくつかの Kibana 表を 1 つの表に結合するのをアシストします",
     "xpack.lens.functions.renameColumns.help": "データベースの列の名前の変更をアシストします",
     "xpack.lens.functions.renameColumns.idMap.help": "キーが古い列 ID で値が対応する新しい列 ID となるように JSON エンコーディングされたオブジェクトです。他の列 ID はすべてのそのままです。",
     "xpack.lens.includeValueButtonAriaLabel": "{value}を含める",

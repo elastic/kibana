@@ -10773,7 +10773,6 @@
     "xpack.lens.fittingFunctionsTitle.lookahead": "下一",
     "xpack.lens.fittingFunctionsTitle.none": "隐藏",
     "xpack.lens.fittingFunctionsTitle.zero": "零",
-    "xpack.lens.functions.mergeTables.help": "将任何数目的 kibana 表合并成单个表的助手",
     "xpack.lens.functions.renameColumns.help": "用于重命名数据表列的助手",
     "xpack.lens.functions.renameColumns.idMap.help": "旧列 ID 为键且相应新列 ID 为值的 JSON 编码对象。所有其他列 ID 都将保留。",
     "xpack.lens.includeValueButtonAriaLabel": "包括 {value}",
