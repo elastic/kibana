@@ -135,18 +135,19 @@ created earlier in dev tools: `manhattan_mta_alerts`. Accept the provided defaul
 - Under `Document to index`, use the following structure:
 ```
 {
-    "CrossingEntityId": "{{entityId}}",
-    "CrossingLine": "{{crossingLine}}",
-    "AfterCrossingPointId": "{{toEntityLocation}}",
-    "AfterCrossingPointLocation": "{{toEntityDateTime}}",
-    "AfterCrossingTime": "{{toEntityDocumentId}}",
-    "BeforeCrossingPointId": "{{toBoundaryId}}",
-    "BeforeCrossingPointLocation": "{{toBoundaryName}}",
-    "BeforeCrossingTime": "{{fromEntityLocation}}",
-    "CurrentBoundaryId": "{{fromEntityDateTime}}",
-    "CurrentBoundaryName": "{{fromEntityDocumentId}}",
-    "PreviousBoundaryId": "{{fromBoundaryId}}",
-    "PreviousBoundaryName": "{{fromBoundaryName}}"
+    "CrossingEntityId": "{{context.entityId}}",
+    "CrossingTimeOfDetection": "{{context.timeOfDetection}}",
+    "CrossingLine": "{{context.crossingLine}}",
+    "BeforeCrossingPointId": "{{context.fromEntityDocumentId}}",
+    "BeforeCrossingPointLocation": "{{context.fromEntityLocation}}",
+    "BeforeCrossingTime": "{{context.fromEntityDateTime}}",
+    "AfterCrossingPointId": "{{context.toEntityDocumentId}}",
+    "AfterCrossingPointLocation": "{{context.toEntityLocation}}",
+    "AfterCrossingTime": "{{context.toEntityDateTime}}",
+    "CurrentBoundaryId": "{{context.toBoundaryId}}",
+    "CurrentBoundaryName": "{{context.toBoundaryName}}",
+    "PreviousBoundaryId": "{{context.fromBoundaryId}}",
+    "PreviousBoundaryName": "{{context.fromBoundaryName}}"
 }
 - At the bottom right, click `Save`. Your alert should now be created!
 ```
