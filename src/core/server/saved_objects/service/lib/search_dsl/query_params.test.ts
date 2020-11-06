@@ -22,7 +22,7 @@ import { esKuery } from '../../../es_query';
 type KueryNode = any;
 
 import { typeRegistryMock } from '../../../saved_objects_type_registry.mock';
-import { ALL_NAMESPACES_STRING } from '../utils';
+import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
 import { getQueryParams, getClauseForReference } from './query_params';
 
 const registry = typeRegistryMock.create();
@@ -53,20 +53,26 @@ const ALL_TYPE_SUBSETS = ALL_TYPES.reduce(
 
 const createTypeClause = (type: string, namespaces?: string[]) => {
   if (registry.isMultiNamespace(type)) {
-    const array = [...(namespaces ?? ['default']), ALL_NAMESPACES_STRING];
+    const array = [...(namespaces ?? [DEFAULT_NAMESPACE_STRING]), ALL_NAMESPACES_STRING];
+
+    const namespacesClause = { terms: { namespaces: array } };
     return {
       bool: {
-        must: expect.arrayContaining([{ terms: { namespaces: array } }]),
+        must: namespaces?.includes(ALL_NAMESPACES_STRING)
+          ? expect.not.arrayContaining([namespacesClause])
+          : expect.arrayContaining([namespacesClause]),
         must_not: [{ exists: { field: 'namespace' } }],
       },
     };
   } else if (registry.isSingleNamespace(type)) {
-    const nonDefaultNamespaces = namespaces?.filter((n) => n !== 'default') ?? [];
+    const nonDefaultNamespaces = namespaces?.filter((n) => n !== DEFAULT_NAMESPACE_STRING) ?? [];
+    const searchingAcrossAllNamespaces = namespaces?.includes(ALL_NAMESPACES_STRING) ?? false;
+
     const should: any = [];
-    if (nonDefaultNamespaces.length > 0) {
+    if (nonDefaultNamespaces.length > 0 && !searchingAcrossAllNamespaces) {
       should.push({ terms: { namespace: nonDefaultNamespaces } });
     }
-    if (namespaces?.includes('default')) {
+    if (namespaces?.includes(DEFAULT_NAMESPACE_STRING)) {
       should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
     }
     return {
@@ -318,7 +324,7 @@ describe('#getQueryParams', () => {
         expectResult(result, ...ALL_TYPES.map((x) => createTypeClause(x, namespaces)));
       };
 
-      it('normalizes and deduplicates provided namespaces', () => {
+      it('deduplicates provided namespaces', () => {
         const result = getQueryParams({
           mappings,
           registry,
@@ -328,7 +334,7 @@ describe('#getQueryParams', () => {
 
         expectResult(
           result,
-          ...ALL_TYPES.map((x) => createTypeClause(x, ['foo', 'default', 'bar']))
+          ...ALL_TYPES.map((x) => createTypeClause(x, ['foo', '*', 'bar', 'default']))
         );
       });
 
