@@ -146,13 +146,11 @@ export class SecurityPlugin
 
   public start(core: CoreStart, { management, securityOss }: PluginStartDependencies) {
     this.sessionTimeout.start();
+    this.navControlService.start({ core });
     this.securityCheckupService.start({ securityOssStart: securityOss, docLinks: core.docLinks });
-
     if (management) {
       this.managementService.start({ capabilities: core.application.capabilities });
     }
-
-    return { navControlService: this.navControlService.start({ core }) };
   }
 
   public stop() {
