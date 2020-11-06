@@ -346,7 +346,7 @@ export const queryTimelineById = <TCache>({
         );
 
         const overrideDaterange =
-          timeline.status === TimelineStatus.immutable
+          timeline.status === TimelineStatus.immutable && timelineType === TimelineType.template
             ? {
                 ...timeline.dateRange,
                 start: DEFAULT_FROM_MOMENT.toISOString(),

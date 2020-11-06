@@ -150,7 +150,8 @@ export const addTimelineToStore = ({
       ...timeline,
       isLoading: timelineById[id].isLoading,
       dateRange:
-        timeline.status === TimelineStatus.immutable
+        timeline.status === TimelineStatus.immutable &&
+        timeline.timelineType === TimelineType.template
           ? {
               start: DEFAULT_FROM_MOMENT.toISOString(),
               end: DEFAULT_TO_MOMENT.toISOString(),
