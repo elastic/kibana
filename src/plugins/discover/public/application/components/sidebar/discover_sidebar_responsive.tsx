@@ -19,6 +19,7 @@
 import './discover_sidebar.scss';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { UiStatsMetricType } from '@kbn/analytics';
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -95,6 +96,12 @@ export interface DiscoverSidebarResponsiveProps {
    * Additional classname used for legacy
    */
   sidebarClassName?: string;
+  /**
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
+   */
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps) {
