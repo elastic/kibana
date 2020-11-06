@@ -63,14 +63,14 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
   private savedObjectsStart: SavedObjectsServiceStart | null = null;
-  private isMlReadyPromise: Promise<void>;
-  private isMlReady: () => void = () => {};
+  private isMlReady: Promise<void>;
+  private setMlReady: () => void = () => {};
 
   constructor(ctx: PluginInitializerContext) {
     this.log = ctx.logger.get();
     this.version = ctx.env.packageInfo.branch;
     this.mlLicense = new MlLicense();
-    this.isMlReadyPromise = new Promise((resolve) => (this.isMlReady = resolve));
+    this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
@@ -134,11 +134,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
-      routeGuard: new RouteGuard(
-        this.mlLicense,
-        getMlSavedObjectsClient,
-        () => this.isMlReadyPromise
-      ),
+      routeGuard: new RouteGuard(this.mlLicense, getMlSavedObjectsClient, () => this.isMlReady),
       mlLicense: this.mlLicense,
     };
 
@@ -184,7 +180,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         plugins.cloud,
         resolveMlCapabilities,
         () => this.clusterClient,
-        () => this.isMlReadyPromise
+        () => this.isMlReady
       ),
     };
   }
@@ -198,7 +194,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     // and create them if needed.
     const { initializeJobs } = jobSavedObjectsInitializationFactory(coreStart);
     initializeJobs().finally(() => {
-      this.isMlReady();
+      this.setMlReady();
     });
   }
 
