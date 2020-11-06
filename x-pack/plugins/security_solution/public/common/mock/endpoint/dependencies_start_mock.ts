@@ -8,6 +8,7 @@ import {
   dataPluginMock,
   Start as DataPublicStartMock,
 } from '../../../../../../../src/plugins/data/public/mocks';
+import { IngestManagerStart } from '../../../../../ingest_manager/public';
 
 type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
   indexPatterns: Omit<DataPublicStartMock['indexPatterns'], 'getFieldsForWildcard'> & {
