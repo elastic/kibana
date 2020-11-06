@@ -4,5 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SecurityNavControlService, SecurityNavControlServiceStart } from './nav_control_service';
-export { UserMenuLink } from './nav_control_component';
+function createSetupMock() {
+  return {
+    cloudId: 'mock-cloud-id',
+    isCloudEnabled: true,
+    resetPasswordUrl: 'reset-password-url',
+    accountUrl: 'account-url',
+  };
+}
+
+export const cloudMock = {
+  createSetup: createSetupMock,
+};

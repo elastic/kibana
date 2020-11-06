@@ -7,7 +7,7 @@
 import { PluginInitializerContext } from '../../../../src/core/public';
 import { CloudPlugin } from './plugin';
 
-export { CloudSetup } from './plugin';
+export { CloudSetup, CloudConfigType } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new CloudPlugin(initializerContext);
 }

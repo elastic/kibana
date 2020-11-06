@@ -4,5 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SecurityNavControlService, SecurityNavControlServiceStart } from './nav_control_service';
-export { UserMenuLink } from './nav_control_component';
+import { SecurityNavControlServiceStart } from '.';
+
+export const navControlServiceMock = {
+  createStart: (): jest.Mocked<SecurityNavControlServiceStart> => ({
+    getUserMenuLinks$: jest.fn(),
+    addUserMenuLinks: jest.fn(),
+  }),
+};
