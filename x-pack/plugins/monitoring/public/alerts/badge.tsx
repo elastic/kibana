@@ -36,7 +36,9 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const alertCount = inSetupMode
     ? Object.keys(alertsContext.allAlerts).length
     : getFiringAlertCount(alerts, stateFilter);
-  const [showByNode, setShowByNode] = React.useState(alertCount > MAX_TO_SHOW_IN_LIST);
+  const [showByNode, setShowByNode] = React.useState(
+    !inSetupMode && alertCount > MAX_TO_SHOW_IN_LIST
+  );
 
   if (alerts.length === 0) {
     return null;

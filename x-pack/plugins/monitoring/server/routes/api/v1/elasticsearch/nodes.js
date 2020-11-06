@@ -5,27 +5,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import moment from 'moment';
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getClusterStatus } from '../../../../lib/cluster/get_cluster_status';
 import { getNodes } from '../../../../lib/elasticsearch/nodes';
 import { getNodesShardCount } from '../../../../lib/elasticsearch/shards/get_nodes_shard_count';
 import { handleError } from '../../../../lib/errors/handle_error';
 import { prefixIndexPattern } from '../../../../lib/ccs_utils';
-import {
-  ALERT_CPU_USAGE,
-  ALERT_DISK_USAGE,
-  ALERT_MEMORY_USAGE,
-  ALERT_MISSING_MONITORING_DATA,
-  ELASTICSEARCH_SYSTEM_ID,
-  INDEX_PATTERN_ELASTICSEARCH,
-} from '../../../../../common/constants';
+import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import { getPaginatedNodes } from '../../../../lib/elasticsearch/nodes/get_nodes/get_paginated_nodes';
 import { LISTING_METRICS_NAMES } from '../../../../lib/elasticsearch/nodes/get_nodes/nodes_listing_metrics';
 import { getIndicesUnassignedShardStats } from '../../../../lib/elasticsearch/shards/get_indices_unassigned_shard_stats';
-import { fetchStatus } from '../../../../lib/alerts/fetch_status';
 
-export function esNodesRoute(server, npRoute) {
+export function esNodesRoute(server) {
   server.route({
     method: 'POST',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/nodes',
@@ -55,8 +46,6 @@ export function esNodesRoute(server, npRoute) {
     async handler(req) {
       const config = server.config();
       const { ccs, pagination, sort, queryText } = req.payload;
-      const min = moment.utc(req.payload.timeRange.min).valueOf();
-      const max = moment.utc(req.payload.timeRange.max).valueOf();
       const clusterUuid = req.params.clusterUuid;
       const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
@@ -70,27 +59,6 @@ export function esNodesRoute(server, npRoute) {
         );
         const clusterStatus = getClusterStatus(clusterStats, indicesUnassignedShardStats);
 
-        const alertsClient = req.getAlertsClient();
-        const status = alertsClient
-          ? await fetchStatus(
-              alertsClient,
-              npRoute.licenseService,
-              [
-                ALERT_CPU_USAGE,
-                ALERT_DISK_USAGE,
-                ALERT_MEMORY_USAGE,
-                ALERT_MISSING_MONITORING_DATA,
-              ],
-              clusterUuid,
-              min,
-              max,
-              [
-                {
-                  stackProduct: ELASTICSEARCH_SYSTEM_ID,
-                },
-              ]
-            )
-          : {};
         const metricSet = LISTING_METRICS_NAMES;
         const { pageOfNodes, totalNodeCount } = await getPaginatedNodes(
           req,
@@ -103,8 +71,7 @@ export function esNodesRoute(server, npRoute) {
           {
             clusterStats,
             nodesShardCount,
-          },
-          status
+          }
         );
 
         const nodes = await getNodes(
@@ -114,7 +81,7 @@ export function esNodesRoute(server, npRoute) {
           clusterStats,
           nodesShardCount
         );
-        return { clusterStatus, nodes, totalNodeCount, alerts: status };
+        return { clusterStatus, nodes, totalNodeCount };
       } catch (err) {
         throw handleError(err, req);
       }

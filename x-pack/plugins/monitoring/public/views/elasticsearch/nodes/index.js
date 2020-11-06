@@ -139,7 +139,7 @@ uiRoutes.when('/elasticsearch/nodes', {
                     clusterUuid={globalState.cluster_uuid}
                     setupMode={setupMode}
                     nodes={nodes}
-                    alerts={data.alerts}
+                    alerts={this.alerts}
                     showCgroupMetricsElasticsearch={showCgroupMetricsElasticsearch}
                     {...this.getPaginationTableProps(pagination)}
                   />

@@ -79,16 +79,11 @@ export interface AlertState {
   stackProductName: string;
 }
 
-export interface AlertNodeState extends AlertState {
-  nodeId: string;
-  nodeName?: string;
-}
-
-export interface AlertCpuUsageState extends AlertNodeState {
+export interface AlertCpuUsageState extends AlertState {
   cpuUsage: number;
 }
 
-export interface AlertDiskUsageState extends AlertNodeState {
+export interface AlertDiskUsageState extends AlertState {
   diskUsage: number;
 }
 
@@ -96,7 +91,7 @@ export interface AlertMissingDataState extends AlertState {
   gapDuration: number;
 }
 
-export interface AlertMemoryUsageState extends AlertNodeState {
+export interface AlertMemoryUsageState extends AlertState {
   memoryUsage: number;
 }
 

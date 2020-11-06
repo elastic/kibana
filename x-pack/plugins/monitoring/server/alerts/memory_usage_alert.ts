@@ -17,12 +17,14 @@ import {
   AlertInstanceState,
   CommonAlertFilter,
   CommonAlertParams,
+  AlertMemoryUsageNodeStats,
 } from '../../common/types/alerts';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   ALERT_MEMORY_USAGE,
   ALERT_DETAILS,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
 import { fetchMemoryUsageNodeStats } from '../lib/alerts/fetch_memory_usage_node_stats';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
@@ -104,7 +106,9 @@ export class MemoryUsageAlert extends BaseAlert {
       return true;
     }
 
-    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
+    const nodeAlerts = alertInstanceStates.filter(
+      ({ stackProductUuid }) => stackProductUuid === nodeFilter.nodeUuid
+    );
     return Boolean(nodeAlerts.length);
   }
 
@@ -115,7 +119,7 @@ export class MemoryUsageAlert extends BaseAlert {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const stat = item.meta as AlertMemoryUsageState;
+    const stat = item.meta as AlertMemoryUsageNodeStats;
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.memoryUsage.ui.resolvedMessage', {
@@ -249,7 +253,7 @@ export class MemoryUsageAlert extends BaseAlert {
         internalFullMessage: this.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
         nodes: firingNodes
-          .map((state) => `${state.nodeName}:${state.memoryUsage.toFixed(2)}`)
+          .map((state) => `${state.stackProductName}:${state.memoryUsage.toFixed(2)}`)
           .join(','),
         count: firingCount,
         clusterName: cluster.clusterName,
@@ -259,7 +263,7 @@ export class MemoryUsageAlert extends BaseAlert {
     } else {
       const resolvedNodes = (alertStates as AlertMemoryUsageState[])
         .filter((state) => !state.ui.isFiring)
-        .map((state) => `${state.nodeName}:${state.memoryUsage.toFixed(2)}`);
+        .map((state) => `${state.stackProductName}:${state.memoryUsage.toFixed(2)}`);
       const resolvedCount = resolvedNodes.length;
 
       if (resolvedCount > 0) {
@@ -309,11 +313,12 @@ export class MemoryUsageAlert extends BaseAlert {
       const newAlertStates: AlertMemoryUsageState[] = [];
 
       for (const node of nodes) {
-        const stat = node.meta as AlertMemoryUsageState;
+        const stat = node.meta as AlertMemoryUsageNodeStats;
         const nodeState = this.getDefaultAlertState(cluster, node) as AlertMemoryUsageState;
         nodeState.memoryUsage = stat.memoryUsage;
-        nodeState.nodeId = stat.nodeId;
-        nodeState.nodeName = stat.nodeName;
+        nodeState.stackProduct = ELASTICSEARCH_SYSTEM_ID;
+        nodeState.stackProductUuid = stat.nodeId;
+        nodeState.stackProductName = stat.nodeName || stat.nodeId;
 
         if (node.shouldFire) {
           nodeState.ui.triggeredMS = currentUTC;

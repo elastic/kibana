@@ -5,79 +5,65 @@
  */
 
 import React, { Fragment } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
-import { CommonAlertStatus } from '../../common/types/alerts';
-import { AlertSeverity } from '../../common/enums';
+import {
+  EuiAccordion,
+  EuiListGroup,
+  EuiListGroupItem,
+  EuiPanel,
+  EuiSpacer,
+  EuiCallOut,
+} from '@elastic/eui';
 import { replaceTokens } from './lib/replace_tokens';
 import { AlertMessage, AlertState } from '../../common/types/alerts';
-
-const TYPES = [
-  {
-    severity: AlertSeverity.Warning,
-    color: 'warning',
-    label: i18n.translate('xpack.monitoring.alerts.callout.warningLabel', {
-      defaultMessage: 'Warning alert(s)',
-    }),
-  },
-  {
-    severity: AlertSeverity.Danger,
-    color: 'danger',
-    label: i18n.translate('xpack.monitoring.alerts.callout.dangerLabel', {
-      defaultMessage: 'Danger alert(s)',
-    }),
-  },
-];
+import { AlertsByName } from './types';
 
 interface Props {
-  alerts: { [alertTypeId: string]: CommonAlertStatus };
+  alerts: AlertsByName;
   stateFilter: (state: AlertState) => boolean;
   nextStepsFilter: (nextStep: AlertMessage) => boolean;
 }
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
   const { alerts, stateFilter = () => true, nextStepsFilter = () => true } = props;
 
-  const callouts = TYPES.map((type) => {
-    const list = [];
-    for (const alertTypeId of Object.keys(alerts)) {
-      const alertInstance = alerts[alertTypeId];
-      for (const { firing, state } of alertInstance.states) {
-        if (firing && stateFilter(state) && state.ui.severity === type.severity) {
-          list.push(state);
-        }
+  const list = [];
+  for (const alertTypeId of Object.keys(alerts)) {
+    const alertInstance = alerts[alertTypeId];
+    for (const { firing, state } of alertInstance.states) {
+      if (firing && stateFilter(state)) {
+        list.push(state);
       }
     }
+  }
 
-    if (list.length) {
-      return (
-        <Fragment>
-          <EuiCallOut title={type.label} color={type.severity} iconType="bell">
-            <ul>
-              {list.map((state, index) => {
-                const nextStepsUi =
-                  state.ui.message.nextSteps && state.ui.message.nextSteps.length ? (
-                    <ul>
-                      {state.ui.message.nextSteps
-                        .filter(nextStepsFilter)
-                        .map((step: AlertMessage, nextStepIndex: number) => (
-                          <li key={nextStepIndex}>{replaceTokens(step)}</li>
-                        ))}
-                    </ul>
-                  ) : null;
-
-                return (
-                  <li key={index}>
-                    {replaceTokens(state.ui.message)}
-                    {nextStepsUi}
-                  </li>
-                );
-              })}
-            </ul>
-          </EuiCallOut>
-          <EuiSpacer />
-        </Fragment>
-      );
-    }
+  const accordions = list.map((state, index) => {
+    const buttonContent = (
+      <EuiCallOut title={replaceTokens(state.ui.message)} color="danger" iconType="bell" size="s" />
+    );
+    const nextStepsUi =
+      state.ui.message.nextSteps && state.ui.message.nextSteps.length ? (
+        <EuiListGroup gutterSize="none" style={{ paddingLeft: '1rem' }}>
+          {state.ui.message.nextSteps
+            .filter(nextStepsFilter)
+            .map((step: AlertMessage, nextStepIndex: number) => (
+              <EuiListGroupItem key={nextStepIndex} label={replaceTokens(step)} />
+            ))}
+        </EuiListGroup>
+      ) : null;
+    const spacer = index !== list.length - 1 ? <EuiSpacer /> : null;
+    return (
+      <div key={index}>
+        <EuiAccordion id={`accordionForm${index}`} buttonContent={buttonContent} paddingSize="xs">
+          {nextStepsUi}
+        </EuiAccordion>
+        {spacer}
+      </div>
+    );
   });
-  return <Fragment>{callouts}</Fragment>;
+
+  return (
+    <Fragment>
+      <EuiPanel>{accordions}</EuiPanel>
+      <EuiSpacer />
+    </Fragment>
+  );
 };

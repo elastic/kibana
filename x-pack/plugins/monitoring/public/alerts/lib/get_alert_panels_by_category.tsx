@@ -31,19 +31,21 @@ export function getAlertPanelsByCategory(
           alertsInCategory.push(categoryAlert);
         }
       }
-      menu.push({
-        ...category,
-        alerts: alertsInCategory.map(({ alertName, panelIndex }) => {
-          const alertStatus = alertsContext.allAlerts[alertName];
-          return {
-            alert: alertStatus.alert,
-            firingStates: [],
-            alertName,
-            panelIndex,
-          };
-        }),
-        alertCount: 0,
-      });
+      if (alertsInCategory.length > 0) {
+        menu.push({
+          ...category,
+          alerts: alertsInCategory.map(({ alertName, panelIndex }) => {
+            const alertStatus = alertsContext.allAlerts[alertName];
+            return {
+              alert: alertStatus.alert,
+              firingStates: [],
+              alertName,
+              panelIndex,
+            };
+          }),
+          alertCount: 0,
+        });
+      }
     } else {
       const firingAlertsInCategory = [];
       for (const { alertName, panelIndex } of category.alerts) {
