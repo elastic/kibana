@@ -11,9 +11,9 @@ import { TimeScaleUnit } from './time_scale';
 
 const unitSuffixes: Record<TimeScaleUnit, string> = {
   s: i18n.translate('xpack.lens.fieldFormats.suffix.s', { defaultMessage: '/h' }),
-  m: i18n.translate('xpack.lens.fieldFormats.suffix.s', { defaultMessage: '/m' }),
-  h: i18n.translate('xpack.lens.fieldFormats.suffix.s', { defaultMessage: '/h' }),
-  d: i18n.translate('xpack.lens.fieldFormats.suffix.s', { defaultMessage: '/d' }),
+  m: i18n.translate('xpack.lens.fieldFormats.suffix.m', { defaultMessage: '/m' }),
+  h: i18n.translate('xpack.lens.fieldFormats.suffix.h', { defaultMessage: '/h' }),
+  d: i18n.translate('xpack.lens.fieldFormats.suffix.d', { defaultMessage: '/d' }),
 };
 
 export function getSuffixFormatter(formatFactory: FormatFactory) {
