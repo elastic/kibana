@@ -98,7 +98,7 @@ export const ActionBar: FC<ActionBarProps> = ({
                   data-test-subj="actionBar-contextMenuButton"
                 >
                   <FormattedMessage
-                    id="xpack.savedObjectsTagging.management.actionBar.totalTagsLabel"
+                    id="xpack.savedObjectsTagging.management.actionBar.selectedTagsLabel"
                     defaultMessage="{count, plural, one {1 selected tag} other {# selected tags}}"
                     values={{
                       count: selectedCount,
