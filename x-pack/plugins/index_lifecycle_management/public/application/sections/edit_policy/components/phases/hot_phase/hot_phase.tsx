@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment, FunctionComponent, useEffect, useState } from 'react';
+import React, { Fragment, FunctionComponent, useState } from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -27,25 +27,21 @@ import {
   NumericField,
 } from '../../../../../../shared_imports';
 
+import { i18nTexts } from '../../../i18n_texts';
+
 import { ROLLOVER_EMPTY_VALIDATION } from '../../../form_validations';
 
 import { ROLLOVER_FORM_PATHS } from '../../../constants';
 
 import { LearnMoreLink, ActiveBadge, PhaseErrorMessage } from '../../';
 
-import { Forcemerge, SetPriorityInput } from '../shared';
+import { Forcemerge, SetPriorityInput, useRolloverPath } from '../shared';
 
 import { maxSizeStoredUnits, maxAgeUnits } from './constants';
 
-import { i18nTexts } from './i18n_texts';
-
-import { useRolloverPath } from '../shared';
-
 const hotProperty: keyof Phases = 'hot';
 
-export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) => void }> = ({
-  setWarmPhaseOnRollover,
-}) => {
+export const HotPhase: FunctionComponent = () => {
   const form = useFormContext();
   const [formData] = useFormData({
     watch: useRolloverPath,
@@ -54,10 +50,6 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
 
   const isShowingErrors = form.isValid === false;
   const [showEmptyRolloverFieldsError, setShowEmptyRolloverFieldsError] = useState(false);
-
-  useEffect(() => {
-    setWarmPhaseOnRollover(isRolloverEnabled ?? false);
-  }, [setWarmPhaseOnRollover, isRolloverEnabled]);
 
   return (
     <>
@@ -127,11 +119,11 @@ export const HotPhase: FunctionComponent<{ setWarmPhaseOnRollover: (v: boolean) 
             {showEmptyRolloverFieldsError && (
               <>
                 <EuiCallOut
-                  title={i18nTexts.rollOverConfigurationCallout.title}
+                  title={i18nTexts.editPolicy.errors.rollOverConfigurationCallout.title}
                   data-test-subj="rolloverSettingsRequired"
                   color="danger"
                 >
-                  <div>{i18nTexts.rollOverConfigurationCallout.body}</div>
+                  <div>{i18nTexts.editPolicy.errors.rollOverConfigurationCallout.body}</div>
                 </EuiCallOut>
                 <EuiSpacer size="s" />
               </>

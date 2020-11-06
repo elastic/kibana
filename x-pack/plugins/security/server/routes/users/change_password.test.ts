@@ -6,6 +6,7 @@
 
 import { errors } from 'elasticsearch';
 import { ObjectType } from '@kbn/config-schema';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   ILegacyClusterClient,
   IRouter,
@@ -194,7 +195,7 @@ describe('Change password', () => {
     it('successfully changes own password if provided old password is correct for non-basic provider.', async () => {
       const mockUser = mockAuthenticatedUser({
         username: 'user',
-        authentication_provider: 'token1',
+        authentication_provider: { type: 'token', name: 'token1' },
       });
       authc.getCurrentUser.mockReturnValue(mockUser);
       authc.login.mockResolvedValue(AuthenticationResult.succeeded(mockUser));

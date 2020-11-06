@@ -26,7 +26,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   TypeOf<typeof PostAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const { version, source_uri: sourceUri } = request.body;
+  const { version, source_uri: sourceUri, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkVersionIsSame(version, kibanaVersion);
@@ -53,7 +53,7 @@ export const postAgentUpgradeHandler: RequestHandler<
   }
 
   const agent = savedObjectToAgent(agentSO);
-  if (!isAgentUpgradeable(agent, kibanaVersion)) {
+  if (!force && !isAgentUpgradeable(agent, kibanaVersion)) {
     return response.customError({
       statusCode: 400,
       body: {
@@ -83,7 +83,7 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
   TypeOf<typeof PostBulkAgentUpgradeRequestSchema.body>
 > = async (context, request, response) => {
   const soClient = context.core.savedObjects.client;
-  const { version, source_uri: sourceUri, agents } = request.body;
+  const { version, source_uri: sourceUri, agents, force } = request.body;
   const kibanaVersion = appContextService.getKibanaVersion();
   try {
     checkVersionIsSame(version, kibanaVersion);
@@ -102,12 +102,14 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
         agentIds: agents,
         sourceUri,
         version,
+        force,
       });
     } else {
       await AgentService.sendUpgradeAgentsActions(soClient, {
         kuery: agents,
         sourceUri,
         version,
+        force,
       });
     }
 

@@ -18,7 +18,7 @@ import {
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 import { pkgToPkgKey } from '../registry';
 import { cacheGet, cacheSet, setArchiveFilelist } from '../registry/cache';
-import { unzipBuffer, untarBuffer, ArchiveEntry } from '../registry/extract';
+import { ArchiveEntry, getBufferExtractor } from '../registry/extract';
 
 export async function loadArchivePackage({
   archiveBuffer,
@@ -37,30 +37,23 @@ export async function loadArchivePackage({
   };
 }
 
-function getBufferExtractorForContentType(contentType: string) {
-  if (contentType === 'application/gzip') {
-    return untarBuffer;
-  } else if (contentType === 'application/zip') {
-    return unzipBuffer;
-  } else {
-    throw new PackageUnsupportedMediaTypeError(
-      `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
-    );
-  }
-}
-
 export async function unpackArchiveToCache(
   archiveBuffer: Buffer,
   contentType: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
-  const bufferExtractor = getBufferExtractorForContentType(contentType);
+  const bufferExtractor = getBufferExtractor({ contentType });
+  if (!bufferExtractor) {
+    throw new PackageUnsupportedMediaTypeError(
+      `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
+    );
+  }
   const paths: string[] = [];
   try {
     await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
       const { path, buffer } = entry;
       // skip directories
-      if (path.slice(-1) === '/') return;
+      if (path.endsWith('/')) return;
       if (buffer) {
         cacheSet(path, buffer);
         paths.push(path);
@@ -68,7 +61,7 @@ export async function unpackArchiveToCache(
     });
   } catch (error) {
     throw new PackageInvalidArchiveError(
-      `Error during extraction of uploaded package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
+      `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
     );
   }
 
@@ -76,7 +69,7 @@ export async function unpackArchiveToCache(
   // unpacking a zip file with untarBuffer() just results in nothing.
   if (paths.length === 0) {
     throw new PackageInvalidArchiveError(
-      `Uploaded archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
+      `Archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
     );
   }
   return paths;

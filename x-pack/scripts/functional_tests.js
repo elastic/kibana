@@ -6,7 +6,9 @@
 
 const alwaysImportedTests = [
   require.resolve('../test/functional/config.js'),
+  require.resolve('../test/functional_basic/config.ts'),
   require.resolve('../test/security_solution_endpoint/config.ts'),
+  require.resolve('../test/plugin_functional/config.ts'),
   require.resolve('../test/functional_with_es_ssl/config.ts'),
   require.resolve('../test/functional/config_security_basic.ts'),
   require.resolve('../test/security_functional/login_selector.config.ts'),
@@ -19,6 +21,7 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/api_integration/config_security_basic.ts'),
   require.resolve('../test/api_integration/config_security_trial.ts'),
   require.resolve('../test/api_integration/config.ts'),
+  require.resolve('../test/api_integration_basic/config.ts'),
   require.resolve('../test/alerting_api_integration/basic/config.ts'),
   require.resolve('../test/alerting_api_integration/spaces_only/config.ts'),
   require.resolve('../test/alerting_api_integration/security_and_spaces/config.ts'),
@@ -62,6 +65,10 @@ const onlyNotInCoverageTests = [
   require.resolve('../test/reporting_api_integration/reporting_without_security.config.ts'),
   require.resolve('../test/security_solution_endpoint_api_int/config.ts'),
   require.resolve('../test/ingest_manager_api_integration/config.ts'),
+  require.resolve('../test/functional_vis_wizard/config.ts'),
+  require.resolve('../test/saved_object_tagging/functional/config.ts'),
+  require.resolve('../test/saved_object_tagging/api_integration/security_and_spaces/config.ts'),
+  require.resolve('../test/saved_object_tagging/api_integration/tagging_api/config.ts'),
 ];
 
 require('../../src/setup_node_env');

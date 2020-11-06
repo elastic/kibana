@@ -503,7 +503,7 @@ describe('Lens App', () => {
       async function testSave(inst: ReactWrapper, saveProps: SaveProps) {
         await getButton(inst).run(inst.getDOMNode());
         inst.update();
-        const handler = inst.find('[data-test-subj="lnsApp_saveModalOrigin"]').prop('onSave') as (
+        const handler = inst.find('SavedObjectSaveModalOrigin').prop('onSave') as (
           p: unknown
         ) => void;
         handler(saveProps);
@@ -722,15 +722,14 @@ describe('Lens App', () => {
         });
         expect(services.attributeService.wrapAttributes).toHaveBeenCalledWith(
           expect.objectContaining({
-            savedObjectId: undefined,
             title: 'hello there',
           }),
           true,
           undefined
         );
-        expect(props.redirectTo).toHaveBeenCalledWith('aaa');
+        expect(props.redirectTo).toHaveBeenCalledWith(defaultSavedObjectId);
         await act(async () => {
-          component.setProps({ initialInput: { savedObjectId: 'aaa' } });
+          component.setProps({ initialInput: { savedObjectId: defaultSavedObjectId } });
         });
         expect(services.attributeService.wrapAttributes).toHaveBeenCalledTimes(1);
         expect(services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
@@ -781,7 +780,6 @@ describe('Lens App', () => {
         await act(async () => {
           testSave(component, { newCopyOnSave: false, newTitle: 'hello there' });
         });
-        expect(services.notifications.toasts.addDanger).toHaveBeenCalled();
         expect(props.redirectTo).not.toHaveBeenCalled();
         expect(getButton(component).disableButton).toEqual(false);
       });
@@ -857,6 +855,7 @@ describe('Lens App', () => {
         );
         component.update();
         await act(async () => {
+          component.setProps({ initialInput: { savedObjectId: '123' } });
           getButton(component).run(component.getDOMNode());
         });
         component.update();
@@ -871,7 +870,7 @@ describe('Lens App', () => {
           });
         });
         expect(checkForDuplicateTitle).toHaveBeenCalledWith(
-          expect.objectContaining({ savedObjectId: '123' }),
+          expect.objectContaining({ id: '123' }),
           false,
           onTitleDuplicate,
           expect.anything()
