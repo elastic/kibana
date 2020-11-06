@@ -25,7 +25,7 @@ import {
   getArchiveFilelist,
   setArchiveFilelist,
   deleteArchiveFilelist,
-} from './cache';
+} from '../archive';
 import { ArchiveEntry } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';

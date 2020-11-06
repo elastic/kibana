@@ -6,9 +6,11 @@
 
 import { ArchivePackage } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
-import { cacheSet, setArchiveFilelist } from '../registry/cache';
+import { cacheSet, setArchiveFilelist } from './cache';
 import { ArchiveEntry, getBufferExtractor } from '../registry/extract';
 import { parseAndVerifyArchive } from './validation';
+
+export * from './cache';
 
 export async function loadArchivePackage({
   archiveBuffer,
