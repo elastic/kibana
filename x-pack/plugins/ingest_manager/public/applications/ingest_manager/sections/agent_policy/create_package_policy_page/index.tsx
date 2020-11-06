@@ -48,6 +48,7 @@ import { StepDefinePackagePolicy } from './step_define_package_policy';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { useUIExtension } from '../../../hooks/use_ui_extension';
 import { ExtensionWrapper } from '../../../components/extension_wrapper';
+import { IntegrationPolicyEditExtensionComponentProps } from '../../../../../../common/types/ui_extensions';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -193,6 +194,21 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [packagePolicy, updatePackagePolicyValidation]
   );
 
+  const handleExtensionViewOnChange = useCallback<
+    IntegrationPolicyEditExtensionComponentProps['onChange']
+  >(
+    ({ isValid, updatedPolicy }) => {
+      updatePackagePolicy(updatedPolicy);
+      setFormState((prevState) => {
+        if (prevState === 'VALID' && !isValid) {
+          return 'INVALID';
+        }
+        return prevState;
+      });
+    },
+    [updatePackagePolicy]
+  );
+
   // Cancel path
   const cancelUrl = useMemo(() => {
     if (routeState && routeState.onCancelUrl) {
@@ -331,7 +347,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
           {/* If an Agent Policy and a package has been selected, then show UI extension (if any) */}
           {packagePolicy.policy_id && packagePolicy.package?.name && ExtensionView && (
             <ExtensionWrapper>
-              <ExtensionView newPolicy={packagePolicy} onChange={() => {}} />
+              <ExtensionView newPolicy={packagePolicy} onChange={handleExtensionViewOnChange} />
             </ExtensionWrapper>
           )}
         </>
@@ -347,6 +363,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       validationResults,
       formState,
       ExtensionView,
+      handleExtensionViewOnChange,
     ]
   );
 
