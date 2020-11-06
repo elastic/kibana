@@ -15,7 +15,7 @@ data streaming in as indicated by the `date` field. Older locations determined b
 are compared with newer locations to determine if a boundary has been crossed in the
 current monitoring interval.
 
-### 1. Run ES/Kibana dev env with https enabled
+### 1. Run ES/Kibana dev env with ssl enabled
 - In two terminals, run the normal commands to launch both elasticsearch and kibana but 
 append `--ssl` to the end of each as an arg, i.e.:
   - `yarn es snapshot --ssl  // Runs Elasticsearch`
@@ -37,8 +37,8 @@ in a local terminal should look something like:
 There are 4 separate tabs you'll need for a combination of loading and viewing the
 data. Since you'll be jumping between them, it might be easiest to just open them
 upfront. Each is preceded by `https://localhost:5601/<your dev env prefix>/app/`:
-- Index Patterns: `management/kibana/indexPatterns`
-- Alerts & Actions: `management/insightsAndAlerting/triggersActions/alerts`
+- Stack Management > Index Patterns: `management/kibana/indexPatterns`
+- Stack Management > Alerts & Actions: `management/insightsAndAlerting/triggersActions/alerts`
 - Dev tools: `dev_tools#/console`
 - Maps: `maps`
 
@@ -53,23 +53,44 @@ PUT /manhattan_mta_alerts
 PUT /manhattan_mta_alerts/_mapping
 {
   "properties": {
-    "AlertInstanceId": {
+    "CrossingEntityId": {
       "type": "keyword"
     },
-    "CrossingEventTimestamp": {
+    "CrossingTimeOfDetection": {
+      "type": "date"
+    },
+    "CrossingLine": {
+      "type": "geo_shape"
+    },
+    "AfterCrossingPointId": {
+      "type": "keyword"
+    },
+    "AfterCrossingPointLocation": {
+      "type": "geo_point"
+    },
+    "AfterCrossingTime": {
+      "type": "date"
+    },
+    "BeforeCrossingPointId": {
+      "type": "keyword"
+    },
+    "BeforeCrossingPointLocation": {
+      "type": "geo_point"
+    },
+    "BeforeCrossingTime": {
       "type": "date"
     },
     "CurrentBoundaryId": {
       "type": "keyword"
     },
-    "CurrentLocation": {
-      "type": "geo_point"
+    "CurrentBoundaryName": {
+      "type": "keyword"
     },
     "PreviousBoundaryId": {
       "type": "keyword"
     },
-    "PreviousLocation": {
-      "type": "geo_point"
+    "PreviousBoundaryName": {
+      "type": "keyword"
     }
   }
 }
@@ -100,12 +121,19 @@ earlier in dev tools: `manhattan_mta_alerts`
 - For document structure, use:
 ```
 {
-    "AlertInstanceId": "{{alertInstanceId}}",
-    "CrossingEventTimestamp": "{{context.crossingEventTimeStamp}}",
-    "CurrentBoundaryId": "{{context.currentBoundaryId}}",
-    "CurrentLocation": "{{context.currentLocation}}",
-    "PreviousBoundaryId": "{{context.previousBoundaryId}}",
-    "PreviousLocation": "{{context.previousLocation}}"
+    "CrossingEntityId": "{{entityId}}",
+    "CrossingTimeOfDetection": "{{timeOfDetection}}",
+    "CrossingLine": "{{crossingLine}}",
+    "AfterCrossingPointId": "{{toEntityLocation}}",
+    "AfterCrossingPointLocation": "{{toEntityDateTime}}",
+    "AfterCrossingTime": "{{toEntityDocumentId}}",
+    "BeforeCrossingPointId": "{{toBoundaryId}}",
+    "BeforeCrossingPointLocation": "{{toBoundaryName}}",
+    "BeforeCrossingTime": "{{fromEntityLocation}}",
+    "CurrentBoundaryId": "{{fromEntityDateTime}}",
+    "CurrentBoundaryName": "{{fromEntityDocumentId}}",
+    "PreviousBoundaryId": "{{fromBoundaryId}}",
+    "PreviousBoundaryName": "{{fromBoundaryName}}"
 }
 ```
 
