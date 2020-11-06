@@ -93,14 +93,6 @@ if [ $? -ne 0 ]; then
 fi
 
 #
-# Cypress
-##################################################
-echo "" # newline
-echo "${bold}Cypress (logs: ${E2E_DIR}${TMP_DIR}/e2e-yarn.log)${normal}"
-echo "Installing cypress dependencies "
-yarn &> ${TMP_DIR}/e2e-yarn.log
-
-#
 # Static mock data
 ##################################################
 echo "" # newline
