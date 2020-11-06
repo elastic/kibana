@@ -30,6 +30,7 @@ import {
 } from './constants';
 import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '../shared_components';
+import { FormatSelector } from '../../../dimension_panel/format_selector';
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
@@ -747,14 +748,13 @@ describe('ranges', () => {
 
       it('should not reset formatters when switching between custom ranges and auto histogram', () => {
         const setStateSpy = jest.fn();
-
-        // Add an extra range
         (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
-          from: DEFAULT_INTERVAL,
-          to: 2 * DEFAULT_INTERVAL,
+          from: null,
+          to: null,
           label: '',
         });
 
+        // set a default formatter for the sourceField used
         state.indexPatterns['1'].fieldFormatMap = {
           MyField: { id: 'custom', params: {} },
         };
@@ -762,7 +762,7 @@ describe('ranges', () => {
         // now set a format on the range operation
         (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.format = {
           id: 'custom',
-          params: { decimals: 0 },
+          params: { decimals: 3 },
         };
 
         const instance = mount(
@@ -776,21 +776,31 @@ describe('ranges', () => {
           />
         );
 
-        expect(instance.find(RangePopover)).toHaveLength(2);
-
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance
-            .find('[data-test-subj="lns-customBucketContainer-remove"]')
-            .last()
-            .prop('onClick')!({} as ReactMouseEvent);
-        });
+          instance.find('.euiLink').first().prop('onClick')!({} as ReactMouseEvent);
 
-        act(() => {
-          instance.update();
-          expect(instance.find(RangePopover).find(EuiText).prop('children')).toMatch(
-            /^Custom format:/
-          );
+          expect(setStateSpy).toHaveBeenCalledWith({
+            ...state,
+            layers: {
+              first: {
+                ...state.layers.first,
+                columns: {
+                  ...state.layers.first.columns,
+                  col1: {
+                    ...state.layers.first.columns.col1,
+                    params: {
+                      ...state.layers.first.columns.col1.params,
+                      format: {
+                        id: 'custom',
+                        params: { decimals: 3 },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          });
         });
       });
     });
