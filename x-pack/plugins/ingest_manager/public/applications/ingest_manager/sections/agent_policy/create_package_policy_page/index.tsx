@@ -34,7 +34,7 @@ import {
 } from '../../../hooks';
 import { Loading } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
-import { CreatePackagePolicyPageLayout, CustomPackagePolicy } from './components';
+import { CreatePackagePolicyPageLayout } from './components';
 import { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
 import {
   PackagePolicyValidationResults,
@@ -46,6 +46,8 @@ import { StepSelectAgentPolicy } from './step_select_agent_policy';
 import { StepConfigurePackagePolicy } from './step_configure_package';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
+import { useUIExtension } from '../../../hooks/use_ui_extension';
+import { ExtensionWrapper } from '../../../components/extension_wrapper';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {
@@ -287,6 +289,12 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy]
   );
 
+  const ExtensionView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'integration-policy',
+    'create'
+  );
+
   const stepSelectPackage = useMemo(
     () => (
       <StepSelectPackage
@@ -320,12 +328,12 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             validationResults={validationResults!}
             submitAttempted={formState === 'INVALID'}
           />
-          <CustomPackagePolicy
-            from={from}
-            packageName={packageInfo.name}
-            packagePolicy={packagePolicy}
-            packagePolicyId=""
-          />
+          {/* If an Agent Policy and a package has been selected, then show UI extension (if any) */}
+          {packagePolicy.policy_id && packagePolicy.package?.name && ExtensionView && (
+            <ExtensionWrapper>
+              <ExtensionView newPolicy={packagePolicy} onChange={() => {}} />
+            </ExtensionWrapper>
+          )}
         </>
       ) : (
         <div />
@@ -338,7 +346,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
       updatePackagePolicy,
       validationResults,
       formState,
-      from,
+      ExtensionView,
     ]
   );
 

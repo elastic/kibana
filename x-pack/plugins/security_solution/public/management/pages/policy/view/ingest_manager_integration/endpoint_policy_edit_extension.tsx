@@ -28,20 +28,20 @@ import {
 } from '../../../../../../common/endpoint/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { IntegrationPolicyEditExtensionComponent } from '../../../../../../../ingest_manager/common/types/ui_extensions';
+import { IntegrationPolicyEditExtensionComponentProps } from '../../../../../../../ingest_manager/common/types/ui_extensions';
 
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
  */
-export const EndpointPolicyEditExtension = memo<IntegrationPolicyEditExtensionComponent>(
-  ({ from, packagePolicyId, packagePolicy: { policy_id: agentPolicyId } }) => {
+export const EndpointPolicyEditExtension = memo<IntegrationPolicyEditExtensionComponentProps>(
+  ({ policy }) => {
     return (
       <>
         <EuiSpacer size="m" />
         <EuiCallOut data-test-subj="endpointPackagePolicy_edit" iconType="iInCircle">
           <EuiText size="s">
-            <EditFlowMessage agentPolicyId={agentPolicyId} integrationPolicyId={packagePolicyId!} />
+            <EditFlowMessage agentPolicyId={policy.policy_id} integrationPolicyId={policy.id} />
           </EuiText>
         </EuiCallOut>
       </>

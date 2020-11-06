@@ -24,9 +24,15 @@ export interface UIExtensionsStorage {
  * UI Component Extension is used on the pages displaying the ability to edit an
  * Integration Policy
  */
-export type IntegrationPolicyEditExtensionComponent = ComponentType<{
+export type IntegrationPolicyEditExtensionComponent = ComponentType<
+  IntegrationPolicyEditExtensionComponentProps
+>;
+
+export interface IntegrationPolicyEditExtensionComponentProps {
   /** The current integration policy being edited */
-  currentPolicy: PackagePolicy;
+  policy: PackagePolicy;
+  /** The new (updated) integration policy that will be saved */
+  newPolicy: NewPackagePolicy;
   /**
    * A callback that should be executed anytime a change to the Integration Policy needs to
    * be reported back to the Fleet Policy Edit page
@@ -37,7 +43,7 @@ export type IntegrationPolicyEditExtensionComponent = ComponentType<{
     /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: NewPackagePolicy;
   }) => void;
-}>;
+}
 
 /** Extension point registration contract for Integration Policy Edit views */
 export interface IntegrationPolicyEditExtension {
@@ -51,9 +57,13 @@ export interface IntegrationPolicyEditExtension {
  * UI Component Extension is used on the pages displaying the ability to Create an
  * Integration Policy
  */
-export type IntegrationPolicyCreateExtensionComponent = ComponentType<{
-  /** The current integration policy being created */
-  currentPolicy: NewPackagePolicy;
+export type IntegrationPolicyCreateExtensionComponent = ComponentType<
+  IntegrationPolicyCreateExtensionComponentProps
+>;
+
+export interface IntegrationPolicyCreateExtensionComponentProps {
+  /** The integration policy being created */
+  newPolicy: NewPackagePolicy;
   /**
    * A callback that should be executed anytime a change to the Integration Policy needs to
    * be reported back to the Fleet Policy Edit page
@@ -64,7 +74,7 @@ export type IntegrationPolicyCreateExtensionComponent = ComponentType<{
     /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: NewPackagePolicy;
   }) => void;
-}>;
+}
 
 /** Extension point registration contract for Integration Policy Create views */
 export interface IntegrationPolicyCreateExtension {

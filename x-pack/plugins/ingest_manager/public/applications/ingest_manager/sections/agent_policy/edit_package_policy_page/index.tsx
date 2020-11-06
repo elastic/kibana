@@ -29,10 +29,7 @@ import {
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
-import {
-  CreatePackagePolicyPageLayout,
-  CustomPackagePolicy,
-} from '../create_package_policy_page/components';
+import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
 import {
   PackagePolicyValidationResults,
   validatePackagePolicy,
@@ -44,6 +41,9 @@ import {
 } from '../create_package_policy_page/types';
 import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
 import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
+import { useUIExtension } from '../../../hooks/use_ui_extension';
+import { ExtensionWrapper } from '../../../components/extension_wrapper';
+import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
 
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
   const { notifications } = useCore();
@@ -71,6 +71,9 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     inputs: [],
     version: '',
   });
+  const [originalPackagePolicy, setOriginalPackagePolicy] = useState<
+    GetOnePackagePolicyResponse['item']
+  >();
 
   // Retrieve agent policy, package, and package policy info
   useEffect(() => {
@@ -86,6 +89,8 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
           setAgentPolicy(agentPolicyData.item);
         }
         if (packagePolicyData?.item) {
+          setOriginalPackagePolicy(packagePolicyData.item);
+
           const {
             id,
             revision,
@@ -270,6 +275,12 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     packageInfo,
   };
 
+  const ExtensionView = useUIExtension(
+    packagePolicy.package?.name ?? '',
+    'integration-policy',
+    'edit'
+  );
+
   const configurePackage = useMemo(
     () =>
       agentPolicy && packageInfo ? (
@@ -292,22 +303,30 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
             submitAttempted={formState === 'INVALID'}
           />
 
-          <CustomPackagePolicy
-            from="edit"
-            packageName={packageInfo.name}
-            packagePolicy={packagePolicy}
-            packagePolicyId={packagePolicyId}
-          />
+          {packagePolicy.policy_id &&
+            packagePolicy.package?.name &&
+            originalPackagePolicy &&
+            ExtensionView && (
+              <ExtensionWrapper>
+                <ExtensionView
+                  policy={originalPackagePolicy}
+                  newPolicy={packagePolicy}
+                  onChange={() => {}}
+                />
+              </ExtensionWrapper>
+            )}
         </>
       ) : null,
     [
       agentPolicy,
-      formState,
-      packagePolicy,
-      packagePolicyId,
       packageInfo,
+      packagePolicy,
       updatePackagePolicy,
       validationResults,
+      packagePolicyId,
+      formState,
+      originalPackagePolicy,
+      ExtensionView,
     ]
   );
 
