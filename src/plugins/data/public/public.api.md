@@ -1658,7 +1658,7 @@ export class Plugin implements Plugin_2<DataPublicPluginSetup, DataPublicPluginS
     // (undocumented)
     setup(core: CoreSetup<DataStartDependencies, DataPublicPluginStart>, { expressions, uiActions, usageCollection }: DataSetupDependencies): DataPublicPluginSetup;
     // (undocumented)
-    start(core: CoreStart_2, { uiActions, usageCollection }: DataStartDependencies): DataPublicPluginStart;
+    start(core: CoreStart_2, { uiActions }: DataStartDependencies): DataPublicPluginStart;
     // (undocumented)
     stop(): void;
     }
@@ -2168,7 +2168,6 @@ export type StatefulSearchBarProps = SearchBarOwnProps & {
     useDefaultBehaviors?: boolean;
     savedQueryId?: string;
     onSavedQueryIdChange?: (savedQueryId?: string) => void;
-    onFilterAdded?: () => void;
 };
 
 // Warning: (ae-forgotten-export) The symbol "IKbnUrlStateStorage" needs to be exported by the entry point index.d.ts
