@@ -21,6 +21,7 @@ import {
 } from './schemas/job_service_schema';
 
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
+import { Job } from '../../common/types/anomaly_detection_jobs';
 
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
@@ -765,6 +766,47 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
 
         return response.ok({
           body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup JobService
+   *
+   * @api {get} /api/ml/jobs/jobs_exist Check whether jobs exists in any space
+   * @apiName JobExists
+   * @apiDescription Returns a boolean based on whether the job exists
+   *
+   * @apiSchema (body) jobIdsSchema
+   */
+  router.get(
+    {
+      path: '/api/ml/jobs/job_exist/{jobId}',
+      validate: {
+        params: jobIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      let exists = false;
+      try {
+        const { jobId } = request.params;
+        try {
+          const { body } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>({
+            job_id: jobId,
+          });
+          exists = body.jobs.length > 0;
+        } catch (error) {
+          // fail silently
+        }
+
+        return response.ok({
+          body: { exists },
         });
       } catch (e) {
         return response.customError(wrapError(e));

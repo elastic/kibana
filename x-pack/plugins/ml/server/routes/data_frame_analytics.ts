@@ -20,6 +20,7 @@ import {
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
 import { getAuthorizationHeader } from '../lib/request_authorization';
+import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
 
 function getIndexPatternId(context: RequestHandlerContext, patternName: string) {
   const iph = new IndexPatternHandler(context.core.savedObjects.client);
@@ -535,6 +536,48 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
         const results = await getAnalyticsAuditMessages(analyticsId);
         return response.ok({
           body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup DataFrameAnalytics
+   *
+   * @api {get} /api/ml/data_frame/analytics/job_exists/:analyticsId Check whether jobs exists in any space
+   * @apiName JobExists
+   * @apiDescription Returns a boolean based on whether the job exists
+   *
+   * @apiSchema (params) analyticsIdSchema
+   */
+  router.get(
+    {
+      path: '/api/ml/data_frame/analytics/job_exists/{analyticsId}',
+      validate: {
+        params: analyticsIdSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetDataFrameAnalytics'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
+      let exists = false;
+      try {
+        const { analyticsId } = request.params;
+        try {
+          const { body } = await client.asInternalUser.ml.getDataFrameAnalytics<{
+            data_frame_analytics: DataFrameAnalyticsConfig[];
+          }>({
+            id: analyticsId,
+          });
+          exists = body.data_frame_analytics.length > 0;
+        } catch (error) {
+          // fail silently
+        }
+        return response.ok({
+          body: { exists },
         });
       } catch (e) {
         return response.customError(wrapError(e));
