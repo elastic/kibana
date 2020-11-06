@@ -134,7 +134,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
             validateInstanceEvent(event, `resolved instance: 'instance'`);
             break;
           case 'active-instance':
-            validateInstanceEvent(event, `active instance: 'instance'`);
+            validateInstanceEvent(event, `active instance: 'instance' in actionGroup: 'default'`);
             break;
           // this will get triggered as we add new event actions
           default:
