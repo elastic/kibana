@@ -19,17 +19,9 @@
 
 import React from 'react';
 import { DashboardContainer } from '..';
-import { isErrorEmbeddable } from '../../embeddable_plugin';
 import { mountWithIntl } from '../../../../../test_utils/public/enzyme_helpers';
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { getSampleDashboardInput } from '../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-} from '../../embeddable_plugin_test_samples';
 import {
   LibraryNotificationPopover,
   LibraryNotificationProps,
@@ -38,6 +30,14 @@ import { CoreStart } from '../../../../../core/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiPopover } from '@elastic/eui';
+import { isErrorEmbeddable } from '../../../../embeddable/public';
+import {
+  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddableFactory,
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+  ContactCardEmbeddable,
+} from '../../../../embeddable/public/lib/test_samples';
 
 describe('LibraryNotificationPopover', () => {
   const { setup, doStart } = embeddablePluginMock.createInstance();

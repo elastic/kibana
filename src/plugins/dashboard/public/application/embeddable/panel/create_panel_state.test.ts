@@ -17,11 +17,11 @@
  * under the License.
  */
 
+import { EmbeddableInput } from '../../../../../embeddable/public';
+import { CONTACT_CARD_EMBEDDABLE } from '../../../../../embeddable/public/lib/test_samples';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { createPanelState } from './create_panel_state';
-import { EmbeddableInput } from '../../../embeddable_plugin';
-import { CONTACT_CARD_EMBEDDABLE } from '../../../embeddable_plugin_test_samples';
 
 interface TestInput extends EmbeddableInput {
   test: string;

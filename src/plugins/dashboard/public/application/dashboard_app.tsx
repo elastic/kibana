@@ -332,7 +332,7 @@ export function DashboardApp({
   const {
     core,
     chrome,
-    // onAppLeave,
+    onAppLeave,
     // localStorage,
     embeddable,
     data,
@@ -566,18 +566,16 @@ export function DashboardApp({
         })
       )
       .then((dashboardContainer: DashboardContainer | ErrorEmbeddable | undefined) => {
-        if (
-          !dashboardContainer ||
-          isErrorEmbeddable(dashboardContainer) ||
-          !dashboardStateManager
-        ) {
+        if (!dashboardContainer || isErrorEmbeddable(dashboardContainer)) {
           return;
         }
 
-        // If the incoming embeddable is newly created, add it with `addNewEmbeddable`
+        // If the incoming embeddable is newly created, or doesn't exist in the current panels list, add it with `addNewEmbeddable`
         if (
-          incomingEmbeddable?.embeddableId &&
-          !dashboardContainer.getInput().panels[incomingEmbeddable.embeddableId]
+          incomingEmbeddable &&
+          (!incomingEmbeddable?.embeddableId ||
+            (incomingEmbeddable.embeddableId &&
+              !dashboardContainer.getInput().panels[incomingEmbeddable.embeddableId]))
         ) {
           dashboardContainer.addNewEmbeddable<EmbeddableInput>(
             incomingEmbeddable.type,
@@ -729,18 +727,25 @@ export function DashboardApp({
   ]);
 
   // Build onAppLeave when Dashboard State Manager changes
-  // useEffect(() => {
-  //   onAppLeave((actions) => {
-  //     if (state.dashboardStateManager?.getIsDirty()) {
-  //       return actions.confirm(leaveConfirmStrings.subtitle, leaveConfirmStrings.title);
-  //     }
-  //     return actions.default();
-  //   });
-  //   return () => {
-  //     // reset on app leave handler so the listing page doesn't trigger a confirmation
-  //     onAppLeave((actions) => actions.default());
-  //   };
-  // }, [state.dashboardStateManager, onAppLeave]);
+  useEffect(() => {
+    if (!state.dashboardStateManager || !state.dashboardContainer) {
+      return;
+    }
+    onAppLeave((actions) => {
+      if (
+        state.dashboardStateManager?.getIsDirty() &&
+        !state.dashboardContainer?.skipWarningOnAppLeave
+      ) {
+        // TODO: Finish App leave handler with overrides when redirecting to an editor.
+        // return actions.confirm(leaveConfirmStrings.leaveSubtitle, leaveConfirmStrings.leaveTitle);
+      }
+      return actions.default();
+    });
+    return () => {
+      // reset on app leave handler so the listing page doesn't trigger a confirmation
+      onAppLeave((actions) => actions.default());
+    };
+  }, [state.dashboardStateManager, state.dashboardContainer, onAppLeave]);
 
   return (
     <>

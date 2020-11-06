@@ -18,18 +18,19 @@
  */
 
 import { nextTick } from 'test_utils/enzyme_helpers';
-import { isErrorEmbeddable, ViewMode } from '../../embeddable_plugin';
 import { DashboardContainer, DashboardContainerOptions } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../test_helpers';
+
+import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { isErrorEmbeddable, ViewMode } from '../../../../embeddable/public';
 import {
   CONTACT_CARD_EMBEDDABLE,
   ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddable,
-  ContactCardEmbeddableOutput,
   EMPTY_EMBEDDABLE,
-} from '../../embeddable_plugin_test_samples';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+  ContactCardEmbeddableOutput,
+} from '../../../../embeddable/public/lib/test_samples';
 
 const options: DashboardContainerOptions = {
   application: {} as any,

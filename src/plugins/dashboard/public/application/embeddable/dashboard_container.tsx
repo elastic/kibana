@@ -108,6 +108,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   private embeddablePanel: EmbeddableStart['EmbeddablePanel'];
 
   public renderEmptyScreen?: () => React.ReactNode;
+  public skipWarningOnAppLeave?: boolean;
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;

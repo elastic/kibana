@@ -22,22 +22,24 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 import { I18nProvider } from '@kbn/i18n/react';
-import { ViewMode, CONTEXT_MENU_TRIGGER, EmbeddablePanel } from '../../embeddable_plugin';
+
 import { DashboardContainer, DashboardContainerOptions } from '../embeddable/dashboard_container';
 import { getSampleDashboardInput } from '../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddable,
-  ContactCardEmbeddableOutput,
-  createEditModeAction,
-} from '../../embeddable_plugin_test_samples';
+
 import { embeddablePluginMock } from '../../../../embeddable/public/mocks';
 import { inspectorPluginMock } from '../../../../inspector/public/mocks';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { uiActionsPluginMock } from '../../../../ui_actions/public/mocks';
 import { applicationServiceMock } from '../../../../../core/public/mocks';
+import {
+  ContactCardEmbeddable,
+  ContactCardEmbeddableFactory,
+  ContactCardEmbeddableInput,
+  ContactCardEmbeddableOutput,
+  CONTACT_CARD_EMBEDDABLE,
+  createEditModeAction,
+} from '../../../../embeddable/public/lib/test_samples';
+import { CONTEXT_MENU_TRIGGER, EmbeddablePanel, ViewMode } from '../../../../embeddable/public';
 
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const inspector = inspectorPluginMock.createStartContract();

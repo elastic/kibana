@@ -26,13 +26,13 @@ import { nextTick } from 'test_utils/enzyme_helpers';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer, DashboardContainerOptions } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
-import {
-  CONTACT_CARD_EMBEDDABLE,
-  ContactCardEmbeddableFactory,
-} from '../../../embeddable_plugin_test_samples';
 import { KibanaContextProvider } from '../../../../../kibana_react/public';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 import { applicationServiceMock } from '../../../../../../core/public/mocks';
+import {
+  ContactCardEmbeddableFactory,
+  CONTACT_CARD_EMBEDDABLE,
+} from '../../../../../embeddable/public/lib/test_samples';
 
 let dashboardContainer: DashboardContainer | undefined;
 
@@ -125,9 +125,9 @@ test('renders DashboardViewport with no visualizations', () => {
 });
 
 test('renders DashboardEmptyScreen', () => {
-  const renderEmptyScreen = jest.fn();
-  const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
-  props.container.updateInput({ isEmptyState: true });
+  const { props, options } = getProps();
+  props.container.updateInput({ panels: {} });
+  props.container.renderEmptyScreen = jest.fn();
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
@@ -137,7 +137,7 @@ test('renders DashboardEmptyScreen', () => {
   );
   const dashboardEmptyScreenDiv = component.find('.dshDashboardEmptyScreen');
   expect(dashboardEmptyScreenDiv.length).toBe(1);
-  expect(renderEmptyScreen).toHaveBeenCalled();
+  expect(props.container.renderEmptyScreen).toHaveBeenCalled();
 
   component.unmount();
 });
@@ -169,10 +169,9 @@ test('renders exit full screen button when in full screen mode', async () => {
 });
 
 test('renders exit full screen button when in full screen mode and empty screen', async () => {
-  const renderEmptyScreen = jest.fn();
-  renderEmptyScreen.mockReturnValue(React.createElement('div'));
-  const { props, options } = getProps({ renderEmpty: renderEmptyScreen });
-  props.container.updateInput({ isEmptyState: true, isFullScreenMode: true });
+  const { props, options } = getProps();
+  props.container.updateInput({ panels: {}, isFullScreenMode: true });
+  props.container.renderEmptyScreen = jest.fn().mockReturnValue(React.createElement('div'));
   const component = mount(
     <I18nProvider>
       <KibanaContextProvider services={options}>
