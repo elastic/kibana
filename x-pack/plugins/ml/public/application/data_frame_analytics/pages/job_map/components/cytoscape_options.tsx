@@ -76,7 +76,6 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: 0.2,
-  // @ts-ignore
   style: [
     {
       selector: 'node',
@@ -93,17 +92,14 @@ export const cytoscapeOptions: cytoscape.CytoscapeOptions = {
         color: theme.textColors.default,
         'font-family': 'Inter UI, Segoe UI, Helvetica, Arial, sans-serif',
         'font-size': theme.euiFontSizeXS,
-        // @ts-ignore
-        'min-zoomed-font-size': theme.euiSizeL,
+        'min-zoomed-font-size': parseInt(theme.euiSizeL, 10),
         label: 'data(label)',
         shape: (el: cytoscape.NodeSingular) => shapeForNode(el),
         'text-background-color': theme.euiColorLightestShade,
         'text-background-opacity': 0,
-        // @ts-ignore
         'text-background-padding': theme.paddingSizes.xs,
         'text-background-shape': 'roundrectangle',
-        // @ts-ignore
-        'text-margin-y': theme.paddingSizes.s,
+        'text-margin-y': parseInt(theme.paddingSizes.s, 10),
         'text-max-width': '200px',
         'text-valign': 'bottom',
         'text-wrap': 'wrap',

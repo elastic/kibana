@@ -7,8 +7,10 @@
 import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
 import cytoscape from 'cytoscape';
 import { FormattedMessage } from '@kbn/i18n/react';
+import moment from 'moment-timezone';
 import {
   EuiButtonEmpty,
+  EuiCodeBlock,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { EuiDescriptionListProps } from '@elastic/eui/src/components/description_list/description_list';
 import { CytoscapeContext } from './cytoscape';
+import { formatHumanReadableDateTimeSeconds } from '../../../../../../common/util/date_utils';
 import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_frame_analytics';
 // import { DeleteButton } from './delete_button';
 
@@ -31,10 +34,26 @@ interface Props {
 }
 
 function getListItems(details: object): EuiDescriptionListProps['listItems'] {
-  return Object.entries(details).map(([key, value]) => ({
-    title: key,
-    description: typeof value === 'object' ? JSON.stringify(value, null, 2) : value,
-  }));
+  return Object.entries(details).map(([key, value]) => {
+    let description;
+    if (key === 'create_time') {
+      description = formatHumanReadableDateTimeSeconds(moment(value).unix() * 1000);
+    } else {
+      description =
+        typeof value === 'object' ? (
+          <EuiCodeBlock language="json" fontSize="s" paddingSize="s">
+            {JSON.stringify(value, null, 2)}
+          </EuiCodeBlock>
+        ) : (
+          value
+        );
+    }
+
+    return {
+      title: key,
+      description,
+    };
+  });
 }
 
 export const Controls: FC<Props> = ({ analyticsId, details, getNodeData }) => {

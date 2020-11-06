@@ -56,7 +56,8 @@ function getLayoutOptions(width: number, height: number) {
     name: 'dagre',
     rankDir: 'LR',
     fit: true,
-    spacingFactor: 0.85,
+    padding: 30,
+    spacingFactor: 0.65,
     boundingBox: { x1: 0, y1: 0, w: width, h: height },
   };
 }
@@ -73,9 +74,8 @@ export function Cytoscape({ children, elements, height, style, width }: Cytoscap
 
   const dataHandler = useCallback<cytoscape.EventHandler>(
     (event) => {
-      if (cy) {
-        const layout = cy.layout(getLayoutOptions(width, height));
-        layout.run();
+      if (cy && height > 0) {
+        cy.layout(getLayoutOptions(width, height)).run();
       }
     },
     [cy, height, width]
