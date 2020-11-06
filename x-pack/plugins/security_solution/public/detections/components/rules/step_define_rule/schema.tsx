@@ -77,12 +77,11 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path, formData }] = args;
-          const { query, filters, edited } = value as DefineStepRule['queryBar'];
+          const { query, filters } = value as DefineStepRule['queryBar'];
           const needsValidation = !isMlRule(formData.ruleType);
-          if (!needsValidation || edited === false) {
+          if (!needsValidation) {
             return;
           }
-
           return isEmpty(query.query as string) && isEmpty(filters)
             ? {
                 code: 'ERR_FIELD_MISSING',
@@ -97,9 +96,9 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path, formData }] = args;
-          const { query, edited } = value as DefineStepRule['queryBar'];
+          const { query } = value as DefineStepRule['queryBar'];
           const needsValidation = !isMlRule(formData.ruleType);
-          if (!needsValidation || edited === false) {
+          if (!needsValidation) {
             return;
           }
 
