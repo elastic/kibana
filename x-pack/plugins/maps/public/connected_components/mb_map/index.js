@@ -5,7 +5,7 @@
  */
 
 import { connect } from 'react-redux';
-import { MBMap } from './view';
+import { MBMap } from './mb_map';
 import {
   mapExtentChanged,
   mapReady,
@@ -14,7 +14,7 @@ import {
   clearMouseCoordinates,
   clearGoto,
   setMapInitError,
-} from '../../../actions';
+} from '../../actions';
 import {
   getLayerList,
   getMapReady,
@@ -25,9 +25,9 @@ import {
   isViewControlHidden,
   getSpatialFiltersLayer,
   getMapSettings,
-} from '../../../selectors/map_selectors';
+} from '../../selectors/map_selectors';
 
-import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
 
 function mapStateToProps(state = {}) {
   return {
@@ -72,7 +72,5 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-const connectedMBMap = connect(mapStateToProps, mapDispatchToProps, null, {
-  forwardRef: true,
-})(MBMap);
-export { connectedMBMap as MBMap };
+const connected = connect(mapStateToProps, mapDispatchToProps)(MBMap);
+export { connected as MBMap };
