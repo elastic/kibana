@@ -52,8 +52,10 @@ EXPOSE 5601
 {{/ubi}}
 
 RUN for iter in {1..10}; do \
-      # update microdnf to have exclusion feature for dnf configuration
-      {{packageManager}} update microdnf --setopt=tsflags=nodocs -y && \
+      {{#ubi}}
+        # update microdnf to have exclusion feature for dnf configuration
+        {{packageManager}} update microdnf --setopt=tsflags=nodocs -y && \
+      {{/ubi}}
       {{packageManager}} update --setopt=tsflags=nodocs -y && \
       {{packageManager}} install --setopt=tsflags=nodocs -y \
         fontconfig freetype shadow-utils libnss3.so {{#ubi}}findutils{{/ubi}} && \
