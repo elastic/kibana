@@ -1,11 +1,15 @@
 .insInspectorPanel__flyoutBody {
-  // TODO: EUI to allow for custom classNames to inner elements
-  // Or supply this as default
-  > div {
+  .euiFlyoutBody__overflowContent {
+    height: 100%;
     display: flex;
+    flex-wrap: nowrap;
     flex-direction: column;
 
-    > div {
+    >div {
+      flex-grow: 0;
+    }
+
+    .insRequestCodeViewer {
       flex-grow: 1;
     }
   }

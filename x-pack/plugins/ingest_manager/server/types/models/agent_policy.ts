@@ -5,14 +5,16 @@
  */
 import { schema } from '@kbn/config-schema';
 import { PackagePolicySchema, NamespaceSchema } from './package_policy';
-import { agentPolicyStatuses } from '../../../common';
+import { agentPolicyStatuses, dataTypes } from '../../../common';
 
 const AgentPolicyBaseSchema = {
   name: schema.string({ minLength: 1 }),
   namespace: NamespaceSchema,
   description: schema.maybe(schema.string()),
   monitoring_enabled: schema.maybe(
-    schema.arrayOf(schema.oneOf([schema.literal('logs'), schema.literal('metrics')]))
+    schema.arrayOf(
+      schema.oneOf([schema.literal(dataTypes.Logs), schema.literal(dataTypes.Metrics)])
+    )
   ),
 };
 
