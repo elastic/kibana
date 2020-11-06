@@ -29,10 +29,6 @@ export function EndpointPageUtils({ getService }: FtrProviderContext) {
       await euiCheckboxLabelElement.click();
     },
 
-    // async addTextToForm(testId: string) {
-    //   const form = await ()
-    // },
-
     /**
      * Finds the Table with the given `selector` (test subject) and returns
      * back an array containing the table's header column text
