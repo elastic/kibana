@@ -61,7 +61,6 @@ export const useHostsKpiAuthentications = ({
           defaultIndex: indexNames,
           factoryQueryType: HostsKpiQueries.kpiAuthentications,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -159,7 +158,6 @@ export const useHostsKpiAuthentications = ({
         defaultIndex: indexNames,
         factoryQueryType: HostsKpiQueries.kpiAuthentications,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
