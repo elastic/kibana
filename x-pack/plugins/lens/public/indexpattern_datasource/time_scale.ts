@@ -10,7 +10,7 @@ import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { search } from '../../../../../src/plugins/data/public';
 
-type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
+export type TimeScaleUnit = 's' | 'm' | 'h' | 'd';
 
 export interface TimeScaleArgs {
   dateColumnId: string;

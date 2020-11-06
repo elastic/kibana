@@ -119,6 +119,7 @@ export const formatColumn: ExpressionFunctionDefinition<
             const innerParams = (col.meta.params?.params as Record<string, unknown>) ?? {};
             return withParams(col, {
               ...col.meta.params,
+              id: parentFormatId || col.meta.params?.id,
               params: {
                 ...innerParams,
                 ...parentFormatParams,
