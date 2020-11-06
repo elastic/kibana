@@ -43,7 +43,7 @@ export function ServiceDetails({ match, tab }: Props) {
       <ApmHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+            <EuiTitle>
               <h1>{serviceName}</h1>
             </EuiTitle>
           </EuiFlexItem>

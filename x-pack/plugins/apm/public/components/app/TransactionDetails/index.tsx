@@ -8,6 +8,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiPage,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -32,6 +33,7 @@ import { useUrlParams } from '../../../hooks/useUrlParams';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { HeightRetainer } from '../../shared/HeightRetainer';
 import { Correlations } from '../Correlations';
+import { SearchBar } from '../../shared/search_bar';
 
 interface Sample {
   traceId: string;
@@ -105,57 +107,58 @@ export function TransactionDetails({
   };
 
   return (
-    <div>
+    <>
       <ApmHeader>
-        <EuiTitle size="l">
+        <EuiTitle>
           <h1>{transactionName}</h1>
         </EuiTitle>
       </ApmHeader>
-
+      <SearchBar />
       <Correlations />
+      <EuiPage>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localUIFiltersConfig} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            <ChartsSyncContextProvider>
+              <TransactionCharts
+                charts={transactionChartsData}
+                urlParams={urlParams}
+              />
+            </ChartsSyncContextProvider>
 
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localUIFiltersConfig} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <ChartsSyncContextProvider>
-            <TransactionCharts
-              charts={transactionChartsData}
-              urlParams={urlParams}
-            />
-          </ChartsSyncContextProvider>
+            <EuiHorizontalRule size="full" margin="l" />
 
-          <EuiHorizontalRule size="full" margin="l" />
+            <EuiPanel>
+              <TransactionDistribution
+                distribution={distributionData}
+                isLoading={distributionStatus === FETCH_STATUS.LOADING}
+                urlParams={urlParams}
+                bucketIndex={bucketIndex}
+                onBucketClick={(bucket) => {
+                  if (!isEmpty(bucket.samples)) {
+                    selectSampleFromBucketClick(bucket.samples[0]);
+                  }
+                }}
+              />
+            </EuiPanel>
 
-          <EuiPanel>
-            <TransactionDistribution
-              distribution={distributionData}
-              isLoading={distributionStatus === FETCH_STATUS.LOADING}
-              urlParams={urlParams}
-              bucketIndex={bucketIndex}
-              onBucketClick={(bucket) => {
-                if (!isEmpty(bucket.samples)) {
-                  selectSampleFromBucketClick(bucket.samples[0]);
-                }
-              }}
-            />
-          </EuiPanel>
+            <EuiSpacer size="s" />
 
-          <EuiSpacer size="s" />
-
-          <HeightRetainer>
-            <WaterfallWithSummmary
-              location={location}
-              urlParams={urlParams}
-              waterfall={waterfall}
-              isLoading={waterfallStatus === FETCH_STATUS.LOADING}
-              exceedsMax={exceedsMax}
-              traceSamples={traceSamples}
-            />
-          </HeightRetainer>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </div>
+            <HeightRetainer>
+              <WaterfallWithSummmary
+                location={location}
+                urlParams={urlParams}
+                waterfall={waterfall}
+                isLoading={waterfallStatus === FETCH_STATUS.LOADING}
+                exceedsMax={exceedsMax}
+                traceSamples={traceSamples}
+              />
+            </HeightRetainer>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
+    </>
   );
 }

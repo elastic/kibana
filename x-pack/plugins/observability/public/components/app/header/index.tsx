@@ -53,7 +53,7 @@ export function Header({
             <EuiIcon type="logoObservability" size="xxl" data-test-subj="observability-logo" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiTitle size="m">
+            <EuiTitle>
               <h1>
                 {i18n.translate('xpack.observability.home.title', {
                   defaultMessage: 'Observability',

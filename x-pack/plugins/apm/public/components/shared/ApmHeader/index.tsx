@@ -4,32 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { DatePicker } from '../DatePicker';
+import styled from 'styled-components';
 import { EnvironmentFilter } from '../EnvironmentFilter';
-import { KueryBar } from '../KueryBar';
+
+const HeaderFlexGroup = styled(EuiFlexGroup)`
+  padding: ${({ theme }) => theme.eui.gutterTypes.gutterMedium};
+  border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+`;
 
 export function ApmHeader({ children }: { children: ReactNode }) {
   return (
-    <>
-      <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
-        <EuiFlexItem>{children}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DatePicker />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer />
-
-      <EuiFlexGroup alignItems="flexStart" gutterSize="s">
-        <EuiFlexItem grow={3}>
-          <KueryBar />
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EnvironmentFilter />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <HeaderFlexGroup alignItems="center" gutterSize="s" wrap={true}>
+      <EuiFlexItem>{children}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EnvironmentFilter />
+      </EuiFlexItem>
+    </HeaderFlexGroup>
   );
 }

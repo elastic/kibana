@@ -4,8 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiPage,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo } from 'react';
 import url from 'url';
@@ -22,6 +28,7 @@ import { MLCallout } from './ServiceList/MLCallout';
 import { useLocalStorage } from '../../../hooks/useLocalStorage';
 import { useAnomalyDetectionJobs } from '../../../hooks/useAnomalyDetectionJobs';
 import { Correlations } from '../Correlations';
+import { SearchBar } from '../../shared/search_bar';
 
 const initialData = {
   items: [],
@@ -121,37 +128,39 @@ export function ServiceInventory() {
 
   return (
     <>
-      <EuiSpacer />
-
-      <Correlations />
-
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localFiltersConfig} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <EuiFlexGroup direction="column">
-            {displayMlCallout ? (
+      <SearchBar />
+      <EuiPage>
+        <Correlations />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localFiltersConfig} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            <EuiFlexGroup direction="column">
+              {displayMlCallout ? (
+                <EuiFlexItem>
+                  <MLCallout
+                    onDismiss={() => setUserHasDismissedCallout(true)}
+                  />
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem>
-                <MLCallout onDismiss={() => setUserHasDismissedCallout(true)} />
+                <EuiPanel>
+                  <ServiceList
+                    items={data.items}
+                    noItemsMessage={
+                      <NoServicesMessage
+                        historicalDataFound={data.hasHistoricalData}
+                        status={status}
+                      />
+                    }
+                  />
+                </EuiPanel>
               </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem>
-              <EuiPanel>
-                <ServiceList
-                  items={data.items}
-                  noItemsMessage={
-                    <NoServicesMessage
-                      historicalDataFound={data.hasHistoricalData}
-                      status={status}
-                    />
-                  }
-                />
-              </EuiPanel>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
     </>
   );
 }

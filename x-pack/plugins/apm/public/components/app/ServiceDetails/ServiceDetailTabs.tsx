@@ -4,20 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiTabs } from '@elastic/eui';
+import { EuiTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceNodeOverviewLink } from '../../shared/Links/apm/ServiceNodeOverviewLink';
 import { ServiceOverviewLink } from '../../shared/Links/apm/service_overview_link';
 import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
+import { MainTabs } from '../../shared/main_tabs';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceMetrics } from '../ServiceMetrics';
@@ -132,16 +132,13 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
 
   return (
     <>
-      <EuiTabs>
+      <MainTabs>
         {tabs.map((serviceTab) => (
-          <EuiTabLink
-            isSelected={serviceTab.name === tab}
-            key={serviceTab.name}
-          >
+          <EuiTab isSelected={serviceTab.name === tab} key={serviceTab.name}>
             {serviceTab.link}
-          </EuiTabLink>
+          </EuiTab>
         ))}
-      </EuiTabs>
+      </MainTabs>
       {selectedTab ? selectedTab.render() : null}
     </>
   );

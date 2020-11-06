@@ -4,7 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPage,
+  EuiSpacer,
+} from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { TraceList } from './TraceList';
@@ -13,6 +19,7 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { Projection } from '../../../../common/projections';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { SearchBar } from '../../shared/search_bar';
 
 type TracesAPIResponse = APIReturnType<'/api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {
@@ -56,20 +63,22 @@ export function TraceOverview() {
 
   return (
     <>
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem grow={1}>
-          <LocalUIFilters {...localUIFiltersConfig} showCount={false} />
-        </EuiFlexItem>
-        <EuiFlexItem grow={7}>
-          <EuiPanel>
-            <TraceList
-              items={data.items}
-              isLoading={status === FETCH_STATUS.LOADING}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <SearchBar />
+      <EuiPage>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <LocalUIFilters {...localUIFiltersConfig} showCount={false} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={7}>
+            <EuiPanel>
+              <TraceList
+                items={data.items}
+                isLoading={status === FETCH_STATUS.LOADING}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPage>
     </>
   );
 }

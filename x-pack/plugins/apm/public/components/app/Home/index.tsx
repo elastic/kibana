@@ -8,7 +8,8 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTabs,
+  EuiPage,
+  EuiTab,
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -17,13 +18,14 @@ import { $ElementType } from 'utility-types';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { getAlertingCapabilities } from '../../alerting/get_alert_capabilities';
 import { ApmHeader } from '../../shared/ApmHeader';
-import { EuiTabLink } from '../../shared/EuiTabLink';
 import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceInventoryLink } from '../../shared/Links/apm/service_inventory_link';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
+import { MainTabs } from '../../shared/main_tabs';
+import { SearchBar } from '../../shared/search_bar';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceInventory } from '../service_inventory';
 import { TraceOverview } from '../TraceOverview';
@@ -101,11 +103,11 @@ export function Home({ tab }: Props) {
   } = getAlertingCapabilities(plugins, core.application.capabilities);
 
   return (
-    <div>
+    <>
       <ApmHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+            <EuiTitle>
               <h1>APM</h1>
             </EuiTitle>
           </EuiFlexItem>
@@ -135,14 +137,14 @@ export function Home({ tab }: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
       </ApmHeader>
-      <EuiTabs>
+      <MainTabs>
         {homeTabs.map((homeTab) => (
-          <EuiTabLink isSelected={homeTab === selectedTab} key={homeTab.name}>
+          <EuiTab isSelected={homeTab === selectedTab} key={homeTab.name}>
             {homeTab.link}
-          </EuiTabLink>
+          </EuiTab>
         ))}
-      </EuiTabs>
+      </MainTabs>
       {selectedTab.render()}
-    </div>
+    </>
   );
 }
