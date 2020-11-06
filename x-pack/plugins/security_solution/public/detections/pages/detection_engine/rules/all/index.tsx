@@ -18,7 +18,6 @@ import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } 
 import { useHistory } from 'react-router-dom';
 import uuid from 'uuid';
 import { debounce } from 'lodash/fp';
-import styled from 'styled-components';
 
 import {
   useRules,
@@ -55,12 +54,6 @@ import { isBoolean } from '../../../../../common/utils/privileges';
 import { AllRulesUtilityBar } from './utility_bar';
 import { LastUpdatedAt } from '../../../../../common/components/last_updated';
 import { DEFAULT_RULES_TABLE_REFRESH_SETTING } from '../../../../../../common/constants';
-
-// Added min-width to fix some jitter that occurs
-// between "Updating..." and "Updated 3 seconds ago"
-const MyLastUpdatedAt = styled(LastUpdatedAt)`
-  min-width: 190px;
-`;
 
 const INITIAL_SORT_FIELD = 'enabled';
 const initialState: State = {
@@ -505,7 +498,7 @@ export const AllRules = React.memo<AllRulesProps>(
               growLeftSplit={false}
               title={i18n.ALL_RULES}
               subtitle={
-                <MyLastUpdatedAt
+                <LastUpdatedAt
                   showUpdating={loading || isLoadingRules || isLoadingRulesStatuses}
                   updatedAt={lastUpdated}
                 />
