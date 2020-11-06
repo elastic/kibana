@@ -36,6 +36,7 @@ describe('createAlertRoute', () => {
       bar: true,
     },
     throttle: '30s',
+    notifyOnStateChange: false,
     actions: [
       {
         group: 'default',
@@ -110,6 +111,7 @@ describe('createAlertRoute', () => {
             "alertTypeId": "1",
             "consumer": "bar",
             "name": "abc",
+            "notifyOnStateChange": false,
             "params": Object {
               "bar": true,
             },

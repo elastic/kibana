@@ -72,6 +72,57 @@ describe('isThrottled', () => {
   });
 });
 
+describe('actionGroupHasChanged()', () => {
+  test('should be false if no last scheduled and nothing scheduled', () => {
+    const alertInstance = new AlertInstance();
+    expect(alertInstance.actionGroupHasChanged()).toEqual(false);
+  });
+
+  test('should be false if group does not change', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.actionGroupHasChanged()).toEqual(false);
+  });
+
+  test('should be true if no last scheduled and group is scheduled', () => {
+    const alertInstance = new AlertInstance();
+    alertInstance.scheduleActions('default');
+    expect(alertInstance.actionGroupHasChanged()).toEqual(true);
+  });
+
+  test('should be true if last scheduled group and next action is undefined', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    expect(alertInstance.actionGroupHasChanged()).toEqual(true);
+  });
+
+  test('should be true if group does change', () => {
+    const alertInstance = new AlertInstance({
+      meta: {
+        lastScheduledActions: {
+          date: new Date(),
+          group: 'default',
+        },
+      },
+    });
+    alertInstance.scheduleActions('penguin');
+    expect(alertInstance.actionGroupHasChanged()).toEqual(true);
+  });
+});
+
 describe('getScheduledActionOptions()', () => {
   test('defaults to undefined', () => {
     const alertInstance = new AlertInstance();

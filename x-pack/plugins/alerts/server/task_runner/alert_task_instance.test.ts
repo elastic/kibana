@@ -27,6 +27,7 @@ const alert: SanitizedAlert = {
   updatedAt: new Date(),
   apiKeyOwner: null,
   throttle: null,
+  notifyOnStateChange: false,
   muteAll: false,
   mutedInstanceIds: [],
   executionStatus: {

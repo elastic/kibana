@@ -90,6 +90,7 @@ describe('Task Runner', () => {
     updatedAt: new Date('2019-02-12T21:01:22.479Z'),
     throttle: null,
     muteAll: false,
+    notifyOnStateChange: false,
     enabled: true,
     alertTypeId: '123',
     apiKey: '',
