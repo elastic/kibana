@@ -20,6 +20,7 @@ export interface IEMSConfig {
   emsTileApiUrl?: string;
   emsLandingPageUrl?: string;
   emsFontLibraryUrl?: string;
+  isEMSEnabled?: boolean;
 }
 
 export class EMSSettings {

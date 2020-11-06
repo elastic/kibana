@@ -53,7 +53,6 @@ import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/publ
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
-import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/public';
 import { EMSSettings } from './ems_settings';
 
 export interface MapsPluginSetupDependencies {
@@ -64,7 +63,6 @@ export interface MapsPluginSetupDependencies {
   mapsLegacy: { config: MapsLegacyConfig };
   share: SharePluginSetup;
   licensing: LicensingPluginSetup;
-  mapsLegacy: MapsLegacyPluginSetup;
 }
 
 export interface MapsPluginStartDependencies {
