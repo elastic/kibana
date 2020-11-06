@@ -27,11 +27,7 @@ type QueryOrder =
 const getQueryOrder = (sort: SortField<NetworkDnsFields>): QueryOrder => {
   switch (sort.field) {
     case NetworkDnsFields.queryCount:
-      return {
-        _count: {
-          order: sort.direction,
-        },
-      };
+      return { _count: { order: sort.direction } };
     case NetworkDnsFields.dnsName:
       return { _key: { order: sort.direction } };
     case NetworkDnsFields.uniqueDomains:
@@ -39,6 +35,7 @@ const getQueryOrder = (sort: SortField<NetworkDnsFields>): QueryOrder => {
     case NetworkDnsFields.dnsBytesIn:
       return { dns_bytes_in: { order: sort.direction } };
     case NetworkDnsFields.dnsBytesOut:
+      return { dns_bytes_out: { order: sort.direction } };
   }
   assertUnreachable(sort.field);
 };
