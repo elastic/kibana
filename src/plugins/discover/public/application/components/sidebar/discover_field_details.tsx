@@ -19,6 +19,7 @@
 import React, { useState, useEffect } from 'react';
 import { EuiLink, EuiIconTip, EuiText, EuiPopoverFooter, EuiButton, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
 import {
@@ -35,6 +36,7 @@ interface DiscoverFieldDetailsProps {
   indexPattern: IndexPattern;
   details: FieldDetails;
   onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverFieldDetails({
@@ -42,6 +44,7 @@ export function DiscoverFieldDetails({
   indexPattern,
   details,
   onAddFilter,
+  trackUiMetric,
 }: DiscoverFieldDetailsProps) {
   const warnings = getWarnings(field);
   const [showVisualizeLink, setShowVisualizeLink] = useState<boolean>(false);
@@ -70,6 +73,9 @@ export function DiscoverFieldDetails({
   const handleVisualizeLinkClick = (event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
     // regular link click. let the uiActions code handle the navigation and show popup if needed
     event.preventDefault();
+    if (trackUiMetric) {
+      trackUiMetric(METRIC_TYPE.CLICK, 'visualize_link_click');
+    }
     triggerVisualizeActions(field, indexPattern.id, details.columns);
   };
 

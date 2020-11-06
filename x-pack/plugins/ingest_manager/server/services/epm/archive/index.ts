@@ -18,7 +18,7 @@ import {
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 import { pkgToPkgKey } from '../registry';
 import { cacheGet, cacheSet, setArchiveFilelist } from '../registry/cache';
-import { unzipBuffer, untarBuffer, ArchiveEntry } from '../registry/extract';
+import { ArchiveEntry, getBufferExtractor } from '../registry/extract';
 
 export async function loadArchivePackage({
   archiveBuffer,
@@ -37,24 +37,17 @@ export async function loadArchivePackage({
   };
 }
 
-function getBufferExtractorForContentType(contentType: string) {
-  if (contentType === 'application/gzip') {
-    return untarBuffer;
-  } else if (contentType === 'application/zip') {
-    return unzipBuffer;
-  } else {
-    throw new PackageUnsupportedMediaTypeError(
-      `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
-    );
-  }
-}
-
 export async function unpackArchiveToCache(
   archiveBuffer: Buffer,
   contentType: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
-  const bufferExtractor = getBufferExtractorForContentType(contentType);
+  const bufferExtractor = getBufferExtractor({ contentType });
+  if (!bufferExtractor) {
+    throw new PackageUnsupportedMediaTypeError(
+      `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
+    );
+  }
   const paths: string[] = [];
   try {
     await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {

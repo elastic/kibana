@@ -460,7 +460,9 @@ describe('Flyout', () => {
       // Ensure all promises resolve
       await new Promise((resolve) => process.nextTick(resolve));
 
-      expect(component.state('error')).toEqual('foobar');
+      expect(component.state('error')).toMatchInlineSnapshot(
+        `"The file could not be processed due to error: \\"foobar\\""`
+      );
       expect(component.find('EuiFlyoutBody EuiCallOut')).toMatchSnapshot();
     });
   });
