@@ -61,7 +61,7 @@ export async function unpackArchiveToCache(
     });
   } catch (error) {
     throw new PackageInvalidArchiveError(
-      `Error during extraction of uploaded package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
+      `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
     );
   }
 
@@ -69,7 +69,7 @@ export async function unpackArchiveToCache(
   // unpacking a zip file with untarBuffer() just results in nothing.
   if (paths.length === 0) {
     throw new PackageInvalidArchiveError(
-      `Uploaded archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
+      `Archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
     );
   }
   return paths;
