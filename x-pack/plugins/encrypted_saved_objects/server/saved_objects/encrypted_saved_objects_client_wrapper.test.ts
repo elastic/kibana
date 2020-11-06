@@ -1576,3 +1576,36 @@ describe('#update', () => {
     );
   });
 });
+
+describe('#removeReferencesTo', () => {
+  it('redirects request to underlying base client', async () => {
+    const options = { namespace: 'some-ns' };
+
+    await wrapper.removeReferencesTo('some-type', 'some-id', options);
+
+    expect(mockBaseClient.removeReferencesTo).toHaveBeenCalledTimes(1);
+    expect(mockBaseClient.removeReferencesTo).toHaveBeenCalledWith('some-type', 'some-id', options);
+  });
+
+  it('returns response from underlying client', async () => {
+    const returnValue = {
+      updated: 12,
+    };
+    mockBaseClient.removeReferencesTo.mockResolvedValue(returnValue);
+
+    const result = await wrapper.removeReferencesTo('known-type', 'some-id');
+
+    expect(result).toBe(returnValue);
+  });
+
+  it('fails if base client fails', async () => {
+    const failureReason = new Error('Something bad happened...');
+    mockBaseClient.removeReferencesTo.mockRejectedValue(failureReason);
+
+    await expect(wrapper.removeReferencesTo('known-type', 'some-id')).rejects.toThrowError(
+      failureReason
+    );
+
+    expect(mockBaseClient.removeReferencesTo).toHaveBeenCalledTimes(1);
+  });
+});
