@@ -44,6 +44,7 @@ import { StepDefinePackagePolicy } from '../create_package_policy_page/step_defi
 import { useUIExtension } from '../../../hooks/use_ui_extension';
 import { ExtensionWrapper } from '../../../components/extension_wrapper';
 import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
+import { IntegrationPolicyEditExtensionComponentProps } from '../../../../../../common/types/ui_extensions';
 
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
   const { notifications } = useCore();
@@ -197,6 +198,21 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     [packagePolicy, updatePackagePolicyValidation]
   );
 
+  const handleExtensionViewOnChange = useCallback<
+    IntegrationPolicyEditExtensionComponentProps['onChange']
+  >(
+    ({ isValid, updatedPolicy }) => {
+      updatePackagePolicy(updatedPolicy);
+      setFormState((prevState) => {
+        if (prevState === 'VALID' && !isValid) {
+          return 'INVALID';
+        }
+        return prevState;
+      });
+    },
+    [updatePackagePolicy]
+  );
+
   // Cancel url
   const cancelUrl = getHref('policy_details', { policyId });
 
@@ -311,7 +327,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
                 <ExtensionView
                   policy={originalPackagePolicy}
                   newPolicy={packagePolicy}
-                  onChange={() => {}}
+                  onChange={handleExtensionViewOnChange}
                 />
               </ExtensionWrapper>
             )}
@@ -327,6 +343,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
       formState,
       originalPackagePolicy,
       ExtensionView,
+      handleExtensionViewOnChange,
     ]
   );
 
