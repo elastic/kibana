@@ -116,7 +116,7 @@ export async function getPackageInfo(options: {
   ] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackage(pkgName),
-    Registry.loadRegistryPackage(pkgName, pkgVersion),
+    Registry.getRegistryPackage(pkgName, pkgVersion),
   ]);
 
   // add properties that aren't (or aren't yet) on Registry response
