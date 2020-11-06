@@ -39,8 +39,8 @@ export function jobSavedObjectsInitializationFactory(core: CoreStart) {
         () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
       );
       const { initSavedObjects } = repairFactory(client, jobSavedObjectService);
-      await initSavedObjects();
-      mlLog.info('Job saved objects initialized for * space');
+      const { jobs } = await initSavedObjects();
+      mlLog.info(`${jobs.length} job saved objects initialized for * space`);
     } catch (error) {
       mlLog.error('Error Initializing jobs');
     }
