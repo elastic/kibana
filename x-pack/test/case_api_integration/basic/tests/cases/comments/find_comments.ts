@@ -29,21 +29,25 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       // post 2 comments
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
 
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
 
       const { body: caseComments } = await supertest
         .get(`${CASES_URL}/${postedCase.id}/comments/_find`)
         .set('kbn-xsrf', 'true')
-        .send();
+        .send()
+        .expect(200);
 
       expect(caseComments.comments).to.eql(patchedCase.comments);
     });
@@ -54,21 +58,25 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       // post 2 comments
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
 
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send({ comment: 'unique' });
+        .send({ comment: 'unique', type: 'user' })
+        .expect(200);
 
       const { body: caseComments } = await supertest
         .get(`${CASES_URL}/${postedCase.id}/comments/_find?search=unique`)
         .set('kbn-xsrf', 'true')
-        .send();
+        .send()
+        .expect(200);
 
       expect(caseComments.comments).to.eql([patchedCase.comments[1]]);
     });
@@ -79,10 +87,13 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
+
       await supertest
         .get(`${CASES_URL}/${postedCase.id}/comments/_find?perPage=true`)
         .set('kbn-xsrf', 'true')

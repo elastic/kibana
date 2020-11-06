@@ -30,7 +30,6 @@ import {
 } from '../../../ingest_manager/common/types/rest_spec';
 import {
   EsAssetReference,
-  InstallationStatus,
   KibanaAssetReference,
 } from '../../../ingest_manager/common/types/models';
 import { agentPolicyStatuses } from '../../../ingest_manager/common/constants';
@@ -1267,7 +1266,7 @@ export class EndpointDocGenerator {
           type: 'image/svg+xml',
         },
       ],
-      status: 'installed' as InstallationStatus,
+      status: 'installed',
       savedObject: {
         type: 'epm-packages',
         id: 'endpoint',
