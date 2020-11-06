@@ -19,18 +19,18 @@ import {
 } from '../../../../src/plugins/home/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
-import { BASE_PATH } from './applications/ingest_manager/constants';
+import { BASE_PATH } from './applications/fleet//constants';
 
 import { IngestManagerConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
-import { licenseService } from './applications/ingest_manager/hooks/use_license';
-import { setHttpClient } from './applications/ingest_manager/hooks/use_request/use_request';
+import { licenseService } from './applications/fleet//hooks/use_license';
+import { setHttpClient } from './applications/fleet//hooks/use_request/use_request';
 import {
   TutorialDirectoryNotice,
   TutorialDirectoryHeaderLink,
   TutorialModuleNotice,
-} from './applications/ingest_manager/components/home_integration';
-import { registerPackagePolicyComponent } from './applications/ingest_manager/sections/agent_policy/create_package_policy_page/components/custom_package_policy';
+} from './applications/fleet//components/home_integration';
+import { registerPackagePolicyComponent } from './applications/fleet//sections/agent_policy/create_package_policy_page/components/custom_package_policy';
 
 export { IngestManagerConfigType } from '../common/types';
 
@@ -91,7 +91,7 @@ export class IngestManagerPlugin
           IngestManagerStartDeps,
           IngestManagerStart
         ];
-        const { renderApp, teardownIngestManager } = await import('./applications/ingest_manager');
+        const { renderApp, teardownIngestManager } = await import('./applications/fleet/');
         const unmount = renderApp(coreStart, params, deps, startDeps, config, kibanaVersion);
 
         return () => {

@@ -5,9 +5,9 @@
  */
 
 import { SavedObjectsClientContract } from 'kibana/server';
-import { AgentService } from '../../../../../../ingest_manager/server';
-import { AgentStatusKueryHelper } from '../../../../../../ingest_manager/common/services';
-import { Agent } from '../../../../../../ingest_manager/common/types/models';
+import { AgentService } from '../../../../../../fleet/server';
+import { AgentStatusKueryHelper } from '../../../../../../fleet/common/services';
+import { Agent } from '../../../../../../fleet/common/types/models';
 import { HostStatus } from '../../../../../common/endpoint/types';
 
 const STATUS_QUERY_MAP = new Map([
