@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
-} from '../../fixtures/kerberos_tools';
+} from '../../fixtures/kerberos/kerberos_tools';
 
 export default function ({ getService }: FtrProviderContext) {
   const spnegoToken = getSPNEGOToken();
@@ -92,21 +92,21 @@ export default function ({ getService }: FtrProviderContext) {
         expect(spnegoResponse.headers['www-authenticate']).to.be('Negotiate');
       });
 
-      it('AJAX requests should properly initiate SPNEGO', async () => {
+      it('AJAX requests should not initiate SPNEGO', async () => {
         const ajaxResponse = await supertest
           .get('/abc/xyz/spnego?one=two three')
           .set('kbn-xsrf', 'xxx')
           .expect(401);
 
         expect(ajaxResponse.headers['set-cookie']).to.be(undefined);
-        expect(ajaxResponse.headers['www-authenticate']).to.be('Negotiate');
+        expect(ajaxResponse.headers['www-authenticate']).to.be(undefined);
       });
     });
 
     describe('finishing SPNEGO', () => {
       it('should properly set cookie and authenticate user', async () => {
         const response = await supertest
-          .get('/internal/security/me')
+          .get('/security/account')
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
@@ -153,7 +153,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should re-initiate SPNEGO handshake if token is rejected with 401', async () => {
         const spnegoResponse = await supertest
-          .get('/internal/security/me')
+          .get('/security/account')
           .set('Authorization', `Negotiate ${Buffer.from('Hello').toString('base64')}`)
           .expect(401);
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
@@ -162,7 +162,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('should fail if SPNEGO token is rejected because of unknown reason', async () => {
         const spnegoResponse = await supertest
-          .get('/internal/security/me')
+          .get('/security/account')
           .set('Authorization', 'Negotiate (:I am malformed:)')
           .expect(500);
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
@@ -175,7 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const response = await supertest
-          .get('/internal/security/me')
+          .get('/security/account')
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
@@ -239,7 +239,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should redirect to `logged_out` page after successful logout', async () => {
         // First authenticate user to retrieve session cookie.
         const response = await supertest
-          .get('/internal/security/me')
+          .get('/security/account')
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
@@ -274,7 +274,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(cookies).to.have.length(1);
         checkCookieIsCleared(request.cookie(cookies[0])!);
 
-        expect(apiResponse.headers['www-authenticate']).to.be('Negotiate');
+        // Request with a session cookie that is linked to an invalidated/non-existent session is treated the same as
+        // request without any session cookie at all.
+        expect(apiResponse.headers['www-authenticate']).to.be(undefined);
       });
 
       it('should redirect to home page if session cookie is not provided', async () => {
@@ -290,7 +292,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const response = await supertest
-          .get('/internal/security/me')
+          .get('/security/account')
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
@@ -342,7 +344,7 @@ export default function ({ getService }: FtrProviderContext) {
         // This request should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const nonAjaxResponse = await supertest
-          .get('/app/kibana')
+          .get('/security/account')
           .set('Cookie', sessionCookie.cookieString())
           .expect(200);
 
@@ -368,7 +370,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const response = await supertest
-          .get('/internal/security/me')
+          .get('/security/account')
           .set('Authorization', `Negotiate ${spnegoToken}`)
           .expect(200);
 
@@ -405,7 +407,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('non-AJAX call should initiate SPNEGO and clear existing cookie', async function () {
         const nonAjaxResponse = await supertest
-          .get('/')
+          .get('/security/account')
           .set('Cookie', sessionCookie.cookieString())
           .expect(401);
 
