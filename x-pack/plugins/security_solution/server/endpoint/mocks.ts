@@ -125,8 +125,6 @@ export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceIn
     createFleetPolicyChangeAction: jest.fn(),
     getFullAgentPolicy: jest.fn(),
     bumpAllAgentPolicies: jest.fn(),
-    triggerAgentPolicyUpdatedEvent: jest.fn(),
-    _update: jest.fn(),
   };
 };
 

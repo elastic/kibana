@@ -72,6 +72,7 @@ import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerIngestManagerUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
+import { AgentPolicyServiceInterface } from './services/agent_policy';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -131,7 +132,7 @@ export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
-  agentPolicyService: typeof agentPolicyService;
+  agentPolicyService: AgentPolicyServiceInterface;
   /**
    * Services for Ingest's package policies
    */

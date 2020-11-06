@@ -29,7 +29,7 @@ import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { agentPolicyService } from '../../../ingest_manager/server/services';
+import { AgentPolicyServiceInterface } from '../../../ingest_manager/server/services/agent_policy';
 
 export interface MetadataService {
   queryStrategy(
@@ -93,7 +93,7 @@ export class EndpointAppContextService {
   private manifestManager: ManifestManager | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private metadataService: MetadataService | undefined;
-  private agentPolicyService: typeof agentPolicyService | undefined;
+  private agentPolicyService: AgentPolicyServiceInterface | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
@@ -119,7 +119,7 @@ export class EndpointAppContextService {
 
   public stop() {}
 
-  public getAgentPolicyService(): typeof agentPolicyService | undefined {
+  public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
     return this.agentPolicyService;
   }
 
