@@ -3,57 +3,77 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { ISavedObjectsRepository, SavedObjectsFindResult } from 'src/core/server';
+import { ISavedObjectsRepository } from 'src/core/server';
 import { AlertsHealth, HealthStatus, RawAlert, AlertExecutionStatusErrorReasons } from '../types';
 
 export const getHealth = async (
   internalSavedObjectsRepository: ISavedObjectsRepository
 ): Promise<AlertsHealth> => {
-  const { saved_objects: data } = await internalSavedObjectsRepository.find<RawAlert>({
-    filter: 'alert.attributes.executionStatus.status:error',
+  const healthStatuses = {
+    decryptionHealth: {
+      status: HealthStatus.OK,
+      timestamp: '',
+    },
+    executionHealth: {
+      status: HealthStatus.OK,
+      timestamp: '',
+    },
+    readHealth: {
+      status: HealthStatus.OK,
+      timestamp: '',
+    },
+  };
+
+  const { saved_objects: decryptErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Decrypt}`,
     fields: ['executionStatus'],
     type: 'alert',
+    sortField: 'executionStatus.lastExecutionDate',
+    sortOrder: 'desc',
+    page: 1,
+    perPage: 1,
   });
 
-  const healthStatuses = data.reduce(
-    (prevItem: AlertsHealth, item: SavedObjectsFindResult<RawAlert>) => {
-      switch (item.attributes.executionStatus.error?.reason) {
-        case AlertExecutionStatusErrorReasons.Decrypt:
-          prevItem.decryptionHealth = {
-            status: HealthStatus.Warning,
-            timestamp: item.attributes.executionStatus.lastExecutionDate,
-          };
-          break;
-        case AlertExecutionStatusErrorReasons.Execute:
-          prevItem.executionHealth = {
-            status: HealthStatus.Warning,
-            timestamp: item.attributes.executionStatus.lastExecutionDate,
-          };
-          break;
-        case AlertExecutionStatusErrorReasons.Read:
-          prevItem.readHealth = {
-            status: HealthStatus.Warning,
-            timestamp: item.attributes.executionStatus.lastExecutionDate,
-          };
-          break;
-      }
-      return prevItem;
-    },
-    {
-      decryptionHealth: {
-        status: HealthStatus.OK,
-        timestamp: '',
-      },
-      executionHealth: {
-        status: HealthStatus.OK,
-        timestamp: '',
-      },
-      readHealth: {
-        status: HealthStatus.OK,
-        timestamp: '',
-      },
-    }
-  );
+  if (decryptErrorData.length > 0) {
+    healthStatuses.decryptionHealth = {
+      status: HealthStatus.Warning,
+      timestamp: decryptErrorData[0].attributes.executionStatus.lastExecutionDate,
+    };
+  }
+
+  const { saved_objects: executeErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Execute}`,
+    fields: ['executionStatus'],
+    type: 'alert',
+    sortField: 'executionStatus.lastExecutionDate',
+    sortOrder: 'desc',
+    page: 1,
+    perPage: 1,
+  });
+
+  if (executeErrorData.length > 0) {
+    healthStatuses.executionHealth = {
+      status: HealthStatus.Warning,
+      timestamp: executeErrorData[0].attributes.executionStatus.lastExecutionDate,
+    };
+  }
+
+  const { saved_objects: readErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
+    filter: `alert.attributes.executionStatus.status:error and alert.attributes.executionStatus.error.reason:${AlertExecutionStatusErrorReasons.Read}`,
+    fields: ['executionStatus'],
+    type: 'alert',
+    sortField: 'executionStatus.lastExecutionDate',
+    sortOrder: 'desc',
+    page: 1,
+    perPage: 1,
+  });
+
+  if (readErrorData.length > 0) {
+    healthStatuses.readHealth = {
+      status: HealthStatus.Warning,
+      timestamp: readErrorData[0].attributes.executionStatus.lastExecutionDate,
+    };
+  }
 
   const { saved_objects: noErrorData } = await internalSavedObjectsRepository.find<RawAlert>({
     filter: 'not alert.attributes.executionStatus.status:error',
