@@ -12,7 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('jobs cloning supported by UI form', function () {
+  describe('total feature importance panel and decision path popover', function () {
     const testDataList: Array<{
       suiteTitle: string;
       archive: string;
@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
           job: {
             id: `bm_fi_binary_${timestamp}`,
             description:
-              "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+              "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '5'",
             source: {
               index: ['ft_bank_marketing'],
               query: {
@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
           job: {
             id: `bm_fi_multi_${timestamp}`,
             description:
-              "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",
+              "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '5'",
             source: {
               index: ['ft_bank_marketing'],
               query: {
