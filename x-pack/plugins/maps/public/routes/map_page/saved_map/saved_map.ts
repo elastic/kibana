@@ -8,7 +8,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
-import { MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
+import { MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 import { createMapStore, MapStore, MapStoreState } from '../../../reducers/store';
 import {
   getTimeFilters,
@@ -35,7 +35,7 @@ import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/publ
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
 import { getCoreChrome, getToasts, getIsAllowByValueEmbeddables } from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
-import { LayerDescriptor, MapCenterAndZoom } from '../../../../common/descriptor_types';
+import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { getInitialLayers } from './get_initial_layers';
 import { copyPersistentState } from '../../../reducers/util';
 import { getBreadcrumbs } from './get_breadcrumbs';
@@ -60,7 +60,7 @@ export class SavedMap {
     originatingApp,
     stateTransfer,
   }: {
-    defaultLayers: LayerDescriptor[];
+    defaultLayers?: LayerDescriptor[];
     mapEmbeddableInput?: MapEmbeddableInput;
     embeddableId?: string;
     onSaveCallback?: () => void;
@@ -293,7 +293,7 @@ export class SavedMap {
 
     getCoreChrome().docTitle.change(newTitle);
     this.setBreadcrumbs();
-    goToSpecifiedPath(`/map/${this.getSavedObjectId()}${window.location.hash}`);
+    goToSpecifiedPath(`/${MAP_PATH}/${this.getSavedObjectId()}${window.location.hash}`);
 
     if (this._onSaveCallback) {
       this._onSaveCallback();

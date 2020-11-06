@@ -374,7 +374,7 @@ export class MapsListView extends React.Component {
           <EuiLink
             onClick={(e: MouseEvent) => {
               e.preventDefault();
-              goToSpecifiedPath(`/map/${record.id}`);
+              goToSpecifiedPath(`/${MAP_PATH}/${record.id}`);
             }}
             data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
           >
