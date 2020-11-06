@@ -42,7 +42,7 @@ export function jobSavedObjectsInitializationFactory(core: CoreStart) {
       const { jobs } = await initSavedObjects();
       mlLog.info(`${jobs.length} job saved objects initialized for * space`);
     } catch (error) {
-      mlLog.error('Error Initializing jobs');
+      mlLog.error(`Error Initializing jobs ${JSON.stringify(error)}`);
     }
   }
 
