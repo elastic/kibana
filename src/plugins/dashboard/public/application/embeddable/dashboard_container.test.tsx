@@ -51,7 +51,7 @@ beforeEach(() => {
   options.embeddable = doStart();
 });
 
-test('DashboardContainer initializes embeddables', async () => {
+test('DashboardContainer initializes embeddables', (done) => {
   const initialInput = getSampleDashboardInput({
     panels: {
       '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
@@ -67,6 +67,7 @@ test('DashboardContainer initializes embeddables', async () => {
       const embeddable = container.getChild<ContactCardEmbeddable>('123');
       expect(embeddable).toBeDefined();
       expect(embeddable.id).toBe('123');
+      done();
     }
   });
 
@@ -75,6 +76,7 @@ test('DashboardContainer initializes embeddables', async () => {
     expect(embeddable).toBeDefined();
     expect(embeddable.id).toBe('123');
     subscription.unsubscribe();
+    done();
   }
 });
 
@@ -99,7 +101,7 @@ test('DashboardContainer.addNewEmbeddable', async () => {
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });
 
-test('DashboardContainer.replacePanel', async (done) => {
+test('DashboardContainer.replacePanel', async () => {
   const ID = '123';
   const initialInput = getSampleDashboardInput({
     panels: {
@@ -124,7 +126,6 @@ test('DashboardContainer.replacePanel', async (done) => {
       case 2: {
         expect(panels[ID].type).toBe(EMPTY_EMBEDDABLE);
         subscription.unsubscribe();
-        done();
       }
 
       default:

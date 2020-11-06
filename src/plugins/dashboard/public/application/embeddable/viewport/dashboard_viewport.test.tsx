@@ -195,7 +195,7 @@ test('renders exit full screen button when in full screen mode and empty screen'
   component.unmount();
 });
 
-test('DashboardViewport unmount unsubscribes', async (done) => {
+test('DashboardViewport unmount unsubscribes', (done) => {
   const { props, options } = getProps();
   const component = mount(
     <I18nProvider>

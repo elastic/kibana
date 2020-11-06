@@ -18,7 +18,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { skip, take } from 'rxjs/operators';
+import { skip } from 'rxjs/operators';
 import {
   isErrorEmbeddable,
   EmbeddableOutput,
@@ -562,7 +562,7 @@ test('Panel added to input state', async () => {
   expect(container.getOutput().embeddableLoaded[embeddable2.id]).toBe(true);
 });
 
-test('Container changes made directly after adding a new embeddable are propagated', async () => {
+test('Container changes made directly after adding a new embeddable are propagated', (done) => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
@@ -606,6 +606,7 @@ test('Container changes made directly after adding a new embeddable are propagat
           const embeddable = container.getChild(embeddableId);
           if (embeddable.getInput().viewMode === ViewMode.VIEW) {
             subscription.unsubscribe();
+            done();
           }
         }
       }
@@ -760,7 +761,7 @@ test('untilEmbeddableLoaded() resolves if child is loaded in the container', asy
   expect(child.type).toBe(HELLO_WORLD_EMBEDDABLE);
 });
 
-test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', async () => {
+test('untilEmbeddableLoaded resolves with undefined if child is subsequently removed', (done) => {
   const { doStart, setup, coreStart, uiActions } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -798,12 +799,13 @@ test('untilEmbeddableLoaded resolves with undefined if child is subsequently rem
 
   container.untilEmbeddableLoaded('123').then((embed) => {
     expect(embed).toBeUndefined();
+    done();
   });
 
   container.updateInput({ panels: {} });
 });
 
-test('adding a panel then subsequently removing it before its loaded removes the panel', async () => {
+test('adding a panel then subsequently removing it before its loaded removes the panel', (done) => {
   const { doStart, coreStart, uiActions, setup } = testPlugin(
     coreMock.createSetup(),
     coreMock.createStart()
@@ -839,7 +841,16 @@ test('adding a panel then subsequently removing it before its loaded removes the
   );
 
   // Final state should be that the panel is removed.
-  const promise = Rx.merge(container.getInput$(), container.getOutput$()).pipe(take(1)).toPromise();
+  Rx.merge(container.getInput$(), container.getOutput$()).subscribe(() => {
+    if (
+      container.getInput().panels['123'] === undefined &&
+      container.getOutput().embeddableLoaded['123'] === undefined &&
+      container.getInput().panels['456'] !== undefined &&
+      container.getOutput().embeddableLoaded['456'] === true
+    ) {
+      done();
+    }
+  });
 
   container.updateInput({ panels: {} });
 
@@ -851,11 +862,4 @@ test('adding a panel then subsequently removing it before its loaded removes the
       },
     },
   });
-
-  await promise;
-
-  expect(container.getInput().panels['123']).toBeUndefined();
-  expect(container.getOutput().embeddableLoaded['123']).toBeUndefined();
-  expect(container.getInput().panels['456']).not.toBeUndefined();
-  expect(container.getOutput().embeddableLoaded['456']).toBeTruthy();
 });

@@ -30,13 +30,15 @@ describe('filter manager utilities', () => {
       expect(result).toHaveProperty('value', 'foo:bar');
     });
 
-    test('should return undefined for none matching', async () => {
+    test('should return undefined for none matching', (done) => {
       const filter = buildEmptyFilter(true);
 
       try {
         mapQueryString(filter as Filter);
       } catch (e) {
         expect(e).toBe(filter);
+
+        done();
       }
     });
   });

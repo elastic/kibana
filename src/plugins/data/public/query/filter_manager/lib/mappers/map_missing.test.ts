@@ -33,13 +33,15 @@ describe('filter manager utilities', () => {
       expect(result).toHaveProperty('value', 'missing');
     });
 
-    test('should return undefined for none matching', async () => {
+    test('should return undefined for none matching', (done) => {
       const filter = buildEmptyFilter(true);
 
       try {
         mapMissing(filter);
       } catch (e) {
         expect(e).toBe(filter);
+
+        done();
       }
     });
   });

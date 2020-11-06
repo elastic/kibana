@@ -58,11 +58,12 @@ describe('TagCloudVisualizationTest', () => {
     setFormatService(dataPluginMock.createStartContract().fieldFormats);
     Object.defineProperties(window.SVGElement.prototype, {
       transform: {
-        get: () => ({
+        value: {
           baseVal: {
             consolidate: () => {},
           },
-        }),
+        },
+        writable: true,
         configurable: true,
       },
     });

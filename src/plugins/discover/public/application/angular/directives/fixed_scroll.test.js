@@ -18,10 +18,10 @@
  */
 
 import angular from 'angular';
+import 'angular-mocks';
 import $ from 'jquery';
 
 import sinon from 'sinon';
-import 'angular-mocks';
 
 import { initAngularBootstrap } from '../../../../../kibana_legacy/public';
 import { FixedScrollProvider } from './fixed_scroll';
@@ -75,7 +75,7 @@ describe('FixedScroll directive', function () {
     currentJqLiteWidth = 120;
     initAngularBootstrap();
 
-    window.angular.mock.module(testModuleName);
+    angular.mock.module(testModuleName);
     angular.mock.inject(($compile, $rootScope, $timeout) => {
       flushPendingTasks = function flushPendingTasks() {
         $rootScope.$digest();

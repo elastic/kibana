@@ -20,3 +20,11 @@
 // Files in directories of this name will be treated as Jest integration tests with instances of
 // Elasticsearch and the Kibana server.
 export const RESERVED_DIR_JEST_INTEGRATION_TESTS = 'integration_tests';
+
+// Paths to directories containing angular code that cannot be run with jest-circus due to the
+// angular-mocks that don't support non-jasmine-based runners
+export const ANGULAR_PATHS = [
+  '<rootDir>/packages/kbn-i18n/src/angular',
+  '<rootDir>/src/plugins/discover/public/application/angular',
+  '<rootDir>/src/plugins/vis_type_table/public/legacy',
+];

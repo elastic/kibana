@@ -57,7 +57,7 @@ describe('Output Tokenization', () => {
       data = JSON.stringify(data, null, 3);
     }
 
-    test('Token test ' + testCount++, async function () {
+    test('Token test ' + testCount++, function (done) {
       output.update(data, function () {
         const tokens = tokensAsList();
         const normTokenList = [];
@@ -66,6 +66,7 @@ describe('Output Tokenization', () => {
         }
 
         expect(tokens).toEqual(normTokenList);
+        done();
       });
     });
   }

@@ -79,7 +79,7 @@ describe('filter manager utilities', () => {
       expect(after.meta).toHaveProperty('negate', false);
     });
 
-    test('should finish with a catch', async (done) => {
+    test('should finish with a catch', async () => {
       const before: any = { meta: { index: 'logstash-*' } };
 
       try {
@@ -87,8 +87,6 @@ describe('filter manager utilities', () => {
       } catch (e) {
         expect(e).toBeInstanceOf(Error);
         expect(e.message).toBe('No mappings have been found for filter.');
-
-        done();
       }
     });
   });

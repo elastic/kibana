@@ -70,7 +70,7 @@ describe('filter manager utilities', () => {
       }
     });
 
-    test('should return undefined for none matching', async () => {
+    test('should return undefined for none matching', (done) => {
       const wrongFilter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
@@ -80,6 +80,8 @@ describe('filter manager utilities', () => {
         mapGeoPolygon(wrongFilter);
       } catch (e) {
         expect(e).toBe(wrongFilter);
+
+        done();
       }
     });
   });

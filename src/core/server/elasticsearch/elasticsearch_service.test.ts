@@ -348,8 +348,6 @@ describe('#stop', () => {
   });
 
   it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
-    expect.assertions(2);
-
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())

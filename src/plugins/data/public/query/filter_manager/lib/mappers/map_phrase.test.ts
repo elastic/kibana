@@ -38,7 +38,7 @@ describe('filter manager utilities', () => {
       }
     });
 
-    test('should return undefined for none matching', async () => {
+    test('should return undefined for none matching', (done) => {
       const filter = {
         meta: { index: 'logstash-*' },
         query: { query_string: { query: 'foo:bar' } },
@@ -48,6 +48,8 @@ describe('filter manager utilities', () => {
         mapPhrase(filter);
       } catch (e) {
         expect(e).toBe(filter);
+
+        done();
       }
     });
   });

@@ -62,7 +62,7 @@ setup.registerEmbeddableFactory(embeddableFactory.type, embeddableFactory);
 
 const start = doStart();
 const getEmbeddableFactory = start.getEmbeddableFactory;
-test('HelloWorldContainer initializes embeddables', async (done) => {
+test('HelloWorldContainer initializes embeddables', async () => {
   const container = new HelloWorldContainer(
     {
       id: '123',
@@ -81,7 +81,6 @@ test('HelloWorldContainer initializes embeddables', async (done) => {
       const embeddable = container.getChild<ContactCardEmbeddable>('123');
       expect(embeddable).toBeDefined();
       expect(embeddable.id).toBe('123');
-      done();
     }
   });
 
@@ -90,7 +89,6 @@ test('HelloWorldContainer initializes embeddables', async (done) => {
     expect(embeddable).toBeDefined();
     expect(embeddable.id).toBe('123');
     subscription.unsubscribe();
-    done();
   }
 });
 

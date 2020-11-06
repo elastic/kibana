@@ -18,9 +18,9 @@
  */
 import angular from 'angular';
 import _ from 'lodash';
+import 'angular-mocks';
 import 'angular-sanitize';
 import 'angular-route';
-import 'angular-mocks';
 import { createBrowserHistory } from 'history';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import hits from 'fixtures/real_hits';

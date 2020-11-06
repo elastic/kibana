@@ -406,7 +406,7 @@ describe('ClusterClient', () => {
       expect(scopedClient.close).toHaveBeenCalledTimes(1);
     });
 
-    it('waits for both clients to close', async () => {
+    it('waits for both clients to close', (done) => {
       expect.assertions(4);
 
       const clusterClient = new ClusterClient(createConfig(), logger, getAuthHeaders);
@@ -439,6 +439,7 @@ describe('ClusterClient', () => {
         clusterClientClosed = true;
         expect(internalClientClosed).toBe(true);
         expect(scopedClientClosed).toBe(true);
+        done();
       });
 
       closeInternalClient!();
