@@ -56,6 +56,10 @@ export class EMSSettings {
     }
   }
 
+  isProxyElasticMapsServiceInMaps(): boolean {
+    return !!this._config.proxyElasticMapsServiceInMaps;
+  }
+
   getEMSTileApiUrl(): string {
     if (this._config.emsTileApiUrl !== DEFAULT_EMS_TILE_API_URL || !this._isEMSUrlSet()) {
       return this._config.emsTileApiUrl!;

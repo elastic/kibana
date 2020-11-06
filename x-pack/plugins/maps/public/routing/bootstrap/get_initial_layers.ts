@@ -39,7 +39,7 @@ export function getInitialLayers(layerListJSON?: string, initialLayers: LayerDes
     return [layerDescriptor, ...initialLayers];
   }
 
-  const isEmsEnabled = getEMSSettings().isEMSEnabled();
+  const isEmsEnabled = getEMSSettings()!.isEMSEnabled();
   if (isEmsEnabled) {
     const layerDescriptor = VectorTileLayer.createDescriptor({
       sourceDescriptor: EMSTMSSource.createDescriptor({ isAutoSelect: true }),

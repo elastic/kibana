@@ -15,7 +15,11 @@ const layerListNotProvided = undefined;
 
 describe('Saved object has layer list', () => {
   beforeEach(() => {
-    require('../../kibana_services').getIsEmsEnabled = () => true;
+    require('../../kibana_services').getEMSSettings = () => {
+      return {
+        isEMSEnabled: () => true,
+      };
+    };
   });
 
   it('Should get initial layers from saved object', () => {
@@ -65,7 +69,11 @@ describe('EMS is enabled', () => {
     require('../../meta').getKibanaTileMap = () => {
       return null;
     };
-    require('../../kibana_services').getIsEmsEnabled = () => true;
+    require('../../kibana_services').getEMSSettings = () => {
+      return {
+        isEMSEnabled: () => true,
+      };
+    };
     require('../../kibana_services').getEmsTileLayerId = () => ({
       bright: 'road_map',
       desaturated: 'road_map_desaturated',
@@ -101,7 +109,11 @@ describe('EMS is not enabled', () => {
     require('../../meta').getKibanaTileMap = () => {
       return null;
     };
-    require('../../kibana_services').getIsEmsEnabled = () => false;
+    require('../../kibana_services').getEMSSettings = () => {
+      return {
+        isEMSEnabled: () => false,
+      };
+    };
   });
 
   it('Should return empty layer list since there are no configured tile layers', () => {

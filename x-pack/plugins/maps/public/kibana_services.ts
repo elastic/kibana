@@ -71,11 +71,8 @@ export const getEMSSettings = () => {
   return emsSettings;
 };
 
-export const getIsEmsEnabled = () => getKibanaCommonConfig().includeElasticMapsService;
-
 export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
-export const getProxyElasticMapsServiceInMaps = () =>
-  getKibanaCommonConfig().proxyElasticMapsServiceInMaps;
+
 export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
 export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
 

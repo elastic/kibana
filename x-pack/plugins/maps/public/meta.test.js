@@ -9,10 +9,22 @@ import { getEMSClient, getGlyphUrl } from './meta';
 
 jest.mock('@elastic/ems-client');
 
+const EMS_FONTS_URL_MOCK = 'ems/fonts';
+const MOCK_EMS_SETTINGS = {
+  isEMSEnabled: () => true,
+  getEMSFileApiUrl: () => 'https://file-api',
+  getEMSTileApiUrl: () => 'https://tile-api',
+  getEMSLandingPageUrl: () => 'http://test.com',
+  getEMSFontLibraryUrl: () => EMS_FONTS_URL_MOCK,
+  isProxyElasticMapsServiceInMaps: () => false,
+};
+
 describe('default use without proxy', () => {
   beforeEach(() => {
-    require('./kibana_services').getProxyElasticMapsServiceInMaps = () => false;
-    require('./kibana_services').getIsEmsEnabled = () => true;
+    require('./kibana_services').getEmsTileLayerId = () => '123';
+    require('./kibana_services').getEMSSettings = () => {
+      return MOCK_EMS_SETTINGS;
+    };
     require('./licensed_features').getLicenseId = () => {
       return 'foobarlicenseid';
     };
@@ -28,9 +40,7 @@ describe('default use without proxy', () => {
 
 describe('getGlyphUrl', () => {
   describe('EMS enabled', () => {
-    const EMS_FONTS_URL_MOCK = 'ems/fonts';
     beforeAll(() => {
-      require('./kibana_services').getIsEmsEnabled = () => true;
       require('./kibana_services').getHttp = () => ({
         basePath: {
           prepend: (url) => url, // No need to actually prepend a dev basepath for test
@@ -40,7 +50,12 @@ describe('getGlyphUrl', () => {
 
     describe('EMS proxy enabled', () => {
       beforeAll(() => {
-        require('./kibana_services').getProxyElasticMapsServiceInMaps = () => true;
+        require('./kibana_services').getEMSSettings = () => {
+          return {
+            ...MOCK_EMS_SETTINGS,
+            isProxyElasticMapsServiceInMaps: () => true,
+          };
+        };
       });
 
       test('should return proxied EMS fonts URL', async () => {
@@ -50,7 +65,12 @@ describe('getGlyphUrl', () => {
 
     describe('EMS proxy disabled', () => {
       beforeAll(() => {
-        require('./kibana_services').getProxyElasticMapsServiceInMaps = () => false;
+        require('./kibana_services').getEMSSettings = () => {
+          return {
+            ...MOCK_EMS_SETTINGS,
+            isProxyElasticMapsServiceInMaps: () => false,
+          };
+        };
       });
 
       test('should return EMS fonts URL', async () => {
@@ -67,7 +87,12 @@ describe('getGlyphUrl', () => {
         },
       };
       require('./kibana_services').getHttp = () => mockHttp;
-      require('./kibana_services').getIsEmsEnabled = () => false;
+      require('./kibana_services').getEMSSettings = () => {
+        return {
+          ...MOCK_EMS_SETTINGS,
+          isEMSEnabled: () => false,
+        };
+      };
     });
 
     test('should return kibana fonts URL', async () => {

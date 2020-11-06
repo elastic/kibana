@@ -18,10 +18,8 @@ import {
 } from '../common/constants';
 import {
   getHttp,
-  getIsEmsEnabled,
   getRegionmapLayers,
   getTilemap,
-  getProxyElasticMapsServiceInMaps,
   getKibanaVersion,
   getEMSSettings,
 } from './kibana_services';
@@ -63,18 +61,17 @@ let latestLicenseId: string | undefined;
 export function getEMSClient(): EMSClient {
   if (!emsClient) {
     const emsSettings = getEMSSettings();
-    const proxyElasticMapsServiceInMaps = getProxyElasticMapsServiceInMaps();
     const proxyPath = '';
-    const tileApiUrl = proxyElasticMapsServiceInMaps
+    const tileApiUrl = emsSettings!.isProxyElasticMapsServiceInMaps()
       ? relativeToAbsolute(
           getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}`)
         )
-      : emsSettings.getEMSTileApiUrl();
-    const fileApiUrl = proxyElasticMapsServiceInMaps
+      : emsSettings!.getEMSTileApiUrl();
+    const fileApiUrl = emsSettings!.isProxyElasticMapsServiceInMaps()
       ? relativeToAbsolute(
           getHttp().basePath.prepend(`/${GIS_API_PATH}/${EMS_FILES_CATALOGUE_PATH}`)
         )
-      : emsSettings.getEMSFileApiUrl();
+      : emsSettings!.getEMSFileApiUrl();
 
     emsClient = new EMSClient({
       language: i18n.getLocale(),
@@ -82,7 +79,7 @@ export function getEMSClient(): EMSClient {
       appName: EMS_APP_NAME,
       tileApiUrl,
       fileApiUrl,
-      landingPageUrl: emsSettings.getEMSLandingPageUrl(),
+      landingPageUrl: emsSettings!.getEMSLandingPageUrl(),
       fetchFunction(url: string) {
         return fetch(url);
       },
@@ -98,18 +95,18 @@ export function getEMSClient(): EMSClient {
 }
 
 export function getGlyphUrl(): string {
-  if (!getEMSSettings().isEMSEnabled()) {
+  const emsSettings = getEMSSettings();
+  if (!emsSettings!.isEMSEnabled()) {
     return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
 
-  const emsSettings = getEMSSettings();
-  return getProxyElasticMapsServiceInMaps()
+  return emsSettings!.isProxyElasticMapsServiceInMaps()
     ? relativeToAbsolute(
         getHttp().basePath.prepend(
           `/${GIS_API_PATH}/${EMS_TILES_CATALOGUE_PATH}/${EMS_GLYPHS_PATH}`
         )
       ) + `/{fontstack}/{range}`
-    : emsSettings.getEMSFontLibraryUrl();
+    : emsSettings!.getEMSFontLibraryUrl();
 }
 
 export function isRetina(): boolean {
