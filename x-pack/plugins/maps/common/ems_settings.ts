@@ -9,8 +9,7 @@ import {
   DEFAULT_EMS_FONT_LIBRARY_URL,
   DEFAULT_EMS_LANDING_PAGE_URL,
   DEFAULT_EMS_TILE_API_URL,
-} from '../../../../src/plugins/maps_legacy/public';
-import { getIsEnterprisePlus } from './licensed_features';
+} from '../../../../src/plugins/maps_legacy/common';
 
 export interface IEMSConfig {
   emsUrl?: string;
@@ -25,9 +24,11 @@ export interface IEMSConfig {
 
 export class EMSSettings {
   private readonly _config: IEMSConfig;
+  private readonly _getIsEnterprisePlus: () => boolean;
 
-  constructor(config: IEMSConfig) {
+  constructor(config: IEMSConfig, getIsEnterPrisePlus: () => boolean) {
     this._config = config;
+    this._getIsEnterprisePlus = getIsEnterPrisePlus;
   }
 
   _isEMSUrlSet() {
@@ -44,7 +45,7 @@ export class EMSSettings {
 
   isEMSEnabled(): boolean {
     if (this._isEMSUrlSet()) {
-      return getIsEnterprisePlus();
+      return this._getIsEnterprisePlus();
     }
     return !!this._config.includeElasticMapsService;
   }

@@ -52,8 +52,12 @@ import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
-import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
-import { EMSSettings } from './ems_settings';
+import {
+  getIsEnterprisePlus,
+  registerLicensedFeatures,
+  setLicensingPluginStart,
+} from './licensed_features';
+import { EMSSettings } from '../common/ems_settings';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -108,7 +112,7 @@ export class MapsPlugin
     setMapAppConfig(config);
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
 
-    const emsSettings = new EMSSettings(plugins.mapsLegacy.config);
+    const emsSettings = new EMSSettings(plugins.mapsLegacy.config, getIsEnterprisePlus);
     setEMSSettings(emsSettings);
 
     // register url generators
