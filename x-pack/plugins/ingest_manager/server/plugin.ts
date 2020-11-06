@@ -60,6 +60,7 @@ import {
   AgentService,
   packagePolicyService,
   PackageService,
+  agentPolicyService,
 } from './services';
 import {
   getAgentStatusById,
@@ -130,6 +131,7 @@ export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
+  agentPolicyService: typeof agentPolicyService;
   /**
    * Services for Ingest's package policies
    */
@@ -302,6 +304,7 @@ export class IngestManagerPlugin
       registerExternalCallback: (...args: ExternalCallback) => {
         return appContextService.addExternalCallback(...args);
       },
+      agentPolicyService,
     };
   }
 

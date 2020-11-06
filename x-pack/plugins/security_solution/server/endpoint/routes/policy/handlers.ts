@@ -41,7 +41,7 @@ export const getPolicySummariesHandler = function (
   return async (context, request, response) => {
     try {
       const result = await getAllAgentUniqueVersionCount(
-        endpointAppContext.service.getAgentService()!,
+        endpointAppContext,
         context.core.savedObjects.client,
         request.query.package_name,
         request.query?.policy_name || undefined
@@ -49,7 +49,10 @@ export const getPolicySummariesHandler = function (
 
       return response.ok({
         body: {
-          versions_count: result,
+          versions_count: {
+            package: request.query.package_name,
+            summary: { ...result },
+          },
         },
       });
     } catch (err) {

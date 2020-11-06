@@ -568,5 +568,5 @@ class AgentPolicyService {
     return fullAgentPolicy;
   }
 }
-
+export type AgentPolicyServiceInterface = AgentPolicyService;
 export const agentPolicyService = new AgentPolicyService();

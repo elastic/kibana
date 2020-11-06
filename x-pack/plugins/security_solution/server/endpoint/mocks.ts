@@ -25,6 +25,8 @@ import {
 import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { AgentPolicyServiceInterface } from '../../../ingest_manager/server/services/agent_policy';
 
 /**
  * Creates a mocked EndpointAppContext.
@@ -103,6 +105,32 @@ export const createMockAgentService = (): jest.Mocked<AgentService> => {
 };
 
 /**
+ * Create a mock AgentPolicyService
+ */
+
+export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
+  return {
+    list: jest.fn(),
+    ensureDefaultAgentPolicy: jest.fn(),
+    create: jest.fn(),
+    requireUniqueName: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+    copy: jest.fn(),
+    bumpRevision: jest.fn(),
+    assignPackagePolicies: jest.fn(),
+    unassignPackagePolicies: jest.fn(),
+    getDefaultAgentPolicyId: jest.fn(),
+    delete: jest.fn(),
+    createFleetPolicyChangeAction: jest.fn(),
+    getFullAgentPolicy: jest.fn(),
+    bumpAllAgentPolicies: jest.fn(),
+    triggerAgentPolicyUpdatedEvent: jest.fn(),
+    _update: jest.fn(),
+  };
+};
+
+/**
  * Creates a mock IndexPatternService for use in tests that need to interact with the Ingest Manager's
  * ESIndexPatternService.
  *
@@ -116,6 +144,7 @@ export const createMockIngestManagerStartContract = (
     esIndexPatternService: {
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
+    agentPolicyService: createMockAgentPolicyService(),
     agentService: createMockAgentService(),
     packageService: createMockPackageService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),

@@ -8,10 +8,9 @@ import { SearchResponse } from 'elasticsearch';
 import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { INITIAL_POLICY_ID } from './index';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentService } from '../../../../../ingest_manager/server/services';
-import { Agent } from '../../../../../ingest_manager/common/types/models';
+import { Agent, AgentPolicy } from '../../../../../ingest_manager/common/types/models';
 import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
+import { EndpointAppContext } from '../../types';
 
 export function getESQueryPolicyResponseByAgentID(agentID: string, index: string) {
   return {
@@ -63,18 +62,35 @@ export async function getPolicyResponseByAgentId(
 }
 
 export async function getAllAgentUniqueVersionCount(
-  agentService: AgentService,
+  endpointAppContext: EndpointAppContext,
   soClient: SavedObjectsClientContract,
   packageName: string,
-  poliicyName?: string,
+  policyName?: string,
   pageSize: number = 1000
 ): Promise<JsonObject> {
+  const policyIdFilter = async (): Promise<string> => {
+    const policyIds = await getPolicyIds(endpointAppContext, soClient, policyName!, pageSize);
+    return policyIds.map((id) => `fleet-agents.policy_id:${id}`).join(' OR ');
+  };
+
+  const query = async (): Promise<string> => {
+    const agentQuery = `fleet-agents.packages:"${packageName}"`;
+    if (policyName) {
+      const policyQuery = await policyIdFilter();
+      return policyQuery && policyQuery !== '' ? `${agentQuery} AND (${policyQuery})` : agentQuery;
+    } else {
+      return agentQuery;
+    }
+  };
+
+  const kqlQuery = await query();
+
   const searchOptions = (pageNum: number) => {
     return {
       page: pageNum,
       perPage: pageSize,
       showInactive: false,
-      kuery: `fleet-agents.packages:"${packageName}"`,
+      kuery: kqlQuery,
     };
   };
 
@@ -82,8 +98,10 @@ export async function getAllAgentUniqueVersionCount(
   const result: Map<string, number> = new Map<string, number>();
   let hasMore = true;
   while (hasMore) {
-    const unenrolledAgents = await agentService.listAgents(soClient, searchOptions(page++));
-    unenrolledAgents.agents.forEach((agent: Agent) => {
+    const queryResult = await endpointAppContext.service
+      .getAgentService()!
+      .listAgents(soClient, searchOptions(page++));
+    queryResult.agents.forEach((agent: Agent) => {
       const agentVersion = agent.local_metadata?.elastic?.agent?.version;
       if (result.has(agentVersion)) {
         result.set(agentVersion, result.get(agentVersion)! + 1);
@@ -91,15 +109,40 @@ export async function getAllAgentUniqueVersionCount(
         result.set(agentVersion, 1);
       }
     });
-    hasMore = unenrolledAgents.agents.length > 0;
+    hasMore = queryResult.agents.length > 0;
   }
   const jsonObject: { [key: string]: number } = {};
   result.forEach((value, key) => {
     jsonObject[key] = value;
   });
 
-  return {
-    package: packageName,
-    summary: { ...jsonObject },
+  return jsonObject;
+}
+
+export async function getPolicyIds(
+  endpointAppContext: EndpointAppContext,
+  soClient: SavedObjectsClientContract,
+  policyName: string,
+  pageSize: number = 1000
+): Promise<string[]> {
+  const searchOptions = (pageNum: number) => {
+    return {
+      page: pageNum,
+      perPage: pageSize,
+      showInactive: false,
+      kuery: `ingest-agent-policies.name :"${policyName}"`,
+    };
   };
+
+  let page = 1;
+  const result: string[] = [];
+  let hasMore = true;
+  while (hasMore) {
+    const queryResult = await endpointAppContext.service
+      .getAgentPolicyService()!
+      .list(soClient, searchOptions(page++));
+    result.push(...queryResult.items.map((agentPolicy: AgentPolicy) => agentPolicy.id));
+    hasMore = queryResult.items.length > 0;
+  }
+  return result;
 }
