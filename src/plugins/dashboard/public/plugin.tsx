@@ -450,6 +450,7 @@ export class DashboardPlugin
     const savedDashboardLoader = createSavedDashboardLoader({
       savedObjectsClient: core.savedObjects.client,
       savedObjects: plugins.savedObjects,
+      embeddableStart: plugins.embeddable,
     });
     const dashboardContainerFactory = plugins.embeddable.getEmbeddableFactory(
       DASHBOARD_CONTAINER_TYPE

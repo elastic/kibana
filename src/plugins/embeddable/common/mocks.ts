@@ -17,9 +17,15 @@
  * under the License.
  */
 
-export * from './extract';
-export * from './inject';
-export * from './migrate';
-export * from './migrate_base_input';
-export * from './telemetry';
-export * from './saved_object_embeddable';
+import { EmbeddablePersistableStateService } from './types';
+
+export const createEmbeddablePersistableStateServiceMock = (): jest.Mocked<
+  EmbeddablePersistableStateService
+> => {
+  return {
+    inject: jest.fn((state, references) => state),
+    extract: jest.fn((state) => ({ state, references: [] })),
+    migrate: jest.fn((state, version) => state),
+    telemetry: jest.fn((state, collector) => ({})),
+  };
+};

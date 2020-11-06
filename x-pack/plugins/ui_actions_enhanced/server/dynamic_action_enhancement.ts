@@ -7,11 +7,11 @@
 import { EnhancementRegistryDefinition } from '../../../../src/plugins/embeddable/server';
 import { SavedObjectReference } from '../../../../src/core/types';
 import { DynamicActionsState, SerializedEvent } from './types';
-import { AdvancedUiActionsPublicPlugin } from './plugin';
+import { AdvancedUiActionsServerPlugin } from './plugin';
 import { SerializableState } from '../../../../src/plugins/kibana_utils/common';
 
 export const dynamicActionEnhancement = (
-  uiActionsEnhanced: AdvancedUiActionsPublicPlugin
+  uiActionsEnhanced: AdvancedUiActionsServerPlugin
 ): EnhancementRegistryDefinition => {
   return {
     id: 'dynamicActions',

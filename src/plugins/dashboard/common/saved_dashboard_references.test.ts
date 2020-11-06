@@ -17,8 +17,18 @@
  * under the License.
  */
 
-import { extractReferences, injectReferences } from './saved_dashboard_references';
-import { SavedObjectDashboard } from './saved_dashboard';
+import {
+  extractReferences,
+  injectReferences,
+  InjectDeps,
+  ExtractDeps,
+} from './saved_dashboard_references';
+import { createEmbeddablePersistableStateServiceMock } from '../../embeddable/common/mocks';
+
+const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
+const deps: InjectDeps & ExtractDeps = {
+  embeddablePersistableStateService: embeddablePersistableStateServiceMock,
+};
 
 describe('extractReferences', () => {
   test('extracts references from panelsJSON', () => {
@@ -41,28 +51,28 @@ describe('extractReferences', () => {
       },
       references: [],
     };
-    const updatedDoc = extractReferences(doc);
+    const updatedDoc = extractReferences(doc, deps);
 
     expect(updatedDoc).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "foo": true,
-    "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_0\\"},{\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_1\\"}]",
-  },
-  "references": Array [
-    Object {
-      "id": "1",
-      "name": "panel_0",
-      "type": "visualization",
-    },
-    Object {
-      "id": "2",
-      "name": "panel_1",
-      "type": "visualization",
-    },
-  ],
-}
-`);
+      Object {
+        "attributes": Object {
+          "foo": true,
+          "panelsJSON": "[{\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"panelRefName\\":\\"panel_0\\"},{\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"panelRefName\\":\\"panel_1\\"}]",
+        },
+        "references": Array [
+          Object {
+            "id": "1",
+            "name": "panel_0",
+            "type": "visualization",
+          },
+          Object {
+            "id": "2",
+            "name": "panel_1",
+            "type": "visualization",
+          },
+        ],
+      }
+    `);
   });
 
   test('fails when "type" attribute is missing from a panel', () => {
@@ -79,7 +89,7 @@ Object {
       },
       references: [],
     };
-    expect(() => extractReferences(doc)).toThrowErrorMatchingInlineSnapshot(
+    expect(() => extractReferences(doc, deps)).toThrowErrorMatchingInlineSnapshot(
       `"\\"type\\" attribute is missing from panel \\"0\\""`
     );
   });
@@ -98,21 +108,21 @@ Object {
       },
       references: [],
     };
-    expect(extractReferences(doc)).toMatchInlineSnapshot(`
-Object {
-  "attributes": Object {
-    "foo": true,
-    "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"title\\":\\"Title 1\\"}]",
-  },
-  "references": Array [],
-}
-`);
+    expect(extractReferences(doc, deps)).toMatchInlineSnapshot(`
+      Object {
+        "attributes": Object {
+          "foo": true,
+          "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\"}]",
+        },
+        "references": Array [],
+      }
+    `);
   });
 });
 
 describe('injectReferences', () => {
-  test('injects references into context', () => {
-    const context = {
+  test('returns injected attributes', () => {
+    const attributes = {
       id: '1',
       title: 'test',
       panelsJSON: JSON.stringify([
@@ -125,7 +135,7 @@ describe('injectReferences', () => {
           title: 'Title 2',
         },
       ]),
-    } as SavedObjectDashboard;
+    };
     const references = [
       {
         name: 'panel_0',
@@ -138,49 +148,49 @@ describe('injectReferences', () => {
         id: '2',
       },
     ];
-    injectReferences(context, references);
+    const newAttributes = injectReferences({ attributes, references }, deps);
 
-    expect(context).toMatchInlineSnapshot(`
-Object {
-  "id": "1",
-  "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\",\\"type\\":\\"visualization\\"},{\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\",\\"type\\":\\"visualization\\"}]",
-  "title": "test",
-}
-`);
+    expect(newAttributes).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\",\\"id\\":\\"2\\"}]",
+        "title": "test",
+      }
+    `);
   });
 
   test('skips when panelsJSON is missing', () => {
-    const context = {
+    const attributes = {
       id: '1',
       title: 'test',
-    } as SavedObjectDashboard;
-    injectReferences(context, []);
-    expect(context).toMatchInlineSnapshot(`
-Object {
-  "id": "1",
-  "title": "test",
-}
-`);
+    };
+    const newAttributes = injectReferences({ attributes, references: [] }, deps);
+    expect(newAttributes).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "title": "test",
+      }
+    `);
   });
 
   test('skips when panelsJSON is not an array', () => {
-    const context = {
+    const attributes = {
       id: '1',
       panelsJSON: '{}',
       title: 'test',
-    } as SavedObjectDashboard;
-    injectReferences(context, []);
-    expect(context).toMatchInlineSnapshot(`
-Object {
-  "id": "1",
-  "panelsJSON": "{}",
-  "title": "test",
-}
-`);
+    };
+    const newAttributes = injectReferences({ attributes, references: [] }, deps);
+    expect(newAttributes).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "panelsJSON": "{}",
+        "title": "test",
+      }
+    `);
   });
 
   test('skips a panel when panelRefName is missing', () => {
-    const context = {
+    const attributes = {
       id: '1',
       title: 'test',
       panelsJSON: JSON.stringify([
@@ -192,7 +202,7 @@ Object {
           title: 'Title 2',
         },
       ]),
-    } as SavedObjectDashboard;
+    };
     const references = [
       {
         name: 'panel_0',
@@ -200,18 +210,18 @@ Object {
         id: '1',
       },
     ];
-    injectReferences(context, references);
-    expect(context).toMatchInlineSnapshot(`
-Object {
-  "id": "1",
-  "panelsJSON": "[{\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\",\\"type\\":\\"visualization\\"},{\\"title\\":\\"Title 2\\"}]",
-  "title": "test",
-}
-`);
+    const newAttributes = injectReferences({ attributes, references }, deps);
+    expect(newAttributes).toMatchInlineSnapshot(`
+      Object {
+        "id": "1",
+        "panelsJSON": "[{\\"type\\":\\"visualization\\",\\"embeddableConfig\\":{},\\"title\\":\\"Title 1\\",\\"id\\":\\"1\\"},{\\"embeddableConfig\\":{},\\"title\\":\\"Title 2\\"}]",
+        "title": "test",
+      }
+    `);
   });
 
   test(`fails when it can't find the reference in the array`, () => {
-    const context = {
+    const attributes = {
       id: '1',
       title: 'test',
       panelsJSON: JSON.stringify([
@@ -220,9 +230,9 @@ Object {
           title: 'Title 1',
         },
       ]),
-    } as SavedObjectDashboard;
-    expect(() => injectReferences(context, [])).toThrowErrorMatchingInlineSnapshot(
-      `"Could not find reference \\"panel_0\\""`
-    );
+    };
+    expect(() =>
+      injectReferences({ attributes, references: [] }, deps)
+    ).toThrowErrorMatchingInlineSnapshot(`"Could not find reference \\"panel_0\\""`);
   });
 });

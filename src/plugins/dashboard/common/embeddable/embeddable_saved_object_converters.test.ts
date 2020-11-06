@@ -21,9 +21,8 @@ import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
 } from './embeddable_saved_object_converters';
-import { SavedDashboardPanel } from '../../types';
-import { DashboardPanelState } from '../embeddable';
-import { EmbeddableInput } from '../../../../embeddable/public';
+import { SavedDashboardPanel, DashboardPanelState } from '../types';
+import { EmbeddableInput } from '../../../embeddable/common/types';
 
 test('convertSavedDashboardPanelToPanelState', () => {
   const savedDashboardPanel: SavedDashboardPanel = {
@@ -134,4 +133,25 @@ test('convertPanelStateToSavedDashboardPanel will not add an undefined id when n
 
   const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel, '8.0.0');
   expect(converted.hasOwnProperty('id')).toBe(false);
+});
+
+test('convertPanelStateToSavedDashboardPanel will not leave title as part of embeddable config', () => {
+  const dashboardPanel: DashboardPanelState = {
+    gridData: {
+      x: 0,
+      y: 0,
+      h: 15,
+      w: 15,
+      i: '123',
+    },
+    explicitInput: {
+      id: '123',
+      title: 'title',
+    } as EmbeddableInput,
+    type: 'search',
+  };
+
+  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel, '8.0.0');
+  expect(converted.embeddableConfig.hasOwnProperty('title')).toBe(false);
+  expect(converted.title).toBe('title');
 });

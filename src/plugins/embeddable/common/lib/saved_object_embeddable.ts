@@ -17,9 +17,14 @@
  * under the License.
  */
 
-export * from './extract';
-export * from './inject';
-export * from './migrate';
-export * from './migrate_base_input';
-export * from './telemetry';
-export * from './saved_object_embeddable';
+import { EmbeddableInput } from '../types';
+
+export interface SavedObjectEmbeddableInput extends EmbeddableInput {
+  savedObjectId: string;
+}
+
+export function isSavedObjectEmbeddableInput(
+  input: EmbeddableInput | SavedObjectEmbeddableInput
+): input is SavedObjectEmbeddableInput {
+  return Boolean((input as SavedObjectEmbeddableInput).savedObjectId);
+}

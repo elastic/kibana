@@ -7,14 +7,13 @@
 <b>Signature:</b>
 
 ```typescript
-export interface EmbeddableSetup 
+export interface EmbeddableSetup extends PersistableStateService<EmbeddableStateWithType> 
 ```
 
 ## Properties
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [getAttributeService](./kibana-plugin-plugins-embeddable-server.embeddablesetup.getattributeservice.md) | <code>any</code> |  |
 |  [registerEmbeddableFactory](./kibana-plugin-plugins-embeddable-server.embeddablesetup.registerembeddablefactory.md) | <code>(factory: EmbeddableRegistryDefinition) =&gt; void</code> |  |
 |  [registerEnhancement](./kibana-plugin-plugins-embeddable-server.embeddablesetup.registerenhancement.md) | <code>(enhancement: EnhancementRegistryDefinition) =&gt; void</code> |  |
 

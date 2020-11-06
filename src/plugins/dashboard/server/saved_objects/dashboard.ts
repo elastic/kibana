@@ -18,9 +18,16 @@
  */
 
 import { SavedObjectsType } from 'kibana/server';
-import { dashboardSavedObjectTypeMigrations } from './dashboard_migrations';
+import {
+  createDashboardSavedObjectTypeMigrations,
+  DashboardSavedObjectTypeMigrationsDeps,
+} from './dashboard_migrations';
 
-export const dashboardSavedObjectType: SavedObjectsType = {
+export const createDashboardSavedObjectType = ({
+  migrationDeps,
+}: {
+  migrationDeps: DashboardSavedObjectTypeMigrationsDeps;
+}): SavedObjectsType => ({
   name: 'dashboard',
   hidden: false,
   namespaceType: 'single',
@@ -65,5 +72,5 @@ export const dashboardSavedObjectType: SavedObjectsType = {
       version: { type: 'integer' },
     },
   },
-  migrations: dashboardSavedObjectTypeMigrations,
-};
+  migrations: createDashboardSavedObjectTypeMigrations(migrationDeps),
+});

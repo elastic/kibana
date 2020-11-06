@@ -17,9 +17,8 @@
  * under the License.
  */
 import { omit } from 'lodash';
-import { SavedDashboardPanel } from '../../types';
-import { DashboardPanelState } from '../embeddable';
-import { SavedObjectEmbeddableInput } from '../../embeddable_plugin';
+import { DashboardPanelState, SavedDashboardPanel } from '../types';
+import { SavedObjectEmbeddableInput } from '../../../embeddable/common/';
 
 export function convertSavedDashboardPanelToPanelState(
   savedDashboardPanel: SavedDashboardPanel
@@ -49,7 +48,7 @@ export function convertPanelStateToSavedDashboardPanel(
     type: panelState.type,
     gridData: panelState.gridData,
     panelIndex: panelState.explicitInput.id,
-    embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId']),
+    embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
     ...(customTitle && { title: customTitle }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
   };

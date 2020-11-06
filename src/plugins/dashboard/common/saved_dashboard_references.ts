@@ -17,18 +17,47 @@
  * under the License.
  */
 
-import { SavedObjectAttributes, SavedObjectReference } from 'kibana/public';
-import { SavedObjectDashboard } from './saved_dashboard';
+import { SavedObjectAttributes, SavedObjectReference } from '../../../core/types';
+import {
+  extractPanelsReferences,
+  injectPanelsReferences,
+} from './embeddable/embeddable_references';
+import { SavedDashboardPanel730ToLatest } from './types';
+import { EmbeddablePersistableStateService } from '../../embeddable/common/types';
 
-export function extractReferences({
-  attributes,
-  references = [],
-}: {
+export interface ExtractDeps {
+  embeddablePersistableStateService: EmbeddablePersistableStateService;
+}
+
+export interface SavedObjectAttributesAndReferences {
   attributes: SavedObjectAttributes;
   references: SavedObjectReference[];
-}) {
+}
+
+export function extractReferences(
+  { attributes, references = [] }: SavedObjectAttributesAndReferences,
+  deps: ExtractDeps
+): SavedObjectAttributesAndReferences {
+  if (typeof attributes.panelsJSON !== 'string') {
+    return { attributes, references };
+  }
   const panelReferences: SavedObjectReference[] = [];
-  const panels: Array<Record<string, string>> = JSON.parse(String(attributes.panelsJSON));
+  let panels: Array<Record<string, string>> = JSON.parse(String(attributes.panelsJSON));
+
+  const extractedReferencesResult = extractPanelsReferences(
+    (panels as unknown) as SavedDashboardPanel730ToLatest[],
+    deps
+  );
+
+  panels = (extractedReferencesResult.map((res) => res.panel) as unknown) as Array<
+    Record<string, string>
+  >;
+  extractedReferencesResult.forEach((res) => {
+    panelReferences.push(...res.references);
+  });
+
+  // TODO: This extraction should be done by EmbeddablePersistableStateService
+  // https://github.com/elastic/kibana/issues/82830
   panels.forEach((panel, i) => {
     if (!panel.type) {
       throw new Error(`"type" attribute is missing from panel "${i}"`);
@@ -46,6 +75,7 @@ export function extractReferences({
     delete panel.type;
     delete panel.id;
   });
+
   return {
     references: [...references, ...panelReferences],
     attributes: {
@@ -55,21 +85,28 @@ export function extractReferences({
   };
 }
 
+export interface InjectDeps {
+  embeddablePersistableStateService: EmbeddablePersistableStateService;
+}
+
 export function injectReferences(
-  savedObject: SavedObjectDashboard,
-  references: SavedObjectReference[]
-) {
+  { attributes, references = [] }: SavedObjectAttributesAndReferences,
+  deps: InjectDeps
+): SavedObjectAttributes {
   // Skip if panelsJSON is missing otherwise this will cause saved object import to fail when
   // importing objects without panelsJSON. At development time of this, there is no guarantee each saved
   // object has panelsJSON in all previous versions of kibana.
-  if (typeof savedObject.panelsJSON !== 'string') {
-    return;
+  if (typeof attributes.panelsJSON !== 'string') {
+    return attributes;
   }
-  const panels = JSON.parse(savedObject.panelsJSON);
+  let panels = JSON.parse(attributes.panelsJSON);
   // Same here, prevent failing saved object import if ever panels aren't an array.
   if (!Array.isArray(panels)) {
-    return;
+    return attributes;
   }
+
+  // TODO: This injection should be done by EmbeddablePersistableStateService
+  // https://github.com/elastic/kibana/issues/82830
   panels.forEach((panel) => {
     if (!panel.panelRefName) {
       return;
@@ -84,5 +121,11 @@ export function injectReferences(
     panel.type = reference.type;
     delete panel.panelRefName;
   });
-  savedObject.panelsJSON = JSON.stringify(panels);
+
+  panels = injectPanelsReferences(panels, references, deps);
+
+  return {
+    ...attributes,
+    panelsJSON: JSON.stringify(panels),
+  };
 }

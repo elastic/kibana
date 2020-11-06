@@ -31,7 +31,7 @@ import {
 import { IContainer, ContainerInput, ContainerOutput, PanelState } from './i_container';
 import { PanelNotFoundError, EmbeddableFactoryNotFoundError } from '../errors';
 import { EmbeddableStart } from '../../plugin';
-import { isSavedObjectEmbeddableInput } from '../embeddables/saved_object_embeddable';
+import { isSavedObjectEmbeddableInput } from '../../../common/lib/saved_object_embeddable';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
