@@ -2,6 +2,7 @@
 
 exports[`IndexPattern toSpec should match snapshot 1`] = `
 Object {
+  "fieldAttributes": Object {},
   "fieldFormats": Object {},
   "fields": Object {
     "@tags": Object {
