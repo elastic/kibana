@@ -65,7 +65,6 @@ export const useNetworkKpiTlsHandshakes = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkKpiQueries.tlsHandshakes,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -156,7 +155,6 @@ export const useNetworkKpiTlsHandshakes = ({
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.tlsHandshakes,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
