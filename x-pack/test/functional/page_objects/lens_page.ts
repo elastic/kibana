@@ -122,11 +122,62 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       }
     },
 
+    /**
+     * Drags field to workspace
+     *
+     * @param field  - the desired field for the dimension
+     * */
     async dragFieldToWorkspace(field: string) {
-      await browser.realDragAndDrop(
+      await browser.html5DragAndDrop(
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector('lnsWorkspace')
       );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Drags field to dimension trigger
+     *
+     * @param field  - the desired field for the dimension
+     * @param dimension - the selector of the dimension being changed
+     * */
+    async dragFieldToDimensionTrigger(field: string, dimension: string) {
+      await browser.html5DragAndDrop(
+        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector(dimension)
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Drags field to dimension trigger
+     *
+     * @param from - the selector of the dimension being moved
+     * @param to - the selector of the dimension being dropped to
+     * */
+    async dragDimensionToDimension(from: string, to: string) {
+      await browser.html5DragAndDrop(
+        testSubjects.getCssSelector(from),
+        testSubjects.getCssSelector(to)
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Reorder elements within the group
+     *
+     * @param startIndex - the index of dragging element
+     * @param endIndex - the index of drop
+     * */
+    async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
+      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${
+        startIndex + 1
+      }) .lnsDragDrop`;
+      const dropping = `[data-test-subj='${dimension}']:nth-of-type(${
+        endIndex + 1
+      }) [data-test-subj='lnsDragDrop-reorderableDrop'`;
+      await browser.html5DragAndDrop(dragging, dropping);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async assertPalette(palette: string) {
@@ -359,19 +410,29 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.missingOrFail('lnsApp_saveAndReturnButton');
     },
+
     /**
      * Gets label of dimension trigger in dimension panel
      *
      * @param dimension - the selector of the dimension
+     * @param index - the index of the dimension trigger in group
      */
     async getDimensionTriggerText(dimension: string, index = 0) {
-      const dimensionElements = await testSubjects.findAll(dimension);
+      const dimensionTexts = await this.getDimensionTriggersTexts(dimension);
+      return dimensionTexts[index];
+    },
+    /**
+     * Gets label of all dimension triggers in dimension group
+     *
+     * @param dimension - the selector of the dimension
+     */
+    async getDimensionTriggersTexts(dimension: string) {
       return retry.try(async () => {
-        const trigger = await testSubjects.findDescendant(
-          'lns-dimensionTrigger',
-          dimensionElements[index]
+        const dimensionElements = await testSubjects.findAll(`${dimension} > lns-dimensionTrigger`);
+        const dimensionTexts = await Promise.all(
+          await dimensionElements.map(async (el) => await el.getVisibleText())
         );
-        return trigger.getVisibleText();
+        return dimensionTexts;
       });
     },
 

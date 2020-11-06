@@ -248,7 +248,17 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return await this.getActions().move(startPoint).press().move(endPoint).release().perform();
     }
 
-    public async realDragAndDrop(origin: string, target: string) {
+    /**
+     * Performs drag and drop for html5 native drag and drop implementation
+     * There's a bug in Chromedriver from html5 dnd that doesn't allow to use the method `dragAndDrop` defined above
+     * https://github.com/SeleniumHQ/selenium/issues/6235
+     * This implementation simulates user's action by calling the drag and drop specific events directly.
+     *
+     * @param {string} from html selector
+     * @param {string} to html selector
+     * @return {Promise<void>}
+     */
+    public async html5DragAndDrop(from: string, to: string) {
       await this.execute(
         `
           function createEvent(typeOfEvent) {
@@ -279,7 +289,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
           const origin = document.querySelector(arguments[0]);
           const target = document.querySelector(arguments[1]);
 
-          var dragStartEvent = createEvent('dragstart');
+          const dragStartEvent = createEvent('dragstart');
           dispatchEvent(origin, dragStartEvent);
 
           setTimeout(() => {
@@ -289,8 +299,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
             dispatchEvent(origin, dragEndEvent, dropEvent.dataTransfer);
           }, 50);
       `,
-        origin,
-        target
+        from,
+        to
       );
     }
 
