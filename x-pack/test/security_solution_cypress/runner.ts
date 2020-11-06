@@ -28,6 +28,12 @@ export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrPr
         FORCE_COLOR: '1',
         // eslint-disable-next-line @typescript-eslint/naming-convention
         CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_protocol: config.get('servers.kibana.protocol'),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_hostname: config.get('servers.kibana.hostname'),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_configport: config.get('servers.kibana.port'),
         CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
         CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
         CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
@@ -55,6 +61,12 @@ export async function SecuritySolutionCypressVisualTestRunner({ getService }: Ft
         FORCE_COLOR: '1',
         // eslint-disable-next-line @typescript-eslint/naming-convention
         CYPRESS_baseUrl: Url.format(config.get('servers.kibana')),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_protocol: config.get('servers.kibana.protocol'),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_hostname: config.get('servers.kibana.hostname'),
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        CYPRESS_configport: config.get('servers.kibana.port'),
         CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
         CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
         CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),

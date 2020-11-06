@@ -5,6 +5,8 @@
  */
 
 import * as yaml from 'js-yaml';
+import Url, { UrlObject } from 'url';
+
 import { TIMELINE_FLYOUT_BODY } from '../screens/timeline';
 
 /**
@@ -53,13 +55,23 @@ export const ROLES = {
 };
 
 export const loginWithRole = async (role: string) => {
+  // post the role to elasticsearch
   cy.exec(
     `bash ./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh ./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`
   );
+  // post the user with the associated role to elasticsearch
   cy.exec(
     `bash ./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_user.sh ./server/lib/detection_engine/scripts/roles_users/${role}/detections_user.json`
   );
-  cy.log(`base url: http://localhost:5620${LOGIN_API_ENDPOINT}`);
+  const theUrl = Url.format({
+    auth: `${role}:changeme`,
+    username: role,
+    password: 'changeme',
+    protocol: Cypress.env('protocol'),
+    hostname: Cypress.env('hostname'),
+    port: Cypress.env('configport'),
+  } as UrlObject);
+  cy.log(`origin: ${theUrl}`);
   cy.request({
     body: {
       providerType: 'basic',
@@ -72,7 +84,7 @@ export const loginWithRole = async (role: string) => {
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
     method: 'POST',
-    url: `http://${role}:changeme@localhost:5620${LOGIN_API_ENDPOINT}`,
+    url: `${theUrl}${LOGIN_API_ENDPOINT}`,
   });
 };
 
