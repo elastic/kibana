@@ -13,10 +13,7 @@ export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint)
 /** Internal storage for registered UI Extension Points */
 export interface UIExtensionsStorage {
   [key: string]: Partial<
-    Record<
-      UIExtensionPoint['type'],
-      Partial<Record<UIExtensionPoint['view'], UIExtensionPoint['component']>>
-    >
+    Record<UIExtensionPoint['type'], Partial<Record<UIExtensionPoint['view'], UIExtensionPoint>>>
   >;
 }
 

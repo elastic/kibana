@@ -26,7 +26,6 @@ export const createExtensionRegistrationCallback = (
       storage[extensionPoint.integration][extensionPoint.type] = {};
     }
 
-    storage[extensionPoint.integration][extensionPoint.type]![extensionPoint.view] =
-      extensionPoint.component;
+    storage[extensionPoint.integration][extensionPoint.type]![extensionPoint.view] = extensionPoint;
   };
 };

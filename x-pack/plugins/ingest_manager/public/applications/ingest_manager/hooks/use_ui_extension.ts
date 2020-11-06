@@ -4,16 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { ComponentType, LazyExoticComponent, useContext } from 'react';
+import React, { useContext } from 'react';
 import { UIExtensionPoint, UIExtensionsStorage } from '../../../../common/types/ui_extensions';
 
 export const UIExtensionsContext = React.createContext<UIExtensionsStorage>({});
 
-export const useUIExtension = (
+type SpecificExtensionPoint<A, T, V> = A extends { type: T; view: V } ? A : never;
+
+export const useUIExtension = <
+  T extends UIExtensionPoint['type'] = UIExtensionPoint['type'],
+  V extends UIExtensionPoint['view'] = UIExtensionPoint['view']
+>(
   integration: UIExtensionPoint['integration'],
-  type: UIExtensionPoint['type'],
-  view: UIExtensionPoint['view']
-): LazyExoticComponent<ComponentType<any>> | undefined => {
-  const extensions = useContext(UIExtensionsContext);
-  return extensions?.[integration]?.[type]?.[view];
+  type: T,
+  view: V
+): SpecificExtensionPoint<UIExtensionPoint, T, V>['component'] | undefined => {
+  const extension = useContext(UIExtensionsContext)?.[integration]?.[type]?.[view];
+  if (extension) {
+    return extension.component;
+  }
 };
