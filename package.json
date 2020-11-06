@@ -847,8 +847,6 @@
     "xml-crypto": "^2.0.0",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
-    "yeoman-generator": "1.1.1",
-    "yo": "2.0.6",
     "zlib": "^1.0.5"
   }
 }
