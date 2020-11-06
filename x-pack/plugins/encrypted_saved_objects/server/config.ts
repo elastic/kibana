@@ -40,7 +40,7 @@ export function createConfig(config: TypeOf<typeof ConfigSchema>, logger: Logger
     logger.warn(
       'Generating a random key for xpack.encryptedSavedObjects.encryptionKey. ' +
       'To be able to decrypt encrypted saved objects attributes after restart, ' +
-      'please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key'
+      'Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key'
     );
 
     encryptionKey = crypto.randomBytes(16).toString('hex');

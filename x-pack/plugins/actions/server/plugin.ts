@@ -171,7 +171,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
 
     if (this.isESOUsingEphemeralEncryptionKey) {
       this.logger.warn(
-        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key.'
+        'APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key.'
       );
     }
 
@@ -299,7 +299,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
     ) => {
       if (isESOUsingEphemeralEncryptionKey === true) {
         throw new Error(
-          `Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key`
+          `Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key`
         );
       }
 
@@ -453,7 +453,7 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         getActionsClient: () => {
           if (isESOUsingEphemeralEncryptionKey === true) {
             throw new Error(
-              `Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key`
+              `Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key`
             );
           }
           return new ActionsClient({

@@ -241,7 +241,7 @@ export class IngestManagerPlugin
         if (isESOUsingEphemeralEncryptionKey) {
           if (this.logger) {
             this.logger.warn(
-              'Fleet APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key.'
+              'Fleet APIs are disabled due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key.'
             );
           }
         } else {
