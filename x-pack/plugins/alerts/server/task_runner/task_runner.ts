@@ -36,6 +36,7 @@ import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_l
 import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error';
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
+import { ResolvedActionGroup } from '../../common';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 
@@ -225,6 +226,14 @@ export class TaskRunner {
       alertInstance.hasScheduledActions()
     );
     const currentAlertInstanceIds = Object.keys(instancesWithScheduledActions);
+
+    scheduleActionsForResolvedInstances(
+      alertInstances,
+      executionHandler,
+      originalAlertInstanceIds,
+      currentAlertInstanceIds
+    );
+
     generateNewAndResolvedInstanceEvents({
       eventLogger,
       originalAlertInstanceIds,
@@ -436,6 +445,35 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
       message,
     };
     eventLogger.logEvent(event);
+  }
+}
+
+function scheduleActionsForResolvedInstances(
+  alertInstancesMap: {
+    [x: string]: AlertInstance<
+      {
+        [x: string]: unknown;
+      },
+      {
+        [x: string]: unknown;
+      }
+    >;
+  },
+  executionHandler: ReturnType<typeof createExecutionHandler>,
+  originalAlertInstanceIds: string[],
+  currentAlertInstanceIds: string[]
+) {
+  const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
+  for (const id of resolvedIds) {
+    alertInstancesMap[id].updateLastScheduledActions(ResolvedActionGroup.id);
+    alertInstancesMap[id].unscheduleActions();
+    executionHandler({
+      actionGroup: ResolvedActionGroup.id,
+      context: {},
+      state: {},
+      alertInstanceId: id,
+    });
+    alertInstancesMap[id].scheduleActions(ResolvedActionGroup.id);
   }
 }
 
