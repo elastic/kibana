@@ -80,13 +80,13 @@ export function createExecutionEnqueuerFunction({
 function executionSourceAsSavedObjectReferences(executionSource: ActionExecutorOptions['source']) {
   return isSavedObjectExecutionSource(executionSource)
     ? {
-      references: [
-        {
-          name: 'source',
-          ...executionSource.source,
-        },
-      ],
-    }
+        references: [
+          {
+            name: 'source',
+            ...executionSource.source,
+          },
+        ],
+      }
     : {};
 }
 

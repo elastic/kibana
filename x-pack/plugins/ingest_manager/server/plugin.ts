@@ -143,12 +143,12 @@ export interface IngestManagerStartContract {
 
 export class IngestManagerPlugin
   implements
-  Plugin<
-  IngestManagerSetupContract,
-  IngestManagerStartContract,
-  IngestManagerSetupDeps,
-  IngestManagerStartDeps
-  > {
+    Plugin<
+      IngestManagerSetupContract,
+      IngestManagerStartContract,
+      IngestManagerSetupDeps,
+      IngestManagerStartDeps
+    > {
   private licensing$!: Observable<ILicense>;
   private config$: Observable<IngestManagerConfigType>;
   private security: SecurityPluginSetup | undefined;
