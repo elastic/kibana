@@ -153,11 +153,10 @@ export function DiscoverLegacy({
     'col-md-12': isSidebarClosed,
   });
 
-  const onQuerySubmit = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
+  const onTrackQuery = () => {
     if (trackUiMetric) {
       trackUiMetric(METRIC_TYPE.CLICK, 'query_submit');
     }
-    updateQuery(payload, isUpdate);
   };
 
   const onFilterAdded = () => {
@@ -174,7 +173,8 @@ export function DiscoverLegacy({
           appName="discover"
           config={topNavMenu}
           indexPatterns={[indexPattern]}
-          onQuerySubmit={onQuerySubmit}
+          onQuerySubmit={updateQuery}
+          onTrackQuery={onTrackQuery}
           onSavedQueryIdChange={updateSavedQueryId}
           query={state.query}
           setMenuMountPoint={opts.setHeaderActionMenu}

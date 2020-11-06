@@ -53,11 +53,12 @@ const defaultFiltersUpdated = (queryService: QueryStart) => {
 };
 
 const defaultOnFilterAdded = (props: StatefulSearchBarProps, queryService: QueryStart) => {
-  const onFilterUpdated = defaultFiltersUpdated(queryService);
-  if (props.onFilterAdded) {
-    props.onFilterAdded();
-  }
-  return onFilterUpdated;
+  return (filters: Filter[]) => {
+    queryService.filterManager.setFilters(filters);
+    if (props.onFilterAdded) {
+      props.onFilterAdded();
+    }
+  };
 };
 
 // Respond to user changing the refresh settings
@@ -126,6 +127,12 @@ const defaultOnSavedQueryUpdated = (props: StatefulSearchBarProps, setSavedQuery
 
 const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
+};
+
+const defaultOnTrackQuery = (props: StatefulSearchBarProps) => {
+  if (props.onTrackQuery) {
+    return props.onTrackQuery;
+  }
 };
 
 export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
@@ -204,6 +211,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
           onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
+          onTrackQuery={defaultOnTrackQuery(props)}
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
