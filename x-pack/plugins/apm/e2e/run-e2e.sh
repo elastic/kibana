@@ -165,7 +165,7 @@ echo "✅ Setup completed successfully. Running tests..."
 #
 # run cypress tests
 ##################################################
-yarn cypress run --config pageLoadTimeout=100000,watchForFileChanges=true
+yarn cypress:run --config pageLoadTimeout=100000,watchForFileChanges=true
 e2e_status=$?
 
 #
@@ -173,7 +173,7 @@ e2e_status=$?
 ##################################################
 echo "${bold}If you want to run the test interactively, run:${normal}"
 echo "" # newline
-echo "cd ${E2E_DIR} && yarn cypress open --config pageLoadTimeout=100000,watchForFileChanges=true"
+echo "cd ${E2E_DIR} && yarn cypress:open --config pageLoadTimeout=100000,watchForFileChanges=true"
 
 # Report the e2e status at the very end
 if [ $e2e_status -ne 0 ]; then
