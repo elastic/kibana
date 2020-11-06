@@ -358,7 +358,6 @@ export {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   injectSearchSourceReferences,
-  ISearch,
   ISearchSetup,
   ISearchStart,
   ISearchStartSearchSource,

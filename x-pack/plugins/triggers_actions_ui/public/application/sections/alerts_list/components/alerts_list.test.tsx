@@ -47,6 +47,7 @@ const alertType = {
   name: 'some alert type',
   description: 'test',
   iconClass: 'test',
+  documentationUrl: null,
   validate: (): ValidationResult => {
     return { errors: {} };
   },
