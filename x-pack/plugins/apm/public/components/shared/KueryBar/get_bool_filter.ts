@@ -32,17 +32,7 @@ export function getBoolFilter({
     throw new Error('Date range was not defined');
   }
 
-  const boolFilter: ESFilter[] = [
-    {
-      range: {
-        '@timestamp': {
-          gte: new Date(start).getTime(),
-          lte: new Date(end).getTime(),
-          format: 'epoch_millis',
-        },
-      },
-    },
-  ];
+  const boolFilter: ESFilter[] = [];
 
   if (serviceName) {
     boolFilter.push({
