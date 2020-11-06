@@ -116,7 +116,9 @@ run(
       ${printList(foundDifferences)}
       `)
       );
-      return;
+
+      // Exit with code 1 so we can fail the CI
+      process.exit(1);
     }
 
     log.success('None non allowed circular dependencies were found');
