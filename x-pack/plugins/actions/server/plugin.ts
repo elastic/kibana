@@ -33,7 +33,13 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../features/serve
 import { SecurityPluginSetup } from '../../security/server';
 
 import { ActionsConfig } from './config';
-import { ActionExecutor, TaskRunnerFactory, LicenseState, ILicenseState } from './lib';
+import {
+  ActionExecutor,
+  TaskRunnerFactory,
+  LicenseState,
+  ILicenseState,
+  calledByXPackPlugin,
+} from './lib';
 import { ActionsClient } from './actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createExecutionEnqueuerFunction } from './create_execute_function';
@@ -263,7 +269,10 @@ export class ActionsPlugin implements Plugin<Promise<PluginSetupContract>, Plugi
         if (!(actionType.minimumLicenseRequired in LICENSE_TYPE)) {
           throw new Error(`"${actionType.minimumLicenseRequired}" is not a valid license type`);
         }
-        if (LICENSE_TYPE[actionType.minimumLicenseRequired] < LICENSE_TYPE.gold) {
+        if (
+          LICENSE_TYPE[actionType.minimumLicenseRequired] < LICENSE_TYPE.gold &&
+          !calledByXPackPlugin()
+        ) {
           throw new Error(
             `Third party action type "${actionType.id}" can only set minimumLicenseRequired to a gold license or higher`
           );
