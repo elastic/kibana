@@ -91,7 +91,7 @@ function logAll(log) {
   log.info(`WORKSPACE in config file ${process.env.WORKSPACE}`);
   log.info(`INTEGRATION_TEST_ROOT = ${INTEGRATION_TEST_ROOT}`);
   log.info(`stateFilePath = ${stateFilePath}`);
-  log.info(`servers data: ${JSON.stringify(servers, null, 2)}`);
+  log.info(`servers data: ${JSON.stringify(servers(), null, 2)}`);
 }
 function servers() {
   return {
