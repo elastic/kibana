@@ -234,6 +234,7 @@
     "markdown-it": "^10.0.0",
     "md5": "^2.1.0",
     "mime": "^2.4.4",
+    "mime-types": "^2.1.27",
     "mini-css-extract-plugin": "0.8.0",
     "minimatch": "^3.0.4",
     "moment": "^2.24.0",
