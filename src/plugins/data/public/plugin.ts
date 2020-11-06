@@ -151,7 +151,10 @@ export class DataPublicPlugin
     };
   }
 
-  public start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart {
+  public start(
+    core: CoreStart,
+    { uiActions, usageCollection }: DataStartDependencies
+  ): DataPublicPluginStart {
     const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
     setNotifications(notifications);
     setOverlays(overlays);
@@ -208,6 +211,7 @@ export class DataPublicPlugin
       core,
       data: dataServices,
       storage: this.storage,
+      trackUiMetric: usageCollection?.reportUiStats.bind(usageCollection, 'data_plugin'),
     });
 
     return {

@@ -21,6 +21,7 @@ import _ from 'lodash';
 import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { QueryStart, SavedQuery } from '../../query';
 import { SearchBar, SearchBarOwnProps } from './';
@@ -35,6 +36,7 @@ interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -49,15 +51,6 @@ export type StatefulSearchBarProps = SearchBarOwnProps & {
 const defaultFiltersUpdated = (queryService: QueryStart) => {
   return (filters: Filter[]) => {
     queryService.filterManager.setFilters(filters);
-  };
-};
-
-const defaultOnFilterAdded = (props: StatefulSearchBarProps, queryService: QueryStart) => {
-  return (filters: Filter[]) => {
-    queryService.filterManager.setFilters(filters);
-    if (props.onFilterAdded) {
-      props.onFilterAdded();
-    }
   };
 };
 
@@ -129,13 +122,7 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-const defaultOnTrackQuery = (props: StatefulSearchBarProps) => {
-  if (props.onTrackQuery) {
-    return props.onTrackQuery;
-  }
-};
-
-export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
+export function createSearchBar({ core, storage, data, trackUiMetric }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
@@ -207,14 +194,13 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           filters={filters}
           query={query}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
-          onFilterAdded={defaultOnFilterAdded(props, data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
           onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
-          onTrackQuery={defaultOnTrackQuery(props)}
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}
+          trackUiMetric={trackUiMetric}
           {...overrideDefaultBehaviors(props)}
         />
       </KibanaContextProvider>

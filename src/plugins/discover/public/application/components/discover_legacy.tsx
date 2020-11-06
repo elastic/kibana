@@ -22,7 +22,6 @@ import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
 import { IUiSettingsClient, MountPoint } from 'kibana/public';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { HitsCounter } from './hits_counter';
 import { TimechartHeader } from './timechart_header';
 import { DiscoverSidebar } from './sidebar';
@@ -153,18 +152,6 @@ export function DiscoverLegacy({
     'col-md-12': isSidebarClosed,
   });
 
-  const onTrackQuery = () => {
-    if (trackUiMetric) {
-      trackUiMetric(METRIC_TYPE.CLICK, 'query_submit');
-    }
-  };
-
-  const onFilterAdded = () => {
-    if (trackUiMetric) {
-      trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
-    }
-  };
-
   return (
     <I18nProvider>
       <div className="dscAppContainer" data-fetch-counter={fetchCounter}>
@@ -174,7 +161,6 @@ export function DiscoverLegacy({
           config={topNavMenu}
           indexPatterns={[indexPattern]}
           onQuerySubmit={updateQuery}
-          onTrackQuery={onTrackQuery}
           onSavedQueryIdChange={updateSavedQueryId}
           query={state.query}
           setMenuMountPoint={opts.setHeaderActionMenu}
@@ -184,7 +170,6 @@ export function DiscoverLegacy({
           showSaveQuery={showSaveQuery}
           showSearchBar={true}
           useDefaultBehaviors={true}
-          onFilterAdded={onFilterAdded}
         />
         <main className="container-fluid">
           <div className="row">

@@ -24,6 +24,7 @@ import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { withKibana, KibanaReactContextValue } from '../../../../kibana_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
@@ -69,18 +70,17 @@ export interface SearchBarOwnProps {
   savedQuery?: SavedQuery;
   onQueryChange?: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onQuerySubmit?: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
-  onTrackQuery?: () => void;
   // User has saved the current state as a saved query
   onSaved?: (savedQuery: SavedQuery) => void;
   // User has modified the saved query, your app should persist the update
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
   // User has cleared the active query, your app should clear the entire query bar
   onClearSavedQuery?: () => void;
-  // User has added a filter
-  onFilterAdded?: (filters: Filter[]) => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
+  // Track UI Metrics
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
@@ -334,8 +334,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
             },
           });
         }
-        if (this.props.onTrackQuery) {
-          this.props.onTrackQuery();
+        if (this.props.trackUiMetric) {
+          this.props.trackUiMetric(METRIC_TYPE.CLICK, `${this.services.appName}:query_submitted`);
         }
       }
     );
@@ -438,7 +438,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
               filters={this.props.filters!}
               onFiltersUpdated={this.props.onFiltersUpdated}
               indexPatterns={this.props.indexPatterns!}
-              onFilterAdded={this.props.onFilterAdded}
+              appName={this.services.appName}
+              trackUiMetric={this.props.trackUiMetric}
             />
           </div>
         </div>

@@ -22,6 +22,7 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
 
+import { METRIC_TYPE, UiStatsMetricType } from '@kbn/analytics';
 import { FilterEditor } from './filter_editor';
 import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
@@ -45,7 +46,9 @@ interface Props {
   className: string;
   indexPatterns: IIndexPattern[];
   intl: InjectedIntl;
-  onFilterAdded?: (filters: Filter[]) => void;
+  appName: string;
+  // Track UI Metrics
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 function FilterBarUI(props: Props) {
@@ -129,12 +132,11 @@ function FilterBarUI(props: Props) {
 
   function onAdd(filter: Filter) {
     setIsAddFilterPopoverOpen(false);
-    const filters = [...props.filters, filter];
-    if (props.onFilterAdded) {
-      props.onFilterAdded(filters);
-    } else {
-      onFiltersUpdated(filters);
+    if (props.trackUiMetric) {
+      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_added`);
     }
+    const filters = [...props.filters, filter];
+    onFiltersUpdated(filters);
   }
 
   function onRemove(i: number) {
