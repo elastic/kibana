@@ -84,6 +84,36 @@ export class Fetcher {
     return statsNodes;
   }
 
+  private static getNextAncestorsToFind(
+    results: unknown[],
+    schema: Schema,
+    levelsLeft: number
+  ): NodeID[] {
+    const nodesByID = results.reduce((accMap: Map<NodeID, unknown>, result: unknown) => {
+      const id = getIDField(result, schema);
+      if (id) {
+        accMap.set(id, result);
+      }
+      return accMap;
+    }, new Map());
+
+    const nodes: NodeID[] = [];
+    // Find all the nodes that don't have their parent in the result set, we will use these
+    // nodes to find the additional ancestry
+    for (const result of results) {
+      const parent = getParentField(result, schema);
+      if (parent) {
+        const parentNode = nodesByID.get(parent);
+        if (!parentNode) {
+          // it's ok if the nodes array is larger than the levelsLeft because the query
+          // will have the size set to the levelsLeft which will restrict the number of results
+          nodes.push(...getAncestryAsArray(result, schema).slice(0, levelsLeft));
+        }
+      }
+    }
+    return nodes;
+  }
+
   private async retrieveAncestors(options: TreeOptions) {
     const ancestors = [];
     const query = new LifecycleQuery({
@@ -125,9 +155,7 @@ export class Fetcher {
        */
       ancestors.push(...results);
       numLevelsLeft -= results.length;
-      // the results come back in ascending order on timestamp so the first entry in the
-      // results should be the furthest ancestor (most distant grandparent)
-      nodes = getAncestryAsArray(results[0], options.schema).slice(0, numLevelsLeft);
+      nodes = Fetcher.getNextAncestorsToFind(results, options.schema, numLevelsLeft);
     }
     return ancestors;
   }
@@ -227,6 +255,9 @@ export function getLeafNodes(
   return nextNodes !== undefined ? Array.from(nextNodes) : [];
 }
 
+// TODO these functions should handle the case where an array is returned for
+// the id and parent fields, maybe convert these to be ECS fields so we can
+// use those helpers?
 function getIDField(obj: unknown, schema: Schema): NodeID | undefined {
   return _.get(obj, schema.id);
 }

@@ -54,12 +54,24 @@ const createLevels = (
   return createLevels(descendantsByParent, levels, nextLevel, schema);
 };
 
+interface TreeExpectation {
+  origin: NodeID;
+  nodeExpectations: NodeExpectations;
+}
+
+interface NodeExpectations {
+  ancestors?: number;
+  descendants?: number;
+  descendantLevels?: number;
+}
+
 interface APITree {
   // entries closer to the beginning of the array are more direct parents of the origin aka
   // ancestors[0] = the origin's parent, ancestors[1] = the origin's grandparent
   ancestors: ResolverNode[];
   origin: ResolverNode;
   descendantLevels: Array<Map<NodeID, ResolverNode>>;
+  nodeExpectations: NodeExpectations;
 }
 
 /**
@@ -110,12 +122,13 @@ export const getParent = (node: ResolverNode, schema: Schema): NodeID => {
 /**
  * Reformats the tree's response to make it easier to perform testing on the results.
  *
- * @param origins the node IDs used to retrieve the trees
+ * @param treeExpectations the node IDs used to retrieve the trees and the expected number of ancestors/descendants in the
+ *  resulting trees
  * @param nodes the response from the tree api
  * @param schema the schema used when calling the tree api
  */
 export const createTreeFromResponse = (
-  origins: NodeID[],
+  treeExpectations: TreeExpectation[],
   nodes: ResolverNode[],
   schema: Schema
 ) => {
@@ -141,11 +154,16 @@ export const createTreeFromResponse = (
 
   const trees: Map<NodeID, APITree> = new Map();
 
-  for (const origin of origins) {
-    const descendantLevels = createLevels(nodesByParent, [], nodesByParent.get(origin), schema);
-    const originNode = nodesByID.get(origin);
+  for (const expectation of treeExpectations) {
+    const descendantLevels = createLevels(
+      nodesByParent,
+      [],
+      nodesByParent.get(expectation.origin),
+      schema
+    );
+    const originNode = nodesByID.get(expectation.origin);
     if (!originNode) {
-      throw new Error(`Unable to find origin for id: ${origin}`);
+      throw new Error(`Unable to find origin for id: ${expectation.origin}`);
     }
 
     let currentID: NodeID | undefined = getParentInternal(originNode, schema);
@@ -158,10 +176,11 @@ export const createTreeFromResponse = (
       currentID = getParentInternal(parentNode, schema);
     }
 
-    trees.set(origin, {
+    trees.set(expectation.origin, {
       ancestors,
       origin: originNode,
       descendantLevels,
+      nodeExpectations: expectation.nodeExpectations,
     });
   }
 
@@ -172,32 +191,45 @@ export const createTreeFromResponse = (
   };
 };
 
-const verifyAncestryInternal = ({
+const verifyAncestry = ({
   responseTrees,
   schema,
   genTree,
-  ancestors,
 }: {
   responseTrees: APIResponse;
   schema: Schema;
   genTree: Tree;
-  ancestors: number;
 }) => {
+  const allGenNodes = new Map<string, TreeNode>([
+    ...genTree.ancestry,
+    ...genTree.children,
+    [genTree.origin.id, genTree.origin],
+  ]);
+
   for (const tree of responseTrees.trees.values()) {
-    expect(tree.ancestors.length).to.be(ancestors);
-    expect(getID(tree.origin, schema)).to.be(genTree.origin.id);
-    expect(getParent(tree.origin, schema)).to.be(
-      parentEntityIDSafeVersion(genTree.origin.lifecycle[0])
+    expect(tree.ancestors.length).to.be(tree.nodeExpectations.ancestors);
+    const originID = getID(tree.origin, schema);
+    const originParentID = getParent(tree.origin, schema);
+    expect(allGenNodes.get(String(originID))?.id).to.be(String(originID));
+    expect(allGenNodes.get(String(originParentID))?.id).to.be(String(originParentID));
+    expect(originID).to.be(entityIDSafeVersion(allGenNodes.get(String(originID))!.lifecycle[0]));
+    expect(originParentID).to.be(
+      parentEntityIDSafeVersion(allGenNodes.get(String(originID))!.lifecycle[0])
     );
-    const originLifecycleSorted = [...genTree.origin.lifecycle].sort((a: Event, b: Event) => {
-      const aTime: number | undefined = timestampSafeVersion(a);
-      const bTime = timestampSafeVersion(b);
-      if (aTime !== undefined && bTime !== undefined) {
-        return aTime - bTime;
-      } else {
-        return 0;
+    // make sure the lifecycle events are sorted by timestamp in ascending order because the
+    // event that will be returned that we need to compare to should be the earliest event
+    // found
+    const originLifecycleSorted = [...allGenNodes.get(String(originID))!.lifecycle].sort(
+      (a: Event, b: Event) => {
+        const aTime: number | undefined = timestampSafeVersion(a);
+        const bTime = timestampSafeVersion(b);
+        if (aTime !== undefined && bTime !== undefined) {
+          return aTime - bTime;
+        } else {
+          return 0;
+        }
       }
-    });
+    );
 
     expect(_.get(tree.origin.data, '@timestamp')).to.be(
       timestampSafeVersion(originLifecycleSorted[0])
@@ -211,8 +243,7 @@ const verifyAncestryInternal = ({
         expect(parent).to.be(getID(tree.ancestors[i + 1], schema));
       }
       // the current node's ID must exist in the generated tree
-      expect(genTree.ancestry.get(String(id))).to.not.be(undefined);
-      expect(genTree.ancestry.get(String(id))?.id).to.be(id);
+      expect(allGenNodes.get(String(id))?.id).to.be(id);
     }
   }
 };
@@ -226,21 +257,20 @@ const verifyAncestryInternal = ({
  * @param genTree the generated tree that was inserted in Elasticsearch that we are querying
  * @param ancestors the number of ancestors that we expect to be returned
  */
-export const verifyAncestry2 = ({
-  origins,
+export const verifyTree = ({
+  expectations,
   response,
   schema,
   genTree,
-  ancestors,
 }: {
-  origins: NodeID[];
+  expectations: TreeExpectation[];
   response: ResolverNode[];
   schema: Schema;
   genTree: Tree;
-  ancestors: number;
 }) => {
-  const responseTrees = createTreeFromResponse(origins, response, schema);
-  verifyAncestryInternal({ responseTrees, schema, genTree, ancestors });
+  const responseTrees = createTreeFromResponse(expectations, response, schema);
+  verifyAncestry({ responseTrees, schema, genTree });
+  // TODO add function for verifying descendants
 };
 
 /**
@@ -283,7 +313,7 @@ const expectLifecycleNodeInMap = (
  * @param verifyLastParent a boolean indicating whether to check the last ancestor. If the ancestors array intentionally
  *  does not contain all the ancestors, the last one will not have the parent
  */
-export const verifyAncestry = (
+export const checkAncestryFromEntityTreeAPI = (
   ancestors: SafeResolverLifecycleNode[],
   tree: Tree,
   verifyLastParent: boolean
@@ -361,7 +391,7 @@ export const retrieveDistantAncestor = (ancestors: SafeResolverLifecycleNode[]) 
  * @param numberOfParents an optional number to compare that are a certain number of parents in the children array
  * @param childrenPerParent an optional number to compare that there are a certain number of children for each parent
  */
-export const verifyChildren = (
+export const verifyChildrenFromEntityTreeAPI = (
   children: SafeResolverChildNode[],
   tree: Tree,
   numberOfParents?: number,
@@ -422,7 +452,7 @@ export const compareArrays = (
  * @param relatedEvents the related events received for a particular node
  * @param categories the related event info used when generating the resolver tree
  */
-export const verifyStats = (
+export const verifyEntityTreeStats = (
   stats: ResolverNodeStats | undefined,
   categories: RelatedEventInfo[],
   relatedAlerts: number
@@ -459,6 +489,6 @@ export const verifyLifecycleStats = (
   relatedAlerts: number
 ) => {
   for (const node of nodes) {
-    verifyStats(node.stats, categories, relatedAlerts);
+    verifyEntityTreeStats(node.stats, categories, relatedAlerts);
   }
 };

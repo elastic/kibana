@@ -27,12 +27,12 @@ import {
 import { Options, GeneratedTrees } from '../../services/resolver';
 import {
   compareArrays,
-  verifyAncestry,
+  checkAncestryFromEntityTreeAPI,
   retrieveDistantAncestor,
-  verifyChildren,
+  verifyChildrenFromEntityTreeAPI,
   verifyLifecycleStats,
-  verifyStats,
-  verifyAncestry2,
+  verifyEntityTreeStats,
+  verifyTree,
 } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -112,26 +112,26 @@ export default function ({ getService }: FtrProviderContext) {
       await resolver.deleteData(resolverTrees);
     });
 
-    describe('ancestry events route', () => {
+    describe('ancestry events', () => {
       it('should the correct ancestor nodes for the tree', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
           .set('kbn-xsrf', 'xxx')
-          .send(
-            createTreeBody({
-              descendants: 0,
-              descendantLevels: 0,
-              ancestors: 9,
-              schema: schemaWithAncestry,
-              nodes: [tree.origin.id],
-              from: tree.startTime,
-              to: tree.endTime,
-            })
-          )
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 9,
+            schema: schemaWithAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
           .expect(200);
-        verifyAncestry2({
-          ancestors: 5,
-          origins: [tree.origin.id],
+        verifyTree({
+          expectations: [{ origin: tree.origin.id, nodeExpectations: { ancestors: 5 } }],
           response: body,
           schema: schemaWithAncestry,
           genTree: tree,
@@ -142,17 +142,18 @@ export default function ({ getService }: FtrProviderContext) {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
           .set('kbn-xsrf', 'xxx')
-          .send(
-            createTreeBody({
-              descendants: 0,
-              descendantLevels: 0,
-              ancestors: 9,
-              schema: schemaWithAncestry,
-              nodes: ['bogus id'],
-              from: tree.startTime,
-              to: tree.endTime,
-            })
-          )
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 9,
+            schema: schemaWithAncestry,
+            nodes: ['bogus id'],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
           .expect(200);
         expect(body).to.be.empty();
       });
@@ -161,22 +162,22 @@ export default function ({ getService }: FtrProviderContext) {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
           .set('kbn-xsrf', 'xxx')
-          .send(
-            createTreeBody({
-              descendants: 0,
-              descendantLevels: 0,
-              // 3 ancestors means 1 origin and 2 ancestors of the origin
-              ancestors: 3,
-              schema: schemaWithAncestry,
-              nodes: [tree.origin.id],
-              from: tree.startTime,
-              to: tree.endTime,
-            })
-          )
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            // 3 ancestors means 1 origin and 2 ancestors of the origin
+            ancestors: 3,
+            schema: schemaWithAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
           .expect(200);
-        verifyAncestry2({
-          ancestors: 2,
-          origins: [tree.origin.id],
+        verifyTree({
+          expectations: [{ origin: tree.origin.id, nodeExpectations: { ancestors: 2 } }],
           response: body,
           schema: schemaWithAncestry,
           genTree: tree,
@@ -187,21 +188,21 @@ export default function ({ getService }: FtrProviderContext) {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
           .set('kbn-xsrf', 'xxx')
-          .send(
-            createTreeBody({
-              descendants: 0,
-              descendantLevels: 0,
-              ancestors: 50,
-              schema: schemaWithoutAncestry,
-              nodes: [tree.origin.id],
-              from: tree.startTime,
-              to: tree.endTime,
-            })
-          )
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 50,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
           .expect(200);
-        verifyAncestry2({
-          ancestors: 5,
-          origins: [tree.origin.id],
+        verifyTree({
+          expectations: [{ origin: tree.origin.id, nodeExpectations: { ancestors: 5 } }],
           response: body,
           schema: schemaWithoutAncestry,
           genTree: tree,
@@ -209,32 +210,68 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should respect the time range specified and only return the origin node', async () => {
-        const from = new Date(timestampSafeVersion(tree.origin.lifecycle[0]) ?? new Date());
+        const from = new Date(
+          timestampSafeVersion(tree.origin.lifecycle[0]) ?? new Date()
+        ).toISOString();
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
           .set('kbn-xsrf', 'xxx')
-          .send(
-            createTreeBody({
-              descendants: 0,
-              descendantLevels: 0,
-              ancestors: 50,
-              schema: schemaWithoutAncestry,
-              nodes: [tree.origin.id],
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 50,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id],
+            timerange: {
               from,
               to: from,
-            })
-          )
+            },
+            indexPatterns: ['logs-*'],
+          })
           .expect(200);
-        verifyAncestry2({
-          ancestors: 0,
-          origins: [tree.origin.id],
+        verifyTree({
+          expectations: [{ origin: tree.origin.id, nodeExpectations: { ancestors: 0 } }],
           response: body,
           schema: schemaWithoutAncestry,
           genTree: tree,
         });
       });
 
-      // TODO tests for multiple nodes in a single request
+      it('should support returning multiple ancestor trees when multiple nodes are requested', async () => {
+        // There should be 2 levels of descendants under the origin, grab the bottom one, and the first node's id
+        const bottomMostDescendant = Array.from(tree.childrenLevels[1].values())[0].id;
+        const { body }: { body: ResolverNode[] } = await supertest
+          .post('/api/endpoint/resolver/tree')
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            descendants: 0,
+            descendantLevels: 0,
+            ancestors: 50,
+            schema: schemaWithoutAncestry,
+            nodes: [tree.origin.id, bottomMostDescendant],
+            timerange: {
+              from: tree.startTime.toISOString(),
+              to: tree.endTime.toISOString(),
+            },
+            indexPatterns: ['logs-*'],
+          })
+          .expect(200);
+        verifyTree({
+          expectations: [
+            // there are 5 ancestors above the origin
+            { origin: tree.origin.id, nodeExpectations: { ancestors: 5 } },
+            // there are 2 levels below the origin so the bottom node's ancestry should be
+            // all the ancestors (5) + one level + the origin = 7
+            { origin: bottomMostDescendant, nodeExpectations: { ancestors: 7 } },
+          ],
+          response: body,
+          schema: schemaWithoutAncestry,
+          genTree: tree,
+        });
+      });
+
+      // TODO add test for getting ancestry for two nodes at the same level (in the top of the tree and bottom)
+      // TODO tests for index without the events in it should return empty result
     });
 
     describe('children route', () => {
@@ -247,7 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
           // 3 children for the origin + 3 children for each of the origin's children = 12
           expect(body.childNodes.length).to.eql(12);
           // there will be 4 parents, the origin of the tree, and it's 3 children
-          verifyChildren(body.childNodes, tree, 4, 3);
+          verifyChildrenFromEntityTreeAPI(body.childNodes, tree, 4, 3);
           expect(body.nextChild).to.eql(null);
         });
 
@@ -259,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=3`)
             .expect(200);
           expect(body.childNodes.length).to.eql(3);
-          verifyChildren(body.childNodes, tree, 1, 3);
+          verifyChildrenFromEntityTreeAPI(body.childNodes, tree, 1, 3);
           expect(body.nextChild).to.not.eql(null);
         });
 
@@ -271,7 +308,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=1`)
             .expect(200);
           expect(body.childNodes.length).to.eql(1);
-          verifyChildren(body.childNodes, tree, 1, 1);
+          verifyChildrenFromEntityTreeAPI(body.childNodes, tree, 1, 1);
           expect(body.nextChild).to.not.be(null);
 
           ({ body } = await supertest
@@ -280,7 +317,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200));
           expect(body.childNodes.length).to.eql(2);
-          verifyChildren(body.childNodes, tree, 1, 2);
+          verifyChildrenFromEntityTreeAPI(body.childNodes, tree, 1, 2);
           expect(body.nextChild).to.not.be(null);
 
           ({ body } = await supertest
@@ -298,7 +335,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=3`)
             .expect(200);
           expect(body.childNodes.length).to.eql(3);
-          verifyChildren(body.childNodes, tree);
+          verifyChildrenFromEntityTreeAPI(body.childNodes, tree);
           expect(body.nextChild).to.not.be(null);
           const firstNodes = [...body.childNodes];
 
@@ -309,7 +346,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200));
           expect(body.childNodes.length).to.eql(9);
           // put all the results together and we should have all the children
-          verifyChildren([...firstNodes, ...body.childNodes], tree, 4, 3);
+          verifyChildrenFromEntityTreeAPI([...firstNodes, ...body.childNodes], tree, 4, 3);
           expect(body.nextChild).to.be(null);
         });
       });
@@ -326,18 +363,18 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(body.children.nextChild).to.equal(null);
           expect(body.children.childNodes.length).to.equal(12);
-          verifyChildren(body.children.childNodes, tree, 4, 3);
+          verifyChildrenFromEntityTreeAPI(body.children.childNodes, tree, 4, 3);
           verifyLifecycleStats(body.children.childNodes, relatedEventsToGen, relatedAlerts);
 
           expect(body.ancestry.nextAncestor).to.equal(null);
-          verifyAncestry(body.ancestry.ancestors, tree, true);
+          checkAncestryFromEntityTreeAPI(body.ancestry.ancestors, tree, true);
           verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen, relatedAlerts);
 
           expect(body.relatedAlerts.nextAlert).to.equal(null);
           compareArrays(tree.origin.relatedAlerts, body.relatedAlerts.alerts, true);
 
           compareArrays(tree.origin.lifecycle, body.lifecycle, true);
-          verifyStats(body.stats, relatedEventsToGen, relatedAlerts);
+          verifyEntityTreeStats(body.stats, relatedEventsToGen, relatedAlerts);
         });
       });
     });
