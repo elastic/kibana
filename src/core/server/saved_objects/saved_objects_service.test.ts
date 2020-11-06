@@ -24,7 +24,6 @@ import {
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
-import { take } from 'rxjs/operators';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { errors as esErrors } from '@elastic/elasticsearch';
 
