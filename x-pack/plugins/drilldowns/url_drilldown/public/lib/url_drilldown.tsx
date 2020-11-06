@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { getFlattenedObject } from '@kbn/std';
 import { reactToUiComponent } from '../../../../../../src/plugins/kibana_react/public';
 import {
   ChartActionContext,
@@ -70,10 +71,16 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, ROW_CLICK_TRIGGER, CONTEXT_MENU_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => {
+  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
+    config,
+    onConfig,
+    context,
+  }) => {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const variables = React.useMemo(() => this.getVariableList(context), [context]);
     return (
       <UrlDrilldownCollectConfig
-        variables={['test']}
+        variables={variables}
         config={config}
         onConfig={onConfig}
         syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
@@ -131,5 +138,14 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
       context: getContextScope(context),
       event: getEventScope(context),
     };
+  };
+
+  private getVariableList = (context: ActionFactoryContext): string[] => {
+    const variables = getFlattenedObject({
+      ...this.deps.getGlobalScope(),
+      context: getContextScope(context),
+    });
+    const variableList = Object.keys(variables).sort();
+    return variableList;
   };
 }
