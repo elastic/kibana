@@ -11,8 +11,14 @@ import { EuiBasicTable, EuiHealth, EuiSpacer, EuiSwitch } from '@elastic/eui';
 // @ts-ignore
 import { RIGHT_ALIGNMENT, CENTER_ALIGNMENT } from '@elastic/eui/lib/services';
 import { padStart, chunk } from 'lodash';
-import { AlertInstanceStatusValues } from '../../../../../../alerts/common';
-import { Alert, AlertInstanceSummary, AlertInstanceStatus, Pagination } from '../../../../types';
+import { ActionGroup, AlertInstanceStatusValues } from '../../../../../../alerts/common';
+import {
+  Alert,
+  AlertInstanceSummary,
+  AlertInstanceStatus,
+  AlertType,
+  Pagination,
+} from '../../../../types';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
@@ -21,6 +27,7 @@ import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 
 type AlertInstancesProps = {
   alert: Alert;
+  alertType: AlertType;
   readOnly: boolean;
   alertInstanceSummary: AlertInstanceSummary;
   requestRefresh: () => Promise<void>;
@@ -48,7 +55,12 @@ export const alertInstancesTableColumns = (
       { defaultMessage: 'Status' }
     ),
     render: (value: AlertInstanceListItemStatus, instance: AlertInstanceListItem) => {
-      return <EuiHealth color={value.healthColor}>{value.label}</EuiHealth>;
+      return (
+        <EuiHealth color={value.healthColor}>
+          {value.label}
+          {value.actionGroup ? ` (${value.actionGroup})` : ``}
+        </EuiHealth>
+      );
     },
     sortable: false,
     'data-test-subj': 'alertInstancesTableCell-status',
@@ -113,6 +125,7 @@ function durationAsString(duration: Duration): string {
 
 export function AlertInstances({
   alert,
+  alertType,
   readOnly,
   alertInstanceSummary,
   muteAlertInstance,
@@ -127,7 +140,7 @@ export function AlertInstances({
 
   const alertInstances = Object.entries(alertInstanceSummary.instances)
     .map(([instanceId, instance]) =>
-      alertInstanceToListItem(durationEpoch, alert, instanceId, instance)
+      alertInstanceToListItem(durationEpoch, alertType, instanceId, instance)
     )
     .sort((leftInstance, rightInstance) => leftInstance.sortPriority - rightInstance.sortPriority);
 
@@ -180,6 +193,7 @@ function getPage(items: any[], pagination: Pagination) {
 interface AlertInstanceListItemStatus {
   label: string;
   healthColor: string;
+  actionGroup?: string;
 }
 export interface AlertInstanceListItem {
   instance: string;
@@ -200,16 +214,28 @@ const INACTIVE_LABEL = i18n.translate(
   { defaultMessage: 'OK' }
 );
 
+function getActionGroupName(alertType: AlertType, actionGroupId?: string): string | undefined {
+  actionGroupId = actionGroupId || alertType.defaultActionGroupId;
+  const actionGroup = alertType?.actionGroups?.find(
+    (group: ActionGroup) => group.id === actionGroupId
+  );
+  return actionGroup?.name;
+}
+
 export function alertInstanceToListItem(
   durationEpoch: number,
-  alert: Alert,
+  alertType: AlertType,
   instanceId: string,
   instance: AlertInstanceStatus
 ): AlertInstanceListItem {
   const isMuted = !!instance?.muted;
   const status =
     instance?.status === 'Active'
-      ? { label: ACTIVE_LABEL, healthColor: 'primary' }
+      ? {
+          label: ACTIVE_LABEL,
+          actionGroup: getActionGroupName(alertType, instance?.actionGroupId),
+          healthColor: 'primary',
+        }
       : { label: INACTIVE_LABEL, healthColor: 'subdued' };
   const start = instance?.activeStartDate ? new Date(instance.activeStartDate) : undefined;
   const duration = start ? durationEpoch - start.valueOf() : 0;
