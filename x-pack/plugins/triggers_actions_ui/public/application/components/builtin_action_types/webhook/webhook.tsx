@@ -59,7 +59,7 @@ export function getActionType(): ActionTypeModel<
           i18n.translate(
             'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.invalidUrlTextField',
             {
-              defaultMessage: 'URL is invalid. URL must start with http:// or https://',
+              defaultMessage: 'URL is invalid.',
             }
           ),
         ];

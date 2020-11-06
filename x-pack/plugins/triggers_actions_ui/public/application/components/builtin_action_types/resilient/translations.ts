@@ -37,7 +37,14 @@ export const API_URL_REQUIRED = i18n.translate(
 export const API_URL_INVALID = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.resilient.invalidApiUrlTextField',
   {
-    defaultMessage: 'URL is invalid. URL must start with https://',
+    defaultMessage: 'URL is invalid.',
+  }
+);
+
+export const API_URL_REQUIRE_HTTPS = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.resilient.requireHttpsApiUrlTextField',
+  {
+    defaultMessage: 'URL must start with https://.',
   }
 );
 
