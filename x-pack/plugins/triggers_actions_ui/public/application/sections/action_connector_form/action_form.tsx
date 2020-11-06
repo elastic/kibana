@@ -333,6 +333,7 @@ export const ActionForm = ({
               actionConnector={actionConnector}
               actionParamsErrors={actionParamsErrors}
               index={index}
+              key={`action-form-action-at-${index}`}
               setActionParamsProperty={setActionParamsProperty}
               actionTypesIndex={actionTypesIndex}
               connectors={connectors}
