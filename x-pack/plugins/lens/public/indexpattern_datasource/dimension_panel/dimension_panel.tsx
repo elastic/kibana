@@ -115,7 +115,11 @@ export const IndexPatternDimensionTriggerComponent = function IndexPatternDimens
       aria-label={triggerLinkA11yText}
       title={triggerLinkA11yText}
     >
-      {formattedLabel}
+      <EuiFlexItem grow={true}>
+        <span>
+          <span className="lnsLayerPanel__triggerLinkLabel">{formattedLabel}</span>
+        </span>
+      </EuiFlexItem>
     </EuiLink>
   );
 };

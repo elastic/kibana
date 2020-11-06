@@ -21,6 +21,7 @@ import { SavedObjectAttributes } from 'kibana/public';
 import { EmbeddableFactoryDefinition } from './embeddable_factory_definition';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { EmbeddableFactory } from './embeddable_factory';
+import { EmbeddableStateWithType } from '../../../common/types';
 import { IContainer } from '..';
 
 export const defaultEmbeddableFactoryProvider = <
@@ -49,8 +50,9 @@ export const defaultEmbeddableFactoryProvider = <
     getDisplayName: def.getDisplayName.bind(def),
     savedObjectMetaData: def.savedObjectMetaData,
     telemetry: def.telemetry || (() => ({})),
-    inject: def.inject || ((state: EmbeddableInput) => state),
-    extract: def.extract || ((state: EmbeddableInput) => ({ state, references: [] })),
+    inject: def.inject || ((state: EmbeddableStateWithType) => state),
+    extract: def.extract || ((state: EmbeddableStateWithType) => ({ state, references: [] })),
+    migrations: def.migrations || {},
   };
   return factory;
 };
