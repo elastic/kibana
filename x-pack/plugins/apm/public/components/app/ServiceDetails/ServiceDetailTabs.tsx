@@ -48,7 +48,9 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
         })}
       </ServiceOverviewLink>
     ),
-    render: () => <ServiceOverview serviceName={serviceName} />,
+    render: () => (
+      <ServiceOverview agentName={agentName} serviceName={serviceName} />
+    ),
     name: 'overview',
   };
 

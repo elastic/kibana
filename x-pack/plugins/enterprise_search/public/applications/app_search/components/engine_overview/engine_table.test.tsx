@@ -6,13 +6,11 @@
 
 import '../../../__mocks__/kea.mock';
 import '../../../__mocks__/enterprise_search_url.mock';
-import { mockHttpValues, mountWithIntl } from '../../../__mocks__/';
+import { mockTelemetryActions, mountWithIntl } from '../../../__mocks__/';
 
 import React from 'react';
-import { EuiBasicTable, EuiPagination, EuiButtonEmpty, EuiLink } from '@elastic/eui';
-
-jest.mock('../../../shared/telemetry', () => ({ sendTelemetry: jest.fn() }));
-import { sendTelemetry } from '../../../shared/telemetry';
+import { EuiBasicTable, EuiPagination, EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink } from '../../../shared/react_router_helpers';
 
 import { EngineTable } from './engine_table';
 
@@ -55,12 +53,10 @@ describe('EngineTable', () => {
     const engineLinks = wrapper.find(EuiLink);
 
     engineLinks.forEach((link) => {
-      expect(link.prop('href')).toEqual('http://localhost:3002/as/engines/test-engine');
+      expect(link.prop('to')).toEqual('/engines/test-engine');
       link.simulate('click');
 
-      expect(sendTelemetry).toHaveBeenCalledWith({
-        http: mockHttpValues.http,
-        product: 'app_search',
+      expect(mockTelemetryActions.sendAppSearchTelemetry).toHaveBeenCalledWith({
         action: 'clicked',
         metric: 'engine_table_link',
       });

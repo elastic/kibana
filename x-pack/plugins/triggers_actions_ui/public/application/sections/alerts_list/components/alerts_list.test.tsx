@@ -42,7 +42,9 @@ const alertTypeRegistry = alertTypeRegistryMock.create();
 const alertType = {
   id: 'test_alert_type',
   name: 'some alert type',
+  description: 'test',
   iconClass: 'test',
+  documentationUrl: null,
   validate: (): ValidationResult => {
     return { errors: {} };
   },
