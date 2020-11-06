@@ -90,12 +90,25 @@ export const XYSettings: FC<XYSettingsProps> = ({
   const theme = themeService.useChartsTheme();
   const baseTheme = themeService.useChartsBaseTheme();
   const dimmingOpacity = getUISettings().get<number | undefined>('visualization:dimmingOpacity');
+  const fontSize =
+    typeof theme.barSeriesStyle?.displayValue?.fontSize === 'number'
+      ? { min: theme.barSeriesStyle?.displayValue?.fontSize }
+      : theme.barSeriesStyle?.displayValue?.fontSize ?? { min: 8 };
 
   const themeOverrides: PartialTheme = {
     markSizeRatio,
     sharedStyle: {
       unhighlighted: {
         opacity: dimmingOpacity,
+      },
+    },
+    barSeriesStyle: {
+      displayValue: {
+        fontSize,
+        alignment: {
+          horizontal: 'center',
+          vertical: 'middle',
+        },
       },
     },
     chartMargins:
