@@ -47,6 +47,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     });
 
     it('can get all ids', async () => {
+      await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
       const response = await supertest.get('/api/index-patterns-plugin/get-all');
       // console.log('***************************', response.body);
       expect(response.status).to.equal(200);
