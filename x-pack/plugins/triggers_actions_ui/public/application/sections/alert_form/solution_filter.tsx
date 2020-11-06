@@ -8,13 +8,8 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiFilterGroup, EuiPopover, EuiFilterButton, EuiFilterSelectItem } from '@elastic/eui';
 
-interface Solution {
-  id: string;
-  title: string;
-}
-
 interface SolutionFilterProps {
-  solutions: Solution[];
+  solutions: Map<string, string>;
   onChange?: (selectedSolutions: string[]) => void;
 }
 
@@ -48,27 +43,27 @@ export const SolutionFilter: React.FunctionComponent<SolutionFilterProps> = ({
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertForm.solutionFilterLabel"
-              defaultMessage="Filter by solution:"
+              defaultMessage="Filter by solution"
             />
           </EuiFilterButton>
         }
       >
         <div className="euiFilterSelect__items">
-          {solutions.map((item) => (
+          {[...solutions.entries()].map(([id, title]) => (
             <EuiFilterSelectItem
-              key={item.id}
+              key={id}
               onClick={() => {
-                const isPreviouslyChecked = selectedValues.includes(item.id);
+                const isPreviouslyChecked = selectedValues.includes(id);
                 if (isPreviouslyChecked) {
-                  setSelectedValues(selectedValues.filter((val) => val !== item.id));
+                  setSelectedValues(selectedValues.filter((val) => val !== id));
                 } else {
-                  setSelectedValues([...selectedValues, item.id]);
+                  setSelectedValues([...selectedValues, id]);
                 }
               }}
-              checked={selectedValues.includes(item.id) ? 'on' : undefined}
-              data-test-subj={`solution${item.id}FilterOption`}
+              checked={selectedValues.includes(id) ? 'on' : undefined}
+              data-test-subj={`solution${id}FilterOption`}
             >
-              {item.title}
+              {title}
             </EuiFilterSelectItem>
           ))}
         </div>
