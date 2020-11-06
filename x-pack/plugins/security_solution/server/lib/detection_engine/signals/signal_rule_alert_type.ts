@@ -46,8 +46,12 @@ import { signalParamsSchema } from './signal_params_schema';
 import { siemRuleActionGroups } from './siem_rule_action_groups';
 import { findMlSignals } from './find_ml_signals';
 import { findThresholdSignals } from './find_threshold_signals';
+import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
+import {
+  bulkCreateThresholdSignals,
+  getThresholdSignalQueryFields,
+} from './bulk_create_threshold_signals';
 import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
@@ -298,6 +302,42 @@ export const signalRulesAlertType = ({
             lists: exceptionItems ?? [],
           });
 
+          const fakeHit = {
+            _index: '',
+            _id: '',
+            _score: 1.0,
+            _source: {
+              '@timestamp': '',
+            },
+            _type: '',
+          };
+          const queryFields = getThresholdSignalQueryFields(fakeHit, esFilter);
+
+          const {
+            searchResult: previousSignals,
+            searchErrors: previousSearchErrors,
+          } = await findPreviousThresholdSignals({
+            indexPattern: [outputIndex],
+            from,
+            to,
+            services,
+            logger,
+            ruleId,
+            queryFields: Object.keys(queryFields),
+            timestampOverride,
+            buildRuleMessage,
+          });
+
+          // TODO: error checking
+
+          previousSignals.aggregations.rule.aggregations.threshold.buckets.foreach(
+            (signal: object) => {
+              // TODO
+            }
+          );
+
+          // console.log(previousSignals);
+
           const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
             inputIndexPattern: inputIndex,
             from,
@@ -346,7 +386,7 @@ export const signalRulesAlertType = ({
             }),
             createSearchAfterReturnType({
               success,
-              errors: [...errors, ...searchErrors],
+              errors: [...errors, ...previousSearchErrors, ...searchErrors],
               createdSignalsCount: createdItemsCount,
               bulkCreateTimes: bulkCreateDuration ? [bulkCreateDuration] : [],
             }),
