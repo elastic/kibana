@@ -93,8 +93,8 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(user.username).to.eql(username);
-      expect(user.authentication_provider).to.eql('basic');
-      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
+      expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
+      // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
     });
 
     it('should properly set cookie and authenticate user', async () => {
@@ -123,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         authentication_realm: { name: 'pki1', type: 'pki' },
         lookup_realm: { name: 'pki1', type: 'pki' },
-        authentication_provider: 'pki',
+        authentication_provider: { name: 'pki', type: 'pki' },
         authentication_type: 'token',
       });
 
@@ -168,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           authentication_realm: { name: 'pki1', type: 'pki' },
           lookup_realm: { name: 'pki1', type: 'pki' },
-          authentication_provider: 'pki',
+          authentication_provider: { name: 'pki', type: 'pki' },
           authentication_type: 'token',
         });
 

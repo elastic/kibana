@@ -14,6 +14,7 @@ import { IngestManagerSetup } from '../../../ingest_manager/public';
 import { IndexMgmtMetricsType } from '../types';
 import { UiMetricService, NotificationService, HttpService } from './services';
 import { ExtensionsService } from '../services';
+import { SharePluginStart } from '../../../../../src/plugins/share/public';
 
 const AppContext = createContext<AppDependencies | undefined>(undefined);
 
@@ -35,6 +36,7 @@ export interface AppDependencies {
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   uiSettings: CoreSetup['uiSettings'];
+  urlGenerators: SharePluginStart['urlGenerators'];
 }
 
 export const AppContextProvider = ({
