@@ -145,6 +145,7 @@ export const getXyVisualization = ({
       state || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
+        valueLabels: 'hide',
         preferredSeriesType: defaultSeriesType,
         layers: [
           {
@@ -174,29 +175,16 @@ export const getXyVisualization = ({
       groups: [
         {
           groupId: 'x',
-          groupLabel: isHorizontal
-            ? i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
-                defaultMessage: 'Vertical axis',
-              })
-            : i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
-                defaultMessage: 'Horizontal axis',
-              }),
+          groupLabel: getAxisName('x', { isHorizontal }),
           accessors: layer.xAccessor ? [layer.xAccessor] : [],
           filterOperations: isBucketed,
           suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
-          required: !layer.seriesType.includes('percentage'),
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
           groupId: 'y',
-          groupLabel: isHorizontal
-            ? i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
-                defaultMessage: 'Horizontal axis',
-              })
-            : i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
-                defaultMessage: 'Vertical axis',
-              }),
+          groupLabel: getAxisName('y', { isHorizontal }),
           accessors: sortedAccessors,
           filterOperations: isNumericMetric,
           supportsMoreColumns: true,
@@ -309,7 +297,116 @@ export const getXyVisualization = ({
   toExpression: (state, layers, attributes) =>
     toExpression(state, layers, paletteService, attributes),
   toPreviewExpression: (state, layers) => toPreviewExpression(state, layers, paletteService),
+
+  getErrorMessages(state, frame) {
+    // Data error handling below here
+    const hasNoAccessors = ({ accessors }: LayerConfig) =>
+      accessors == null || accessors.length === 0;
+    const hasNoSplitAccessor = ({ splitAccessor, seriesType }: LayerConfig) =>
+      seriesType.includes('percentage') && splitAccessor == null;
+
+    const errors: Array<{
+      shortMessage: string;
+      longMessage: string;
+    }> = [];
+
+    // check if the layers in the state are compatible with this type of chart
+    if (state && state.layers.length > 1) {
+      // Order is important here: Y Axis is fundamental to exist to make it valid
+      const checks: Array<[string, (layer: LayerConfig) => boolean]> = [
+        ['Y', hasNoAccessors],
+        ['Break down', hasNoSplitAccessor],
+      ];
+
+      // filter out those layers with no accessors at all
+      const filteredLayers = state.layers.filter(
+        ({ accessors, xAccessor, splitAccessor }: LayerConfig) =>
+          accessors.length > 0 || xAccessor != null || splitAccessor != null
+      );
+      for (const [dimension, criteria] of checks) {
+        const result = validateLayersForDimension(dimension, filteredLayers, criteria);
+        if (!result.valid) {
+          errors.push(result.payload);
+        }
+      }
+    }
+
+    return errors.length ? errors : undefined;
+  },
 });
+
+function validateLayersForDimension(
+  dimension: string,
+  layers: LayerConfig[],
+  missingCriteria: (layer: LayerConfig) => boolean
+):
+  | { valid: true }
+  | {
+      valid: false;
+      payload: { shortMessage: string; longMessage: string };
+    } {
+  // Multiple layers must be consistent:
+  // * either a dimension is missing in ALL of them
+  // * or should not miss on any
+  if (layers.every(missingCriteria) || !layers.some(missingCriteria)) {
+    return { valid: true };
+  }
+  // otherwise it's an error and it has to be reported
+  const layerMissingAccessors = layers.reduce((missing: number[], layer, i) => {
+    if (missingCriteria(layer)) {
+      missing.push(i);
+    }
+    return missing;
+  }, []);
+
+  return {
+    valid: false,
+    payload: getMessageIdsForDimension(dimension, layerMissingAccessors, isHorizontalChart(layers)),
+  };
+}
+
+function getAxisName(axis: 'x' | 'y', { isHorizontal }: { isHorizontal: boolean }) {
+  const vertical = i18n.translate('xpack.lens.xyChart.verticalAxisLabel', {
+    defaultMessage: 'Vertical axis',
+  });
+  const horizontal = i18n.translate('xpack.lens.xyChart.horizontalAxisLabel', {
+    defaultMessage: 'Horizontal axis',
+  });
+  if (axis === 'x') {
+    return isHorizontal ? vertical : horizontal;
+  }
+  return isHorizontal ? horizontal : vertical;
+}
+
+// i18n ids cannot be dynamically generated, hence the function below
+function getMessageIdsForDimension(dimension: string, layers: number[], isHorizontal: boolean) {
+  const layersList = layers.map((i: number) => i + 1).join(', ');
+  switch (dimension) {
+    case 'Break down':
+      return {
+        shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitShort', {
+          defaultMessage: `Missing {axis}.`,
+          values: { axis: 'Break down by axis' },
+        }),
+        longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureSplitLong', {
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}.`,
+          values: { layers: layers.length, layersList, axis: 'Break down by axis' },
+        }),
+      };
+    case 'Y':
+      return {
+        shortMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYShort', {
+          defaultMessage: `Missing {axis}.`,
+          values: { axis: getAxisName('y', { isHorizontal }) },
+        }),
+        longMessage: i18n.translate('xpack.lens.xyVisualization.dataFailureYLong', {
+          defaultMessage: `{layers, plural, one {Layer} other {Layers}} {layersList} {layers, plural, one {requires} other {require}} a field for the {axis}.`,
+          values: { layers: layers.length, layersList, axis: getAxisName('y', { isHorizontal }) },
+        }),
+      };
+  }
+  return { shortMessage: '', longMessage: '' };
+}
 
 function newLayerState(seriesType: SeriesType, layerId: string): LayerConfig {
   return {

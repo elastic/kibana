@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { pickBy, mapValues, without } from 'lodash';
+import { Dictionary, pickBy, mapValues, without } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
@@ -224,11 +224,10 @@ export class TaskRunner {
     const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
       alertInstance.hasScheduledActions()
     );
-    const currentAlertInstanceIds = Object.keys(instancesWithScheduledActions);
     generateNewAndResolvedInstanceEvents({
       eventLogger,
       originalAlertInstanceIds,
-      currentAlertInstanceIds,
+      currentAlertInstances: instancesWithScheduledActions,
       alertId,
       alertLabel,
       namespace,
@@ -382,7 +381,7 @@ export class TaskRunner {
 interface GenerateNewAndResolvedInstanceEventsParams {
   eventLogger: IEventLogger;
   originalAlertInstanceIds: string[];
-  currentAlertInstanceIds: string[];
+  currentAlertInstances: Dictionary<AlertInstance>;
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
@@ -393,9 +392,10 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
     eventLogger,
     alertId,
     namespace,
-    currentAlertInstanceIds,
+    currentAlertInstances,
     originalAlertInstanceIds,
   } = params;
+  const currentAlertInstanceIds = Object.keys(currentAlertInstances);
 
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
   const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
@@ -411,11 +411,12 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
   }
 
   for (const id of currentAlertInstanceIds) {
-    const message = `${params.alertLabel} active instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message);
+    const actionGroup = currentAlertInstances[id].getScheduledActionOptions()?.actionGroup;
+    const message = `${params.alertLabel} active instance: '${id}' in actionGroup: '${actionGroup}'`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message, actionGroup);
   }
 
-  function logInstanceEvent(instanceId: string, action: string, message: string) {
+  function logInstanceEvent(instanceId: string, action: string, message: string, group?: string) {
     const event: IEvent = {
       event: {
         action,
@@ -423,6 +424,7 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
       kibana: {
         alerting: {
           instance_id: instanceId,
+          action_group_id: group,
         },
         saved_objects: [
           {
