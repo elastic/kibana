@@ -292,7 +292,7 @@ export class IndexPattern implements IIndexPattern {
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
   ): FieldFormat {
     const formatSpec = this.fieldFormatMap[field.name];
-    if (formatSpec) {
+    if (formatSpec && formatSpec.id) {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     } else {
       return this.fieldFormats.getDefaultInstance(
