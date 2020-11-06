@@ -17,25 +17,16 @@
  * under the License.
  */
 
-import { EuiIcon, IconType } from '@elastic/eui';
-import React from 'react';
+import { PluginConfigDescriptor } from 'kibana/server';
+import { copyFromRoot } from '@kbn/config';
+import { configSchema, ConfigSchema } from '../config';
 
-interface VisTypeIconProps {
-  icon?: IconType;
-  image?: string;
-}
-
-/**
- * This renders the icon for a specific visualization type.
- * This currently checks the following:
- * - If image is set, use that as the `src` of an image
- * - Otherwise use the icon as an EuiIcon or the 'empty' icon if that's not set
- */
-export const VisTypeIcon = ({ icon, image }: VisTypeIconProps) => {
-  return (
-    <React.Fragment>
-      {image && <img src={image} alt="" className="visNewVisDialog__typeImage" />}
-      {!image && <EuiIcon type={icon || 'empty'} size="l" color="secondary" />}
-    </React.Fragment>
-  );
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+  deprecations: () => [copyFromRoot('xpack.lens.enabled', 'lens_oss.enabled')],
 };
+
+export const plugin = () => ({
+  setup() {},
+  start() {},
+});
