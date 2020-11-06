@@ -35,6 +35,13 @@ export interface TermsIndexPatternColumn extends FieldBasedIndexPatternColumn {
     size: number;
     orderBy: { type: 'alphabetical' } | { type: 'column'; columnId: string };
     orderDirection: 'asc' | 'desc';
+    // Terms on numeric fields can be formatted
+    format?: {
+      id: string;
+      params?: {
+        decimals: number;
+      };
+    };
   };
 }
 
@@ -104,11 +111,17 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  onFieldChange: (oldColumn, field) => {
+  onFieldChange: (oldColumn, indexPattern, field) => {
+    const newParams = { ...oldColumn.params };
+    if ('format' in newParams && field.type !== 'number') {
+      delete newParams.format;
+    }
     return {
       ...oldColumn,
+      dataType: field.type as DataType,
       label: ofName(field.displayName),
       sourceField: field.name,
+      params: newParams,
     };
   },
   onOtherColumnChanged: (currentColumn, columns) => {
