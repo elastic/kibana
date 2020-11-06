@@ -10,7 +10,7 @@ import { registerDeleteTagRoute } from './delete_tag';
 import { registerGetAllTagsRoute } from './get_all_tags';
 import { registerGetTagRoute } from './get_tag';
 import { registerUpdateTagRoute } from './update_tag';
-import { registerInternalFindTagsRoute } from './internal';
+import { registerInternalFindTagsRoute, registerInternalBulkDeleteRoute } from './internal';
 
 export const registerRoutes = ({ router }: { router: IRouter }) => {
   // public API
@@ -21,4 +21,5 @@ export const registerRoutes = ({ router }: { router: IRouter }) => {
   registerGetTagRoute(router);
   // internal API
   registerInternalFindTagsRoute(router);
+  registerInternalBulkDeleteRoute(router);
 };

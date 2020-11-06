@@ -1,0 +1,11 @@
+.tagMgt__actionBar {
+  > .euiHorizontalRule {
+    margin: 8px 0 3px;
+  }
+}
+
+.tagMgt__actionBar + .euiSpacer {
+  display: none;
+}
+
+// $euiBorderColor

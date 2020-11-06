@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useRef, useEffect, FC } from 'react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import React, { useRef, useEffect, FC, ReactNode } from 'react';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, Query } from '@elastic/eui';
 import { Action as EuiTableAction } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -16,12 +16,16 @@ interface TagTableProps {
   loading: boolean;
   capabilities: TagsCapabilities;
   tags: TagWithRelations[];
+  initialQuery?: Query;
+  allowSelection: boolean;
+  onQueryChange: (query?: Query) => void;
   selectedTags: TagWithRelations[];
   onSelectionChange: (selection: TagWithRelations[]) => void;
   onEdit: (tag: TagWithRelations) => void;
   onDelete: (tag: TagWithRelations) => void;
   getTagRelationUrl: (tag: TagWithRelations) => string;
   onShowRelations: (tag: TagWithRelations) => void;
+  actionBar: ReactNode;
 }
 
 const tablePagination = {
@@ -43,11 +47,16 @@ export const TagTable: FC<TagTableProps> = ({
   loading,
   capabilities,
   tags,
+  initialQuery,
+  allowSelection,
+  onQueryChange,
   selectedTags,
+  onSelectionChange,
   onEdit,
   onDelete,
   onShowRelations,
   getTagRelationUrl,
+  actionBar,
 }) => {
   const tableRef = useRef<EuiInMemoryTable<TagWithRelations>>(null);
 
@@ -171,13 +180,26 @@ export const TagTable: FC<TagTableProps> = ({
     <EuiInMemoryTable
       data-test-subj="tagsManagementTable"
       ref={tableRef}
+      childrenBetween={actionBar}
       loading={loading}
       itemId={'id'}
       columns={columns}
       items={tags}
       pagination={tablePagination}
       sorting={sorting}
+      selection={
+        allowSelection
+          ? {
+              initialSelected: selectedTags,
+              onSelectionChange,
+            }
+          : undefined
+      }
       search={{
+        defaultQuery: initialQuery,
+        onChange: ({ query }) => {
+          onQueryChange(query || undefined);
+        },
         box: {
           'data-test-subj': 'tagsManagementSearchBar',
           incremental: true,

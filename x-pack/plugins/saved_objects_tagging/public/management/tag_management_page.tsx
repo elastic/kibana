@@ -6,13 +6,14 @@
 
 import React, { useEffect, useCallback, useState, useMemo, FC } from 'react';
 import useMount from 'react-use/lib/useMount';
-import { EuiPageContent } from '@elastic/eui';
+import { EuiPageContent, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener, getEditModalOpener } from '../components/edition_modal';
 import { ITagInternalClient } from '../tags';
-import { Header, TagTable } from './components';
+import { Header, TagTable, ActionBar } from './components';
+import { getBulkActions } from './actions';
 import { getTagConnectionsUrl } from './utils';
 
 interface TagManagementPageParams {
@@ -32,6 +33,20 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);
   const [selectedTags, setSelectedTags] = useState<TagWithRelations[]>([]);
+  const [query, setQuery] = useState<Query | undefined>();
+
+  const filteredTags = useMemo(() => {
+    return query ? Query.execute(query, allTags) : allTags;
+  }, [allTags, query]);
+
+  const bulkActions = useMemo(() => {
+    return getBulkActions({
+      core,
+      capabilities,
+      tagClient,
+      clearSelection: () => setSelectedTags([]),
+    });
+  }, [core, capabilities, tagClient]);
 
   const createModalOpener = useMemo(() => getCreateModalOpener({ overlays, tagClient }), [
     overlays,
@@ -160,13 +175,47 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     [overlays, notifications, fetchTags, tagClient]
   );
 
+  const actionBar = useMemo(
+    () => (
+      <ActionBar
+        actions={bulkActions}
+        totalCount={filteredTags.length}
+        selectedCount={selectedTags.length}
+        onActionSelected={async (action) => {
+          setLoading(true);
+          try {
+            await action.execute(selectedTags.map(({ id }) => id));
+            if (action.refreshAfterExecute) {
+              await fetchTags();
+            }
+          } catch (e) {
+            notifications.toasts.addError(e, {
+              title: i18n.translate('xpack.savedObjectsTagging.notifications.bulkActionError', {
+                defaultMessage: 'An error occurred',
+              }),
+            });
+          }
+          setLoading(false);
+        }}
+      />
+    ),
+    [notifications, bulkActions, selectedTags, filteredTags, fetchTags]
+  );
+
   return (
     <EuiPageContent horizontalPosition="center">
       <Header canCreate={capabilities.create} onCreate={openCreateModal} />
       <TagTable
         loading={loading}
-        tags={allTags}
+        tags={filteredTags}
         capabilities={capabilities}
+        actionBar={actionBar}
+        initialQuery={query}
+        onQueryChange={(newQuery) => {
+          setQuery(newQuery);
+          setSelectedTags([]);
+        }}
+        allowSelection={bulkActions.length > 0}
         selectedTags={selectedTags}
         onSelectionChange={(tags) => {
           setSelectedTags(tags);
