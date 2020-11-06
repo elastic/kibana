@@ -31,7 +31,7 @@ import {
   EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 
-import { legendColors, LegendItem } from './models';
+import { LegendItem } from './models';
 import { ColorPicker } from '../../../../../charts/public';
 
 interface Props {
@@ -44,7 +44,7 @@ interface Props {
   onSelect: (label: string | null) => (event?: BaseSyntheticEvent) => void;
   onHighlight: (event: BaseSyntheticEvent) => void;
   onUnhighlight: (event: BaseSyntheticEvent) => void;
-  setColor: (label: string, color: string, event: BaseSyntheticEvent) => void;
+  setColor: (label: string, color: string | null, event: BaseSyntheticEvent) => void;
   getColor: (label: string) => string;
 }
 

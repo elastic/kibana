@@ -163,13 +163,13 @@ const VisComponent = (props: VisComponentProps) => {
   }, [props.uiState?.set]);
 
   const setColor = useCallback(
-    (newColor: string, seriesLabel: string | number, event: BaseSyntheticEvent) => {
+    (newColor: string | null, seriesLabel: string | number, event: BaseSyntheticEvent) => {
       if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
         return;
       }
 
       const colors = props.uiState?.get('vis.colors') || {};
-      if (colors[seriesLabel] === newColor) {
+      if (colors[seriesLabel] === newColor || !newColor) {
         delete colors[seriesLabel];
       } else {
         colors[seriesLabel] = newColor;

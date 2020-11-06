@@ -39,16 +39,22 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
 
 export const getColorPicker = (
   legendPosition: Position,
-  setColor: (newColor: string, seriesKey: string | number, event: BaseSyntheticEvent) => void,
+  setColor: (
+    newColor: string | null,
+    seriesKey: string | number,
+    event: BaseSyntheticEvent
+  ) => void,
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName
 ): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
   const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
-  const handlChange = (newColor: string, event: BaseSyntheticEvent) => {
+  const handlChange = (newColor: string | null, event: BaseSyntheticEvent) => {
     onClose();
     if (!seriesName) {
       return;
     }
-    onChange(newColor);
+    if (newColor) {
+      onChange(newColor);
+    }
     setColor(newColor, seriesName, event);
   };
 

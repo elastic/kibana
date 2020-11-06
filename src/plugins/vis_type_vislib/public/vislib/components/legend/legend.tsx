@@ -78,18 +78,20 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     });
   };
 
-  setColor = (label: string, color: string | number, event: BaseSyntheticEvent) => {
+  setColor = (label: string | number, color: string | null, event: BaseSyntheticEvent) => {
     if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
       return;
     }
 
-    const colors = this.props.uiState?.get('vis.colors') || {};
-    if (colors[label] === color) delete colors[label];
-    else colors[label] = color;
-    this.props.uiState?.setSilent('vis.colors', null);
-    this.props.uiState?.set('vis.colors', colors);
-    this.props.uiState?.emit('colorChanged');
-    this.refresh();
+    this.setState({ selectedLabel: null }, () => {
+      const colors = this.props.uiState?.get('vis.colors') || {};
+      if (colors[label] === color || !color) delete colors[label];
+      else colors[label] = color;
+      this.props.uiState?.setSilent('vis.colors', null);
+      this.props.uiState?.set('vis.colors', colors);
+      this.props.uiState?.emit('colorChanged');
+      this.refresh();
+    });
   };
 
   filter = ({ values: data }: LegendItem, negate: boolean) => {

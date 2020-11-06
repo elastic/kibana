@@ -20,7 +20,7 @@
 import classNames from 'classnames';
 import React, { BaseSyntheticEvent } from 'react';
 
-import { EuiIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
 import './color_picker.scss';
@@ -87,7 +87,7 @@ export const legendColors: string[] = [
 interface ColorPickerProps {
   id?: string;
   label: string | number | null;
-  onChange: (color: string, event: BaseSyntheticEvent) => void;
+  onChange: (color: string | null, event: BaseSyntheticEvent) => void;
   color: string;
 }
 
@@ -95,7 +95,7 @@ export const ColorPicker = ({ onChange, color: selectedColor, id, label }: Color
   <div className="visColorPicker">
     <span id={`${id}ColorPickerDesc`} className="euiScreenReaderOnly">
       <FormattedMessage
-        id="visTypeVislib.vislib.legend.setColorScreenReaderDescription"
+        id="charts.colorPicker.setColor.screenReaderDescription"
         defaultMessage="Set color for value {legendDataLabel}"
         values={{ legendDataLabel: label }}
       />
@@ -123,5 +123,16 @@ export const ColorPicker = ({ onChange, color: selectedColor, id, label }: Color
         />
       ))}
     </div>
+    {legendColors.some((c) => c === selectedColor) && (
+      <EuiFlexItem grow={false}>
+        <EuiButtonEmpty
+          size="s"
+          onClick={(e: any) => onChange(null, e)}
+          onKeyPress={(e: any) => onChange(null, e)}
+        >
+          <FormattedMessage id="charts.colorPicker.clearColor" defaultMessage="Clear color" />
+        </EuiButtonEmpty>
+      </EuiFlexItem>
+    )}
   </div>
 );
