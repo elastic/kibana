@@ -3,7 +3,7 @@
 == Create a map with multiple layers and data sources
 
 ++++
-<titleabbrev>Create a map</titleabbrev>
+<titleabbrev>Create a multilayer map</titleabbrev>
 ++++
 
 If you are new to creating maps in {kib}, this tutorial is a good place to start.
@@ -13,8 +13,8 @@ You'll learn to:
 
 - Create a map with multiple layers and data sources
 - Use symbols, colors, and labels to style data values
-- Focus in on just the data you want
 - Embed a map in a dashboard
+- Search across panels in your dashboard
 
 When you complete this tutorial, you’ll have a map that looks like this:
 
@@ -35,9 +35,10 @@ a read-only icon appears in the application header. For more information on gran
 === Step 1. Create a map
 
 . Open the main menu, then click *Dashboard*.
-. Click **Create new**.
-. Click **Maps**.
+. Click **Create dashboards**.
 . Set the time range to *Last 7 days*.
+. Click **Create new**
+. Click **Maps**.
 
 [float]
 [[maps-add-choropleth-layer]]
@@ -100,6 +101,8 @@ The layer is only visible when users zoom in past level 9.
 
 . Click **Add layer**.
 
+. Set **Scaling* to *Limits reulsts to 10000.*
+
 . In **Layer settings**, set:
 ** **Name** to `Actual Requests`
 ** **Visibilty** to the range [9, 24]
@@ -135,7 +138,7 @@ grids with less bytes transferred.
 ** **Opacity** to 100%
 . Add a metric with:
 ** **Aggregation** set to **Sum**
-** **Field** set to **bytes
+** **Field** set to **bytes**
 . In **Layer style**, change **Symbol size**:
 ** Min size to 7
 ** Max size to 25
@@ -186,4 +189,5 @@ image::maps/images/gs_dashboard_with_terms_filter.png[]
 [float]
 === What's next?
 
-* Three to five bullet points about what to do next.
+* Check out <<vector-layer, additional layers>> that you can build.
+* Learn more about <<maps-vector-style-properties, customizing your map>>.
