@@ -59,18 +59,17 @@ export const getHealth = async (
     filter: 'not alert.attributes.executionStatus.status:error',
     fields: ['executionStatus'],
     type: 'alert',
+    sortField: 'executionStatus.lastExecutionDate',
+    sortOrder: 'desc',
   });
-  const lastExecutionDate = noErrorData.reduce(
-    (prev: Date, item) =>
-      prev > new Date(item.attributes.executionStatus.lastExecutionDate)
-        ? prev
-        : new Date(item.attributes.executionStatus.lastExecutionDate),
-    new Date('0001/01/01')
-  );
+  const lastExecutionDate =
+    noErrorData.length > 0
+      ? noErrorData[0].attributes.executionStatus.lastExecutionDate
+      : new Date().toISOString();
 
   for (const [, statusItem] of Object.entries(healthStatuses)) {
     if (statusItem.status === HealthStatus.OK) {
-      statusItem.timestamp = lastExecutionDate.toISOString();
+      statusItem.timestamp = lastExecutionDate;
     }
   }
 
