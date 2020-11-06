@@ -341,6 +341,23 @@ export const InnerVisualizationWrapper = ({
     [dispatch]
   );
 
+  if (localState.expressionBuildError) {
+    return (
+      <EuiFlexGroup style={{ maxWidth: '100%' }} direction="column" alignItems="center">
+        <EuiFlexItem>
+          <EuiIcon type="alert" size="xl" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem data-test-subj="expression-failure">
+          <FormattedMessage
+            id="xpack.lens.editorFrame.expressionFailure"
+            defaultMessage="An error occurred in the expression"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{localState.expressionBuildError}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <div className="lnsExpressionRenderer">
       <ExpressionRendererComponent
