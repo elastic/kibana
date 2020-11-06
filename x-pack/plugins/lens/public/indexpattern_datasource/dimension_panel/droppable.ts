@@ -12,7 +12,7 @@ import {
 import { IndexPatternColumn } from '../indexpattern';
 import { insertNewColumn, replaceColumn } from '../operations';
 import { mergeLayer } from '../state_helpers';
-import { isDraggedField } from '../utils';
+import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { getOperationSupportMatrix } from './operation_support';
@@ -28,9 +28,12 @@ export function canHandleDrop(props: DatasourceDimensionDropProps<IndexPatternPr
   }
 
   if (isDraggedField(dragging)) {
+    const currentColumn = props.state.layers[props.layerId].columns[props.columnId];
     return (
       layerIndexPatternId === dragging.indexPatternId &&
-      Boolean(hasOperationForField(dragging.field))
+      Boolean(hasOperationForField(dragging.field)) &&
+      (!currentColumn ||
+        (hasField(currentColumn) && currentColumn.sourceField !== dragging.field.name))
     );
   }
 

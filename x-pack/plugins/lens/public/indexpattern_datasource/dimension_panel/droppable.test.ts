@@ -283,6 +283,33 @@ describe('IndexPatternDimensionEditorPanel', () => {
     ).toBe(false);
   });
 
+  it('is not droppable if the dragged field is already in use by this operation', () => {
+    expect(
+      canHandleDrop({
+        ...defaultProps,
+        dragDropContext: {
+          ...dragDropContext,
+          dragging: {
+            field: {
+              name: 'timestamp',
+              displayName: 'timestampLabel',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+              exists: true,
+            },
+            indexPatternId: 'foo',
+            id: 'bar',
+          },
+        },
+        state: dragDropState(),
+        columnId: 'col1',
+        filterOperations: (op: OperationMetadata) => true,
+        layerId: 'myLayer',
+      })
+    ).toBe(false);
+  });
+
   it('is droppable if the dragged column is compatible', () => {
     expect(
       canHandleDrop({
