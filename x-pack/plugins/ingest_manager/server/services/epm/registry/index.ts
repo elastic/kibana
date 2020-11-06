@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import mime from 'mime-types';
 import semver from 'semver';
 import { Response } from 'node-fetch';
 import { URL } from 'url';
@@ -18,22 +18,16 @@ import {
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
-import {
-  cacheGet,
-  cacheSet,
-  cacheDelete,
-  getArchiveFilelist,
-  setArchiveFilelist,
-  deleteArchiveFilelist,
-} from './cache';
-import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
+import { unpackArchiveToCache } from '../archive';
+import { cacheGet, getArchiveFilelist, setArchiveFilelist } from '../archive';
+import { ArchiveEntry } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError } from '../../../errors';
 
-export { ArchiveEntry } from './extract';
+export { ArchiveEntry, getBufferExtractor } from './extract';
 
 export interface SearchParams {
   category?: CategoryId;
@@ -137,19 +131,12 @@ export async function unpackRegistryPackageToCache(
   pkgVersion: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
-  const paths: string[] = [];
   const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
-  const bufferExtractor = getBufferExtractor(archivePath);
-  await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
-    const { path, buffer } = entry;
-    const { file } = pathParts(path);
-    if (!file) return;
-    if (buffer) {
-      cacheSet(path, buffer);
-      paths.push(path);
-    }
-  });
-
+  const contentType = mime.lookup(archivePath);
+  if (!contentType) {
+    throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
+  }
+  const paths: string[] = await unpackArchiveToCache(archiveBuffer, contentType);
   return paths;
 }
 
@@ -199,13 +186,6 @@ export function pathParts(path: string): AssetParts {
   } as AssetParts;
 }
 
-export function getBufferExtractor(archivePath: string) {
-  const isZip = archivePath.endsWith('.zip');
-  const bufferExtractor = isZip ? unzipBuffer : untarBuffer;
-
-  return bufferExtractor;
-}
-
 export async function ensureCachedArchiveInfo(
   name: string,
   version: string,
@@ -242,10 +222,12 @@ export function getAsset(key: string) {
 }
 
 export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByType {
+  const kibanaAssetTypes = Object.values<string>(KibanaAssetType);
+
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
     const parts = pathParts(path.replace(/^\/package\//, ''));
-    if (parts.type in KibanaAssetType) {
+    if (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) {
       if (!map[parts.service]) map[parts.service] = {};
       if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];
       map[parts.service][parts.type].push(parts);
@@ -259,15 +241,3 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     // elasticsearch: assets.elasticsearch,
   };
 }
-
-export const deletePackageCache = (name: string, version: string) => {
-  // get cached archive filelist
-  const paths = getArchiveFilelist(name, version);
-
-  // delete cached archive filelist
-  deleteArchiveFilelist(name, version);
-
-  // delete cached archive files
-  // this has been populated in unpackRegistryPackageToCache()
-  paths?.forEach((path) => cacheDelete(path));
-};
