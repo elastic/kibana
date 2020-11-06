@@ -7,25 +7,38 @@ import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { useEffect } from 'react';
+import { ProcessListAPIResponse, ProcessListAPIResponseRT } from '../../../../../common/http_api';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
-import {
-  InventoryMetaResponseRT,
-  InventoryMetaResponse,
-} from '../../../../../common/http_api/inventory_meta_api';
 
-export function useProcessList(hostname: string, timefield: string) {
+export function useProcessList(
+  hostTerm: string,
+  indexPattern: string,
+  timefield: string,
+  to: number
+) {
   const decodeResponse = (response: any) => {
     return pipe(
-      InventoryMetaResponseRT.decode(response),
+      ProcessListAPIResponseRT.decode(response),
       fold(throwErrors(createPlainError), identity)
     );
   };
 
-  const { error, loading, response, makeRequest } = useHTTPRequest<InventoryMetaResponse>(
-    '/api/infra/metrics_api',
+  const timerange = {
+    timefield,
+    interval: 'modules',
+    to,
+    from: to - 15 * 60 * 1000, // 15 minutes
+  };
+
+  const { error, loading, response, makeRequest } = useHTTPRequest<ProcessListAPIResponse>(
+    '/api/metrics/process_list',
     'POST',
-    generateRequest(hostname, timefield),
+    JSON.stringify({
+      hostTerm,
+      timerange,
+      indexPattern,
+    }),
     decodeResponse
   );
 
@@ -36,60 +49,7 @@ export function useProcessList(hostname: string, timefield: string) {
   return {
     error,
     loading,
-    accounts: response ? response.accounts : [],
-    regions: response ? response.regions : [],
+    response,
     makeRequest,
   };
 }
-
-const generateRequest = (hostname: string, timefield: string = '@timestamp') => {
-  const to = Date.now();
-  const from = to - 15 * 60 * 1000; // 15 minutes
-  return JSON.stringify({
-    timerange: {
-      field: timefield,
-      from,
-      to,
-      interval: 'modules',
-    },
-    modules: ['system.cpu', 'system.memory'],
-    groupBy: ['system.process.cmdline'],
-    filter: [{ term: { 'host.name': hostname } }],
-    indexPattern: 'metricbeat-*',
-    limit: 9,
-    metrics: [
-      {
-        id: 'cpu',
-        aggregations: {
-          cpu: {
-            avg: {
-              field: 'system.process.cpu.total.norm.pct',
-            },
-          },
-        },
-      },
-      {
-        id: 'memory',
-        aggregations: {
-          memory: {
-            avg: {
-              field: 'system.process.memory.rss.pct',
-            },
-          },
-        },
-      },
-      {
-        id: 'meta',
-        aggregations: {
-          meta: {
-            top_hits: {
-              size: 1,
-              sort: [{ '@timestamp': { order: 'desc' } }],
-              _source: ['system.process.cpu.start_time', 'system.process.state'],
-            },
-          },
-        },
-      },
-    ],
-  });
-};
