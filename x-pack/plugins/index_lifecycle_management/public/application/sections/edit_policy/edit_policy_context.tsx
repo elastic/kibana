@@ -9,7 +9,7 @@ import { ApplicationStart } from 'kibana/public';
 
 import { PolicyFromES, SerializedPolicy } from '../../../../common/types';
 
-interface EditPolicyContextValue {
+export interface EditPolicyContextValue {
   isNewPolicy: boolean;
   policy: SerializedPolicy;
   existingPolicies: PolicyFromES[];
