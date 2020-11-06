@@ -18,6 +18,7 @@ import {
   KibanaAssetReference,
   EsAssetReference,
   InstallType,
+  KibanaAssetType,
 } from '../../../types';
 import * as Registry from '../registry';
 import {
@@ -364,9 +365,9 @@ export async function createInstallation(options: {
 export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  kibanaAssets: ArchiveAsset[]
+  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
-  const assetRefs = kibanaAssets.map(toAssetReference);
+  const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_kibana: assetRefs,
   });
