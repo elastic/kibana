@@ -53,7 +53,7 @@ export async function unpackArchiveToCache(
     await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
       const { path, buffer } = entry;
       // skip directories
-      if (path.slice(-1) === '/') return;
+      if (path.endsWith('/')) return;
       if (buffer) {
         cacheSet(path, buffer);
         paths.push(path);
