@@ -26,6 +26,7 @@ import {
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
 import { documentField } from './document_field';
 import { readFromStorage, writeToStorage } from '../settings_storage';
+import { getFieldByNameFactory } from './pure_helpers';
 
 type SetState = StateSetter<IndexPatternPrivateState>;
 type SavedObjectsClient = Pick<SavedObjectsClientContract, 'find'>;
@@ -112,7 +113,7 @@ export async function loadIndexPatterns({
             ])
           ),
         fields: newFields,
-        fieldsMap: _.keyBy(newFields, 'name'),
+        getFieldByName: getFieldByNameFactory(newFields),
         hasRestrictions: !!typeMeta?.aggs,
       };
 

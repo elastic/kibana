@@ -22,7 +22,7 @@ import { IndexPatternColumn } from '../operations';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
-import { keyBy } from 'lodash';
+import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../loader');
 jest.mock('../state_helpers');
@@ -79,7 +79,7 @@ const expectedIndexPatterns = {
     hasExistence: true,
     hasRestrictions: false,
     fields,
-    fieldsMap: keyBy(fields, 'name'),
+    getFieldByName: getFieldByNameFactory(fields),
   },
 };
 

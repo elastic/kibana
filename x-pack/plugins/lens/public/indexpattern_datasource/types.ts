@@ -11,7 +11,7 @@ import { IndexPatternAggRestrictions } from '../../../../../src/plugins/data/pub
 export interface IndexPattern {
   id: string;
   fields: IndexPatternField[];
-  fieldsMap: Record<string, IndexPatternField>;
+  getFieldByName(name: string): IndexPatternField | undefined;
   title: string;
   timeFieldName?: string;
   fieldFormatMap?: Record<

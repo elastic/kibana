@@ -11,7 +11,7 @@ import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
 import { ChangeIndexPattern } from './change_indexpattern';
-import { keyBy } from 'lodash';
+import { getFieldByNameFactory } from './pure_helpers';
 
 jest.mock('./state_helpers');
 
@@ -179,7 +179,7 @@ const initialState: IndexPatternPrivateState = {
       timeFieldName: 'timestamp',
       hasRestrictions: false,
       fields: fieldsOne,
-      fieldsMap: keyBy(fieldsOne, 'name'),
+      getFieldByName: getFieldByNameFactory(fieldsOne),
     },
     '2': {
       id: '2',
@@ -187,7 +187,7 @@ const initialState: IndexPatternPrivateState = {
       hasRestrictions: true,
       timeFieldName: 'timestamp',
       fields: fieldsTwo,
-      fieldsMap: keyBy(fieldsTwo, 'name'),
+      getFieldByName: getFieldByNameFactory(fieldsTwo),
     },
     '3': {
       id: '3',
@@ -195,7 +195,7 @@ const initialState: IndexPatternPrivateState = {
       timeFieldName: 'timestamp',
       hasRestrictions: false,
       fields: fieldsThree,
-      fieldsMap: keyBy(fieldsThree, 'name'),
+      getFieldByName: getFieldByNameFactory(fieldsThree),
     },
   },
 };

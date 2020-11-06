@@ -18,6 +18,7 @@ import {
 } from '../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
+import { getFieldByNameFactory } from '../../pure_helpers';
 
 const dataStart = dataPluginMock.createStartContract();
 dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression(
@@ -66,8 +67,9 @@ describe('date_histogram', () => {
               searchable: true,
             },
           ],
-          fieldsMap: {
-            timestamp: {
+
+          getFieldByName: getFieldByNameFactory([
+            {
               name: 'timestamp',
               displayName: 'timestampLabel',
               type: 'date',
@@ -75,7 +77,7 @@ describe('date_histogram', () => {
               aggregatable: true,
               searchable: true,
             },
-          },
+          ]),
         },
         2: {
           id: '2',
@@ -91,8 +93,8 @@ describe('date_histogram', () => {
               searchable: true,
             },
           ],
-          fieldsMap: {
-            other_timestamp: {
+          getFieldByName: getFieldByNameFactory([
+            {
               name: 'other_timestamp',
               displayName: 'other_timestamp',
               type: 'date',
@@ -100,7 +102,7 @@ describe('date_histogram', () => {
               aggregatable: true,
               searchable: true,
             },
-          },
+          ]),
         },
       },
       layers: {
@@ -287,8 +289,8 @@ describe('date_histogram', () => {
               },
             },
           ],
-          fieldsMap: {
-            timestamp: {
+          getFieldByName: getFieldByNameFactory([
+            {
               name: 'timestamp',
               displayName: 'timestamp',
               aggregatable: true,
@@ -302,7 +304,7 @@ describe('date_histogram', () => {
                 },
               },
             },
-          },
+          ]),
         }
       );
       expect(esAggsConfig).toEqual(
@@ -392,8 +394,8 @@ describe('date_histogram', () => {
               },
             },
           ],
-          fieldsMap: {
-            dateField: {
+          getFieldByName: getFieldByNameFactory([
+            {
               name: 'dateField',
               displayName: 'dateField',
               type: 'date',
@@ -407,7 +409,7 @@ describe('date_histogram', () => {
                 },
               },
             },
-          },
+          ]),
         }
       );
       expect(transferedColumn).toEqual(
@@ -445,15 +447,15 @@ describe('date_histogram', () => {
               searchable: true,
             },
           ],
-          fieldsMap: {
-            dateField: {
+          getFieldByName: getFieldByNameFactory([
+            {
               name: 'dateField',
               displayName: 'dateField',
               type: 'date',
               aggregatable: true,
               searchable: true,
             },
-          },
+          ]),
         }
       );
       expect(transferedColumn).toEqual(
@@ -670,8 +672,8 @@ describe('date_histogram', () => {
                     },
                   },
                 ],
-                fieldsMap: {
-                  [state.indexPatterns[1].fields[0].name]: {
+                getFieldByName: getFieldByNameFactory([
+                  {
                     ...state.indexPatterns[1].fields[0],
                     aggregationRestrictions: {
                       date_histogram: {
@@ -681,7 +683,7 @@ describe('date_histogram', () => {
                       },
                     },
                   },
-                },
+                ]),
               },
             },
           }}

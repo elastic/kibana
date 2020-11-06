@@ -15,7 +15,7 @@ import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { IndexPatternColumn } from '../operations';
-import { keyBy } from 'lodash';
+import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../state_helpers');
 
@@ -63,7 +63,7 @@ const expectedIndexPatterns = {
     hasExistence: true,
     hasRestrictions: false,
     fields,
-    fieldsMap: keyBy(fields, 'name'),
+    getFieldByName: getFieldByNameFactory(fields),
   },
 };
 
@@ -180,22 +180,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
               type: 'string',
             },
           ],
-          fieldsMap: {
-            bar: {
+
+          getFieldByName: getFieldByNameFactory([
+            {
               aggregatable: true,
               name: 'bar',
               displayName: 'bar',
               searchable: true,
               type: 'number',
             },
-            mystring: {
+            {
               aggregatable: true,
               name: 'mystring',
               displayName: 'mystring',
               searchable: true,
               type: 'string',
             },
-          },
+          ]),
         },
       },
       currentIndexPatternId: '1',

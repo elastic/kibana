@@ -16,7 +16,7 @@ import { TermsIndexPatternColumn } from './operations/definitions/terms';
 import { DateHistogramIndexPatternColumn } from './operations/definitions/date_histogram';
 import { AvgIndexPatternColumn } from './operations/definitions/metrics';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
-import { keyBy } from 'lodash';
+import { getFieldByNameFactory } from './pure_helpers';
 
 jest.mock('./operations');
 
@@ -639,7 +639,7 @@ describe('state_helpers', () => {
       id: 'test',
       title: '',
       hasRestrictions: true,
-      fieldsMap: keyBy(fields, 'name'),
+      getFieldByName: getFieldByNameFactory(fields),
       fields,
     };
 

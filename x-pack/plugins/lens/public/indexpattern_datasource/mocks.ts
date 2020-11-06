@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { keyBy } from 'lodash';
 import { DragContextState } from '../drag_drop';
+import { getFieldByNameFactory } from './pure_helpers';
 import { IndexPattern } from './types';
 
 export const createMockedIndexPattern = (): IndexPattern => {
@@ -78,7 +78,7 @@ export const createMockedIndexPattern = (): IndexPattern => {
     timeFieldName: 'timestamp',
     hasRestrictions: false,
     fields,
-    fieldsMap: keyBy(fields, 'name'),
+    getFieldByName: getFieldByNameFactory(fields),
   };
 };
 
@@ -117,7 +117,7 @@ export const createMockedRestrictedIndexPattern = () => {
     hasRestrictions: true,
     fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
     fields,
-    fieldsMap: keyBy(fields, 'name'),
+    getFieldByName: getFieldByNameFactory(fields),
     typeMeta: {
       params: {
         rollup_index: 'my-fake-index-pattern',

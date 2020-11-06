@@ -18,7 +18,7 @@ import { ChangeIndexPattern } from './change_indexpattern';
 import { EuiProgress, EuiLoadingSpinner } from '@elastic/eui';
 import { documentField } from './document_field';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { keyBy } from 'lodash';
+import { getFieldByNameFactory } from './pure_helpers';
 
 const fieldsOne = [
   {
@@ -211,7 +211,7 @@ const initialState: IndexPatternPrivateState = {
       timeFieldName: 'timestamp',
       hasRestrictions: false,
       fields: fieldsOne,
-      fieldsMap: keyBy(fieldsOne, 'name'),
+      getFieldByName: getFieldByNameFactory(fieldsOne),
     },
     '2': {
       id: '2',
@@ -219,7 +219,7 @@ const initialState: IndexPatternPrivateState = {
       timeFieldName: 'timestamp',
       hasRestrictions: true,
       fields: fieldsTwo,
-      fieldsMap: keyBy(fieldsTwo, 'name'),
+      getFieldByName: getFieldByNameFactory(fieldsTwo),
     },
     '3': {
       id: '3',
@@ -227,7 +227,7 @@ const initialState: IndexPatternPrivateState = {
       timeFieldName: 'timestamp',
       hasRestrictions: false,
       fields: fieldsThree,
-      fieldsMap: keyBy(fieldsThree, 'name'),
+      getFieldByName: getFieldByNameFactory(fieldsThree),
     },
   },
   isFirstExistenceFetch: false,
@@ -340,7 +340,7 @@ describe('IndexPattern Data Panel', () => {
               title: 'aaa',
               timeFieldName: 'atime',
               fields: [],
-              fieldsMap: {},
+              getFieldByName: getFieldByNameFactory([]),
               hasRestrictions: false,
             },
             b: {
@@ -348,7 +348,7 @@ describe('IndexPattern Data Panel', () => {
               title: 'bbb',
               timeFieldName: 'btime',
               fields: [],
-              fieldsMap: {},
+              getFieldByName: getFieldByNameFactory([]),
               hasRestrictions: false,
             },
           },

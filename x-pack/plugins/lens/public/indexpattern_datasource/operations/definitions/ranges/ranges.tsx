@@ -140,7 +140,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
     };
   },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fieldsMap[column.sourceField];
+    const newField = newIndexPattern.getFieldByName(column.sourceField);
 
     return Boolean(
       newField &&
@@ -168,7 +168,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
   },
   paramEditor: ({ state, setState, currentColumn, layerId, columnId, uiSettings, data }) => {
     const indexPattern = state.indexPatterns[state.layers[layerId].indexPatternId];
-    const currentField = indexPattern.fieldsMap[currentColumn.sourceField];
+    const currentField = indexPattern.getFieldByName(currentColumn.sourceField);
     const numberFormat = currentColumn.params.format;
     const numberFormatterPattern =
       numberFormat &&

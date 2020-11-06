@@ -12,7 +12,7 @@ import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
-import { keyBy } from 'lodash';
+import { getFieldByNameFactory } from './pure_helpers';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -125,7 +125,7 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     hasRestrictions: false,
     fields: fieldsOne,
-    fieldsMap: keyBy(fieldsOne, 'name'),
+    getFieldByName: getFieldByNameFactory(fieldsOne),
   },
   2: {
     id: '2',
@@ -133,7 +133,7 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     hasRestrictions: true,
     fields: fieldsTwo,
-    fieldsMap: keyBy(fieldsTwo, 'name'),
+    getFieldByName: getFieldByNameFactory(fieldsTwo),
   },
 };
 

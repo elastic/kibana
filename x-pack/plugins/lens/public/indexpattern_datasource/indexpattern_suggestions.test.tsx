@@ -12,7 +12,7 @@ import {
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
-import { keyBy } from 'lodash';
+import { getFieldByNameFactory } from './pure_helpers';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
@@ -125,7 +125,7 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     hasRestrictions: false,
     fields: fieldsOne,
-    fieldsMap: keyBy(fieldsOne, 'name'),
+    getFieldByName: getFieldByNameFactory(fieldsOne),
   },
   2: {
     id: '2',
@@ -133,7 +133,7 @@ const expectedIndexPatterns = {
     hasRestrictions: true,
     timeFieldName: 'timestamp',
     fields: fieldsTwo,
-    fieldsMap: keyBy(fieldsTwo, 'name'),
+    getFieldByName: getFieldByNameFactory(fieldsTwo),
   },
 };
 
@@ -342,15 +342,15 @@ describe('IndexPattern Data Source suggestions', () => {
                   searchable: true,
                 },
               ],
-              fieldsMap: {
-                bytes: {
+              getFieldByName: getFieldByNameFactory([
+                {
                   name: 'bytes',
                   displayName: 'bytes',
                   type: 'number',
                   aggregatable: true,
                   searchable: true,
                 },
-              },
+              ]),
             },
           },
           layers: {
@@ -562,15 +562,16 @@ describe('IndexPattern Data Source suggestions', () => {
                   searchable: true,
                 },
               ],
-              fieldsMap: {
-                bytes: {
+
+              getFieldByName: getFieldByNameFactory([
+                {
                   name: 'bytes',
                   displayName: 'bytes',
                   type: 'number',
                   aggregatable: true,
                   searchable: true,
                 },
-              },
+              ]),
             },
           },
           layers: {
@@ -1603,7 +1604,7 @@ describe('IndexPattern Data Source suggestions', () => {
             title: 'my-fake-index-pattern',
             hasRestrictions: false,
             fields,
-            fieldsMap: keyBy(fields, 'name'),
+            getFieldByName: getFieldByNameFactory(fields),
           },
         },
         isFirstExistenceFetch: false,
@@ -1727,22 +1728,23 @@ describe('IndexPattern Data Source suggestions', () => {
                 searchable: true,
               },
             ],
-            fieldsMap: {
-              field1: {
+
+            getFieldByName: getFieldByNameFactory([
+              {
                 name: 'field1',
                 displayName: 'field1',
                 type: 'number',
                 aggregatable: true,
                 searchable: true,
               },
-              field2: {
+              {
                 name: 'field2',
                 displayName: 'field2',
                 type: 'date',
                 aggregatable: true,
                 searchable: true,
               },
-            },
+            ]),
           },
         },
         isFirstExistenceFetch: false,
@@ -1799,15 +1801,15 @@ describe('IndexPattern Data Source suggestions', () => {
                 searchable: true,
               },
             ],
-            fieldsMap: {
-              field1: {
+            getFieldByName: getFieldByNameFactory([
+              {
                 name: 'field1',
                 displayName: 'field1',
                 type: 'number',
                 aggregatable: true,
                 searchable: true,
               },
-            },
+            ]),
           },
         },
         isFirstExistenceFetch: false,

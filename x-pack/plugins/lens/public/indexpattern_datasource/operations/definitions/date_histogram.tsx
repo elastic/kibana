@@ -81,7 +81,7 @@ export const dateHistogramOperation: OperationDefinition<
     };
   },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fieldsMap[column.sourceField];
+    const newField = newIndexPattern.getFieldByName(column.sourceField);
 
     return Boolean(
       newField &&
@@ -91,7 +91,7 @@ export const dateHistogramOperation: OperationDefinition<
     );
   },
   transfer: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fieldsMap[column.sourceField];
+    const newField = newIndexPattern.getFieldByName(column.sourceField);
 
     if (newField?.aggregationRestrictions?.date_histogram) {
       const restrictions = newField.aggregationRestrictions.date_histogram;
@@ -120,7 +120,7 @@ export const dateHistogramOperation: OperationDefinition<
     };
   },
   toEsAggsConfig: (column, columnId, indexPattern) => {
-    const usedField = indexPattern.fieldsMap[column.sourceField];
+    const usedField = indexPattern.getFieldByName(column.sourceField);
     return {
       id: columnId,
       enabled: true,
@@ -140,9 +140,9 @@ export const dateHistogramOperation: OperationDefinition<
   paramEditor: ({ state, setState, currentColumn, layerId, dateRange, data }) => {
     const field =
       currentColumn &&
-      state.indexPatterns[state.layers[layerId].indexPatternId].fieldsMap[
+      state.indexPatterns[state.layers[layerId].indexPatternId].getFieldByName(
         currentColumn.sourceField
-      ];
+      );
     const intervalIsRestricted =
       field!.aggregationRestrictions && field!.aggregationRestrictions.date_histogram;
 

@@ -8,7 +8,7 @@ import { getOperationTypesForField, getAvailableOperationsByMetadata, buildColum
 import { AvgIndexPatternColumn } from './definitions/metrics';
 import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
-import { keyBy } from 'lodash';
+import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../loader');
 
@@ -43,7 +43,7 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     hasRestrictions: false,
     fields,
-    fieldsMap: keyBy(fields, 'name'),
+    getFieldByName: getFieldByNameFactory(fields),
   },
 };
 

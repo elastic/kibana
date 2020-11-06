@@ -43,7 +43,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       }
     },
     isTransferable: (column, newIndexPattern) => {
-      const newField = newIndexPattern.fieldsMap[column.sourceField];
+      const newField = newIndexPattern.getFieldByName(column.sourceField);
 
       return Boolean(
         newField &&
