@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart, ISavedObjectsRepository, Logger } from 'kibana/server';
+import { CoreStart, Logger } from 'kibana/server';
 import {
   RunContext,
   TaskManagerSetupContract,
