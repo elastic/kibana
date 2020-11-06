@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import React from 'react';
+import React, { BaseSyntheticEvent } from 'react';
 
 import { LegendColorPicker, Position, XYChartSeriesIdentifier, SeriesName } from '@elastic/charts';
 import { PopoverAnchorPosition, EuiWrappingPopover } from '@elastic/eui';
@@ -39,29 +39,30 @@ function getAnchorPosition(legendPosition: Position): PopoverAnchorPosition {
 
 export const getColorPicker = (
   legendPosition: Position,
-  setColor: (newColor: string, seriesKey: string | number) => void,
+  setColor: (newColor: string, seriesKey: string | number, event: BaseSyntheticEvent) => void,
   getSeriesName: (series: XYChartSeriesIdentifier) => SeriesName
 ): LegendColorPicker => ({ anchor, color, onClose, onChange, seriesIdentifier }) => {
-  const handlChange = (newColor: string) => {
-    const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
+  const seriesName = getSeriesName(seriesIdentifier as XYChartSeriesIdentifier);
+  const handlChange = (newColor: string, event: BaseSyntheticEvent) => {
     onClose();
     if (!seriesName) {
       return;
     }
     onChange(newColor);
-    setColor(newColor, seriesName);
+    setColor(newColor, seriesName, event);
   };
 
   return (
     <EuiWrappingPopover
       isOpen
+      ownFocus
       display="block"
       button={anchor}
       anchorPosition={getAnchorPosition(legendPosition)}
       closePopover={onClose}
       panelPaddingSize="s"
     >
-      <ColorPicker color={color} onChange={handlChange} />
+      <ColorPicker color={color} onChange={handlChange} label={seriesName} />
     </EuiWrappingPopover>
   );
 };

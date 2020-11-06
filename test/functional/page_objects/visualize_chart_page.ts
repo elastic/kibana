@@ -45,7 +45,8 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
      */
     public async isNewChartUiEnabled(): Promise<boolean> {
       const enabled =
-        Boolean(await kibanaServer.uiSettings.get('visualization.visualize:chartsLibrary')) ?? false;
+        Boolean(await kibanaServer.uiSettings.get('visualization.visualize:chartsLibrary')) ??
+        false;
       log.debug(`-- isNewChartUiEnabled = ${enabled}`);
 
       return enabled;
@@ -322,11 +323,11 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async doesLegendColorChoiceExist(color: string) {
-      return await testSubjects.exists(`legendSelectColor-${color}`);
+      return await testSubjects.exists(`visColorPickerColor-${color}`);
     }
 
     public async selectNewLegendColorChoice(color: string) {
-      await testSubjects.click(`legendSelectColor-${color}`);
+      await testSubjects.click(`visColorPickerColor-${color}`);
     }
 
     public async doesSelectedLegendColorExist(color: string) {

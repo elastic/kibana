@@ -17,7 +17,14 @@
  * under the License.
  */
 
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, {
+  BaseSyntheticEvent,
+  KeyboardEvent,
+  memo,
+  useCallback,
+  useMemo,
+  useState,
+} from 'react';
 
 import {
   Chart,
@@ -29,6 +36,7 @@ import {
   RenderChangeListener,
   ScaleType,
 } from '@elastic/charts';
+import { keys } from '@elastic/eui';
 
 import {
   getFilterFromChartClickEventFn,
@@ -155,7 +163,11 @@ const VisComponent = (props: VisComponentProps) => {
   }, [props.uiState?.set]);
 
   const setColor = useCallback(
-    (newColor: string, seriesLabel: string | number) => {
+    (newColor: string, seriesLabel: string | number, event: BaseSyntheticEvent) => {
+      if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
+        return;
+      }
+
       const colors = props.uiState?.get('vis.colors') || {};
       if (colors[seriesLabel] === newColor) {
         delete colors[seriesLabel];

@@ -18,9 +18,12 @@
  */
 
 import classNames from 'classnames';
-import React from 'react';
+import React, { BaseSyntheticEvent } from 'react';
 
 import { EuiIcon } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
+
+import './color_picker.scss';
 
 export const legendColors: string[] = [
   '#3F6833',
@@ -82,13 +85,22 @@ export const legendColors: string[] = [
 ];
 
 interface ColorPickerProps {
-  onChange: (color: string) => void;
+  id?: string;
+  label: string | number | null;
+  onChange: (color: string, event: BaseSyntheticEvent) => void;
   color: string;
 }
 
-export const ColorPicker = ({ onChange, color: selectedColor }: ColorPickerProps) => (
-  <div className="visLegend__valueDetails">
-    <div className="visLegend__valueColorPicker" role="listbox">
+export const ColorPicker = ({ onChange, color: selectedColor, id, label }: ColorPickerProps) => (
+  <div className="visColorPicker">
+    <span id={`${id}ColorPickerDesc`} className="euiScreenReaderOnly">
+      <FormattedMessage
+        id="visTypeVislib.vislib.legend.setColorScreenReaderDescription"
+        defaultMessage="Set color for value {legendDataLabel}"
+        values={{ legendDataLabel: label }}
+      />
+    </span>
+    <div className="visColorPicker__value" role="listbox">
       {legendColors.map((color) => (
         <EuiIcon
           role="option"
@@ -98,15 +110,16 @@ export const ColorPicker = ({ onChange, color: selectedColor }: ColorPickerProps
           color={selectedColor}
           key={color}
           aria-label={color}
+          aria-describedby={`${id}ColorPickerDesc`}
           aria-selected={color === selectedColor}
-          onClick={() => onChange(color)}
-          onKeyPress={() => onChange(color)}
-          className={classNames('visLegend__valueColorPickerDot', {
+          onClick={(e) => onChange(color, e)}
+          onKeyPress={(e) => onChange(color, e)}
+          className={classNames('visColorPicker__valueDot', {
             // eslint-disable-next-line @typescript-eslint/naming-convention
-            'visLegend__valueColorPickerDot-isSelected': color === selectedColor,
+            'visColorPicker__valueDot-isSelected': color === selectedColor,
           })}
           style={{ color }}
-          data-test-subj={`legendSelectColor-${color}`}
+          data-test-subj={`visColorPickerColor-${color}`}
         />
       ))}
     </div>

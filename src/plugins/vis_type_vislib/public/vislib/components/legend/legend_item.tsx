@@ -18,10 +18,8 @@
  */
 
 import React, { memo, useState, BaseSyntheticEvent, KeyboardEvent } from 'react';
-import classNames from 'classnames';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPopover,
   keys,
@@ -34,6 +32,7 @@ import {
 } from '@elastic/eui';
 
 import { legendColors, LegendItem } from './models';
+import { ColorPicker } from '../../../../../charts/public';
 
 interface Props {
   item: LegendItem;
@@ -45,7 +44,7 @@ interface Props {
   onSelect: (label: string | null) => (event?: BaseSyntheticEvent) => void;
   onHighlight: (event: BaseSyntheticEvent) => void;
   onUnhighlight: (event: BaseSyntheticEvent) => void;
-  setColor: (label: string, color: string) => (event: BaseSyntheticEvent) => void;
+  setColor: (label: string, color: string, event: BaseSyntheticEvent) => void;
   getColor: (label: string) => string;
 }
 
@@ -160,40 +159,14 @@ const VisLegendItemComponent = ({
       closePopover={onSelect(null)}
       panelPaddingSize="s"
     >
-      <div className="visLegend__valueDetails">
-        {canFilter && renderFilterBar()}
+      {canFilter && renderFilterBar()}
 
-        <div className="visLegend__valueColorPicker" role="listbox">
-          <span id={`${legendId}ColorPickerDesc`} className="euiScreenReaderOnly">
-            <FormattedMessage
-              id="visTypeVislib.vislib.legend.setColorScreenReaderDescription"
-              defaultMessage="Set color for value {legendDataLabel}"
-              values={{ legendDataLabel: item.label }}
-            />
-          </span>
-          {legendColors.map((color) => (
-            <EuiIcon
-              role="option"
-              tabIndex={0}
-              type="dot"
-              size="l"
-              color={getColor(item.label)}
-              key={color}
-              aria-label={color}
-              aria-describedby={`${legendId}ColorPickerDesc`}
-              aria-selected={color === getColor(item.label)}
-              onClick={setColor(item.label, color)}
-              onKeyPress={setColor(item.label, color)}
-              className={classNames('visLegend__valueColorPickerDot', {
-                // eslint-disable-next-line @typescript-eslint/naming-convention
-                'visLegend__valueColorPickerDot-isSelected': color === getColor(item.label),
-              })}
-              style={{ color }}
-              data-test-subj={`legendSelectColor-${color}`}
-            />
-          ))}
-        </div>
-      </div>
+      <ColorPicker
+        id={legendId}
+        label={item.label}
+        color={getColor(item.label)}
+        onChange={(c, e) => setColor(item.label, c, e)}
+      />
     </EuiPopover>
   );
 

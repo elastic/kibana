@@ -78,7 +78,7 @@ export class VisLegend extends PureComponent<VisLegendProps, VisLegendState> {
     });
   };
 
-  setColor = (label: string, color: string) => (event: BaseSyntheticEvent) => {
+  setColor = (label: string, color: string | number, event: BaseSyntheticEvent) => {
     if ((event as KeyboardEvent).key && (event as KeyboardEvent).key !== keys.ENTER) {
       return;
     }

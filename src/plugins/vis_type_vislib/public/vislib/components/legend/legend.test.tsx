@@ -238,7 +238,7 @@ describe('VisLegend Component', () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('click');
 
-      expect(wrapper.exists('.visLegend__valueDetails')).toBe(true);
+      expect(wrapper.exists('.visColorPicker')).toBe(true);
     });
   });
 
@@ -251,8 +251,8 @@ describe('VisLegend Component', () => {
       const first = getLegendItems(wrapper).first();
       first.simulate('click');
 
-      const popover = wrapper.find('.visLegend__valueDetails').first();
-      const firstColor = popover.find('.visLegend__valueColorPickerDot').first();
+      const popover = wrapper.find('.visColorPicker').first();
+      const firstColor = popover.find('.visColorPicker__valueDot').first();
       firstColor.simulate('click');
 
       const colors = mockState.get('vis.colors');
