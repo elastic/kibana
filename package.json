@@ -567,7 +567,7 @@
     "@types/zen-observable": "^0.8.0",
     "@typescript-eslint/eslint-plugin": "^3.10.0",
     "@typescript-eslint/parser": "^3.10.0",
-    "@welldone-software/why-did-you-render": "^4.0.0",
+    "@welldone-software/why-did-you-render": "^5.0.0",
     "@yarnpkg/lockfile": "^1.1.0",
     "abab": "^1.0.4",
     "angular-aria": "^1.8.0",
