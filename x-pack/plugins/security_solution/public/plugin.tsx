@@ -62,7 +62,7 @@ import {
   IndexFieldsStrategyResponse,
 } from '../common/search_strategy/index_fields';
 import { SecurityAppStore } from './common/store/store';
-import { getCaseConnectorUI } from './common/lib/connectors';
+import { licenseService } from './common/hooks/use_license';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private kibanaVersion: string;
@@ -313,8 +313,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
-    plugins.triggersActionsUi.actionTypeRegistry.register(getCaseConnectorUI());
-
     return {
       resolver: async () => {
         /**
@@ -337,6 +335,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         ConfigureEndpointPackagePolicy
       );
     }
+    licenseService.start(plugins.licensing.license$);
 
     return {};
   }
