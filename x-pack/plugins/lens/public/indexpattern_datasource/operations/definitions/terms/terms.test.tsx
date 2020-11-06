@@ -103,7 +103,7 @@ describe('terms', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newDateField = indexPattern.fields.find((i) => i.name === 'dest')!;
+      const newDateField = indexPattern.getFieldByName('dest')!;
 
       const column = termsOperation.onFieldChange(oldColumn, indexPattern, newDateField);
       expect(column).toHaveProperty('sourceField', 'dest');

@@ -97,14 +97,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const ParamEditor = selectedOperationDefinition?.paramEditor;
 
-  const fieldMap: Record<string, IndexPatternField> = useMemo(() => {
-    const fields: Record<string, IndexPatternField> = {};
-    currentIndexPattern.fields.forEach((field) => {
-      fields[field.name] = field;
-    });
-    return fields;
-  }, [currentIndexPattern]);
-
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
       .sort((op1, op2) => {
@@ -212,7 +204,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     layerId: props.layerId,
                     op: operationType,
                     indexPattern: currentIndexPattern,
-                    field: fieldMap[possibleFields[0]],
+                    field: currentIndexPattern.getFieldByName(possibleFields[0]),
                     previousColumn: selectedColumn,
                   }),
                 })
@@ -236,7 +228,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
             layerId: props.layerId,
             op: operationType,
             indexPattern: currentIndexPattern,
-            field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
+            field: hasField(selectedColumn)
+              ? currentIndexPattern.getFieldByName(selectedColumn.sourceField)
+              : undefined,
             previousColumn: selectedColumn,
           });
 
@@ -297,7 +291,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
               fieldIsInvalid={currentFieldIsInvalid}
               currentIndexPattern={currentIndexPattern}
               existingFields={state.existingFields}
-              fieldMap={fieldMap}
               operationSupportMatrix={operationSupportMatrix}
               selectedColumnOperationType={selectedColumn && selectedColumn.operationType}
               selectedColumnSourceField={
@@ -323,7 +316,11 @@ export function DimensionEditor(props: DimensionEditorProps) {
                 ) {
                   // If we just changed the field are not in an error state and the operation didn't change,
                   // we use the operations onFieldChange method to calculate the new column.
-                  column = changeField(selectedColumn, currentIndexPattern, fieldMap[choice.field]);
+                  column = changeField(
+                    selectedColumn,
+                    currentIndexPattern,
+                    currentIndexPattern.getFieldByName(choice.field)!
+                  );
                 } else {
                   // Otherwise we'll use the buildColumn method to calculate a new column
                   const compatibleOperations =
@@ -341,7 +338,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   }
                   column = buildColumn({
                     columns: props.state.layers[props.layerId].columns,
-                    field: fieldMap[choice.field],
+                    field: currentIndexPattern.getFieldByName(choice.field),
                     indexPattern: currentIndexPattern,
                     layerId: props.layerId,
                     suggestedPriority: props.suggestedPriority,
@@ -417,12 +414,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
           {!incompatibleSelectedOperationType && !hideGrouping && (
             <BucketNestingEditor
-              fieldMap={fieldMap}
               layer={state.layers[props.layerId]}
               columnId={props.columnId}
               setColumns={(columnOrder) =>
                 setState(mergeLayer({ state, layerId, newLayer: { columnOrder } }))
               }
+              getFieldByName={currentIndexPattern.getFieldByName}
             />
           )}
 
