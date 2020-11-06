@@ -58,3 +58,10 @@
   white-space: nowrap;
   font-weight: $euiFontWeightBold;
 }
+
+.chart-top-title {
+  @include euiFontSizeXS;
+  flex: 0;
+  text-align: center;
+  font-weight: $euiFontWeightBold;
+}

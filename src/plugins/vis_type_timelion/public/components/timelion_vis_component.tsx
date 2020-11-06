@@ -158,7 +158,7 @@ function TimelionVisComponent({
 
   return (
     <div className="timelionChart">
-      <div className="chart-top-title">{title}</div>
+      <div className="timelionChart__topTitle">{title}</div>
       <Chart renderer="canvas" size={{ width: '100%' }}>
         <Settings
           onBrushEnd={brushEndListener}
