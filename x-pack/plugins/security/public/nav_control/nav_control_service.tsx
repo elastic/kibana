@@ -72,8 +72,10 @@ export class SecurityNavControlService {
     return {
       getUserMenuLinks$: () =>
         this.userMenuLinks$.pipe(map(this.sortUserMenuLinks), takeUntil(this.stop$)),
-      addUserMenuLinks: (userMenuLink: UserMenuLink[]) => {
-        this.userMenuLinks$.next(userMenuLink);
+      addUserMenuLinks: (userMenuLinks: UserMenuLink[]) => {
+        const currentLinks = this.userMenuLinks$.value;
+        const newLinks = [...currentLinks, ...userMenuLinks];
+        this.userMenuLinks$.next(newLinks);
       },
     };
   }
