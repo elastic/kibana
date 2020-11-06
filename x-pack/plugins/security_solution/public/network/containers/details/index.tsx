@@ -69,7 +69,6 @@ export const useNetworkDetails = ({
           docValueFields: docValueFields ?? [],
           factoryQueryType: NetworkQueries.details,
           filterQuery: createFilter(filterQuery),
-          id,
           ip,
         }
       : null
@@ -153,7 +152,6 @@ export const useNetworkDetails = ({
         docValueFields: docValueFields ?? [],
         factoryQueryType: NetworkQueries.details,
         filterQuery: createFilter(filterQuery),
-        id,
         ip,
       };
       if (!skip && !deepEqual(prevRequest, myRequest)) {

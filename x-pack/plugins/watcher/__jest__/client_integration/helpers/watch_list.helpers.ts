@@ -14,7 +14,7 @@ import {
   nextTick,
 } from '../../../../../test_utils';
 import { WatchList } from '../../../public/application/sections/watch_list/components/watch_list';
-import { ROUTES } from '../../../common/constants';
+import { ROUTES, REFRESH_INTERVALS } from '../../../common/constants';
 import { withAppContext } from './app_context.mock';
 
 const testBedConfig: TestBedConfig = {
@@ -31,6 +31,8 @@ export interface WatchListTestBed extends TestBed<WatchListTestSubjects> {
     selectWatchAt: (index: number) => void;
     clickWatchAt: (index: number) => void;
     clickWatchActionAt: (index: number, action: 'delete' | 'edit') => void;
+    searchWatches: (term: string) => void;
+    advanceTimeToTableRefresh: () => Promise<void>;
   };
 }
 
@@ -73,12 +75,35 @@ export const setup = async (): Promise<WatchListTestBed> => {
     });
   };
 
+  const searchWatches = (term: string) => {
+    const { find, component } = testBed;
+    const searchInput = find('watchesTableContainer').find('.euiFieldSearch');
+
+    // Enter input into the search box
+    // @ts-ignore
+    searchInput.instance().value = term;
+    searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+
+    component.update();
+  };
+
+  const advanceTimeToTableRefresh = async () => {
+    const { component } = testBed;
+    await act(async () => {
+      // Advance timers to simulate another request
+      jest.advanceTimersByTime(REFRESH_INTERVALS.WATCH_LIST);
+    });
+    component.update();
+  };
+
   return {
     ...testBed,
     actions: {
       selectWatchAt,
       clickWatchAt,
       clickWatchActionAt,
+      searchWatches,
+      advanceTimeToTableRefresh,
     },
   };
 };
@@ -95,4 +120,5 @@ export type TestSubjects =
   | 'createWatchButton'
   | 'emptyPrompt'
   | 'emptyPrompt.createWatchButton'
-  | 'editWatchButton';
+  | 'editWatchButton'
+  | 'watchesTableContainer';

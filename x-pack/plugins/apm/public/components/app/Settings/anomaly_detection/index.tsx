@@ -76,8 +76,7 @@ export function AnomalyDetection() {
       <EuiSpacer size="l" />
       <EuiText>
         {i18n.translate('xpack.apm.settings.anomalyDetection.descriptionText', {
-          defaultMessage:
-            'The Machine Learning anomaly detection integration enables application health status indicators for each configured environment in the Service map by identifying transaction duration anomalies.',
+          defaultMessage: `Machine Learning's anomaly detection integration enables application health status indicators for services in each configured environment by identifying transaction duration anomalies.`,
         })}
       </EuiText>
       <EuiSpacer size="l" />
