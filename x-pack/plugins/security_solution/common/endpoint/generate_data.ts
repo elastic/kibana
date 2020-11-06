@@ -29,11 +29,10 @@ import {
   GetPackagesResponse,
 } from '../../../ingest_manager/common/types/rest_spec';
 import {
-  AgentPolicyStatus,
   EsAssetReference,
-  InstallationStatus,
   KibanaAssetReference,
 } from '../../../ingest_manager/common/types/models';
+import { agentPolicyStatuses } from '../../../ingest_manager/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 
 export type Event = AlertEvent | SafeEndpointEvent;
@@ -311,6 +310,8 @@ export interface Tree {
    * All events from children, ancestry, origin, and the alert in a single array
    */
   allEvents: Event[];
+  startTime: Date;
+  endTime: Date;
 }
 
 export interface TreeOptions {
@@ -712,6 +713,33 @@ export class EndpointDocGenerator {
     };
   }
 
+  private static getStartEndTimes(events: Event[]): { startTime: Date; endTime: Date } {
+    let startTime: number;
+    let endTime: number;
+    if (events.length > 0) {
+      startTime = timestampSafeVersion(events[0]) ?? new Date().getTime();
+      endTime = startTime;
+    } else {
+      startTime = new Date().getTime();
+      endTime = startTime;
+    }
+
+    for (const event of events) {
+      const eventTimestamp = timestampSafeVersion(event);
+      if (eventTimestamp !== undefined) {
+        if (eventTimestamp < startTime) {
+          startTime = eventTimestamp;
+        } else if (eventTimestamp > endTime) {
+          endTime = eventTimestamp;
+        }
+      }
+    }
+    return {
+      startTime: new Date(startTime),
+      endTime: new Date(endTime),
+    };
+  }
+
   /**
    * This generates a full resolver tree and keeps the entire tree in memory. This is useful for tests that want
    * to compare results from elasticsearch with the actual events created by this generator. Because all the events
@@ -809,12 +837,17 @@ export class EndpointDocGenerator {
     const childrenByParent = groupNodesByParent(childrenNodes);
     const levels = createLevels(childrenByParent, [], childrenByParent.get(origin.id));
 
+    const allEvents = [...ancestry, ...children];
+    const { startTime, endTime } = EndpointDocGenerator.getStartEndTimes(allEvents);
+
     return {
       children: childrenNodes,
       ancestry: ancestryNodes,
-      allEvents: [...ancestry, ...children],
+      allEvents,
       origin,
       childrenLevels: levels,
+      startTime,
+      endTime,
     };
   }
 
@@ -1235,7 +1268,7 @@ export class EndpointDocGenerator {
     return {
       id: this.seededUUIDv4(),
       name: 'Agent Policy',
-      status: AgentPolicyStatus.Active,
+      status: agentPolicyStatuses.Active,
       description: 'Some description',
       namespace: 'default',
       monitoring_enabled: ['logs', 'metrics'],
@@ -1267,7 +1300,7 @@ export class EndpointDocGenerator {
           type: 'image/svg+xml',
         },
       ],
-      status: 'installed' as InstallationStatus,
+      status: 'installed',
       savedObject: {
         type: 'epm-packages',
         id: 'endpoint',

@@ -47,7 +47,6 @@ export class LifecycleQuery {
                 '@timestamp': {
                   gte: this.timerange.from,
                   lte: this.timerange.to,
-                  // TODO this is what the search_strategy uses, need to double check
                   format: 'strict_date_optional_time',
                 },
               },
@@ -73,6 +72,10 @@ export class LifecycleQuery {
   }
 
   async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<unknown[]> {
+    if (nodes.length <= 0) {
+      return [];
+    }
+
     const response: ApiResponse<SearchResponse<unknown>> = await client.asCurrentUser.search({
       body: this.query(nodes),
       index: this.indexPatterns,

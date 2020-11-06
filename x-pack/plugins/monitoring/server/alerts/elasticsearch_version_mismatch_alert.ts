@@ -13,22 +13,25 @@ import {
   AlertMessage,
   AlertInstanceState,
   LegacyAlert,
-} from './types';
+  CommonAlertParams,
+} from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { INDEX_ALERTS, ALERT_ELASTICSEARCH_VERSION_MISMATCH } from '../../common/constants';
+import {
+  INDEX_ALERTS,
+  ALERT_ELASTICSEARCH_VERSION_MISMATCH,
+  LEGACY_ALERT_DETAILS,
+} from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertSeverity } from '../../common/enums';
-import { CommonAlertParams } from '../../common/types';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
-import { AlertingDefaults } from './alerts_common';
+import { AlertingDefaults } from './alert_helpers';
 
 const WATCH_NAME = 'elasticsearch_version_mismatch';
 
 export class ElasticsearchVersionMismatchAlert extends BaseAlert {
   public type = ALERT_ELASTICSEARCH_VERSION_MISMATCH;
-  public label = i18n.translate('xpack.monitoring.alerts.elasticsearchVersionMismatch.label', {
-    defaultMessage: 'Elasticsearch version mismatch',
-  });
+  public label = LEGACY_ALERT_DETAILS[ALERT_ELASTICSEARCH_VERSION_MISMATCH].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_ELASTICSEARCH_VERSION_MISMATCH].description;
   public isLegacy = true;
 
   protected actionVariables = [

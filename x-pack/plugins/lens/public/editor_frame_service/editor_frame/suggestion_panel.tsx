@@ -34,6 +34,7 @@ import {
 import { prependDatasourceExpression } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { validateDatasourceAndVisualization } from './state_helpers';
 
 const MAX_SUGGESTIONS_DISPLAYED = 5;
 
@@ -61,11 +62,28 @@ const PreviewRenderer = ({
   withLabel,
   ExpressionRendererComponent,
   expression,
+  hasError,
 }: {
   withLabel: boolean;
-  expression: string;
+  expression: string | null | undefined;
   ExpressionRendererComponent: ReactExpressionRendererType;
+  hasError: boolean;
 }) => {
+  const onErrorMessage = (
+    <div className="lnsSuggestionPanel__suggestionIcon">
+      <EuiIconTip
+        size="xl"
+        color="danger"
+        type="alert"
+        aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+          defaultMessage: 'Preview rendering failed',
+        })}
+        content={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
+          defaultMessage: 'Preview rendering failed',
+        })}
+      />
+    </div>
+  );
   return (
     <div
       className={classNames('lnsSuggestionPanel__chartWrapper', {
@@ -73,29 +91,19 @@ const PreviewRenderer = ({
         'lnsSuggestionPanel__chartWrapper--withLabel': withLabel,
       })}
     >
-      <ExpressionRendererComponent
-        className="lnsSuggestionPanel__expressionRenderer"
-        padding="s"
-        expression={expression}
-        debounce={2000}
-        renderError={() => {
-          return (
-            <div className="lnsSuggestionPanel__suggestionIcon">
-              <EuiIconTip
-                size="xl"
-                color="danger"
-                type="alert"
-                aria-label={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-                  defaultMessage: 'Preview rendering failed',
-                })}
-                content={i18n.translate('xpack.lens.editorFrame.previewErrorLabel', {
-                  defaultMessage: 'Preview rendering failed',
-                })}
-              />
-            </div>
-          );
-        }}
-      />
+      {!expression || hasError ? (
+        onErrorMessage
+      ) : (
+        <ExpressionRendererComponent
+          className="lnsSuggestionPanel__expressionRenderer"
+          padding="s"
+          expression={expression}
+          debounce={2000}
+          renderError={() => {
+            return onErrorMessage;
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -112,6 +120,7 @@ const SuggestionPreview = ({
     expression?: Ast | null;
     icon: IconType;
     title: string;
+    error?: boolean;
   };
   ExpressionRenderer: ReactExpressionRendererType;
   selected: boolean;
@@ -129,11 +138,12 @@ const SuggestionPreview = ({
           data-test-subj="lnsSuggestion"
           onClick={onSelect}
         >
-          {preview.expression ? (
+          {preview.expression || preview.error ? (
             <PreviewRenderer
               ExpressionRendererComponent={ExpressionRendererComponent}
-              expression={toExpression(preview.expression)}
+              expression={preview.expression && toExpression(preview.expression)}
               withLabel={Boolean(showTitleAsLabel)}
+              hasError={Boolean(preview.error)}
             />
           ) : (
             <span className="lnsSuggestionPanel__suggestionIcon">
@@ -170,47 +180,81 @@ export function SuggestionPanel({
     ? stagedPreview.visualization.activeId
     : activeVisualizationId;
 
-  const { suggestions, currentStateExpression } = useMemo(() => {
-    const newSuggestions = getSuggestions({
-      datasourceMap,
-      datasourceStates: currentDatasourceStates,
-      visualizationMap,
-      activeVisualizationId: currentVisualizationId,
-      visualizationState: currentVisualizationState,
-    })
-      .map((suggestion) => ({
-        ...suggestion,
-        previewExpression: preparePreviewExpression(
-          suggestion,
-          visualizationMap[suggestion.visualizationId],
-          datasourceMap,
-          currentDatasourceStates,
-          frame
-        ),
-      }))
-      .filter((suggestion) => !suggestion.hide)
-      .slice(0, MAX_SUGGESTIONS_DISPLAYED);
-
-    const newStateExpression =
-      currentVisualizationState && currentVisualizationId
-        ? preparePreviewExpression(
-            { visualizationState: currentVisualizationState },
-            visualizationMap[currentVisualizationId],
+  const { suggestions, currentStateExpression, currentStateError } = useMemo(
+    () => {
+      const newSuggestions = getSuggestions({
+        datasourceMap,
+        datasourceStates: currentDatasourceStates,
+        visualizationMap,
+        activeVisualizationId: currentVisualizationId,
+        visualizationState: currentVisualizationState,
+      })
+        .filter((suggestion) => !suggestion.hide)
+        .filter(
+          ({
+            visualizationId,
+            visualizationState: suggestionVisualizationState,
+            datasourceState: suggestionDatasourceState,
+            datasourceId: suggetionDatasourceId,
+          }) => {
+            return (
+              validateDatasourceAndVisualization(
+                suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
+                suggestionDatasourceState,
+                visualizationMap[visualizationId],
+                suggestionVisualizationState,
+                frame
+              ) == null
+            );
+          }
+        )
+        .slice(0, MAX_SUGGESTIONS_DISPLAYED)
+        .map((suggestion) => ({
+          ...suggestion,
+          previewExpression: preparePreviewExpression(
+            suggestion,
+            visualizationMap[suggestion.visualizationId],
             datasourceMap,
             currentDatasourceStates,
             frame
-          )
-        : undefined;
+          ),
+        }));
 
-    return { suggestions: newSuggestions, currentStateExpression: newStateExpression };
+      const validationErrors = validateDatasourceAndVisualization(
+        activeDatasourceId ? datasourceMap[activeDatasourceId] : null,
+        activeDatasourceId && currentDatasourceStates[activeDatasourceId]?.state,
+        currentVisualizationId ? visualizationMap[currentVisualizationId] : null,
+        currentVisualizationState,
+        frame
+      );
+
+      const newStateExpression =
+        currentVisualizationState && currentVisualizationId && !validationErrors
+          ? preparePreviewExpression(
+              { visualizationState: currentVisualizationState },
+              visualizationMap[currentVisualizationId],
+              datasourceMap,
+              currentDatasourceStates,
+              frame
+            )
+          : undefined;
+
+      return {
+        suggestions: newSuggestions,
+        currentStateExpression: newStateExpression,
+        currentStateError: validationErrors,
+      };
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    currentDatasourceStates,
-    currentVisualizationState,
-    currentVisualizationId,
-    datasourceMap,
-    visualizationMap,
-  ]);
+    [
+      currentDatasourceStates,
+      currentVisualizationState,
+      currentVisualizationId,
+      activeDatasourceId,
+      datasourceMap,
+      visualizationMap,
+    ]
+  );
 
   const context: ExecutionContextSearch = useMemo(
     () => ({
@@ -305,6 +349,7 @@ export function SuggestionPanel({
         {currentVisualizationId && (
           <SuggestionPreview
             preview={{
+              error: currentStateError != null,
               expression: currentStateExpression,
               icon:
                 visualizationMap[currentVisualizationId].getDescription(currentVisualizationState)

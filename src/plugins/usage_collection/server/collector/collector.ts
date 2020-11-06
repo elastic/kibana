@@ -72,7 +72,7 @@ export interface CollectorOptions<T = unknown, U = T> {
   type: string;
   init?: Function;
   /**
-   * Method to return `true`/`false` to confirm if the collector is ready for the `fetch` method to be called.
+   * Method to return `true`/`false` or Promise(`true`/`false`) to confirm if the collector is ready for the `fetch` method to be called.
    */
   isReady: () => Promise<boolean> | boolean;
   /**
@@ -101,6 +101,7 @@ export class Collector<T = unknown, U = T> {
    * @param {Function} options.init (optional) - initialization function
    * @param {Function} options.fetch - function to query data
    * @param {Function} options.formatForBulkUpload - optional
+   * @param {Function} options.isReady - method that returns a boolean or Promise of a boolean to indicate the collector is ready to report data
    * @param {Function} options.rest - optional other properties
    */
   constructor(

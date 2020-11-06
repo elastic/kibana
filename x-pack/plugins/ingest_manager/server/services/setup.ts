@@ -58,7 +58,6 @@ async function createSetupSideEffects(
     ensureInstalledDefaultPackages(soClient, callCluster),
     outputService.ensureDefaultOutput(soClient),
     agentPolicyService.ensureDefaultAgentPolicy(soClient),
-    ensurePackagesCompletedInstall(soClient, callCluster),
     ensureDefaultIndices(callCluster),
     settingsService.getSettings(soClient).catch((e: any) => {
       if (e.isBoom && e.output.statusCode === 404) {
@@ -69,6 +68,14 @@ async function createSetupSideEffects(
       return Promise.reject(e);
     }),
   ]);
+
+  // Keeping this outside of the Promise.all because it introduces a race condition.
+  // If one of the required packages fails to install/upgrade it might get stuck in the installing state.
+  // On the next call to the /setup API, if there is a upgrade available for one of the required packages a race condition
+  // will occur between upgrading the package and reinstalling the previously failed package.
+  // By moving this outside of the Promise.all, the upgrade will occur first, and then we'll attempt to reinstall any
+  // packages that are stuck in the installing state.
+  await ensurePackagesCompletedInstall(soClient, callCluster);
 
   // If we just created the default policy, ensure default packages are added to it
   if (defaultAgentPolicyCreated) {
