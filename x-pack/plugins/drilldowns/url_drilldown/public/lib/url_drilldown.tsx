@@ -23,11 +23,10 @@ import {
   UrlDrilldownConfig,
   UrlDrilldownCollectConfig,
   urlDrilldownValidateUrlTemplate,
-  urlDrilldownBuildScope,
   urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
 } from '../../../../ui_actions_enhanced/public';
-import { getContextScope, getEventScope, getMockEventScope } from './url_drilldown_scope';
+import { getContextScope, getEventScope } from './url_drilldown_scope';
 import { txtUrlDrilldownDisplayName } from './i18n';
 
 interface UrlDrilldownDeps {
@@ -71,13 +70,7 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     return [VALUE_CLICK_TRIGGER, SELECT_RANGE_TRIGGER, ROW_CLICK_TRIGGER, CONTEXT_MENU_TRIGGER];
   }
 
-  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({
-    config,
-    onConfig,
-    context,
-  }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const scope = React.useMemo(() => this.buildEditorScope(context), [context]);
+  private readonly ReactCollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => {
     return (
       <UrlDrilldownCollectConfig
         variables={['test']}
@@ -100,8 +93,8 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     config: Config,
     context: ActionFactoryContext
   ): config is Config => {
-    const { isValid } = urlDrilldownValidateUrlTemplate(config.url, this.buildEditorScope(context));
-    return isValid;
+    // TODO: add validation
+    return true;
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
@@ -132,19 +125,11 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     }
   };
 
-  private buildEditorScope = (context: ActionFactoryContext) => {
-    return urlDrilldownBuildScope({
-      globalScope: this.deps.getGlobalScope(),
-      contextScope: getContextScope(context),
-      eventScope: getMockEventScope(context),
-    });
-  };
-
   private buildRuntimeScope = (context: ActionContext) => {
-    return urlDrilldownBuildScope({
-      globalScope: this.deps.getGlobalScope(),
-      contextScope: getContextScope(context),
-      eventScope: getEventScope(context),
-    });
+    return {
+      ...this.deps.getGlobalScope(),
+      context: getContextScope(context),
+      event: getEventScope(context),
+    };
   };
 }
