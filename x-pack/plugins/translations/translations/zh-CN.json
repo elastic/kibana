@@ -10950,7 +10950,6 @@
     "xpack.lens.xyChart.chartTypeLabel": "图表类型",
     "xpack.lens.xyChart.chartTypeLegend": "图表类型",
     "xpack.lens.xyChart.emptyXLabel": "（空）",
-    "xpack.lens.xyChart.fittingDisabledHelpText": "此设置仅适用于折线图和面积图。",
     "xpack.lens.xyChart.fittingFunction.help": "定义处理缺失值的方式",
     "xpack.lens.xyChart.Gridlines": "网格线",
     "xpack.lens.xyChart.gridlinesSettings.help": "显示 x 和 y 轴网格线",
