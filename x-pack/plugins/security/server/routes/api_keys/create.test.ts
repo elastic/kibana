@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { kibanaResponseFactory } from '../../../../../../src/core/server';
+import { kibanaResponseFactory, RequestHandlerContext } from '../../../../../../src/core/server';
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 import { routeDefinitionParamsMock } from '../index.mock';
@@ -14,6 +14,8 @@ jest.mock('../licensed_route_handler');
 
 const createLicensedRouteHandlerMock = createLicensedRouteHandler as jest.Mock;
 createLicensedRouteHandlerMock.mockImplementation((handler) => handler);
+
+const contextMock = ({} as unknown) as RequestHandlerContext;
 
 describe('defineCreateApiKeyRoutes', () => {
   beforeEach(() => {
@@ -51,7 +53,7 @@ describe('defineCreateApiKeyRoutes', () => {
       path: '/internal/security/api_key',
       body: {},
     });
-    const response = await handler(undefined, mockRequest, kibanaResponseFactory);
+    const response = await handler(contextMock, mockRequest, kibanaResponseFactory);
     expect(mockRouteDefinitionParams.authc.createAPIKey).toHaveBeenCalledWith(
       mockRequest,
       mockRequest.body
@@ -62,12 +64,12 @@ describe('defineCreateApiKeyRoutes', () => {
 
   test('returns bad request if api keys are not available', async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
-    mockRouteDefinitionParams.authc.createAPIKey.mockResolvedValue(undefined);
+    mockRouteDefinitionParams.authc.createAPIKey.mockResolvedValue(null);
     defineCreateApiKeyRoutes(mockRouteDefinitionParams);
     const [[, handler]] = mockRouteDefinitionParams.router.post.mock.calls;
 
     const response = await handler(
-      undefined,
+      contextMock,
       httpServerMock.createKibanaRequest({
         method: 'post',
         path: '/internal/security/api_key',
@@ -86,7 +88,7 @@ describe('defineCreateApiKeyRoutes', () => {
     const [[, handler]] = mockRouteDefinitionParams.router.post.mock.calls;
 
     const response = await handler(
-      undefined,
+      contextMock,
       httpServerMock.createKibanaRequest({
         method: 'post',
         path: '/internal/security/api_key',
