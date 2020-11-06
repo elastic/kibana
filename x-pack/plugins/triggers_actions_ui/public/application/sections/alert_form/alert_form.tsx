@@ -173,10 +173,17 @@ export const AlertForm = ({
           setDefaultActionGroupId(index.get(alert.alertTypeId)!.defaultActionGroupId);
         }
         setAlertTypesIndex(index);
-        setAvailableAlertTypes(getAvailableAlertTypes(alertTypesResult));
-        setSolutions(
-          alertTypesResult.reduce((result: Array<{ id: string; title: string }>, alertTypeItem) => {
-            if (!result.find((solution) => solution.id === alertTypeItem.producer)) {
+        const availableAlertTypesResult = getAvailableAlertTypes(alertTypesResult);
+        setAvailableAlertTypes(availableAlertTypesResult);
+
+        const solutionsResult = alertTypesResult.reduce(
+          (result: Array<{ id: string; title: string }>, alertTypeItem) => {
+            if (
+              availableAlertTypesResult.find(
+                (availableItem) => availableItem.alertTypeModel.id === alertTypeItem.id
+              ) &&
+              !result.find((solution) => solution.id === alertTypeItem.producer)
+            ) {
               result.push({
                 id: alertTypeItem.producer,
                 title:
@@ -186,7 +193,11 @@ export const AlertForm = ({
               });
             }
             return result;
-          }, [])
+          },
+          []
+        );
+        setSolutions(
+          solutionsResult.sort((a, b) => a.title.toString().localeCompare(b.title.toString()))
         );
       } catch (e) {
         toastNotifications.addDanger({
@@ -290,7 +301,7 @@ export const AlertForm = ({
           name:
             typeof alertTypeValue.alertTypeModel.name === 'string'
               ? alertTypeValue.alertTypeModel.name
-              : alertTypeValue.alertTypeModel.id,
+              : alertTypeValue.alertTypeModel.name.props.defaultMessage,
           id: alertTypeValue.alertTypeModel.id,
           alertTypeItem: alertTypeValue.alertTypeModel,
         });
