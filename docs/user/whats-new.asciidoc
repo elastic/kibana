@@ -5,6 +5,8 @@
 <titleabbrev>What's new in {minor-version}</titleabbrev>
 ++++
 
+coming[7.10.0]
+
 Here are the highlights of what's new and improved in {minor-version}.
 For detailed information about this release,
 check out the {kibana-ref-all}/7.10/release-notes.html[release notes] and
@@ -47,10 +49,10 @@ image::user/images/landing-page.png[Solution-focused landing page]
 
 In 7.8, we introduced a new and improved main menu as part of our
 quest for the optimal navigation design.
-In 7.10, we’ve revealed more of the picture, with the
+In 7.10, we reveal more of the picture, with the
 addition of a global header that includes a
 navigational search.
-Using a keyboard shortcut (Ctrl+/ on Windows and Linux; Command+/ on MacOS),
+Using a keyboard shortcut (Ctrl+/ on Windows and Linux, Command+/ on MacOS),
 you can now jump between applications and saved objects,
 including dashboards, visualizations, workpads, saved searches, and more.
 
@@ -108,8 +110,8 @@ the fields are automatically converted to a `geo_point` field.
 [role="screenshot"]
 image::user/images/maps-new.png[File upload of a CSV file with latitude and longitude fields]
 
-**Maps** also has a new tracking alert experimental[] for monitoring the location of
-entities in relation to area of interest boundaries. Also the new vector
+**Maps** has a new tracking alert experimental[] for monitoring the location of
+entities in relation to area of interest boundaries. Also, the new vector
 tile rendering enables you to work with more data at faster speeds.
 
 [float]
@@ -117,12 +119,13 @@ tile rendering enables you to work with more data at faster speeds.
 === Vega is generally available
 
 *Vega*, an advanced editor you use to create custom panels in dashboards, is production ready.
-Now users whose companies limit the use of beta software or services in production can leverage the full visualization customization capabilities that Vega provides.
+Now users whose companies limit the use of beta software or services in production can
+leverage the full visualization customization capabilities that *Vega* provides.
 
 [role="screenshot"]
 image::user/images/vega-new.png[Percentage bar chart in Lens]
 
-For information about Vega, refer to the {kibana-ref}/dashboard.html#vega[documentation].
+For information about *Vega*, refer to the {kibana-ref}/dashboard.html#vega[documentation].
 
 [float]
 [[alerts-new-connectors]]
@@ -130,7 +133,7 @@ For information about Vega, refer to the {kibana-ref}/dashboard.html#vega[docume
 
 In 7.10, we extended our offering of connectors
 by adding the {kibana-ref}/jira-action-type.html[Jira] and
-{kibana-ref}/resilient-action-type.html[IBM Resilient connectors] for
+{kibana-ref}/resilient-action-type.html[IBM Resilient] connectors for
 use with all alert types. Also,
 you can now test if a connector works before using
 it with your alerts, so you won't lose notifications due to setup errors.
@@ -154,17 +157,16 @@ The `all` privilege to stack alerts gives users the
 ability to create and edit alerts, and the
 `read` privilege allows users to view the alerts.
 
-The new feature control for actions and connectors
-controls which roles can create connectors and attach actions to alerts.
-The `all` privilege to *Actions and Connectors* enables users to
+There's also a new feature control for actions and connectors.
+The `all` privilege enables users to
 create and edit connectors, and the
 the `read` privileges allows users to view connectors and attach actions to alerts.
 
 NOTE: If you upgrade from a previous version,
 any alerts created by a user who does not have access to the
-alert types in applied in the 7.10 RBAC model, will stop working.
+alert types applied in the 7.10 RBAC model, will stop working.
 For example, if a user created a metrics-specific alert
-without having access to the Observability Metrics application, the alert will stop.
+without having access to the **Observability Metrics** application, the alert will stop.
 To resume the alert, a user with the correct access must access and save them.
 
 [role="screenshot"]
@@ -172,8 +174,7 @@ image::user/images/kibana-privileges.png[Kibana privileges]
 
 The *Alerts and Actions*  management views now includes alert statuses that provide
 immediate feedback on whether an alert is active (the alerting condition is met),
-inactive, or there is an error. The information about
-the errors can help you troubleshoot.
+inactive, or if there is an error and how you can troubleshoot it.
 
 [role="screenshot"]
 image::user/images/alerts-and-actions.png[Alerts and Actions UI]
@@ -206,7 +207,7 @@ While laying the groundwork for sharing saved objects in multiple spaces,
 we overhauled the UI for copying and importing saved objects.
 When copying saved objects, you can now create objects, easily resolve conflicts,
 and get information on subtotals, object icons, and object titles.
-After importing saved objects, you’ll see a summary of what objects were created.
+After importing saved objects, you’ll see a summary of the objects created.
 
 [role="screenshot"]
 image::user/images/copy-import-objects.png[Copy to space UI]
@@ -252,12 +253,3 @@ image::user/images/feature-importance.png[Feature importance]
 
 
 // end::notable-highlights[]
-
-[float]
-=== Give {minor-version} a try
-
-Try {minor-version} now by deploying {es} and {kib} on
-https://www.elastic.co/cloud/elasticsearch-service/signup[Elastic Cloud] or
-by https://www.elastic.co/start[downloading them].
-Let us know what you think on Twitter https://twitter.com/elastic[(@elastic)]
-or in our https://discuss.elastic.co/c/elasticsearch[forum].
