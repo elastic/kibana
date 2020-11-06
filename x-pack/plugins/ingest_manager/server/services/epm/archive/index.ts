@@ -81,6 +81,6 @@ export const deletePackageCache = (name: string, version: string) => {
   deleteArchiveFilelist(name, version);
 
   // delete cached archive files
-  // this has been populated in unpackRegistryPackageToCache()
+  // this has been populated in unpackArchiveToCache()
   paths?.forEach((path) => cacheDelete(path));
 };
