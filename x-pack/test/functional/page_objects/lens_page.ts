@@ -14,6 +14,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const retry = getService('retry');
   const find = getService('find');
   const comboBox = getService('comboBox');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['header', 'header', 'timePicker', 'common']);
 
   return logWrapper('lensPage', log, {
@@ -119,6 +120,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (!opts.keepOpen) {
         this.closeDimensionEditor();
       }
+    },
+
+    async dragFieldToWorkspace(field: string) {
+      await browser.realDragAndDrop(
+        testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
+        testSubjects.getCssSelector('lnsWorkspace')
+      );
     },
 
     async assertPalette(palette: string) {
