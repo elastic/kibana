@@ -26,12 +26,6 @@ export function getBoolFilter({
   serviceName?: string;
   urlParams: IUrlParams;
 }) {
-  const { start, end } = urlParams;
-
-  if (!start || !end) {
-    throw new Error('Date range was not defined');
-  }
-
   const boolFilter: ESFilter[] = [];
 
   if (serviceName) {
