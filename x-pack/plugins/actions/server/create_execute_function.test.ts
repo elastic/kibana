@@ -172,7 +172,7 @@ describe('execute()', () => {
         apiKey: null,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+      `"Unable to execute action due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml manually or by using bin/kibana-encryption-key"`
     );
   });
 
