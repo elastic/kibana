@@ -19,13 +19,7 @@ import {
   RegistrySearchResult,
 } from '../../../types';
 import { unpackArchiveToCache } from '../archive';
-import {
-  cacheGet,
-  cacheDelete,
-  getArchiveFilelist,
-  setArchiveFilelist,
-  deleteArchiveFilelist,
-} from './cache';
+import { cacheGet, getArchiveFilelist, setArchiveFilelist } from '../archive';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
@@ -237,15 +231,3 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     // elasticsearch: assets.elasticsearch,
   };
 }
-
-export const deletePackageCache = (name: string, version: string) => {
-  // get cached archive filelist
-  const paths = getArchiveFilelist(name, version);
-
-  // delete cached archive filelist
-  deleteArchiveFilelist(name, version);
-
-  // delete cached archive files
-  // this has been populated in unpackRegistryPackageToCache()
-  paths?.forEach((path) => cacheDelete(path));
-};
