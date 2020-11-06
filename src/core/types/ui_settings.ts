@@ -17,6 +17,7 @@
  * under the License.
  */
 import { Type } from '@kbn/config-schema';
+import { UiStatsMetricType } from '@kbn/analytics';
 
 /**
  * UI element type to represent the settings.
@@ -80,6 +81,13 @@ export interface UiSettingsParams<T = unknown> {
    * Used to validate value on write and read.
    */
   schema: Type<T>;
+  /**
+   * Metric to track once this property changes
+   */
+  metric?: {
+    type: UiStatsMetricType;
+    name: string;
+  };
 }
 
 /**
