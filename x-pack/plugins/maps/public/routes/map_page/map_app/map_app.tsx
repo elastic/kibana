@@ -17,7 +17,7 @@ import {
   getMapsCapabilities,
   getNavigation,
   getToasts,
-} from '../../kibana_services';
+} from '../../../kibana_services';
 import {
   AppStateManager,
   startAppStateSyncing,
@@ -25,7 +25,7 @@ import {
   updateGlobalState,
   startGlobalStateSyncing,
   MapsGlobalState,
-} from './url_state';
+} from '../url_state';
 import {
   esFilters,
   Filter,
@@ -35,14 +35,14 @@ import {
   SavedQuery,
   QueryStateChange,
   QueryState,
-} from '../../../../../../src/plugins/data/public';
-import { MapContainer } from '../../connected_components/map_container';
-import { getIndexPatternsFromIds } from '../../index_pattern_util';
-import { getTopNavConfig } from './top_nav_config';
-import { MapRefreshConfig, MapQuery } from '../../../common/descriptor_types';
-import { goToSpecifiedPath } from '../../render_app';
-import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
-import { getExistingMapPath } from '../../../common/constants';
+} from '../../../../../../../src/plugins/data/public';
+import { MapContainer } from '../../../connected_components/map_container';
+import { getIndexPatternsFromIds } from '../../../index_pattern_util';
+import { getTopNavConfig } from '../top_nav_config';
+import { MapRefreshConfig, MapQuery } from '../../../../common/descriptor_types';
+import { goToSpecifiedPath } from '../../../render_app';
+import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
+import { getExistingMapPath } from '../../../../common/constants';
 import {
   getInitialLayersFromUrlParam,
   getInitialQuery,
@@ -51,7 +51,7 @@ import {
   SavedMap,
   unsavedChangesTitle,
   unsavedChangesWarning,
-} from './saved_map';
+} from '../saved_map';
 
 interface Props {
   savedMap: SavedMap;

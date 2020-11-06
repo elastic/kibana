@@ -8,7 +8,7 @@ import React, { Component } from 'react';
 import { Provider } from 'react-redux';
 import { AppMountParameters } from 'kibana/public';
 import { EmbeddableStateTransfer } from 'src/plugins/embeddable/public';
-import { MapApp } from './map_app_connector';
+import { MapApp } from './map_app';
 import { SavedMap } from './saved_map';
 import { MapEmbeddableInput } from '../../embeddable/types';
 

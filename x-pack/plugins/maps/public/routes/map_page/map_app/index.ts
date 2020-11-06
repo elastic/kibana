@@ -9,7 +9,7 @@ import { ThunkDispatch } from 'redux-thunk';
 import { AnyAction } from 'redux';
 import { Filter, Query, TimeRange } from 'src/plugins/data/public';
 import { MapApp } from './map_app';
-import { getFlyoutDisplay, getIsFullScreen } from '../../selectors/ui_selectors';
+import { getFlyoutDisplay, getIsFullScreen } from '../../../selectors/ui_selectors';
 import {
   getFilters,
   getQuery,
@@ -17,12 +17,12 @@ import {
   getRefreshConfig,
   getTimeFilters,
   hasDirtyState,
-} from '../../selectors/map_selectors';
-import { setQuery, setRefreshConfig, enableFullScreen, openMapSettings } from '../../actions';
-import { FLYOUT_STATE } from '../../reducers/ui';
-import { getInspectorAdapters } from '../../reducers/non_serializable_instances';
-import { MapStoreState } from '../../reducers/store';
-import { MapRefreshConfig } from '../../../common/descriptor_types';
+} from '../../../selectors/map_selectors';
+import { setQuery, setRefreshConfig, enableFullScreen, openMapSettings } from '../../../actions';
+import { FLYOUT_STATE } from '../../../reducers/ui';
+import { getInspectorAdapters } from '../../../reducers/non_serializable_instances';
+import { MapStoreState } from '../../../reducers/store';
+import { MapRefreshConfig } from '../../../../common/descriptor_types';
 
 function mapStateToProps(state: MapStoreState) {
   return {
