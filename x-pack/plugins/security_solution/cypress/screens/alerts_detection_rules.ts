@@ -65,9 +65,6 @@ export const SORT_RULES_BTN = '[data-test-subj="tableHeaderSortButton"]';
 
 export const THREE_HUNDRED_ROWS = '[data-test-subj="tablePagination-300-rows"]';
 
-export const RULE_AUTO_REFRESH_START_STOP_BUTTON =
-  '[data-test-subj="superDatePickerToggleRefreshButton"]';
-
 export const RULE_AUTO_REFRESH_IDLE_MODAL = '[data-test-subj="allRulesIdleModal"]';
 
 export const RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE = '[data-test-subj="allRulesIdleModal"] button';
