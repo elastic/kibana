@@ -30,7 +30,7 @@ that opens Github from the dashboard.
 Some panels support multiple interactions, also known as triggers. 
 The <<variables,variables>> you use to create a URL template depends on the trigger you choose. URL drilldowns support *Single click* and *Range selection* triggers. 
 You configure *Single click* triggers to a single data point in the visualization, and configure *Range selection* triggers to a range of values in a visualization.
-For example, *Single click* has `{{event.value}} and *Range selection* has {{event.from}} and {{event.to}}. Panel support multiple URL drilldowns, which you can attach to triggers.
+For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`. Panel support multiple URL drilldowns, which you can attach to triggers.
 
 For information about the URL templating language, refer to <<url_templating-language, URL templating language>>.
 
@@ -246,4 +246,3 @@ image:images/url_drilldown_popup.png[URL drilldown popup]
 image:images/url_drilldown_github.png[Github]
 
 include::url-drilldown.asciidoc[]
-
