@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'kibana/public';
+import { IngestManagerStartServices } from '../../../plugin';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
-export function useCore(): CoreStart {
-  const { services } = useKibana<CoreStart>();
+export function useStartServices(): IngestManagerStartServices {
+  const { services } = useKibana<IngestManagerStartServices>();
   if (services === null) {
     throw new Error('KibanaContextProvider not initialized');
   }

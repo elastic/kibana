@@ -17,6 +17,7 @@ import {
   HomePublicPluginSetup,
   FeatureCatalogueCategory,
 } from '../../../../src/plugins/home/public';
+import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 import { BASE_PATH } from './applications/fleet/constants';
@@ -58,12 +59,17 @@ export interface IngestManagerStartDeps {
   data: DataPublicPluginStart;
 }
 
+export interface IngestManagerStartServices extends CoreStart, IngestManagerStartDeps {
+  storage: Storage;
+}
+
 export class IngestManagerPlugin
   implements
     Plugin<IngestManagerSetup, IngestManagerStart, IngestManagerSetupDeps, IngestManagerStartDeps> {
   private config: IngestManagerConfigType;
   private kibanaVersion: string;
   private extensions: UIExtensionsStorage = {};
+  private storage = new Storage(localStorage);
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<IngestManagerConfigType>();
@@ -88,18 +94,23 @@ export class IngestManagerPlugin
       title: i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' }),
       order: 9020,
       euiIconType: 'logoElastic',
-      async mount(params: AppMountParameters) {
-        const [coreStart, startDeps] = (await core.getStartServices()) as [
+      mount: async (params: AppMountParameters) => {
+        const [coreStartServices, startDepsServices] = (await core.getStartServices()) as [
           CoreStart,
           IngestManagerStartDeps,
           IngestManagerStart
         ];
-        const { renderApp, teardownIngestManager } = await import('./applications/fleet/');
+        const startServices: IngestManagerStartServices = {
+          ...coreStartServices,
+          ...startDepsServices,
+          storage: this.storage,
+        };
+        const { renderApp, teardownIngestManager } = await import('./applications/fleet');
         const unmount = renderApp(
-          coreStart,
+          startServices,
           params,
           deps,
-          startDeps,
+          startDepsServices,
           config,
           kibanaVersion,
           extensions
@@ -107,7 +118,7 @@ export class IngestManagerPlugin
 
         return () => {
           unmount();
-          teardownIngestManager(coreStart);
+          teardownIngestManager(startServices);
         };
       },
     });

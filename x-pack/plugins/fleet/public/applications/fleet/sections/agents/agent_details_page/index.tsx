@@ -28,7 +28,7 @@ import {
   useGetOneAgentPolicy,
   useLink,
   useBreadcrumbs,
-  useCore,
+  useStartServices,
   useKibanaVersion,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
@@ -72,7 +72,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
   const {
     application: { navigateToApp },
-  } = useCore();
+  } = useStartServices();
   const routeState = useIntraAppState<AgentDetailsReassignPolicyAction>();
   const queryParams = new URLSearchParams(useLocation().search);
   const openReassignFlyoutOpenByDefault = queryParams.get('openReassignFlyout') === 'true';
