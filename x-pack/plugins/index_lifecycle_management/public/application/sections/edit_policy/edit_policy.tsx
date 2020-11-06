@@ -34,7 +34,7 @@ import { useForm, Form, UseField, TextField, useFormData } from '../../../shared
 
 import { toasts } from '../../services/notification';
 
-import { savePolicy } from '../../lib/policies';
+import { savePolicy } from './save_policy';
 
 import {
   LearnMoreLink,
