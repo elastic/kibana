@@ -33,16 +33,16 @@ import fs from 'fs';
 import path from 'path';
 import { initMVTRoutes } from './mvt/mvt_routes';
 
-export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
+export function initRoutes(router, licenseUid, emsSettings, kbnVersion, logger) {
   let emsClient;
-  if (mapConfig.includeElasticMapsService) {
+  if (emsSettings.isEMSEnabled()) {
     emsClient = new EMSClient({
       language: i18n.getLocale(),
       appVersion: kbnVersion,
       appName: EMS_APP_NAME,
-      fileApiUrl: mapConfig.emsFileApiUrl,
-      tileApiUrl: mapConfig.emsTileApiUrl,
-      landingPageUrl: mapConfig.emsLandingPageUrl,
+      fileApiUrl: emsSettings.getEMSFileApiUrl(),
+      tileApiUrl: emsSettings.getEMSTileApiUrl(),
+      landingPageUrl: emsSettings.getEMSLandingPageUrl(),
       fetchFunction: fetch,
     });
     emsClient.addQueryParams({ license: licenseUid });
@@ -439,7 +439,8 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
       if (!checkEMSProxyEnabled()) {
         return response.badRequest('map.proxyElasticMapsServiceInMaps disabled');
       }
-      const url = mapConfig.emsFontLibraryUrl
+      const url = emsSettings
+        .getEMSFontLibraryUrl()
         .replace('{fontstack}', request.params.fontstack)
         .replace('{range}', request.params.range);
 
@@ -573,7 +574,7 @@ export function initRoutes(router, licenseUid, mapConfig, kbnVersion, logger) {
   );
 
   function checkEMSProxyEnabled() {
-    const proxyEMSInMaps = mapConfig.proxyElasticMapsServiceInMaps;
+    const proxyEMSInMaps = emsSettings.isProxyElasticMapsServiceInMaps();
     if (!proxyEMSInMaps) {
       logger.warn(
         `Cannot load content from EMS when map.proxyElasticMapsServiceInMaps is turned off`
