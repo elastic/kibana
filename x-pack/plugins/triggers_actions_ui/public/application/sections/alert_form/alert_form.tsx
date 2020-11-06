@@ -153,12 +153,7 @@ export const AlertForm = ({
   >([]);
   const [searchText, setSearchText] = useState<string | undefined>();
   const [inputText, setInputText] = useState<string | undefined>();
-  const [solutions, setSolutions] = useState<
-    Array<{
-      id: string;
-      title: string;
-    }>
-  >([]);
+  const [solutions, setSolutions] = useState<Map<string, string> | undefined>(undefined);
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
 
   // load alert types
@@ -177,28 +172,23 @@ export const AlertForm = ({
         const availableAlertTypesResult = getAvailableAlertTypes(alertTypesResult);
         setAvailableAlertTypes(availableAlertTypesResult);
 
-        const solutionsResult = alertTypesResult.reduce(
-          (result: Array<{ id: string; title: string }>, alertTypeItem) => {
-            if (
-              availableAlertTypesResult.find(
-                (availableItem) => availableItem.alertTypeModel.id === alertTypeItem.id
-              ) &&
-              !result.find((solution) => solution.id === alertTypeItem.producer)
-            ) {
-              result.push({
-                id: alertTypeItem.producer,
-                title:
-                  (kibanaFeatures
-                    ? getProducerFeatureName(alertTypeItem.producer, kibanaFeatures)
-                    : capitalize(alertTypeItem.producer)) ?? capitalize(alertTypeItem.producer),
-              });
+        const solutionsResult = availableAlertTypesResult.reduce(
+          (result: Map<string, string>, alertTypeItem) => {
+            if (!result.has(alertTypeItem.alertType.producer)) {
+              result.set(
+                alertTypeItem.alertType.producer,
+                (kibanaFeatures
+                  ? getProducerFeatureName(alertTypeItem.alertType.producer, kibanaFeatures)
+                  : capitalize(alertTypeItem.alertType.producer)) ??
+                  capitalize(alertTypeItem.alertType.producer)
+              );
             }
             return result;
           },
-          []
+          new Map()
         );
         setSolutions(
-          solutionsResult.sort((a, b) => a.title.toString().localeCompare(b.title.toString()))
+          new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
         );
       } catch (e) {
         toastNotifications.addDanger({
@@ -313,7 +303,9 @@ export const AlertForm = ({
   );
 
   const alertTypeNodes = Object.entries(alertTypesByProducer)
-    .sort(([a], [b]) => a.localeCompare(b))
+    .sort(([a], [b]) =>
+      solutions ? solutions.get(a)!.localeCompare(solutions.get(b)!) : a.localeCompare(b)
+    )
     .map(([solution, items], groupIndex) => (
       <Fragment key={`group${groupIndex}`}>
         <EuiFlexGroup
@@ -707,13 +699,15 @@ export const AlertForm = ({
                   )}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <SolutionFilter
-                  key="solution-filter"
-                  solutions={solutions}
-                  onChange={(selectedSolutions: string[]) => setSolutionFilter(selectedSolutions)}
-                />
-              </EuiFlexItem>
+              {solutions ? (
+                <EuiFlexItem grow={false}>
+                  <SolutionFilter
+                    key="solution-filter"
+                    solutions={solutions}
+                    onChange={(selectedSolutions: string[]) => setSolutionFilter(selectedSolutions)}
+                  />
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFormRow>
           <EuiSpacer />
