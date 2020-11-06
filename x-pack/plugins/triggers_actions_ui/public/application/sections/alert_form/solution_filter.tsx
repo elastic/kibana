@@ -48,7 +48,7 @@ export const SolutionFilter: React.FunctionComponent<SolutionFilterProps> = ({
           >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.alertForm.solutionFilterLabel"
-              defaultMessage="Filter by solution:"
+              defaultMessage="Filter by solution"
             />
           </EuiFilterButton>
         }

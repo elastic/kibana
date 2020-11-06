@@ -29,6 +29,7 @@ import {
   EuiListGroup,
   EuiLink,
   EuiText,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -315,36 +316,44 @@ export const AlertForm = ({
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([solution, items], groupIndex) => (
       <Fragment key={`group${groupIndex}`}>
-        <EuiTitle
-          data-test-subj={`alertType${groupIndex}Group`}
-          size="xxxs"
-          textTransform="uppercase"
+        <EuiFlexGroup
+          gutterSize="none"
+          alignItems="center"
           className="triggersActionsUI__alertTypeNodeHeading"
         >
-          <EuiTextColor color="subdued">
-            {(kibanaFeatures
-              ? getProducerFeatureName(solution, kibanaFeatures)
-              : capitalize(solution)) ?? capitalize(solution)}
-            &nbsp;({items.length})
-          </EuiTextColor>
-        </EuiTitle>
+          <EuiFlexItem>
+            <EuiTitle
+              data-test-subj={`alertType${groupIndex}Group`}
+              size="xxxs"
+              textTransform="uppercase"
+            >
+              <EuiTextColor color="subdued">
+                {(kibanaFeatures
+                  ? getProducerFeatureName(solution, kibanaFeatures)
+                  : capitalize(solution)) ?? capitalize(solution)}
+              </EuiTextColor>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiNotificationBadge color="subdued">{items.length}</EuiNotificationBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
         <EuiHorizontalRule size="full" margin="xs" />
-        <EuiListGroup flush={true} gutterSize="m" maxWidth={false} size="s">
+        <EuiListGroup flush={true} gutterSize="m" size="l" maxWidth={false}>
           {items
             .sort((a, b) => a.name.toString().localeCompare(b.name.toString()))
             .map((item, index) => (
               <Fragment key={index}>
                 <EuiListGroupItem
                   data-test-subj={`${item.id}-SelectOption`}
+                  color="primary"
                   label={
-                    <div>
-                      <EuiText>
-                        <h4>{item.name}</h4>
-                      </EuiText>
+                    <span>
+                      <strong>{item.name}</strong>
                       <EuiText color="subdued" size="s">
                         <p>{item.alertTypeItem.description}</p>
                       </EuiText>
-                    </div>
+                    </span>
                   }
                   onClick={() => {
                     setAlertProperty('alertTypeId', item.id);
@@ -671,7 +680,7 @@ export const AlertForm = ({
           <EuiFormRow
             fullWidth
             label={
-              <EuiTitle size="xs">
+              <EuiTitle size="xxs">
                 <h5>
                   <FormattedMessage
                     id="xpack.triggersActionsUI.sections.alertForm.alertTypeSelectLabel"
