@@ -45,6 +45,7 @@ describe('#toExpression', () => {
       xyVisualization.toExpression(
         {
           legend: { position: Position.Bottom, isVisible: true },
+          valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
           tickLabelsVisibilitySettings: { x: false, yLeft: true, yRight: true },
@@ -69,6 +70,7 @@ describe('#toExpression', () => {
       (xyVisualization.toExpression(
         {
           legend: { position: Position.Bottom, isVisible: true },
+          valueLabels: 'hide',
           preferredSeriesType: 'bar',
           layers: [
             {
@@ -89,6 +91,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -115,6 +118,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -138,6 +142,7 @@ describe('#toExpression', () => {
       xyVisualization.toExpression(
         {
           legend: { position: Position.Bottom, isVisible: true },
+          valueLabels: 'hide',
           preferredSeriesType: 'bar',
           layers: [
             {
@@ -158,6 +163,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -193,6 +199,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -219,6 +226,7 @@ describe('#toExpression', () => {
     const expression = xyVisualization.toExpression(
       {
         legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -239,5 +247,26 @@ describe('#toExpression', () => {
       yLeft: [true],
       yRight: [true],
     });
+  });
+
+  it('should correctly report the valueLabels visibility settings', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Bottom, isVisible: true },
+        valueLabels: 'inside',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers
+    ) as Ast;
+    expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('inside');
   });
 });

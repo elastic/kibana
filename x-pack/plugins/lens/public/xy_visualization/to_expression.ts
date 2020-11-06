@@ -7,13 +7,9 @@
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
 import { PaletteRegistry } from 'src/plugins/charts/public';
-import { State, LayerConfig } from './types';
+import { State, ValidLayer, LayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
 import { getColumnToLabelMap } from './state_helpers';
-
-interface ValidLayer extends LayerConfig {
-  xAccessor: NonNullable<LayerConfig['xAccessor']>;
-}
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: LayerConfig) => {
   const originalOrder = datasource
@@ -61,6 +57,7 @@ export function toPreviewExpression(
         ...state.legend,
         isVisible: false,
       },
+      valueLabels: 'hide',
     },
     datasourceLayers,
     paletteService,
@@ -198,6 +195,7 @@ export const buildExpression = (
               ],
             },
           ],
+          valueLabels: [state?.valueLabels || 'hide'],
           layers: validLayers.map((layer) => {
             const columnToLabel = getColumnToLabelMap(layer, datasourceLayers[layer.layerId]);
 

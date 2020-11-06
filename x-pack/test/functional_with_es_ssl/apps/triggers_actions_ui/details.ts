@@ -392,21 +392,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(instancesList.map((instance) => omit(instance, 'duration'))).to.eql([
           {
             instance: 'us-central',
-            status: 'Active',
+            status: 'Active (Default)',
             start: moment(dateOnAllInstancesFromApiResponse['us-central'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-east',
-            status: 'Active',
+            status: 'Active (Default)',
             start: moment(dateOnAllInstancesFromApiResponse['us-east'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
           },
           {
             instance: 'us-west',
-            status: 'Active',
+            status: 'Active (Default)',
             start: moment(dateOnAllInstancesFromApiResponse['us-west'])
               .utc()
               .format('D MMM YYYY @ HH:mm:ss'),
