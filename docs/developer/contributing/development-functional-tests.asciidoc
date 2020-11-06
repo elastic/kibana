@@ -6,7 +6,7 @@ We use functional tests to make sure the {kib} UI works as expected. It replaces
 [discrete]
 === Running functional tests
 
-The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at link:{kib-repo}/tree/{branch}/test/functional/config.js[test/functional/config.js]. If you’re writing a plugin outside the {kib} repo, you will have your own config file.
+The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at link:{kib-repo}tree/{branch}/test/functional/config.js[test/functional/config.js]. If you’re writing a plugin outside the {kib} repo, you will have your own config file.
  See <<external-plugin-functional-tests>> for more info.
 
 There are three ways to run the tests depending on your goals:
