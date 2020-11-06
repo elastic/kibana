@@ -14,7 +14,6 @@ import {
   getCreateThreatMatchSchemaMock,
   getFullCreateSchemaMock,
 } from './rule_schemas.mock';
-import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
 
 describe('create rules schema', () => {

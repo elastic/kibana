@@ -23,7 +23,7 @@ import {
   waitForSignalsToBePresent,
 } from '../../utils';
 
-import { getFullCreateThreatMatchSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
+import { getCreateThreatMatchSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
 
 // eslint-disable-next-line import/no-default-export
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getFullCreateThreatMatchSchemaMock())
+          .send(getCreateThreatMatchSchemaMock())
           .expect(400);
 
         expect(body).to.eql({
@@ -63,13 +63,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule with a rule_id', async () => {
-        const ruleResponse = await createRule(supertest, getFullCreateThreatMatchSchemaMock());
+        const ruleResponse = await createRule(supertest, getCreateThreatMatchSchemaMock());
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock());
       });
 
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-        const ruleResponse = await createRule(supertest, getFullCreateThreatMatchSchemaMock());
+        const ruleResponse = await createRule(supertest, getCreateThreatMatchSchemaMock());
         await waitForRuleSuccess(supertest, ruleResponse.id);
 
         const { body: statusBody } = await supertest

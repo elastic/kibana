@@ -65,7 +65,7 @@ import {
   updatedByOrNull,
 } from '../common/schemas';
 
-const createUpdateSchema = <
+const createSchema = <
   Required extends t.Props,
   Optional extends t.Props,
   Defaultable extends t.Props
@@ -114,16 +114,16 @@ const responseSchema = <
 };
 
 const buildAPISchemas = <R extends t.Props, O extends t.Props, D extends t.Props>(
-  params: RuleSpecificParams<R, O, D>
+  params: APIParams<R, O, D>
 ) => {
   return {
-    create: createUpdateSchema(params.required, params.optional, params.defaultable),
+    create: createSchema(params.required, params.optional, params.defaultable),
     patch: patchSchema(params.required, params.optional, params.defaultable),
     response: responseSchema(params.required, params.optional, params.defaultable),
   };
 };
 
-interface RuleSpecificParams<
+interface APIParams<
   Required extends t.Props,
   Optional extends t.Props,
   Defaultable extends t.Props
@@ -310,6 +310,7 @@ const createTypeSpecific = t.union([
 ]);
 export type CreateTypeSpecific = t.TypeOf<typeof createTypeSpecific>;
 
+// Convenience types for building specific types of rules
 export const eqlCreateSchema = t.intersection([eqlCreateParams, commonCreateParams]);
 export type EqlCreateSchema = t.TypeOf<typeof eqlCreateSchema>;
 
