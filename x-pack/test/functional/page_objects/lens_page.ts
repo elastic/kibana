@@ -366,11 +366,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      */
     async getDimensionTriggerText(dimension: string, index = 0) {
       const dimensionElements = await testSubjects.findAll(dimension);
-      const trigger = await testSubjects.findDescendant(
-        'lns-dimensionTrigger',
-        dimensionElements[index]
-      );
-      return await trigger.getVisibleText();
+      return retry.try(async () => {
+        const trigger = await testSubjects.findDescendant(
+          'lns-dimensionTrigger',
+          dimensionElements[index]
+        );
+        return trigger.getVisibleText();
+      });
     },
 
     async isShowingNoResults() {
