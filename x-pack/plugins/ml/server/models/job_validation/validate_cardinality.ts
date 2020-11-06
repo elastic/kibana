@@ -96,7 +96,7 @@ const validateFactory = (client: IScopedClusterClient, job: CombinedJob): Valida
             // if datafeed has aggregation fields, check recursively if field exist
             if (
               datafeedAggregations !== undefined &&
-              isValidAggregationField(datafeedAggregations, fieldName)
+              isValidAggregationField(datafeedAggregations, field)
             ) {
               return true;
             }
