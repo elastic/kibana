@@ -20,6 +20,9 @@ normal=$(tput sgr0)
 E2E_DIR="${0%/*}"
 TMP_DIR="tmp"
 APM_IT_DIR="tmp/apm-integration-testing"
+KIBANA_DIR="${E2E_DIR}/../../../.."
+WAIT_ON_BIN=$(yarn --cwd ${KIBANA_DIR} bin wait-on)
+CYPRESS_BIN=$(yarn --cwd ${KIBANA_DIR} bin cypress)
 
 cd ${E2E_DIR}
 
@@ -140,7 +143,7 @@ fi
 echo "" # newline
 echo "${bold}Waiting for Kibana to start...${normal}"
 echo "Note: you need to start Kibana manually. Find the instructions at the top."
-yarn wait-on -i 500 -w 500 http-get://admin:changeme@localhost:$KIBANA_PORT/api/status > /dev/null
+$WAIT_ON_BIN -i 500 -w 500 http-get://admin:changeme@localhost:$KIBANA_PORT/api/status > /dev/null
 
 ## Workaround to wait for the http server running
 ## See: https://github.com/elastic/kibana/issues/66326
@@ -157,7 +160,7 @@ echo "✅ Setup completed successfully. Running tests..."
 #
 # run cypress tests
 ##################################################
-yarn cypress:run --config pageLoadTimeout=100000,watchForFileChanges=true
+$CYPRESS_BIN run --config pageLoadTimeout=100000,watchForFileChanges=true
 e2e_status=$?
 
 #
@@ -165,7 +168,7 @@ e2e_status=$?
 ##################################################
 echo "${bold}If you want to run the test interactively, run:${normal}"
 echo "" # newline
-echo "cd ${E2E_DIR} && yarn cypress:open --config pageLoadTimeout=100000,watchForFileChanges=true"
+echo "cd ${E2E_DIR} && ${CYPRESS_BIN} open --config pageLoadTimeout=100000,watchForFileChanges=true"
 
 # Report the e2e status at the very end
 if [ $e2e_status -ne 0 ]; then
