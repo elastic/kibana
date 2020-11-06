@@ -50,7 +50,7 @@ export const SetPriorityInput: FunctionComponent<Props> = ({ phase }) => {
           fullWidth: false,
           euiFieldProps: {
             'data-test-subj': `${phase}-phaseIndexPriority`,
-            min: 1,
+            min: 0,
           },
         }}
       />
