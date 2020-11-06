@@ -237,6 +237,7 @@
     "markdown-it": "^10.0.0",
     "md5": "^2.1.0",
     "mime": "^2.4.4",
+    "mime-types": "^2.1.27",
     "mini-css-extract-plugin": "0.8.0",
     "minimatch": "^3.0.4",
     "moment": "^2.24.0",
@@ -850,8 +851,6 @@
     "xml-crypto": "^2.0.0",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
-    "yeoman-generator": "1.1.1",
-    "yo": "2.0.6",
     "zlib": "^1.0.5"
   }
 }
