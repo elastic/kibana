@@ -154,7 +154,16 @@ export class TaskRunner {
     executionHandler: ReturnType<typeof createExecutionHandler>,
     spaceId: string
   ): Promise<AlertTaskState> {
-    const { throttle, muteAll, mutedInstanceIds, name, tags, createdBy, updatedBy } = alert;
+    const {
+      throttle,
+      notifyOnStateChange,
+      muteAll,
+      mutedInstanceIds,
+      name,
+      tags,
+      createdBy,
+      updatedBy,
+    } = alert;
     const {
       params: { alertId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
@@ -236,15 +245,19 @@ export class TaskRunner {
     if (!muteAll) {
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
-      await Promise.all(
-        Object.entries(instancesWithScheduledActions)
-          .filter(
+      const instancesToExecute = notifyOnStateChange
+        ? Object.entries(instancesWithScheduledActions).filter(
+            ([_, alertInstance]: [string, AlertInstance]) => !alertInstance.actionGroupHasChanged()
+          )
+        : Object.entries(instancesWithScheduledActions).filter(
             ([alertInstanceName, alertInstance]: [string, AlertInstance]) =>
               !alertInstance.isThrottled(throttle) && !mutedInstanceIdsSet.has(alertInstanceName)
-          )
-          .map(([id, alertInstance]: [string, AlertInstance]) =>
-            this.executeAlertInstance(id, alertInstance, executionHandler)
-          )
+          );
+
+      await Promise.all(
+        instancesToExecute.map(([id, alertInstance]: [string, AlertInstance]) =>
+          this.executeAlertInstance(id, alertInstance, executionHandler)
+        )
       );
     }
 

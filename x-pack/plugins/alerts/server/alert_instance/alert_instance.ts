@@ -51,6 +51,10 @@ export class AlertInstance<
     return false;
   }
 
+  actionGroupHasChanged(): boolean {
+    return this.scheduledExecutionOptions?.actionGroup !== this.meta?.lastScheduledActions?.group;
+  }
+
   getScheduledActionOptions() {
     return this.scheduledExecutionOptions;
   }
