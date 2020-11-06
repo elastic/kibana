@@ -44,6 +44,28 @@ const testContext = [
     fields: [],
   },
   {
+    name: 'java.lang.Long',
+    imported: true,
+    constructors: [],
+    static_methods: [
+      {
+        declaring: 'java.lang.Long',
+        name: 'parseLong',
+        return: 'long',
+        parameters: ['java.lang.String'],
+      },
+      {
+        declaring: 'java.lang.Long',
+        name: 'parseLong',
+        return: 'long',
+        parameters: ['java.lang.String', 'int'],
+      },
+    ],
+    methods: [],
+    static_fields: [],
+    fields: [],
+  },
+  {
     name: 'java.lang.Math',
     imported: true,
     constructors: [],
@@ -89,7 +111,7 @@ describe('Autocomplete utils', () => {
 
   describe('getMethodDescription()', () => {
     test('returns a string describing the method', () => {
-      expect(getMethodDescription('pow', ['double', 'double'], 'double')).toEqual(
+      expect(getMethodDescription('pow', [['double', 'double']], 'double')).toEqual(
         'pow(double a, double b): double'
       );
     });
@@ -97,7 +119,7 @@ describe('Autocomplete utils', () => {
       expect(
         getMethodDescription(
           'myMethod',
-          ['string', 'string', 'string', 'string', 'string'],
+          [['string', 'string', 'string', 'string', 'string']],
           'string'
         )
       ).toEqual('myMethod(string a, string b, string c, string d, string e): string');
@@ -106,7 +128,7 @@ describe('Autocomplete utils', () => {
 
   describe('getPainlessClassToAutocomplete()', () => {
     test('returns the fields and methods associated with a class', () => {
-      const mathClass = testContext[2];
+      const mathClass = testContext[3];
 
       const {
         static_fields: staticFields,
@@ -149,6 +171,33 @@ describe('Autocomplete utils', () => {
         },
       ]);
     });
+
+    test('removes duplicate methods', () => {
+      const longClass = testContext[2];
+
+      const {
+        static_fields: staticFields,
+        fields,
+        static_methods: staticMethods,
+        methods,
+      } = longClass;
+
+      expect(
+        getPainlessClassToAutocomplete({
+          staticFields,
+          fields,
+          staticMethods,
+          methods,
+        })
+      ).toEqual([
+        {
+          label: 'parseLong',
+          kind: 'method',
+          documentation: 'parseLong(java.lang.String a, int b | java.lang.String a): long',
+          insertText: 'parseLong',
+        },
+      ]);
+    });
   });
 
   describe('createAutocompleteDefinitions()', () => {
@@ -169,6 +218,21 @@ describe('Autocomplete utils', () => {
           insertText: 'int',
           kind: 'type',
           label: 'int',
+        },
+        {
+          constructorDefinition: undefined,
+          documentation: 'Class: Long',
+          insertText: 'Long',
+          kind: 'class',
+          label: 'Long',
+          properties: [
+            {
+              documentation: 'parseLong(java.lang.String a, int b | java.lang.String a): long',
+              insertText: 'parseLong',
+              kind: 'method',
+              label: 'parseLong',
+            },
+          ],
         },
         {
           properties: [

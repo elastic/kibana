@@ -67,7 +67,13 @@ const fields = [
   value={code}
   onChange={onChange}
   suggestionProvider={PainlessLang.getSuggestionProvider(context, fields)}
-  options={{}}
+  options={{
+    ...,
+    suggest: {
+      // This is necessary to allow autocomplete suggestions for document fields
+      snippetsPreventQuickSuggestions: false,
+    }
+  }}
 />
 ```
 

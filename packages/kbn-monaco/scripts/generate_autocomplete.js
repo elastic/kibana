@@ -22,12 +22,12 @@ const { readdirSync, readFileSync, writeFileSync } = require('fs');
 const minimist = require('minimist');
 const semver = require('semver');
 const ora = require('ora');
-const rimraf = require('rimraf');
+const del = require('del');
 
 const {
   cloneAndCheckout,
   createAutocompleteDefinitions,
-  createAutocompletExports,
+  createAutocompleteExports,
 } = require('./utils');
 const { supportedContexts } = require('./constants');
 
@@ -54,7 +54,7 @@ function start(opts) {
   );
 
   log.text = 'Cleaning autocomplete definitions folder';
-  rimraf.sync(join(autocompleteOutputFolder, '*.json'));
+  del.sync([`${autocompleteOutputFolder}/**`]);
 
   cloneAndCheckout(
     { log, tag: opts.tag, branch: opts.branch },
@@ -92,7 +92,7 @@ function start(opts) {
 
       // Create index.ts file for autocomplete definitions
       const indexFilePath = join(autocompleteOutputFolder, 'index.ts');
-      const indexCode = createAutocompletExports();
+      const indexCode = createAutocompleteExports();
 
       writeFileSync(indexFilePath, indexCode, { encoding: 'utf8' });
 

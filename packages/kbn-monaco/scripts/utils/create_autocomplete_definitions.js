@@ -66,22 +66,90 @@ const getPrimitives = (contextData) => {
  *
  * Example of final format: pow(double a, double b): double
  *
+ * Some methods support different parameter types, so this is also supported
+ * and represented by the "|" character
+ *
+ * Example: Long.parseLong(String a, int b | String a): long
+ *
  * @param {string} methodName
- * @param {Array<String>} parameters
+ * @param {Array<Array<String>>} parameters
  * @param {string} returnValue
  * @returns {string}
  */
 const getMethodDescription = (methodName, parameters, returnValue) => {
-  const parameterDescription = parameters.reduce((description, parameterType, index) => {
-    const newParameterDescription = `${parameterType} ${parameterIndexToLetterMap[index]}`;
-    const isLastParameter = parameters.length - 1 === index;
+  const parametersDescription = parameters.reduce((paramsDescription, paramsArray, index) => {
+    const isNotLast = parameters.length - 1 !== index;
 
-    description = `${description}${newParameterDescription}${isLastParameter ? '' : ', '}`;
+    const parameterSetDescription = paramsArray.reduce(
+      (description, parameterType, paramsArrayIndex) => {
+        const newParameterDescription = `${parameterType} ${parameterIndexToLetterMap[paramsArrayIndex]}`;
+        const isLastParameter = paramsArray.length - 1 === paramsArrayIndex;
 
-    return description;
+        description = `${description}${newParameterDescription}${isLastParameter ? '' : ', '}`;
+
+        return isNotLast && isLastParameter ? `${description} | ` : description;
+      },
+      ''
+    );
+
+    paramsDescription = `${paramsDescription}${parameterSetDescription}`;
+
+    return paramsDescription;
   }, '');
 
-  return `${methodName}(${parameterDescription}): ${returnValue}`;
+  return `${methodName}(${parametersDescription}): ${returnValue}`;
+};
+
+/**
+ * If a method supports multiple types of parameters, it is listed
+ * twice in the dataset. This method filters out the duplicates and
+ * adds all possible parameters to a method
+ *
+ * @param {Array} methods
+ * @returns {Array}
+ */
+const removeDuplicateMethods = (methods) => {
+  let previousMethod;
+
+  if (methods.length === 0) {
+    return [];
+  }
+
+  const filteredMethods = methods.reduce((acc, currentVal) => {
+    const { name } = currentVal;
+
+    if (previousMethod === undefined || previousMethod !== name) {
+      previousMethod = name;
+
+      acc.push(currentVal);
+    }
+    return acc;
+  }, []);
+
+  const paramsToMethodMap = methods.reduce((acc, currentVal) => {
+    const { name, parameters } = currentVal;
+    const hasParameters = parameters.length > 0;
+    const hasIncomingParameters = acc[name] && acc[name].length > 0;
+
+    if (acc[name] === undefined) {
+      acc[name] = hasParameters ? [parameters] : undefined;
+    } else {
+      if (hasParameters && hasIncomingParameters) {
+        acc[name] = [parameters, ...acc[name]];
+      } else {
+        acc[name] = [parameters];
+      }
+    }
+
+    return acc;
+  }, {});
+
+  return filteredMethods.map((method) => {
+    return {
+      ...method,
+      parameters: paramsToMethodMap[method.name] || [],
+    };
+  });
 };
 
 /**
@@ -111,7 +179,7 @@ const getPainlessClassToAutocomplete = (painlessClass) => {
     };
   });
 
-  const staticMethodsAutocomplete = staticMethods.map(
+  const staticMethodsAutocomplete = removeDuplicateMethods(staticMethods).map(
     ({ name, parameters, return: returnValue }) => {
       return {
         label: name,
@@ -122,14 +190,16 @@ const getPainlessClassToAutocomplete = (painlessClass) => {
     }
   );
 
-  const methodsAutocomplete = methods.map(({ name, parameters, return: returnValue }) => {
-    return {
-      label: name,
-      kind: 'method',
-      documentation: getMethodDescription(name, parameters, returnValue),
-      insertText: name,
-    };
-  });
+  const methodsAutocomplete = removeDuplicateMethods(methods).map(
+    ({ name, parameters, return: returnValue }) => {
+      return {
+        label: name,
+        kind: 'method',
+        documentation: getMethodDescription(name, parameters, returnValue),
+        insertText: name,
+      };
+    }
+  );
 
   return [
     ...staticFieldsAutocomplete,

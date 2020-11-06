@@ -799,7 +799,6 @@
     "reselect": "^4.0.0",
     "resize-observer-polyfill": "^1.5.0",
     "resolve": "^1.7.1",
-    "rimraf": "^3.0.2",
     "rxjs-marbles": "^5.0.6",
     "sass-lint": "^1.12.1",
     "sass-loader": "^8.0.2",

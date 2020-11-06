@@ -17,7 +17,7 @@
  * under the License.
  */
 
-// Please note: this module is intended to be run inside of a webworker.
+// This module is intended to be run inside of a webworker
 /* eslint-disable @kbn/eslint/module_migration */
 
 import 'regenerator-runtime/runtime';

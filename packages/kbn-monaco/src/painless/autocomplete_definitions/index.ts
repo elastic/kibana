@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-// DO NOT EDIT: THIS FILE CONTAINS GENERATED CODE. REFER TO THE README FOR MORE INFORMATION.
+// DO NOT EDIT: THIS FILE CONTAINS GENERATED CODE. REFER TO THE PAINLESS README FOR MORE INFORMATION.
 import * as stringScriptFieldScriptFieldContext from './string_script_field_script_field.json';
 import * as scoreContext from './score.json';
 import * as processorConditionalContext from './processor_conditional.json';

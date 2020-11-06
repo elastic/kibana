@@ -17,8 +17,10 @@
  * under the License.
  */
 
-// If the active typing contains dot notation, we assume we need to access the object's properties
-// Currently only supporting one-level nesting
+/**
+ * If the active typing contains dot notation, we assume we need to access the object's properties
+ * Currently only supporting one-level deep nesting
+ */
 export const isAccessingProperty = (activeTyping: string): boolean => {
   const activeTypingParts = activeTyping.split('.');
 

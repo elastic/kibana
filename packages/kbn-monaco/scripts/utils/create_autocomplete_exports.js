@@ -20,8 +20,8 @@
 const { licenseHeader, supportedContexts } = require('../constants');
 
 const toCamelcase = (string) => {
-  return string.replace(/([_][a-z])/gi, ($1) => {
-    return $1.toUpperCase().replace('_', '');
+  return string.replace(/([_][a-z])/gi, (match) => {
+    return match.toUpperCase().replace('_', '');
   });
 };
 
@@ -40,7 +40,7 @@ export { ${toCamelcase(context)}Context };`;
     return exportList;
   }, '');
 
-  const doNotEditComment = `// DO NOT EDIT: THIS FILE CONTAINS GENERATED CODE. REFER TO THE README FOR MORE INFORMATION.`;
+  const doNotEditComment = `// DO NOT EDIT: THIS FILE CONTAINS GENERATED CODE. REFER TO THE PAINLESS README FOR MORE INFORMATION.`;
 
   return `${licenseHeader}${doNotEditComment}${imports}${exports}
 `;

@@ -133,6 +133,7 @@ export class PainlessCompletionService {
             },
           }
         ),
+        // A trailing quotation mark is added to format the field for the user
         insertText: `${name}'`,
       };
     });
