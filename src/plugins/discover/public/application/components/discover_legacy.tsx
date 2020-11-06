@@ -31,7 +31,6 @@ import { LoadingSpinner } from './loading_spinner/loading_spinner';
 import { DocTableLegacy } from '../angular/doc_table/create_doc_table_react';
 import { SkipBottomButton } from './skip_bottom_button';
 import {
-  IndexPatternField,
   search,
   ISearchSource,
   TimeRange,
@@ -39,6 +38,7 @@ import {
   IndexPatternAttributes,
   DataPublicPluginStart,
   AggConfigs,
+  FilterManager,
 } from '../../../../data/public';
 import { Chart } from '../angular/helpers/point_series';
 import { AppState } from '../angular/discover_state';
@@ -47,8 +47,9 @@ import { SavedSearch } from '../../saved_searches';
 import { SavedObject } from '../../../../../core/types';
 import { TopNavMenuData } from '../../../../navigation/public';
 import { DiscoverSidebarResponsive } from './sidebar';
+import { DocViewFilterFn, ElasticSearchHit } from '../doc_views/doc_views_types';
 
-export interface DiscoverLegacyProps {
+export interface DiscoverProps {
   addColumn: (column: string) => void;
   fetch: () => void;
   fetchCounter: number;
@@ -58,7 +59,7 @@ export interface DiscoverLegacyProps {
   hits: number;
   indexPattern: IndexPattern;
   minimumVisibleRows: number;
-  onAddFilter: (field: IndexPatternField | string, value: string, type: '+' | '-') => void;
+  onAddFilter: DocViewFilterFn;
   onChangeInterval: (interval: string) => void;
   onMoveColumn: (columns: string, newIdx: number) => void;
   onRemoveColumn: (column: string) => void;
@@ -70,6 +71,7 @@ export interface DiscoverLegacyProps {
     config: IUiSettingsClient;
     data: DataPublicPluginStart;
     fixedScroll: (el: HTMLElement) => void;
+    filterManager: FilterManager;
     indexPatternList: Array<SavedObject<IndexPatternAttributes>>;
     sampleSize: number;
     savedSearch: SavedSearch;
@@ -79,7 +81,7 @@ export interface DiscoverLegacyProps {
   };
   resetQuery: () => void;
   resultState: string;
-  rows: Array<Record<string, unknown>>;
+  rows: ElasticSearchHit[];
   searchSource: ISearchSource;
   setIndexPattern: (id: string) => void;
   showSaveQuery: boolean;
@@ -120,7 +122,7 @@ export function DiscoverLegacy({
   topNavMenu,
   updateQuery,
   updateSavedQueryId,
-}: DiscoverLegacyProps) {
+}: DiscoverProps) {
   const [toggleOn, toggleChart] = useState(true);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
   const { TopNavMenu } = getServices().navigation.ui;

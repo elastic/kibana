@@ -33,6 +33,7 @@ import { getSortArray } from './doc_table';
 import { DEFAULT_COLUMNS_SETTING } from '../../../common';
 import { SavedSearch } from '../../saved_searches';
 import { DiscoverGridSettings } from '../components/discover_grid/types';
+import { SortPairArr } from './doc_table/lib/get_sort';
 
 export interface AppState {
   /**
@@ -62,7 +63,7 @@ export interface AppState {
   /**
    * Array of the used sorting [[field,direction],...]
    */
-  sort?: Array<[string, string]>;
+  sort?: SortPairArr[];
   /**
    * id of the used saved query
    */

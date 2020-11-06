@@ -44,12 +44,11 @@ import { ViewButton } from './discover_grid_view_button';
 import { getRenderCellValueFn } from './get_render_cell_value';
 import { DiscoverGridSettings } from './types';
 import { DiscoverGridSelectButton, DiscoverGridSelection } from './discover_grid_doc_selection';
+import { SortPairArr } from '../../angular/doc_table/lib/get_sort';
 
-type Direction = 'asc' | 'desc';
-type SortArr = [string, Direction];
 interface SortObj {
   id: string;
-  direction: Direction;
+  direction: string;
 }
 
 interface Props {
@@ -69,7 +68,7 @@ interface Props {
   searchDescription?: string;
   searchTitle?: string;
   showTimeCol: boolean;
-  sort: SortArr[];
+  sort: SortPairArr[];
   useDocSelector: boolean;
 }
 
