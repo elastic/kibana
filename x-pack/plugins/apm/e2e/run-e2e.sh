@@ -20,9 +20,8 @@ normal=$(tput sgr0)
 E2E_DIR="${0%/*}"
 TMP_DIR="tmp"
 APM_IT_DIR="tmp/apm-integration-testing"
-KIBANA_DIR="${E2E_DIR}/../../../.."
-WAIT_ON_BIN=$(yarn --cwd ${KIBANA_DIR} bin wait-on)
-CYPRESS_BIN=$(yarn --cwd ${KIBANA_DIR} bin cypress)
+WAIT_ON_BIN="../../../../node_modules/.bin/wait-on"
+CYPRESS_BIN="../../../../node_modules/.bin/cypress"
 
 cd ${E2E_DIR}
 
