@@ -34,7 +34,7 @@ import {
 } from '../../../hooks';
 import { Loading } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
-import { CreatePackagePolicyPageLayout } from './components';
+import { CreatePackagePolicyPageLayout, CustomPackagePolicy } from './components';
 import { CreatePackagePolicyFrom, PackagePolicyFormState } from './types';
 import {
   PackagePolicyValidationResults,
@@ -320,18 +320,25 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
             validationResults={validationResults!}
             submitAttempted={formState === 'INVALID'}
           />
+          <CustomPackagePolicy
+            from={from}
+            packageName={packageInfo.name}
+            packagePolicy={packagePolicy}
+            packagePolicyId=""
+          />
         </>
       ) : (
         <div />
       ),
     [
-      agentPolicy,
-      formState,
       isLoadingSecondStep,
-      packagePolicy,
+      agentPolicy,
       packageInfo,
+      packagePolicy,
       updatePackagePolicy,
       validationResults,
+      formState,
+      from,
     ]
   );
 

@@ -29,7 +29,10 @@ import {
 } from '../../../hooks';
 import { Loading, Error } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
-import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
+import {
+  CreatePackagePolicyPageLayout,
+  CustomPackagePolicy,
+} from '../create_package_policy_page/components';
 import {
   PackagePolicyValidationResults,
   validatePackagePolicy,
@@ -287,6 +290,13 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
             updatePackagePolicy={updatePackagePolicy}
             validationResults={validationResults!}
             submitAttempted={formState === 'INVALID'}
+          />
+
+          <CustomPackagePolicy
+            from="edit"
+            packageName={packageInfo.name}
+            packagePolicy={packagePolicy}
+            packagePolicyId={packagePolicyId}
           />
         </>
       ) : null,

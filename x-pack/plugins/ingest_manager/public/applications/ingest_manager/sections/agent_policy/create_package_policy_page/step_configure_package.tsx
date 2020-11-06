@@ -4,12 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React from 'react';
-import { EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiEmptyPrompt,
+  EuiText,
+} from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { PackageInfo, RegistryStream, NewPackagePolicy, PackagePolicyInput } from '../../../types';
 import { Loading } from '../../../components';
 import { PackagePolicyValidationResults } from './services';
-import { PackagePolicyInputPanel, CustomPackagePolicy } from './components';
+import { PackagePolicyInputPanel } from './components';
 import { CreatePackagePolicyFrom } from './types';
+import { useUIExtension } from '../../../hooks/use_ui_extension';
 
 const findStreamsForInputType = (
   inputType: string,
@@ -50,6 +58,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   validationResults,
   submitAttempted,
 }) => {
+  const hasUiExtension =
+    useUIExtension(packageInfo.name, 'integration-policy', from === 'edit' ? 'edit' : 'create') !==
+    undefined;
+
   // Configure inputs (and their streams)
   // Assume packages only export one config template for now
   const renderConfigureInputs = () =>
@@ -93,14 +105,22 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
           })}
         </EuiFlexGroup>
       </>
-    ) : (
-      <CustomPackagePolicy
-        from={from}
-        packageName={packageInfo.name}
-        packagePolicy={packagePolicy}
-        packagePolicyId={packagePolicyId}
+    ) : !hasUiExtension ? (
+      <EuiEmptyPrompt
+        iconType="checkInCircleFilled"
+        iconColor="secondary"
+        body={
+          <EuiText>
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.stepConfigure.noPolicyOptionsMessage"
+                defaultMessage="Nothing to configure"
+              />
+            </p>
+          </EuiText>
+        }
       />
-    );
+    ) : null;
 
   return validationResults ? renderConfigureInputs() : <Loading />;
 };
