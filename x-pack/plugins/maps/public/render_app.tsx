@@ -23,7 +23,7 @@ import {
   withNotifyOnErrors,
   IKbnUrlStateStorage,
 } from '../../../../src/plugins/kibana_utils/public';
-import { MapList, MapApp } from './routes';
+import { ListPage, MapPage } from './routes';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
 export let goToSpecifiedPath: (path: string) => void;
@@ -94,7 +94,7 @@ export async function renderApp({
     }
 
     return (
-      <MapApp
+      <MapPage
         mapEmbeddableInput={mapEmbeddableInput}
         embeddableId={embeddableId}
         onAppLeave={onAppLeave}
@@ -121,7 +121,7 @@ export async function renderApp({
                 const newPath = hash.substr(1);
                 return <Redirect to={newPath} />;
               } else if (pathname === '/' || pathname === '') {
-                return <MapList />;
+                return <ListPage />;
               } else {
                 return <Redirect to="/" />;
               }

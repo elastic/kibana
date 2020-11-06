@@ -4,5 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { SavedMap } from './saved_map';
-export { MapAppContainer as MapApp } from './map_app_container';
+export { LoadListAndRender as ListPage } from './load_list_and_render';

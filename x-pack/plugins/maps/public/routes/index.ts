@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { MapApp, SavedMap } from './map_app';
-export { MapList } from './list';
+export { MapPage, SavedMap } from './map_page';
+export { ListPage } from './list_page';

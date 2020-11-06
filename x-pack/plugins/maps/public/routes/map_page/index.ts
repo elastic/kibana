@@ -4,4 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { LoadListAndRender as MapList } from './load_list_and_render';
+export { SavedMap } from './saved_map';
+export { MapPage } from './map_page';
