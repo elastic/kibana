@@ -69,7 +69,7 @@ export interface VisTypeAlias {
 }
 
 let registry: VisTypeAlias[] = [];
-let discardOnRegister: string[] = [];
+const discardOnRegister: string[] = [];
 
 interface VisTypeAliasRegistry {
   get: () => VisTypeAlias[];
@@ -80,15 +80,14 @@ interface VisTypeAliasRegistry {
 export const visTypeAliasRegistry: VisTypeAliasRegistry = {
   get: () => [...registry],
   add: (newVisTypeAlias) => {
+    if (registry.find((visTypeAlias) => visTypeAlias.name === newVisTypeAlias.name)) {
+      throw new Error(`${newVisTypeAlias.name} already registered`);
+    }
     // if it exists on discardOnRegister array then we don't allow it to be registered
-    if (discardOnRegister.some((aliasName) => aliasName === newVisTypeAlias.name)) {
-      discardOnRegister = discardOnRegister.filter(
-        (aliasName) => aliasName !== newVisTypeAlias.name
-      );
-    } else {
-      if (registry.find((visTypeAlias) => visTypeAlias.name === newVisTypeAlias.name)) {
-        throw new Error(`${newVisTypeAlias.name} already registered`);
-      }
+    const isToBeDiscarded = discardOnRegister.some(
+      (aliasName) => aliasName === newVisTypeAlias.name
+    );
+    if (!isToBeDiscarded) {
       registry.push(newVisTypeAlias);
     }
   },
