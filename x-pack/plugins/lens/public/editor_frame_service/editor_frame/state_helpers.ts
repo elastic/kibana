@@ -104,8 +104,18 @@ export const validateDatasourceAndVisualization = (
       longMessage: string;
     }>
   | undefined => {
+  const layersGroups =
+    currentVisualizationState &&
+    currentVisualization?.getLayerIds(currentVisualizationState).map((layerId) => {
+      return currentVisualization?.getConfiguration({
+        frame: frameAPI,
+        layerId,
+        state: currentVisualizationState,
+      }).groups;
+    });
+
   const datasourceValidationErrors = currentDatasourceState
-    ? currentDataSource?.getErrorMessages(currentDatasourceState)
+    ? currentDataSource?.getErrorMessages(currentDatasourceState, layersGroups)
     : undefined;
 
   const visualizationValidationErrors = currentVisualizationState

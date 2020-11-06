@@ -342,7 +342,7 @@ export function getIndexPatternDatasource({
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
 
-    getErrorMessages(state) {
+    getErrorMessages(state, layersGroups) {
       if (!state) {
         return;
       }

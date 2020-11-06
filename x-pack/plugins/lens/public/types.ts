@@ -183,7 +183,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
   getErrorMessages: (
     state: T,
-    groups?: VisualizationDimensionGroupConfig[]
+    layersGroups?: VisualizationDimensionGroupConfig[][]
   ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
   /**
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
