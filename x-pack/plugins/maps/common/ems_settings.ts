@@ -43,11 +43,15 @@ export class EMSSettings {
     return this._isEMSUrlSet();
   }
 
+  isIncludeElasticMapsService() {
+    return !!this._config.includeElasticMapsService;
+  }
+
   isEMSEnabled(): boolean {
     if (this._isEMSUrlSet()) {
       return this._getIsEnterprisePlus();
     }
-    return !!this._config.includeElasticMapsService;
+    return this.isIncludeElasticMapsService();
   }
 
   getEMSFileApiUrl(): string {
