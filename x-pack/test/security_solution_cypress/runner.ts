@@ -37,6 +37,11 @@ export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrPr
         CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
         CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
         CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+        CYPRESS_KIBANA_URL: Url.format({
+          protocol: config.get('servers.kibana.protocol'),
+          hostname: config.get('servers.kibana.hostname'),
+          port: config.get('servers.kibana.port'),
+        }),
         ...process.env,
       },
       wait: true,
