@@ -17,15 +17,18 @@ export interface AlertStatusAndState {
 
 export interface PanelItem {
   id: number;
-  title: string | React.ReactElement;
+  title: string;
   width?: number;
   content?: React.ReactElement;
-  items?: ContextMenuItem[];
+  items?: Array<ContextMenuItem | ContextMenuItemSeparator>;
 }
 
 export interface ContextMenuItem {
-  name?: React.ReactElement;
+  name: React.ReactElement;
   panel?: number;
-  isSeparator?: boolean;
   onClick?: () => void;
+}
+
+export interface ContextMenuItemSeparator {
+  isSeparator: true;
 }

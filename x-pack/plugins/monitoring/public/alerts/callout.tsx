@@ -6,12 +6,15 @@
 
 import React, { Fragment } from 'react';
 import {
-  EuiAccordion,
-  EuiListGroup,
-  EuiListGroupItem,
+  EuiPopover,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiCallOut,
+  EuiContextMenu,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import { replaceTokens } from './lib/replace_tokens';
 import { AlertMessage, AlertState } from '../../common/types/alerts';
@@ -24,6 +27,7 @@ interface Props {
 }
 export const AlertsCallout: React.FC<Props> = (props: Props) => {
   const { alerts, stateFilter = () => true, nextStepsFilter = () => true } = props;
+  const [activePopover, setActivePopover] = React.useState<boolean | number>(false);
 
   const list = [];
   for (const alertTypeId of Object.keys(alerts)) {
@@ -36,25 +40,51 @@ export const AlertsCallout: React.FC<Props> = (props: Props) => {
   }
 
   const accordions = list.map((state, index) => {
-    const buttonContent = (
-      <EuiCallOut title={replaceTokens(state.ui.message)} color="danger" iconType="bell" size="s" />
+    const panels = [
+      {
+        id: 0,
+        title: 'Next steps',
+        items: (state.ui.message.nextSteps || [])
+          .filter(nextStepsFilter)
+          .map((step: AlertMessage) => {
+            return {
+              name: replaceTokens(step),
+            };
+          }),
+      },
+    ];
+    const button = (
+      <EuiLink onClick={() => setActivePopover(index)}>
+        <EuiText size="s">View next steps</EuiText>
+      </EuiLink>
     );
-    const nextStepsUi =
-      state.ui.message.nextSteps && state.ui.message.nextSteps.length ? (
-        <EuiListGroup gutterSize="none" style={{ paddingLeft: '1rem' }}>
-          {state.ui.message.nextSteps
-            .filter(nextStepsFilter)
-            .map((step: AlertMessage, nextStepIndex: number) => (
-              <EuiListGroupItem key={nextStepIndex} label={replaceTokens(step)} />
-            ))}
-        </EuiListGroup>
-      ) : null;
+    const title = (
+      <EuiFlexGroup alignItems="baseline" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" style={{ display: 'inline' }}>
+            {replaceTokens(state.ui.message)}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            id="contextMenuExample"
+            button={button}
+            isOpen={activePopover === index}
+            closePopover={() => setActivePopover(false)}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            <EuiContextMenu initialPanelId={0} panels={panels} />
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+    const buttonContent = <EuiCallOut title={title} color="danger" iconType="bell" size="s" />;
+
     const spacer = index !== list.length - 1 ? <EuiSpacer /> : null;
     return (
       <div key={index}>
-        <EuiAccordion id={`accordionForm${index}`} buttonContent={buttonContent} paddingSize="xs">
-          {nextStepsUi}
-        </EuiAccordion>
+        {buttonContent}
         {spacer}
       </div>
     );

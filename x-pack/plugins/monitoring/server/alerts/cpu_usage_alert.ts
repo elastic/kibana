@@ -23,6 +23,7 @@ import {
 import { AlertInstance, AlertServices } from '../../../alerts/server';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
+  ELASTICSEARCH_SYSTEM_ID,
   ALERT_CPU_USAGE,
   ALERT_DETAILS,
 } from '../../common/constants';
@@ -112,7 +113,7 @@ export class CpuUsageAlert extends BaseAlert {
         if (filter && filter.nodeUuid) {
           let nodeExistsInStates = false;
           for (const state of alertInstanceState.alertStates) {
-            if ((state as AlertCpuUsageState).nodeId === filter.nodeUuid) {
+            if ((state as AlertCpuUsageState).stackProductUuid === filter.nodeUuid) {
               nodeExistsInStates = true;
               break;
             }
@@ -215,7 +216,7 @@ export class CpuUsageAlert extends BaseAlert {
       .filter((_state) => (_state as AlertCpuUsageState).ui.isFiring)
       .map((_state) => {
         const state = _state as AlertCpuUsageState;
-        return `${state.nodeName}:${state.cpuUsage.toFixed(2)}`;
+        return `${state.stackProductName}:${state.cpuUsage.toFixed(2)}`;
       })
       .join(',');
     if (firingCount > 0) {
@@ -266,7 +267,7 @@ export class CpuUsageAlert extends BaseAlert {
         .filter((_state) => !(_state as AlertCpuUsageState).ui.isFiring)
         .map((_state) => {
           const state = _state as AlertCpuUsageState;
-          return `${state.nodeName}:${state.cpuUsage.toFixed(2)}`;
+          return `${state.stackProductName}:${state.cpuUsage.toFixed(2)}`;
         })
         .join(',');
       if (resolvedCount > 0) {
@@ -330,7 +331,7 @@ export class CpuUsageAlert extends BaseAlert {
           const nodeAlertState = alertState as AlertCpuUsageState;
           return (
             nodeAlertState.cluster.clusterUuid === cluster.clusterUuid &&
-            nodeAlertState.nodeId === (node.meta as AlertCpuUsageNodeStats).nodeId
+            nodeAlertState.stackProductUuid === (node.meta as AlertCpuUsageNodeStats).nodeId
           );
         });
         if (indexInState > -1) {
@@ -339,8 +340,9 @@ export class CpuUsageAlert extends BaseAlert {
           nodeState = this.getDefaultAlertState(cluster, node) as AlertCpuUsageState;
         }
         nodeState.cpuUsage = stat.cpuUsage;
-        nodeState.nodeId = stat.nodeId;
-        nodeState.nodeName = stat.nodeName;
+        nodeState.stackProduct = ELASTICSEARCH_SYSTEM_ID;
+        nodeState.stackProductUuid = stat.nodeId;
+        nodeState.stackProductName = stat.nodeName || '';
 
         if (node.shouldFire) {
           if (!nodeState.ui.isFiring) {

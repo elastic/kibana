@@ -40,13 +40,23 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     !inSetupMode && alertCount > MAX_TO_SHOW_IN_LIST
   );
 
+  // React.useEffect(() => {
+  //   console.log('showByNode changed', { showByNode });
+  //   setShowPopover(false);
+  //   setTimeout(() => {
+  //     setShowPopover(true);
+  //   })
+  // }, [showByNode])
+
   if (alerts.length === 0) {
     return null;
   }
 
-  const panelTitle = i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
-    defaultMessage: 'Alerts',
-  });
+  const panelTitle = showByNode
+    ? i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
+        defaultMessage: 'Alerts (by node)',
+      })
+    : 'Alerts (by type)';
 
   const panels = showByNode
     ? getAlertPanelsByNode(panelTitle, alerts, setShowByNode, stateFilter, nextStepsFilter)
@@ -67,7 +77,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
       onClickAriaLabel={numberOfAlertsLabel(alertCount)}
       onClick={() => setShowPopover(true)}
     >
-      {numberOfAlertsLabel(alertCount)}
+      {numberOfAlertsLabel(alertCount)} ({showByNode ? 'byNode' : 'byType'})
     </EuiBadge>
   );
 
@@ -80,7 +90,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels as any} />
+      <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };
