@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginStart;
+start(core: CoreStart, { uiActions, usageCollection }: DataStartDependencies): DataPublicPluginStart;
 ```
 
 ## Parameters
@@ -15,7 +15,7 @@ start(core: CoreStart, { uiActions }: DataStartDependencies): DataPublicPluginSt
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  core | <code>CoreStart</code> |  |
-|  { uiActions } | <code>DataStartDependencies</code> |  |
+|  { uiActions, usageCollection } | <code>DataStartDependencies</code> |  |
 
 <b>Returns:</b>
 
