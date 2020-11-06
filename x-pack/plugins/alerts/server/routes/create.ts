@@ -38,6 +38,7 @@ export const bodySchema = schema.object({
     }),
     { defaultValue: [] }
   ),
+  notifyOnStateChange: schema.boolean({ defaultValue: true }),
 });
 
 export const createAlertRoute = (router: IRouter, licenseState: LicenseState) => {

@@ -27,6 +27,7 @@ import {
   EuiEmptyPrompt,
   EuiLink,
   EuiText,
+  EuiSwitch,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -480,6 +481,18 @@ export const AlertForm = ({
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
+          <EuiSwitch
+            checked={alert.notifyOnStateChange || false}
+            data-test-subj="notifyOnStateChange"
+            id="notifyOnStateChange"
+            label={
+              <FormattedMessage
+                defaultMessage="Notify on state change only"
+                id="xpack.triggersActionsUI.sections.alertForm.notifyOnStateChange"
+              />
+            }
+            onChange={(e) => setAlertProperty('notifyOnStateChange', e.target.checked)}
+          />
           <EuiFormRow fullWidth label={labelForAlertRenotify}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>

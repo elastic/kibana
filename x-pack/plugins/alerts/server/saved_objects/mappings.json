@@ -71,6 +71,9 @@
       "throttle": {
         "type": "keyword"
       },
+      "notifyOnStateChange": {
+        "type": "boolean"
+      },
       "muteAll": {
         "type": "boolean"
       },
