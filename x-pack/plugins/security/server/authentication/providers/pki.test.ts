@@ -127,7 +127,7 @@ describe('PKIAuthenticationProvider', () => {
 
       await expect(operation(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'pki' },
+          { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
           {
             authHeaders: { authorization: 'Bearer access-token' },
             state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
@@ -169,7 +169,7 @@ describe('PKIAuthenticationProvider', () => {
 
       await expect(operation(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'pki' },
+          { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
           {
             authHeaders: { authorization: 'Bearer access-token' },
             state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
@@ -356,7 +356,7 @@ describe('PKIAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'pki' },
+          { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
           {
             authHeaders: { authorization: 'Bearer access-token' },
             state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
@@ -405,7 +405,7 @@ describe('PKIAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'pki' },
+          { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
           {
             authHeaders: { authorization: 'Bearer access-token' },
             state: { accessToken: 'access-token', peerCertificateFingerprint256: '2A:7A:C2:DD' },
@@ -486,7 +486,7 @@ describe('PKIAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'pki' },
+          { ...user, authentication_provider: { type: 'pki', name: 'pki' } },
           { authHeaders: { authorization: `Bearer ${state.accessToken}` } }
         )
       );
