@@ -594,4 +594,30 @@ describe('processFields', () => {
     ];
     expect(processFields(fields)).toEqual(fieldsExpected);
   });
+
+  test('ignores multiple redefinitions of a field', () => {
+    const fields = [
+      {
+        name: 'a',
+        type: 'text',
+      },
+      {
+        name: 'a',
+        type: 'number',
+      },
+      {
+        name: 'a',
+        type: 'keyword',
+      },
+    ];
+
+    const fieldsExpected = [
+      {
+        name: 'a',
+        // should preserve the field that was parsed first which had type: text
+        type: 'text',
+      },
+    ];
+    expect(processFields(fields)).toEqual(fieldsExpected);
+  });
 });
