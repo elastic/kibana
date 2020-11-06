@@ -6329,10 +6329,10 @@
     text-table "^0.2.0"
     webpack-log "^1.1.2"
 
-"@welldone-software/why-did-you-render@^4.0.0":
-  version "4.0.0"
-  resolved "https://registry.yarnpkg.com/@welldone-software/why-did-you-render/-/why-did-you-render-4.0.0.tgz#cc98c996f5a06ea55bd07dc99ba4b4d68af93332"
-  integrity sha512-PjqriZ8Ak9biP2+kOcIrg+NwsFwWVhGV03Hm+ns84YBCArn+hWBKM9rMBEU6e62I1qyrYF2/G9yktNpEmfWfJA==
+"@welldone-software/why-did-you-render@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@welldone-software/why-did-you-render/-/why-did-you-render-5.0.0.tgz#5dd8d20ad9f00fd500de852dd06eea0c057a0bce"
+  integrity sha512-A6xUP/55vJQwA1+L6iZbG81cQanSQQVR15yPcjLIp6lHmybXEOXsYcuXaDZHYqiNStZRzv64YPcYJC9wdphfhw==
   dependencies:
     lodash "^4"
 
