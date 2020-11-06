@@ -360,7 +360,12 @@ export class SessionIndex {
     // If session belongs to a not configured provider we should also remove it.
     deleteQueries.push({
       bool: {
-        must_not: { bool: { should: providersSessionConfig.map(({ boolQuery }) => boolQuery) } },
+        must_not: {
+          bool: {
+            should: providersSessionConfig.map(({ boolQuery }) => boolQuery),
+            minimum_should_match: 1,
+          },
+        },
       },
     });
 
