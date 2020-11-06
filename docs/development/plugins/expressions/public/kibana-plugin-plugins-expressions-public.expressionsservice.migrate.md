@@ -4,7 +4,7 @@
 
 ## ExpressionsService.migrate property
 
-Injects saved object references into expression AST
+Runs the migration (if it exists) for specified version. This will run a single migration step (ie from 7.10.0 to 7.10.1)
 
 <b>Signature:</b>
 

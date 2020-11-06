@@ -28,6 +28,8 @@ import {
   EuiEmptyPrompt,
   EuiListGroupItem,
   EuiListGroup,
+  EuiLink,
+  EuiText,
 } from '@elastic/eui';
 import { some, filter, map, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -385,6 +387,33 @@ export const AlertForm = ({
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
+      {alertTypeModel?.description && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiText color="subdued" size="s" data-test-subj="alertDescription">
+              {alertTypeModel.description}&nbsp;
+              {alertTypeModel?.documentationUrl && (
+                <EuiLink
+                  external
+                  target="_blank"
+                  data-test-subj="alertDocumentationLink"
+                  href={
+                    typeof alertTypeModel.documentationUrl === 'function'
+                      ? alertTypeModel.documentationUrl(docLinks)
+                      : alertTypeModel.documentationUrl
+                  }
+                >
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.alertForm.documentationLabel"
+                    defaultMessage="Documentation"
+                  />
+                </EuiLink>
+              )}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <EuiHorizontalRule />
       {AlertParamsExpressionComponent ? (
         <Suspense fallback={<CenterJustifiedSpinner />}>
           <AlertParamsExpressionComponent
