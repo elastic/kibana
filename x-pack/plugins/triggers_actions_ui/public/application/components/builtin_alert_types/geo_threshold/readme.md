@@ -15,17 +15,21 @@ data streaming in as indicated by the `date` field. Older locations determined b
 are compared with newer locations to determine if a boundary has been crossed in the
 current monitoring interval.
 
-### 1. Run ES/Kibana dev env with ssl enabled
+### 1. Set experimental flag to enable threshold alerts
+- Set the following configuration settings in your `config/kibana.yml`:
+`xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert: true`
+
+### 2. Run ES/Kibana dev env with ssl enabled
 - In two terminals, run the normal commands to launch both elasticsearch and kibana but 
 append `--ssl` to the end of each as an arg, i.e.:
   - `yarn es snapshot --ssl  // Runs Elasticsearch`
   - `yarn start --ssl // Runs Kibana`
   
-### 2. Get an MTA data api key
+### 3. Get an MTA data api key
 - You'll need to obtain an NYC MTA api key, you can request this
   key [here](https://docs.google.com/forms/d/e/1FAIpQLSfGUZA6h4eHd2-ImaK5Q_I5Gb7C3UEP5vYDALyGd7r3h08YKg/viewform?hl=en&formkey=dG9kcGIxRFpSS0NhQWM4UjA0V0VkNGc6MQ#gid=0)
 
-### 3. Get trackable point data (MTA bus data) into elasticsearch
+### 4. Get trackable point data (MTA bus data) into elasticsearch
 - You'll be using the script: `https://github.com/thomasneirynck/mtatracks` to harvest
 live bus data to populate the system. Clone the repo and follow the instructions in
 the readme to set up. 
@@ -33,7 +37,7 @@ the readme to set up.
 in a local terminal should look something like:
 `node ./load_tracks.js -a <YOUR_API_KEY>`
 
-### 4. Open required Kibana tabs
+### 5. Open required Kibana tabs
 There are 4 separate tabs you'll need for a combination of loading and viewing the
 data. Since you'll be jumping between them, it might be easiest to just open them
 upfront. Each is preceded by `https://localhost:5601/<your dev env prefix>/app/`:
@@ -42,7 +46,7 @@ upfront. Each is preceded by `https://localhost:5601/<your dev env prefix>/app/`
 - Dev tools: `dev_tools#/console`
 - Maps: `maps`
 
-### 5. Create a new alert index in dev tools
+### 6. Create a new alert index in dev tools
 Execute the following two commands:
 - Create index
 ```
@@ -96,33 +100,42 @@ PUT /manhattan_mta_alerts/_mapping
 }
 ```
 
-### 6 Start the map to index the boundaries
+### 7 Create map to monitor alerts
 - Go to the Maps app
 - Create a new map
-- Using GeoJSON Upload, upload the geojson located in the folder of the previously 
+- Using GeoJSON Upload, upload the geojson file located in the folder of the previously 
 cloned `mta_tracks` repo: `nyc-neighborhoods.geo.json`. Accept all of the default
 settings.
+- You may want to click your newly added layer and select "Fit to data" so you can see the
+boundaries you've added.
 _ When finished uploading and adding the layer, save the map using a name of your
 choice.
 - Keep the Maps tab open, you'll come back to this
 
-### 7. Create index pattern for generated tracks
-- Go to the index pattern tab to create a new index pattern
-- Set time field to default
-- Repeat for new index pattern: `tracks`
-- Leave tab open, you'll come back to this
+### 8. Create index pattern for generated tracks
+- Go to the index pattern tab to create a new index pattern.
+- Give it the index name `mtatracks*`
+- For `Time field` select `@timestamp`
+- Click `Create index pattern`
+- Leave this tab open, you'll come back to this
 
-### 8. Create threshold alert
-- Go to `Stack management` > `Alerts & Actions` > `Create Alert` > `Tracking threshold`
-- Fill out top and middle sections. _Should_ flow somewhat logically. Do set both 
-`Check every` and `Notify every` to `2 seconds`
-- Create index connector (any name is fine). For index name, use the one we created 
-earlier in dev tools: `manhattan_mta_alerts`
-- For document structure, use:
+
+### 9. Create threshold alert
+- Go to the Alerts tab and click `Create Alert` > `Tracking threshold`
+- Fill the side bar form top to bottom. This _should_ flow somewhat logically. In the top section, set both `Check every` and `Notify every` to `2 seconds`
+- Enter a `Delayed evaluation offset` of `1` minute
+- The default settings for `Select Entity` will mostly be correct. Select `mta_tracks*`
+as the index you'd like to track. Use the defaults populated under
+`Select entity` > `INDEX`, update `Select entity` > `BY` to `vehicle_ref`.
+- `WHEN ENTITY` can be left as `entered`
+- For `Select boundary` > `INDEX`, select `nyc-neighborhoods` and all populated defaults.
+- Under `Actions`, create an `Index` action, then create an `Index connector`. When it
+prompts you for a name, you can just call it `index connector` . For index name, use the one we 
+created earlier in dev tools: `manhattan_mta_alerts`. Accept the provided defaults and save.
+- Under `Document to index`, use the following structure:
 ```
 {
     "CrossingEntityId": "{{entityId}}",
-    "CrossingTimeOfDetection": "{{timeOfDetection}}",
     "CrossingLine": "{{crossingLine}}",
     "AfterCrossingPointId": "{{toEntityLocation}}",
     "AfterCrossingPointLocation": "{{toEntityDateTime}}",
@@ -135,13 +148,16 @@ earlier in dev tools: `manhattan_mta_alerts`
     "PreviousBoundaryId": "{{fromBoundaryId}}",
     "PreviousBoundaryName": "{{fromBoundaryName}}"
 }
+- At the bottom right, click `Save`. Your alert should now be created!
 ```
 
-### 9. Create another index pattern to track on maps for indexed alert data
-- Go to Stack Management > Index Patterns
+### 10. Create another index pattern to track the alerts you're creating
+- Go to Index patterns tab and click `Create index pattern`
 - Create new index pattern: `manhattan_mta_alerts`
+- For `Time field` select `crossingTimeOfDetection`
+- Click `Create index pattern`
 
-### 10. Create Map
+### 11. Create Map
 - You should already have the boundaries layer from the GeoJson upload earlier
 - Do top hits (quantity: 1) on the generate tracks script output docs (index: `tracks`). Set sorting on timestamp descending
 - Create another doc layer for the alerting index (not top hits) (manhattan_index_alerts: current location)
