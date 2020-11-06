@@ -53,12 +53,13 @@ enum UrlParams {
 export async function mountApp({
   core,
   element,
+  onAppLeave,
+  appUnMounted,
   scopedHistory,
   usageCollection,
   initializerContext,
   restorePreviousUrl,
   setHeaderActionMenu,
-  appUnMounted,
 }: DashboardMountProps) {
   const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
 
@@ -75,6 +76,7 @@ export async function mountApp({
 
   const dashboardServices: DashboardAppServices = {
     navigation,
+    onAppLeave,
     savedObjects,
     usageCollection,
     core: coreStart,
@@ -187,6 +189,7 @@ export async function mountApp({
 
   render(app, element);
   return () => {
+    dataStart.search.session.clear();
     unmountComponentAtNode(element);
     appUnMounted();
   };

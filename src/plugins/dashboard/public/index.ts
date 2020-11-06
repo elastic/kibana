@@ -42,7 +42,6 @@ export {
   createDashboardUrlGenerator,
   DashboardUrlGeneratorState,
 } from './url_generator';
-export { addEmbeddableToDashboardUrl } from './url_utils/url_helper';
 export { DashboardSavedObject as SavedObjectDashboard } from './saved_dashboards';
 export { SavedDashboardPanel } from './types';
 

@@ -104,11 +104,12 @@ export interface DashboardListingProps {
 }
 
 export interface DashboardMountProps {
-  restorePreviousUrl: () => void;
   appUnMounted: () => void;
+  restorePreviousUrl: () => void;
   scopedHistory: ScopedHistory<unknown>;
   element: AppMountParameters['element'];
   initializerContext: PluginInitializerContext;
+  onAppLeave: AppMountParameters['onAppLeave'];
   core: CoreSetup<DashboardStartDependencies, DashboardStart>;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   usageCollection: DashboardSetupDependencies['usageCollection'];
@@ -124,24 +125,25 @@ export interface DashboardAppServices {
   core: CoreStart;
   chrome: ChromeStart;
   localStorage: Storage;
+  share?: SharePluginStart;
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
   uiSettings: IUiSettingsClient;
+  restorePreviousUrl: () => void;
   savedObjects: SavedObjectsStart;
   savedDashboards: SavedObjectLoader;
+  scopedHistory: () => ScopedHistory;
   indexPatterns: IndexPatternsContract;
+  addBasePath: (path: string) => string;
+  usageCollection?: UsageCollectionSetup;
   navigation: NavigationPublicPluginStart;
   dashboardCapabilities: DashboardCapabilities;
   initializerContext: PluginInitializerContext;
-  savedObjectsClient: SavedObjectsClientContract;
+  onAppLeave: AppMountParameters['onAppLeave'];
   savedObjectsTagging?: SavedObjectsTaggingApi;
+  savedObjectsClient: SavedObjectsClientContract;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   navigateToDefaultApp: UrlForwardingStart['navigateToDefaultApp'];
   savedQueryService: DataPublicPluginStart['query']['savedQueries'];
   navigateToLegacyKibanaUrl: UrlForwardingStart['navigateToLegacyKibanaUrl'];
-  addBasePath: (path: string) => string;
-  scopedHistory: () => ScopedHistory;
-  restorePreviousUrl: () => void;
-  usageCollection?: UsageCollectionSetup;
-  share?: SharePluginStart;
 }

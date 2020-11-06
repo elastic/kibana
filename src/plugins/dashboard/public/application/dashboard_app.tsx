@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useEffect, useCallback, useState } from 'react';
+import { History } from 'history';
 
 import _, { uniqBy } from 'lodash';
 import deepEqual from 'fast-deep-equal';
@@ -32,9 +32,15 @@ import {
   switchMap,
 } from 'rxjs/operators';
 import { merge, Observable, pipe, Subscription } from 'rxjs';
+import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import { getSavedObjectFinder, SavedObject } from '../../../saved_objects/public';
 import { DashboardStateManager } from './dashboard_state_manager';
-import { createKbnUrlStateStorage, withNotifyOnErrors } from '../../../kibana_utils/public';
+import {
+  createKbnUrlStateStorage,
+  getQueryParams,
+  removeQueryParam,
+  withNotifyOnErrors,
+} from '../../../kibana_utils/public';
 import {
   DashboardAppComponentActiveState,
   DashboardAppComponentState,
@@ -58,6 +64,8 @@ import {
 import {
   ContainerOutput,
   EmbeddableFactoryNotFoundError,
+  EmbeddableInput,
+  EmbeddablePackageState,
   ErrorEmbeddable,
   isErrorEmbeddable,
   openAddPanelFlyout,
@@ -66,10 +74,15 @@ import {
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE } from '.';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
-import { getDashboardTitle } from './dashboard_strings';
+import { dashboardBreadcrumb, getDashboardTitle, leaveConfirmStrings } from './dashboard_strings';
 import type { TagDecoratedSavedObject } from '../../../saved_objects_tagging_oss/public';
-import { DashboardEmptyScreen } from './dashboard_empty_screen';
-import { DashboardContainer, DashboardContainerInput, SavedDashboardPanel } from '..';
+import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
+import {
+  DashboardConstants,
+  DashboardContainer,
+  DashboardContainerInput,
+  SavedDashboardPanel,
+} from '..';
 
 // enum UrlParams {
 //   SHOW_TOP_MENU = 'show-top-menu',
@@ -130,11 +143,13 @@ const getChangesFromAppStateForContainerState = ({
 const getDashboardContainerInput = ({
   query,
   searchSessionId,
+  incomingEmbeddable,
   dashboardStateManager,
   dashboardCapabilities,
 }: {
   dashboardCapabilities: DashboardCapabilities;
   dashboardStateManager: DashboardStateManager;
+  incomingEmbeddable?: EmbeddablePackageState;
   searchSessionId: string;
   query: QueryStart;
 }): DashboardContainerInput => {
@@ -146,23 +161,19 @@ const getDashboardContainerInput = ({
   });
 
   // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
-  // if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
-  //   const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
-  //   embeddablesMap[incomingEmbeddable.embeddableId] = {
-  //     gridData: originalPanelState.gridData,
-  //     type: incomingEmbeddable.type,
-  //     explicitInput: {
-  //       ...originalPanelState.explicitInput,
-  //       ...incomingEmbeddable.input,
-  //       id: incomingEmbeddable.embeddableId,
-  //     },
-  //   };
-  //   incomingEmbeddable = undefined;
-  // }
+  if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
+    const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
+    embeddablesMap[incomingEmbeddable.embeddableId] = {
+      gridData: originalPanelState.gridData,
+      type: incomingEmbeddable.type,
+      explicitInput: {
+        ...originalPanelState.explicitInput,
+        ...incomingEmbeddable.input,
+        id: incomingEmbeddable.embeddableId,
+      },
+    };
+  }
 
-  // const shouldShowEditHelp = getShouldShowEditHelp();
-  // const shouldShowViewHelp = getShouldShowViewHelp();
-  // const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
   return {
     id: dashboardStateManager.savedDashboard.id || '',
     filters: query.filterManager.getFilters(),
@@ -177,7 +188,6 @@ const getDashboardContainerInput = ({
     panels: embeddablesMap,
     isFullScreenMode: dashboardStateManager.getFullScreenMode(),
     // isEmbeddedExternally,
-    // isEmptyState: shouldShowEditHelp || shouldShowViewHelp || isEmptyInReadonlyMode,
     useMargins: dashboardStateManager.getUseMargins(),
     // lastReloadRequestTime,
     dashboardCapabilities,
@@ -299,6 +309,9 @@ const getFiltersSubscription = (props: {
     });
 };
 
+const getSearchSessionIdFromURL = (history: History): string | undefined =>
+  getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
+
 const isActiveState = (
   testState: DashboardAppComponentState
 ): testState is DashboardAppComponentActiveState => {
@@ -319,6 +332,7 @@ export function DashboardApp({
   const {
     core,
     chrome,
+    // onAppLeave,
     // localStorage,
     embeddable,
     data,
@@ -335,7 +349,7 @@ export function DashboardApp({
     // savedQueryService,
     // navigateToLegacyKibanaUrl,
     // addBasePath,
-    // scopedHistory,
+    scopedHistory,
     // restorePreviousUrl,
     // embeddableCapabilities,
     savedObjectsTagging,
@@ -359,9 +373,19 @@ export function DashboardApp({
       }),
     });
     if (changes) {
+      if (getSearchSessionIdFromURL(history)) {
+        // going away from a background search results
+        removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
+      }
+
+      state.dashboardContainer.updateInput({
+        ...changes,
+        searchSessionId: data.search.session.start(),
+      });
       state.dashboardContainer.updateInput(changes);
     }
   }, [
+    history,
     data.query,
     data.search.session,
     dashboardCapabilities,
@@ -522,12 +546,22 @@ export function DashboardApp({
         'dashboard app requires dashboard embeddable factory'
       );
     }
+    const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+    if (searchSessionIdFromURL) {
+      data.search.session.restore(searchSessionIdFromURL);
+    }
+    // get incoming embeddable from the state transfer service.
+    const incomingEmbeddable = embeddable
+      .getStateTransfer(scopedHistory())
+      .getIncomingEmbeddablePackage();
+
     dashboardFactory
       .create(
         getDashboardContainerInput({
-          searchSessionId: data.search.session.start(),
+          searchSessionId: searchSessionIdFromURL ?? data.search.session.start(),
           dashboardStateManager,
           dashboardCapabilities,
+          incomingEmbeddable,
           query: data.query,
         })
       )
@@ -538,6 +572,17 @@ export function DashboardApp({
           !dashboardStateManager
         ) {
           return;
+        }
+
+        // If the incoming embeddable is newly created, add it with `addNewEmbeddable`
+        if (
+          incomingEmbeddable?.embeddableId &&
+          !dashboardContainer.getInput().panels[incomingEmbeddable.embeddableId]
+        ) {
+          dashboardContainer.addNewEmbeddable<EmbeddableInput>(
+            incomingEmbeddable.type,
+            incomingEmbeddable.input
+          );
         }
         setState((s) => ({ ...s, dashboardContainer, dashboardStateManager }));
       });
@@ -552,6 +597,7 @@ export function DashboardApp({
     embeddable,
     uiSettings,
     data.query,
+    scopedHistory,
     usageCollection,
     data.search.session,
     state.savedDashboard,
@@ -623,7 +669,6 @@ export function DashboardApp({
     return () => {
       dashboardContainer?.destroy();
       subscriptions.unsubscribe();
-      data.search.session.clear();
     };
   }, [
     createNew,
@@ -646,11 +691,24 @@ export function DashboardApp({
     }
     chrome.setBreadcrumbs([
       {
-        text: i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-          defaultMessage: 'Dashboard',
-        }),
+        text: dashboardBreadcrumb,
         onClick: () => {
-          redirectToDashboard({ listingFilter: '' });
+          if (state.dashboardStateManager?.getIsDirty()) {
+            core.overlays
+              .openConfirm(leaveConfirmStrings.leaveSubtitle, {
+                confirmButtonText: leaveConfirmStrings.confirmButtonText,
+                cancelButtonText: leaveConfirmStrings.cancelButtonText,
+                defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+                title: leaveConfirmStrings.leaveTitle,
+              })
+              .then((isConfirmed) => {
+                if (isConfirmed) {
+                  redirectToDashboard({ listingFilter: '' });
+                }
+              });
+          } else {
+            redirectToDashboard({ listingFilter: '' });
+          }
         },
       },
       {
@@ -662,7 +720,27 @@ export function DashboardApp({
         ),
       },
     ]);
-  }, [state.dashboardStateManager, chrome, data.query.timefilter.timefilter, redirectToDashboard]);
+  }, [
+    state.dashboardStateManager,
+    chrome,
+    data.query.timefilter.timefilter,
+    redirectToDashboard,
+    core.overlays,
+  ]);
+
+  // Build onAppLeave when Dashboard State Manager changes
+  // useEffect(() => {
+  //   onAppLeave((actions) => {
+  //     if (state.dashboardStateManager?.getIsDirty()) {
+  //       return actions.confirm(leaveConfirmStrings.subtitle, leaveConfirmStrings.title);
+  //     }
+  //     return actions.default();
+  //   });
+  //   return () => {
+  //     // reset on app leave handler so the listing page doesn't trigger a confirmation
+  //     onAppLeave((actions) => actions.default());
+  //   };
+  // }, [state.dashboardStateManager, onAppLeave]);
 
   return (
     <>

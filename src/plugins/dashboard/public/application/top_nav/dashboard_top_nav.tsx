@@ -27,6 +27,7 @@ import { ViewMode } from '../../../../embeddable/public';
 import { useKibana } from '../../../../kibana_react/public';
 import { SavedObjectSaveOpts, SaveResult, showSaveModal } from '../../../../saved_objects/public';
 import { NavAction } from '../../types';
+import { leaveConfirmStrings } from '../dashboard_strings';
 import { saveDashboard } from '../lib';
 import { DashboardAppServices, DashboardSaveOptions, DashboardTopNavProps } from '../types';
 import { getTopNavConfig } from './get_top_nav_config';
@@ -89,25 +90,12 @@ export function DashboardTopNav({
       }
 
       core.overlays
-        .openConfirm(
-          i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesDescription', {
-            defaultMessage: `Once you discard your changes, there's no getting them back.`,
-          }),
-          {
-            confirmButtonText: i18n.translate(
-              'dashboard.changeViewModeConfirmModal.confirmButtonLabel',
-              { defaultMessage: 'Discard changes' }
-            ),
-            cancelButtonText: i18n.translate(
-              'dashboard.changeViewModeConfirmModal.cancelButtonLabel',
-              { defaultMessage: 'Continue editing' }
-            ),
-            defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
-            title: i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesTitle', {
-              defaultMessage: 'Discard changes to dashboard?',
-            }),
-          }
-        )
+        .openConfirm(leaveConfirmStrings.discardSubtitle, {
+          confirmButtonText: leaveConfirmStrings.confirmButtonText,
+          cancelButtonText: leaveConfirmStrings.cancelButtonText,
+          defaultFocusedButton: EUI_MODAL_CANCEL_BUTTON,
+          title: leaveConfirmStrings.discardTitle,
+        })
         .then((isConfirmed) => {
           if (isConfirmed) {
             revertChangesAndExitEditMode();

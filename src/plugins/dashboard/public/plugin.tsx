@@ -303,6 +303,7 @@ export class DashboardPlugin
           core,
           appUnMounted,
           usageCollection,
+          onAppLeave: params.onAppLeave,
           initializerContext: this.initializerContext,
           restorePreviousUrl,
           element: params.element,
@@ -361,23 +362,6 @@ export class DashboardPlugin
       });
     }
   }
-
-  // private addEmbeddableToDashboard(
-  //   core: CoreStart,
-  //   { embeddableId, embeddableType }: { embeddableId: string; embeddableType: string }
-  // ) {
-  //   if (!this.getActiveUrl) {
-  //     throw new Error('dashboard is not ready yet.');
-  //   }
-
-  //   const lastDashboardUrl = this.getActiveUrl();
-  //   const dashboardUrl = addEmbeddableToDashboardUrl(
-  //     lastDashboardUrl,
-  //     embeddableId,
-  //     embeddableType
-  //   );
-  //   core.application.navigateToApp('dashboards', { path: dashboardUrl });
-  // }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     const { notifications } = core;
