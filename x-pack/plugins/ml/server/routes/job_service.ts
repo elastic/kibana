@@ -403,7 +403,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
    *
    * @api {post} /api/ml/jobs/jobs_exist Check whether jobs exists in current or any space
    * @apiName JobsExist
-   * @apiDescription Checks if each of the jobs in the specified list of IDs exist
+   * @apiDescription Checks if each of the jobs in the specified list of IDs exist.
+   *                 If allSpaces is true, the check will look across all spaces.
    *
    * @apiSchema (body) jobsExistSchema
    */

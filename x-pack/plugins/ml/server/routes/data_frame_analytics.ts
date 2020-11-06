@@ -547,9 +547,10 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
   /**
    * @apiGroup DataFrameAnalytics
    *
-   * @api {post} /api/ml/data_frame/analytics/job_exists/:analyticsId Check whether jobs exists in current or any space
+   * @api {post} /api/ml/data_frame/analytics/job_exists Check whether jobs exists in current or any space
    * @apiName JobExists
-   * @apiDescription Returns a boolean based on whether the job exists
+   * @apiDescription Checks if each of the jobs in the specified list of IDs exist.
+   *                 If allSpaces is true, the check will look across all spaces.
    *
    * @apiSchema (params) analyticsIdSchema
    */
