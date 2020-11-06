@@ -16,6 +16,7 @@ import {
   analyticsIdSchema,
   stopsDataFrameAnalyticsJobQuerySchema,
   deleteDataFrameAnalyticsJobSchema,
+  jobsExistSchema,
 } from './schemas/data_analytics_schema';
 import { IndexPatternHandler } from '../models/data_frame_analytics/index_patterns';
 import { DeleteDataFrameAnalyticsWithIndexStatus } from '../../common/types/data_frame_analytics';
@@ -546,38 +547,50 @@ export function dataFrameAnalyticsRoutes({ router, mlLicense, routeGuard }: Rout
   /**
    * @apiGroup DataFrameAnalytics
    *
-   * @api {get} /api/ml/data_frame/analytics/job_exists/:analyticsId Check whether jobs exists in any space
+   * @api {post} /api/ml/data_frame/analytics/job_exists/:analyticsId Check whether jobs exists in current or any space
    * @apiName JobExists
    * @apiDescription Returns a boolean based on whether the job exists
    *
    * @apiSchema (params) analyticsIdSchema
    */
-  router.get(
+  router.post(
     {
-      path: '/api/ml/data_frame/analytics/job_exists/{analyticsId}',
+      path: '/api/ml/data_frame/analytics/jobs_exist',
       validate: {
-        params: analyticsIdSchema,
+        body: jobsExistSchema,
       },
       options: {
         tags: ['access:ml:canGetDataFrameAnalytics'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      let exists = false;
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
-        const { analyticsId } = request.params;
-        try {
-          const { body } = await client.asInternalUser.ml.getDataFrameAnalytics<{
-            data_frame_analytics: DataFrameAnalyticsConfig[];
-          }>({
-            id: analyticsId,
-          });
-          exists = body.data_frame_analytics.length > 0;
-        } catch (error) {
-          // fail silently
+        const { analyticsIds, allSpaces } = request.body;
+        const results: { [id: string]: boolean } = {};
+        for (const id of analyticsIds) {
+          try {
+            const { body } = allSpaces
+              ? await client.asInternalUser.ml.getDataFrameAnalytics<{
+                  data_frame_analytics: DataFrameAnalyticsConfig[];
+                }>({
+                  id,
+                })
+              : await mlClient.getDataFrameAnalytics<{
+                  data_frame_analytics: DataFrameAnalyticsConfig[];
+                }>({
+                  id,
+                });
+            results[id] = body.data_frame_analytics.length > 0;
+          } catch (error) {
+            if (error.statusCode !== 404) {
+              throw error;
+            }
+            results[id] = false;
+          }
         }
+
         return response.ok({
-          body: { exists },
+          body: { results },
         });
       } catch (e) {
         return response.customError(wrapError(e));

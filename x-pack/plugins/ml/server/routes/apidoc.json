@@ -16,7 +16,7 @@
     "GetDataFrameAnalyticsMessages",
     "UpdateDataFrameAnalytics",
     "DeleteDataFrameAnalytics",
-    "JobExists",
+    "JobsExist",
 
     "DataVisualizer",
     "GetOverallStats",
@@ -86,7 +86,6 @@
     "DeletingJobTasks",
     "DeleteJobs",
     "RevertModelSnapshot",
-    "JobExists",
 
     "Calendars",
     "PutCalendars",

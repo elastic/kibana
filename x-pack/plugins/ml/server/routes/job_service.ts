@@ -18,10 +18,10 @@ import {
   topCategoriesSchema,
   updateGroupsSchema,
   revertModelSnapshotSchema,
+  jobsExistSchema,
 } from './schemas/job_service_schema';
 
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
-import { Job } from '../../common/types/anomaly_detection_jobs';
 
 import { jobServiceProvider } from '../models/job_service';
 import { categorizationExamplesProvider } from '../models/job_service/new_job';
@@ -401,17 +401,17 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/jobs_exist Check if jobs exist
+   * @api {post} /api/ml/jobs/jobs_exist Check whether jobs exists in current or any space
    * @apiName JobsExist
    * @apiDescription Checks if each of the jobs in the specified list of IDs exist
    *
-   * @apiSchema (body) jobIdsSchema
+   * @apiSchema (body) jobsExistSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/jobs_exist',
       validate: {
-        body: jobIdsSchema,
+        body: jobsExistSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -420,8 +420,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { jobsExist } = jobServiceProvider(client, mlClient);
-        const { jobIds } = request.body;
-        const resp = await jobsExist(jobIds);
+        const { jobIds, allSpaces } = request.body;
+        const resp = await jobsExist(jobIds, allSpaces);
 
         return response.ok({
           body: resp,
@@ -766,47 +766,6 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
 
         return response.ok({
           body: resp,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
-    })
-  );
-
-  /**
-   * @apiGroup JobService
-   *
-   * @api {get} /api/ml/jobs/jobs_exist Check whether jobs exists in any space
-   * @apiName JobExists
-   * @apiDescription Returns a boolean based on whether the job exists
-   *
-   * @apiSchema (body) jobIdsSchema
-   */
-  router.get(
-    {
-      path: '/api/ml/jobs/job_exist/{jobId}',
-      validate: {
-        params: jobIdSchema,
-      },
-      options: {
-        tags: ['access:ml:canGetJobs'],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      let exists = false;
-      try {
-        const { jobId } = request.params;
-        try {
-          const { body } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>({
-            job_id: jobId,
-          });
-          exists = body.jobs.length > 0;
-        } catch (error) {
-          // fail silently
-        }
-
-        return response.ok({
-          body: { exists },
         });
       } catch (e) {
         return response.customError(wrapError(e));
