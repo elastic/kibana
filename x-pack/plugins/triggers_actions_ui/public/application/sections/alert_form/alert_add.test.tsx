@@ -99,6 +99,7 @@ describe('alert_add', () => {
       iconClass: 'test',
       name: 'test-alert',
       description: 'test',
+      documentationUrl: null,
       validate: (): ValidationResult => {
         return { errors: {} };
       },
