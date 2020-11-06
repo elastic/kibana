@@ -4,4 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const DEFAULT_FILTER_BY_MAP_BOUNDS = true;
+import { SecurityNavControlServiceStart } from '.';
+
+export const navControlServiceMock = {
+  createStart: (): jest.Mocked<SecurityNavControlServiceStart> => ({
+    getUserMenuLinks$: jest.fn(),
+    addUserMenuLinks: jest.fn(),
+  }),
+};
