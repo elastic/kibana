@@ -1,0 +1,3006 @@
+---
+id: kibanaFormLib
+slug: /kibana/development/form-lib
+title: Kibana form lib
+image: https://source.unsplash.com/400x175/?Nature
+summary: Tools for building forms.
+date: 2020-07-08
+tags: ['kibana','elasticsearch','forms']
+---
+
+## Getting started
+
+### About
+
+#### Presentation
+
+The form library helps us building forms efficiently by providing a system whose main task is (1) to abstract away the state management of fields values and validity and (2) running validations on the fields when their values change.
+
+The system is composed of **three Cparts**:
+
+* [the core](../core/about)
+* [fields components](../helpers/components)
+* [validators](../helpers/validators)
+
+#### Motivation
+
+In the Elasticsearch UI team we build many forms. Many many forms! :blush: For each of them, we used to manually declare the form state, write validation functions, call them on certain events and then update the form state. We were basically re-inventing the wheel for each new form we built. It took our precious dev time to re-think the approach each time, but even more problematic: it meant that each of our form was built slightly differently. Maintaining those forms meant that we needed to remember how the state was being updated on a specific form and how its validation worked. This was far from efficient...
+
+We needed a system in place that took care of the repetitive task of managing a form state and validating its value, so we could dedicate more time doing what we love: **build amazing UX for our users!**.
+
+The form lib was born.
+
+#### When shoud I use the form lib?
+
+As soon as you have a form with 3+ fields and some validation that you need to run on any of those fields, the form lib can help you reduce the boilerplate and the time to get you form running. Of course, the more you use it, the more addicted you will get! :smile:
+
+## Examples
+
+### Style fields
+
+#### Basic
+
+To its most basic form, you can style your fields by passing props to the `UseField` component that will be applied to an `<input />` in the DOM:
+
+```css
+/* my_styles.css */
+.text-input {
+  color: blue;
+  border-radius: 16px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  margin-right: 12px;
+}
+```
+
+```js
+import './my_styles.css';
+
+export const StyleFieldsBasic = () => {
+  const { form } = useForm();
+
+  return (
+    <Form form={form}>
+      <UseField path="username" className="text-input" />
+      <UseField path="password" type="password" className="text-input" />
+    </Form>
+  );
+};
+```
+
+#### With chilren prop
+
+The above solution can work with very simple usecases but we might want to display validation errors below the field and change the styling accordingly. For that we can use the "children prop" declaration where we will receive the `FieldHook` back and we'll have all the freedom of styling that we want.
+
+```js
+export const StyleFieldsChildrenProp = () => {
+  const { form } = useForm();
+
+  // Notice how we have typed the value of the field with <UseField<string> ...>
+  return (
+    <Form form={form}>
+      <UseField<string> path="firstname" config={{ label: 'First name' }}>
+        {(field) => {
+          // You get back a FieldHook: the styling is all yours!
+          const errors = field.getErrorsMessages();
+          return (
+            <div style={{ border: field.isValid ? 'none' : '1px solid red' }}>
+              <label>{field.label}</label>
+              <input id="firstName" type="text" value={field.value} onChange={field.onChange} />
+              {!field.isValid && <div>{errors}</div>}
+            </div>
+          );
+        }}
+      </UseField>
+    </Form>
+  );
+};
+```
+
+#### Using the "component" prop
+
+The above solution works great, but if we have multiple fields with the same styling and logic, it will be a very repetitive task with with a lot of noise in our JSX. Let's encapsulate the content of the children func into its own component.
+
+```js
+// This is exactly what we had in the previous example
+export const MyTextField = ({ field }: { field: FieldHook<string> }) => {
+  const errors = field.getErrorsMessages();
+  return (
+    <div style={{ border: field.isValid ? 'none' : '1px solid red' }}>
+      <label>{field.label}</label>
+      <input id="firstName" type="text" value={field.value} onChange={field.onChange} />
+      {!field.isValid && <div>{errors}</div>}
+    </div>
+  );
+};
+```
+
+Now we can have multiple fields using this component for styling.
+
+```js
+import { MyTextField } from './my_text_field';
+
+export const StyleFieldsComponent = () => {
+  const { form } = useForm();
+
+  return (
+    <Form form={form}>
+      <UseField<string> path="firstname" config={{ label: 'First name' }} component={MyTextField} />
+      <UseField<string> path="lastname" config={{ label: 'Last name' }} component={MyTextField} />
+    </Form>
+  );
+};
+```
+
+And if you need to pass some props to your custom component you can pass them with the `componentProps` prop.
+
+```js
+export const StyleFieldsComponent = () => {
+  const { form } = useForm();
+
+  return (
+    <Form form={form}>
+      <UseField<string> path="firstname" config={{ label: 'First name' }} component={MyTextField} />
+      <UseField<string>
+        path="lastname"
+        config={{ label: 'Last name' }}
+        component={MyTextField}
+        componentProps={{ some: 'value' }}
+      />
+    </Form>
+  );
+};
+```
+
+### Validation
+
+#### Basic
+
+```js
+import React from 'react';
+import {
+  useForm,
+  Form,
+  UseField,
+  FieldConfig,
+} from '<path-to-form-lib>';
+
+interface MyForm {
+  name: string;
+}
+
+const nameConfig: FieldConfig<MyForm, string> = {
+  validations: [
+    {
+      validator: ({ value }) => {
+        if (value.trim() === '') {
+          return {
+            message: 'The name cannot be empty.',
+          };
+        }
+      },
+    },
+    // ...
+    // You can add as many validations as you need.
+    // It is better to kepp validators single purposed.
+  ],
+};
+
+export const ValidationBasic = () => {
+  const { form } = useForm<MyForm>();
+
+  return (
+    <Form form={form}>
+      <UseField path="name" config={nameConfig}>
+        {(field) => {
+          const isInvalid = !field.isChangingValue && field.errors.length > 0;
+          return (
+            <>
+              <EuiFieldText
+                isInvalid={isInvalid}
+                value={field.value}
+                onChange={field.onChange}
+                fullWidth
+              />
+              {!field.isValid && <div>{field.getErrorsMessages()}</div>}
+            </>
+          );
+        }}
+      </UseField>
+    </Form>
+  );
+};
+```
+
+#### Reusable validators
+
+Before creating your own validator, verify that it does not exist already in our reusable field validators.
+
+In the example below, in just a few lines we've added 2 validations on a field that:
+
+* must be a valid index name (try adding a "?" or "/" character so see the validation)
+* cannot be empty
+
+```js
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  fieldValidators,
+  ...
+} from '<path-to-form-lib>';
+
+const { emptyField, indexNameField } = fieldValidators;
+
+const nameConfig: FieldConfig<MyForm, string> = {
+  validations: [
+    {
+      validator: emptyField('The name cannot be empty,'),
+    },
+    {
+      validator: indexNameField(i18n),
+    },
+  ],
+};
+
+export const ReusableValidations = () => {
+  const { form } = useForm<MyForm>();
+
+  return (
+    <Form form={form}>
+      <UseField<string> path="name" config={nameConfig}>
+        {(field) => {
+          const isInvalid = !field.isChangingValue && field.errors.length > 0;
+          return (
+            <>
+              <EuiFieldText
+                isInvalid={isInvalid}
+                value={field.value}
+                onChange={field.onChange}
+                fullWidth
+              />
+              {!field.isValid && <div>{field.getErrorsMessages()}</div>}
+            </>
+          );
+        }}
+      </UseField>
+    </Form>
+  );
+};
+```
+
+#### Asynchronous validation
+
+You can mix synchronous and asynchronous validations. Although it is usually better to first declare the synchronous one(s), this way if any of those ones fails, the asynchronous validation is not executed.
+
+In the example below, if you enter "bad" in the field, the asynchronous validation will fail.
+
+```js
+const nameConfig: FieldConfig<MyForm, string> = {
+  validations: [
+    {
+      validator: emptyField('The name cannot be empty,'),
+    },
+    {
+      validator: indexNameField(i18n),
+    },
+    {
+      validator: async ({ value }) => {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            if (value === 'bad') {
+              resolve({ message: 'This index already exists' });
+            }
+            resolve();
+          }, 2000);
+        });
+      },
+    },
+  ],
+};
+
+export const AsyncValidation = () => {
+  const { form } = useForm<MyForm>();
+  return (
+    <Form form={form}>
+      <UseField<string> path="name" config={nameConfig}>
+        {(field) => {
+          const isInvalid = !field.isChangingValue && field.errors.length > 0;
+          return (
+            <>
+              <EuiFieldText
+                isInvalid={isInvalid}
+                value={field.value}
+                onChange={field.onChange}
+                isLoading={field.isValidating}
+                fullWidth
+              />
+              {isInvalid && <div>{field.getErrorsMessages()}</div>}
+            </>
+          );
+        }}
+      </UseField>
+    </Form>
+  );
+};
+```
+
+##### Cancel asynchronous validation
+
+If you need to cancel the previous asynchronous validation before calling the new one, you can do it by adding a `cancel()` handler to the Promise returned.
+
+**Note:** Make sure **to not** use an `async` validator function when returning your Promise, or the `cancel` handler will be stripped out.
+
+```js
+const nameConfig: FieldConfig<MyForm, string> = {
+  validations: [
+    {
+      validator: ({ value }) => {
+        let isCanceled = false;
+        const promise: Promise<any> & { cancel?(): void } = new Promise((resolve) => {
+          setTimeout(() => {
+            if (isCanceled) {
+              console.log('This promise has been canceled, skipping');
+              return resolve();
+            }
+
+            if (value === 'bad') {
+              resolve({ message: 'This index already exists' });
+            }
+            resolve();
+          }, 2000);
+        });
+
+        promise.cancel = () => {
+          isCanceled = true;
+        };
+
+        return promise;
+      },
+    },
+  ],
+};
+
+export const CancelAsyncValidation = () => {
+  const { form } = useForm<MyForm>();
+  return (
+    <Form form={form}>
+      <UseField<string> path="name" config={nameConfig}>
+        {(field) => {
+          const isInvalid = !field.isChangingValue && field.errors.length > 0;
+          return (
+            <>
+              <EuiFieldText
+                isInvalid={isInvalid}
+                value={field.value}
+                onChange={field.onChange}
+                isLoading={field.isValidating}
+                fullWidth
+              />
+              {isInvalid && <div>{field.getErrorsMessages()}</div>}
+            </>
+          );
+        }}
+      </UseField>
+    </Form>
+  );
+};
+```
+
+#### Typed validation
+
+It is possible to give a `type` to a validation to cover some cases where you need different validation type for the same field. Let's imagine that we have a form field to enter "tags" (an array of string). The array cannot be left empty and the tags cannot contain the "?" and "/" characters.
+
+The field `value` is an array of string, and the default (not typed) validation(s) will run against this array of string. We are going to use a typed validation for the array items.
+
+**Note:** Typed validation are not executed when the field value changes, we need to manually validate the field with `field.validate(...)`.
+
+```js
+const tagsConfig: FieldConfig<MyForm, string[]> = {
+  defaultValue: [],
+  validations: [
+    // Validator for the Array
+    { validator: emptyField('You need to add at least one tag') },
+    {
+      // Validator for the Array item
+      validator: containsCharsField({
+        message: ({ charsFound }) => {
+          return `Remove the char ${charsFound.join(', ')} from the field.`;
+        },
+        chars: ['?', '/'],
+      }),
+      // We give a custom type to this validation.
+      // This validation won't be executed when the field value changes (items being added or removed to the array).
+      // This means that we will need to manually call field.validate({ validationType: 'arrayItem }).
+      type: 'arrayItem',
+    },
+  ],
+};
+
+export const ValidationWithType = () => {
+  const onSubmit: FormConfig['onSubmit'] = async (data, isValid) => {
+    console.log('Is form valid:', isValid);
+    console.log('Form data', data);
+  };
+
+  const { form } = useForm<MyForm>({ onSubmit });
+
+  return (
+    <Form form={form}>
+      <UseField<string[]> path="tags" config={tagsConfig}>
+        {(field) => {
+          // Look for error message on **both** the default validation and the "arrayItem" type
+          const errorMessage =
+            field.getErrorsMessages() ?? field.getErrorsMessages({ validationType: 'arrayItem' });
+
+          const onCreateOption = (value: string) => {
+            const { isValid } = field.validate({
+              value: value as any,
+              validationType: 'arrayItem', // Validate  **only** this validation type against the value provided
+            }) as { isValid: boolean };
+
+            if (!isValid) {
+              // Reject the user's input.
+              return false;
+            }
+
+            field.setValue([...field.value, value]);
+          };
+
+          const onChange = (options: EuiComboBoxOptionOption[]) => {
+            field.setValue(options.map((option) => option.label));
+          };
+
+          const onSearchChange = (value: string) => {
+            if (value !== undefined) {
+              // Clear immediately the "arrayItem" validation type
+              field.clearErrors('arrayItem');
+            }
+          };
+
+          return (
+            <>
+              <EuiComboBox
+                noSuggestions
+                placeholder="Type and then hit ENTER"
+                selectedOptions={field.value.map((v) => ({ label: v }))}
+                onCreateOption={onCreateOption}
+                onChange={onChange}
+                onSearchChange={onSearchChange}
+                fullWidth
+              />
+              {!field.isValid && <div>{errorMessage}</div>}
+              <button onClick={form.submit}>Submit</button>
+            </>
+          );
+        }}
+      </UseField>
+    </Form>
+  );
+};
+```
+
+Great, but that's **a lot** of code for a simple tags field input. Fortunatelly the `<ComboBoxField />` helper component takes care of all the heavy lifting for us. The above component can simply be:
+
+```js
+const tagsConfig: FieldConfig<MyForm, string[]> = {
+  defaultValue: [],
+  validations: [
+    { validator: emptyField('You need to add at least one tag')},
+    {
+      validator: containsCharsField({
+        message: ({ charsFound }) => {
+          return `Remove the char ${charsFound.join(', ')} from the field.`;
+        },
+        chars: ['?', '/'],
+      }),
+      // Make sure to use the "ARRAY_ITEM" constant
+      type: VALIDATION_TYPES.ARRAY_ITEM,
+    },
+  ],
+};
+
+export const ValidationWithTypeComboBoxField = () => {
+  const onSubmit: FormConfig['onSubmit'] = async (data, isValid) => {
+    console.log('Is form valid:', isValid);
+    console.log('Form data', data);
+  };
+
+  const { form } = useForm<MyForm>({ onSubmit });
+
+  return (
+    <Form form={form}>
+      <UseField<string[]> path="tags" config={tagsConfig} component={ComboBoxField} />
+      <button onClick={form.submit}>Submit</button>
+    </Form>
+  );
+};
+```
+
+Much better! :blush:
+
+### React to changes
+
+#### Basic
+
+```js
+// From the root component (where the "form" is declared)
+export const ReactToChangesBasic = () => {
+  const { form } = useForm();
+
+  const [formData] = useFormData({ form });
+
+  return (
+    <Form form={form}>
+      <UseField path="fistName" config={{ label: 'First name' }} component={TextField} />
+      <UseField path="lastName" config={{ label: 'Last name' }} component={TextField} />
+      <EuiCode>{JSON.stringify(formData)}</EuiCode>
+    </Form>
+  );
+};
+
+// Inside a child component (no need to pass the form object, it is read from context)
+const FormFields = () => {
+  const [formData] = useFormData();
+
+  return (
+    <>
+      <UseField path="fistName" config={{ label: 'First name' }} component={TextField} />
+      <UseField path="lastName" config={{ label: 'Last name' }} component={TextField} />
+      <EuiCode>{JSON.stringify(formData)}</EuiCode>
+    </>
+  )
+};
+
+export const ReactToChangesBasic = () => {
+  const { form } = useForm();
+
+  return (
+    <Form form={form}>
+      <FormFields />
+    </Form>
+  );
+};
+```
+
+#### Listen to specific form fields changes
+
+In some cases you only want to listen to some field change and don't want to trigger a re-render of your component for every field value change. You can specify a **watch** (`string | string[]`) parameter for that.
+
+```js
+export const ReactToSpecificFields = () => {
+  const { form } = useForm();
+  const [{ showAddress }] = useFormData({ form, watch: 'showAddress' });
+
+  return (
+    <Form form={form}>
+      {/* Changing the "name" field won't trigger a re-render */}
+      <UseField path="name" config={{ label: 'First name' }} component={TextField} />
+
+      <UseField
+        path="showAddress"
+        config={{ defaultValue: false, label: 'Show address' }}
+        component={ToggleField}
+      />
+      {showAddress && (
+        <>
+          <p>800 W El Camino Real #350</p>
+        </>
+      )}
+    </Form>
+  );
+};
+```
+
+#### Using the `onChange` handler
+
+Sometimes the good old `onChange` handler is all you need to react to a form field value change (instead of reading the form data and add a `useEffect` to react to it).
+
+```js
+export const OnChangeHandler = () => {
+  const { form } = useForm();
+
+  const onNameChange = (value: string) => {
+    console.log(value);
+  };
+
+  return (
+    <Form form={form}>
+      <UseField
+        path="name"
+        config={{ label: 'Name' }}
+        component={TextField}
+        onChange={onNameChange}
+      />
+    </Form>
+  );
+};
+```
+
+#### Forward the form state to a parent component
+
+If your UX requires to submit the form in a parent component (e.g. because that's where your submit button is located), you will need a way to access the form validity and the form data outside your form component. Unless your parent component needs to be aware of every field value change in the form (which should rarely be needed), you don't want to use the `useFormData()` hook and forward the data from there. This would create unnecessary re-renders. Instead it is better to forward the `getFormData()` handler on the form.
+
+```js
+interface MyForm {
+  name: string;
+}
+
+interface FormState {
+  isValid: boolean | undefined;
+  validate(): Promise<boolean>;
+  getData(): MyForm;
+}
+
+const schema: FormSchema<MyForm> = {
+  name: {
+    validations: [
+      {
+        validator: ({ value }) => {
+          if (value === 'John') {
+            return { message: `The username "John" already exists` };
+          }
+        },
+      },
+    ],
+  },
+};
+
+interface Props {
+  defaultValue: MyForm;
+  onChange(formState: FormState): void;
+}
+
+const MyForm = ({ defaultValue, onChange }: Props) => {
+  const { form } = useForm<MyForm>({ defaultValue, schema });
+  const { isValid, validate, getFormData } = form;
+
+  useEffect(() => {
+    onChange({ isValid, validate, getData: getFormData });
+  }, [onChange, isValid, validate, getFormData]);
+
+  return (
+    <Form form={form}>
+      <UseField path="name" component={TextField} />
+    </Form>
+  );
+};
+
+export const ForwardFormStateToParent = () => {
+  // This would probably come from the server
+  const formDefaultValue: MyForm = {
+    name: 'John',
+  };
+
+  const initialState = {
+    isValid: true,
+    validate: async () => true,
+    getData: () => formDefaultValue,
+  };
+
+  const [formState, setFormState] = useState<FormState>(initialState);
+
+  const sendForm = useCallback(async () => {
+    // The form isValid state will stay "undefined" until all the fields are dirty.
+    // This is why we check first if its undefined, and if so  we call the validate() method
+    // to trigger the validation on all the fields that haven't been validated yet.
+    const isValid = formState.isValid ?? (await formState.validate());
+    if (!isValid) {
+      // Maybe show a callout?
+      return;
+    }
+
+    console.log('Form data', formState.getData());
+  }, [formState]);
+
+  return (
+    <>
+      <h1>My form</h1>
+      <MyForm defaultValue={formDefaultValue} onChange={setFormState} />
+      <EuiButton color="primary" onClick={sendForm} disabled={formState.isValid === false} fill>
+        Submit
+      </EuiButton>
+    </>
+  );
+};
+```
+
+### Field composition
+
+If you need to swap your form fields according to one field value (e.g. the "type" has changed), you can leverage the power of field composition with the form lib.
+
+Let's imagine that we need to build a form to declare a _value_ configuration. This value can either be of type `text`, `float` or `boolean`, and each type has an additional parameter that can be configured.
+We will build a form with a dropdown to select the value **type**, and then accordinglty to the chosen type we will add to the form different configuration fields.
+
+Those are the 3 type of values that the form can generate:
+
+```js
+const textType = {
+  type: 'text',
+  index: true,
+  analyzer: 'standard', // specific to this type
+};
+
+const floatType = {
+  type: 'float',
+  index: true,
+  coerce: true, // specific to this type
+};
+
+const booleanType = {
+  type: 'boolean',
+  index: true,
+  boost: 1.0, // specific to this type
+}
+```
+
+We can see that we have a common "index" field in all three configuration, which is a boolean. We will create a reusable component for that field. And then each value has one specific parameter.
+
+Let's start by creating our reusable "index" parameter field.
+
+```js
+// index_parameter.tsx
+const indexConfig = {
+  label: 'Index',
+  defaultValue: true,
+};
+
+export const IndexParameter = () => {
+  return <UseField path="index" config={indexConfig} component={ToggleField} />;
+};
+```
+
+Now let's create one component for each value type that will expose its parameters. Those components won't have to declare the "type" parameter it is common to all three values and we will put it at the root of the form.
+
+```js
+// text_type.tsx
+import { IndexParameter } from './index_parameter';
+
+const analyzerConfig = {
+  label: 'Analyzer',
+  defaultValue: 'standard',
+};
+
+export const TextType = () => {
+  return (
+    <>
+      <IndexParameter />
+      <UseField path="analyzer" config={analyzerConfig} component={TextField} />
+    </>
+  );
+};
+```
+
+```js
+// float_type.tsx
+import { IndexParameter } from './index_parameter';
+
+const coerceConfig = {
+  label: 'Coerce',
+  defaultValue: true,
+};
+
+export const FloatType = () => {
+  return (
+    <>
+      <IndexParameter />
+      <UseField path="corece" config={coerceConfig} component={ToggleField} />
+    </>
+  );
+};
+```
+
+```js
+// boolean_type.tsx
+import { IndexParameter } from './index_parameter';
+
+const boostConfig = {
+  label: 'Boost',
+  defaultValue: 1.0,
+  serializer: parseFloat,
+};
+
+export const BooleanType = () => {
+  return (
+    <>
+      <IndexParameter />
+      <UseField path="boost" config={boostConfig} component={NumericField} />
+    </>
+  );
+};
+```
+
+And finally, let's build our form which will swap those component according to the "type" selected.
+
+```js
+import { TextType } from './text_type';
+import { FloatType } from './float_type';
+import { BooleanType } from './boolean_type';
+
+const typeToCompMap: { [key: string]: React.FunctionComponent } = {
+  text: TextType,
+  float: FloatType,
+  boolean: BooleanType,
+};
+
+const typeConfig = {
+  label: 'Type',
+  defaultValue: 'text',
+};
+
+const typeOptions = [
+  {
+    text: 'text',
+  },
+  {
+    text: 'float',
+  },
+  {
+    text: 'boolean',
+  },
+];
+
+export const FieldsComposition = () => {
+  const { form } = useForm();
+  const [{ type }] = useFormData({ form, watch: 'type' });
+
+  const renderTypeFields = () => {
+    // Swap form fields according to the chosen type.
+    const FieldsForType = typeToCompMap[type as string];
+    return <FieldsForType />;
+  };
+
+  const submitForm = () => {
+    console.log(form.getFormData());
+  };
+
+  return (
+    <Form form={form}>
+      <UseField
+        path="type"
+        config={typeConfig}
+        component={SelectField}
+        componentProps={{
+          euiFieldProps: { options: typeOptions },
+        }}
+      />
+      {type !== undefined ? renderTypeFields() : null}
+      <EuiSpacer />
+      <EuiButton onClick={submitForm} fill>
+        Submit
+      </EuiButton>
+    </Form>
+  );
+};
+```
+
+### Dynamic fields
+
+#### Basic
+
+Dynamic fields are fields that the user can add or remove in your form. Those fields will end up in an array of _values_ or an array of _objects_.  To enable dynamic fields in your form you use [the `<UseArray />` component](../core/use_array).
+
+Let's imagine a form that lets a user enter multiple parent / child relationships.
+
+```js
+export const DynamicFields = () => {
+  const todoList = {
+    items: [
+      {
+        title: 'Title 1',
+        subTitle: 'Subtitle 1',
+      },
+      {
+        title: 'Title 2',
+        subTitle: 'Subtitle 2',
+      },
+    ],
+  };
+  const { form } = useForm({ defaultValue: todoList });
+
+  const submitForm = () => {
+    console.log(form.getFormData());
+  };
+
+  return (
+    <Form form={form}>
+      <UseArray path="items">
+        {({ items, addItem, removeItem }) => {
+          return (
+            <>
+              {items.map((item) => (
+                <EuiFlexGroup key={item.id}>
+                  <EuiFlexItem>
+                    <UseField
+                      path={`${item.path}.title`}
+                      config={{ label: 'Title' }}
+                      component={TextField}
+                      // Make sure to add this prop otherwise when you delete
+                      // a row and add a new one, the stale values will appear
+                      readDefaultValueOnForm={!item.isNew}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <UseField
+                      path={`${item.path}.subTitle`}
+                      config={{ label: 'Subtitle' }}
+                      component={TextField}
+                      readDefaultValueOnForm={!item.isNew}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      color="danger"
+                      onClick={() => removeItem(item.id)}
+                      iconType="minusInCircle"
+                      aria-label="Remove item"
+                      style={{ marginTop: '28px' }}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ))}
+              <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
+                Add item
+              </EuiButtonEmpty>
+              <EuiSpacer />
+            </>
+          );
+        }}
+      </UseArray>
+
+      <EuiSpacer />
+      <EuiButton onClick={submitForm} fill>
+        Submit
+      </EuiButton>
+    </Form>
+  );
+};
+```
+
+#### Validation
+
+If you need to validate the number of items in the array, you can provide a `validations` prop to the `<UseArray />`. If, for example, we require at least one relationship to be provided, we can either:
+
+* Hide the "Remove" button when there is only one relationship
+* Add a `validations` prop
+
+The first one is easy, let's look at the second option:
+
+```js
+const itemsValidations = [
+  {
+    validator: ({ value }: { value: any[] }) => {
+      if (value.length === 0) {
+        return {
+          message: 'You need to add at least one item',
+        };
+      }
+    },
+  },
+];
+
+const { emptyField } = fieldValidators;
+const textFieldValidations = [{ validator: emptyField("The field can't be empty.") }];
+
+export const DynamicFieldsValidation = () => {
+  const { form } = useForm();
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+
+    if (isValid) {
+      console.log(data);
+    }
+  };
+
+  return (
+    <Form form={form}>
+      <UseArray path="items" validations={itemsValidations}>
+        {({ items, addItem, removeItem, error, form: { isSubmitted } }) => {
+          const isInvalid = error !== null && isSubmitted;
+          return (
+            <>
+              <EuiFormRow label="Todo items" error={error} isInvalid={isInvalid} fullWidth>
+                <>
+                  {items.map((item) => (
+                    <EuiFlexGroup key={item.id}>
+                      <EuiFlexItem>
+                        <UseField
+                          path={`${item.path}.title`}
+                          config={{ label: 'Title', validations: textFieldValidations }}
+                          component={TextField}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <UseField
+                          path={`${item.path}.subtitle`}
+                          config={{ label: 'Subtitle', validations: textFieldValidations }}
+                          component={TextField}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonIcon
+                          color="danger"
+                          onClick={() => removeItem(item.id)}
+                          iconType="minusInCircle"
+                          aria-label="Remove item"
+                          style={{ marginTop: '28px' }}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ))}
+                </>
+              </EuiFormRow>
+              <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
+                Add item
+              </EuiButtonEmpty>
+              <EuiSpacer />
+            </>
+          );
+        }}
+      </UseArray>
+
+      <EuiSpacer />
+      <EuiButton onClick={submitForm} fill disabled={form.isSubmitted && form.isValid === false}>
+        Submit
+      </EuiButton>
+    </Form>
+  );
+};
+```
+
+#### Reorder array items
+
+```js
+export const DynamicFieldsReorder = () => {
+  const { form } = useForm();
+
+  const submitForm = async () => {
+    const { data } = await form.submit();
+    console.log(data);
+  };
+
+  return (
+    <Form form={form}>
+      <UseArray path="items">
+        {({ items, addItem, removeItem, moveItem }) => {
+          const onDragEnd = ({ source, destination }: DropResult) => {
+            if (source && destination) {
+              moveItem(source.index, destination.index);
+            }
+          };
+
+          return (
+            <>
+              <EuiFormRow label="Todo items" fullWidth>
+                <EuiDragDropContext onDragEnd={onDragEnd}>
+                  <EuiDroppable droppableId="1">
+                    {items.map((item, idx) => {
+                      return (
+                        <EuiDraggable
+                          spacing="none"
+                          draggableId={String(item.id)}
+                          index={idx}
+                          key={item.id}
+                        >
+                          {(provided) => {
+                            return (
+                              <EuiFlexGroup key={item.id}>
+                                <EuiFlexItem grow={false}>
+                                  <div {...provided.dragHandleProps} style={{ marginTop: '30px' }}>
+                                    <EuiIcon type="grab" />
+                                  </div>
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  <UseField
+                                    path={`${item.path}.title`}
+                                    config={{ label: 'Title', validations: textFieldValidations }}
+                                    component={TextField}
+                                  />
+                                </EuiFlexItem>
+                                <EuiFlexItem>
+                                  <UseField
+                                    path={`${item.path}.subtitle`}
+                                    config={{
+                                      label: 'Subtitle',
+                                      validations: textFieldValidations,
+                                    }}
+                                    component={TextField}
+                                  />
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  <EuiButtonIcon
+                                    color="danger"
+                                    onClick={() => removeItem(item.id)}
+                                    iconType="minusInCircle"
+                                    aria-label="Remove item"
+                                    style={{ marginTop: '28px' }}
+                                  />
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            );
+                          }}
+                        </EuiDraggable>
+                      );
+                    })}
+                  </EuiDroppable>
+                </EuiDragDropContext>
+              </EuiFormRow>
+              <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
+                Add item
+              </EuiButtonEmpty>
+              <EuiSpacer />
+            </>
+          );
+        }}
+      </UseArray>
+
+      <EuiSpacer />
+      <EuiButton onClick={submitForm} fill disabled={form.isSubmitted && form.isValid === false}>
+        Submit
+      </EuiButton>
+    </Form>
+  );
+};
+```
+
+### Serializers and deserializers
+
+* **Deserializer**: A function that converts the form default value provided to the internal state object.
+* **Serializer**: A function that converts the internal state object to the expected form interface.
+
+```js
+interface MyForm {
+  name: string;
+  // The "dynamic" parameter can have 3 values (true, false, "strict").
+  // Ww¡e will use a toggle field + a checkbox to help the user define it
+  dynamic: boolean | 'strict';
+  _meta?: { [key: string]: any };
+}
+
+// This is the internal fields we will need in our form
+interface MyFormUI {
+  name: MyForm['name'];
+  _meta?: string; // the JSON editor work with string and not objects
+  isStrict: boolean; // New field
+  isDynamic: boolean; // New field
+  showAdvancedSettings: boolean; // New field
+}
+
+const formDeserializer = ({ name, _meta, dynamic }: MyForm): MyFormUI => {
+  const isDynamic = dynamic !== false;
+  const isStrict = dynamic === 'strict';
+  const showAdvancedSettings = _meta !== undefined;
+
+  return {
+    name,
+    _meta: _meta === undefined ? undefined : JSON.stringify(_meta, null, 2),
+    isDynamic,
+    isStrict,
+    showAdvancedSettings,
+  };
+};
+
+const formSerializer = ({ name, isStrict, isDynamic, _meta }: MyFormUI): MyForm => {
+  const dynamic = isStrict ? 'strict' : isDynamic;
+
+  return { name, dynamic, _meta: _meta === undefined ? undefined : JSON.parse(_meta) };
+};
+
+const { isJsonField } = fieldValidators;
+
+const schema: FormSchema<MyFormUI> = {
+  name: { label: 'Name' },
+  isDynamic: { label: 'Dyamic fields' },
+  isStrict: {
+    label: 'Strict',
+    helpText: 'Throw an exception when a document contains an unmapped field',
+  },
+  _meta: {
+    label: 'Meta',
+    defaultValue: '{\n\n}',
+    validations: [
+      {
+        // Make sure to add the validation so the serializer above
+        // receives a valid JSON to be able to parse it.
+        validator: isJsonField('The JSON is invalid'),
+      },
+    ],
+  },
+  showAdvancedSettings: {
+    label: 'Show advanced settings',
+  },
+};
+
+export const SerializersAndDeserializers = () => {
+  // Data coming from the server
+  const fetchedData: MyForm = {
+    name: 'My resource',
+    dynamic: 'strict',
+    _meta: { foo: 'bar' },
+  };
+
+  const { form } = useForm<MyForm, MyFormUI>({
+    defaultValue: fetchedData,
+    schema,
+    deserializer: formDeserializer,
+    serializer: formSerializer,
+  });
+
+  const [{ isDynamic, showAdvancedSettings }] = useFormData({
+    form,
+    watch: ['isDynamic', 'showAdvancedSettings'],
+  });
+
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    if (isValid) {
+      console.log(data);
+    }
+  };
+
+  return (
+    <Form form={form}>
+      <UseField path="name" component={TextField} />
+      <UseField path="isDynamic" component={ToggleField} />
+      {isDynamic !== false && <UseField path="isStrict" component={CheckBoxField} />}
+
+      <UseField path="showAdvancedSettings" component={ToggleField} />
+
+      <EuiSpacer />
+      {/* We don't remove it from the DOM as we would lose the value entered in the field. */}
+      <div style={{ display: showAdvancedSettings ? 'block' : 'none' }}>
+        <UseField
+          path="_meta"
+          component={JsonEditorField}
+          componentProps={{
+            euiCodeEditorProps: {
+              height: '200px',
+            },
+          }}
+        />
+      </div>
+      <EuiSpacer />
+
+      <EuiButton onClick={submitForm} fill disabled={form.isSubmitted && form.isValid === false}>
+        Submit
+      </EuiButton>
+    </Form>
+  );
+};
+```
+
+## Core
+
+The core exposes the main building blocks (hooks and components) needed to build your form.
+
+It is important to note that the core **is not** responsible for rendering UI. Its responsibility is to return form and fields **state and handlers** that you can connect to React components. The core of the form lib is agnostic of any UI rendering the form.
+
+In Kibana we work with [the EUI component library](https://elastic.github.io/eui) and have created [field components](../helpers/components.md) that wrap EUI components. With these components, connection with the form lib is already done for you.
+
+### Getting started
+
+The three required components to build a form are:
+
+- `useForm()` hook to declare a new form
+- `<Form />` component that will wrap your form and create a context for it
+- `<UseField />` component to declare a field
+
+Let's see them in action before going into details
+
+```js
+import { useForm, Form, UseField } from 'src/plugins/es_ui_shared/public';
+
+export const UserForm = () => {
+  const { form } = useForm(); // 1
+
+  return (
+    <Form form={form}> // 2
+      <UseField path="name" /> // 3
+      <UseField path="lastName" />
+
+      <button onClick={form.submit}>Submit</button>
+    </Form>
+  );
+};
+```
+
+1. We use the `useForm` hook to declare a new form.
+2. We then wrap our form with the `<Form />` component, providing the `form` that we have just created.
+3. Finally, we declared two fields with the `<UseField />` component, providing a unique `path` for each one of them.
+
+If you were to run this code in the browser and click on the "Submit" button nothing would happen as we haven't defined any handler to execute when submitting the form. Let's do that now along with providing a `UserFormData` interface to the form, which we will get back in our `onSubmit` handler.
+
+```js
+import { useForm, Form, UseField, FormConfig } from 'src/plugins/es_ui_shared/public';
+
+interface UserFormData {
+  name: string;
+  lastName: string;
+}
+
+export const UserForm = () => {
+  const onFormSubmit: FormConfig<UserFormData>['onSubmit'] = async (data, isValid) => {
+    console.log("Is form valid:", isValid);
+    if (!isValid) {
+      // Maybe show a callout?
+      return;
+    }
+
+    console.log("Form data:", data);
+  };
+
+  const { form } = useForm({ onSubmit: onFormSubmit });
+
+  return (
+    <Form form={form}>
+      ...
+      <button onClick={form.submit}>Submit</button>
+    </Form>
+  );
+};
+```
+
+Great! We have our first working form. No state to worry about, just a simple declarative way to build our fields.
+
+Those of you who are attentive might have noticed that the above form _does_ render the fields in the UI although we said earlier that the core of the form lib is not responsible for any UI rendering. This is because the `<UseField />` has a fallback mechanism to render an `<input type="text" />` and hook to the field `value` and `onChange`. Unless you have styled your `input` elements and don't require other field types like `checkbox` or `select`, you will probably want to customize how the the `<UseField />` renders. We will see that in a future section.
+
+### In, out, and raw values
+
+It is important to understand the different state of the form data as this will help understanding other concepts likes the `serializers` and `deserializers`.
+
+#### "Raw" data state
+
+As you have probably noticed when declaring a field with the `<UseField />` component we don't give it a "_name_" but a "_path_". This gives us a lot of flexibility to declare the final shape of the outputted data of our form, as a path can be any valid [`lodash.set()` path](https://lodash.com/docs/#set).
+
+For example
+
+```js
+
+// Given the following interface for the form
+interface MyForm {
+  user: {
+    name: string;
+    lastName: string;
+  }
+}
+
+// You would declare the following field paths
+<UseField path="user.name" />
+<UseField path="user.lastName" />
+
+// And this would be the raw form data
+const rawFormData = {
+  'user.name': 'John',
+  'user.lastname': 'Snow'
+};
+```
+
+Now try changing the paths to `user[0]` and `user[1]`, can you guess what the output will be?
+
+Being able to declare fields paths improves performance as the form data is saved as a **flat object**, meaning that updating its state is always an O(1) operation. Only when we submit the form, or when we explicityly ask for it, the final object is built and returned to the consumer.
+This also means that, when we listen to form data changes, we will receive both the raw data, and a handler to build the "Out" data state object.
+
+#### "Out" data state
+
+The "out" data state data is the object you expect to receive back from the form. To build this object, all the `serializers` provided (at the form or at the field level) are executed against the "In" data state. In the above example, the "Out" data state corresponds to the `interface MyForm`.
+
+#### "In" data state
+
+The "In" data state is the state the form internally works with. If a `defaultValue` is provided to the form, this "In" data state will be the result of running all the `deserializers` (at the form or at the field level) against this `defaultValue`.
+ This state can diverge from the "Out" data state in **two aspects**:
+
+- The _type_ of a field is different
+- The number of _fields_ of the form diverge (it has less or more fields).
+
+This does not mean it will always be different than the Out state, but in some cases it will.
+
+For example
+
+```js
+interface AddressFormData {
+  country: string; // we expect a country code (e.g. "ES")
+  ...
+}
+
+// Internally, the form "Select" component expects an object with a label and a value property
+// This will be the internal ("In") state of that field.
+interface AddressFormDataIn {
+  country: { label: 'España', value: 'ES' }
+}
+```
+
+```js
+// In some cases we might need an extra field to toggle advanced configuration.
+// This field is _only_ used in the UI but we don't want it in our outputted form data
+
+interface AddressFormDataIn {
+  // This toggle field is only used in the UI and should not be returned by the form.
+  // We will probably add a serializer() to the form to remove it.
+  showAdvancedSettings: boolean;
+}
+```
+
+Once we understand the difference between those three data states it will be easier to understand why we get a "raw" data object, or when to use a `(de)serializers`.
+
+### defaultValue
+
+There are multiple places where you can define the default value of a field. Note that by "default value" we are saying "the initial value" of a field. Once the field is initiated it has its own internal state and can't be controlled.
+
+#### Order of precedence
+
+1. As a prop on the `<UseField path="name" defaultValue="John" />` component
+2. In the **form** `defaultValue` config passed to `useForm({ defaultValue: { ... } })`
+3. In the **field** `defaultValue` config parameter (either passed as prop to `<UseField />` prop or declared inside a form schema)
+4. If no default value is found above, it defaults to `""` (empty string)
+
+##### As a prop on `<UseField />`
+
+This takes over any other `defaultValue` defined elsewhere. What you provide as prop is what you will have as default value for the field. Remember that the `<UseField />` **is not** a controlled component, so changing the `defaultValue` prop to another value does not have any effect.
+
+```js
+// Here we manually set the default value
+<UseField path="user.firstName" defaultValue="John" />
+```
+
+##### In the form `defaultValue` config passed to `useForm()`
+
+The above solution works well for very small forms, but with larger form it is not very convenient to manually add the default value of each field.
+
+```js
+// Let's imagine some data coming from the server
+const fetchedData = {
+  user: {
+    firstName: 'John',
+    lastName: 'Snow',
+  }
+}
+
+// We need to manually write each connection, which is not convenient
+<UseField path="user.firstName" defaultValue={fetchedData.user.firstName} />
+<UseField path="user.lastName" defaultValue={fetchedData.user.lastName} />
+```
+
+It is much easier to provide the `defaultValue` object (probably some data that we have fetched from the server) at the form level
+
+```js
+const { form } = useForm({ defaultValue: fetchedData });
+
+// And the defaultValue for each field will be automatically mapped to its paths
+<UseField path="user.firstName" />
+<UseField path="user.lastName" />
+```
+
+##### In the field `defaultValue` config parameter of the field config
+
+When you are creating a new resource, the form is empty and there is no data coming from the server to map. You still might want to define a default value for your fields.
+
+```js
+interface Props {
+  fetchedData?: { index: boolean }
+}
+
+export const MyForm = ({ fetchedData }: Props) => {
+  // fetchedData can be "undefined" or an object.
+  // If it is undefined, then the config.defaultValue will be used
+  const { form } = useForm({ defaultValue: fetchedData });
+
+  return (
+    <UseField path="index" config={{ defaultValue: true } />
+  );
+}
+```
+
+Or the same but using a form schema
+
+```js
+const schema = {
+  // Field config for the path "index" declared below
+  index: {
+    defaultValue: true,
+  },
+};
+
+export const MyComponent = ({ fetchedData }: Props) => {
+  // 1. If defaultValue is not undefined **and** there is a value at the "index" path, use it
+  // 2. otherwise if there is a schema with a config at the "index" path read its "defaultValue"
+  // 3. if it's still undefined, use an "" (empty string) - which will throw an error for a checkbox field-.
+  const { form } = useForm({ schema, defaultValue: fetchedData });
+
+  return (
+    <UseField path="index" />
+  );
+}
+```
+
+### useForm()
+
+**Returns:** [`FormHook`](form_hook.md)
+
+Use the `useForm` hook to declare a new form object. As we have seen in the ["Getting started"](about.md), you can use it without any additional configuration. It does accept an optional `config` object with the following configuration (all parameters are optional).
+
+#### Configuration
+
+##### onSubmit(data, isValid)
+
+**Arguments:** `data: T, isValid: boolean`
+**Returns:** `Promise<void>`
+
+The `onSubmit` handler is executed when calling `form.submit()`. It receives the form data and a boolean for the validity of the form.
+When the form is submitted `isSubmitting` will be set to `true` then back to `false` after the `onSubmit` handler has run. This can be useful to change the state of the submit button in the UI.
+
+```js
+interface MyFormData {
+  name: string;
+}
+
+const onFormSubmit = async (data: MyFormData, isValid: boolean): Promise<void> => {
+    // "form.isSubmitting" is set to "true"
+
+    if (!isValid) {
+      // Maybe show a callout
+      return;
+    }
+    // Do anything with the data
+    await myApiService.createResource(data);
+
+    // "form.isSubmitting" is set to "false".
+}
+const { form } = useForm<MyFormData>({ onSubmit: onFormSubmit });
+
+// JSX
+<button disabled={form.isSubmitting} onClick{form.submit}>Send form</button>
+```
+
+##### defaultValue
+
+**Type:** `Record<string, any>`
+
+The `defaultValue` is an object that you provide to give the initial value for your fields.
+
+**Note:** There are multiple places where you can define the default value of a field, [read the difference between them here](default_value.md).
+
+```js
+const fetchedData = { firstName: 'John' };
+const { form } = useForm({ defaultValue: fetchedData });
+```
+
+##### schema
+
+**Type:** `Record<string, FieldConfig>`
+
+Instead of manually providing a `config` object to each `<UseField />`, in some cases it is more convenient to provide a schema to the form with the fields configuration at the desired paths.
+
+```js
+interface MyForm {
+  user: {
+    firstName: string;
+    lastName: string;
+  }
+}
+
+const schema: Schema<MyForm> {
+  user: {
+    firstName: {
+      defaultValue: '',
+      ... // other config
+    },
+    lastName: {
+      defaultValue: '',
+      ...
+    },
+    isAdmin: {
+      defaultValue: false,
+    }
+  }
+};
+
+export const MyComponent = () => {
+  const { form } = useForm<MyForm>({ schema });
+
+  // No need to provide the "config" prop on each field,
+  // it will be read from the schema
+  return (
+    <Form form={form}>
+      <UseField path="user.firstName" />
+      <UseField path="user.lastName" />
+      <UseField path="user.isAdmin" />
+    </Form>
+  );
+}
+```
+
+##### deserializer
+
+When you provide a `defaultValue` to the form, you might want to parse the object and modify it (e.g. add an extra field just for the UI). You would use a `deserializer` to do that. This handler receives the `defaultValue` provided and return a new object with updated fields default values ([read more about the "In" state here](in_out_raw_state.md#in-data-state)).
+**Note:** It is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.
+
+```js
+import { Form, useForm, useFormData, Field, FIELD_TYPES, FormDataProvider } from '<path-to-form-lib>';
+
+// Data coming from the server
+const fetchedData = {
+  name: 'John',
+  address: {
+    street: 'El Camino Real #350'
+  }
+}
+
+// We want to have a toggle in the UI to display the address _if_ there is one.
+// Otherwise the toggle value is "false" and no address is displayed.
+const deserializer = (defaultValue) => {
+  return {
+    ...defaultValue,
+    // We add an extra toggle field
+    showAddress:  defaultValue.hasOwnProperty('address'),
+  };
+}
+
+export const MyComponent = ({ fetchedData }: Props) => {
+  const { form } = useForm({
+    defaultValue: fetchedData,
+    deserializer
+  });
+  const [{ showAddress }] = useFormData({ form, watch: 'showAddress' });
+
+  // We can now use our "showAddress" internal field in the UI
+  return (
+    <Form form={form}>
+      <UseField path="name" config={{ type: FIELD_TYPES.TEXT }} component={Field} />
+      <UseField path="showAddress" config={{ type: FIELD_TYPES.TOGGLE }} component={Field} />
+      {/* Show the street address when the toggle is "true" */}
+      {showAddress ? <UseField path="address.street" /> : null}
+
+      <button onClick={form.submit}>Submit</button>
+    </Form>
+  )
+}
+```
+
+##### serializer
+
+Serializer is the inverse process of the deserializer. It is executed when we build the form data (when calling `form.submit()` for example).  [Read more about the "Out" state here](in_out_raw_state.md#out-data-state).
+**Note:** As with the `deserializer`, it is recommended to keep this pure function _outside_ your component and not declare it inline on the hook.
+
+If we run the example above for the `deserializer`, and we click on the "Submit" button, we would get this in the console
+
+```
+Form data: {
+  address: {
+    street: 'El Camino Real #350'
+  },
+  name: 'John',
+  showAddress: true
+}
+```
+
+We don't want to surface the internal `showAddress` field. Let's use a `serializer` to remove it.
+
+```js
+
+const deserializer = (value) => {
+  ...
+};
+
+  // Remove the showAddress field from the outputted data
+const serializer = (value) => {
+  const { showAddress, ...rest } = value;
+  return rest;
+}
+
+export const MyComponent = ({ fetchedData }: Props) => {
+  const { form } = useForm({
+    defaultValue: fetchedData,
+    deserializer,
+    serializer,
+  });
+
+  ...
+
+};
+```
+
+Much better, now when we submit the form, the internal fields are not leaked outside when building the form object.
+
+##### id
+
+**Type:** `string`
+
+You can optionally give an id to the form, that will be attached to the `form` object you receive. This can be useful for debugging purpose when you have multiple forms on the page.
+
+##### options
+
+**Type:** `{ valueChangeDebounceTime?: number; stripEmptyFields?: boolean }`
+
+###### valueChangeDebounceTime
+
+**Type:** `number` (ms)
+**Default:** 500
+
+When a field value changes, for example when we hit a key inside a text field, its `isChangingValue` state is set to `true`. Then, after all the validations have run for the field, the `isChangingValue` state is back to `false`. The time it take between those two state changes entirely depends on the time it takes to run the validations. If the validations are all synchronous, the time will be `0`. If there are some asynchronous validations, (e.g. making an HTTP request to validate the value on the server), the "value change" duration will be the time it takes to run all the async validations.
+
+With this option, you can define the minimum time you'd like to have between the two state change, so the `isChangingValue` state will stay `true` for at least the amount of milliseconds defined here. This is useful for example if you want to display possible errors on the field after a minimum of time has passed since the last value change.
+
+This setting **can be overriden** on a per-field basis, providing a `valueChangeDebounceTime` in its config object.
+
+```js
+const { form } = useForm({ options: { valueChangeDebounceTime: 300 } });
+
+return (
+  <UseField<string> path="name">
+    {(field) => {
+      let isInvalid = false;
+      let errorMessage = null;
+
+      if (!field.isChangingValue) {
+        // Only update this derived state after 300ms of the last key stroke
+        isInvalid = field.errors.length > 0;
+        errorMessage = isInvalid ? field.errors[0].message : null;
+      }
+
+      return (
+        <div>
+          <input type="text" value={field.value} onChange={field.onChange} />
+          {isInvalid && <div>{errorMessage}</div>}
+        </div>
+      );
+    }}
+  </UseField>
+);
+```
+
+###### stripEmptyFields
+
+**Type:**: `boolean`
+**Default:**: true
+
+With this option you can decide if you want empty string value to be returned by the form.
+
+```js
+// stripEmptyFields: true (default)
+{
+  "firstName": "John"
+}
+
+// stripEmptyFields: false
+{
+  "firstName": "John",
+  "lastName": "",
+  "role": ""
+}
+```
+
+### Form hook
+
+When you call `useForm()` you receive back a `form` hook object.
+This object has the following properties and handlers
+
+#### Properties
+
+##### isSubmitted
+
+**Type:** `boolean`
+
+Flag that indicates if the form has been submitted at least once. It is set to `true` when we call `submit()`. ([see below](#submit)).
+**Note:** If you have a dynamic form where fields are removed and added, the `isSubmitted` is set to `false` whenever a new field is added, as in such case the user has a new form in front of him.
+
+##### isSubmitting
+
+**Type:** `boolean`
+
+Flag that indicates if the form is being submitted. When we submit the form, if you have provided an [`onSubmit()` handler](use_form_hook.md#onsubmitdata-isvalid) in the config, it might take some time to resolve (e.g. an HTTP request being made). This flag will be set to `true` until the Promise resolves.
+
+##### isValid
+
+**Type:** `boolean | undefined`
+
+Flag that indicates if the form is valid. It can have three values:
+* `true`
+* `false`
+* `undefined`
+
+When the form first renders, its validity is neither `true` nor `false`. It is `undefined`, we don't know its validity. It could be valid if none of the fields are required or invalid if some field is required.
+
+Each time a field value changes, it is validated. When **all** fields have changed (are dirty), then only the `isValid` is either `true` or `false`, as at this stage we know the form validity. Of course we will probably need to know the validity of the form without updating each field one by one. There are two ways of doing that:
+
+* calling `form.submit()`
+
+```js
+export const MyComponent = () => {
+  const { form } = useForm();
+
+  const onClickSubmit = async () => {
+    // We validate all the form fields and set the "isValid" state to true or false
+    const { isValid, data } = await form.submit();
+
+    if (isValid) {
+      // ...
+    }
+  };
+
+  return (
+    <Form form={form}>
+      ...
+      <button onClick={onClickSubmit}>Submit</button>
+      {form.isValid === false && (
+        <div>Only show this message if the form validity is "false".</div>
+      )}
+    </Form>
+  );
+}
+```
+
+* calling the `validate()` handler on the form. As you can see in the example below, if you don't use the `form.submit()`, you have to manually declare and update the `isSubmitting` and `isSubmitted` states.
+**Note:** It is usually better to use `form.submit()`, but you might need at some stage to know the form validity without updating its `isSubmitted` state, and that's what `validate()` is for.
+
+```js
+export const MyComponent = ({ onFormUpdate }: Props) => {
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { form } = useForm<UserFormData>();
+
+  const onClickSubmit = async () => {
+    setIsSubmitted(true);
+    setIsSubmitting(true);
+
+    // If the "isValid" state is "undefined" (=== not all the fields are dirty),
+    // call validate() to run validation on all the fields.
+    const isValid = form.isValid ?? (await form.validate());
+    setIsSubmitting(false);
+
+    if (isValid) {
+      console.log('Form data:', form.getFormData());
+    }
+  };
+
+  const hasErrors = isSubmitted && form.isValid === false;
+
+  return (
+    <Form form={form}>
+      <UseField path="firstName" config={{ validations: [{ validator }] }} />
+      <UseField path="lastName" />
+
+      <button
+        onClick={onClickSubmit}
+        disabled={isSubmitting || hasErrors}
+      >
+        {isSubmitting ? 'Sending...' : 'Submit'}
+      </button>
+      {hasErrors && <div>Form is invalid.</div>}
+    </Form>
+  );
+};
+```
+
+##### id
+
+**Type:** `string`
+
+The form id. If none was provided, "default" will be returned.
+
+#### Handlers
+
+##### submit()
+
+**Returns:** `Promise<{ data: T | {}, isValid: boolean }>`
+
+This handler submits the form and returns its data and validity. If the form is not valid, the data will be `null` as only valid data is passed through the `serializer(s)` before being returned.
+
+```js
+const { data, isValid } = await form.submit();
+```
+
+##### validate()
+
+**Returns:** `Promise<boolean>`
+
+Use this handler to get the validity of the form.
+
+```js
+const isFormValid = await form.validate();
+```
+
+##### getFields()
+
+**Returns:** `{ [path: string]: FieldHook }`
+
+Access any field on the form.
+
+```js
+const { name: nameField }  = form.getFields();
+```
+
+##### getFormData()
+
+**Arguments:** `options?: { unflatten?: boolean }`
+**Returns:** `T | R`
+
+Return the form data. Accepts an optional `options` with an `unflatten` parameter (defaults to `true`). If you are only interested in the raw form data, pass `unflatten: false` to the handler ([read more about the "Raw" data state here](in_out_raw_state.md#raw-data-state)).
+
+```js
+const formData  = form.getFormData();
+
+const rawFormData  = form.getFormData({ unflatten: false });
+```
+
+##### getErrors()
+
+**Returns:** `string[]`
+
+Returns an array of all errors in the form.
+
+```js
+const errors  = form.getErrors();
+```
+
+##### reset()
+
+**Arguments:** `options?: { resetValues?: boolean; defaultValue?: any }`
+
+Resets the form to its initial state. It accepts an optional configuration object:
+
+- `resetValues` (default: `true`). Flag to indicate if we want to not only reset the form state (`isValid`, `isSubmitted`...) but also the field values. If set to `true` all form values will be reset to their default value. Remember: default field values can be set in [different ways](./default_value).
+
+- `defaultValue`. In some cases you might not want to reset the form to the default value initially provided to the form (probably because it is data that came from the server and you want a clean form). In this case you can provide a new `defaultValue` object when resetting.
+
+```js
+// Reset to the defaultValue object passed to the form
+// If none was provided, reset to the field config defaultValue.
+form.reset();
+
+// Reset to the default value declared on the field config defaultValue
+form.reset({ defaultValue: {} });
+
+// You can keep some current field value and the rest will come from the field config defaultValue.
+form.reset({ defaultValue: { type: 'SomeValueToKeep' } });
+```
+
+##### setFieldValue()
+
+**Arguments:** `fieldName: string, value: unknown`
+
+Sets a field value imperatively.
+
+```js
+form.setFieldValue('name', 'John');
+```
+
+##### setFieldErrors()
+
+**Arguments:** `fieldName: string, errors: ValidationError[]`
+
+Sets field errors imperatively.
+
+```js
+form.setFieldErrors('name', [{ message: 'There is an error in the field' }]);
+```
+
+### <Form />
+
+Once you have created [a `FormHook` object](form_hook.md), you can wrap your form with the `<Form />` component.
+
+This component accepts the following props.
+
+#### Props
+
+##### form (required)
+
+**Type:** `FormHook`
+
+The form hook you've created with `useForm()`.
+
+```js
+const MyFormComponent = () => {
+  const { form } = useForm();
+
+  return (
+    <Form form={form}>
+      ...
+    </Form>
+  );
+};
+```
+
+##### FormWrapper
+
+**Type:** `React.ComponentType`
+**Default:**: `EuiForm`
+
+This is the component that will wrap your form fields. By default it renders the `<EuiForm />` component.
+
+Any props that you pass to the `<Form />` component, aside from the `form` hook, will be forwarded to that component.
+
+```js
+const MyFormComponent = () => {
+  const { form } = useForm();
+
+  // "isInvalid" and "error" are 2 props from <EuiForm />
+  return (
+    <Form form={form} isInvalid={form.isSubmitted && !form.isValid} error={form.getErrors()}>
+      ...
+    </Form>
+  );
+};
+```
+
+By default, `<EuiForm />` wraps the form with a `<div>` element. In some cases semantic HTML is preferred: wrapping your form with the `<form>` element. This also allows the user to submit the form by hitting the "ENTER" key inside a field.
+
+**Important:** Make sure to **not** declare the FormWrapper inline on the prop but outside of your component.
+
+```js
+// Create a wrapper component with the <form> element
+const FormWrapper = (props: any) => <form {...props} />;
+
+export const MyFormComponent = () => {
+  const { form } = useForm();
+
+  // Hitting the "ENTER" key in a textfield will submit the form.
+  const submitForm = async () => {
+    const { isValid, data } = await form.submit();
+    ...
+  };
+
+  return (
+    <Form form={form} FormWrapper={FormWrapper} onSubmit={submitForm}>
+      ...
+    </Form>
+  );
+};
+```
+
+### <UseField />
+
+To declare a field in the form you use the `<UseField />` component.
+
+This component accepts the following props (the only required prop is the `path`).
+
+#### Props
+
+##### path (required)
+
+**Type:** `string`
+
+The field path. It can be any valid [`lodash.set()` path](https://lodash.com/docs/#set).
+
+```js
+<UseField path="user.name" />
+<UseField path="user.email" />
+<UseField path="city" />
+
+// The above 3 fields will output the following object
+
+{
+  user: {
+    name: 'John',
+    email: 'john@elastic.co',
+  },
+  city: 'Paris'
+}
+```
+
+##### defaultValue
+
+**Type:** `any`
+
+An optional default value for the field. This will be the initial value of the field. The component is not controlled so updating this prop does not have any effect on the field.
+
+**Note:** You can define the field `defaultValue` in different places, [read their differences here](default_value.md).
+
+##### config
+
+**Type:** `FieldConfig<FormInterface, ValueType>`
+
+The field configuration.
+
+**Note**: In some cases it makes more sense to declare all your form fields configuration inside a [form schema](use_form_hook.md#schema) that you pass to the form. This will unclutter your JSX.
+
+```js
+// It is a good habit to keep the configuration outside the component
+// as in most case it is static and so this will avoid unnecessary re-renders.
+const nameConfig: FieldConfig<MyForm, string> = {
+  label: 'Name',
+  validations: [ ... ],
+};
+
+export const MyFormComponent = {
+  const { form } = useForm(;)
+  return (
+    <Form form={form}>
+      <UseField path="name" config={nameConfig} />
+    </Form>
+  );
+};
+```
+
+This configuration has the following parameters.
+
+###### label
+
+**Type:** `string`
+
+A label for the field.
+
+###### labelAppend
+
+**Type:** `string | ReactNode`
+
+A second label for the field.
+
+When `<UseField />` is paired with one of [the helper components](../helpers/components) that wrap the EUI form fields, this prop is forwarded to the `<EuiFormRow />` `labelAppend` prop.  As per [the EUI docs](https://elastic.github.io/eui/#/forms/form-layouts): _it adds an extra node to the right of the form label without being contained inside the form label. Good for things like documentation links._
+
+###### helpText
+
+**Type:** `string | ReactNode`
+
+A help text for the field.
+
+###### type
+
+**Type:** `string`
+
+Specify a type for your field. It can be any string, but if you decide to use the `<Field />` helper component, then defining one of the `FIELD_TYPES` will automatically render the correct field for you.
+
+```js
+import { Form, UseField, Field, FIELD_TYPES } from '<path-to-form-lib>';
+
+const nameConfig = {
+  label: 'Name',
+  type: FIELD_TYPES.TEXT,
+};
+
+const showSettingsConfig = {
+  label: 'Show advanced settings',
+  type: FIELD_TYPES.TOGGLE,
+};
+
+export const MyFormComponent = () => {
+  const { form } = useForm();
+
+  // We use the same "Field" component to render both fields
+  // but as their "type" differs, they will render different UI fields.
+  return (
+    <Form form={form}>
+      <UseField path="name" config={nameConfig} component={Field} />
+      <UseField path="showSettings" config={showSettingsConfig} component={Field} />
+    </Form>
+  );
+};
+```
+
+The above example could be written a bit simpler with a form schema and [the `getUseField` helper](#getusefield).
+
+```js
+import { Form, getUseField, Field, FIELD_TYPES } from '<path-to-form-lib>';
+
+const schema = {
+  name: {
+    label: 'Name',
+    type: FIELD_TYPES.TEXT,
+  },
+  showSettings: {
+    label: 'Show advanced settings',
+    type: FIELD_TYPES.TOGGLE,
+  }
+};
+
+const UseField = getUseField({ component: Field });
+
+export const MyFormComponent = () => {
+  const { form } = useForm({ schema });
+
+  return (
+    <Form form={form}>
+      <UseField path="name"  />
+      <UseField path="showSettings" />
+    </Form>
+  );
+};
+```
+
+###### validations
+
+**Type:** `ValidationConfig[]`
+
+An array of validation to run against the field value. Although it would be possible to have a single validation that does multiple checks, it often makes the code clearer to have single purpose validation that return a single error if there is one.
+
+If any of the validation fails, the other validations don't run unless [the `exitOnFail` parameter](#exitonfail) (`false` by default) is set to `true`.
+
+**Note:** There are already many reusable field validators. Check if there isn't already one for your use case before writing your own.
+
+The `ValidationConfig` accepts the following parameters:
+
+###### validator (Required)
+
+**Type:** `ValidationFunc`
+**Arguments:** `data: ValidationFuncArg`
+**Returns:** `ValidationError | void | Promise<ValidationError> | Promise<void>`
+
+A validator function to execute. It can be synchronous or asynchronous.
+
+**Note:** Have a look a [the validation examples](../examples/validation.md) for different use cases.
+
+This function receives a data argument with the following properties:
+
+* `value` - The field value
+* `path` - The field path being validated
+* `form.getFormData` - A handler to build the form data
+* `form.getFields` - A handler to access the form fields
+* `formData` - The raw form data
+* `errors` - An array of any previous validation errors
+
+###### type
+
+**Type:** `string`
+
+A specific type for the validation. [Read more about typed validation](../examples/validation#typed-validation) in the examples.
+
+###### isBlocking
+
+**Type:** `boolean`
+**Default:** `true`
+
+By default all validation are blockers, which means that if they fail, the field `isValid` state is set to `false`. There might be some cases, like when trying to add an item to the ComboBox array, where we don't want to block the UI and set the field as invalid. If the item is not valid we won't add it to the array, but the field is still valid. Thus the validation on the array item is **not** blocking.
+
+###### exitOnFail
+
+**Type:** `boolean`
+**Default:** `true`
+
+By default, when any of the validation fails, the following validation are not executed. If you still want to execute the following validation(s), set the `exitOnFail` to `false`.
+
+###### deserializer
+
+**Type:** `SerializerFunc`
+
+If the type of a field value differs from the type provided as `defaultValue` you can use a `deserializer` to transform the value. This handler is executed, once, on the default value provided right before initializing the field `value` state.
+
+```js
+// The country field select options
+const countries = [{
+  value: 'us',
+  label: 'USA',
+}, {
+  value: 'es',
+  label: 'Spain',
+}];
+
+const countryConfig = {
+  label: 'Country',
+  deserializer: (defaultValue: string) => {
+    // We return the object our field expects.
+    return countries.find(country => country.value === defaultValue);
+  }
+};
+
+export const MyFormComponent = () => {
+  const fetchedData = {
+    // The server returns a string, but our field expects
+    // an object with a "value" and "label" property.
+    country: 'es',
+  };
+
+  const { form } = useForm({ defaultValue: fetchedData });
+
+  return (
+    <Form form={form}>
+      <UseField path="country" config={countryConfig} component={SelectField} />
+    </Form>
+  )
+}
+```
+
+###### serializer
+
+**Type:** `SerializerFunc`
+
+This is the reverse process of the `deserializer`. It is only executed when getting the form data (with `form.submit()` or `form.getFormData()`).
+
+```js
+// Continuing the example above
+
+const countryConfig = {
+  label: 'Country',
+  deserializer: (defaultValue: string) => {
+    return countries.find(country => country.value === defaultValue);
+  },
+  serializer: (fieldValue: { value: string; label: string }) => {
+    return fieldValue.value;
+  },
+};
+```
+
+###### formatters
+
+**Type:** `FormatterFunc[]`
+
+If you need to format the field value each time it changes you can use a formatter for that. Like with the validations you can provide as many formatters as needed.
+
+**Note:** Only use formatters when you need to change visually how the field value appears in the UI. If you only need the transformed value when submitting the form, it is better to use a `serializer` for that.
+
+Each `FormatterFunc` receives 2 arguments:
+
+* `value` - The field value
+* `formData` - The form data
+
+```js
+const nameConfig = {
+  formatters: [(value: string) => {
+    // Capitalize the field value on each key stroke
+    return value.toUppercase();
+  }],
+};
+```
+
+###### fieldsToValidateOnChange
+
+**Type:** `string[]` - An array of field paths
+**Default:** `[<current-field-path>]`
+
+By default when a field value changes, it is the only field that is validated. In some cases you might also want to run the validation on another field that is linked.
+
+Don't forget to include the current field path if you update this settings, unless you specifically do not want to run the validations on the current field.
+
+```js
+const field1Config = {
+  fieldsToValidateOnChange: ['field1', 'field2'],
+};
+
+const field2Config = {
+  fieldsToValidateOnChange: ['field2', 'field1'],
+};
+```
+
+###### valueChangeDebounceTime
+
+**Type:** `number`
+
+The minimum time to update the `isChanging` field state. [Read more about this setting](use_form_hook.md#valuechangedebouncetime) in the `useFormHook()`.
+
+##### component
+
+**Type:** `FunctionComponent`
+
+The component to render. This component will receive the `field` hook object as props plus any other props that you pass in `componentProps` (see below).
+
+**Note:** You can see examples on how this prop is used in [the "Style fields" page](../examples/style_fields.md#using-the-component-prop).
+
+##### componentProps
+
+**Type:** `{ [prop: string]: any }`
+
+If you provide a `component` you can pass here any prop you want to forward to this component.
+
+##### readDefaultValueOnForm
+
+**Type:** `boolean`
+**Default:** true
+
+By default if you don't provide a `defaultValue` prop to `<UseField />`, it will try to read the default value on [the form `defaultValue` object](use_form_hook.md#defaultvalue). If you want to prevent this behaviour you can set `readDefaultValueOnForm` to false. This can be usefull for dynamic fields, as [you can see in the examples](../examples/dynamic_fields.md).
+
+##### onChange
+
+**Type:** `(value:T) => void`
+
+With this handler you can listen to the field value changes. [See the example](../examples/react_to_changes.md#using-the-onchange-handler) in the "React to changes" page.
+
+##### children
+
+**Type:** `(field: FieldHook<T>) => JSX.Element`
+
+The (optional) children of `<UseField />` is a function child which receives the field hook. You are then responsible to return a JSX element from that function.
+
+The docs for the [FieldHook are right here](field_hook.md).
+
+#### `getUseField()`
+
+**Arguments:** `props: UseFieldProps`
+
+In some cases you might find yourself declaring the exact same prop on `<UseField />` for all your fields. (e.g. using the [the `Field` component](../helpers/components#field) everywhere).
+
+You can use the `getUseField` helper to get a `<UseField />` component with predefined props values.
+
+```js
+const UseField = getUseField({ component: Field });
+
+const MyFormComponent = () => {
+  ...
+  return (
+    <Form form={form}>
+      {/*You now can use it in your JSX without specifying the component anymore */}
+      <UseField path="name" />
+    </Form>
+  );
+};
+```
+
+
+#### Typescript value type
+
+You can provide the value type (`unknown` by default) on the component.
+
+```js
+<UseField<string> path="name" defaultValue="mustBeAString" />
+```
+
+This has implication on the field config provided that has to have the same type.
+
+```js
+const nameConfig:FieldConfig<MyForm, string> = { ... };
+
+<UseField<string> path="name" config={nameConfig} />
+```
+
+### Field hook
+
+When you use the  `<UseField />` component you receive a `field` hook object that you can connect to your React components.
+
+This hook has the following properties and handlers:
+
+#### Properties
+
+##### path
+
+**Type:** `string`
+
+The field `path`.
+
+##### label
+
+**Type:** `string`
+
+The field `label` provided in the config.
+
+##### labelAppend
+
+**Type:** `string | ReactNode`
+
+The field `labelAppend` provided in the config.
+
+##### helpText
+
+**Type:** `string | ReactNode`
+
+The field `helpText` provided in the config.
+
+##### type
+
+**Type:** `string`
+
+The field `type` provided in the config.
+
+##### value
+
+**Type:** `T`
+
+The field state value.
+
+##### errors
+
+**Type:** `ValidationError[]`
+
+An array of possible validation errors. Each error has a required `message` property and any other meta data returned by your validation(s).
+
+##### isValid
+
+**Type:** `boolean`
+
+Flag that indicates if the field is valid.
+
+##### isPristine
+
+**Type:** `boolean`
+
+Flag that indicates if the field is pristine (if it hasn't been modified by the user).
+
+##### isValidating
+
+**Type:** `boolean`
+
+Flag that indicates if the field is being validated. It is set to `true` when the value changes, and back to `false` right after all the validations have executed.  If all your validations are synchronous, this state is always `false`.
+
+##### isValidated
+
+**Type:** `boolean`
+
+Flag that indicates if this field has run at least once its validation(s). The validations are run when the field values changes or, if the field value has not changed, when we call `form.submit()` or `form.validate()`.
+
+##### isChangingValue
+
+**Type:** `boolean`
+
+Flag that indicates if the field value is changing. If you have set the [`valueChangeDebounceTime`](use_field.md#valuechangedebouncetime) to `0`, then this state is the same as the `isValidating` state. But if you have increased the `valueChangeDebounceTime` time, then you will have a minimum value changing time. This is useful if you want to display your validation errors after a certain amount of time has passed.
+
+#### Handlers
+
+##### setValue()
+
+**Arguments:** `value: T | (prevValue: T) => T`
+**Returns:** `void`
+
+Handler to set the value of the field.
+You can either pass the value directly or provide a callback that will receive the previous field value and you will have to return the next value.
+
+##### onChange()
+
+**Arguments:** `event: React.ChangeEvent<HTMLInputElement>`
+**Returns:** `void`
+
+Use the `onChange` helper to directly hook into the forms fields inputs `onChange` prop without having to extract the event value and call `setValue()` on the field.
+
+```js
+// Instead of this
+<UseField path="name">
+  {({ setValue }) => {
+    return <input type="text" value={field.value} onChange={(e) => setValue(e.target.value)} />
+  }}
+</UseField>
+
+// You can use the "onChange" handler
+<UseField path="name">
+  {({ onChange }) => {
+    return <input type="text" value={field.value} onChange={onChange} />
+  }}
+</UseField>
+```
+
+##### setErrors()
+
+**Arguments:** `ValidationError[]`
+**Returns:** `void`
+
+Handler to set the errors of the field.
+
+##### clearErrors()
+
+**Arguments:** `type?: string | string[]`
+**Returns:** `void`
+
+Handler to clear the errors of the field. You can optionally provide the type of error to clear.
+Read more about [typed validation here](../examples/validation.md#typed-validation).
+
+##### getErrorsMessages()
+
+**Arguments:** `options?: { validationType?: string; errorCode?: string }`
+**Returns:** `string | null`
+
+Returns a concatenated string with all the error messages if the field has errors, or `null` otherwise.
+
+You can optionally provide an error code or a validation type to narrow down the errors you want to receive back.
+
+**Note:** You can add error code to your errors by adding a `code` property to your validation errors.
+
+```js
+const nameValidator = ({ value }) => {
+  if (value.startsWith('.')) => {
+    return {
+      message: "The name can't start with a dot (.)",
+      code: 'ERR_NAME_FORMAT',
+    };
+  }
+};
+```
+
+##### validate()
+
+**Arguments:** `options?: { formData?: any; value?: T; validationType?: string; }`
+**Returns:** `FieldValidateResponse | Promise<FieldValidateResponse>`
+
+Validate the field by calling all the validations declared in its config.  Optionally you can provide an options object with the following properties:
+
+* `formData` - The form data
+* `value` - The value to validate
+* `validationType` - The validation type to run against the value
+
+You rarely need to manually call this method as it is automatically done for you whenever the field value changes.
+
+**Important:** Calling `validate()` **does not update** the form `isValid` state and is only meant to get the field validity at a point in time.
+
+###### Example where you might need this method:
+
+The user changes the value inside one of your components and you receive this value in an `onChange` handler. Before updating the field value with `setValue()`, you want to validate this value and maybe prevent the field `value` to be updated at all.
+
+##### reset()
+
+**Arguments:** `options?: { resetValue?: boolean; defaultValue?: T }`
+**Returns:** `T | undefined`
+
+Resets the field to its initial state. It accepts an optional configuration object:
+
+- `resetValue` (default: `true`). Flag to indicate if we want to not only reset the field state (`errors`, `isPristine`...) but also the field value. If set to `true`, it will put back the default value passed to the field, or to the form, or declared on the field config (in that order).
+
+- `defaultValue`. In some cases you might not want to reset the field to the default value initiallly provided. In this case you can provide a new `defaultValue` value when resetting.
+
+If you provided a new `defaultValue`, you will receive back this value after it has gone through any possible `deserializer(s)` defined for that field. If you didn't provide a default value `undefined` is returned.
+
+### useFormData()
+
+**Returns:** `[rawFormData, () => T]`
+
+Use the `useFormData` hook to access and react to form field value changes. The hook accepts an optional options object.
+
+Have a look at the examples on how to use this hook in [the "React to changes" page](../examples/react_to_changes.md).
+
+#### Options
+
+##### form
+
+**Type:** `FormHook`
+
+The form hook object. It is only required to provide the form hook object in your **root form component**.
+
+```js
+const RootFormComponent = () => {
+  // root form component, where the form object is declared
+  const { form } = useForm();
+  const [formData] = useFormData({ form });
+
+  return (
+    <Form form={form}>
+      <ChildComponent />
+    </Form>
+  );
+};
+
+const ChildComponent = () => {
+  const [formData] = useFormData(); // no need to provide the form object
+  return (
+    <div>...</div>
+  );
+};
+```
+
+##### watch
+
+**Type:** `string | string[]`
+
+This option lets you define which field(s) to get updates from. If you don't specify a `watch` option, you will get updates when any form field changes. This will trigger a re-render of your component. If you want to only get update when a specific field changes you can pass it in the `watch`.
+
+```js
+// Only get update whenever the "type" field changes
+const [{ type }] = useFormData({ watch: 'type' });
+
+// Only get update whenever either the "type" or the "subType" field changes
+const [{ type, subType }] = useFormData({ watch: ['type', 'subType'] });
+```
+
+#### Return
+
+As you have noticed, you get back an array from the hook. The first element of the array is the **raw** form state ([read more about it here](in_out_raw_state.md#raw-data-state)). As a second argument you get a handler to build the form data (which means unflatten the object and run all the `serializer(s)` on the fields and the form).
+
+```js
+const [rawFormData, buildFormData] = useFormData();
+```
+
+### <UseArray />
+
+Use the `<UseArray />` component whenever you want to let the user add or remove fields in your form. Those fields will always be part of an array. Either an array of _values_, or an array of _objects_.
+If you need those dynamic fields to be returned differently, you can [use a `serializer`](use_field.md#serializer) to transform the array.
+There are no limits to how nested arrays and fields can be.
+
+```js
+// You can simply generate a list of string values
+const myFormData = {
+  tags: ['value1', 'value2', 'value3'];
+};
+
+// Or you can generate more complex objects
+const myFormData = {
+  book: { // path: "book"
+    title: 'My book', // path: "book.title"
+    tags: [ // path: "book.tags"
+      {
+        label: 'Tag 1', // path: "book.tags[0].label
+        value: 'tag_1', // path: "book.tags[0].value
+        colors: [ // path: "book.tags[0].colors
+          'green', // path: "book.tags[0].colors[0]
+          'yellow' // path: "book.tags[0].colors[1]
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Note:** Have a [look at the examples](../examples/dynamic_fields.md) on how to use `<UseArray />`.
+
+This component accepts the following props (the only required prop is the `path`).
+
+#### Props
+
+##### path (required)
+
+**Type:** `string`
+
+The array path. It can be any valid [`lodash.set()` path](https://lodash.com/docs/#set).
+
+##### initialNumberOfItems
+
+**Type:** `number`
+**Default:** 1
+
+Define the number of items you want to have by default in the array. It is only used when there are no `defaultValue` found for the array. If there is a default value found, the number of items will be the length of the array.
+
+Those items are not fields yet, they are objects that you will receive back in the child function (see below).
+
+##### validations
+
+**Type:** `FieldConfig['validations']`
+
+Array of validations to run whenever an item is added or removed. This is [the same `validations` configuration](use_field.md#validations) that you define on the field config. The `value` that you receive is the `items` passed down to the child function (see below).
+
+##### readDefaultValueOnForm
+
+**Type:** `boolean`
+**Default:** true
+
+Flag to indicate if you want to read the array value from [the form `defaultValue` object](use_form_hook.md#defaultvalue).
+
+##### children
+
+**Type:** `(formFieldArray: FormArrayField) => JSX.Element`
+
+The children of `<UseArray />` is a function child which receives the form array field. You are then responsible to return a JSX element from that function.
+
+The `FormArrayField` that you get back in the function has the following properties:
+
+* `items` - The array items you can iterate on
+* `error` - A string with possible validation error messages concatenated. It is `null` if there are no errors
+* `addItem()` - Handler to add a new item to the array
+* `removeItem(id: number)` - Handler to remove an item from the array
+* `moveItem(source: number, destination: number)` - Handler to reorder items
+* `form` - The `FormHook` object
+
+### <UseMultiFields />
+
+You might find yourself at some point wanting to hook multiple fields to a component because that component accepts multiple values. In that case you will have to nest multiple `<UseField />` with their child function, which is not very elegant.
+
+```js
+<UseField path="maxValue">
+  {maxValueField => {
+    return (
+      <UseField path="minValue">
+        {minValueField => {
+          return (
+            <EuiDualRange
+              min={0}
+              max={100}
+              value={[minValueField.value, maxValueField.value]}
+              onChange={([minValue, maxValue]) => {
+                minValueField.setValue(minValue);
+                maxValueField.setValue(maxValue);
+              }}
+            />
+          )
+        }}
+      </UseField>
+    )
+  }}
+</UseField>
+```
+
+You can use `<UseMultiField />` to provide any number of fields and you will get them back in a single child function.
+
+```js
+const fields = {
+  min: {
+    // Any prop you would pass to <UseField />
+    path: 'minValue',
+    config: {
+      ...
+    }
+  },
+  max: {
+    path: 'maxValue',
+  },
+};
+
+<UseMultiField fields={fields}>
+  {({ min, max }) => {
+    return (
+      <EuiDualRange
+        min={0}
+        max={100}
+        value={[min.value, max.value]}
+        onChange={([minValue, maxValue]) => {
+          min.setValue(minValue);
+          max.setValue(maxValue);
+        }}
+      />
+    );
+  }}
+</UseMultiField>
+```
+
+#### Props
+
+##### fields (required)
+
+**Type:** `{ [fieldId: string]: UseFieldProps }`
+
+A map of field id to `<UseField />` props.  The id does not have to match the field path, it will simply help you identify the fields that you get back in the child function.
+
+##### children
+
+**Type:** `(fields: { fieldId: string: FieldHook }) => JSX.Element`
+
+The children of `<UseMultiField />` is a function child which receives a map of field id to FieldHook. You are then responsible to return a JSX element from that function.
+
+#### Typescript value type
+
+You can provide the field value type for each field (`unknown` by default) on the component.
+
+```js
+interface Fields {
+  min: number;
+  max: number;
+}
+
+// You are then required to provide those exact 2 fields in the "fields" prop
+<UseMultiField<Fields> fields={{ min: { ... }, max: { ... } }}>
+  ...
+</UseMultiField>
+```
+
+## Helpers
+
+### Components
+
+The core of the form lib is UI agnostic. It can be used with any React UI library to render the form fields. As in Elastic we use [the EUI framework](https://elastic.github.io/eui), we have created components that connect our `FieldHook` to the `<EuiFormRow/>` and its corresponding EUI field.
+
+You can import those component and directly use them as `component` prop on your `<UseField />`.
+
+```js
+import { Form, useForm, UseField, TextField, ToggleField } from '<path-to-form-lib>';
+
+export const MyFormComponent = () => {
+  const { form } = useForm();
+
+  return (
+    <Form form={form}>
+      <UseField path="name" component={TextField} />
+      <UseField path="isAdmin" component={ToggleField} />
+    </Form>
+  );
+};
+```
+
+As you can see it is very straightforward. If there are any validation error(s) on those fields, they will be correctly set on the underlying `<EuiFormRow/>`, as well as the field `value`, `onChange` handler, label, helpText...
+
+#### Fields components
+
+This is the list of component we currently have. This list might grow in the future if we see the need to support additional fields.
+
+* TextField
+* TextAreaField
+* NumericField
+* CheckBoxField
+* ToggleField
+* ComboBoxField<sup>*</sup>
+* JsonEditorField
+* SelectField
+* SuperSelectField
+* MultiSelectField
+* RadioGroupField
+* RangeField
+
+(*) Currently the `<ComboBoxField />` only support the free form entry of items (e.g a list of "tags" that the user enters). This means that it does not work (yet) **with predefined selections** to chose from.
+
+#### `euiFieldProps`
+
+Those helper components have been set to a default state that cover most of our use cases. You can override those defaults by passing new props to the `euiFieldProps`.
+
+```js
+<UseField
+  path="name"
+  component={TextField}
+  componentProps={{
+    euiFieldProps: {
+      fullWidth. false,
+      // ... any other <EuiFieldText /> prop override
+    }
+  }}
+/>
+```
+
+#### `Field`
+
+There is a special `<Field />` component that you can use if you prefer. If you use this component, it will check [the field `type` configuration](../core/use_field.md#type) and map to the corresponding component in the list above. If the type does not match any known component, a `<TextField />` component is rendered.
+
+It is recommended to use the available `FIELD_TYPES` constant to indicate the type of a field in the `FieldConfig`.
+
+```js
+const schema: FormSchema = {
+  name: {
+    label: 'Name',
+    type: FIELD_TYPES.TEXT
+  },
+  isAdmin: {
+    label: 'User is admin',
+    type: FIELD_TYPES.CHECKBOX,
+  },
+  country: {
+    label: 'Country,
+    type: FIELD_TYPES.SELECT,
+  }
+};
+
+export const MyFormComponent = () => {
+  const { form } = useForm({ schema });
+
+  // You now can use the <Field /> component everywhere
+  return (
+    <Form form={form}>
+      <UseField path="name" component={Field} />
+      <UseField path="isAdmin" component={Field} />
+      <UseField path="country" component={Field} />
+    </Form>
+  );
+};
+```
+
+The above example can be simplified one step further with [the `getUseField` helper](../core/use_field#getusefield).
+
+```js
+const schema: FormSchema = {
+  name: {
+    label: 'Name',
+    type: FIELD_TYPES.TEXT
+  },
+  ...
+};
+
+const UseField = getUseField({ prop: Field });
+
+// Nice and tidy form component :)
+export const MyFormComponent = () => {
+  const { form } = useForm({ schema });
+
+  return (
+    <Form form={form}>
+      <UseField path="name" />
+      <UseField path="isAdmin" />
+      <UseField path="country" />
+    </Form>
+  );
+};
+```
+
+### Validators
+
+As you have seen in the `<UseField />` configuration, the validations are objects with [a required `validator` function](../core/use_field#validator-required) attached to them.
+
+After building many forms, we have realized that we are doing almost all the time the same validation on a field: is the field empty? does it contain a character not allowed?, does it start with an invalid character? is it valid JSON? ...
+
+So instead of reinventing the wheel on each form we have exported to most common validators as reusable function that you can use directly in your field validations. Some validator might expose directly the handler to validate, some others expose a function that you need to call with some parameter and you will receive the validator back.
+
+```js
+import { fieldValidators } from '<path-to-form-lib>';
+
+const { emptyField } = fieldValidators;
+
+// Some validator expose a function that you need to call to receive the validator handler
+const nameConfig: FieldConfig<string> = {
+  validations: [{
+    validator: emptyField('Your custom error message'),
+  }, {
+    validator: containsCharsField({
+      chars: ' ',
+      message: 'Spaces are not allowed in a component template name.',
+    })
+  }],
+};
+```
+
+We have validators for valid
+
+* index pattern name
+* JSON
+* URL
+* number
+* string start with char
+* string contains char
+* ...
+
+Before your write your own validator, check (thanks to Typescript suggestions in your IDE) what is already exposed from the `fieldValidators` object.
+
+And if need to build your own validator and you think that it is common enough for other forms, make a contribution to the form lib and open a PR to add it to our list!
