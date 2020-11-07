@@ -101,6 +101,67 @@ describe('test policy response handler', () => {
   describe('test policy summaries handler', () => {
     let mockAgentService: jest.Mocked<AgentService>;
     let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
+
+    const agentListResult = {
+      agents: [
+        ({
+          local_metadata: {
+            elastic: {
+              agent: {
+                version: '8.0.0',
+              },
+            },
+          },
+        } as unknown) as Agent,
+        ({
+          local_metadata: {
+            elastic: {
+              agent: {
+                version: '8.0.0',
+              },
+            },
+          },
+        } as unknown) as Agent,
+        ({
+          local_metadata: {
+            elastic: {
+              agent: {
+                version: '8.1.0',
+              },
+            },
+          },
+        } as unknown) as Agent,
+      ],
+      total: 2,
+      page: 1,
+      perPage: 1,
+    };
+
+    const emptyAgentListResult = {
+      agents: [],
+      total: 2,
+      page: 1,
+      perPage: 1,
+    };
+
+    const agentPolicyListResult = {
+      items: [
+        ({
+          id: 'policy-1',
+        } as unknown) as AgentPolicy,
+      ],
+      total: 1,
+      page: 1,
+      perPage: 1,
+    };
+
+    const emptyAgentPolicyListResult = {
+      items: [],
+      total: 2,
+      page: 1,
+      perPage: 1,
+    };
+
     beforeEach(() => {
       mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockSavedObjectClient = savedObjectsClientMock.create();
@@ -118,53 +179,13 @@ describe('test policy response handler', () => {
 
     it('should return the summary of all the policies with the given policy name', async () => {
       mockAgentService.listAgents
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            agents: [
-              ({
-                local_metadata: {
-                  elastic: {
-                    agent: {
-                      version: '8.0.0',
-                    },
-                  },
-                },
-              } as unknown) as Agent,
-            ],
-            total: 2,
-            page: 1,
-            perPage: 1,
-          })
-        )
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            agents: [],
-            total: 2,
-            page: 1,
-            perPage: 1,
-          })
-        );
+        .mockImplementationOnce(() => Promise.resolve(agentListResult))
+        .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
+
       mockAgentPolicyService.list
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            items: [
-              ({
-                id: 'policy-1',
-              } as unknown) as AgentPolicy,
-            ],
-            total: 2,
-            page: 1,
-            perPage: 1,
-          })
-        )
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            items: [],
-            total: 2,
-            page: 1,
-            perPage: 1,
-          })
-        );
+        .mockImplementationOnce(() => Promise.resolve(agentPolicyListResult))
+        .mockImplementationOnce(() => Promise.resolve(emptyAgentPolicyListResult));
+
       const policySummariesHandler = getPolicySummariesHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
@@ -182,41 +203,49 @@ describe('test policy response handler', () => {
       );
       expect(mockResponse.ok).toBeCalled();
       expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
-        versions_count: { package: 'endpoint', summary: { '8.0.0': 1 } },
+        policy_name: 'my-policy',
+        package: 'endpoint',
+        versions_count: { '8.0.0': 2, '8.1.0': 1 },
       });
       expect(mockAgentService.listAgents.mock.calls[0][1]?.kuery).toEqual(
         'fleet-agents.packages:"endpoint" AND (fleet-agents.policy_id:policy-1)'
       );
     });
 
+    it('should return the empty summary when there is no policy for selected policy name', async () => {
+      mockAgentPolicyService.list.mockImplementationOnce(() =>
+        Promise.resolve(emptyAgentPolicyListResult)
+      );
+
+      const policySummariesHandler = getPolicySummariesHandler({
+        logFactory: loggingSystemMock.create(),
+        service: endpointAppContextService,
+        config: () => Promise.resolve(createMockConfig()),
+      });
+
+      const mockRequest = httpServerMock.createKibanaRequest({
+        query: { policy_name: 'bad-policy', package_name: 'endpoint' },
+      });
+
+      await policySummariesHandler(
+        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        mockRequest,
+        mockResponse
+      );
+      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
+        policy_name: 'bad-policy',
+        package: 'endpoint',
+        versions_count: {},
+      });
+      expect(mockAgentService.listAgents).toBeCalledTimes(0);
+    });
+
     it('should return the summary of all the policies', async () => {
       mockAgentService.listAgents
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            agents: [
-              ({
-                local_metadata: {
-                  elastic: {
-                    agent: {
-                      version: '8.0.0',
-                    },
-                  },
-                },
-              } as unknown) as Agent,
-            ],
-            total: 2,
-            page: 1,
-            perPage: 1,
-          })
-        )
-        .mockImplementationOnce(() =>
-          Promise.resolve({
-            agents: [],
-            total: 2,
-            page: 1,
-            perPage: 1,
-          })
-        );
+        .mockImplementationOnce(() => Promise.resolve(agentListResult))
+        .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
+
       const policySummariesHandler = getPolicySummariesHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
@@ -234,7 +263,8 @@ describe('test policy response handler', () => {
       );
       expect(mockResponse.ok).toBeCalled();
       expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
-        versions_count: { package: 'endpoint', summary: { '8.0.0': 1 } },
+        package: 'endpoint',
+        versions_count: { '8.0.0': 2, '8.1.0': 1 },
       });
     });
   });

@@ -46,14 +46,15 @@ export const getPolicySummariesHandler = function (
         request.query.package_name,
         request.query?.policy_name || undefined
       );
+      const responseBody = {
+        package: request.query.package_name,
+        versions_count: { ...result },
+      };
 
       return response.ok({
-        body: {
-          versions_count: {
-            package: request.query.package_name,
-            summary: { ...result },
-          },
-        },
+        body: request.query?.policy_name
+          ? { ...responseBody, ...{ policy_name: request.query?.policy_name } }
+          : responseBody,
       });
     } catch (err) {
       return response.internalError({ body: err });

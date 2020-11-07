@@ -73,18 +73,42 @@ export async function getAllAgentUniqueVersionCount(
     return policyIds.map((id) => `fleet-agents.policy_id:${id}`).join(' OR ');
   };
 
-  const query = async (): Promise<string> => {
-    const agentQuery = `fleet-agents.packages:"${packageName}"`;
-    if (policyName) {
-      const policyQuery = await policyIdFilter();
-      return policyQuery && policyQuery !== '' ? `${agentQuery} AND (${policyQuery})` : agentQuery;
-    } else {
-      return agentQuery;
-    }
+  const agentVersionMapToJson = (versionMap: Map<string, number>): JsonObject => {
+    const jsonObject: { [key: string]: number } = {};
+    versionMap.forEach((value, key) => {
+      jsonObject[key] = value;
+    });
+    return jsonObject;
   };
 
-  const kqlQuery = await query();
+  const agentQuery = `fleet-agents.packages:"${packageName}"`;
+  if (policyName) {
+    const policyQuery = await policyIdFilter();
+    if (!policyQuery || policyQuery === '') {
+      return {};
+    } else {
+      return agentVersionMapToJson(
+        await agentVersionsMap(
+          endpointAppContext,
+          soClient,
+          `${agentQuery} AND (${policyQuery})`,
+          pageSize
+        )
+      );
+    }
+  }
 
+  return agentVersionMapToJson(
+    await agentVersionsMap(endpointAppContext, soClient, agentQuery, pageSize)
+  );
+}
+
+export async function agentVersionsMap(
+  endpointAppContext: EndpointAppContext,
+  soClient: SavedObjectsClientContract,
+  kqlQuery: string,
+  pageSize: number = 1000
+): Promise<Map<string, number>> {
   const searchOptions = (pageNum: number) => {
     return {
       page: pageNum,
@@ -111,12 +135,7 @@ export async function getAllAgentUniqueVersionCount(
     });
     hasMore = queryResult.agents.length > 0;
   }
-  const jsonObject: { [key: string]: number } = {};
-  result.forEach((value, key) => {
-    jsonObject[key] = value;
-  });
-
-  return jsonObject;
+  return result;
 }
 
 export async function getPolicyIds(
@@ -130,7 +149,7 @@ export async function getPolicyIds(
       page: pageNum,
       perPage: pageSize,
       showInactive: false,
-      kuery: `ingest-agent-policies.name :"${policyName}"`,
+      kuery: `ingest-agent-policies.name:"${policyName}"`,
     };
   };
 
