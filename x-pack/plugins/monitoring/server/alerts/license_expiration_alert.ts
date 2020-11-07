@@ -16,27 +16,27 @@ import {
   AlertMessageLinkToken,
   AlertInstanceState,
   LegacyAlert,
-} from './types';
+  CommonAlertParams,
+} from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
 import {
   INDEX_ALERTS,
   ALERT_LICENSE_EXPIRATION,
   FORMAT_DURATION_TEMPLATE_SHORT,
+  LEGACY_ALERT_DETAILS,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType } from '../../common/enums';
-import { CommonAlertParams } from '../../common/types';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
-import { AlertingDefaults } from './alerts_common';
+import { AlertingDefaults } from './alert_helpers';
 
 const WATCH_NAME = 'xpack_license_expiration';
 
 export class LicenseExpirationAlert extends BaseAlert {
   public type = ALERT_LICENSE_EXPIRATION;
-  public label = i18n.translate('xpack.monitoring.alerts.licenseExpiration.label', {
-    defaultMessage: 'License expiration',
-  });
+  public label = LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_LICENSE_EXPIRATION].description;
   public isLegacy = true;
   protected actionVariables = [
     {

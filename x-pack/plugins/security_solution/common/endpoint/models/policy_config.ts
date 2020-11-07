@@ -24,6 +24,12 @@ export const factory = (): PolicyConfig => {
       malware: {
         mode: ProtectionModes.prevent,
       },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
+      },
       logging: {
         file: 'info',
       },
@@ -36,6 +42,12 @@ export const factory = (): PolicyConfig => {
       },
       malware: {
         mode: ProtectionModes.prevent,
+      },
+      popup: {
+        malware: {
+          message: '',
+          enabled: true,
+        },
       },
       logging: {
         file: 'info',

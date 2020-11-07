@@ -22,12 +22,10 @@ import {
   EuiSwitch,
   EuiCallOut,
   EuiSpacer,
-  EuiBetaBadge,
   EuiButtonEmpty,
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { i18n } from '@kbn/i18n';
 import { useAppDependencies } from '../../../app_context';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
@@ -39,7 +37,6 @@ import {
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesRouteWithApi } from './alert_instances_route';
 import { ViewInApp } from './view_in_app';
-import { PLUGIN } from '../../../constants/plugin';
 import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
@@ -130,20 +127,6 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
               <EuiTitle size="m">
                 <h1>
                   <span data-test-subj="alertDetailsTitle">{alert.name}</span>
-                  &emsp;
-                  <EuiBetaBadge
-                    label="Beta"
-                    tooltipContent={i18n.translate(
-                      'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
-                      {
-                        defaultMessage:
-                          '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                        values: {
-                          pluginName: PLUGIN.getI18nName(i18n),
-                        },
-                      }
-                    )}
-                  />
                 </h1>
               </EuiTitle>
             </EuiPageContentHeaderSection>
@@ -318,6 +301,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   <AlertInstancesRouteWithApi
                     requestRefresh={requestRefresh}
                     alert={alert}
+                    alertType={alertType}
                     readOnly={!canSaveAlert}
                   />
                 ) : (

@@ -20,6 +20,10 @@ import {
   GeometryValue,
   XYChartSeriesIdentifier,
   StackMode,
+  RecursivePartial,
+  Theme,
+  VerticalAlignment,
+  HorizontalAlignment,
 } from '@elastic/charts';
 import { I18nProvider } from '@kbn/i18n/react';
 import {
@@ -42,11 +46,16 @@ import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
 import { parseInterval } from '../../../../../src/plugins/data/common';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import {
+  ChartsPluginSetup,
+  PaletteRegistry,
+  SeriesLayer,
+} from '../../../../../src/plugins/charts/public';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
 import { fittingFunctionDefinitions, getFitOptions } from './fitting_functions';
 import { getAxesConfiguration } from './axes_configuration';
+import { getColorAssignments } from './color_assignment';
 
 type InferPropType<T> = T extends React.FunctionComponent<infer P> ? P : T;
 type SeriesSpec = InferPropType<typeof LineSeries> &
@@ -66,6 +75,7 @@ export interface XYRender {
 
 type XYChartRenderProps = XYChartProps & {
   chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
   histogramBarTarget: number;
@@ -125,6 +135,11 @@ export const xyChart: ExpressionFunctionDefinition<
         defaultMessage: 'Define how missing values are treated',
       }),
     },
+    valueLabels: {
+      types: ['string'],
+      options: ['hide', 'inside'],
+      help: '',
+    },
     tickLabelsVisibilitySettings: {
       types: ['lens_xy_tickLabelsConfig'],
       help: i18n.translate('xpack.lens.xyChart.tickLabelsSettings.help', {
@@ -165,6 +180,7 @@ export const xyChart: ExpressionFunctionDefinition<
 export const getXyChartRenderer = (dependencies: {
   formatFactory: Promise<FormatFactory>;
   chartsThemeService: ChartsPluginSetup['theme'];
+  paletteService: PaletteRegistry;
   histogramBarTarget: number;
   timeZone: string;
 }): ExpressionRenderDefinition<XYChartProps> => ({
@@ -194,6 +210,7 @@ export const getXyChartRenderer = (dependencies: {
           {...config}
           formatFactory={formatFactory}
           chartsThemeService={dependencies.chartsThemeService}
+          paletteService={dependencies.paletteService}
           timeZone={dependencies.timeZone}
           histogramBarTarget={dependencies.histogramBarTarget}
           onClickValue={onClickValue}
@@ -205,6 +222,40 @@ export const getXyChartRenderer = (dependencies: {
     );
   },
 });
+
+function mergeThemeWithValueLabelsStyling(
+  theme: RecursivePartial<Theme>,
+  valuesLabelMode: string = 'hide',
+  isHorizontal: boolean
+) {
+  const VALUE_LABELS_MAX_FONTSIZE = 15;
+  const VALUE_LABELS_MIN_FONTSIZE = 10;
+  const VALUE_LABELS_VERTICAL_OFFSET = -10;
+  const VALUE_LABELS_HORIZONTAL_OFFSET = 10;
+
+  if (valuesLabelMode === 'hide') {
+    return theme;
+  }
+  return {
+    ...theme,
+    ...{
+      barSeriesStyle: {
+        ...theme.barSeriesStyle,
+        displayValue: {
+          fontSize: { min: VALUE_LABELS_MIN_FONTSIZE, max: VALUE_LABELS_MAX_FONTSIZE },
+          fill: { textInverted: true, textBorder: 2 },
+          alignment: isHorizontal
+            ? {
+                vertical: VerticalAlignment.Middle,
+              }
+            : { horizontal: HorizontalAlignment.Center },
+          offsetX: isHorizontal ? VALUE_LABELS_HORIZONTAL_OFFSET : 0,
+          offsetY: isHorizontal ? 0 : VALUE_LABELS_VERTICAL_OFFSET,
+        },
+      },
+    },
+  };
+}
 
 function getIconForSeriesType(seriesType: SeriesType): IconType {
   return visualizationTypes.find((c) => c.id === seriesType)!.icon || 'empty';
@@ -241,11 +292,12 @@ export function XYChart({
   formatFactory,
   timeZone,
   chartsThemeService,
+  paletteService,
   histogramBarTarget,
   onClickValue,
   onSelectRange,
 }: XYChartRenderProps) {
-  const { legend, layers, fittingFunction, gridlinesVisibilitySettings } = args;
+  const { legend, layers, fittingFunction, gridlinesVisibilitySettings, valueLabels } = args;
   const chartTheme = chartsThemeService.useChartsTheme();
   const chartBaseTheme = chartsThemeService.useChartsBaseTheme();
 
@@ -387,6 +439,18 @@ export function XYChart({
     return style;
   };
 
+  const shouldShowValueLabels =
+    // No stacked bar charts
+    filteredLayers.every((layer) => !layer.seriesType.includes('stacked')) &&
+    // No histogram charts
+    !isHistogramViz;
+
+  const baseThemeWithMaybeValueLabels = !shouldShowValueLabels
+    ? chartTheme
+    : mergeThemeWithValueLabelsStyling(chartTheme, valueLabels, shouldRotate);
+
+  const colorAssignments = getColorAssignments(args.layers, data, formatFactory);
+
   return (
     <Chart>
       <Settings
@@ -397,7 +461,7 @@ export function XYChart({
         }
         legendPosition={legend.position}
         showLegendExtra={false}
-        theme={chartTheme}
+        theme={baseThemeWithMaybeValueLabels}
         baseTheme={chartBaseTheme}
         tooltip={{
           headerFormatter: (d) => safeXAccessorLabelRenderer(d.value),
@@ -540,6 +604,7 @@ export function XYChart({
             yScaleType,
             xScaleType,
             isHistogram,
+            palette,
           } = layer;
           const columnToLabelMap: Record<string, string> = columnToLabel
             ? JSON.parse(columnToLabel)
@@ -601,6 +666,10 @@ export function XYChart({
             });
           }
 
+          const yAxis = yAxesConfiguration.find((axisConfiguration) =>
+            axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
+          );
+
           const seriesProps: SeriesSpec = {
             splitSeriesAccessors: splitAccessor ? [splitAccessor] : [],
             stackAccessors: seriesType.includes('stacked') ? [xAccessor as string] : [],
@@ -610,10 +679,34 @@ export function XYChart({
             data: rows,
             xScaleType: xAccessor ? xScaleType : 'ordinal',
             yScaleType,
-            color: () => getSeriesColor(layer, accessor),
-            groupId: yAxesConfiguration.find((axisConfiguration) =>
-              axisConfiguration.series.find((currentSeries) => currentSeries.accessor === accessor)
-            )?.groupId,
+            color: ({ yAccessor, seriesKeys }) => {
+              const overwriteColor = getSeriesColor(layer, accessor);
+              if (overwriteColor !== null) {
+                return overwriteColor;
+              }
+              const colorAssignment = colorAssignments[palette.name];
+              const seriesLayers: SeriesLayer[] = [
+                {
+                  name: splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
+                  totalSeriesAtDepth: colorAssignment.totalSeriesCount,
+                  rankAtDepth: colorAssignment.getRank(
+                    layer,
+                    String(seriesKeys[0]),
+                    String(yAccessor)
+                  ),
+                },
+              ];
+              return paletteService.get(palette.name).getColor(
+                seriesLayers,
+                {
+                  maxDepth: 1,
+                  behindText: false,
+                  totalSeries: colorAssignment.totalSeriesCount,
+                },
+                palette.params
+              );
+            },
+            groupId: yAxis?.groupId,
             enableHistogramMode:
               isHistogram &&
               (seriesType.includes('stacked') || !splitAccessor) &&
@@ -685,7 +778,19 @@ export function XYChart({
             case 'bar_horizontal':
             case 'bar_horizontal_stacked':
             case 'bar_horizontal_percentage_stacked':
-              return <BarSeries key={index} {...seriesProps} />;
+              const valueLabelsSettings = {
+                displayValueSettings: {
+                  // This format double fixes two issues in elastic-chart
+                  // * when rotating the chart, the formatter is not correctly picked
+                  // * in some scenarios value labels are not strings, and this breaks the elastic-chart lib
+                  valueFormatter: (d: unknown) => yAxis?.formatter?.convert(d) || '',
+                  showValueLabel: shouldShowValueLabels && valueLabels !== 'hide',
+                  isAlternatingValueLabel: false,
+                  isValueContainedInElement: true,
+                  hideClippedValue: true,
+                },
+              };
+              return <BarSeries key={index} {...seriesProps} {...valueLabelsSettings} />;
             case 'area_stacked':
             case 'area_percentage_stacked':
               return (

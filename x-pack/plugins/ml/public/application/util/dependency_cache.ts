@@ -201,7 +201,6 @@ export function getGetUrlGenerator() {
 }
 
 export function clearCache() {
-  console.log('clearing dependency cache'); // eslint-disable-line no-console
   Object.keys(cache).forEach((k) => {
     cache[k as keyof DependencyCache] = null;
   });

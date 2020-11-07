@@ -65,7 +65,6 @@ const {
   timefilter,
   toastNotifications,
   uiSettings: config,
-  visualizations,
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
@@ -87,6 +86,7 @@ const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
   LOADING: 'loading',
   COMPLETE: 'complete',
+  ERROR: 'error',
 };
 
 const app = getAngularModule();
@@ -620,6 +620,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     config: config,
     fixedScroll: createFixedScroll($scope, $timeout),
     setHeaderActionMenu: getHeaderActionMenuMounter(),
+    data,
   };
 
   const shouldSearchOnPageLoad = () => {
@@ -685,7 +686,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
           function pick(rows, oldRows, fetchStatus) {
             // initial state, pretend we're already loading if we're about to execute a search so
             // that the uninitilized message doesn't flash on screen
-            if (rows == null && oldRows == null && shouldSearchOnPageLoad()) {
+            if (!$scope.fetchError && rows == null && oldRows == null && shouldSearchOnPageLoad()) {
               return status.LOADING;
             }
 
@@ -814,7 +815,7 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         if (error instanceof Error && error.name === 'AbortError') return;
 
         $scope.fetchStatus = fetchStatuses.NO_RESULTS;
-        $scope.rows = [];
+        $scope.fetchError = error;
 
         data.search.showError(error);
       });
@@ -872,11 +873,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
     if (getTimeField()) {
-      const tabifiedData = tabifyAggResponse($scope.vis.data.aggs, resp);
+      const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
       $scope.searchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
         tabifiedData,
-        getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
+        getDimensions($scope.opts.chartAggConfigs.aggs, $scope.timeRange)
       );
       $scope.updateTime();
     }
@@ -1043,27 +1044,19 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         },
       },
     ];
-
-    $scope.vis = await visualizations.createVis('histogram', {
-      title: savedSearch.title,
-      params: {
-        addLegend: false,
-        addTimeMarker: true,
-      },
-      data: {
-        aggs: visStateAggs,
-        searchSource: $scope.searchSource.getSerializedFields(),
-      },
-    });
+    $scope.opts.chartAggConfigs = data.search.aggs.createAggConfigs(
+      $scope.indexPattern,
+      visStateAggs
+    );
 
     $scope.searchSource.onRequestStart((searchSource, options) => {
-      if (!$scope.vis) return;
-      return $scope.vis.data.aggs.onSearchRequestStart(searchSource, options);
+      if (!$scope.opts.chartAggConfigs) return;
+      return $scope.opts.chartAggConfigs.onSearchRequestStart(searchSource, options);
     });
 
     $scope.searchSource.setField('aggs', function () {
-      if (!$scope.vis) return;
-      return $scope.vis.data.aggs.toDsl();
+      if (!$scope.opts.chartAggConfigs) return;
+      return $scope.opts.chartAggConfigs.toDsl();
     });
   }
 

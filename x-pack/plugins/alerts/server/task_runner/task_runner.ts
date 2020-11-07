@@ -3,14 +3,13 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
-import { pickBy, mapValues, without } from 'lodash';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import { Dictionary, pickBy, mapValues, without } from 'lodash';
 import { Logger, KibanaRequest } from '../../../../../src/core/server';
 import { TaskRunnerContext } from './task_runner_factory';
-import { ConcreteTaskInstance } from '../../../task_manager/server';
+import { ConcreteTaskInstance, throwUnrecoverableError } from '../../../task_manager/server';
 import { createExecutionHandler } from './create_execution_handler';
 import { AlertInstance, createAlertInstanceFactory } from '../alert_instance';
-import { getNextRunAt } from './get_next_run_at';
 import {
   validateAlertTypeParams,
   executionStatusFromState,
@@ -29,6 +28,7 @@ import {
   AlertExecutorOptions,
   SanitizedAlert,
   AlertExecutionStatus,
+  AlertExecutionStatusErrorReasons,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -38,11 +38,11 @@ import { isAlertSavedObjectNotFoundError } from '../lib/is_alert_not_found_error
 import { AlertsClient } from '../alerts_client';
 import { partiallyUpdateAlert } from '../saved_objects';
 
-const FALLBACK_RETRY_INTERVAL: IntervalSchedule = { interval: '5m' };
+const FALLBACK_RETRY_INTERVAL = '5m';
 
 interface AlertTaskRunResult {
   state: AlertTaskState;
-  runAt: Date | undefined;
+  schedule: IntervalSchedule | undefined;
 }
 
 interface AlertTaskInstance extends ConcreteTaskInstance {
@@ -212,7 +212,7 @@ export class TaskRunner {
       event.event = event.event || {};
       event.event.outcome = 'failure';
       eventLogger.logEvent(event);
-      throw new ErrorWithReason('execute', err);
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, err);
     }
 
     eventLogger.stopTiming(event);
@@ -225,11 +225,10 @@ export class TaskRunner {
     const instancesWithScheduledActions = pickBy(alertInstances, (alertInstance: AlertInstance) =>
       alertInstance.hasScheduledActions()
     );
-    const currentAlertInstanceIds = Object.keys(instancesWithScheduledActions);
     generateNewAndResolvedInstanceEvents({
       eventLogger,
       originalAlertInstanceIds,
-      currentAlertInstanceIds,
+      currentAlertInstances: instancesWithScheduledActions,
       alertId,
       alertLabel,
       namespace,
@@ -290,7 +289,7 @@ export class TaskRunner {
     try {
       apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
     } catch (err) {
-      throw new ErrorWithReason('decrypt', err);
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
     const [services, alertsClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
@@ -300,21 +299,17 @@ export class TaskRunner {
     try {
       alert = await alertsClient.get({ id: alertId });
     } catch (err) {
-      throw new ErrorWithReason('read', err);
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
 
     return {
       state: await promiseResult<AlertTaskState, Error>(
         this.validateAndExecuteAlert(services, apiKey, alert)
       ),
-      runAt: asOk(
-        getNextRunAt(
-          new Date(this.taskInstance.startedAt!),
-          // we do not currently have a good way of returning the type
-          // from SavedObjectsClient, and as we currenrtly require a schedule
-          // and we only support `interval`, we can cast this safely
-          alert.schedule
-        )
+      schedule: asOk(
+        // fetch the alert again to ensure we return the correct schedule as it may have
+        // cahnged during the task execution
+        (await alertsClient.get({ id: alertId })).schedule
       ),
     };
   }
@@ -322,11 +317,12 @@ export class TaskRunner {
   async run(): Promise<AlertTaskRunResult> {
     const {
       params: { alertId, spaceId },
-      startedAt: previousStartedAt,
+      startedAt,
       state: originalState,
+      schedule: taskSchedule,
     } = this.taskInstance;
 
-    const { state, runAt } = await errorAsAlertTaskRunResult(this.loadAlertAttributesAndRun());
+    const { state, schedule } = await errorAsAlertTaskRunResult(this.loadAlertAttributesAndRun());
     const namespace = spaceId === 'default' ? undefined : spaceId;
 
     const executionStatus: AlertExecutionStatus = map(
@@ -360,7 +356,7 @@ export class TaskRunner {
         (stateUpdates: AlertTaskState) => {
           return {
             ...stateUpdates,
-            previousStartedAt,
+            previousStartedAt: startedAt,
           };
         },
         (err: Error) => {
@@ -370,22 +366,14 @@ export class TaskRunner {
           } else {
             this.logger.error(message);
           }
-          return {
-            ...originalState,
-            previousStartedAt,
-          };
+          return originalState;
         }
       ),
-      runAt: resolveErr<Date | undefined, Error>(runAt, (err) => {
-        return isAlertSavedObjectNotFoundError(err, alertId)
-          ? undefined
-          : getNextRunAt(
-              new Date(),
-              // if we fail at this point we wish to recover but don't have access to the Alert's
-              // attributes, so we'll use a default interval to prevent the underlying task from
-              // falling into a failed state
-              FALLBACK_RETRY_INTERVAL
-            );
+      schedule: resolveErr<IntervalSchedule | undefined, Error>(schedule, (error) => {
+        if (isAlertSavedObjectNotFoundError(error, alertId)) {
+          throwUnrecoverableError(error);
+        }
+        return { interval: taskSchedule?.interval ?? FALLBACK_RETRY_INTERVAL };
       }),
     };
   }
@@ -394,7 +382,7 @@ export class TaskRunner {
 interface GenerateNewAndResolvedInstanceEventsParams {
   eventLogger: IEventLogger;
   originalAlertInstanceIds: string[];
-  currentAlertInstanceIds: string[];
+  currentAlertInstances: Dictionary<AlertInstance>;
   alertId: string;
   alertLabel: string;
   namespace: string | undefined;
@@ -405,9 +393,10 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
     eventLogger,
     alertId,
     namespace,
-    currentAlertInstanceIds,
+    currentAlertInstances,
     originalAlertInstanceIds,
   } = params;
+  const currentAlertInstanceIds = Object.keys(currentAlertInstances);
 
   const newIds = without(currentAlertInstanceIds, ...originalAlertInstanceIds);
   const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
@@ -423,11 +412,12 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
   }
 
   for (const id of currentAlertInstanceIds) {
-    const message = `${params.alertLabel} active instance: '${id}'`;
-    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message);
+    const actionGroup = currentAlertInstances[id].getScheduledActionOptions()?.actionGroup;
+    const message = `${params.alertLabel} active instance: '${id}' in actionGroup: '${actionGroup}'`;
+    logInstanceEvent(id, EVENT_LOG_ACTIONS.activeInstance, message, actionGroup);
   }
 
-  function logInstanceEvent(instanceId: string, action: string, message: string) {
+  function logInstanceEvent(instanceId: string, action: string, message: string, group?: string) {
     const event: IEvent = {
       event: {
         action,
@@ -435,6 +425,7 @@ function generateNewAndResolvedInstanceEvents(params: GenerateNewAndResolvedInst
       kibana: {
         alerting: {
           instance_id: instanceId,
+          action_group_id: group,
         },
         saved_objects: [
           {
@@ -463,7 +454,7 @@ async function errorAsAlertTaskRunResult(
   } catch (e) {
     return {
       state: asErr(e),
-      runAt: asErr(e),
+      schedule: asErr(e),
     };
   }
 }

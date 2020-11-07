@@ -5,7 +5,7 @@
  */
 import { AlertsClient, ConstructorOptions } from '../alerts_client';
 import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/task_manager.mock';
+import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
@@ -19,7 +19,7 @@ import { EventsFactory } from '../../lib/alert_instance_summary_from_event_log.t
 import { RawAlert } from '../../types';
 import { getBeforeSetup, mockedDateString, setGlobalDate } from './lib';
 
-const taskManager = taskManagerMock.start();
+const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
 const eventLogClient = eventLogClientMock.create();
@@ -118,12 +118,12 @@ describe('getAlertInstanceSummary()', () => {
       .addExecute()
       .addNewInstance('instance-currently-active')
       .addNewInstance('instance-previously-active')
-      .addActiveInstance('instance-currently-active')
-      .addActiveInstance('instance-previously-active')
+      .addActiveInstance('instance-currently-active', 'action group A')
+      .addActiveInstance('instance-previously-active', 'action group B')
       .advanceTime(10000)
       .addExecute()
       .addResolvedInstance('instance-previously-active')
-      .addActiveInstance('instance-currently-active')
+      .addActiveInstance('instance-currently-active', 'action group A')
       .getEvents();
     const eventsResult = {
       ...AlertInstanceSummaryFindEventsResult,
@@ -144,16 +144,19 @@ describe('getAlertInstanceSummary()', () => {
         "id": "1",
         "instances": Object {
           "instance-currently-active": Object {
+            "actionGroupId": "action group A",
             "activeStartDate": "2019-02-12T21:01:22.479Z",
             "muted": false,
             "status": "Active",
           },
           "instance-muted-no-activity": Object {
+            "actionGroupId": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
           },
           "instance-previously-active": Object {
+            "actionGroupId": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",

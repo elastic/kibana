@@ -42,6 +42,7 @@ interface Props {
   onUnPinEvent: OnUnPinEvent;
   pinnedEventIds: Readonly<Record<string, boolean>>;
   refetch: inputsModel.Refetch;
+  onRuleChange?: () => void;
   rowRenderers: RowRenderer[];
   selectedEventIds: Readonly<Record<string, TimelineNonEcsData[]>>;
   showCheckboxes: boolean;
@@ -69,6 +70,7 @@ const EventsComponent: React.FC<Props> = ({
   onUnPinEvent,
   pinnedEventIds,
   refetch,
+  onRuleChange,
   rowRenderers,
   selectedEventIds,
   showCheckboxes,
@@ -84,7 +86,6 @@ const EventsComponent: React.FC<Props> = ({
         columnHeaders={columnHeaders}
         columnRenderers={columnRenderers}
         containerElementRef={containerElementRef}
-        disableSensorVisibility={data != null && data.length < 101}
         docValueFields={docValueFields}
         event={event}
         eventIdToNoteIds={eventIdToNoteIds}
@@ -99,6 +100,7 @@ const EventsComponent: React.FC<Props> = ({
         onUpdateColumns={onUpdateColumns}
         refetch={refetch}
         rowRenderers={rowRenderers}
+        onRuleChange={onRuleChange}
         selectedEventIds={selectedEventIds}
         showCheckboxes={showCheckboxes}
         timelineId={id}

@@ -74,6 +74,7 @@
 |  [ISearchSetup](./kibana-plugin-plugins-data-public.isearchsetup.md) | The setup contract exposed by the Search plugin exposes the search strategy extension point. |
 |  [ISearchStart](./kibana-plugin-plugins-data-public.isearchstart.md) | search service |
 |  [ISearchStartSearchSource](./kibana-plugin-plugins-data-public.isearchstartsearchsource.md) | high level search service |
+|  [ISessionService](./kibana-plugin-plugins-data-public.isessionservice.md) |  |
 |  [KueryNode](./kibana-plugin-plugins-data-public.kuerynode.md) |  |
 |  [OptionedValueProp](./kibana-plugin-plugins-data-public.optionedvalueprop.md) |  |
 |  [QueryState](./kibana-plugin-plugins-data-public.querystate.md) | All query state service state |
@@ -158,7 +159,6 @@
 |  [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |  |
 |  [IndexPatternSelectProps](./kibana-plugin-plugins-data-public.indexpatternselectprops.md) |  |
 |  [InputTimeRange](./kibana-plugin-plugins-data-public.inputtimerange.md) |  |
-|  [ISearch](./kibana-plugin-plugins-data-public.isearch.md) |  |
 |  [ISearchGeneric](./kibana-plugin-plugins-data-public.isearchgeneric.md) |  |
 |  [ISearchSource](./kibana-plugin-plugins-data-public.isearchsource.md) | search source interface |
 |  [MatchAllFilter](./kibana-plugin-plugins-data-public.matchallfilter.md) |  |

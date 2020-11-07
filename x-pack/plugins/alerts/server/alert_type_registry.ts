@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import typeDetect from 'type-detect';
@@ -86,7 +86,6 @@ export class AlertTypeRegistry {
     this.taskManager.registerTaskDefinitions({
       [`alerting:${alertType.id}`]: {
         title: alertType.name,
-        type: `alerting:${alertType.id}`,
         createTaskRunner: (context: RunContext) =>
           this.taskRunnerFactory.create({ ...alertType } as AlertType, context),
       },

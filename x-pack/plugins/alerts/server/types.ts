@@ -3,13 +3,14 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { AlertInstance } from './alert_instance';
 import { AlertTypeRegistry as OrigAlertTypeRegistry } from './alert_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { AlertsClient } from './alerts_client';
 export * from '../common';
 import {
+  ElasticsearchClient,
   ILegacyClusterClient,
   ILegacyScopedClusterClient,
   KibanaRequest,
@@ -26,6 +27,7 @@ import {
   AlertInstanceState,
   AlertExecutionStatuses,
   AlertExecutionStatusErrorReasons,
+  AlertsHealth,
 } from '../common';
 
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
@@ -38,6 +40,7 @@ declare module 'src/core/server' {
     alerting?: {
       getAlertsClient: () => AlertsClient;
       listTypes: AlertTypeRegistry['list'];
+      getFrameworkHealth: () => Promise<AlertsHealth>;
     };
   }
 }
@@ -45,6 +48,7 @@ declare module 'src/core/server' {
 export interface Services {
   callCluster: ILegacyScopedClusterClient['callAsCurrentUser'];
   savedObjectsClient: SavedObjectsClientContract;
+  scopedClusterClient: ElasticsearchClient;
   getLegacyScopedClusterClient(clusterClient: ILegacyClusterClient): ILegacyScopedClusterClient;
 }
 
@@ -168,6 +172,12 @@ export type AlertInfoParams = Pick<
 export interface AlertingPlugin {
   setup: PluginSetupContract;
   start: PluginStartContract;
+}
+
+export interface AlertsConfigType {
+  healthCheck: {
+    interval: string;
+  };
 }
 
 export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;

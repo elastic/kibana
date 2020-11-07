@@ -3,8 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TaskManager } from '../../../../task_manager/server/task_manager';
+import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { IEventLogClient } from '../../../../event_log/server';
 import { actionsClientMock } from '../../../../actions/server/mocks';
 import { ConstructorOptions } from '../alerts_client';
@@ -41,9 +40,7 @@ export function setGlobalDate() {
 
 export function getBeforeSetup(
   alertsClientParams: jest.Mocked<ConstructorOptions>,
-  taskManager: jest.Mocked<
-    Pick<TaskManager, 'fetch' | 'get' | 'remove' | 'schedule' | 'runNow' | 'ensureScheduled'>
-  >,
+  taskManager: ReturnType<typeof taskManagerMock.createStart>,
   alertTypeRegistry: jest.Mocked<Pick<AlertTypeRegistry, 'get' | 'has' | 'register' | 'list'>>,
   eventLogClient?: jest.Mocked<IEventLogClient>
 ) {

@@ -18,22 +18,25 @@
  */
 
 import { SavedObjectReference } from '../../../../core/types';
-import { EmbeddableInput } from '../types';
+import { EmbeddableStateWithType } from '../types';
+import { MigrateFunctionsObject } from '../../../kibana_utils/common';
 
 export const telemetryBaseEmbeddableInput = (
-  state: EmbeddableInput,
+  state: EmbeddableStateWithType,
   telemetryData: Record<string, any>
 ) => {
   return telemetryData;
 };
 
-export const extractBaseEmbeddableInput = (state: EmbeddableInput) => {
+export const extractBaseEmbeddableInput = (state: EmbeddableStateWithType) => {
   return { state, references: [] as SavedObjectReference[] };
 };
 
 export const injectBaseEmbeddableInput = (
-  state: EmbeddableInput,
+  state: EmbeddableStateWithType,
   references: SavedObjectReference[]
 ) => {
   return state;
 };
+
+export const baseEmbeddableMigrations: MigrateFunctionsObject = {};

@@ -143,6 +143,19 @@ export const getQuerySignalIds = (signalIds: SignalIds) => ({
   },
 });
 
+/**
+ * Given an array of ruleIds for a test this will get the signals
+ * created from that rule_id.
+ * @param ruleIds The rule_id to search for signals
+ */
+export const getQuerySignalsRuleId = (ruleIds: string[]) => ({
+  query: {
+    terms: {
+      'signal.rule.rule_id': ruleIds,
+    },
+  },
+});
+
 export const setSignalStatus = ({
   signalIds,
   status,
@@ -794,11 +807,14 @@ export const waitForRuleSuccess = async (
 };
 
 /**
- * Waits for the signal hits to be greater than zero before continuing
+ * Waits for the signal hits to be greater than the supplied number
+ * before continuing with a default of at least one signal
  * @param supertest Deps
+ * @param numberOfSignals The number of signals to wait for, default is 1
  */
 export const waitForSignalsToBePresent = async (
-  supertest: SuperTest<supertestAsPromised.Test>
+  supertest: SuperTest<supertestAsPromised.Test>,
+  numberOfSignals = 1
 ): Promise<void> => {
   await waitFor(async () => {
     const {
@@ -808,7 +824,7 @@ export const waitForSignalsToBePresent = async (
       .set('kbn-xsrf', 'true')
       .send(getQueryAllSignals())
       .expect(200);
-    return signalsOpen.hits.hits.length > 0;
+    return signalsOpen.hits.hits.length >= numberOfSignals;
   });
 };
 
@@ -827,6 +843,22 @@ export const getAllSignals = async (
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
     .send(getQueryAllSignals())
+    .expect(200);
+  return signalsOpen;
+};
+
+export const getSignalsByRuleIds = async (
+  supertest: SuperTest<supertestAsPromised.Test>,
+  ruleIds: string[]
+): Promise<
+  SearchResponse<{
+    signal: Signal;
+  }>
+> => {
+  const { body: signalsOpen }: { body: SearchResponse<{ signal: Signal }> } = await supertest
+    .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
+    .set('kbn-xsrf', 'true')
+    .send(getQuerySignalsRuleId(ruleIds))
     .expect(200);
   return signalsOpen;
 };
