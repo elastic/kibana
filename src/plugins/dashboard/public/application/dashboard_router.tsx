@@ -42,7 +42,7 @@ import { DashboardApp } from './dashboard_app';
 import { createDashboardListingFilterUrl } from '../dashboard_constants';
 import { createDashboardEditUrl, DashboardConstants } from '..';
 
-enum UrlParams {
+export enum UrlParams {
   SHOW_TOP_MENU = 'show-top-menu',
   SHOW_QUERY_INPUT = 'show-query-input',
   SHOW_TIME_FILTER = 'show-time-filter',
@@ -102,6 +102,11 @@ export async function mountApp({
       hideWriteControls: dashboardConfig.getHideWriteControls(),
       visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize.save) },
       mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps.save) },
+      createNew: Boolean(coreStart.application.capabilities.dashboard.createNew),
+      show: Boolean(coreStart.application.capabilities.dashboard.show),
+      showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
+      createShortUrl: Boolean(coreStart.application.capabilities.dashboard.createShortUrl),
+      saveQuery: Boolean(coreStart.application.capabilities.dashboard.saveQuery),
     },
   };
 
@@ -125,9 +130,11 @@ export async function mountApp({
     historyFunction(destination);
   };
 
-  const getDashboardEmbedSettings = (routeParams: ParsedQuery<string>): DashboardEmbedSettings => {
+  const getDashboardEmbedSettings = (
+    routeParams: ParsedQuery<string>
+  ): DashboardEmbedSettings | undefined => {
     if (!routeParams.embd) {
-      return {};
+      return undefined;
     }
     return {
       forceShowTopNavMenu: Boolean(routeParams[UrlParams.SHOW_TOP_MENU]),

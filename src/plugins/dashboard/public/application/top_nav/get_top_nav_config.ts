@@ -38,18 +38,18 @@ export function getTopNavConfig(
       return hideWriteControls
         ? [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
-            // getShareConfig(actions[TopNavIds.SHARE]),
+            getShareConfig(actions[TopNavIds.SHARE]),
           ]
         : [
             getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
-            // getShareConfig(actions[TopNavIds.SHARE]),
+            getShareConfig(actions[TopNavIds.SHARE]),
             getCloneConfig(actions[TopNavIds.CLONE]),
             getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE]),
           ];
     case ViewMode.EDIT:
       return [
         getOptionsConfig(actions[TopNavIds.OPTIONS]),
-        // getShareConfig(actions[TopNavIds.SHARE]),
+        getShareConfig(actions[TopNavIds.SHARE]),
         getAddConfig(actions[TopNavIds.ADD_EXISTING]),
         getViewConfig(actions[TopNavIds.EXIT_EDIT_MODE]),
         getSaveConfig(actions[TopNavIds.SAVE]),
@@ -186,21 +186,21 @@ function getCreateNewConfig(action: NavAction) {
 // /**
 //  * @returns {kbnTopNavConfig}
 //  */
-// function getShareConfig(action: NavAction | undefined) {
-//   return {
-//     id: 'share',
-//     label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
-//       defaultMessage: 'share',
-//     }),
-//     description: i18n.translate('dashboard.topNave.shareConfigDescription', {
-//       defaultMessage: 'Share Dashboard',
-//     }),
-//     testId: 'shareTopNavButton',
-//     run: action,
-//     // disable the Share button if no action specified
-//     disableButton: !action,
-//   };
-// }
+function getShareConfig(action: NavAction | undefined) {
+  return {
+    id: 'share',
+    label: i18n.translate('dashboard.topNave.shareButtonAriaLabel', {
+      defaultMessage: 'share',
+    }),
+    description: i18n.translate('dashboard.topNave.shareConfigDescription', {
+      defaultMessage: 'Share Dashboard',
+    }),
+    testId: 'shareTopNavButton',
+    run: action,
+    // disable the Share button if no action specified
+    disableButton: !action,
+  };
+}
 
 /**
  * @returns {kbnTopNavConfig}

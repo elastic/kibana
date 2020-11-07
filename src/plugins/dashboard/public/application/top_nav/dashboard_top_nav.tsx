@@ -17,16 +17,19 @@
  * under the License.
  */
 
-import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import { EuiCheckboxGroup, EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/form/checkbox/checkbox_group';
 
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
-import React, { useCallback, useMemo } from 'react';
+import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { ViewMode } from '../../../../embeddable/public';
 import { useKibana } from '../../../../kibana_react/public';
+import { setStateToKbnUrl, unhashUrl } from '../../../../kibana_utils/public';
 import { SavedObjectSaveOpts, SaveResult, showSaveModal } from '../../../../saved_objects/public';
 import { NavAction } from '../../types';
+import { UrlParams } from '../dashboard_router';
 import { leaveConfirmStrings } from '../dashboard_strings';
 import { saveDashboard } from '../lib';
 import { DashboardAppServices, DashboardSaveOptions, DashboardTopNavProps } from '../types';
@@ -35,6 +38,17 @@ import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
 import { showOptionsPopover } from './show_options_popover';
 import { TopNavIds } from './top_nav_ids';
+
+interface UrlParamsSelectedMap {
+  [UrlParams.SHOW_TOP_MENU]: boolean;
+  [UrlParams.SHOW_QUERY_INPUT]: boolean;
+  [UrlParams.SHOW_TIME_FILTER]: boolean;
+  [UrlParams.SHOW_FILTER_BAR]: boolean;
+}
+
+interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTER_BAR> {
+  [UrlParams.HIDE_FILTER_BAR]: boolean;
+}
 
 export function DashboardTopNav({
   refreshDashboardContainer,
@@ -51,12 +65,23 @@ export function DashboardTopNav({
 }: DashboardTopNavProps) {
   const {
     core,
+    data,
+    share,
     chrome,
     navigation,
     setHeaderActionMenu,
     savedObjectsTagging,
     dashboardCapabilities,
   } = useKibana<DashboardAppServices>().services;
+
+  const [chromeIsVisible, setChromeIsVisible] = useState(false);
+
+  useEffect(() => {
+    const visibleSubscription = chrome.getIsVisible$().subscribe((isVisible) => {
+      setChromeIsVisible(isVisible);
+    });
+    return () => visibleSubscription.unsubscribe();
+  }, [chrome]);
 
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
@@ -255,43 +280,156 @@ export function DashboardTopNav({
     showCloneModal(onClone, currentTitle);
   }, [dashboardStateManager, runSave]);
 
-  const dashboardTopNavActions = useMemo(
-    () =>
-      ({
-        [TopNavIds.FULL_SCREEN]: () => {
-          dashboardStateManager.setFullScreenMode(true);
-        },
-        [TopNavIds.EXIT_EDIT_MODE]: () => onChangeViewMode(ViewMode.VIEW),
-        [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
-        [TopNavIds.SAVE]: runSave,
-        [TopNavIds.CLONE]: runClone,
-        [TopNavIds.ADD_EXISTING]: addFromLibrary,
-        [TopNavIds.VISUALIZE]: createNew,
-        [TopNavIds.OPTIONS]: (anchorElement) => {
-          showOptionsPopover({
-            anchorElement,
-            useMargins: dashboardStateManager.getUseMargins(),
-            onUseMarginsChange: (isChecked: boolean) => {
-              dashboardStateManager.setUseMargins(isChecked);
-            },
-            hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
-            onHidePanelTitlesChange: (isChecked: boolean) => {
-              dashboardStateManager.setHidePanelTitles(isChecked);
-            },
+  const dashboardTopNavActions = useMemo(() => {
+    const actions = {
+      [TopNavIds.FULL_SCREEN]: () => {
+        dashboardStateManager.setFullScreenMode(true);
+      },
+      [TopNavIds.EXIT_EDIT_MODE]: () => onChangeViewMode(ViewMode.VIEW),
+      [TopNavIds.ENTER_EDIT_MODE]: () => onChangeViewMode(ViewMode.EDIT),
+      [TopNavIds.SAVE]: runSave,
+      [TopNavIds.CLONE]: runClone,
+      [TopNavIds.ADD_EXISTING]: addFromLibrary,
+      [TopNavIds.VISUALIZE]: createNew,
+      [TopNavIds.OPTIONS]: (anchorElement) => {
+        showOptionsPopover({
+          anchorElement,
+          useMargins: dashboardStateManager.getUseMargins(),
+          onUseMarginsChange: (isChecked: boolean) => {
+            dashboardStateManager.setUseMargins(isChecked);
+          },
+          hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
+          onHidePanelTitlesChange: (isChecked: boolean) => {
+            dashboardStateManager.setHidePanelTitles(isChecked);
+          },
+        });
+      },
+    } as { [key: string]: NavAction };
+    if (share) {
+      actions[TopNavIds.SHARE] = (anchorElement) => {
+        const EmbedUrlParamExtension = ({
+          setParamValue,
+        }: {
+          setParamValue: (paramUpdate: UrlParamValues) => void;
+        }): ReactElement => {
+          const [urlParamsSelectedMap, setUrlParamsSelectedMap] = useState<UrlParamsSelectedMap>({
+            [UrlParams.SHOW_TOP_MENU]: false,
+            [UrlParams.SHOW_QUERY_INPUT]: false,
+            [UrlParams.SHOW_TIME_FILTER]: false,
+            [UrlParams.SHOW_FILTER_BAR]: true,
           });
-        },
-      } as { [key: string]: NavAction }),
-    [dashboardStateManager, onChangeViewMode, addFromLibrary, createNew, runClone, runSave]
-  );
+
+          const checkboxes = [
+            {
+              id: UrlParams.SHOW_TOP_MENU,
+              label: i18n.translate('dashboard.embedUrlParamExtension.topMenu', {
+                defaultMessage: 'Top menu',
+              }),
+            },
+            {
+              id: UrlParams.SHOW_QUERY_INPUT,
+              label: i18n.translate('dashboard.embedUrlParamExtension.query', {
+                defaultMessage: 'Query',
+              }),
+            },
+            {
+              id: UrlParams.SHOW_TIME_FILTER,
+              label: i18n.translate('dashboard.embedUrlParamExtension.timeFilter', {
+                defaultMessage: 'Time filter',
+              }),
+            },
+            {
+              id: UrlParams.SHOW_FILTER_BAR,
+              label: i18n.translate('dashboard.embedUrlParamExtension.filterBar', {
+                defaultMessage: 'Filter bar',
+              }),
+            },
+          ];
+
+          const handleChange = (param: string): void => {
+            const urlParamsSelectedMapUpdate = {
+              ...urlParamsSelectedMap,
+              [param]: !urlParamsSelectedMap[param as keyof UrlParamsSelectedMap],
+            };
+            setUrlParamsSelectedMap(urlParamsSelectedMapUpdate);
+
+            const urlParamValues = {
+              [UrlParams.SHOW_TOP_MENU]: urlParamsSelectedMap[UrlParams.SHOW_TOP_MENU],
+              [UrlParams.SHOW_QUERY_INPUT]: urlParamsSelectedMap[UrlParams.SHOW_QUERY_INPUT],
+              [UrlParams.SHOW_TIME_FILTER]: urlParamsSelectedMap[UrlParams.SHOW_TIME_FILTER],
+              [UrlParams.HIDE_FILTER_BAR]: !urlParamsSelectedMap[UrlParams.SHOW_FILTER_BAR],
+              [param === UrlParams.SHOW_FILTER_BAR ? UrlParams.HIDE_FILTER_BAR : param]:
+                param === UrlParams.SHOW_FILTER_BAR
+                  ? urlParamsSelectedMap[UrlParams.SHOW_FILTER_BAR]
+                  : !urlParamsSelectedMap[param as keyof UrlParamsSelectedMap],
+            };
+            setParamValue(urlParamValues);
+          };
+
+          return (
+            <EuiCheckboxGroup
+              options={checkboxes}
+              idToSelectedMap={(urlParamsSelectedMap as unknown) as EuiCheckboxGroupIdToSelectedMap}
+              onChange={handleChange}
+              legend={{
+                children: i18n.translate('dashboard.embedUrlParamExtension.include', {
+                  defaultMessage: 'Include',
+                }),
+              }}
+              data-test-subj="embedUrlParamExtension"
+            />
+          );
+        };
+
+        share.toggleShareContextMenu({
+          anchorElement,
+          allowEmbed: true,
+          allowShortUrl:
+            !dashboardCapabilities.hideWriteControls || dashboardCapabilities.createShortUrl,
+          shareableUrl: setStateToKbnUrl(
+            '_a',
+            dashboardStateManager.getAppState(),
+            { useHash: false, storeInHashQuery: true },
+            unhashUrl(window.location.href)
+          ),
+          objectId: savedDashboard.id,
+          objectType: 'dashboard',
+          sharingData: {
+            title: savedDashboard.title,
+          },
+          isDirty: dashboardStateManager.getIsDirty(),
+          embedUrlParamExtensions: [
+            {
+              paramName: 'embed',
+              component: EmbedUrlParamExtension,
+            },
+          ],
+        });
+      };
+    }
+    return actions;
+  }, [
+    dashboardCapabilities.hideWriteControls,
+    dashboardCapabilities.createShortUrl,
+    dashboardStateManager,
+    savedDashboard.title,
+    savedDashboard.id,
+    onChangeViewMode,
+    addFromLibrary,
+    createNew,
+    runClone,
+    runSave,
+    share,
+  ]);
 
   const getNavBarProps = () => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
-      !dashboardStateManager.getFullScreenMode();
-    // (forceShow || $scope.isVisible) && !dashboardStateManager.getFullScreenMode();
+      (forceShow || chromeIsVisible) && !dashboardStateManager.getFullScreenMode();
 
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
-      !dashboardStateManager.getFullScreenMode();
-    // !forceHide && ($scope.model.filters.length > 0 || !dashboardStateManager.getFullScreenMode());
+      !forceHide &&
+      (data.query.filterManager.getFilters().length > 0 ||
+        !dashboardStateManager.getFullScreenMode());
 
     const isFullScreenMode = dashboardStateManager.getFullScreenMode();
     const screenTitle = dashboardStateManager.getTitle();
@@ -321,7 +459,7 @@ export function DashboardTopNav({
       showFilterBar,
       setMenuMountPoint: setHeaderActionMenu,
       indexPatterns,
-      // showSaveQuery: $scope.showSaveQuery,
+      showSaveQuery: dashboardCapabilities.saveQuery,
       // savedQuery: $scope.savedQuery,
       // onSavedQueryIdChange,
       savedQueryId: dashboardStateManager.getSavedQueryId(),

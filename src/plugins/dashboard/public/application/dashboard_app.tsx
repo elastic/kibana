@@ -84,25 +84,6 @@ import {
   SavedDashboardPanel,
 } from '..';
 
-// enum UrlParams {
-//   SHOW_TOP_MENU = 'show-top-menu',
-//   SHOW_QUERY_INPUT = 'show-query-input',
-//   SHOW_TIME_FILTER = 'show-time-filter',
-//   SHOW_FILTER_BAR = 'show-filter-bar',
-//   HIDE_FILTER_BAR = 'hide-filter-bar',
-// }
-
-// interface UrlParamsSelectedMap {
-//   [UrlParams.SHOW_TOP_MENU]: boolean;
-//   [UrlParams.SHOW_QUERY_INPUT]: boolean;
-//   [UrlParams.SHOW_TIME_FILTER]: boolean;
-//   [UrlParams.SHOW_FILTER_BAR]: boolean;
-// }
-
-// interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTER_BAR> {
-//   [UrlParams.HIDE_FILTER_BAR]: boolean;
-// }
-
 const getChangesFromAppStateForContainerState = ({
   dashboardContainer,
   appStateDashboardInput,

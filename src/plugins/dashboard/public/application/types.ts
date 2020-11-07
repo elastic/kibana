@@ -119,6 +119,11 @@ export interface DashboardCapabilities {
   visualizeCapabilities: { save: boolean };
   mapsCapabilities: { save: boolean };
   hideWriteControls: boolean;
+  show: boolean;
+  createNew: boolean;
+  showWriteControls: boolean;
+  createShortUrl: boolean;
+  saveQuery: boolean;
 }
 
 export interface DashboardAppServices {
