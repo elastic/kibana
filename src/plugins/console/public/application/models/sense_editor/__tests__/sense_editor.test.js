@@ -205,7 +205,7 @@ describe('Editor', () => {
     'full url: single line request data',
     'POST https://somehost/_search',
     singleLineRequest.data,
-    callWithEditorMethod('getRequest', (request, done) => {
+    callWithEditorMethod('getRequest', (request) => {
       const expected = {
         method: 'POST',
         url: 'https://somehost/_search',
