@@ -37,7 +37,6 @@ describe('filter manager utilities', () => {
         mapQueryString(filter as Filter);
       } catch (e) {
         expect(e).toBe(filter);
-
         done();
       }
     });

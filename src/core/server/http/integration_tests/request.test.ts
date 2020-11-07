@@ -174,7 +174,7 @@ describe('KibanaRequest', () => {
 
   describe('events', () => {
     describe('aborted$', () => {
-      it('emits once and completes when request aborted', async (done) => {
+      it('emits once and completes when request aborted', async () => {
         expect.assertions(1);
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
@@ -185,7 +185,6 @@ describe('KibanaRequest', () => {
             next: nextSpy,
             complete: () => {
               expect(nextSpy).toHaveBeenCalledTimes(1);
-              done();
             },
           });
 
@@ -202,6 +201,7 @@ describe('KibanaRequest', () => {
           .end();
 
         setTimeout(() => incomingRequest.abort(), 50);
+        await delay(100);
       });
 
       it('completes & does not emit when request handled', async () => {
@@ -310,7 +310,7 @@ describe('KibanaRequest', () => {
         expect(completeSpy).toHaveBeenCalledTimes(1);
       });
 
-      it('emits once and completes when response is aborted', async (done) => {
+      it('emits once and completes when response is aborted', async () => {
         expect.assertions(2);
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
@@ -322,7 +322,6 @@ describe('KibanaRequest', () => {
             next: nextSpy,
             complete: () => {
               expect(nextSpy).toHaveBeenCalledTimes(1);
-              done();
             },
           });
 
@@ -338,6 +337,7 @@ describe('KibanaRequest', () => {
           // end required to send request
           .end();
         setTimeout(() => incomingRequest.abort(), 50);
+        await delay(100);
       });
     });
   });

@@ -40,7 +40,6 @@ describe('filter manager utilities', () => {
         mapMissing(filter);
       } catch (e) {
         expect(e).toBe(filter);
-
         done();
       }
     });
