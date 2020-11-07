@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { INITIAL_LOCATION } from '../../../../common/constants';
-import { Goto, MapCenterAndZoom } from '../../../../common/descriptor_types';
-import { MapSettings } from '../../../reducers/map';
+import { INITIAL_LOCATION } from '../../../common/constants';
+import { Goto, MapCenterAndZoom } from '../../../common/descriptor_types';
+import { MapSettings } from '../../reducers/map';
 
 export async function getInitialView(
   goto: Goto | null,
