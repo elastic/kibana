@@ -34,16 +34,15 @@ export const authentications: SecuritySolutionFactory<HostsQueries.authenticatio
     options: HostAuthenticationsRequestOptions,
     response: IEsSearchResponse<unknown>
   ): Promise<HostAuthenticationsStrategyResponse> => {
-    const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;
+    const { activePage, fakePossibleCount } = options.pagination;
     const totalCount = getOr(0, 'aggregations.user_count.value', response.rawResponse);
 
     const fakeTotalCount = fakePossibleCount <= totalCount ? fakePossibleCount : totalCount;
     const hits: AuthenticationHit[] = getHits(response);
-    const authenticationEdges: AuthenticationsEdges[] = hits.map((hit) =>
+    const edges: AuthenticationsEdges[] = hits.map((hit) =>
       formatAuthenticationData(authenticationsFields, hit, auditdFieldsMap)
     );
 
-    const edges = authenticationEdges.splice(cursorStart, querySize - cursorStart);
     const inspect = {
       dsl: [inspectStringifyObject(buildAuthenticationQuery(options))],
     };

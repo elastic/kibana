@@ -74,10 +74,15 @@ export interface AuthenticationBucket {
   successes: {
     doc_count: number;
   };
-  authentication: {
-    hits: {
-      total: TotalHit;
-      hits: ArrayLike<AuthenticationHit>;
-    };
+  events_by_outcome: {
+    buckets: Array<{
+      doc_count: number;
+      lastEvent: {
+        hits: {
+          total: TotalHit;
+          hits: ArrayLike<AuthenticationHit>;
+        };
+      };
+    }>;
   };
 }

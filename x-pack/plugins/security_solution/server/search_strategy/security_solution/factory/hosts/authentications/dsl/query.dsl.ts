@@ -19,16 +19,16 @@ export const auditdFieldsMap: Readonly<Record<string, string>> = {
   latest: '@timestamp',
   'lastSuccess.timestamp': 'lastSuccess.@timestamp',
   'lastFailure.timestamp': 'lastFailure.@timestamp',
-  ...{ ...extendMap('lastSuccess', sourceFieldsMap) },
-  ...{ ...extendMap('lastSuccess', hostFieldsMap) },
-  ...{ ...extendMap('lastFailure', sourceFieldsMap) },
-  ...{ ...extendMap('lastFailure', hostFieldsMap) },
+  ...extendMap('lastSuccess', sourceFieldsMap),
+  ...extendMap('lastSuccess', hostFieldsMap),
+  ...extendMap('lastFailure', sourceFieldsMap),
+  ...extendMap('lastFailure', hostFieldsMap),
 };
 
 export const buildQuery = ({
   filterQuery,
   timerange: { from, to },
-  pagination: { querySize },
+  pagination: { cursorStart, querySize },
   defaultIndex,
   docValueFields,
 }: HostAuthenticationsRequestOptions) => {
@@ -48,14 +48,6 @@ export const buildQuery = ({
     },
   ];
 
-  const agg = {
-    user_count: {
-      cardinality: {
-        field: 'user.name',
-      },
-    },
-  };
-
   const dslQuery = {
     allowNoIndices: true,
     index: defaultIndex,
@@ -63,38 +55,29 @@ export const buildQuery = ({
     body: {
       ...(isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
-        ...agg,
+        user_count: {
+          cardinality: {
+            field: 'user.name',
+          },
+        },
         group_by_users: {
           terms: {
-            size: querySize,
             field: 'user.name',
-            order: [{ 'successes.doc_count': 'desc' }, { 'failures.doc_count': 'desc' }],
+            min_doc_count: 0,
           },
           aggs: {
-            failures: {
-              filter: {
-                term: {
-                  'event.outcome': 'failure',
-                },
-              },
-              aggs: {
-                lastFailure: {
-                  top_hits: {
-                    size: 1,
-                    _source: esFields,
-                    sort: [{ '@timestamp': { order: 'desc' } }],
-                  },
-                },
+            bucket_sort: {
+              bucket_sort: {
+                // FIXME
+                // order: [{ 'successes.doc_count': 'desc' }, { 'failures.doc_count': 'desc' }],
+                from: cursorStart,
+                size: querySize,
               },
             },
-            successes: {
-              filter: {
-                term: {
-                  'event.outcome': 'success',
-                },
-              },
+            events_by_outcome: {
+              terms: { field: 'event.outcome', include: ['success', 'failure'] },
               aggs: {
-                lastSuccess: {
+                lastEvent: {
                   top_hits: {
                     size: 1,
                     _source: esFields,

@@ -79,15 +79,23 @@ export const getHits = <T extends FactoryQueryTypes>(response: StrategyResponseT
     (bucket: AuthenticationBucket) => ({
       _id: getOr(
         `${bucket.key}+${bucket.doc_count}`,
-        'failures.lastFailure.hits.hits[0].id',
+        'events_by_outcome.buckets[0].lastEvent.hits.hits[0].id',
         bucket
       ),
       _source: {
-        lastSuccess: getOr(null, 'successes.lastSuccess.hits.hits[0]._source', bucket),
-        lastFailure: getOr(null, 'failures.lastFailure.hits.hits[0]._source', bucket),
+        lastSuccess: getOr(
+          null,
+          'events_by_outcome.buckets[1].lastEvent.hits.hits[0]._source',
+          bucket
+        ),
+        lastFailure: getOr(
+          null,
+          'events_by_outcome.buckets[0].lastEvent.hits.hits[0]._source',
+          bucket
+        ),
       },
       user: bucket.key,
-      failures: bucket.failures.doc_count,
-      successes: bucket.successes.doc_count,
+      failures: bucket.events_by_outcome.buckets[0].doc_count,
+      successes: bucket.events_by_outcome.buckets[1].doc_count,
     })
   );
