@@ -3,20 +3,17 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import axios from 'axios';
+import axiosXhrAdapter from 'axios/lib/adapters/xhr';
 
 import {
   notificationServiceMock,
   fatalErrorsServiceMock,
   docLinksServiceMock,
-  injectedMetadataServiceMock,
 } from '../../../../../../src/core/public/mocks';
 
 import { usageCollectionPluginMock } from '../../../../../../src/plugins/usage_collection/public/mocks';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { HttpService } from '../../../../../../src/core/public/http';
-
-/* eslint-disable @kbn/eslint/no-restricted-paths */
 import { init as initBreadcrumb } from '../../../public/application/services/breadcrumb';
 import { init as initHttp } from '../../../public/application/services/http';
 import { init as initNotification } from '../../../public/application/services/notification';
@@ -25,10 +22,10 @@ import { init as initDocumentation } from '../../../public/application/services/
 import { init as initHttpRequests } from './http_requests';
 
 export const setupEnvironment = () => {
-  const httpServiceSetupMock = new HttpService().setup({
-    injectedMetadata: injectedMetadataServiceMock.createSetupContract(),
-    fatalErrors: fatalErrorsServiceMock.createSetupContract(),
-  });
+  // axios has a similar interface to HttpSetup, but we
+  // flatten out the response.
+  const mockHttpClient = axios.create({ adapter: axiosXhrAdapter });
+  mockHttpClient.interceptors.response.use(({ data }) => data);
 
   initBreadcrumb(() => {});
   initDocumentation(docLinksServiceMock.createStartContract());
@@ -37,7 +34,7 @@ export const setupEnvironment = () => {
     notificationServiceMock.createSetupContract().toasts,
     fatalErrorsServiceMock.createSetupContract()
   );
-  initHttp(httpServiceSetupMock);
+  initHttp(mockHttpClient);
 
   const { server, httpRequestsMockHelpers } = initHttpRequests();
 

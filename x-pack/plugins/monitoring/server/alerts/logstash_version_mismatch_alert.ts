@@ -31,6 +31,7 @@ const WATCH_NAME = 'logstash_version_mismatch';
 export class LogstashVersionMismatchAlert extends BaseAlert {
   public type = ALERT_LOGSTASH_VERSION_MISMATCH;
   public label = LEGACY_ALERT_DETAILS[ALERT_LOGSTASH_VERSION_MISMATCH].label;
+  public description = LEGACY_ALERT_DETAILS[ALERT_LOGSTASH_VERSION_MISMATCH].description;
   public isLegacy = true;
 
   protected actionVariables = [

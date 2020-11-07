@@ -3,25 +3,24 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { agentPolicyStatuses } from '../../constants';
+import { DataType, ValueOf } from '../../types';
 import { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import { Output } from './output';
 
-export enum AgentPolicyStatus {
-  Active = 'active',
-  Inactive = 'inactive',
-}
+export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
 export interface NewAgentPolicy {
   name: string;
   namespace: string;
   description?: string;
   is_default?: boolean;
-  monitoring_enabled?: Array<'logs' | 'metrics'>;
+  monitoring_enabled?: Array<ValueOf<DataType>>;
 }
 
 export interface AgentPolicy extends NewAgentPolicy {
   id: string;
-  status: AgentPolicyStatus;
+  status: ValueOf<AgentPolicyStatus>;
   package_policies: string[] | PackagePolicy[];
   updated_at: string;
   updated_by: string;

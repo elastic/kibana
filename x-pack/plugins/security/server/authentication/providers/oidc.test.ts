@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
@@ -29,7 +29,7 @@ describe('OIDCAuthenticationProvider', () => {
     mockOptions = mockAuthenticationProviderOptions({ name: 'oidc' });
 
     mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockUser = mockAuthenticatedUser({ authentication_provider: 'oidc' });
+    mockUser = mockAuthenticatedUser({ authentication_provider: { type: 'oidc', name: 'oidc' } });
     mockScopedClusterClient.callAsCurrentUser.mockImplementation(async (method) => {
       if (method === 'shield.authenticate') {
         return mockUser;
