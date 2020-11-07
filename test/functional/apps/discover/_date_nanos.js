@@ -29,8 +29,7 @@ export default function ({ getService, getPageObjects }) {
 
   // Failing: See https://github.com/elastic/kibana/issues/82035
 
-  // eslint-disable-next-line mocha/no-exclusive-tests
-  describe.only('date_nanos', function () {
+  describe('date_nanos', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('date_nanos');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
