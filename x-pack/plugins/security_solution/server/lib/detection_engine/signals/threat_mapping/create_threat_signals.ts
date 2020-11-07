@@ -90,11 +90,7 @@ export const createThreatSignals = async ({
 
   while (threatList.hits.hits.length !== 0) {
     const chunks = chunk(itemsPerSearch, threatList.hits.hits);
-    logger.debug(
-      buildRuleMessage(
-        `${chunks.length} concurrent indicator searches are starting. Each search can have up to ${itemsPerSearch} indicator items per search`
-      )
-    );
+    logger.debug(buildRuleMessage(`${chunks.length} concurrent indicator searches are starting.`));
     const concurrentSearchesPerformed = chunks.map<Promise<SearchAfterAndBulkCreateReturnType>>(
       (slicedChunk) =>
         createThreatSignal({
