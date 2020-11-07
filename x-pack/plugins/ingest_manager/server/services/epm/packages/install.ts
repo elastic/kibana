@@ -275,8 +275,7 @@ interface InstallUploadedArchiveParams {
 
 export type InstallPackageParams =
   | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
-  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams)
-  | never;
+  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams);
 
 async function installPackageByUpload({
   savedObjectsClient,
@@ -312,11 +311,19 @@ export async function installPackage(args: InstallPackageParams) {
   if (!('installSource' in args)) {
     throw new Error('installSource is required');
   }
+
   if (args.installSource === 'registry') {
     const { savedObjectsClient, pkgkey, callCluster, force } = args;
-    return installPackageFromRegistry({ savedObjectsClient, pkgkey, callCluster, force });
+
+    return installPackageFromRegistry({
+      savedObjectsClient,
+      pkgkey,
+      callCluster,
+      force,
+    });
   } else if (args.installSource === 'upload') {
     const { savedObjectsClient, callCluster, archiveBuffer, contentType } = args;
+
     return installPackageByUpload({
       savedObjectsClient,
       callCluster,
