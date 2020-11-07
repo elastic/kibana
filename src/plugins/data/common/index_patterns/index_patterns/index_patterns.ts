@@ -222,12 +222,15 @@ export class IndexPatternsService {
    */
   getFieldsForWildcard = async (options: GetFieldsOptions = {}) => {
     const metaFields = await this.config.get(UI_SETTINGS.META_FIELDS);
-    return this.apiClient.getFieldsForWildcard({
+    const result = this.apiClient.getFieldsForWildcard({
       pattern: options.pattern,
       metaFields,
       type: options.type,
       params: options.params || {},
     });
+    // eslint-disable-next-line no-console
+    console.log('getFieldsForWildcard returns', JSON.stringify(result));
+    return result;
   };
 
   /**
