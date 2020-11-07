@@ -4,10 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import 'core-js/stable';
-import 'regenerator-runtime/runtime';
-import 'whatwg-fetch';
-import 'jquery';
-import '@kbn/ui-shared-deps/flot_charts';
-
-export * from './shareable';
+export { getHealthStatusStream } from './get_state';
+export { scheduleAlertingHealthCheck, initializeAlertingHealth } from './task';

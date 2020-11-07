@@ -71,6 +71,7 @@ export function registerTransactionErrorRateAlertType({
         config,
         savedObjectsClient: services.savedObjectsClient,
       });
+      const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
       const searchParams = {
         index: indices['apm_oss.transactionIndices'],
@@ -120,6 +121,7 @@ export function registerTransactionErrorRateAlertType({
                     environments: {
                       terms: {
                         field: SERVICE_ENVIRONMENT,
+                        size: maxServiceEnvironments,
                       },
                     },
                   },
