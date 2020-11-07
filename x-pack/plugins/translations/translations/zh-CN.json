@@ -17844,7 +17844,6 @@
     "xpack.securitySolution.footer.of": "/",
     "xpack.securitySolution.footer.rows": "行",
     "xpack.securitySolution.footer.totalCountOfEvents": "事件",
-    "xpack.securitySolution.footer.updated": "已更新",
     "xpack.securitySolution.formatted.duration.aFewMillisecondsTooltip": "几毫秒",
     "xpack.securitySolution.formatted.duration.aFewNanosecondsTooltip": "几纳秒",
     "xpack.securitySolution.formatted.duration.aMillisecondTooltip": "一毫秒",
