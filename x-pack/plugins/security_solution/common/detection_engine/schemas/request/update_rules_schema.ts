@@ -51,6 +51,8 @@ import {
 } from '../common/schemas';
 import {
   threat_index,
+  concurrent_searches,
+  items_per_search,
   threat_query,
   threat_filters,
   threat_mapping,
@@ -134,6 +136,8 @@ export const updateRulesSchema = t.intersection([
       threat_filters, // defaults to "undefined" if not set during decode
       threat_index, // defaults to "undefined" if not set during decode
       threat_language, // defaults "undefined" if not set during decode
+      concurrent_searches, // defaults to "undefined" if not set during decode
+      items_per_search, // defaults to "undefined" if not set during decode
     })
   ),
 ]);
