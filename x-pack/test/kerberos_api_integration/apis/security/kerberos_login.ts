@@ -79,9 +79,9 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(user.username).to.eql(username);
-      expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       expect(user.authentication_type).to.eql('realm');
-      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
+      // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
     });
 
     describe('initiating SPNEGO', () => {
@@ -146,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
             enabled: true,
             authentication_realm: { name: 'kerb1', type: 'kerberos' },
             lookup_realm: { name: 'kerb1', type: 'kerberos' },
-            authentication_provider: 'kerberos',
+            authentication_provider: { type: 'kerberos', name: 'kerberos' },
             authentication_type: 'token',
           });
       });
