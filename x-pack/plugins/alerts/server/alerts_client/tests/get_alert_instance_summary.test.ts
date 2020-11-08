@@ -118,12 +118,12 @@ describe('getAlertInstanceSummary()', () => {
       .addExecute()
       .addNewInstance('instance-currently-active')
       .addNewInstance('instance-previously-active')
-      .addActiveInstance('instance-currently-active')
-      .addActiveInstance('instance-previously-active')
+      .addActiveInstance('instance-currently-active', 'action group A')
+      .addActiveInstance('instance-previously-active', 'action group B')
       .advanceTime(10000)
       .addExecute()
       .addResolvedInstance('instance-previously-active')
-      .addActiveInstance('instance-currently-active')
+      .addActiveInstance('instance-currently-active', 'action group A')
       .getEvents();
     const eventsResult = {
       ...AlertInstanceSummaryFindEventsResult,
@@ -144,16 +144,19 @@ describe('getAlertInstanceSummary()', () => {
         "id": "1",
         "instances": Object {
           "instance-currently-active": Object {
+            "actionGroupId": "action group A",
             "activeStartDate": "2019-02-12T21:01:22.479Z",
             "muted": false,
             "status": "Active",
           },
           "instance-muted-no-activity": Object {
+            "actionGroupId": undefined,
             "activeStartDate": undefined,
             "muted": true,
             "status": "OK",
           },
           "instance-previously-active": Object {
+            "actionGroupId": undefined,
             "activeStartDate": undefined,
             "muted": false,
             "status": "OK",
