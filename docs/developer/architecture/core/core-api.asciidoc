@@ -1,10 +1,10 @@
 [[kibana-platform-core-api]]
-== Kibana Platform Core API
+== {kib} Core API
 
 experimental[]
 
-Kibana Platform provides a set of low-level API required to run all the Kibana plugins.
-API is provided as a part of plugin lifecycle contract and may be invoked during an appropriate lifecycle only:
+{kib} Core provides a set of low-level API's required to run all {kib} plugins.
+These API's are injected into your plugin's lifecycle methods and may be invoked during that lifecycle only:
 
 [source,typescript]
 ----
@@ -33,9 +33,7 @@ export class MyPlugin {
 ==== Configuration service
 Kibana provides `ConfigService` if a plugin developer may want to support
 adjustable runtime behavior for their plugins.
-Access to Kibana config in Kibana Platform has been subject to significant refactoring.
-Config service does not provide access to the whole config anymore.
-Kibana platform plugin cannot read configuration parameters of the core services nor other plugins directly.
+Plugins can only read their own configuration values, it is not possible to access the configuration values from {kib} Core or other plugins directly.
 
 [source,js]
 ----
@@ -133,7 +131,7 @@ export const config = {
 ----
 [[handle-plugin-configuration-deprecations]]
 ===== Handle plugin configuration deprecations
-If your plugin has deprecated properties, you can describe them using
+If your plugin has deprecated configuration keys, you can describe them using
 the `deprecations` config descriptor field.
 Deprecations are managed on a per-plugin basis, meaning you don’t need to specify
 the whole property path, but use the relative path from your plugin’s
@@ -344,7 +342,7 @@ However, we recommend using React and https://elastic.github.io/eui[EUI] for all
 components to create a consistent UI experience.
 
 ==== HTTP service
-Provides API to communicate with the Kibana server. Feel free to use another HTTP client library to request 3rd party services.
+Provides API to communicate with the {kib} server. Feel free to use another HTTP client library to request 3rd party services.
 
 [source,typescript]
 ----
