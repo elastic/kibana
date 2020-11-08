@@ -151,7 +151,7 @@ export class Form extends PureComponent<FormProps> {
       if (!setting) {
         return;
       }
-      const { defVal, type, requiresPageReload } = setting;
+      const { defVal, type, requiresPageReload, metric } = setting;
       let valueToSave = value;
       let equalsToDefault = false;
       switch (type) {
@@ -165,6 +165,11 @@ export class Form extends PureComponent<FormProps> {
           const isArray = Array.isArray(JSON.parse((defVal as string) || '{}'));
           valueToSave = valueToSave.trim();
           valueToSave = valueToSave || (isArray ? '[]' : '{}');
+        case 'boolean':
+          if (metric && this.props.trackUiMetric) {
+            const metricName = valueToSave ? `${metric.name}_on` : `${metric.name}_off`;
+            this.props.trackUiMetric(metric.type, metricName);
+          }
         default:
           equalsToDefault = valueToSave === defVal;
       }
@@ -269,7 +274,6 @@ export class Form extends PureComponent<FormProps> {
                   enableSaving={this.props.enableSaving}
                   dockLinks={this.props.dockLinks}
                   toasts={this.props.toasts}
-                  trackUiMetric={this.props.trackUiMetric}
                 />
               );
             })}

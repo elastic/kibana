@@ -47,7 +47,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { UiStatsMetricType } from '@kbn/analytics';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
 import {
@@ -67,7 +66,6 @@ interface FieldProps {
   clearChange?: (name: string) => void;
   unsavedChanges?: FieldState;
   loading?: boolean;
-  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export const getEditableValue = (
@@ -171,13 +169,7 @@ export class Field extends PureComponent<FieldProps> {
   };
 
   onFieldChangeSwitch = (e: EuiSwitchEvent) => {
-    const checked = e.target.checked;
-    const { metric } = this.props.setting;
-    if (metric && this.props.trackUiMetric) {
-      const metricName = checked ? `${metric.name}_on` : `${metric.name}_off`;
-      this.props.trackUiMetric(metric.type, metricName);
-    }
-    return this.onFieldChange(checked);
+    return this.onFieldChange(e.target.checked);
   };
 
   onFieldChangeEvent = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
