@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEmpty } from 'lodash';
 import { createSelector } from 'reselect';
+import { State } from '../../store';
+import { InputsModelId } from '../../store/inputs/constants';
 import { Policy, InputsRange, TimeRange, GlobalQuery } from '../../store/inputs/model';
 
 export const getPolicy = (inputState: InputsRange): Policy => inputState.policy;
@@ -12,6 +15,16 @@ export const getPolicy = (inputState: InputsRange): Policy => inputState.policy;
 export const getTimerange = (inputState: InputsRange): TimeRange => inputState.timerange;
 
 export const getQueries = (inputState: InputsRange): GlobalQuery[] => inputState.queries;
+
+export const getGlobalQueries = (state: State, id: InputsModelId): GlobalQuery[] => {
+  const inputsRange = state.inputs[id];
+  return !isEmpty(inputsRange.linkTo)
+    ? inputsRange.linkTo.reduce<GlobalQuery[]>((acc, linkToId) => {
+        const linkToIdInputsRange: InputsRange = state.inputs[linkToId];
+        return [...acc, ...linkToIdInputsRange.queries];
+      }, inputsRange.queries)
+    : inputsRange.queries;
+};
 
 export const policySelector = () => createSelector(getPolicy, (policy) => policy.kind);
 
@@ -31,7 +44,7 @@ export const isLoadingSelector = () =>
   createSelector(getQueries, (queries) => queries.some((i) => i.loading === true));
 
 export const queriesSelector = () =>
-  createSelector(getQueries, (queries) => queries.filter((q) => q.id !== 'kql'));
+  createSelector(getGlobalQueries, (queries) => queries.filter((q) => q.id !== 'kql'));
 
 export const kqlQuerySelector = () =>
   createSelector(getQueries, (queries) => queries.find((q) => q.id === 'kql'));

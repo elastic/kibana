@@ -94,7 +94,7 @@ export interface AggsCommonStart {
    */
   getDateMetaByDatatableColumn: (
     column: DatatableColumn
-  ) => Promise<undefined | { timeZone: string; timeRange: TimeRange; interval: string }>;
+  ) => Promise<undefined | { timeZone: string; timeRange?: TimeRange; interval: string }>;
   createAggConfigs: (
     indexPattern: IndexPattern,
     configStates?: CreateAggConfigParams[],
