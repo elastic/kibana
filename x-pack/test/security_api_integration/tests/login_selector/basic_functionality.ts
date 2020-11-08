@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import url from 'url';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
+import type { AuthenticationProvider } from '../../../../plugins/security/common/types';
 import { getStateAndNonce } from '../../../oidc_api_integration/fixtures/oidc_tools';
 import {
   getMutualAuthenticationResponseToken,
@@ -35,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
   async function checkSessionCookie(
     sessionCookie: Cookie,
     username: string,
-    providerName: string,
+    provider: AuthenticationProvider,
     authenticationRealm: { name: string; type: string } | null,
     authenticationType: string
   ) {
@@ -66,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
     ]);
 
     expect(apiResponse.body.username).to.be(username);
-    expect(apiResponse.body.authentication_provider).to.be(providerName);
+    expect(apiResponse.body.authentication_provider).to.eql(provider);
     if (authenticationRealm) {
       expect(apiResponse.body.authentication_realm).to.eql(authenticationRealm);
     }
@@ -146,11 +147,8 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(
             request.cookie(cookies[0])!,
             'a@b.c',
-            providerName,
-            {
-              name: providerName,
-              type: 'saml',
-            },
+            { type: 'saml', name: providerName },
+            { name: providerName, type: 'saml' },
             'token'
           );
         }
@@ -182,11 +180,8 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(
             request.cookie(cookies[0])!,
             'a@b.c',
-            providerName,
-            {
-              name: providerName,
-              type: 'saml',
-            },
+            { type: 'saml', name: providerName },
+            { name: providerName, type: 'saml' },
             'token'
           );
         }
@@ -215,11 +210,8 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(
             request.cookie(cookies[0])!,
             'a@b.c',
-            providerName,
-            {
-              name: providerName,
-              type: 'saml',
-            },
+            { type: 'saml', name: providerName },
+            { name: providerName, type: 'saml' },
             'token'
           );
         }
@@ -244,7 +236,13 @@ export default function ({ getService }: FtrProviderContext) {
           )!;
           // Skip auth provider check since this comes from the reserved realm,
           // which is not available when running on ESS
-          await checkSessionCookie(basicSessionCookie, 'elastic', 'basic1', null, 'realm');
+          await checkSessionCookie(
+            basicSessionCookie,
+            'elastic',
+            { type: 'basic', name: 'basic1' },
+            null,
+            'realm'
+          );
 
           const authenticationResponse = await supertest
             .post('/api/security/saml/callback')
@@ -267,11 +265,8 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(
             request.cookie(cookies[0])!,
             'a@b.c',
-            providerName,
-            {
-              name: providerName,
-              type: 'saml',
-            },
+            { type: 'saml', name: providerName },
+            { name: providerName, type: 'saml' },
             'token'
           );
         }
@@ -293,11 +288,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           saml1SessionCookie,
           'a@b.c',
-          'saml1',
-          {
-            name: 'saml1',
-            type: 'saml',
-          },
+          { type: 'saml', name: 'saml1' },
+          { name: 'saml1', type: 'saml' },
           'token'
         );
 
@@ -321,11 +313,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           saml2SessionCookie,
           'a@b.c',
-          'saml2',
-          {
-            name: 'saml2',
-            type: 'saml',
-          },
+          { type: 'saml', name: 'saml2' },
+          { name: 'saml2', type: 'saml' },
           'token'
         );
       });
@@ -346,11 +335,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           saml1SessionCookie,
           'a@b.c',
-          'saml1',
-          {
-            name: 'saml1',
-            type: 'saml',
-          },
+          { type: 'saml', name: 'saml1' },
+          { name: 'saml1', type: 'saml' },
           'token'
         );
 
@@ -376,11 +362,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           saml2SessionCookie,
           'a@b.c',
-          'saml2',
-          {
-            name: 'saml2',
-            type: 'saml',
-          },
+          { type: 'saml', name: 'saml2' },
+          { name: 'saml2', type: 'saml' },
           'token'
         );
       });
@@ -466,11 +449,8 @@ export default function ({ getService }: FtrProviderContext) {
           await checkSessionCookie(
             request.cookie(cookies[0])!,
             'a@b.c',
-            providerName,
-            {
-              name: providerName,
-              type: 'saml',
-            },
+            { type: 'saml', name: providerName },
+            { name: providerName, type: 'saml' },
             'token'
           );
         }
@@ -537,11 +517,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           saml2SessionCookie,
           'a@b.c',
-          'saml2',
-          {
-            name: 'saml2',
-            type: 'saml',
-          },
+          { type: 'saml', name: 'saml2' },
+          { name: 'saml2', type: 'saml' },
           'token'
         );
       });
@@ -586,11 +563,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'tester@TEST.ELASTIC.CO',
-          'kerberos1',
-          {
-            name: 'kerb1',
-            type: 'kerberos',
-          },
+          { type: 'kerberos', name: 'kerberos1' },
+          { name: 'kerb1', type: 'kerberos' },
           'token'
         );
       });
@@ -635,11 +609,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'tester@TEST.ELASTIC.CO',
-          'kerberos1',
-          {
-            name: 'kerb1',
-            type: 'kerberos',
-          },
+          { type: 'kerberos', name: 'kerberos1' },
+          { name: 'kerb1', type: 'kerberos' },
           'token'
         );
       });
@@ -677,11 +648,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'user2',
-          'oidc1',
-          {
-            name: 'oidc1',
-            type: 'oidc',
-          },
+          { type: 'oidc', name: 'oidc1' },
+          { name: 'oidc1', type: 'oidc' },
           'token'
         );
       });
@@ -737,11 +705,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'user1',
-          'oidc1',
-          {
-            name: 'oidc1',
-            type: 'oidc',
-          },
+          { type: 'oidc', name: 'oidc1' },
+          { name: 'oidc1', type: 'oidc' },
           'token'
         );
       });
@@ -779,11 +744,8 @@ export default function ({ getService }: FtrProviderContext) {
         await checkSessionCookie(
           request.cookie(cookies[0])!,
           'first_client',
-          'pki1',
-          {
-            name: 'pki1',
-            type: 'pki',
-          },
+          { type: 'pki', name: 'pki1' },
+          { name: 'pki1', type: 'pki' },
           'token'
         );
       });
