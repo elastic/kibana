@@ -160,17 +160,23 @@ when the browser tab or window is being closed.
 The table below explains how each lifecycle relates to the state
 of Kibana.
 
-[width="100%",cols="15%,38%,47%",options="header",]
+[width="100%",cols="10%, 15%, 37%, 38%",options="header",]
 |===
-|lifecycle |server |browser
-|_setup_ |bootstrapping and configuring routes |loading plugin bundles
-and configuring applications
+|lifecycle | purpose| server |browser
+|_setup_
+|perform "registration" work to setup environment for runtime
+|configure REST API endpoint, register saved object types, etc.
+|configure application routes in SPA, register custom UI elements in extension points, etc.
 
-|_start_ |server is now serving traffic |browser is now showing UI to
-the user
+|_start_
+|bootstrap runtime logic
+|respond to an incoming request, request Elasticsearch server, etc.
+|start polling Kibana server, update DOM tree in response to user interactions, etc.
 
-|_stop_ |server has received a request to shutdown |user is navigating
-away from Kibana
+|_stop_
+|cleanup runtime
+|dispose of active handles before the server shutdown.
+|store session data in the LocalStorage when user navigating from Kibana away, etc.
 |===
 
 There is no equivalent behavior to `start` or `stop` in legacy plugins.
