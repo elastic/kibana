@@ -54,6 +54,7 @@ import { ShardsResponse } from 'elasticsearch';
 import { ToastInputFields } from 'src/core/public/notifications';
 import { Type } from '@kbn/config-schema';
 import { TypeOf } from '@kbn/config-schema';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { Unit } from '@elastic/datemath';
 import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 
