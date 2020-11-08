@@ -21,7 +21,7 @@ export function getReasonFromError(error: Error): AlertExecutionStatusErrorReaso
   if (isErrorWithReason(error)) {
     return error.reason;
   }
-  return 'unknown';
+  return AlertExecutionStatusErrorReasons.Unknown;
 }
 
 export function isErrorWithReason(error: Error | ErrorWithReason): error is ErrorWithReason {
