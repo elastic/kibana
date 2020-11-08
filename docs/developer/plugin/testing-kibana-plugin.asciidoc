@@ -58,3 +58,5 @@ export const myPluginMocks = {
 Plugin mocks should consist of mocks for _public APIs only_:
 `setup`, `start` & `stop` contracts. Mocks aren’t necessary for pure functions as
 other plugins can call the original implementation in tests.
+
+<<development-tests, Writing tests>>
