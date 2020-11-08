@@ -304,7 +304,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
 
@@ -403,7 +402,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
 
@@ -502,7 +500,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
 
@@ -599,7 +596,6 @@ describe('helpers', () => {
         templateTimelineId: null,
         templateTimelineVersion: null,
         version: '1',
-        width: 1100,
       });
     });
 
@@ -732,7 +728,6 @@ describe('helpers', () => {
           sortDirection: 'desc',
         },
         status: TimelineStatus.draft,
-        width: 1100,
         id: 'savedObject-1',
       });
     });
@@ -899,7 +894,6 @@ describe('helpers', () => {
           sortDirection: 'desc',
         },
         status: TimelineStatus.draft,
-        width: 1100,
         id: 'savedObject-1',
       });
     });

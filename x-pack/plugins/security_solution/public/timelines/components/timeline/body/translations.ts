@@ -93,10 +93,3 @@ export const ACTION_INVESTIGATE_IN_RESOLVER = i18n.translate(
     defaultMessage: 'Analyze event',
   }
 );
-
-export const EVENT_DETAILS_PLACEHOLDER = i18n.translate(
-  'xpack.securitySolution.timeline.eventDetailsPlaceholder',
-  {
-    defaultMessage: 'Select an event to show event details',
-  }
-);

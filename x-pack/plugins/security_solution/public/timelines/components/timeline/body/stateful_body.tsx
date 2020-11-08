@@ -36,13 +36,16 @@ import { Body } from './index';
 import { columnRenderers, rowRenderers } from './renderers';
 import { Sort } from './sort';
 import { plainRowRenderer } from './renderers/plain_row_renderer';
+import { ActiveTimelineExpandedEvent } from '../../../containers/active_timeline_context';
 
 interface OwnProps {
   browserFields: BrowserFields;
   data: TimelineItem[];
   docValueFields: DocValueFields[];
+  expanded: ActiveTimelineExpandedEvent;
   id: string;
   isEventViewer?: boolean;
+  onEventToggled: (event: TimelineItem) => void;
   sort: Sort;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   refetch: inputsModel.Refetch;
@@ -63,6 +66,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     docValueFields,
     eventIdToNoteIds,
     excludedRowRendererIds,
+    expanded,
     id,
     isEventViewer = false,
     isSelectAllChecked,
@@ -74,6 +78,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     selectedEventIds,
     setSelected,
     clearSelected,
+    onEventToggled,
     onRuleChange,
     show,
     showCheckboxes,
@@ -198,6 +203,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         data={data}
         docValueFields={docValueFields}
         eventIdToNoteIds={eventIdToNoteIds}
+        expanded={expanded}
         getNotesByIds={getNotesByIds}
         graphEventId={graphEventId}
         isEventViewer={isEventViewer}
@@ -206,6 +212,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
         onColumnRemoved={onColumnRemoved}
         onColumnResized={onColumnResized}
         onColumnSorted={onColumnSorted}
+        onEventToggled={onEventToggled}
         onRowSelected={onRowSelected}
         onSelectAll={onSelectAll}
         onPinEvent={onPinEvent}
@@ -231,6 +238,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
     deepEqual(prevProps.data, nextProps.data) &&
     deepEqual(prevProps.excludedRowRendererIds, nextProps.excludedRowRendererIds) &&
+    deepEqual(prevProps.expanded, nextProps.expanded) &&
     deepEqual(prevProps.docValueFields, nextProps.docValueFields) &&
     prevProps.eventIdToNoteIds === nextProps.eventIdToNoteIds &&
     prevProps.graphEventId === nextProps.graphEventId &&
@@ -239,6 +247,7 @@ const StatefulBodyComponent = React.memo<StatefulBodyComponentProps>(
     prevProps.isEventViewer === nextProps.isEventViewer &&
     prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
     prevProps.loadingEventIds === nextProps.loadingEventIds &&
+    prevProps.onEventToggled === nextProps.onEventToggled &&
     prevProps.pinnedEventIds === nextProps.pinnedEventIds &&
     prevProps.show === nextProps.show &&
     prevProps.selectedEventIds === nextProps.selectedEventIds &&

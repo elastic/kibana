@@ -19,3 +19,10 @@ export const EVENT = i18n.translate(
     defaultMessage: 'Event',
   }
 );
+
+export const EVENT_DETAILS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.timeline.expandableEvent.placeholder',
+  {
+    defaultMessage: 'Select an event to show its details',
+  }
+);

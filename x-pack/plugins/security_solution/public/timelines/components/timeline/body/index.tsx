@@ -4,19 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
-import styled from 'styled-components';
+import React, { useMemo } from 'react';
 
 import { inputsModel } from '../../../../common/store';
 import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
-import {
-  TimelineItem,
-  TimelineEventsDetailsItem,
-  TimelineNonEcsData,
-} from '../../../../../common/search_strategy';
+import { TimelineItem, TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { Note } from '../../../../common/lib/note';
-import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../notes/helpers';
 import {
   OnColumnRemoved,
@@ -38,9 +32,7 @@ import { Sort } from './sort';
 import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
 import { TimelineEventsType, TimelineId, TimelineType } from '../../../../../common/types/timeline';
-import { ExpandableEvent } from '../expandable_event';
-import { useTimelineEventsDetails } from '../../../containers/details';
-import * as i18n from './translations';
+import { ActiveTimelineExpandedEvent } from '../../../containers/active_timeline_context';
 
 export interface BodyProps {
   addNoteToEvent: AddNoteToEvent;
@@ -49,6 +41,7 @@ export interface BodyProps {
   columnRenderers: ColumnRenderer[];
   data: TimelineItem[];
   docValueFields: DocValueFields[];
+  expanded: ActiveTimelineExpandedEvent;
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
   isEventViewer?: boolean;
@@ -59,6 +52,7 @@ export interface BodyProps {
   onColumnRemoved: OnColumnRemoved;
   onColumnResized: OnColumnResized;
   onColumnSorted: OnColumnSorted;
+  onEventToggled: (event: TimelineItem) => void;
   onRowSelected: OnRowSelected;
   onSelectAll: OnSelectAll;
   onPinEvent: OnPinEvent;
@@ -85,17 +79,6 @@ export const hasAdditionalActions = (id: TimelineId): boolean =>
 
 const EXTRA_WIDTH = 4; // px
 
-const emptyDetails: TimelineEventsDetailsItem[] = [];
-
-const FullWidthFlexGroup = styled(EuiFlexGroup)`
-  width: 100%;
-  overflow: hidden;
-`;
-
-const ScrollableFlexItem = styled(EuiFlexItem)`
-  overflow: auto;
-`;
-
 /** Renders the timeline body */
 export const Body = React.memo<BodyProps>(
   ({
@@ -104,8 +87,8 @@ export const Body = React.memo<BodyProps>(
     columnHeaders,
     columnRenderers,
     data,
-    docValueFields,
     eventIdToNoteIds,
+    expanded,
     getNotesByIds,
     graphEventId,
     isEventViewer = false,
@@ -114,6 +97,7 @@ export const Body = React.memo<BodyProps>(
     onColumnRemoved,
     onColumnResized,
     onColumnSorted,
+    onEventToggled,
     onRowSelected,
     onSelectAll,
     onPinEvent,
@@ -132,26 +116,6 @@ export const Body = React.memo<BodyProps>(
     timelineType,
     updateNote,
   }) => {
-    const [expanded, setExpanded] = useState<{ eventId?: string; indexName?: string }>({});
-    const [loading, detailsData] = useTimelineEventsDetails({
-      docValueFields,
-      indexName: expanded.indexName!,
-      eventId: expanded.eventId!,
-      skip: !expanded.eventId,
-    });
-
-    const onEventToggled = useCallback((event) => {
-      const eventId = event._id;
-
-      setExpanded((currentExpanded) => {
-        if (currentExpanded.eventId === eventId) {
-          return {};
-        }
-
-        return { eventId, indexName: event._index };
-      });
-    }, []);
-
     const actionsColumnWidth = useMemo(
       () =>
         getActionsColumnWidth(
@@ -180,81 +144,64 @@ export const Body = React.memo<BodyProps>(
             timelineType={timelineType}
           />
         )}
-        <FullWidthFlexGroup>
-          <ScrollableFlexItem grow={2}>
-            <TimelineBody
-              data-test-subj="timeline-body"
-              data-timeline-id={timelineId}
-              visible={show && !graphEventId}
-            >
-              <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
-                <ColumnHeaders
-                  actionsColumnWidth={actionsColumnWidth}
-                  browserFields={browserFields}
-                  columnHeaders={columnHeaders}
-                  isEventViewer={isEventViewer}
-                  isSelectAllChecked={isSelectAllChecked}
-                  onColumnRemoved={onColumnRemoved}
-                  onColumnResized={onColumnResized}
-                  onColumnSorted={onColumnSorted}
-                  onSelectAll={onSelectAll}
-                  onUpdateColumns={onUpdateColumns}
-                  showEventsSelect={false}
-                  showSelectAllCheckbox={showCheckboxes}
-                  sort={sort}
-                  timelineId={timelineId}
-                  toggleColumn={toggleColumn}
-                />
 
-                <Events
-                  actionsColumnWidth={actionsColumnWidth}
-                  addNoteToEvent={addNoteToEvent}
-                  browserFields={browserFields}
-                  columnHeaders={columnHeaders}
-                  columnRenderers={columnRenderers}
-                  data={data}
-                  expanded={expanded}
-                  eventIdToNoteIds={eventIdToNoteIds}
-                  getNotesByIds={getNotesByIds}
-                  id={timelineId}
-                  isEventViewer={isEventViewer}
-                  loadingEventIds={loadingEventIds}
-                  onColumnResized={onColumnResized}
-                  onPinEvent={onPinEvent}
-                  onRowSelected={onRowSelected}
-                  onUnPinEvent={onUnPinEvent}
-                  onEventToggled={onEventToggled}
-                  pinnedEventIds={pinnedEventIds}
-                  refetch={refetch}
-                  rowRenderers={rowRenderers}
-                  onRuleChange={onRuleChange}
-                  selectedEventIds={selectedEventIds}
-                  showCheckboxes={showCheckboxes}
-                  toggleColumn={toggleColumn}
-                  updateNote={updateNote}
-                />
-              </EventsTable>
-            </TimelineBody>
-          </ScrollableFlexItem>
-          <ScrollableFlexItem grow={1}>
-            {expanded.eventId ? (
-              <ExpandableEvent
-                browserFields={browserFields}
-                columnHeaders={columnHeaders}
-                event={detailsData || emptyDetails}
-                forceExpand={!!expanded.eventId && !loading}
-                id={expanded.eventId!}
-                onUpdateColumns={onUpdateColumns}
-                timelineId={timelineId}
-                toggleColumn={toggleColumn}
-              />
-            ) : (
-              <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>
-            )}
-          </ScrollableFlexItem>
-        </FullWidthFlexGroup>
+        <TimelineBody
+          data-test-subj="timeline-body"
+          data-timeline-id={timelineId}
+          visible={show && !graphEventId}
+        >
+          <EventsTable data-test-subj="events-table" columnWidths={columnWidths}>
+            <ColumnHeaders
+              actionsColumnWidth={actionsColumnWidth}
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              isEventViewer={isEventViewer}
+              isSelectAllChecked={isSelectAllChecked}
+              onColumnRemoved={onColumnRemoved}
+              onColumnResized={onColumnResized}
+              onColumnSorted={onColumnSorted}
+              onSelectAll={onSelectAll}
+              onUpdateColumns={onUpdateColumns}
+              showEventsSelect={false}
+              showSelectAllCheckbox={showCheckboxes}
+              sort={sort}
+              timelineId={timelineId}
+              toggleColumn={toggleColumn}
+            />
+
+            <Events
+              actionsColumnWidth={actionsColumnWidth}
+              addNoteToEvent={addNoteToEvent}
+              browserFields={browserFields}
+              columnHeaders={columnHeaders}
+              columnRenderers={columnRenderers}
+              data={data}
+              expanded={expanded}
+              eventIdToNoteIds={eventIdToNoteIds}
+              getNotesByIds={getNotesByIds}
+              id={timelineId}
+              isEventViewer={isEventViewer}
+              loadingEventIds={loadingEventIds}
+              onColumnResized={onColumnResized}
+              onPinEvent={onPinEvent}
+              onRowSelected={onRowSelected}
+              onUnPinEvent={onUnPinEvent}
+              onEventToggled={onEventToggled}
+              pinnedEventIds={pinnedEventIds}
+              refetch={refetch}
+              rowRenderers={rowRenderers}
+              onRuleChange={onRuleChange}
+              selectedEventIds={selectedEventIds}
+              showCheckboxes={showCheckboxes}
+              toggleColumn={toggleColumn}
+              updateNote={updateNote}
+            />
+          </EventsTable>
+        </TimelineBody>
         <TimelineBodyGlobalStyle />
       </>
     );
   }
 );
+
+Body.displayName = 'Body';

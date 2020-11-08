@@ -6,11 +6,11 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import deepEqual from 'fast-deep-equal';
 
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, TimelineItem } from '../../../../common/search_strategy';
 import { BrowserFields, DocValueFields } from '../../containers/source';
 import { useTimelineEvents } from '../../../timelines/containers';
 import { useKibana } from '../../lib/kibana';
@@ -37,6 +37,8 @@ import { useManageTimeline } from '../../../timelines/components/manage_timeline
 import { ExitFullScreen } from '../exit_full_screen';
 import { useFullScreen } from '../../containers/use_full_screen';
 import { TimelineId } from '../../../../common/types/timeline';
+import { ActiveTimelineExpandedEvent } from '../../../timelines/containers/active_timeline_context';
+import { ExpandableEvent } from '../../../timelines/components/timeline/expandable_event';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -74,6 +76,15 @@ const EventsContainerLoading = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+`;
+
+const FullWidthFlexGroup = styled(EuiFlexGroup)`
+  width: 100%;
+  overflow: hidden;
+`;
+
+const ScrollableFlexItem = styled(EuiFlexItem)`
+  overflow: auto;
 `;
 
 /**
@@ -143,6 +154,20 @@ const EventsViewerComponent: React.FC<Props> = ({
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
+
+  const [expanded, setExpanded] = useState<ActiveTimelineExpandedEvent>({});
+
+  const onEventToggled = useCallback((event: TimelineItem) => {
+    const eventId = event._id;
+
+    setExpanded((currentExpanded) => {
+      if (currentExpanded.eventId === eventId) {
+        return {};
+      }
+
+      return { eventId, indexName: event._index! };
+    });
+  }, []);
 
   const { getManageTimelineById, setIsTimelineLoading } = useManageTimeline();
 
@@ -280,38 +305,53 @@ const EventsViewerComponent: React.FC<Props> = ({
                 refetch={refetch}
               />
 
-              <StatefulBody
-                browserFields={browserFields}
-                data={nonDeletedEvents}
-                docValueFields={docValueFields}
-                id={id}
-                isEventViewer={true}
-                onRuleChange={onRuleChange}
-                refetch={refetch}
-                sort={sort}
-                toggleColumn={toggleColumn}
-              />
-
-              {
-                /** Hide the footer if Resolver is showing. */
-                !graphEventId && (
-                  <Footer
-                    activePage={pageInfo.activePage}
-                    data-test-subj="events-viewer-footer"
-                    updatedAt={updatedAt}
-                    height={footerHeight}
+              <FullWidthFlexGroup>
+                <ScrollableFlexItem grow={2}>
+                  <StatefulBody
+                    browserFields={browserFields}
+                    data={nonDeletedEvents}
+                    docValueFields={docValueFields}
+                    expanded={expanded}
                     id={id}
-                    isLive={isLive}
-                    isLoading={loading}
-                    itemsCount={nonDeletedEvents.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    onChangeItemsPerPage={onChangeItemsPerPage}
-                    onChangePage={loadPage}
-                    totalCount={totalCountMinusDeleted}
+                    isEventViewer={true}
+                    onEventToggled={onEventToggled}
+                    onRuleChange={onRuleChange}
+                    refetch={refetch}
+                    sort={sort}
+                    toggleColumn={toggleColumn}
                   />
-                )
-              }
+
+                  {
+                    /** Hide the footer if Resolver is showing. */
+                    !graphEventId && (
+                      <Footer
+                        activePage={pageInfo.activePage}
+                        data-test-subj="events-viewer-footer"
+                        updatedAt={updatedAt}
+                        height={footerHeight}
+                        id={id}
+                        isLive={isLive}
+                        isLoading={loading}
+                        itemsCount={nonDeletedEvents.length}
+                        itemsPerPage={itemsPerPage}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        onChangeItemsPerPage={onChangeItemsPerPage}
+                        onChangePage={loadPage}
+                        totalCount={totalCountMinusDeleted}
+                      />
+                    )
+                  }
+                </ScrollableFlexItem>
+                <ScrollableFlexItem grow={1}>
+                  <ExpandableEvent
+                    browserFields={browserFields}
+                    docValueFields={docValueFields}
+                    event={expanded}
+                    timelineId={id}
+                    toggleColumn={toggleColumn}
+                  />
+                </ScrollableFlexItem>
+              </FullWidthFlexGroup>
             </EventsContainerLoading>
           </>
         </EventDetailsWidthProvider>

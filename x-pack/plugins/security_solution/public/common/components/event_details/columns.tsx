@@ -12,7 +12,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
-  EuiText,
   EuiToolTip,
   EuiIconTip,
 } from '@elastic/eui';
@@ -28,7 +27,6 @@ import { DroppableWrapper } from '../drag_and_drop/droppable_wrapper';
 import { getDroppableId, getDraggableFieldId, DRAG_TYPE_FIELD } from '../drag_and_drop/helpers';
 import { DraggableFieldBadge } from '../draggables/field_badge';
 import { FieldName } from '../../../timelines/components/fields_browser/field_name';
-import { SelectableText } from '../selectable_text';
 import { OverflowField } from '../tables/helpers';
 import { defaultColumnHeaderType } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';

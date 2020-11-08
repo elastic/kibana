@@ -42,14 +42,6 @@ export const upsertColumn = actionCreator<{
 
 export const addProvider = actionCreator<{ id: string; provider: DataProvider }>('ADD_PROVIDER');
 
-export const applyDeltaToWidth = actionCreator<{
-  id: string;
-  delta: number;
-  bodyClientWidthPixels: number;
-  minWidthPixels: number;
-  maxWidthPercent: number;
-}>('APPLY_DELTA_TO_WIDTH');
-
 export const applyDeltaToColumnWidth = actionCreator<{
   id: string;
   columnId: string;

@@ -28,6 +28,7 @@ const mockSort: Sort = {
 
 jest.mock('../../../../common/hooks/use_selector', () => ({
   useShallowEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
+  useDeepEqualSelector: jest.fn().mockReturnValue(mockTimelineModel),
 }));
 
 jest.mock('../../../../common/components/link_to');
@@ -58,12 +59,14 @@ describe('Body', () => {
     data: mockTimelineData,
     docValueFields: [],
     eventIdToNoteIds: {},
+    expanded: {},
     isSelectAllChecked: false,
     getNotesByIds: mockGetNotesByIds,
     loadingEventIds: [],
     onColumnRemoved: jest.fn(),
     onColumnResized: jest.fn(),
     onColumnSorted: jest.fn(),
+    onEventToggled: jest.fn(),
     onPinEvent: jest.fn(),
     onRowSelected: jest.fn(),
     onSelectAll: jest.fn(),

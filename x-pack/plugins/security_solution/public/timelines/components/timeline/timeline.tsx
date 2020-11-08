@@ -4,14 +4,21 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlyoutHeader, EuiFlyoutBody, EuiFlyoutFooter, EuiProgress } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiProgress,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { FlyoutHeaderWithCloseButton } from '../flyout/header_with_close_button';
 import { BrowserFields, DocValueFields } from '../../../common/containers/source';
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, TimelineItem } from '../../../../common/search_strategy';
 import { useTimelineEvents } from '../../containers/index';
 import { useKibana } from '../../../common/lib/kibana';
 import { ColumnHeaderOptions, KqlMode } from '../../../timelines/store/timeline/model';
@@ -35,6 +42,11 @@ import {
 import { useManageTimeline } from '../manage_timeline';
 import { TimelineType, TimelineStatusLiteral } from '../../../../common/types/timeline';
 import { requiredFieldsForActions } from '../../../detections/components/alerts_table/default_config';
+import { ExpandableEvent } from './expandable_event';
+import {
+  activeTimeline,
+  ActiveTimelineExpandedEvent,
+} from '../../containers/active_timeline_context';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -79,6 +91,15 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   padding: 0 10px 5px 12px;
 `;
 
+const FullWidthFlexGroup = styled(EuiFlexGroup)`
+  width: 100%;
+  overflow: hidden;
+`;
+
+const ScrollableFlexItem = styled(EuiFlexItem)`
+  overflow: auto;
+`;
+
 const TimelineTemplateBadge = styled.div`
   background: ${({ theme }) => theme.eui.euiColorVis3_behindText};
   color: #fff;
@@ -112,6 +133,7 @@ export interface Props {
   start: string;
   status: TimelineStatusLiteral;
   timelineType: TimelineType;
+  timerangeKind: 'absolute' | 'relative';
   toggleColumn: (column: ColumnHeaderOptions) => void;
   usersViewing: string[];
 }
@@ -143,9 +165,27 @@ export const TimelineComponent: React.FC<Props> = ({
   status,
   sort,
   timelineType,
+  timerangeKind,
   toggleColumn,
   usersViewing,
 }) => {
+  const [expanded, setExpanded] = useState<ActiveTimelineExpandedEvent>(
+    activeTimeline.getExpandedEvent()
+  );
+
+  const onEventToggled = useCallback((event: TimelineItem) => {
+    const eventId = event._id;
+
+    setExpanded((currentExpanded) => {
+      if (currentExpanded.eventId === eventId) {
+        return {};
+      }
+
+      return { eventId, indexName: event._index! };
+    });
+    activeTimeline.toggleExpandedEvent({ eventId, indexName: event._index! });
+  }, []);
+
   const kibana = useKibana();
   const [filterManager] = useState<FilterManager>(new FilterManager(kibana.services.uiSettings));
   const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(kibana.services.uiSettings), [
@@ -212,6 +252,7 @@ export const TimelineComponent: React.FC<Props> = ({
     startDate: start,
     skip: !canQueryTimeline,
     sort: timelineQuerySortField,
+    timerangeKind,
   });
 
   useEffect(() => {
@@ -258,42 +299,60 @@ export const TimelineComponent: React.FC<Props> = ({
             loading={loading}
             refetch={refetch}
           />
-          <StyledEuiFlyoutBody data-test-subj="eui-flyout-body" className="timeline-flyout-body">
-            <StatefulBody
-              browserFields={browserFields}
-              data={events}
-              docValueFields={docValueFields}
-              id={id}
-              refetch={refetch}
-              sort={sort}
-              toggleColumn={toggleColumn}
-            />
-          </StyledEuiFlyoutBody>
-          {
-            /** Hide the footer if Resolver is showing. */
-            !graphEventId && (
-              <StyledEuiFlyoutFooter
-                data-test-subj="eui-flyout-footer"
-                className="timeline-flyout-footer"
+          <FullWidthFlexGroup>
+            <ScrollableFlexItem grow={2}>
+              <StyledEuiFlyoutBody
+                data-test-subj="eui-flyout-body"
+                className="timeline-flyout-body"
               >
-                <Footer
-                  activePage={pageInfo.activePage}
-                  data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
-                  height={footerHeight}
+                <StatefulBody
+                  browserFields={browserFields}
+                  data={events}
+                  docValueFields={docValueFields}
+                  expanded={expanded}
                   id={id}
-                  isLive={isLive}
-                  isLoading={loading || loadingSourcerer}
-                  itemsCount={events.length}
-                  itemsPerPage={itemsPerPage}
-                  itemsPerPageOptions={itemsPerPageOptions}
-                  onChangeItemsPerPage={onChangeItemsPerPage}
-                  onChangePage={loadPage}
-                  totalCount={totalCount}
+                  onEventToggled={onEventToggled}
+                  refetch={refetch}
+                  sort={sort}
+                  toggleColumn={toggleColumn}
                 />
-              </StyledEuiFlyoutFooter>
-            )
-          }
+              </StyledEuiFlyoutBody>
+              {
+                /** Hide the footer if Resolver is showing. */
+                !graphEventId && (
+                  <StyledEuiFlyoutFooter
+                    data-test-subj="eui-flyout-footer"
+                    className="timeline-flyout-footer"
+                  >
+                    <Footer
+                      activePage={pageInfo.activePage}
+                      data-test-subj="timeline-footer"
+                      updatedAt={updatedAt}
+                      height={footerHeight}
+                      id={id}
+                      isLive={isLive}
+                      isLoading={loading || loadingSourcerer}
+                      itemsCount={events.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangeItemsPerPage={onChangeItemsPerPage}
+                      onChangePage={loadPage}
+                      totalCount={totalCount}
+                    />
+                  </StyledEuiFlyoutFooter>
+                )
+              }
+            </ScrollableFlexItem>
+            <ScrollableFlexItem grow={1}>
+              <ExpandableEvent
+                browserFields={browserFields}
+                docValueFields={docValueFields}
+                event={expanded}
+                timelineId={id}
+                toggleColumn={toggleColumn}
+              />
+            </ScrollableFlexItem>
+          </FullWidthFlexGroup>
         </>
       ) : null}
     </TimelineContainer>

@@ -98,7 +98,6 @@ const EventsComponent: React.FC<Props> = ({
         onUnPinEvent={onUnPinEvent}
         refetch={refetch}
         rowRenderers={rowRenderers}
-        // TODO: Move to the store
         onEventToggled={() => onEventToggled(event)}
         onRuleChange={onRuleChange}
         selectedEventIds={selectedEventIds}

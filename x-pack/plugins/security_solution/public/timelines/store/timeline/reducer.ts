@@ -12,7 +12,6 @@ import {
   addProvider,
   addTimeline,
   applyDeltaToColumnWidth,
-  applyDeltaToWidth,
   applyKqlFilterQuery,
   clearEventsDeleted,
   clearEventsLoading,
@@ -67,7 +66,6 @@ import {
   addTimelineNoteToEvent,
   addTimelineProvider,
   addTimelineToStore,
-  applyDeltaToCurrentWidth,
   applyDeltaToTimelineColumnWidth,
   applyKqlFilterQueryDraft,
   pinTimelineEvent,
@@ -218,20 +216,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
-  .case(
-    applyDeltaToWidth,
-    (state, { id, delta, bodyClientWidthPixels, minWidthPixels, maxWidthPercent }) => ({
-      ...state,
-      timelineById: applyDeltaToCurrentWidth({
-        id,
-        delta,
-        bodyClientWidthPixels,
-        minWidthPixels,
-        maxWidthPercent,
-        timelineById: state.timelineById,
-      }),
-    })
-  )
   .case(pinEvent, (state, { id, eventId }) => ({
     ...state,
     timelineById: pinTimelineEvent({ id, eventId, timelineById: state.timelineById }),

@@ -4,15 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiTextColor, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
+import { useDispatch } from 'react-redux';
 
-import { BrowserFields } from '../../../../common/containers/source';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { BrowserFields, DocValueFields } from '../../../../common/containers/source';
 import { ColumnHeaderOptions } from '../../../../timelines/store/timeline/model';
-import { TimelineEventsDetailsItem } from '../../../../../common/search_strategy/timeline';
 import { StatefulEventDetails } from '../../../../common/components/event_details/stateful_event_details';
 import { LazyAccordion } from '../../lazy_accordion';
-import { OnUpdateColumns } from '../events';
+import { useTimelineEventsDetails } from '../../../containers/details';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
+import { ActiveTimelineExpandedEvent } from '../../../containers/active_timeline_context';
+import { getColumnHeaders } from '../body/column_headers/helpers';
+import { timelineDefaults } from '../../../store/timeline/defaults';
+import * as i18n from './translations';
 
 const ExpandableDetails = styled.div`
   .euiAccordion__button {
@@ -24,48 +31,72 @@ ExpandableDetails.displayName = 'ExpandableDetails';
 
 interface Props {
   browserFields: BrowserFields;
-  columnHeaders: ColumnHeaderOptions[];
-  id: string;
-  event: TimelineEventsDetailsItem[];
-  forceExpand?: boolean;
-  hideExpandButton?: boolean;
-  onUpdateColumns: OnUpdateColumns;
+  docValueFields: DocValueFields[];
+  event: ActiveTimelineExpandedEvent;
   timelineId: string;
   toggleColumn: (column: ColumnHeaderOptions) => void;
 }
 
 export const ExpandableEvent = React.memo<Props>(
-  ({
-    browserFields,
-    columnHeaders,
-    event,
-    forceExpand = false,
-    id,
-    timelineId,
-    toggleColumn,
-    onUpdateColumns,
-  }) => {
+  ({ browserFields, docValueFields, event, timelineId, toggleColumn }) => {
+    const dispatch = useDispatch();
+    const getTimeline = timelineSelectors.getTimelineByIdSelector();
+
+    const columnHeaders = useDeepEqualSelector((state) => {
+      const { columns } = getTimeline(state, timelineId) ?? timelineDefaults;
+
+      return getColumnHeaders(columns, browserFields);
+    });
+
+    const [loading, detailsData] = useTimelineEventsDetails({
+      docValueFields,
+      indexName: event.indexName!,
+      eventId: event.eventId!,
+      skip: !event.eventId,
+    });
+
+    const onUpdateColumns = useCallback(
+      (columns) => dispatch(timelineActions.updateColumns({ id: timelineId, columns })),
+      [dispatch, timelineId]
+    );
+
     const handleRenderExpandedContent = useCallback(
       () => (
         <StatefulEventDetails
           browserFields={browserFields}
           columnHeaders={columnHeaders}
-          data={event}
-          id={id}
+          data={detailsData!}
+          id={event.eventId!}
           onUpdateColumns={onUpdateColumns}
           timelineId={timelineId}
           toggleColumn={toggleColumn}
         />
       ),
-      [browserFields, columnHeaders, event, id, onUpdateColumns, timelineId, toggleColumn]
+      [
+        browserFields,
+        columnHeaders,
+        detailsData,
+        event.eventId,
+        onUpdateColumns,
+        timelineId,
+        toggleColumn,
+      ]
     );
+
+    if (!event.eventId) {
+      return <EuiTextColor color="subdued">{i18n.EVENT_DETAILS_PLACEHOLDER}</EuiTextColor>;
+    }
+
+    if (loading) {
+      return <EuiLoadingSpinner />;
+    }
 
     return (
       <ExpandableDetails>
         <LazyAccordion
-          id={`timeline-${timelineId}-row-${id}`}
+          id={`timeline-${timelineId}-row-${event.eventId}`}
           renderExpandedContent={handleRenderExpandedContent}
-          forceExpand={forceExpand}
+          forceExpand={!!event.eventId && !loading}
           paddingSize="none"
         />
       </ExpandableDetails>

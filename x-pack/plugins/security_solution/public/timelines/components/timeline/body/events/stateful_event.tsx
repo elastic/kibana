@@ -14,7 +14,7 @@ import {
   TimelineNonEcsData,
 } from '../../../../../../common/search_strategy/timeline';
 import { Note } from '../../../../../common/lib/note';
-import { ColumnHeaderOptions, TimelineModel } from '../../../../../timelines/store/timeline/model';
+import { ColumnHeaderOptions } from '../../../../../timelines/store/timeline/model';
 import { AddNoteToEvent, UpdateNote } from '../../../notes/helpers';
 import { OnColumnResized, OnPinEvent, OnRowSelected, OnUnPinEvent } from '../../events';
 import { STATEFUL_EVENT_CSS_CLASS_NAME } from '../../helpers';
@@ -38,6 +38,7 @@ interface Props {
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventViewer?: boolean;
+  isExpanded: boolean;
   loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
   onEventToggled: () => void;
@@ -99,8 +100,8 @@ const StatefulEventComponent: React.FC<Props> = ({
 
   const onToggleShowNotes = useCallback(() => {
     const eventId = event._id;
-    setShowNotes({ ...showNotes, [eventId]: !showNotes[eventId] });
-  }, [event, showNotes]);
+    setShowNotes((prevShowNotes) => ({ ...prevShowNotes, [eventId]: !prevShowNotes[eventId] }));
+  }, [event]);
 
   const associateNote = useCallback(
     (noteId: string) => {
