@@ -10,8 +10,6 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { Pane } from '.';
 
-const testWidth = 640;
-
 describe('Pane', () => {
   test('renders correctly against snapshot', () => {
     const EmptyComponent = shallow(
