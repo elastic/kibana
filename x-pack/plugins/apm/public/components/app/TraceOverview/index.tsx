@@ -4,22 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPage,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPage, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
-import { TraceList } from './TraceList';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { Projection } from '../../../../common/projections';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
+import { useUrlParams } from '../../../hooks/useUrlParams';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { SearchBar } from '../../shared/search_bar';
+import { TraceList } from './TraceList';
 
 type TracesAPIResponse = APIReturnType<'/api/apm/traces'>;
 const DEFAULT_RESPONSE: TracesAPIResponse = {

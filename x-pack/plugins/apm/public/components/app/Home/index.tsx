@@ -8,7 +8,6 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPage,
   EuiTab,
   EuiTitle,
 } from '@elastic/eui';
@@ -25,7 +24,6 @@ import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { MainTabs } from '../../shared/main_tabs';
-import { SearchBar } from '../../shared/search_bar';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceInventory } from '../service_inventory';
 import { TraceOverview } from '../TraceOverview';
