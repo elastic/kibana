@@ -1,9 +1,9 @@
 [[kibana-platform-plugin-api]]
-== Kibana Platform Plugin API
+== {kib} Plugin API
 
 experimental[]
 
-Plugins in the Kibana Platform are not especially novel or complicated to
+{kib} plugins are not especially novel or complicated to
 describe. Our intention wasn’t to build some clever system that
 magically solved problems through abstractions and layers of obscurity,
 and we wanted to make sure plugins could continue to use most of the
@@ -11,15 +11,15 @@ same technologies they use today, at least from a technical perspective.
 
 === Anatomy of a plugin
 
-Plugins are defined as classes and exposed to the platform itself
+Plugins are defined as classes and expose themselves to {kib} 
 through a simple wrapper function. A plugin can have browser-side code,
 server-side code, or both. There is no architectural difference between
 a plugin in the browser and a plugin on the server, which is to say that
 in both places you describe your plugin similarly, and you interact with
 Core and/or other plugins in the same way.
 
-The basic file structure of a Kibana Platform plugin named `demo` that
-had both client-side and server-side code would be:
+The basic file structure of a {kib} plugin named `demo` that
+has both client-side and server-side code would be:
 
 [source,tree]
 ----
@@ -35,8 +35,7 @@ src/plugins
 ----
 
 *[1] `kibana.json`* is a static manifest file that is used to identify the
-plugin and to determine what kind of code the platform should execute from the
-plugin:
+plugin and to specify if this plugin has server-side code, browser-side code or both:
 
 [source,json]
 ----
@@ -51,14 +50,13 @@ plugin:
 More details about {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[manifest
 file format]
 
-Note that `package.json` files are irrelevant to and ignored by the new
-platform.
+Note that `package.json` files are irrelevant to and ignored by {kib} for discovering and loading plugins.
 
 *[2] `public/index.ts`* is the entry point into the client-side code of
 this plugin. It must export a function named `plugin`, which will
 receive {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.plugininitializercontext.md[a standard set of core capabilities] as an argument.
-It should return an instance of its plugin definition for
-the platform to register at load time.
+It should return an instance of its plugin class for
+{kib} to load.
 
 [source,typescript]
 ----
@@ -123,23 +121,24 @@ export class MyPlugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    // called when plugin is setting up during Kibana's startup sequence
+    // called when Kibana enters the setup lifecycle
   }
 
   public start(core: CoreStart) {
-    // called after all plugins are set up
+    // called when Kibana enters the start lifecycle
   }
 
   public stop() {
-    // called when plugin is torn down during Kibana's shutdown sequence
+    // called when Kibana enters the stop lifecycle
   }
 }
 ----
 
-The platform does not impose any technical restrictions on how the
-the internals of the plugin are architected, though there are certain
-considerations related to how plugins interact with the core and how plugins
-interact with other plugins that may greatly impact how they are built.
+{kib} does not impose any technical restrictions on how the
+the internals of a plugin are architected, though there are certain
+considerations related to how plugins integrate with core API's 
+and API's exposed by other plugins that may greatly impact how 
+they are built.
 [[plugin-lifecycles]]
 === Lifecycles & Core Services
 
@@ -150,20 +149,20 @@ at different parts of their _lifecycle_. We describe the lifecycle of
 core services and plugins with specifically-named functions on the
 service definition.
 
-In the Kibana Platform, there are three lifecycle functions today: `setup`,
-`start`, and `stop`. The `setup` functions are invoked sequentially
+{kib} has three lifecycles: `setup`,
+`start`, and `stop`. Each plugin's `setup` functions is invoked sequentially
 while Kibana is setting up on the server or when it is being loaded in
 the browser. The `start` functions are invoked sequentially after setup
 has been completed for all plugins. The `stop` functions are invoked
 sequentially while Kibana is gracefully shutting down on the server or
 when the browser tab or window is being closed.
 
-The table below explains how each lifecycle event relates to the state
+The table below explains how each lifecycle relates to the state
 of Kibana.
 
 [width="100%",cols="15%,38%,47%",options="header",]
 |===
-|lifecycle event |server |browser
+|lifecycle |server |browser
 |_setup_ |bootstrapping and configuring routes |loading plugin bundles
 and configuring applications
 
@@ -213,15 +212,13 @@ execute asynchronous code here reliably. For that reason,
 
 The current lifecycle function for all plugins will be executed before the next
 lifecycle starts. That is to say that all `setup` functions are executed before
-any `start` functions are executed. Core services that expose functionality to
-plugins always have their lifecycle functions executed before any plugins.
+any `start` functions are executed.
 
-These are the contracts exposed by the core services for each lifecycle
-event:
+These are the contracts exposed by the core services for each lifecycle:
 
 [cols=",,",options="header",]
 |===
-|lifecycle event |server contract|browser contract
+|lifecycle |server contract|browser contract
 |_contructor_
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md[PluginInitializerContext]
 |{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.plugininitializercontext.md[PluginInitializerContext]
@@ -254,11 +251,11 @@ encouraged to expose types for their plugin interfaces.
 [source, typescript]
 ----
 import type { Plugin } from 'kibana/server';
-export interface FoobarPluginSetup { // <1>
+export interface FoobarPluginSetup { <1>
   getFoo(): string;
 }
 
-export interface FoobarPluginStart {
+export interface FoobarPluginStart { <1>
   getBar(): string;
 }
 
@@ -280,7 +277,7 @@ export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
   }
 }
 ----
-<1> We highly encourage plugin authors to declare a plugin public interfaces explicitly.
+<1> We highly encourage plugin authors to explicitly declare public interfaces for their plugins.
 
 Unlike core, capabilities exposed by plugins are _not_ automatically
 injected into all plugins. Instead, if a plugin wishes to use the public
@@ -341,7 +338,7 @@ the second argument to the plugin.
 <3> Notice that the type for the setup and start lifecycles are different. Plugin lifecycle
 functions can only access the APIs that are exposed _during_ that lifecycle.
 
-=== Migrating legacy plugins to Kibana Platform
+=== Migrating legacy plugins
 
 In Kibana 7.10, support for legacy plugins was removed. See
 <<migrating-legacy-plugins>> for detailed information on how to convert existing

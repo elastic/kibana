@@ -1,6 +1,6 @@
 [[testing-kibana-plugin]]
-== Testing Kibana Plugin
-=== Mock Kibana Platform services in tests
+== Testing Kibana Plugins
+=== Mock Kibana Core services in tests
 
 Core services already provide mocks to simplify testing and make sure
 plugins always rely on valid public contracts:

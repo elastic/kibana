@@ -47,10 +47,10 @@ export const config = {
 export type MyPluginConfig = TypeOf<typeof config.schema>;
 ----
 
-==== Using Kibana Platform config in a new plugin
+==== Using {kib} config in a new plugin
 
-After setting the config schema for your plugin, you might want to reach
-the configuration in the plugin. It is provided as part of the
+After setting the config schema for your plugin, you might want to read
+configuration values from your plugin. It is provided as part of the
 {kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.md[PluginInitializerContext]
 in the _constructor_ of the plugin:
 

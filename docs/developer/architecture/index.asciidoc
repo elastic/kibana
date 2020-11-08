@@ -3,7 +3,7 @@
 
 [IMPORTANT]
 ==============================================
-The {kib} Platform Plugin API and developer services are in a state of
+The {kib} Plugin API's are in a state of
 constant development. We cannot provide backwards compatibility at this time due
 to the high rate of change.
 ==============================================
@@ -34,4 +34,3 @@ include::security/index.asciidoc[leveloffset=+1]
 include::add-data-tutorials.asciidoc[leveloffset=+1]
 
 include::development-visualize-index.asciidoc[leveloffset=+1]
-
