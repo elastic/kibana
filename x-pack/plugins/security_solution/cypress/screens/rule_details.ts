@@ -62,7 +62,7 @@ export const REFERENCE_URLS_DETAILS = 'Reference URLs';
 
 export const REMOVE_EXCEPTION_BTN = '[data-test-subj="exceptionsViewerDeleteBtn"]';
 
-export const RULE_SWITCH = '[data-test-subj="rule-switch"]';
+export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
 
 export const RULE_SWITCH_LOADER = '[data-test-subj="rule-switch-loader"]';
 

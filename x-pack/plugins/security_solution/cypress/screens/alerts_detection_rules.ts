@@ -47,7 +47,7 @@ export const RULE_CHECKBOX = '.euiTableRow .euiCheckbox__input';
 
 export const RULE_NAME = '[data-test-subj="ruleName"]';
 
-export const RULE_SWITCH = '[data-test-subj="ruleSwitch"]';
+export const RULE_SWITCH = '[data-test-subj="rule-switch"]';
 
 export const RULE_SWITCH_LOADER = '[data-test-subj="ruleSwitchLoader"]';
 

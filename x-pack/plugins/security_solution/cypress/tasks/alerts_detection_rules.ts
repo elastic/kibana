@@ -67,7 +67,7 @@ export const exportFirstRule = () => {
 };
 
 export const filterByCustomRules = () => {
-  cy.get(CUSTOM_RULES_BTN).click({ force: true };
+  cy.get(CUSTOM_RULES_BTN).click({ force: true });
   cy.get(ASYNC_LOADING_PROGRESS).should('exist');
   cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
 };

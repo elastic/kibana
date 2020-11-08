@@ -11,6 +11,7 @@ import {
   CLOSE_ALERTS_CHECKBOX,
   CONFIRM_BTN,
   FIELD_INPUT,
+  FIELD_INPUT_RESULT,
   LOADING_SPINNER,
   OPERATOR_INPUT,
   VALUES_INPUT,
@@ -21,28 +22,24 @@ import {
   REFRESH_BUTTON,
   REMOVE_EXCEPTION_BTN,
   RULE_SWITCH,
-  RULE_SWITCH_LOADER,
 } from '../screens/rule_details';
 
 export const activatesRule = () => {
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
-  cy.get(RULE_SWITCH_LOADER).should('exist');
-  cy.get(RULE_SWITCH_LOADER).should('not.exist');
 };
 
 export const deactivatesRule = () => {
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
-  cy.get(RULE_SWITCH_LOADER).should('exist');
-  cy.get(RULE_SWITCH_LOADER).should('not.exist');
 };
 
 export const addsException = (exception: Exception) => {
   cy.get(LOADING_SPINNER).should('exist');
   cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('be.visible');
+  cy.get(FIELD_INPUT).should('exist');
   cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
+  cy.get(FIELD_INPUT_RESULT).first().click();
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {
     cy.get(VALUES_INPUT).type(`${value}{enter}`);
@@ -86,7 +83,7 @@ export const removeException = () => {
 export const waitForTheRuleToBeExecuted = async () => {
   let status = '';
   while (status !== 'succeeded') {
-    cy.get(REFRESH_BUTTON).click();
+    cy.get(REFRESH_BUTTON).click({ force: true });
     status = await cy.get(RULE_STATUS).invoke('text').promisify();
   }
 };

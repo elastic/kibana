@@ -14,6 +14,8 @@ export const CONFIRM_BTN = '[data-test-subj="add-exception-confirm-button"]';
 export const FIELD_INPUT =
   '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"]';
 
+export const FIELD_INPUT_RESULT = '.euiFilterSelectItem';
+
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 
 export const OPERATOR_INPUT = '[data-test-subj="operatorAutocompleteComboBox"]';
