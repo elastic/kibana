@@ -7,9 +7,9 @@ best user experiences regardless of whether they run Kibana locally or
 in the cloud, regardless of their hardware & environment.
 
 There are 2 main aspects of the perceived speed of an application: loading time
-and responsiveness to user actions. Kibana Platform loads and bootstraps *all*
-the plugins whenever a user lands on any page. It means that adding
-every new application affects overall *loading performance*, as plugin code is
+and responsiveness to user actions. Kibana loads and bootstraps *all*
+the plugins whenever a user lands on any page. It means that
+every new application affects the overall *loading performance*, as plugin code is
 loaded *eagerly* to initialize the plugin and provide plugin API to dependent
 plugins.
 
@@ -53,14 +53,15 @@ export class MyPlugin implements Plugin<MyPluginSetup> {
 
 === Understanding plugin bundle size
 
-Kibana Platform plugins are distributed as a pre-built with
-`@kbn/optimizer` package artifacts. It allows us to get rid of the
-shipping of `optimizer` in the distributable version of Kibana. Every NP
-plugin artifact contains all plugin dependencies required to run the
-plugin, except some stateful dependencies shared across plugin bundles
-via `@kbn/ui-shared-deps`. It means that NP plugin artifacts tend to
-have a bigger size than the legacy platform version. To understand the
-current size of your plugin artifact, run `@kbn/optimizer` as
+Kibana Platform plugins are pre-built with `@kbn/optimizer` 
+and distributed as package artifacts. This means that it is no
+longer necessary for us to include the `optimizer` in the 
+distributable version of {kib}. Every plugin artifact contains all
+plugin dependencies required to run the plugin, except some
+stateful dependencies shared across plugin bundles via 
+`@kbn/ui-shared-deps`. This means that plugin artifacts tend to
+be larger than they were in the legacy platform. To understand the
+current size of your plugin artifact, run `@kbn/optimizer` with
 
 [source,bash]
 ----
@@ -79,13 +80,13 @@ ls -lh plugins/my_plugin/target/public/
 ... 50K  my_plugin.plugin.js
 ----
 
-you might see at least one js bundle - `my_plugin.plugin.js`. This is
-the only artifact loaded by the platform during bootstrap in the
+You might see at least one js bundle - `my_plugin.plugin.js`. This is
+the only artifact loaded by {kib} during bootstrap in the
 browser. The rule of thumb is to keep its size as small as possible.
-Other lazily loaded parts of your plugin present in the same folder as
-separate chunks under `{number}.plugin.js` names. If you want to
+Other lazily loaded parts of your plugin will be present in the same folder as
+separate chunks under `{number}.myplugin.js` names. If you want to
 investigate what your plugin bundle consists of you need to run
-`@kbn/optimizer` with `--profile` flag to get generated
+`@kbn/optimizer` with `--profile` flag to generate a
 https://webpack.js.org/api/stats/[webpack stats file].
 
 [source,bash]
