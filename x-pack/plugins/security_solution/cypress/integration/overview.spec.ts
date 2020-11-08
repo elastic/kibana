@@ -13,7 +13,7 @@ import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Overview Page', () => {
   it('Host stats render with correct values', () => {
-    cy.stubSearchStrategyApi('overviewHostQuery', 'overview_search_strategy');
+    cy.stubSearchStrategyApi('overview_search_strategy');
     loginAndWaitForPage(OVERVIEW_URL);
     expandHostStats();
 
@@ -23,7 +23,7 @@ describe('Overview Page', () => {
   });
 
   it('Network stats render with correct values', () => {
-    cy.stubSearchStrategyApi('overviewNetworkQuery', 'overview_search_strategy');
+    cy.stubSearchStrategyApi('overview_search_strategy');
     loginAndWaitForPage(OVERVIEW_URL);
     expandNetworkStats();
 

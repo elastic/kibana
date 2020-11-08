@@ -6,7 +6,8 @@
   "requiredPlugins": [
     "licensing",
     "management",
-    "features"
+    "features",
+    "share"
   ],
   "optionalPlugins": [
     "cloud",
