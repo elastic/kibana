@@ -18,7 +18,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { IndexPatternAttrs } from '../..';
+import { FieldAttrs } from '../..';
 import { DuplicateField } from '../../../../kibana_utils/common';
 
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES, IIndexPattern, IFieldType } from '../../../common';
@@ -37,7 +37,7 @@ interface IndexPatternDeps {
 }
 
 interface SavedObjectBody {
-  attributes?: IndexPatternAttrs;
+  fieldAttrs?: string;
   title?: string;
   timeFieldName?: string;
   intervalName?: string;
@@ -72,6 +72,8 @@ export class IndexPattern implements IIndexPattern {
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
+  // make private once manual field refresh is removed
+  public fieldAttrs: FieldAttrs;
 
   constructor({
     spec = {},
@@ -106,6 +108,7 @@ export class IndexPattern implements IIndexPattern {
     this.fields.replaceAll(Object.values(spec.fields || {}));
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
+    this.fieldAttrs = spec.fieldAttrs || {};
   }
 
   setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
@@ -126,6 +129,20 @@ export class IndexPattern implements IIndexPattern {
    */
   resetOriginalSavedObjectBody = () => {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
+  };
+
+  getFieldAttrs = () => {
+    const newFieldAttrs = { ...this.fieldAttrs };
+
+    this.fields.forEach((field) => {
+      if (field.customName) {
+        newFieldAttrs[field.name] = { customName: field.customName };
+      } else {
+        delete newFieldAttrs[field.name];
+      }
+    });
+
+    return newFieldAttrs;
   };
 
   getComputedFields() {
@@ -181,6 +198,7 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta,
       type: this.type,
       fieldFormats: this.fieldFormatMap,
+      fieldAttrs: this.fieldAttrs,
     };
   }
 
@@ -272,9 +290,10 @@ export class IndexPattern implements IIndexPattern {
     const fieldFormatMap = _.isEmpty(this.fieldFormatMap)
       ? undefined
       : JSON.stringify(this.fieldFormatMap);
+    const fieldAttrs = this.getFieldAttrs();
 
     return {
-      attributes: this.getSavedObjectAttrsField(),
+      fieldAttrs: fieldAttrs ? JSON.stringify(fieldAttrs) : undefined,
       title: this.title,
       timeFieldName: this.timeFieldName,
       intervalName: this.intervalName,
@@ -313,21 +332,6 @@ export class IndexPattern implements IIndexPattern {
     if (formatSpec) {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
-  }
-
-  /**
-   * Creates saved object attributes field.
-   */
-  private getSavedObjectAttrsField() {
-    const fieldAttrs = this.fields.reduce((collector, { name, customName }) => {
-      if (customName) {
-        collector[name] = {
-          customName,
-        };
-      }
-      return collector;
-    }, {} as IndexPatternAttrs['fields']);
-    return Object.keys(fieldAttrs).length ? { fields: fieldAttrs } : undefined;
   }
   /**
    * Helper function to extend field specs with e.g. customName

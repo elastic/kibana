@@ -35,7 +35,7 @@ import {
   GetFieldsOptions,
   IndexPatternSpec,
   IndexPatternAttributes,
-  IndexPatternAttrsFields,
+  FieldAttrs,
   FieldSpec,
   IndexPatternFieldMap,
 } from '../types';
@@ -249,7 +249,9 @@ export class IndexPatternsService {
     try {
       const fields = await this.getFieldsForIndexPattern(indexPattern);
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
-      indexPattern.fields.replaceAll([...fields, ...scripted]);
+      const fieldAttrs = indexPattern.getFieldAttrs();
+      const fieldsWithSavedAttrs = Object.values(this.fieldArrayToMap(fields, fieldAttrs));
+      indexPattern.fields.replaceAll([...fieldsWithSavedAttrs, ...scripted]);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -279,7 +281,7 @@ export class IndexPatternsService {
   ) => {
     const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
-      const newFields = await this.getFieldsForWildcard(options);
+      const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
       return this.fieldArrayToMap([...newFields, ...scriptdFields]);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
@@ -301,7 +303,7 @@ export class IndexPatternsService {
    * Converts field array to map
    * @param fields
    */
-  fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: IndexPatternAttrsFields) =>
+  fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
       collector[field.name] = { ...field, customName: fieldAttrs?.[field.name]?.customName };
       return collector;
@@ -325,7 +327,7 @@ export class IndexPatternsService {
         fieldFormatMap,
         typeMeta,
         type,
-        attributes,
+        fieldAttrs,
       },
     } = savedObject;
 
@@ -333,6 +335,7 @@ export class IndexPatternsService {
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
+    const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
 
     return {
       id,
@@ -341,7 +344,7 @@ export class IndexPatternsService {
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
-      fields: this.fieldArrayToMap(parsedFields, attributes?.fields),
+      fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
       typeMeta: parsedTypeMeta,
       type,
       fieldFormats: parsedFieldFormatMap,
@@ -403,7 +406,9 @@ export class IndexPatternsService {
     spec.fieldFormats = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
-    spec.attributes = savedObject.attributes.attributes;
+    spec.fieldAttrs = savedObject.attributes.fieldAttrs
+      ? JSON.parse(savedObject.attributes.fieldAttrs)
+      : {};
 
     const indexPattern = await this.create(spec, true);
     indexPatternCache.set(id, indexPattern);

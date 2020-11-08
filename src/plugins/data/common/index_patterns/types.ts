@@ -48,18 +48,10 @@ export interface IndexPatternAttributes {
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
-  attributes?: IndexPatternAttrs;
+  fieldAttrs?: string;
 }
 
-/**
- * Generic location for IndexPattern class attributes from saved object
- */
-
-export interface IndexPatternAttrs {
-  fields: IndexPatternAttrsFields;
-}
-
-export interface IndexPatternAttrsFields {
+export interface FieldAttrs {
   [key: string]: { customName: string };
 }
 
@@ -144,7 +136,6 @@ export interface FieldSpecExportFmt {
   lang?: string;
   conflictDescriptions?: FieldSpecConflictDescriptions;
   name: string;
-  customLabel?: string;
   type: KBN_FIELD_TYPES;
   esTypes?: string[];
   scripted: boolean;
@@ -189,7 +180,7 @@ export interface IndexPatternSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
-  attributes?: IndexPatternAttrs;
+  fieldAttrs?: FieldAttrs;
 }
 
 export interface SourceFilter {
