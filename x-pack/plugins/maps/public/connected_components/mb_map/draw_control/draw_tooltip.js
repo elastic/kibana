@@ -8,7 +8,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 import { EuiPopover, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DRAW_TYPE } from '../../../../../common/constants';
+import { DRAW_TYPE } from '../../../../common/constants';
 
 const noop = () => {};
 
