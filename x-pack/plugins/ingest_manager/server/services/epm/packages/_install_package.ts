@@ -47,9 +47,8 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
 }): Promise<AssetReference[]> {
-  const { name: pkgName, version: pkgVersion } = packageInfo;
+  const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
   const removable = !isRequiredPackage(pkgName);
-  const { internal = false } = packageInfo;
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
   // add the package installation to the saved object.
   // if some installation already exists, just update install info
