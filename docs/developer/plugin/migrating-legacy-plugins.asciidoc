@@ -552,7 +552,7 @@ Platform.
 |
 
 |`interpreter`
-|
+|{kib-repo}blob/{branch}/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.md[`plugins.data.expressions`]
 |
 
 |`links`
@@ -592,7 +592,7 @@ Platform.
 |
 
 |`shareContextMenuExtensions`
-|
+|{kib-repo}blob/{branch}/src/plugins/share/README.md[`plugins.share`]
 |
 
 |`taskDefinitions`
@@ -612,11 +612,11 @@ Platform.
 |
 
 |`visEditorTypes`
-|
+|{kib-repo}blob/{branch}/src/plugins/visualizations[`visualizations plugin`]
 |
 
 |`visTypeEnhancers`
-|
+|{kib-repo}blob/{branch}/src/plugins/visualizations[`visualizations plugin`]
 |
 
 |`visTypes`
