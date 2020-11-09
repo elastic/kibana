@@ -108,7 +108,12 @@ export class MapEmbeddable
   }
 
   private async _initializeSaveMap() {
-    await this._savedMap.whenReady();
+    try {
+      await this._savedMap.whenReady();
+    } catch (e) {
+      this.onFatalError(e);
+      return;
+    }
     this._initializeStore();
     this._initializeOutput();
     this._isInitialized = true;
