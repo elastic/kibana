@@ -154,42 +154,43 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       placementMethod,
       placementArgs
     );
+
     this.updateInput({
       panels: {
         ...this.input.panels,
         [placeholderPanelState.explicitInput.id]: placeholderPanelState,
       },
     });
-    newStateComplete.then((newPanelState: Partial<PanelState>) =>
-      this.replacePanel(placeholderPanelState, newPanelState)
-    );
+
+    // wait until the placeholder is ready, then replace it with new panel
+    // this is useful as sometimes panels can load faster than the placeholder one (i.e. by value embeddables)
+    this.untilEmbeddableLoaded(originalPanelState.explicitInput.id)
+      .then(() => newStateComplete)
+      .then((newPanelState: Partial<PanelState>) =>
+        this.replacePanel(placeholderPanelState, newPanelState)
+      );
   }
 
   public replacePanel(
     previousPanelState: DashboardPanelState<EmbeddableInput>,
     newPanelState: Partial<PanelState>
   ) {
-    // TODO: In the current infrastructure, embeddables in a container do not react properly to
-    // changes. Removing the existing embeddable, and adding a new one is a temporary workaround
-    // until the container logic is fixed.
-
-    const finalPanels = { ...this.input.panels };
-    delete finalPanels[previousPanelState.explicitInput.id];
-    const newPanelId = newPanelState.explicitInput?.id ? newPanelState.explicitInput.id : uuid.v4();
-    finalPanels[newPanelId] = {
-      ...previousPanelState,
-      ...newPanelState,
-      gridData: {
-        ...previousPanelState.gridData,
-        i: newPanelId,
+    // Because the embeddable type can change, we have to operate at the container level here
+    return this.updateInput({
+      panels: {
+        ...this.input.panels,
+        [previousPanelState.explicitInput.id]: {
+          ...previousPanelState,
+          ...newPanelState,
+          gridData: {
+            ...previousPanelState.gridData,
+          },
+          explicitInput: {
+            ...newPanelState.explicitInput,
+            id: previousPanelState.explicitInput.id,
+          },
+        },
       },
-      explicitInput: {
-        ...newPanelState.explicitInput,
-        id: newPanelId,
-      },
-    };
-    this.updateInput({
-      panels: finalPanels,
       lastReloadRequestTime: new Date().getTime(),
     });
   }
@@ -201,16 +202,15 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   >(type: string, explicitInput: Partial<EEI>, embeddableId?: string) {
     const idToReplace = embeddableId || explicitInput.id;
     if (idToReplace && this.input.panels[idToReplace]) {
-      this.replacePanel(this.input.panels[idToReplace], {
+      return this.replacePanel(this.input.panels[idToReplace], {
         type,
         explicitInput: {
           ...explicitInput,
-          id: uuid.v4(),
+          id: idToReplace,
         },
       });
-    } else {
-      this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
     }
+    return this.addNewEmbeddable<EEI, EEO, E>(type, explicitInput);
   }
 
   public render(dom: HTMLElement) {
