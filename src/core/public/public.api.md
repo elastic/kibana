@@ -862,6 +862,41 @@ export interface OverlayBannersStart {
     replace(id: string | undefined, mount: MountPoint, priority?: number): string;
 }
 
+// @public (undocumented)
+export interface OverlayFlyoutOpenOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+    // (undocumented)
+    ownFocus?: boolean;
+}
+
+// @public
+export interface OverlayFlyoutStart {
+    open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+}
+
+// @public (undocumented)
+export interface OverlayModalOpenOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+}
+
+// @public
+export interface OverlayModalStart {
+    open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
+    // Warning: (ae-forgotten-export) The symbol "OverlayModalConfirmOptions" needs to be exported by the entry point index.d.ts
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "OverlayModalConfirmOptions"
+    openConfirm(message: MountPoint | string, options?: OverlayModalConfirmOptions): Promise<boolean>;
+}
+
 // @public
 export interface OverlayRef {
     close(): Promise<void>;
@@ -874,12 +909,8 @@ export interface OverlayStart {
     banners: OverlayBannersStart;
     // (undocumented)
     openConfirm: OverlayModalStart['openConfirm'];
-    // Warning: (ae-forgotten-export) The symbol "OverlayFlyoutStart" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     openFlyout: OverlayFlyoutStart['open'];
-    // Warning: (ae-forgotten-export) The symbol "OverlayModalStart" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
     openModal: OverlayModalStart['open'];
 }
