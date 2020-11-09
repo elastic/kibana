@@ -17,8 +17,16 @@
  * under the License.
  */
 
-import { ExpressionValueBoxed } from '../types';
-import { ExecutionContextSearch } from '../../execution/types';
+import { ExpressionValueBoxed } from 'src/plugins/expressions/common';
+import { Filter } from '../../es_query';
+import { Query, TimeRange } from '../../query';
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type ExecutionContextSearch = {
+  filters?: Filter[];
+  query?: Query | Query[];
+  timeRange?: TimeRange;
+};
 
 export type ExpressionValueSearchContext = ExpressionValueBoxed<
   'kibana_context',

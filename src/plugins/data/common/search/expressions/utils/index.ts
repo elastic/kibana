@@ -18,3 +18,4 @@
  */
 
 export * from './courier_inspector_stats';
+export * from './function_wrapper';

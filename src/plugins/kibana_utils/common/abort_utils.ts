@@ -36,7 +36,9 @@ export class AbortError extends Error {
  *
  * @param signal The `AbortSignal` to generate the `Promise` from
  */
-export function toPromise(signal: AbortSignal): { promise: Promise<never>; cleanup: () => void } {
+export function abortSignalToPromise(
+  signal: AbortSignal
+): { promise: Promise<never>; cleanup: () => void } {
   let abortHandler: () => void;
   const cleanup = () => {
     if (abortHandler) {
@@ -60,7 +62,7 @@ export function toPromise(signal: AbortSignal): { promise: Promise<never>; clean
  *
  * @param signals
  */
-export function getCombinedSignal(
+export function getCombinedAbortSignal(
   signals: AbortSignal[]
 ): { signal: AbortSignal; cleanup: () => void } {
   const controller = new AbortController();
@@ -69,7 +71,7 @@ export function getCombinedSignal(
   if (signals.some((signal) => signal.aborted)) {
     controller.abort();
   } else {
-    const promises = signals.map((signal) => toPromise(signal));
+    const promises = signals.map((signal) => abortSignalToPromise(signal));
     cleanup = () => {
       promises.forEach((p) => p.cleanup());
       controller.signal.removeEventListener('abort', cleanup);
