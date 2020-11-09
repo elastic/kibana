@@ -1,4 +1,4 @@
-[[kibana-platform-core-api]]
+[[kibana-platform-api]]
 == {kib} Core API
 
 experimental[]
@@ -27,7 +27,6 @@ export class MyPlugin {
 }
 ----
 
-== Core services
 === Server-side
 [[configuration-service]]
 ==== Configuration service
@@ -37,7 +36,6 @@ Plugins can only read their own configuration values, it is not possible to acce
 
 [source,js]
 ----
-// your-plugin.js
 // in Legacy platform
 const basePath = config.get('server.basePath');
 // in Kibana Platform 'basePath' belongs to the http service
@@ -47,27 +45,28 @@ const basePath = core.http.basePath.get(request);
 To have access to your plugin config, you _should_:
 
 * Declare plugin-specific `configPath` (will fallback to plugin `id`
-if not specified) in `kibana.json` manifest file.
+if not specified) in {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`kibana.json`] manifest file.
 * Export schema validation for the config from plugin's main file. Schema is
 mandatory. If a plugin reads from the config without schema declaration,
 `ConfigService` will throw an error.
 
+*my_plugin/server/index.ts*
 [source,typescript]
 ----
-// my_plugin/server/index.ts
 import { schema, TypeOf } from '@kbn/config-schema';
-export const plugin = ...
+export const plugin = …
 export const config = {
-  schema: schema.object(...),
+  schema: schema.object(…),
 };
 export type MyPluginConfigType = TypeOf<typeof config.schema>;
 ----
 
 * Read config value exposed via `PluginInitializerContext`.
+*my_plugin/server/index.ts*
 [source,typescript]
 ----
 import type { PluginInitializerContext } from 'kibana/server';
-class MyPlugin {
+export class MyPlugin {
   constructor(initializerContext: PluginInitializerContext) {
     this.config$ = initializerContext.config.create<MyPluginConfigType>();
     // or if config is optional:
@@ -79,9 +78,9 @@ If your plugin also has a client-side part, you can also expose
 configuration properties to it using the configuration `exposeToBrowser`
 allow-list property.
 
+*my_plugin/server/index.ts*
 [source,typescript]
 ----
-// my_plugin/server/index.ts
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from 'kibana/server';
 
@@ -103,9 +102,9 @@ export const config: PluginConfigDescriptor<ConfigType> = {
 Configuration containing only the exposed properties will be then
 available on the client-side using the plugin's `initializerContext`:
 
+*my_plugin/public/index.ts*
 [source,typescript]
 ----
-// my_plugin/public/index.ts
 interface ClientConfigType {
   uiProp: string;
 }
@@ -120,7 +119,7 @@ export class MyPlugin implements Plugin<PluginSetup, PluginStart> {
 
 All plugins are considered enabled by default. If you want to disable
 your plugin, you could declare the `enabled` flag in the plugin
-config. This is a special Kibana platform key. The platform reads its
+config. This is a special Kibana Platform key. Kibana reads its
 value and won’t create a plugin instance if `enabled: false`.
 
 [source,js]
@@ -137,9 +136,9 @@ Deprecations are managed on a per-plugin basis, meaning you don’t need to spec
 the whole property path, but use the relative path from your plugin’s
 configuration root.
 
+*my_plugin/server/index.ts*
 [source,typescript]
 ----
-// my_plugin/server/index.ts
 import { schema, TypeOf } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from 'kibana/server';
 
@@ -162,9 +161,9 @@ In some cases, accessing the whole configuration for deprecations is
 necessary. For these edge cases, `renameFromRoot` and `unusedFromRoot`
 are also accessible when declaring deprecations.
 
+*my_plugin/server/index.ts*
 [source,typescript]
 ----
-// my_plugin/server/index.ts
 export const config: PluginConfigDescriptor<ConfigType> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot, unusedFromRoot }) => [
@@ -202,6 +201,7 @@ export class MyPlugin implements Plugin {
 ==== Elasticsearch service
 `Elasticsearch service` provides `elasticsearch.client` program API to communicate with Elasticsearch server REST API.
 `elasticsearch.client` interacts with Elasticsearch service on behalf of:
+
 - `kibana_system` user via `elasticsearch.client.asInternalUser.*` methods.
 - a current end-user via `elasticsearch.client.asCurrentUser.*` methods. In this case Elasticsearch client should be given the current user credentials.
 See <<scoped-services>> and <<development-security>>.
@@ -225,7 +225,7 @@ export class MyPlugin implements Plugin {
 For advanced use-cases, such as a search, use {kib-repo}blob/{branch}/docs/development/plugins/data/server/kibana-plugin-plugins-data-server.md[Data plugin]
 
 ==== SavedObjects service
-include::saved-objects-service.asciidoc
+See <<saved-objects-service, SavedObjects service>> docs.
 
 ==== HTTP service
 Allows plugins:
@@ -270,11 +270,13 @@ export class MyPlugin implements Plugin {
 ----
 
 ==== UI settings service
-The program interface to <<advanced-options>>
+The program interface to <<advanced-options, UI settings>>.
 It makes it possible for Kibana plugins to extend Kibana UI Settings Management with custom settings.
 
-See {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.register.md[UI settings service Setup API docs]
-See {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicestart.register.md[UI settings service Start API docs]
+See:
+
+- {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.register.md[UI settings service Setup API docs]
+- {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicestart.register.md[UI settings service Start API docs]
 
 [source,typescript]
 ----
@@ -305,7 +307,7 @@ export class MyPlugin implements Plugin {
 
 === Client-side
 ==== Application service
-Kibana has migrated to be a Single Page Application. Plugins should use `Application service` API to instruct Kibana what an application should be loaded & rendered in UI in response to user interactions.
+Kibana has migrated to be a Single Page Application. Plugins should use `Application service` API to instruct Kibana what an application should be loaded & rendered in the UI in response to user interactions.
 [source,typescript]
 ----
 import { AppMountParameters, CoreSetup, Plugin, DEFAULT_APP_CATEGORIES } from 'kibana/public';
@@ -337,7 +339,7 @@ export class MyPlugin implements Plugin {
 <4> `core.getStartServices` method provides API available during `start` lifecycle.
 <5> `mount` method must return a function that will be called to unmount the application.
 
-Note that you are free to use any UI library to render a plugin application in DOM.
+NOTE:: you are free to use any UI library to render a plugin application in DOM.
 However, we recommend using React and https://elastic.github.io/eui[EUI] for all your basic UI
 components to create a consistent UI experience.
 
@@ -358,7 +360,7 @@ async function fetchData<ResponseType>(core: CoreStart) {
 See {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.httpsetup.md[for all available API].
 
 ==== Elasticsearch service
-Is not available in the browser. Use {kib-repo}blob/{branch}/docs/development/plugins/data/server/kibana-plugin-plugins-data-public.md[Data plugin] instead.
+Not available in the browser. Use {kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.md[Data plugin] instead.
 
 == Patterns
 [[scoped-services]]

@@ -9,15 +9,16 @@ in the cloud, regardless of their hardware & environment.
 There are 2 main aspects of the perceived speed of an application: loading time
 and responsiveness to user actions. Kibana loads and bootstraps *all*
 the plugins whenever a user lands on any page. It means that
-every new application affects the overall *loading performance*, as plugin code is
-loaded *eagerly* to initialize the plugin and provide plugin API to dependent
+every new application affects the overall _loading performance_, as plugin code is
+loaded _eagerly_ to initialize the plugin and provide plugin API to dependent
 plugins.
 
 However, it’s usually not necessary that the whole plugin code should be loaded
 and initialized at once. The plugin could keep on loading code covering API functionality
 on Kibana bootstrap but load UI related code lazily on-demand, when an
-application page or management section is mounted. Always prefer to
-require UI root components lazily when possible (such as in mount
+application page or management section is mounted.
+Always prefer to
+require UI root components lazily when possible (such as in `mount`
 handlers). Even if their size may seem negligible, they are likely using
 some heavy-weight libraries that will also be removed from the initial
 plugin bundle, therefore, reducing its size by a significant amount.
@@ -59,13 +60,13 @@ longer necessary for us to include the `optimizer` in the
 distributable version of {kib}. Every plugin artifact contains all
 plugin dependencies required to run the plugin, except some
 stateful dependencies shared across plugin bundles via 
-`@kbn/ui-shared-deps`. This means that plugin artifacts tend to
-be larger than they were in the legacy platform. To understand the
+`@kbn/ui-shared-deps`. This means that plugin artifacts _tend to
+be larger_ than they were in the legacy platform. To understand the
 current size of your plugin artifact, run `@kbn/optimizer` with
 
 [source,bash]
 ----
-node scripts/build_kibana_platform_plugins.js --dist --profile --focus=my_plugin    
+node scripts/build_kibana_platform_plugins.js --dist --profile --focus=my_plugin
 ----
 
 and check the output in the `target` sub-folder of your plugin folder
@@ -81,7 +82,7 @@ ls -lh plugins/my_plugin/target/public/
 ----
 
 You might see at least one js bundle - `my_plugin.plugin.js`. This is
-the only artifact loaded by {kib} during bootstrap in the
+the _only_ artifact loaded by {kib} during bootstrap in the
 browser. The rule of thumb is to keep its size as small as possible.
 Other lazily loaded parts of your plugin will be present in the same folder as
 separate chunks under `{number}.myplugin.js` names. If you want to

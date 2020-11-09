@@ -23,14 +23,14 @@ has both client-side and server-side code would be:
 
 [source,tree]
 ----
-src/plugins
+plugins/
   demo
     kibana.json [1]
     public
-      index.ts [2]
+      index.ts  [2]
       plugin.ts [3]
     server
-      index.ts [4]
+      index.ts  [4]
       plugin.ts [5]
 ----
 
@@ -50,7 +50,7 @@ plugin and to specify if this plugin has server-side code, browser-side code or 
 More details about {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[manifest
 file format]
 
-Note that `package.json` files are irrelevant to and ignored by {kib} for discovering and loading plugins.
+Note:: `package.json` files are irrelevant to and ignored by {kib} for discovering and loading plugins.
 
 *[2] `public/index.ts`* is the entry point into the client-side code of
 this plugin. It must export a function named `plugin`, which will
@@ -76,13 +76,13 @@ for first-party Elastic plugins]_.
 
 [source,typescript]
 ----
-import type { PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
 
-export class Plugin {
+export class MyPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    // called when plugin is setting up
+    // called when plugin is setting up during Kibana's startup sequence
   }
 
   public start(core: CoreStart) {
@@ -90,7 +90,7 @@ export class Plugin {
   }
 
   public stop() {
-    // called when plugin is torn down, aka window.onbeforeunload
+    // called when plugin is torn down during Kibana's shutdown sequence
   }
 }
 ----
@@ -115,21 +115,21 @@ _shape_ of this plugin is the same as it’s client-side counter-part:
 
 [source,typescript]
 ----
-import type { PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
+import type { Plugin, PluginInitializerContext, CoreSetup, CoreStart } from 'kibana/server';
 
-export class MyPlugin {
+export class MyPlugin implements Plugin {
   constructor(initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup) {
-    // called when Kibana enters the setup lifecycle
+    // called when plugin is setting up during Kibana's startup sequence
   }
 
   public start(core: CoreStart) {
-    // called when Kibana enters the start lifecycle
+    // called after all plugins are set up
   }
 
   public stop() {
-    // called when Kibana enters the stop lifecycle
+    // called when plugin is torn down during Kibana's shutdown sequence
   }
 }
 ----
@@ -189,8 +189,7 @@ The lifecycle-specific contracts exposed by core services are always
 passed as the first argument to the equivalent lifecycle function in a
 plugin. For example, the core `http` service exposes a function
 `createRouter` to all plugin `setup` functions. To use this function to register
-an HTTP route handler, a plugin just accesses it off of the first:
-argument:
+an HTTP route handler, a plugin just accesses it off of the first argument:
 
 [source, typescript]
 ----
@@ -248,7 +247,7 @@ and/or `start`.
 
 Anything returned from `setup` or `start` will act as the interface, and
 while not a technical requirement, all first-party Elastic plugins
-will expose types for that interface as well. 3rd party plugins
+will expose types for that interface as well. Third party plugins
 wishing to allow other plugins to integrate with it are also highly
 encouraged to expose types for their plugin interfaces.
 
@@ -288,7 +287,7 @@ export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
 Unlike core, capabilities exposed by plugins are _not_ automatically
 injected into all plugins. Instead, if a plugin wishes to use the public
 interface provided by another plugin, they must first declare that
-plugin as a dependency in their `kibana.json` manifest file.
+plugin as a dependency in their {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`kibana.json`] manifest file.
 
 *demo kibana.json:*
 

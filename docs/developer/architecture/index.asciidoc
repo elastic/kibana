@@ -20,7 +20,7 @@ A few services also automatically generate api documentation which can be browse
 
 A few notable services are called out below.
 
-* <<kibana-platform-core-api>>
+* <<kibana-platform-api>>
 * <<development-security>>
 * <<add-data-tutorials>>
 * <<development-visualize-index>>

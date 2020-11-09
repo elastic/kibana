@@ -5,9 +5,9 @@
 Core services already provide mocks to simplify testing and make sure
 plugins always rely on valid public contracts:
 
+*my_plugin/server/plugin.test.ts*
 [source,typescript]
 ----
-// my_plugin/server/plugin.test.ts
 import { configServiceMock } from 'kibana/server/mocks';
 
 const configService = configServiceMock.create();
@@ -18,9 +18,9 @@ const plugin = new MyPlugin({ configService }, …);
 
 Or if you need to get the whole core `setup` or `start` contracts:
 
+*my_plugin/server/plugin.test.ts*
 [source,typescript]
 ----
-// my_plugin/public/plugin.test.ts
 import { coreMock } from 'kibana/public/mocks';
 
 const coreSetup = coreMock.createSetup();
@@ -37,9 +37,9 @@ plugin mocks as well, in order for dependent plugins to use them in
 tests. Your plugin mocks should be exported from the root `/server` and
 `/public` directories in your plugin:
 
+*my_plugin/(server|public)/mocks.ts*
 [source,typescript]
 ----
-// my_plugin/server/mocks.ts or my_plugin/public/mocks.ts
 const createSetupContractMock = () => {
   const startContract: jest.Mocked<MyPluginStartContract>= {
     isValid: jest.fn(),

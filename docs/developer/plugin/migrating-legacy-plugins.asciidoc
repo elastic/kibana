@@ -192,7 +192,7 @@ then expose it to both server-side and client-side code, they can do so
 by exporting in the index files for both the `server` and `public`
 directories.
 
-Plugins should not ever import code from deeply inside another plugin
+Plugins _should not_ ever import code from deeply inside another plugin
 (eg. `my_plugin/public/components`) or from other top-level directories
 (eg. `my_plugin/common/constants`) as these are not checked for breaking
 changes and are considered unstable and subject to change at any time.
@@ -233,7 +233,7 @@ In client code, `core` can be imported in legacy plugins via the
 |
 
 |`chrome.breadcrumbs.set`
-|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-public.chromestart.setbreadcrumbs.md[`core.chrome.setBreadcrumbs`]
+|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.chromestart.setbreadcrumbs.md[`core.chrome.setBreadcrumbs`]
 |
 
 |`chrome.getUiSettingsClient`
@@ -241,18 +241,19 @@ In client code, `core` can be imported in legacy plugins via the
 |
 
 |`chrome.helpExtension.set`
-|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-public.chromestart.sethelpextension.md[`core.chrome.setHelpExtension`]
+|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.chromestart.sethelpextension.md[`core.chrome.setHelpExtension`]
 |
 
 |`chrome.setVisible`
-|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-public.chromestart.setisvisible.md[`core.chrome.setIsVisible`]
+|{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.chromestart.setisvisible.md[`core.chrome.setIsVisible`]
 |
 
 |`chrome.getInjected`
 | - | Request Data with your plugin REST HTTP API.
 
-|`chrome.setRootTemplate` / `chrome.setRootController` |– |Use
-application mounting via |{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[`core.application.register`]
+|`chrome.setRootTemplate` / `chrome.setRootController`
+|–
+|Use application mounting via {kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[`core.application.register`]
 
 |`chrome.navLinks.update`
 |{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.app.updater_.md[`core.appbase.updater`]
@@ -279,20 +280,21 @@ application mounting via |{kib-repo}/tree/{branch}/docs/development/core/public/
 |{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.notificationsstart.md[`core.notifications`]
 and
 {kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.overlaystart.md[`core.overlays`]
-|Toast messages are in `notifications`, banners are in `overlays`. May
-be combined later.
+|Toast messages are in `notifications`, banners are in `overlays`.
 
-|`ui/routes` |– |There is no global routing mechanism. Each app
+|`ui/routes`
+|–
+|There is no global routing mechanism. Each app
 {kib-repo}blob/{branch}/rfcs/text/0004_application_service_mounting.md#complete-example[configures
 its own routing].
 
 |`ui/saved_objects`
 |{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.savedobjectsstart.md[`core.savedObjects`]
-|Client API is the same
+|-
 
 |`ui/doc_title`
 |{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md[`core.chrome.docTitle`]
-|
+|-
 
 |`uiExports/injectedVars` / `chrome.getInjected`
 |<<configuration-service>>
@@ -312,7 +314,7 @@ often used in Kibana plugins.
 This table maps some of the most commonly used legacy items to their Kibana
 Platform locations.
 
-[width="100%",cols="22%,24%,54%",options="header",]
+[width="100%",cols="15%,24%,61%",options="header",]
 |===
 |Legacy Platform |Kibana Platform |Notes
 |`import 'ui/apply_filters'` |N/A. Replaced by triggering an
@@ -385,7 +387,7 @@ In server code, `core` can be accessed from either `server.newPlatform`
 or `kbnServer.newPlatform`. There are not currently very many services
 available on the server-side:
 
-[width="100%",cols="17%,67%,16%",options="header",]
+[width="100%",cols="17, 67, 16",options="header",]
 |===
 |Legacy Platform |Kibana Platform |Notes
 |`server.config()`
@@ -478,11 +480,11 @@ CoreSetup API Docs]_
 [width="100%",cols="50%,47%,3%",options="header",]
 |===
 |Legacy Platform |Kibana Platform |Notes
-|`server.plugins.xpack_main.registerFeature`
+|`xpack_main.registerFeature`
 |{kib-repo}blob/{branch}/x-pack/plugins/features/server/plugin.ts[`plugins.features.registerKibanaFeature`]
 |
 
-|`server.plugins.xpack_main.feature(pluginID).registerLicenseCheckResultsGenerator`
+|`xpack_main.feature(pluginID).registerLicenseCheckResultsGenerator`
 |{kib-repo}blob/{branch}/x-pack/plugins/licensing/README.md[`x-pack licensing plugin`] |
 |===
 
@@ -490,13 +492,13 @@ CoreSetup API Docs]_
 
 The legacy platform used a set of `uiExports` to inject modules from
 one plugin into other plugins. This mechanism is not necessary for the
-Kibana Platform because all plugins are executed on the page at once,
+Kibana Platform because _all plugins are executed on the page at once_,
 though only one application is rendered at a time.
 
 This table shows where these uiExports have moved to in the Kibana
 Platform.
 
-[width="100%",cols="11%,42%,47%",options="header",]
+[width="100%",cols="11%,59%,30%",options="header",]
 |===
 |Legacy Platform |Kibana Platform |Notes
 |`aliases` |N/A|
@@ -505,64 +507,97 @@ Platform.
 |{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[`core.application.register`]
 |
 
-|`canvas` | {kib-repo}blob/{branch}/x-pack/plugins/canvas/README.md[Canvas plugin API]|-
+|`canvas`
+|{kib-repo}blob/{branch}/x-pack/plugins/canvas/README.md[Canvas plugin API]
+|
 
 |`chromeNavControls`
 |{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.chromenavcontrols.md[`core.chrome.navControls.register{Left,Right}`]
 |
 
 |`docViews`
-|{kib-repo}blob/{branch}/src/plugins/discover/public/[`plugins.discover.docViews.addDocView`]
+|{kib-repo}blob/{branch}/src/plugins/discover/public/[`discover.docViews.addDocView`]
 |
 
-|`embeddableActions` | |-
-
-|`embeddableFactories` | {kib-repo}blob/{branch}/docs/development/plugins/embeddable/server/kibana-plugin-plugins-embeddable-server.embeddablesetup.registerembeddablefactory.md[`plugins.embeddable.registerEmbeddableFactory`]|-
-
-|`fieldFormatEditors` | |
-
-|`fieldFormats`
-|{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.fieldformats.md[`plugins.data.fieldFormats`]
+|`embeddableActions`
+|{kib-repo}blob/{branch}/src/plugins/embeddable/README.asciidoc[`embeddable plugin`]
 |
 
-|`hacks` |n/a |Just run the code in your plugin’s `start` method.
+|`embeddableFactories`
+|{kib-repo}blob/{branch}/src/plugins/embeddable/README.asciidoc[`embeddable plugin`], {kib-repo}blob/{branch}/docs/development/plugins/embeddable/server/kibana-plugin-plugins-embeddable-server.embeddablesetup.registerembeddablefactory.md[`embeddable.registerEmbeddableFactory`]
+|
+
+|`fieldFormatEditors`, `fieldFormats`
+|{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.fieldformats.md[`data.fieldFormats`]
+|
+
+|`hacks`
+|n/a
+|Just run the code in your plugin’s `start` method.
 
 |`home`
-|{kib-repo}blob/{branch}/src/plugins/home/public/feature_catalogue[`plugins.home.featureCatalogue.register`]
+|{kib-repo}blob/{branch}/src/plugins/embeddable/README.asciidoc[`home plugin`] {kib-repo}blob/{branch}/src/plugins/home/public/services/feature_catalogue[`home.featureCatalogue.register`]
 |
 
-|`indexManagement` | |Should be an API on the indexManagement plugin.
+|`indexManagement`
+|{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[`index management plugin`]
+|
 
-|`injectDefaultVars` |n/a |Plugins will only be able to allow config
-values for the frontend. See<<configuration-service>>
+|`injectDefaultVars`
+|n/a
+|Plugins will only be able to allow config values for the frontend. See<<configuration-service>>
 
-|`inspectorViews` | |
+|`inspectorViews`
+|{kib-repo}blob/{branch}/src/plugins/inspector/README.md[`inspector plugin`]
+|
 
-|`interpreter` | |
+|`interpreter`
+|
+|
 
-|`links` |{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[`core.application.register`]|
+|`links`
+|{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[`core.application.register`]
+|
 
 |`managementSections`
-|{kib-repo}blob/{branch}/src/plugins/management/public[`plugins.management.sections.register`]
+|{kib-repo}blob/{branch}/src/plugins/management/README.md[`plugins.management.sections.register`]
 |
 
-|`mappings` | {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]|-
+|`mappings`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|
 
-|`migrations` | {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]|-
+|`migrations`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|
 
-|`navbarExtensions` |n/a |Deprecated
+|`navbarExtensions`
+|n/a
+|Deprecated
 
-|`savedObjectSchemas` | {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]|-
+|`savedObjectSchemas`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|
 
-|`savedObjectsManagement` | {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]|-
+|`savedObjectsManagement`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|
 
-|`savedObjectTypes` | {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]|-
+|`savedObjectTypes`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|
 
-|`search` | |
+|`search`
+|{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.search.md
+|
 
-|`shareContextMenuExtensions` | |
+|`shareContextMenuExtensions`
+|
+|
 
-|`taskDefinitions` | {kib-repo}blob/{branch}/x-pack/plugins/task_manager/server/plugin.ts[`plugins.taskManager.registerTaskDefinitions`]|-
+|`taskDefinitions`
+| {kib-repo}blob/{branch}/x-pack/plugins/task_manager/README.md[`taskManager plugin`]
+|
 
 |`uiCapabilities`
 |{kib-repo}blob/{branch}/docs/development/core/public/kibana-plugin-core-public.applicationsetup.register.md[`core.application.register`]
@@ -572,15 +607,25 @@ values for the frontend. See<<configuration-service>>
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.uisettingsservicesetup.md[`core.uiSettings.register`]
 |
 
-|`validations` | {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]|-
+|`validations`
+|{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
+|
 
-|`visEditorTypes` | |
+|`visEditorTypes`
+|
+|
 
-|`visTypeEnhancers` | |
+|`visTypeEnhancers`
+|
+|
 
-|`visTypes` |{kib-repo}blob/{branch}src/plugins/visualizations/public/plugin.ts[`plugins.visualizations`] |
+|`visTypes`
+|{kib-repo}blob/{branch}/src/plugins/visualizations[`visualizations plugin`]
+|
 
-|`visualize` | |
+|`visualize`
+|{kib-repo}blob/{branch}/src/plugins/visualize/README.md[`visualize plugin`]
+|
 |===
 
 ===== Plugin Spec
@@ -609,10 +654,10 @@ values for the frontend. See<<configuration-service>>
 
 |`uiExports` |`N/A`. Use platform & plugin public contracts
 
-|`publicDir` |`N/A`. Platform serves static assets from `/public/assets`
+|`publicDir` |`N/A`. Kibana Platform serves static assets from `/public/assets`
 folder under `/plugins/{id}/assets/{path*}` URL.
 
-|`preInit`, `init`, `postInit` |`N/A`. Use NP <<plugin-lifecycles,plugin-lifecycles>>
+|`preInit`, `init`, `postInit` |`N/A`. Use Kibana Platform <<plugin-lifecycles,plugin-lifecycles>>
 |===
 
 === See also

@@ -31,7 +31,7 @@ WARNING: Kibana distributable is not shipped with `@kbn/optimizer` anymore. You 
 
 You can leverage {kib-repo}blob/{branch}/packages/kbn-plugin-helpers[@kbn/plugin-helpers] to build a distributable archive for your plugin.
 The package transpiles the plugin code, adds polyfills, and links necessary js modules in the runtime.
-To build your plugin run within the plugin folder:
+To build your plugin run within your plugin folder:
 ["source","shell"]
 -----------
 yarn build
@@ -42,7 +42,7 @@ it will emit `zip` archive in `kibana/plugins/my_plugin_name/build/` folder.
 See <<install-plugin, How to install a plugin>>.
 
 === Run Kibana with your plugin in dev mode
-Run `yarn start` in the {kbn} root folder. You should be able to see Kibana found and bootstrapped your plugin:
+Run `yarn start` in the {kib} root folder. You should be able to see {kib} found and bootstrapped your plugin:
 ["source","shell"]
 -----------
 [info][plugins-system] Setting up […] plugins: […, myPluginName, …]
