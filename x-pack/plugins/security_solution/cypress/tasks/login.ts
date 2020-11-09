@@ -69,7 +69,15 @@ export const loginWithRole = async (role: string) => {
   );
   // post the user with the associated role to elasticsearch
   cy.exec(
-    `bash ./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_user.sh ./server/lib/detection_engine/scripts/roles_users/${role}/detections_user.json`
+    `bash ./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_user.sh ./server/lib/detection_engine/scripts/roles_users/${role}/detections_user.json`,
+    {
+      env: {
+        ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
+        ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
+        ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
+        KIBANA_URL: Cypress.env('KIBANA_URL'),
+      },
+    }
   );
   const theUrl = Url.format({
     auth: `${role}:changeme`,
