@@ -23,7 +23,7 @@ import { GetActionTypeParams } from '..';
 
 const supportedSubActions: string[] = ['create', 'update', 'addComment'];
 
-export const CASE_ACTION_ID = '.case';
+export const CASE_ACTION_TYPE_ID = '.case';
 // action type definition
 export function getActionType({
   logger,
@@ -32,7 +32,7 @@ export function getActionType({
   userActionService,
 }: GetActionTypeParams): CaseActionType {
   return {
-    id: CASE_ACTION_ID,
+    id: CASE_ACTION_TYPE_ID,
     minimumLicenseRequired: 'gold',
     name: i18n.NAME,
     validate: {
