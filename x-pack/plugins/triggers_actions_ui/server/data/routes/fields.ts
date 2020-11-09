@@ -16,7 +16,7 @@ import {
   KibanaResponseFactory,
   ILegacyScopedClusterClient,
 } from 'kibana/server';
-import { Service } from '../../../types';
+import { Logger } from '../../../../../../src/core/server';
 
 const bodySchema = schema.object({
   indexPatterns: schema.arrayOf(schema.string()),
@@ -24,9 +24,9 @@ const bodySchema = schema.object({
 
 type RequestBody = TypeOf<typeof bodySchema>;
 
-export function createFieldsRoute(service: Service, router: IRouter, baseRoute: string) {
+export function createFieldsRoute(logger: Logger, router: IRouter, baseRoute: string) {
   const path = `${baseRoute}/_fields`;
-  service.logger.debug(`registering indexThreshold route POST ${path}`);
+  logger.debug(`registering indexThreshold route POST ${path}`);
   router.post(
     {
       path,
@@ -41,7 +41,7 @@ export function createFieldsRoute(service: Service, router: IRouter, baseRoute: 
     req: KibanaRequest<unknown, unknown, RequestBody>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    service.logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
+    logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
 
     let rawFields: RawFields;
 
@@ -54,7 +54,7 @@ export function createFieldsRoute(service: Service, router: IRouter, baseRoute: 
       rawFields = await getRawFields(ctx.core.elasticsearch.legacy.client, req.body.indexPatterns);
     } catch (err) {
       const indexPatterns = req.body.indexPatterns.join(',');
-      service.logger.warn(
+      logger.warn(
         `route ${path} error getting fields from pattern "${indexPatterns}": ${err.message}`
       );
       return res.ok({ body: { fields: [] } });
@@ -62,7 +62,7 @@ export function createFieldsRoute(service: Service, router: IRouter, baseRoute: 
 
     const result = { fields: getFieldsFromRawFields(rawFields) };
 
-    service.logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
+    logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
   }
 }

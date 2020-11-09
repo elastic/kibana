@@ -19,7 +19,7 @@ import {
   ILegacyScopedClusterClient,
 } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
-import { Service } from '../../../types';
+import { Logger } from '../../../../../../src/core/server';
 
 const bodySchema = schema.object({
   pattern: schema.string(),
@@ -27,9 +27,9 @@ const bodySchema = schema.object({
 
 type RequestBody = TypeOf<typeof bodySchema>;
 
-export function createIndicesRoute(service: Service, router: IRouter, baseRoute: string) {
+export function createIndicesRoute(logger: Logger, router: IRouter, baseRoute: string) {
   const path = `${baseRoute}/_indices`;
-  service.logger.debug(`registering indexThreshold route POST ${path}`);
+  logger.debug(`registering indexThreshold route POST ${path}`);
   router.post(
     {
       path,
@@ -45,7 +45,7 @@ export function createIndicesRoute(service: Service, router: IRouter, baseRoute:
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
     const pattern = req.body.pattern;
-    service.logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
+    logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
 
     if (pattern.trim() === '') {
       return res.ok({ body: { indices: [] } });
@@ -55,23 +55,19 @@ export function createIndicesRoute(service: Service, router: IRouter, baseRoute:
     try {
       aliases = await getAliasesFromPattern(ctx.core.elasticsearch.legacy.client, pattern);
     } catch (err) {
-      service.logger.warn(
-        `route ${path} error getting aliases from pattern "${pattern}": ${err.message}`
-      );
+      logger.warn(`route ${path} error getting aliases from pattern "${pattern}": ${err.message}`);
     }
 
     let indices: string[] = [];
     try {
       indices = await getIndicesFromPattern(ctx.core.elasticsearch.legacy.client, pattern);
     } catch (err) {
-      service.logger.warn(
-        `route ${path} error getting indices from pattern "${pattern}": ${err.message}`
-      );
+      logger.warn(`route ${path} error getting indices from pattern "${pattern}": ${err.message}`);
     }
 
     const result = { indices: uniqueCombined(aliases, indices, MAX_INDICES) };
 
-    service.logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
+    logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
   }
 }

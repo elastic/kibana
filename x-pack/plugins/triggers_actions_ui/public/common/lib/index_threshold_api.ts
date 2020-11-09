@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { HttpSetup } from 'kibana/public';
-import { TimeSeriesResult } from '../../../../stack_alerts/common/alert_types/index_threshold';
+import { TimeSeriesResult } from '../../../common';
 
-const INDEX_THRESHOLD_API_ROOT = '/api/stack_alerts/index_threshold';
+const INDEX_THRESHOLD_DATA_API_ROOT = '/api/triggers_actions_ui/data';
 
 export async function getMatchingIndicesForThresholdAlertType({
   pattern,
@@ -21,7 +21,7 @@ export async function getMatchingIndicesForThresholdAlertType({
   if (!pattern.endsWith('*')) {
     pattern = `${pattern}*`;
   }
-  const { indices } = await http.post(`${INDEX_THRESHOLD_API_ROOT}/_indices`, {
+  const { indices } = await http.post(`${INDEX_THRESHOLD_DATA_API_ROOT}/_indices`, {
     body: JSON.stringify({ pattern }),
   });
   return indices;
@@ -34,7 +34,7 @@ export async function getThresholdAlertTypeFields({
   indexes: string[];
   http: HttpSetup;
 }): Promise<Record<string, any>> {
-  const { fields } = await http.post(`${INDEX_THRESHOLD_API_ROOT}/_fields`, {
+  const { fields } = await http.post(`${INDEX_THRESHOLD_DATA_API_ROOT}/_fields`, {
     body: JSON.stringify({ indexPatterns: indexes }),
   });
   return fields;
@@ -85,7 +85,7 @@ export async function getThresholdAlertVisualizationData({
     interval: visualizeOptions.interval,
   };
 
-  return await http.post<TimeSeriesResult>(`${INDEX_THRESHOLD_API_ROOT}/_time_series_query`, {
+  return await http.post<TimeSeriesResult>(`${INDEX_THRESHOLD_DATA_API_ROOT}/_time_series_query`, {
     body: JSON.stringify(timeSeriesQueryParams),
   });
 }

@@ -11,14 +11,20 @@ import {
   IKibanaResponse,
   KibanaResponseFactory,
 } from 'kibana/server';
+import { Logger } from '../../../../../../src/core/server';
+import { TimeSeriesQueryParameters } from '../lib/time_series_query';
 
-import { Service } from '../../../types';
-import { TimeSeriesQuery, TimeSeriesQuerySchema } from '../lib/time_series_types';
+import { TimeSeriesQuery, TimeSeriesQuerySchema, TimeSeriesResult } from '../lib/time_series_types';
 export { TimeSeriesQuery, TimeSeriesResult } from '../lib/time_series_types';
 
-export function createTimeSeriesQueryRoute(service: Service, router: IRouter, baseRoute: string) {
+export function createTimeSeriesQueryRoute(
+  logger: Logger,
+  timeSeriesQuery: (params: TimeSeriesQueryParameters) => Promise<TimeSeriesResult>,
+  router: IRouter,
+  baseRoute: string
+) {
   const path = `${baseRoute}/_time_series_query`;
-  service.logger.debug(`registering indexThreshold route POST ${path}`);
+  logger.debug(`registering indexThreshold route POST ${path}`);
   router.post(
     {
       path,
@@ -33,15 +39,15 @@ export function createTimeSeriesQueryRoute(service: Service, router: IRouter, ba
     req: KibanaRequest<unknown, unknown, TimeSeriesQuery>,
     res: KibanaResponseFactory
   ): Promise<IKibanaResponse> {
-    service.logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
+    logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
 
-    const result = await service.indexThreshold.timeSeriesQuery({
-      logger: service.logger,
+    const result = await timeSeriesQuery({
+      logger,
       callCluster: ctx.core.elasticsearch.legacy.client.callAsCurrentUser,
       query: req.body,
     });
 
-    service.logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
+    logger.debug(`route ${path} response: ${JSON.stringify(result)}`);
     return res.ok({ body: result });
   }
 }

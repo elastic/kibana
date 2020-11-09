@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import { parseDuration } from '../../../../../alerts/server';
+import { parseDuration } from '../../../../alerts/server';
 import { MAX_INTERVALS } from '../index';
 import { CoreQueryParamsSchemaProperties, validateCoreQueryBody } from './core_query_types';
 import {
@@ -18,11 +18,7 @@ import {
   getDateStartAfterDateEndErrorMessage,
 } from './date_range_info';
 
-export {
-  TimeSeriesResult,
-  TimeSeriesResultRow,
-  MetricResult,
-} from '../../../../common/alert_types/index_threshold';
+export { TimeSeriesResult, TimeSeriesResultRow, MetricResult } from '../../../common/data';
 
 // The parameters here are very similar to the alert parameters.
 // Missing are `comparator` and `threshold`, which aren't needed to generate

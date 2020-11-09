@@ -6,12 +6,8 @@
 
 // test error conditions of calling timeSeriesQuery - postive results tested in FT
 
-import { loggingSystemMock } from '../../../../../../../src/core/server/mocks';
-import { coreMock } from '../../../../../../../src/core/server/mocks';
-import { AlertingBuiltinsPlugin } from '../../../plugin';
-import { TimeSeriesQueryParameters, TimeSeriesResult, TimeSeriesQuery } from './time_series_query';
-
-type TimeSeriesQueryFn = (query: TimeSeriesQueryParameters) => Promise<TimeSeriesResult>;
+import { loggingSystemMock } from '../../../../../../src/core/server/mocks';
+import { TimeSeriesQueryParameters, TimeSeriesQuery, timeSeriesQuery } from './time_series_query';
 
 const DefaultQueryParams: TimeSeriesQuery = {
   index: 'index-name',
@@ -32,16 +28,7 @@ describe('timeSeriesQuery', () => {
   let params: TimeSeriesQueryParameters;
   const mockCallCluster = jest.fn();
 
-  let timeSeriesQueryFn: TimeSeriesQueryFn;
-
   beforeEach(async () => {
-    // rather than use the function from an import, retrieve it from the plugin
-    const context = coreMock.createPluginInitializerContext();
-    const plugin = new AlertingBuiltinsPlugin(context);
-    const coreStart = coreMock.createStart();
-    const service = await plugin.start(coreStart);
-    timeSeriesQueryFn = service.indexThreshold.timeSeriesQuery;
-
     mockCallCluster.mockReset();
     params = {
       logger: loggingSystemMock.create().get(),
@@ -52,14 +39,14 @@ describe('timeSeriesQuery', () => {
 
   it('fails as expected when the callCluster call fails', async () => {
     mockCallCluster.mockRejectedValue(new Error('woopsie'));
-    expect(timeSeriesQueryFn(params)).rejects.toThrowErrorMatchingInlineSnapshot(
+    expect(timeSeriesQuery(params)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"error running search"`
     );
   });
 
   it('fails as expected when the query params are invalid', async () => {
     params.query = { ...params.query, dateStart: 'x' };
-    expect(timeSeriesQueryFn(params)).rejects.toThrowErrorMatchingInlineSnapshot(
+    expect(timeSeriesQuery(params)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"invalid date format for dateStart: \\"x\\""`
     );
   });

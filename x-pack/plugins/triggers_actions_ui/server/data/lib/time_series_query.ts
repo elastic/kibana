@@ -5,16 +5,17 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { Logger } from 'kibana/server';
+import { LegacyScopedClusterClient } from '../../../../../../src/core/server';
 import { DEFAULT_GROUPS } from '../index';
 import { getDateRangeInfo } from './date_range_info';
-import { Logger, CallCluster } from '../../../types';
 
 import { TimeSeriesQuery, TimeSeriesResult, TimeSeriesResultRow } from './time_series_types';
 export { TimeSeriesQuery, TimeSeriesResult } from './time_series_types';
 
 export interface TimeSeriesQueryParameters {
   logger: Logger;
-  callCluster: CallCluster;
+  callCluster: LegacyScopedClusterClient['callAsCurrentUser'];
   query: TimeSeriesQuery;
 }
 

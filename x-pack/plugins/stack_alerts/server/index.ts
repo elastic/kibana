@@ -14,5 +14,3 @@ export const plugin = (ctx: PluginInitializerContext) => new AlertingBuiltinsPlu
 export const config = {
   schema: configSchema,
 };
-
-export { IService } from './types';
