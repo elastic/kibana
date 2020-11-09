@@ -55,7 +55,7 @@ export function resultsServiceProvider(mlClient: MlClient) {
     maxRecords: number = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
     maxExamples: number = DEFAULT_MAX_EXAMPLES,
     influencersFilterQuery?: any,
-    functionDescription?: string | undefined
+    functionDescription?: string
   ) {
     // Build the query to return the matching anomaly record results.
     // Add criteria for the time range, record score, plus any specified job IDs.

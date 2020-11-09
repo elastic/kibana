@@ -10,6 +10,7 @@ import { ToastNotificationService } from '../services/toast_notification_service
 import { getControlsForDetector } from './get_controls_for_detector';
 import { getCriteriaFields } from './get_criteria_fields';
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import { ML_JOB_AGGREGATION } from '../../../common/constants/aggregation_types';
 
 /**
  * Get the function description from the record with the highest anomaly score
@@ -30,7 +31,11 @@ export const getFunctionDescription = async (
 ) => {
   // if the detector's function is metric, fetch the highest scoring anomaly record
   // and set to plot the function_description (avg/min/max) of that record by default
-  if (selectedJob?.analysis_config?.detectors[selectedDetectorIndex]?.function !== 'metric') return;
+  if (
+    selectedJob?.analysis_config?.detectors[selectedDetectorIndex]?.function !==
+    ML_JOB_AGGREGATION.METRIC
+  )
+    return;
 
   const entityControls = getControlsForDetector(
     selectedDetectorIndex,

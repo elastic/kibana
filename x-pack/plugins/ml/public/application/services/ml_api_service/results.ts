@@ -26,7 +26,7 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     maxRecords: number,
     maxExamples?: number,
     influencersFilterQuery?: any,
-    functionDescription?: string | undefined
+    functionDescription?: string
   ) {
     const body = JSON.stringify({
       jobIds,

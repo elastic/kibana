@@ -351,7 +351,7 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       earliestMs: number | null,
       latestMs: number | null,
       maxResults: number | undefined,
-      functionDescription?: string | undefined
+      functionDescription?: string
     ): Observable<RecordsForCriteria> {
       const obj: RecordsForCriteria = { success: true, records: [] };
 

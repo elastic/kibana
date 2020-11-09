@@ -428,9 +428,11 @@ export class TimeSeriesExplorer extends React.Component {
 
     const { loadCounter: currentLoadCounter, functionDescription } = this.state;
 
-    const functionToPlotByIfMetric = aggregationTypeTransform.toES(functionDescription);
-
     const currentSelectedJob = mlJobService.getJob(selectedJobId);
+    if (currentSelectedJob === undefined) {
+      return;
+    }
+    const functionToPlotByIfMetric = aggregationTypeTransform.toES(functionDescription);
 
     this.contextChartSelectedInitCallDone = false;
 

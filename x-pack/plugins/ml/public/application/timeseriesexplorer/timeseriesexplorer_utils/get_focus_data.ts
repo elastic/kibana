@@ -53,7 +53,7 @@ export function getFocusData(
   nonBlankEntities: any[],
   searchBounds: any,
   selectedJob: Job,
-  functionDescription: string | undefined
+  functionDescription?: string | undefined
 ): Observable<FocusData> {
   const esFunctionToPlotIfMetric =
     functionDescription !== undefined
