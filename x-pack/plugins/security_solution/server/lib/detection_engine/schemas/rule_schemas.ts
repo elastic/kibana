@@ -11,6 +11,8 @@ import {
   threat_mapping,
   threat_index,
   threat_query,
+  concurrentSearchesOrUndefined,
+  itemsPerSearchOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 import {
   author,
@@ -113,6 +115,8 @@ const threatSpecificRuleParams = t.type({
   threatMapping: threat_mapping,
   threatLanguage: t.union([nonEqlLanguages, t.undefined]),
   threatIndex: threat_index,
+  concurrentSearches: concurrentSearchesOrUndefined,
+  itemsPerSearch: itemsPerSearchOrUndefined,
 });
 
 const querySpecificRuleParams = t.exact(

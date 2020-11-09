@@ -150,9 +150,7 @@ describe('update_rules_bulk', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith(
-        'Invalid value "unknown_type" supplied to "type"'
-      );
+      expect(result.badRequest).toHaveBeenCalled();
     });
 
     test('allows rule type of query and custom from and interval', async () => {

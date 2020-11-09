@@ -46,6 +46,8 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         threatMapping: params.threat_mapping,
         threatLanguage: params.threat_language,
         threatIndex: params.threat_index,
+        concurrentSearches: params.concurrent_searches,
+        itemsPerSearch: params.items_per_search,
       };
     }
     case 'query': {
@@ -118,6 +120,8 @@ export const typeSpecificCamelToSnake = (params: TypeSpecificRuleParams): Respon
         threat_mapping: params.threatMapping,
         threat_language: params.threatLanguage,
         threat_index: params.threatIndex,
+        concurrent_searches: params.concurrentSearches,
+        items_per_search: params.itemsPerSearch,
       };
     }
     case 'query': {

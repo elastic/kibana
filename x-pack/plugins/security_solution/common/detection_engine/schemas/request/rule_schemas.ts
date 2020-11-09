@@ -12,6 +12,8 @@ import {
   threat_query,
   threat_mapping,
   threat_index,
+  concurrent_searches,
+  items_per_search,
 } from '../types/threat_mapping';
 import {
   id,
@@ -211,6 +213,8 @@ const threatMatchRuleParams = {
     saved_id,
     threat_filters,
     threat_language: t.keyof({ kuery: null, lucene: null }),
+    concurrent_searches,
+    items_per_search,
   },
   defaultable: {
     language: t.keyof({ kuery: null, lucene: null }),
@@ -362,6 +366,7 @@ export const fullUpdateSchema = t.intersection([
   createTypeSpecific,
   t.exact(t.partial({ id })),
 ]);
+export type FullUpdateSchema = t.TypeOf<typeof fullUpdateSchema>;
 
 export const fullPatchSchema = t.intersection([
   commonPatchParams,

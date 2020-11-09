@@ -13,6 +13,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { FullUpdateSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
   FalsePositives,
@@ -101,6 +102,7 @@ import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
 import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
+import { AppClient } from '../../../types';
 
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
@@ -250,55 +252,10 @@ export interface CreateRulesOptions {
 }
 
 export interface UpdateRulesOptions {
-  id: IdOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   alertsClient: AlertsClient;
-  anomalyThreshold: AnomalyThresholdOrUndefined;
-  author: Author;
-  buildingBlockType: BuildingBlockTypeOrUndefined;
-  description: Description;
-  enabled: Enabled;
-  eventCategoryOverride: EventCategoryOverrideOrUndefined;
-  falsePositives: FalsePositives;
-  from: From;
-  query: QueryOrUndefined;
-  language: LanguageOrUndefined;
-  savedId: SavedIdOrUndefined;
-  timelineId: TimelineIdOrUndefined;
-  timelineTitle: TimelineTitleOrUndefined;
-  meta: MetaOrUndefined;
-  machineLearningJobId: MachineLearningJobIdOrUndefined;
-  filters: PartialFilter[];
-  ruleId: RuleIdOrUndefined;
-  index: IndexOrUndefined;
-  interval: Interval;
-  license: LicenseOrUndefined;
-  maxSignals: MaxSignals;
-  riskScore: RiskScore;
-  riskScoreMapping: RiskScoreMapping;
-  ruleNameOverride: RuleNameOverrideOrUndefined;
-  outputIndex: OutputIndex;
-  name: Name;
-  severity: Severity;
-  severityMapping: SeverityMapping;
-  tags: Tags;
-  threat: Threat;
-  threshold: ThresholdOrUndefined;
-  threatFilters: ThreatFiltersOrUndefined;
-  threatIndex: ThreatIndexOrUndefined;
-  threatQuery: ThreatQueryOrUndefined;
-  threatMapping: ThreatMappingOrUndefined;
-  itemsPerSearch: ItemsPerSearchOrUndefined;
-  concurrentSearches: ConcurrentSearchesOrUndefined;
-  threatLanguage: ThreatLanguageOrUndefined;
-  timestampOverride: TimestampOverrideOrUndefined;
-  to: To;
-  type: Type;
-  references: References;
-  note: NoteOrUndefined;
-  version: VersionOrUndefined;
-  exceptionsList: ListArray;
-  actions: RuleAlertAction[];
+  siemClient: AppClient;
+  ruleUpdate: FullUpdateSchema;
 }
 
 export interface PatchRulesOptions {
