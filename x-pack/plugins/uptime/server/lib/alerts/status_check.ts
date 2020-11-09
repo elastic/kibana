@@ -26,7 +26,6 @@ import { GetMonitorStatusResult } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../common/constants';
 import { uptimeAlertWrapper } from './uptime_alert_wrapper';
 import { MonitorStatusTranslations } from '../../../common/translations';
-import { ESAPICaller } from '../adapters/framework';
 import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
 import { UMServerLibs } from '../lib';
 
@@ -81,7 +80,6 @@ export const generateFilterDSL = async (
 
 export const formatFilterString = async (
   dynamicSettings: DynamicSettings,
-  callES: ESAPICaller,
   esClient: ElasticsearchClient,
   filters: StatusCheckFilters,
   search: string,
@@ -90,9 +88,8 @@ export const formatFilterString = async (
   await generateFilterDSL(
     () =>
       libs?.requests?.getIndexPattern
-        ? libs?.requests?.getIndexPattern({ callES, esClient, dynamicSettings })
+        ? libs?.requests?.getIndexPattern({ esClient, dynamicSettings })
         : getUptimeIndexPattern({
-            callES,
             esClient,
             dynamicSettings,
           }),
@@ -237,12 +234,15 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       ],
       state: [...commonMonitorStateI18, ...commonStateTranslations],
     },
-    async executor(
-      { params: rawParams, state, services: { alertInstanceFactory } },
-      callES,
+    async executor({
+      options: {
+        params: rawParams,
+        state,
+        services: { alertInstanceFactory },
+      },
       esClient,
-      dynamicSettings
-    ) {
+      dynamicSettings,
+    }) {
       const {
         filters,
         search,
@@ -258,7 +258,6 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
 
       const filterString = await formatFilterString(
         dynamicSettings,
-        callES,
         esClient,
         filters,
         search,
@@ -278,7 +277,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       // after that shouldCheckStatus should be explicitly false
       if (!(!oldVersionTimeRange && shouldCheckStatus === false)) {
         downMonitorsByLocation = await libs.requests.getMonitorStatus({
-          callES,
+          callES: esClient,
           dynamicSettings,
           timerange,
           numTimes,
@@ -311,7 +310,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory = (_server, libs) =
       let availabilityResults: GetMonitorAvailabilityResult[] = [];
       if (shouldCheckAvailability) {
         availabilityResults = await libs.requests.getMonitorAvailability({
-          callES,
+          callES: esClient,
           dynamicSettings,
           ...availability,
           filters: JSON.stringify(filterString) || undefined,

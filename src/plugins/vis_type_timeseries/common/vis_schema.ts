@@ -273,4 +273,5 @@ export const visPayloadSchema = schema.object({
     min: stringRequired,
     max: stringRequired,
   }),
+  sessionId: schema.maybe(schema.string()),
 });

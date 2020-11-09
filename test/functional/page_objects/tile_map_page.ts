@@ -50,12 +50,14 @@ export function TileMapPageProvider({ getService, getPageObjects }: FtrProviderC
       await testSubjects.click('inspectorViewChooser');
       await testSubjects.click('inspectorViewChooserRequests');
       await testSubjects.click('inspectorRequestDetailRequest');
-      return await testSubjects.getVisibleText('inspectorRequestBody');
+
+      return await inspector.getCodeEditorValue();
     }
 
     public async getMapBounds(): Promise<object> {
       const request = await this.getVisualizationRequest();
       const requestObject = JSON.parse(request);
+
       return requestObject.aggs.filter_agg.filter.geo_bounding_box['geo.coordinates'];
     }
 
