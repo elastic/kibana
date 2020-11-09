@@ -17,7 +17,6 @@ import {
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useDynamicIndexPattern } from '../../../hooks/useDynamicIndexPattern';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useServiceName } from '../../../hooks/use_service_name';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 import { getBoolFilter } from './get_bool_filter';
 // @ts-expect-error
@@ -39,8 +38,10 @@ function convertKueryToEsQuery(kuery: string, indexPattern: IIndexPattern) {
 }
 
 export function KueryBar() {
-  const serviceName = useServiceName();
-  const { groupId } = useParams<{ groupId?: string }>();
+  const { groupId, serviceName } = useParams<{
+    groupId?: string;
+    serviceName?: string;
+  }>();
   const history = useHistory();
   const [state, setState] = useState<State>({
     suggestions: [],

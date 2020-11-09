@@ -8,9 +8,9 @@ import { EuiFlexItem, EuiIconTip, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useServiceName } from '../../../../hooks/use_service_name';
 import { MLJobLink } from '../../Links/MachineLearningLinks/MLJobLink';
 
 interface Props {
@@ -31,7 +31,7 @@ const ShiftedEuiText = styled(EuiText)`
 `;
 
 export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
-  const serviceName = useServiceName();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
 
   if (!hasValidMlLicense || !mlJobId) {

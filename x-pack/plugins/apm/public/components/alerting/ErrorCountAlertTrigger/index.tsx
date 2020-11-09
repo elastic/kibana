@@ -6,12 +6,12 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { ForLastExpression } from '../../../../../triggers_actions_ui/public';
 import { ALERT_TYPES_CONFIG, AlertType } from '../../../../common/alert_types';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { useEnvironments } from '../../../hooks/useEnvironments';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useServiceName } from '../../../hooks/use_service_name';
 import { EnvironmentField, ServiceField, IsAboveField } from '../fields';
 import { ServiceAlertTrigger } from '../ServiceAlertTrigger';
 
@@ -31,7 +31,7 @@ interface Props {
 
 export function ErrorCountAlertTrigger(props: Props) {
   const { setAlertParams, setAlertProperty, alertParams } = props;
-  const serviceName = useServiceName();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams } = useUrlParams();
   const { start, end } = urlParams;
   const { environmentOptions } = useEnvironments({ serviceName, start, end });

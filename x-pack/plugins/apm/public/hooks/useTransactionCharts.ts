@@ -5,13 +5,13 @@
  */
 
 import { useMemo } from 'react';
+import { useParams } from 'react-router-dom';
 import { getTransactionCharts } from '../selectors/chartSelectors';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
-import { useServiceName } from './use_service_name';
 
 export function useTransactionCharts() {
-  const serviceName = useServiceName();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
     urlParams: { transactionType, start, end, transactionName },
     uiFilters,

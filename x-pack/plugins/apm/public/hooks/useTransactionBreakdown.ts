@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { useParams } from 'react-router-dom';
 import { useFetcher } from './useFetcher';
 import { useUrlParams } from './useUrlParams';
-import { useServiceName } from './use_service_name';
 
 export function useTransactionBreakdown() {
-  const serviceName = useServiceName();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const {
     urlParams: { start, end, transactionName, transactionType },
     uiFilters,
   } = useUrlParams();
 
-  const { data = { timeseries: [] }, error, status } = useFetcher(
+  const { data = { timeseries: undefined }, error, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end && transactionType) {
         return callApmApi({

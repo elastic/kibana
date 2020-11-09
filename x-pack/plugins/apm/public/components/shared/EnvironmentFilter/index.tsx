@@ -8,14 +8,13 @@ import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useHistory, useLocation, useParams } from 'react-router-dom';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../common/environment_filter_values';
 import { useEnvironments } from '../../../hooks/useEnvironments';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useServiceName } from '../../../hooks/use_service_name';
 import { fromQuery, toQuery } from '../Links/url_helpers';
 
 function updateEnvironmentUrl(
@@ -63,7 +62,7 @@ function getOptions(environments: string[]) {
 export function EnvironmentFilter() {
   const history = useHistory();
   const location = useLocation();
-  const serviceName = useServiceName();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { uiFilters, urlParams } = useUrlParams();
 
   const { environment } = uiFilters;
