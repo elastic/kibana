@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import mime from 'mime-types';
 import semver from 'semver';
 import { Response } from 'node-fetch';
 import { URL } from 'url';
@@ -18,22 +18,15 @@ import {
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
-import {
-  cacheGet,
-  cacheSet,
-  cacheDelete,
-  getArchiveFilelist,
-  setArchiveFilelist,
-  deleteArchiveFilelist,
-} from './cache';
-import { ArchiveEntry, untarBuffer, unzipBuffer } from './extract';
+import { unpackArchiveToCache } from '../archive';
+import { cacheGet, getArchiveFilelist, setArchiveFilelist } from '../archive';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
 import { appContextService } from '../..';
 import { PackageNotFoundError, PackageCacheError } from '../../../errors';
 
-export { ArchiveEntry } from './extract';
+export { ArchiveEntry, getBufferExtractor } from './extract';
 
 export interface SearchParams {
   category?: CategoryId;
@@ -132,34 +125,18 @@ export async function fetchCategories(params?: CategoriesParams): Promise<Catego
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function unpackRegistryPackageToCache(
-  pkgName: string,
-  pkgVersion: string,
-  filter = (entry: ArchiveEntry): boolean => true
-): Promise<string[]> {
-  const paths: string[] = [];
-  const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
-  const bufferExtractor = getBufferExtractor(archivePath);
-  await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
-    const { path, buffer } = entry;
-    const { file } = pathParts(path);
-    if (!file) return;
-    if (buffer) {
-      cacheSet(path, buffer);
-      paths.push(path);
-    }
-  });
-
-  return paths;
-}
-
-export async function loadRegistryPackage(
+export async function getRegistryPackage(
   pkgName: string,
   pkgVersion: string
 ): Promise<{ paths: string[]; registryPackageInfo: RegistryPackage }> {
   let paths = getArchiveFilelist(pkgName, pkgVersion);
   if (!paths || paths.length === 0) {
-    paths = await unpackRegistryPackageToCache(pkgName, pkgVersion);
+    const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
+    const contentType = mime.lookup(archivePath);
+    if (!contentType) {
+      throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
+    }
+    paths = await unpackArchiveToCache(archiveBuffer, contentType);
     setArchiveFilelist(pkgName, pkgVersion, paths);
   }
 
@@ -199,13 +176,6 @@ export function pathParts(path: string): AssetParts {
   } as AssetParts;
 }
 
-export function getBufferExtractor(archivePath: string) {
-  const isZip = archivePath.endsWith('.zip');
-  const bufferExtractor = isZip ? unzipBuffer : untarBuffer;
-
-  return bufferExtractor;
-}
-
 export async function ensureCachedArchiveInfo(
   name: string,
   version: string,
@@ -214,7 +184,7 @@ export async function ensureCachedArchiveInfo(
   const paths = getArchiveFilelist(name, version);
   if (!paths || paths.length === 0) {
     if (installSource === 'registry') {
-      await loadRegistryPackage(name, version);
+      await getRegistryPackage(name, version);
     } else {
       throw new PackageCacheError(
         `Package ${name}-${version} not cached. If it was uploaded, try uninstalling and reinstalling manually.`
@@ -261,15 +231,3 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     // elasticsearch: assets.elasticsearch,
   };
 }
-
-export const deletePackageCache = (name: string, version: string) => {
-  // get cached archive filelist
-  const paths = getArchiveFilelist(name, version);
-
-  // delete cached archive filelist
-  deleteArchiveFilelist(name, version);
-
-  // delete cached archive files
-  // this has been populated in unpackRegistryPackageToCache()
-  paths?.forEach((path) => cacheDelete(path));
-};

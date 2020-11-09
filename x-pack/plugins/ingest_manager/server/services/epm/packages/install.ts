@@ -248,7 +248,7 @@ export async function installPackageFromRegistry({
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
 
-  const { paths, registryPackageInfo } = await Registry.loadRegistryPackage(pkgName, pkgVersion);
+  const { paths, registryPackageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
   const removable = !isRequiredPackage(pkgName);
   const { internal = false } = registryPackageInfo;

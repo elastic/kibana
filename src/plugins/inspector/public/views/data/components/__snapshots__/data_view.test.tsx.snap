@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Inspector Data View component should render empty state 1`] = `
-<component
+<EnhancedType
   adapters={
     Object {
       "data": DataAdapter {
@@ -235,8 +235,24 @@ exports[`Inspector Data View component should render empty state 1`] = `
         "timeZone": null,
       }
     }
+    kibana={
+      Object {
+        "notifications": Object {
+          "toasts": Object {
+            "danger": [Function],
+            "show": [Function],
+            "success": [Function],
+            "warning": [Function],
+          },
+        },
+        "overlays": Object {
+          "openFlyout": [Function],
+          "openModal": [Function],
+        },
+        "services": Object {},
+      }
+    }
     title="Test Data"
-    uiSettings={Object {}}
   >
     <EuiEmptyPrompt
       body={
@@ -311,23 +327,15 @@ exports[`Inspector Data View component should render empty state 1`] = `
       </div>
     </EuiEmptyPrompt>
   </DataViewComponent>
-</component>
+</EnhancedType>
 `;
 
 exports[`Inspector Data View component should render loading state 1`] = `
-<component
-  adapters={
-    Object {
-      "data": DataAdapter {
-        "_events": Object {
-          "change": [Function],
-        },
-        "_eventsCount": 1,
-        "_maxListeners": undefined,
-        "tabular": undefined,
-        "tabularOptions": undefined,
-      },
-    }
+<Suspense
+  fallback={
+    <div>
+      loading
+    </div>
   }
   intl={
     Object {
@@ -431,204 +439,9 @@ exports[`Inspector Data View component should render loading state 1`] = `
       "timeZone": null,
     }
   }
-  title="Test Data"
 >
-  <DataViewComponent
-    adapters={
-      Object {
-        "data": DataAdapter {
-          "_events": Object {
-            "change": [Function],
-          },
-          "_eventsCount": 1,
-          "_maxListeners": undefined,
-          "tabular": undefined,
-          "tabularOptions": undefined,
-        },
-      }
-    }
-    intl={
-      Object {
-        "defaultFormats": Object {},
-        "defaultLocale": "en",
-        "formatDate": [Function],
-        "formatHTMLMessage": [Function],
-        "formatMessage": [Function],
-        "formatNumber": [Function],
-        "formatPlural": [Function],
-        "formatRelative": [Function],
-        "formatTime": [Function],
-        "formats": Object {
-          "date": Object {
-            "full": Object {
-              "day": "numeric",
-              "month": "long",
-              "weekday": "long",
-              "year": "numeric",
-            },
-            "long": Object {
-              "day": "numeric",
-              "month": "long",
-              "year": "numeric",
-            },
-            "medium": Object {
-              "day": "numeric",
-              "month": "short",
-              "year": "numeric",
-            },
-            "short": Object {
-              "day": "numeric",
-              "month": "numeric",
-              "year": "2-digit",
-            },
-          },
-          "number": Object {
-            "currency": Object {
-              "style": "currency",
-            },
-            "percent": Object {
-              "style": "percent",
-            },
-          },
-          "relative": Object {
-            "days": Object {
-              "units": "day",
-            },
-            "hours": Object {
-              "units": "hour",
-            },
-            "minutes": Object {
-              "units": "minute",
-            },
-            "months": Object {
-              "units": "month",
-            },
-            "seconds": Object {
-              "units": "second",
-            },
-            "years": Object {
-              "units": "year",
-            },
-          },
-          "time": Object {
-            "full": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-              "second": "numeric",
-              "timeZoneName": "short",
-            },
-            "long": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-              "second": "numeric",
-              "timeZoneName": "short",
-            },
-            "medium": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-              "second": "numeric",
-            },
-            "short": Object {
-              "hour": "numeric",
-              "minute": "numeric",
-            },
-          },
-        },
-        "formatters": Object {
-          "getDateTimeFormat": [Function],
-          "getMessageFormat": [Function],
-          "getNumberFormat": [Function],
-          "getPluralFormat": [Function],
-          "getRelativeFormat": [Function],
-        },
-        "locale": "en",
-        "messages": Object {},
-        "now": [Function],
-        "onError": [Function],
-        "textComponent": Symbol(react.fragment),
-        "timeZone": null,
-      }
-    }
-    title="Test Data"
-    uiSettings={Object {}}
-  >
-    <EuiFlexGroup
-      alignItems="center"
-      justifyContent="center"
-      style={
-        Object {
-          "height": "100%",
-        }
-      }
-    >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
-        style={
-          Object {
-            "height": "100%",
-          }
-        }
-      >
-        <EuiFlexItem
-          grow={false}
-        >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <EuiPanel
-              className="eui-textCenter"
-            >
-              <div
-                className="euiPanel euiPanel--paddingMedium eui-textCenter"
-              >
-                <EuiLoadingChart
-                  size="m"
-                >
-                  <span
-                    className="euiLoadingChart euiLoadingChart--medium"
-                  >
-                    <span
-                      className="euiLoadingChart__bar"
-                    />
-                    <span
-                      className="euiLoadingChart__bar"
-                    />
-                    <span
-                      className="euiLoadingChart__bar"
-                    />
-                    <span
-                      className="euiLoadingChart__bar"
-                    />
-                  </span>
-                </EuiLoadingChart>
-                <EuiSpacer
-                  size="s"
-                >
-                  <div
-                    className="euiSpacer euiSpacer--s"
-                  />
-                </EuiSpacer>
-                <EuiText>
-                  <div
-                    className="euiText euiText--medium"
-                  >
-                    <p>
-                      <FormattedMessage
-                        defaultMessage="Gathering data"
-                        id="inspector.data.gatheringDataLabel"
-                        values={Object {}}
-                      >
-                        Gathering data
-                      </FormattedMessage>
-                    </p>
-                  </div>
-                </EuiText>
-              </div>
-            </EuiPanel>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
-  </DataViewComponent>
-</component>
+  <div>
+    loading
+  </div>
+</Suspense>
 `;
