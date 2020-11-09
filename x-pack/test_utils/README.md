@@ -122,7 +122,7 @@ In order to prevent flakiness in component integration tests, please consider th
 
 - Be **synchronous** as much as possible.
 ​
-  Hooks are delicate when it comes to state updates. Sometimes calling `act()` synchronously works, sometimes it doesn't. The reasoning behind this isn't clear yet. The best approach is to try synchrounsly first and if it fails, because of an `act()` error, then use the async version.
+  Hooks are delicate when it comes to state updates. Sometimes calling `act()` synchronously works, sometimes it doesn't. The reasoning behind this isn't clear yet. The best approach is to try synchronously first and if it fails, because of an `act()` error, then use the async version.
 
   ```js
   // First try this

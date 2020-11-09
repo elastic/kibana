@@ -21,6 +21,7 @@ type PayloadType = 'params' | 'query' | 'body';
 
 interface IMockRouterProps {
   method: MethodType;
+  path: string;
   payload?: PayloadType;
 }
 interface IMockRouterRequest {
@@ -33,12 +34,14 @@ type TMockRouterRequest = KibanaRequest | IMockRouterRequest;
 export class MockRouter {
   public router!: jest.Mocked<IRouter>;
   public method: MethodType;
+  public path: string;
   public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
-  constructor({ method, payload }: IMockRouterProps) {
+  constructor({ method, path, payload }: IMockRouterProps) {
     this.createRouter();
     this.method = method;
+    this.path = path;
     this.payload = payload;
   }
 
@@ -47,8 +50,13 @@ export class MockRouter {
   };
 
   public callRoute = async (request: TMockRouterRequest) => {
-    const [, handler] = this.router[this.method].mock.calls[0];
+    const routerCalls = this.router[this.method].mock.calls as any[];
+    if (!routerCalls.length) throw new Error('No routes registered.');
 
+    const route = routerCalls.find(([router]: any) => router.path === this.path);
+    if (!route) throw new Error('No matching registered routes found - check method/path keys');
+
+    const [, handler] = route;
     const context = {} as jest.Mocked<RequestHandlerContext>;
     await handler(context, httpServerMock.createKibanaRequest(request as any), this.response);
   };
@@ -81,7 +89,11 @@ export class MockRouter {
 /**
  * Example usage:
  */
-// const mockRouter = new MockRouter({ method: 'get', payload: 'body' });
+// const mockRouter = new MockRouter({
+//   method: 'get',
+//   path: '/api/app_search/test',
+//   payload: 'body'
+// });
 //
 // beforeEach(() => {
 //   jest.clearAllMocks();
