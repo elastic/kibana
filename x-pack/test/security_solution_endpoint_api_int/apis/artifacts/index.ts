@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 import { inflateSync } from 'zlib';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { getSupertestWithoutAuth } from '../../../ingest_manager_api_integration/apis/fleet/agents/services';
+import { getSupertestWithoutAuth } from '../../../fleet_api_integration/apis/agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
