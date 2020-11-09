@@ -267,9 +267,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.failed(err);
     }
 
-    // If refresh token is no longer valid, let's check if the request is allowed to start a new session, and if so try
-    // to renegotiate new tokens using SPNEGO. We allow this because expired underlying token is an implementation
-    // detail and Kibana user facing session is still valid.
+    // If refresh token is no longer valid, let's try to renegotiate new tokens using SPNEGO. We
+    // allow this because expired underlying token is an implementation detail and Kibana user
+    // facing session is still valid.
     if (refreshedTokenPair === null) {
       this.logger.debug('Both access and refresh tokens are expired. Re-authenticating...');
       return this.authenticateViaSPNEGO(request, state);
