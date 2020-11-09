@@ -284,6 +284,8 @@ export class IndexPatternsService {
     title: string,
     options: GetFieldsOptions
   ) => {
+    // eslint-disable-next-line no-console
+    console.log('refreshFieldSpecMap start');
     const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
       const newFields = await this.getFieldsForWildcard(options);
@@ -294,6 +296,8 @@ export class IndexPatternsService {
       console.log('fieldArrayToMap returns', JSON.stringify(result));
       return result;
     } catch (err) {
+      // eslint-disable-next-line no-console
+      console.log('refreshFieldSpecMap ERROR', JSON.stringify(err));
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
         return {};
