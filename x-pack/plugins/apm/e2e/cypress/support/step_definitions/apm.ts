@@ -29,16 +29,3 @@ Then(`should redirect to correct path with correct params`, () => {
   cy.url().should('contain', `/app/apm/services/opbeans-node/transactions`);
   cy.url().should('contain', `transactionType=request`);
 });
-
-Then(`should have correct y-axis ticks`, () => {
-  const yAxisTick =
-    '[data-cy=transaction-duration-charts] .rv-xy-plot__axis--vertical .rv-xy-plot__axis__tick__text';
-
-  // wait for all loading to finish
-  cy.get('kbnLoadingIndicator').should('not.be.visible');
-
-  // literal assertions because snapshot() doesn't retry
-  cy.get(yAxisTick).eq(2).should('have.text', '55 ms');
-  cy.get(yAxisTick).eq(1).should('have.text', '28 ms');
-  cy.get(yAxisTick).eq(0).should('have.text', '0 ms');
-});

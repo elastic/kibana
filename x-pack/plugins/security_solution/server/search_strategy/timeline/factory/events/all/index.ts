@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { cloneDeep, getOr, uniq } from 'lodash/fp';
+import { cloneDeep, uniq } from 'lodash/fp';
 
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
@@ -36,7 +36,7 @@ export const timelineEventsAll: SecuritySolutionTimelineFactory<TimelineEventsQu
     const { fieldRequested, ...queryOptions } = cloneDeep(options);
     queryOptions.fields = uniq([...fieldRequested, ...TIMELINE_EVENTS_FIELDS]);
     const { activePage, querySize } = options.pagination;
-    const totalCount = getOr(0, 'hits.total.value', response.rawResponse);
+    const totalCount = response.rawResponse.hits.total || 0;
     const hits = response.rawResponse.hits.hits;
     const edges: TimelineEdges[] = hits.map((hit) =>
       // @ts-expect-error

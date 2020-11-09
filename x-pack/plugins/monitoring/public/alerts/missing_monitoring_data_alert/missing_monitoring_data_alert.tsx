@@ -16,6 +16,9 @@ export function createMissingMonitoringDataAlertType(): AlertTypeModel {
     name: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].label,
     description: ALERT_DETAILS[ALERT_MISSING_MONITORING_DATA].description,
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/kibana-alerts.html#kibana-alerts-missing-monitoring-data`;
+    },
     alertParamsExpression: (props: any) => (
       <Expression
         {...props}

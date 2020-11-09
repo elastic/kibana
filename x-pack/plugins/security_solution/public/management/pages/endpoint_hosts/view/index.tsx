@@ -51,7 +51,7 @@ import {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
   pagePathGetters,
-} from '../../../../../../ingest_manager/public';
+} from '../../../../../../fleet/public';
 import { SecurityPageName } from '../../../../app/types';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { useFormatUrl } from '../../../../common/components/link_to';

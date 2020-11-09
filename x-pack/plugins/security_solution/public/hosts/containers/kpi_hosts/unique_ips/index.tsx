@@ -61,7 +61,6 @@ export const useHostsKpiUniqueIps = ({
           defaultIndex: indexNames,
           factoryQueryType: HostsKpiQueries.kpiUniqueIps,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -156,7 +155,6 @@ export const useHostsKpiUniqueIps = ({
         defaultIndex: indexNames,
         factoryQueryType: HostsKpiQueries.kpiUniqueIps,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,
