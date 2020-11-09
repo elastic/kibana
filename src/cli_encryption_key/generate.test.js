@@ -77,10 +77,8 @@ describe('encryption key generation', () => {
   });
 
   it('should write keys if confirm is true', async () => {
-    /* eslint-disable import/namespace */
-    prompt.confirm = jest.fn(() => Promise.resolve(true));
+    jest.spyOn(prompt, 'confirm').mockResolvedValue(true);
     fs.appendFileSync = jest.fn();
-    /* eslint-enable import/namespace */
     await generate(encryptionConfig, { interactive: true });
     expect(fs.appendFileSync).toHaveBeenCalled();
   });
