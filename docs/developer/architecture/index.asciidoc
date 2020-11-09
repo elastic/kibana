@@ -27,7 +27,7 @@ A few notable services are called out below.
 
 include::kibana-platform-plugin-api.asciidoc[leveloffset=+1]
 
-include::core/core-api.asciidoc[leveloffset=+1]
+include::core/index.asciidoc[leveloffset=+1]
 
 include::security/index.asciidoc[leveloffset=+1]
 

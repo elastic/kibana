@@ -91,7 +91,7 @@ export interface LegacyRequest {
     };
     newPlatform: {
       setup: {
-        plugins: PluginsStart;
+        plugins: PluginsSetup;
       };
     };
     plugins: {
