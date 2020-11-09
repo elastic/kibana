@@ -4,7 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import semver from 'semver';
+import semverParse from 'semver/functions/parse';
+import semverLt from 'semver/functions/lt';
+
 import { timer, from, Observable, TimeoutError, of, EMPTY } from 'rxjs';
 import { omit } from 'lodash';
 import {
@@ -132,10 +134,10 @@ export async function createAgentActionFromPolicyAction(
   policyAction: AgentPolicyAction
 ) {
   // Transform the policy action for agent version <=  7.9.x for BWC
-  const agentVersion = semver.parse((agent.local_metadata?.elastic as any)?.agent?.version);
+  const agentVersion = semverParse((agent.local_metadata?.elastic as any)?.agent?.version);
   const agentPolicyAction: AgentPolicyAction | AgentPolicyActionV7_9 =
     agentVersion &&
-    semver.lt(
+    semverLt(
       agentVersion,
       // A prerelease tag is added here so that agent versions with prerelease tags can be compared
       // correctly using `semvar`

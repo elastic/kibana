@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import mime from 'mime-types';
-import semver from 'semver';
+import semverValid from 'semver/functions/valid';
 import { Response } from 'node-fetch';
 import { URL } from 'url';
 import {
@@ -51,7 +51,7 @@ export function splitPkgKey(pkgkey: string): { pkgName: string; pkgVersion: stri
 
   // this will return the entire string if `indexOf` return -1
   const pkgVersion = pkgkey.substr(pkgkey.indexOf('-') + 1);
-  if (!semver.valid(pkgVersion)) {
+  if (!semverValid(pkgVersion)) {
     throw new Error('Package key parsing failed: package version was not a valid semver');
   }
   return { pkgName, pkgVersion };

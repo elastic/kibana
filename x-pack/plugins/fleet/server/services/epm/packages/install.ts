@@ -5,7 +5,8 @@
  */
 
 import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
-import semver from 'semver';
+import semverGt from 'semver/functions/gt';
+import semverLt from 'semver/functions/lt';
 import Boom from '@hapi/boom';
 import { UnwrapPromise } from '@kbn/utility-types';
 import { BulkInstallPackageInfo, InstallSource, defaultPackages } from '../../../../common';
@@ -179,7 +180,7 @@ export async function upgradePackage({
   latestPkg,
   pkgToUpgrade,
 }: UpgradePackageParams): Promise<BulkInstallResponse> {
-  if (!installedPkg || semver.gt(latestPkg.version, installedPkg.attributes.version)) {
+  if (!installedPkg || semverGt(latestPkg.version, installedPkg.attributes.version)) {
     const pkgkey = Registry.pkgToPkgKey({
       name: latestPkg.name,
       version: latestPkg.version,
@@ -249,7 +250,7 @@ async function installPackageFromRegistry({
   // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
   const installOutOfDateVersionOk =
     installType === 'reinstall' || installType === 'reupdate' || installType === 'rollback';
-  if (semver.lt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
+  if (semverLt(pkgVersion, latestPackage.version) && !force && !installOutOfDateVersionOk) {
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
 
