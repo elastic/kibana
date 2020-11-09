@@ -109,7 +109,7 @@ image:images/filter-field.png[Fields list that displays the top five search resu
 image:images/document-table.png[Document table with fields for manufacturer, geo.country_iso_code, and day_of_week]
 
 . To rearrange the table columns to suit your needs, hover the mouse over a
-column header for move and sort controls.
+column header, and then use the move and sort controls.
 
 [float]
 [[search-and-filter-in-discover]]
