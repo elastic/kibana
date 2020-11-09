@@ -13,17 +13,11 @@ import { EuiDescribedFormGroup, EuiTextColor } from '@elastic/eui';
 
 import { Phases } from '../../../../../../../common/types';
 
-import {
-  useFormData,
-  useFormContext,
-  UseField,
-  ToggleField,
-  NumericField,
-} from '../../../../../../shared_imports';
+import { useFormData, UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, DescribedFormField } from '../../';
+import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
 
 import { MinAgeInputField, DataTierAllocationField, SetPriorityInput } from '../shared_fields';
 
@@ -44,14 +38,12 @@ const formFieldPaths = {
 
 export const ColdPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
-  const form = useFormContext();
 
   const [formData] = useFormData({
     watch: [formFieldPaths.enabled],
   });
 
   const enabled = get(formData, formFieldPaths.enabled);
-  const isShowingErrors = form.isValid === false;
 
   return (
     <div id="coldPhaseContent" aria-live="polite" role="region">
@@ -66,8 +58,7 @@ export const ColdPhase: FunctionComponent = () => {
                   defaultMessage="Cold phase"
                 />
               </h2>{' '}
-              {enabled && !isShowingErrors ? <ActiveBadge /> : null}
-              <PhaseErrorMessage isShowingErrors={isShowingErrors} />
+              {enabled && <ActiveBadge />}
             </div>
           }
           titleSize="s"

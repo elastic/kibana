@@ -9,14 +9,9 @@ import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiDescribedFormGroup, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
-import {
-  useFormData,
-  UseField,
-  ToggleField,
-  useFormContext,
-} from '../../../../../../shared_imports';
+import { useFormData, UseField, ToggleField } from '../../../../../../shared_imports';
 
-import { ActiveBadge, LearnMoreLink, OptionalLabel, PhaseErrorMessage } from '../../index';
+import { ActiveBadge, LearnMoreLink, OptionalLabel } from '../../index';
 
 import { MinAgeInputField, SnapshotPoliciesField } from '../shared_fields';
 
@@ -25,13 +20,11 @@ const formFieldPaths = {
 };
 
 export const DeletePhase: FunctionComponent = () => {
-  const form = useFormContext();
   const [formData] = useFormData({
     watch: formFieldPaths.enabled,
   });
 
   const enabled = get(formData, formFieldPaths.enabled);
-  const isShowingErrors = form.isValid === false;
 
   return (
     <div id="deletePhaseContent" aria-live="polite" role="region">
@@ -44,8 +37,7 @@ export const DeletePhase: FunctionComponent = () => {
                 defaultMessage="Delete phase"
               />
             </h2>{' '}
-            {enabled && !isShowingErrors ? <ActiveBadge /> : null}
-            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
+            {enabled && <ActiveBadge />}
           </div>
         }
         titleSize="s"

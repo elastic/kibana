@@ -17,13 +17,7 @@ import {
   EuiDescribedFormGroup,
 } from '@elastic/eui';
 
-import {
-  useFormData,
-  UseField,
-  ToggleField,
-  useFormContext,
-  NumericField,
-} from '../../../../../../shared_imports';
+import { useFormData, UseField, ToggleField, NumericField } from '../../../../../../shared_imports';
 
 import { Phases } from '../../../../../../../common/types';
 
@@ -31,7 +25,7 @@ import { useRolloverPath, MinAgeInputField, Forcemerge, SetPriorityInput } from 
 
 import { useEditPolicyContext } from '../../../edit_policy_context';
 
-import { LearnMoreLink, ActiveBadge, PhaseErrorMessage, DescribedFormField } from '../../';
+import { LearnMoreLink, ActiveBadge, DescribedFormField } from '../../';
 
 import { DataTierAllocationField } from '../shared_fields';
 
@@ -55,7 +49,6 @@ const formFieldPaths = {
 
 export const WarmPhase: FunctionComponent = () => {
   const { policy } = useEditPolicyContext();
-  const form = useFormContext();
   const [formData] = useFormData({
     watch: [useRolloverPath, formFieldPaths.enabled, formFieldPaths.warmPhaseOnRollover],
   });
@@ -63,7 +56,6 @@ export const WarmPhase: FunctionComponent = () => {
   const enabled = get(formData, formFieldPaths.enabled);
   const hotPhaseRolloverEnabled = get(formData, useRolloverPath);
   const warmPhaseOnRollover = get(formData, formFieldPaths.warmPhaseOnRollover);
-  const isShowingErrors = form.isValid === false;
 
   return (
     <div id="warmPhaseContent" aria-live="polite" role="region" aria-relevant="additions">
@@ -77,8 +69,7 @@ export const WarmPhase: FunctionComponent = () => {
                   defaultMessage="Warm phase"
                 />
               </h2>{' '}
-              {enabled && !isShowingErrors ? <ActiveBadge /> : null}
-              <PhaseErrorMessage isShowingErrors={isShowingErrors} />
+              {enabled && <ActiveBadge />}
             </div>
           }
           titleSize="s"
