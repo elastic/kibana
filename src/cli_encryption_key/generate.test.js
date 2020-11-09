@@ -66,9 +66,7 @@ describe('encryption key generation', () => {
   });
 
   it('should prompt the user to write keys if the interactive flag is set', () => {
-    // confirm is read-only when imported standalone
-    // eslint-disable-next-line
-    prompt.confirm = jest.fn();
+    const confirmSpy = jest.spyOn(prompt, 'confirm');
 
     generate(encryptionConfig, { interactive: false });
     expect(prompt.confirm).not.toHaveBeenCalled();
