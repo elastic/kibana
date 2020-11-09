@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { PluginInitializer } from '../../../../../../src/core/server';
+import type { PluginInitializer } from '../../../../../../../src/core/server';
 import { initRoutes } from './init_routes';
 
 export const plugin: PluginInitializer<void, void> = () => ({

@@ -11,21 +11,15 @@ import { services } from './services';
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
-  const kerberosKeytabPath = resolve(
-    __dirname,
-    '../../test/kerberos_api_integration/fixtures/krb5.keytab'
-  );
-  const kerberosConfigPath = resolve(
-    __dirname,
-    '../../test/kerberos_api_integration/fixtures/krb5.conf'
-  );
+  const kerberosKeytabPath = resolve(__dirname, './fixtures/kerberos/krb5.keytab');
+  const kerberosConfigPath = resolve(__dirname, './fixtures/kerberos/krb5.conf');
 
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./tests/kerberos')],
     servers: xPackAPITestsConfig.get('servers'),
     services,
     junit: {
-      reportName: 'X-Pack Kerberos API Integration Tests',
+      reportName: 'X-Pack Security API Integration Tests (Kerberos)',
     },
 
     esTestCluster: {

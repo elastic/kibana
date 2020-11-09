@@ -7,14 +7,14 @@
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const oidcAPITestsConfig = await readConfigFile(require.resolve('./config.ts'));
+  const oidcAPITestsConfig = await readConfigFile(require.resolve('./oidc.config.ts'));
 
   return {
     ...oidcAPITestsConfig.getAll(),
-    testFiles: [require.resolve('./apis/implicit_flow')],
+    testFiles: [require.resolve('./tests/oidc/implicit_flow')],
 
     junit: {
-      reportName: 'X-Pack OpenID Connect API Integration Tests (Implicit Flow)',
+      reportName: 'X-Pack Security API Integration Tests (OIDC - Implicit Flow)',
     },
 
     esTestCluster: {

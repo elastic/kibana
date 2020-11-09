@@ -8,8 +8,8 @@ import expect from '@kbn/expect';
 import { JSDOM } from 'jsdom';
 import request, { Cookie } from 'request';
 import { format as formatURL } from 'url';
-import { createTokens, getStateAndNonce } from '../../fixtures/oidc_tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { createTokens, getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
