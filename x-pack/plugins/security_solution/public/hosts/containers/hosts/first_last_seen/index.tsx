@@ -17,10 +17,10 @@ import {
 import * as i18n from './translations';
 import { DocValueFields } from '../../../../../common/search_strategy';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 
 const ID = 'firstLastSeenHostQuery';
 

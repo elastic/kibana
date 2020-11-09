@@ -37,7 +37,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        // delete .kibana index and then wait for Kibana to re-create it
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await esArchiver.load('management');
@@ -471,16 +470,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      it('should display an explicit error message when importing a file bigger than allowed', async () => {
-        await PageObjects.savedObjects.importFile(
-          path.join(__dirname, 'exports', '_import_too_big.ndjson')
-        );
+      describe('when bigger than savedObjects.maxImportPayloadBytes (not Cloud)', function () {
+        // see --savedObjects.maxImportPayloadBytes in config file
+        this.tags(['skipCloud']);
+        it('should display an explicit error message when importing a file bigger than allowed', async () => {
+          await PageObjects.savedObjects.importFile(
+            path.join(__dirname, 'exports', '_import_too_big.ndjson')
+          );
 
-        await PageObjects.savedObjects.checkImportError();
+          await PageObjects.savedObjects.checkImportError();
 
-        const errorText = await PageObjects.savedObjects.getImportErrorText();
+          const errorText = await PageObjects.savedObjects.getImportErrorText();
 
-        expect(errorText).to.contain(`Payload content length greater than maximum allowed`);
+          expect(errorText).to.contain(`Payload content length greater than maximum allowed`);
+        });
       });
 
       it('should display an explicit error message when importing an invalid file', async () => {
