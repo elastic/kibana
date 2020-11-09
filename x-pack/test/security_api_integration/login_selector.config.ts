@@ -15,13 +15,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
   const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
 
-  const kerberosKeytabPath = resolve(__dirname, '../kerberos_api_integration/fixtures/krb5.keytab');
-  const kerberosConfigPath = resolve(__dirname, '../kerberos_api_integration/fixtures/krb5.conf');
+  const kerberosKeytabPath = resolve(__dirname, './fixtures/kerberos/krb5.keytab');
+  const kerberosConfigPath = resolve(__dirname, './fixtures/kerberos/krb5.conf');
 
-  const oidcJWKSPath = resolve(__dirname, '../oidc_api_integration/fixtures/jwks.json');
-  const oidcIdPPlugin = resolve(__dirname, '../oidc_api_integration/fixtures/oidc_provider');
+  const oidcJWKSPath = resolve(__dirname, './fixtures/oidc/jwks.json');
+  const oidcIdPPlugin = resolve(__dirname, './fixtures/oidc/oidc_provider');
 
-  const pkiKibanaCAPath = resolve(__dirname, '../pki_api_integration/fixtures/kibana_ca.crt');
+  const pkiKibanaCAPath = resolve(__dirname, './fixtures/pki/kibana_ca.crt');
 
   const saml1IdPMetadataPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
   const saml2IdPMetadataPath = resolve(__dirname, './fixtures/saml/idp_metadata_2.xml');

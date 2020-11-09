@@ -55,6 +55,7 @@ export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
 });
 
 // Reserved for future implementation
+export const ExecutorSubActionCommonFieldsParamsSchema = schema.object({});
 export const ExecutorSubActionHandshakeParamsSchema = schema.object({});
 export const ExecutorSubActionGetCapabilitiesParamsSchema = schema.object({});
 export const ExecutorSubActionGetIssueTypesParamsSchema = schema.object({});
@@ -65,6 +66,10 @@ export const ExecutorSubActionGetIssuesParamsSchema = schema.object({ title: sch
 export const ExecutorSubActionGetIssueParamsSchema = schema.object({ id: schema.string() });
 
 export const ExecutorParamsSchema = schema.oneOf([
+  schema.object({
+    subAction: schema.literal('getFields'),
+    subActionParams: ExecutorSubActionCommonFieldsParamsSchema,
+  }),
   schema.object({
     subAction: schema.literal('getIncident'),
     subActionParams: ExecutorSubActionGetIncidentParamsSchema,

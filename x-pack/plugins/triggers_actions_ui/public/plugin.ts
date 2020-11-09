@@ -115,7 +115,6 @@ export class Plugin
 
         const { boot } = await import('./application/boot');
         const kibanaFeatures = await pluginsStart.features.getFeatures();
-
         return boot({
           dataPlugin: pluginsStart.data,
           charts: pluginsStart.charts,
