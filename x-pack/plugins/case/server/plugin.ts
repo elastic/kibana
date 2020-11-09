@@ -139,7 +139,7 @@ export class CasePlugin {
     caseService: CaseServiceSetup;
     caseConfigureService: CaseConfigureServiceSetup;
     userActionService: CaseUserActionServiceSetup;
-  }): IContextProvider<RequestHandler<unknown, unknown, unknown>, typeof APP_ID> => {
+  }): IContextProvider<RequestHandler<unknown, unknown, unknown>, 'case'> => {
     return async (context, request) => {
       const [{ savedObjects }] = await core.getStartServices();
       return {
