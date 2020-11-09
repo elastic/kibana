@@ -170,40 +170,40 @@ export const getTestCases = (
       typeUseInQueryField: 'dashboard',
     },
     aggsWithNamespaceAgnosticType: {
-      title: 'aggs with namespace-agnostic type',
+      title: buildTitle('aggs with namespace-agnostic type'),
       query: `type=globaltype&aggs=${encodeURIComponent(
         JSON.stringify({
           type_count: { max: { field: 'globaltype.attributes.version' } },
         })
-      )}`,
+      )}${namespacesQueryParam}`,
       successResult: { savedObjects: SAVED_OBJECT_TEST_CASES.NAMESPACE_AGNOSTIC },
       typeUseInQueryField: 'globaltype',
     },
     aggsWithHiddenType: {
-      title: 'aggs with hidden type',
+      title: buildTitle('aggs with hidden type'),
       query: `type=hiddentype&fields=name&aggs=${encodeURIComponent(
         JSON.stringify({
           type_count: { max: { field: 'hiddentype.attributes.title' } },
         })
-      )}`,
+      )}${namespacesQueryParam}`,
       typeUseInQueryField: 'hiddentype',
     },
     aggsWithUnknownType: {
-      title: 'aggs with unknown type',
+      title: buildTitle('aggs with unknown type'),
       query: `type=wigwags&aggs=${encodeURIComponent(
         JSON.stringify({
           type_count: { max: { field: 'wigwags.attributes.version' } },
         })
-      )}`,
+      )}${namespacesQueryParam}`,
       typeUseInQueryField: 'wigwags',
     },
     aggsWithDisallowedType: {
-      title: 'aggs with disallowed type',
+      title: buildTitle('aggs with disallowed type'),
       query: `type=globaltype&aggs=${encodeURIComponent(
         JSON.stringify({
           type_count: { max: { field: 'dashboard.attributes.version' } },
         })
-      )}`,
+      )}${namespacesQueryParam}`,
       failure: {
         statusCode: 400,
         reason: 'bad_request',
@@ -222,7 +222,6 @@ const getTestTitle = ({ failure, title }: FindTestCase) =>
   `${failure?.reason || 'success'} ["${title}"]`;
 
 export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbiddenTypes('find');
   const expectResponseBody = (
     testCase: FindTestCase,
     user?: TestUser
@@ -242,12 +241,9 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       } else {
         throw new Error(`Unexpected failure reason: ${failure.reason}`);
       }
-    } else if (failure?.statusCode === 403) {
-      const type = parsedQuery.type;
-      await expectForbidden(type)(response);
     } else if (failure?.statusCode === 400) {
       if (failure.reason === 'bad_request') {
-        const type = (parsedQuery.filter as string).split('.')[0];
+        const type = testCase.typeUseInQueryField ?? 'unknown type';
         expect(response.body.error).to.eql('Bad Request');
         expect(response.body.statusCode).to.eql(failure.statusCode);
         expect(response.body.message).to.eql(`This type ${type} is not allowed: Bad Request`);

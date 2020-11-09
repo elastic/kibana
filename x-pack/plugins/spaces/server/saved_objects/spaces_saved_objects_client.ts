@@ -180,12 +180,12 @@ export class SpacesSavedObjectsClient implements SavedObjectsClientContract {
         }
         if (namespaces.length === 0) {
           // return empty response, since the user is unauthorized in this space (or these spaces), but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
         }
       } catch (err) {
         if (Boom.isBoom(err) && err.output.payload.statusCode === 403) {
           // return empty response, since the user is unauthorized in any space, but we don't return forbidden errors for `find` operations
-          return SavedObjectsUtils.createEmptyFindResponse<T>(options);
+          return SavedObjectsUtils.createEmptyFindResponse<T, A>(options);
         }
         throw err;
       }
