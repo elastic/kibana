@@ -19,7 +19,7 @@ import {
   EuiContextMenuPanelProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { pagePathGetters } from '../../../../../../../ingest_manager/public';
+import { pagePathGetters } from '../../../../../../../fleet/public';
 import { getPolicyDetailPath, getTrustedAppsListPath } from '../../../../common/routing';
 import { MANAGEMENT_APP_ID } from '../../../../common/constants';
 import {
