@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useRef, FunctionComponent, MouseEventHandler, RefObject } from 'react';
+import React, { useEffect, FunctionComponent, MouseEventHandler, RefObject } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
