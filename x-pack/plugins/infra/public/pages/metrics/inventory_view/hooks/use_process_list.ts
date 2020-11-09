@@ -12,7 +12,7 @@ import { throwErrors, createPlainError } from '../../../../../common/runtime_typ
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 
 export function useProcessList(
-  hostTerm: string,
+  hostTerm: Record<string, string>,
   indexPattern: string,
   timefield: string,
   to: number
@@ -25,7 +25,7 @@ export function useProcessList(
   };
 
   const timerange = {
-    timefield,
+    field: timefield,
     interval: 'modules',
     to,
     from: to - 15 * 60 * 1000, // 15 minutes
