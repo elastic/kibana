@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
 
     const initBarChart = async () => {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should not filter out first label after rotation of the chart', async function () {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('bar charts range on x axis', () => {
       it('should individual bars for each configured range', async function () {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();

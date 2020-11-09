@@ -4,13 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getThreatList } from './get_threat_list';
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 
 import { getFilter } from '../get_filter';
 import { searchAfterAndBulkCreate } from '../search_after_bulk_create';
-import { CreateThreatSignalOptions, ThreatSignalResults } from './types';
-import { combineResults } from './utils';
+import { CreateThreatSignalOptions } from './types';
+import { SearchAfterAndBulkCreateReturnType } from '../types';
 
 export const createThreatSignal = async ({
   threatMapping,
@@ -41,28 +40,11 @@ export const createThreatSignal = async ({
   refresh,
   tags,
   throttle,
-  threatFilters,
-  threatQuery,
-  threatLanguage,
   buildRuleMessage,
-  threatIndex,
   name,
   currentThreatList,
   currentResult,
-}: CreateThreatSignalOptions): Promise<ThreatSignalResults> => {
-  const threatList = await getThreatList({
-    callCluster: services.callCluster,
-    exceptionItems,
-    query: threatQuery,
-    language: threatLanguage,
-    threatFilters,
-    index: threatIndex,
-    searchAfter: currentThreatList.hits.hits[currentThreatList.hits.hits.length - 1].sort,
-    sortField: undefined,
-    sortOrder: undefined,
-    listClient,
-  });
-
+}: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
     threatList: currentThreatList,
@@ -71,7 +53,12 @@ export const createThreatSignal = async ({
   if (threatFilter.query.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
     // a hit so opt to return the existing result.
-    return { threatList, results: currentResult };
+    logger.debug(
+      buildRuleMessage(
+        'Indicator items are empty after filtering for missing data, returning without attempting a match'
+      )
+    );
+    return currentResult;
   } else {
     const esFilter = await getFilter({
       type,
@@ -83,7 +70,13 @@ export const createThreatSignal = async ({
       index: inputIndex,
       lists: exceptionItems,
     });
-    const newResult = await searchAfterAndBulkCreate({
+
+    logger.debug(
+      buildRuleMessage(
+        `${threatFilter.query.bool.should.length} indicator items are being checked for existence of matches`
+      )
+    );
+    const result = await searchAfterAndBulkCreate({
       gap,
       previousStartedAt,
       listClient,
@@ -110,7 +103,15 @@ export const createThreatSignal = async ({
       throttle,
       buildRuleMessage,
     });
-    const results = combineResults(currentResult, newResult);
-    return { threatList, results };
+    logger.debug(
+      buildRuleMessage(
+        `${
+          threatFilter.query.bool.should.length
+        } items have completed match checks and the total times to search were ${
+          result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
+        }ms`
+      )
+    );
+    return result;
   }
 };
