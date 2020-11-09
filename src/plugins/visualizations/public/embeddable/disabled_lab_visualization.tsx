@@ -27,12 +27,15 @@ export function DisabledLabVisualization({ title }: { title: string }) {
   return (
     <I18nProvider>
       <EuiEmptyPrompt
+        titleSize="xs"
         title={
-          <FormattedMessage
-            id="visualizations.disabledLabVisualizationTitle"
-            defaultMessage="{title} is a lab visualization."
-            values={{ title }}
-          />
+          <h6>
+            <FormattedMessage
+              id="visualizations.disabledLabVisualizationTitle"
+              defaultMessage="{title} is a lab visualization."
+              values={{ title }}
+            />
+          </h6>
         }
         iconType="beaker"
         body={
