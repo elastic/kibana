@@ -50,3 +50,11 @@ export interface ISessionService {
    */
   isStored: () => boolean;
 }
+
+export interface SearchSessionFindOptions {
+  page?: number;
+  perPage?: number;
+  sortField?: string;
+  sortOrder?: string;
+  filter?: string;
+}

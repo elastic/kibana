@@ -24,6 +24,7 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
   EuiButton,
+  EuiButtonEmpty,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -97,6 +98,7 @@ export const SearchExamplesApp = ({
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
   const [numericFields, setNumericFields] = useState<IndexPatternField[]>();
   const [selectedField, setSelectedField] = useState<IndexPatternField | null | undefined>();
+  const [searchSessionId, setSearchSessionId] = useState<string | undefined>();
 
   // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
   useEffect(() => {
@@ -116,6 +118,10 @@ export const SearchExamplesApp = ({
     setNumericFields(fields);
     setSelectedField(fields?.length ? fields[0] : null);
   }, [indexPattern]);
+
+  useEffect(() => {
+    setSearchSessionId(data.search.session.start());
+  }, [data]);
 
   const doAsyncSearch = async (strategy?: string) => {
     if (!indexPattern || !selectedField) return;
@@ -143,6 +149,8 @@ export const SearchExamplesApp = ({
     const searchSubscription$ = data.search
       .search(request, {
         strategy,
+        sessionId: searchSessionId,
+        isStored: data.search.session.isStored(),
       })
       .subscribe({
         next: (response) => {
@@ -268,6 +276,31 @@ export const SearchExamplesApp = ({
                       values={{ time: timeTook || 'Unknown' }}
                     />
                   </EuiText>
+                  <EuiText>
+                    <FormattedMessage
+                      id="inspector.requests.searchSessionId"
+                      defaultMessage="Search session id: {searchSessionId}"
+                      values={{ searchSessionId }}
+                    />
+                    <br />
+                    <EuiButtonEmpty
+                      size="s"
+                      onClick={() => setSearchSessionId(data.search.session.start())}
+                    >
+                      Generate new search session ID
+                    </EuiButtonEmpty>
+                    <EuiButton
+                      onClick={() =>
+                        data.search.session.save(
+                          `Search example ${searchSessionId}`,
+                          `/app/searchExamples?sessionId=${searchSessionId}`
+                        )
+                      }
+                    >
+                      Save session
+                    </EuiButton>
+                  </EuiText>
+                  <EuiSpacer />
                   <EuiSpacer />
                   <EuiTitle size="s">
                     <h3>

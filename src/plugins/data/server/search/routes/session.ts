@@ -85,4 +85,74 @@ export function registerSessionRoutes(router: IRouter): void {
       }
     }
   );
+
+  router.post(
+    {
+      path: '/internal/session/_find',
+      validate: {
+        body: schema.object({
+          page: schema.maybe(schema.number()),
+          perPage: schema.maybe(schema.number()),
+          sortField: schema.maybe(schema.string()),
+          sortOrder: schema.maybe(schema.string()),
+          filter: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, request, res) => {
+      const { page, perPage, sortField, sortOrder, filter } = request.body;
+      try {
+        const response = await context.search!.session.find({
+          page,
+          perPage,
+          sortField,
+          sortOrder,
+          filter,
+        });
+
+        return res.ok({
+          body: response,
+        });
+      } catch (err) {
+        return res.customError({
+          statusCode: err.statusCode || 500,
+          body: {
+            message: err.message,
+            attributes: {
+              error: err.body?.error || err.message,
+            },
+          },
+        });
+      }
+    }
+  );
+
+  router.delete(
+    {
+      path: '/internal/session/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, res) => {
+      const { id } = request.params;
+      try {
+        await context.search!.session.delete(id);
+
+        return res.ok();
+      } catch (err) {
+        return res.customError({
+          statusCode: err.statusCode || 500,
+          body: {
+            message: err.message,
+            attributes: {
+              error: err.body?.error || err.message,
+            },
+          },
+        });
+      }
+    }
+  );
 }

@@ -21,7 +21,7 @@ import uuid from 'uuid';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { HttpStart, PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
 import { ConfigSchema } from '../../config';
-import { ISessionService } from '../../common';
+import { ISessionService, SearchSessionFindOptions } from '../../common';
 
 export class SessionService implements ISessionService {
   private session$ = new BehaviorSubject<string | undefined>(undefined);
@@ -93,13 +93,29 @@ export class SessionService implements ISessionService {
     this.session$.next(undefined);
   }
 
-  public async save() {
+  public async save(name, url, sessionId = this.sessionId) {
     const response = await this.http!.post(`/internal/session`, {
       body: JSON.stringify({
-        sessionId: this.sessionId,
+        name,
+        url,
+        sessionId,
       }),
     });
     this._isStored = true;
     return response;
+  }
+
+  public delete(sessionId: string) {
+    return this.http!.delete(`/internal/session/${encodeURIComponent(sessionId)}}`);
+  }
+
+  public get(sessionId: string) {
+    return this.http!.get(`/internal/session/${encodeURIComponent(sessionId)}}`);
+  }
+
+  public find(options: SearchSessionFindOptions) {
+    return this.http!.post(`/internal/session`, {
+      body: JSON.stringify(options),
+    });
   }
 }
