@@ -10,7 +10,7 @@ import { skipIfNoDockerRegistry } from '../../helpers';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_TIME_COMPLETE_INSTALL,
-} from '../../../../plugins/ingest_manager/common';
+} from '../../../../plugins/fleet/common';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
