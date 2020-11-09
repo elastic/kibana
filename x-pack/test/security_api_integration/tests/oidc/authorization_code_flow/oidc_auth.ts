@@ -8,8 +8,8 @@ import expect from '@kbn/expect';
 import request, { Cookie } from 'request';
 import url from 'url';
 import { delay } from 'bluebird';
-import { getStateAndNonce } from '../../fixtures/oidc_tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
