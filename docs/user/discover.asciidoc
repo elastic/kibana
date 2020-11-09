@@ -165,7 +165,7 @@ To apply filters and toggle a field into the table, hover over a field name for 
 
 . To view documents that occurred before or after the event, click **View surrounding documents**.
 
-. To view document data as a separate page, click View single document.
+. To view document data as a separate page, click **View single document**.
 +
 You can bookmark and share the link for direct access to a particular document.
 
