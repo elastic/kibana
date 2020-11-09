@@ -5,11 +5,11 @@
  */
 
 import { IScopedClusterClient, CoreStart } from 'kibana/server';
-import { getInternalSavedObjectsClient } from '../util';
-import { repairFactory } from '../repair';
-import { jobSavedObjectServiceFactory } from '../service';
-import { mlLog } from '../../lib/log';
-import { ML_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
+import { getInternalSavedObjectsClient } from './util';
+import { repairFactory } from './repair';
+import { jobSavedObjectServiceFactory } from './service';
+import { mlLog } from '../lib/log';
+import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
 
 /**
  * Creates initializeJobs function which is used to check whether
