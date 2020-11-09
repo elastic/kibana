@@ -5,52 +5,63 @@
 Custom dashboard actions, also known as drilldowns, allow you to create
 workflows for analyzing and troubleshooting your data. Drilldowns apply only to the panel that you created the drilldown from, and are not shared across all of the panels. Each panel can have multiple drilldowns. 
 
-{kib} supports two types of drilldowns.
+Third-party developers can create drilldowns. To learn how to code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
+
+[float]
 [[supported-drilldowns]]
+=== Supported drilldowns
 
-[cols="50, 50"]
-|===
+{kib} supports two types of drilldowns.
 
-a| *Dashboard drilldown*
+[NOTE]
+==============================================
+Some drilldowns are paid subscription features, while others are free.
+For a comparison of the Elastic subscription levels,
+refer https://www.elastic.co/subscriptions[the subscription page].
+==============================================
 
-| Open a dashboard from another dashboard,
+[float]
+[[dashboard-drilldown]]
+==== Dashboard drilldowns
+
+Dashboard drilldowns enable you to open a dashboard from another dashboard,
 taking the time range, filters, and other parameters with you,
-so the context remains the same, then continue your analysis from a new perspective.
+so the context remains the same. Dashboard drilldowns help you to continue your analysis from a new perspective.
+
 For example, if you have a dashboard that shows the overall status of multiple data center, 
 you can create a drilldown that navigates from the overall status dashboard to a dashboard
 that shows a single data center or server.
 
-a| *URL drilldown*
+[float]
+[[url-drilldown]]
+==== URL drilldowns
 
-| beta[] URL drilldowns allow you to navigate from a dashboard to internal or external URLs.
+beta[] URL drilldowns enable you to navigate from a dashboard to internal or external URLs.
 Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel.
 For example, if you have a dashboard that shows data from a Github repository, you can create a URL drilldown
 that opens Github from the dashboard.
 
 Some panels support multiple interactions, also known as triggers. 
-The <<variables,variables>> you use to create a URL template depends on the trigger you choose. URL drilldowns support *Single click* and *Range selection* triggers. 
-You configure *Single click* triggers to a single data point in the visualization, and configure *Range selection* triggers to a range of values in a visualization.
-For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`. Panel support multiple URL drilldowns, which you can attach to triggers.
+The <<variables,variables>> you use to create a <<url_templating, URL template>> depends on the trigger you choose. URL drilldowns support these types of triggers:
 
-For information about the URL templating language, refer to <<url_templating-language, URL templating language>>.
+* *Single click* &mdash; A single data point in the visualization.
 
-|===
+* *Range selection* &mdash; A range of values in a visualization.
 
-[NOTE]
-==============================================
-Some drilldowns are paid commercial features, while others are free.
-For a comparison of the Elastic subscription levels,
-refer https://www.elastic.co/subscriptions[the subscription page].
-==============================================
+For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`. 
 
-Third-party developers can create drilldowns.
-To learn about code drilldowns, refer to {kib-repo}blob/{branch}/x-pack/examples/ui_actions_enhanced_examples[this example plugin].
+To disable URL drilldowns on your {kib} instance, disable the plugin:
+
+["source","yml"]
+-----------
+url_drilldown.enabled: false
+-----------
 
 [float]
 [[dashboard-drilldown-supported-panels]]
 === Supported panels
 
-The following panels support drilldowns.
+The following panels support dashboard and URL drilldowns.
 
 [options="header"]
 |===

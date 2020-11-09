@@ -1,5 +1,5 @@
-[[url_templating-language]]
-=== URL templating language
+[[url_templating]]
+=== URL templating
 
 beta[]
 
@@ -252,14 +252,3 @@ Tip: Consider using <<helpers, date>> helper for date formatting.
 | Aggregation field behind the selected range, if available.
 
 |===
-
-[float]
-[[disable]]
-==== Disable URL drilldown
-
-You can disable URL drilldown feature on your {kib} instance by disabling the plugin:
-
-["source","yml"]
------------
-url_drilldown.enabled: false
------------
