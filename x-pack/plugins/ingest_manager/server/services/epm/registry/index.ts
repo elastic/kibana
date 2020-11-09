@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
+import mime from 'mime-types';
 import semver from 'semver';
 import { Response } from 'node-fetch';
 import { URL } from 'url';
@@ -18,15 +18,15 @@ import {
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
+import { unpackArchiveToCache } from '../archive';
 import {
   cacheGet,
-  cacheSet,
   cacheDelete,
   getArchiveFilelist,
   setArchiveFilelist,
   deleteArchiveFilelist,
 } from './cache';
-import { ArchiveEntry, getBufferExtractor } from './extract';
+import { ArchiveEntry } from './extract';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
@@ -137,22 +137,12 @@ export async function unpackRegistryPackageToCache(
   pkgVersion: string,
   filter = (entry: ArchiveEntry): boolean => true
 ): Promise<string[]> {
-  const paths: string[] = [];
   const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
-  const bufferExtractor = getBufferExtractor({ archivePath });
-  if (!bufferExtractor) {
-    throw new Error('Unknown compression format. Please use .zip or .gz');
+  const contentType = mime.lookup(archivePath);
+  if (!contentType) {
+    throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
   }
-  await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
-    const { path, buffer } = entry;
-    const { file } = pathParts(path);
-    if (!file) return;
-    if (buffer) {
-      cacheSet(path, buffer);
-      paths.push(path);
-    }
-  });
-
+  const paths: string[] = await unpackArchiveToCache(archiveBuffer, contentType);
   return paths;
 }
 
