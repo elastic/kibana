@@ -146,6 +146,9 @@ function FilterBarUI(props: Props) {
   }
 
   function onUpdate(i: number, filter: Filter) {
+    if (props.trackUiMetric) {
+      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_edited`);
+    }
     const filters = [...props.filters];
     filters[i] = filter;
     onFiltersUpdated(filters);
@@ -172,11 +175,17 @@ function FilterBarUI(props: Props) {
   }
 
   function onToggleAllNegated() {
+    if (props.trackUiMetric) {
+      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_invertInclusion`);
+    }
     const filters = props.filters.map(toggleFilterNegated);
     onFiltersUpdated(filters);
   }
 
   function onToggleAllDisabled() {
+    if (props.trackUiMetric) {
+      props.trackUiMetric(METRIC_TYPE.CLICK, `${props.appName}:filter_toggleAllDisabled`);
+    }
     const filters = props.filters.map(toggleFilterDisabled);
     onFiltersUpdated(filters);
   }
