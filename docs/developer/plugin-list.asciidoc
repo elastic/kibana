@@ -28,9 +28,7 @@ allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
 
-|{kib-repo}blob/{branch}/src/plugins/apm_oss[apmOss]
-|WARNING: Missing README.
-
+|{kib-repo}blob/{branch}/src/plugins/apm_oss/README.asciidoc[apmOss]
 
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
@@ -132,6 +130,11 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |The legacyExport plugin adds support for the legacy saved objects export format.
 
 
+|{kib-repo}blob/{branch}/src/plugins/lens_oss/README.md[lensOss]
+|The lens_oss plugin registers the lens visualization on OSS.
+It is registered as disabled. The x-pack plugin should unregister this.
+
+
 |{kib-repo}blob/{branch}/src/plugins/management/README.md[management]
 |This plugins contains the "Stack Management" page framework. It offers navigation and an API
 to link individual managment section into it. This plugin does not contain any individual
@@ -140,6 +143,11 @@ management section itself.
 
 |{kib-repo}blob/{branch}/src/plugins/maps_legacy/README.md[mapsLegacy]
 |Internal objects used by the Coordinate, Region, and Vega visualizations.
+
+
+|{kib-repo}blob/{branch}/src/plugins/maps_oss/README.md[mapsOss]
+|The maps_oss plugin registers the maps visualization on OSS.
+It is registered as disabled. The x-pack plugin should unregister this.
 
 
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
@@ -405,7 +413,7 @@ Index Management by running this series of requests in Console:
 the infrastructure monitoring use-case within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ingest_manager/README.md[ingestManager]
+|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[ingestManager]
 |Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
 
