@@ -117,7 +117,7 @@ column header, and then use the move and sort controls.
 
 One of the unique capabilities of **Discover** is the ability to combine free text search with filtering based on structured data.
 
-. Enter your search terms in the **Search** field.
+. Enter your terms in the **Search** field.
 +
 To search all fields, enter a simple string. To search particular fields and
 build more complex queries, use the <<kuery-query,Kibana Query language>>.
