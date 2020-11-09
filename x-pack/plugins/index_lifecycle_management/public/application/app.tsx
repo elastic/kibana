@@ -40,16 +40,16 @@ export const App = ({
 
   return (
     <Switch>
-        <Redirect exact from="/" to={ROUTES.list} />
-        <Route
-          exact
-          path={ROUTES.list}
-          render={(props) => <PolicyTable {...props} navigateToApp={navigateToApp} />}
-        />
-        <Route
-          path={ROUTES.edit}
-          render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
-        />
-      </Switch>
+      <Redirect exact from="/" to={ROUTES.list} />
+      <Route
+        exact
+        path={ROUTES.list}
+        render={(props) => <PolicyTable {...props} navigateToApp={navigateToApp} />}
+      />
+      <Route
+        path={ROUTES.edit}
+        render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
+      />
+    </Switch>
   );
 };

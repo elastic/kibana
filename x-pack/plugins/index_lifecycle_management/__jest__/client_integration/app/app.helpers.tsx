@@ -4,10 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { registerTestBed, TestBed, TestBedConfig } from '../../../../../test_utils';
 import { App } from '../../../public/application/app';
 import { TestSubjects } from '../helpers';
+import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
+import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public/context';
+
+const breadcrumbService = createBreadcrumbsMock();
+
+const AppWithContext = (props: any) => {
+  return (
+    <KibanaContextProvider services={{ breadcrumbService }}>
+      <App {...props} />
+    </KibanaContextProvider>
+  );
+};
 
 const getTestBedConfig = (initialEntries: string[]): TestBedConfig => ({
   memoryRouter: {
@@ -20,7 +33,7 @@ const getTestBedConfig = (initialEntries: string[]): TestBedConfig => ({
 });
 
 const initTestBed = (initialEntries: string[]) =>
-  registerTestBed(App, getTestBedConfig(initialEntries))();
+  registerTestBed(AppWithContext, getTestBedConfig(initialEntries))();
 
 export interface AppTestBed extends TestBed<TestSubjects> {
   actions: {

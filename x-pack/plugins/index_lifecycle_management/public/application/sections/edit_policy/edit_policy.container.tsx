@@ -90,7 +90,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
     );
   }
 
-  const existingPolicy = getPolicyByName(policies, policyName);
+  const existingPolicy = getPolicyByName(policies, attemptToURIDecode(policyName));
 
   return (
     <EditPolicyContextProvider

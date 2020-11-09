@@ -231,7 +231,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       */}
       {dataStreamName && (
         <DataStreamDetailPanel
-          dataStreamName={attemptToURIDecode(dataStreamName)}
+          dataStreamName={attemptToURIDecode(dataStreamName)!}
           onClose={(shouldReload?: boolean) => {
             history.push(`/${Section.DataStreams}`);
 

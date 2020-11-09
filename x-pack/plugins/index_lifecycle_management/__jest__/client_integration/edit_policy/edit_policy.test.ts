@@ -34,7 +34,7 @@ describe('<EditPolicy />', () => {
   describe('hot phase', () => {
     describe('serialization', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('test')]);
+        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
         httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
         await act(async () => {

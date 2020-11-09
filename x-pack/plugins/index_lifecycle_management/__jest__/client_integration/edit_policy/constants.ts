@@ -128,9 +128,12 @@ export const getDefaultHotPhasePolicy = (policyName: string): PolicyFromES => ({
     name: policyName,
     phases: {
       hot: {
-        min_age: '123ms',
+        min_age: '0ms',
         actions: {
-          rollover: {},
+          rollover: {
+            max_age: '30d',
+            max_size: '50gb',
+          },
         },
       },
     },
