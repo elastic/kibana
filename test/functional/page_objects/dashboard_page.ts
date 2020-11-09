@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { DashboardConstants } from '../../../src/plugins/dashboard/public/dashboard_constants';
-
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
 export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';

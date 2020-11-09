@@ -28,7 +28,7 @@ export function showCloneModal(
     newTitle: string,
     isTitleDuplicateConfirmed: boolean,
     onTitleDuplicate: () => void
-  ) => Promise<void>,
+  ) => Promise<{ id?: string } | { error: Error }>,
   title: string
 ) {
   const container = document.createElement('div');

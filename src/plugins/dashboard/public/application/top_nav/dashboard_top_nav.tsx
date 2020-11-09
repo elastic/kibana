@@ -149,116 +149,117 @@ export function DashboardTopNav({
    * @return {Promise}
    * @resolved {String} - The id of the doc
    */
-  const runSave = useCallback(
-    async (saveOptions?: SavedObjectSaveOpts) => {
-      const currentTitle = dashboardStateManager.getTitle();
-      const currentDescription = dashboardStateManager.getDescription();
-      const currentTimeRestore = dashboardStateManager.getTimeRestore();
-
-      let currentTags: string[] = [];
-      if (savedObjectsTagging) {
-        const dashboard = dashboardStateManager.savedDashboard;
-        if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
-          currentTags = dashboard.getTags();
-        }
-      }
-
-      const onSave = ({
-        newTitle,
-        newDescription,
-        newCopyOnSave,
-        newTimeRestore,
-        onTitleDuplicate,
-        isTitleDuplicateConfirmed,
-        newTags,
-      }: DashboardSaveOptions): Promise<SaveResult> => {
-        dashboardStateManager.setTitle(newTitle);
-        dashboardStateManager.setDescription(newDescription);
-        dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
-        dashboardStateManager.setTimeRestore(newTimeRestore);
-        if (savedObjectsTagging && newTags) {
-          dashboardStateManager.setTags(newTags);
-        }
-
-        const defaultSaveOptions = {
-          confirmOverwrite: false,
-          isTitleDuplicateConfirmed,
-          onTitleDuplicate,
-        };
-
-        return saveDashboard(
-          angular.toJson,
-          timefilter,
-          dashboardStateManager,
-          saveOptions ?? defaultSaveOptions
-        )
-          .then(function (id) {
-            if (id) {
-              core.notifications.toasts.addSuccess({
-                title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
-                  defaultMessage: `Dashboard '{dashTitle}' was saved`,
-                  values: { dashTitle: dashboardStateManager.savedDashboard.title },
-                }),
-                'data-test-subj': 'saveDashboardSuccess',
-              });
-
-              if (id !== lastDashboardId) {
-                redirectToDashboard({ id });
-              } else {
-                chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
-                updateViewMode(ViewMode.VIEW);
-              }
-            }
-            return { id };
-          })
-          .catch((error) => {
-            core.notifications?.toasts.addDanger({
-              title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
-                defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
-                values: {
-                  dashTitle: dashboardStateManager.savedDashboard.title,
-                  errorMessage: error.message,
-                },
+  const save = useCallback(
+    async (saveOptions: SavedObjectSaveOpts) => {
+      return saveDashboard(angular.toJson, timefilter, dashboardStateManager, saveOptions)
+        .then(function (id) {
+          if (id) {
+            core.notifications.toasts.addSuccess({
+              title: i18n.translate('dashboard.dashboardWasSavedSuccessMessage', {
+                defaultMessage: `Dashboard '{dashTitle}' was saved`,
+                values: { dashTitle: dashboardStateManager.savedDashboard.title },
               }),
-              'data-test-subj': 'saveDashboardFailure',
+              'data-test-subj': 'saveDashboardSuccess',
             });
 
-            dashboardStateManager.setTitle(currentTitle);
-            dashboardStateManager.setDescription(currentDescription);
-            dashboardStateManager.setTimeRestore(currentTimeRestore);
-            if (savedObjectsTagging) {
-              dashboardStateManager.setTags(currentTags);
+            if (id !== lastDashboardId) {
+              redirectToDashboard({ id });
+            } else {
+              chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
+              updateViewMode(ViewMode.VIEW);
             }
-            return { error };
+          }
+          return { id };
+        })
+        .catch((error) => {
+          core.notifications?.toasts.addDanger({
+            title: i18n.translate('dashboard.dashboardWasNotSavedDangerMessage', {
+              defaultMessage: `Dashboard '{dashTitle}' was not saved. Error: {errorMessage}`,
+              values: {
+                dashTitle: dashboardStateManager.savedDashboard.title,
+                errorMessage: error.message,
+              },
+            }),
+            'data-test-subj': 'saveDashboardFailure',
           });
-      };
-
-      const dashboardSaveModal = (
-        <DashboardSaveModal
-          onSave={onSave}
-          onClose={() => {}}
-          title={currentTitle}
-          description={currentDescription}
-          tags={currentTags}
-          savedObjectsTagging={savedObjectsTagging}
-          timeRestore={currentTimeRestore}
-          showCopyOnSave={lastDashboardId ? true : false}
-        />
-      );
-      showSaveModal(dashboardSaveModal, core.i18n.Context);
+          return { error };
+        });
     },
     [
-      chrome.docTitle,
-      core.i18n.Context,
-      redirectToDashboard,
-      savedObjectsTagging,
-      timefilter,
-      updateViewMode,
       core.notifications.toasts,
       dashboardStateManager,
+      redirectToDashboard,
       lastDashboardId,
+      chrome.docTitle,
+      updateViewMode,
+      timefilter,
     ]
   );
+
+  const runSave = useCallback(async () => {
+    const currentTitle = dashboardStateManager.getTitle();
+    const currentDescription = dashboardStateManager.getDescription();
+    const currentTimeRestore = dashboardStateManager.getTimeRestore();
+
+    let currentTags: string[] = [];
+    if (savedObjectsTagging) {
+      const dashboard = dashboardStateManager.savedDashboard;
+      if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
+        currentTags = dashboard.getTags();
+      }
+    }
+
+    const onSave = ({
+      newTitle,
+      newDescription,
+      newCopyOnSave,
+      newTimeRestore,
+      onTitleDuplicate,
+      isTitleDuplicateConfirmed,
+      newTags,
+    }: DashboardSaveOptions): Promise<SaveResult> => {
+      dashboardStateManager.setTitle(newTitle);
+      dashboardStateManager.setDescription(newDescription);
+      dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
+      dashboardStateManager.setTimeRestore(newTimeRestore);
+      if (savedObjectsTagging && newTags) {
+        dashboardStateManager.setTags(newTags);
+      }
+
+      const saveOptions = {
+        confirmOverwrite: false,
+        isTitleDuplicateConfirmed,
+        onTitleDuplicate,
+      };
+
+      return save(saveOptions).then((response: SaveResult) => {
+        // If the save wasn't successful, put the original values back.
+        if (!(response as { id: string }).id) {
+          dashboardStateManager.setTitle(currentTitle);
+          dashboardStateManager.setDescription(currentDescription);
+          dashboardStateManager.setTimeRestore(currentTimeRestore);
+          if (savedObjectsTagging) {
+            dashboardStateManager.setTags(currentTags);
+          }
+        }
+        return response;
+      });
+    };
+
+    const dashboardSaveModal = (
+      <DashboardSaveModal
+        onSave={onSave}
+        onClose={() => {}}
+        title={currentTitle}
+        description={currentDescription}
+        tags={currentTags}
+        savedObjectsTagging={savedObjectsTagging}
+        timeRestore={currentTimeRestore}
+        showCopyOnSave={lastDashboardId ? true : false}
+      />
+    );
+    showSaveModal(dashboardSaveModal, core.i18n.Context);
+  }, [save, core.i18n.Context, savedObjectsTagging, dashboardStateManager, lastDashboardId]);
 
   const runClone = useCallback(() => {
     const currentTitle = dashboardStateManager.getTitle();
@@ -274,11 +275,17 @@ export function DashboardTopNav({
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
       };
-      runSave(saveOptions);
+      return save(saveOptions).then((response: { id?: string } | { error: Error }) => {
+        // If the save wasn't successful, put the original title back.
+        if ((response as { error: Error }).error) {
+          dashboardStateManager.setTitle(currentTitle);
+        }
+        return response;
+      });
     };
 
     showCloneModal(onClone, currentTitle);
-  }, [dashboardStateManager, runSave]);
+  }, [dashboardStateManager, save]);
 
   const dashboardTopNavActions = useMemo(() => {
     const actions = {
