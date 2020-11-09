@@ -41,8 +41,6 @@ export const loadTestFiles = ({
   updateBaselines,
   updateSnapshots,
 }) => {
-  console.log('loadTestFiles');
-
   decorateSnapshotUi(lifecycle, updateSnapshots);
 
   const innerLoadTestFile = (path) => {
