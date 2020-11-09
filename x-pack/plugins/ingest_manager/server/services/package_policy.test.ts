@@ -34,6 +34,12 @@ jest.mock('./epm/packages/assets', () => {
   };
 });
 
+jest.mock('./epm/packages', () => {
+  return {
+    getPackageInfo: () => ({}),
+  };
+});
+
 jest.mock('./epm/registry', () => {
   return {
     fetchInfo: () => ({}),
