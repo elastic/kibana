@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { useValues } from 'kea';
+import { useActions } from 'kea';
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -16,12 +16,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { sendTelemetry } from '../../../../shared/telemetry';
-import { HttpLogic } from '../../../../shared/http';
+import { TelemetryLogic } from '../../../../shared/telemetry';
 import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
 
 export const EngineOverviewHeader: React.FC = () => {
-  const { http } = useValues(HttpLogic);
+  const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   const buttonProps = {
     fill: true,
@@ -30,9 +29,7 @@ export const EngineOverviewHeader: React.FC = () => {
     href: getAppSearchUrl(),
     target: '_blank',
     onClick: () =>
-      sendTelemetry({
-        http,
-        product: 'app_search',
+      sendAppSearchTelemetry({
         action: 'clicked',
         metric: 'header_launch_button',
       }),

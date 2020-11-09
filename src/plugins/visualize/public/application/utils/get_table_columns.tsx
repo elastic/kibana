@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 
 import { ApplicationStart } from 'kibana/public';
 import { VisualizationListItem } from 'src/plugins/visualizations/public';
+import type { SavedObjectsTaggingApi } from 'src/plugins/saved_objects_tagging_oss/public';
 
 const getBadge = (item: VisualizationListItem) => {
   if (item.stage === 'beta') {
@@ -80,7 +81,11 @@ const renderItemTypeIcon = (item: VisualizationListItem) => {
   return icon;
 };
 
-export const getTableColumns = (application: ApplicationStart, history: History) => [
+export const getTableColumns = (
+  application: ApplicationStart,
+  history: History,
+  taggingApi?: SavedObjectsTaggingApi
+) => [
   {
     field: 'title',
     name: i18n.translate('visualize.listing.table.titleColumnName', {
@@ -133,6 +138,7 @@ export const getTableColumns = (application: ApplicationStart, history: History)
     sortable: true,
     render: (field: string, record: VisualizationListItem) => <span>{record.description}</span>,
   },
+  ...(taggingApi ? [taggingApi.ui.getTableColumnDefinition()] : []),
 ];
 
 export const getNoItemsMessage = (createItem: () => void) => (

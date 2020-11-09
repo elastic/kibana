@@ -177,7 +177,8 @@ async function fetchMetricsHostsAnomalies(
 
   const results = decodeOrThrow(metricsHostsAnomaliesResponseRT)(
     await mlSystem.mlAnomalySearch(
-      createMetricsHostsAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination)
+      createMetricsHostsAnomaliesQuery(jobIds, startTime, endTime, sort, expandedPagination),
+      jobIds
     )
   );
 
