@@ -37,7 +37,7 @@ export const Dashboard404 = () => {
     const history = scopedHistory();
     restorePreviousUrl();
 
-    const bannerMessage = i18n.translate('visualize.noMatchRoute.bannerTitleText', {
+    const bannerMessage = i18n.translate('dashboard.noMatchRoute.bannerTitleText', {
       defaultMessage: 'Page not found',
     });
 

@@ -33,12 +33,14 @@ import {
 } from 'rxjs/operators';
 import { merge, Observable, pipe, Subscription } from 'rxjs';
 import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { getSavedObjectFinder, SavedObject } from '../../../saved_objects/public';
 import { DashboardStateManager } from './dashboard_state_manager';
 import {
   createKbnUrlStateStorage,
   getQueryParams,
   removeQueryParam,
+  SavedObjectNotFound,
   withNotifyOnErrors,
 } from '../../../kibana_utils/public';
 import {
@@ -74,7 +76,12 @@ import {
 import { DashboardPanelState, DASHBOARD_CONTAINER_TYPE } from '.';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { DashboardTopNav } from './top_nav/dashboard_top_nav';
-import { dashboardBreadcrumb, getDashboardTitle, leaveConfirmStrings } from './dashboard_strings';
+import {
+  dashboardBreadcrumb,
+  dashboardReadonlyBadge,
+  getDashboardTitle,
+  leaveConfirmStrings,
+} from './dashboard_strings';
 import type { TagDecoratedSavedObject } from '../../../saved_objects_tagging_oss/public';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 import {
@@ -424,8 +431,9 @@ export function DashboardApp({
       .ensureDefaultIndexPattern()
       ?.then(() => savedDashboards.get(savedDashboardId) as Promise<DashboardSavedObject>)
       .then((savedDashboard) => {
-        // if you've loaded an existing dashboard, add it to the recently accessed
+        // if you've loaded an existing dashboard, add it to the recently accessed and update doc title
         if (savedDashboardId) {
+          chrome.docTitle.change(savedDashboard.title);
           chrome.recentlyAccessed.add(
             savedDashboard.getFullPath(),
             savedDashboard.title,
@@ -433,8 +441,38 @@ export function DashboardApp({
           );
         }
         setState((s) => ({ ...s, savedDashboard }));
+      })
+      .catch((error) => {
+        // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
+        // See https://github.com/elastic/kibana/issues/10951 for more context.
+        if (error instanceof SavedObjectNotFound && savedDashboardId === 'create') {
+          // Note preserve querystring part is necessary so the state is preserved through the redirect.
+          history.replace({
+            ...history.location, // preserve query,
+            pathname: DashboardConstants.CREATE_NEW_DASHBOARD_URL,
+          });
+
+          core.notifications.toasts.addWarning(
+            i18n.translate('dashboard.urlWasRemovedInSixZeroWarningMessage', {
+              defaultMessage:
+                'The url "dashboard/create" was removed in 6.0. Please update your bookmarks.',
+            })
+          );
+        } else {
+          // E.g. a corrupt or deleted dashboard
+          core.notifications.toasts.addDanger(error.message);
+          history.push(DashboardConstants.LANDING_PAGE_PATH);
+        }
       });
-  }, [savedDashboardId, savedDashboards, chrome.recentlyAccessed, data.indexPatterns]);
+  }, [
+    chrome.recentlyAccessed,
+    data.indexPatterns,
+    core.notifications,
+    savedDashboardId,
+    savedDashboards,
+    chrome.docTitle,
+    history,
+  ]);
 
   // Build Dashboard State Manager and Dashboard Container when Saved Dashboard changes
   useEffect(() => {
@@ -669,14 +707,22 @@ export function DashboardApp({
     state.dashboardStateManager,
   ]);
 
-  // Sync breadcrumbs when Dashboard State Manager changes
+  // Sync breadcrumbs & badge when Dashboard State Manager changes
   useEffect(() => {
     if (!state.dashboardStateManager) {
       return;
     }
+    if (!dashboardCapabilities.showWriteControls) {
+      chrome.setBadge({
+        text: dashboardReadonlyBadge.text,
+        tooltip: dashboardReadonlyBadge.tooltip,
+        iconType: 'glasses',
+      });
+    }
     chrome.setBreadcrumbs([
       {
         text: dashboardBreadcrumb,
+        'data-test-subj': 'dashboardListingBreadcrumb',
         onClick: () => {
           if (state.dashboardStateManager?.getIsDirty()) {
             core.overlays
@@ -706,11 +752,12 @@ export function DashboardApp({
       },
     ]);
   }, [
+    dashboardCapabilities.showWriteControls,
     state.dashboardStateManager,
-    chrome,
     data.query.timefilter.timefilter,
     redirectToDashboard,
     core.overlays,
+    chrome,
   ]);
 
   // Build onAppLeave when Dashboard State Manager changes

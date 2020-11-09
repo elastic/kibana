@@ -25,6 +25,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Switch, Route, RouteComponentProps, HashRouter } from 'react-router-dom';
 import { parse, ParsedQuery } from 'query-string';
 import { isNil } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import {
   createKbnUrlStateStorage,
   Storage,
@@ -100,8 +101,8 @@ export async function mountApp({
     savedDashboards: dashboardStart.getSavedDashboardLoader(),
     dashboardCapabilities: {
       hideWriteControls: dashboardConfig.getHideWriteControls(),
-      visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize.save) },
-      mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps.save) },
+      visualizeCapabilities: { save: Boolean(coreStart.application.capabilities.visualize?.save) },
+      mapsCapabilities: { save: Boolean(coreStart.application.capabilities.maps?.save) },
       createNew: Boolean(coreStart.application.capabilities.dashboard.createNew),
       show: Boolean(coreStart.application.capabilities.dashboard.show),
       showWriteControls: Boolean(coreStart.application.capabilities.dashboard.showWriteControls),
@@ -158,6 +159,9 @@ export async function mountApp({
   };
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
+    coreStart.chrome.docTitle.change(
+      i18n.translate('dashboard.dashboardPageTitle', { defaultMessage: 'Dashboards' })
+    );
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
     const filter = (routeParams.filter as string) || undefined;

@@ -660,7 +660,6 @@
     "dashboard.topNave.shareConfigDescription": "共享仪表板",
     "dashboard.topNave.viewConfigDescription": "取消编辑并切换到仅查看模式",
     "dashboard.urlWasRemovedInSixZeroWarningMessage": "6.0 中已移除 url“dashboard/create”。请更新您的书签。",
-    "dashboard.visitVisualizeAppLinkText": "访问 Visualize 应用",
     "data.advancedSettings.courier.batchSearchesText": "禁用时，仪表板面板将分别加载，用户离开时或更新查询时，\n           搜索请求将终止。如果启用，加载所有数据时，仪表板面板将一起加载，并且\n           搜索将不会终止。",
     "data.advancedSettings.courier.batchSearchesTextDeprecation": "此设置已过时，将在 Kibana 8.0 中移除。",
     "data.advancedSettings.courier.batchSearchesTitle": "批量并发搜索",

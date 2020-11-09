@@ -660,7 +660,6 @@
     "dashboard.topNave.shareConfigDescription": "ダッシュボードを共有します",
     "dashboard.topNave.viewConfigDescription": "編集をキャンセルして表示限定モードに切り替えます",
     "dashboard.urlWasRemovedInSixZeroWarningMessage": "URL「dashboard/create」は6.0で廃止されました。ブックマークを更新してください。",
-    "dashboard.visitVisualizeAppLinkText": "可視化アプリにアクセス",
     "data.advancedSettings.courier.batchSearchesText": "無効の場合、ダッシュボードパネルは個々に読み込まれ、検索リクエストはユーザーが移動するか\n           クエリを更新すると停止します。有効の場合、ダッシュボードパネルはすべてのデータが読み込まれると同時に読み込まれ、\n           検索は停止しません。",
     "data.advancedSettings.courier.batchSearchesTextDeprecation": "この設定はサポートが終了し、Kibana 8.0 では削除されます。",
     "data.advancedSettings.courier.batchSearchesTitle": "同時検索のバッチ処理",

@@ -61,6 +61,15 @@ export const dashboardBreadcrumb = i18n.translate('dashboard.dashboardAppBreadcr
   defaultMessage: 'Dashboard',
 });
 
+export const dashboardReadonlyBadge = {
+  text: i18n.translate('dashboard.badge.readOnly.text', {
+    defaultMessage: 'Read only',
+  }),
+  tooltip: i18n.translate('dashboard.badge.readOnly.tooltip', {
+    defaultMessage: 'Unable to save dashboards',
+  }),
+};
+
 export const leaveConfirmStrings = {
   leaveTitle: i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesTitle', {
     defaultMessage: 'Unsaved changes',
