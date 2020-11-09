@@ -215,7 +215,7 @@ There’s much more you can do with your data.
 * <<kuery-query,Learn more about KQL>>.  This page has examples for you to follow.
 
 * <<kibana-discover-settings, Configure Discover>> to better meet your needs.
-In Advanced Settings, you can configure the number of documents to show, configure the context view, and more.
+In **Advanced Settings**, you can configure the number of documents to show, configure the context view, and more.
 
 * <<dashboard,Create a dashboard>> with even more awesome visualizations, like treemaps, metrics, and tables.
 
