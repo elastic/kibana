@@ -188,6 +188,7 @@ export function SuggestionPanel({
         visualizationMap,
         activeVisualizationId: currentVisualizationId,
         visualizationState: currentVisualizationState,
+        activeData: frame.activeData,
       })
         .filter((suggestion) => !suggestion.hide)
         .filter(
