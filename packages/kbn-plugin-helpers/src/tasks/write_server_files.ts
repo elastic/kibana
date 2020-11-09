@@ -20,6 +20,7 @@
 import { pipeline } from 'stream';
 import { promisify } from 'util';
 
+import semver from 'semver';
 import vfs from 'vinyl-fs';
 import { transformFileWithBabel, transformFileStream } from '@kbn/dev-utils';
 
@@ -37,16 +38,20 @@ export async function writeServerFiles({
 }: BuildContext) {
   log.info('copying source into the build and converting with babel');
 
+  const KIBANA_VERSION_79 = semver.satisfies(kibanaVersion, '~7.9.0');
+
   // copy source files and apply some babel transformations in the process
   await asyncPipeline(
     vfs.src(
       [
         'kibana.json',
-        ...(plugin.manifest.server
+        // always copy over the package.json file if we're building for 7.9
+        ...(KIBANA_VERSION_79 ? ['package.json'] : []),
+        // always copy over server files if we're building for 7.9, otherwise rely on `server: true` in kibana.json manifest
+        ...(KIBANA_VERSION_79 || plugin.manifest.server
           ? config.serverSourcePatterns || [
               'yarn.lock',
               'tsconfig.json',
-              'package.json',
               'index.{js,ts}',
               '{lib,server,common,translations}/**/*',
             ]
@@ -66,20 +71,32 @@ export async function writeServerFiles({
       }
     ),
 
-    // add kibanaVersion to kibana.json files
+    // add kibanaVersion to kibana.json files and kibana.version to package.json files
+    // we don't check for `kibana.version` in 7.10+ but the plugin helpers can still be used
+    // to build plugins for older Kibana versions so we do our best to support those needs by
+    // setting the property if the package.json file is encountered
     transformFileStream((file) => {
-      if (file.relative !== 'kibana.json') {
+      if (file.relative !== 'kibana.json' && file.relative !== 'package.json') {
         return;
       }
 
       const json = file.contents.toString('utf8');
-      const manifest = JSON.parse(json);
+      const parsed = JSON.parse(json);
+
       file.contents = Buffer.from(
         JSON.stringify(
-          {
-            ...manifest,
-            kibanaVersion,
-          },
+          file.relative === 'kibana.json'
+            ? {
+                ...parsed,
+                kibanaVersion,
+              }
+            : {
+                ...parsed,
+                kibana: {
+                  ...parsed.kibana,
+                  version: kibanaVersion,
+                },
+              },
           null,
           2
         )

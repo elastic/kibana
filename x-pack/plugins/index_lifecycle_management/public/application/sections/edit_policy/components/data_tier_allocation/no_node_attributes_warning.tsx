@@ -19,7 +19,7 @@ const i18nTexts = {
       'xpack.indexLifecycleMgmt.editPolicy.warm.nodeAttributesMissingDescription',
       {
         defaultMessage:
-          'Define custom node attributes in elasticsearch.yml to use attribute-based allocation. Warm nodes will be used instead.',
+          'Define custom node attributes in elasticsearch.yml to use attribute-based allocation.',
       }
     ),
   },
@@ -28,7 +28,7 @@ const i18nTexts = {
       'xpack.indexLifecycleMgmt.editPolicy.cold.nodeAttributesMissingDescription',
       {
         defaultMessage:
-          'Define custom node attributes in elasticsearch.yml to use attribute-based allocation. Cold nodes will be used instead.',
+          'Define custom node attributes in elasticsearch.yml to use attribute-based allocation.',
       }
     ),
   },

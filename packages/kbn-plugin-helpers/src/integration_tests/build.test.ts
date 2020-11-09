@@ -28,9 +28,10 @@ import del from 'del';
 import globby from 'globby';
 import loadJsonFile from 'load-json-file';
 
+const KIBANA_VERSION = '7.9.0';
 const PLUGIN_DIR = Path.resolve(REPO_ROOT, 'plugins/foo_test_plugin');
 const PLUGIN_BUILD_DIR = Path.resolve(PLUGIN_DIR, 'build');
-const PLUGIN_ARCHIVE = Path.resolve(PLUGIN_BUILD_DIR, `fooTestPlugin-7.5.0.zip`);
+const PLUGIN_ARCHIVE = Path.resolve(PLUGIN_BUILD_DIR, `fooTestPlugin-${KIBANA_VERSION}.zip`);
 const TMP_DIR = Path.resolve(__dirname, '__tmp__');
 
 expect.addSnapshotSerializer(createReplaceSerializer(/[\d\.]+ sec/g, '<time>'));
@@ -64,7 +65,7 @@ it('builds a generated plugin into a viable archive', async () => {
 
   const buildProc = await execa(
     process.execPath,
-    ['../../scripts/plugin_helpers', 'build', '--kibana-version', '7.5.0'],
+    ['../../scripts/plugin_helpers', 'build', '--kibana-version', KIBANA_VERSION],
     {
       cwd: PLUGIN_DIR,
       all: true,
@@ -72,14 +73,15 @@ it('builds a generated plugin into a viable archive', async () => {
   );
 
   expect(buildProc.all).toMatchInlineSnapshot(`
-    " info deleting the build and target directories
+    " warn These tools might work with 7.9 versions, but there are known workarounds required. See https://github.com/elastic/kibana/issues/82466 for more info
+     info deleting the build and target directories
      info running @kbn/optimizer
      │ info initialized, 0 bundles cached
      │ info starting worker [1 bundle]
      │ succ 1 bundles compiled successfully after <time>
      info copying source into the build and converting with babel
      info running yarn to install dependencies
-     info compressing plugin into [fooTestPlugin-7.5.0.zip]"
+     info compressing plugin into [fooTestPlugin-7.9.0.zip]"
   `);
 
   await extract(PLUGIN_ARCHIVE, { dir: TMP_DIR });
@@ -111,7 +113,7 @@ it('builds a generated plugin into a viable archive', async () => {
     .toMatchInlineSnapshot(`
     Object {
       "id": "fooTestPlugin",
-      "kibanaVersion": "7.5.0",
+      "kibanaVersion": "7.9.0",
       "optionalPlugins": Array [],
       "requiredPlugins": Array [
         "navigation",

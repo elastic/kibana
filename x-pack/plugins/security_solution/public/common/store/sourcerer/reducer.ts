@@ -15,6 +15,7 @@ import {
   setSelectedIndexPatterns,
   setSignalIndexName,
   setSource,
+  initTimelineIndexPatterns,
 } from './actions';
 import { initialSourcererState, SourcererModel, SourcererScopeName } from './model';
 
@@ -76,6 +77,32 @@ export const sourcererReducer = reducerWithInitialState(initialSourcererState)
       },
     };
   })
+  .case(initTimelineIndexPatterns, (state, { id, selectedPatterns, eventType }) => {
+    let defaultIndexPatterns = state.configIndexPatterns;
+    if (isEmpty(selectedPatterns)) {
+      if (eventType === 'all' && !isEmpty(state.signalIndexName)) {
+        defaultIndexPatterns = [...state.configIndexPatterns, state.signalIndexName ?? ''];
+      } else if (eventType === 'raw') {
+        defaultIndexPatterns = state.configIndexPatterns;
+      } else if (
+        !isEmpty(state.signalIndexName) &&
+        (eventType === 'signal' || eventType === 'alert')
+      ) {
+        defaultIndexPatterns = [state.signalIndexName ?? ''];
+      }
+    }
+    return {
+      ...state,
+      sourcererScopes: {
+        ...state.sourcererScopes,
+        [id]: {
+          ...state.sourcererScopes[id],
+          selectedPatterns: isEmpty(selectedPatterns) ? defaultIndexPatterns : selectedPatterns,
+        },
+      },
+    };
+  })
+
   .case(setSource, (state, { id, payload }) => {
     const { ...sourcererScopes } = payload;
     return {

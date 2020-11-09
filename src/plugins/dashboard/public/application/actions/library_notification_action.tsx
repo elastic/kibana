@@ -20,7 +20,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiBadge } from '@elastic/eui';
-import { IEmbeddable, ViewMode, isReferenceOrValueEmbeddable } from '../../embeddable_plugin';
+import {
+  IEmbeddable,
+  ViewMode,
+  isReferenceOrValueEmbeddable,
+  isErrorEmbeddable,
+} from '../../embeddable_plugin';
 import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
 import { reactToUiComponent } from '../../../../kibana_react/public';
 
@@ -79,6 +84,7 @@ export class LibraryNotificationAction implements ActionByType<typeof ACTION_LIB
 
   public isCompatible = async ({ embeddable }: LibraryNotificationActionContext) => {
     return (
+      !isErrorEmbeddable(embeddable) &&
       embeddable.getRoot().isContainer &&
       embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
       isReferenceOrValueEmbeddable(embeddable) &&
