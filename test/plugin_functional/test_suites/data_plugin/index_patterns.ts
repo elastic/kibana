@@ -23,8 +23,6 @@ import '../../plugins/core_provider_plugin/types';
 export default function ({ getService }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');
 
-  // skipping the tests as it deletes index patterns created by other test causing unexpected failures
-  // https://github.com/elastic/kibana/issues/79886
   describe('index patterns', function () {
     let indexPatternId = '';
 
@@ -44,12 +42,9 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(body.title).to.equal(title);
       expect(body.fields.length).to.equal(15);
       expect(body.fieldFormatMap).to.eql(fieldFormats);
-    });
 
-    it('can get all ids', async () => {
       await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
       const response = await supertest.get('/api/index-patterns-plugin/get-all');
-      // console.log('***************************', response.body);
       expect(response.status).to.equal(200);
       expect(response.body.length > 0).to.equal(true);
     });

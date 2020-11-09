@@ -58,7 +58,6 @@ export class IndexPatternsTestPlugin
     router.get(
       { path: '/api/index-patterns-plugin/get-all', validate: false },
       async (context, req, res) => {
-        console.log('get /api/index-patterns-plugin/get-all');
         const [{ savedObjects, elasticsearch }, { data }] = await core.getStartServices();
         const savedObjectsClient = savedObjects.getScopedClient(req);
         const service = await data.indexPatterns.indexPatternsServiceFactory(
