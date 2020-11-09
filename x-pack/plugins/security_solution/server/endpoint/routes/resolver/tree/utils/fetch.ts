@@ -5,7 +5,11 @@
  */
 import _ from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
-import { ResolverNode } from '../../../../../../common/endpoint/types';
+import {
+  firstNonNullValue,
+  values,
+} from '../../../../../../common/endpoint/models/ecs_safety_helpers';
+import { ECSField, ResolverNode } from '../../../../../../common/endpoint/types';
 import { DescendantsQuery } from '../queries/descendants';
 import { Schema, NodeID } from './index';
 import { LifecycleQuery } from '../queries/lifecycle';
@@ -247,27 +251,55 @@ export function getLeafNodes(
   return nextNodes !== undefined ? Array.from(nextNodes) : [];
 }
 
-// TODO these functions should handle the case where an array is returned for
-// the id and parent fields, maybe convert these to be ECS fields so we can
-// use those helpers?
-function getIDField(obj: unknown, schema: Schema): NodeID | undefined {
-  return _.get(obj, schema.id);
+/**
+ * Retrieves the unique ID field from a document.
+ *
+ * Exposed for testing.
+ * @param obj an unknown document returned by Elasticsearch
+ * @param schema the schema used for identifying connections between documents
+ */
+export function getIDField(obj: unknown, schema: Schema): NodeID | undefined {
+  const id: ECSField<NodeID> = _.get(obj, schema.id);
+  return firstNonNullValue(id);
 }
 
-function getParentField(obj: unknown, schema: Schema): NodeID | undefined {
-  return _.get(obj, schema.parent);
+/**
+ * Retrieves the unique parent ID field from a document.
+ *
+ * Exposed for testing.
+ * @param obj an unknown document returned by Elasticsearch
+ * @param schema the schema used for identifying connections between documents
+ */
+export function getParentField(obj: unknown, schema: Schema): NodeID | undefined {
+  const parent: ECSField<NodeID> = _.get(obj, schema.parent);
+  return firstNonNullValue(parent);
 }
 
 function getAncestryField(obj: unknown, schema: Schema): NodeID[] | undefined {
   if (!schema.ancestry) {
     return undefined;
   }
-  return _.get(obj, schema.ancestry);
+
+  const ancestry: ECSField<NodeID> = _.get(obj, schema.ancestry);
+  if (!ancestry) {
+    return undefined;
+  }
+
+  return values(ancestry);
 }
 
-function getAncestryAsArray(obj: unknown, schema: Schema): NodeID[] {
+/**
+ * Retrieves the ancestry array field if it exists. If it doesn't exist or if it is empty it reverts to
+ * creating an array using the parent field. If the parent field doesn't exist, it returns
+ * an empty array.
+ *
+ * Exposed for testing.
+ * @param obj an unknown document returned by Elasticsearch
+ * @param schema the schema used for identifying connections between documents
+ */
+export function getAncestryAsArray(obj: unknown, schema: Schema): NodeID[] {
   const ancestry = getAncestryField(obj, schema);
-  if (!ancestry) {
+  if (!ancestry || ancestry.length <= 0) {
     const parentField = getParentField(obj, schema);
     return parentField !== undefined ? [parentField] : [];
   }

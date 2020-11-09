@@ -4,7 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Fetcher, getLeafNodes, TreeOptions } from './fetch';
+import {
+  Fetcher,
+  getAncestryAsArray,
+  getIDField,
+  getLeafNodes,
+  getParentField,
+  TreeOptions,
+} from './fetch';
 import { LifecycleQuery } from '../queries/lifecycle';
 import { DescendantsQuery } from '../queries/descendants';
 import { StatsQuery } from '../queries/stats';
@@ -583,6 +590,58 @@ describe('fetcher test', () => {
         // children of b
         expect(leaves).toStrictEqual(['2', '4', '5']);
       });
+    });
+  });
+
+  describe('getIDField', () => {
+    it('returns undefined if the field does not exist', () => {
+      expect(getIDField({}, { id: 'a', parent: 'b' })).toBeUndefined();
+    });
+
+    it('returns the first value if the field is an array', () => {
+      expect(getIDField({ a: { b: ['1', '2'] } }, { id: 'a.b', parent: 'b' })).toStrictEqual('1');
+    });
+  });
+
+  describe('getParentField', () => {
+    it('returns undefined if the field does not exist', () => {
+      expect(getParentField({}, { id: 'a', parent: 'b' })).toBeUndefined();
+    });
+
+    it('returns the first value if the field is an array', () => {
+      expect(getParentField({ a: { b: ['1', '2'] } }, { id: 'z', parent: 'a.b' })).toStrictEqual(
+        '1'
+      );
+    });
+  });
+
+  describe('getAncestryAsArray', () => {
+    it('returns an empty array if the field does not exist', () => {
+      expect(getAncestryAsArray({}, { id: 'a', parent: 'b', ancestry: 'z' })).toStrictEqual([]);
+    });
+
+    it('returns the full array if the field exists', () => {
+      expect(
+        getAncestryAsArray({ a: { b: ['1', '2'] } }, { id: 'z', parent: 'f', ancestry: 'a.b' })
+      ).toStrictEqual(['1', '2']);
+    });
+
+    it('returns a built array using the parent field if ancestry field is empty', () => {
+      expect(
+        getAncestryAsArray(
+          { aParent: { bParent: ['1', '2'] }, ancestry: [] },
+          { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry' }
+        )
+      ).toStrictEqual(['1']);
+    });
+
+    it('returns a built array using the parent field if ancestry field does not exist', () => {
+      expect(
+        getAncestryAsArray(
+          { aParent: { bParent: '1' } },
+          { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry' }
+        )
+      ).toStrictEqual(['1']);
     });
   });
 });
