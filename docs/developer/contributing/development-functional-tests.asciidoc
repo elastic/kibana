@@ -118,7 +118,7 @@ The tests are written in https://mochajs.org[mocha] using https://github.com/ela
 
 We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
-The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that {kib} source code uses. Refer to {kib-repo}tree/{branch}/style_guides/js_style_guide.md[style_guides/js_style_guide.md].
+The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that {kib} source code uses. Refer to {kib-repo}tree/6.0/style_guides/js_style_guide.md[style_guides/js_style_guide.md].
 
 [discrete]
 ==== Definitions
@@ -187,7 +187,7 @@ Tests should run at the positive security boundry condition, meaning that they s
  
 The functional UI tests now default to logging in with a user named `test_user` and the roles of this user can be changed dynamically without logging in and out.  
 
-In order to achieve this a new service was introduced called `createTestUserService` (see `test/common/services/security/test_user.ts`). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
+In order to achieve this a new service was introduced called `createTestUserService` (see link:link:{kib-repo}tree/{branch}/test/common/services/security/test_user.ts[test/common/services/security/test_user.ts]). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
 
 An example of how to set the role like how its defined below:
 
@@ -290,7 +290,7 @@ The `FunctionalTestRunner` comes with three built-in services:
 
 **config:**:::
 * Source: link:{kib-repo}tree/{branch}/packages/kbn-test/src/functional_test_runner/lib/config/config.ts[packages/kbn-test/src/functional_test_runner/lib/config/config.ts]
-* Schema: Link:{kib-repo}tree/{branch}/packages/kbn-test/src/functional_test_runner/lib/config/schema.ts[src/functional_test_runner/lib/config/schema.ts]
+* Schema: link:{kib-repo}tree/{branch}/packages/kbn-test/src/functional_test_runner/lib/config/schema.ts[src/functional_test_runner/lib/config/schema.ts]
 * Use `config.get(path)` to read any value from the config file
 
 **log:**:::
@@ -299,7 +299,7 @@ The `FunctionalTestRunner` comes with three built-in services:
 * `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
 
 **lifecycle:**:::
-* Source: {kib-repo}tree/{branch}/src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
+* Source: link:{kib-repo}tree/{branch}/packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
 * Designed primary for use in services
 * Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
 * Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`
@@ -310,14 +310,14 @@ The `FunctionalTestRunner` comes with three built-in services:
 The {kib} functional tests define the vast majority of the actual functionality used by tests.
 
 **browser**:::
-* Source: link:{kib-repo}tree/{branch}/test/functional/services/browser.ts[test/functional/services/browser.ts]
+* Source: link:{kib-repo}tree/{branch}/test/functional/services/common/browser.ts[test/functional/services/common/browser.ts]
 * Higher level wrapper for `remote` service, which exposes available browser actions
 * Popular methods:
 ** `browser.getWindowSize()`
 ** `browser.refresh()`
 
 **testSubjects:**:::
-* Source: {kib-repo}tree/{branch}/test/functional/services/test_subjects.ts[test/functional/services/test_subjects.ts]
+* Source: link:{kib-repo}tree/{branch}/test/functional/services/common/test_subjects.ts[test/functional/services/common/test_subjects.ts]
 * Test subjects are elements that are tagged specifically for selecting from tests
 * Use `testSubjects` over CSS selectors when possible
 * Usage:
@@ -342,7 +342,7 @@ await testSubjects.click(‘containerButton’);
 ** `testSubjects.click(testSubjectSelector)` - Click a test subject in the page; throw if it can't be found after some time
 
 **find:**:::
-* Source: {kib-repo}tree/{branch}/test/functional/services/find.ts[test/functional/services/find.ts]
+* Source: {kib-repo}tree/{branch}/test/functional/services/common/find.ts[test/functional/services/common/find.ts]
 * Helpers for `remote.findBy*` methods that log and manage timeouts
 * Popular methods:
 ** `find.byCssSelector()`
