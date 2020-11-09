@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS, useFetcher } from '../../../../hooks/useFetcher';
+import { useFetcher } from '../../../../hooks/useFetcher';
 import { useTheme } from '../../../../hooks/useTheme';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
@@ -25,7 +26,11 @@ function yTickFormat(y?: number | null) {
   });
 }
 
-export function ErroneousTransactionsRateChart() {
+interface Props {
+  showAnnotations?: boolean;
+}
+
+export function TransactionErrorRateChart({ showAnnotations = true }: Props) {
   const theme = useTheme();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
@@ -56,25 +61,32 @@ export function ErroneousTransactionsRateChart() {
   const errorRates = data?.transactionErrorRate || [];
 
   return (
-    <LineChart
-      id="errorRate"
-      isLoading={
-        (status === FETCH_STATUS.LOADING || status === FETCH_STATUS.PENDING) &&
-        !data
-      }
-      timeseries={[
-        {
-          data: errorRates,
-          type: 'linemark',
-          color: theme.eui.euiColorVis7,
-          hideLegend: true,
-          title: i18n.translate('xpack.apm.chart.currentPeriodLabel', {
-            defaultMessage: 'Current period',
-          }),
-        },
-      ]}
-      yLabelFormat={yLabelFormat}
-      yTickFormat={yTickFormat}
-    />
+    <EuiPanel>
+      <EuiTitle size="xs">
+        <h2>
+          {i18n.translate('xpack.apm.errorRate', {
+            defaultMessage: 'Error rate',
+          })}
+        </h2>
+      </EuiTitle>
+      <LineChart
+        id="errorRate"
+        showAnnotations={showAnnotations}
+        fetchStatus={status}
+        timeseries={[
+          {
+            data: errorRates,
+            type: 'linemark',
+            color: theme.eui.euiColorVis7,
+            hideLegend: true,
+            title: i18n.translate('xpack.apm.errorRate.currentPeriodLabel', {
+              defaultMessage: 'Current period',
+            }),
+          },
+        ]}
+        yLabelFormat={yLabelFormat}
+        yTickFormat={yTickFormat}
+      />
+    </EuiPanel>
   );
 }
