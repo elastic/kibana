@@ -18,7 +18,7 @@ import { parseAndVerifyArchive } from './validation';
 
 export * from './cache';
 
-export async function loadArchivePackage({
+export async function getArchivePackage({
   archiveBuffer,
   contentType,
 }: {
