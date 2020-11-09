@@ -56,7 +56,7 @@ export class ESTermSource extends AbstractESAggSource {
     }
     return {
       ...normalizedDescriptor,
-      term: descriptor!.term,
+      term: descriptor.term!,
       type: SOURCE_TYPES.ES_TERM_SOURCE,
     };
   }

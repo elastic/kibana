@@ -51,13 +51,17 @@ export class TOCEntryButton extends Component<Props, State> {
     this._loadIsFilteredByGlobalTime();
   }
 
+  componentDidUpdate() {
+    this._loadIsFilteredByGlobalTime();
+  }
+
   componentWillUnmount() {
     this._isMounted = false;
   }
 
   async _loadIsFilteredByGlobalTime() {
     const isFilteredByGlobalTime = await this.props.layer.isFilteredByGlobalTime();
-    if (this._isMounted) {
+    if (this._isMounted && isFilteredByGlobalTime !== this.state.isFilteredByGlobalTime) {
       this.setState({ isFilteredByGlobalTime });
     }
   }
