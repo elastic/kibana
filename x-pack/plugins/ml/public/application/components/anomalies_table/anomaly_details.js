@@ -38,6 +38,7 @@ import {
 import { MULTI_BUCKET_IMPACT } from '../../../../common/constants/multi_bucket_impact';
 import { formatValue } from '../../formatters/format_value';
 import { MAX_CHARS } from './anomalies_table_constants';
+import { ML_JOB_AGGREGATION } from '../../../../common/constants/aggregation_types';
 
 const TIME_FIELD_NAME = 'timestamp';
 
@@ -130,7 +131,8 @@ function getDetailsItems(anomaly, examples, filter) {
     title: i18n.translate('xpack.ml.anomaliesTable.anomalyDetails.functionTitle', {
       defaultMessage: 'function',
     }),
-    description: source.function !== 'metric' ? source.function : source.function_description,
+    description:
+      source.function !== ML_JOB_AGGREGATION.METRIC ? source.function : source.function_description,
   });
 
   if (source.field_name !== undefined) {

@@ -60,7 +60,7 @@ describe('TokenAuthenticationProvider', () => {
 
       await expect(provider.login(request, credentials)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'token' },
+          { ...user, authentication_provider: { type: 'token', name: 'token' } },
           { authHeaders: { authorization }, state: tokenPair }
         )
       );
@@ -196,7 +196,7 @@ describe('TokenAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'token' },
+          { ...user, authentication_provider: { type: 'token', name: 'token' } },
           { authHeaders: { authorization } }
         )
       );
@@ -236,7 +236,7 @@ describe('TokenAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'token' },
+          { ...user, authentication_provider: { type: 'token', name: 'token' } },
           {
             authHeaders: { authorization: 'Bearer newfoo' },
             state: { accessToken: 'newfoo', refreshToken: 'newbar' },
