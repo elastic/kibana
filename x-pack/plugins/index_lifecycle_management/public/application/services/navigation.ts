@@ -4,6 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export const getPolicyPath = (policyName: string): string => {
+export const ROUTES = {
+  list: '/policies',
+  edit: '/policies/edit/:policyName?',
+  create: '/policies/edit',
+};
+
+export const getPolicyEditPath = (policyName: string): string => {
   return encodeURI(`/policies/edit/${encodeURIComponent(policyName)}`);
+};
+
+export const getPolicyCreatePath = () => {
+  return ROUTES.create;
+};
+
+export const getPoliciesListPath = () => {
+  return ROUTES.list;
 };
