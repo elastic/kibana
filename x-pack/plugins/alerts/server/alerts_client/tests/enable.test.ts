@@ -14,6 +14,7 @@ import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { TaskStatus } from '../../../../task_manager/server';
 import { getBeforeSetup } from './lib';
+import { InvalidatePendingApiKey } from '../../types';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -172,13 +173,7 @@ describe('enable()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalledWith(
-      'api_key_pending_invalidation',
-      {
-        apiKeyId: '123',
-        createdAt,
-      }
-    );
+    expect(unsecuredSavedObjectsClient.create).not.toBeCalledWith('api_key_pending_invalidation');
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
       'alert',
@@ -255,13 +250,9 @@ describe('enable()', () => {
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
     });
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'api_key_pending_invalidation',
-      {
-        apiKeyId: '123',
-        createdAt,
-      }
-    );
+    expect(
+      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
+    ).toBe('123');
   });
 
   test(`doesn't enable already enabled alerts`, async () => {
@@ -365,13 +356,9 @@ describe('enable()', () => {
     );
     expect(alertsClientParams.getUserName).toHaveBeenCalled();
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'api_key_pending_invalidation',
-      {
-        apiKeyId: '123',
-        createdAt,
-      }
-    );
+    expect(
+      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
+    ).toBe('123');
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);
     expect(taskManager.schedule).not.toHaveBeenCalled();
   });

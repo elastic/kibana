@@ -10,7 +10,6 @@ import { markApiKeyForInvalidation } from './mark_api_key_for_invalidation';
 describe('markApiKeyForInvalidation', () => {
   test('should call savedObjectsClient create with the proper params', async () => {
     const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-    const createdAt = new Date().toISOString();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'api_key_pending_invalidation',
@@ -30,9 +29,5 @@ describe('markApiKeyForInvalidation', () => {
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toEqual(
       'api_key_pending_invalidation'
     );
-    expect(unsecuredSavedObjectsClient.create.mock.calls[0][1]).toMatchObject({
-      apiKeyId: '123',
-      createdAt: '2019-02-12T21:01:22.479Z',
-    });
   });
 });

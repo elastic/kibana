@@ -175,6 +175,7 @@ export interface AlertingPlugin {
 export interface AlertsConfigType {
   invalidateApiKeysTask: {
     interval: string;
+    removalDelay: string;
   };
 }
 

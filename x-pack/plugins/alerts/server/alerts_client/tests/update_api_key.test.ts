@@ -13,6 +13,7 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup } from './lib';
+import { InvalidatePendingApiKey } from '../../types';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -83,7 +84,8 @@ describe('updateApiKey()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -128,11 +130,8 @@ describe('updateApiKey()', () => {
       },
       { version: '123' }
     );
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'api_key_pending_invalidation',
-      {
-        apiKeyId: '123',
-      }
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
+      'api_key_pending_invalidation'
     );
   });
 
@@ -142,7 +141,8 @@ describe('updateApiKey()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -188,11 +188,8 @@ describe('updateApiKey()', () => {
 
     await alertsClient.updateApiKey({ id: '1' });
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'api_key_pending_invalidation',
-      {
-        apiKeyId: '123',
-      }
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
+      'api_key_pending_invalidation'
     );
   });
 
@@ -203,6 +200,7 @@ describe('updateApiKey()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -225,7 +223,8 @@ describe('updateApiKey()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -233,18 +232,9 @@ describe('updateApiKey()', () => {
     await expect(alertsClient.updateApiKey({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Fail"`
     );
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalledWith(
-      'api_key_pending_invalidation',
-      {
-        apiKeyId: '123',
-      }
-    );
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'api_key_pending_invalidation',
-      {
-        apiKeyId: '234',
-      }
-    );
+    expect(
+      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
+    ).toBe('234');
   });
 
   describe('authorization', () => {

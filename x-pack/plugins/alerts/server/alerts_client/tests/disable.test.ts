@@ -13,6 +13,7 @@ import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
 import { ActionsAuthorization } from '../../../../actions/server';
 import { getBeforeSetup } from './lib';
+import { InvalidatePendingApiKey } from '../../types';
 
 const taskManager = taskManagerMock.createStart();
 const alertTypeRegistry = alertTypeRegistryMock.create();
@@ -112,6 +113,7 @@ describe('disable()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -152,12 +154,9 @@ describe('disable()', () => {
       }
     );
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'api_key_pending_invalidation',
-      {
-        apiKeyId: '123',
-      }
-    );
+    expect(
+      (unsecuredSavedObjectsClient.create.mock.calls[0][1] as InvalidatePendingApiKey).apiKeyId
+    ).toBe('123');
   });
 
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {
@@ -167,6 +166,7 @@ describe('disable()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -226,6 +226,7 @@ describe('disable()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -241,7 +242,8 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -256,7 +258,8 @@ describe('disable()', () => {
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
-        apiKeyId: 'test',
+        apiKeyId: '123',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });

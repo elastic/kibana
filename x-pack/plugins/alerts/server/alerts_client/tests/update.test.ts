@@ -10,7 +10,7 @@ import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src
 import { taskManagerMock } from '../../../../task_manager/server/mocks';
 import { alertTypeRegistryMock } from '../../alert_type_registry.mock';
 import { alertsAuthorizationMock } from '../../authorization/alerts_authorization.mock';
-import { IntervalSchedule } from '../../types';
+import { IntervalSchedule, InvalidatePendingApiKey } from '../../types';
 import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
 import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
 import { AlertsAuthorization } from '../../authorization/alerts_authorization';
@@ -165,6 +165,7 @@ describe('update()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -388,6 +389,7 @@ describe('update()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -396,6 +398,7 @@ describe('update()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -558,6 +561,7 @@ describe('update()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '234',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -996,8 +1000,9 @@ describe('update()', () => {
         },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalledWith({ apiKeyId: '123' });
-    expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toStrictEqual({ apiKeyId: '234' });
+    expect(
+      (unsecuredSavedObjectsClient.create.mock.calls[1][1] as InvalidatePendingApiKey).apiKeyId
+    ).toBe('234');
   });
 
   describe('updating an alert schedule', () => {

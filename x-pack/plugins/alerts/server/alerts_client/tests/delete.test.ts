@@ -98,6 +98,7 @@ describe('delete()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -105,11 +106,8 @@ describe('delete()', () => {
     expect(result).toEqual({ success: true });
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalledWith('alert', '1');
     expect(taskManager.remove).toHaveBeenCalledWith('task-123');
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'api_key_pending_invalidation',
-      {
-        apiKeyId: '123',
-      }
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
+      'api_key_pending_invalidation'
     );
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith('alert', '1', {
       namespace: 'default',
@@ -124,6 +122,7 @@ describe('delete()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -158,6 +157,7 @@ describe('delete()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });
@@ -176,11 +176,8 @@ describe('delete()', () => {
   test('swallows error when invalidate API key throws', async () => {
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Fail'));
     await alertsClient.delete({ id: '1' });
-    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
-      'api_key_pending_invalidation',
-      {
-        apiKeyId: '123',
-      }
+    expect(unsecuredSavedObjectsClient.create.mock.calls[0][0]).toBe(
+      'api_key_pending_invalidation'
     );
     expect(alertsClientParams.logger.error).toHaveBeenCalledWith(
       'Failed to mark for API key [id="123"] for invalidation: Fail'
@@ -193,6 +190,7 @@ describe('delete()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
+        createdAt: '2019-02-12T21:01:22.479Z',
       },
       references: [],
     });

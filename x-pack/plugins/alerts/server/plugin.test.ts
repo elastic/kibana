@@ -21,6 +21,7 @@ describe('Alerting Plugin', () => {
       const context = coreMock.createPluginInitializerContext<AlertsConfig>({
         invalidateApiKeysTask: {
           interval: '5m',
+          removalDelay: '5m',
         },
       });
       const plugin = new AlertingPlugin(context);
@@ -63,6 +64,7 @@ describe('Alerting Plugin', () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           invalidateApiKeysTask: {
             interval: '5m',
+            removalDelay: '5m',
           },
         });
         const plugin = new AlertingPlugin(context);
@@ -110,6 +112,7 @@ describe('Alerting Plugin', () => {
         const context = coreMock.createPluginInitializerContext<AlertsConfig>({
           invalidateApiKeysTask: {
             interval: '5m',
+            removalDelay: '5m',
           },
         });
         const plugin = new AlertingPlugin(context);
