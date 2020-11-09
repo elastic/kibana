@@ -17825,7 +17825,6 @@
     "xpack.securitySolution.footer.of": "/",
     "xpack.securitySolution.footer.rows": "行",
     "xpack.securitySolution.footer.totalCountOfEvents": "イベント",
-    "xpack.securitySolution.footer.updated": "更新しました",
     "xpack.securitySolution.formatted.duration.aFewMillisecondsTooltip": "数ミリ秒",
     "xpack.securitySolution.formatted.duration.aFewNanosecondsTooltip": "数ナノ秒",
     "xpack.securitySolution.formatted.duration.aMillisecondTooltip": "1 ミリ秒",

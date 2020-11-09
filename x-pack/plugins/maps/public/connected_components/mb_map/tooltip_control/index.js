@@ -11,13 +11,13 @@ import {
   openOnClickTooltip,
   closeOnHoverTooltip,
   openOnHoverTooltip,
-} from '../../../../actions';
+} from '../../../actions';
 import {
   getLayerList,
   getOpenTooltips,
   getHasLockedTooltips,
   isDrawingFilter,
-} from '../../../../selectors/map_selectors';
+} from '../../../selectors/map_selectors';
 
 function mapStateToProps(state = {}) {
   return {

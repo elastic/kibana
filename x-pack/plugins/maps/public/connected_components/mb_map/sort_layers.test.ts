@@ -8,8 +8,8 @@
 import _ from 'lodash';
 import { Map as MbMap, Layer as MbLayer, Style as MbStyle } from 'mapbox-gl';
 import { getIsTextLayer, syncLayerOrder } from './sort_layers';
-import { SPATIAL_FILTERS_LAYER_ID } from '../../../../common/constants';
-import { ILayer } from '../../../classes/layers/layer';
+import { SPATIAL_FILTERS_LAYER_ID } from '../../../common/constants';
+import { ILayer } from '../../classes/layers/layer';
 
 let moveCounter = 0;
 
