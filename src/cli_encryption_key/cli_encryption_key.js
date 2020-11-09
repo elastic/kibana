@@ -28,7 +28,7 @@ import { generateCli } from './generate';
 const argv = process.env.kbnWorkerArgv
   ? JSON.parse(process.env.kbnWorkerArgv)
   : process.argv.slice();
-const program = new Command('bin/kibana-keystore');
+const program = new Command('bin/kibana-encryption-key');
 
 program.version(pkg.version).description('A tool for managing encryption keys');
 
