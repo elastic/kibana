@@ -75,6 +75,9 @@ export function MachineLearningDataFrameAnalyticsResultsProvider({
       await testSubjects.existOrFail('mlDFADecisionPathPopoverTab-decision_path_json', {
         timeout: 5000,
       });
+    },
+
+    async assertFeatureImportanceDecisionPathChartElementsExists() {
       await testSubjects.existOrFail('mlDFADecisionPathChart', {
         timeout: 5000,
       });

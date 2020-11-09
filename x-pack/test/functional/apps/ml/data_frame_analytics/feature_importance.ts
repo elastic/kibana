@@ -218,6 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.openFeatureImportanceDecisionPathPopover();
           await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathElementsExists();
+          await ml.dataFrameAnalyticsResults.assertFeatureImportanceDecisionPathChartElementsExists();
         });
       });
     }
