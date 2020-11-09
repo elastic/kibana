@@ -51,11 +51,12 @@ export class ESTermSource extends AbstractESAggSource {
 
   static createDescriptor(descriptor: Partial<ESTermSourceDescriptor>): ESTermSourceDescriptor {
     const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
-    if (!isValidStringConfig(normalizedDescriptor.term)) {
+    if (!isValidStringConfig(descriptor.term)) {
       throw new Error('Cannot create an ESTermSource without a term');
     }
     return {
       ...normalizedDescriptor,
+      term: descriptor.term,
       type: SOURCE_TYPES.ES_TERM_SOURCE,
     };
   }

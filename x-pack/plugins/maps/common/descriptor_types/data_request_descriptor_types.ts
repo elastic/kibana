@@ -38,7 +38,7 @@ export type VectorSourceSyncMeta = ESSearchSourceSyncMeta | ESGeoGridSourceSyncM
 
 export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
-  applyglobalTime: boolean;
+  applyGlobalTime: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
   sourceQuery?: MapQuery;
@@ -48,7 +48,7 @@ export type VectorSourceRequestMeta = MapFilters & {
 export type VectorJoinSourceRequestMeta = Omit<
   VectorSourceRequestMeta,
   'geogridPrecision' | 'sourceMeta'
->;
+> & { sourceQuery?: Query };
 
 export type VectorStyleRequestMeta = MapFilters & {
   dynamicStyleFields: string[];
