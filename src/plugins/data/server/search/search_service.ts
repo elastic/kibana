@@ -177,7 +177,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const asScoped = this.asScopedProvider(core);
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
+      aggs: this.aggsService.start({
+        fieldFormats,
+        uiSettings,
+        indexPatterns,
+      }),
       getSearchStrategy: this.getSearchStrategy,
       asScoped,
       searchSource: {
@@ -185,7 +189,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const esClient = elasticsearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
           const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(
-            savedObjectsClient
+            savedObjectsClient,
+            esClient.asCurrentUser
           );
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
 

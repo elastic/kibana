@@ -1373,9 +1373,9 @@ export class IndexPatternsService {
     // (undocumented)
     getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>;
     getDefault: () => Promise<IndexPattern | null>;
-    getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions) => Promise<any>;
+    getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>;
     // Warning: (ae-forgotten-export) The symbol "GetFieldsOptions" needs to be exported by the entry point index.d.ts
-    getFieldsForWildcard: (options?: GetFieldsOptions) => Promise<any>;
+    getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
     getIds: (refresh?: boolean) => Promise<string[]>;
     getIdsWithTitle: (refresh?: boolean) => Promise<Array<{
         id: string;

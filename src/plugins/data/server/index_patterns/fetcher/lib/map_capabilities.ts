@@ -17,14 +17,21 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract, ElasticsearchClient } from 'src/core/server';
-import { AggsCommonSetup, AggsStart as Start } from '../../../common';
+import { mergeJobConfigurations } from './jobs_compatibility';
 
-export type AggsSetup = AggsCommonSetup;
+export function getCapabilitiesForRollupIndices(indices: { [key: string]: any }) {
+  const indexNames = Object.keys(indices);
+  const capabilities = {} as { [key: string]: any };
 
-export interface AggsStart {
-  asScopedToClient: (
-    savedObjectsClient: SavedObjectsClientContract,
-    elasticsearchClient: ElasticsearchClient
-  ) => Promise<Start>;
+  indexNames.forEach((index) => {
+    try {
+      capabilities[index] = mergeJobConfigurations(indices[index].rollup_jobs);
+    } catch (e) {
+      capabilities[index] = {
+        error: e.message,
+      };
+    }
+  });
+
+  return capabilities;
 }
