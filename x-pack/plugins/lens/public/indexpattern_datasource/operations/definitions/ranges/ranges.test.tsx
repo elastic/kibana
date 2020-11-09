@@ -748,17 +748,6 @@ describe('ranges', () => {
 
       it('should not reset formatters when switching between custom ranges and auto histogram', () => {
         const setStateSpy = jest.fn();
-        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.ranges.push({
-          from: null,
-          to: null,
-          label: '',
-        });
-
-        // set a default formatter for the sourceField used
-        state.indexPatterns['1'].fieldFormatMap = {
-          MyField: { id: 'custom', params: {} },
-        };
-
         // now set a format on the range operation
         (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.format = {
           id: 'custom',
@@ -778,29 +767,12 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find('.euiLink').first().prop('onClick')!({} as ReactMouseEvent);
+          instance.find(EuiLink).first().prop('onClick')!({} as ReactMouseEvent);
+        });
 
-          expect(setStateSpy).toHaveBeenCalledWith({
-            ...state,
-            layers: {
-              first: {
-                ...state.layers.first,
-                columns: {
-                  ...state.layers.first.columns,
-                  col1: {
-                    ...state.layers.first.columns.col1,
-                    params: {
-                      ...state.layers.first.columns.col1.params,
-                      format: {
-                        id: 'custom',
-                        params: { decimals: 3 },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          });
+        expect(setStateSpy.mock.calls[1][0].layers.first.columns.col1.params.format).toEqual({
+          id: 'custom',
+          params: { decimals: 3 },
         });
       });
     });
