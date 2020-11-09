@@ -194,7 +194,7 @@ export function getTopNavConfig({
             isTitleDuplicateConfirmed: false,
             returnToOrigin: true,
             onTitleDuplicate: () => {},
-            saveByReference: false,
+            saveByReference: savedMap.isByReference(),
           });
         },
         testId: 'mapSaveAndReturnButton',

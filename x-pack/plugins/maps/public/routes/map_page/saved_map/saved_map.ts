@@ -224,6 +224,12 @@ export class SavedMap {
     return this._attributes;
   }
 
+  public isByReference(): boolean {
+    return (
+      this._mapEmbeddableInput && getMapAttributeService().inputIsRefType(this._mapEmbeddableInput)
+    );
+  }
+
   public async save({
     newDescription,
     newTitle,
