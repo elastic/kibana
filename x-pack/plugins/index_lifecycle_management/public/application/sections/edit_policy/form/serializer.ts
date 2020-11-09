@@ -4,12 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isNumber } from 'lodash';
 
-import { SerializedPolicy, SerializedActionWithAllocation } from '../../../../common/types';
+import { SerializedPolicy, SerializedActionWithAllocation } from '../../../../../common/types';
 
-import { FormInternal, DataAllocationMetaFields } from './types';
-import { isNumber } from '../../services/policies/policy_serialization';
+import { FormInternal, DataAllocationMetaFields } from '../types';
 
 const serializeAllocateAction = (
   { dataTierAllocationType, allocationNodeAttribute }: DataAllocationMetaFields,
@@ -162,6 +161,23 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 
     if (_meta.cold.freezeEnabled) {
       policy.phases.cold.actions.freeze = {};
+    }
+  }
+
+  /**
+   * DELETE PHASE SERIALIZATION
+   */
+  if (policy.phases.delete) {
+    if (policy.phases.delete.min_age) {
+      policy.phases.delete.min_age = `${policy.phases.delete.min_age}${_meta.delete.minAgeUnit}`;
+    }
+
+    if (originalPolicy?.phases.delete?.actions) {
+      const { wait_for_snapshot: __, ...rest } = originalPolicy.phases.delete.actions;
+      policy.phases.delete.actions = {
+        ...policy.phases.delete.actions,
+        ...rest,
+      };
     }
   }
 

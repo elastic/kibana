@@ -7,53 +7,24 @@
 import React, { FunctionComponent, Fragment } from 'react';
 import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiDescribedFormGroup, EuiSwitch, EuiTextColor, EuiFormRow } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiTextColor, EuiFormRow } from '@elastic/eui';
 
-import { DeletePhase as DeletePhaseInterface, Phases } from '../../../../../../common/types';
+import { useFormData, UseField, ToggleField } from '../../../../../../shared_imports';
 
-import { useFormData } from '../../../../../shared_imports';
+import { ActiveBadge, LearnMoreLink, OptionalLabel } from '../../index';
 
-import { PhaseValidationErrors } from '../../../../services/policies/policy_validation';
+import { MinAgeInputField, SnapshotPoliciesField } from '../shared_fields';
 
-import {
-  ActiveBadge,
-  LearnMoreLink,
-  OptionalLabel,
-  PhaseErrorMessage,
-  MinAgeInput,
-  SnapshotPolicies,
-} from '../';
-import { useRolloverPath } from './shared';
+const formFieldPaths = {
+  enabled: '_meta.delete.enabled',
+};
 
-const deleteProperty: keyof Phases = 'delete';
-const phaseProperty = (propertyName: keyof DeletePhaseInterface) => propertyName;
-
-interface Props {
-  setPhaseData: (key: keyof DeletePhaseInterface & string, value: string | boolean) => void;
-  phaseData: DeletePhaseInterface;
-  isShowingErrors: boolean;
-  errors?: PhaseValidationErrors<DeletePhaseInterface>;
-  getUrlForApp: (
-    appId: string,
-    options?: {
-      path?: string;
-      absolute?: boolean;
-    }
-  ) => string;
-}
-
-export const DeletePhase: FunctionComponent<Props> = ({
-  setPhaseData,
-  phaseData,
-  errors,
-  isShowingErrors,
-  getUrlForApp,
-}) => {
+export const DeletePhase: FunctionComponent = () => {
   const [formData] = useFormData({
-    watch: useRolloverPath,
+    watch: formFieldPaths.enabled,
   });
 
-  const hotPhaseRolloverEnabled = get(formData, useRolloverPath);
+  const enabled = get(formData, formFieldPaths.enabled);
 
   return (
     <div id="deletePhaseContent" aria-live="polite" role="region">
@@ -66,8 +37,7 @@ export const DeletePhase: FunctionComponent<Props> = ({
                 defaultMessage="Delete phase"
               />
             </h2>{' '}
-            {phaseData.phaseEnabled && !isShowingErrors ? <ActiveBadge /> : null}
-            <PhaseErrorMessage isShowingErrors={isShowingErrors} />
+            {enabled && <ActiveBadge />}
           </div>
         }
         titleSize="s"
@@ -79,39 +49,23 @@ export const DeletePhase: FunctionComponent<Props> = ({
                 defaultMessage="You no longer need your index.  You can define when it is safe to delete it."
               />
             </p>
-            <EuiSwitch
-              data-test-subj="enablePhaseSwitch-delete"
-              label={
-                <FormattedMessage
-                  id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.activateWarmPhaseSwitchLabel"
-                  defaultMessage="Activate delete phase"
-                />
-              }
-              id={`${deleteProperty}-${phaseProperty('phaseEnabled')}`}
-              checked={phaseData.phaseEnabled}
-              onChange={(e) => {
-                setPhaseData(phaseProperty('phaseEnabled'), e.target.checked);
+            <UseField
+              path={formFieldPaths.enabled}
+              component={ToggleField}
+              componentProps={{
+                euiFieldProps: {
+                  'data-test-subj': 'enablePhaseSwitch-delete',
+                  'aria-controls': 'deletePhaseContent',
+                },
               }}
-              aria-controls="deletePhaseContent"
             />
           </Fragment>
         }
         fullWidth
       >
-        {phaseData.phaseEnabled ? (
-          <MinAgeInput<DeletePhaseInterface>
-            errors={errors}
-            phaseData={phaseData}
-            phase={deleteProperty}
-            isShowingErrors={isShowingErrors}
-            setPhaseData={setPhaseData}
-            rolloverEnabled={hotPhaseRolloverEnabled}
-          />
-        ) : (
-          <div />
-        )}
+        {enabled && <MinAgeInputField phase="delete" />}
       </EuiDescribedFormGroup>
-      {phaseData.phaseEnabled ? (
+      {enabled ? (
         <EuiDescribedFormGroup
           title={
             <h3>
@@ -145,11 +99,7 @@ export const DeletePhase: FunctionComponent<Props> = ({
               </Fragment>
             }
           >
-            <SnapshotPolicies
-              value={phaseData.waitForSnapshotPolicy}
-              onChange={(value) => setPhaseData(phaseProperty('waitForSnapshotPolicy'), value)}
-              getUrlForApp={getUrlForApp}
-            />
+            <SnapshotPoliciesField />
           </EuiFormRow>
         </EuiDescribedFormGroup>
       ) : null}

@@ -6,18 +6,19 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { FormSchema, fieldValidators } from '../../../shared_imports';
-import { defaultSetPriority, defaultPhaseIndexPriority } from '../../constants';
+import { FormSchema, fieldValidators } from '../../../../shared_imports';
+import { defaultSetPriority, defaultPhaseIndexPriority } from '../../../constants';
 
-import { FormInternal } from './types';
+import { FormInternal } from '../types';
 
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
   rolloverThresholdsValidator,
-} from './form_validations';
+  minAgeValidator,
+} from './validations';
 
-import { i18nTexts } from './i18n_texts';
+import { i18nTexts } from '../i18n_texts';
 
 const { emptyField, numberGreaterThanField } = fieldValidators;
 
@@ -95,6 +96,18 @@ export const schema: FormSchema<FormInternal> = {
       },
       allocationNodeAttribute: {
         label: i18nTexts.editPolicy.allocationNodeAttributeFieldLabel,
+      },
+    },
+    delete: {
+      enabled: {
+        defaultValue: false,
+        label: i18n.translate(
+          'xpack.indexLifecycleMgmt.editPolicy.deletePhase.activateWarmPhaseSwitchLabel',
+          { defaultMessage: 'Activate delete phase' }
+        ),
+      },
+      minAgeUnit: {
+        defaultValue: 'd',
       },
     },
   },
@@ -177,15 +190,7 @@ export const schema: FormSchema<FormInternal> = {
         defaultValue: '0',
         validations: [
           {
-            validator: (arg) =>
-              numberGreaterThanField({
-                than: 0,
-                allowEquality: true,
-                message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
-              })({
-                ...arg,
-                value: arg.value === '' ? -Infinity : parseInt(arg.value, 10),
-              }),
+            validator: minAgeValidator,
           },
         ],
       },
@@ -256,15 +261,7 @@ export const schema: FormSchema<FormInternal> = {
         defaultValue: '0',
         validations: [
           {
-            validator: (arg) =>
-              numberGreaterThanField({
-                than: 0,
-                allowEquality: true,
-                message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
-              })({
-                ...arg,
-                value: arg.value === '' ? -Infinity : parseInt(arg.value, 10),
-              }),
+            validator: minAgeValidator,
           },
         ],
       },
@@ -290,6 +287,16 @@ export const schema: FormSchema<FormInternal> = {
             serializer: serializers.stringToNumber,
           },
         },
+      },
+    },
+    delete: {
+      min_age: {
+        defaultValue: '0',
+        validations: [
+          {
+            validator: minAgeValidator,
+          },
+        ],
       },
     },
   },

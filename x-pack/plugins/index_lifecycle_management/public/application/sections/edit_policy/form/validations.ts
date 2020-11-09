@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fieldValidators, ValidationFunc } from '../../../shared_imports';
+import { fieldValidators, ValidationFunc, ValidationConfig } from '../../../../shared_imports';
 
-import { ROLLOVER_FORM_PATHS } from './constants';
+import { ROLLOVER_FORM_PATHS } from '../constants';
 
-import { i18nTexts } from './i18n_texts';
+import { i18nTexts } from '../i18n_texts';
+import { PolicyFromES } from '../../../../../common/types';
+import { FormInternal } from '../types';
 
-const { numberGreaterThanField } = fieldValidators;
+const { numberGreaterThanField, containsCharsField, emptyField, startsWithField } = fieldValidators;
 
 const createIfNumberExistsValidator = ({
   than,
@@ -46,7 +48,7 @@ export const ifExistsNumberNonNegative = createIfNumberExistsValidator({
  * A special validation type used to keep track of validation errors for
  * the rollover threshold values not being set (e.g., age and doc count)
  */
-export const ROLLOVER_EMPTY_VALIDATION = 'EMPTY';
+export const ROLLOVER_EMPTY_VALIDATION = 'ROLLOVER_EMPTY_VALIDATION';
 
 /**
  * An ILM policy requires that for rollover a value must be set for one of the threshold values.
@@ -86,4 +88,69 @@ export const rolloverThresholdsValidator: ValidationFunc = ({ form }) => {
     fields[ROLLOVER_FORM_PATHS.maxDocs].clearErrors(ROLLOVER_EMPTY_VALIDATION);
     fields[ROLLOVER_FORM_PATHS.maxSize].clearErrors(ROLLOVER_EMPTY_VALIDATION);
   }
+};
+
+export const minAgeValidator: ValidationFunc<any, any, any> = (arg) =>
+  numberGreaterThanField({
+    than: 0,
+    allowEquality: true,
+    message: i18nTexts.editPolicy.errors.nonNegativeNumberRequired,
+  })({
+    ...arg,
+    value: arg.value === '' ? -Infinity : parseInt(arg.value, 10),
+  });
+
+export const createPolicyNameValidations = ({
+  policies,
+  saveAsNewPolicy,
+  originalPolicyName,
+}: {
+  policies: PolicyFromES[];
+  saveAsNewPolicy: boolean;
+  originalPolicyName?: string;
+}): Array<ValidationConfig<FormInternal, string, string>> => {
+  return [
+    {
+      validator: emptyField(i18nTexts.editPolicy.errors.policyNameRequiredMessage),
+    },
+    {
+      validator: startsWithField({
+        message: i18nTexts.editPolicy.errors.policyNameStartsWithUnderscoreErrorMessage,
+        char: '_',
+      }),
+    },
+    {
+      validator: containsCharsField({
+        message: i18nTexts.editPolicy.errors.policyNameContainsInvalidChars,
+        chars: [',', ' '],
+      }),
+    },
+    {
+      validator: (arg) => {
+        const policyName = arg.value;
+        if (window.TextEncoder && new window.TextEncoder().encode(policyName).length > 255) {
+          return {
+            message: i18nTexts.editPolicy.errors.policyNameTooLongErrorMessage,
+          };
+        }
+      },
+    },
+    {
+      validator: (arg) => {
+        const policyName = arg.value;
+        if (saveAsNewPolicy && policyName === originalPolicyName) {
+          return {
+            message: i18nTexts.editPolicy.errors.policyNameMustBeDifferentErrorMessage,
+          };
+        } else if (policyName !== originalPolicyName) {
+          const policyNames = policies.map((existingPolicy) => existingPolicy.name);
+          if (policyNames.includes(policyName)) {
+            return {
+              message: i18nTexts.editPolicy.errors.policyNameAlreadyUsedErrorMessage,
+            };
+          }
+        }
+      },
+    },
+  ];
 };
