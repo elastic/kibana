@@ -6,9 +6,9 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { FEATURE_ID_PROPERTY_NAME, LON_INDEX } from '../../../../../common/constants';
+import { FEATURE_ID_PROPERTY_NAME, LON_INDEX } from '../../../../common/constants';
 import { TooltipPopover } from './tooltip_popover';
-import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../../classes/util/mb_filter_expressions';
+import { EXCLUDE_TOO_MANY_FEATURES_BOX } from '../../../classes/util/mb_filter_expressions';
 
 function justifyAnchorLocation(mbLngLat, targetFeature) {
   let popupAnchorLocation = [mbLngLat.lng, mbLngLat.lat]; // default popup location to mouse location

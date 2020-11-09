@@ -6,15 +6,15 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { ResizeChecker } from '../../../../../../../src/plugins/kibana_utils/public';
+import { ResizeChecker } from '../../../../../../src/plugins/kibana_utils/public';
 import { removeOrphanedSourcesAndLayers, addSpritesheetToMap } from './utils';
 import { syncLayerOrder } from './sort_layers';
-import { getGlyphUrl, isRetina } from '../../../meta';
+import { getGlyphUrl, isRetina } from '../../meta';
 import {
   DECIMAL_DEGREES_PRECISION,
   KBN_TOO_MANY_FEATURES_IMAGE_ID,
   ZOOM_PRECISION,
-} from '../../../../common/constants';
+} from '../../../common/constants';
 import mapboxgl from 'mapbox-gl/dist/mapbox-gl-csp';
 import mbWorkerUrl from '!!file-loader!mapbox-gl/dist/mapbox-gl-csp-worker';
 import mbRtlPlugin from '!!file-loader!@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js';
@@ -23,9 +23,9 @@ import sprites1 from '@elastic/maki/dist/sprite@1.png';
 import sprites2 from '@elastic/maki/dist/sprite@2.png';
 import { DrawControl } from './draw_control';
 import { TooltipControl } from './tooltip_control';
-import { clampToLatBounds, clampToLonBounds } from '../../../../common/elasticsearch_util';
+import { clampToLatBounds, clampToLonBounds } from '../../../common/elasticsearch_util';
 import { getInitialView } from './get_initial_view';
-import { getPreserveDrawingBuffer } from '../../../kibana_services';
+import { getPreserveDrawingBuffer } from '../../kibana_services';
 
 mapboxgl.workerUrl = mbWorkerUrl;
 mapboxgl.setRTLTextPlugin(mbRtlPlugin);
