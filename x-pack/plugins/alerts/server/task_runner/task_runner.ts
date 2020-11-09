@@ -247,8 +247,10 @@ export class TaskRunner {
       const mutedInstanceIdsSet = new Set(mutedInstanceIds);
 
       const instancesToExecute = notifyOnStateChange
-        ? Object.entries(instancesWithScheduledActions).filter(
-            ([_, alertInstance]: [string, AlertInstance]) => !alertInstance.actionGroupHasChanged()
+        ? Object.entries(
+            instancesWithScheduledActions
+          ).filter(([_, alertInstance]: [string, AlertInstance]) =>
+            alertInstance.actionGroupHasChanged()
           )
         : Object.entries(instancesWithScheduledActions).filter(
             ([alertInstanceName, alertInstance]: [string, AlertInstance]) =>

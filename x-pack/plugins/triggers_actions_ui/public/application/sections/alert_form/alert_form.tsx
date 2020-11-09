@@ -438,7 +438,7 @@ export const AlertForm = ({
         </EuiFlexItem>
       </EuiFlexGrid>
       <EuiSpacer size="m" />
-      <EuiFlexGrid columns={2}>
+      <EuiFlexGrid columns={1}>
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
@@ -480,26 +480,39 @@ export const AlertForm = ({
             </EuiFlexGroup>
           </EuiFormRow>
         </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer size="m" />
+      <EuiFlexGrid columns={1}>
         <EuiFlexItem>
-          <EuiSwitch
-            checked={alert.notifyOnStateChange || false}
-            data-test-subj="notifyOnStateChange"
-            id="notifyOnStateChange"
-            label={
-              <FormattedMessage
-                defaultMessage="Notify on state change only"
-                id="xpack.triggersActionsUI.sections.alertForm.notifyOnStateChange"
-              />
-            }
-            onChange={(e) => setAlertProperty('notifyOnStateChange', e.target.checked)}
-          />
           <EuiFormRow fullWidth label={labelForAlertRenotify}>
+            <EuiSwitch
+              checked={alert.notifyOnStateChange || false}
+              data-test-subj="notifyOnStateChange"
+              id="notifyOnStateChange"
+              label={
+                <FormattedMessage
+                  defaultMessage="Notify only when action group changes."
+                  id="xpack.triggersActionsUI.sections.alertForm.notifyOnStateChange"
+                />
+              }
+              onChange={(e) => {
+                if (e.target.checked) {
+                  // unset throttle
+                  setAlertThrottle(null);
+                  setAlertProperty('throttle', null);
+                }
+                setAlertProperty('notifyOnStateChange', e.target.checked);
+              }}
+            />
+          </EuiFormRow>
+          <EuiFormRow fullWidth>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
                 <EuiFieldNumber
                   fullWidth
                   min={1}
                   compressed
+                  disabled={alert.notifyOnStateChange}
                   value={alertThrottle || ''}
                   name="throttle"
                   data-test-subj="throttleInput"
@@ -527,6 +540,7 @@ export const AlertForm = ({
               <EuiFlexItem grow={false}>
                 <EuiSelect
                   compressed
+                  disabled={alert.notifyOnStateChange}
                   value={alertThrottleUnit}
                   options={getTimeOptions(alertThrottle ?? 1)}
                   onChange={(e) => {

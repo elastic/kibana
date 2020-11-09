@@ -333,6 +333,117 @@ describe('Task Runner', () => {
     });
   });
 
+  test('actionsPlugin.execute is not called when notifyOnStateChange is true and alert instance state does not change', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      {
+        ...mockedTaskInstance,
+        state: {
+          ...mockedTaskInstance.state,
+          alertInstances: {
+            '1': {
+              meta: {
+                lastScheduledActions: { date: '1970-01-01T00:00:00.000Z', group: 'default' },
+              },
+              state: { bar: false },
+            },
+          },
+        },
+      },
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyOnStateChange: true,
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(0);
+
+    const eventLogger = taskRunnerFactoryInitializerParams.eventLogger;
+    expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+    expect(eventLogger.logEvent).toHaveBeenCalledWith({
+      event: {
+        action: 'execute',
+        outcome: 'success',
+      },
+      kibana: {
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+          },
+        ],
+      },
+      message: "alert executed: test:1: 'alert-name'",
+    });
+    expect(eventLogger.logEvent).toHaveBeenCalledWith({
+      event: {
+        action: 'active-instance',
+      },
+      kibana: {
+        alerting: {
+          instance_id: '1',
+          action_group_id: 'default',
+        },
+        saved_objects: [
+          {
+            id: '1',
+            namespace: undefined,
+            rel: 'primary',
+            type: 'alert',
+          },
+        ],
+      },
+      message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
+    });
+  });
+
+  test('actionsPlugin.execute is called when notifyOnStateChange is true and alert instance state has changed', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    alertType.executor.mockImplementation(
+      ({ services: executorServices }: AlertExecutorOptions) => {
+        executorServices.alertInstanceFactory('1').scheduleActions('default');
+      }
+    );
+    const taskRunner = new TaskRunner(
+      alertType,
+      mockedTaskInstance,
+      taskRunnerFactoryInitializerParams
+    );
+    alertsClient.get.mockResolvedValue({
+      ...mockedAlertTypeSavedObject,
+      notifyOnStateChange: true,
+    });
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [],
+    });
+    await taskRunner.run();
+    expect(actionsClient.enqueueExecution).toHaveBeenCalledTimes(1);
+  });
+
   test('includes the apiKey in the request used to initialize the actionsClient', async () => {
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
