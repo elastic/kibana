@@ -6,8 +6,8 @@
 <titleabbrev>Create a multilayer map</titleabbrev>
 ++++
 
-If you are new to creating maps in {kib}, this tutorial is a good place to start.
-It guides you through the most common steps for plotting location data.
+If you are new to maps in {kib}, this tutorial is a good place to start.
+It guides you through the common steps for working with your location data.
 
 You'll learn to:
 
@@ -26,16 +26,17 @@ image::maps/images/sample_data_web_logs.png[]
 
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
 - This tutorial uses the <<get-started, web logs sample data set>>. The sample data includes a [Logs] Total Requests and Bytes map, which you’ll create in this tutorial.
-- You must have the correct privileges for creating a map. If you have insufficient privileges to create or save maps,
-a read-only icon appears in the application header. For more information on granting access to {kib},
- see <<xpack-security-authorization,Granting access to {kib}>>.
+- You must have the correct privileges for creating a map.
+If you don't have sufficient privileges to create or save maps,
+a read-only icon appears in the application header. For more information,
+refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
 [[maps-create]]
-=== Step 1. Create a map
+=== Step 1. Create a basic map
 
-. Open the main menu, then click *Dashboard*.
-. Click **Create dashboards**.
+. Open the main menu, and then click *Dashboard*.
+. Click **Create dashboard**.
 . Set the time range to *Last 7 days*.
 . Click **Create new**
 . Click **Maps**.
@@ -45,7 +46,7 @@ a read-only icon appears in the application header. For more information on gran
 === Step 2. Add a choropleth layer
 
 The first layer you'll add is a choropleth layer to shade world countries
-by web log traffic. Darker will shades symbolize countries with more web log traffic,
+by web log traffic. Darker shades will symbolize countries with more web log traffic,
 and lighter shades will symbolize countries with less traffic.
 
 . Click **Add layer**, and then click **Choropleth**.
@@ -65,8 +66,8 @@ and lighter shades will symbolize countries with less traffic.
 
 . Add a Tooltip field:
 
-** Select **ISO 3166-1 alpha-2 code** and **name**
-** Click **Add**
+** Select **ISO 3166-1 alpha-2 code** and **name**.
+** Click **Add**.
 
 . In **Layer style**, set:
 
@@ -86,35 +87,36 @@ image::maps/images/gs_add_cloropeth_layer.png[]
 
 To avoid overwhelming the user with too much data at once, you'll add two layers
 for the Elasticsearch data. The first layer will display individual documents
-when the user zooms in the maps. The second layer will
-display aggregated data when the user zooms out the map.
+when users zoom in on the map. The second layer will
+display aggregated data when users zoom the map out.
 
 [float]
-==== Add a layer for indiviual documents
+==== Add a layer for individual documents
 
 This layer displays web log documents as points.
-The layer is only visible when users zoom in past level 9.
+The layer is only visible when users zoom in.
 
 . Click **Add layer**, and then click **Documents**.
 
 . Set **Index pattern** to **kibana_sample_data_logs**.
 
-. Click **Add layer**.
+. Set **Scaling** to *Limits results to 10000.*
 
-. Set **Scaling* to *Limits reulsts to 10000.*
+. Click **Add layer**.
 
 . In **Layer settings**, set:
 ** **Name** to `Actual Requests`
 ** **Visibilty** to the range [9, 24]
 ** **Opacity** to 100%
 
-. Add a tooltip field and select **timestamp**, **agent**, **bytes**, **clientip**, **host**, **machine.os**, **request**, and **response**.
+. Add a tooltip field and select **agent**, **bytes**, **clientip**, **host**,
+**machine.os**, **request**, **response**, and **timestamp**.
 
-. Set **Fill color** to **#2200ff**.
+. In **Layer style**, set **Fill color** to **#2200FF**.
 
 . Click **Save & close**.
 +
-Your map will look like this between zoom levels 9 and 24:
+Your map will look like this from zoom level 9 to 24:
 +
 [role="screenshot"]
 image::maps/images/gs_add_es_document_layer.png[]
@@ -122,8 +124,8 @@ image::maps/images/gs_add_es_document_layer.png[]
 [float]
 ==== Add a layer for aggregated data
 
-You'll create a layer for aggregated data and make it visible only when the map
-is zoomed out past zoom level 9. Darker colors will symbolize grids
+You'll create a layer for {ref}/search-aggregations.html[aggregated data] and make it visible only when the map
+is zoomed out. Darker colors will symbolize grids
 with more web log traffic, and lighter colors will symbolize grids with less
 traffic. Larger circles will symbolize grids with
 more total bytes transferred, and smaller circles will symbolize
@@ -140,9 +142,8 @@ grids with less bytes transferred.
 ** **Aggregation** set to **Sum**
 ** **Field** set to **bytes**
 . In **Layer style**, change **Symbol size**:
-** Min size to 7
-** Max size to 25
-** Change the field select from *count* to *sum of bytes*.
+** Set the field select to *sum bytes*.
+** Set the min size to 7 and the max size to 25 px.
 . Click **Save & close** button.
 +
 Your map will look like this between zoom levels 0 and 9:
@@ -155,7 +156,7 @@ image::maps/images/sample_data_web_logs.png[]
 === Step 4. Save the map
 Now that your map is complete, you'll want to save it and return to the dashboard.
 
-. In the application toolbar, click *Save*.
+. In the toolbar, click *Save*.
 . Enter `Tutorial web logs map` for the title.
 . Ensure *Add to Dashboard after saving* is enabled.
 . Click *Save and return*.
@@ -164,24 +165,27 @@ Now that your map is complete, you'll want to save it and return to the dashboar
 [[maps-embedding]]
 === Step 5. Explore your data from the dashboard
 
-View your geospatial data alongside a heat map and pie charts, and then fitler the data.
+View your geospatial data alongside a heat map and pie chart, and then filter the data.
 
-. Click **Add** to open a panel with a list of objects that you can add to the dashboard.
-. Set the **Types** select to **Visualization** and add **[Logs] Heatmap** and **[Logs] Visitors by OS** to the dashboard.
+. In the toolbar, click **Add** to open a list of objects that you can add to the dashboard.
+. Set the **Types** select to **Visualization**.
+. Add **[Logs] Heatmap** and **[Logs] Visitors by OS** to the dashboard.
 +
 [role="screenshot"]
 image::maps/images/gs_dashboard_with_map.png[]
 
-. Apply filters to your dashboard to hone in on the data that you are most interested in.
-The panels are linked, so watch as you apply a filter in one panel, it is applied to all panels on the dashboard.
+. To filter for documents where **machine.os.keyword** is **osx**, click
+the **osx** slice in the pie chart.
++
+When you apply a filter in one panel, it is applied to all panels on the dashboard.
 
-.. To filter filter for documents where **machine.os.keyword** is **osx**, click **osx** in the pie chart.
+. Remove the filter by clicking **x** next to its name in the filter bar.
 
-.. In the filter bar, click the **x** to remove the **machine.os.keyword: osx** filter.
+. Set a filter from the map:
 
-.. In the map, click anywhere in the United States vector.
+.. Open a tooltip by clicking anywhere in the United States vector.
 
-.. To show documents where **geo.src** is **US**, click the plus (+) icon next to the iso2 row in the tooltip.
+.. To show only documents where **geo.src** is **US**, click the filter icon in the row for **ISO 3066-1 alpha-2**.
 +
 [role="screenshot"]
 image::maps/images/gs_dashboard_with_terms_filter.png[]
@@ -189,5 +193,6 @@ image::maps/images/gs_dashboard_with_terms_filter.png[]
 [float]
 === What's next?
 
-* Check out <<vector-layer, additional layers>> that you can build.
-* Learn more about <<maps-vector-style-properties, customizing your map>>.
+* Check out <<vector-layer, additional types of layers>> that you can add to your map.
+* Learn more ways <<maps-vector-style-properties, customize your map>>.
+* Learn more ways to work with <<vector-tooltip,vector tooltips>>.
