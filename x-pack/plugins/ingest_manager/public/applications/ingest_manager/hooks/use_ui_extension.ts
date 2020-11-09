@@ -10,10 +10,15 @@ import { UIExtensionPoint, UIExtensionsStorage } from '../../../../common/types/
 export const UIExtensionsContext = React.createContext<UIExtensionsStorage>({});
 
 type SpecificExtensionPoint<A, T, V> = A extends { type: T; view: V } ? A : never;
+type NarrowViews<T = UIExtensionPoint['type'], A = UIExtensionPoint> = A extends {
+  type: T;
+}
+  ? A
+  : never;
 
 export const useUIExtension = <
   T extends UIExtensionPoint['type'] = UIExtensionPoint['type'],
-  V extends UIExtensionPoint['view'] = UIExtensionPoint['view']
+  V extends NarrowViews<T>['view'] = never
 >(
   integration: UIExtensionPoint['integration'],
   type: T,
