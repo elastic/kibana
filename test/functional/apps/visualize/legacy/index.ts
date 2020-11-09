@@ -42,10 +42,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     describe('legacy data table visualization', function () {
       this.tags('ciGroup9');
 
-      loadTestFile(require.resolve('./data_table/_embedding_chart'));
-      loadTestFile(require.resolve('./data_table/_data_table'));
-      loadTestFile(require.resolve('./data_table/_data_table_nontimeindex'));
-      loadTestFile(require.resolve('./data_table/_data_table_notimeindex_filters'));
+      loadTestFile(require.resolve('./_data_table'));
     });
   });
 }

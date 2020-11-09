@@ -63,7 +63,7 @@ export const createGridColumns = (
       ? [
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
-            const contentsIsDefined = rowValue ?? false;
+            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
 
             const filterForText = i18n.translate(
               'visTypeTable.tableCellFilter.filterForValueText',
@@ -89,7 +89,7 @@ export const createGridColumns = (
           },
           ({ rowIndex, columnId, Component }: EuiDataGridColumnCellActionProps) => {
             const rowValue = rows[rowIndex][columnId];
-            const contentsIsDefined = rowValue ?? false;
+            const contentsIsDefined = rowValue !== null && rowValue !== undefined;
 
             const filterOutText = i18n.translate(
               'visTypeTable.tableCellFilter.filterOutValueText',
