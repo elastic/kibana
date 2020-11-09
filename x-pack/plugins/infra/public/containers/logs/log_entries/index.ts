@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useEffect, useState, useReducer, useCallback } from 'react';
-import { useMountedState } from 'react-use';
+import useMountedState from 'react-use/lib/useMountedState';
 import createContainer from 'constate';
 import { pick, throttle } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
