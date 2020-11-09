@@ -188,7 +188,7 @@ Want to share your findings with your peers? Export your data into a spreadsheet
 
 . In the toolbar, click **Share**, then **CSV Reports**.
 
-. Click Generate **CSV**.
+. Click **Generate CSV**.
 +
 Your report is available in **Stack Management > Reporting**.
 
