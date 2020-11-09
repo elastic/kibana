@@ -5,7 +5,7 @@
  */
 import { RequestHandler, SavedObjectsClientContract } from 'src/core/server';
 import { DataStream } from '../../types';
-import { GetDataStreamsResponse, KibanaAssetType } from '../../../common';
+import { GetDataStreamsResponse, KibanaAssetType, KibanaSavedObjectType } from '../../../common';
 import { getPackageSavedObjects, getKibanaSavedObject } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
@@ -124,7 +124,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
         // then pick the dashboards from the package saved object
         const dashboards =
           pkgSavedObject[0].attributes?.installed_kibana?.filter(
-            (o) => o.type === KibanaAssetType.dashboard
+            (o) => o.type === KibanaSavedObjectType.dashboard
           ) || [];
         // and then pick the human-readable titles from the dashboard saved objects
         const enhancedDashboards = await getEnhancedDashboards(

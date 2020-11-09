@@ -50,7 +50,14 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
       if (!siemClient || !alertsClient) {
         return siemResponse.error({ statusCode: 404 });
       }
-      const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+
+      const mlAuthz = buildMlAuthz({
+        license: context.licensing.license,
+        ml,
+        request,
+        savedObjectsClient,
+      });
+
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
@@ -95,6 +102,8 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
             threat_query: threatQuery,
             threat_mapping: threatMapping,
             threat_language: threatLanguage,
+            concurrent_searches: concurrentSearches,
+            items_per_search: itemsPerSearch,
             throttle,
             timestamp_override: timestampOverride,
             references,
@@ -167,6 +176,8 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               threatQuery,
               threatMapping,
               threatLanguage,
+              concurrentSearches,
+              itemsPerSearch,
               timestampOverride,
               references,
               note,

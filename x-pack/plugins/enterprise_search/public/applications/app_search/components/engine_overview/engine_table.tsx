@@ -5,14 +5,13 @@
  */
 
 import React from 'react';
-import { useValues } from 'kea';
-import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { useActions } from 'kea';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
-import { sendTelemetry } from '../../../shared/telemetry';
-import { HttpLogic } from '../../../shared/http';
-import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
+import { TelemetryLogic } from '../../../shared/telemetry';
+import { EuiLink } from '../../../shared/react_router_helpers';
 import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
@@ -42,15 +41,12 @@ export const EngineTable: React.FC<IEngineTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex, onPaginate },
 }) => {
-  const { http } = useValues(HttpLogic);
+  const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   const engineLinkProps = (name: string) => ({
-    href: getAppSearchUrl(getEngineRoute(name)),
-    target: '_blank',
+    to: getEngineRoute(name),
     onClick: () =>
-      sendTelemetry({
-        http,
-        product: 'app_search',
+      sendAppSearchTelemetry({
         action: 'clicked',
         metric: 'engine_table_link',
       }),
