@@ -94,7 +94,7 @@
             "title": {
               "type": "text"
             },
-            "attributes": {
+            "fieldAttrs": {
               "type": "text"
             }
           }
