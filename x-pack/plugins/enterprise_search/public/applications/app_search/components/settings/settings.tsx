@@ -7,10 +7,17 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { EuiPageHeader, EuiPageHeaderSection, EuiPageContentBody, EuiTitle } from '@elastic/eui';
+import {
+  EuiPageHeader,
+  EuiPageHeaderSection,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
+import { LogRetentionPanel } from './log_retention/log_retention_panel';
 
 export const Settings: React.FC = () => {
   return (
@@ -33,9 +40,12 @@ export const Settings: React.FC = () => {
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>
-      <EuiPageContentBody>
-        <FlashMessages />
-      </EuiPageContentBody>
+      <EuiPageContent>
+        <EuiPageContentBody>
+          <FlashMessages />
+          <LogRetentionPanel />
+        </EuiPageContentBody>
+      </EuiPageContent>
     </>
   );
 };
