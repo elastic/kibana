@@ -24,7 +24,7 @@ import { Logger } from '../cli_plugin/lib/logger';
 import * as prompt from '../cli_keystore/utils/prompt';
 import fs from 'fs';
 
-describe('encyption key generation', () => {
+describe('encryption key generation', () => {
   const encryptionConfig = new EncryptionConfig();
   beforeEach(() => {
     Logger.prototype.log = jest.fn();
