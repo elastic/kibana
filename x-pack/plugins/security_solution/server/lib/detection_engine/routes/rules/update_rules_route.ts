@@ -69,7 +69,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
             enabled: request.body.enabled ?? true,
             actions: request.body.actions,
             throttle: request.body.throttle,
-            name,
+            name: request.body.name,
           });
           const ruleStatuses = await ruleStatusClient.find({
             perPage: 1,

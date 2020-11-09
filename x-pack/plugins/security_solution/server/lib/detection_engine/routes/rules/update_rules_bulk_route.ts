@@ -80,7 +80,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 enabled: payloadRule.enabled ?? true,
                 actions: payloadRule.actions,
                 throttle: payloadRule.throttle,
-                name,
+                name: payloadRule.name,
               });
               const ruleStatuses = await ruleStatusClient.find({
                 perPage: 1,
