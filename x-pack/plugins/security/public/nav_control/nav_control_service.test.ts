@@ -6,7 +6,6 @@
 
 import { coreMock } from 'src/core/public/mocks';
 import { BehaviorSubject } from 'rxjs';
-import { toArray } from 'rxjs/operators';
 import { ILicense } from '../../../licensing/public';
 import { SecurityNavControlService } from '.';
 import { SecurityLicenseService } from '../../common/licensing';
