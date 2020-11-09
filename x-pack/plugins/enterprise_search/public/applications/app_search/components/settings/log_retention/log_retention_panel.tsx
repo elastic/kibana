@@ -30,11 +30,11 @@ export const LogRetentionPanel: React.FC = () => {
   return (
     <div data-test-subj="LogRetentionPanel">
       <EuiTitle size="s">
-        <h3>
+        <h2>
           {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.title', {
             defaultMessage: 'Log Retention',
           })}
-        </h3>
+        </h2>
       </EuiTitle>
       <EuiText>
         <p>
