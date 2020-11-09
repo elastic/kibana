@@ -228,8 +228,6 @@ export class IndexPatternsService {
       type: options.type,
       params: options.params || {},
     });
-    // eslint-disable-next-line no-console
-    console.log('getFieldsForWildcard returns', JSON.stringify(result));
     return result;
   };
 
@@ -255,6 +253,8 @@ export class IndexPatternsService {
   refreshFields = async (indexPattern: IndexPattern) => {
     try {
       const fields = await this.getFieldsForIndexPattern(indexPattern);
+      // eslint-disable-next-line no-console
+      console.log('refreshFields returns', JSON.stringify(fields));
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       indexPattern.fields.replaceAll([...fields, ...scripted]);
     } catch (err) {
@@ -287,7 +287,12 @@ export class IndexPatternsService {
     const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
       const newFields = await this.getFieldsForWildcard(options);
-      return this.fieldArrayToMap([...newFields, ...scriptdFields]);
+      // eslint-disable-next-line no-console
+      console.log('getFieldsForWildcard returns', JSON.stringify(newFields));
+      const result = this.fieldArrayToMap([...newFields, ...scriptdFields]);
+      // eslint-disable-next-line no-console
+      console.log('fieldArrayToMap returns', JSON.stringify(result));
+      return result;
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
