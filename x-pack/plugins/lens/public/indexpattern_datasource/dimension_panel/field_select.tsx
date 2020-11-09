@@ -61,11 +61,11 @@ export function FieldSelect({
 
     function isCompatibleWithCurrentOperation(fieldName: string) {
       if (incompatibleSelectedOperationType) {
-        return operationByField[fieldName]!.includes(incompatibleSelectedOperationType);
+        return operationByField[fieldName]!.has(incompatibleSelectedOperationType);
       }
       return (
         !selectedColumnOperationType ||
-        operationByField[fieldName]!.includes(selectedColumnOperationType)
+        operationByField[fieldName]!.has(selectedColumnOperationType)
       );
     }
 

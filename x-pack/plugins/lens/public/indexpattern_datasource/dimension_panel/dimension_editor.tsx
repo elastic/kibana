@@ -103,9 +103,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         return op1.displayName.localeCompare(op2.displayName);
       })
       .map((def) => def.type)
-      .filter(
-        (type) => fieldByOperation[type]?.length || operationWithoutField.indexOf(type) !== -1
-      );
+      .filter((type) => fieldByOperation[type]?.size || operationWithoutField.has(type));
   }, [fieldByOperation, operationWithoutField]);
 
   // Operations are compatible if they match inputs. They are always compatible in
@@ -120,7 +118,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         (selectedColumn &&
           hasField(selectedColumn) &&
           definition.input === 'field' &&
-          fieldByOperation[operationType]?.indexOf(selectedColumn.sourceField) !== -1) ||
+          fieldByOperation[operationType]?.has(selectedColumn.sourceField)) ||
         (selectedColumn && !hasField(selectedColumn) && definition.input !== 'field'),
     };
   });
@@ -190,9 +188,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
-            const possibleFields = fieldByOperation[operationType] || [];
+            const possibleFields = fieldByOperation[operationType] || new Set();
 
-            if (possibleFields.length === 1) {
+            if (possibleFields.size === 1) {
               setState(
                 changeColumn({
                   state,
@@ -204,7 +202,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     layerId: props.layerId,
                     op: operationType,
                     indexPattern: currentIndexPattern,
-                    field: currentIndexPattern.getFieldByName(possibleFields[0]),
+                    field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
                     previousColumn: selectedColumn,
                   }),
                 })
@@ -325,14 +323,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   // Otherwise we'll use the buildColumn method to calculate a new column
                   const compatibleOperations =
                     ('field' in choice && operationSupportMatrix.operationByField[choice.field]) ||
-                    [];
+                    new Set();
                   let operation;
-                  if (compatibleOperations.length > 0) {
+                  if (compatibleOperations.size > 0) {
                     operation =
                       incompatibleSelectedOperationType &&
-                      compatibleOperations.includes(incompatibleSelectedOperationType)
+                      compatibleOperations.has(incompatibleSelectedOperationType)
                         ? incompatibleSelectedOperationType
-                        : compatibleOperations[0];
+                        : compatibleOperations.values().next().value;
                   } else if ('field' in choice) {
                     operation = choice.operationType;
                   }
