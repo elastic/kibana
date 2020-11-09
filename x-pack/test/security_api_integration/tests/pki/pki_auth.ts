@@ -13,10 +13,10 @@ import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CA_CERT = readFileSync(CA_CERT_PATH);
-const FIRST_CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/first_client.p12'));
-const SECOND_CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/second_client.p12'));
+const FIRST_CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/pki/first_client.p12'));
+const SECOND_CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/pki/second_client.p12'));
 const UNTRUSTED_CLIENT_CERT = readFileSync(
-  resolve(__dirname, '../../fixtures/untrusted_client.p12')
+  resolve(__dirname, '../../fixtures/pki/untrusted_client.p12')
 );
 
 export default function ({ getService }: FtrProviderContext) {
@@ -97,9 +97,20 @@ export default function ({ getService }: FtrProviderContext) {
       // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
     });
 
+    it('AJAX requests should not create a new session', async () => {
+      const ajaxResponse = await supertest
+        .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
+        .ca(CA_CERT)
+        .pfx(FIRST_CLIENT_CERT)
+        .expect(401);
+
+      expect(ajaxResponse.headers['set-cookie']).to.be(undefined);
+    });
+
     it('should properly set cookie and authenticate user', async () => {
       const response = await supertest
-        .get('/internal/security/me')
+        .get('/security/account')
         .ca(CA_CERT)
         .pfx(FIRST_CLIENT_CERT)
         .expect(200);
@@ -110,35 +121,34 @@ export default function ({ getService }: FtrProviderContext) {
       const sessionCookie = request.cookie(cookies[0])!;
       checkCookieIsSet(sessionCookie);
 
-      expect(response.body).to.eql({
-        username: 'first_client',
-        roles: ['kibana_admin'],
-        full_name: null,
-        email: null,
-        enabled: true,
-        metadata: {
-          pki_delegated_by_realm: 'reserved',
-          pki_delegated_by_user: 'kibana',
-          pki_dn: 'CN=first_client',
-        },
-        authentication_realm: { name: 'pki1', type: 'pki' },
-        lookup_realm: { name: 'pki1', type: 'pki' },
-        authentication_provider: { name: 'pki', type: 'pki' },
-        authentication_type: 'token',
-      });
-
       // Cookie should be accepted.
       await supertest
         .get('/internal/security/me')
+        .set('kbn-xsrf', 'xxx')
         .ca(CA_CERT)
         .pfx(FIRST_CLIENT_CERT)
         .set('Cookie', sessionCookie.cookieString())
-        .expect(200);
+        .expect(200, {
+          username: 'first_client',
+          roles: ['kibana_admin'],
+          full_name: null,
+          email: null,
+          enabled: true,
+          metadata: {
+            pki_delegated_by_realm: 'reserved',
+            pki_delegated_by_user: 'kibana',
+            pki_dn: 'CN=first_client',
+          },
+          authentication_realm: { name: 'pki1', type: 'pki' },
+          lookup_realm: { name: 'pki1', type: 'pki' },
+          authentication_provider: { name: 'pki', type: 'pki' },
+          authentication_type: 'token',
+        });
     });
 
     it('should update session if new certificate is provided', async () => {
       let response = await supertest
-        .get('/internal/security/me')
+        .get('/security/account')
         .ca(CA_CERT)
         .pfx(FIRST_CLIENT_CERT)
         .expect(200);
@@ -177,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should reject valid cookie if used with untrusted certificate', async () => {
       const response = await supertest
-        .get('/internal/security/me')
+        .get('/security/account')
         .ca(CA_CERT)
         .pfx(FIRST_CLIENT_CERT)
         .expect(200);
@@ -201,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const response = await supertest
-          .get('/internal/security/me')
+          .get('/security/account')
           .ca(CA_CERT)
           .pfx(FIRST_CLIENT_CERT)
           .expect(200);
@@ -274,7 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should redirect to `logged_out` page after successful logout', async () => {
         // First authenticate user to retrieve session cookie.
         const response = await supertest
-          .get('/internal/security/me')
+          .get('/security/account')
           .ca(CA_CERT)
           .pfx(FIRST_CLIENT_CERT)
           .expect(200);
@@ -317,7 +327,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       beforeEach(async () => {
         const response = await supertest
-          .get('/internal/security/me')
+          .get('/security/account')
           .ca(CA_CERT)
           .pfx(FIRST_CLIENT_CERT)
           .expect(200);
@@ -363,7 +373,7 @@ export default function ({ getService }: FtrProviderContext) {
         // This request should succeed and automatically refresh token. Returned cookie will contain
         // the new access and refresh token pair.
         const nonAjaxResponse = await supertest
-          .get('/app/kibana')
+          .get('/security/account')
           .ca(CA_CERT)
           .pfx(FIRST_CLIENT_CERT)
           .set('Cookie', sessionCookie.cookieString())

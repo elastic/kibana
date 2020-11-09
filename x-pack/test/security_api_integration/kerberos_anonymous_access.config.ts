@@ -7,13 +7,13 @@
 import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const kerberosAPITestsConfig = await readConfigFile(require.resolve('./config.ts'));
+  const kerberosAPITestsConfig = await readConfigFile(require.resolve('./kerberos.config.ts'));
 
   return {
     ...kerberosAPITestsConfig.getAll(),
 
     junit: {
-      reportName: 'X-Pack Kerberos API with Anonymous Access Integration Tests',
+      reportName: 'X-Pack Security API Integration Tests (Kerberos with Anonymous Access)',
     },
 
     esTestCluster: {

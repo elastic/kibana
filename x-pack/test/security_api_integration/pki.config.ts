@@ -25,12 +25,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   };
 
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./tests/pki')],
     servers,
     security: { disableTestUser: true },
     services,
     junit: {
-      reportName: 'X-Pack PKI API Integration Tests',
+      reportName: 'X-Pack Security API Integration Tests (PKI)',
     },
 
     esTestCluster: {
@@ -58,7 +58,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--server.ssl.certificate=${KBN_CERT_PATH}`,
         `--server.ssl.certificateAuthorities=${JSON.stringify([
           CA_CERT_PATH,
-          resolve(__dirname, './fixtures/kibana_ca.crt'),
+          resolve(__dirname, './fixtures/pki/kibana_ca.crt'),
         ])}`,
         `--server.ssl.clientAuthentication=required`,
         `--elasticsearch.hosts=${servers.elasticsearch.protocol}://${servers.elasticsearch.hostname}:${servers.elasticsearch.port}`,
