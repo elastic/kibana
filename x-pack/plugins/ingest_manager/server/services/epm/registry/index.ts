@@ -19,14 +19,7 @@ import {
   RegistrySearchResult,
 } from '../../../types';
 import { unpackArchiveToCache } from '../archive';
-import {
-  cacheGet,
-  cacheDelete,
-  getArchiveFilelist,
-  setArchiveFilelist,
-  deleteArchiveFilelist,
-} from './cache';
-import { ArchiveEntry } from './extract';
+import { cacheGet, getArchiveFilelist, setArchiveFilelist } from '../archive';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
@@ -132,27 +125,18 @@ export async function fetchCategories(params?: CategoriesParams): Promise<Catego
   return fetchUrl(url.toString()).then(JSON.parse);
 }
 
-export async function unpackRegistryPackageToCache(
-  pkgName: string,
-  pkgVersion: string,
-  filter = (entry: ArchiveEntry): boolean => true
-): Promise<string[]> {
-  const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
-  const contentType = mime.lookup(archivePath);
-  if (!contentType) {
-    throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
-  }
-  const paths: string[] = await unpackArchiveToCache(archiveBuffer, contentType);
-  return paths;
-}
-
-export async function loadRegistryPackage(
+export async function getRegistryPackage(
   pkgName: string,
   pkgVersion: string
 ): Promise<{ paths: string[]; registryPackageInfo: RegistryPackage }> {
   let paths = getArchiveFilelist(pkgName, pkgVersion);
   if (!paths || paths.length === 0) {
-    paths = await unpackRegistryPackageToCache(pkgName, pkgVersion);
+    const { archiveBuffer, archivePath } = await fetchArchiveBuffer(pkgName, pkgVersion);
+    const contentType = mime.lookup(archivePath);
+    if (!contentType) {
+      throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
+    }
+    paths = await unpackArchiveToCache(archiveBuffer, contentType);
     setArchiveFilelist(pkgName, pkgVersion, paths);
   }
 
@@ -200,7 +184,7 @@ export async function ensureCachedArchiveInfo(
   const paths = getArchiveFilelist(name, version);
   if (!paths || paths.length === 0) {
     if (installSource === 'registry') {
-      await loadRegistryPackage(name, version);
+      await getRegistryPackage(name, version);
     } else {
       throw new PackageCacheError(
         `Package ${name}-${version} not cached. If it was uploaded, try uninstalling and reinstalling manually.`
@@ -247,15 +231,3 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
     // elasticsearch: assets.elasticsearch,
   };
 }
-
-export const deletePackageCache = (name: string, version: string) => {
-  // get cached archive filelist
-  const paths = getArchiveFilelist(name, version);
-
-  // delete cached archive filelist
-  deleteArchiveFilelist(name, version);
-
-  // delete cached archive files
-  // this has been populated in unpackRegistryPackageToCache()
-  paths?.forEach((path) => cacheDelete(path));
-};

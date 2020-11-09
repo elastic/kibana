@@ -306,7 +306,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Alert Instances', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/57426
+    describe.skip('Alert Instances', function () {
       const testRunUuid = uuid.v4();
       let alert: any;
 

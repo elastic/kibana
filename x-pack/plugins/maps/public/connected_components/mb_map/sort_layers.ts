@@ -5,7 +5,7 @@
  */
 
 import { Map as MbMap, Layer as MbLayer } from 'mapbox-gl';
-import { ILayer } from '../../../classes/layers/layer';
+import { ILayer } from '../../classes/layers/layer';
 
 // "Layer" is overloaded and can mean the following
 // 1) Map layer (ILayer): A single map layer consists of one to many mapbox layers.
