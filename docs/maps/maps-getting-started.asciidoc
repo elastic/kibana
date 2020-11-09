@@ -6,7 +6,7 @@
 <titleabbrev>Create a multilayer map</titleabbrev>
 ++++
 
-If you are new to maps in {kib}, this tutorial is a good place to start.
+If you are new to **Maps**, this tutorial is a good place to start.
 It guides you through the common steps for working with your location data.
 
 You'll learn to:
