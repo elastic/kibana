@@ -17,6 +17,7 @@
   ],
   "configPath": ["xpack", "ilm"],
   "requiredBundles": [
+    "indexManagement",
     "kibanaReact",
     "esUiShared",
     "home"
