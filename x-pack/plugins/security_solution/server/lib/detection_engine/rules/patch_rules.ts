@@ -170,6 +170,7 @@ export const patchRules = async ({
       },
       actions: actions?.map(transformRuleToAlertAction) ?? rule.actions,
       params: nextParams,
+      notifyOnStateChange: false,
     },
   });
 

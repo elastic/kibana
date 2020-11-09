@@ -57,6 +57,7 @@ function getMockData(overwrites: Record<string, unknown> = {}): CreateOptions['d
     consumer: 'bar',
     schedule: { interval: '10s' },
     throttle: null,
+    notifyOnStateChange: false,
     params: {
       bar: true,
     },

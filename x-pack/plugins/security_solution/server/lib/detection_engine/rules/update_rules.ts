@@ -122,6 +122,7 @@ export const updateRules = async ({
       schedule: { interval },
       actions: actions.map(transformRuleToAlertAction),
       throttle: null,
+      notifyOnStateChange: false,
       params: {
         author,
         buildingBlockType,

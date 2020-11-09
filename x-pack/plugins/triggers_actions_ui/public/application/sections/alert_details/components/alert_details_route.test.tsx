@@ -402,6 +402,7 @@ function mockAlert(overloads: Partial<Alert> = {}): Alert {
     updatedAt: new Date(),
     apiKeyOwner: null,
     throttle: null,
+    notifyOnStateChange: false,
     muteAll: false,
     mutedInstanceIds: [],
     executionStatus: {

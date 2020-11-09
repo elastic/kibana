@@ -66,6 +66,7 @@ describe('update()', () => {
       scheduledTaskId: 'task-123',
       params: {},
       throttle: null,
+      notifyOnStateChange: false,
       actions: [
         {
           group: 'default',
@@ -171,6 +172,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: null,
+        notifyOnStateChange: false,
         actions: [
           {
             group: 'default',
@@ -386,6 +388,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
+        notifyOnStateChange: false,
         actions: [
           {
             group: 'default',
@@ -540,6 +543,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
+        notifyOnStateChange: false,
         actions: [
           {
             group: 'default',
@@ -657,6 +661,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyOnStateChange: false,
           actions: [
             {
               group: 'default',
@@ -785,6 +790,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: null,
+        notifyOnStateChange: false,
         actions: [
           {
             group: 'default',
@@ -892,6 +898,7 @@ describe('update()', () => {
           bar: true,
         },
         throttle: '5m',
+        notifyOnStateChange: false,
         actions: [
           {
             group: 'default',
@@ -953,6 +960,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyOnStateChange: false,
           actions: [
             {
               group: 'default',
@@ -1071,6 +1079,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyOnStateChange: false,
           actions: [
             {
               group: 'default',
@@ -1102,6 +1111,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyOnStateChange: false,
           actions: [
             {
               group: 'default',
@@ -1138,6 +1148,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyOnStateChange: false,
           actions: [
             {
               group: 'default',
@@ -1173,6 +1184,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyOnStateChange: false,
           actions: [
             {
               group: 'default',
@@ -1226,6 +1238,7 @@ describe('update()', () => {
             bar: true,
           },
           throttle: null,
+          notifyOnStateChange: false,
           actions: [],
         },
       });
@@ -1249,6 +1262,7 @@ describe('update()', () => {
               bar: true,
             },
             throttle: null,
+            notifyOnStateChange: false,
             actions: [],
           },
         })

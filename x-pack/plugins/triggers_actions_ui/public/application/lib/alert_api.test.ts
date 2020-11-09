@@ -547,6 +547,7 @@ describe('createAlert', () => {
       actions: [],
       params: {},
       throttle: null,
+      notifyOnStateChange: false,
       createdAt: new Date('1970-01-01T00:00:00.000Z'),
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
@@ -595,6 +596,7 @@ describe('updateAlert', () => {
       updatedAt: new Date('1970-01-01T00:00:00.000Z'),
       apiKey: null,
       apiKeyOwner: null,
+      notifyOnStateChange: false,
     };
     const resolvedValue: Alert = {
       ...alertToUpdate,
