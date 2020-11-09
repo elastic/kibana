@@ -51,33 +51,45 @@ export function validateCoreQueryBody(anyParams: unknown): string | undefined {
     termSize,
   }: CoreQueryParams = anyParams as CoreQueryParams;
   if (aggType !== 'count' && !aggField) {
-    return i18n.translate('xpack.stackAlerts.indexThreshold.aggTypeRequiredErrorMessage', {
-      defaultMessage: '[aggField]: must have a value when [aggType] is "{aggType}"',
-      values: {
-        aggType,
-      },
-    });
+    return i18n.translate(
+      'xpack.triggersActionsUI.data.coreQueryParams.aggTypeRequiredErrorMessage',
+      {
+        defaultMessage: '[aggField]: must have a value when [aggType] is "{aggType}"',
+        values: {
+          aggType,
+        },
+      }
+    );
   }
 
   // check grouping
   if (groupBy === 'top') {
     if (termField == null) {
-      return i18n.translate('xpack.stackAlerts.indexThreshold.termFieldRequiredErrorMessage', {
-        defaultMessage: '[termField]: termField required when [groupBy] is top',
-      });
+      return i18n.translate(
+        'xpack.triggersActionsUI.data.coreQueryParams.termFieldRequiredErrorMessage',
+        {
+          defaultMessage: '[termField]: termField required when [groupBy] is top',
+        }
+      );
     }
     if (termSize == null) {
-      return i18n.translate('xpack.stackAlerts.indexThreshold.termSizeRequiredErrorMessage', {
-        defaultMessage: '[termSize]: termSize required when [groupBy] is top',
-      });
+      return i18n.translate(
+        'xpack.triggersActionsUI.data.coreQueryParams.termSizeRequiredErrorMessage',
+        {
+          defaultMessage: '[termSize]: termSize required when [groupBy] is top',
+        }
+      );
     }
     if (termSize > MAX_GROUPS) {
-      return i18n.translate('xpack.stackAlerts.indexThreshold.invalidTermSizeMaximumErrorMessage', {
-        defaultMessage: '[termSize]: must be less than or equal to {maxGroups}',
-        values: {
-          maxGroups: MAX_GROUPS,
-        },
-      });
+      return i18n.translate(
+        'xpack.triggersActionsUI.data.coreQueryParams.invalidTermSizeMaximumErrorMessage',
+        {
+          defaultMessage: '[termSize]: must be less than or equal to {maxGroups}',
+          values: {
+            maxGroups: MAX_GROUPS,
+          },
+        }
+      );
     }
   }
 }
@@ -89,7 +101,7 @@ function validateAggType(aggType: string): string | undefined {
     return;
   }
 
-  return i18n.translate('xpack.stackAlerts.indexThreshold.invalidAggTypeErrorMessage', {
+  return i18n.translate('xpack.triggersActionsUI.data.coreQueryParams.invalidAggTypeErrorMessage', {
     defaultMessage: 'invalid aggType: "{aggType}"',
     values: {
       aggType,
@@ -102,7 +114,7 @@ export function validateGroupBy(groupBy: string): string | undefined {
     return;
   }
 
-  return i18n.translate('xpack.stackAlerts.indexThreshold.invalidGroupByErrorMessage', {
+  return i18n.translate('xpack.triggersActionsUI.data.coreQueryParams.invalidGroupByErrorMessage', {
     defaultMessage: 'invalid groupBy: "{groupBy}"',
     values: {
       groupBy,
@@ -117,10 +129,13 @@ export function validateTimeWindowUnits(timeWindowUnit: string): string | undefi
     return;
   }
 
-  return i18n.translate('xpack.stackAlerts.indexThreshold.invalidTimeWindowUnitsErrorMessage', {
-    defaultMessage: 'invalid timeWindowUnit: "{timeWindowUnit}"',
-    values: {
-      timeWindowUnit,
-    },
-  });
+  return i18n.translate(
+    'xpack.triggersActionsUI.data.coreQueryParams.invalidTimeWindowUnitsErrorMessage',
+    {
+      defaultMessage: 'invalid timeWindowUnit: "{timeWindowUnit}"',
+      values: {
+        timeWindowUnit,
+      },
+    }
+  );
 }

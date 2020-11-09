@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { Spaces } from '../../../../scenarios';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
-import { TimeSeriesQuery } from '../../../../../../../plugins/stack_alerts/server/alert_types/index_threshold/lib/time_series_query';
+import { TimeSeriesQuery } from '../../../../../../../plugins/triggers_actions_ui/server';
 
 import { createEsDocuments } from './create_test_data';
 
