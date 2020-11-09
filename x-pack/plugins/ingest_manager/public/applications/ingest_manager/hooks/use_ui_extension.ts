@@ -21,6 +21,8 @@ export const useUIExtension = <
 ): SpecificExtensionPoint<UIExtensionPoint, T, V>['component'] | undefined => {
   const extension = useContext(UIExtensionsContext)?.[integration]?.[type]?.[view];
   if (extension) {
+    // FIXME:PT Revisit ignore below and see if TS error can be addressed
+    // @ts-ignore
     return extension.component;
   }
 };

@@ -38,7 +38,12 @@ describe('UI Extension services', () => {
         component: LazyCustomView,
       });
 
-      expect(storage.endpoint['integration-policy']!.edit).toBe(LazyCustomView);
+      expect(storage.endpoint['integration-policy']!.edit).toEqual({
+        type: 'integration-policy',
+        view: 'edit',
+        integration: 'endpoint',
+        component: LazyCustomView,
+      });
     });
 
     it('should throw if extension point has already registered', () => {
@@ -65,7 +70,12 @@ describe('UI Extension services', () => {
         });
       }).toThrow();
 
-      expect(storage.endpoint['integration-policy']!.edit).toBe(LazyCustomView);
+      expect(storage.endpoint['integration-policy']!.edit).toEqual({
+        type: 'integration-policy',
+        view: 'edit',
+        integration: 'endpoint',
+        component: LazyCustomView,
+      });
     });
   });
 });

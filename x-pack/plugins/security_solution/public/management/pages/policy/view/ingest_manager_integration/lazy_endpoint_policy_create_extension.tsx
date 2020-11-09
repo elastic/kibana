@@ -11,8 +11,7 @@ export const LazyEndpointPolicyCreateExtension = lazy<IntegrationPolicyCreateExt
   async () => {
     const { EndpointPolicyCreateExtension } = await import('./endpoint_policy_create_extension');
     return {
-      // FIXME: remove casting once old UI component registration is removed
-      default: (EndpointPolicyCreateExtension as unknown) as IntegrationPolicyCreateExtensionComponent,
+      default: EndpointPolicyCreateExtension,
     };
   }
 );
