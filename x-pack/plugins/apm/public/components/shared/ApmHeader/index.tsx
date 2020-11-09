@@ -6,14 +6,12 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { useActionMenu } from '../../../hooks/use_action_menu';
+import { ActionMenu } from '../../../application/action_menu';
 import { DatePicker } from '../DatePicker';
 import { EnvironmentFilter } from '../EnvironmentFilter';
 import { KueryBar } from '../KueryBar';
 
 export function ApmHeader({ children }: { children: ReactNode }) {
-  const ActionMenu = useActionMenu();
-
   return (
     <>
       <ActionMenu />

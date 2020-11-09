@@ -14,8 +14,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
+import { ActionMenu } from '../../../application/action_menu';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useActionMenu } from '../../../hooks/use_action_menu';
 import { getAPMHref } from '../../shared/Links/apm/APMLink';
 import { HomeLink } from '../../shared/Links/apm/HomeLink';
 
@@ -32,8 +32,6 @@ export function Settings({ children, location }: SettingsProps) {
   function getSettingsHref(path: string) {
     return getAPMHref({ basePath, path: `/settings${path}`, search });
   }
-
-  const ActionMenu = useActionMenu();
 
   return (
     <>

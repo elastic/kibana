@@ -38,6 +38,7 @@ const mockCore = {
   application: {
     capabilities: {
       apm: {},
+      ml: {},
     },
     currentAppId$: new Observable(),
     navigateToUrl: (url: string) => {},

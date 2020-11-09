@@ -7,11 +7,11 @@
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useParams } from 'react-router-dom';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/useFetcher';
 import { useTheme } from '../../../../hooks/useTheme';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { useServiceName } from '../../../../hooks/use_service_name';
 import { callApmApi } from '../../../../services/rest/createCallApmApi';
 import { LineChart } from '../line_chart';
 
@@ -32,7 +32,7 @@ interface Props {
 
 export function TransactionErrorRateChart({ showAnnotations = true }: Props) {
   const theme = useTheme();
-  const serviceName = useServiceName();
+  const { serviceName } = useParams<{ serviceName?: string }>();
   const { urlParams, uiFilters } = useUrlParams();
 
   const { start, end, transactionType, transactionName } = urlParams;
