@@ -43,6 +43,13 @@ export class LicenseService {
       this.licenseInformation?.hasAtLeast('gold')
     );
   }
+  public isPlatinumPlus() {
+    return (
+      this.licenseInformation?.isAvailable &&
+      this.licenseInformation?.isActive &&
+      this.licenseInformation?.hasAtLeast('platinum')
+    );
+  }
   public isEnterprise() {
     return (
       this.licenseInformation?.isAvailable &&
