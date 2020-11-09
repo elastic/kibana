@@ -23,6 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { dataTypes } from '../../../../../../common';
 import { NewAgentPolicy, AgentPolicy } from '../../../types';
 import { isValidNamespace } from '../../../services';
 import { AgentPolicyDeleteProvider } from './agent_policy_delete_provider';
@@ -211,7 +212,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
         <EuiCheckboxGroup
           options={[
             {
-              id: 'logs',
+              id: dataTypes.Logs,
               label: (
                 <>
                   <FormattedMessage
@@ -233,7 +234,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
               ),
             },
             {
-              id: 'metrics',
+              id: dataTypes.Metrics,
               label: (
                 <>
                   <FormattedMessage
@@ -263,7 +264,7 @@ export const AgentPolicyForm: React.FunctionComponent<Props> = ({
             { logs: false, metrics: false }
           )}
           onChange={(id) => {
-            if (id !== 'logs' && id !== 'metrics') {
+            if (id !== dataTypes.Logs && id !== dataTypes.Metrics) {
               return;
             }
 

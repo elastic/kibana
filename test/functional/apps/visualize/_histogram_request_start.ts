@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('histogram agg onSearchRequestStart', function () {
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();

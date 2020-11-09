@@ -13,9 +13,15 @@ import {
 } from '../types';
 import { State, XYState, visualizationTypes } from './types';
 import { generateId } from '../id_generator';
-import { xyVisualization } from './xy_visualization';
+import { getXyVisualization } from './xy_visualization';
+import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { PaletteOutput } from 'src/plugins/charts/public';
 
 jest.mock('../id_generator');
+
+const xyVisualization = getXyVisualization({
+  paletteService: chartPluginMock.createPaletteRegistry(),
+});
 
 describe('xy_suggestions', () => {
   function numCol(columnId: string): TableSuggestionColumn {
@@ -131,6 +137,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
       state: {
         legend: { isVisible: true, position: 'bottom' },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -243,6 +250,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: ['first'],
       state: {
         legend: { isVisible: true, position: 'bottom' },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -283,6 +291,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: ['first', 'second'],
       state: {
         legend: { isVisible: true, position: 'bottom' },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -475,6 +484,38 @@ describe('xy_suggestions', () => {
     );
   });
 
+  test('includes passed in palette for split charts if specified', () => {
+    const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), numCol('quantity'), dateCol('date'), strCol('product')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      mainPalette,
+    });
+
+    expect(suggestion.state.layers[0].palette).toEqual(mainPalette);
+  });
+
+  test('ignores passed in palette for non splitted charts', () => {
+    const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    const [suggestion] = getSuggestions({
+      table: {
+        isMultiRow: true,
+        columns: [numCol('price'), dateCol('date')],
+        layerId: 'first',
+        changeType: 'unchanged',
+      },
+      keptLayerIds: [],
+      mainPalette,
+    });
+
+    expect(suggestion.state.layers[0].palette).toEqual(undefined);
+  });
+
   test('hides reduced suggestions if there is a current state', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {
@@ -485,6 +526,7 @@ describe('xy_suggestions', () => {
       },
       state: {
         legend: { isVisible: true, position: 'bottom' },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -537,6 +579,7 @@ describe('xy_suggestions', () => {
   test('keeps existing seriesType for initial tables', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       fittingFunction: 'None',
       preferredSeriesType: 'line',
       layers: [
@@ -570,6 +613,7 @@ describe('xy_suggestions', () => {
   test('makes a visible seriesType suggestion for unchanged table without split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       fittingFunction: 'None',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -610,6 +654,7 @@ describe('xy_suggestions', () => {
   test('suggests seriesType and stacking when there is a split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -655,6 +700,7 @@ describe('xy_suggestions', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       fittingFunction: 'None',
       preferredSeriesType: 'bar',
       layers: [
@@ -687,6 +733,7 @@ describe('xy_suggestions', () => {
   test('suggests stacking for unchanged table that has a split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
       layers: [
@@ -722,6 +769,7 @@ describe('xy_suggestions', () => {
   test('keeps column to dimension mappings on extended tables', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -764,6 +812,7 @@ describe('xy_suggestions', () => {
   test('changes column mappings when suggestion is reorder', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -807,6 +856,7 @@ describe('xy_suggestions', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
