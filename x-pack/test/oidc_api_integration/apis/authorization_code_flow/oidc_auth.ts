@@ -43,7 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
 
       expect(user.username).to.eql(username);
-      expect(user.authentication_provider).to.eql('basic');
+      expect(user.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
       expect(user.authentication_type).to.be('realm');
       // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
     });
@@ -235,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(apiResponse.body.username).to.be('user1');
         expect(apiResponse.body.authentication_realm).to.eql({ name: 'oidc1', type: 'oidc' });
-        expect(apiResponse.body.authentication_provider).to.eql('oidc');
+        expect(apiResponse.body.authentication_provider).to.eql({ type: 'oidc', name: 'oidc' });
         expect(apiResponse.body.authentication_type).to.be('token');
       });
     });
@@ -289,7 +289,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(apiResponse.body.username).to.be('user2');
         expect(apiResponse.body.authentication_realm).to.eql({ name: 'oidc1', type: 'oidc' });
-        expect(apiResponse.body.authentication_provider).to.eql('oidc');
+        expect(apiResponse.body.authentication_provider).to.eql({ type: 'oidc', name: 'oidc' });
         expect(apiResponse.body.authentication_type).to.be('token');
       });
     });
