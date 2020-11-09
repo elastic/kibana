@@ -43,7 +43,7 @@ export const findPreviousThresholdSignals = async ({
     rule: {
       filter: {
         term: {
-          'signal.rule.id': ruleId,
+          'signal.rule.rule_id': ruleId,
         },
       },
       aggs: {

@@ -330,15 +330,32 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
 
-          // TODO: error checking
+          previousSignals.aggregations.rule.threshold.buckets.forEach((bucket: object) => {
+            esFilter.bool.filter.push({
+              bool: {
+                must_not: {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          [Object.keys(queryFields)[0]]: bucket.key,
+                        },
+                      },
+                      {
+                        range: {
+                          '@timestamp': {
+                            lt: bucket.lastSignalTimestamp.value_as_string,
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+            });
+          });
 
-          previousSignals.aggregations.rule.aggregations.threshold.buckets.foreach(
-            (signal: object) => {
-              // TODO
-            }
-          );
-
-          // console.log(previousSignals);
+          // console.log(JSON.stringify(esFilter));
 
           const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
             inputIndexPattern: inputIndex,
