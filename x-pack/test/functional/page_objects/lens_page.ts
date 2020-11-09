@@ -15,7 +15,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const find = getService('find');
   const comboBox = getService('comboBox');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['header', 'header', 'timePicker', 'common']);
+  const PageObjects = getPageObjects(['header', 'timePicker', 'common']);
 
   return logWrapper('lensPage', log, {
     /**
@@ -132,7 +132,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector('lnsWorkspace')
       );
-      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     /**
@@ -146,7 +145,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(`lnsFieldListPanelField-${field}`),
         testSubjects.getCssSelector(dimension)
       );
-      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     /**
@@ -160,7 +158,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         testSubjects.getCssSelector(from),
         testSubjects.getCssSelector(to)
       );
-      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     /**
@@ -177,7 +174,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         endIndex + 1
       }) [data-test-subj='lnsDragDrop-reorderableDrop'`;
       await browser.html5DragAndDrop(dragging, dropping);
-      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     async assertPalette(palette: string) {
