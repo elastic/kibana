@@ -19,6 +19,7 @@ import { ML_MEDIAN_PERCENTS } from '../../../../common/util/job_utils';
 import { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import { MlApiServices } from '../ml_api_service';
 import { CriteriaField } from './index';
+import { aggregationTypeTransform } from '../../../../common/util/anomaly_utils';
 
 interface ResultResponse {
   success: boolean;
@@ -347,9 +348,10 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
       jobIds: string[],
       criteriaFields: CriteriaField[],
       threshold: any,
-      earliestMs: number,
-      latestMs: number,
-      maxResults: number | undefined
+      earliestMs: number | null,
+      latestMs: number | null,
+      maxResults: number | undefined,
+      functionDescription?: string
     ): Observable<RecordsForCriteria> {
       const obj: RecordsForCriteria = { success: true, records: [] };
 
@@ -399,6 +401,19 @@ export function resultsServiceRxProvider(mlApiServices: MlApiServices) {
           },
         });
       });
+
+      if (functionDescription !== undefined) {
+        const mlFunctionToPlotIfMetric =
+          functionDescription !== undefined
+            ? aggregationTypeTransform.toML(functionDescription)
+            : functionDescription;
+
+        boolCriteria.push({
+          term: {
+            function_description: mlFunctionToPlotIfMetric,
+          },
+        });
+      }
 
       return mlApiServices.results
         .anomalySearch$(
