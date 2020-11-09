@@ -84,8 +84,8 @@ const modifyStackTracePrepareOnce = once(() => {
     let filteredStrackTrace: NodeJS.CallSite[] = structuredStackTrace;
     if (registered) {
       filteredStrackTrace = filteredStrackTrace.filter((callSite) => {
-        // use .js as this file will be compiled
-        return !callSite.getFileName()?.endsWith('decorate_snapshot_ui.js');
+        // check for both compiled and uncompiled files
+        return !callSite.getFileName()?.match(/decorate_snapshot_ui\.(js|ts)/);
       });
     }
 
