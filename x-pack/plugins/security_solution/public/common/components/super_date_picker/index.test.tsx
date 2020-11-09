@@ -139,7 +139,7 @@ describe('SIEM Super Date Picker', () => {
         expect(store.getState().inputs.global.timerange.toStr).toBe('now');
       });
 
-      test('Make Sure it is Today date', () => {
+      test('Make Sure it is Today date is an absolute date', () => {
         wrapper
           .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
@@ -151,8 +151,22 @@ describe('SIEM Super Date Picker', () => {
           .first()
           .simulate('click');
         wrapper.update();
-        expect(store.getState().inputs.global.timerange.fromStr).toBe('now/d');
-        expect(store.getState().inputs.global.timerange.toStr).toBe('now/d');
+        expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
+      });
+
+      test('Make Sure it is This Week date is an absolute date', () => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerCommonlyUsed_This_week"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+        expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
       });
 
       test('Make Sure to (end date) is superior than from (start date)', () => {

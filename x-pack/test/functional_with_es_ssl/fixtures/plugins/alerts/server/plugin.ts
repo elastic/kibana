@@ -78,6 +78,7 @@ function createAlwaysFiringAlertType(alerts: AlertingSetup) {
       { id: 'default', name: 'Default' },
       { id: 'other', name: 'Other' },
     ],
+    defaultActionGroupId: 'default',
     producer: 'alerts',
     async executor(alertExecutorOptions: any) {
       const { services, state, params } = alertExecutorOptions;
