@@ -18,7 +18,7 @@ import { OverviewStats } from './overview_stats';
 import { SO_SEARCH_LIMIT } from '../../../constants';
 import { useLink, useGetPackagePolicies } from '../../../hooks';
 import { AgentPolicy } from '../../../types';
-import { Loading } from '../../fleet/components';
+import { Loading } from '../../agents/components';
 
 export const OverviewPolicySection: React.FC<{ agentPolicies: AgentPolicy[] }> = ({
   agentPolicies,
