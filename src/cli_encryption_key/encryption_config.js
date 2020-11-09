@@ -26,14 +26,12 @@ import { safeLoad } from 'js-yaml';
 import { getConfigDirectory } from '@kbn/utils';
 
 export class EncryptionConfig {
-  constructor() {
-    this._config = safeLoad(readFileSync(join(getConfigDirectory(), 'kibana.yml')));
-    this._encryptionKeyPaths = [
-      'xpack.encryptedSavedObjects.encryptionKey',
-      'xpack.reporting.encryptionKey',
-      'xpack.security.encryptionKey',
-    ];
-  }
+#config = safeLoad(readFileSync(join(getConfigDirectory(), 'kibana.yml')));
+#encryptionKeyPaths = [
+  'xpack.encryptedSavedObjects.encryptionKey',
+  'xpack.reporting.encryptionKey',
+  'xpack.security.encryptionKey',
+];
 
   _getEncryptionKey(key) {
     return get(this._config, key);
