@@ -15,16 +15,35 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
+  const kibanaPort = xPackAPITestsConfig.get('servers.kibana.port');
+  const idpPath = resolve(__dirname, './fixtures/saml/idp_metadata.xml');
+
   return {
     testFiles: [resolve(__dirname, './tests/session_idle')],
 
     services: {
+      randomness: kibanaAPITestsConfig.get('services.randomness'),
       legacyEs: kibanaAPITestsConfig.get('services.legacyEs'),
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
 
     servers: xPackAPITestsConfig.get('servers'),
-    esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
+
+    esTestCluster: {
+      ...xPackAPITestsConfig.get('esTestCluster'),
+      serverArgs: [
+        ...xPackAPITestsConfig.get('esTestCluster.serverArgs'),
+        'xpack.security.authc.token.enabled=true',
+        'xpack.security.authc.token.timeout=15s',
+        'xpack.security.authc.realms.saml.saml1.order=0',
+        `xpack.security.authc.realms.saml.saml1.idp.metadata.path=${idpPath}`,
+        'xpack.security.authc.realms.saml.saml1.idp.entity_id=http://www.elastic.co/saml1',
+        `xpack.security.authc.realms.saml.saml1.sp.entity_id=http://localhost:${kibanaPort}`,
+        `xpack.security.authc.realms.saml.saml1.sp.logout=http://localhost:${kibanaPort}/logout`,
+        `xpack.security.authc.realms.saml.saml1.sp.acs=http://localhost:${kibanaPort}/api/security/saml/callback`,
+        'xpack.security.authc.realms.saml.saml1.attributes.principal=urn:oid:0.0.7',
+      ],
+    },
 
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
@@ -32,6 +51,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
         '--xpack.security.session.idleTimeout=5s',
         '--xpack.security.session.cleanupInterval=10s',
+        `--xpack.security.authc.providers=${JSON.stringify({
+          basic: { basic1: { order: 0 } },
+          saml: {
+            saml_fallback: { order: 1, realm: 'saml1' },
+            saml_override: { order: 2, realm: 'saml1', session: { idleTimeout: '1m' } },
+            saml_disable: { order: 3, realm: 'saml1', session: { idleTimeout: 0 } },
+          },
+        })}`,
       ],
     },
 
