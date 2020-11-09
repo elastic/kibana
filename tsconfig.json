@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "./build/tsbuildinfo/kibana"
+    "incremental": false
   },
   "include": ["kibana.d.ts", "src/**/*", "typings/**/*", "test_utils/**/*"],
   "exclude": [

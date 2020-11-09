@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "tsBuildInfoFile": "../build/tsbuildinfo/test",
+    "incremental": false,
     "types": ["node", "mocha", "flot"]
   },
   "include": ["**/*", "../typings/elastic__node_crypto.d.ts", "typings/**/*"],
