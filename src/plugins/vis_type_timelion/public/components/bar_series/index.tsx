@@ -24,11 +24,6 @@ export function BarSeriesComponent({ data, index }: { data: any; index: number }
   const bars = data.bars || {};
   const styles = {
     barSeriesStyle: {
-      rectBorder: {
-        stroke: data.color,
-        strokeWidth: parseInt(bars.lineWidth || '0', 10),
-        visible: bars.show ?? true,
-      },
       rect: {
         fill: data.color,
         opacity: !bars.fill || bars.fill < 0 ? 1 : bars.fill,

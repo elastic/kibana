@@ -33,6 +33,7 @@ import {
 } from 'src/plugins/data/public';
 
 import { VisualizationsSetup } from '../../visualizations/public';
+import { ChartsPluginSetup } from '../../charts/public';
 
 import { getTimelionVisualizationConfig } from './timelion_vis_fn';
 import { getTimelionVisDefinition } from './timelion_vis_type';
@@ -47,6 +48,7 @@ export interface TimelionVisDependencies extends Partial<CoreStart> {
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   timefilter: TimefilterContract;
+  chartTheme: ChartsPluginSetup['theme'];
 }
 
 /** @internal */
@@ -54,6 +56,7 @@ export interface TimelionVisSetupDependencies {
   expressions: ReturnType<ExpressionsPlugin['setup']>;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
+  charts: ChartsPluginSetup;
 }
 
 /** @internal */
@@ -84,12 +87,13 @@ export class TimelionVisPlugin
 
   public setup(
     core: CoreSetup,
-    { expressions, visualizations, data }: TimelionVisSetupDependencies
+    { expressions, visualizations, data, charts }: TimelionVisSetupDependencies
   ) {
     const dependencies: TimelionVisDependencies = {
       uiSettings: core.uiSettings,
       http: core.http,
       timefilter: data.query.timefilter.timefilter,
+      chartTheme: charts.theme,
     };
 
     expressions.registerFunction(() => getTimelionVisualizationConfig(dependencies));

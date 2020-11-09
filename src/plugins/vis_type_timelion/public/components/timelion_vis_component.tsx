@@ -165,18 +165,8 @@ function TimelionVisComponent({
           showLegend
           legendPosition={getLegendPosition()}
           onRenderChange={onRenderChange}
-          theme={[
-            {
-              crosshair: {
-                band: {
-                  fill: options.crosshair.color,
-                },
-                line: {
-                  strokeWidth: options.crosshair.lineWidth,
-                },
-              },
-            },
-          ]}
+          theme={kibana.services.chartTheme.useChartsTheme()}
+          baseTheme={kibana.services.chartTheme.useChartsBaseTheme()}
           tooltip={{
             snap: true,
             type: TooltipType.VerticalCursor,
