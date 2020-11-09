@@ -11,7 +11,7 @@ import styled from 'styled-components';
 import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
-import { ErroneousTransactionsRateChart } from '../../shared/charts/erroneous_transactions_rate_chart';
+import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
 import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
@@ -125,19 +125,7 @@ export function ServiceOverview({
           <EuiFlexGroup gutterSize="s">
             {!isRumAgentName(agentName) && (
               <EuiFlexItem grow={4}>
-                <EuiPanel>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate(
-                        'xpack.apm.serviceOverview.errorRateChartTitle',
-                        {
-                          defaultMessage: 'Error rate',
-                        }
-                      )}
-                    </h2>
-                  </EuiTitle>
-                  <ErroneousTransactionsRateChart />
-                </EuiPanel>
+                <TransactionErrorRateChart showAnnotations={false} />
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={6}>
