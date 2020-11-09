@@ -15,6 +15,7 @@ import {
 import { ChartsPluginSetup } from 'src/plugins/charts/public';
 import { FieldFormatsRegistry } from 'src/plugins/data/common/field_formats';
 import { DataPublicPluginStartUi, IndexPatternsContract } from 'src/plugins/data/public';
+import { KibanaFeature } from '../../../../features/common';
 import { AlertTypeRegistryContract, ActionTypeRegistryContract } from '../../types';
 
 export interface AlertsContextValue<MetaData = Record<string, any>> {
@@ -31,6 +32,7 @@ export interface AlertsContextValue<MetaData = Record<string, any>> {
   metadata?: MetaData;
   dataUi?: DataPublicPluginStartUi;
   dataIndexPatterns?: IndexPatternsContract;
+  kibanaFeatures?: KibanaFeature[];
 }
 
 const AlertsContext = createContext<AlertsContextValue>(null as any);

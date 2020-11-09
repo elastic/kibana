@@ -187,7 +187,7 @@ describe('alert_form', () => {
 
     it('renders alert type description', async () => {
       await setup();
-      wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
       const alertDescription = wrapper.find('[data-test-subj="alertDescription"]');
       expect(alertDescription.exists()).toBeTruthy();
       expect(alertDescription.first().text()).toContain('Alert when testing');
@@ -195,7 +195,7 @@ describe('alert_form', () => {
 
     it('renders alert type documentation link', async () => {
       await setup();
-      wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
+      wrapper.find('button[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
       const alertDocumentationLink = wrapper.find('[data-test-subj="alertDocumentationLink"]');
       expect(alertDocumentationLink.exists()).toBeTruthy();
       expect(alertDocumentationLink.first().prop('href')).toBe('https://localhost.local/docs');
