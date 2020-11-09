@@ -274,6 +274,7 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
+        "notifyOnStateChange": false,
         "params": Object {
           "bar": true,
         },
@@ -322,6 +323,7 @@ describe('create()', () => {
         "muteAll": false,
         "mutedInstanceIds": Array [],
         "name": "abc",
+        "notifyOnStateChange": false,
         "params": Object {
           "bar": true,
         },
@@ -965,6 +967,7 @@ describe('create()', () => {
         },
         schedule: { interval: '10s' },
         throttle: null,
+        notifyOnStateChange: false,
         muteAll: false,
         mutedInstanceIds: [],
         tags: ['foo'],
@@ -1086,6 +1089,7 @@ describe('create()', () => {
         },
         schedule: { interval: '10s' },
         throttle: null,
+        notifyOnStateChange: false,
         muteAll: false,
         mutedInstanceIds: [],
         tags: ['foo'],

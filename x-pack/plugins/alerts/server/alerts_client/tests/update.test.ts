@@ -283,6 +283,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
+        "notifyOnStateChange": false,
         "params": Object {
           "bar": true,
         },
@@ -450,6 +451,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
+        "notifyOnStateChange": false,
         "params": Object {
           "bar": true,
         },
@@ -606,6 +608,7 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
+        "notifyOnStateChange": false,
         "params": Object {
           "bar": true,
         },
