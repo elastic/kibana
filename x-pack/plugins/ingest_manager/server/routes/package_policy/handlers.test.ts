@@ -28,6 +28,13 @@ jest.mock('../../services/package_policy', (): {
       create: jest.fn((soClient, callCluster, newData) =>
         Promise.resolve({
           ...newData,
+          inputs: newData.inputs.map((input) => ({
+            ...input,
+            streams: input.streams.map((stream) => ({
+              id: stream.data_stream.dataset,
+              ...stream,
+            })),
+          })),
           id: '1',
           revision: 1,
           updated_at: new Date().toISOString(),

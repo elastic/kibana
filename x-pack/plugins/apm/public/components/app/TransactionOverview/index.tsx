@@ -22,7 +22,7 @@ import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
-import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
+import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
@@ -33,11 +33,10 @@ import { ElasticDocsLink } from '../../shared/Links/ElasticDocsLink';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
 import { TransactionTypeFilter } from '../../shared/LocalUIFilters/TransactionTypeFilter';
+import { Correlations } from '../Correlations';
 import { TransactionList } from './TransactionList';
 import { useRedirect } from './useRedirect';
-import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
 import { UserExperienceCallout } from './user_experience_callout';
-import { Correlations } from '../Correlations';
 
 function getRedirectLocation({
   urlParams,
@@ -83,7 +82,10 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     })
   );
 
-  const { data: transactionCharts } = useTransactionCharts();
+  const {
+    data: transactionCharts,
+    status: transactionChartsStatus,
+  } = useTransactionCharts();
 
   useTrackPageview({ app: 'apm', path: 'transaction_overview' });
   useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
@@ -135,12 +137,11 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
               <EuiSpacer size="s" />
             </>
           )}
-          <ChartsSyncContextProvider>
-            <TransactionCharts
-              charts={transactionCharts}
-              urlParams={urlParams}
-            />
-          </ChartsSyncContextProvider>
+          <TransactionCharts
+            fetchStatus={transactionChartsStatus}
+            charts={transactionCharts}
+            urlParams={urlParams}
+          />
 
           <EuiSpacer size="s" />
 
@@ -190,7 +191,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
             <EuiSpacer size="s" />
             <TransactionList
               isLoading={transactionListStatus === 'loading'}
-              items={transactionListData.items}
+              items={transactionListData.items || []}
             />
           </EuiPanel>
         </EuiFlexItem>
