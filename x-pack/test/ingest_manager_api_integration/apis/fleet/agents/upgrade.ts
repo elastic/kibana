@@ -9,7 +9,7 @@ import semver from 'semver';
 import { FtrProviderContext } from '../../../../api_integration/ftr_provider_context';
 import { setupIngest } from './services';
 import { skipIfNoDockerRegistry } from '../../../helpers';
-import { AGENT_SAVED_OBJECT_TYPE } from '../../../../../plugins/ingest_manager/common';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../../../plugins/fleet/common';
 
 const makeSnapshotVersion = (version: string) => {
   return version.endsWith('-SNAPSHOT') ? version : `${version}-SNAPSHOT`;
