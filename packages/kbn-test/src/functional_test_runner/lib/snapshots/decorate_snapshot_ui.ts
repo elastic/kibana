@@ -1,7 +1,20 @@
 /*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
- * you may not use this file except in compliance with the Elastic License.
+ * Licensed to Elasticsearch B.V. under one or more contributor
+ * license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright
+ * ownership. Elasticsearch B.V. licenses this file to you under
+ * the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
  */
 
 import {
@@ -15,7 +28,8 @@ import expect from '@kbn/expect';
 import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
 import { Suite, Test } from 'mocha';
-import { flatten } from 'lodash';
+import { flatten, once } from 'lodash';
+import { Lifecycle } from 'packages/kbn-test/types/ftr';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
@@ -59,11 +73,37 @@ function getSnapshotMeta(currentTest: Test) {
   };
 }
 
-export function registerMochaHooksForSnapshots() {
+const modifyStackTracePrepareOnce = once(() => {
+  const originalPrepareStackTrace = Error.prepareStackTrace;
+
+  // jest-snapshot uses a stack trace to determine which file/line/column
+  // an inline snapshot should be written to. We filter out match_snapshot
+  // from the stack trace to prevent it from wanting to write to this file.
+
+  Error.prepareStackTrace = (error, structuredStackTrace) => {
+    let filteredStrackTrace: NodeJS.CallSite[] = structuredStackTrace;
+    if (registered) {
+      filteredStrackTrace = filteredStrackTrace.filter((callSite) => {
+        // use .js as this file will be compiled
+        return !callSite.getFileName()?.endsWith('decorate_snapshot_ui.js');
+      });
+    }
+
+    if (originalPrepareStackTrace) {
+      return originalPrepareStackTrace(error, filteredStrackTrace);
+    }
+  };
+});
+
+export function decorateSnapshotUi(lifecycle: Lifecycle, updateSnapshots: boolean) {
   let snapshotStatesByFilePath: Record<
     string,
     { snapshotState: ISnapshotState; testsInFile: Test[] }
   > = {};
+
+  registered = true;
+
+  modifyStackTracePrepareOnce();
 
   addSerializer({
     serialize: (num: number) => {
@@ -74,15 +114,14 @@ export function registerMochaHooksForSnapshots() {
     },
   });
 
-  registered = true;
+  // @ts-expect-error
+  global.expectSnapshot = expectSnapshot;
 
-  beforeEach(function () {
-    const currentTest = this.currentTest!;
-
+  lifecycle.beforeEachTest.add((currentTest: Test) => {
     const { file, snapshotTitle } = getSnapshotMeta(currentTest);
 
     if (!snapshotStatesByFilePath[file]) {
-      snapshotStatesByFilePath[file] = getSnapshotState(file, currentTest);
+      snapshotStatesByFilePath[file] = getSnapshotState(file, currentTest, updateSnapshots);
     }
 
     testContext = {
@@ -95,16 +134,10 @@ export function registerMochaHooksForSnapshots() {
     };
   });
 
-  afterEach(function () {
-    testContext = null;
-  });
-
-  after(function () {
+  lifecycle.afterTestSuite.add(function () {
     // save snapshot after tests complete
 
     const unused: string[] = [];
-
-    const isUpdatingSnapshots = process.env.UPDATE_SNAPSHOTS;
 
     Object.keys(snapshotStatesByFilePath).forEach((file) => {
       const { snapshotState, testsInFile } = snapshotStatesByFilePath[file];
@@ -118,7 +151,7 @@ export function registerMochaHooksForSnapshots() {
         }
       });
 
-      if (!isUpdatingSnapshots) {
+      if (!updateSnapshots) {
         unused.push(...snapshotState.getUncheckedKeys());
       } else {
         snapshotState.removeUncheckedKeys();
@@ -136,31 +169,14 @@ export function registerMochaHooksForSnapshots() {
     }
 
     snapshotStatesByFilePath = {};
-
-    registered = false;
   });
 }
-
-const originalPrepareStackTrace = Error.prepareStackTrace;
-
-// jest-snapshot uses a stack trace to determine which file/line/column
-// an inline snapshot should be written to. We filter out match_snapshot
-// from the stack trace to prevent it from wanting to write to this file.
-
-Error.prepareStackTrace = (error, structuredStackTrace) => {
-  const filteredStrackTrace = structuredStackTrace.filter((callSite) => {
-    return !callSite.getFileName()?.endsWith('match_snapshot.ts');
-  });
-  if (originalPrepareStackTrace) {
-    return originalPrepareStackTrace(error, filteredStrackTrace);
-  }
-};
 
 function recursivelyGetTestsFromSuite(suite: Suite): Test[] {
   return suite.tests.concat(flatten(suite.suites.map((s) => recursivelyGetTestsFromSuite(s))));
 }
 
-function getSnapshotState(file: string, test: Test) {
+function getSnapshotState(file: string, test: Test, updateSnapshots: boolean) {
   const dirname = path.dirname(file);
   const filename = path.basename(file);
 
@@ -177,7 +193,7 @@ function getSnapshotState(file: string, test: Test) {
   const snapshotState = new SnapshotState(
     path.join(dirname + `/__snapshots__/` + filename.replace(path.extname(filename), '.snap')),
     {
-      updateSnapshot: process.env.UPDATE_SNAPSHOTS ? 'all' : 'new',
+      updateSnapshot: updateSnapshots ? 'all' : 'new',
       getPrettier: () => prettier,
       getBabelTraverse: () => babelTraverse,
     }

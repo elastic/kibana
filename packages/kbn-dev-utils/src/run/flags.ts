@@ -29,7 +29,6 @@ export interface Flags {
   help: boolean;
   _: string[];
   unexpected: string[];
-
   [key: string]: undefined | boolean | string | string[];
 }
 

@@ -61,6 +61,7 @@ export function runFtrCli() {
             exclude: toArray(flags['exclude-tag'] as string | string[]),
           },
           updateBaselines: flags.updateBaselines,
+          updateSnapshots: flags.updateSnapshots,
         }
       );
 
@@ -126,7 +127,15 @@ export function runFtrCli() {
           'exclude-tag',
           'kibana-install-dir',
         ],
-        boolean: ['bail', 'invert', 'test-stats', 'updateBaselines', 'throttle', 'headless'],
+        boolean: [
+          'bail',
+          'invert',
+          'test-stats',
+          'updateBaselines',
+          'throttle',
+          'headless',
+          'updateSnapshots',
+        ],
         default: {
           config: 'test/functional/config.js',
         },
@@ -141,6 +150,7 @@ export function runFtrCli() {
         --exclude-tag=tag  a tag to be excluded, pass multiple times for multiple tags
         --test-stats       print the number of tests (included and excluded) to STDERR
         --updateBaselines  replace baseline screenshots with whatever is generated from the test
+        --updateSnapshots  replace inline and file snapshots with whatever is generated from the test
         --kibana-install-dir  directory where the Kibana install being tested resides
         --throttle         enable network throttling in Chrome browser
         --headless         run browser in headless mode

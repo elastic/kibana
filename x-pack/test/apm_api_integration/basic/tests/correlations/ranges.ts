@@ -6,7 +6,6 @@
 
 import expect from '@kbn/expect';
 import { format } from 'url';
-import { expectSnapshot } from '../../../common/match_snapshot';
 import { PromiseReturnType } from '../../../../../plugins/apm/typings/common';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import archives_metadata from '../../../common/archives_metadata';
