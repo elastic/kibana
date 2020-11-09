@@ -163,7 +163,7 @@ image:images/document-table-expanded.png[Table view with document expanded]
 +
 To apply filters and toggle a field into the table, hover over a field name for the controls.
 
-. To view documents that occurred closest in time this event, click View surrounding documents.
+. To view documents that occurred before or after the event, click **View surrounding documents**.
 
 . To view document data as a separate page, click View single document.
 +
