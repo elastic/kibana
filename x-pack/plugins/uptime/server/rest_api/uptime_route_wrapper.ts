@@ -13,11 +13,11 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute) => ({
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
   },
   handler: async (context, request, response) => {
-    const { callAsCurrentUser: callES } = context.core.elasticsearch.legacy.client;
+    const { client: esClient } = context.core.elasticsearch;
     const { client: savedObjectsClient } = context.core.savedObjects;
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
     return uptimeRoute.handler(
-      { callES, savedObjectsClient, dynamicSettings },
+      { callES: esClient.asCurrentUser, esClient, savedObjectsClient, dynamicSettings },
       context,
       request,
       response
