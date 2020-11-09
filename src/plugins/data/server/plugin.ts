@@ -96,7 +96,7 @@ export class DataServerPlugin
     core.uiSettings.register(getUiSettings());
 
     const searchSetup = this.searchService.setup(core, {
-      registerFunction: expressions.registerFunction,
+      expressions,
       usageCollection,
     });
 
