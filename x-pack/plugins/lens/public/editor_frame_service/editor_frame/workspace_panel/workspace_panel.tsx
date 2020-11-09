@@ -50,6 +50,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
+import { LensInspectorAdapters } from '../../types';
 import { getOriginalRequestErrorMessage } from '../../error_helper';
 import { validateDatasourceAndVisualization } from '../state_helpers';
 
@@ -296,6 +297,7 @@ export function WorkspacePanel({
         expression={expression}
         framePublicAPI={framePublicAPI}
         timefilter={plugins.data.query.timefilter.timefilter}
+        dispatch={dispatch}
         onEvent={onEvent}
         setLocalState={setLocalState}
         localState={{ ...localState, configurationValidationError }}
@@ -309,7 +311,6 @@ export function WorkspacePanel({
       title={title}
       framePublicAPI={framePublicAPI}
       dispatch={dispatch}
-      emptyExpression={expression === null}
       visualizationState={visualizationState}
       visualizationId={activeVisualizationId}
       datasourceStates={datasourceStates}
@@ -340,11 +341,13 @@ export const InnerVisualizationWrapper = ({
   setLocalState,
   localState,
   ExpressionRendererComponent,
+  dispatch,
 }: {
   expression: Ast | null | undefined;
   framePublicAPI: FramePublicAPI;
   timefilter: TimefilterContract;
   onEvent: (event: ExpressionRendererEvent) => void;
+  dispatch: (action: Action) => void;
   setLocalState: (dispatch: (prevState: WorkspaceState) => WorkspaceState) => void;
   localState: WorkspaceState & {
     configurationValidationError?: Array<{ shortMessage: string; longMessage: string }>;
@@ -368,6 +371,18 @@ export const InnerVisualizationWrapper = ({
       framePublicAPI.dateRange.toDate,
       framePublicAPI.filters,
     ]
+  );
+
+  const onData$ = useCallback(
+    (data: unknown, inspectorAdapters?: LensInspectorAdapters) => {
+      if (inspectorAdapters && inspectorAdapters.tables) {
+        dispatch({
+          type: 'UPDATE_ACTIVE_DATA',
+          tables: inspectorAdapters.tables,
+        });
+      }
+    },
+    [dispatch]
   );
 
   if (localState.configurationValidationError) {
@@ -456,6 +471,7 @@ export const InnerVisualizationWrapper = ({
         searchContext={context}
         reload$={autoRefreshFetch$}
         onEvent={onEvent}
+        onData$={onData$}
         renderError={(errorMessage?: string | null, error?: ExpressionRenderError | null) => {
           const visibleErrorMessage = getOriginalRequestErrorMessage(error) || errorMessage;
 
