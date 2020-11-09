@@ -250,7 +250,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Performs drag and drop for html5 native drag and drop implementation
-     * There's a bug in Chromedriver from html5 dnd that doesn't allow to use the method `dragAndDrop` defined above
+     * There's a bug in Chromedriver for html5 dnd that doesn't allow to use the method `dragAndDrop` defined above
      * https://github.com/SeleniumHQ/selenium/issues/6235
      * This implementation simulates user's action by calling the drag and drop specific events directly.
      *
