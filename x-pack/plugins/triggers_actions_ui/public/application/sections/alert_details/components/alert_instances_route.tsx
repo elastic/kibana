@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { ToastsApi } from 'kibana/public';
 import React, { useState, useEffect } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { Alert, AlertInstanceSummary } from '../../../../types';
+import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
 import { useAppDependencies } from '../../../app_context';
 import {
   ComponentOpts as AlertApis,
@@ -18,12 +18,14 @@ import { AlertInstancesWithApi as AlertInstances } from './alert_instances';
 
 type WithAlertInstanceSummaryProps = {
   alert: Alert;
+  alertType: AlertType;
   readOnly: boolean;
   requestRefresh: () => Promise<void>;
 } & Pick<AlertApis, 'loadAlertInstanceSummary'>;
 
 export const AlertInstancesRoute: React.FunctionComponent<WithAlertInstanceSummaryProps> = ({
   alert,
+  alertType,
   readOnly,
   requestRefresh,
   loadAlertInstanceSummary: loadAlertInstanceSummary,
@@ -48,6 +50,7 @@ export const AlertInstancesRoute: React.FunctionComponent<WithAlertInstanceSumma
     <AlertInstances
       requestRefresh={requestRefresh}
       alert={alert}
+      alertType={alertType}
       readOnly={readOnly}
       alertInstanceSummary={alertInstanceSummary}
     />

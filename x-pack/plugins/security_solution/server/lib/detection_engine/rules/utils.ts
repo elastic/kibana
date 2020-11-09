@@ -43,6 +43,8 @@ import {
 } from '../../../../common/detection_engine/schemas/common/schemas';
 import { PartialFilter } from '../types';
 import {
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
   ListArrayOrUndefined,
   ThreatFiltersOrUndefined,
   ThreatIndexOrUndefined,
@@ -98,6 +100,8 @@ export interface UpdateProperties {
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;

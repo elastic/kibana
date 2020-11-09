@@ -253,6 +253,48 @@ describe('workspace_panel', () => {
     expect(trigger.exec).toHaveBeenCalledWith({ data: eventData });
   });
 
+  it('should push add current data table to state on data$ emitting value', () => {
+    const framePublicAPI = createMockFramePublicAPI();
+    framePublicAPI.datasourceLayers = {
+      first: mockDatasource.publicAPIMock,
+    };
+    mockDatasource.toExpression.mockReturnValue('datasource');
+    mockDatasource.getLayers.mockReturnValue(['first']);
+    const dispatch = jest.fn();
+
+    instance = mount(
+      <WorkspacePanel
+        activeDatasourceId={'mock'}
+        datasourceStates={{
+          mock: {
+            state: {},
+            isLoading: false,
+          },
+        }}
+        datasourceMap={{
+          mock: mockDatasource,
+        }}
+        framePublicAPI={framePublicAPI}
+        activeVisualizationId="vis"
+        visualizationMap={{
+          vis: { ...mockVisualization, toExpression: () => 'vis' },
+        }}
+        visualizationState={{}}
+        dispatch={dispatch}
+        ExpressionRenderer={expressionRendererMock}
+        core={coreMock.createSetup()}
+        plugins={{ uiActions: uiActionsMock, data: dataMock }}
+      />
+    );
+
+    const onData = expressionRendererMock.mock.calls[0][0].onData$!;
+
+    const tableData = { table1: { columns: [], rows: [] } };
+    onData(undefined, { tables: tableData });
+
+    expect(dispatch).toHaveBeenCalledWith({ type: 'UPDATE_ACTIVE_DATA', tables: tableData });
+  });
+
   it('should include data fetching for each layer in the expression', () => {
     const mockDatasource2 = createMockDatasource('a');
     const framePublicAPI = createMockFramePublicAPI();
