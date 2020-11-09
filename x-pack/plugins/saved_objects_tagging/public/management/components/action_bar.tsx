@@ -82,8 +82,8 @@ export const ActionBar: FC<ActionBarProps> = ({
             />
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {selectedCount > 0 && (
+        {selectedCount > 0 && (
+          <EuiFlexItem grow={false}>
             <EuiPopover
               isOpen={isPopoverOpened}
               closePopover={closePopover}
@@ -91,7 +91,6 @@ export const ActionBar: FC<ActionBarProps> = ({
               button={
                 <EuiButtonEmpty
                   size="xs"
-                  style={{ height: '18px', fontSize: '0.75rem' }}
                   iconType="arrowDown"
                   iconSide="right"
                   onClick={togglePopover}
@@ -113,8 +112,8 @@ export const ActionBar: FC<ActionBarProps> = ({
                 data-test-subj="actionBar-contextMenu"
               />
             </EuiPopover>
-          )}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
     </div>
