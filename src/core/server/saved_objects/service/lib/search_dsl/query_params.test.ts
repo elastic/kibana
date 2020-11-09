@@ -191,6 +191,47 @@ describe('#getQueryParams', () => {
     });
   });
 
+  describe('reference filter clause (query.bool.filter[bool.must])', () => {
+    describe('`hasReference` parameter', () => {
+      const expectResult = (result: Result, expected: any) => {
+        expect(result.query.bool.filter).toEqual(
+          expect.arrayContaining([{ bool: expect.objectContaining({ must: expected }) }])
+        );
+      };
+
+      it('does not include the clause when `hasReference` is not specified', () => {
+        const result = getQueryParams({
+          registry,
+          hasReference: undefined,
+        });
+        expectResult(result, undefined);
+      });
+
+      it('creates a clause with query for specified reference', () => {
+        const hasReference = { id: 'foo', type: 'bar' };
+        const result = getQueryParams({
+          registry,
+          hasReference,
+        });
+        expectResult(result, [
+          {
+            nested: {
+              path: 'references',
+              query: {
+                bool: {
+                  must: [
+                    { term: { 'references.id': hasReference.id } },
+                    { term: { 'references.type': hasReference.type } },
+                  ],
+                },
+              },
+            },
+          },
+        ]);
+      });
+    });
+  });
+
   describe('type filter clauses (query.bool.filter[bool.should])', () => {
     describe('`type` parameter', () => {
       const expectResult = (result: Result, ...types: string[]) => {

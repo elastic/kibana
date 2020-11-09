@@ -134,26 +134,6 @@ interface QueryParams {
   kueryNode?: KueryNode;
 }
 
-function getReferencesFilter(
-  references: HasReferenceQueryParams[],
-  operator: SearchOperator = 'OR'
-) {
-  if (operator === 'AND') {
-    return {
-      bool: {
-        must: references.map(getClauseForReference),
-      },
-    };
-  } else {
-    return {
-      bool: {
-        should: references.map(getClauseForReference),
-        minimum_should_match: 1,
-      },
-    };
-  }
-}
-
 export function getClauseForReference(reference: HasReferenceQueryParams) {
   return {
     nested: {
@@ -214,41 +194,12 @@ export function getQueryParams({
     typeToNamespacesMap ? Array.from(typeToNamespacesMap.keys()) : type
   );
 
-  if (hasReference && !Array.isArray(hasReference)) {
-    hasReference = [hasReference];
-  }
-
   const bool: any = {
     filter: [
       ...(kueryNode != null ? [esKuery.toElasticsearchQuery(kueryNode)] : []),
-      ...(hasReference?.length ? [getReferencesFilter(hasReference, hasReferenceOperator)] : []),
       {
         bool: {
-          must: hasReference
-            ? [
-                {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        must: [
-                          {
-                            term: {
-                              'references.id': hasReference.id,
-                            },
-                          },
-                          {
-                            term: {
-                              'references.type': hasReference.type,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  },
-                },
-              ]
-            : undefined,
+          must: hasReference ? [getClauseForReference(hasReference)] : undefined,
           should: types.map((shouldType) => {
             const normalizedNamespaces = normalizeNamespaces(
               typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces
@@ -382,7 +333,7 @@ const getSimpleQueryStringClause = ({
   types: string[];
   searchFields?: string[];
   rootSearchFields?: string[];
-  defaultSearchOperator?: SearchOperator;
+  defaultSearchOperator?: string;
 }) => {
   return {
     simple_query_string: {
