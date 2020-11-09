@@ -28,7 +28,7 @@ describe('<LogRetentionPanel />', () => {
 
   it('renders', () => {
     const logRetentionPanel = shallow(<LogRetentionPanel />);
-    expect(logRetentionPanel.find('div[data-test-subj="LogRetentionPanel"]')).toHaveLength(1);
+    expect(logRetentionPanel.find('[data-test-subj="LogRetentionPanel"]')).toHaveLength(1);
   });
 
   it('initializes data on mount', () => {
@@ -160,7 +160,7 @@ describe('<LogRetentionPanel />', () => {
   });
 });
 
-function mockLogRetention(logRetention: Partial<ILogRetention>) {
+const mockLogRetention = (logRetention: Partial<ILogRetention>) => {
   const baseLogRetention = {
     analytics: {
       disabledAt: null,
