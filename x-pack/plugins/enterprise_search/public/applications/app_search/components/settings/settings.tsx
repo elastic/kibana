@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-
 import { i18n } from '@kbn/i18n';
+
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -18,6 +18,7 @@ import {
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { FlashMessages } from '../../../shared/flash_messages';
 import { LogRetentionPanel } from './log_retention/log_retention_panel';
+import { LogRetentionConfirmationModal } from './log_retention/log_retention_confirmation_modal';
 
 export const Settings: React.FC = () => {
   return (
@@ -43,6 +44,7 @@ export const Settings: React.FC = () => {
       <EuiPageContent>
         <EuiPageContentBody>
           <FlashMessages />
+          <LogRetentionConfirmationModal />
           <LogRetentionPanel />
         </EuiPageContentBody>
       </EuiPageContent>
