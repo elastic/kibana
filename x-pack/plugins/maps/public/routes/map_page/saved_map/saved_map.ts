@@ -184,7 +184,7 @@ export class SavedMap {
       ? i18n.translate('xpack.maps.breadcrumbsEditByValue', {
           defaultMessage: 'Edit map',
         })
-      : this._attributes.title;
+      : this._attributes!.title;
   }
 
   setBreadcrumbs() {
@@ -237,15 +237,9 @@ export class SavedMap {
     return this._attributes;
   }
 
-  public isByReference(): boolean {
-    return (
-      this._mapEmbeddableInput && getMapAttributeService().inputIsRefType(this._mapEmbeddableInput)
-    );
-  }
-
   public isByValue(): boolean {
     const hasSavedObjectId = !!this.getSavedObjectId();
-    return getIsAllowByValueEmbeddables() && this._originatingApp && !hasSavedObjectId;
+    return getIsAllowByValueEmbeddables() && !!this._originatingApp && !hasSavedObjectId;
   }
 
   public async save({
