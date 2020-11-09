@@ -37,7 +37,7 @@
 
 import { EncryptionConfig } from './encryption_config';
 
-describe('encyption key configuration', () => {
+describe('encryption key configuration', () => {
   let encryptionConfig = null;
 
   beforeEach(() => {
