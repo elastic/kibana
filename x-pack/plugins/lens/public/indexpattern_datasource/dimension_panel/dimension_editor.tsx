@@ -22,10 +22,10 @@ import { IndexPatternColumn, OperationType } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,
-  insertNewColumn,
+  insertOrReplaceColumn,
+  replaceColumn,
   deleteColumn,
   updateColumnParam,
-  replaceColumn,
 } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
@@ -182,19 +182,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
             if (selectedColumn?.operationType === operationType) {
               return;
             }
-            const newLayer = selectedColumn
-              ? replaceColumn({
-                  layer: props.state.layers[props.layerId],
-                  indexPattern: currentIndexPattern,
-                  columnId,
-                  op: operationType,
-                })
-              : insertNewColumn({
-                  layer: props.state.layers[props.layerId],
-                  indexPattern: currentIndexPattern,
-                  columnId,
-                  op: operationType,
-                });
+            const newLayer = insertOrReplaceColumn({
+              layer: props.state.layers[props.layerId],
+              indexPattern: currentIndexPattern,
+              columnId,
+              op: operationType,
+            });
             setState(mergeLayer({ state, layerId, newLayer }));
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
@@ -202,23 +195,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
             const possibleFields = fieldByOperation[operationType] || [];
 
             if (possibleFields.length === 1) {
-              const newLayer = selectedColumn
-                ? replaceColumn({
+              setState(
+                mergeLayer({
+                  state,
+                  layerId,
+                  newLayer: insertOrReplaceColumn({
                     layer: props.state.layers[props.layerId],
                     indexPattern: currentIndexPattern,
                     columnId,
                     op: operationType,
                     field: fieldMap[possibleFields[0]],
-                  })
-                : insertNewColumn({
-                    layer: props.state.layers[props.layerId],
-                    indexPattern: currentIndexPattern,
-                    columnId,
-                    op: operationType,
-                    field: fieldMap[possibleFields[0]],
-                  });
-
-              setState(mergeLayer({ state, layerId, newLayer }));
+                  }),
+                })
+              );
             } else {
               setInvalidOperationType(operationType);
             }
@@ -314,15 +303,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   'field' in choice &&
                   choice.operationType === selectedColumn.operationType
                 ) {
+                  // Replaces just the field
                   newLayer = replaceColumn({
                     layer: state.layers[layerId],
                     columnId,
                     indexPattern: currentIndexPattern,
+                    op: choice.operationType,
                     field: fieldMap[choice.field],
-                    // TODO: don't keep params?
                   });
                 } else {
-                  // Otherwise we'll use the buildColumn method to calculate a new column
+                  // Finds a new operation
                   const compatibleOperations =
                     ('field' in choice && operationSupportMatrix.operationByField[choice.field]) ||
                     [];
@@ -336,22 +326,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   } else if ('field' in choice) {
                     operation = choice.operationType;
                   }
-                  newLayer = selectedColumn
-                    ? replaceColumn({
-                        layer: state.layers[layerId],
-                        columnId,
-                        indexPattern: currentIndexPattern,
-                        op: operation,
-                        field: fieldMap[choice.field],
-                        // TODO: don't keep params?
-                      })
-                    : insertNewColumn({
-                        layer: state.layers[layerId],
-                        columnId,
-                        indexPattern: currentIndexPattern,
-                        op: operation as OperationType,
-                        field: fieldMap[choice.field],
-                      });
+                  newLayer = insertOrReplaceColumn({
+                    layer: state.layers[layerId],
+                    columnId,
+                    indexPattern: currentIndexPattern,
+                    op: operation as OperationType,
+                    field: fieldMap[choice.field],
+                  });
                 }
 
                 setState(mergeLayer({ state, layerId, newLayer }));

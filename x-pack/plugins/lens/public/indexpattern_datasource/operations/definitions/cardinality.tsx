@@ -63,8 +63,9 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
-        'format' in previousColumn.params
-          ? previousColumn.params
+        'format' in previousColumn.params &&
+        previousColumn.params.format
+          ? { format: previousColumn.params.format }
           : undefined,
     };
   },

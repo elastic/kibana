@@ -52,8 +52,9 @@ export const countOperation: OperationDefinition<CountIndexPatternColumn, 'field
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
-        'format' in previousColumn.params
-          ? previousColumn.params
+        'format' in previousColumn.params &&
+        previousColumn.params.format
+          ? { format: previousColumn.params.format }
           : undefined,
     };
   },

@@ -286,13 +286,13 @@ describe('IndexPattern Data Source suggestions', () => {
             state: expect.objectContaining({
               layers: {
                 id1: expect.objectContaining({
-                  columnOrder: ['id2', 'id3'],
+                  columnOrder: ['id3', 'id2'],
                   columns: {
-                    id2: expect.objectContaining({
+                    id3: expect.objectContaining({
                       operationType: 'date_histogram',
                       sourceField: 'timestamp',
                     }),
-                    id3: expect.objectContaining({
+                    id2: expect.objectContaining({
                       operationType: 'avg',
                       sourceField: 'bytes',
                     }),
@@ -306,10 +306,10 @@ describe('IndexPattern Data Source suggestions', () => {
               isMultiRow: true,
               columns: [
                 expect.objectContaining({
-                  columnId: 'id2',
+                  columnId: 'id3',
                 }),
                 expect.objectContaining({
-                  columnId: 'id3',
+                  columnId: 'id2',
                 }),
               ],
               layerId: 'id1',
@@ -497,13 +497,13 @@ describe('IndexPattern Data Source suggestions', () => {
             state: expect.objectContaining({
               layers: {
                 previousLayer: expect.objectContaining({
-                  columnOrder: ['id1', 'id2'],
+                  columnOrder: ['id2', 'id1'],
                   columns: {
-                    id1: expect.objectContaining({
+                    id2: expect.objectContaining({
                       operationType: 'date_histogram',
                       sourceField: 'timestamp',
                     }),
-                    id2: expect.objectContaining({
+                    id1: expect.objectContaining({
                       operationType: 'avg',
                       sourceField: 'bytes',
                     }),
@@ -517,10 +517,10 @@ describe('IndexPattern Data Source suggestions', () => {
               isMultiRow: true,
               columns: [
                 expect.objectContaining({
-                  columnId: 'id1',
+                  columnId: 'id2',
                 }),
                 expect.objectContaining({
-                  columnId: 'id2',
+                  columnId: 'id1',
                 }),
               ],
               layerId: 'previousLayer',

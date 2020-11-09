@@ -207,49 +207,6 @@ describe('state_helpers', () => {
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2', 'col3'] }));
     });
 
-    it('should set the first terms agg size to 5', () => {
-      expect(
-        insertNewColumn({
-          layer: { indexPatternId: '1', columnOrder: [], columns: {} },
-          indexPattern,
-          columnId: 'col1',
-          op: 'terms',
-          field: indexPattern.fields[2],
-        }).columns.col1.params
-      ).toEqual(expect.objectContaining({ size: 5 }));
-    });
-
-    it('should not change the second terms agg size', () => {
-      expect(
-        insertNewColumn({
-          layer: {
-            indexPatternId: '1',
-            columnOrder: ['col1'],
-            columns: {
-              col1: {
-                label: 'Top values of source',
-                dataType: 'string',
-                isBucketed: true,
-
-                // Private
-                operationType: 'terms',
-                sourceField: 'source',
-                params: {
-                  orderBy: { type: 'alphabetical' },
-                  orderDirection: 'asc',
-                  size: 5,
-                },
-              },
-            },
-          },
-          indexPattern,
-          columnId: 'col2',
-          op: 'terms',
-          field: indexPattern.fields[2],
-        }).columns.col2.params
-      ).toEqual(expect.objectContaining({ size: 3 }));
-    });
-
     it('should throw if the aggregation does not support the field', () => {
       expect(() => {
         insertNewColumn({
@@ -380,7 +337,6 @@ describe('state_helpers', () => {
       }).toThrow();
     });
 
-    // TODO: Is this actually happening/needed?
     it('should update order on changing the column', () => {
       const layer: IndexPatternLayer = {
         indexPatternId: '1',

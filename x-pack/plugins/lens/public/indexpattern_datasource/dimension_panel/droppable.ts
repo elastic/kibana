@@ -138,12 +138,19 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
   const selectedColumn: IndexPatternColumn | null = layer.columns[columnId] || null;
   const currentIndexPattern = state.indexPatterns[layer.indexPatternId];
 
+  // Detects if we can change the field only, otherwise change field + operation
+  const fieldIsCompatibleWithCurrent =
+    selectedColumn &&
+    operationSupportMatrix.operationByField[droppedItem.field.name]?.includes(
+      selectedColumn.operationType
+    );
+
   const newLayer = selectedColumn
     ? replaceColumn({
         layer,
         columnId,
         indexPattern: currentIndexPattern,
-        op: operationsForNewField[0],
+        op: fieldIsCompatibleWithCurrent ? selectedColumn.operationType : operationsForNewField[0],
         field: droppedItem.field,
       })
     : insertNewColumn({

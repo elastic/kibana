@@ -275,6 +275,36 @@ describe('terms', () => {
         })
       );
     });
+
+    it('should use the default size when there is an existing bucket', () => {
+      const termsColumn = termsOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        columns: state.layers.first.columns,
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+      });
+      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 3 }));
+    });
+
+    it('should use a size of 5 when there are no other buckets', () => {
+      const termsColumn = termsOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        columns: {},
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+      });
+      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 5 }));
+    });
   });
 
   describe('onOtherColumnChanged', () => {

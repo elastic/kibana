@@ -76,6 +76,9 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
 
+    const previousBucketsLength = Object.values(columns).filter((col) => col && col.isBucketed)
+      .length;
+
     return {
       label: ofName(field.displayName),
       dataType: field.type as DataType,
@@ -84,7 +87,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: DEFAULT_SIZE,
+        size: previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
         orderBy: existingMetricColumn
           ? { type: 'column', columnId: existingMetricColumn }
           : { type: 'alphabetical' },

@@ -20,19 +20,28 @@ import {
 import { getSortScoreByPriority } from './operations';
 import { mergeLayer } from '../state_helpers';
 
+interface ColumnChange {
+  op: OperationType;
+  layer: IndexPatternLayer;
+  columnId: string;
+  indexPattern: IndexPattern;
+  field?: IndexPatternField;
+}
+
+export function insertOrReplaceColumn(args: ColumnChange): IndexPatternLayer {
+  if (args.layer.columns[args.columnId]) {
+    return replaceColumn(args);
+  }
+  return insertNewColumn(args);
+}
+
 export function insertNewColumn({
   op,
   layer,
   columnId,
   field,
   indexPattern,
-}: {
-  op: OperationType;
-  layer: IndexPatternLayer;
-  columnId: string;
-  indexPattern: IndexPattern;
-  field?: IndexPatternField;
-}): IndexPatternLayer {
+}: ColumnChange): IndexPatternLayer {
   const operationDefinition = operationDefinitionMap[op];
 
   if (!operationDefinition) {
@@ -84,13 +93,7 @@ export function replaceColumn({
   indexPattern,
   op,
   field,
-}: {
-  layer: IndexPatternLayer;
-  columnId: string;
-  indexPattern: IndexPattern;
-  op?: OperationType;
-  field?: IndexPatternField;
-}): IndexPatternLayer {
+}: ColumnChange): IndexPatternLayer {
   const previousColumn = layer.columns[columnId];
   if (!previousColumn) {
     throw new Error(`Can't replace column because there is no prior column`);
@@ -106,7 +109,7 @@ export function replaceColumn({
   const baseOptions = {
     columns: layer.columns,
     indexPattern,
-    previousColumn: layer.columns[columnId],
+    previousColumn,
   };
 
   if (isNewOperation) {
@@ -149,14 +152,11 @@ export function replaceColumn({
   } else if (
     operationDefinition.input === 'field' &&
     field &&
-    ('sourceField' in previousColumn ? field.name !== previousColumn.sourceField : true)
+    'sourceField' in previousColumn &&
+    previousColumn.sourceField !== field.name
   ) {
-    const newColumn = operationDefinition.buildColumn({ ...baseOptions, field, previousColumn });
-
-    // TODO: This is probably wrong, not all params are shared on all ops?
-    if ('params' in previousColumn) {
-      newColumn.params = previousColumn.params;
-    }
+    // Same operation, new field
+    const newColumn = operationDefinition.onFieldChange(previousColumn, field);
 
     if (previousColumn.customLabel) {
       newColumn.customLabel = true;
@@ -181,18 +181,12 @@ function addBucket(
 ): IndexPatternLayer {
   const [buckets, metrics] = separateBucketColumns(layer);
 
-  if (buckets.length === 0 && column.operationType === 'terms') {
-    column.params.size = 5;
-  }
-
   const oldDateHistogramIndex = layer.columnOrder.findIndex(
     (columnId) => layer.columns[columnId].operationType === 'date_histogram'
   );
-  const oldDateHistogramId =
-    oldDateHistogramIndex > -1 ? layer.columnOrder[oldDateHistogramIndex] : null;
 
   let updatedColumnOrder: string[] = [];
-  if (oldDateHistogramId && column.operationType === 'terms') {
+  if (oldDateHistogramIndex > -1 && column.operationType === 'terms') {
     // Insert the new terms bucket above the first date histogram
     updatedColumnOrder = [
       ...buckets.slice(0, oldDateHistogramIndex),
@@ -235,10 +229,7 @@ export function getMetricOperationTypes(field: IndexPatternField) {
   return operationDefinitions.sort(getSortScoreByPriority).filter((definition) => {
     if (definition.input !== 'field') return;
     const metadata = definition.getPossibleOperationForField(field);
-    if (!metadata) return;
-    return (
-      !metadata.isBucketed && (metadata.dataType === 'number' || metadata.dataType === 'document')
-    );
+    return metadata && !metadata.isBucketed && metadata.dataType === 'number';
   });
 }
 

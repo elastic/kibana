@@ -9,6 +9,7 @@ const actualHelpers = jest.requireActual('../layer_helpers');
 
 jest.spyOn(actualOperations.operationDefinitionMap.date_histogram, 'paramEditor');
 jest.spyOn(actualOperations.operationDefinitionMap.terms, 'onOtherColumnChanged');
+jest.spyOn(actualHelpers, 'insertOrReplaceColumn');
 jest.spyOn(actualHelpers, 'insertNewColumn');
 jest.spyOn(actualHelpers, 'replaceColumn');
 
@@ -23,6 +24,7 @@ export const {
 } = actualOperations;
 
 export const {
+  insertOrReplaceColumn,
   insertNewColumn,
   replaceColumn,
   getColumnOrder,

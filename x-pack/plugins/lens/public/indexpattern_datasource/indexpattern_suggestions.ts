@@ -288,44 +288,61 @@ function createNewLayerWithBucketAggregation(
   field: IndexPatternField,
   operation: OperationType
 ): IndexPatternLayer {
-  let layer: IndexPatternLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
-  layer = insertNewColumn({ op: operation, layer, columnId: generateId(), field, indexPattern });
-  layer = insertNewColumn({
+  return insertNewColumn({
     op: 'count',
-    layer,
+    layer: insertNewColumn({
+      op: operation,
+      layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
+      columnId: generateId(),
+      field,
+      indexPattern,
+    }),
     columnId: generateId(),
     field: documentField,
     indexPattern,
   });
-  return layer;
 }
 
 function createNewLayerWithMetricAggregation(
   indexPattern: IndexPattern,
   field: IndexPatternField
 ): IndexPatternLayer | undefined {
-  let layer: IndexPatternLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
   const dateField = indexPattern.fields.find((f) => f.name === indexPattern.timeFieldName)!;
   const [metricOperation] = getMetricOperationTypes(field);
   if (!metricOperation) {
     return;
   }
 
-  layer = insertNewColumn({
+  return insertNewColumn({
     op: 'date_histogram',
-    layer,
+    layer: insertNewColumn({
+      op: metricOperation.type,
+      layer: { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] },
+      columnId: generateId(),
+      field,
+      indexPattern,
+    }),
     columnId: generateId(),
     field: dateField,
     indexPattern,
   });
-  layer = insertNewColumn({
-    op: metricOperation.type,
-    layer,
-    columnId: generateId(),
-    field,
-    indexPattern,
-  });
-  return layer;
+
+  // let layer: IndexPatternLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
+  // layer = insertNewColumn({
+  //   op: 'date_histogram',
+  //   layer,
+  //   columnId: generateId(),
+  //   field: dateField,
+  //   indexPattern,
+  // });
+  // layer = insertNewColumn({
+  //   op: metricOperation.type,
+  //   layer,
+  //   columnId: generateId(),
+  //   field,
+  //   indexPattern,
+  // });
+  // return layer;
 }
 
 export function getDatasourceSuggestionsFromCurrentState(
