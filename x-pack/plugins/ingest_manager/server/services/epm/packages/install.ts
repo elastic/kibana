@@ -18,6 +18,7 @@ import {
   KibanaAssetReference,
   EsAssetReference,
   InstallType,
+  KibanaAssetType,
 } from '../../../types';
 import * as Registry from '../registry';
 import {
@@ -247,7 +248,7 @@ export async function installPackageFromRegistry({
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
 
-  const { paths, registryPackageInfo } = await Registry.loadRegistryPackage(pkgName, pkgVersion);
+  const { paths, registryPackageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
   const removable = !isRequiredPackage(pkgName);
   const { internal = false } = registryPackageInfo;
@@ -364,9 +365,9 @@ export async function createInstallation(options: {
 export const saveKibanaAssetsRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  kibanaAssets: ArchiveAsset[]
+  kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
-  const assetRefs = kibanaAssets.map(toAssetReference);
+  const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
   await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
     installed_kibana: assetRefs,
   });
