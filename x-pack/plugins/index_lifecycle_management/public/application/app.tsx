@@ -13,6 +13,7 @@ import { UIM_APP_LOAD } from './constants/ui_metric';
 import { EditPolicy } from './sections/edit_policy';
 import { PolicyTable } from './sections/policy_table';
 import { trackUiMetric } from './services/ui_metric';
+import { ROUTES } from './services/navigation';
 
 export const AppWithRouter = ({
   history,
@@ -39,16 +40,16 @@ export const App = ({
 
   return (
     <Switch>
-      <Redirect exact from="/" to="/policies" />
-      <Route
-        exact
-        path={`/policies`}
-        render={(props) => <PolicyTable {...props} navigateToApp={navigateToApp} />}
-      />
-      <Route
-        path={`/policies/edit/:policyName?`}
-        render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
-      />
-    </Switch>
+        <Redirect exact from="/" to={ROUTES.list} />
+        <Route
+          exact
+          path={ROUTES.list}
+          render={(props) => <PolicyTable {...props} navigateToApp={navigateToApp} />}
+        />
+        <Route
+          path={ROUTES.edit}
+          render={(props) => <EditPolicy {...props} getUrlForApp={getUrlForApp} />}
+        />
+      </Switch>
   );
 };
