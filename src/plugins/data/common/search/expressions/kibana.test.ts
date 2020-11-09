@@ -17,14 +17,14 @@
  * under the License.
  */
 
+import { ExecutionContext } from 'src/plugins/expressions/common';
+import { kibana } from './kibana';
+import { ExpressionValueSearchContext } from './kibana_context_type';
 import { functionWrapper } from './utils';
-import { kibana } from '../kibana';
-import { ExecutionContext } from '../../../execution/types';
-import { KibanaContext, ExpressionValueSearchContext } from '../../../expression_types';
 
 describe('interpreter/functions#kibana', () => {
   const fn = functionWrapper(kibana);
-  let input: Partial<KibanaContext>;
+  let input: Partial<ExpressionValueSearchContext>;
   let search: ExpressionValueSearchContext;
   let context: ExecutionContext;
 

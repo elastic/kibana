@@ -13,7 +13,7 @@ import {
   SearchInterceptorDeps,
   UI_SETTINGS,
 } from '../../../../../src/plugins/data/public';
-import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
+import { AbortError, abortSignalToPromise } from '../../../../../src/plugins/kibana_utils/public';
 
 import {
   IAsyncSearchRequest,
@@ -70,7 +70,7 @@ export class EnhancedSearchInterceptor extends SearchInterceptor {
       abortSignal: options.abortSignal,
       timeout: this.searchTimeout,
     });
-    const abortedPromise = toPromise(combinedSignal);
+    const abortedPromise = abortSignalToPromise(combinedSignal);
     const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
 
     this.pendingCount$.next(this.pendingCount$.getValue() + 1);

@@ -88,6 +88,10 @@
 |  [AggGroupName](./kibana-plugin-plugins-data-server.agggroupname.md) |  |
 |  [AggParam](./kibana-plugin-plugins-data-server.aggparam.md) |  |
 |  [EsaggsExpressionFunctionDefinition](./kibana-plugin-plugins-data-server.esaggsexpressionfunctiondefinition.md) |  |
+|  [ExecutionContextSearch](./kibana-plugin-plugins-data-server.executioncontextsearch.md) |  |
+|  [ExpressionFunctionKibana](./kibana-plugin-plugins-data-server.expressionfunctionkibana.md) |  |
+|  [ExpressionFunctionKibanaContext](./kibana-plugin-plugins-data-server.expressionfunctionkibanacontext.md) |  |
+|  [ExpressionValueSearchContext](./kibana-plugin-plugins-data-server.expressionvaluesearchcontext.md) |  |
 |  [FieldFormatsGetConfigFn](./kibana-plugin-plugins-data-server.fieldformatsgetconfigfn.md) |  |
 |  [Filter](./kibana-plugin-plugins-data-server.filter.md) |  |
 |  [IAggConfig](./kibana-plugin-plugins-data-server.iaggconfig.md) |  AggConfig This class represents an aggregation, which is displayed in the left-hand nav of the Visualize app. |
@@ -96,6 +100,7 @@
 |  [IFieldFormatsRegistry](./kibana-plugin-plugins-data-server.ifieldformatsregistry.md) |  |
 |  [IFieldParamType](./kibana-plugin-plugins-data-server.ifieldparamtype.md) |  |
 |  [IMetricAggType](./kibana-plugin-plugins-data-server.imetricaggtype.md) |  |
+|  [KibanaContext](./kibana-plugin-plugins-data-server.kibanacontext.md) |  |
 |  [ParsedInterval](./kibana-plugin-plugins-data-server.parsedinterval.md) |  |
 |  [Query](./kibana-plugin-plugins-data-server.query.md) |  |
 |  [TabbedAggRow](./kibana-plugin-plugins-data-server.tabbedaggrow.md) | \* |

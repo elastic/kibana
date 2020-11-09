@@ -20,7 +20,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { CoreStart, CoreSetup } from 'kibana/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import {
+  DataPublicPluginStart,
+  ExecutionContextSearch,
+  TimefilterContract,
+} from 'src/plugins/data/public';
 import {
   ExpressionRendererEvent,
   ExpressionRenderError,
@@ -44,10 +48,6 @@ import {
   VisualizeFieldContext,
 } from '../../../../../../../src/plugins/ui_actions/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../../../../../../src/plugins/visualizations/public';
-import {
-  DataPublicPluginStart,
-  TimefilterContract,
-} from '../../../../../../../src/plugins/data/public';
 import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import { DropIllustration } from '../../../assets/drop_illustration';
 import { LensInspectorAdapters } from '../../types';

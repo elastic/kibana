@@ -17,5 +17,8 @@
  * under the License.
  */
 
+export * from './kibana';
+export * from './kibana_context';
+export * from './kibana_context_type';
 export * from './esaggs';
 export * from './utils';

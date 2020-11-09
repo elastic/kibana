@@ -29,7 +29,6 @@ import { I18nProvider } from '@kbn/i18n/react';
 import {
   ExpressionFunctionDefinition,
   ExpressionRenderDefinition,
-  ExpressionValueSearchContext,
   Datatable,
   DatatableRow,
 } from 'src/plugins/expressions/public';
@@ -45,7 +44,7 @@ import {
 import { XYArgs, SeriesType, visualizationTypes } from './types';
 import { VisualizationContainer } from '../visualization_container';
 import { isHorizontalChart, getSeriesColor } from './state_helpers';
-import { parseInterval } from '../../../../../src/plugins/data/common';
+import { ExpressionValueSearchContext, search } from '../../../../../src/plugins/data/public';
 import {
   ChartsPluginSetup,
   PaletteRegistry,
@@ -384,7 +383,8 @@ export function XYChart({
     // add minInterval only for single point in domain
     if (data.dateRange && isSingleTimestampInXDomain()) {
       const params = xAxisColumn?.meta?.sourceParams?.params as Record<string, string>;
-      if (params?.interval !== 'auto') return parseInterval(params?.interval)?.asMilliseconds();
+      if (params?.interval !== 'auto')
+        return search.aggs.parseInterval(params?.interval)?.asMilliseconds();
 
       const { fromDate, toDate } = data.dateRange;
       const duration = moment(toDate).diff(moment(fromDate));
