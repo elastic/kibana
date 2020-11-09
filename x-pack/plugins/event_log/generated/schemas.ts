@@ -60,6 +60,7 @@ export const EventSchema = schema.maybe(
         alerting: schema.maybe(
           schema.object({
             instance_id: ecsString(),
+            action_group_id: ecsString(),
           })
         ),
         saved_objects: schema.maybe(

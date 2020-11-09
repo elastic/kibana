@@ -23,8 +23,10 @@ import {
   IUiSettingsClient,
   SavedObjectsClientContract,
 } from 'kibana/server';
+
 import { Framework } from '../../../plugin';
 import { IndexPatternsFetcher } from '../../../../../data/server';
+import { VisPayload } from '../../../../common/types';
 
 /**
  * ReqFacade is a regular KibanaRequest object extended with additional service
@@ -32,17 +34,17 @@ import { IndexPatternsFetcher } from '../../../../../data/server';
  *
  * This will be replaced by standard KibanaRequest and RequestContext objects in a later version.
  */
-export type ReqFacade = FakeRequest & {
+export interface ReqFacade<T = unknown> extends FakeRequest {
   requestContext: RequestHandlerContext;
   framework: Framework;
-  payload: unknown;
+  payload: T;
   pre: {
     indexPatternsService?: IndexPatternsFetcher;
   };
   getUiSettingsService: () => IUiSettingsClient;
   getSavedObjectsClient: () => SavedObjectsClientContract;
   getEsShardTimeout: () => Promise<number>;
-};
+}
 
 export class AbstractSearchStrategy {
   public indexType?: string;
@@ -53,13 +55,14 @@ export class AbstractSearchStrategy {
     this.additionalParams = additionalParams;
   }
 
-  async search(req: ReqFacade, bodies: any[], options = {}) {
-    const [, deps] = await req.framework.core.getStartServices();
+  async search(req: ReqFacade<VisPayload>, bodies: any[], options = {}) {
     const requests: any[] = [];
+    const { sessionId } = req.payload;
+
     bodies.forEach((body) => {
       requests.push(
-        deps.data.search
-          .search(
+        req.requestContext
+          .search!.search(
             {
               params: {
                 ...body,
@@ -68,9 +71,9 @@ export class AbstractSearchStrategy {
               indexType: this.indexType,
             },
             {
+              sessionId,
               ...options,
-            },
-            req.requestContext
+            }
           )
           .toPromise()
       );

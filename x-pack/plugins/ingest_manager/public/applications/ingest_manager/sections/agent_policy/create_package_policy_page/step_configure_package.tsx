@@ -12,7 +12,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { PackageInfo, RegistryStream, NewPackagePolicy, PackagePolicyInput } from '../../../types';
+import {
+  PackageInfo,
+  RegistryStream,
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+} from '../../../types';
 import { Loading } from '../../../components';
 import { PackagePolicyValidationResults } from './services';
 import { PackagePolicyInputPanel } from './components';
@@ -83,7 +88,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
                   packageInput={packageInput}
                   packageInputStreams={packageInputStreams}
                   packagePolicyInput={packagePolicyInput}
-                  updatePackagePolicyInput={(updatedInput: Partial<PackagePolicyInput>) => {
+                  updatePackagePolicyInput={(updatedInput: Partial<NewPackagePolicyInput>) => {
                     const indexOfUpdatedInput = packagePolicy.inputs.findIndex(
                       (input) => input.type === packageInput.type
                     );
