@@ -262,7 +262,7 @@ export function XyToolbar(props: VisualizationToolbarProps<State>) {
               title={i18n.translate('xpack.lens.xyChart.valuesLabel', {
                 defaultMessage: 'Values',
               })}
-              type="values"
+              type="numeric"
               groupPosition="left"
               buttonDataTestSubj="lnsValuesButton"
               isDisabled={!isValueLabelsEnabled && !isFittingEnabled}
