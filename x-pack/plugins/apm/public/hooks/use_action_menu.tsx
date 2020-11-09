@@ -4,24 +4,23 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
-import { getActionMenuMountPoint } from '../application/action_menu';
+import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import { toMountPoint } from '../../../../../src/plugins/kibana_react/public';
+import { ActionMenu } from '../application/action_menu';
 import { useApmPluginContext } from './useApmPluginContext';
 
-export function useActionMenu(serviceName?: string) {
-  const apmPluginContextValue = useApmPluginContext();
-  const { setHeaderActionMenu } = apmPluginContextValue.appMountParameters;
+export function useActionMenu() {
+  const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
+  const portalNode = createPortalNode();
 
   useEffect(() => {
     let mountPointElement: HTMLElement;
 
     setHeaderActionMenu((element) => {
       mountPointElement = element;
-      return getActionMenuMountPoint(
-        apmPluginContextValue,
-        serviceName
-      )(element);
+      return toMountPoint(<OutPortal node={portalNode} />)(mountPointElement);
     });
 
     return () => {
@@ -30,4 +29,10 @@ export function useActionMenu(serviceName?: string) {
       }
     };
   });
+
+  return () => (
+    <InPortal node={portalNode}>
+      <ActionMenu />
+    </InPortal>
+  );
 }

@@ -33,10 +33,11 @@ export function Settings({ children, location }: SettingsProps) {
     return getAPMHref({ basePath, path: `/settings${path}`, search });
   }
 
-  useActionMenu();
+  const ActionMenu = useActionMenu();
 
   return (
     <>
+      <ActionMenu />
       <HomeLink>
         <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
           {i18n.translate('xpack.apm.settings.returnLinkLabel', {

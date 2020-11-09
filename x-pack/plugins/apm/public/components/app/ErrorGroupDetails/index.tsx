@@ -21,7 +21,6 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useFetcher } from '../../../hooks/useFetcher';
 import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useActionMenu } from '../../../hooks/use_action_menu';
 import { callApmApi } from '../../../services/rest/createCallApmApi';
 import { fontFamilyCode, fontSizes, px, units } from '../../../style/variables';
 import { ApmHeader } from '../../shared/ApmHeader';
@@ -107,8 +106,6 @@ export function ErrorGroupDetails({ location, match }: ErrorGroupDetailsProps) {
 
   useTrackPageview({ app: 'apm', path: 'error_group_details' });
   useTrackPageview({ app: 'apm', path: 'error_group_details', delay: 15000 });
-
-  useActionMenu(serviceName);
 
   if (!errorGroupData || !errorDistributionData) {
     return null;

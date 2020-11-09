@@ -7,21 +7,8 @@
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Router } from 'react-router-dom';
-import {
-  RedirectAppLinks,
-  toMountPoint,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { AlertsContextProvider } from '../../../../triggers_actions_ui/public';
 import { getAlertingCapabilities } from '../../components/alerting/get_alert_capabilities';
 import { getAPMHref } from '../../components/shared/Links/apm/APMLink';
-import {
-  ApmPluginContextValue,
-  ApmPluginContext,
-} from '../../context/ApmPluginContext';
-import { LicenseProvider } from '../../context/LicenseContext';
-import { ServiceNameContext } from '../../context/service_name_context';
-import { UrlParamsProvider } from '../../context/UrlParamsContext';
 import { useApmPluginContext } from '../../hooks/useApmPluginContext';
 import { useServiceName } from '../../hooks/use_service_name';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
@@ -81,46 +68,5 @@ export function ActionMenu() {
         })}
       </EuiHeaderLink>
     </EuiHeaderLinks>
-  );
-}
-
-/**
- * Get the mount point to set the header menu with the header links.
- *
- * Alerts and ML links require a lot of context so include what we need here.
- */
-export function getActionMenuMountPoint(
-  apmPluginContextValue: ApmPluginContextValue,
-  serviceName?: string
-) {
-  const { appMountParameters, core, plugins } = apmPluginContextValue;
-
-  return toMountPoint(
-    <Router history={appMountParameters.history}>
-      <RedirectAppLinks application={core.application}>
-        <ApmPluginContext.Provider value={apmPluginContextValue}>
-          <UrlParamsProvider>
-            <LicenseProvider>
-              <ServiceNameContext.Provider value={serviceName}>
-                <AlertsContextProvider
-                  value={{
-                    actionTypeRegistry:
-                      plugins.triggersActionsUi.actionTypeRegistry,
-                    alertTypeRegistry:
-                      plugins.triggersActionsUi.alertTypeRegistry,
-                    capabilities: core.application.capabilities,
-                    docLinks: core.docLinks,
-                    http: core.http,
-                    toastNotifications: core.notifications.toasts,
-                  }}
-                >
-                  <ActionMenu />
-                </AlertsContextProvider>
-              </ServiceNameContext.Provider>
-            </LicenseProvider>
-          </UrlParamsProvider>
-        </ApmPluginContext.Provider>
-      </RedirectAppLinks>
-    </Router>
   );
 }
