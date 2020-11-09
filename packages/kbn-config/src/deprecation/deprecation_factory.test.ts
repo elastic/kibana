@@ -18,7 +18,7 @@
  */
 
 import { ConfigDeprecationLogger } from './types';
-import { configDeprecationFactory } from './deprecation_factory';
+import { configDeprecationFactory, copyFromRoot } from './deprecation_factory';
 
 describe('DeprecationFactory', () => {
   const { rename, unused, renameFromRoot, unusedFromRoot } = configDeprecationFactory;
@@ -247,6 +247,89 @@ describe('DeprecationFactory', () => {
           "\\"myplugin.deprecated\\" is deprecated and has been replaced by \\"myplugin.renamed\\". However both key are present, ignoring \\"myplugin.deprecated\\"",
         ]
       `);
+    });
+  });
+
+  describe('copyFromRoot', () => {
+    it('copies a property to a different namespace', () => {
+      const rawConfig = {
+        originplugin: {
+          deprecated: 'toberenamed',
+          valid: 'valid',
+        },
+        destinationplugin: {
+          property: 'value',
+        },
+      };
+      const processed = copyFromRoot('originplugin.deprecated', 'destinationplugin.renamed')(
+        rawConfig,
+        'does-not-matter',
+        logger
+      );
+      expect(processed).toEqual({
+        originplugin: {
+          deprecated: 'toberenamed',
+          valid: 'valid',
+        },
+        destinationplugin: {
+          renamed: 'toberenamed',
+          property: 'value',
+        },
+      });
+      expect(deprecationMessages.length).toEqual(0);
+    });
+
+    it('does not alter config if origin property is not present', () => {
+      const rawConfig = {
+        myplugin: {
+          new: 'new',
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const processed = copyFromRoot('myplugin.deprecated', 'myplugin.new')(
+        rawConfig,
+        'does-not-matter',
+        logger
+      );
+      expect(processed).toEqual({
+        myplugin: {
+          new: 'new',
+          valid: 'valid',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      });
+      expect(deprecationMessages.length).toEqual(0);
+    });
+
+    it('does not alter config if they both exist', () => {
+      const rawConfig = {
+        myplugin: {
+          deprecated: 'deprecated',
+          renamed: 'renamed',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      };
+      const processed = copyFromRoot('myplugin.deprecated', 'someOtherPlugin.property')(
+        rawConfig,
+        'does-not-matter',
+        logger
+      );
+      expect(processed).toEqual({
+        myplugin: {
+          deprecated: 'deprecated',
+          renamed: 'renamed',
+        },
+        someOtherPlugin: {
+          property: 'value',
+        },
+      });
     });
   });
 
