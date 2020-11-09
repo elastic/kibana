@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Logger, CoreStart } from 'kibana/server';
+import {
+  Logger,
+  CoreStart,
+  SavedObjectsFindResponse,
+  ISavedObjectsRepository,
+} from 'kibana/server';
 import { InvalidateAPIKeyParams, SecurityPluginSetup } from '../../../security/server';
 import {
   RunContext,
@@ -109,39 +114,27 @@ function taskRunner(
           const repository = savedObjects.createInternalRepository();
           const configuredDelay = await configResult.invalidateApiKeysTask.removalDelay;
           const delay = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
-          const totalApiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
-            type: 'api_key_pending_invalidation',
-            filter: `api_key_pending_invalidation.attributes.createdAt < ${delay}`,
-            page: 1,
-            perPage: 0,
-          });
-          let perPageLimit = Math.min(totalApiKeysToInvalidate.total, 100);
-          while (perPageLimit <= totalApiKeysToInvalidate.total) {
+
+          let hasApiKeysPendingInvalidation = true;
+          let pageNumber = 1;
+          const PAGE_SIZE = 100;
+          do {
             const apiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
               type: 'api_key_pending_invalidation',
-              page: 1,
-              perPage: totalApiKeysToInvalidate.total,
+              filter: `api_key_pending_invalidation.attributes.createdAt < ${delay}`,
+              page: pageNumber,
+              perPage: PAGE_SIZE,
             });
-            apiKeysToInvalidate.saved_objects.forEach(async (obj) => {
-              const response = await invalidateAPIKey(
-                { id: obj.attributes.apiKeyId },
-                securityPluginSetup
-              );
-              if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-                logger.error(`Failed to invalidate API Key [id="${obj.attributes.apiKeyId}"]`);
-              } else {
-                try {
-                  await repository.delete('api_key_pending_invalidation', obj.id);
-                  totalInvalidated++;
-                } catch (err) {
-                  logger.error(
-                    `Failed to cleanup api key "${obj.attributes.apiKeyId}". Error: ${err.message}`
-                  );
-                }
-              }
-            });
-            perPageLimit += 100;
-          }
+            totalInvalidated += manageToInvalidateApiKeys(
+              logger,
+              repository,
+              apiKeysToInvalidate,
+              securityPluginSetup
+            );
+            hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > 0;
+            pageNumber++;
+          } while (hasApiKeysPendingInvalidation);
+
           return {
             state: {
               runs: (state.runs || 0) + 1,
@@ -166,4 +159,29 @@ function taskRunner(
       },
     };
   };
+}
+
+function manageToInvalidateApiKeys(
+  logger: Logger,
+  repository: ISavedObjectsRepository,
+  apiKeysToInvalidate: SavedObjectsFindResponse<InvalidatePendingApiKey>,
+  securityPluginSetup?: SecurityPluginSetup
+) {
+  let totalInvalidated = 0;
+  apiKeysToInvalidate.saved_objects.forEach(async (obj) => {
+    const response = await invalidateAPIKey({ id: obj.attributes.apiKeyId }, securityPluginSetup);
+    if (response.apiKeysEnabled === true && response.result.error_count > 0) {
+      logger.error(`Failed to invalidate API Key [id="${obj.attributes.apiKeyId}"]`);
+    } else {
+      try {
+        await repository.delete('api_key_pending_invalidation', obj.id);
+        totalInvalidated++;
+      } catch (err) {
+        logger.error(
+          `Failed to cleanup api key "${obj.attributes.apiKeyId}". Error: ${err.message}`
+        );
+      }
+    }
+  });
+  return totalInvalidated;
 }
