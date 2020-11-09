@@ -9123,7 +9123,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeUnitsAriaLabel": "コールドフェーズのタイミングの単位",
     "xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeLabel": "削除フェーズのタイミング",
     "xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeUnitsAriaLabel": "削除フェーズのタイミングの単位",
-    "xpack.indexLifecycleMgmt.editPolicy.phaseErrorMessage": "エラーを修正してください",
     "xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeLabel": "ウォームフェーズのタイミング",
     "xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeUnitsAriaLabel": "ウォームフェーズのタイミングの単位",
     "xpack.indexLifecycleMgmt.editPolicy.policiesLoading": "ポリシーを読み込み中…",

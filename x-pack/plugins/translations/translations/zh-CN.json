@@ -9132,7 +9132,6 @@
     "xpack.indexLifecycleMgmt.editPolicy.phaseCold.minimumAgeUnitsAriaLabel": "冷阶段计时单位",
     "xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeLabel": "删除阶段计时",
     "xpack.indexLifecycleMgmt.editPolicy.phaseDelete.minimumAgeUnitsAriaLabel": "删除阶段计时单位",
-    "xpack.indexLifecycleMgmt.editPolicy.phaseErrorMessage": "修复错误",
     "xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeLabel": "温阶段计时",
     "xpack.indexLifecycleMgmt.editPolicy.phaseWarm.minimumAgeUnitsAriaLabel": "温阶段计时单位",
     "xpack.indexLifecycleMgmt.editPolicy.policiesLoading": "正在加载策略……",
