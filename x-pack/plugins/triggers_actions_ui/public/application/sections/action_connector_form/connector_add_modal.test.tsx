@@ -65,8 +65,7 @@ describe('connector_add_modal', () => {
 
     const wrapper = mountWithIntl(
       <ConnectorAddModal
-        addModalVisible={true}
-        setAddModalVisibility={() => {}}
+        onClose={() => {}}
         actionType={actionType}
         http={deps!.http}
         actionTypeRegistry={deps!.actionTypeRegistry}
