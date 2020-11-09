@@ -14,7 +14,6 @@ import {
   registerShareGroupRoute,
   registerAssignGroupRoute,
   registerBoostsGroupRoute,
-  registerGroupsRoutes,
 } from './groups';
 
 describe('groups routes', () => {
@@ -391,13 +390,6 @@ describe('groups routes', () => {
         path: '/ws/org/groups/123/update_source_boosts',
         body: mockPayload,
       });
-    });
-  });
-
-  describe('registerGroupsRoutes', () => {
-    it('runs without errors', () => {
-      const mockRouter = new MockRouter({} as any);
-      registerGroupsRoutes({ ...mockDependencies, router: mockRouter.router });
     });
   });
 });
