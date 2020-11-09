@@ -157,7 +157,7 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
         );
       });
     } else if (operationDefinition.input === 'none') {
-      return addToMap(
+      addToMap(
         {
           type: 'none',
           operationType: operationDefinition.type,
