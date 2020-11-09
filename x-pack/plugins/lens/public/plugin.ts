@@ -9,7 +9,7 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/p
 import { EmbeddableSetup, EmbeddableStart } from 'src/plugins/embeddable/public';
 import { DashboardStart } from 'src/plugins/dashboard/public';
 import { ExpressionsSetup, ExpressionsStart } from 'src/plugins/expressions/public';
-import { VisualizationsSetup } from 'src/plugins/visualizations/public';
+import { VisualizationsSetup, VisualizationsStart } from 'src/plugins/visualizations/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { UrlForwardingSetup } from 'src/plugins/url_forwarding/public';
 import { GlobalSearchPluginSetup } from '../../global_search/public';
@@ -35,6 +35,7 @@ import {
   VISUALIZE_FIELD_TRIGGER,
 } from '../../../../src/plugins/ui_actions/public';
 import { NOT_INTERNATIONALIZED_PRODUCT_NAME } from '../common';
+import { PLUGIN_ID_OSS } from '../../../../src/plugins/lens_oss/common/constants';
 import { EditorFrameStart } from './types';
 import { getLensAliasConfig } from './vis_type_alias';
 import { visualizeFieldAction } from './trigger_actions/visualize_field_actions';
@@ -58,6 +59,7 @@ export interface LensPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
   dashboard: DashboardStart;
+  visualizations: VisualizationsStart;
   embeddable: EmbeddableStart;
   charts: ChartsPluginStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
@@ -170,6 +172,8 @@ export class LensPlugin {
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies) {
     this.createEditorFrame = this.editorFrameService.start(core, startDependencies).createInstance;
+    // unregisters the OSS alias
+    startDependencies.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);

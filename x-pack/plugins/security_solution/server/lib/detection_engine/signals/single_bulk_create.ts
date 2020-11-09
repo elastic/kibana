@@ -14,6 +14,7 @@ import { generateId, makeFloatString, errorAggregator } from './utils';
 import { buildBulkBody } from './build_bulk_body';
 import { BuildRuleMessage } from './rule_messages';
 import { Logger } from '../../../../../../../src/core/server';
+import { isEventTypeSignal } from './build_event_type_signal';
 
 interface SingleBulkCreateParams {
   filteredEvents: SignalSearchResponse;
@@ -50,7 +51,7 @@ export const filterDuplicateRules = (
   signalSearchResponse: SignalSearchResponse
 ) => {
   return signalSearchResponse.hits.hits.filter((doc) => {
-    if (doc._source.signal == null) {
+    if (doc._source.signal == null || !isEventTypeSignal(doc)) {
       return true;
     } else {
       return !(
