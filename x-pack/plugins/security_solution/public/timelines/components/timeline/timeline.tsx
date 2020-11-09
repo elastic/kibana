@@ -47,6 +47,7 @@ import {
   activeTimeline,
   ActiveTimelineExpandedEvent,
 } from '../../containers/active_timeline_context';
+import { GraphOverlay } from '../graph_overlay';
 
 const TimelineContainer = styled.div`
   height: 100%;
@@ -91,9 +92,10 @@ const StyledEuiFlyoutFooter = styled(EuiFlyoutFooter)`
   padding: 0 10px 5px 12px;
 `;
 
-const FullWidthFlexGroup = styled(EuiFlexGroup)`
+const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
   width: 100%;
   overflow: hidden;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
@@ -299,7 +301,15 @@ export const TimelineComponent: React.FC<Props> = ({
             loading={loading}
             refetch={refetch}
           />
-          <FullWidthFlexGroup>
+          {graphEventId && (
+            <GraphOverlay
+              graphEventId={graphEventId}
+              isEventViewer={false}
+              timelineId={id}
+              timelineType={timelineType}
+            />
+          )}
+          <FullWidthFlexGroup $visible={!graphEventId}>
             <ScrollableFlexItem grow={2}>
               <StyledEuiFlyoutBody
                 data-test-subj="eui-flyout-body"
@@ -317,31 +327,26 @@ export const TimelineComponent: React.FC<Props> = ({
                   toggleColumn={toggleColumn}
                 />
               </StyledEuiFlyoutBody>
-              {
-                /** Hide the footer if Resolver is showing. */
-                !graphEventId && (
-                  <StyledEuiFlyoutFooter
-                    data-test-subj="eui-flyout-footer"
-                    className="timeline-flyout-footer"
-                  >
-                    <Footer
-                      activePage={pageInfo.activePage}
-                      data-test-subj="timeline-footer"
-                      updatedAt={updatedAt}
-                      height={footerHeight}
-                      id={id}
-                      isLive={isLive}
-                      isLoading={loading || loadingSourcerer}
-                      itemsCount={events.length}
-                      itemsPerPage={itemsPerPage}
-                      itemsPerPageOptions={itemsPerPageOptions}
-                      onChangeItemsPerPage={onChangeItemsPerPage}
-                      onChangePage={loadPage}
-                      totalCount={totalCount}
-                    />
-                  </StyledEuiFlyoutFooter>
-                )
-              }
+              <StyledEuiFlyoutFooter
+                data-test-subj="eui-flyout-footer"
+                className="timeline-flyout-footer"
+              >
+                <Footer
+                  activePage={pageInfo.activePage}
+                  data-test-subj="timeline-footer"
+                  updatedAt={updatedAt}
+                  height={footerHeight}
+                  id={id}
+                  isLive={isLive}
+                  isLoading={loading || loadingSourcerer}
+                  itemsCount={events.length}
+                  itemsPerPage={itemsPerPage}
+                  itemsPerPageOptions={itemsPerPageOptions}
+                  onChangeItemsPerPage={onChangeItemsPerPage}
+                  onChangePage={loadPage}
+                  totalCount={totalCount}
+                />
+              </StyledEuiFlyoutFooter>
             </ScrollableFlexItem>
             <ScrollableFlexItem grow={1}>
               <ExpandableEvent

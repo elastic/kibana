@@ -29,9 +29,8 @@ import { Events } from './events';
 import { ColumnRenderer } from './renderers/column_renderer';
 import { RowRenderer } from './renderers/row_renderer';
 import { Sort } from './sort';
-import { GraphOverlay } from '../../graph_overlay';
 import { DEFAULT_ICON_BUTTON_WIDTH } from '../helpers';
-import { TimelineEventsType, TimelineId, TimelineType } from '../../../../../common/types/timeline';
+import { TimelineEventsType, TimelineId } from '../../../../../common/types/timeline';
 import { ActiveTimelineExpandedEvent } from '../../../containers/active_timeline_context';
 
 export interface BodyProps {
@@ -67,7 +66,6 @@ export interface BodyProps {
   showCheckboxes: boolean;
   sort: Sort;
   timelineId: string;
-  timelineType: TimelineType;
   toggleColumn: (column: ColumnHeaderOptions) => void;
   updateNote: UpdateNote;
 }
@@ -113,7 +111,6 @@ export const Body = React.memo<BodyProps>(
     sort,
     toggleColumn,
     timelineId,
-    timelineType,
     updateNote,
   }) => {
     const actionsColumnWidth = useMemo(
@@ -136,15 +133,6 @@ export const Body = React.memo<BodyProps>(
 
     return (
       <>
-        {graphEventId && (
-          <GraphOverlay
-            graphEventId={graphEventId}
-            isEventViewer={isEventViewer}
-            timelineId={timelineId}
-            timelineType={timelineType}
-          />
-        )}
-
         <TimelineBody
           data-test-subj="timeline-body"
           data-timeline-id={timelineId}

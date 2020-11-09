@@ -36,9 +36,10 @@ import { inputsModel } from '../../store';
 import { useManageTimeline } from '../../../timelines/components/manage_timeline';
 import { ExitFullScreen } from '../exit_full_screen';
 import { useFullScreen } from '../../containers/use_full_screen';
-import { TimelineId } from '../../../../common/types/timeline';
+import { TimelineId, TimelineType } from '../../../../common/types/timeline';
 import { ActiveTimelineExpandedEvent } from '../../../timelines/containers/active_timeline_context';
 import { ExpandableEvent } from '../../../timelines/components/timeline/expandable_event';
+import { GraphOverlay } from '../../../timelines/components/graph_overlay';
 
 export const EVENTS_VIEWER_HEADER_HEIGHT = 90; // px
 const UTILITY_BAR_HEIGHT = 19; // px
@@ -78,9 +79,10 @@ const EventsContainerLoading = styled.div`
   flex-direction: column;
 `;
 
-const FullWidthFlexGroup = styled(EuiFlexGroup)`
+const FullWidthFlexGroup = styled(EuiFlexGroup)<{ $visible: boolean }>`
   width: 100%;
   overflow: hidden;
+  display: ${({ $visible }) => ($visible ? 'flex' : 'none')};
 `;
 
 const ScrollableFlexItem = styled(EuiFlexItem)`
@@ -305,7 +307,15 @@ const EventsViewerComponent: React.FC<Props> = ({
                 refetch={refetch}
               />
 
-              <FullWidthFlexGroup>
+              {graphEventId && (
+                <GraphOverlay
+                  graphEventId={graphEventId}
+                  isEventViewer={true}
+                  timelineId={id}
+                  timelineType={TimelineType.default}
+                />
+              )}
+              <FullWidthFlexGroup $visible={!graphEventId}>
                 <ScrollableFlexItem grow={2}>
                   <StatefulBody
                     browserFields={browserFields}
@@ -320,27 +330,21 @@ const EventsViewerComponent: React.FC<Props> = ({
                     sort={sort}
                     toggleColumn={toggleColumn}
                   />
-
-                  {
-                    /** Hide the footer if Resolver is showing. */
-                    !graphEventId && (
-                      <Footer
-                        activePage={pageInfo.activePage}
-                        data-test-subj="events-viewer-footer"
-                        updatedAt={updatedAt}
-                        height={footerHeight}
-                        id={id}
-                        isLive={isLive}
-                        isLoading={loading}
-                        itemsCount={nonDeletedEvents.length}
-                        itemsPerPage={itemsPerPage}
-                        itemsPerPageOptions={itemsPerPageOptions}
-                        onChangeItemsPerPage={onChangeItemsPerPage}
-                        onChangePage={loadPage}
-                        totalCount={totalCountMinusDeleted}
-                      />
-                    )
-                  }
+                  <Footer
+                    activePage={pageInfo.activePage}
+                    data-test-subj="events-viewer-footer"
+                    updatedAt={updatedAt}
+                    height={footerHeight}
+                    id={id}
+                    isLive={isLive}
+                    isLoading={loading}
+                    itemsCount={nonDeletedEvents.length}
+                    itemsPerPage={itemsPerPage}
+                    itemsPerPageOptions={itemsPerPageOptions}
+                    onChangeItemsPerPage={onChangeItemsPerPage}
+                    onChangePage={loadPage}
+                    totalCount={totalCountMinusDeleted}
+                  />
                 </ScrollableFlexItem>
                 <ScrollableFlexItem grow={1}>
                   <ExpandableEvent
