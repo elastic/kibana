@@ -16,5 +16,5 @@ export interface I18nServiceSetup
 |  Method | Description |
 |  --- | --- |
 |  [getLocale()](./kibana-plugin-core-server.i18nservicesetup.getlocale.md) | Return the locale currently in use. |
-|  [getTranslationFiles()](./kibana-plugin-core-server.i18nservicesetup.gettranslationfiles.md) | Return the list of translation files currently in use. |
+|  [getTranslationFiles()](./kibana-plugin-core-server.i18nservicesetup.gettranslationfiles.md) | Return the absolute paths to translation files currently in use. |
 

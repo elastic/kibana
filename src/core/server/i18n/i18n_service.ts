@@ -39,7 +39,7 @@ export interface I18nServiceSetup {
   getLocale(): string;
 
   /**
-   * Return the list of translation files currently in use.
+   * Return the absolute paths to translation files currently in use.
    */
   getTranslationFiles(): string[];
 }

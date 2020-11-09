@@ -4,7 +4,7 @@
 
 ## I18nServiceSetup.getTranslationFiles() method
 
-Return the list of translation files currently in use.
+Return the absolute paths to translation files currently in use.
 
 <b>Signature:</b>
 
