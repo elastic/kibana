@@ -44,7 +44,10 @@ describe('Search service', () => {
     it('exposes proper contract', async () => {
       const setup = plugin.setup(mockCoreSetup, ({
         packageInfo: { version: '8' },
-        registerFunction: jest.fn(),
+        expressions: {
+          registerFunction: jest.fn(),
+          registerType: jest.fn(),
+        },
       } as unknown) as SearchServiceSetupDependencies);
       expect(setup).toHaveProperty('aggs');
       expect(setup).toHaveProperty('registerSearchStrategy');
