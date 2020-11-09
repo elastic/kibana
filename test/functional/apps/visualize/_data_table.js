@@ -210,7 +210,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data when selecting a field by its custom name', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
