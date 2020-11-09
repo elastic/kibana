@@ -225,7 +225,7 @@ export class MyPlugin implements Plugin {
 For advanced use-cases, such as a search, use {kib-repo}blob/{branch}/docs/development/plugins/data/server/kibana-plugin-plugins-data-server.md[Data plugin]
 
 ==== SavedObjects service
-See <<saved-objects-service, SavedObjects service>> docs.
+See <<saved-objects-service,SavedObjects service>> docs.
 
 ==== HTTP service
 Allows plugins:
