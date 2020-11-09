@@ -83,7 +83,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('creating', () => {
-      it('allows to assign tags to the new visualization', async () => {
+      it.skip('allows to assign tags to the new visualization', async () => {
         await PageObjects.visualize.navigateToNewVisualization();
 
         await PageObjects.visualize.clickMarkdownWidget();

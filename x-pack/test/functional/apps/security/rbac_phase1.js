@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('log in as kibanauser with rbac_all role');
       await PageObjects.security.login('kibanauser', 'changeme');
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickVerticalBarChart');
       await PageObjects.visualize.clickVerticalBarChart();
       await PageObjects.visualize.clickNewSearch();
