@@ -314,15 +314,15 @@ export class IndexPattern implements IIndexPattern {
   getFormatterForField(
     field: IndexPatternField | IndexPatternField['spec'] | IFieldType
   ): FieldFormat {
-    const formatSpec = this.fieldFormatMap[field.name];
-    if (formatSpec) {
-      return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
-    } else {
-      return this.fieldFormats.getDefaultInstance(
-        field.type as KBN_FIELD_TYPES,
-        field.esTypes as ES_FIELD_TYPES[]
-      );
+    const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
+    if (fieldFormat) {
+      return fieldFormat;
     }
+
+    return this.fieldFormats.getDefaultInstance(
+      field.type as KBN_FIELD_TYPES,
+      field.esTypes as ES_FIELD_TYPES[]
+    );
   }
 
   /**
@@ -331,7 +331,7 @@ export class IndexPattern implements IIndexPattern {
    */
   getFormatterForFieldNoDefault(fieldname: string) {
     const formatSpec = this.fieldFormatMap[fieldname];
-    if (formatSpec) {
+    if (formatSpec?.id) {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
   }
