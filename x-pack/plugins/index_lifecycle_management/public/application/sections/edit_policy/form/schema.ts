@@ -6,19 +6,19 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { FormSchema, fieldValidators } from '../../../shared_imports';
-import { defaultSetPriority, defaultPhaseIndexPriority } from '../../constants';
+import { FormSchema, fieldValidators } from '../../../../shared_imports';
+import { defaultSetPriority, defaultPhaseIndexPriority } from '../../../constants';
 
-import { FormInternal } from './types';
+import { FormInternal } from '../types';
 
 import {
   ifExistsNumberGreaterThanZero,
   ifExistsNumberNonNegative,
   rolloverThresholdsValidator,
   minAgeValidator,
-} from './form_validations';
+} from './validations';
 
-import { i18nTexts } from './i18n_texts';
+import { i18nTexts } from '../i18n_texts';
 
 const { emptyField, numberGreaterThanField } = fieldValidators;
 

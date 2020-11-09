@@ -6,13 +6,13 @@
 
 import { produce } from 'immer';
 
-import { SerializedPolicy } from '../../../../common/types';
+import { SerializedPolicy } from '../../../../../common/types';
 
-import { splitSizeAndUnits } from '../../lib/policies';
+import { splitSizeAndUnits } from '../../../lib/policies';
 
-import { determineDataTierAllocationType } from '../../lib';
+import { determineDataTierAllocationType } from '../../../lib';
 
-import { FormInternal } from './types';
+import { FormInternal } from '../types';
 
 export const deserializer = (policy: SerializedPolicy): FormInternal => {
   const {

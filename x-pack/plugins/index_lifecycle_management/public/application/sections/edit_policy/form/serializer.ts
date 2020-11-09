@@ -6,9 +6,9 @@
 
 import { isEmpty, isNumber } from 'lodash';
 
-import { SerializedPolicy, SerializedActionWithAllocation } from '../../../../common/types';
+import { SerializedPolicy, SerializedActionWithAllocation } from '../../../../../common/types';
 
-import { FormInternal, DataAllocationMetaFields } from './types';
+import { FormInternal, DataAllocationMetaFields } from '../types';
 
 const serializeAllocateAction = (
   { dataTierAllocationType, allocationNodeAttribute }: DataAllocationMetaFields,

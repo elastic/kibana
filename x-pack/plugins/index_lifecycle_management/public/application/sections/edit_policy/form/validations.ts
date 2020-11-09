@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fieldValidators, ValidationFunc, ValidationConfig } from '../../../shared_imports';
+import { fieldValidators, ValidationFunc, ValidationConfig } from '../../../../shared_imports';
 
-import { ROLLOVER_FORM_PATHS } from './constants';
+import { ROLLOVER_FORM_PATHS } from '../constants';
 
-import { i18nTexts } from './i18n_texts';
-import { PolicyFromES } from '../../../../common/types';
-import { FormInternal } from './types';
+import { i18nTexts } from '../i18n_texts';
+import { PolicyFromES } from '../../../../../common/types';
+import { FormInternal } from '../types';
 
 const { numberGreaterThanField, containsCharsField, emptyField, startsWithField } = fieldValidators;
 
@@ -48,7 +48,7 @@ export const ifExistsNumberNonNegative = createIfNumberExistsValidator({
  * A special validation type used to keep track of validation errors for
  * the rollover threshold values not being set (e.g., age and doc count)
  */
-export const ROLLOVER_EMPTY_VALIDATION = 'EMPTY';
+export const ROLLOVER_EMPTY_VALIDATION = 'ROLLOVER_EMPTY_VALIDATION';
 
 /**
  * An ILM policy requires that for rollover a value must be set for one of the threshold values.

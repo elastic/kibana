@@ -29,7 +29,7 @@ import {
 
 import { i18nTexts } from '../../../i18n_texts';
 
-import { ROLLOVER_EMPTY_VALIDATION } from '../../../form_validations';
+import { ROLLOVER_EMPTY_VALIDATION } from '../../../form';
 
 import { ROLLOVER_FORM_PATHS } from '../../../constants';
 

@@ -45,11 +45,9 @@ import {
   WarmPhase,
 } from './components';
 
-import { schema } from './form_schema';
-import { deserializer } from './deserializer';
-import { createSerializer } from './serializer';
+import { schema, deserializer, createSerializer, createPolicyNameValidations } from './form';
+
 import { useEditPolicyContext } from './edit_policy_context';
-import { createPolicyNameValidations } from './form_validations';
 import { FormInternal } from './types';
 
 export interface Props {
