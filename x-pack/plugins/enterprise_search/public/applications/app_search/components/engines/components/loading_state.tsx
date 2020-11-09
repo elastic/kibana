@@ -8,13 +8,13 @@ import React from 'react';
 import { EuiPageContent, EuiSpacer, EuiLoadingContent } from '@elastic/eui';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
-import { EngineOverviewHeader } from './header';
+import { EnginesOverviewHeader } from './header';
 
 export const LoadingState: React.FC = () => {
   return (
     <>
       <SetPageChrome />
-      <EngineOverviewHeader />
+      <EnginesOverviewHeader />
       <EuiPageContent paddingSize="l">
         <EuiLoadingContent lines={5} />
         <EuiSpacer size="xxl" />

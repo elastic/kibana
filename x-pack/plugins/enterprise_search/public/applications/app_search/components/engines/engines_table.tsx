@@ -16,28 +16,28 @@ import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 
-export interface IEngineTableData {
+interface IEnginesTableData {
   name: string;
   created_at: string;
   document_count: number;
   field_count: number;
 }
-export interface IEngineTablePagination {
+interface IEnginesTablePagination {
   totalEngines: number;
   pageIndex: number;
   onPaginate(pageIndex: number): void;
 }
-export interface IEngineTableProps {
-  data: IEngineTableData[];
-  pagination: IEngineTablePagination;
+interface IEnginesTableProps {
+  data: IEnginesTableData[];
+  pagination: IEnginesTablePagination;
 }
-export interface IOnChange {
+interface IOnChange {
   page: {
     index: number;
   };
 }
 
-export const EngineTable: React.FC<IEngineTableProps> = ({
+export const EnginesTable: React.FC<IEnginesTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex, onPaginate },
 }) => {
@@ -52,7 +52,7 @@ export const EngineTable: React.FC<IEngineTableProps> = ({
       }),
   });
 
-  const columns: Array<EuiBasicTableColumn<IEngineTableData>> = [
+  const columns: Array<EuiBasicTableColumn<IEnginesTableData>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {

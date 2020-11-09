@@ -28,6 +28,7 @@ import { FlashMessages } from '../../../shared/flash_messages';
 
 import { CredentialsLogic } from './credentials_logic';
 import { externalUrl } from '../../../shared/enterprise_search_url/external_url';
+import { CREDENTIALS_TITLE } from './constants';
 import { CredentialsList } from './credentials_list';
 import { CredentialsFlyout } from './credentials_flyout';
 
@@ -47,21 +48,11 @@ export const Credentials: React.FC = () => {
 
   return (
     <>
-      <SetPageChrome
-        trail={[
-          i18n.translate('xpack.enterpriseSearch.appSearch.credentials.title', {
-            defaultMessage: 'Credentials',
-          }),
-        ]}
-      />
+      <SetPageChrome trail={[CREDENTIALS_TITLE]} />
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.title', {
-                defaultMessage: 'Credentials',
-              })}
-            </h1>
+            <h1>{CREDENTIALS_TITLE}</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>

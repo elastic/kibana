@@ -4,5 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Credentials } from './credentials';
-export { CREDENTIALS_TITLE } from './constants';
+import { i18n } from '@kbn/i18n';
+
+export const SETTINGS_TITLE = i18n.translate('xpack.enterpriseSearch.appSearch.settings.title', {
+  defaultMessage: 'Settings',
+});
