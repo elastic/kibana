@@ -19,15 +19,17 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { AlertTypeParamsExpressionProps } from '../../../../../types';
+import {
+  AlertTypeParamsExpressionProps,
+  getTimeOptions,
+  AlertsContextValue,
+} from '../../../../../triggers_actions_ui/public';
 import { GeoThresholdAlertParams, TrackingEvent } from '../types';
-import { AlertsContextValue } from '../../../../context/alerts_context';
 import { ExpressionWithPopover } from './util_components/expression_with_popover';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
 import { EntityByExpression } from './expressions/entity_by_expression';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
-import { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns';
-import { getTimeOptions } from '../../../../../common/lib/get_time_options';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common/index_patterns';
 
 const DEFAULT_VALUES = {
   TRACKING_EVENT: '',
@@ -45,8 +47,8 @@ const DEFAULT_VALUES = {
 };
 
 const conditionOptions = Object.keys(TrackingEvent).map((key) => ({
-  text: (TrackingEvent as any)[key],
-  value: (TrackingEvent as any)[key],
+  text: TrackingEvent[key as TrackingEvent],
+  value: TrackingEvent[key as TrackingEvent],
 }));
 
 const labelForDelayOffset = (

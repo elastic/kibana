@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME, getUrlPrefix } from '../../../../../common/lib';
 import { createEsDocuments } from './create_test_data';
 
-const API_URI = 'api/stack_alerts/index_threshold/_indices';
+const API_URI = 'api/triggers_actions_ui/data/_indices';
 
 // eslint-disable-next-line import/no-default-export
 export default function indicesEndpointTests({ getService }: FtrProviderContext) {

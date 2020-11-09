@@ -8,14 +8,13 @@ import React, { Fragment, FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { IErrorObject } from '../../../../../../types';
+import { IErrorObject, AlertsContextValue } from '../../../../../../triggers_actions_ui/public';
 import { ES_GEO_FIELD_TYPES } from '../../types';
-import { AlertsContextValue } from '../../../../../context/alerts_context';
 import { GeoIndexPatternSelect } from '../util_components/geo_index_pattern_select';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../../../src/plugins/data/common/index_patterns/fields';
-import { IIndexPattern } from '../../../../../../../../../../src/plugins/data/common/index_patterns';
+import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
+import { IIndexPattern } from '../../../../../../../../src/plugins/data/common/index_patterns';
 
 interface Props {
   dateField: string;

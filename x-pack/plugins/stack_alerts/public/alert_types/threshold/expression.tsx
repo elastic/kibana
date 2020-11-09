@@ -29,21 +29,20 @@ import {
   getIndexPatterns,
   getIndexOptions,
   getFields,
-} from '../../../../common/index_controls';
-import { COMPARATORS, builtInComparators } from '../../../../common/constants';
-import { getTimeFieldOptions } from '../../../../common/lib/get_time_options';
-import { ThresholdVisualization } from './visualization';
-import { WhenExpression } from '../../../../common';
-import {
+  COMPARATORS,
+  builtInComparators,
+  getTimeFieldOptions,
   OfExpression,
   ThresholdExpression,
   ForLastExpression,
   GroupByExpression,
-} from '../../../../common';
-import { builtInAggregationTypes } from '../../../../common/constants';
+  WhenExpression,
+  builtInAggregationTypes,
+  AlertTypeParamsExpressionProps,
+  AlertsContextValue,
+} from '../../../../triggers_actions_ui/public';
+import { ThresholdVisualization } from './visualization';
 import { IndexThresholdAlertParams } from './types';
-import { AlertTypeParamsExpressionProps } from '../../../../types';
-import { AlertsContextValue } from '../../../context/alerts_context';
 import './expression.scss';
 
 const DEFAULT_VALUES = {
@@ -89,7 +88,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
 
   const [indexPopoverOpen, setIndexPopoverOpen] = useState(false);
   const [indexPatterns, setIndexPatterns] = useState([]);
-  const [esFields, setEsFields] = useState<Record<string, any>>([]);
+  const [esFields, setEsFields] = useState<unknown[]>([]);
   const [indexOptions, setIndexOptions] = useState<EuiComboBoxOptionOption[]>([]);
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
   const [isIndiciesLoading, setIsIndiciesLoading] = useState<boolean>(false);
@@ -98,7 +97,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
     (errorKey) =>
       expressionFieldsWithValidation.includes(errorKey) &&
       errors[errorKey].length >= 1 &&
-      (alertParams as { [key: string]: any })[errorKey] !== undefined
+      alertParams[errorKey as keyof IndexThresholdAlertParams] !== undefined
   );
 
   const canShowVizualization = !!Object.keys(errors).find(
@@ -126,7 +125,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
 
     if (index && index.length > 0) {
       const currentEsFields = await getFields(http, index);
-      const timeFields = getTimeFieldOptions(currentEsFields as any);
+      const timeFields = getTimeFieldOptions(currentEsFields);
 
       setEsFields(currentEsFields);
       setTimeFieldOptions([firstFieldOption, ...timeFields]);
@@ -211,7 +210,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
               return;
             }
             const currentEsFields = await getFields(http, indices);
-            const timeFields = getTimeFieldOptions(currentEsFields as any);
+            const timeFields = getTimeFieldOptions(currentEsFields);
 
             setEsFields(currentEsFields);
             setTimeFieldOptions([firstFieldOption, ...timeFields]);
@@ -411,10 +410,10 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         timeWindowUnit={timeWindowUnit}
         display="fullWidth"
         errors={errors}
-        onChangeWindowSize={(selectedWindowSize: any) =>
+        onChangeWindowSize={(selectedWindowSize: number | undefined) =>
           setAlertParams('timeWindowSize', selectedWindowSize)
         }
-        onChangeWindowUnit={(selectedWindowUnit: any) =>
+        onChangeWindowUnit={(selectedWindowUnit: string) =>
           setAlertParams('timeWindowUnit', selectedWindowUnit)
         }
       />

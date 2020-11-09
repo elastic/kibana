@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { ValidationResult } from '../../../../types';
+import { ValidationResult } from '../../../../triggers_actions_ui/public';
 import { GeoThresholdAlertParams } from './types';
 
 export const validateExpression = (alertParams: GeoThresholdAlertParams): ValidationResult => {

@@ -6,10 +6,9 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { AlertTypeModel } from '../../../../types';
 import { validateExpression } from './validation';
 import { IndexThresholdAlertParams } from './types';
-import { AlertsContextValue } from '../../../context/alerts_context';
+import { AlertTypeModel, AlertsContextValue } from '../../../../triggers_actions_ui/public';
 
 export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, AlertsContextValue> {
   return {

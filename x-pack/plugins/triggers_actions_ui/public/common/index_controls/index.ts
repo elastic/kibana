@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import {
   loadIndexPatterns,
   getMatchingIndicesForThresholdAlertType,
-  getThresholdAlertTypeFields,
+  getESIndexFields,
   getSavedObjectsClient,
 } from '../lib/index_threshold_api';
 
@@ -85,7 +85,7 @@ export const getIndexOptions = async (
 };
 
 export const getFields = async (http: HttpSetup, indexes: string[]) => {
-  return await getThresholdAlertTypeFields({ indexes, http });
+  return await getESIndexFields({ indexes, http });
 };
 
 export const firstFieldOption = {

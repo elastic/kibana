@@ -13,7 +13,7 @@ import { TimeSeriesQuery } from '../../../../../../../plugins/triggers_actions_u
 
 import { createEsDocuments } from './create_test_data';
 
-const INDEX_THRESHOLD_TIME_SERIES_QUERY_URL = 'api/stack_alerts/index_threshold/_time_series_query';
+const INDEX_THRESHOLD_TIME_SERIES_QUERY_URL = 'api/triggers_actions_ui/data/_time_series_query';
 
 const START_DATE_MM_DD_HH_MM_SS_MS = '01-01T00:00:00.000Z';
 const START_DATE = `2020-${START_DATE_MM_DD_HH_MM_SS_MS}`;

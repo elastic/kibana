@@ -3,5 +3,4 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-export * from './config';
-export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
+export { getTimeFieldOptions, getTimeOptions } from './get_time_options';

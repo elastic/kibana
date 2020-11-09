@@ -29,11 +29,17 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { getThresholdAlertVisualizationData } from '../../../../common/lib/index_threshold_api';
-import { AggregationType, Comparator } from '../../../../common/types';
-import { AlertsContextValue } from '../../../context/alerts_context';
+import {
+  getThresholdAlertVisualizationData,
+  GetThresholdAlertVisualizationDataParams,
+} from './index_threshold_api';
+import {
+  AlertsContextValue,
+  AggregationType,
+  Comparator,
+} from '../../../../triggers_actions_ui/public';
 import { IndexThresholdAlertParams } from './types';
-import { parseDuration } from '../../../../../../alerts/common/parse_duration';
+import { parseDuration } from '../../../../alerts/common/parse_duration';
 
 const customTheme = () => {
   return {
@@ -125,7 +131,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
   const { http, toastNotifications, charts, uiSettings, dataFieldsFormats } = alertsContext;
 
   const [loadingState, setLoadingState] = useState<LoadingStateType | null>(null);
-  const [error, setError] = useState<undefined | any>(undefined);
+  const [error, setError] = useState<undefined | Error>(undefined);
   const [visualizationData, setVisualizationData] = useState<Record<string, MetricResult[]>>();
   const [startVisualizationAt, setStartVisualizationAt] = useState<Date>(new Date());
 
@@ -239,7 +245,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
     const alertVisualizationDataKeys = Object.keys(visualizationData);
     const timezone = getTimezone(uiSettings);
     const actualThreshold = getThreshold();
-    let maxY = actualThreshold[actualThreshold.length - 1] as any;
+    let maxY = actualThreshold[actualThreshold.length - 1];
 
     (Object.values(visualizationData) as number[][][]).forEach((data) => {
       data.forEach(([, y]) => {
@@ -288,14 +294,14 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
                 />
               );
             })}
-            {actualThreshold.map((_value: any, i: number) => {
-              const specId = i === 0 ? 'threshold' : `threshold${i}`;
+            {actualThreshold.map((_value: number, thresholdIndex: number) => {
+              const specId = thresholdIndex === 0 ? 'threshold' : `threshold${thresholdIndex}`;
               return (
                 <LineAnnotation
                   key={specId}
                   id={specId}
                   domainType={AnnotationDomainTypes.YDomain}
-                  dataValues={[{ dataValue: threshold[i], details: specId }]}
+                  dataValues={[{ dataValue: threshold[thresholdIndex], details: specId }]}
                 />
               );
             })}
@@ -325,7 +331,11 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
 };
 
 // convert the data from the visualization API into something easier to digest with charts
-async function getVisualizationData(model: any, visualizeOptions: any, http: HttpSetup) {
+async function getVisualizationData(
+  model: IndexThresholdAlertParams,
+  visualizeOptions: GetThresholdAlertVisualizationDataParams['visualizeOptions'],
+  http: HttpSetup
+) {
   const vizData = await getThresholdAlertVisualizationData({
     model,
     visualizeOptions,

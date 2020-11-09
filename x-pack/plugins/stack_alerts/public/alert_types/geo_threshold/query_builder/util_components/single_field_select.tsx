@@ -14,7 +14,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
-import { FieldIcon } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import { FieldIcon } from '../../../../../../../../src/plugins/kibana_react/public';
 
 function fieldsToOptions(fields?: IFieldType[]): Array<EuiComboBoxOptionOption<IFieldType>> {
   if (!fields) {

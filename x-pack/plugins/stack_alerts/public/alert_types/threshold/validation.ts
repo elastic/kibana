@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-import { ValidationResult } from '../../../../types';
 import { IndexThresholdAlertParams } from './types';
 import {
+  ValidationResult,
   builtInGroupByTypes,
   builtInAggregationTypes,
   builtInComparators,
-} from '../../../../common/constants';
+} from '../../../../triggers_actions_ui/public';
 
 export const validateExpression = (alertParams: IndexThresholdAlertParams): ValidationResult => {
   const {

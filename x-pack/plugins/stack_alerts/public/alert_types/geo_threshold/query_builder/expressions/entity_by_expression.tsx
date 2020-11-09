@@ -8,10 +8,10 @@ import React, { FunctionComponent, useEffect, useRef } from 'react';
 import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { IErrorObject } from '../../../../../../types';
+import { IErrorObject } from '../../../../../../triggers_actions_ui/public';
 import { SingleFieldSelect } from '../util_components/single_field_select';
 import { ExpressionWithPopover } from '../util_components/expression_with_popover';
-import { IFieldType } from '../../../../../../../../../../src/plugins/data/common/index_patterns/fields';
+import { IFieldType } from '../../../../../../../../src/plugins/data/common/index_patterns/fields';
 
 interface Props {
   errors: IErrorObject;

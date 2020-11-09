@@ -100,7 +100,7 @@ function getDuration(durationS: string, field: string): number {
 }
 
 function getParseErrorMessage(formatName: string, fieldName: string, fieldValue: string) {
-  return i18n.translate('xpack.stackAlerts.indexThreshold.formattedFieldErrorMessage', {
+  return i18n.translate('xpack.triggersActionsUI.data.coreQueryParams.formattedFieldErrorMessage', {
     defaultMessage: 'invalid {formatName} format for {fieldName}: "{fieldValue}"',
     values: {
       formatName,
@@ -111,7 +111,7 @@ function getParseErrorMessage(formatName: string, fieldName: string, fieldValue:
 }
 
 export function getTooManyIntervalsErrorMessage(intervals: number, maxIntervals: number) {
-  return i18n.translate('xpack.stackAlerts.indexThreshold.maxIntervalsErrorMessage', {
+  return i18n.translate('xpack.triggersActionsUI.data.coreQueryParams.maxIntervalsErrorMessage', {
     defaultMessage:
       'calculated number of intervals {intervals} is greater than maximum {maxIntervals}',
     values: {
@@ -122,7 +122,10 @@ export function getTooManyIntervalsErrorMessage(intervals: number, maxIntervals:
 }
 
 export function getDateStartAfterDateEndErrorMessage(): string {
-  return i18n.translate('xpack.stackAlerts.indexThreshold.dateStartGTdateEndErrorMessage', {
-    defaultMessage: '[dateStart]: is greater than [dateEnd]',
-  });
+  return i18n.translate(
+    'xpack.triggersActionsUI.data.coreQueryParams.dateStartGTdateEndErrorMessage',
+    {
+      defaultMessage: '[dateStart]: is greater than [dateEnd]',
+    }
+  );
 }

@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, ReactNode } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -14,6 +14,7 @@ import { HttpSetup } from 'kibana/public';
 interface Props {
   onChange: (indexPattern: IndexPattern) => void;
   value: string | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   IndexPatternSelectComponent: any;
   indexPatternService: IndexPatternsContract | undefined;
   http: HttpSetup;
@@ -39,7 +40,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     this._isMounted = true;
   }
 
-  _onIndexPatternSelect = async (indexPatternId: any) => {
+  _onIndexPatternSelect = async (indexPatternId: string) => {
     if (!indexPatternId || indexPatternId.length === 0 || !this.props.indexPatternService) {
       return;
     }

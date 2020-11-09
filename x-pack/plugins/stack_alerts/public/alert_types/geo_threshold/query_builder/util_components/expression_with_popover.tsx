@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { ReactNode, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiExpression,
@@ -22,10 +22,10 @@ export const ExpressionWithPopover: ({
   value,
   isInvalid,
 }: {
-  popoverContent: any;
-  expressionDescription: any;
-  defaultValue?: any;
-  value?: any;
+  popoverContent: ReactNode;
+  expressionDescription: ReactNode;
+  defaultValue?: ReactNode;
+  value?: ReactNode;
   isInvalid?: boolean;
 }) => JSX.Element = ({ popoverContent, expressionDescription, defaultValue, value, isInvalid }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);

@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { PluginInitializerContext } from 'src/core/public';
+import { StackAlertsPublicPlugin } from './plugin';
 
-export const configSchema = schema.object({
-  enabled: schema.boolean({ defaultValue: true }),
-});
-
-export type Config = TypeOf<typeof configSchema>;
+export const plugin = (ctx: PluginInitializerContext) => new StackAlertsPublicPlugin(ctx);
