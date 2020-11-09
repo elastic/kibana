@@ -414,6 +414,7 @@ Maps::
 * Fixes top-level Map page is called 'Kibana' {kibana-pull}81238[#81238]
 * Fixes auto-refresh not auto fitting to bounds {kibana-pull}81251[#81251]
 * Adds layer type preview icons {kibana-pull}78650[#78650]
+* GeoJSON datasets link:https://github.com/elastic/ems-file-service/pull/192[#192]
 Metrics::
 * Fixes inventory footer misalignment {kibana-pull}74707[#74707]
 * Displays No Data context.values as [NO DATA] {kibana-pull}78038[#78038]
