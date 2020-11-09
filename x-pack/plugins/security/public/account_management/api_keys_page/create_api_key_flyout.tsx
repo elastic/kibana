@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FunctionComponent } from 'react';
+import React, { useRef, FunctionComponent } from 'react';
 import {
   EuiCallOut,
   EuiFieldNumber,
@@ -59,6 +59,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
     },
     [services.http]
   );
+  const nameInput = useRef<HTMLInputElement>(null);
 
   return (
     <FormFlyout
@@ -73,6 +74,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
         }
       )}
       isLoading={form.isSubmitting}
+      initialFocus={nameInput}
       onSubmit={eventHandlers.onSubmit}
       onClose={onClose}
       size="s"
@@ -111,6 +113,7 @@ export const CreateApiKeyFlyout: FunctionComponent<CreateApiKeyFlyoutProps> = ({
             name="name"
             defaultValue={form.values.name}
             isInvalid={!!form.errors.name}
+            inputRef={nameInput}
             fullWidth
           />
         </EuiFormRow>

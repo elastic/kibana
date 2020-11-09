@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useRef, FunctionComponent, MouseEventHandler } from 'react';
+import React, { useEffect, useRef, FunctionComponent, MouseEventHandler, RefObject } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiTitle,
@@ -24,6 +24,7 @@ import {
 export interface FormFlyoutProps extends Omit<EuiFlyoutProps, 'onSubmit'> {
   title: string;
   isLoading?: EuiButtonProps['isLoading'];
+  initialFocus?: RefObject<HTMLElement>;
   onSubmit: MouseEventHandler;
   submitButtonText: string;
   submitButtonColor?: EuiButtonProps['color'];
@@ -36,15 +37,14 @@ export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
   onSubmit,
   isLoading,
   children,
+  initialFocus,
   ...rest
 }) => {
-  const submitButton = useRef<HTMLButtonElement>(null);
-
   useEffect(() => {
-    if (submitButton.current) {
-      submitButton.current.focus();
+    if (initialFocus && initialFocus.current) {
+      initialFocus.current.focus();
     }
-  }, []);
+  }, [initialFocus]);
 
   const flyout = (
     <EuiFlyout {...rest}>
@@ -65,13 +65,7 @@ export const FormFlyout: FunctionComponent<FormFlyoutProps> = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
-              buttonRef={submitButton}
-              isLoading={isLoading}
-              color={submitButtonColor}
-              fill
-              onClick={onSubmit}
-            >
+            <EuiButton isLoading={isLoading} color={submitButtonColor} fill onClick={onSubmit}>
               {submitButtonText}
             </EuiButton>
           </EuiFlexItem>
