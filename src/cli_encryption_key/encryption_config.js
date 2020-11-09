@@ -26,19 +26,19 @@ import { safeLoad } from 'js-yaml';
 import { getConfigDirectory } from '@kbn/utils';
 
 export class EncryptionConfig {
-#config = safeLoad(readFileSync(join(getConfigDirectory(), 'kibana.yml')));
-#encryptionKeyPaths = [
-  'xpack.encryptedSavedObjects.encryptionKey',
-  'xpack.reporting.encryptionKey',
-  'xpack.security.encryptionKey',
-];
+  #config = safeLoad(readFileSync(join(getConfigDirectory(), 'kibana.yml')));
+  #encryptionKeyPaths = [
+    'xpack.encryptedSavedObjects.encryptionKey',
+    'xpack.reporting.encryptionKey',
+    'xpack.security.encryptionKey',
+  ];
 
   _getEncryptionKey(key) {
-    return get(this._config, key);
+    return get(this.#config, key);
   }
 
   _hasEncryptionKey(key) {
-    return !!get(this._config, key);
+    return !!get(this.#config, key);
   }
 
   _generateEncryptionKey() {
@@ -47,7 +47,7 @@ export class EncryptionConfig {
 
   generate({ force = false }) {
     const output = {};
-    this._encryptionKeyPaths.forEach((key) => {
+    this.#encryptionKeyPaths.forEach((key) => {
       if (force || !this._hasEncryptionKey(key)) {
         output[key] = this._generateEncryptionKey();
       }
