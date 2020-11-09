@@ -25,6 +25,7 @@ export interface EngineDetails extends Engine {
   apiKey: string;
   schema: Schema;
   schemaConflicts?: SchemaConflicts;
+  unconfirmedFields?: string[];
   activeReindexJob?: IndexingStatus;
   invalidBoosts: boolean;
   sample?: boolean;

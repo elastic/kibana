@@ -8,7 +8,7 @@ import { kea, MakeLogicType } from 'kea';
 
 import { HttpLogic } from '../../../shared/http';
 
-import { Schema, IndexingStatus } from '../schema/types';
+import { IndexingStatus } from '../schema/types';
 import { EngineDetails } from './types';
 
 interface EngineValues {
@@ -18,13 +18,13 @@ interface EngineValues {
   isMetaEngine: boolean;
   isSampleEngine: boolean;
   hasSchemaConflicts: boolean;
+  hasUnconfirmedSchemaFields: boolean;
   engineNotFound: boolean;
 }
 
 interface EngineActions {
   setEngineData(engine: EngineDetails): { engine: EngineDetails };
   setEngineName(engineName: string): { engineName: string };
-  setEngineSchema(schema: Schema): Schema;
   setIndexingStatus(activeReindexJob: IndexingStatus): IndexingStatus;
   setEngineNotFound(notFound: boolean): boolean;
   clearEngine(): void;
@@ -36,7 +36,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
   actions: {
     setEngineData: (engine) => ({ engine }),
     setEngineName: (engineName) => ({ engineName }),
-    setEngineSchema: (schema) => schema,
     setIndexingStatus: (activeReindexJob) => activeReindexJob,
     setEngineNotFound: (notFound) => notFound,
     clearEngine: () => ({}),
@@ -55,7 +54,6 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       {
         setEngineData: (_, { engine }) => engine,
         clearEngine: () => ({}),
-        setEngineSchema: (state, schema) => ({ ...state, schema }),
         setIndexingStatus: (state, activeReindexJob) => ({
           ...state,
           activeReindexJob,
@@ -81,6 +79,10 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     hasSchemaConflicts: [
       () => [selectors.engine],
       (engine) => !!(engine?.schemaConflicts && Object.keys(engine.schemaConflicts).length > 0),
+    ],
+    hasUnconfirmedSchemaFields: [
+      () => [selectors.engine],
+      (engine) => engine?.unconfirmedFields?.length > 0,
     ],
   }),
   listeners: ({ actions, values }) => ({
