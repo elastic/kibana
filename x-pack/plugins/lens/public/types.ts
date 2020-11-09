@@ -178,10 +178,16 @@ export interface Datasource<T = unknown, P = unknown> {
     indexPatternId: string,
     fieldName: string
   ) => Array<DatasourceSuggestion<T>>;
-  getDatasourceSuggestionsFromCurrentState: (state: T) => Array<DatasourceSuggestion<T>>;
+  getDatasourceSuggestionsFromCurrentState: (
+    state: T,
+    activeData?: Record<string, Datatable>
+  ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
-  getErrorMessages: (state: T) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+  getErrorMessages: (
+    state: T,
+    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>
+  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
   /**
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
    */
@@ -231,6 +237,7 @@ export type DatasourceDimensionProps<T> = SharedDimensionProps & {
   columnId: string;
   onRemove?: (accessor: string) => void;
   state: T;
+  activeData?: Record<string, Datatable>;
 };
 
 // The only way a visualization has to restrict the query building
@@ -238,6 +245,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   setState: StateSetter<T>;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
+  dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {
@@ -249,6 +257,7 @@ export interface DatasourceLayerPanelProps<T> {
   layerId: string;
   state: T;
   setState: StateSetter<T>;
+  activeData?: Record<string, Datatable>;
 }
 
 export interface DraggedOperation {
@@ -428,6 +437,12 @@ export interface VisualizationSuggestion<T = unknown> {
 
 export interface FramePublicAPI {
   datasourceLayers: Record<string, DatasourcePublicAPI>;
+  /**
+   * Data of the chart currently rendered in the preview.
+   * This data might be not available (e.g. if the chart can't be rendered) or outdated and belonging to another chart.
+   * If accessing, make sure to check whether expected columns actually exist.
+   */
+  activeData?: Record<string, Datatable>;
 
   dateRange: DateRange;
   query: Query;
