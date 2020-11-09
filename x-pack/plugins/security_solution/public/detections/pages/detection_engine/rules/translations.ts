@@ -554,3 +554,38 @@ export const IMPORT_FAILED_DETAILED = (ruleId: string, statusCode: number, messa
       defaultMessage: 'Rule ID: {ruleId}\n Status Code: {statusCode}\n Message: {message}',
     }
   );
+
+export const REFRESH_PROMPT_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptTitle',
+  {
+    defaultMessage: 'Are you still there?',
+  }
+);
+
+export const REFRESH_PROMPT_CONFIRM = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptConfirm',
+  {
+    defaultMessage: 'Continue',
+  }
+);
+
+export const REFRESH_PROMPT_BODY = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.refreshPromptBody',
+  {
+    defaultMessage: 'Rule auto-refresh has been paused. Click "Continue" to resume.',
+  }
+);
+
+export const REFRESH_RULE_POPOVER_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverDescription',
+  {
+    defaultMessage: 'Automatically refresh table',
+  }
+);
+
+export const REFRESH_RULE_POPOVER_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.refreshRulePopoverLabel',
+  {
+    defaultMessage: 'Refresh settings',
+  }
+);
