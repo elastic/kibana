@@ -29,7 +29,7 @@ describe('OIDCAuthenticationProvider', () => {
     mockOptions = mockAuthenticationProviderOptions({ name: 'oidc' });
 
     mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockUser = mockAuthenticatedUser({ authentication_provider: 'oidc' });
+    mockUser = mockAuthenticatedUser({ authentication_provider: { type: 'oidc', name: 'oidc' } });
     mockScopedClusterClient.callAsCurrentUser.mockImplementation(async (method) => {
       if (method === 'shield.authenticate') {
         return mockUser;
