@@ -128,7 +128,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       await expect(operation(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'kerberos' },
+          { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           {
             authHeaders: { authorization: 'Bearer some-token' },
             state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
@@ -164,7 +164,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       await expect(operation(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'kerberos' },
+          { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           {
             authHeaders: { authorization: 'Bearer some-token' },
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate response-token' },
@@ -361,7 +361,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'kerberos' },
+          { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           { authHeaders: { authorization } }
         )
       );
@@ -401,7 +401,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'kerberos' },
+          { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           {
             authHeaders: { authorization: 'Bearer newfoo' },
             state: { accessToken: 'newfoo', refreshToken: 'newbar' },
