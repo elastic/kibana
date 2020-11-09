@@ -51,6 +51,9 @@ export function setupSavedObjects(
         apiKeyId: {
           type: 'keyword',
         },
+        createdAt: {
+          type: 'date',
+        },
       },
     },
   });

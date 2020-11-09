@@ -197,6 +197,7 @@ export class AlertingPlugin {
       this.logger,
       core.getStartServices(),
       plugins.taskManager,
+      this.config,
       this.security
     );
 

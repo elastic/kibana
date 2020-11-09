@@ -13,6 +13,7 @@ import {
 } from '../../../task_manager/server';
 import { InvalidateAPIKeyResult } from '../alerts_client';
 import { AlertsConfig } from '../config';
+import { timePeriodBeforeDate } from '../lib/get_cadence';
 import { AlertingPluginsStart } from '../plugin';
 import { InvalidatePendingApiKey } from '../types';
 
@@ -43,12 +44,14 @@ export function initializeApiKeyInvalidator(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
   taskManager: TaskManagerSetupContract,
+  config: Promise<AlertsConfig>,
   securityPluginSetup?: SecurityPluginSetup
 ) {
   registerApiKeyInvalitorTaskDefinition(
     logger,
     coreStartServices,
     taskManager,
+    config,
     securityPluginSetup
   );
 }
@@ -78,12 +81,13 @@ function registerApiKeyInvalitorTaskDefinition(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
   taskManager: TaskManagerSetupContract,
+  config: Promise<AlertsConfig>,
   securityPluginSetup?: SecurityPluginSetup
 ) {
   taskManager.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Invalidate alert API Keys',
-      createTaskRunner: taskRunner(logger, coreStartServices, securityPluginSetup),
+      createTaskRunner: taskRunner(logger, coreStartServices, config, securityPluginSetup),
     },
   });
 }
@@ -91,6 +95,7 @@ function registerApiKeyInvalitorTaskDefinition(
 function taskRunner(
   logger: Logger,
   coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>,
+  config: Promise<AlertsConfig>,
   securityPluginSetup?: SecurityPluginSetup
 ) {
   return ({ taskInstance }: RunContext) => {
@@ -101,8 +106,11 @@ function taskRunner(
         try {
           const [{ savedObjects }] = await coreStartServices;
           const repository = savedObjects.createInternalRepository();
+          const configuredDelay = await (await config).invalidateApiKeysTask.removalDelay;
+          const delay = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
           const totalApiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
             type: 'api_key_pending_invalidation',
+            filter: `api_key_pending_invalidation.attributes.createdAt < ${delay}`,
             page: 1,
             perPage: 0,
           });

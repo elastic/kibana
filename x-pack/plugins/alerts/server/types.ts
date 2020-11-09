@@ -180,6 +180,7 @@ export interface AlertsConfigType {
 
 export interface InvalidatePendingApiKey {
   apiKeyId: string;
+  createdAt: string;
 }
 
 export type AlertTypeRegistry = PublicMethodsOf<OrigAlertTypeRegistry>;

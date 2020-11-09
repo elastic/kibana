@@ -17,6 +17,7 @@ export const markApiKeyForInvalidation = async (
   try {
     await internalSavedObjectsRepository.create('api_key_pending_invalidation', {
       apiKeyId,
+      createdAt: new Date().toISOString(),
     });
   } catch (e) {
     logger.error(`Failed to mark for API key [id="${apiKeyId}"] for invalidation: ${e.message}`);

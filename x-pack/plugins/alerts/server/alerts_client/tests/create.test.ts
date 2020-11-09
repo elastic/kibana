@@ -730,11 +730,13 @@ describe('create()', () => {
       ],
     });
     unsecuredSavedObjectsClient.create.mockRejectedValueOnce(new Error('Test failure'));
+    const createdAt = new Date().toISOString();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: 'test',
+        createdAt,
       },
       references: [],
     });
@@ -745,6 +747,7 @@ describe('create()', () => {
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledTimes(2);
     expect(unsecuredSavedObjectsClient.create.mock.calls[1][1]).toStrictEqual({
       apiKeyId: '123',
+      createdAt,
     });
   });
 

@@ -10,6 +10,7 @@ import { validateDurationSchema } from './lib';
 export const configSchema = schema.object({
   invalidateApiKeysTask: schema.object({
     interval: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
+    removalDelay: schema.string({ validate: validateDurationSchema, defaultValue: '5m' }),
   }),
 });
 

@@ -146,6 +146,7 @@ describe('enable()', () => {
   });
 
   test('enables an alert', async () => {
+    const createdAt = new Date().toISOString();
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       ...existingAlert,
       attributes: {
@@ -161,6 +162,7 @@ describe('enable()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '123',
+        createdAt,
       },
       references: [],
     });
@@ -174,6 +176,7 @@ describe('enable()', () => {
       'api_key_pending_invalidation',
       {
         apiKeyId: '123',
+        createdAt,
       }
     );
     expect(alertsClientParams.createAPIKey).toHaveBeenCalled();
@@ -229,6 +232,7 @@ describe('enable()', () => {
   });
 
   test('invalidates API key if ever one existed prior to updating', async () => {
+    const createdAt = new Date().toISOString();
     encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue({
       ...existingAlert,
       attributes: {
@@ -241,6 +245,7 @@ describe('enable()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '123',
+        createdAt,
       },
       references: [],
     });
@@ -254,6 +259,7 @@ describe('enable()', () => {
       'api_key_pending_invalidation',
       {
         apiKeyId: '123',
+        createdAt,
       }
     );
   });
@@ -337,6 +343,7 @@ describe('enable()', () => {
   });
 
   test('throws error when failing to update the first time', async () => {
+    const createdAt = new Date().toISOString();
     alertsClientParams.createAPIKey.mockResolvedValueOnce({
       apiKeysEnabled: true,
       result: { id: '123', name: '123', api_key: 'abc' },
@@ -348,6 +355,7 @@ describe('enable()', () => {
       type: 'api_key_pending_invalidation',
       attributes: {
         apiKeyId: '123',
+        createdAt,
       },
       references: [],
     });
@@ -361,6 +369,7 @@ describe('enable()', () => {
       'api_key_pending_invalidation',
       {
         apiKeyId: '123',
+        createdAt,
       }
     );
     expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledTimes(1);

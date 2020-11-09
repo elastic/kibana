@@ -12,6 +12,7 @@ describe('config validation', () => {
       Object {
         "invalidateApiKeysTask": Object {
           "interval": "5m",
+          "removalDelay": "5m",
         },
       }
     `);
