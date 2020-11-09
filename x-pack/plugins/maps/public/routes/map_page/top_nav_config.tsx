@@ -12,7 +12,6 @@ import {
   getMapsCapabilities,
   getInspector,
   getCoreI18n,
-  getIsAllowByValueEmbeddables,
   getSavedObjectsClient,
   getCoreOverlays,
 } from '../../kibana_services';
@@ -25,16 +24,6 @@ import {
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { SavedMap } from './saved_map';
 import { getMapEmbeddableDisplayName } from '../../../common/i18n_getters';
-
-function getSaveAndReturnButtonLabel() {
-  return getIsAllowByValueEmbeddables()
-    ? i18n.translate('xpack.maps.topNav.saveToMaps', {
-        defaultMessage: 'Save to maps',
-      })
-    : i18n.translate('xpack.maps.topNav.saveAsButtonLabel', {
-        defaultMessage: 'Save as',
-      });
-}
 
 export function getTopNavConfig({
   savedMap,
@@ -104,12 +93,19 @@ export function getTopNavConfig({
     const mapDescription = savedMap.getAttributes().description
       ? savedMap.getAttributes().description!
       : '';
+    const saveAndReturnButtonLabel = savedMap.isByValue()
+      ? i18n.translate('xpack.maps.topNav.saveToMapsButtonLabel', {
+          defaultMessage: 'Save to maps',
+        })
+      : i18n.translate('xpack.maps.topNav.saveAsButtonLabel', {
+          defaultMessage: 'Save as',
+        });
 
     topNavConfigs.push({
       id: 'save',
       iconType: hasSaveAndReturnConfig ? undefined : 'save',
       label: hasSaveAndReturnConfig
-        ? getSaveAndReturnButtonLabel()
+        ? saveAndReturnButtonLabel
         : i18n.translate('xpack.maps.topNav.saveMapButtonLabel', {
             defaultMessage: `save`,
           }),

@@ -11375,7 +11375,6 @@
     "xpack.maps.mvtSource.tooltipsTitle": "工具提示字段",
     "xpack.maps.mvtSource.trashButtonAriaLabel": "移除字段",
     "xpack.maps.mvtSource.trashButtonTitle": "移除字段",
-    "xpack.maps.newMapTitle": "新地图",
     "xpack.maps.noIndexPattern.doThisLinkTextDescription": "创建索引模式",
     "xpack.maps.noIndexPattern.doThisPrefixDescription": "您将需要 ",
     "xpack.maps.noIndexPattern.doThisSuffixDescription": " 使用地理空间字段。",

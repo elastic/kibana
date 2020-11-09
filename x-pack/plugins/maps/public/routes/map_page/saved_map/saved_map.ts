@@ -83,9 +83,7 @@ export class SavedMap {
   async whenReady() {
     if (!this._mapEmbeddableInput) {
       this._attributes = {
-        title: i18n.translate('xpack.maps.newMapTitle', {
-          defaultMessage: 'New map',
-        }),
+        title: '',
         description: '',
       };
     } else {
@@ -175,13 +173,28 @@ export class SavedMap {
     return this._stateTransfer;
   }
 
+  private _getPageTitle(): string {
+    if (!this._mapEmbeddableInput) {
+      return i18n.translate('xpack.maps.breadcrumbsCreate', {
+        defaultMessage: 'Create',
+      });
+    }
+
+    return this.isByValue()
+      ? i18n.translate('xpack.maps.breadcrumbsEditByValue', {
+          defaultMessage: 'Edit map',
+        })
+      : this._attributes.title;
+  }
+
   setBreadcrumbs() {
     if (!this._attributes) {
       throw new Error('Invalid usage, must await whenReady before calling hasUnsavedChanges');
     }
 
     const breadcrumbs = getBreadcrumbs({
-      title: this._attributes.title ? this._attributes.title : '',
+      pageTitle: this._getPageTitle(),
+      isByValue: this.isByValue(),
       getHasUnsavedChanges: this.hasUnsavedChanges,
       originatingApp: this._originatingApp,
       getAppNameFromId: this._getStateTransfer().getAppNameFromId,
@@ -228,6 +241,11 @@ export class SavedMap {
     return (
       this._mapEmbeddableInput && getMapAttributeService().inputIsRefType(this._mapEmbeddableInput)
     );
+  }
+
+  public isByValue(): boolean {
+    const hasSavedObjectId = !!this.getSavedObjectId();
+    return getIsAllowByValueEmbeddables() && this._originatingApp && !hasSavedObjectId;
   }
 
   public async save({

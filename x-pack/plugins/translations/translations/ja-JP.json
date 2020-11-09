@@ -11362,7 +11362,6 @@
     "xpack.maps.mvtSource.tooltipsTitle": "ツールチップフィールド",
     "xpack.maps.mvtSource.trashButtonAriaLabel": "フィールドの削除",
     "xpack.maps.mvtSource.trashButtonTitle": "フィールドの削除",
-    "xpack.maps.newMapTitle": "新しいマップ",
     "xpack.maps.noIndexPattern.doThisLinkTextDescription": "インデックスパターンを作成します",
     "xpack.maps.noIndexPattern.doThisPrefixDescription": "次のことが必要です ",
     "xpack.maps.noIndexPattern.doThisSuffixDescription": " 地理空間フィールドを含む",

@@ -21,17 +21,20 @@ export const unsavedChangesTitle = i18n.translate('xpack.maps.breadCrumbs.unsave
 });
 
 export function getBreadcrumbs({
-  title,
+  pageTitle,
+  isByValue,
   getHasUnsavedChanges,
   originatingApp,
   getAppNameFromId,
 }: {
-  title: string;
+  pageTitle: string;
+  isByValue: boolean;
   getHasUnsavedChanges: () => boolean;
   originatingApp?: string;
   getAppNameFromId?: (id: string) => string | undefined;
 }) {
   const breadcrumbs = [];
+
   if (originatingApp && getAppNameFromId) {
     breadcrumbs.push({
       onClick: () => {
@@ -39,7 +42,9 @@ export function getBreadcrumbs({
       },
       text: getAppNameFromId(originatingApp),
     });
-  } else {
+  }
+
+  if (!isByValue) {
     breadcrumbs.push({
       text: getAppTitle(),
       onClick: async () => {
@@ -58,7 +63,7 @@ export function getBreadcrumbs({
     });
   }
 
-  breadcrumbs.push({ text: title });
+  breadcrumbs.push({ text: pageTitle });
 
   return breadcrumbs;
 }
