@@ -197,7 +197,7 @@ Your report is available in **Stack Management > Reporting**.
 If a field can be {ref}/search-aggregations.html[aggregated], you can quickly
 visualize it from **Discover**.
 
-. In the side navigation, click  `day_of_week` and then click **Visualize**.
+. From the **Available fields** list, click  `day_of_week`, and then click **Visualize**.
 +
 {kib} creates a visualization best suited for this field.
 +
