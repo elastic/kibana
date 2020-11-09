@@ -17,14 +17,12 @@
  * under the License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiCallOut } from '@elastic/eui';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
 
-import './disabled_lab_visualization.scss';
-
 export function DisabledLabVisualization({ title }: { title: string }) {
-  const calloutTitle = (
+  const promptTitle = (
     <FormattedMessage
       id="visualizations.disabledLabVisualizationTitle"
       defaultMessage="{title} is a lab visualization."
@@ -32,16 +30,17 @@ export function DisabledLabVisualization({ title }: { title: string }) {
     />
   );
   return (
-    <EuiCallOut
-      className="visDisabledLabVisualization"
-      size="s"
-      title={calloutTitle}
-      iconType="beaker"
-    >
-      <FormattedMessage
-        id="visualizations.disabledLabVisualizationMessage"
-        defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
+    <I18nProvider>
+      <EuiEmptyPrompt
+        title={promptTitle}
+        iconType="beaker"
+        body={
+          <FormattedMessage
+            id="visualizations.disabledLabVisualizationMessage"
+            defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
+          />
+        }
       />
-    </EuiCallOut>
+    </I18nProvider>
   );
 }
