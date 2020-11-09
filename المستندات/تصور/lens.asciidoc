@@ -171,3 +171,4 @@ image::images/lens_tutorial_3.png[Lens tutorial]
 Now that you've created your visualization, you can add it to a dashboard or Canvas workpad.
 
 For more information, refer to <<dashboard,Dashboard>> or <<canvas,Canvas>>.
+Hello World 
