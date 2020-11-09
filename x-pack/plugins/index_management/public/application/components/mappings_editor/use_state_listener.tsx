@@ -71,6 +71,11 @@ export const useMappingsStateListener = ({ onChange, value, mappingsType }: Args
             : {
                 [mappingsType]: output as Mappings,
               };
+        } else if (mappingsType) {
+          // We still need to preserve the mappings type even if no fields have been defined
+          return {
+            [mappingsType]: {},
+          };
         }
 
         return undefined;
