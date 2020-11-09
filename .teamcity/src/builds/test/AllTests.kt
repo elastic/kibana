@@ -8,5 +8,5 @@ object AllTests : BuildType({
   description = "All Non-Functional Tests"
   type = Type.COMPOSITE
 
-  dependsOn(QuickTests, Jest, XPackJest, JestIntegration, ApiIntegration)
+  dependsOn(QuickTests, Jest, XPackJest, JestIntegration, ApiServerIntegration)
 })

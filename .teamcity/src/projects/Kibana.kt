@@ -106,7 +106,7 @@ fun Kibana(config: KibanaConfiguration = KibanaConfiguration()) : Project {
           buildType(JestIntegration)
         }
 
-        buildType(ApiIntegration)
+        buildType(ApiServerIntegration)
         buildType(QuickTests)
         buildType(AllTests)
       }
