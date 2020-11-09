@@ -103,10 +103,11 @@ function taskRunner(
     return {
       async run() {
         let totalInvalidated = 0;
+        const configResult = await config;
         try {
           const [{ savedObjects }] = await coreStartServices;
           const repository = savedObjects.createInternalRepository();
-          const configuredDelay = await (await config).invalidateApiKeysTask.removalDelay;
+          const configuredDelay = await configResult.invalidateApiKeysTask.removalDelay;
           const delay = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
           const totalApiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
             type: 'api_key_pending_invalidation',
@@ -145,6 +146,9 @@ function taskRunner(
             state: {
               runs: (state.runs || 0) + 1,
               total_invalidated: totalInvalidated,
+              schedule: {
+                interval: configResult.invalidateApiKeysTask.interval,
+              },
             },
           };
         } catch (errMsg) {
@@ -153,6 +157,9 @@ function taskRunner(
             state: {
               runs: (state.runs || 0) + 1,
               total_invalidated: totalInvalidated,
+              schedule: {
+                interval: configResult.invalidateApiKeysTask.interval,
+              },
             },
           };
         }
