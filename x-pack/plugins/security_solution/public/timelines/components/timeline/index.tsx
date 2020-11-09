@@ -27,6 +27,11 @@ export interface OwnProps {
 
 export type Props = OwnProps & PropsFromRedux;
 
+const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
+  prevProps.end === nextProps.end &&
+  prevProps.start === nextProps.start &&
+  prevProps.timerangeKind === nextProps.timerangeKind;
+
 const StatefulTimelineComponent = React.memo<Props>(
   ({
     columns,
@@ -51,6 +56,7 @@ const StatefulTimelineComponent = React.memo<Props>(
     start,
     status,
     timelineType,
+    timerangeKind,
     updateItemsPerPage,
     upsertColumn,
     usersViewing,
@@ -125,13 +131,14 @@ const StatefulTimelineComponent = React.memo<Props>(
         status={status}
         toggleColumn={toggleColumn}
         timelineType={timelineType}
+        timerangeKind={timerangeKind}
         usersViewing={usersViewing}
       />
     );
   },
   (prevProps, nextProps) => {
     return (
-      prevProps.end === nextProps.end &&
+      isTimerangeSame(prevProps, nextProps) &&
       prevProps.graphEventId === nextProps.graphEventId &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
@@ -142,7 +149,6 @@ const StatefulTimelineComponent = React.memo<Props>(
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-      prevProps.start === nextProps.start &&
       prevProps.timelineType === nextProps.timelineType &&
       prevProps.status === nextProps.status &&
       deepEqual(prevProps.columns, nextProps.columns) &&
@@ -209,6 +215,7 @@ const makeMapStateToProps = () => {
       start: input.timerange.from,
       status,
       timelineType,
+      timerangeKind: input.timerange.kind,
     };
   };
   return mapStateToProps;
