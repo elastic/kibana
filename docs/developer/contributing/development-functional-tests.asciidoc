@@ -6,7 +6,7 @@ We use functional tests to make sure the {kib} UI works as expected. It replaces
 [discrete]
 === Running functional tests
 
-The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at {blob}test/functional/config.js[test/functional/config.js]. If you’re writing a plugin outside the {kib} repo, you will have your own config file.
+The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at link:{kib-repo}tree/{branch}/test/functional/config.js[test/functional/config.js]. If you’re writing a plugin outside the {kib} repo, you will have your own config file.
  See <<external-plugin-functional-tests>> for more info.
 
 There are three ways to run the tests depending on your goals:
@@ -62,7 +62,7 @@ export TEST_ES_PASS=<password>
 node scripts/functional_test_runner
 ----------
 
-** If you are running x-pack functional tests, start server and runner from {blob}xpack[x-pack] folder:
+** If you are running x-pack functional tests, start server and runner from the link:{kib-repo}tree/{branch}/x-pack[x-pack] folder:
 +
 ["source", "shell"]
 ----------
@@ -84,7 +84,7 @@ export TEST_BROWSER_HEADLESS=1
 export TEST_THROTTLE_NETWORK=1
 ----------
 
-** When running against a Cloud deployment, some tests are not applicable. To skip tests that do not apply, use --exclude-tag.  An example shell file can be found at: {blob}test/scripts/jenkins_cloud.sh[test/scripts/jenkins_cloud.sh]
+** When running against a Cloud deployment, some tests are not applicable. To skip tests that do not apply, use --exclude-tag.  An example shell file can be found at link:{kib-repo}tree/{branch}/test/scripts/jenkins_cloud.sh[test/scripts/jenkins_cloud.sh]
 +
 ["source", "shell"]
 ----------
@@ -118,7 +118,7 @@ The tests are written in https://mochajs.org[mocha] using https://github.com/ela
 
 We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
-The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that {kib} source code uses. See {blob}style_guides/js_style_guide.md[style_guides/js_style_guide.md].
+The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that {kib} source code uses. Refer to {kib-repo}tree/6.0/style_guides/js_style_guide.md[style_guides/js_style_guide.md].
 
 [discrete]
 ==== Definitions
@@ -187,7 +187,7 @@ Tests should run at the positive security boundry condition, meaning that they s
  
 The functional UI tests now default to logging in with a user named `test_user` and the roles of this user can be changed dynamically without logging in and out.  
 
-In order to achieve this a new service was introduced called `createTestUserService` (see `test/common/services/security/test_user.ts`). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
+In order to achieve this a new service was introduced called `createTestUserService` (see link:link:{kib-repo}tree/{branch}/test/common/services/security/test_user.ts[test/common/services/security/test_user.ts]). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
 
 An example of how to set the role like how its defined below:
 
@@ -266,7 +266,7 @@ The first and only argument to all providers is a Provider API Object. This obje
 Within config files the API has the following properties
 
 [horizontal]
-`log`::: An instance of the {blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[`ToolingLog`] that is ready for use
+`log`::: An instance of the link:{kib-repo}tree/{branch}/packages/kbn-dev-utils/src/tooling_log/tooling_log.ts[`ToolingLog`] that is ready for use
 `readConfigFile(path)`::: Returns a promise that will resolve to a Config instance that provides the values from the config file at `path`
 
 Within service and PageObject Providers the API is:
@@ -289,17 +289,17 @@ Within a test Provider the API is exactly the same as the service providers API 
 The `FunctionalTestRunner` comes with three built-in services:
 
 **config:**:::
-* Source: {blob}src/functional_test_runner/lib/config/config.ts[src/functional_test_runner/lib/config/config.ts]
-* Schema: {blob}src/functional_test_runner/lib/config/schema.ts[src/functional_test_runner/lib/config/schema.ts]
+* Source: link:{kib-repo}tree/{branch}/packages/kbn-test/src/functional_test_runner/lib/config/config.ts[packages/kbn-test/src/functional_test_runner/lib/config/config.ts]
+* Schema: link:{kib-repo}tree/{branch}/packages/kbn-test/src/functional_test_runner/lib/config/schema.ts[src/functional_test_runner/lib/config/schema.ts]
 * Use `config.get(path)` to read any value from the config file
 
 **log:**:::
-* Source: {blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[packages/kbn-dev-utils/src/tooling_log/tooling_log.js]
+* Source: link:{kib-repo}tree/{branch}/packages/kbn-dev-utils/src/tooling_log/tooling_log.ts[packages/kbn-dev-utils/src/tooling_log/tooling_log.ts]
 * `ToolingLog` instances are readable streams. The instance provided by this service is automatically piped to stdout by the `FunctionalTestRunner` CLI
 * `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
 
 **lifecycle:**:::
-* Source: {blob}src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
+* Source: link:{kib-repo}tree/{branch}/packages/kbn-test/src/functional_test_runner/lib/lifecycle.ts[src/functional_test_runner/lib/lifecycle.ts]
 * Designed primary for use in services
 * Exposes lifecycle events for basic coordination. Handlers can return a promise and resolve/fail asynchronously
 * Phases include: `beforeLoadTests`, `beforeTests`, `beforeEachTest`, `cleanup`
@@ -310,14 +310,14 @@ The `FunctionalTestRunner` comes with three built-in services:
 The {kib} functional tests define the vast majority of the actual functionality used by tests.
 
 **browser**:::
-* Source: {blob}test/functional/services/browser.ts[test/functional/services/browser.ts]
+* Source: link:{kib-repo}tree/{branch}/test/functional/services/common/browser.ts[test/functional/services/common/browser.ts]
 * Higher level wrapper for `remote` service, which exposes available browser actions
 * Popular methods:
 ** `browser.getWindowSize()`
 ** `browser.refresh()`
 
 **testSubjects:**:::
-* Source: {blob}test/functional/services/test_subjects.ts[test/functional/services/test_subjects.ts]
+* Source: link:{kib-repo}tree/{branch}/test/functional/services/common/test_subjects.ts[test/functional/services/common/test_subjects.ts]
 * Test subjects are elements that are tagged specifically for selecting from tests
 * Use `testSubjects` over CSS selectors when possible
 * Usage:
@@ -342,21 +342,21 @@ await testSubjects.click(‘containerButton’);
 ** `testSubjects.click(testSubjectSelector)` - Click a test subject in the page; throw if it can't be found after some time
 
 **find:**:::
-* Source: {blob}test/functional/services/find.ts[test/functional/services/find.ts]
+* Source: {kib-repo}tree/{branch}/test/functional/services/common/find.ts[test/functional/services/common/find.ts]
 * Helpers for `remote.findBy*` methods that log and manage timeouts
 * Popular methods:
 ** `find.byCssSelector()`
 ** `find.allByCssSelector()`
 
 **retry:**:::
-* Source: {blob}test/common/services/retry/retry.ts[test/common/services/retry/retry.ts]
+* Source: link:{kib-repo}tree/{branch}/test/common/services/retry/retry.ts[test/common/services/retry/retry.ts]
 * Helpers for retrying operations
 * Popular methods:
 ** `retry.try(fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or the default timeout elapses. The optional `onFailureBlock` is executed before each retry attempt.
 ** `retry.tryForTime(ms, fn, onFailureBlock)` - Execute `fn` in a loop until it succeeds or `ms` milliseconds elapses. The optional `onFailureBlock` is executed before each retry attempt.
 
 **kibanaServer:**:::
-* Source: {blob}test/common/services/kibana_server/kibana_server.js[test/common/services/kibana_server/kibana_server.js]
+* Source: link:{kib-repo}tree/{branch}/test/common/services/kibana_server/kibana_server.ts[test/common/services/kibana_server/kibana_server.ts]
 * Helpers for interacting with {kib}'s server
 * Commonly used methods:
 ** `kibanaServer.uiSettings.update()`
@@ -364,23 +364,23 @@ await testSubjects.click(‘containerButton’);
 ** `kibanaServer.status.getOverallState()`
 
 **esArchiver:**:::
-* Source: {blob}test/common/services/es_archiver.ts[test/common/services/es_archiver.ts]
+* Source: link:{kib-repo}tree/{branch}/test/common/services/es_archiver.ts[test/common/services/es_archiver.ts]
 * Load/unload archives created with the `esArchiver`
 * Popular methods:
 ** `esArchiver.load(name)`
 ** `esArchiver.loadIfNeeded(name)`
 ** `esArchiver.unload(name)`
 
-Full list of services that are used in functional tests can be found here: {blob}test/functional/services[test/functional/services]
+Full list of services that are used in functional tests can be found here: link:{kib-repo}tree/{branch}/test/functional/services[test/functional/services]
 
 
 **Low-level utilities:**:::
 * es
-** Source: {blob}test/common/services/es.ts[test/common/services/es.ts]
+** Source: link:{kib-repo}tree/{branch}/test/common/services/elasticsearch.ts[test/common/services/elasticsearch.ts]
 ** {es} client
 ** Higher level options: `kibanaServer.uiSettings` or `esArchiver`
 * remote
-** Source: {blob}test/functional/services/remote/remote.ts[test/functional/services/remote/remote.ts]
+** Source: link:{kib-repo}tree/{branch}/test/functional/services/remote/remote.ts[test/functional/services/remote/remote.ts]
 ** Instance of https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/index_exports_WebDriver.html[WebDriver] class
 ** Responsible for all communication with the browser
 ** To perform browser actions, use `remote` service 
