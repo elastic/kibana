@@ -7,6 +7,7 @@
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
 
+import { EuiDescriptionListDescription } from '@elastic/eui';
 import {
   registerTestBed,
   TestBed,
@@ -26,15 +27,17 @@ export interface DataStreamsTabTestBed extends TestBed<TestSubjects> {
     clickReloadButton: () => void;
     clickNameAt: (index: number) => void;
     clickIndicesAt: (index: number) => void;
-    clickDeletActionAt: (index: number) => void;
+    clickDeleteActionAt: (index: number) => void;
     clickConfirmDelete: () => void;
-    clickDeletDataStreamButton: () => void;
+    clickDeleteDataStreamButton: () => void;
   };
   findDeleteActionAt: (index: number) => ReactWrapper;
   findDeleteConfirmationModal: () => ReactWrapper;
   findDetailPanel: () => ReactWrapper;
   findDetailPanelTitle: () => string;
   findEmptyPromptIndexTemplateLink: () => ReactWrapper;
+  findDetailPanelIlmPolicyLink: () => ReactWrapper;
+  findDetailPanelIlmPolicyName: () => ReactWrapper;
 }
 
 export const setup = async (overridingDependencies: any = {}): Promise<DataStreamsTabTestBed> => {
@@ -115,7 +118,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
 
   const findDeleteActionAt = findTestSubjectAt.bind(null, 'deleteDataStream');
 
-  const clickDeletActionAt = (index: number) => {
+  const clickDeleteActionAt = (index: number) => {
     findDeleteActionAt(index).simulate('click');
   };
 
@@ -135,7 +138,7 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     });
   };
 
-  const clickDeletDataStreamButton = () => {
+  const clickDeleteDataStreamButton = () => {
     const { find } = testBed;
     find('deleteDataStreamButton').simulate('click');
   };
@@ -150,6 +153,17 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
     return find('dataStreamDetailPanelTitle').text();
   };
 
+  const findDetailPanelIlmPolicyLink = () => {
+    const { find } = testBed;
+    return find('ilmPolicyLink');
+  };
+
+  const findDetailPanelIlmPolicyName = () => {
+    const descriptionList = testBed.component.find(EuiDescriptionListDescription);
+    // ilm policy is the last in the details list
+    return descriptionList.last();
+  };
+
   return {
     ...testBed,
     actions: {
@@ -159,15 +173,17 @@ export const setup = async (overridingDependencies: any = {}): Promise<DataStrea
       clickReloadButton,
       clickNameAt,
       clickIndicesAt,
-      clickDeletActionAt,
+      clickDeleteActionAt,
       clickConfirmDelete,
-      clickDeletDataStreamButton,
+      clickDeleteDataStreamButton,
     },
     findDeleteActionAt,
     findDeleteConfirmationModal,
     findDetailPanel,
     findDetailPanelTitle,
     findEmptyPromptIndexTemplateLink,
+    findDetailPanelIlmPolicyLink,
+    findDetailPanelIlmPolicyName,
   };
 };
 
