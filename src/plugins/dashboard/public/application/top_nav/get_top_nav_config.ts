@@ -196,7 +196,7 @@ function getShareConfig(action: NavAction | undefined) {
       defaultMessage: 'Share Dashboard',
     }),
     testId: 'shareTopNavButton',
-    run: action,
+    run: action ?? (() => {}),
     // disable the Share button if no action specified
     disableButton: !action,
   };

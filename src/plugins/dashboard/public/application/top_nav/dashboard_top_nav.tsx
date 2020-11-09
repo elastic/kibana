@@ -457,7 +457,7 @@ export function DashboardTopNav({
       showQueryInput,
       showDatePicker,
       showFilterBar,
-      setMenuMountPoint: setHeaderActionMenu,
+      setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
       indexPatterns,
       showSaveQuery: dashboardCapabilities.saveQuery,
       // savedQuery: $scope.savedQuery,

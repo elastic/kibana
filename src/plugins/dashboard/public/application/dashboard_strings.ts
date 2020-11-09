@@ -65,7 +65,7 @@ export const leaveConfirmStrings = {
   leaveTitle: i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesTitle', {
     defaultMessage: 'Unsaved changes',
   }),
-  leaveSubtitle: i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesTitle', {
+  leaveSubtitle: i18n.translate('dashboard.appLeaveConfirmModal.unsavedChangesSubtitle', {
     defaultMessage: 'Leave Dashboard with unsaved work?',
   }),
   discardTitle: i18n.translate('dashboard.changeViewModeConfirmModal.discardChangesTitle', {

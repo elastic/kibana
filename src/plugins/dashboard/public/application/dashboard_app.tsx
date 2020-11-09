@@ -125,12 +125,14 @@ const getDashboardContainerInput = ({
   query,
   searchSessionId,
   incomingEmbeddable,
+  isEmbeddedExternally,
   dashboardStateManager,
   dashboardCapabilities,
 }: {
   dashboardCapabilities: DashboardCapabilities;
   dashboardStateManager: DashboardStateManager;
   incomingEmbeddable?: EmbeddablePackageState;
+  isEmbeddedExternally: boolean;
   searchSessionId: string;
   query: QueryStart;
 }): DashboardContainerInput => {
@@ -168,7 +170,7 @@ const getDashboardContainerInput = ({
     viewMode: dashboardStateManager.getViewMode(),
     panels: embeddablesMap,
     isFullScreenMode: dashboardStateManager.getFullScreenMode(),
-    // isEmbeddedExternally,
+    isEmbeddedExternally,
     useMargins: dashboardStateManager.getUseMargins(),
     // lastReloadRequestTime,
     dashboardCapabilities,
@@ -347,6 +349,7 @@ export function DashboardApp({
     const changes = getChangesFromAppStateForContainerState({
       dashboardContainer: state.dashboardContainer,
       appStateDashboardInput: getDashboardContainerInput({
+        isEmbeddedExternally: Boolean(embedSettings),
         dashboardStateManager: state.dashboardStateManager,
         searchSessionId: data.search.session.start(),
         dashboardCapabilities,
@@ -368,6 +371,7 @@ export function DashboardApp({
   }, [
     history,
     data.query,
+    embedSettings,
     data.search.session,
     dashboardCapabilities,
     state.dashboardContainer,
@@ -540,6 +544,7 @@ export function DashboardApp({
       .create(
         getDashboardContainerInput({
           searchSessionId: searchSessionIdFromURL ?? data.search.session.start(),
+          isEmbeddedExternally: Boolean(embedSettings),
           dashboardStateManager,
           dashboardCapabilities,
           incomingEmbeddable,
@@ -576,6 +581,7 @@ export function DashboardApp({
     embeddable,
     uiSettings,
     data.query,
+    embedSettings,
     scopedHistory,
     usageCollection,
     data.search.session,

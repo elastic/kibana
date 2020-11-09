@@ -97,9 +97,14 @@ export type DashboardReactContextValue = KibanaReactContextValue<DashboardContai
 export type DashboardReactContext = KibanaReactContext<DashboardContainerOptions>;
 
 const defaultCapabilities = {
+  show: false,
+  createNew: false,
+  saveQuery: false,
+  createShortUrl: false,
   hideWriteControls: true,
-  visualizeCapabilities: { save: false },
+  showWriteControls: false,
   mapsCapabilities: { save: false },
+  visualizeCapabilities: { save: false },
 };
 
 export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
