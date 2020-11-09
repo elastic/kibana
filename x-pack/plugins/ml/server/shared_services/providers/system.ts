@@ -4,43 +4,46 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { KibanaRequest } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { SearchResponse } from 'elasticsearch';
 import { RequestParams } from '@elastic/elasticsearch';
-import { MlServerLicense } from '../../lib/license';
+import { MlLicense } from '../../../common/license';
 import { CloudSetup } from '../../../../cloud/server';
 import { spacesUtilsProvider } from '../../lib/spaces_utils';
 import { SpacesPluginSetup } from '../../../../spaces/server';
 import { capabilitiesProvider } from '../../lib/capabilities';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { MlCapabilitiesResponse, ResolveMlCapabilities } from '../../../common/types/capabilities';
 import { GetGuards } from '../shared_services';
 
 export interface MlSystemProvider {
   mlSystemProvider(
-    request: KibanaRequest
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
   ): {
     mlCapabilities(): Promise<MlCapabilitiesResponse>;
     mlInfo(): Promise<MlInfoResponse>;
-    mlAnomalySearch<T>(searchParams: RequestParams.Search<any>): Promise<SearchResponse<T>>;
+    mlAnomalySearch<T>(
+      searchParams: RequestParams.Search<any>,
+      jobIds: string[]
+    ): Promise<SearchResponse<T>>;
   };
 }
 
 export function getMlSystemProvider(
   getGuards: GetGuards,
-  mlLicense: MlServerLicense,
+  mlLicense: MlLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup | undefined,
   resolveMlCapabilities: ResolveMlCapabilities
 ): MlSystemProvider {
   return {
-    mlSystemProvider(request: KibanaRequest) {
+    mlSystemProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
       return {
         async mlCapabilities() {
-          return await getGuards(request)
+          return await getGuards(request, savedObjectsClient)
             .isMinimumLicense()
-            .ok(async ({ scopedClient }) => {
+            .ok(async ({ mlClient }) => {
               const { isMlEnabledInSpace } =
                 spaces !== undefined
                   ? spacesUtilsProvider(spaces, request)
@@ -52,7 +55,7 @@ export function getMlSystemProvider(
               }
 
               const { getCapabilities } = capabilitiesProvider(
-                scopedClient,
+                mlClient,
                 mlCapabilities,
                 mlLicense,
                 isMlEnabledInSpace
@@ -61,12 +64,10 @@ export function getMlSystemProvider(
             });
         },
         async mlInfo(): Promise<MlInfoResponse> {
-          return await getGuards(request)
+          return await getGuards(request, savedObjectsClient)
             .isMinimumLicense()
-            .ok(async ({ scopedClient }) => {
-              const { asInternalUser } = scopedClient;
-
-              const { body: info } = await asInternalUser.ml.info<MlInfoResponse>();
+            .ok(async ({ mlClient }) => {
+              const { body: info } = await mlClient.info<MlInfoResponse>();
               const cloudId = cloud && cloud.cloudId;
               return {
                 ...info,
@@ -75,17 +76,14 @@ export function getMlSystemProvider(
             });
         },
         async mlAnomalySearch<T>(
-          searchParams: RequestParams.Search<any>
+          searchParams: RequestParams.Search<any>,
+          jobIds: string[]
         ): Promise<SearchResponse<T>> {
-          return await getGuards(request)
+          return await getGuards(request, savedObjectsClient)
             .isFullLicense()
             .hasMlCapabilities(['canAccessML'])
-            .ok(async ({ scopedClient }) => {
-              const { asInternalUser } = scopedClient;
-              const { body } = await asInternalUser.search<SearchResponse<T>>({
-                ...searchParams,
-                index: ML_RESULTS_INDEX_PATTERN,
-              });
+            .ok(async ({ mlClient }) => {
+              const { body } = await mlClient.anomalySearch<T>(searchParams, jobIds);
               return body;
             });
         },

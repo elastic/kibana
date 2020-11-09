@@ -65,6 +65,7 @@ export interface RequestHandlerParams {
   metricsAtAllLevels?: boolean;
   visParams?: any;
   abortSignal?: AbortSignal;
+  searchSessionId?: string;
 }
 
 const name = 'esaggs';
@@ -82,6 +83,7 @@ const handleCourierRequest = async ({
   inspectorAdapters,
   filterManager,
   abortSignal,
+  searchSessionId,
 }: RequestHandlerParams) => {
   // Create a new search source that inherits the original search source
   // but has the appropriate timeRange applied via a filter.
@@ -143,6 +145,7 @@ const handleCourierRequest = async ({
         defaultMessage:
           'This request queries Elasticsearch to fetch the data for the visualization.',
       }),
+      searchSessionId,
     }
   );
   request.stats(getRequestInspectorStats(requestSearchSource));
@@ -150,6 +153,7 @@ const handleCourierRequest = async ({
   try {
     const response = await requestSearchSource.fetch({
       abortSignal,
+      sessionId: searchSessionId,
     });
 
     request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
@@ -248,7 +252,7 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       multi: true,
     },
   },
-  async fn(input, args, { inspectorAdapters, abortSignal }) {
+  async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
     const indexPatterns = getIndexPatterns();
     const { filterManager } = getQueryService();
     const searchService = getSearchService();
@@ -263,6 +267,8 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
     searchSource.setField('index', indexPattern);
     searchSource.setField('size', 0);
 
+    const resolvedTimeRange = input?.timeRange && calculateBounds(input.timeRange);
+
     const response = await handleCourierRequest({
       searchSource,
       aggs,
@@ -276,6 +282,7 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
       inspectorAdapters: inspectorAdapters as Adapters,
       filterManager,
       abortSignal: (abortSignal as unknown) as AbortSignal,
+      searchSessionId: getSearchSessionId(),
     });
 
     const table: Datatable = {
@@ -293,6 +300,16 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
             source: 'esaggs',
             sourceParams: {
               indexPatternId: indexPattern.id,
+              appliedTimeRange:
+                column.aggConfig.params.field?.name &&
+                input?.timeRange &&
+                args.timeFields &&
+                args.timeFields.includes(column.aggConfig.params.field?.name)
+                  ? {
+                      from: resolvedTimeRange?.min?.toISOString(),
+                      to: resolvedTimeRange?.max?.toISOString(),
+                    }
+                  : undefined,
               ...column.aggConfig.serialize(),
             },
           },

@@ -24,7 +24,7 @@ import { TransactionCharts } from '../../shared/charts/TransactionCharts';
 import { TransactionDistribution } from './Distribution';
 import { WaterfallWithSummmary } from './WaterfallWithSummmary';
 import { FETCH_STATUS } from '../../../hooks/useFetcher';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { fromQuery, toQuery } from '../../shared/Links/url_helpers';
@@ -52,7 +52,11 @@ export function TransactionDetails({
     status: distributionStatus,
   } = useTransactionDistribution(urlParams);
 
-  const { data: transactionChartsData } = useTransactionCharts();
+  const {
+    data: transactionChartsData,
+    status: transactionChartsStatus,
+  } = useTransactionCharts();
+
   const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
     urlParams
   );
@@ -121,6 +125,7 @@ export function TransactionDetails({
         <EuiFlexItem grow={7}>
           <ChartsSyncContextProvider>
             <TransactionCharts
+              fetchStatus={transactionChartsStatus}
               charts={transactionChartsData}
               urlParams={urlParams}
             />
@@ -131,7 +136,7 @@ export function TransactionDetails({
           <EuiPanel>
             <TransactionDistribution
               distribution={distributionData}
-              isLoading={distributionStatus === FETCH_STATUS.LOADING}
+              fetchStatus={distributionStatus}
               urlParams={urlParams}
               bucketIndex={bucketIndex}
               onBucketClick={(bucket) => {

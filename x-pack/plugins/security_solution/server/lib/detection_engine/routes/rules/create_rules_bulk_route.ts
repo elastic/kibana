@@ -53,7 +53,12 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
         return siemResponse.error({ statusCode: 404 });
       }
 
-      const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+      const mlAuthz = buildMlAuthz({
+        license: context.licensing.license,
+        ml,
+        request,
+        savedObjectsClient,
+      });
 
       const ruleDefinitions = request.body;
       const dupes = getDuplicates(ruleDefinitions, 'rule_id');
@@ -97,6 +102,8 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               threat_mapping: threatMapping,
               threat_query: threatQuery,
               threat_language: threatLanguage,
+              concurrent_searches: concurrentSearches,
+              items_per_search: itemsPerSearch,
               threshold,
               throttle,
               timestamp_override: timestampOverride,
@@ -188,6 +195,8 @@ export const createRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 threatQuery,
                 threatIndex,
                 threatLanguage,
+                concurrentSearches,
+                itemsPerSearch,
                 threshold,
                 timestampOverride,
                 references,

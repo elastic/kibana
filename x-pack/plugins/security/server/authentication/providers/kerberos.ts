@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import {
   LegacyElasticsearchError,
   LegacyElasticsearchErrorHelpers,
@@ -13,6 +13,7 @@ import {
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
+import { canRedirectRequest } from '../can_redirect_request';
 import { Tokens, TokenPair } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 
@@ -32,8 +33,9 @@ const WWWAuthenticateHeaderName = 'WWW-Authenticate';
  * @param request Request instance.
  */
 function canStartNewSession(request: KibanaRequest) {
-  // We should try to establish new session only if request requires authentication.
-  return request.route.options.authRequired === true;
+  // We should try to establish new session only if request requires authentication and it's not an XHR request.
+  // Technically we can authenticate XHR requests too, but we don't want these to create a new session unintentionally.
+  return canRedirectRequest(request) && request.route.options.authRequired === true;
 }
 
 /**
@@ -65,7 +67,9 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param [state] Optional state object associated with the provider.
    */
   public async authenticate(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to authenticate user request to ${request.url.path}.`);
+    this.logger.debug(
+      `Trying to authenticate user request to ${request.url.pathname}${request.url.search}.`
+    );
 
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     if (authorizationHeader && authorizationHeader.scheme.toLowerCase() !== 'negotiate') {
@@ -73,11 +77,8 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = authorizationHeader
-      ? await this.authenticateWithNegotiateScheme(request)
-      : AuthenticationResult.notHandled();
-
-    if (state && authenticationResult.notHandled()) {
+    let authenticationResult = AuthenticationResult.notHandled();
+    if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
       if (
         authenticationResult.failed() &&
@@ -87,11 +88,15 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       }
     }
 
-    // If we couldn't authenticate by means of all methods above, let's try to check if Elasticsearch can
-    // start authentication mechanism negotiation, otherwise just return authentication result we have.
-    return authenticationResult.notHandled() && canStartNewSession(request)
-      ? await this.authenticateViaSPNEGO(request, state)
-      : authenticationResult;
+    if (!authenticationResult.notHandled() || !canStartNewSession(request)) {
+      return authenticationResult;
+    }
+
+    // If we couldn't authenticate by means of all methods above, let's check if we're already at the authentication
+    // mechanism negotiation stage, otherwise check with Elasticsearch if we can start it.
+    return authorizationHeader
+      ? await this.authenticateWithNegotiateScheme(request)
+      : await this.authenticateViaSPNEGO(request, state);
   }
 
   /**
@@ -100,7 +105,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
    * @param state State value previously stored by the provider.
    */
   public async logout(request: KibanaRequest, state?: ProviderState | null) {
-    this.logger.debug(`Trying to log user out via ${request.url.path}.`);
+    this.logger.debug(`Trying to log user out via ${request.url.pathname}${request.url.search}.`);
 
     // Having a `null` state means that provider was specifically called to do a logout, but when
     // session isn't defined then provider is just being probed whether or not it can perform logout.
@@ -262,12 +267,12 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.failed(err);
     }
 
-    // If refresh token is no longer valid, then we should clear session and renegotiate using SPNEGO.
+    // If refresh token is no longer valid, let's try to renegotiate new tokens using SPNEGO. We
+    // allow this because expired underlying token is an implementation detail and Kibana user
+    // facing session is still valid.
     if (refreshedTokenPair === null) {
-      this.logger.debug('Both access and refresh tokens are expired.');
-      return canStartNewSession(request)
-        ? this.authenticateViaSPNEGO(request, state)
-        : AuthenticationResult.notHandled();
+      this.logger.debug('Both access and refresh tokens are expired. Re-authenticating...');
+      return this.authenticateViaSPNEGO(request, state);
     }
 
     try {

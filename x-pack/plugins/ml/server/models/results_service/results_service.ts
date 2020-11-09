@@ -6,11 +6,8 @@
 
 import { sortBy, slice, get } from 'lodash';
 import moment from 'moment';
-import { SearchResponse } from 'elasticsearch';
-import { IScopedClusterClient } from 'kibana/server';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
-import { ML_RESULTS_INDEX_PATTERN } from '../../../common/constants/index_patterns';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
 import {
@@ -21,6 +18,7 @@ import {
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../common/constants/anomalies';
 import { GetStoppedPartitionResult } from '../../../common/types/results';
 import { MlJobsResponse } from '../job_service/jobs';
+import type { MlClient } from '../../lib/ml_client';
 
 // Service for carrying out Elasticsearch queries to obtain data for the
 // ML Results dashboards.
@@ -38,8 +36,7 @@ interface Influencer {
   fieldValue: any;
 }
 
-export function resultsServiceProvider(client: IScopedClusterClient) {
-  const { asInternalUser } = client;
+export function resultsServiceProvider(mlClient: MlClient) {
   // Obtains data for the anomalies table, aggregating anomalies by day or hour as requested.
   // Return an Object with properties 'anomalies' and 'interval' (interval used to aggregate anomalies,
   // one of day, hour or second. Note 'auto' can be provided as the aggregationInterval in the request,
@@ -57,7 +54,8 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     dateFormatTz: string,
     maxRecords: number = ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
     maxExamples: number = DEFAULT_MAX_EXAMPLES,
-    influencersFilterQuery: any
+    influencersFilterQuery?: any,
+    functionDescription?: string
   ) {
     // Build the query to return the matching anomaly record results.
     // Add criteria for the time range, record score, plus any specified job IDs.
@@ -105,6 +103,13 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
         },
       });
     });
+    if (functionDescription !== undefined) {
+      boolCriteria.push({
+        term: {
+          function_description: functionDescription,
+        },
+      });
+    }
 
     if (influencersFilterQuery !== undefined) {
       boolCriteria.push(influencersFilterQuery);
@@ -142,30 +147,32 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
       });
     }
 
-    const { body } = await asInternalUser.search({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: maxRecords,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  query: 'result_type:record',
-                  analyze_wildcard: false,
+    const { body } = await mlClient.anomalySearch(
+      {
+        size: maxRecords,
+        body: {
+          query: {
+            bool: {
+              filter: [
+                {
+                  query_string: {
+                    query: 'result_type:record',
+                    analyze_wildcard: false,
+                  },
                 },
-              },
-              {
-                bool: {
-                  must: boolCriteria,
+                {
+                  bool: {
+                    must: boolCriteria,
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
+          sort: [{ record_score: { order: 'desc' } }],
         },
-        sort: [{ record_score: { order: 'desc' } }],
       },
-    });
+      []
+    );
 
     const tableData: {
       anomalies: AnomaliesTableRecord[];
@@ -266,7 +273,6 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
 
     const query = {
       size: 0,
-      index: ML_RESULTS_INDEX_PATTERN,
       body: {
         query: {
           bool: {
@@ -295,7 +301,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
       },
     };
 
-    const { body } = await asInternalUser.search(query);
+    const { body } = await mlClient.anomalySearch(query, []);
     const maxScore = get(body, ['aggregations', 'max_score', 'value'], null);
 
     return { maxScore };
@@ -333,32 +339,34 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     // Size of job terms agg, consistent with maximum number of jobs supported by Java endpoints.
     const maxJobs = 10000;
 
-    const { body } = await asInternalUser.search({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter,
-          },
-        },
-        aggs: {
-          byJobId: {
-            terms: {
-              field: 'job_id',
-              size: maxJobs,
+    const { body } = await mlClient.anomalySearch(
+      {
+        size: 0,
+        body: {
+          query: {
+            bool: {
+              filter,
             },
-            aggs: {
-              maxTimestamp: {
-                max: {
-                  field: 'timestamp',
+          },
+          aggs: {
+            byJobId: {
+              terms: {
+                field: 'job_id',
+                size: maxJobs,
+              },
+              aggs: {
+                maxTimestamp: {
+                  max: {
+                    field: 'timestamp',
+                  },
                 },
               },
             },
           },
         },
       },
-    });
+      []
+    );
 
     const bucketsByJobId: Array<{ key: string; maxTimestamp: { value?: number } }> = get(
       body,
@@ -377,17 +385,19 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
   // from the given index and job ID.
   // Returned response consists of a list of examples against category ID.
   async function getCategoryExamples(jobId: string, categoryIds: any, maxExamples: number) {
-    const { body } = await asInternalUser.search({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
-      body: {
-        query: {
-          bool: {
-            filter: [{ term: { job_id: jobId } }, { terms: { category_id: categoryIds } }],
+    const { body } = await mlClient.anomalySearch(
+      {
+        size: ANOMALIES_TABLE_DEFAULT_QUERY_SIZE, // Matches size of records in anomaly summary table.
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { job_id: jobId } }, { terms: { category_id: categoryIds } }],
+            },
           },
         },
       },
-    });
+      []
+    );
 
     const examplesByCategoryId: { [key: string]: any } = {};
     if (body.hits.total.value > 0) {
@@ -411,17 +421,19 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
   // Returned response contains four properties - categoryId, regex, examples
   // and terms (space delimited String of the common tokens matched in values of the category).
   async function getCategoryDefinition(jobId: string, categoryId: string) {
-    const { body } = await asInternalUser.search({
-      index: ML_RESULTS_INDEX_PATTERN,
-      size: 1,
-      body: {
-        query: {
-          bool: {
-            filter: [{ term: { job_id: jobId } }, { term: { category_id: categoryId } }],
+    const { body } = await mlClient.anomalySearch<any>(
+      {
+        size: 1,
+        body: {
+          query: {
+            bool: {
+              filter: [{ term: { job_id: jobId } }, { term: { category_id: categoryId } }],
+            },
           },
         },
       },
-    });
+      []
+    );
 
     const definition = { categoryId, terms: null, regex: null, examples: [] };
     if (body.hits.total.value > 0) {
@@ -451,23 +463,25 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
         },
       });
     }
-    const { body } = await asInternalUser.search<SearchResponse<AnomalyCategorizerStatsDoc>>({
-      index: ML_RESULTS_INDEX_PATTERN,
-      body: {
-        query: {
-          bool: {
-            must: mustMatchClauses,
-            filter: [
-              {
-                term: {
-                  job_id: jobId,
+    const { body } = await mlClient.anomalySearch<AnomalyCategorizerStatsDoc>(
+      {
+        body: {
+          query: {
+            bool: {
+              must: mustMatchClauses,
+              filter: [
+                {
+                  term: {
+                    job_id: jobId,
+                  },
                 },
-              },
-            ],
+              ],
+            },
           },
         },
       },
-    });
+      []
+    );
     return body ? body.hits.hits.map((r) => r._source) : [];
   }
 
@@ -480,7 +494,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     };
     // first determine from job config if stop_on_warn is true
     // if false return []
-    const { body } = await asInternalUser.ml.getJobs<MlJobsResponse>({
+    const { body } = await mlClient.getJobs<MlJobsResponse>({
       job_id: jobIds.join(),
     });
 
@@ -538,25 +552,27 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
           },
         },
       ];
-      const { body: results } = await asInternalUser.search<SearchResponse<any>>({
-        index: ML_RESULTS_INDEX_PATTERN,
-        size: 0,
-        body: {
-          query: {
-            bool: {
-              must: mustMatchClauses,
-              filter: [
-                {
-                  terms: {
-                    job_id: jobIdsWithStopOnWarnSet,
+      const { body: results } = await mlClient.anomalySearch<any>(
+        {
+          size: 0,
+          body: {
+            query: {
+              bool: {
+                must: mustMatchClauses,
+                filter: [
+                  {
+                    terms: {
+                      job_id: jobIdsWithStopOnWarnSet,
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
+            aggs,
           },
-          aggs,
         },
-      });
+        []
+      );
       if (fieldToBucket === JOB_ID) {
         finalResults = {
           jobs: results.aggregations?.unique_terms?.buckets.map(
@@ -589,7 +605,7 @@ export function resultsServiceProvider(client: IScopedClusterClient) {
     getCategoryExamples,
     getLatestBucketTimestampByJob,
     getMaxAnomalyScore,
-    getPartitionFieldsValues: getPartitionFieldsValuesFactory(client),
+    getPartitionFieldsValues: getPartitionFieldsValuesFactory(mlClient),
     getCategorizerStats,
     getCategoryStoppedPartitions,
   };

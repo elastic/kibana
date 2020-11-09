@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -91,6 +92,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         field?: string;
         isPreviousIncompatible?: boolean;
         keepOpen?: boolean;
+        palette?: string;
       },
       layerIndex = 0
     ) {
@@ -109,9 +111,24 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await comboBox.setElement(target, opts.field);
       }
 
+      if (opts.palette) {
+        await testSubjects.click('lns-palettePicker');
+        await find.clickByCssSelector(`#${opts.palette}`);
+      }
+
       if (!opts.keepOpen) {
         this.closeDimensionEditor();
       }
+    },
+
+    async assertPalette(palette: string) {
+      await retry.try(async () => {
+        await testSubjects.click('lns-palettePicker');
+        const currentPalette = await (
+          await find.byCssSelector('[aria-selected=true]')
+        ).getAttribute('id');
+        expect(currentPalette).to.equal(palette);
+      });
     },
 
     /**
@@ -205,8 +222,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
     async editMissingValues(option: string) {
       await retry.try(async () => {
-        await testSubjects.click('lnsMissingValuesButton');
-        await testSubjects.exists('lnsMissingValuesSelect');
+        await testSubjects.click('lnsValuesButton');
+        await testSubjects.exists('lnsValuesButton');
       });
       await testSubjects.click('lnsMissingValuesSelect');
       const optionSelector = await find.byCssSelector(`#${option}`);
@@ -214,7 +231,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     getTitle() {
-      return testSubjects.getVisibleText('lns_ChartTitle');
+      return testSubjects.getAttribute('lns_ChartTitle', 'innerText');
     },
 
     async getFiltersAggLabels() {
@@ -293,6 +310,38 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await testSubjects.click('lnsLayerAddButton');
     },
 
+    /**
+     * Changes the index pattern in the data panel
+     */
+    async switchDataPanelIndexPattern(name: string) {
+      await testSubjects.click('indexPattern-switch-link');
+      await find.clickByCssSelector(`[title="${name}"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Changes the index pattern for the first layer
+     */
+    async switchFirstLayerIndexPattern(name: string) {
+      await testSubjects.click('lns_layerIndexPatternLabel');
+      await find.clickByCssSelector(`[title="${name}"]`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    /**
+     * Returns the current index pattern of the data panel
+     */
+    async getDataPanelIndexPattern() {
+      return await (await testSubjects.find('indexPattern-switch-link')).getAttribute('title');
+    },
+
+    /**
+     * Returns the current index pattern of the first layer
+     */
+    async getFirstLayerIndexPattern() {
+      return await (await testSubjects.find('lns_layerIndexPatternLabel')).getAttribute('title');
+    },
+
     async linkedToOriginatingApp() {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.existOrFail('lnsApp_saveAndReturnButton');
@@ -314,6 +363,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         dimensionElements[index]
       );
       return await trigger.getVisibleText();
+    },
+
+    async isShowingNoResults() {
+      return (
+        (await (await testSubjects.find('lnsWorkspace')).getVisibleText()) === 'No results found'
+      );
     },
 
     /**
