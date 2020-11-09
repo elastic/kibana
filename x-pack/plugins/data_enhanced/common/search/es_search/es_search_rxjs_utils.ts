@@ -8,11 +8,11 @@ import { of, merge, timer, throwError } from 'rxjs';
 import { takeWhile, switchMap, expand, mergeMap, tap } from 'rxjs/operators';
 
 import {
-  AbortError,
   doSearch,
   IKibanaSearchResponse,
   isErrorResponse,
 } from '../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import type { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common';
 import type { IAsyncSearchOptions } from '../../../common/search/types';
 
