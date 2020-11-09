@@ -63,7 +63,8 @@ export const LogRetentionPanel: React.FC = () => {
                     defaultMessage: 'Analytics Logs',
                   }
                 )}
-              </strong>{' '}
+              </strong>
+              {': '}
               {hasILM && (
                 <EuiTextColor color="subdued">
                   <AnalyticsLogRetentionMessage />
@@ -89,8 +90,9 @@ export const LogRetentionPanel: React.FC = () => {
                     defaultMessage: 'API Logs',
                   }
                 )}
-              </strong>{' '}
-              {logRetention !== null && (
+              </strong>
+              {': '}
+              {hasILM && (
                 <EuiTextColor color="subdued">
                   <ApiLogRetentionMessage />
                 </EuiTextColor>
