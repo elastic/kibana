@@ -181,7 +181,10 @@ export interface Datasource<T = unknown, P = unknown> {
   ) => Array<DatasourceSuggestion<T>>;
 
   getPublicAPI: (props: PublicAPIProps<T>) => DatasourcePublicAPI;
-  getErrorMessages: (state: T) => Array<{ shortMessage: string; longMessage: string }> | undefined;
+  getErrorMessages: (
+    state: T,
+    layersGroups?: Record<string, VisualizationDimensionGroupConfig[]>
+  ) => Array<{ shortMessage: string; longMessage: string }> | undefined;
   /**
    * uniqueLabels of dimensions exposed for aria-labels of dragged dimensions
    */
@@ -234,6 +237,7 @@ export type DatasourceDimensionEditorProps<T = unknown> = DatasourceDimensionPro
   setState: StateSetter<T>;
   core: Pick<CoreSetup, 'http' | 'notifications' | 'uiSettings'>;
   dateRange: DateRange;
+  dimensionGroups: VisualizationDimensionGroupConfig[];
 };
 
 export type DatasourceDimensionTriggerProps<T> = DatasourceDimensionProps<T> & {

@@ -456,6 +456,7 @@ export function LayerPanel(
                     core: props.core,
                     columnId: activeId,
                     filterOperations: activeGroup.filterOperations,
+                    dimensionGroups: groups,
                     setState: (newState: unknown) => {
                       props.updateAll(
                         datasourceId,

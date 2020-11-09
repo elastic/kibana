@@ -5,7 +5,7 @@
  */
 
 import { ExtensionsSetup } from './services';
-import { IngestManagerSetup } from '../../ingest_manager/public';
+import { IngestManagerSetup } from '../../fleet/public';
 import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { SharePluginStart } from '../../../../src/plugins/share/public';

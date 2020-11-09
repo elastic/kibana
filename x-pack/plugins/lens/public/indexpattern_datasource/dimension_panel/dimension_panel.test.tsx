@@ -173,6 +173,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         } as unknown) as DataPublicPluginStart['fieldFormats'],
       } as unknown) as DataPublicPluginStart,
       core: {} as CoreSetup,
+      dimensionGroups: [],
     };
 
     jest.clearAllMocks();
