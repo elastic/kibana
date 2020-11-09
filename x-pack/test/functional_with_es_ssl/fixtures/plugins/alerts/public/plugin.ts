@@ -31,6 +31,7 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
       name: 'Test Always Firing',
       description: 'Always fires',
       iconClass: 'alert',
+      documentationUrl: null,
       alertParamsExpression: () => React.createElement('div', null, 'Test Always Firing'),
       validate: () => {
         return { errors: {} };
@@ -43,6 +44,7 @@ export class AlertingFixturePlugin implements Plugin<Setup, Start, AlertingExamp
       name: 'Test Noop',
       description: `Doesn't do anything`,
       iconClass: 'alert',
+      documentationUrl: null,
       alertParamsExpression: () => React.createElement('div', null, 'Test Noop'),
       validate: () => {
         return { errors: {} };
