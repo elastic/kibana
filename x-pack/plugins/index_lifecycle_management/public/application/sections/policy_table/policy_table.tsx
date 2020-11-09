@@ -26,6 +26,7 @@ import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_rea
 import { PolicyFromES } from '../../../../common/types';
 import { filterItems } from '../../services';
 import { TableContent } from './components/table_content';
+import { getPolicyCreatePath } from '../../services/navigation';
 
 interface Props {
   policies: PolicyFromES[];
@@ -45,7 +46,7 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
 
   const createPolicyButton = (
     <EuiButton
-      {...reactRouterNavigate(history, '/policies/edit')}
+      {...reactRouterNavigate(history, getPolicyCreatePath())}
       fill
       iconType="plusInCircle"
       data-test-subj="createPolicyButton"
