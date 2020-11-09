@@ -1068,6 +1068,10 @@ export class IndexPattern implements IIndexPattern {
     addScriptedField(name: string, script: string, fieldType?: string): Promise<void>;
     // (undocumented)
     deleteFieldFormat: (fieldName: string) => void;
+    // Warning: (ae-forgotten-export) The symbol "FieldAttrs" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    fieldAttrs: FieldAttrs;
     // (undocumented)
     fieldFormatMap: Record<string, any>;
     // (undocumented)
@@ -1093,9 +1097,7 @@ export class IndexPattern implements IIndexPattern {
         time_zone?: string | undefined;
     }>> | undefined;
     getAsSavedObjectBody(): {
-        attributes: {
-            fields: import("../types").IndexPatternAttrsFields;
-        } | undefined;
+        fieldAttrs: string | undefined;
         title: string;
         timeFieldName: string | undefined;
         intervalName: string | undefined;
@@ -1115,13 +1117,19 @@ export class IndexPattern implements IIndexPattern {
         }[];
     };
     // (undocumented)
+    getFieldAttrs: () => {
+        [x: string]: {
+            customName: string;
+        };
+    };
+    // (undocumented)
     getFieldByName(name: string): IndexPatternField | undefined;
     getFormatterForField(field: IndexPatternField | IndexPatternField['spec'] | IFieldType): FieldFormat;
     getFormatterForFieldNoDefault(fieldname: string): FieldFormat | undefined;
     // (undocumented)
     getNonScriptedFields(): IndexPatternField[];
     getOriginalSavedObjectBody: () => {
-        attributes?: IndexPatternAttrs | undefined;
+        fieldAttrs?: string | undefined;
         title?: string | undefined;
         timeFieldName?: string | undefined;
         intervalName?: string | undefined;
@@ -1187,7 +1195,7 @@ export type IndexPatternAggRestrictions = Record<string, {
 // @public (undocumented)
 export interface IndexPatternAttributes {
     // (undocumented)
-    attributes?: IndexPatternAttrs;
+    fieldAttrs?: string;
     // (undocumented)
     fieldFormatMap?: string;
     // (undocumented)
@@ -1307,7 +1315,7 @@ export type IndexPatternSelectProps = Required<Omit<EuiComboBoxProps<any>, 'isLo
 // @public (undocumented)
 export interface IndexPatternSpec {
     // (undocumented)
-    attributes?: IndexPatternAttrs;
+    fieldAttrs?: FieldAttrs;
     // (undocumented)
     fieldFormats?: Record<string, SerializedFieldFormat>;
     // (undocumented)
@@ -1345,8 +1353,7 @@ export class IndexPatternsService {
     //
     // (undocumented)
     ensureDefaultIndexPattern: EnsureDefaultIndexPattern;
-    // Warning: (ae-forgotten-export) The symbol "IndexPatternAttrsFields" needs to be exported by the entry point index.d.ts
-    fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: IndexPatternAttrsFields | undefined) => Record<string, FieldSpec>;
+    fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => Record<string, FieldSpec>;
     get: (id: string) => Promise<IndexPattern>;
     // Warning: (ae-forgotten-export) The symbol "IndexPatternSavedObjectAttrs" needs to be exported by the entry point index.d.ts
     //
@@ -2303,7 +2310,6 @@ export const UI_SETTINGS: {
 // src/plugins/data/common/es_query/filters/phrase_filter.ts:33:3 - (ae-forgotten-export) The symbol "PhraseFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/es_query/filters/phrases_filter.ts:31:3 - (ae-forgotten-export) The symbol "PhrasesFilterMeta" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:64:5 - (ae-forgotten-export) The symbol "FormatFieldFn" needs to be exported by the entry point index.d.ts
-// src/plugins/data/common/index_patterns/index_patterns/index_pattern.ts:122:29 - (ae-forgotten-export) The symbol "IndexPatternAttrs" needs to be exported by the entry point index.d.ts
 // src/plugins/data/common/search/aggs/types.ts:113:51 - (ae-forgotten-export) The symbol "AggTypesRegistryStart" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/field_formats/field_formats_service.ts:67:3 - (ae-forgotten-export) The symbol "FormatFactory" needs to be exported by the entry point index.d.ts
 // src/plugins/data/public/index.ts:66:23 - (ae-forgotten-export) The symbol "FILTERS" needs to be exported by the entry point index.d.ts

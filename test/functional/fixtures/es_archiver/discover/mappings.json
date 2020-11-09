@@ -94,9 +94,8 @@
             "title": {
               "type": "text"
             },
-            "attributes": {
-              "type": "object",
-              "dynamic": "false"
+            "fieldAttrs": {
+              "type": "text"
             }
           }
         },

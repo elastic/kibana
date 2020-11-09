@@ -277,12 +277,13 @@ export class IndexPatternsService {
     fields: IndexPatternFieldMap,
     id: string,
     title: string,
-    options: GetFieldsOptions
+    options: GetFieldsOptions,
+    fieldAttrs: FieldAttrs = {}
   ) => {
     const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
       const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
-      return this.fieldArrayToMap([...newFields, ...scriptdFields]);
+      return this.fieldArrayToMap([...newFields, ...scriptdFields], fieldAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -348,6 +349,7 @@ export class IndexPatternsService {
       typeMeta: parsedTypeMeta,
       type,
       fieldFormats: parsedFieldFormatMap,
+      fieldAttrs: parsedFieldAttrs,
     };
   };
 
@@ -373,17 +375,26 @@ export class IndexPatternsService {
 
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta } = spec;
+    spec.fieldAttrs = savedObject.attributes.fieldAttrs
+      ? JSON.parse(savedObject.attributes.fieldAttrs)
+      : {};
 
     const isFieldRefreshRequired = this.isFieldRefreshRequired(spec.fields);
     let isSaveRequired = isFieldRefreshRequired;
     try {
       spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
-            pattern: title,
-            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-            type,
-            params: typeMeta && typeMeta.params,
-          })
+        ? await this.refreshFieldSpecMap(
+            spec.fields || {},
+            id,
+            spec.title as string,
+            {
+              pattern: title,
+              metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+              type,
+              params: typeMeta && typeMeta.params,
+            },
+            spec.fieldAttrs
+          )
         : spec.fields;
     } catch (err) {
       isSaveRequired = false;
@@ -405,9 +416,6 @@ export class IndexPatternsService {
 
     spec.fieldFormats = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
-      : {};
-    spec.fieldAttrs = savedObject.attributes.fieldAttrs
-      ? JSON.parse(savedObject.attributes.fieldAttrs)
       : {};
 
     const indexPattern = await this.create(spec, true);
