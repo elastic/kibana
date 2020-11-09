@@ -20,6 +20,7 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import { EuiDataGrid, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { orderBy } from 'lodash';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { createTableVisCell } from './table_vis_cell';
@@ -41,15 +42,31 @@ interface TableVisBasicProps {
 export const TableVisBasic = memo(
   ({ fireEvent, setSort, sort, table, visConfig, title }: TableVisBasicProps) => {
     const { columns, rows, splitRow } = useFormattedColumnsAndRows(table, visConfig);
-    const renderCellValue = useMemo(() => createTableVisCell(columns, rows), [columns, rows]);
-    const gridColumns = useMemo(() => createGridColumns(table, columns, rows, fireEvent), [
+
+    // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
+    const sortedRows = useMemo(
+      () =>
+        sort.columnIndex !== null && sort.direction
+          ? orderBy(rows, columns[sort.columnIndex]?.id, sort.direction)
+          : rows,
+      [columns, rows, sort]
+    );
+
+    // renderCellValue is a component which renders a cell based on column and row indexes
+    const renderCellValue = useMemo(() => createTableVisCell(columns, sortedRows), [
+      columns,
+      sortedRows,
+    ]);
+
+    // Columns config
+    const gridColumns = useMemo(() => createGridColumns(table, columns, sortedRows, fireEvent), [
       table,
       columns,
-      rows,
+      sortedRows,
       fireEvent,
     ]);
 
-    // Pagination
+    // Pagination config
     const pagination = usePagination(visConfig);
     // Sorting config
     const sortingColumns = useMemo(
@@ -124,7 +141,6 @@ export const TableVisBasic = memo(
               : undefined
           }
           pagination={pagination}
-          inMemory={{ level: 'sorting' }}
           sorting={{ columns: sortingColumns, onSort }}
         />
       </>

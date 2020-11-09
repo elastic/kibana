@@ -49,7 +49,10 @@ export const createGridColumns = (
       data: {
         data: [
           {
-            table,
+            table: {
+              ...table,
+              rows,
+            },
             ...data,
           },
         ],
