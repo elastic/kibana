@@ -880,6 +880,27 @@ export interface OverlayFlyoutStart {
 }
 
 // @public (undocumented)
+export interface OverlayModalConfirmOptions {
+    // (undocumented)
+    'data-test-subj'?: string;
+    // (undocumented)
+    buttonColor?: EuiConfirmModalProps['buttonColor'];
+    // (undocumented)
+    cancelButtonText?: string;
+    // (undocumented)
+    className?: string;
+    // (undocumented)
+    closeButtonAriaLabel?: string;
+    // (undocumented)
+    confirmButtonText?: string;
+    // (undocumented)
+    defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
+    maxWidth?: boolean | number | string;
+    // (undocumented)
+    title?: string;
+}
+
+// @public (undocumented)
 export interface OverlayModalOpenOptions {
     // (undocumented)
     'data-test-subj'?: string;
@@ -892,8 +913,6 @@ export interface OverlayModalOpenOptions {
 // @public
 export interface OverlayModalStart {
     open(mount: MountPoint, options?: OverlayModalOpenOptions): OverlayRef;
-    // Warning: (ae-forgotten-export) The symbol "OverlayModalConfirmOptions" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "OverlayModalConfirmOptions"
     openConfirm(message: MountPoint | string, options?: OverlayModalConfirmOptions): Promise<boolean>;
 }
 

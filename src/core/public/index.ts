@@ -174,6 +174,7 @@ export {
   OverlayFlyoutStart,
   OverlayFlyoutOpenOptions,
   OverlayModalOpenOptions,
+  OverlayModalConfirmOptions,
   OverlayModalStart,
 } from './overlays';
 

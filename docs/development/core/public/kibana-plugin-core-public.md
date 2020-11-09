@@ -84,6 +84,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayBannersStart](./kibana-plugin-core-public.overlaybannersstart.md) |  |
 |  [OverlayFlyoutOpenOptions](./kibana-plugin-core-public.overlayflyoutopenoptions.md) |  |
 |  [OverlayFlyoutStart](./kibana-plugin-core-public.overlayflyoutstart.md) | APIs to open and manage fly-out dialogs. |
+|  [OverlayModalConfirmOptions](./kibana-plugin-core-public.overlaymodalconfirmoptions.md) |  |
 |  [OverlayModalOpenOptions](./kibana-plugin-core-public.overlaymodalopenoptions.md) |  |
 |  [OverlayModalStart](./kibana-plugin-core-public.overlaymodalstart.md) | APIs to open and manage modal dialogs. |
 |  [OverlayRef](./kibana-plugin-core-public.overlayref.md) | Returned by [OverlayStart](./kibana-plugin-core-public.overlaystart.md) methods for closing a mounted overlay. |
