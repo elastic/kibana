@@ -81,20 +81,14 @@ export const CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT = i18n.translate(
   }
 );
 
-export const FIELD_MAPPING_TITLE = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingTitle',
-  {
-    defaultMessage: 'Field mappings',
-  }
-);
-
-export const FIELD_MAPPING_DESC = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingDesc',
-  {
-    defaultMessage:
-      'Map Security case fields when pushing data to a third-party. Field mappings require an established connection to an external incident management system.',
-  }
-);
+export const FIELD_MAPPING_TITLE = (thirdPartyName: string) =>
+  i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingTitle', {
+    defaultMessage: `${thirdPartyName} field mappings`,
+  });
+export const FIELD_MAPPING_DESC = (thirdPartyName: string) =>
+  i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingDesc', {
+    defaultMessage: `Map Security Case fields to ${thirdPartyName} fields when pushing data to ${thirdPartyName}. Field mappings require an established connection to ${thirdPartyName}.`,
+  });
 
 export const FIELD_MAPPING_FIRST_COL = i18n.translate(
   'xpack.securitySolution.case.configureCases.fieldMappingFirstCol',
@@ -103,12 +97,10 @@ export const FIELD_MAPPING_FIRST_COL = i18n.translate(
   }
 );
 
-export const FIELD_MAPPING_SECOND_COL = i18n.translate(
-  'xpack.securitySolution.case.configureCases.fieldMappingSecondCol',
-  {
-    defaultMessage: 'External incident field',
-  }
-);
+export const FIELD_MAPPING_SECOND_COL = (thirdPartyName: string) =>
+  i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingSecondCol', {
+    defaultMessage: `${thirdPartyName} field`,
+  });
 
 export const FIELD_MAPPING_THIRD_COL = i18n.translate(
   'xpack.securitySolution.case.configureCases.fieldMappingThirdCol',
@@ -164,10 +156,10 @@ export const MAPPING_FIELD_NOT_MAPPED = i18n.translate(
   }
 );
 
-export const UPDATE_CONNECTOR = i18n.translate(
+export const UPDATE_FIELD_MAPPINGS = i18n.translate(
   'xpack.securitySolution.case.configureCases.updateConnector',
   {
-    defaultMessage: 'Update connector',
+    defaultMessage: 'Update field mappings',
   }
 );
 

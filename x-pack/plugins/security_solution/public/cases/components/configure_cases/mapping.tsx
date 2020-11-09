@@ -4,72 +4,68 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
-import {
-  EuiDescribedFormGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiTextColor } from '@elastic/eui';
 
 import * as i18n from './translations';
 
 import { FieldMapping } from './field_mapping';
 import { CasesConfigurationMapping } from '../../containers/configure/types';
+import { connectorsConfiguration } from '../../../common/lib/connectors/config';
 
 export interface MappingProps {
   connectorActionTypeId: string;
-  disabled: boolean;
   mapping: CasesConfigurationMapping[] | null;
-  onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;
   setEditFlyoutVisibility: () => void;
-  updateConnectorDisabled: boolean;
+  updateFieldMappingsDisabled: boolean;
 }
 
 const EuiButtonEmptyExtended = styled(EuiButtonEmpty)`
   font-size: 12px;
   height: 24px;
 `;
-
 const MappingComponent: React.FC<MappingProps> = ({
   connectorActionTypeId,
-  disabled,
   mapping,
-  onChangeMapping,
   setEditFlyoutVisibility,
-  updateConnectorDisabled,
+  updateFieldMappingsDisabled,
 }) => {
+  const selectedConnector = useMemo(() => connectorsConfiguration[connectorActionTypeId], [
+    connectorActionTypeId,
+  ]);
   return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={<h3>{i18n.FIELD_MAPPING_TITLE}</h3>}
-      description={i18n.FIELD_MAPPING_DESC}
-      data-test-subj="case-mapping-form-group"
-    >
-      <EuiFormRow fullWidth data-test-subj="case-mapping-form-row">
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false} className="euiFormLabel">
+    <EuiFlexGroup direction="column" gutterSize="none" className={'poop'}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs">
+          <h4>{i18n.FIELD_MAPPING_TITLE(selectedConnector.name)}</h4>
+          <EuiTextColor color="subdued">
+            {i18n.FIELD_MAPPING_DESC(selectedConnector.name)}
+          </EuiTextColor>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+          <EuiFlexItem grow={false}>
             <EuiButtonEmptyExtended
-              onClick={setEditFlyoutVisibility}
-              disabled={updateConnectorDisabled}
               data-test-subj="case-mapping-update-connector-button"
+              disabled={updateFieldMappingsDisabled}
+              onClick={setEditFlyoutVisibility}
             >
-              {i18n.UPDATE_CONNECTOR}
+              {i18n.UPDATE_FIELD_MAPPINGS}
             </EuiButtonEmptyExtended>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFormRow>
-      <FieldMapping
-        disabled={disabled}
-        connectorActionTypeId={connectorActionTypeId}
-        mapping={mapping}
-        onChangeMapping={onChangeMapping}
-        data-test-subj="case-mapping-field"
-      />
-    </EuiDescribedFormGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <FieldMapping
+          connectorActionTypeId={connectorActionTypeId}
+          data-test-subj="case-mapping-field"
+          mapping={mapping}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
