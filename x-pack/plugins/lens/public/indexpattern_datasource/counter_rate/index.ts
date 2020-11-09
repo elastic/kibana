@@ -16,7 +16,7 @@ export interface CounterRateArgs {
 }
 
 export type ExpressionFunctionCounterRate = ExpressionFunctionDefinition<
-  'counter_rate',
+  'lens_counter_rate',
   Datatable,
   CounterRateArgs,
   Datatable
@@ -52,7 +52,7 @@ export type ExpressionFunctionCounterRate = ExpressionFunctionDefinition<
  *   Missing values (`null` and `undefined`) will be treated as empty strings.
  */
 export const counterRate: ExpressionFunctionCounterRate = {
-  name: 'counter_rate',
+  name: 'lens_counter_rate',
   type: 'datatable',
 
   inputTypes: ['datatable'],
@@ -94,6 +94,16 @@ export const counterRate: ExpressionFunctionCounterRate = {
   },
 
   fn(input, { by, inputColumnId, outputColumnId, outputColumnName }) {
+    const resultColumns = buildResultColumns(
+      input,
+      outputColumnId,
+      inputColumnId,
+      outputColumnName
+    );
+
+    if (!resultColumns) {
+      return input;
+    }
     const previousValues: Partial<Record<string, number>> = {};
     return {
       ...input,

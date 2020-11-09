@@ -9,7 +9,7 @@ import { counterRate, CounterRateArgs } from '../counter_rate';
 import { Datatable } from 'src/plugins/expressions/public';
 import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
 
-describe('counter_rate', () => {
+describe('lens_counter_rate', () => {
   const fn = functionWrapper(counterRate);
   const runFn = (input: Datatable, args: CounterRateArgs) => fn(input, args) as Datatable;
 
