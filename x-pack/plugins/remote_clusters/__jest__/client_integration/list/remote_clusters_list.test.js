@@ -10,25 +10,23 @@ import { getRemoteClusterMock } from '../../../fixtures/remote_cluster';
 
 import { PROXY_MODE } from '../../../common/constants';
 
-import { setupEnvironment, nextTick, getRandomString, findTestSubject } from '../helpers';
+import { setupEnvironment, getRandomString, findTestSubject } from '../helpers';
 
 import { setup } from './remote_clusters_list.helpers';
 
 describe('<RemoteClusterList />', () => {
-  let server;
-  let httpRequestsMockHelpers;
+  const { server, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeAll(() => {
-    ({ server, httpRequestsMockHelpers } = setupEnvironment());
+    jest.useFakeTimers();
   });
 
   afterAll(() => {
+    jest.useRealTimers();
     server.restore();
   });
 
-  beforeEach(() => {
-    httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
-  });
+  httpRequestsMockHelpers.setLoadRemoteClustersResponse([]);
 
   describe('on component mount', () => {
     let exists;
@@ -47,9 +45,10 @@ describe('<RemoteClusterList />', () => {
     let component;
 
     beforeEach(async () => {
-      ({ exists, component } = setup());
+      await act(async () => {
+        ({ exists, component } = setup());
+      });
 
-      await nextTick(100); // We need to wait next tick for the mock server response to kick in
       component.update();
     });
 
@@ -66,7 +65,7 @@ describe('<RemoteClusterList />', () => {
     let find;
     let table;
     let actions;
-    let waitFor;
+    let component;
     let form;
 
     const remoteClusters = [
@@ -87,9 +86,10 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       await act(async () => {
-        ({ find, table, actions, waitFor, form } = setup());
-        await waitFor('remoteClusterListTable');
+        ({ find, table, actions, form, component } = setup());
       });
+
+      component.update();
     });
 
     test('pagination works', () => {
@@ -117,7 +117,6 @@ describe('<RemoteClusterList />', () => {
     let actions;
     let tableCellsValues;
     let rows;
-    let waitFor;
 
     // For deterministic tests, we need to make sure that remoteCluster1 comes before remoteCluster2
     // in the table list that is rendered. As the table orders alphabetically by index name
@@ -151,10 +150,10 @@ describe('<RemoteClusterList />', () => {
       httpRequestsMockHelpers.setLoadRemoteClustersResponse(remoteClusters);
 
       await act(async () => {
-        ({ component, find, exists, table, actions, waitFor } = setup());
-
-        await waitFor('remoteClusterListTable');
+        ({ component, find, exists, table, actions } = setup());
       });
+
+      component.update();
 
       // Read the remote clusters list table
       ({ rows, tableCellsValues } = table.getMetaData('remoteClusterListTable'));
@@ -282,9 +281,10 @@ describe('<RemoteClusterList />', () => {
         actions.clickConfirmModalDeleteRemoteCluster();
 
         await act(async () => {
-          await nextTick(600); // there is a 500ms timeout in the api action
-          component.update();
+          jest.advanceTimersByTime(600); // there is a 500ms timeout in the api action
         });
+
+        component.update();
 
         ({ rows } = table.getMetaData('remoteClusterListTable'));
 
