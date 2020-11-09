@@ -21,7 +21,8 @@ import { deletePipeline } from '../elasticsearch/ingest_pipeline/';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { deleteTransforms } from '../elasticsearch/transform/remove';
 import { packagePolicyService, appContextService } from '../..';
-import { splitPkgKey, deletePackageCache } from '../registry';
+import { splitPkgKey } from '../registry';
+import { deletePackageCache } from '../archive';
 
 export async function removeInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
