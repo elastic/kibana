@@ -164,6 +164,13 @@ export class DescendantsQuery {
     };
   }
 
+  /**
+   * Searches for descendant nodes matching the specified IDs.
+   *
+   * @param client for making requests to Elasticsearch
+   * @param nodes the unique IDs to search for in Elasticsearch
+   * @param limit the upper limit of documents to returned
+   */
   async search(
     client: IScopedClusterClient,
     nodes: NodeID[],

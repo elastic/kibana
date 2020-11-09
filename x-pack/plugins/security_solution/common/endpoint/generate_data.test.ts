@@ -27,7 +27,6 @@ interface Node {
 }
 
 describe('data generator data streams', () => {
-  // these tests cast the result of the generate methods so that we can specifically compare the `data_stream` fields
   it('creates a generator with default data streams', () => {
     const generator = new EndpointDocGenerator('seed');
     expect(generator.generateHostMetadata().data_stream).toEqual({
@@ -267,6 +266,29 @@ describe('data generator', () => {
         }
       }
     };
+
+    it('sets the start and end times correctly', () => {
+      const startOfEpoch = new Date(0);
+      let startTime = new Date(timestampSafeVersion(tree.allEvents[0]) ?? startOfEpoch);
+      expect(startTime).not.toEqual(startOfEpoch);
+      let endTime = new Date(timestampSafeVersion(tree.allEvents[0]) ?? startOfEpoch);
+      expect(startTime).not.toEqual(startOfEpoch);
+
+      for (const event of tree.allEvents) {
+        const currentEventTime = new Date(timestampSafeVersion(event) ?? startOfEpoch);
+        expect(currentEventTime).not.toEqual(startOfEpoch);
+        if (currentEventTime < startTime) {
+          startTime = currentEventTime;
+        }
+
+        if (currentEventTime > endTime) {
+          endTime = currentEventTime;
+        }
+      }
+      expect(startTime).toEqual(tree.startTime);
+      expect(endTime).toEqual(tree.endTime);
+      expect(endTime.getTime() - startTime.getTime()).toBeGreaterThanOrEqual(0);
+    });
 
     it('creates related events in ascending order', () => {
       // the order should not change since it should already be in ascending order

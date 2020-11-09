@@ -112,6 +112,11 @@ export class StatsQuery {
     };
   }
 
+  /**
+   * Returns the related event statistics for a set of nodes.
+   * @param client used to make requests to Elasticsearch
+   * @param nodes an array of unique IDs representing nodes in a resolver graph
+   */
   async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<Record<string, EventStats>> {
     if (nodes.length <= 0) {
       return {};

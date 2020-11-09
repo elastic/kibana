@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ECSField } from '../../../../../../common/endpoint/types';
-
 /**
  * Represents a time range filter
  */

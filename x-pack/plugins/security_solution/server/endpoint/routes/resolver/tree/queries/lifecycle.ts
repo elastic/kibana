@@ -72,6 +72,12 @@ export class LifecycleQuery {
     };
   }
 
+  /**
+   * Searches for lifecycle events matching the specified node IDs.
+   *
+   * @param client for making requests to Elasticsearch
+   * @param nodes the unique IDs to search for in Elasticsearch
+   */
   async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<FieldsObject[]> {
     if (nodes.length <= 0) {
       return [];
