@@ -10,11 +10,7 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
 
-import { PhaseWithAllocationAction } from '../../../../../../../../../common/types';
-
 import { UseField, SelectField, useFormData } from '../../../../../../../../shared_imports';
-
-import { propertyof } from '../../../../../../../services/policies/policy_validation';
 
 import { LearnMoreLink } from '../../../../learn_more_link';
 
@@ -61,9 +57,6 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes })
 
   nodeOptions.sort((a, b) => a.value.localeCompare(b.value));
 
-  // check that this string is a valid property
-  const nodeAttrsProperty = propertyof<PhaseWithAllocationAction>('selectedNodeAttrs');
-
   return (
     <>
       <EuiText size="s">
@@ -100,7 +93,7 @@ export const NodeAllocation: FunctionComponent<SharedProps> = ({ phase, nodes })
             </EuiButtonEmpty>
           ) : undefined,
           euiFieldProps: {
-            'data-test-subj': `${phase}-${nodeAttrsProperty}`,
+            'data-test-subj': `${phase}-selectedNodeAttrs`,
             options: [{ text: i18nTexts.doNotModifyAllocationOption, value: '' }].concat(
               nodeOptions
             ),
