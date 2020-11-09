@@ -145,7 +145,7 @@ export const getCerts: UMElasticsearchQueryFn<GetCertsParams, CertResult> = asyn
   }
 
   // console.log(JSON.stringify(params, null, 2));
-  const result = await callES('search', params);
+  const { body: result } = await callES.search(params);
 
   const certs = (result?.hits?.hits ?? []).map((hit: any) => {
     const {
