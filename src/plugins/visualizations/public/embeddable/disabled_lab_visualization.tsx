@@ -18,27 +18,36 @@
  */
 
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { getDocLinks } from '../services';
 
 export function DisabledLabVisualization({ title }: { title: string }) {
-  const promptTitle = (
-    <FormattedMessage
-      id="visualizations.disabledLabVisualizationTitle"
-      defaultMessage="{title} is a lab visualization."
-      values={{ title }}
-    />
-  );
+  const advancedSettingsLink = getDocLinks().links.management.visualizationSettings;
   return (
     <I18nProvider>
       <EuiEmptyPrompt
-        title={promptTitle}
+        title={
+          <FormattedMessage
+            id="visualizations.disabledLabVisualizationTitle"
+            defaultMessage="{title} is a lab visualization."
+            values={{ title }}
+          />
+        }
         iconType="beaker"
         body={
           <FormattedMessage
             id="visualizations.disabledLabVisualizationMessage"
             defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
           />
+        }
+        actions={
+          <EuiLink target="_blank" external href={advancedSettingsLink}>
+            <FormattedMessage
+              id="visualizations.disabledLabVisualizationLink"
+              defaultMessage="Read documentation"
+            />
+          </EuiLink>
         }
       />
     </I18nProvider>
