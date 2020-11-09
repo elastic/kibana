@@ -80,6 +80,7 @@ export function FieldSelect({
 
     function fieldNamesToOptions(items: string[]) {
       return items
+        .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
         .map((field) => ({
           label: currentIndexPattern.getFieldByName(field)?.displayName,
           value: {

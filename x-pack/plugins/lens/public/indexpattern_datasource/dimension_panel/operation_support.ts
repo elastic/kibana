@@ -37,7 +37,6 @@ export const getOperationSupportMatrix = (props: Props): OperationSupportMatrix 
 
   filteredOperationsByMetadata.forEach(({ operations }) => {
     operations.forEach((operation) => {
-      // replace spread operator by regular push as it's performance wise faster
       if (operation.type === 'field') {
         if (!supportedOperationsByField[operation.field]) {
           supportedOperationsByField[operation.field] = [];
