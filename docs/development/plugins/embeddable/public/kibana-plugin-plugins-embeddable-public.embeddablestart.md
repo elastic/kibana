@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface EmbeddableStart extends PersistableState<EmbeddableInput> 
+export interface EmbeddableStart extends PersistableStateService<EmbeddableStateWithType> 
 ```
 
 ## Properties

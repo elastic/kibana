@@ -82,7 +82,6 @@ export const useNetworkTls = ({
           factoryQueryType: NetworkQueries.tls,
           filterQuery: createFilter(filterQuery),
           flowTarget,
-          id,
           ip,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
@@ -195,7 +194,6 @@ export const useNetworkTls = ({
         factoryQueryType: NetworkQueries.tls,
         filterQuery: createFilter(filterQuery),
         flowTarget,
-        id,
         ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
