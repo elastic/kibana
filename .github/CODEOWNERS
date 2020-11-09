@@ -12,6 +12,7 @@
 /src/plugins/advanced_settings/ @elastic/kibana-app
 /src/plugins/charts/ @elastic/kibana-app
 /src/plugins/discover/ @elastic/kibana-app
+/src/plugins/lens_oss/ @elastic/kibana-app
 /src/plugins/management/ @elastic/kibana-app
 /src/plugins/kibana_legacy/ @elastic/kibana-app
 /src/plugins/timelion/ @elastic/kibana-app
