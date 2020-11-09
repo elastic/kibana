@@ -80,7 +80,7 @@ export const createGridColumns = (
                   onClick={() =>
                     onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, false)
                   }
-                  iconType="magnifyWithPlus"
+                  iconType="plusInCircle"
                 >
                   {filterForText}
                 </Component>
@@ -105,7 +105,7 @@ export const createGridColumns = (
                   onClick={() =>
                     onFilterClick({ row: rowIndex, column: colIndex, value: rowValue }, true)
                   }
-                  iconType="magnifyWithMinus"
+                  iconType="minusInCircle"
                 >
                   {filterOutText}
                 </Component>

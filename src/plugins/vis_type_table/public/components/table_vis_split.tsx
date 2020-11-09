@@ -18,7 +18,6 @@
  */
 
 import React, { memo } from 'react';
-import { EuiTitle } from '@elastic/eui';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { TableGroup } from '../table_vis_response_handler';
@@ -39,15 +38,13 @@ export const TableVisSplit = memo(
       <>
         {tables.map(({ tables: dataTable, key, title }) => (
           <div key={key} className="tbvChart__split">
-            <EuiTitle size="xs">
-              <h3>{title}</h3>
-            </EuiTitle>
             <TableVisBasic
               fireEvent={fireEvent}
               setSort={setSort}
               sort={sort}
               table={dataTable[0]}
               visConfig={visConfig}
+              title={title}
             />
           </div>
         ))}

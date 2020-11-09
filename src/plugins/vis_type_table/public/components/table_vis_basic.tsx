@@ -18,7 +18,8 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiDataGrid, EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { createTableVisCell } from './table_vis_cell';
@@ -34,10 +35,11 @@ interface TableVisBasicProps {
   sort: TableVisUiState['sort'];
   table: Table;
   visConfig: TableVisConfig;
+  title?: string;
 }
 
 export const TableVisBasic = memo(
-  ({ fireEvent, setSort, sort, table, visConfig }: TableVisBasicProps) => {
+  ({ fireEvent, setSort, sort, table, visConfig, title }: TableVisBasicProps) => {
     const { columns, rows, splitRow } = useFormattedColumnsAndRows(table, visConfig);
     const renderCellValue = useMemo(() => createTableVisCell(columns, rows), [columns, rows]);
     const gridColumns = useMemo(() => createGridColumns(table, columns, rows, fireEvent), [
@@ -72,46 +74,60 @@ export const TableVisBasic = memo(
       [columns, setSort]
     );
 
+    const ariaLabel =
+      title ||
+      visConfig.title ||
+      i18n.translate('visTypeTable.defaultAriaLabel', {
+        defaultMessage: 'Data table visualization',
+      });
+
     return (
-      <EuiDataGrid
-        aria-label=""
-        columns={gridColumns}
-        gridStyle={{
-          border: 'horizontal',
-          header: 'underline',
-        }}
-        rowCount={rows.length}
-        columnVisibility={{
-          visibleColumns: columns.map(({ id }) => id),
-          setVisibleColumns: () => {},
-        }}
-        toolbarVisibility={
-          visConfig.showToolbar && {
-            showColumnSelector: false,
-            showFullScreenSelector: false,
-            showSortSelector: false,
-            additionalControls: (
-              <TableVisControls
-                cols={columns}
-                rows={rows}
-                table={table}
-                filename={visConfig.title}
-                splitRow={splitRow}
-              />
-            ),
+      <>
+        {title && (
+          <EuiTitle size="xs">
+            <h3>{title}</h3>
+          </EuiTitle>
+        )}
+        <EuiDataGrid
+          aria-label={ariaLabel}
+          columns={gridColumns}
+          gridStyle={{
+            border: 'horizontal',
+            header: 'underline',
+          }}
+          rowCount={rows.length}
+          columnVisibility={{
+            visibleColumns: columns.map(({ id }) => id),
+            setVisibleColumns: () => {},
+          }}
+          toolbarVisibility={
+            visConfig.showToolbar && {
+              showColumnSelector: false,
+              showFullScreenSelector: false,
+              showSortSelector: false,
+              additionalControls: (
+                <TableVisControls
+                  cols={columns}
+                  rows={rows}
+                  table={table}
+                  filename={visConfig.title}
+                  splitRow={splitRow}
+                />
+              ),
+            }
           }
-        }
-        renderCellValue={renderCellValue}
-        renderFooterCellValue={
-          visConfig.showTotal
-            ? // @ts-expect-error
-              ({ colIndex }) => columns[colIndex].formattedTotal || null
-            : undefined
-        }
-        pagination={pagination}
-        inMemory={{ level: 'sorting' }}
-        sorting={{ columns: sortingColumns, onSort }}
-      />
+          renderCellValue={renderCellValue}
+          renderFooterCellValue={
+            visConfig.showTotal
+              ? // @ts-expect-error
+                ({ colIndex }) => columns[colIndex].formattedTotal || null
+              : undefined
+          }
+          pagination={pagination}
+          inMemory={{ level: 'sorting' }}
+          sorting={{ columns: sortingColumns, onSort }}
+        />
+      </>
     );
   }
 );
