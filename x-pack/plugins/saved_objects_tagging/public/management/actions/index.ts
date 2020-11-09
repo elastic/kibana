@@ -16,6 +16,7 @@ interface GetBulkActionOptions {
   capabilities: TagsCapabilities;
   tagClient: ITagInternalClient;
   clearSelection: () => void;
+  setLoading: (loading: boolean) => void;
 }
 
 export const getBulkActions = ({
@@ -23,11 +24,12 @@ export const getBulkActions = ({
   capabilities,
   tagClient,
   clearSelection,
+  setLoading,
 }: GetBulkActionOptions): TagBulkAction[] => {
   const actions: TagBulkAction[] = [];
 
   if (capabilities.delete) {
-    actions.push(getBulkDeleteAction({ notifications, overlays, tagClient }));
+    actions.push(getBulkDeleteAction({ notifications, overlays, tagClient, setLoading }));
   }
 
   // only add clear selection if user has permission to perform any other action

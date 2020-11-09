@@ -45,6 +45,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
       core,
       capabilities,
       tagClient,
+      setLoading,
       clearSelection: () => setSelectedTags([]),
     });
   }, [core, capabilities, tagClient]);
@@ -178,7 +179,6 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
 
   const executeBulkAction = useCallback(
     async (action: TagBulkAction) => {
-      setLoading(true);
       try {
         await action.execute(selectedTags.map(({ id }) => id));
         if (action.refreshAfterExecute) {

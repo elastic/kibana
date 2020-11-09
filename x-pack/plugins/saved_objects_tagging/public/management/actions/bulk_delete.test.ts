@@ -16,6 +16,7 @@ describe('bulkDeleteAction', () => {
   let tagClient: ReturnType<typeof tagClientMock.create>;
   let overlays: ReturnType<typeof overlayServiceMock.createStartContract>;
   let notifications: ReturnType<typeof notificationServiceMock.createStartContract>;
+  let setLoading: jest.MockedFunction<(loading: boolean) => void>;
   let action: TagBulkAction;
 
   const tagIds = ['id-1', 'id-2', 'id-3'];
@@ -24,8 +25,9 @@ describe('bulkDeleteAction', () => {
     tagClient = tagClientMock.create();
     overlays = overlayServiceMock.createStartContract();
     notifications = notificationServiceMock.createStartContract();
+    setLoading = jest.fn();
 
-    action = getBulkDeleteAction({ tagClient, overlays, notifications });
+    action = getBulkDeleteAction({ tagClient, overlays, notifications, setLoading });
   });
 
   it('performs the operation if the confirmation is accepted', async () => {

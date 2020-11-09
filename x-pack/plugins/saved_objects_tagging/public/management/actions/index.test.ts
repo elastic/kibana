@@ -15,12 +15,14 @@ import { getBulkActions } from './index';
 describe('getBulkActions', () => {
   let core: ReturnType<typeof coreMock.createStart>;
   let tagClient: ReturnType<typeof tagClientMock.create>;
-  let clearSelection: jest.Mock;
+  let clearSelection: jest.MockedFunction<() => void>;
+  let setLoading: jest.MockedFunction<(loading: boolean) => void>;
 
   beforeEach(() => {
     core = coreMock.createStart();
     tagClient = tagClientMock.create();
     clearSelection = jest.fn();
+    setLoading = jest.fn();
   });
 
   const getActions = (caps: Partial<TagsCapabilities>) =>
@@ -28,6 +30,7 @@ describe('getBulkActions', () => {
       core,
       tagClient,
       clearSelection,
+      setLoading,
       capabilities: createTagCapabilities(caps),
     });
 

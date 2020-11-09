@@ -13,12 +13,14 @@ interface GetBulkDeleteActionOptions {
   overlays: OverlayStart;
   notifications: NotificationsStart;
   tagClient: ITagInternalClient;
+  setLoading: (loading: boolean) => void;
 }
 
 export const getBulkDeleteAction = ({
   overlays,
   notifications,
   tagClient,
+  setLoading,
 }: GetBulkDeleteActionOptions): TagBulkAction => {
   return {
     id: 'delete',
@@ -63,7 +65,9 @@ export const getBulkDeleteAction = ({
       );
 
       if (confirmed) {
+        setLoading(true);
         await tagClient.bulkDelete(tagIds);
+        setLoading(false);
 
         notifications.toasts.addSuccess({
           title: i18n.translate(
