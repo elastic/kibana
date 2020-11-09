@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import {
   NodeID,
   Schema,
-} from '../../../../plugins/security_solution/server/endpoint/routes/resolver/new_tree/utils';
+} from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils';
 import {
   SafeResolverChildNode,
   SafeResolverLifecycleNode,

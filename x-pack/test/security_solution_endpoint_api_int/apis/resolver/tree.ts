@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
-import { Schema } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/new_tree/utils';
+import { Schema } from '../../../../plugins/security_solution/server/endpoint/routes/resolver/tree/utils';
 import { ResolverNode } from '../../../../plugins/security_solution/common/endpoint/types';
 import {
   parentEntityIDSafeVersion,
