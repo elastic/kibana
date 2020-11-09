@@ -118,11 +118,7 @@ The tests are written in https://mochajs.org[mocha] using https://github.com/ela
 
 We use https://www.w3.org/TR/webdriver1/[WebDriver Protocol] to run tests in both Chrome and Firefox with the help of https://sites.google.com/a/chromium.org/chromedriver/[chromedriver] and https://firefox-source-docs.mozilla.org/testing/geckodriver/[geckodriver]. When the `FunctionalTestRunner` launches, remote service creates a new webdriver session, which starts the driver and a stripped-down browser instance. We use `browser` service and `webElementWrapper` class to wrap up https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/[Webdriver API].
 
-<<<<<<< HEAD
 The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that {kib} source code uses. Refer to {kib-repo}tree/{branch}/style_guides/js_style_guide.md[style_guides/js_style_guide.md].
-=======
-The `FunctionalTestRunner` automatically transpiles functional tests using babel, so that tests can use the same ECMAScript features that {kib} source code uses. Refer to {kib-repo}/tree/{branch}/STYLEGUIDE.md#typescriptjavascript[STYLEGUIDE.md].
->>>>>>> 7043717198ab2eb0a17155d9efdf12879f4ec7eb
 
 [discrete]
 ==== Definitions
