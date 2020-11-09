@@ -58,6 +58,7 @@ export const getBulkDeleteAction = ({
             }
           ),
           buttonColor: 'danger',
+          maxWidth: 560,
         }
       );
 
