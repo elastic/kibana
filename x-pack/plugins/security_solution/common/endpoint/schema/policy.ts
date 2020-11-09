@@ -11,7 +11,7 @@ export const GetPolicyResponseSchema = {
   }),
 };
 
-export const GetPolicySummariesSchema = {
+export const GetAgentPolicySummaryRequestSchema = {
   query: schema.object({
     package_name: schema.string(),
     policy_name: schema.nullable(schema.string()),

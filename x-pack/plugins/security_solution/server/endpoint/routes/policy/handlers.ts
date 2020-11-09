@@ -8,10 +8,10 @@ import { TypeOf } from '@kbn/config-schema';
 import { policyIndexPattern } from '../../../../common/endpoint/constants';
 import {
   GetPolicyResponseSchema,
-  GetPolicySummariesSchema,
+  GetAgentPolicySummaryRequestSchema,
 } from '../../../../common/endpoint/schema/policy';
 import { EndpointAppContext } from '../../types';
-import { getAllAgentUniqueVersionCount, getPolicyResponseByAgentId } from './service';
+import { getAgentPolicySummary, getPolicyResponseByAgentId } from './service';
 import { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
 
 export const getHostPolicyResponseHandler = function (
@@ -36,12 +36,12 @@ export const getHostPolicyResponseHandler = function (
   };
 };
 
-export const getPolicySummariesHandler = function (
+export const getAgentPolicySummaryHandler = function (
   endpointAppContext: EndpointAppContext
-): RequestHandler<undefined, TypeOf<typeof GetPolicySummariesSchema.query>, undefined> {
+): RequestHandler<undefined, TypeOf<typeof GetAgentPolicySummaryRequestSchema.query>, undefined> {
   return async (context, request, response) => {
     try {
-      const result = await getAllAgentUniqueVersionCount(
+      const result = await getAgentPolicySummary(
         endpointAppContext,
         context.core.savedObjects.client,
         request.query.package_name,

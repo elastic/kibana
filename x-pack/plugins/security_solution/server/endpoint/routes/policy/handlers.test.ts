@@ -10,7 +10,7 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
 } from '../../mocks';
-import { getHostPolicyResponseHandler, getPolicySummariesHandler } from './handlers';
+import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
 import {
   ILegacyScopedClusterClient,
   KibanaResponseFactory,
@@ -177,7 +177,7 @@ describe('test policy response handler', () => {
 
     afterEach(() => endpointAppContextService.stop());
 
-    it('should return the summary of all the policies with the given policy name', async () => {
+    it('should return the summary of all the agent with the given policy name', async () => {
       mockAgentService.listAgents
         .mockImplementationOnce(() => Promise.resolve(agentListResult))
         .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
@@ -186,7 +186,7 @@ describe('test policy response handler', () => {
         .mockImplementationOnce(() => Promise.resolve(agentPolicyListResult))
         .mockImplementationOnce(() => Promise.resolve(emptyAgentPolicyListResult));
 
-      const policySummariesHandler = getPolicySummariesHandler({
+      const policySummarysHandler = getAgentPolicySummaryHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
@@ -196,7 +196,7 @@ describe('test policy response handler', () => {
         query: { policy_name: 'my-policy', package_name: 'endpoint' },
       });
 
-      await policySummariesHandler(
+      await policySummarysHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
         mockResponse
@@ -214,12 +214,12 @@ describe('test policy response handler', () => {
       );
     });
 
-    it('should return the empty summary when there is no policy for selected policy name', async () => {
+    it('should return the empty agent summary when there is no policy for selected policy name', async () => {
       mockAgentPolicyService.list.mockImplementationOnce(() =>
         Promise.resolve(emptyAgentPolicyListResult)
       );
 
-      const policySummariesHandler = getPolicySummariesHandler({
+      const policySummaryHandler = getAgentPolicySummaryHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
@@ -229,7 +229,7 @@ describe('test policy response handler', () => {
         query: { policy_name: 'bad-policy', package_name: 'endpoint' },
       });
 
-      await policySummariesHandler(
+      await policySummaryHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
         mockResponse
@@ -245,12 +245,12 @@ describe('test policy response handler', () => {
       expect(mockAgentService.listAgents).toBeCalledTimes(0);
     });
 
-    it('should return the summary of all the policies', async () => {
+    it('should return the agent summary', async () => {
       mockAgentService.listAgents
         .mockImplementationOnce(() => Promise.resolve(agentListResult))
         .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
 
-      const policySummariesHandler = getPolicySummariesHandler({
+      const agentPolicySummaryHandler = getAgentPolicySummaryHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
@@ -260,7 +260,7 @@ describe('test policy response handler', () => {
         query: { package_name: 'endpoint' },
       });
 
-      await policySummariesHandler(
+      await agentPolicySummaryHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
         mockResponse

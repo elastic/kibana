@@ -61,7 +61,7 @@ export async function getPolicyResponseByAgentId(
   };
 }
 
-export async function getAllAgentUniqueVersionCount(
+export async function getAgentPolicySummary(
   endpointAppContext: EndpointAppContext,
   soClient: SavedObjectsClientContract,
   packageName: string,
