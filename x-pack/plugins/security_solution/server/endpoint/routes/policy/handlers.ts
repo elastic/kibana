@@ -12,6 +12,7 @@ import {
 } from '../../../../common/endpoint/schema/policy';
 import { EndpointAppContext } from '../../types';
 import { getAllAgentUniqueVersionCount, getPolicyResponseByAgentId } from './service';
+import { GetAgentSummaryResponse } from '../../../../common/endpoint/types';
 
 export const getHostPolicyResponseHandler = function (
   endpointAppContext: EndpointAppContext
@@ -51,10 +52,14 @@ export const getPolicySummariesHandler = function (
         versions_count: { ...result },
       };
 
-      return response.ok({
-        body: request.query?.policy_name
+      const body: GetAgentSummaryResponse = {
+        summary_response: request.query?.policy_name
           ? { ...responseBody, ...{ policy_name: request.query?.policy_name } }
           : responseBody,
+      };
+
+      return response.ok({
+        body,
       });
     } catch (err) {
       return response.internalError({ body: err });

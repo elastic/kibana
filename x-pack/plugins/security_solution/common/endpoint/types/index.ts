@@ -7,6 +7,7 @@
 import { ApplicationStart } from 'kibana/public';
 import { NewPackagePolicy, PackagePolicy } from '../../../../ingest_manager/common';
 import { ManifestSchema } from '../schema/manifest';
+import { JsonObject } from '../../../../infra/common/typed_json';
 
 export * from './trusted_apps';
 
@@ -1094,4 +1095,15 @@ export interface HostPolicyResponse {
  */
 export interface GetHostPolicyResponse {
   policy_response: HostPolicyResponse;
+}
+
+/**
+ * REST API response for retrieving agent summary
+ */
+export interface GetAgentSummaryResponse {
+  summary_response: {
+    package: string;
+    policy_name?: string;
+    versions_count: JsonObject;
+  };
 }

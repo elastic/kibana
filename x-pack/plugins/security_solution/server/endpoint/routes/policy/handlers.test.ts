@@ -203,9 +203,11 @@ describe('test policy response handler', () => {
       );
       expect(mockResponse.ok).toBeCalled();
       expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
-        policy_name: 'my-policy',
-        package: 'endpoint',
-        versions_count: { '8.0.0': 2, '8.1.0': 1 },
+        summary_response: {
+          policy_name: 'my-policy',
+          package: 'endpoint',
+          versions_count: { '8.0.0': 2, '8.1.0': 1 },
+        },
       });
       expect(mockAgentService.listAgents.mock.calls[0][1]?.kuery).toEqual(
         'fleet-agents.packages:"endpoint" AND (fleet-agents.policy_id:policy-1)'
@@ -234,9 +236,11 @@ describe('test policy response handler', () => {
       );
       expect(mockResponse.ok).toBeCalled();
       expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
-        policy_name: 'bad-policy',
-        package: 'endpoint',
-        versions_count: {},
+        summary_response: {
+          policy_name: 'bad-policy',
+          package: 'endpoint',
+          versions_count: {},
+        },
       });
       expect(mockAgentService.listAgents).toBeCalledTimes(0);
     });
@@ -263,8 +267,10 @@ describe('test policy response handler', () => {
       );
       expect(mockResponse.ok).toBeCalled();
       expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
-        package: 'endpoint',
-        versions_count: { '8.0.0': 2, '8.1.0': 1 },
+        summary_response: {
+          package: 'endpoint',
+          versions_count: { '8.0.0': 2, '8.1.0': 1 },
+        },
       });
     });
   });
