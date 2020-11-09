@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(await tagManagementPage.isDeleteButtonVisible()).to.be(privileges.delete);
       });
 
-      it(`${testPrefix(privileges.delete)} bulk delete tag`, async () => {
+      it(`${testPrefix(privileges.delete)} bulk delete tags`, async () => {
         await selectSomeTags();
         expect(await tagManagementPage.isActionPresent('delete')).to.be(privileges.delete);
       });

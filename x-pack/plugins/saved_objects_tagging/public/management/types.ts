@@ -6,6 +6,9 @@
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
+/**
+ * Represents a tag `bulk action`
+ */
 export interface TagBulkAction {
   /**
    * The unique identifier for this action.
@@ -20,7 +23,7 @@ export interface TagBulkAction {
    */
   icon?: EuiIconType;
   /**
-   * Handler to execute this action against the given list of tag ids.
+   * Handler to execute this action against the given list of selected tag ids.
    */
   execute: (tagIds: string[]) => void | Promise<void>;
   /**

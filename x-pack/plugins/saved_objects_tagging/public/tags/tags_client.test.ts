@@ -216,41 +216,83 @@ describe('TagsClient', () => {
     });
   });
 
-  /////
+  describe('internal APIs', () => {
+    describe('#find', () => {
+      const findOptions: FindTagsOptions = {
+        search: 'for, you know.',
+      };
+      let expectedTags: Tag[];
 
-  describe('#find', () => {
-    const findOptions: FindTagsOptions = {
-      search: 'for, you know.',
-    };
-    let expectedTags: Tag[];
+      beforeEach(() => {
+        expectedTags = [
+          createTag({ id: 'tag-1' }),
+          createTag({ id: 'tag-2' }),
+          createTag({ id: 'tag-3' }),
+        ];
+        http.get.mockResolvedValue({ tags: expectedTags, total: expectedTags.length });
+      });
 
-    beforeEach(() => {
-      expectedTags = [
-        createTag({ id: 'tag-1' }),
-        createTag({ id: 'tag-2' }),
-        createTag({ id: 'tag-3' }),
-      ];
-      http.get.mockResolvedValue({ tags: expectedTags, total: expectedTags.length });
-    });
+      it('calls `http.get` with the correct parameters', async () => {
+        await tagsClient.find(findOptions);
 
-    it('calls `http.get` with the correct parameters', async () => {
-      await tagsClient.find(findOptions);
+        expect(http.get).toHaveBeenCalledTimes(1);
+        expect(http.get).toHaveBeenCalledWith(`/internal/saved_objects_tagging/tags/_find`, {
+          query: findOptions,
+        });
+      });
+      it('returns the tag objects from the response', async () => {
+        const { tags, total } = await tagsClient.find(findOptions);
+        expect(tags).toEqual(expectedTags);
+        expect(total).toEqual(3);
+      });
+      it('forwards the error from the http call if any', async () => {
+        const error = new Error('something when wrong');
+        http.get.mockRejectedValue(error);
 
-      expect(http.get).toHaveBeenCalledTimes(1);
-      expect(http.get).toHaveBeenCalledWith(`/internal/saved_objects_tagging/tags/_find`, {
-        query: findOptions,
+        await expect(tagsClient.find(findOptions)).rejects.toThrowError(error);
       });
     });
-    it('returns the tag objects from the response', async () => {
-      const { tags, total } = await tagsClient.find(findOptions);
-      expect(tags).toEqual(expectedTags);
-      expect(total).toEqual(3);
-    });
-    it('forwards the error from the http call if any', async () => {
-      const error = new Error('something when wrong');
-      http.get.mockRejectedValue(error);
 
-      await expect(tagsClient.find(findOptions)).rejects.toThrowError(error);
+    describe('#bulkDelete', () => {
+      const tagIds = ['id-to-delete-1', 'id-to-delete-2'];
+
+      beforeEach(() => {
+        http.post.mockResolvedValue({});
+      });
+
+      it('calls `http.post` with the correct parameters', async () => {
+        await tagsClient.bulkDelete(tagIds);
+
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenCalledWith(
+          `/internal/saved_objects_tagging/tags/_bulk_delete`,
+          {
+            body: JSON.stringify({
+              ids: tagIds,
+            }),
+          }
+        );
+      });
+      it('forwards the error from the http call if any', async () => {
+        const error = new Error('something when wrong');
+        http.post.mockRejectedValue(error);
+
+        await expect(tagsClient.bulkDelete(tagIds)).rejects.toThrowError(error);
+      });
+      it('notifies its changeListener if the http call succeed', async () => {
+        await tagsClient.bulkDelete(tagIds);
+
+        expect(changeListener.onDelete).toHaveBeenCalledTimes(2);
+        expect(changeListener.onDelete).toHaveBeenCalledWith(tagIds[0]);
+        expect(changeListener.onDelete).toHaveBeenCalledWith(tagIds[1]);
+      });
+      it('ignores potential errors when calling `changeListener.onDelete`', async () => {
+        changeListener.onDelete.mockImplementation(() => {
+          throw new Error('error in onCreate');
+        });
+
+        await expect(tagsClient.bulkDelete(tagIds)).resolves.toBeUndefined();
+      });
     });
   });
 });

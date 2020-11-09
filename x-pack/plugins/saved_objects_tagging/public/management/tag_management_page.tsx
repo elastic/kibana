@@ -12,6 +12,7 @@ import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener, getEditModalOpener } from '../components/edition_modal';
 import { ITagInternalClient } from '../tags';
+import { TagBulkAction } from './types';
 import { Header, TagTable, ActionBar } from './components';
 import { getBulkActions } from './actions';
 import { getTagConnectionsUrl } from './utils';
@@ -175,31 +176,36 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
     [overlays, notifications, fetchTags, tagClient]
   );
 
+  const executeBulkAction = useCallback(
+    async (action: TagBulkAction) => {
+      setLoading(true);
+      try {
+        await action.execute(selectedTags.map(({ id }) => id));
+        if (action.refreshAfterExecute) {
+          await fetchTags();
+        }
+      } catch (e) {
+        notifications.toasts.addError(e, {
+          title: i18n.translate('xpack.savedObjectsTagging.notifications.bulkActionError', {
+            defaultMessage: 'An error occurred',
+          }),
+        });
+      }
+      setLoading(false);
+    },
+    [selectedTags, fetchTags, notifications]
+  );
+
   const actionBar = useMemo(
     () => (
       <ActionBar
         actions={bulkActions}
         totalCount={filteredTags.length}
         selectedCount={selectedTags.length}
-        onActionSelected={async (action) => {
-          setLoading(true);
-          try {
-            await action.execute(selectedTags.map(({ id }) => id));
-            if (action.refreshAfterExecute) {
-              await fetchTags();
-            }
-          } catch (e) {
-            notifications.toasts.addError(e, {
-              title: i18n.translate('xpack.savedObjectsTagging.notifications.bulkActionError', {
-                defaultMessage: 'An error occurred',
-              }),
-            });
-          }
-          setLoading(false);
-        }}
+        onActionSelected={executeBulkAction}
       />
     ),
-    [notifications, bulkActions, selectedTags, filteredTags, fetchTags]
+    [selectedTags, filteredTags, bulkActions, executeBulkAction]
   );
 
   return (
