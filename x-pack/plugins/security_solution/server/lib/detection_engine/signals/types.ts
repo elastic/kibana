@@ -157,6 +157,7 @@ export interface Signal {
   original_event?: SearchTypes;
   status: Status;
   threshold_count?: SearchTypes;
+  original_signal?: SearchTypes;
   depth: number;
 }
 

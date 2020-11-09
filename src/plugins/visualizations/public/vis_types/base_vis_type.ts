@@ -20,7 +20,7 @@
 import { defaultsDeep } from 'lodash';
 import { ISchemas } from 'src/plugins/vis_default_editor/public';
 import { VisParams } from '../types';
-import { VisType, VisTypeOptions } from './types';
+import { VisType, VisTypeOptions, VisGroups } from './types';
 
 interface CommonBaseVisTypeOptions<TVisParams>
   extends Pick<
@@ -41,7 +41,14 @@ interface CommonBaseVisTypeOptions<TVisParams>
     >,
     Pick<
       Partial<VisType<TVisParams>>,
-      'editorConfig' | 'hidden' | 'stage' | 'useCustomNoDataScreen' | 'visConfig'
+      | 'editorConfig'
+      | 'hidden'
+      | 'stage'
+      | 'useCustomNoDataScreen'
+      | 'visConfig'
+      | 'group'
+      | 'titleInWizard'
+      | 'note'
     > {
   options?: Partial<VisType<TVisParams>['options']>;
 }
@@ -72,10 +79,13 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
   public readonly name;
   public readonly title;
   public readonly description;
+  public readonly note;
   public readonly getSupportedTriggers;
   public readonly icon;
   public readonly image;
   public readonly stage;
+  public readonly group;
+  public readonly titleInWizard;
   public readonly options;
   public readonly visualization;
   public readonly visConfig;
@@ -98,6 +108,7 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
 
     this.name = opts.name;
     this.description = opts.description ?? '';
+    this.note = opts.note ?? '';
     this.getSupportedTriggers = opts.getSupportedTriggers;
     this.title = opts.title;
     this.icon = opts.icon;
@@ -108,6 +119,8 @@ export class BaseVisType<TVisParams = VisParams> implements VisType<TVisParams> 
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage ?? 'production';
+    this.group = opts.group ?? VisGroups.AGGBASED;
+    this.titleInWizard = opts.titleInWizard ?? '';
     this.hidden = opts.hidden ?? false;
     this.requestHandler = opts.requestHandler ?? 'courier';
     this.responseHandler = opts.responseHandler ?? 'none';
