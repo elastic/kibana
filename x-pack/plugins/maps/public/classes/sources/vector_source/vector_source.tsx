@@ -37,6 +37,7 @@ export interface GeoJsonWithMeta {
 
 export interface BoundsFilters {
   applyGlobalQuery: boolean;
+  applyGlobalTime: boolean;
   filters: Filter[];
   query?: MapQuery;
   sourceQuery?: MapQuery;

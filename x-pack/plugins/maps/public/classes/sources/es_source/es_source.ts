@@ -101,6 +101,10 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return this._descriptor.applyGlobalQuery;
   }
 
+  getApplyGlobalTime(): boolean {
+    return this._descriptor.applyGlobalTime;
+  }
+
   isFieldAware(): boolean {
     return true;
   }
@@ -208,7 +212,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     initialSearchContext?: object
   ): Promise<ISearchSource> {
     const indexPattern = await this.getIndexPattern();
-    const isTimeAware = await this.isTimeAware();
     const globalFilters: Filter[] = searchFilters.applyGlobalQuery ? searchFilters.filters : [];
     const allFilters: Filter[] = [...globalFilters];
     if (this.isFilterByMapBounds() && 'buffer' in searchFilters && searchFilters.buffer) {
@@ -229,7 +232,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       // @ts-expect-error
       allFilters.push(extentFilter);
     }
-    if (isTimeAware) {
+    if (searchFilters.applyGlobalTime && (await this.isTimeAware())) {
       const filter = getTimeFilter().createFilter(indexPattern, searchFilters.timeFilters);
       if (filter) {
         allFilters.push(filter);

@@ -254,6 +254,7 @@ export class VectorLayer extends AbstractLayer {
       timeFilters: searchFilters.timeFilters,
       filters: searchFilters.filters,
       applyGlobalQuery: searchFilters.applyGlobalQuery,
+      applyGlobalTime: searchFilters.applyGlobalTime,
     };
 
     let bounds = null;
@@ -315,14 +316,16 @@ export class VectorLayer extends AbstractLayer {
     return indexPatternIds;
   }
 
-  async isTimeAware(): Promise<boolean> {
-    const isSourceTimeAware = await this.getSource().isTimeAware();
-    if (isSourceTimeAware) {
+  async isFilteredByGlobalTime(): Promise<boolean> {
+    if (this.getSource().getApplyGlobalTime() && (await this.getSource().isTimeAware())) {
       return true;
     }
 
     const joinPromises = this.getValidJoins().map(async (join) => {
-      return await join.getRightJoinSource().isTimeAware();
+      return (
+        join.getRightJoinSource().getApplyGlobalTime() &&
+        (await join.getRightJoinSource().isTimeAware())
+      );
     });
     return (await Promise.all(joinPromises)).some((isJoinTimeAware: boolean) => {
       return isJoinTimeAware;
@@ -345,6 +348,7 @@ export class VectorLayer extends AbstractLayer {
       fieldNames: joinSource.getFieldNames(),
       sourceQuery: joinSource.getWhereQuery(),
       applyGlobalQuery: joinSource.getApplyGlobalQuery(),
+      applyGlobalTime: joinSource.getApplyGlobalTime(),
     };
     const prevDataRequest = this.getDataRequest(sourceDataId);
 
@@ -417,6 +421,7 @@ export class VectorLayer extends AbstractLayer {
       geogridPrecision: source.getGeoGridPrecision(dataFilters.zoom),
       sourceQuery: sourceQuery ? sourceQuery : undefined,
       applyGlobalQuery: source.getApplyGlobalQuery(),
+      applyGlobalTime: source.getApplyGlobalTime(),
       sourceMeta: source.getSyncMeta(),
     };
   }

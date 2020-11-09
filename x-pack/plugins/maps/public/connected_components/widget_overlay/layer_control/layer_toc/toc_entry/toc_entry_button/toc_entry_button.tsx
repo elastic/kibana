@@ -36,29 +36,29 @@ export interface OwnProps {
 type Props = StateProps & OwnProps;
 
 interface State {
-  isTimeAware: boolean;
+  isFilteredByGlobalTime: boolean;
 }
 
 export class TOCEntryButton extends Component<Props, State> {
   private _isMounted: boolean = false;
 
   state: State = {
-    isTimeAware: false,
+    isFilteredByGlobalTime: false,
   };
 
   componentDidMount() {
     this._isMounted = true;
-    this._loadIsTimeAware();
+    this._loadIsFilteredByGlobalTime();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
   }
 
-  async _loadIsTimeAware() {
-    const isTimeAware = await this.props.layer.isTimeAware();
+  async _loadIsFilteredByGlobalTime() {
+    const isFilteredByGlobalTime = await this.props.layer.isFilteredByGlobalTime();
     if (this._isMounted) {
-      this.setState({ isTimeAware });
+      this.setState({ isFilteredByGlobalTime });
     }
   }
 
@@ -115,7 +115,7 @@ export class TOCEntryButton extends Component<Props, State> {
           }),
         });
       }
-      if (this.state.isTimeAware) {
+      if (this.state.isFilteredByGlobalTime) {
         footnotes.push({
           icon: <EuiIcon color="subdued" type="clock" size="s" />,
           message: i18n.translate('xpack.maps.layer.isUsingTimeFilter', {

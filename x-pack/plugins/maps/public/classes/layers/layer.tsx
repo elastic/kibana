@@ -61,7 +61,7 @@ export interface ILayer {
   getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]>;
   renderSourceSettingsEditor({ onChange }: SourceEditorArgs): ReactElement<any> | null;
   isLayerLoading(): boolean;
-  isTimeAware(): Promise<boolean>;
+  isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
   getMbLayerIds(): string[];
@@ -228,7 +228,7 @@ export class AbstractLayer implements ILayer {
     return (await this.supportsFitToBounds()) && this.isVisible();
   }
 
-  async isTimeAware(): Promise<boolean> {
+  async isFilteredByGlobalTime(): Promise<boolean> {
     return false;
   }
 
