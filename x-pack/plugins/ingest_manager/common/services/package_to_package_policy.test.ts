@@ -84,16 +84,14 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
         {
           type: 'foo',
           enabled: true,
-          streams: [
-            { id: 'foo-foo', enabled: true, data_stream: { dataset: 'foo', type: 'logs' } },
-          ],
+          streams: [{ enabled: true, data_stream: { dataset: 'foo', type: 'logs' } }],
         },
         {
           type: 'bar',
           enabled: true,
           streams: [
-            { id: 'bar-bar', enabled: true, data_stream: { dataset: 'bar', type: 'logs' } },
-            { id: 'bar-bar2', enabled: true, data_stream: { dataset: 'bar2', type: 'logs' } },
+            { enabled: true, data_stream: { dataset: 'bar', type: 'logs' } },
+            { enabled: true, data_stream: { dataset: 'bar2', type: 'logs' } },
           ],
         },
       ]);
@@ -142,7 +140,6 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
           enabled: true,
           streams: [
             {
-              id: 'foo-foo',
               enabled: true,
               data_stream: { dataset: 'foo', type: 'logs' },
               vars: { 'var-name': { value: 'foo-var-value' } },
@@ -154,13 +151,11 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
           enabled: true,
           streams: [
             {
-              id: 'bar-bar',
               enabled: true,
               data_stream: { dataset: 'bar', type: 'logs' },
               vars: { 'var-name': { type: 'text', value: 'bar-var-value' } },
             },
             {
-              id: 'bar-bar2',
               enabled: true,
               data_stream: { dataset: 'bar2', type: 'logs' },
               vars: { 'var-name': { type: 'yaml', value: 'bar2-var-value' } },
@@ -258,7 +253,6 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
           },
           streams: [
             {
-              id: 'foo-foo',
               enabled: true,
               data_stream: { dataset: 'foo', type: 'logs' },
               vars: {
@@ -276,7 +270,6 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
           },
           streams: [
             {
-              id: 'bar-bar',
               enabled: true,
               data_stream: { dataset: 'bar', type: 'logs' },
               vars: {
@@ -284,7 +277,6 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
               },
             },
             {
-              id: 'bar-bar2',
               enabled: true,
               data_stream: { dataset: 'bar2', type: 'logs' },
               vars: {
@@ -298,7 +290,6 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
           enabled: false,
           streams: [
             {
-              id: 'with-disabled-streams-disabled',
               enabled: false,
               data_stream: { dataset: 'disabled', type: 'logs' },
               vars: {
@@ -306,7 +297,6 @@ describe('Ingest Manager - packageToPackagePolicy', () => {
               },
             },
             {
-              id: 'with-disabled-streams-disabled2',
               enabled: false,
               data_stream: { dataset: 'disabled2', type: 'logs' },
             },
