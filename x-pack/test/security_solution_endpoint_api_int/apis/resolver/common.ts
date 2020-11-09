@@ -30,12 +30,17 @@ import {
   categoryMapping,
 } from '../../../../plugins/security_solution/common/endpoint/generate_data';
 
-const createLevels = (
-  descendantsByParent: Map<NodeID, Map<NodeID, ResolverNode>>,
-  levels: Array<Map<NodeID, ResolverNode>>,
-  currentNodes: Map<NodeID, ResolverNode> | undefined,
-  schema: Schema
-): Array<Map<NodeID, ResolverNode>> => {
+const createLevels = ({
+  descendantsByParent,
+  levels,
+  currentNodes,
+  schema,
+}: {
+  descendantsByParent: Map<NodeID, Map<NodeID, ResolverNode>>;
+  levels: Array<Map<NodeID, ResolverNode>>;
+  currentNodes: Map<NodeID, ResolverNode> | undefined;
+  schema: Schema;
+}): Array<Map<NodeID, ResolverNode>> => {
   if (!currentNodes || currentNodes.size === 0) {
     return levels;
   }
@@ -51,7 +56,7 @@ const createLevels = (
       }
     }
   }
-  return createLevels(descendantsByParent, levels, nextLevel, schema);
+  return createLevels({ descendantsByParent, levels, currentNodes: nextLevel, schema });
 };
 
 interface TreeExpectation {
@@ -69,7 +74,8 @@ interface APITree {
   // entries closer to the beginning of the array are more direct parents of the origin aka
   // ancestors[0] = the origin's parent, ancestors[1] = the origin's grandparent
   ancestors: ResolverNode[];
-  origin: ResolverNode;
+  // if no ancestors were retrieved then the origin will be undefined
+  origin: ResolverNode | undefined;
   descendantLevels: Array<Map<NodeID, ResolverNode>>;
   nodeExpectations: NodeExpectations;
 }
@@ -90,8 +96,8 @@ export interface APIResponse {
  * @param node a resolver node
  * @param schema the schema that was used to retrieve this resolver node
  */
-export const getID = (node: ResolverNode, schema: Schema): NodeID => {
-  const id = _.get(node.data, schema.id);
+export const getID = (node: ResolverNode | undefined, schema: Schema): NodeID => {
+  const id = _.get(node?.data, schema.id);
   if (!id) {
     throw new Error(`Unable to find id ${schema.id} in node: ${JSON.stringify(node)}`);
   }
@@ -111,7 +117,7 @@ const getParentInternal = (node: ResolverNode | undefined, schema: Schema): Node
  * @param node a resolver node
  * @param schema the schema that was used to retrieve this resolver node
  */
-export const getParent = (node: ResolverNode, schema: Schema): NodeID => {
+export const getParent = (node: ResolverNode | undefined, schema: Schema): NodeID => {
   const parent = getParentInternal(node, schema);
   if (!parent) {
     throw new Error(`Unable to find parent ${schema.parent} in node: ${JSON.stringify(node)}`);
@@ -155,25 +161,24 @@ export const createTreeFromResponse = (
   const trees: Map<NodeID, APITree> = new Map();
 
   for (const expectation of treeExpectations) {
-    const descendantLevels = createLevels(
-      nodesByParent,
-      [],
-      nodesByParent.get(expectation.origin),
-      schema
-    );
-    const originNode = nodesByID.get(expectation.origin);
-    if (!originNode) {
-      throw new Error(`Unable to find origin for id: ${expectation.origin}`);
-    }
+    const descendantLevels = createLevels({
+      descendantsByParent: nodesByParent,
+      levels: [],
+      currentNodes: nodesByParent.get(expectation.origin),
+      schema,
+    });
 
-    let currentID: NodeID | undefined = getParentInternal(originNode, schema);
     const ancestors: ResolverNode[] = [];
-    while (currentID !== undefined) {
-      const parentNode = nodesByID.get(currentID);
-      if (parentNode) {
-        ancestors.push(parentNode);
+    const originNode = nodesByID.get(expectation.origin);
+    if (originNode) {
+      let currentID: NodeID | undefined = getParentInternal(originNode, schema);
+      while (currentID !== undefined) {
+        const parentNode = nodesByID.get(currentID);
+        if (parentNode) {
+          ancestors.push(parentNode);
+        }
+        currentID = getParentInternal(parentNode, schema);
       }
-      currentID = getParentInternal(parentNode, schema);
     }
 
     trees.set(expectation.origin, {
@@ -207,33 +212,39 @@ const verifyAncestry = ({
   ]);
 
   for (const tree of responseTrees.trees.values()) {
-    expect(tree.ancestors.length).to.be(tree.nodeExpectations.ancestors);
-    const originID = getID(tree.origin, schema);
-    const originParentID = getParent(tree.origin, schema);
-    expect(allGenNodes.get(String(originID))?.id).to.be(String(originID));
-    expect(allGenNodes.get(String(originParentID))?.id).to.be(String(originParentID));
-    expect(originID).to.be(entityIDSafeVersion(allGenNodes.get(String(originID))!.lifecycle[0]));
-    expect(originParentID).to.be(
-      parentEntityIDSafeVersion(allGenNodes.get(String(originID))!.lifecycle[0])
-    );
-    // make sure the lifecycle events are sorted by timestamp in ascending order because the
-    // event that will be returned that we need to compare to should be the earliest event
-    // found
-    const originLifecycleSorted = [...allGenNodes.get(String(originID))!.lifecycle].sort(
-      (a: Event, b: Event) => {
-        const aTime: number | undefined = timestampSafeVersion(a);
-        const bTime = timestampSafeVersion(b);
-        if (aTime !== undefined && bTime !== undefined) {
-          return aTime - bTime;
-        } else {
-          return 0;
-        }
-      }
-    );
+    if (tree.nodeExpectations.ancestors !== undefined) {
+      expect(tree.ancestors.length).to.be(tree.nodeExpectations.ancestors);
+    }
 
-    expect(_.get(tree.origin.data, '@timestamp')).to.be(
-      timestampSafeVersion(originLifecycleSorted[0])
-    );
+    if (tree.origin !== undefined) {
+      const originID = getID(tree.origin, schema);
+      const originParentID = getParent(tree.origin, schema);
+      expect(allGenNodes.get(String(originID))?.id).to.be(String(originID));
+      expect(allGenNodes.get(String(originParentID))?.id).to.be(String(originParentID));
+      expect(originID).to.be(entityIDSafeVersion(allGenNodes.get(String(originID))!.lifecycle[0]));
+      expect(originParentID).to.be(
+        parentEntityIDSafeVersion(allGenNodes.get(String(originID))!.lifecycle[0])
+      );
+      // make sure the lifecycle events are sorted by timestamp in ascending order because the
+      // event that will be returned that we need to compare to should be the earliest event
+      // found
+      const originLifecycleSorted = [...allGenNodes.get(String(originID))!.lifecycle].sort(
+        (a: Event, b: Event) => {
+          const aTime: number | undefined = timestampSafeVersion(a);
+          const bTime = timestampSafeVersion(b);
+          if (aTime !== undefined && bTime !== undefined) {
+            return aTime - bTime;
+          } else {
+            return 0;
+          }
+        }
+      );
+
+      expect(_.get(tree.origin?.data, '@timestamp')).to.be(
+        timestampSafeVersion(originLifecycleSorted[0])
+      );
+    }
+
     for (let i = 0; i < tree.ancestors.length; i++) {
       const id = getID(tree.ancestors[i], schema);
       const parent = getParentInternal(tree.ancestors[i], schema);
@@ -248,29 +259,100 @@ const verifyAncestry = ({
   }
 };
 
+const verifyChildren = ({
+  responseTrees,
+  schema,
+  genTree,
+}: {
+  responseTrees: APIResponse;
+  schema: Schema;
+  genTree: Tree;
+}) => {
+  const allGenNodes = new Map<string, TreeNode>([
+    ...genTree.ancestry,
+    ...genTree.children,
+    [genTree.origin.id, genTree.origin],
+  ]);
+  for (const tree of responseTrees.trees.values()) {
+    if (tree.nodeExpectations.descendantLevels !== undefined) {
+      expect(tree.nodeExpectations.descendantLevels).to.be(tree.descendantLevels.length);
+    }
+    let totalDescendants = 0;
+
+    for (const level of tree.descendantLevels) {
+      for (const node of level.values()) {
+        totalDescendants += 1;
+        const id = getID(node, schema);
+        const parent = getParent(node, schema);
+        const genNode = allGenNodes.get(String(id));
+        // make sure the id field is the same in the returned node as the generated one
+        expect(id).to.be(entityIDSafeVersion(genNode!.lifecycle[0]));
+        // make sure the parent field is the same in the returned node as the generated one
+        expect(parent).to.be(parentEntityIDSafeVersion(genNode!.lifecycle[0]));
+      }
+    }
+    if (tree.nodeExpectations.descendants !== undefined) {
+      expect(tree.nodeExpectations.descendants).to.be(totalDescendants);
+    }
+  }
+};
+
+const verifyStats = ({
+  responseTrees,
+  relatedEventsCategories,
+}: {
+  responseTrees: APIResponse;
+  relatedEventsCategories: RelatedEventInfo[];
+}) => {
+  for (const node of responseTrees.allNodes) {
+    let totalExpEvents = 0;
+    for (const cat of relatedEventsCategories) {
+      const ecsCategories = categoryMapping[cat.category];
+      if (Array.isArray(ecsCategories)) {
+        // if there are multiple ecs categories used to define a related event, the count for all of them should be the same
+        // and they should equal what is defined in the categories used to generate the related events
+        for (const ecsCat of ecsCategories) {
+          expect(node.stats.byCategory[ecsCat]).to.be(cat.count);
+        }
+      } else {
+        expect(node.stats.byCategory[ecsCategories]).to.be(cat.count);
+      }
+
+      totalExpEvents += cat.count;
+    }
+    expect(node.stats.total).to.be(totalExpEvents);
+  }
+};
+
 /**
  * Verify the ancestry of multiple trees.
  *
- * @param origins the IDs passed to the tree api for getting the trees
+ * @param expectations array of expectations based on the origin that built a particular tree
  * @param response the nodes returned from the api
  * @param schema the schema fields passed to the tree api
  * @param genTree the generated tree that was inserted in Elasticsearch that we are querying
- * @param ancestors the number of ancestors that we expect to be returned
+ * @param relatedEventsCategories an optional array to instruct the verification to check the stats
+ *  on each node returned
  */
 export const verifyTree = ({
   expectations,
   response,
   schema,
   genTree,
+  relatedEventsCategories,
 }: {
   expectations: TreeExpectation[];
   response: ResolverNode[];
   schema: Schema;
   genTree: Tree;
+  relatedEventsCategories?: RelatedEventInfo[];
 }) => {
   const responseTrees = createTreeFromResponse(expectations, response, schema);
   verifyAncestry({ responseTrees, schema, genTree });
-  // TODO add function for verifying descendants
+  verifyChildren({ responseTrees, schema, genTree });
+  if (relatedEventsCategories !== undefined) {
+    verifyStats({ responseTrees, relatedEventsCategories });
+  }
 };
 
 /**
@@ -293,6 +375,7 @@ export const createAncestryArray = (events: Event[]) => {
 /**
  * Check that the given lifecycle is in the resolver tree's corresponding map
  *
+ * @deprecated use verifyTree
  * @param node a lifecycle node containing the start and end events for a node
  * @param nodeMap a map of entity_ids to nodes to look for the passed in `node`
  */
@@ -308,6 +391,7 @@ const expectLifecycleNodeInMap = (
 /**
  * Verify that all the ancestor nodes are valid and optionally have parents.
  *
+ * @deprecated use verifyTree
  * @param ancestors an array of ancestors
  * @param tree the generated resolver tree as the source of truth
  * @param verifyLastParent a boolean indicating whether to check the last ancestor. If the ancestors array intentionally
@@ -363,6 +447,7 @@ export const checkAncestryFromEntityTreeAPI = (
 /**
  * Retrieves the most distant ancestor in the given array.
  *
+ * @deprecated use verifyTree
  * @param ancestors an array of ancestor nodes
  */
 export const retrieveDistantAncestor = (ancestors: SafeResolverLifecycleNode[]) => {
@@ -386,6 +471,7 @@ export const retrieveDistantAncestor = (ancestors: SafeResolverLifecycleNode[]) 
 /**
  * Verify that the children nodes are correct
  *
+ * @deprecated use verifyTree
  * @param children the children nodes
  * @param tree the generated resolver tree as the source of truth
  * @param numberOfParents an optional number to compare that are a certain number of parents in the children array
@@ -449,6 +535,7 @@ export const compareArrays = (
 /**
  * Verifies that the stats received from ES for a node reflect the categories of events that the generator created.
  *
+ * @deprecated use verifyTree
  * @param relatedEvents the related events received for a particular node
  * @param categories the related event info used when generating the resolver tree
  */
@@ -474,12 +561,12 @@ export const verifyEntityTreeStats = (
     totalExpEvents += cat.count;
   }
   expect(stats?.events.total).to.be(totalExpEvents);
-  expect(stats?.totalAlerts);
 };
 
 /**
  * A helper function for verifying the stats information an array of nodes.
  *
+ * @deprecated use verifyTree
  * @param nodes an array of lifecycle nodes that should have a stats field defined
  * @param categories the related event info used when generating the resolver tree
  */

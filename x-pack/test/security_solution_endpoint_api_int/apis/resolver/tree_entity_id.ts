@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  describe('Resolver tree', () => {
+  describe('Resolver entity tree api', () => {
     before(async () => {
       await esArchiver.load('endpoint/resolver/api_feature');
       resolverTrees = await resolver.createTrees(treeOptions);

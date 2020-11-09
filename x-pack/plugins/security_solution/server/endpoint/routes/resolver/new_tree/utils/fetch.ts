@@ -180,18 +180,10 @@ export class Fetcher {
         return descendants;
       }
 
-      const parents: Set<NodeID> = results.reduce((totalParents: Set<NodeID>, result) => {
-        const parentID = getParentField(result, options.schema);
-        if (parentID) {
-          totalParents.add(parentID);
-        }
-        return totalParents;
-      }, new Set<NodeID>());
-
       nodes = getLeafNodes(results, nodes, options.schema);
 
       numNodesLeftToRequest -= results.length;
-      levelsLeftToRequest -= parents.size;
+      levelsLeftToRequest -= 1;
       descendants.push(...results);
     }
 

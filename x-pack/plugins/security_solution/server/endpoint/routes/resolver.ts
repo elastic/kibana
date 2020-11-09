@@ -44,6 +44,9 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     handleEvents(log)
   );
 
+  /**
+   * @deprecated will be removed because it is not used
+   */
   router.post(
     {
       path: '/api/endpoint/resolver/{id}/alerts',
