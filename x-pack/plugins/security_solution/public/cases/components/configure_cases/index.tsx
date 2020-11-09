@@ -35,6 +35,7 @@ import {
   normalizeCaseConnector,
 } from './utils';
 import * as i18n from './translations';
+import { Mapping } from './mapping';
 
 const FormWrapper = styled.div`
   ${({ theme }) => css`
@@ -187,6 +188,19 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
           selectedConnector={connector.id}
         />
       </SectionWrapper>
+
+      {connector.id != null && (
+        <SectionWrapper>
+          <Mapping
+            connectorActionTypeId={connector.id}
+            disabled={persistLoading || isLoadingConnectors || !userCanCrud}
+            mapping={}
+            onChangeMapping={}
+            setEditFlyoutVisibility={}
+            updateConnectorDisabled={updateConnectorDisabled || !userCanCrud}
+          />
+        </SectionWrapper>
+      )}
       <ActionsConnectorsContextProvider
         value={{
           http,

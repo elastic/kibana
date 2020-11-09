@@ -241,6 +241,7 @@ export const pushToService = async (
   casePushParams: ServiceConnectorCaseParams,
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
+  // TO DO STEPH formatting here
   const response = await KibanaServices.get().http.fetch<
     ActionTypeExecutorResult<ReturnType<typeof decodeServiceConnectorCaseResponse>>
   >(`${ACTION_URL}/action/${connectorId}/_execute`, {

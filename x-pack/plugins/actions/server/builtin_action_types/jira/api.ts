@@ -5,7 +5,6 @@
  */
 
 import {
-  ExternalServiceParams,
   PushToServiceApiHandlerArgs,
   HandshakeApiHandlerArgs,
   GetIncidentApiHandlerArgs,
@@ -14,26 +13,14 @@ import {
   GetFieldsByIssueTypeHandlerArgs,
   GetIssueTypesHandlerArgs,
   GetIssuesHandlerArgs,
-  PushToServiceApiParams,
   PushToServiceResponse,
   GetIssueHandlerArgs,
   GetCommonFieldsHandlerArgs,
 } from './types';
 
-// TODO: to remove, need to support Case
-import { prepareFieldsForTransformation, transformFields, transformComments } from '../case/utils';
+const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
 
-const handshakeHandler = async ({
-  externalService,
-  mapping,
-  params,
-}: HandshakeApiHandlerArgs) => {};
-
-const getIncidentHandler = async ({
-  externalService,
-  mapping,
-  params,
-}: GetIncidentApiHandlerArgs) => {};
+const getIncidentHandler = async ({ externalService, params }: GetIncidentApiHandlerArgs) => {};
 
 const getIssueTypesHandler = async ({ externalService }: GetIssueTypesHandlerArgs) => {
   const res = await externalService.getIssueTypes();
@@ -68,58 +55,13 @@ const getIssueHandler = async ({ externalService, params }: GetIssueHandlerArgs)
 
 const pushToServiceHandler = async ({
   externalService,
-  mapping,
   params,
-  logger,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
   const { externalId, comments } = params;
-  const updateIncident = externalId ? true : false;
-  const defaultPipes = updateIncident ? ['informationUpdated'] : ['informationCreated'];
-  let currentIncident: ExternalServiceParams | undefined;
   let res: PushToServiceResponse;
 
-  if (externalId) {
-    try {
-      currentIncident = await externalService.getIncident(externalId);
-    } catch (ex) {
-      logger.debug(
-        `Retrieving Incident by id ${externalId} from Jira failed with exception: ${ex}`
-      );
-    }
-  }
-
-  let incident: Incident;
-  // TODO: should be removed later but currently keep it for the Case implementation support
-  if (mapping) {
-    const fields = prepareFieldsForTransformation({
-      externalCase: params.externalObject,
-      mapping,
-      defaultPipes,
-    });
-
-    const transformedFields = transformFields<
-      PushToServiceApiParams,
-      ExternalServiceParams,
-      Incident
-    >({
-      params,
-      fields,
-      currentIncident,
-    });
-
-    const { priority, labels, issueType, parent } = params;
-    incident = {
-      summary: transformedFields.summary,
-      description: transformedFields.description,
-      priority,
-      labels,
-      issueType,
-      parent,
-    };
-  } else {
-    const { title, description, priority, labels, issueType, parent } = params;
-    incident = { summary: title, description, priority, labels, issueType, parent };
-  }
+  const { title, description, priority, labels, issueType, parent } = params;
+  const incident: Incident = { summary: title, description, priority, labels, issueType, parent };
 
   if (externalId != null) {
     res = await externalService.updateIncident({
@@ -128,23 +70,13 @@ const pushToServiceHandler = async ({
     });
   } else {
     res = await externalService.createIncident({
-      incident: {
-        ...incident,
-      },
+      incident,
     });
   }
 
   if (comments && Array.isArray(comments) && comments.length > 0) {
-    if (mapping && mapping.get('comments')?.actionType === 'nothing') {
-      return res;
-    }
-
-    const commentsTransformed = mapping
-      ? transformComments(comments, ['informationAdded'])
-      : comments;
-
     res.comments = [];
-    for (const currentComment of commentsTransformed) {
+    for (const currentComment of comments) {
       const comment = await externalService.createComment({
         incidentId: res.id,
         comment: currentComment,

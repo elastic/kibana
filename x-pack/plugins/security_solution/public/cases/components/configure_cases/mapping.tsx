@@ -21,12 +21,12 @@ import { FieldMapping } from './field_mapping';
 import { CasesConfigurationMapping } from '../../containers/configure/types';
 
 export interface MappingProps {
-  disabled: boolean;
-  updateConnectorDisabled: boolean;
-  mapping: CasesConfigurationMapping[] | null;
   connectorActionTypeId: string;
+  disabled: boolean;
+  mapping: CasesConfigurationMapping[] | null;
   onChangeMapping: (newMapping: CasesConfigurationMapping[]) => void;
   setEditFlyoutVisibility: () => void;
+  updateConnectorDisabled: boolean;
 }
 
 const EuiButtonEmptyExtended = styled(EuiButtonEmpty)`
@@ -35,12 +35,12 @@ const EuiButtonEmptyExtended = styled(EuiButtonEmpty)`
 `;
 
 const MappingComponent: React.FC<MappingProps> = ({
+  connectorActionTypeId,
   disabled,
-  updateConnectorDisabled,
   mapping,
   onChangeMapping,
   setEditFlyoutVisibility,
-  connectorActionTypeId,
+  updateConnectorDisabled,
 }) => {
   return (
     <EuiDescribedFormGroup

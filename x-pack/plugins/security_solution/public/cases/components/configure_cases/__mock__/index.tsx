@@ -8,7 +8,6 @@ import { ActionConnector } from '../../../containers/configure/types';
 import { UseConnectorsResponse } from '../../../containers/configure/use_connectors';
 import { connectorsMock } from '../../../containers/configure/mock';
 import { ReturnUseCaseConfigure } from '../../../containers/configure/use_configure';
-export { mapping } from '../../../containers/configure/mock';
 import { ConnectorTypes } from '../../../../../../case/common/api';
 
 export const connectors: ActionConnector[] = connectorsMock;

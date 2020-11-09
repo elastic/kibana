@@ -36,10 +36,6 @@ export const connectorsMock: ActionConnector[] = [
     name: 'My Connector',
     config: {
       apiUrl: 'https://instance1.service-now.com',
-      incidentConfiguration: {
-        mapping,
-      },
-      isCaseOwned: true,
     },
     isPreconfigured: false,
   },
@@ -50,25 +46,6 @@ export const connectorsMock: ActionConnector[] = [
     config: {
       apiUrl: 'https://test/',
       orgId: '201',
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'name',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
     },
     isPreconfigured: false,
   },
@@ -78,25 +55,6 @@ export const connectorsMock: ActionConnector[] = [
     name: 'Jira',
     config: {
       apiUrl: 'https://instance.atlassian.ne',
-      incidentConfiguration: {
-        mapping: [
-          {
-            source: 'title',
-            target: 'summary',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'description',
-            target: 'description',
-            actionType: 'overwrite',
-          },
-          {
-            source: 'comments',
-            target: 'comments',
-            actionType: 'append',
-          },
-        ],
-      },
     },
     isPreconfigured: false,
   },

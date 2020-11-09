@@ -4,86 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  ExternalServiceParams,
   PushToServiceApiHandlerArgs,
   HandshakeApiHandlerArgs,
   GetIncidentApiHandlerArgs,
   ExternalServiceApi,
-  PushToServiceApiParams,
   PushToServiceResponse,
-  Incident,
   GetCommonFieldsHandlerArgs,
   GetCommonFieldsResponse,
 } from './types';
 
-// TODO: to remove, need to support Case
-import { transformFields, transformComments, prepareFieldsForTransformation } from '../case/utils';
-
-const handshakeHandler = async ({
-  externalService,
-  mapping,
-  params,
-}: HandshakeApiHandlerArgs) => {};
-const getIncidentHandler = async ({
-  externalService,
-  mapping,
-  params,
-}: GetIncidentApiHandlerArgs) => {};
+const handshakeHandler = async ({ externalService, params }: HandshakeApiHandlerArgs) => {};
+const getIncidentHandler = async ({ externalService, params }: GetIncidentApiHandlerArgs) => {};
 
 const pushToServiceHandler = async ({
   externalService,
-  mapping,
   params,
   secrets,
-  logger,
 }: PushToServiceApiHandlerArgs): Promise<PushToServiceResponse> => {
   const { externalId, comments } = params;
-  const updateIncident = externalId ? true : false;
-  const defaultPipes = updateIncident ? ['informationUpdated'] : ['informationCreated'];
-  let currentIncident: ExternalServiceParams | undefined;
   let res: PushToServiceResponse;
 
-  if (externalId) {
-    try {
-      currentIncident = await externalService.getIncident(externalId);
-    } catch (ex) {
-      logger.debug(
-        `Retrieving Incident by id ${externalId} from ServiceNow was failed with exception: ${ex}`
-      );
-    }
-  }
+  const incident = { ...params, short_description: params.title, comments: params.comment };
 
-  let incident = {};
-  // TODO: should be removed later but currently keep it for the Case implementation support
-  if (mapping && Array.isArray(params.comments)) {
-    const fields = prepareFieldsForTransformation({
-      externalCase: params.externalObject,
-      mapping,
-      defaultPipes,
-    });
-
-    const transformedFields = transformFields<
-      PushToServiceApiParams,
-      ExternalServiceParams,
-      Incident
-    >({
-      params,
-      fields,
-      currentIncident,
-    });
-
-    incident = {
-      severity: params.severity,
-      urgency: params.urgency,
-      impact: params.impact,
-      short_description: transformedFields.short_description,
-      description: transformedFields.description,
-    };
-  } else {
-    incident = { ...params, short_description: params.title, comments: params.comment };
-  }
-
-  if (updateIncident) {
+  if (externalId != null) {
     res = await externalService.updateIncident({
       incidentId: externalId,
       incident,
@@ -98,23 +41,15 @@ const pushToServiceHandler = async ({
   }
 
   // TODO: should temporary keep comments for a Case usage
-  if (
-    comments &&
-    Array.isArray(comments) &&
-    comments.length > 0 &&
-    mapping &&
-    mapping.get('comments')?.actionType !== 'nothing'
-  ) {
+  if (comments && Array.isArray(comments) && comments.length > 0) {
     res.comments = [];
-    const commentsTransformed = transformComments(comments, ['informationAdded']);
 
-    const fieldsKey = mapping.get('comments')?.target ?? 'comments';
-    for (const currentComment of commentsTransformed) {
+    for (const currentComment of comments) {
       await externalService.updateIncident({
         incidentId: res.id,
         incident: {
           ...incident,
-          [fieldsKey]: currentComment.comment,
+          comments: currentComment.comment,
         },
       });
       res.comments = [
