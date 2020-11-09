@@ -27,10 +27,10 @@ import { DefaultSearchCapabilities } from './default_search_capabilities';
 
 class MockSearchStrategy extends AbstractSearchStrategy {
   checkForViability() {
-    return {
+    return Promise.resolve({
       isViable: true,
       capabilities: {},
-    };
+    });
   }
 }
 

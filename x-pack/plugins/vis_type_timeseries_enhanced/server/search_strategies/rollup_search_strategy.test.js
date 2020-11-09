@@ -3,11 +3,9 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getRollupSearchStrategy } from './rollup_search_strategy';
+import { RollupSearchStrategy } from './rollup_search_strategy';
 
 describe('Rollup Search Strategy', () => {
-  let RollupSearchStrategy;
-  let RollupSearchCapabilities;
   let callWithRequest;
   let rollupResolvedData;
 
@@ -26,6 +24,7 @@ describe('Rollup Search Strategy', () => {
       },
     },
   };
+
   const getRollupService = jest.fn().mockImplementation(() => {
     return {
       callAsCurrentUser: async () => {
@@ -33,36 +32,24 @@ describe('Rollup Search Strategy', () => {
       },
     };
   });
+
   const indexPattern = 'indexPattern';
 
   beforeEach(() => {
-    class AbstractSearchStrategy {
-      getCallWithRequestInstance = jest.fn(() => callWithRequest);
-
-      getFieldsForWildcard() {
-        return [
-          {
-            name: 'day_of_week.terms.value',
-            type: 'object',
-            esTypes: ['object'],
-            searchable: false,
-            aggregatable: false,
-          },
-        ];
-      }
-    }
-
-    RollupSearchCapabilities = jest.fn(() => 'capabilities');
-
-    RollupSearchStrategy = getRollupSearchStrategy(
-      AbstractSearchStrategy,
-      RollupSearchCapabilities,
-      getRollupService
-    );
+    RollupSearchStrategy.prototype.getCallWithRequestInstance = jest.fn(() => callWithRequest);
+    RollupSearchStrategy.prototype.getFieldsForWildcard = jest.fn(() => [
+      {
+        name: 'day_of_week.terms.value',
+        type: 'object',
+        esTypes: ['object'],
+        searchable: false,
+        aggregatable: false,
+      },
+    ]);
   });
 
   test('should create instance of RollupSearchRequest', () => {
-    const rollupSearchStrategy = new RollupSearchStrategy();
+    const rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
 
     expect(rollupSearchStrategy.name).toBe('rollup');
   });
@@ -72,7 +59,7 @@ describe('Rollup Search Strategy', () => {
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy();
+      rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
       rollupSearchStrategy.getRollupData = jest.fn(() => ({
         [rollupIndex]: {
           rollup_jobs: [
@@ -109,19 +96,13 @@ describe('Rollup Search Strategy', () => {
         capabilities: null,
       });
     });
-
-    test('should get RollupSearchCapabilities for valid rollup index ', async () => {
-      await rollupSearchStrategy.checkForViability(request, rollupIndex);
-
-      expect(RollupSearchCapabilities).toHaveBeenCalled();
-    });
   });
 
   describe('getRollupData', () => {
     let rollupSearchStrategy;
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy();
+      rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
     });
 
     test('should return rollup data', async () => {
@@ -149,7 +130,7 @@ describe('Rollup Search Strategy', () => {
     const rollupIndex = 'rollupIndex';
 
     beforeEach(() => {
-      rollupSearchStrategy = new RollupSearchStrategy();
+      rollupSearchStrategy = new RollupSearchStrategy(getRollupService);
       fieldsCapabilities = {
         [rollupIndex]: {
           aggs: {

@@ -43,7 +43,7 @@ export {
   AbstractSearchStrategy,
   ReqFacade,
 } from './lib/search_strategies/strategies/abstract_search_strategy';
-// @ts-ignore
+
 export { DefaultSearchCapabilities } from './lib/search_strategies/default_search_capabilities';
 
 export function plugin(initializerContext: PluginInitializerContext) {

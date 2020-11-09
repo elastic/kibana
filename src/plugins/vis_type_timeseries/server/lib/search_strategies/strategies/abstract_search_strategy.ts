@@ -46,7 +46,7 @@ export interface ReqFacade<T = unknown> extends FakeRequest {
   getEsShardTimeout: () => Promise<number>;
 }
 
-export class AbstractSearchStrategy {
+export abstract class AbstractSearchStrategy {
   public indexType?: string;
   public additionalParams: any;
 
@@ -81,7 +81,11 @@ export class AbstractSearchStrategy {
     return Promise.all(requests);
   }
 
-  async getFieldsForWildcard(req: ReqFacade, indexPattern: string, capabilities: any) {
+  async getFieldsForWildcard(
+    req: ReqFacade,
+    indexPattern: string,
+    capabilities?: Record<string, any>
+  ) {
     const { indexPatternsService } = req.pre;
 
     return await indexPatternsService!.getFieldsForWildcard({
@@ -93,7 +97,9 @@ export class AbstractSearchStrategy {
   checkForViability(
     req: ReqFacade,
     indexPattern: string
-  ): { isViable: boolean; capabilities: any } {
+  ):
+    | { isViable: boolean; capabilities: Record<string, any> }
+    | Promise<{ isViable: boolean; capabilities: Record<string, any> }> {
     throw new TypeError('Must override method');
   }
 }

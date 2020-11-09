@@ -8,6 +8,8 @@ import { PluginInitializerContext, PluginConfigDescriptor } from 'src/core/serve
 import { RollupPlugin } from './plugin';
 import { configSchema, RollupConfig } from './config';
 
+export { RollupPluginSetup } from './plugin';
+
 export const plugin = (pluginInitializerContext: PluginInitializerContext) =>
   new RollupPlugin(pluginInitializerContext);
 

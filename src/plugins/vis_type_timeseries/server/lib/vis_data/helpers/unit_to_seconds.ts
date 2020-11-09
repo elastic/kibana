@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
 import { sortBy, isNumber } from 'lodash';
+import { INTERVAL_STRING_RE } from '../../../../common/interval_regexp';
 
 export const ASCENDING_UNIT_ORDER = ['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y'];
 
@@ -32,9 +32,11 @@ const units = {
   y: 86400 * 7 * 4 * 12, // Leap year?
 };
 
-const sortedUnits = sortBy(Object.keys(units), (key) => units[key]);
+export type IntervalUnits = keyof typeof units;
 
-export const parseInterval = (intervalString) => {
+const sortedUnits = sortBy(Object.keys(units), (key: IntervalUnits) => units[key]);
+
+export const parseInterval = (intervalString: string) => {
   let value;
   let unit;
 
@@ -50,7 +52,7 @@ export const parseInterval = (intervalString) => {
   return { value, unit };
 };
 
-export const convertIntervalToUnit = (intervalString, newUnit) => {
+export const convertIntervalToUnit = (intervalString: string, newUnit: IntervalUnits) => {
   const parsedInterval = parseInterval(intervalString);
   let value;
   let unit;
@@ -65,7 +67,7 @@ export const convertIntervalToUnit = (intervalString, newUnit) => {
   return { value, unit };
 };
 
-export const getSuitableUnit = (intervalInSeconds) =>
+export const getSuitableUnit = (intervalInSeconds: string) =>
   sortedUnits.find((key, index, array) => {
     const nextUnit = array[index + 1];
     const isValidInput = isNumber(intervalInSeconds) && intervalInSeconds > 0;
@@ -77,4 +79,4 @@ export const getSuitableUnit = (intervalInSeconds) =>
     );
   });
 
-export const getUnitValue = (unit) => units[unit];
+export const getUnitValue = (unit: IntervalUnits) => units[unit];

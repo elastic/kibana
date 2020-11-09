@@ -3,14 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { getRollupSearchCapabilities } from './rollup_search_capabilities';
-
-class DefaultSearchCapabilities {
-  constructor(request, fieldsCapabilities = {}) {
-    this.fieldsCapabilities = fieldsCapabilities;
-    this.parseInterval = jest.fn((interval) => interval);
-  }
-}
+import { RollupSearchCapabilities } from './rollup_search_capabilities';
 
 describe('Rollup Search Capabilities', () => {
   const testTimeZone = 'time_zone';
@@ -18,12 +11,10 @@ describe('Rollup Search Capabilities', () => {
   const rollupIndex = 'rollupIndex';
   const request = {};
 
-  let RollupSearchCapabilities;
-  let fieldsCapabilities;
-  let rollupSearchCaps;
+  let fieldsCapabilities: Record<string, any>;
+  let rollupSearchCaps: RollupSearchCapabilities;
 
   beforeEach(() => {
-    RollupSearchCapabilities = getRollupSearchCapabilities(DefaultSearchCapabilities);
     fieldsCapabilities = {
       [rollupIndex]: {
         aggs: {
@@ -41,7 +32,6 @@ describe('Rollup Search Capabilities', () => {
   });
 
   test('should create instance of RollupSearchRequest', () => {
-    expect(rollupSearchCaps).toBeInstanceOf(DefaultSearchCapabilities);
     expect(rollupSearchCaps.fieldsCapabilities).toBe(fieldsCapabilities);
     expect(rollupSearchCaps.rollupIndex).toBe(rollupIndex);
   });

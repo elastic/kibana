@@ -17,16 +17,16 @@
  * under the License.
  */
 
-import { AbstractSearchStrategy } from './abstract_search_strategy';
+import { AbstractSearchStrategy, ReqFacade } from './abstract_search_strategy';
 import { DefaultSearchCapabilities } from '../default_search_capabilities';
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
   name = 'default';
 
-  checkForViability(req) {
-    return {
+  checkForViability(req: ReqFacade) {
+    return Promise.resolve({
       isViable: true,
       capabilities: new DefaultSearchCapabilities(req),
-    };
+    });
   }
 }
