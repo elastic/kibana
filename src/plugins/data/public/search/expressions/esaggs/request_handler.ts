@@ -17,40 +17,33 @@
  * under the License.
  */
 
-import { get, hasIn } from 'lodash';
+import { hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Datatable, DatatableColumn } from 'src/plugins/expressions/public';
-import { PersistedState } from '../../../../../plugins/visualizations/public';
-import { Adapters } from '../../../../../plugins/inspector/public';
+
+import { Adapters } from 'src/plugins/inspector/common';
 
 import {
   calculateBounds,
-  EsaggsExpressionFunctionDefinition,
   Filter,
   getTime,
   IIndexPattern,
   isRangeFilter,
   Query,
   TimeRange,
-} from '../../../common';
+} from '../../../../common';
 import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   IAggConfigs,
   ISearchSource,
   tabifyAggResponse,
-} from '../../../common/search';
+} from '../../../../common/search';
 
-import { FilterManager } from '../../query';
-import {
-  getFieldFormats,
-  getIndexPatterns,
-  getQueryService,
-  getSearchService,
-} from '../../services';
-import { buildTabularInspectorData } from './build_tabular_inspector_data';
+import { FilterManager } from '../../../query';
+import { getFieldFormats } from '../../../services';
+import { buildTabularInspectorData } from '../build_tabular_inspector_data';
 
-export interface RequestHandlerParams {
+interface RequestHandlerParams {
   searchSource: ISearchSource;
   aggs: IAggConfigs;
   timeRange?: TimeRange;
@@ -59,7 +52,6 @@ export interface RequestHandlerParams {
   query?: Query;
   filters?: Filter[];
   filterManager: FilterManager;
-  uiState?: PersistedState;
   partialRows?: boolean;
   inspectorAdapters: Adapters;
   metricsAtAllLevels?: boolean;
@@ -68,9 +60,7 @@ export interface RequestHandlerParams {
   searchSessionId?: string;
 }
 
-const name = 'esaggs';
-
-const handleCourierRequest = async ({
+export const handleRequest = async ({
   searchSource,
   aggs,
   timeRange,
@@ -213,111 +203,3 @@ const handleCourierRequest = async ({
 
   return response;
 };
-
-export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
-  name,
-  type: 'datatable',
-  inputTypes: ['kibana_context', 'null'],
-  help: i18n.translate('data.functions.esaggs.help', {
-    defaultMessage: 'Run AggConfig aggregation',
-  }),
-  args: {
-    index: {
-      types: ['string'],
-      help: '',
-    },
-    metricsAtAllLevels: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    partialRows: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    includeFormatHints: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    aggConfigs: {
-      types: ['string'],
-      default: '""',
-      help: '',
-    },
-    timeFields: {
-      types: ['string'],
-      help: '',
-      multi: true,
-    },
-  },
-  async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
-    const indexPatterns = getIndexPatterns();
-    const { filterManager } = getQueryService();
-    const searchService = getSearchService();
-
-    const aggConfigsState = JSON.parse(args.aggConfigs);
-    const indexPattern = await indexPatterns.get(args.index);
-    const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
-
-    // we should move searchSource creation inside courier request handler
-    const searchSource = await searchService.searchSource.create();
-
-    searchSource.setField('index', indexPattern);
-    searchSource.setField('size', 0);
-
-    const resolvedTimeRange = input?.timeRange && calculateBounds(input.timeRange);
-
-    const response = await handleCourierRequest({
-      searchSource,
-      aggs,
-      indexPattern,
-      timeRange: get(input, 'timeRange', undefined),
-      query: get(input, 'query', undefined) as any,
-      filters: get(input, 'filters', undefined),
-      timeFields: args.timeFields,
-      metricsAtAllLevels: args.metricsAtAllLevels,
-      partialRows: args.partialRows,
-      inspectorAdapters: inspectorAdapters as Adapters,
-      filterManager,
-      abortSignal: (abortSignal as unknown) as AbortSignal,
-      searchSessionId: getSearchSessionId(),
-    });
-
-    const table: Datatable = {
-      type: 'datatable',
-      rows: response.rows,
-      columns: response.columns.map((column) => {
-        const cleanedColumn: DatatableColumn = {
-          id: column.id,
-          name: column.name,
-          meta: {
-            type: column.aggConfig.params.field?.type || 'number',
-            field: column.aggConfig.params.field?.name,
-            index: indexPattern.title,
-            params: column.aggConfig.toSerializedFieldFormat(),
-            source: 'esaggs',
-            sourceParams: {
-              indexPatternId: indexPattern.id,
-              appliedTimeRange:
-                column.aggConfig.params.field?.name &&
-                input?.timeRange &&
-                args.timeFields &&
-                args.timeFields.includes(column.aggConfig.params.field?.name)
-                  ? {
-                      from: resolvedTimeRange?.min?.toISOString(),
-                      to: resolvedTimeRange?.max?.toISOString(),
-                    }
-                  : undefined,
-              ...column.aggConfig.serialize(),
-            },
-          },
-        };
-        return cleanedColumn;
-      }),
-    };
-
-    return table;
-  },
-});
