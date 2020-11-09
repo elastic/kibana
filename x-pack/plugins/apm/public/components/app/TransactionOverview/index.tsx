@@ -24,7 +24,6 @@ import { useLocation } from 'react-router-dom';
 import { useTrackPageview } from '../../../../../observability/public';
 import { Projection } from '../../../../common/projections';
 import { TRANSACTION_PAGE_LOAD } from '../../../../common/transaction_types';
-import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { IUrlParams } from '../../../context/UrlParamsContext/types';
 import { useServiceTransactionTypes } from '../../../hooks/useServiceTransactionTypes';
 import { useTransactionCharts } from '../../../hooks/useTransactionCharts';
@@ -85,7 +84,10 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
     })
   );
 
-  const { data: transactionCharts } = useTransactionCharts();
+  const {
+    data: transactionCharts,
+    status: transactionChartsStatus,
+  } = useTransactionCharts();
 
   useTrackPageview({ app: 'apm', path: 'transaction_overview' });
   useTrackPageview({ app: 'apm', path: 'transaction_overview', delay: 15000 });
@@ -140,15 +142,12 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
                 <EuiSpacer size="s" />
               </>
             )}
-            <ChartsSyncContextProvider>
-              <TransactionCharts
-                charts={transactionCharts}
-                urlParams={urlParams}
-              />
-            </ChartsSyncContextProvider>
-
+            <TransactionCharts
+              fetchStatus={transactionChartsStatus}
+              charts={transactionCharts}
+              urlParams={urlParams}
+            />
             <EuiSpacer size="s" />
-
             <EuiPanel>
               <EuiTitle size="xs">
                 <h3>Transactions</h3>
@@ -195,7 +194,7 @@ export function TransactionOverview({ serviceName }: TransactionOverviewProps) {
               <EuiSpacer size="s" />
               <TransactionList
                 isLoading={transactionListStatus === 'loading'}
-                items={transactionListData.items}
+                items={transactionListData.items || []}
               />
             </EuiPanel>
           </EuiFlexItem>

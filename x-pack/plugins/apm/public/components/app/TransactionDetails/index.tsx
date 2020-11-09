@@ -54,7 +54,11 @@ export function TransactionDetails({
     status: distributionStatus,
   } = useTransactionDistribution(urlParams);
 
-  const { data: transactionChartsData } = useTransactionCharts();
+  const {
+    data: transactionChartsData,
+    status: transactionChartsStatus,
+  } = useTransactionCharts();
+
   const { waterfall, exceedsMax, status: waterfallStatus } = useWaterfall(
     urlParams
   );
@@ -114,8 +118,8 @@ export function TransactionDetails({
         </EuiTitle>
       </ApmHeader>
       <SearchBar />
-      <Correlations />
       <EuiPage>
+        <Correlations />
         <EuiFlexGroup>
           <EuiFlexItem grow={1}>
             <LocalUIFilters {...localUIFiltersConfig} />
@@ -123,6 +127,7 @@ export function TransactionDetails({
           <EuiFlexItem grow={7}>
             <ChartsSyncContextProvider>
               <TransactionCharts
+                fetchStatus={transactionChartsStatus}
                 charts={transactionChartsData}
                 urlParams={urlParams}
               />
@@ -133,7 +138,7 @@ export function TransactionDetails({
             <EuiPanel>
               <TransactionDistribution
                 distribution={distributionData}
-                isLoading={distributionStatus === FETCH_STATUS.LOADING}
+                fetchStatus={distributionStatus}
                 urlParams={urlParams}
                 bucketIndex={bucketIndex}
                 onBucketClick={(bucket) => {
