@@ -332,7 +332,7 @@ See
 
 [[glossary-stack-alerts]] stack alerts ::
 // tag::stack-alert-def[]
-The general purpose alert types Kibana provides out of the box.  Index threshold and geo alerts are currently the two stack alert types.
+The general purpose alert types {kib} provides out of the box.  Index threshold and geo alerts are currently the two stack alert types.
 // end::stack-alert-def[]
 
 
