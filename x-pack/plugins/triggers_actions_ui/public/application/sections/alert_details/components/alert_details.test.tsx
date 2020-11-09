@@ -8,20 +8,13 @@ import uuid from 'uuid';
 import { shallow } from 'enzyme';
 import { AlertDetails } from './alert_details';
 import { Alert, ActionType, ValidationResult } from '../../../../types';
-import {
-  EuiTitle,
-  EuiBadge,
-  EuiFlexItem,
-  EuiSwitch,
-  EuiBetaBadge,
-  EuiButtonEmpty,
-  EuiText,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiTitle, EuiBadge, EuiFlexItem, EuiSwitch, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import { ViewInApp } from './view_in_app';
-import { PLUGIN } from '../../../constants/plugin';
 import { coreMock } from 'src/core/public/mocks';
-import { ALERTS_FEATURE_ID } from '../../../../../../alerts/common';
+import {
+  AlertExecutionStatusErrorReasons,
+  ALERTS_FEATURE_ID,
+} from '../../../../../../alerts/common';
 
 const mockes = coreMock.createSetup();
 
@@ -104,20 +97,6 @@ describe('alert_details', () => {
         <EuiTitle size="m">
           <h1>
             <span>{alert.name}</span>
-            &emsp;
-            <EuiBetaBadge
-              label="Beta"
-              tooltipContent={i18n.translate(
-                'xpack.triggersActionsUI.sections.alertDetails.betaBadgeTooltipContent',
-                {
-                  defaultMessage:
-                    '{pluginName} is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features.',
-                  values: {
-                    pluginName: PLUGIN.getI18nName(i18n),
-                  },
-                }
-              )}
-            />
           </h1>
         </EuiTitle>
       )
@@ -149,7 +128,7 @@ describe('alert_details', () => {
         status: 'error',
         lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
         error: {
-          reason: 'unknown',
+          reason: AlertExecutionStatusErrorReasons.Unknown,
           message: 'test',
         },
       },

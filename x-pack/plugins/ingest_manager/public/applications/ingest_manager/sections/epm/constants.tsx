@@ -20,7 +20,7 @@ export const AssetTitleMap: Record<AssetType, string> = {
   ilm_policy: 'ILM Policy',
   ingest_pipeline: 'Ingest Pipeline',
   transform: 'Transform',
-  'index-pattern': 'Index Pattern',
+  index_pattern: 'Index Pattern',
   index_template: 'Index Template',
   component_template: 'Component Template',
   search: 'Saved Search',
@@ -36,7 +36,7 @@ export const ServiceTitleMap: Record<ServiceName, string> = {
 
 export const AssetIcons: Record<KibanaAssetType, IconType> = {
   dashboard: 'dashboardApp',
-  'index-pattern': 'indexPatternApp',
+  index_pattern: 'indexPatternApp',
   search: 'searchProfilerApp',
   visualization: 'visualizeApp',
   map: 'mapApp',

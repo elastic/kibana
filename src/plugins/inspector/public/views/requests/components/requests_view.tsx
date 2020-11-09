@@ -153,6 +153,21 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
           </EuiText>
         )}
 
+        {this.state.request && this.state.request.searchSessionId && (
+          <EuiText size="xs">
+            <p
+              data-test-subj={'inspectorRequestSearchSessionId'}
+              data-search-session-id={this.state.request.searchSessionId}
+            >
+              <FormattedMessage
+                id="inspector.requests.searchSessionId"
+                defaultMessage="Search session id: {searchSessionId}"
+                values={{ searchSessionId: this.state.request.searchSessionId }}
+              />
+            </p>
+          </EuiText>
+        )}
+
         <EuiSpacer size="m" />
 
         {this.state.request && <RequestDetails request={this.state.request} />}
@@ -160,3 +175,7 @@ export class RequestsViewComponent extends Component<InspectorViewProps, Request
     );
   }
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export { RequestsViewComponent as default };

@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import {
-  PackagePolicyInput,
+  NewPackagePolicyInput,
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
@@ -40,7 +40,7 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 const shouldShowStreamsByDefault = (
   packageInput: RegistryInput,
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>,
-  packagePolicyInput: PackagePolicyInput
+  packagePolicyInput: NewPackagePolicyInput
 ): boolean => {
   return (
     packagePolicyInput.enabled &&
@@ -63,8 +63,8 @@ const shouldShowStreamsByDefault = (
 export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>;
-  packagePolicyInput: PackagePolicyInput;
-  updatePackagePolicyInput: (updatedInput: Partial<PackagePolicyInput>) => void;
+  packagePolicyInput: NewPackagePolicyInput;
+  updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
 }> = memo(
@@ -133,7 +133,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <EuiText color="danger" size="s">
                     <FormattedMessage
-                      id="xpack.ingestManager.createPackagePolicy.stepConfigure.errorCountText"
+                      id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
                       defaultMessage="{count, plural, one {# error} other {# errors}}"
                       values={{ count: errorCount }}
                     />
@@ -148,7 +148,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                   aria-label={
                     isShowingStreams
                       ? i18n.translate(
-                          'xpack.ingestManager.createPackagePolicy.stepConfigure.hideStreamsAriaLabel',
+                          'xpack.fleet.createPackagePolicy.stepConfigure.hideStreamsAriaLabel',
                           {
                             defaultMessage: 'Hide {type} inputs',
                             values: {
@@ -157,7 +157,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                           }
                         )
                       : i18n.translate(
-                          'xpack.ingestManager.createPackagePolicy.stepConfigure.showStreamsAriaLabel',
+                          'xpack.fleet.createPackagePolicy.stepConfigure.showStreamsAriaLabel',
                           {
                             defaultMessage: 'Show {type} inputs',
                             values: {
@@ -210,7 +210,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                       ...updatedStream,
                     };
 
-                    const updatedInput: Partial<PackagePolicyInput> = {
+                    const updatedInput: Partial<NewPackagePolicyInput> = {
                       streams: newStreams,
                     };
 
@@ -227,7 +227,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     updatePackagePolicyInput(updatedInput);
                   }}
                   inputStreamValidationResults={
-                    inputValidationResults.streams![packagePolicyInputStream!.id]
+                    inputValidationResults.streams![packagePolicyInputStream!.data_stream!.dataset]
                   }
                   forceShowErrors={forceShowErrors}
                 />

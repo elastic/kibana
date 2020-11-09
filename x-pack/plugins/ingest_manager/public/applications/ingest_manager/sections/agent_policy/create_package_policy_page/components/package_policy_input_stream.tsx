@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { PackagePolicyInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
+import { NewPackagePolicyInputStream, RegistryStream, RegistryVarsEntry } from '../../../../types';
 import {
   isAdvancedVar,
   PackagePolicyConfigValidationResults,
@@ -30,8 +30,8 @@ const FlexItemWithMaxWidth = styled(EuiFlexItem)`
 
 export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
   packageInputStream: RegistryStream;
-  packagePolicyInputStream: PackagePolicyInputStream;
-  updatePackagePolicyInputStream: (updatedStream: Partial<PackagePolicyInputStream>) => void;
+  packagePolicyInputStream: NewPackagePolicyInputStream;
+  updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
 }> = memo(
@@ -135,7 +135,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                         flush="left"
                       >
                         <FormattedMessage
-                          id="xpack.ingestManager.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.toggleAdvancedOptionsButtonText"
                           defaultMessage="Advanced options"
                         />
                       </EuiButtonEmpty>
@@ -144,7 +144,7 @@ export const PackagePolicyInputStreamConfig: React.FunctionComponent<{
                       <EuiFlexItem grow={false}>
                         <EuiText color="danger" size="s">
                           <FormattedMessage
-                            id="xpack.ingestManager.createPackagePolicy.stepConfigure.errorCountText"
+                            id="xpack.fleet.createPackagePolicy.stepConfigure.errorCountText"
                             defaultMessage="{count, plural, one {# error} other {# errors}}"
                             values={{ count: advancedVarsWithErrorsCount }}
                           />

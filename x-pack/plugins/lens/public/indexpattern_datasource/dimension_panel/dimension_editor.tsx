@@ -420,22 +420,14 @@ export function DimensionEditor(props: DimensionEditorProps) {
               fieldMap={fieldMap}
               layer={state.layers[props.layerId]}
               columnId={props.columnId}
-              setColumns={(columnOrder) => {
-                setState({
-                  ...state,
-                  layers: {
-                    ...state.layers,
-                    [props.layerId]: {
-                      ...state.layers[props.layerId],
-                      columnOrder,
-                    },
-                  },
-                });
-              }}
+              setColumns={(columnOrder) =>
+                setState(mergeLayer({ state, layerId, newLayer: { columnOrder } }))
+              }
             />
           )}
 
-          {selectedColumn && selectedColumn.dataType === 'number' ? (
+          {selectedColumn &&
+          (selectedColumn.dataType === 'number' || selectedColumn.operationType === 'range') ? (
             <FormatSelector
               selectedColumn={selectedColumn}
               onChange={(newFormat) => {
