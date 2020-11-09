@@ -28,7 +28,7 @@ import {
 } from '../../../../../../common/endpoint/types';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { IntegrationPolicyEditExtensionComponentProps } from '../../../../../../../ingest_manager/common/types/ui_extensions';
+import { IntegrationPolicyEditExtensionComponentProps } from '../../../../../../../fleet/common/types/ui_extensions';
 
 /**
  * Exports Endpoint-specific package policy instructions
