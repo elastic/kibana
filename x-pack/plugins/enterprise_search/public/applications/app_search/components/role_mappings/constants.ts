@@ -4,4 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EngineOverview } from './engine_overview';
+import { i18n } from '@kbn/i18n';
+
+export const ROLE_MAPPINGS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.appSearch.roleMappings.title',
+  { defaultMessage: 'Role Mappings' }
+);
