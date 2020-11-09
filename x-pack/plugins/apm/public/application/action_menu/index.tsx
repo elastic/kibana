@@ -6,7 +6,7 @@
 
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { unmountComponentAtNode } from 'react-dom';
 import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { useParams } from 'react-router-dom';
@@ -32,7 +32,7 @@ export function ActionMenu() {
     canSaveAlerts,
     canReadAnomalies,
   } = getAlertingCapabilities(plugins, capabilities);
-  const portalNode = createPortalNode();
+  const portalNode = useMemo(() => createPortalNode(), []);
 
   function apmHref(path: string) {
     return getAPMHref({ basePath, path, search });
@@ -43,17 +43,16 @@ export function ActionMenu() {
   }
 
   useEffect(() => {
-    let mountPointElement: HTMLElement;
+    let unmount = () => {};
 
     setHeaderActionMenu((element) => {
-      mountPointElement = element;
-      return toMountPoint(<OutPortal node={portalNode} />)(mountPointElement);
+      const mount = toMountPoint(<OutPortal node={portalNode} />);
+      unmount = mount(element);
     });
 
     return () => {
-      if (mountPointElement) {
-        unmountComponentAtNode(mountPointElement);
-      }
+      portalNode.unmount();
+      unmount();
     };
   }, [portalNode, setHeaderActionMenu]);
 
