@@ -79,7 +79,12 @@ export const Create = React.memo(() => {
 
   return (
     <EuiPanel>
-      <CreateCaseForm form={form} fields={fields} onChangeFields={setFields} />
+      <CreateCaseForm
+        form={form}
+        fields={fields}
+        onChangeFields={setFields}
+        isLoading={isLoading}
+      />
       <Container>
         <EuiFlexGroup
           alignItems="center"

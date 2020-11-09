@@ -13,14 +13,19 @@ import * as i18n from './translations';
 interface ValidationResult {
   errors: {
     comment: string[];
+    caseId: string[];
   };
 }
 
 const validateParams = (actionParams: CaseActionParams) => {
-  const validationResult: ValidationResult = { errors: { comment: [] } };
+  const validationResult: ValidationResult = { errors: { comment: [], caseId: [] } };
 
   if (actionParams.subActionParams && !actionParams.subActionParams.comment?.comment?.length) {
     validationResult.errors.comment.push(i18n.CASE_CONNECTOR_COMMENT_REQUIRED);
+  }
+
+  if (actionParams.subActionParams && !actionParams.subActionParams.caseId) {
+    validationResult.errors.caseId.push(i18n.CASE_CONNECTOR_CASE_REQUIRED);
   }
 
   return validationResult;

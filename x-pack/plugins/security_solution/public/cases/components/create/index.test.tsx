@@ -11,7 +11,6 @@ import { TestProviders } from '../../../common/mock';
 import { getFormMock } from '../__mock__/form';
 import { Router, routeData, mockHistory, mockLocation } from '../__mock__/router';
 
-import { useInsertTimeline } from '../../../timelines/components/timeline/insert_timeline_popover/use_insert_timeline';
 import { usePostCase } from '../../containers/use_post_case';
 import { useGetTags } from '../../containers/use_get_tags';
 
@@ -55,7 +54,6 @@ const useConnectorsMock = useConnectors as jest.Mock;
 const useFormMock = useForm as jest.Mock;
 const useFormDataMock = useFormData as jest.Mock;
 
-const useInsertTimelineMock = useInsertTimeline as jest.Mock;
 const usePostCaseMock = usePostCase as jest.Mock;
 
 const postCase = jest.fn();
@@ -95,7 +93,6 @@ describe('Create case', () => {
   const formHookMock = getFormMock(sampleData);
   beforeEach(() => {
     jest.resetAllMocks();
-    useInsertTimelineMock.mockImplementation(() => defaultInsertTimeline);
     usePostCaseMock.mockImplementation(() => defaultPostCase);
     useFormMock.mockImplementation(() => ({ form: formHookMock }));
     useFormDataMock.mockImplementation(() => [

@@ -20,7 +20,7 @@ const TitleComponent: React.FC<Props> = ({ isLoading }) => (
       idAria: 'caseTitle',
       'data-test-subj': 'caseTitle',
       euiFieldProps: {
-        fullWidth: false,
+        fullWidth: true,
         disabled: isLoading,
       },
     }}

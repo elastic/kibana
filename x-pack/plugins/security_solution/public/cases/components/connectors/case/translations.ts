@@ -6,6 +6,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+export * from '../../../translations';
+
 export const CASE_CONNECTOR_DESC = i18n.translate(
   'xpack.securitySolution.case.components.connectors.case.selectMessageText',
   {
@@ -31,5 +33,47 @@ export const CASE_CONNECTOR_COMMENT_REQUIRED = i18n.translate(
   'xpack.securitySolution.case.components.connectors.case.commentRequired',
   {
     defaultMessage: 'Comment is required.',
+  }
+);
+
+export const CASE_CONNECTOR_CASES_DROPDOWN_ROW_LABEL = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.casesDropdownRowLabel',
+  {
+    defaultMessage: 'Case',
+  }
+);
+
+export const CASE_CONNECTOR_CASES_DROPDOWN_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.casesDropdownPlaceholder',
+  {
+    defaultMessage: 'Select case',
+  }
+);
+
+export const CASE_CONNECTOR_CASES_OPTION_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.optionAddNewCase',
+  {
+    defaultMessage: 'Add to a new case',
+  }
+);
+
+export const CASE_CONNECTOR_CASES_OPTION_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.optionAddToExistingCase',
+  {
+    defaultMessage: 'Add to existing case',
+  }
+);
+
+export const CASE_CONNECTOR_CASE_REQUIRED = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.caseRequired',
+  {
+    defaultMessage: 'A case is required. Create or select a case.',
+  }
+);
+
+export const CASE_CONNECTOR_CALL_OUT_INFO = i18n.translate(
+  'xpack.securitySolution.case.components.connectors.case.callOutInfo',
+  {
+    defaultMessage: 'All alerts after rule creation will be appended to the selected case.',
   }
 );

@@ -9,7 +9,6 @@ import { EuiLoadingSpinner, EuiSteps } from '@elastic/eui';
 import styled, { css } from 'styled-components';
 
 import { Form, FormHook } from '../../../shared_imports';
-import { usePostCase } from '../../containers/use_post_case';
 import { FormProps } from './schema';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useConnectors } from '../../containers/configure/use_connectors';
@@ -41,6 +40,7 @@ const MySpinner = styled(EuiLoadingSpinner)`
 `;
 
 interface Props {
+  isLoading: boolean;
   form: FormHook<FormProps>;
   fields: ConnectorFields;
   withSteps?: boolean;
@@ -48,11 +48,10 @@ interface Props {
 }
 
 export const CreateCaseForm: React.FC<Props> = React.memo(
-  ({ form, fields, onChangeFields, withSteps = true }) => {
-    const { isLoading } = usePostCase();
+  ({ isLoading, form, fields, onChangeFields, withSteps = true }) => {
     const { loading: isLoadingConnectors, connectors } = useConnectors();
     const { connector: configureConnector, loading: isLoadingCaseConfigure } = useCaseConfigure();
-    const { tags: tagOptions } = useGetTags();
+    const { tags: tagOptions, isLoading: isLoadingTags } = useGetTags();
 
     const [connector, setConnector] = useState<ActionConnector | null>(null);
     const [options, setOptions] = useState(
@@ -98,7 +97,11 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
           <>
             <Title isLoading={isLoading} />
             <Container>
-              <Tags isLoading={isLoading} options={options} setOptions={setOptions} />
+              <Tags
+                isLoading={isLoading || isLoadingTags}
+                options={options}
+                setOptions={setOptions}
+              />
             </Container>
             <Container big>
               <Description isLoading={isLoading} />
@@ -106,7 +109,7 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
           </>
         ),
       }),
-      [isLoading, options]
+      [isLoading, options, isLoadingTags]
     );
 
     const secondStep = useMemo(
@@ -119,8 +122,7 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
               connectors={connectors}
               currentConnectorId={currentConnectorId}
               fields={fields}
-              isLoading={isLoading}
-              isLoadingConnectors={isLoadingConnectors}
+              isLoading={isLoading || isLoadingConnectors || isLoadingCaseConfigure}
               onChangeConnector={onChangeConnector}
               onChangeFields={onChangeFields}
             />
@@ -134,6 +136,7 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
         fields,
         isLoading,
         isLoadingConnectors,
+        isLoadingCaseConfigure,
         onChangeConnector,
         onChangeFields,
       ]
@@ -149,19 +152,8 @@ export const CreateCaseForm: React.FC<Props> = React.memo(
             <EuiSteps headingElement="h2" steps={allSteps} />
           ) : (
             <>
-              <Title isLoading={isLoading} />
-              <Tags isLoading={isLoading} options={options} setOptions={setOptions} />
-              <Description isLoading={isLoading} />
-              <Connector
-                connector={connector}
-                connectors={connectors}
-                currentConnectorId={currentConnectorId}
-                fields={fields}
-                isLoading={isLoading}
-                isLoadingConnectors={isLoadingConnectors}
-                onChangeConnector={onChangeConnector}
-                onChangeFields={onChangeFields}
-              />
+              {firstStep.children}
+              {secondStep.children}
             </>
           )}
         </Form>
