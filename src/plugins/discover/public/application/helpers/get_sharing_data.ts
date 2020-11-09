@@ -19,7 +19,7 @@
 import { IUiSettingsClient } from 'kibana/public';
 import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '../../../common';
 import { getSortForSearchSource } from '../angular/doc_table';
-import { IndexPattern, SearchSource } from '../../../../data/common';
+import { SearchSource } from '../../../../data/common';
 import { AppState } from '../angular/discover_state';
 import { SortOrder } from '../../saved_searches/types';
 
@@ -51,26 +51,22 @@ const getSharingDataFields = async (
 export async function getSharingData(
   currentSearchSource: SearchSource,
   state: AppState,
-  indexPattern: IndexPattern,
   config: IUiSettingsClient,
   getFieldCounts: () => Promise<Record<string, number>>
 ) {
   const searchSource = currentSearchSource.createCopy();
+  const index = searchSource.getField('index')!;
 
   const { searchFields, selectFields } = await getSharingDataFields(
     getFieldCounts,
     state.columns || [],
-    indexPattern.timeFieldName || '',
+    index.timeFieldName || '',
     config.get(DOC_HIDE_TIME_COLUMN_SETTING)
   );
   searchSource.setField('fields', searchFields);
   searchSource.setField(
     'sort',
-    getSortForSearchSource(
-      state.sort as SortOrder[],
-      indexPattern,
-      config.get(SORT_DEFAULT_ORDER_SETTING)
-    )
+    getSortForSearchSource(state.sort as SortOrder[], index, config.get(SORT_DEFAULT_ORDER_SETTING))
   );
   searchSource.setField('highlight', null);
   searchSource.setField('highlightAll', undefined);
@@ -78,17 +74,15 @@ export async function getSharingData(
   searchSource.setField('size', undefined);
 
   const body = await searchSource.getSearchRequestBody();
-  const index = searchSource.getField('index')!;
+
   return {
     searchRequest: {
       index: index.title,
       body,
     },
     fields: selectFields,
-    metaFields: indexPattern.metaFields,
-    conflictedTypesFields: indexPattern.fields
-      .filter((f) => f.type === 'conflict')
-      .map((f) => f.name),
+    metaFields: index.metaFields,
+    conflictedTypesFields: index.fields.filter((f) => f.type === 'conflict').map((f) => f.name),
     indexPatternId: index.id,
   };
 }

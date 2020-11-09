@@ -53,4 +53,5 @@ export function updateSearchSource(
     )
     .setField('query', data.query.queryString.getQuery() || null)
     .setField('filter', data.query.filterManager.getFilters());
+  return searchSource;
 }

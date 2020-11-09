@@ -103,7 +103,6 @@ export const getTopNavLinks = ({
       const sharingData = await getSharingData(
         savedSearch.searchSource,
         state.appStateContainer.getState(),
-        indexPattern,
         services.uiSettings,
         getFieldCounts
       );

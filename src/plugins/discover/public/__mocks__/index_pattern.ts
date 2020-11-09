@@ -23,4 +23,7 @@ export const indexPatternMock = ({
   id: 'the-index-pattern-id',
   title: 'the-index-pattern-title',
   fields: [],
+  getComputedFields: () => ({}),
+  getSourceFiltering: () => ({}),
+  getFieldByName: () => ({}),
 } as unknown) as IndexPattern;
