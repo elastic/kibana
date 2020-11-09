@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import _ from 'lodash';
-
 import { pkg } from '../core/server/utils';
 import Command from '../cli/command';
 import { EncryptionConfig } from './encryption_config';
@@ -40,7 +38,7 @@ program
   .command('help <command>')
   .description('Get the help for a specific command')
   .action(function (cmdName) {
-    const cmd = _.find(program.commands, { _name: cmdName });
+    const cmd = Object.values(program.commands).find((command) => command._name === cmdName);
     if (!cmd) return program.error(`unknown command ${cmdName}`);
     cmd.help();
   });
