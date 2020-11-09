@@ -7,6 +7,7 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
+  EuiButtonEmptyProps,
   EuiButtonIcon,
   EuiButtonIconProps,
   EuiFlexGroup,
@@ -32,7 +33,12 @@ const backgroundSessionIndicatorViewStateToProps: {
     button: Pick<EuiButtonIconProps, 'color' | 'iconType' | 'aria-label'> & { tooltipText: string };
     popover: {
       text: string;
-      buttons: Array<React.ComponentType<BackgroundSessionIndicatorProps>>;
+      primaryAction?: React.ComponentType<
+        BackgroundSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps }
+      >;
+      secondaryAction?: React.ComponentType<
+        BackgroundSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps }
+      >;
     };
   };
 } = {
@@ -40,23 +46,21 @@ const backgroundSessionIndicatorViewStateToProps: {
     button: {
       color: 'subdued',
       iconType: 'clock',
-      'aria-label': 'Loading results...',
+      'aria-label': 'Loading results',
       tooltipText: 'Loading results',
     },
     popover: {
       text: 'Loading',
-      buttons: [
-        ({ onStopLoading = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onStopLoading} iconType={'cross'}>
-            Cancel
-          </EuiButtonEmpty>
-        ),
-        ({ onContinueInBackground = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onContinueInBackground}>
-            Continue in background
-          </EuiButtonEmpty>
-        ),
-      ],
+      primaryAction: ({ onStopLoading = () => {}, buttonProps = {} }) => (
+        <EuiButtonEmpty onClick={onStopLoading} {...buttonProps}>
+          Cancel
+        </EuiButtonEmpty>
+      ),
+      secondaryAction: ({ onContinueInBackground = () => {}, buttonProps = {} }) => (
+        <EuiButtonEmpty onClick={onContinueInBackground} {...buttonProps}>
+          Continue in background
+        </EuiButtonEmpty>
+      ),
     },
   },
   [BackgroundSessionViewState.Completed]: {
@@ -68,19 +72,17 @@ const backgroundSessionIndicatorViewStateToProps: {
     },
     popover: {
       text: 'Results loaded',
-      buttons: [
-        ({ onSaveResults = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onSaveResults}>
-            Save results
-          </EuiButtonEmpty>
-        ),
-        ({ onViewBackgroundRequests = () => {} }) => (
-          // TODO: make this a link
-          <EuiButtonEmpty size="xs" onClick={onViewBackgroundRequests}>
-            View requests
-          </EuiButtonEmpty>
-        ),
-      ],
+      primaryAction: ({ onSaveResults = () => {}, buttonProps = {} }) => (
+        <EuiButtonEmpty onClick={onSaveResults} {...buttonProps}>
+          Save
+        </EuiButtonEmpty>
+      ),
+      secondaryAction: ({ onViewBackgroundRequests = () => {}, buttonProps = {} }) => (
+        // TODO: make this a link
+        <EuiButtonEmpty onClick={onViewBackgroundRequests} {...buttonProps}>
+          View background sessions
+        </EuiButtonEmpty>
+      ),
     },
   },
   [BackgroundSessionViewState.BackgroundLoading]: {
@@ -91,18 +93,16 @@ const backgroundSessionIndicatorViewStateToProps: {
     },
     popover: {
       text: 'Loading in the background',
-      buttons: [
-        ({ onStopLoading = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onStopLoading} iconType={'cross'}>
-            Cancel
-          </EuiButtonEmpty>
-        ),
-        ({ onViewBackgroundRequests = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onViewBackgroundRequests}>
-            View requests
-          </EuiButtonEmpty>
-        ),
-      ],
+      primaryAction: ({ onStopLoading = () => {}, buttonProps = {} }) => (
+        <EuiButtonEmpty onClick={onStopLoading} {...buttonProps}>
+          Cancel
+        </EuiButtonEmpty>
+      ),
+      secondaryAction: ({ onViewBackgroundRequests = () => {}, buttonProps = {} }) => (
+        <EuiButtonEmpty onClick={onViewBackgroundRequests} {...buttonProps}>
+          View background sessions
+        </EuiButtonEmpty>
+      ),
     },
   },
   [BackgroundSessionViewState.BackgroundCompleted]: {
@@ -113,14 +113,12 @@ const backgroundSessionIndicatorViewStateToProps: {
       tooltipText: 'Results loaded in the background',
     },
     popover: {
-      text: 'Loaded in the background',
-      buttons: [
-        ({ onViewBackgroundRequests = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onViewBackgroundRequests}>
-            View background requests
-          </EuiButtonEmpty>
-        ),
-      ],
+      text: 'Results loaded',
+      primaryAction: ({ onViewBackgroundRequests = () => {}, buttonProps = {} }) => (
+        <EuiButtonEmpty onClick={onViewBackgroundRequests} {...buttonProps}>
+          View background sessions
+        </EuiButtonEmpty>
+      ),
     },
   },
   [BackgroundSessionViewState.Restored]: {
@@ -131,14 +129,17 @@ const backgroundSessionIndicatorViewStateToProps: {
       tooltipText: 'Restored older results. The data is not current.',
     },
     popover: {
-      text: 'The data is not current',
-      buttons: [
-        ({ onReload = () => {} }) => (
-          <EuiButtonEmpty size="xs" onClick={onReload} iconType={'refresh'}>
-            Reload
-          </EuiButtonEmpty>
-        ),
-      ],
+      text: 'Results no longer current',
+      primaryAction: ({ onReload = () => {}, buttonProps = {} }) => (
+        <EuiButtonEmpty onClick={onReload} {...buttonProps}>
+          Refresh
+        </EuiButtonEmpty>
+      ),
+      secondaryAction: ({ onViewBackgroundRequests = () => {}, buttonProps = {} }) => (
+        <EuiButtonEmpty onClick={onViewBackgroundRequests} {...buttonProps}>
+          View background sessions
+        </EuiButtonEmpty>
+      ),
     },
   },
 };
@@ -168,17 +169,29 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
         </EuiToolTip>
       }
     >
-      <EuiFlexGroup responsive={false} alignItems={'center'} gutterSize={'none'}>
-        <EuiFlexItem grow={true} style={{ marginRight: '12px' }}>
-          <EuiText size="s" color={'subdued'}>
-            <p>{popover.text}</p>
-          </EuiText>
+      <EuiFlexGroup responsive={false} alignItems={'center'} gutterSize={'s'}>
+        <EuiFlexItem grow={true}>
+          <EuiFlexGroup responsive={false} alignItems={'center'} gutterSize={'xs'}>
+            <EuiFlexItem grow={true}>
+              <EuiText size="s" color={'subdued'}>
+                <p>{popover.text}</p>
+              </EuiText>
+            </EuiFlexItem>
+            {popover.primaryAction && (
+              <EuiFlexItem grow={false}>
+                <popover.primaryAction {...props} buttonProps={{ size: 'xs' }} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
-        {popover.buttons.map((Button, index) => (
-          <EuiFlexItem key={props.state + index} grow={false}>
-            <Button {...props} />
+        {popover.secondaryAction && (
+          <EuiFlexItem grow={false} style={{ borderLeft: '1px solid #D3DAE6' }}>
+            <popover.secondaryAction
+              {...props}
+              buttonProps={{ size: 'xs', style: { marginLeft: 8 } }}
+            />
           </EuiFlexItem>
-        ))}
+        )}
       </EuiFlexGroup>
     </EuiPopover>
   );
