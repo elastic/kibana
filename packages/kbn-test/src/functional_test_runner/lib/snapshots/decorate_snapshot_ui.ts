@@ -134,8 +134,11 @@ export function decorateSnapshotUi(lifecycle: Lifecycle, updateSnapshots: boolea
     };
   });
 
-  lifecycle.afterTestSuite.add(function () {
-    // save snapshot after tests complete
+  lifecycle.afterTestSuite.add(function (testSuite) {
+    // save snapshot & check unused after top-level test suite completes
+    if (testSuite.parent?.parent) {
+      return;
+    }
 
     const unused: string[] = [];
 
@@ -164,7 +167,7 @@ export function decorateSnapshotUi(lifecycle: Lifecycle, updateSnapshots: boolea
       throw new Error(
         `${unused.length} obsolete snapshot(s) found:\n${unused.join(
           '\n\t'
-        )}.\n\nRun tests again with \`UPDATE_SNAPSHOTS=1\` to remove them.`
+        )}.\n\nRun tests again with \`--updateSnapshots\` to remove them.`
       );
     }
 
