@@ -30,9 +30,6 @@ import {
 import * as i18n from './translations';
 import { Logger } from '../../../../../../src/core/server';
 
-// TODO: to remove, need to support Case
-import { buildMap, mapParams } from '../case/utils';
-
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -104,19 +101,9 @@ async function executor(
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
-    const { comments, externalId, ...restParams } = pushToServiceParams;
-    const mapping = config.incidentConfiguration
-      ? buildMap(config.incidentConfiguration.mapping)
-      : null;
-    const externalObject =
-      config.incidentConfiguration && mapping
-        ? mapParams<ExecutorSubActionPushParams>(restParams as ExecutorSubActionPushParams, mapping)
-        : {};
-
     data = await api.pushToService({
       externalService,
-      mapping,
-      params: { ...pushToServiceParams, externalObject },
+      params: { ...pushToServiceParams, externalObject: {} },
       logger,
     });
 

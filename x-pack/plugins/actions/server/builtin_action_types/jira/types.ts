@@ -160,7 +160,6 @@ export type ExecutorSubActionGetIssueParams = TypeOf<typeof ExecutorSubActionGet
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;
-  mapping: Map<string, any> | null;
 }
 
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {

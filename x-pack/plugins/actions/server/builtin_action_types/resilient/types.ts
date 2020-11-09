@@ -122,7 +122,6 @@ export type ExecutorSubActionGetSeverityParams = TypeOf<
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;
-  mapping: Map<string, any> | null;
 }
 
 export type ExecutorSubActionGetIncidentParams = TypeOf<

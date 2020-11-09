@@ -79,7 +79,6 @@ export interface PushToServiceApiParams extends ExecutorSubActionPushParams {
 
 export interface ExternalServiceApiHandlerArgs {
   externalService: ExternalService;
-  mapping: Map<string, any> | null;
 }
 
 export type ExecutorSubActionGetIncidentParams = TypeOf<

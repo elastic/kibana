@@ -111,27 +111,6 @@ const createMock = (): jest.Mocked<ExternalService> => {
 const externalServiceMock = {
   create: createMock,
 };
-const mapping: Map<string, Partial<MapRecord>> = new Map();
-
-mapping.set('title', {
-  target: 'summary',
-  actionType: 'overwrite',
-});
-
-mapping.set('description', {
-  target: 'description',
-  actionType: 'overwrite',
-});
-
-mapping.set('comments', {
-  target: 'comments',
-  actionType: 'append',
-});
-
-mapping.set('summary', {
-  target: 'title',
-  actionType: 'overwrite',
-});
 
 const executorParams: ExecutorSubActionPushParams = {
   savedObjectId: 'd4387ac5-0899-4dc2-bbfa-0dd605c934aa',
@@ -171,4 +150,4 @@ const apiParams: PushToServiceApiParams = {
   externalObject: { summary: 'Incident title', description: 'Incident description' },
 };
 
-export { externalServiceMock, mapping, executorParams, apiParams };
+export { externalServiceMock, executorParams, apiParams };

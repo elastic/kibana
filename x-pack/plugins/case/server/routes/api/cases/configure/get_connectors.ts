@@ -17,39 +17,16 @@ import {
   RESILIENT_ACTION_TYPE_ID,
 } from '../../../../../common/constants';
 
-/**
- * We need to take into account connectors that have been created within cases and
- * they do not have the isCaseOwned field. Checking for the existence of
- * the mapping attribute ensures that the connector is indeed a case connector.
- * Cases connector should always have a mapping.
- */
-
-interface CaseAction extends FindActionResult {
-  config?: {
-    isCaseOwned?: boolean;
-    incidentConfiguration?: Record<string, unknown>;
-  };
-}
-
-const isCaseOwned = (action: CaseAction): boolean => {
-  if (
-    [SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
-      action.actionTypeId
-    )
-  ) {
-    if (action.config?.isCaseOwned === true || action.config?.incidentConfiguration?.mapping) {
-      return true;
-    }
-  }
-
-  return false;
-};
+const isCaseOwned = (action: FindActionResult): boolean =>
+  [SERVICENOW_ACTION_TYPE_ID, JIRA_ACTION_TYPE_ID, RESILIENT_ACTION_TYPE_ID].includes(
+    action.actionTypeId
+  );
 
 /*
  * Be aware that this api will only return 20 connectors
  */
 
-export function initCaseConfigureGetActionConnector({ caseService, router }: RouteDeps) {
+export function initCaseConfigureGetActionConnector({ router }: RouteDeps) {
   router.get(
     {
       path: `${CASE_CONFIGURE_CONNECTORS_URL}/_find`,

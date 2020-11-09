@@ -29,9 +29,6 @@ import {
   ServiceNowExecutorResultData,
 } from './types';
 
-// TODO: to remove, need to support Case
-import { buildMap, mapParams } from '../case/utils';
-
 interface GetActionTypeParams {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -102,16 +99,9 @@ async function executor(
   if (subAction === 'pushToService') {
     const pushToServiceParams = subActionParams as ExecutorSubActionPushParams;
 
-    const { comments, externalId, ...restParams } = pushToServiceParams;
-    const incidentConfiguration = config.incidentConfiguration;
-    const mapping = incidentConfiguration ? buildMap(incidentConfiguration.mapping) : null;
-    const externalObject =
-      config.incidentConfiguration && mapping ? mapParams(restParams, mapping) : {};
-
     data = await api.pushToService({
       externalService,
-      mapping,
-      params: { ...pushToServiceParams, externalObject },
+      params: { ...pushToServiceParams, externalObject: {} },
       secrets,
       logger,
     });

@@ -5,7 +5,7 @@
  */
 
 import { Logger } from '../../../../../../src/core/server';
-import { externalServiceMock, mapping, apiParams } from './mocks';
+import { externalServiceMock, apiParams } from './mocks';
 import { ExternalService } from './types';
 import { api } from './api';
 let mockedLogger: jest.Mocked<Logger>;
@@ -22,7 +22,6 @@ describe('api', () => {
       const params = { ...apiParams, externalId: null };
       const res = await api.pushToService({
         externalService,
-        mapping,
         params,
         logger: mockedLogger,
       });
@@ -49,7 +48,6 @@ describe('api', () => {
       const params = { ...apiParams, externalId: null, comments: [] };
       const res = await api.pushToService({
         externalService,
-        mapping,
         params,
         logger: mockedLogger,
       });
@@ -64,7 +62,7 @@ describe('api', () => {
 
     test('it calls createIncident correctly', async () => {
       const params = { ...apiParams, externalId: null };
-      await api.pushToService({ externalService, mapping, params, logger: mockedLogger });
+      await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.createIncident).toHaveBeenCalledWith({
         incident: {
@@ -81,7 +79,7 @@ describe('api', () => {
 
     test('it calls createIncident correctly without mapping', async () => {
       const params = { ...apiParams, externalId: null };
-      await api.pushToService({ externalService, mapping: null, params, logger: mockedLogger });
+      await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.createIncident).toHaveBeenCalledWith({
         incident: {
@@ -98,7 +96,7 @@ describe('api', () => {
 
     test('it calls createComment correctly', async () => {
       const params = { ...apiParams, externalId: null };
-      await api.pushToService({ externalService, mapping, params, logger: mockedLogger });
+      await api.pushToService({ externalService, params, logger: mockedLogger });
       expect(externalService.createComment).toHaveBeenCalledTimes(2);
       expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
         incidentId: 'incident-1',
@@ -139,7 +137,7 @@ describe('api', () => {
 
     test('it calls createComment correctly without mapping', async () => {
       const params = { ...apiParams, externalId: null };
-      await api.pushToService({ externalService, mapping: null, params, logger: mockedLogger });
+      await api.pushToService({ externalService, params, logger: mockedLogger });
       expect(externalService.createComment).toHaveBeenCalledTimes(2);
       expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
         incidentId: 'incident-1',
@@ -183,7 +181,6 @@ describe('api', () => {
     test('it updates an incident', async () => {
       const res = await api.pushToService({
         externalService,
-        mapping,
         params: apiParams,
         logger: mockedLogger,
       });
@@ -210,7 +207,6 @@ describe('api', () => {
       const params = { ...apiParams, comments: [] };
       const res = await api.pushToService({
         externalService,
-        mapping,
         params,
         logger: mockedLogger,
       });
@@ -225,7 +221,7 @@ describe('api', () => {
 
     test('it calls updateIncident correctly', async () => {
       const params = { ...apiParams };
-      await api.pushToService({ externalService, mapping, params, logger: mockedLogger });
+      await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.updateIncident).toHaveBeenCalledWith({
         incidentId: 'incident-3',
@@ -243,7 +239,7 @@ describe('api', () => {
 
     test('it calls updateIncident correctly without mapping', async () => {
       const params = { ...apiParams };
-      await api.pushToService({ externalService, mapping: null, params, logger: mockedLogger });
+      await api.pushToService({ externalService, params, logger: mockedLogger });
 
       expect(externalService.updateIncident).toHaveBeenCalledWith({
         incidentId: 'incident-3',
@@ -261,7 +257,7 @@ describe('api', () => {
 
     test('it calls createComment correctly', async () => {
       const params = { ...apiParams };
-      await api.pushToService({ externalService, mapping, params, logger: mockedLogger });
+      await api.pushToService({ externalService, params, logger: mockedLogger });
       expect(externalService.createComment).toHaveBeenCalledTimes(2);
       expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
         incidentId: 'incident-1',
@@ -302,7 +298,7 @@ describe('api', () => {
 
     test('it calls createComment correctly without mapping', async () => {
       const params = { ...apiParams };
-      await api.pushToService({ externalService, mapping: null, params, logger: mockedLogger });
+      await api.pushToService({ externalService, params, logger: mockedLogger });
       expect(externalService.createComment).toHaveBeenCalledTimes(2);
       expect(externalService.createComment).toHaveBeenNthCalledWith(1, {
         incidentId: 'incident-1',
@@ -412,395 +408,385 @@ describe('api', () => {
     });
   });
 
-  describe('mapping variations', () => {
-    test('overwrite & append', async () => {
-      mapping.set('title', {
-        target: 'summary',
-        actionType: 'overwrite',
-      });
-
-      mapping.set('description', {
-        target: 'description',
-        actionType: 'append',
-      });
-
-      mapping.set('comments', {
-        target: 'comments',
-        actionType: 'append',
-      });
-
-      mapping.set('summary', {
-        target: 'title',
-        actionType: 'overwrite',
-      });
-
-      await api.pushToService({
-        externalService,
-        mapping,
-        params: apiParams,
-        logger: mockedLogger,
-      });
-      expect(externalService.updateIncident).toHaveBeenCalledWith({
-        incidentId: 'incident-3',
-        incident: {
-          labels: ['kibana', 'elastic'],
-          priority: 'High',
-          issueType: '10006',
-          parent: null,
-          summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-          description:
-            'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-        },
-      });
-    });
-
-    test('nothing & append', async () => {
-      mapping.set('title', {
-        target: 'summary',
-        actionType: 'nothing',
-      });
-
-      mapping.set('description', {
-        target: 'description',
-        actionType: 'append',
-      });
-
-      mapping.set('comments', {
-        target: 'comments',
-        actionType: 'append',
-      });
-
-      mapping.set('summary', {
-        target: 'title',
-        actionType: 'nothing',
-      });
-
-      await api.pushToService({
-        externalService,
-        mapping,
-        params: apiParams,
-        logger: mockedLogger,
-      });
-      expect(externalService.updateIncident).toHaveBeenCalledWith({
-        incidentId: 'incident-3',
-        incident: {
-          labels: ['kibana', 'elastic'],
-          priority: 'High',
-          issueType: '10006',
-          parent: null,
-          description:
-            'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-        },
-      });
-    });
-
-    test('append & append', async () => {
-      mapping.set('title', {
-        target: 'summary',
-        actionType: 'append',
-      });
-
-      mapping.set('description', {
-        target: 'description',
-        actionType: 'append',
-      });
-
-      mapping.set('comments', {
-        target: 'comments',
-        actionType: 'append',
-      });
-
-      mapping.set('summary', {
-        target: 'title',
-        actionType: 'append',
-      });
-
-      await api.pushToService({
-        externalService,
-        mapping,
-        params: apiParams,
-        logger: mockedLogger,
-      });
-      expect(externalService.updateIncident).toHaveBeenCalledWith({
-        incidentId: 'incident-3',
-        incident: {
-          labels: ['kibana', 'elastic'],
-          priority: 'High',
-          issueType: '10006',
-          parent: null,
-          summary:
-            'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-          description:
-            'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-        },
-      });
-    });
-
-    test('nothing & nothing', async () => {
-      mapping.set('title', {
-        target: 'summary',
-        actionType: 'nothing',
-      });
-
-      mapping.set('description', {
-        target: 'description',
-        actionType: 'nothing',
-      });
-
-      mapping.set('comments', {
-        target: 'comments',
-        actionType: 'append',
-      });
-
-      mapping.set('summary', {
-        target: 'title',
-        actionType: 'nothing',
-      });
-
-      await api.pushToService({
-        externalService,
-        mapping,
-        params: apiParams,
-        logger: mockedLogger,
-      });
-      expect(externalService.updateIncident).toHaveBeenCalledWith({
-        incidentId: 'incident-3',
-        incident: {
-          labels: ['kibana', 'elastic'],
-          priority: 'High',
-          issueType: '10006',
-          parent: null,
-        },
-      });
-    });
-
-    test('overwrite & nothing', async () => {
-      mapping.set('title', {
-        target: 'summary',
-        actionType: 'overwrite',
-      });
-
-      mapping.set('description', {
-        target: 'description',
-        actionType: 'nothing',
-      });
-
-      mapping.set('comments', {
-        target: 'comments',
-        actionType: 'append',
-      });
-
-      mapping.set('summary', {
-        target: 'title',
-        actionType: 'overwrite',
-      });
-
-      await api.pushToService({
-        externalService,
-        mapping,
-        params: apiParams,
-        logger: mockedLogger,
-      });
-      expect(externalService.updateIncident).toHaveBeenCalledWith({
-        incidentId: 'incident-3',
-        incident: {
-          labels: ['kibana', 'elastic'],
-          priority: 'High',
-          issueType: '10006',
-          parent: null,
-          summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-        },
-      });
-    });
-
-    test('overwrite & overwrite', async () => {
-      mapping.set('title', {
-        target: 'summary',
-        actionType: 'overwrite',
-      });
-
-      mapping.set('description', {
-        target: 'description',
-        actionType: 'overwrite',
-      });
-
-      mapping.set('comments', {
-        target: 'comments',
-        actionType: 'append',
-      });
-
-      mapping.set('summary', {
-        target: 'title',
-        actionType: 'overwrite',
-      });
-
-      await api.pushToService({
-        externalService,
-        mapping,
-        params: apiParams,
-        logger: mockedLogger,
-      });
-      expect(externalService.updateIncident).toHaveBeenCalledWith({
-        incidentId: 'incident-3',
-        incident: {
-          labels: ['kibana', 'elastic'],
-          priority: 'High',
-          issueType: '10006',
-          parent: null,
-          summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-          description: 'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-        },
-      });
-    });
-
-    test('nothing & overwrite', async () => {
-      mapping.set('title', {
-        target: 'summary',
-        actionType: 'nothing',
-      });
-
-      mapping.set('description', {
-        target: 'description',
-        actionType: 'overwrite',
-      });
-
-      mapping.set('comments', {
-        target: 'comments',
-        actionType: 'append',
-      });
-
-      mapping.set('summary', {
-        target: 'title',
-        actionType: 'nothing',
-      });
-
-      await api.pushToService({
-        externalService,
-        mapping,
-        params: apiParams,
-        logger: mockedLogger,
-      });
-      expect(externalService.updateIncident).toHaveBeenCalledWith({
-        incidentId: 'incident-3',
-        incident: {
-          labels: ['kibana', 'elastic'],
-          priority: 'High',
-          issueType: '10006',
-          parent: null,
-          description: 'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-        },
-      });
-    });
-
-    test('append & overwrite', async () => {
-      mapping.set('title', {
-        target: 'summary',
-        actionType: 'append',
-      });
-
-      mapping.set('description', {
-        target: 'description',
-        actionType: 'overwrite',
-      });
-
-      mapping.set('comments', {
-        target: 'comments',
-        actionType: 'append',
-      });
-
-      mapping.set('summary', {
-        target: 'title',
-        actionType: 'append',
-      });
-
-      await api.pushToService({
-        externalService,
-        mapping,
-        params: apiParams,
-        logger: mockedLogger,
-      });
-      expect(externalService.updateIncident).toHaveBeenCalledWith({
-        incidentId: 'incident-3',
-        incident: {
-          labels: ['kibana', 'elastic'],
-          priority: 'High',
-          issueType: '10006',
-          parent: null,
-          summary:
-            'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-          description: 'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-        },
-      });
-    });
-
-    test('append & nothing', async () => {
-      mapping.set('title', {
-        target: 'summary',
-        actionType: 'append',
-      });
-
-      mapping.set('description', {
-        target: 'description',
-        actionType: 'nothing',
-      });
-
-      mapping.set('comments', {
-        target: 'comments',
-        actionType: 'append',
-      });
-
-      mapping.set('summary', {
-        target: 'title',
-        actionType: 'append',
-      });
-
-      await api.pushToService({
-        externalService,
-        mapping,
-        params: apiParams,
-        logger: mockedLogger,
-      });
-      expect(externalService.updateIncident).toHaveBeenCalledWith({
-        incidentId: 'incident-3',
-        incident: {
-          labels: ['kibana', 'elastic'],
-          priority: 'High',
-          issueType: '10006',
-          parent: null,
-          summary:
-            'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
-        },
-      });
-    });
-
-    test('comment nothing', async () => {
-      mapping.set('title', {
-        target: 'summary',
-        actionType: 'overwrite',
-      });
-
-      mapping.set('description', {
-        target: 'description',
-        actionType: 'nothing',
-      });
-
-      mapping.set('comments', {
-        target: 'comments',
-        actionType: 'nothing',
-      });
-
-      mapping.set('summary', {
-        target: 'title',
-        actionType: 'overwrite',
-      });
-
-      await api.pushToService({
-        externalService,
-        mapping,
-        params: apiParams,
-        logger: mockedLogger,
-      });
-      expect(externalService.createComment).not.toHaveBeenCalled();
-    });
-  });
+  // describe('mapping variations', () => {
+  //   test('overwrite & append', async () => {
+  //     mapping.set('title', {
+  //       target: 'summary',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     mapping.set('description', {
+  //       target: 'description',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('comments', {
+  //       target: 'comments',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('summary', {
+  //       target: 'title',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     await api.pushToService({
+  //       externalService,
+  //       params: apiParams,
+  //       logger: mockedLogger,
+  //     });
+  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
+  //       incidentId: 'incident-3',
+  //       incident: {
+  //         labels: ['kibana', 'elastic'],
+  //         priority: 'High',
+  //         issueType: '10006',
+  //         parent: null,
+  //         summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //         description:
+  //           'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //       },
+  //     });
+  //   });
+  //
+  //   test('nothing & append', async () => {
+  //     mapping.set('title', {
+  //       target: 'summary',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     mapping.set('description', {
+  //       target: 'description',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('comments', {
+  //       target: 'comments',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('summary', {
+  //       target: 'title',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     await api.pushToService({
+  //       externalService,
+  //       params: apiParams,
+  //       logger: mockedLogger,
+  //     });
+  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
+  //       incidentId: 'incident-3',
+  //       incident: {
+  //         labels: ['kibana', 'elastic'],
+  //         priority: 'High',
+  //         issueType: '10006',
+  //         parent: null,
+  //         description:
+  //           'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //       },
+  //     });
+  //   });
+  //
+  //   test('append & append', async () => {
+  //     mapping.set('title', {
+  //       target: 'summary',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('description', {
+  //       target: 'description',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('comments', {
+  //       target: 'comments',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('summary', {
+  //       target: 'title',
+  //       actionType: 'append',
+  //     });
+  //
+  //     await api.pushToService({
+  //       externalService,
+  //       params: apiParams,
+  //       logger: mockedLogger,
+  //     });
+  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
+  //       incidentId: 'incident-3',
+  //       incident: {
+  //         labels: ['kibana', 'elastic'],
+  //         priority: 'High',
+  //         issueType: '10006',
+  //         parent: null,
+  //         summary:
+  //           'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //         description:
+  //           'description from jira \r\nIncident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //       },
+  //     });
+  //   });
+  //
+  //   test('nothing & nothing', async () => {
+  //     mapping.set('title', {
+  //       target: 'summary',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     mapping.set('description', {
+  //       target: 'description',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     mapping.set('comments', {
+  //       target: 'comments',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('summary', {
+  //       target: 'title',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     await api.pushToService({
+  //       externalService,
+  //       params: apiParams,
+  //       logger: mockedLogger,
+  //     });
+  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
+  //       incidentId: 'incident-3',
+  //       incident: {
+  //         labels: ['kibana', 'elastic'],
+  //         priority: 'High',
+  //         issueType: '10006',
+  //         parent: null,
+  //       },
+  //     });
+  //   });
+  //
+  //   test('overwrite & nothing', async () => {
+  //     mapping.set('title', {
+  //       target: 'summary',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     mapping.set('description', {
+  //       target: 'description',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     mapping.set('comments', {
+  //       target: 'comments',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('summary', {
+  //       target: 'title',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     await api.pushToService({
+  //       externalService,
+  //       params: apiParams,
+  //       logger: mockedLogger,
+  //     });
+  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
+  //       incidentId: 'incident-3',
+  //       incident: {
+  //         labels: ['kibana', 'elastic'],
+  //         priority: 'High',
+  //         issueType: '10006',
+  //         parent: null,
+  //         summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //       },
+  //     });
+  //   });
+  //
+  //   test('overwrite & overwrite', async () => {
+  //     mapping.set('title', {
+  //       target: 'summary',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     mapping.set('description', {
+  //       target: 'description',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     mapping.set('comments', {
+  //       target: 'comments',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('summary', {
+  //       target: 'title',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     await api.pushToService({
+  //       externalService,
+  //       params: apiParams,
+  //       logger: mockedLogger,
+  //     });
+  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
+  //       incidentId: 'incident-3',
+  //       incident: {
+  //         labels: ['kibana', 'elastic'],
+  //         priority: 'High',
+  //         issueType: '10006',
+  //         parent: null,
+  //         summary: 'Incident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //         description: 'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //       },
+  //     });
+  //   });
+  //
+  //   test('nothing & overwrite', async () => {
+  //     mapping.set('title', {
+  //       target: 'summary',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     mapping.set('description', {
+  //       target: 'description',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     mapping.set('comments', {
+  //       target: 'comments',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('summary', {
+  //       target: 'title',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     await api.pushToService({
+  //       externalService,
+  //       params: apiParams,
+  //       logger: mockedLogger,
+  //     });
+  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
+  //       incidentId: 'incident-3',
+  //       incident: {
+  //         labels: ['kibana', 'elastic'],
+  //         priority: 'High',
+  //         issueType: '10006',
+  //         parent: null,
+  //         description: 'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //       },
+  //     });
+  //   });
+  //
+  //   test('append & overwrite', async () => {
+  //     mapping.set('title', {
+  //       target: 'summary',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('description', {
+  //       target: 'description',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     mapping.set('comments', {
+  //       target: 'comments',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('summary', {
+  //       target: 'title',
+  //       actionType: 'append',
+  //     });
+  //
+  //     await api.pushToService({
+  //       externalService,
+  //       params: apiParams,
+  //       logger: mockedLogger,
+  //     });
+  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
+  //       incidentId: 'incident-3',
+  //       incident: {
+  //         labels: ['kibana', 'elastic'],
+  //         priority: 'High',
+  //         issueType: '10006',
+  //         parent: null,
+  //         summary:
+  //           'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //         description: 'Incident description (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //       },
+  //     });
+  //   });
+  //
+  //   test('append & nothing', async () => {
+  //     mapping.set('title', {
+  //       target: 'summary',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('description', {
+  //       target: 'description',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     mapping.set('comments', {
+  //       target: 'comments',
+  //       actionType: 'append',
+  //     });
+  //
+  //     mapping.set('summary', {
+  //       target: 'title',
+  //       actionType: 'append',
+  //     });
+  //
+  //     await api.pushToService({
+  //       externalService,
+  //       params: apiParams,
+  //       logger: mockedLogger,
+  //     });
+  //     expect(externalService.updateIncident).toHaveBeenCalledWith({
+  //       incidentId: 'incident-3',
+  //       incident: {
+  //         labels: ['kibana', 'elastic'],
+  //         priority: 'High',
+  //         issueType: '10006',
+  //         parent: null,
+  //         summary:
+  //           'title from jira \r\nIncident title (updated at 2020-04-27T10:59:46.202Z by Elastic User)',
+  //       },
+  //     });
+  //   });
+  //
+  //   test('comment nothing', async () => {
+  //     mapping.set('title', {
+  //       target: 'summary',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     mapping.set('description', {
+  //       target: 'description',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     mapping.set('comments', {
+  //       target: 'comments',
+  //       actionType: 'nothing',
+  //     });
+  //
+  //     mapping.set('summary', {
+  //       target: 'title',
+  //       actionType: 'overwrite',
+  //     });
+  //
+  //     await api.pushToService({
+  //       externalService,
+  //       params: apiParams,
+  //       logger: mockedLogger,
+  //     });
+  //     expect(externalService.createComment).not.toHaveBeenCalled();
+  //   });
+  // });
 });

@@ -19,24 +19,25 @@ type ActionMigration = (
 export function getMigrations(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ): SavedObjectMigrationMap {
-  const migrationActions = encryptedSavedObjects.createMigration<RawAction, RawAction>(
+  console.log('GET MIGRATIONS!');
+  const migrationActionsTen = encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
       !!doc.attributes.config?.casesConfiguration || doc.attributes.actionTypeId === '.email',
     pipeMigrations(renameCasesConfigurationObject, addHasAuthConfigurationObject)
   );
 
-  const migrationWebhookConnectorHasAuth = encryptedSavedObjects.createMigration<
-    RawAction,
-    RawAction
-  >(
+  const migrationActionsEleven = encryptedSavedObjects.createMigration<RawAction, RawAction>(
     (doc): doc is SavedObjectUnsanitizedDoc<RawAction> =>
+      doc.attributes.config?.hasOwnProperty('isCaseOwned') ||
+      doc.attributes.config?.hasOwnProperty('incidentConfiguration') ||
       doc.attributes.actionTypeId === '.webhook',
-    pipeMigrations(addHasAuthConfigurationObject)
+    pipeMigrations(removeCasesFieldMappings, addHasAuthConfigurationObject)
   );
 
+  console.log('RETURN MIGRATIONS!');
   return {
-    '7.10.0': executeMigrationWithErrorHandling(migrationActions, '7.10.0'),
-    '7.11.0': executeMigrationWithErrorHandling(migrationWebhookConnectorHasAuth, '7.11.0'),
+    '7.10.0': executeMigrationWithErrorHandling(migrationActionsTen, '7.10.0'),
+    '7.11.0': executeMigrationWithErrorHandling(migrationActionsEleven, '7.11.0'),
   };
 }
 
@@ -46,6 +47,7 @@ function executeMigrationWithErrorHandling(
 ) {
   return (doc: SavedObjectUnsanitizedDoc<RawAction>, context: SavedObjectMigrationContext) => {
     try {
+      console.log('migration version', version);
       return migrationFunc(doc, context);
     } catch (ex) {
       context.log.error(
@@ -73,6 +75,29 @@ function renameCasesConfigurationObject(
         ...restConfiguration,
         incidentConfiguration: casesConfiguration,
       },
+    },
+  };
+}
+
+function removeCasesFieldMappings(
+  doc: SavedObjectUnsanitizedDoc<RawAction>
+): SavedObjectUnsanitizedDoc<RawAction> {
+  console.log('removeCasesFieldMappings');
+  if (
+    !doc.attributes.config?.hasOwnProperty('isCaseOwned') &&
+    !doc.attributes.config?.hasOwnProperty('incidentConfiguration')
+  ) {
+    console.log('nope');
+    return doc;
+  }
+  const { incidentConfiguration, isCaseOwned, ...restConfiguration } = doc.attributes.config;
+
+  console.log('yep');
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      config: restConfiguration,
     },
   };
 }

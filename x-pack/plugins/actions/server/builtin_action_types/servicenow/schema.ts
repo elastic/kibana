@@ -5,13 +5,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CommentSchema, EntityInformation, IncidentConfigurationSchema } from '../case/schema';
+import { CommentSchema, EntityInformation } from '../case/schema';
 
 export const ExternalIncidentServiceConfiguration = {
   apiUrl: schema.string(),
-  // TODO: to remove - set it optional for the current stage to support Case ServiceNow implementation
-  incidentConfiguration: schema.nullable(IncidentConfigurationSchema),
-  isCaseOwned: schema.maybe(schema.boolean()),
 };
 
 export const ExternalIncidentServiceConfigurationSchema = schema.object(
