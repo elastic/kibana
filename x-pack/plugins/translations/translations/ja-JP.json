@@ -3733,7 +3733,6 @@
     "visTypeTable.tableVisEditorConfig.schemas.bucketTitle": "行を分割",
     "visTypeTable.tableVisEditorConfig.schemas.metricTitle": "メトリック",
     "visTypeTable.tableVisEditorConfig.schemas.splitTitle": "テーブルを分割",
-    "visTypeTable.tableVisTitle": "データテーブル",
     "visTypeTable.totalAggregations.averageText": "平均",
     "visTypeTable.totalAggregations.countText": "カウント",
     "visTypeTable.totalAggregations.maxText": "最高",

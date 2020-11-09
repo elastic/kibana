@@ -29,7 +29,7 @@ import { TableVisParams } from './types';
 export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
   name: 'table',
   title: i18n.translate('visTypeTable.tableVisTitle', {
-    defaultMessage: 'Data Table',
+    defaultMessage: 'Data table',
   }),
   icon: 'visTable',
   description: i18n.translate('visTypeTable.tableVisDescription', {
