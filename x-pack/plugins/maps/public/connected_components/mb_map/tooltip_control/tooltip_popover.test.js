@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-jest.mock('../../features_tooltip/features_tooltip', () => ({
+jest.mock('../features_tooltip/features_tooltip', () => ({
   FeaturesTooltip: () => {
     return <div>mockFeaturesTooltip</div>;
   },
