@@ -210,7 +210,7 @@ export const getColumns = ({
           getEmptyTagValue()
         ) : (
           <LocalizedDateTooltip fieldName={i18n.COLUMN_LAST_UPDATE} date={new Date(value)}>
-            <FormattedRelative value={value} />
+            <FormattedDate value={value} fieldName={'last rule update date'} />
           </LocalizedDateTooltip>
         );
       },

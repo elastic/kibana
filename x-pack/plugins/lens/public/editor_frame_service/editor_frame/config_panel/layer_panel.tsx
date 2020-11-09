@@ -93,6 +93,7 @@ export function LayerPanel(
     state: props.visualizationState,
     frame: props.framePublicAPI,
     dateRange: props.framePublicAPI.dateRange,
+    activeData: props.framePublicAPI.activeData,
   };
   const datasourceId = datasourcePublicAPI.datasourceId;
   const layerDatasourceState = props.datasourceStates[datasourceId].state;
@@ -111,6 +112,7 @@ export function LayerPanel(
     ...layerDatasourceDropProps,
     frame: props.framePublicAPI,
     dateRange: props.framePublicAPI.dateRange,
+    activeData: props.framePublicAPI.activeData,
   };
 
   const { groups } = activeVisualization.getConfiguration(layerVisualizationConfigProps);
@@ -140,6 +142,7 @@ export function LayerPanel(
                 nativeProps={{
                   layerId,
                   state: layerDatasourceState,
+                  activeData: props.framePublicAPI.activeData,
                   setState: (updater: unknown) => {
                     const newState =
                       typeof updater === 'function' ? updater(layerDatasourceState) : updater;
@@ -448,6 +451,7 @@ export function LayerPanel(
                     columnId: activeId,
                     filterOperations: activeGroup.filterOperations,
                     suggestedPriority: activeGroup?.suggestedPriority,
+                    dimensionGroups: groups,
                     setState: (newState: unknown) => {
                       props.updateAll(
                         datasourceId,
