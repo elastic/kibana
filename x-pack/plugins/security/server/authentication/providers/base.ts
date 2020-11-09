@@ -113,7 +113,7 @@ export abstract class BaseAuthenticationProvider {
       ...(await this.options.client
         .asScoped({ headers: { ...request.headers, ...authHeaders } })
         .callAsCurrentUser('shield.authenticate')),
-      authentication_provider: this.options.name,
+      authentication_provider: { type: this.type, name: this.options.name },
     } as AuthenticatedUser);
   }
 }
