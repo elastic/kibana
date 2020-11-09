@@ -376,6 +376,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.logger.debug('Stopping plugin');
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
-    this.licenseService.stop();
+    licenseService.stop();
   }
 }
