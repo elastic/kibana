@@ -133,8 +133,8 @@ function taskRunner(
               apiKeysToInvalidate,
               securityPluginSetup
             );
-            pageNumber++;
             hasApiKeysPendingInvalidation = pageNumber * PAGE_SIZE < apiKeysToInvalidate.total;
+            pageNumber++;
           } while (hasApiKeysPendingInvalidation);
 
           return {
