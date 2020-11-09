@@ -95,7 +95,7 @@ describe('decorateSnapshotUi', () => {
         expectSnapshot('foo').toMatch();
       }).not.toThrow();
 
-      await lifecycle.afterTestSuite.trigger(parent);
+      await lifecycle.afterTestSuite.trigger(test.parent);
 
       expect(fs.existsSync(snapshotFile)).toBe(true);
 
@@ -112,7 +112,7 @@ describe('decorateSnapshotUi', () => {
       decorateSnapshotUi(lifecycle, true);
     });
 
-    it("does'nt throw if the value does not match", async () => {
+    it("doesn't throw if the value does not match", async () => {
       const test: Test = {
         title: 'Test',
         file: 'foo.ts',
