@@ -27,6 +27,7 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
+  EMPTY_EMBEDDABLE,
 } from '../../embeddable_plugin_test_samples';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
@@ -98,6 +99,48 @@ test('DashboardContainer.addNewEmbeddable', async () => {
   const embeddableInContainer = container.getChild<ContactCardEmbeddable>(embeddable.id);
   expect(embeddableInContainer).toBeDefined();
   expect(embeddableInContainer.id).toBe(embeddable.id);
+});
+
+test('DashboardContainer.replacePanel', async (done) => {
+  const ID = '123';
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      [ID]: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Sam', id: ID },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+
+  const container = new DashboardContainer(initialInput, options);
+  let counter = 0;
+
+  const subscriptionHandler = jest.fn(({ panels }) => {
+    counter++;
+    expect(panels[ID]).toBeDefined();
+    // It should be called exactly 2 times and exit the second time
+    switch (counter) {
+      case 1:
+        return expect(panels[ID].type).toBe(CONTACT_CARD_EMBEDDABLE);
+
+      case 2: {
+        expect(panels[ID].type).toBe(EMPTY_EMBEDDABLE);
+        subscription.unsubscribe();
+        done();
+      }
+
+      default:
+        throw Error('Called too many times!');
+    }
+  });
+
+  const subscription = container.getInput$().subscribe(subscriptionHandler);
+
+  // replace the panel now
+  container.replacePanel(container.getInput().panels[ID], {
+    type: EMPTY_EMBEDDABLE,
+    explicitInput: { id: ID },
+  });
 });
 
 test('Container view mode change propagates to existing children', async () => {

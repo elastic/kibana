@@ -47,6 +47,7 @@ export function getAlertType(): AlertTypeModel {
     name: 'People Are In Space Right Now',
     description: 'Alert when people are in space right now',
     iconClass: 'globe',
+    documentationUrl: null,
     alertParamsExpression: PeopleinSpaceExpression,
     validate: (alertParams: PeopleinSpaceParamsProps['alertParams']) => {
       const { outerSpaceCapacity, craft, op } = alertParams;
