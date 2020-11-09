@@ -111,7 +111,9 @@ function taskRunner(
         const configResult = await config;
         try {
           const [{ savedObjects }] = await coreStartServices;
-          const repository = savedObjects.createInternalRepository();
+          const repository = savedObjects.createInternalRepository([
+            'api_key_pending_invalidation',
+          ]);
           const configuredDelay = await configResult.invalidateApiKeysTask.removalDelay;
           const delay = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
 
@@ -121,7 +123,7 @@ function taskRunner(
           do {
             const apiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
               type: 'api_key_pending_invalidation',
-              filter: `api_key_pending_invalidation.attributes.createdAt < ${delay}`,
+              filter: `api_key_pending_invalidation.attributes.createdAt <= ${delay}`,
               page: pageNumber,
               perPage: PAGE_SIZE,
             });
@@ -131,28 +133,28 @@ function taskRunner(
               apiKeysToInvalidate,
               securityPluginSetup
             );
-            hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > 0;
             pageNumber++;
+            hasApiKeysPendingInvalidation = pageNumber * PAGE_SIZE < apiKeysToInvalidate.total;
           } while (hasApiKeysPendingInvalidation);
 
           return {
             state: {
               runs: (state.runs || 0) + 1,
               total_invalidated: totalInvalidated,
-              schedule: {
-                interval: configResult.invalidateApiKeysTask.interval,
-              },
+            },
+            schedule: {
+              interval: configResult.invalidateApiKeysTask.interval,
             },
           };
         } catch (errMsg) {
-          logger.warn(`Error executing alerting health check task: ${errMsg}`);
+          logger.warn(`Error executing alerting apiKey invalidation task: ${errMsg}`);
           return {
             state: {
               runs: (state.runs || 0) + 1,
               total_invalidated: totalInvalidated,
-              schedule: {
-                interval: configResult.invalidateApiKeysTask.interval,
-              },
+            },
+            schedule: {
+              interval: configResult.invalidateApiKeysTask.interval,
             },
           };
         }
