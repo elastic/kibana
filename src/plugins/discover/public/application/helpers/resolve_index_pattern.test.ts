@@ -29,12 +29,18 @@ describe('Resolve index pattern tests', () => {
         "list": Array [
           Object {
             "fields": Array [],
+            "getComputedFields": [Function],
+            "getFieldByName": [Function],
+            "getSourceFiltering": [Function],
             "id": "the-index-pattern-id",
             "title": "the-index-pattern-title",
           },
         ],
         "loaded": Object {
           "fields": Array [],
+          "getComputedFields": [Function],
+          "getFieldByName": [Function],
+          "getSourceFiltering": [Function],
           "id": "the-index-pattern-id",
           "title": "the-index-pattern-title",
         },
@@ -50,12 +56,18 @@ describe('Resolve index pattern tests', () => {
         "list": Array [
           Object {
             "fields": Array [],
+            "getComputedFields": [Function],
+            "getFieldByName": [Function],
+            "getSourceFiltering": [Function],
             "id": "the-index-pattern-id",
             "title": "the-index-pattern-title",
           },
         ],
         "loaded": Object {
           "fields": Array [],
+          "getComputedFields": [Function],
+          "getFieldByName": [Function],
+          "getSourceFiltering": [Function],
           "id": "the-index-pattern-id",
           "title": "the-index-pattern-title",
         },
