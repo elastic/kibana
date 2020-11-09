@@ -167,7 +167,9 @@ describe('AggConfigs', () => {
           type: 'oops',
           params: {},
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Unable to find a registered agg type for \\"oops\\""`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Unable to find a registered agg type for \\"oops\\"."`
+      );
     });
   });
 

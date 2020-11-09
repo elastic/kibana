@@ -123,24 +123,30 @@ export class AggConfigs {
     { addToAggConfigs = true } = {}
   ) => {
     const { type } = params;
-    const aggType = typeof type === 'string' ? this.typesRegistry.get(type) : type;
+    const getType = (t: string) => {
+      const typeFromRegistry = this.typesRegistry.get(t);
 
-    if (!aggType) {
-      throw new Error(
-        i18n.translate('data.search.aggs.error.aggNotFound', {
-          defaultMessage: 'Unable to find a registered agg type for "{type}"',
-          values: { type: type as string },
-        })
-      );
-    }
+      if (!typeFromRegistry) {
+        throw new Error(
+          i18n.translate('data.search.aggs.error.aggNotFound', {
+            defaultMessage: 'Unable to find a registered agg type for "{type}".',
+            values: { type: type as string },
+          })
+        );
+      }
+
+      return typeFromRegistry;
+    };
 
     let aggConfig;
-
     if (params instanceof AggConfig) {
       aggConfig = params;
       params.parent = this;
     } else {
-      aggConfig = new AggConfig(this, { ...params, type: aggType });
+      aggConfig = new AggConfig(this, {
+        ...params,
+        type: typeof type === 'string' ? getType(type) : type,
+      });
     }
 
     if (addToAggConfigs) {
