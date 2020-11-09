@@ -8,7 +8,7 @@ import React, { useEffect } from 'react';
 import { Route, Switch, Redirect, useParams } from 'react-router-dom';
 import { useValues, useActions } from 'kea';
 
-import { EuiText, EuiBadge } from '@elastic/eui';
+import { EuiText, EuiBadge, EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { SideNavLink, SideNavItem } from '../../../shared/layout';
@@ -48,6 +48,7 @@ import {
 } from './constants';
 
 import { EngineLogic } from './';
+import { EngineDetails } from './types';
 
 import './engine_nav.scss';
 
@@ -114,13 +115,21 @@ export const EngineNav: React.FC = () => {
     },
   } = useValues(AppLogic);
 
-  // TODO: Use EngineLogic
-  const isSampleEngine = true;
-  const isMetaEngine = false;
-  const { engineName } = useParams() as { engineName: string };
-  const engineRoute = engineName && getEngineRoute(engineName);
+  const {
+    engineName,
+    dataLoading,
+    isSampleEngine,
+    isMetaEngine,
+    hasSchemaConflicts,
+    hasUnconfirmedSchemaFields,
+    engine,
+  } = useValues(EngineLogic);
 
+  if (dataLoading) return null;
   if (!engineName) return null;
+
+  const engineRoute = getEngineRoute(engineName);
+  const { invalidBoosts, unsearchedUnconfirmedFields } = engine as Required<EngineDetails>;
 
   return (
     <>
@@ -166,8 +175,33 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_SCHEMA_PATH)}
           data-test-subj="EngineSchemaLink"
         >
-          {SCHEMA_TITLE}
-          {/* TODO: Engine schema warning icon */}
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+            <EuiFlexItem>{SCHEMA_TITLE}</EuiFlexItem>
+            <EuiFlexItem className="appSearchNavIcons">
+              {hasUnconfirmedSchemaFields && (
+                <EuiIcon
+                  type="iInCircle"
+                  color="primary"
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.schema.unconfirmedFields',
+                    { defaultMessage: 'New unconfirmed fields' }
+                  )}
+                  data-test-subj="EngineNavSchemaUnconfirmedFields"
+                />
+              )}
+              {hasSchemaConflicts && (
+                <EuiIcon
+                  type="alert"
+                  color="warning"
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.schema.conflicts',
+                    { defaultMessage: 'Schema conflicts' }
+                  )}
+                  data-test-subj="EngineNavSchemaConflicts"
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </SideNavLink>
       )}
       {canViewEngineCrawler && !isMetaEngine && !isSampleEngine && (
@@ -194,8 +228,33 @@ export const EngineNav: React.FC = () => {
           to={getAppSearchUrl(engineRoute + ENGINE_RELEVANCE_TUNING_PATH)}
           data-test-subj="EngineRelevanceTuningLink"
         >
-          {RELEVANCE_TUNING_TITLE}
-          {/* TODO: invalid boosts error icon */}
+          <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none">
+            <EuiFlexItem>{RELEVANCE_TUNING_TITLE}</EuiFlexItem>
+            <EuiFlexItem className="appSearchNavIcons">
+              {invalidBoosts && (
+                <EuiIcon
+                  type="alert"
+                  color="warning"
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.invalidBoosts',
+                    { defaultMessage: 'Invalid boosts' }
+                  )}
+                  data-test-subj="EngineNavRelevanceTuningInvalidBoosts"
+                />
+              )}
+              {unsearchedUnconfirmedFields && (
+                <EuiIcon
+                  type="alert"
+                  color="warning"
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.unsearchedFields',
+                    { defaultMessage: 'Unsearched fields' }
+                  )}
+                  data-test-subj="EngineNavRelevanceTuningUnsearchedFields"
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </SideNavLink>
       )}
       {canManageEngineSynonyms && (

@@ -9,7 +9,7 @@ import { unmountHandler } from '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__/kea.mock';
 
 import React from 'react';
-import { shallow, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import { Switch, Redirect, useParams } from 'react-router-dom';
 import { EuiBadge } from '@elastic/eui';
 
@@ -82,106 +82,153 @@ describe('EngineRouter', () => {
 });
 
 describe('EngineNav', () => {
+  const values = { myRole: {}, engineName: 'some-engine', dataLoading: false, engine: {} };
+
   beforeEach(() => {
-    (useParams as jest.Mock).mockReturnValue({ engineName: 'some-engine' });
+    setMockValues(values);
   });
 
-  it('does not render without an engine name', () => {
-    setMockValues({ myRole: {} });
-    (useParams as jest.Mock).mockReturnValue({ engineName: '' });
+  it('does not render if async data is still loading', () => {
+    setMockValues({ ...values, dataLoading: true });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.isEmptyRender()).toBe(true);
   });
 
-  it('renders an engine label', () => {
-    setMockValues({ myRole: {} });
-    const wrapper = mount(<EngineNav />);
+  it('does not render without an engine name', () => {
+    setMockValues({ ...values, engineName: '' });
+    const wrapper = shallow(<EngineNav />);
+    expect(wrapper.isEmptyRender()).toBe(true);
+  });
 
-    const label = wrapper.find('[data-test-subj="EngineLabel"]').last();
-    expect(label.text()).toEqual(expect.stringContaining('SOME-ENGINE'));
+  it('renders an engine label and badges', () => {
+    setMockValues({ ...values, isSampleEngine: false, isMetaEngine: false });
+    const wrapper = shallow(<EngineNav />);
+    const label = wrapper.find('[data-test-subj="EngineLabel"]').find('.eui-textTruncate');
 
-    // TODO: Test sample & meta engine conditional rendering
-    expect(label.find(EuiBadge).text()).toEqual('SAMPLE ENGINE');
+    expect(label.text()).toEqual('SOME-ENGINE');
+    expect(wrapper.find(EuiBadge)).toHaveLength(0);
+
+    setMockValues({ ...values, isSampleEngine: true });
+    wrapper.setProps({}); // Re-render
+    expect(wrapper.find(EuiBadge).prop('children')).toEqual('SAMPLE ENGINE');
+
+    setMockValues({ ...values, isMetaEngine: true });
+    wrapper.setProps({}); // Re-render
+    expect(wrapper.find(EuiBadge).prop('children')).toEqual('META ENGINE');
   });
 
   it('renders a default engine overview link', () => {
-    setMockValues({ myRole: {} });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineOverviewLink"]')).toHaveLength(1);
   });
 
   it('renders an analytics link', () => {
-    setMockValues({ myRole: { canViewEngineAnalytics: true } });
+    setMockValues({ ...values, myRole: { canViewEngineAnalytics: true } });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineAnalyticsLink"]')).toHaveLength(1);
   });
 
   it('renders a documents link', () => {
-    setMockValues({ myRole: { canViewEngineDocuments: true } });
+    setMockValues({ ...values, myRole: { canViewEngineDocuments: true } });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineDocumentsLink"]')).toHaveLength(1);
   });
 
   it('renders a schema link', () => {
-    setMockValues({ myRole: { canViewEngineSchema: true } });
+    setMockValues({ ...values, myRole: { canViewEngineSchema: true } });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineSchemaLink"]')).toHaveLength(1);
-
-    // TODO: Schema warning icon
   });
 
-  // TODO: Unskip when EngineLogic is migrated
-  it.skip('renders a crawler link', () => {
-    setMockValues({ myRole: { canViewEngineCrawler: true } });
+  it('renders schema nav icons', () => {
+    const myRole = { canViewEngineSchema: true };
+    const wrapper = shallow(<EngineNav />);
+
+    setMockValues({ ...values, myRole, hasUnconfirmedSchemaFields: true });
+    wrapper.setProps({}); // Re-render
+    expect(wrapper.find('[data-test-subj="EngineNavSchemaUnconfirmedFields"]')).toHaveLength(1);
+
+    setMockValues({ ...values, myRole, hasSchemaConflicts: true });
+    wrapper.setProps({}); // Re-render
+    expect(wrapper.find('[data-test-subj="EngineNavSchemaConflicts"]')).toHaveLength(1);
+  });
+
+  it('renders a crawler link', () => {
+    const myRole = { canViewEngineCrawler: true };
+    setMockValues({ ...values, myRole });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineCrawlerLink"]')).toHaveLength(1);
 
-    // TODO: Test that the crawler link does NOT show up for meta/sample engines
+    // Does not render for meta engines
+    setMockValues({ ...values, myRole, isMetaEngine: true });
+    wrapper.setProps({}); // Re-render
+    expect(wrapper.find('[data-test-subj="EngineCrawlerLink"]')).toHaveLength(0);
+
+    // Does not render for sample engine
+    setMockValues({ ...values, myRole, isSampleEngine: true });
+    wrapper.setProps({}); // Re-render
+    expect(wrapper.find('[data-test-subj="EngineCrawlerLink"]')).toHaveLength(0);
   });
 
-  // TODO: Unskip when EngineLogic is migrated
-  it.skip('renders a meta engine source engines link', () => {
-    setMockValues({ myRole: { canViewMetaEngineSourceEngines: true } });
+  it('renders a meta engine source engines link', () => {
+    const myRole = { canViewMetaEngineSourceEngines: true };
+    setMockValues({ ...values, myRole, isMetaEngine: true });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="MetaEngineEnginesLink"]')).toHaveLength(1);
 
-    // TODO: Test that the crawler link does NOT show up for non-meta engines
+    // Does not render if engine is not a meta-engine
+    setMockValues({ ...values, myRole, isMetaEngine: false });
+    wrapper.setProps({}); // Re-render
+    expect(wrapper.find('[data-test-subj="MetaEngineEnginesLink"]')).toHaveLength(0);
   });
 
   it('renders a relevance tuning link', () => {
-    setMockValues({ myRole: { canManageEngineRelevanceTuning: true } });
+    setMockValues({ ...values, myRole: { canManageEngineRelevanceTuning: true } });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineRelevanceTuningLink"]')).toHaveLength(1);
+  });
 
-    // TODO: Boost error icon
+  it('renders relevance tuning nav icons', () => {
+    setMockValues({
+      ...values,
+      myRole: { canManageEngineRelevanceTuning: true },
+      engine: {
+        unsearchedUnconfirmedFields: true,
+        invalidBoosts: true,
+      },
+    });
+    const wrapper = shallow(<EngineNav />);
+
+    expect(wrapper.find('[data-test-subj="EngineNavRelevanceTuningInvalidBoosts"]')).toHaveLength(1); // prettier-ignore
+    expect(wrapper.find('[data-test-subj="EngineNavRelevanceTuningUnsearchedFields"]')).toHaveLength(1); // prettier-ignore
   });
 
   it('renders a synonyms link', () => {
-    setMockValues({ myRole: { canManageEngineSynonyms: true } });
+    setMockValues({ ...values, myRole: { canManageEngineSynonyms: true } });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineSynonymsLink"]')).toHaveLength(1);
   });
 
   it('renders a curations link', () => {
-    setMockValues({ myRole: { canManageEngineCurations: true } });
+    setMockValues({ ...values, myRole: { canManageEngineCurations: true } });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineCurationsLink"]')).toHaveLength(1);
   });
 
   it('renders a results settings link', () => {
-    setMockValues({ myRole: { canManageEngineResultSettings: true } });
+    setMockValues({ ...values, myRole: { canManageEngineResultSettings: true } });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineResultSettingsLink"]')).toHaveLength(1);
   });
 
   it('renders a Search UI link', () => {
-    setMockValues({ myRole: { canManageEngineSearchUi: true } });
+    setMockValues({ ...values, myRole: { canManageEngineSearchUi: true } });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineSearchUILink"]')).toHaveLength(1);
   });
 
   it('renders an API logs link', () => {
-    setMockValues({ myRole: { canViewEngineApiLogs: true } });
+    setMockValues({ ...values, myRole: { canViewEngineApiLogs: true } });
     const wrapper = shallow(<EngineNav />);
     expect(wrapper.find('[data-test-subj="EngineAPILogsLink"]')).toHaveLength(1);
   });
