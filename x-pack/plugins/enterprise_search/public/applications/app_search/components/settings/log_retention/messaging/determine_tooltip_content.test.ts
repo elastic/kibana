@@ -20,7 +20,7 @@ describe('determineTooltipContent', () => {
 
   describe('analytics messages', () => {
     describe('when analytics logs are enabled', () => {
-      describe('and they're using the default policy', () => {
+      describe("and they're using the default policy", () => {
         it('will render a retention policy message', () => {
           expect(
             determineTooltipContent(ANALYTICS_MESSAGES, true, {
@@ -95,7 +95,7 @@ describe('determineTooltipContent', () => {
 
   describe('api messages', () => {
     describe('when analytics logs are enabled', () => {
-      describe('and they're using the default policy', () => {
+      describe("and they're using the default policy", () => {
         it('will render a retention policy message', () => {
           expect(
             determineTooltipContent(API_MESSAGES, true, {

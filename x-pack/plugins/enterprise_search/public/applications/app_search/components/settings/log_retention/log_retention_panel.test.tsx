@@ -48,7 +48,7 @@ describe('<LogRetentionPanel />', () => {
 
     const logRetentionPanel = shallow(<LogRetentionPanel />);
     expect(
-      logRetentionPanel.find(`[data-test-subj="LogRetentionPanelAnalyticsSwitch"]`).prop('checked')
+      logRetentionPanel.find('[data-test-subj="LogRetentionPanelAnalyticsSwitch"]').prop('checked')
     ).toEqual(false);
   });
 
@@ -64,7 +64,7 @@ describe('<LogRetentionPanel />', () => {
 
     const logRetentionPanel = shallow(<LogRetentionPanel />);
     expect(
-      logRetentionPanel.find(`[data-test-subj="LogRetentionPanelAnalyticsSwitch"]`).prop('checked')
+      logRetentionPanel.find('[data-test-subj="LogRetentionPanelAnalyticsSwitch"]').prop('checked')
     ).toEqual(true);
   });
 
@@ -80,7 +80,7 @@ describe('<LogRetentionPanel />', () => {
 
     const logRetentionPanel = shallow(<LogRetentionPanel />);
     expect(
-      logRetentionPanel.find(`[data-test-subj="LogRetentionPanelAPISwitch"]`).prop('checked')
+      logRetentionPanel.find('[data-test-subj="LogRetentionPanelAPISwitch"]').prop('checked')
     ).toEqual(false);
   });
 
@@ -96,7 +96,7 @@ describe('<LogRetentionPanel />', () => {
 
     const logRetentionPanel = shallow(<LogRetentionPanel />);
     expect(
-      logRetentionPanel.find(`[data-test-subj="LogRetentionPanelAPISwitch"]`).prop('checked')
+      logRetentionPanel.find('[data-test-subj="LogRetentionPanelAPISwitch"]').prop('checked')
     ).toEqual(true);
   });
 
@@ -107,10 +107,10 @@ describe('<LogRetentionPanel />', () => {
     });
     const logRetentionPanel = shallow(<LogRetentionPanel />);
     expect(
-      logRetentionPanel.find(`[data-test-subj="LogRetentionPanelAnalyticsSwitch"]`).prop('disabled')
+      logRetentionPanel.find('[data-test-subj="LogRetentionPanelAnalyticsSwitch"]').prop('disabled')
     ).toEqual(false);
     expect(
-      logRetentionPanel.find(`[data-test-subj="LogRetentionPanelAPISwitch"]`).prop('disabled')
+      logRetentionPanel.find('[data-test-subj="LogRetentionPanelAPISwitch"]').prop('disabled')
     ).toEqual(false);
   });
 
@@ -122,10 +122,10 @@ describe('<LogRetentionPanel />', () => {
     const logRetentionPanel = shallow(<LogRetentionPanel />);
 
     expect(
-      logRetentionPanel.find(`[data-test-subj="LogRetentionPanelAnalyticsSwitch"]`).prop('disabled')
+      logRetentionPanel.find('[data-test-subj="LogRetentionPanelAnalyticsSwitch"]').prop('disabled')
     ).toEqual(true);
     expect(
-      logRetentionPanel.find(`[data-test-subj="LogRetentionPanelAPISwitch"]`).prop('disabled')
+      logRetentionPanel.find('[data-test-subj="LogRetentionPanelAPISwitch"]').prop('disabled')
     ).toEqual(true);
   });
 
@@ -140,7 +140,7 @@ describe('<LogRetentionPanel />', () => {
     });
     const logRetentionPanel = shallow(<LogRetentionPanel />);
     logRetentionPanel
-      .find(`[data-test-subj="LogRetentionPanelAnalyticsSwitch"]`)
+      .find('[data-test-subj="LogRetentionPanelAnalyticsSwitch"]')
       .simulate('change');
     expect(actions.toggleLogRetention).toHaveBeenCalledWith('analytics');
   });
@@ -155,7 +155,7 @@ describe('<LogRetentionPanel />', () => {
       }),
     });
     const logRetentionPanel = shallow(<LogRetentionPanel />);
-    logRetentionPanel.find(`[data-test-subj="LogRetentionPanelAPISwitch"]`).simulate('change');
+    logRetentionPanel.find('[data-test-subj="LogRetentionPanelAPISwitch"]').simulate('change');
     expect(actions.toggleLogRetention).toHaveBeenCalledWith('api');
   });
 });
@@ -184,4 +184,4 @@ const mockLogRetention = (logRetention: Partial<ILogRetention>) => {
       ...logRetention.api,
     },
   };
-}
+};
