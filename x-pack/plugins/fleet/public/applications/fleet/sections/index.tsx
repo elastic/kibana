@@ -7,6 +7,6 @@ export { IngestManagerOverview } from './overview';
 export { EPMApp } from './epm';
 export { AgentPolicyApp } from './agent_policy';
 export { DataStreamApp } from './data_stream';
-export { FleetApp } from './fleet';
+export { FleetApp } from './agents';
 
 export type Section = 'overview' | 'epm' | 'agent_policy' | 'fleet' | 'data_stream';

@@ -16,7 +16,7 @@ import {
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 import { useLink, useGetPackages } from '../../../hooks';
-import { Loading } from '../../fleet/components';
+import { Loading } from '../../agents/components';
 import { installationStatuses } from '../../../../../../common/constants';
 
 export const OverviewIntegrationSection: React.FC = () => {

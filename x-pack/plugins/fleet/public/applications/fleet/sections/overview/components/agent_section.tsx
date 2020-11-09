@@ -16,7 +16,7 @@ import {
 import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 import { useLink, useGetAgentStatus } from '../../../hooks';
-import { Loading } from '../../fleet/components';
+import { Loading } from '../../agents/components';
 
 export const OverviewAgentSection = () => {
   const { getHref } = useLink();

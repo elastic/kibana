@@ -21,7 +21,7 @@ function createXPackRoot(config: {} = {}) {
       scanDirs: [],
       paths: [
         resolve(__dirname, '../../../../../x-pack/plugins/encrypted_saved_objects'),
-        resolve(__dirname, '../../../../../x-pack/plugins/ingest_manager'),
+        resolve(__dirname, '../../../../../x-pack/plugins/fleet'),
         resolve(__dirname, '../../../../../x-pack/plugins/licensing'),
       ],
     },
@@ -94,7 +94,7 @@ describe('ingestManager', () => {
 
   // For now, only the manager routes (/agent_policies & /package_policies) are added
   // EPM and ingest will be conditionally added when we enable these lines
-  // https://github.com/jfsiii/kibana/blob/f73b54ebb7e0f6fc00efd8a6800a01eb2d9fb772/x-pack/plugins/ingest_manager/server/plugin.ts#L84
+  // https://github.com/jfsiii/kibana/blob/f73b54ebb7e0f6fc00efd8a6800a01eb2d9fb772/x-pack/plugins/fleet/server/plugin.ts#L84
   // adding tests to confirm the Fleet & EPM routes are never added
 
   describe('manager and EPM; no Fleet', () => {
