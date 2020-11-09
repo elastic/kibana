@@ -36,8 +36,8 @@ type ActionButtonProps = BackgroundSessionIndicatorProps & { buttonProps: EuiBut
 const CancelButton = ({ onCancel = () => {}, buttonProps = {} }: ActionButtonProps) => (
   <EuiButtonEmpty onClick={onCancel} {...buttonProps}>
     <FormattedMessage
-      id={'xpack.dataEnhanced.backgroundSessionIndicator.cancelButtonText'}
-      defaultMessage={'Cancel'}
+      id="xpack.data.backgroundSessionIndicator.cancelButtonText"
+      defaultMessage="Cancel"
     />
   </EuiButtonEmpty>
 );
@@ -48,8 +48,8 @@ const ContinueInBackgroundButton = ({
 }: ActionButtonProps) => (
   <EuiButtonEmpty onClick={onContinueInBackground} {...buttonProps}>
     <FormattedMessage
-      id={'xpack.dataEnhanced.backgroundSessionIndicator.continueInBackgroundButtonText'}
-      defaultMessage={'Continue in background'}
+      id="xpack.data.backgroundSessionIndicator.continueInBackgroundButtonText"
+      defaultMessage="Continue in background"
     />
   </EuiButtonEmpty>
 );
@@ -61,8 +61,8 @@ const ViewBackgroundSessionsButton = ({
   // TODO: make this a link
   <EuiButtonEmpty onClick={onViewBackgroundSessions} {...buttonProps}>
     <FormattedMessage
-      id={'xpack.dataEnhanced.backgroundSessionIndicator.viewBackgroundSessionsLinkText'}
-      defaultMessage={'View background sessions'}
+      id="xpack.data.backgroundSessionIndicator.viewBackgroundSessionsLinkText"
+      defaultMessage="View background sessions"
     />
   </EuiButtonEmpty>
 );
@@ -70,8 +70,8 @@ const ViewBackgroundSessionsButton = ({
 const RefreshButton = ({ onRefresh = () => {}, buttonProps = {} }: ActionButtonProps) => (
   <EuiButtonEmpty onClick={onRefresh} {...buttonProps}>
     <FormattedMessage
-      id={'xpack.dataEnhanced.backgroundSessionIndicator.refreshButtonText'}
-      defaultMessage={'Refresh'}
+      id="xpack.data.backgroundSessionIndicator.refreshButtonText"
+      defaultMessage="Refresh"
     />
   </EuiButtonEmpty>
 );
@@ -79,8 +79,8 @@ const RefreshButton = ({ onRefresh = () => {}, buttonProps = {} }: ActionButtonP
 const SaveButton = ({ onSaveResults = () => {}, buttonProps = {} }: ActionButtonProps) => (
   <EuiButtonEmpty onClick={onSaveResults} {...buttonProps}>
     <FormattedMessage
-      id={'xpack.dataEnhanced.backgroundSessionIndicator.saveButtonText'}
-      defaultMessage={'Save'}
+      id="xpack.data.backgroundSessionIndicator.saveButtonText"
+      defaultMessage="Save"
     />
   </EuiButtonEmpty>
 );
@@ -100,16 +100,16 @@ const backgroundSessionIndicatorViewStateToProps: {
       color: 'subdued',
       iconType: 'clock',
       'aria-label': i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.loadingResultsIconAriaLabel',
+        'xpack.data.backgroundSessionIndicator.loadingResultsIconAriaLabel',
         { defaultMessage: 'Loading results' }
       ),
       tooltipText: i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.loadingResultsIconTooltipText',
+        'xpack.data.backgroundSessionIndicator.loadingResultsIconTooltipText',
         { defaultMessage: 'Loading results' }
       ),
     },
     popover: {
-      text: i18n.translate('xpack.dataEnhanced.backgroundSessionIndicator.loadingResultsText', {
+      text: i18n.translate('xpack.data.backgroundSessionIndicator.loadingResultsText', {
         defaultMessage: 'Loading',
       }),
       primaryAction: CancelButton,
@@ -121,20 +121,20 @@ const backgroundSessionIndicatorViewStateToProps: {
       color: 'subdued',
       iconType: 'checkInCircleFilled',
       'aria-label': i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.resultsLoadedIconAriaLabel',
+        'xpack.data.backgroundSessionIndicator.resultsLoadedIconAriaLabel',
         {
           defaultMessage: 'Results loaded',
         }
       ),
       tooltipText: i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.resultsLoadedIconTooltipText',
+        'xpack.data.backgroundSessionIndicator.resultsLoadedIconTooltipText',
         {
           defaultMessage: 'Results loaded',
         }
       ),
     },
     popover: {
-      text: i18n.translate('xpack.dataEnhanced.backgroundSessionIndicator.resultsLoadedText', {
+      text: i18n.translate('xpack.data.backgroundSessionIndicator.resultsLoadedText', {
         defaultMessage: 'Results loaded',
       }),
       primaryAction: SaveButton,
@@ -145,25 +145,22 @@ const backgroundSessionIndicatorViewStateToProps: {
     button: {
       iconType: EuiLoadingSpinner,
       'aria-label': i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.loadingInTheBackgroundIconAriaLabel',
+        'xpack.data.backgroundSessionIndicator.loadingInTheBackgroundIconAriaLabel',
         {
           defaultMessage: 'Loading results in the background',
         }
       ),
       tooltipText: i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.loadingInTheBackgroundIconTooltipText',
+        'xpack.data.backgroundSessionIndicator.loadingInTheBackgroundIconTooltipText',
         {
           defaultMessage: 'Loading results in the background',
         }
       ),
     },
     popover: {
-      text: i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.loadingInTheBackgroundText',
-        {
-          defaultMessage: 'Loading in the background',
-        }
-      ),
+      text: i18n.translate('xpack.data.backgroundSessionIndicator.loadingInTheBackgroundText', {
+        defaultMessage: 'Loading in the background',
+      }),
       primaryAction: CancelButton,
       secondaryAction: ViewBackgroundSessionsButton,
     },
@@ -173,13 +170,13 @@ const backgroundSessionIndicatorViewStateToProps: {
       color: 'success',
       iconType: 'checkInCircleFilled',
       'aria-label': i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.resultLoadedInTheBackgroundIconAraText',
+        'xpack.data.backgroundSessionIndicator.resultLoadedInTheBackgroundIconAraText',
         {
           defaultMessage: 'Results loaded in the background',
         }
       ),
       tooltipText: i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.resultLoadedInTheBackgroundIconTooltipText',
+        'xpack.data.backgroundSessionIndicator.resultLoadedInTheBackgroundIconTooltipText',
         {
           defaultMessage: 'Results loaded in the background',
         }
@@ -187,7 +184,7 @@ const backgroundSessionIndicatorViewStateToProps: {
     },
     popover: {
       text: i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.resultLoadedInTheBackgroundText',
+        'xpack.data.backgroundSessionIndicator.resultLoadedInTheBackgroundText',
         {
           defaultMessage: 'Results loaded',
         }
@@ -200,20 +197,20 @@ const backgroundSessionIndicatorViewStateToProps: {
       color: 'warning',
       iconType: 'refresh',
       'aria-label': i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.restoredResultsIconAriaLabel',
+        'xpack.data.backgroundSessionIndicator.restoredResultsIconAriaLabel',
         {
           defaultMessage: 'Results no longer current',
         }
       ),
       tooltipText: i18n.translate(
-        'xpack.dataEnhanced.backgroundSessionIndicator.restoredResultsTooltipText',
+        'xpack.data.backgroundSessionIndicator.restoredResultsTooltipText',
         {
           defaultMessage: 'Results no longer current',
         }
       ),
     },
     popover: {
-      text: i18n.translate('xpack.dataEnhanced.backgroundSessionIndicator.restoredText', {
+      text: i18n.translate('xpack.data.backgroundSessionIndicator.restoredText', {
         defaultMessage: 'Results no longer current',
       }),
       primaryAction: RefreshButton,

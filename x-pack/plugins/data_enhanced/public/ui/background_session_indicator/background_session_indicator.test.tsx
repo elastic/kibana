@@ -8,7 +8,7 @@ import React, { ReactNode } from 'react';
 import { screen, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BackgroundSessionIndicator } from './background_session_indicator';
-import { BackgroundSessionViewState } from '../background_session_view_state';
+import { BackgroundSessionViewState } from '../connected_background_session_indicator';
 import { IntlProvider } from 'react-intl';
 
 function Container({ children }: { children?: ReactNode }) {
