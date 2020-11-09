@@ -273,6 +273,129 @@ export default function ({ getService }) {
               });
             }));
       });
+
+      describe('`has_reference` and `has_reference_operator` parameters', () => {
+        before(() => esArchiver.load('saved_objects/references'));
+        after(() => esArchiver.unload('saved_objects/references'));
+
+        it('search for a reference', async () => {
+          await supertest
+            .get('/api/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              has_reference: JSON.stringify({ type: 'ref-type', id: 'ref-1' }),
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj) => obj.id)).to.eql(['only-ref-1', 'ref-1-and-ref-2']);
+            });
+        });
+
+        it('search for multiple references with OR operator', async () => {
+          await supertest
+            .get('/api/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              has_reference: JSON.stringify([
+                { type: 'ref-type', id: 'ref-1' },
+                { type: 'ref-type', id: 'ref-2' },
+              ]),
+              has_reference_operator: 'OR',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj) => obj.id)).to.eql([
+                'only-ref-1',
+                'ref-1-and-ref-2',
+                'only-ref-2',
+              ]);
+            });
+        });
+
+        it('search for multiple references with AND operator', async () => {
+          await supertest
+            .get('/api/saved_objects/_find')
+            .query({
+              type: 'visualization',
+              has_reference: JSON.stringify([
+                { type: 'ref-type', id: 'ref-1' },
+                { type: 'ref-type', id: 'ref-2' },
+              ]),
+              has_reference_operator: 'AND',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.map((obj) => obj.id)).to.eql(['ref-1-and-ref-2']);
+            });
+        });
+      });
+    });
+
+    describe('searching for special characters', () => {
+      before(() => esArchiver.load('saved_objects/find_edgecases'));
+      after(() => esArchiver.unload('saved_objects/find_edgecases'));
+
+      it('can search for objects with dashes', async () =>
+        await supertest
+          .get('/api/saved_objects/_find')
+          .query({
+            type: 'visualization',
+            search_fields: 'title',
+            search: 'my-vis*',
+          })
+          .expect(200)
+          .then((resp) => {
+            const savedObjects = resp.body.saved_objects;
+            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['my-visualization']);
+          }));
+
+      it('can search with the prefix search character just after a special one', async () =>
+        await supertest
+          .get('/api/saved_objects/_find')
+          .query({
+            type: 'visualization',
+            search_fields: 'title',
+            search: 'my-*',
+          })
+          .expect(200)
+          .then((resp) => {
+            const savedObjects = resp.body.saved_objects;
+            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['my-visualization']);
+          }));
+
+      it('can search for objects with asterisk', async () =>
+        await supertest
+          .get('/api/saved_objects/_find')
+          .query({
+            type: 'visualization',
+            search_fields: 'title',
+            search: 'some*vi*',
+          })
+          .expect(200)
+          .then((resp) => {
+            const savedObjects = resp.body.saved_objects;
+            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['some*visualization']);
+          }));
+
+      it('can still search tokens by prefix', async () =>
+        await supertest
+          .get('/api/saved_objects/_find')
+          .query({
+            type: 'visualization',
+            search_fields: 'title',
+            search: 'visuali*',
+          })
+          .expect(200)
+          .then((resp) => {
+            const savedObjects = resp.body.saved_objects;
+            expect(savedObjects.map((so) => so.attributes.title)).to.eql([
+              'my-visualization',
+              'some*visualization',
+            ]);
+          }));
     });
 
     describe('without kibana index', () => {

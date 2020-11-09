@@ -17,14 +17,14 @@ import { OverviewPanel } from './overview_panel';
 import { OverviewStats } from './overview_stats';
 import { useLink, useGetPackages } from '../../../hooks';
 import { Loading } from '../../fleet/components';
-import { InstallationStatus } from '../../../types';
+import { installationStatuses } from '../../../../../../common/constants';
 
 export const OverviewIntegrationSection: React.FC = () => {
   const { getHref } = useLink();
   const packagesRequest = useGetPackages();
   const res = packagesRequest.data?.response;
   const total = res?.length ?? 0;
-  const installed = res?.filter((p) => p.status === InstallationStatus.installed)?.length ?? 0;
+  const installed = res?.filter((p) => p.status === installationStatuses.Installed)?.length ?? 0;
   const updatablePackages =
     res?.filter(
       (item) => 'savedObject' in item && item.version > item.savedObject.attributes.version
