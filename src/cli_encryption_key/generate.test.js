@@ -66,12 +66,11 @@ describe('encryption key generation', () => {
   });
 
   it('should prompt the user to write keys if the interactive flag is set', () => {
-    const confirmSpy = jest.spyOn(prompt, 'confirm');
-
+    const confirmSpy = jest.spyOn(prompt, 'confirm').mockResolvedValue(false);
     generate(encryptionConfig, { interactive: false });
-    expect(prompt.confirm).not.toHaveBeenCalled();
+    expect(confirmSpy).not.toHaveBeenCalled();
     generate(encryptionConfig, { interactive: true });
-    expect(prompt.confirm).toHaveBeenCalledWith('Write to kibana.yml?');
+    expect(confirmSpy).toHaveBeenCalledWith('Write to kibana.yml?');
   });
 
   it('should write keys if confirm is true', async () => {
