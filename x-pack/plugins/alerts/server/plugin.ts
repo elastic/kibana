@@ -6,6 +6,7 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { first, map } from 'rxjs/operators';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { combineLatest } from 'rxjs';
 import { SecurityPluginSetup } from '../../security/server';
 import {
   EncryptedSavedObjectsPluginSetup,
@@ -30,6 +31,8 @@ import {
   SharedGlobalConfig,
   ElasticsearchServiceStart,
   ILegacyClusterClient,
+  StatusServiceSetup,
+  ServiceStatus,
 } from '../../../../src/core/server';
 
 import {
@@ -56,17 +59,23 @@ import {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
 } from '../../actions/server';
-import { Services } from './types';
+import { AlertsHealth, Services } from './types';
 import { registerAlertsUsageCollector } from './usage';
 import { initializeAlertingTelemetry, scheduleAlertingTelemetry } from './usage/task';
 import { IEventLogger, IEventLogService, IEventLogClientService } from '../../event_log/server';
 import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
 import { setupSavedObjects } from './saved_objects';
-import { AlertsConfig } from './config';
 import {
   initializeApiKeyInvalidator,
   scheduleApiKeyInvalidatorTask,
 } from './invalidate_pending_api_keys/task';
+import {
+  getHealthStatusStream,
+  scheduleAlertingHealthCheck,
+  initializeAlertingHealth,
+} from './health';
+import { AlertsConfig } from './config';
+import { getHealth } from './health/get_health';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -83,6 +92,7 @@ export interface PluginSetupContract {
 export interface PluginStartContract {
   listTypes: AlertTypeRegistry['list'];
   getAlertsClientWithRequest(request: KibanaRequest): PublicMethodsOf<AlertsClient>;
+  getFrameworkHealth: () => Promise<AlertsHealth>;
 }
 
 export interface AlertingPluginsSetup {
@@ -94,6 +104,7 @@ export interface AlertingPluginsSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   eventLog: IEventLogService;
+  statusService: StatusServiceSetup;
 }
 export interface AlertingPluginsStart {
   actions: ActionsPluginStartContract;
@@ -201,6 +212,25 @@ export class AlertingPlugin {
       this.security
     );
 
+    core.getStartServices().then(async ([, startPlugins]) => {
+      core.status.set(
+        combineLatest([
+          core.status.derivedStatus$,
+          getHealthStatusStream(startPlugins.taskManager),
+        ]).pipe(
+          map(([derivedStatus, healthStatus]) => {
+            if (healthStatus.level > derivedStatus.level) {
+              return healthStatus as ServiceStatus;
+            } else {
+              return derivedStatus;
+            }
+          })
+        )
+      );
+    });
+
+    initializeAlertingHealth(this.logger, plugins.taskManager, core.getStartServices());
+
     core.http.registerRouteHandlerContext('alerting', this.createRouteHandlerContext(core));
 
     // Routes
@@ -291,11 +321,14 @@ export class AlertingPlugin {
 
     scheduleAlertingTelemetry(this.telemetryLogger, plugins.taskManager);
 
+    scheduleAlertingHealthCheck(this.logger, this.config, plugins.taskManager);
     scheduleApiKeyInvalidatorTask(this.telemetryLogger, this.config, plugins.taskManager);
 
     return {
       listTypes: alertTypeRegistry!.list.bind(this.alertTypeRegistry!),
       getAlertsClientWithRequest,
+      getFrameworkHealth: async () =>
+        await getHealth(core.savedObjects.createInternalRepository(['alert'])),
     };
   }
 
@@ -310,6 +343,8 @@ export class AlertingPlugin {
           return alertsClientFactory!.create(request, savedObjects);
         },
         listTypes: alertTypeRegistry!.list.bind(alertTypeRegistry!),
+        getFrameworkHealth: async () =>
+          await getHealth(savedObjects.createInternalRepository(['alert'])),
       };
     };
   };

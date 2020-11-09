@@ -10,6 +10,9 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {};
     expect(configSchema.validate(config)).toMatchInlineSnapshot(`
       Object {
+        "healthCheck": Object {
+          "interval": "60m",
+        },
         "invalidateApiKeysTask": Object {
           "interval": "5m",
           "removalDelay": "5m",
