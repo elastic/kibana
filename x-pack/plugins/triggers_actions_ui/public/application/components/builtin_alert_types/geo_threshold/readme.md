@@ -34,8 +34,9 @@ append `--ssl` to the end of each as an arg, i.e.:
 live bus data to populate the system. Clone the repo and follow the instructions in
 the readme to set up. 
 - Using the MTA key you obtained in the previous step, the final command to run
-in a local terminal should look something like:
-`node ./load_tracks.js -a <YOUR_API_KEY>`
+in a local terminal should look something like the following. This script loads large
+quantities of data the frequency listed below (20000ms = 20s) or higher:
+`node ./load_tracks.js -a <YOUR_API_KEY> -f 20000`
 
 ### 5. Open required Kibana tabs
 There are 4 separate tabs you'll need for a combination of loading and viewing the
@@ -159,7 +160,24 @@ created earlier in dev tools: `manhattan_mta_alerts`. Accept the provided defaul
 - Click `Create index pattern`
 
 ### 11. Create Map
-- You should already have the boundaries layer from the GeoJson upload earlier
-- Do top hits (quantity: 1) on the generate tracks script output docs (index: `tracks`). Set sorting on timestamp descending
-- Create another doc layer for the alerting index (not top hits) (manhattan_index_alerts: current location)
-- On time picker set: `Last 30 seconds, <Apply>` and `Refresh every: 2 seconds, <start>`
+- The map you create is entirely up to you, minimally you have the following
+source data to work with:
+    - Original tracks data
+    - Generated alert data
+    - Boundary data
+- Each of these data sources can be added 1 or more times with different layers
+  focusing on different aspects of the data worth illustrating
+- Minimally here are a few tips for working with live data:
+    - Update the time settings to see new crossings and remove old ones, something
+    like the following screenshot:
+    ![Example Time Settings](images/example_time_settings.png)
+    - Consider adding multiple layers for the alerts, minimally add the crossing line
+    but also consider adding layers for both the before and after locations. These would
+    all come from the same source but be separate layers
+    - If you add `mtatracks*`, consider setting the `Top Hits` setting to 1 or a larger
+    number if you want to see a trail of where it's been. Just be aware that many busses
+    moving around will create a lot of points. You could do multiple layers here where
+    small points plot the bus's trail and the larger point covers the most recent location.
+    - Consider adding tooltips to layers to better understand what layers you're looking at.
+
+![Example map](images/example_mta_map.png)
