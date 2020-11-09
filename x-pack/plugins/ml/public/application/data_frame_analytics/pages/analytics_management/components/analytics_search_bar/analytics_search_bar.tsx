@@ -4,15 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, FC, Fragment, useState } from 'react';
-import {
-  EuiSearchBar,
-  EuiSearchBarProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { stringMatch } from '../../../../../util/string_utils';
 import {
   TermClause,
@@ -151,69 +143,3 @@ export function filterAnalytics(
 
   return filtered;
 }
-
-function getError(errorMessage: string | null) {
-  if (errorMessage) {
-    return i18n.translate('xpack.ml.analyticList.searchBar.invalidSearchErrorMessage', {
-      defaultMessage: 'Invalid search: {errorMessage}',
-      values: { errorMessage },
-    });
-  }
-
-  return '';
-}
-
-interface Props {
-  filters: EuiSearchBarProps['filters'];
-  searchQueryText: string;
-  setSearchQueryText: Dispatch<SetStateAction<string>>;
-}
-
-export const AnalyticsSearchBar: FC<Props> = ({ filters, searchQueryText, setSearchQueryText }) => {
-  const [errorMessage, setErrorMessage] = useState<null | string>(null);
-
-  const onChange: EuiSearchBarProps['onChange'] = ({ query, error }) => {
-    if (error) {
-      setErrorMessage(error.message);
-    } else if (query !== null && query.text !== undefined) {
-      setSearchQueryText(query.text);
-      setErrorMessage(null);
-    }
-  };
-
-  return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem data-test-subj="mlAnalyticsSearchBar" grow={false}>
-        {searchQueryText === undefined && (
-          <EuiSearchBar
-            box={{
-              incremental: true,
-            }}
-            filters={filters}
-            onChange={onChange}
-            className="mlAnalyitcsSearchBar"
-          />
-        )}
-        {searchQueryText !== undefined && (
-          <EuiSearchBar
-            box={{
-              incremental: true,
-            }}
-            defaultQuery={searchQueryText}
-            filters={filters}
-            onChange={onChange}
-            className="mlAnalyitcsSearchBar"
-          />
-        )}
-        <EuiFormRow
-          fullWidth
-          isInvalid={errorMessage !== null}
-          error={getError(errorMessage)}
-          style={{ maxHeight: '0px' }}
-        >
-          <Fragment />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-};

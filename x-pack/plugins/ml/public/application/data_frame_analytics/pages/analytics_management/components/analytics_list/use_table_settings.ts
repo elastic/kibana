@@ -7,8 +7,8 @@
 import { useState } from 'react';
 import { Direction, EuiBasicTableProps, Pagination, PropertySort } from '@elastic/eui';
 
-const PAGE_SIZE = 2;
-const PAGE_SIZE_OPTIONS = [2, 10, 25, 50];
+const PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 // Copying from EUI EuiBasicTable types as type is not correctly picked up for table's onChange
 // Can be removed when https://github.com/elastic/eui/issues/4011 is addressed in EUI
