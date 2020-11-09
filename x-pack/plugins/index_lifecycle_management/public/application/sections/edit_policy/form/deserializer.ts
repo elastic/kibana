@@ -6,17 +6,17 @@
 
 import { produce } from 'immer';
 
-import { SerializedPolicy } from '../../../../common/types';
+import { SerializedPolicy } from '../../../../../common/types';
 
-import { splitSizeAndUnits } from '../../services/policies/policy_serialization';
+import { splitSizeAndUnits } from '../../../lib/policies';
 
-import { determineDataTierAllocationType } from '../../lib';
+import { determineDataTierAllocationType } from '../../../lib';
 
-import { FormInternal } from './types';
+import { FormInternal } from '../types';
 
 export const deserializer = (policy: SerializedPolicy): FormInternal => {
   const {
-    phases: { hot, warm, cold },
+    phases: { hot, warm, cold, delete: deletePhase },
   } = policy;
 
   const _meta: FormInternal['_meta'] = {
@@ -36,6 +36,9 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
       enabled: Boolean(cold),
       dataTierAllocationType: determineDataTierAllocationType(cold?.actions),
       freezeEnabled: Boolean(cold?.actions?.freeze),
+    },
+    delete: {
+      enabled: Boolean(deletePhase),
     },
   };
 
@@ -84,6 +87,14 @@ export const deserializer = (policy: SerializedPolicy): FormInternal => {
           const minAge = splitSizeAndUnits(draft.phases.cold.min_age);
           draft.phases.cold.min_age = minAge.size;
           draft._meta.cold.minAgeUnit = minAge.units;
+        }
+      }
+
+      if (draft.phases.delete) {
+        if (draft.phases.delete.min_age) {
+          const minAge = splitSizeAndUnits(draft.phases.delete.min_age);
+          draft.phases.delete.min_age = minAge.size;
+          draft._meta.delete.minAgeUnit = minAge.units;
         }
       }
     }

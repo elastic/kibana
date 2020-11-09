@@ -8,11 +8,9 @@ import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiTextColor, EuiDescribedFormGroup } from '@elastic/eui';
 
-import { PhaseWithIndexPriority, Phases } from '../../../../../../../common/types';
+import { Phases } from '../../../../../../../common/types';
 
 import { UseField, NumericField } from '../../../../../../shared_imports';
-
-import { propertyof } from '../../../../../services/policies/policy_validation';
 
 import { LearnMoreLink } from '../../';
 
@@ -21,7 +19,6 @@ interface Props {
 }
 
 export const SetPriorityInput: FunctionComponent<Props> = ({ phase }) => {
-  const phaseIndexPriorityProperty = propertyof<PhaseWithIndexPriority>('phaseIndexPriority');
   return (
     <EuiDescribedFormGroup
       title={
@@ -52,8 +49,8 @@ export const SetPriorityInput: FunctionComponent<Props> = ({ phase }) => {
         componentProps={{
           fullWidth: false,
           euiFieldProps: {
-            'data-test-subj': `${phase}-${phaseIndexPriorityProperty}`,
-            min: 1,
+            'data-test-subj': `${phase}-phaseIndexPriority`,
+            min: 0,
           },
         }}
       />

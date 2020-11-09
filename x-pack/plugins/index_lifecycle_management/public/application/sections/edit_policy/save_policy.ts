@@ -3,23 +3,22 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import { SerializedPolicy } from '../../../../common/types';
-import { savePolicy as savePolicyApi } from '../api';
-import { showApiError } from '../api_errors';
-import { getUiMetricsForPhases, trackUiMetric } from '../ui_metric';
+
 import { UIM_POLICY_CREATE, UIM_POLICY_UPDATE } from '../../constants';
-import { toasts } from '../notification';
+
+import { toasts } from '../../services/notification';
+import { savePolicy as savePolicyApi } from '../../services/api';
+import { getUiMetricsForPhases, trackUiMetric } from '../../services/ui_metric';
+import { showApiError } from '../../services/api_errors';
 
 export const savePolicy = async (
-  readSerializedPolicy: () => SerializedPolicy,
+  serializedPolicy: SerializedPolicy,
   isNew: boolean
 ): Promise<boolean> => {
-  const serializedPolicy = readSerializedPolicy();
-
   try {
     await savePolicyApi(serializedPolicy);
   } catch (err) {
