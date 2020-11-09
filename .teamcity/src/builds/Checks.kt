@@ -14,7 +14,6 @@ object Checks : BuildType({
     "Check Telemetry Schema" to ".ci/teamcity/checks/telemetry.sh",
     "Check TypeScript Projects" to ".ci/teamcity/checks/ts_projects.sh",
     "Check File Casing" to ".ci/teamcity/checks/file_casing.sh",
-    "Check Lockfile Symlinks" to ".ci/teamcity/checks/lock_file_symlinks.sh",
     "Check Licenses" to ".ci/teamcity/checks/licenses.sh",
     "Verify NOTICE" to ".ci/teamcity/checks/verify_notice.sh",
     "Test Hardening" to ".ci/teamcity/checks/test_hardening.sh",
