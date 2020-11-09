@@ -103,7 +103,6 @@ export class IndexPatternsService {
       fields: ['title'],
       perPage: 10000,
     });
-    console.log('refreshSavedObjectsCache', so);
     this.savedObjectsCache = so;
   }
 
@@ -112,7 +111,6 @@ export class IndexPatternsService {
    * @param refresh Force refresh of index pattern list
    */
   getIds = async (refresh: boolean = false) => {
-    console.log('getIds');
     if (!this.savedObjectsCache || refresh) {
       await this.refreshSavedObjectsCache();
     }

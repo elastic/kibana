@@ -42,11 +42,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       expect(body.title).to.equal(title);
       expect(body.fields.length).to.equal(15);
       expect(body.fieldFormatMap).to.eql(fieldFormats);
-
-      await new Promise((resolve) => setTimeout(resolve, 1000 * 5));
-      const response = await supertest.get('/api/index-patterns-plugin/get-all');
-      expect(response.status).to.equal(200);
-      expect(response.body.length > 0).to.equal(true);
     });
 
     it('can get index pattern by id', async () => {
