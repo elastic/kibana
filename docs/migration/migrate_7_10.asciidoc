@@ -731,3 +731,26 @@ know about each plugin that wants to gain access
 *via https://github.com/elastic/kibana/pull/74357[#74357]*
 
 ====
+
+[discrete]
+[[breaking_plugin_v7.10.0_77327]]
+.Settings per case per connector
+[%collapsible]
+====
+
+- To create a case (`POST <kibana host>:<port>/api/cases`), you must provide a `connector`.
+Requests without a `connector` get a `400 Bad Request`.
+- To update the connector of a case (`PATCH <kibana host>:<port>/api/cases`),
+you must provide the `connector`. The `connector_id` attribute has been
+removed in favor of the `connector` attribute.
+- To set the default connector (`POST <kibana host>:<port>/api/cases/configure`),
+you must provide a `connector`. The `connector_id` and `connector_name`
+attributes have been removed in favor of the `connector` attribute.
+- To update the connector’s case closure settings
+(`PATCH <kibana host>:<port>/api/cases/configure`), you must provide a `connector`.
+The `connector_id` and `connector_name` attributes have been removed in
+favor of the `connector` attribute.
+
+*via https://github.com/elastic/kibana/pull/77327[#77327]*
+
+====
