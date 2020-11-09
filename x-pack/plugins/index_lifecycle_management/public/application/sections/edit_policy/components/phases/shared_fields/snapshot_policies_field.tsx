@@ -4,51 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
-
+import React from 'react';
+import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
-import { ApplicationStart } from 'kibana/public';
 
 import {
   EuiButtonIcon,
   EuiCallOut,
-  EuiComboBox,
   EuiComboBoxOptionOption,
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 
-import { useLoadSnapshotPolicies } from '../../../services/api';
+import { UseField, ComboBoxField, useFormData } from '../../../../../../shared_imports';
+import { useLoadSnapshotPolicies } from '../../../../../services/api';
+import { useEditPolicyContext } from '../../../edit_policy_context';
 
-interface Props {
-  value: string;
-  onChange: (value: string) => void;
-  getUrlForApp: ApplicationStart['getUrlForApp'];
-}
-export const SnapshotPolicies: React.FunctionComponent<Props> = ({
-  value,
-  onChange,
-  getUrlForApp,
-}) => {
+const waitForSnapshotFormField = 'phases.delete.actions.wait_for_snapshot.policy';
+
+export const SnapshotPoliciesField: React.FunctionComponent = () => {
+  const { getUrlForApp } = useEditPolicyContext();
   const { error, isLoading, data, resendRequest } = useLoadSnapshotPolicies();
+  const [formData] = useFormData({
+    watch: waitForSnapshotFormField,
+  });
+
+  const selectedSnapshotPolicy = get(formData, waitForSnapshotFormField);
 
   const policies = data.map((name: string) => ({
     label: name,
     value: name,
   }));
-
-  const onComboChange = (options: EuiComboBoxOptionOption[]) => {
-    if (options.length > 0) {
-      onChange(options[0].label);
-    } else {
-      onChange('');
-    }
-  };
-
-  const onCreateOption = (newValue: string) => {
-    onChange(newValue);
-  };
 
   const getUrlForSnapshotPolicyWizard = () => {
     return getUrlForApp('management', {
@@ -59,14 +46,14 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({
   let calloutContent;
   if (error) {
     calloutContent = (
-      <Fragment>
+      <>
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj="policiesErrorCallout"
           iconType="help"
           color="warning"
           title={
-            <Fragment>
+            <>
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesLoadedTitle"
                 defaultMessage="Unable to load existing policies"
@@ -84,7 +71,7 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({
                   }
                 )}
               />
-            </Fragment>
+            </>
           }
         >
           <FormattedMessage
@@ -92,11 +79,11 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({
             defaultMessage="Refresh this field and enter the name of an existing snapshot policy."
           />
         </EuiCallOut>
-      </Fragment>
+      </>
     );
   } else if (data.length === 0) {
     calloutContent = (
-      <Fragment>
+      <>
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj="noPoliciesCallout"
@@ -126,11 +113,11 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({
             }}
           />
         </EuiCallOut>
-      </Fragment>
+      </>
     );
-  } else if (value && !data.includes(value)) {
+  } else if (selectedSnapshotPolicy && !data.includes(selectedSnapshotPolicy)) {
     calloutContent = (
-      <Fragment>
+      <>
         <EuiSpacer size="m" />
         <EuiCallOut
           data-test-subj="customPolicyCallout"
@@ -160,32 +147,48 @@ export const SnapshotPolicies: React.FunctionComponent<Props> = ({
             }}
           />
         </EuiCallOut>
-      </Fragment>
+      </>
     );
   }
 
   return (
-    <Fragment>
-      <EuiComboBox
-        data-test-subj="snapshotPolicyCombobox"
-        options={policies}
-        singleSelection={{ asPlainText: true }}
-        isLoading={isLoading}
-        onCreateOption={onCreateOption}
-        selectedOptions={
-          value
-            ? [
+    <>
+      <UseField<string> path={waitForSnapshotFormField}>
+        {(field) => {
+          const singleSelectionArray: [selectedSnapshot?: string] = field.value
+            ? [field.value]
+            : [];
+
+          return (
+            <ComboBoxField
+              field={
                 {
-                  label: value,
-                  value,
+                  ...field,
+                  value: singleSelectionArray,
+                } as any
+              }
+              euiFieldProps={{
+                'data-test-subj': 'snapshotPolicyCombobox',
+                options: policies,
+                singleSelection: { asPlainText: true },
+                isLoading,
+                noSuggestions: !!(error || data.length === 0),
+                onCreateOption: (newOption: string) => {
+                  field.setValue(newOption);
                 },
-              ]
-            : []
-        }
-        onChange={onComboChange}
-        noSuggestions={!!(error || data.length === 0)}
-      />
+                onChange: (options: EuiComboBoxOptionOption[]) => {
+                  if (options.length > 0) {
+                    field.setValue(options[0].label);
+                  } else {
+                    field.setValue('');
+                  }
+                },
+              }}
+            />
+          );
+        }}
+      </UseField>
       {calloutContent}
-    </Fragment>
+    </>
   );
 };
