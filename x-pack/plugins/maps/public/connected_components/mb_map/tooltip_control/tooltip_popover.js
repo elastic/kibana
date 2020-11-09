@@ -5,8 +5,8 @@
  */
 
 import React, { Component } from 'react';
-import { LAT_INDEX, LON_INDEX } from '../../../../../common/constants';
-import { FeaturesTooltip } from '../../features_tooltip/features_tooltip';
+import { LAT_INDEX, LON_INDEX } from '../../../../common/constants';
+import { FeaturesTooltip } from '../features_tooltip/features_tooltip';
 import { EuiPopover, EuiText } from '@elastic/eui';
 
 const noop = () => {};
