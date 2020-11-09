@@ -5,6 +5,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { i18n } from '@kbn/i18n';
 
 import { EuiLink, EuiSpacer, EuiSwitch, EuiText, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { useActions, useValues } from 'kea';
@@ -29,16 +30,24 @@ export const LogRetentionPanel: React.FC = () => {
   return (
     <div data-test-subj="LogRetentionPanel">
       <EuiTitle size="s">
-        <h3>Log Retention</h3>
+        <h3>
+          {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.title', {
+            defaultMessage: 'Log Retention',
+          })}
+        </h3>
       </EuiTitle>
       <EuiText>
         <p>
-          Manage the default write settings for API Logs and Analytics.{' '}
+          {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.description', {
+            defaultMessage: 'Manage the default write settings for API Logs and Analytics.',
+          })}{' '}
           <EuiLink
             href="https://www.elastic.co/guide/en/app-search/current/logs.html"
             target="_blank"
           >
-            Learn more about retention settings.
+            {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.learnMore', {
+              defaultMessage: 'Learn more about retention settings.',
+            })}
           </EuiLink>
         </p>
       </EuiText>
@@ -47,7 +56,14 @@ export const LogRetentionPanel: React.FC = () => {
         <EuiSwitch
           label={
             <>
-              <strong>Analytics Logs</strong>{' '}
+              <strong>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.analytics.label',
+                  {
+                    defaultMessage: 'Analytics Logs',
+                  }
+                )}
+              </strong>{' '}
               {hasILM && (
                 <EuiTextColor color="subdued">
                   <AnalyticsLogRetentionMessage />
@@ -66,7 +82,14 @@ export const LogRetentionPanel: React.FC = () => {
         <EuiSwitch
           label={
             <>
-              <strong>API Logs</strong>{' '}
+              <strong>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.api.label',
+                  {
+                    defaultMessage: 'API Logs',
+                  }
+                )}
+              </strong>{' '}
               {logRetention !== null && (
                 <EuiTextColor color="subdued">
                   <ApiLogRetentionMessage />
