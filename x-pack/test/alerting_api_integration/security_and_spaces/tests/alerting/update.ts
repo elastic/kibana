@@ -214,6 +214,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 createdAt: response.body.createdAt,
                 updatedAt: response.body.updatedAt,
                 executionStatus: response.body.executionStatus,
+                notifyOnStateChange: false,
               });
               expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
               expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
