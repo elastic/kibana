@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
 
   async function initChart() {
     log.debug('navigateToApp visualize');
-    await PageObjects.visualize.navigateToNewVisualization();
+    await PageObjects.visualize.navigateToNewAggBasedVisualization();
     log.debug('clickLineChart');
     await PageObjects.visualize.clickLineChart();
     await PageObjects.visualize.clickNewSearch();
@@ -197,7 +197,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('show values on chart', () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickVerticalBarChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -232,7 +232,7 @@ export default function ({ getService, getPageObjects }) {
       const customLabel = 'myLabel';
       const axisTitle = 'myTitle';
       before(async function () {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickLineChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visEditor.selectYAxisAggregation('Average', 'bytes', customLabel, 1);
