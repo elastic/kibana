@@ -22,7 +22,6 @@ export type ExpressionFunctionCounterRate = ExpressionFunctionDefinition<
   Datatable
 >;
 
-// TODO
 /**
  * Calculates the counter rate of a specified column in the data table.
  *
@@ -35,8 +34,10 @@ export type ExpressionFunctionCounterRate = ExpressionFunctionDefinition<
  * Behavior:
  * * Will write the counter rate of `inputColumnId` into `outputColumnId`
  * * If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`
- * * Counter rate always start with an undefined value for the first row of a series, a cell will contain its own value minus the
- *   value of the previous cell of the same series.
+ * * Counter rate always start with an undefined value for the first row of a series.
+ * * If the value of the current cell is not smaller than the previous one, an output cell will contain
+ * * its own value minus the value of the previous cell of the same series. If the value is smaller,
+ * * an output cell will contain its own value
  *
  * Edge cases:
  * * Will return the input table if `inputColumnId` does not exist
