@@ -7,7 +7,8 @@ import type { MockedKeys } from '@kbn/utility-types/jest';
 import { coreMock } from '../../../../../src/core/public/mocks';
 import { EnhancedSearchInterceptor } from './search_interceptor';
 import { CoreSetup, CoreStart } from 'kibana/public';
-import { AbortError, UI_SETTINGS } from '../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../src/plugins/kibana_utils/public';
 import { SearchTimeoutError } from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 

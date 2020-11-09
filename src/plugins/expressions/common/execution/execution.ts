@@ -22,8 +22,7 @@ import { keys, last, mapValues, reduce, zipObject } from 'lodash';
 import { Executor } from '../executor';
 import { createExecutionContainer, ExecutionContainer } from './container';
 import { createError } from '../util';
-import { Defer, now } from '../../../kibana_utils/common';
-import { toPromise } from '../../../data/common/utils/abort_utils';
+import { abortSignalToPromise, Defer, now } from '../../../kibana_utils/common';
 import { RequestAdapter, DataAdapter, Adapters } from '../../../inspector/common';
 import { isExpressionValueError, ExpressionValueError } from '../expression_types/specs/error';
 import {
@@ -93,7 +92,7 @@ export class Execution<
   /**
    * Promise that rejects if/when abort controller sends "abort" signal.
    */
-  private readonly abortRejection = toPromise(this.abortController.signal);
+  private readonly abortRejection = abortSignalToPromise(this.abortController.signal);
 
   /**
    * Races a given promise against the "abort" event of `abortController`.

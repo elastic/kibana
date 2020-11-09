@@ -18,8 +18,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../types';
-import { ExpressionValueSearchContext } from '../../expression_types';
+import { ExecutionContext, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { Adapters } from 'src/plugins/inspector/common';
+import { ExpressionValueSearchContext, ExecutionContextSearch } from './kibana_context_type';
 
 const toArray = <T>(query: undefined | T | T[]): T[] =>
   !query ? [] : Array.isArray(query) ? query : [query];
@@ -29,7 +30,8 @@ export type ExpressionFunctionKibana = ExpressionFunctionDefinition<
   // TODO: Get rid of the `null` type below.
   ExpressionValueSearchContext | null,
   object,
-  ExpressionValueSearchContext
+  ExpressionValueSearchContext,
+  ExecutionContext<Adapters, ExecutionContextSearch>
 >;
 
 export const kibana: ExpressionFunctionKibana = {
@@ -38,7 +40,7 @@ export const kibana: ExpressionFunctionKibana = {
 
   inputTypes: ['kibana_context', 'null'],
 
-  help: i18n.translate('expressions.functions.kibana.help', {
+  help: i18n.translate('data.search.functions.kibana.help', {
     defaultMessage: 'Gets kibana global context',
   }),
 

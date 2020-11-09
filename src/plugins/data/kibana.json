@@ -8,7 +8,7 @@
     "uiActions"
   ],
   "optionalPlugins": ["usageCollection"],
-  "extraPublicDirs": ["common", "common/utils/abort_utils"],
+  "extraPublicDirs": ["common"],
   "requiredBundles": [
     "usageCollection",
     "kibanaUtils",
