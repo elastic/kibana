@@ -17,7 +17,7 @@ export async function untarBuffer(
   buffer: Buffer,
   filter = (entry: ArchiveEntry): boolean => true,
   onEntry = (entry: ArchiveEntry): void => {}
-): Promise<void> {
+): Promise<unknown> {
   const deflatedStream = bufferToStream(buffer);
   // use tar.list vs .extract to avoid writing to disk
   const inflateStream = tar.list().on('entry', (entry: tar.FileStat) => {
@@ -36,7 +36,7 @@ export async function unzipBuffer(
   buffer: Buffer,
   filter = (entry: ArchiveEntry): boolean => true,
   onEntry = (entry: ArchiveEntry): void => {}
-): Promise<void> {
+): Promise<unknown> {
   const zipfile = await yauzlFromBuffer(buffer, { lazyEntries: true });
   zipfile.readEntry();
   zipfile.on('entry', async (entry: yauzl.Entry) => {
@@ -48,6 +48,26 @@ export async function unzipBuffer(
     zipfile.readEntry();
   });
   return new Promise((resolve, reject) => zipfile.on('end', resolve).on('error', reject));
+}
+
+type BufferExtractor = typeof unzipBuffer | typeof untarBuffer;
+export function getBufferExtractor(
+  args: { contentType: string } | { archivePath: string }
+): BufferExtractor | undefined {
+  if ('contentType' in args) {
+    if (args.contentType === 'application/gzip') {
+      return untarBuffer;
+    } else if (args.contentType === 'application/zip') {
+      return unzipBuffer;
+    }
+  } else if ('archivePath' in args) {
+    if (args.archivePath.endsWith('.zip')) {
+      return unzipBuffer;
+    }
+    if (args.archivePath.endsWith('.gz')) {
+      return untarBuffer;
+    }
+  }
 }
 
 function yauzlFromBuffer(buffer: Buffer, opts: yauzl.Options): Promise<yauzl.ZipFile> {

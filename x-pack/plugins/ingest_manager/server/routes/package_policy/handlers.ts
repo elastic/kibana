@@ -7,7 +7,6 @@ import { TypeOf } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
 import { RequestHandler, SavedObjectsErrorHelpers } from '../../../../../../src/core/server';
 import { appContextService, packagePolicyService } from '../../services';
-import { getPackageInfo } from '../../services/epm/packages';
 import {
   GetPackagePoliciesRequestSchema,
   GetOnePackagePolicyRequestSchema,
@@ -134,21 +133,11 @@ export const updatePackagePolicyHandler: RequestHandler<
     const newData = { ...request.body };
     const pkg = newData.package || packagePolicy.package;
     const inputs = newData.inputs || packagePolicy.inputs;
-    if (pkg && (newData.inputs || newData.package)) {
-      const pkgInfo = await getPackageInfo({
-        savedObjectsClient: soClient,
-        pkgName: pkg.name,
-        pkgVersion: pkg.version,
-      });
-      newData.inputs = (await packagePolicyService.assignPackageStream(pkgInfo, inputs)) as TypeOf<
-        typeof CreatePackagePolicyRequestSchema.body
-      >['inputs'];
-    }
 
     const updatedPackagePolicy = await packagePolicyService.update(
       soClient,
       request.params.packagePolicyId,
-      newData,
+      { ...newData, package: pkg, inputs },
       { user }
     );
     return response.ok({

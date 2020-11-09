@@ -30,7 +30,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
 import { LibraryNotificationAction, UnlinkFromLibraryAction } from '.';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import { ViewMode } from '../../../../embeddable/public';
+import { ErrorEmbeddable, IContainer, ViewMode } from '../../../../embeddable/public';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -85,6 +85,16 @@ beforeEach(async () => {
     mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
   });
   embeddable.updateInput({ viewMode: ViewMode.EDIT });
+});
+
+test('Notification is incompatible with Error Embeddables', async () => {
+  const action = new LibraryNotificationAction(unlinkAction);
+  const errorEmbeddable = new ErrorEmbeddable(
+    'Wow what an awful error',
+    { id: ' 404' },
+    embeddable.getRoot() as IContainer
+  );
+  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
 });
 
 test('Notification is shown when embeddable on dashboard has reference type input', async () => {

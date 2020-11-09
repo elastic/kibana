@@ -25,7 +25,11 @@ describe('groups routes', () => {
     });
 
     it('creates a request handler', () => {
-      mockRouter = new MockRouter({ method: 'get', payload: 'query' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/groups',
+        payload: 'query',
+      });
 
       registerGroupsRoute({
         ...mockDependencies,
@@ -43,7 +47,11 @@ describe('groups routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'post', payload: 'body' });
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/groups',
+        payload: 'body',
+      });
 
       registerGroupsRoute({
         ...mockDependencies,
@@ -71,7 +79,11 @@ describe('groups routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'post', payload: 'body' });
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/groups/search',
+        payload: 'body',
+      });
 
       registerSearchGroupsRoute({
         ...mockDependencies,
@@ -141,7 +153,11 @@ describe('groups routes', () => {
     });
 
     it('creates a request handler', () => {
-      mockRouter = new MockRouter({ method: 'get', payload: 'params' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/groups/{id}',
+        payload: 'params',
+      });
 
       registerGroupRoute({
         ...mockDependencies,
@@ -176,7 +192,11 @@ describe('groups routes', () => {
     };
 
     it('creates a request handler', () => {
-      mockRouter = new MockRouter({ method: 'put', payload: 'body' });
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/api/workplace_search/groups/{id}',
+        payload: 'body',
+      });
 
       registerGroupRoute({
         ...mockDependencies,
@@ -204,7 +224,11 @@ describe('groups routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'delete', payload: 'params' });
+      mockRouter = new MockRouter({
+        method: 'delete',
+        path: '/api/workplace_search/groups/{id}',
+        payload: 'params',
+      });
 
       registerGroupRoute({
         ...mockDependencies,
@@ -227,7 +251,7 @@ describe('groups routes', () => {
     });
   });
 
-  describe('GET /api/workplace_search/groups/{id}/users', () => {
+  describe('GET /api/workplace_search/groups/{id}/group_users', () => {
     let mockRouter: MockRouter;
 
     beforeEach(() => {
@@ -235,7 +259,11 @@ describe('groups routes', () => {
     });
 
     it('creates a request handler', () => {
-      mockRouter = new MockRouter({ method: 'get', payload: 'params' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/workplace_search/groups/{id}/group_users',
+        payload: 'params',
+      });
 
       registerGroupUsersRoute({
         ...mockDependencies,
@@ -261,7 +289,11 @@ describe('groups routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'post', payload: 'body' });
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/groups/{id}/share',
+        payload: 'body',
+      });
 
       registerShareGroupRoute({
         ...mockDependencies,
@@ -291,7 +323,11 @@ describe('groups routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'post', payload: 'body' });
+      mockRouter = new MockRouter({
+        method: 'post',
+        path: '/api/workplace_search/groups/{id}/assign',
+        payload: 'body',
+      });
 
       registerAssignGroupRoute({
         ...mockDependencies,
@@ -330,7 +366,11 @@ describe('groups routes', () => {
     };
 
     it('creates a request handler', () => {
-      mockRouter = new MockRouter({ method: 'put', payload: 'body' });
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/api/workplace_search/groups/{id}/boosts',
+        payload: 'body',
+      });
 
       registerBoostsGroupRoute({
         ...mockDependencies,
