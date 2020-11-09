@@ -19,6 +19,7 @@
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { UiStatsMetricType } from '@kbn/analytics';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon, FieldButton } from '../../../../../kibana_react/public';
 import { FieldDetails } from './types';
@@ -61,6 +62,12 @@ export interface DiscoverFieldProps {
    * Determines whether the field name is shortened test.sub1.sub2 = t.s.sub2
    */
   useShortDots?: boolean;
+  /**
+   * Metric tracking function
+   * @param metricType
+   * @param eventName
+   */
+  trackUiMetric?: (metricType: UiStatsMetricType, eventName: string | string[]) => void;
 }
 
 export function DiscoverField({
@@ -72,6 +79,7 @@ export function DiscoverField({
   getDetails,
   selected,
   useShortDots,
+  trackUiMetric,
 }: DiscoverFieldProps) {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -220,6 +228,7 @@ export function DiscoverField({
           field={field}
           details={getDetails(field)}
           onAddFilter={onAddFilter}
+          trackUiMetric={trackUiMetric}
         />
       )}
     </EuiPopover>
