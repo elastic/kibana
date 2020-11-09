@@ -5,6 +5,7 @@
  */
 import _ from 'lodash';
 import expect from '@kbn/expect';
+import { firstNonNullValue } from '../../../../plugins/security_solution/common/endpoint/models/ecs_safety_helpers';
 import {
   NodeID,
   Schema,
@@ -97,7 +98,7 @@ export interface APIResponse {
  * @param schema the schema that was used to retrieve this resolver node
  */
 export const getID = (node: ResolverNode | undefined, schema: Schema): NodeID => {
-  const id = _.get(node?.data, schema.id);
+  const id = firstNonNullValue(node?.data[schema.id]);
   if (!id) {
     throw new Error(`Unable to find id ${schema.id} in node: ${JSON.stringify(node)}`);
   }
@@ -106,7 +107,7 @@ export const getID = (node: ResolverNode | undefined, schema: Schema): NodeID =>
 
 const getParentInternal = (node: ResolverNode | undefined, schema: Schema): NodeID | undefined => {
   if (node) {
-    return _.get(node.data, schema.parent);
+    return firstNonNullValue(node?.data[schema.parent]);
   }
   return undefined;
 };

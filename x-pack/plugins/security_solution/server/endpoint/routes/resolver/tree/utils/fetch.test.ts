@@ -17,13 +17,13 @@ import { DescendantsQuery } from '../queries/descendants';
 import { StatsQuery } from '../queries/stats';
 import { IScopedClusterClient } from 'src/core/server';
 import { elasticsearchServiceMock } from 'src/core/server/mocks';
-import { ResolverNode } from '../../../../../../common/endpoint/types';
+import { FieldsObject, ResolverNode } from '../../../../../../common/endpoint/types';
 
 jest.mock('../queries/descendants');
 jest.mock('../queries/lifecycle');
 jest.mock('../queries/stats');
 
-function addEmptyStats(results: object[]): ResolverNode[] {
+function addEmptyStats(results: FieldsObject[]): ResolverNode[] {
   return results.map((node) => {
     return {
       data: node,
@@ -599,7 +599,7 @@ describe('fetcher test', () => {
     });
 
     it('returns the first value if the field is an array', () => {
-      expect(getIDField({ a: { b: ['1', '2'] } }, { id: 'a.b', parent: 'b' })).toStrictEqual('1');
+      expect(getIDField({ 'a.b': ['1', '2'] }, { id: 'a.b', parent: 'b' })).toStrictEqual('1');
     });
   });
 
@@ -609,9 +609,7 @@ describe('fetcher test', () => {
     });
 
     it('returns the first value if the field is an array', () => {
-      expect(getParentField({ a: { b: ['1', '2'] } }, { id: 'z', parent: 'a.b' })).toStrictEqual(
-        '1'
-      );
+      expect(getParentField({ 'a.b': ['1', '2'] }, { id: 'z', parent: 'a.b' })).toStrictEqual('1');
     });
   });
 
@@ -622,14 +620,14 @@ describe('fetcher test', () => {
 
     it('returns the full array if the field exists', () => {
       expect(
-        getAncestryAsArray({ a: { b: ['1', '2'] } }, { id: 'z', parent: 'f', ancestry: 'a.b' })
+        getAncestryAsArray({ 'a.b': ['1', '2'] }, { id: 'z', parent: 'f', ancestry: 'a.b' })
       ).toStrictEqual(['1', '2']);
     });
 
     it('returns a built array using the parent field if ancestry field is empty', () => {
       expect(
         getAncestryAsArray(
-          { aParent: { bParent: ['1', '2'] }, ancestry: [] },
+          { 'aParent.bParent': ['1', '2'], ancestry: [] },
           { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry' }
         )
       ).toStrictEqual(['1']);
@@ -638,7 +636,7 @@ describe('fetcher test', () => {
     it('returns a built array using the parent field if ancestry field does not exist', () => {
       expect(
         getAncestryAsArray(
-          { aParent: { bParent: '1' } },
+          { 'aParent.bParent': '1' },
           { id: 'z', parent: 'aParent.bParent', ancestry: 'ancestry' }
         )
       ).toStrictEqual(['1']);

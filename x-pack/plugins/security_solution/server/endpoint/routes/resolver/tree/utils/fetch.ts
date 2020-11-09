@@ -3,13 +3,12 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import _ from 'lodash';
 import { IScopedClusterClient } from 'kibana/server';
 import {
   firstNonNullValue,
   values,
 } from '../../../../../../common/endpoint/models/ecs_safety_helpers';
-import { ECSField, ResolverNode } from '../../../../../../common/endpoint/types';
+import { ECSField, ResolverNode, FieldsObject } from '../../../../../../common/endpoint/types';
 import { DescendantsQuery } from '../queries/descendants';
 import { Schema, NodeID } from './index';
 import { LifecycleQuery } from '../queries/lifecycle';
@@ -43,7 +42,7 @@ export class Fetcher {
    *
    * @param options the options for retrieving the structure of the tree.
    */
-  public async tree(options: TreeOptions) {
+  public async tree(options: TreeOptions): Promise<ResolverNode[]> {
     const treeParts = await Promise.all([
       this.retrieveAncestors(options),
       this.retrieveDescendants(options),
@@ -58,7 +57,7 @@ export class Fetcher {
   }
 
   private async applyStatsToTree(
-    treeNodes: unknown[],
+    treeNodes: FieldsObject[],
     options: TreeOptions
   ): Promise<ResolverNode[]> {
     const statsIDs: NodeID[] = [];
@@ -89,11 +88,11 @@ export class Fetcher {
   }
 
   private static getNextAncestorsToFind(
-    results: unknown[],
+    results: FieldsObject[],
     schema: Schema,
     levelsLeft: number
   ): NodeID[] {
-    const nodesByID = results.reduce((accMap: Map<NodeID, unknown>, result: unknown) => {
+    const nodesByID = results.reduce((accMap: Map<NodeID, FieldsObject>, result: FieldsObject) => {
       const id = getIDField(result, schema);
       if (id) {
         accMap.set(id, result);
@@ -118,8 +117,8 @@ export class Fetcher {
     return nodes;
   }
 
-  private async retrieveAncestors(options: TreeOptions) {
-    const ancestors = [];
+  private async retrieveAncestors(options: TreeOptions): Promise<FieldsObject[]> {
+    const ancestors: FieldsObject[] = [];
     const query = new LifecycleQuery({
       schema: options.schema,
       indexPatterns: options.indexPatterns,
@@ -130,7 +129,7 @@ export class Fetcher {
     let numLevelsLeft = options.ancestors;
 
     while (numLevelsLeft > 0) {
-      const results: unknown[] = await query.search(this.client, nodes);
+      const results: FieldsObject[] = await query.search(this.client, nodes);
       if (results.length <= 0) {
         return ancestors;
       }
@@ -164,8 +163,8 @@ export class Fetcher {
     return ancestors;
   }
 
-  private async retrieveDescendants(options: TreeOptions): Promise<unknown[]> {
-    const descendants: unknown[] = [];
+  private async retrieveDescendants(options: TreeOptions): Promise<FieldsObject[]> {
+    const descendants: FieldsObject[] = [];
     const query = new DescendantsQuery({
       schema: options.schema,
       indexPatterns: options.indexPatterns,
@@ -179,7 +178,7 @@ export class Fetcher {
       numNodesLeftToRequest > 0 &&
       (options.schema.ancestry !== undefined || levelsLeftToRequest > 0)
     ) {
-      const results: unknown[] = await query.search(this.client, nodes, numNodesLeftToRequest);
+      const results: FieldsObject[] = await query.search(this.client, nodes, numNodesLeftToRequest);
       if (results.length <= 0) {
         return descendants;
       }
@@ -198,19 +197,19 @@ export class Fetcher {
 /**
  * This functions finds the leaf nodes for a given response from an Elasticsearch query.
  *
- * @param results the documents returned from an Elasticsearch query
+ * @param results the doc values portion of the documents returned from an Elasticsearch query
  * @param nodes an array of unique IDs that were used to find the returned documents
  * @param schema the field definitions for how nodes are represented in the resolver graph
  */
 export function getLeafNodes(
-  results: unknown[],
+  results: FieldsObject[],
   nodes: Array<string | number>,
   schema: Schema
 ): NodeID[] {
   let largestAncestryArray = 0;
   const nodesToQueryNext: Map<number, Set<NodeID>> = new Map();
   const queriedNodes = new Set<NodeID>(nodes);
-  const isDistantGrandchild = (event: unknown) => {
+  const isDistantGrandchild = (event: FieldsObject) => {
     const ancestry = getAncestryAsArray(event, schema);
     return ancestry.length > 0 && queriedNodes.has(ancestry[ancestry.length - 1]);
   };
@@ -255,11 +254,11 @@ export function getLeafNodes(
  * Retrieves the unique ID field from a document.
  *
  * Exposed for testing.
- * @param obj an unknown document returned by Elasticsearch
+ * @param obj the doc value fields retrieved from a document returned by Elasticsearch
  * @param schema the schema used for identifying connections between documents
  */
-export function getIDField(obj: unknown, schema: Schema): NodeID | undefined {
-  const id: ECSField<NodeID> = _.get(obj, schema.id);
+export function getIDField(obj: FieldsObject, schema: Schema): NodeID | undefined {
+  const id: ECSField<NodeID> = obj[schema.id];
   return firstNonNullValue(id);
 }
 
@@ -267,20 +266,20 @@ export function getIDField(obj: unknown, schema: Schema): NodeID | undefined {
  * Retrieves the unique parent ID field from a document.
  *
  * Exposed for testing.
- * @param obj an unknown document returned by Elasticsearch
+ * @param obj the doc value fields retrieved from a document returned by Elasticsearch
  * @param schema the schema used for identifying connections between documents
  */
-export function getParentField(obj: unknown, schema: Schema): NodeID | undefined {
-  const parent: ECSField<NodeID> = _.get(obj, schema.parent);
+export function getParentField(obj: FieldsObject, schema: Schema): NodeID | undefined {
+  const parent: ECSField<NodeID> = obj[schema.parent];
   return firstNonNullValue(parent);
 }
 
-function getAncestryField(obj: unknown, schema: Schema): NodeID[] | undefined {
+function getAncestryField(obj: FieldsObject, schema: Schema): NodeID[] | undefined {
   if (!schema.ancestry) {
     return undefined;
   }
 
-  const ancestry: ECSField<NodeID> = _.get(obj, schema.ancestry);
+  const ancestry: ECSField<NodeID> = obj[schema.ancestry];
   if (!ancestry) {
     return undefined;
   }
@@ -294,10 +293,10 @@ function getAncestryField(obj: unknown, schema: Schema): NodeID[] | undefined {
  * an empty array.
  *
  * Exposed for testing.
- * @param obj an unknown document returned by Elasticsearch
+ * @param obj the doc value fields retrieved from a document returned by Elasticsearch
  * @param schema the schema used for identifying connections between documents
  */
-export function getAncestryAsArray(obj: unknown, schema: Schema): NodeID[] {
+export function getAncestryAsArray(obj: FieldsObject, schema: Schema): NodeID[] {
   const ancestry = getAncestryField(obj, schema);
   if (!ancestry || ancestry.length <= 0) {
     const parentField = getParentField(obj, schema);

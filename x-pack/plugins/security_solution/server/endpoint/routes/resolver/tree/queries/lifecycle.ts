@@ -6,8 +6,9 @@
 import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { NodeID, sourceFilter, Schema, Timerange } from '../utils/index';
+import { FieldsObject } from '../../../../../../common/endpoint/types';
+import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
+import { NodeID, Schema, Timerange, docValueFields } from '../utils/index';
 
 interface LifecycleParams {
   schema: Schema;
@@ -22,9 +23,9 @@ export class LifecycleQuery {
   private readonly schema: Schema;
   private readonly indexPatterns: string | string[];
   private readonly timerange: Timerange;
-  private readonly sourceFields: string[];
+  private readonly docValueFields: JsonValue[];
   constructor({ schema, indexPatterns, timerange }: LifecycleParams) {
-    this.sourceFields = sourceFilter(schema);
+    this.docValueFields = docValueFields(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timerange = timerange;
@@ -32,8 +33,8 @@ export class LifecycleQuery {
 
   private query(nodes: NodeID[]): JsonObject {
     return {
-      // TODO look into switching this to doc_values
-      _source: this.sourceFields,
+      _source: false,
+      docvalue_fields: this.docValueFields,
       size: nodes.length,
       collapse: {
         field: this.schema.id,
@@ -71,7 +72,7 @@ export class LifecycleQuery {
     };
   }
 
-  async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<unknown[]> {
+  async search(client: IScopedClusterClient, nodes: NodeID[]): Promise<FieldsObject[]> {
     if (nodes.length <= 0) {
       return [];
     }
@@ -81,6 +82,14 @@ export class LifecycleQuery {
       index: this.indexPatterns,
     });
 
-    return response.body.hits.hits.map((hit) => hit._source);
+    /**
+     * The returned values will look like:
+     * [
+     *  { 'schema_id_value': <value>, 'schema_parent_value': <value> }
+     * ]
+     *
+     * So the schema fields are flattened ('process.parent.entity_id')
+     */
+    return response.body.hits.hits.map((hit) => hit.fields);
   }
 }

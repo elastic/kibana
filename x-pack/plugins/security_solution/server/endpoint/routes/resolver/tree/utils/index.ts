@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { ECSField } from '../../../../../../common/endpoint/types';
+
 /**
  * Represents a time range filter
  */
@@ -37,16 +39,18 @@ export interface Schema {
 }
 
 /**
- * Returns the source filter to use in queries to limit the number of fields returned in the
+ * Returns the doc value fields filter to use in queries to limit the number of fields returned in the
  * query response.
+ *
+ * See for more info: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-fields.html#docvalue-fields
  *
  * @param schema is the node schema information describing how relationships are formed between nodes
  *  in the resolver graph.
  */
-export function sourceFilter(schema: Schema) {
-  const filter = ['@timestamp', schema.id, schema.parent];
+export function docValueFields(schema: Schema): Array<{ field: string }> {
+  const filter = [{ field: '@timestamp' }, { field: schema.id }, { field: schema.parent }];
   if (schema.ancestry) {
-    filter.push(schema.ancestry);
+    filter.push({ field: schema.ancestry });
   }
   return filter;
 }

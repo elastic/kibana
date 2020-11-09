@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 
 /**
- * Used to validate GET requests for a complete resolver tree.
+ * Used to validate GET requests for a complete resolver tree centered around an entity_id.
  */
 export const validateTreeEntityID = {
   params: schema.object({ id: schema.string({ minLength: 1 }) }),
@@ -23,38 +23,6 @@ export const validateTreeEntityID = {
   }),
 };
 
-// {
-//   id: ["host.id", "process.pid"]
-//   parent: ["host.id", "process.parent.pid"]
-// }
-
-// {
-//   id_definition: [
-//     {
-//       entity_id_field: "name",
-//       parent_id_field: "name_parent",
-//     },
-//     {
-//       entity_id_field: "age",
-//       parent_id_field: "age_parent",
-//     }
-//   ],
-//   id: [
-//     {
-//       "name": "Jon",
-//       "age": "50",
-//     },
-//     {
-//       "name": "Mike",
-//       "age": "~30",
-//     }
-//   ],
-//   levels: 10,
-//   limit: 50,
-// }
-
-// toID(): string
-
 /**
  * Used to validate GET requests for a complete resolver tree.
  */
@@ -62,9 +30,8 @@ export const validateTree = {
   body: schema.object({
     // if the ancestry field is specified this field will be ignored
     descendantLevels: schema.number({ defaultValue: 20, min: 0, max: 1000 }),
-    // levels supersedes limit if it is defined
     descendants: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
-    // if the ancestry array isn't specified we'll want to limit this
+    // if the ancestry array isn't specified allowing 200 might be too high
     ancestors: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
     timerange: schema.object({
       from: schema.string(),
@@ -72,12 +39,13 @@ export const validateTree = {
     }),
     schema: schema.object({
       // the ancestry field is optional
-      ancestry: schema.maybe(schema.string()),
-      id: schema.string(),
-      parent: schema.string(),
+      ancestry: schema.maybe(schema.string({ minLength: 1 })),
+      id: schema.string({ minLength: 1 }),
+      parent: schema.string({ minLength: 1 }),
     }),
-    // TODO could we be more careful than `any`, it'd probably be nice to support numbers or strings
-    nodes: schema.arrayOf(schema.any(), { minSize: 1 }),
+    nodes: schema.arrayOf(schema.oneOf([schema.string({ minLength: 1 }), schema.number()]), {
+      minSize: 1,
+    }),
     indexPatterns: schema.arrayOf(schema.string(), { minSize: 1 }),
   }),
 };

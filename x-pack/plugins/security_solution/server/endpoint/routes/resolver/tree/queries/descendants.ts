@@ -6,8 +6,9 @@
 import { SearchResponse } from 'elasticsearch';
 import { ApiResponse } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from 'src/core/server';
-import { JsonObject } from '../../../../../../../../../src/plugins/kibana_utils/common';
-import { NodeID, sourceFilter, Schema, Timerange } from '../utils/index';
+import { FieldsObject } from '../../../../../../common/endpoint/types';
+import { JsonObject, JsonValue } from '../../../../../../../../../src/plugins/kibana_utils/common';
+import { NodeID, Schema, Timerange, docValueFields } from '../utils/index';
 
 interface DescendantsParams {
   schema: Schema;
@@ -22,9 +23,9 @@ export class DescendantsQuery {
   private readonly schema: Schema;
   private readonly indexPatterns: string | string[];
   private readonly timerange: Timerange;
-  private readonly sourceFields: string[];
+  private readonly docValueFields: JsonValue[];
   constructor({ schema, indexPatterns, timerange }: DescendantsParams) {
-    this.sourceFields = sourceFilter(schema);
+    this.docValueFields = docValueFields(schema);
     this.schema = schema;
     this.indexPatterns = indexPatterns;
     this.timerange = timerange;
@@ -32,8 +33,8 @@ export class DescendantsQuery {
 
   private query(nodes: NodeID[], size: number): JsonObject {
     return {
-      // TODO look into switching this to doc_values
-      _source: this.sourceFields,
+      _source: false,
+      docvalue_fields: this.docValueFields,
       size,
       collapse: {
         field: this.schema.id,
@@ -47,7 +48,6 @@ export class DescendantsQuery {
                 '@timestamp': {
                   gte: this.timerange.from,
                   lte: this.timerange.to,
-                  // TODO this is what the search_strategy uses, need to double check
                   format: 'strict_date_optional_time',
                 },
               },
@@ -79,8 +79,8 @@ export class DescendantsQuery {
 
   private queryWithAncestryArray(nodes: NodeID[], ancestryField: string, size: number): JsonObject {
     return {
-      // TODO look into switching this to doc_values
-      _source: this.sourceFields,
+      _source: false,
+      docvalue_fields: this.docValueFields,
       size,
       collapse: {
         field: this.schema.id,
@@ -90,9 +90,16 @@ export class DescendantsQuery {
           _script: {
             type: 'number',
             script: {
+              /**
+               * This script is used to sort the returned documents in a breadth first order so that we return all of
+               * a single level of nodes before returning the next level of nodes. This is needed because using the
+               * ancestry array could result in the search going deep before going wide depending on when the nodes
+               * spawned their children. If a node spawns a child before it's sibling is spawned then the child would
+               * be found before the sibling because by default the sort was on timestamp ascending.
+               */
               source: `
                 Map ancestryToIndex = [:];
-                List sourceAncestryArray = params._source.process.Ext.ancestry;
+                List sourceAncestryArray = params._source.${ancestryField};
                 int length = sourceAncestryArray.length;
                 for (int i = 0; i < length; i++) {
                   ancestryToIndex[sourceAncestryArray[i]] = i;
@@ -157,7 +164,11 @@ export class DescendantsQuery {
     };
   }
 
-  async search(client: IScopedClusterClient, nodes: NodeID[], limit: number): Promise<unknown[]> {
+  async search(
+    client: IScopedClusterClient,
+    nodes: NodeID[],
+    limit: number
+  ): Promise<FieldsObject[]> {
     if (nodes.length <= 0) {
       return [];
     }
@@ -175,6 +186,14 @@ export class DescendantsQuery {
       });
     }
 
-    return response.body.hits.hits.map((hit) => hit._source);
+    /**
+     * The returned values will look like:
+     * [
+     *  { 'schema_id_value': <value>, 'schema_parent_value': <value> }
+     * ]
+     *
+     * So the schema fields are flattened ('process.parent.entity_id')
+     */
+    return response.body.hits.hits.map((hit) => hit.fields);
   }
 }
