@@ -71,6 +71,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 updatedAt: response.body.updatedAt,
                 createdAt: response.body.createdAt,
                 throttle: '1m',
+                notifyOnStateChange: false,
                 updatedBy: 'elastic',
                 apiKeyOwner: 'elastic',
                 muteAll: false,

@@ -195,12 +195,23 @@ export async function updateAlert({
   id,
 }: {
   http: HttpSetup;
-  alert: Pick<AlertUpdates, 'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions'>;
+  alert: Pick<
+    AlertUpdates,
+    'throttle' | 'name' | 'tags' | 'schedule' | 'params' | 'actions' | 'notifyOnStateChange'
+  >;
   id: string;
 }): Promise<Alert> {
   return await http.put(`${BASE_ALERT_API_PATH}/alert/${id}`, {
     body: JSON.stringify(
-      pick(alert, ['throttle', 'name', 'tags', 'schedule', 'params', 'actions'])
+      pick(alert, [
+        'throttle',
+        'name',
+        'tags',
+        'schedule',
+        'params',
+        'actions',
+        'notifyOnStateChange',
+      ])
     ),
   });
 }
