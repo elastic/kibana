@@ -204,7 +204,7 @@ visualize it from **Discover**.
 [role="screenshot"]
 image:images/visualize-from-discover.png[Visualization that opens from Discover based on your data]
 
-. Customize the visualization and then save it  for use in a dashboard.
+. Customize the visualization and then save it for use in a dashboard or Canvas workpad.
 
 [float]
 === What’s next?
