@@ -6,9 +6,17 @@
 
 import { ArchivePackage } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
-import { cacheSet, setArchiveFilelist } from '../registry/cache';
+import {
+  cacheSet,
+  cacheDelete,
+  getArchiveFilelist,
+  setArchiveFilelist,
+  deleteArchiveFilelist,
+} from './cache';
 import { ArchiveEntry, getBufferExtractor } from '../registry/extract';
 import { parseAndVerifyArchive } from './validation';
+
+export * from './cache';
 
 export async function loadArchivePackage({
   archiveBuffer,
@@ -64,3 +72,15 @@ export async function unpackArchiveToCache(
   }
   return paths;
 }
+
+export const deletePackageCache = (name: string, version: string) => {
+  // get cached archive filelist
+  const paths = getArchiveFilelist(name, version);
+
+  // delete cached archive filelist
+  deleteArchiveFilelist(name, version);
+
+  // delete cached archive files
+  // this has been populated in unpackArchiveToCache()
+  paths?.forEach((path) => cacheDelete(path));
+};
