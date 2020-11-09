@@ -76,6 +76,7 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
 
 export * from './rename_columns';
 export * from './format_column';
+export * from './time_scale';
 
 export function getIndexPatternDatasource({
   core,
@@ -342,7 +343,7 @@ export function getIndexPatternDatasource({
     getDatasourceSuggestionsFromCurrentState,
     getDatasourceSuggestionsForVisualizeField,
 
-    getErrorMessages(state) {
+    getErrorMessages(state, layersGroups) {
       if (!state) {
         return;
       }
