@@ -10931,7 +10931,6 @@
     "xpack.lens.xyChart.chartTypeLabel": "チャートタイプ",
     "xpack.lens.xyChart.chartTypeLegend": "チャートタイプ",
     "xpack.lens.xyChart.emptyXLabel": "（空）",
-    "xpack.lens.xyChart.fittingDisabledHelpText": "この設定は折れ線グラフとエリアグラフでのみ適用されます。",
     "xpack.lens.xyChart.fittingFunction.help": "欠測値の処理方法を定義",
     "xpack.lens.xyChart.Gridlines": "グリッド線",
     "xpack.lens.xyChart.gridlinesSettings.help": "xおよびy軸のグリッド線を表示",
