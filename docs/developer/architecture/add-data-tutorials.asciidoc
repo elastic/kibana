@@ -28,11 +28,11 @@ Then register the tutorial object by calling `home.tutorials.registerTutorial(tu
 String values can contain variables that are substituted when rendered. Variables are specified by `{}`.
 For example: `{config.docs.version}` is rendered as `6.2` when running the tutorial in {kib} 6.2.
 
-link:{kib-repo}tree/{branch}/src/legacy/core_plugins/kibana/public/home/np_ready/components/tutorial/replace_template_strings.js#L23[Provided variables]
+link:{kib-repo}tree/{branch}/src/plugins/home/public/application/components/tutorial/replace_template_strings.js[Provided variables]
 
 [discrete]
 ==== Markdown
 String values can contain limited Markdown syntax.
 
-link:{kib-repo}tree/{branch}/src/legacy/core_plugins/kibana/public/home/components/tutorial/content.js#L8[Enabled Markdown grammars]
+link:{kib-repo}tree/{branch}/src/legacy/core_plugins/kibana/public/home/components/tutorial/content.js[Enabled Markdown grammars]
 

@@ -312,7 +312,7 @@ application services which are not technically part of `core`, but are
 often used in Kibana plugins.
 
 This table maps some of the most commonly used legacy items to their Kibana
-Platform locations.
+Platform locations. For the API provided by Kibana Plugins see <<plugin-list, the plugin list>>.
 
 [width="100%",cols="15%,24%,61%",options="header",]
 |===
