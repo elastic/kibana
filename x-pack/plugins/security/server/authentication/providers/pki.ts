@@ -10,6 +10,7 @@ import { KibanaRequest } from '../../../../../../src/core/server';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
+import { canRedirectRequest } from '../can_redirect_request';
 import { Tokens } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 
@@ -33,8 +34,9 @@ interface ProviderState {
  * @param request Request instance.
  */
 function canStartNewSession(request: KibanaRequest) {
-  // We should try to establish new session only if request requires authentication.
-  return request.route.options.authRequired === true;
+  // We should try to establish new session only if request requires authentication and it's not an XHR request.
+  // Technically we can authenticate XHR requests too, but we don't want these to create a new session unintentionally.
+  return canRedirectRequest(request) && request.route.options.authRequired === true;
 }
 
 /**
@@ -75,12 +77,14 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
       authenticationResult = await this.authenticateViaState(request, state);
 
       // If access token expired or doesn't match to the certificate fingerprint we should try to get
-      // a new one in exchange to peer certificate chain assuming request can initiate new session.
+      // a new one in exchange to peer certificate chain. Since we know that we had a valid session
+      // before we can safely assume that it's desired to automatically re-create session even for XHR
+      // requests.
       const invalidAccessToken =
         authenticationResult.notHandled() ||
         (authenticationResult.failed() &&
           Tokens.isAccessTokenExpiredError(authenticationResult.error));
-      if (invalidAccessToken && canStartNewSession(request)) {
+      if (invalidAccessToken) {
         authenticationResult = await this.authenticateViaPeerCertificate(request);
         // If we have an active session that we couldn't use to authenticate user and at the same time
         // we couldn't use peer's certificate to establish a new one, then we should respond with 401
@@ -88,14 +92,12 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
         if (authenticationResult.notHandled()) {
           return AuthenticationResult.failed(Boom.unauthorized());
         }
-      } else if (invalidAccessToken) {
-        return AuthenticationResult.notHandled();
       }
     }
 
-    // If we couldn't authenticate by means of all methods above, let's try to check if we can authenticate
-    // request using its peer certificate chain, otherwise just return authentication result we have.
-    // We shouldn't establish new session if authentication isn't required for this particular request.
+    // If we couldn't authenticate by means of all methods above, let's check if the request is allowed
+    // to start a new session, and if so try to authenticate request using its peer certificate chain,
+    // otherwise just return authentication result we have.
     return authenticationResult.notHandled() && canStartNewSession(request)
       ? await this.authenticateViaPeerCertificate(request)
       : authenticationResult;

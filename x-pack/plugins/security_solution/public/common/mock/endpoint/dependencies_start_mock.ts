@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  IngestManagerStart,
-  registerPackagePolicyComponent,
-} from '../../../../../ingest_manager/public';
+import { IngestManagerStart, registerPackagePolicyComponent } from '../../../../../fleet/public';
 import {
   dataPluginMock,
   Start as DataPublicStartMock,
