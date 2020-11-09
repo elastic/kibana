@@ -7,26 +7,26 @@
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { distinctUntilChanged, map } from 'rxjs/operators';
-import { BackgroundSearchIndicator } from './background_session_indicator';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public/';
-import { BackgroundSessionViewState } from './background_session_state';
+import { BackgroundSessionIndicator } from '../background_session_indicator';
+import { ISessionService } from '../../../../../../src/plugins/data/public/';
+import { BackgroundSessionViewState } from './background_session_view_state';
 
 export interface BackgroundSessionIndicatorDeps {
-  sessionService: DataPublicPluginStart['search']['session'];
+  sessionService: ISessionService;
 }
 
 export const createConnectedBackgroundSessionIndicator = ({
   sessionService,
 }: BackgroundSessionIndicatorDeps): React.FC => {
   const sessionId$ = sessionService.getSession$();
-  const isSession$ = sessionId$.pipe(
+  const hasActiveSession$ = sessionId$.pipe(
     map((sessionId) => !!sessionId),
     distinctUntilChanged()
   );
 
   return () => {
-    const isSession = useObservable(isSession$, !!sessionService.getSessionId());
+    const isSession = useObservable(hasActiveSession$, !!sessionService.getSessionId());
     if (!isSession) return null;
-    return <BackgroundSearchIndicator state={BackgroundSessionViewState.Loading} />;
+    return <BackgroundSessionIndicator state={BackgroundSessionViewState.Loading} />;
   };
 };

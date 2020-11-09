@@ -7,7 +7,7 @@
 import React from 'react';
 import { storiesOf } from '@storybook/react';
 import { BackgroundSessionIndicator } from './background_session_indicator';
-import { BackgroundSessionViewState } from '../background_session_state';
+import { BackgroundSessionViewState } from '../connected_background_session_indicator';
 
 storiesOf('components/BackgroundSessionIndicator', module).add('default', () => (
   <>

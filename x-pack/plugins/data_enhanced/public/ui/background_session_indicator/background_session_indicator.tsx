@@ -17,28 +17,81 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { BackgroundSessionViewState } from '../background_session_state';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { i18n } from '@kbn/i18n';
+import { BackgroundSessionViewState } from '../connected_background_session_indicator';
+import './background_session_indicator.scss';
 
 export interface BackgroundSessionIndicatorProps {
   state: BackgroundSessionViewState;
-  onContinueInBackground?: () => {};
-  onStopLoading?: () => {};
-  onViewBackgroundRequests?: () => {};
-  onSaveResults?: () => {};
-  onReload?: () => {};
+  onContinueInBackground?: () => void;
+  onCancel?: () => void;
+  onViewBackgroundSessions?: () => void;
+  onSaveResults?: () => void;
+  onRefresh?: () => void;
 }
+
+type ActionButtonProps = BackgroundSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps };
+
+const CancelButton = ({ onCancel = () => {}, buttonProps = {} }: ActionButtonProps) => (
+  <EuiButtonEmpty onClick={onCancel} {...buttonProps}>
+    <FormattedMessage
+      id={'xpack.dataEnhanced.backgroundSessionIndicator.cancelButtonText'}
+      defaultMessage={'Cancel'}
+    />
+  </EuiButtonEmpty>
+);
+
+const ContinueInBackgroundButton = ({
+  onContinueInBackground = () => {},
+  buttonProps = {},
+}: ActionButtonProps) => (
+  <EuiButtonEmpty onClick={onContinueInBackground} {...buttonProps}>
+    <FormattedMessage
+      id={'xpack.dataEnhanced.backgroundSessionIndicator.continueInBackgroundButtonText'}
+      defaultMessage={'Continue in background'}
+    />
+  </EuiButtonEmpty>
+);
+
+const ViewBackgroundSessionsButton = ({
+  onViewBackgroundSessions = () => {},
+  buttonProps = {},
+}: ActionButtonProps) => (
+  // TODO: make this a link
+  <EuiButtonEmpty onClick={onViewBackgroundSessions} {...buttonProps}>
+    <FormattedMessage
+      id={'xpack.dataEnhanced.backgroundSessionIndicator.viewBackgroundSessionsLinkText'}
+      defaultMessage={'View background sessions'}
+    />
+  </EuiButtonEmpty>
+);
+
+const RefreshButton = ({ onRefresh = () => {}, buttonProps = {} }: ActionButtonProps) => (
+  <EuiButtonEmpty onClick={onRefresh} {...buttonProps}>
+    <FormattedMessage
+      id={'xpack.dataEnhanced.backgroundSessionIndicator.refreshButtonText'}
+      defaultMessage={'Refresh'}
+    />
+  </EuiButtonEmpty>
+);
+
+const SaveButton = ({ onSaveResults = () => {}, buttonProps = {} }: ActionButtonProps) => (
+  <EuiButtonEmpty onClick={onSaveResults} {...buttonProps}>
+    <FormattedMessage
+      id={'xpack.dataEnhanced.backgroundSessionIndicator.saveButtonText'}
+      defaultMessage={'Save'}
+    />
+  </EuiButtonEmpty>
+);
 
 const backgroundSessionIndicatorViewStateToProps: {
   [state in BackgroundSessionViewState]: {
     button: Pick<EuiButtonIconProps, 'color' | 'iconType' | 'aria-label'> & { tooltipText: string };
     popover: {
       text: string;
-      primaryAction?: React.ComponentType<
-        BackgroundSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps }
-      >;
-      secondaryAction?: React.ComponentType<
-        BackgroundSessionIndicatorProps & { buttonProps: EuiButtonEmptyProps }
-      >;
+      primaryAction?: React.ComponentType<ActionButtonProps>;
+      secondaryAction?: React.ComponentType<ActionButtonProps>;
     };
   };
 } = {
@@ -46,100 +99,125 @@ const backgroundSessionIndicatorViewStateToProps: {
     button: {
       color: 'subdued',
       iconType: 'clock',
-      'aria-label': 'Loading results',
-      tooltipText: 'Loading results',
+      'aria-label': i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.loadingResultsIconAriaLabel',
+        { defaultMessage: 'Loading results' }
+      ),
+      tooltipText: i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.loadingResultsIconTooltipText',
+        { defaultMessage: 'Loading results' }
+      ),
     },
     popover: {
-      text: 'Loading',
-      primaryAction: ({ onStopLoading = () => {}, buttonProps = {} }) => (
-        <EuiButtonEmpty onClick={onStopLoading} {...buttonProps}>
-          Cancel
-        </EuiButtonEmpty>
-      ),
-      secondaryAction: ({ onContinueInBackground = () => {}, buttonProps = {} }) => (
-        <EuiButtonEmpty onClick={onContinueInBackground} {...buttonProps}>
-          Continue in background
-        </EuiButtonEmpty>
-      ),
+      text: i18n.translate('xpack.dataEnhanced.backgroundSessionIndicator.loadingResultsText', {
+        defaultMessage: 'Loading',
+      }),
+      primaryAction: CancelButton,
+      secondaryAction: ContinueInBackgroundButton,
     },
   },
   [BackgroundSessionViewState.Completed]: {
     button: {
       color: 'subdued',
       iconType: 'checkInCircleFilled',
-      'aria-label': 'Results loaded',
-      tooltipText: 'Results loaded',
+      'aria-label': i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.resultsLoadedIconAriaLabel',
+        {
+          defaultMessage: 'Results loaded',
+        }
+      ),
+      tooltipText: i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.resultsLoadedIconTooltipText',
+        {
+          defaultMessage: 'Results loaded',
+        }
+      ),
     },
     popover: {
-      text: 'Results loaded',
-      primaryAction: ({ onSaveResults = () => {}, buttonProps = {} }) => (
-        <EuiButtonEmpty onClick={onSaveResults} {...buttonProps}>
-          Save
-        </EuiButtonEmpty>
-      ),
-      secondaryAction: ({ onViewBackgroundRequests = () => {}, buttonProps = {} }) => (
-        // TODO: make this a link
-        <EuiButtonEmpty onClick={onViewBackgroundRequests} {...buttonProps}>
-          View background sessions
-        </EuiButtonEmpty>
-      ),
+      text: i18n.translate('xpack.dataEnhanced.backgroundSessionIndicator.resultsLoadedText', {
+        defaultMessage: 'Results loaded',
+      }),
+      primaryAction: SaveButton,
+      secondaryAction: ViewBackgroundSessionsButton,
     },
   },
   [BackgroundSessionViewState.BackgroundLoading]: {
     button: {
       iconType: EuiLoadingSpinner,
-      'aria-label': 'Loading results in the background',
-      tooltipText: 'Loading results in the background',
+      'aria-label': i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.loadingInTheBackgroundIconAriaLabel',
+        {
+          defaultMessage: 'Loading results in the background',
+        }
+      ),
+      tooltipText: i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.loadingInTheBackgroundIconTooltipText',
+        {
+          defaultMessage: 'Loading results in the background',
+        }
+      ),
     },
     popover: {
-      text: 'Loading in the background',
-      primaryAction: ({ onStopLoading = () => {}, buttonProps = {} }) => (
-        <EuiButtonEmpty onClick={onStopLoading} {...buttonProps}>
-          Cancel
-        </EuiButtonEmpty>
+      text: i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.loadingInTheBackgroundText',
+        {
+          defaultMessage: 'Loading in the background',
+        }
       ),
-      secondaryAction: ({ onViewBackgroundRequests = () => {}, buttonProps = {} }) => (
-        <EuiButtonEmpty onClick={onViewBackgroundRequests} {...buttonProps}>
-          View background sessions
-        </EuiButtonEmpty>
-      ),
+      primaryAction: CancelButton,
+      secondaryAction: ViewBackgroundSessionsButton,
     },
   },
   [BackgroundSessionViewState.BackgroundCompleted]: {
     button: {
       color: 'success',
       iconType: 'checkInCircleFilled',
-      'aria-label': 'Results loaded in the background',
-      tooltipText: 'Results loaded in the background',
+      'aria-label': i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.resultLoadedInTheBackgroundIconAraText',
+        {
+          defaultMessage: 'Results loaded in the background',
+        }
+      ),
+      tooltipText: i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.resultLoadedInTheBackgroundIconTooltipText',
+        {
+          defaultMessage: 'Results loaded in the background',
+        }
+      ),
     },
     popover: {
-      text: 'Results loaded',
-      primaryAction: ({ onViewBackgroundRequests = () => {}, buttonProps = {} }) => (
-        <EuiButtonEmpty onClick={onViewBackgroundRequests} {...buttonProps}>
-          View background sessions
-        </EuiButtonEmpty>
+      text: i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.resultLoadedInTheBackgroundText',
+        {
+          defaultMessage: 'Results loaded',
+        }
       ),
+      primaryAction: ViewBackgroundSessionsButton,
     },
   },
   [BackgroundSessionViewState.Restored]: {
     button: {
       color: 'warning',
       iconType: 'refresh',
-      'aria-label': 'Restored older results. The data is not current.',
-      tooltipText: 'Restored older results. The data is not current.',
+      'aria-label': i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.restoredResultsIconAriaLabel',
+        {
+          defaultMessage: 'Results no longer current',
+        }
+      ),
+      tooltipText: i18n.translate(
+        'xpack.dataEnhanced.backgroundSessionIndicator.restoredResultsTooltipText',
+        {
+          defaultMessage: 'Results no longer current',
+        }
+      ),
     },
     popover: {
-      text: 'Results no longer current',
-      primaryAction: ({ onReload = () => {}, buttonProps = {} }) => (
-        <EuiButtonEmpty onClick={onReload} {...buttonProps}>
-          Refresh
-        </EuiButtonEmpty>
-      ),
-      secondaryAction: ({ onViewBackgroundRequests = () => {}, buttonProps = {} }) => (
-        <EuiButtonEmpty onClick={onViewBackgroundRequests} {...buttonProps}>
-          View background sessions
-        </EuiButtonEmpty>
-      ),
+      text: i18n.translate('xpack.dataEnhanced.backgroundSessionIndicator.restoredText', {
+        defaultMessage: 'Results no longer current',
+      }),
+      primaryAction: RefreshButton,
+      secondaryAction: ViewBackgroundSessionsButton,
     },
   },
 };
@@ -156,8 +234,9 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
       ownFocus
       isOpen={isPopoverOpen}
       closePopover={closePopover}
-      anchorPosition={'leftCenter'}
+      anchorPosition={'rightCenter'}
       panelPaddingSize={'s'}
+      data-test-subj={'backgroundSessionIndicator'}
       button={
         <EuiToolTip content={button.tooltipText}>
           <EuiButtonIcon
@@ -185,10 +264,14 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
           </EuiFlexGroup>
         </EuiFlexItem>
         {popover.secondaryAction && (
-          <EuiFlexItem grow={false} style={{ borderLeft: '1px solid #D3DAE6' }}>
+          <EuiFlexItem
+            grow={false}
+            className={'backgroundSessionIndicator__secondaryActionContainer'}
+          >
             <popover.secondaryAction
               {...props}
-              buttonProps={{ size: 'xs', style: { marginLeft: 8 } }}
+              // marginLeft: 10 to make borderLeft look like a separator
+              buttonProps={{ size: 'xs', style: { marginLeft: 10 } }}
             />
           </EuiFlexItem>
         )}

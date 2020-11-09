@@ -15,9 +15,9 @@ const Fallback = () => (
   </EuiDelayRender>
 );
 
-const LazyBackgroundSearchIndicator = React.lazy(() => import('./background_session_indicator'));
-export const BackgroundSearchIndicator = (props: BackgroundSessionIndicatorProps) => (
+const LazyBackgroundSessionIndicator = React.lazy(() => import('./background_session_indicator'));
+export const BackgroundSessionIndicator = (props: BackgroundSessionIndicatorProps) => (
   <React.Suspense fallback={<Fallback />}>
-    <LazyBackgroundSearchIndicator {...props} />
+    <LazyBackgroundSessionIndicator {...props} />
   </React.Suspense>
 );
