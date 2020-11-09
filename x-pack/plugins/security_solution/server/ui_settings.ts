@@ -23,6 +23,10 @@ import {
   NEWS_FEED_URL_SETTING_DEFAULT,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
+  DEFAULT_RULES_TABLE_REFRESH_SETTING,
+  DEFAULT_RULE_REFRESH_INTERVAL_ON,
+  DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
+  DEFAULT_RULE_REFRESH_IDLE_VALUE,
 } from '../common/constants';
 
 export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
@@ -111,6 +115,31 @@ export const initUiSettings = (uiSettings: CoreSetup['uiSettings']) => {
       category: ['securitySolution'],
       requiresPageReload: true,
       schema: schema.boolean(),
+    },
+    [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.rulesTableRefresh', {
+        defaultMessage: 'Rules auto refresh',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.rulesTableRefreshDescription',
+        {
+          defaultMessage:
+            '<p>Enables auto refresh on the all rules and monitoring tables, in milliseconds</p>',
+        }
+      ),
+      type: 'json',
+      value: `{
+  "on": ${DEFAULT_RULE_REFRESH_INTERVAL_ON},
+  "value": ${DEFAULT_RULE_REFRESH_INTERVAL_VALUE},
+  "idleTimeout": ${DEFAULT_RULE_REFRESH_IDLE_VALUE}
+}`,
+      category: ['securitySolution'],
+      requiresPageReload: true,
+      schema: schema.object({
+        idleTimeout: schema.number({ min: 300000 }),
+        value: schema.number({ min: 60000 }),
+        on: schema.boolean(),
+      }),
     },
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
