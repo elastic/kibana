@@ -69,18 +69,21 @@ Table of Contents
     - [`secrets`](#secrets-6)
     - [`params`](#params-6)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-1)
   - [Jira](#jira)
     - [`config`](#config-7)
     - [`secrets`](#secrets-7)
     - [`params`](#params-7)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-1)
       - [`subActionParams (issueTypes)`](#subactionparams-issuetypes)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-2)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-2)
   - [IBM Resilient](#ibm-resilient)
     - [`config`](#config-8)
     - [`secrets`](#secrets-8)
     - [`params`](#params-8)
       - [`subActionParams (pushToService)`](#subactionparams-pushtoservice-3)
+      - [`subActionParams (getFields)`](#subactionparams-getfields-3)
 - [Command Line Utility](#command-line-utility)
 - [Developing New Action Types](#developing-new-action-types)
   - [licensing](#licensing)
@@ -563,7 +566,7 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 
 | Property        | Description                                                                          | Type   |
 | --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, and `getIncident` | string |
 | subActionParams | The parameters of the sub action                                                     | object |
 
 #### `subActionParams (pushToService)`
@@ -579,6 +582,10 @@ The ServiceNow action uses the [V2 Table API](https://developer.servicenow.com/a
 | severity      | The name of the severity in ServiceNow.                                                                                   | string _(optional)_   |
 | urgency       | The name of the urgency in ServiceNow.                                                                                    | string _(optional)_   |
 | impact        | The name of the impact in ServiceNow.                                                                                     | string _(optional)_   |
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 ---
 
@@ -606,7 +613,7 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 
 | Property        | Description                                                                                                             | Type   |
 | --------------- | ----------------------------------------------------------------------------------------------------------------------- | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, `getIncident`, `issueTypes`, and `fieldsByIssueType` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, `getIncident`, `issueTypes`, and `fieldsByIssueType` | string |
 | subActionParams | The parameters of the sub action                                                                                        | object |
 
 #### `subActionParams (pushToService)`
@@ -626,6 +633,10 @@ The Jira action uses the [V2 API](https://developer.atlassian.com/cloud/jira/pla
 #### `subActionParams (issueTypes)`
 
 No parameters for `issueTypes` sub-action. Provide an empty object `{}`.
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 #### `subActionParams (pushToService)`
 
@@ -655,7 +666,7 @@ ID: `.resilient`
 
 | Property        | Description                                                                          | Type   |
 | --------------- | ------------------------------------------------------------------------------------ | ------ |
-| subAction       | The sub action to perform. It can be `pushToService`, `handshake`, and `getIncident` | string |
+| subAction       | The sub action to perform. It can be `getFields`, `pushToService`, `handshake`, and `getIncident` | string |
 | subActionParams | The parameters of the sub action                                                     | object |
 
 #### `subActionParams (pushToService)`
@@ -669,6 +680,10 @@ ID: `.resilient`
 | externalId    | The id of the incident in IBM Resilient. If presented the incident will be update. Otherwise a new incident will be created. | string _(optional)_   |
 | incidentTypes | An array with the ids of IBM Resilient incident types.                                                                       | number[] _(optional)_ |
 | severityCode  | IBM Resilient id of the severity code.                                                                                       | number _(optional)_   |
+
+#### `subActionParams (getFields)`
+
+No parameters for `getFields` sub-action. Provide an empty object `{}`.
 
 # Command Line Utility
 

@@ -101,6 +101,7 @@ export function EditorFrame(props: EditorFrameProps) {
 
   const framePublicAPI: FramePublicAPI = {
     datasourceLayers,
+    activeData: state.activeData,
     dateRange: props.dateRange,
     query: props.query,
     filters: props.filters,
