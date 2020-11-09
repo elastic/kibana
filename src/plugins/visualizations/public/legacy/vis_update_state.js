@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 
 /**
@@ -31,7 +32,7 @@ function convertHeatmapLabelColor(visState) {
   if (visState.type === 'heatmap' && visState.params && !hasOverwriteColorParam) {
     const showLabels = _.get(visState, 'params.valueAxes[0].labels.show', false);
     const color = _.get(visState, 'params.valueAxes[0].labels.color', '#555');
-    _.set(visState, 'params.valueAxes[0].labels.overwriteColor', showLabels && color !== '#555');
+    set(visState, 'params.valueAxes[0].labels.overwriteColor', showLabels && color !== '#555');
   }
 }
 
@@ -167,7 +168,7 @@ export const updateOldState = (visState) => {
 
   if (visState.type === 'gauge' && visState.fontSize) {
     delete newState.fontSize;
-    _.set(newState, 'gauge.style.fontSize', visState.fontSize);
+    set(newState, 'gauge.style.fontSize', visState.fontSize);
   }
 
   // update old metric to the new one

@@ -8,7 +8,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
-  // @ts-ignore
+  // @ts-expect-error
   EuiLoadingSpinnerSize,
   EuiText,
 } from '@elastic/eui';

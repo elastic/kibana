@@ -14,6 +14,7 @@ const signalSchema = schema.object({
   buildingBlockType: schema.nullable(schema.string()),
   description: schema.string(),
   note: schema.nullable(schema.string()),
+  eventCategoryOverride: schema.maybe(schema.string()),
   falsePositives: schema.arrayOf(schema.string(), { defaultValue: [] }),
   from: schema.string(),
   ruleId: schema.string(),
@@ -37,6 +38,9 @@ const signalSchema = schema.object({
   severity: schema.string(),
   severityMapping: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
   threat: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  threshold: schema.maybe(
+    schema.object({ field: schema.nullable(schema.string()), value: schema.number() })
+  ),
   timestampOverride: schema.nullable(schema.string()),
   to: schema.string(),
   type: schema.string(),
@@ -45,6 +49,13 @@ const signalSchema = schema.object({
   lists: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))), // For backwards compatibility with customers that had a data bug in 7.7. Once we use a migration script please remove this.
   exceptions_list: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))), // For backwards compatibility with customers that had a data bug in 7.8. Once we use a migration script please remove this.
   exceptionsList: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  threatFilters: schema.nullable(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  threatIndex: schema.maybe(schema.arrayOf(schema.string())),
+  threatQuery: schema.maybe(schema.string()),
+  threatMapping: schema.maybe(schema.arrayOf(schema.object({}, { unknowns: 'allow' }))),
+  threatLanguage: schema.maybe(schema.string()),
+  concurrentSearches: schema.maybe(schema.number()),
+  itemsPerSearch: schema.maybe(schema.number()),
 });
 
 /**

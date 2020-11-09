@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import {
   IRouter,
   SavedObjectsClientContract,
@@ -11,16 +10,17 @@ import {
   IKibanaResponse,
   SavedObject,
 } from 'src/core/server';
+import LRU from 'lru-cache';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { authenticateAgentWithAccessToken } from '../../../../../ingest_manager/server/services/agents/authenticate';
-import { validate } from '../../../../common/validate';
+import { authenticateAgentWithAccessToken } from '../../../../../fleet/server/services/agents/authenticate';
+import { LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG } from '../../../../common/endpoint/constants';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
-import { ArtifactConstants, ExceptionsCache } from '../../lib/artifacts';
+import { ArtifactConstants } from '../../lib/artifacts';
 import {
   DownloadArtifactRequestParamsSchema,
   downloadArtifactRequestParamsSchema,
   downloadArtifactResponseSchema,
-  InternalArtifactSchema,
+  InternalArtifactCompleteSchema,
 } from '../../schemas/artifacts';
 import { EndpointAppContext } from '../../types';
 
@@ -32,7 +32,7 @@ const allowlistBaseRoute: string = '/api/endpoint/artifacts';
 export function registerDownloadExceptionListRoute(
   router: IRouter,
   endpointContext: EndpointAppContext,
-  cache: ExceptionsCache
+  cache: LRU<string, Buffer>
 ) {
   router.get(
     {
@@ -43,9 +43,8 @@ export function registerDownloadExceptionListRoute(
           DownloadArtifactRequestParamsSchema
         >(downloadArtifactRequestParamsSchema),
       },
-      options: { tags: [] },
+      options: { tags: [LIMITED_CONCURRENCY_ENDPOINT_ROUTE_TAG] },
     },
-    // @ts-ignore
     async (context, req, res) => {
       let scopedSOClient: SavedObjectsClientContract;
       const logger = endpointContext.logFactory.get('download_exception_list');
@@ -55,27 +54,27 @@ export function registerDownloadExceptionListRoute(
         scopedSOClient = endpointContext.service.getScopedSavedObjectsClient(req);
         await authenticateAgentWithAccessToken(scopedSOClient, req);
       } catch (err) {
-        if (err.output.statusCode === 401) {
+        if ((err.isBoom ? err.output.statusCode : err.statusCode) === 401) {
           return res.unauthorized();
         } else {
           return res.notFound();
         }
       }
 
-      const buildAndValidateResponse = (artName: string, body: string): IKibanaResponse => {
+      const validateDownload = (await endpointContext.config()).validateArtifactDownloads;
+      const buildAndValidateResponse = (artName: string, body: Buffer): IKibanaResponse => {
         const artifact: HttpResponseOptions = {
           body,
           headers: {
-            'content-encoding': 'application/json',
-            'content-disposition': `attachment; filename=${artName}.json`,
+            'content-encoding': 'identity',
+            'content-disposition': `attachment; filename=${artName}.zz`,
           },
         };
 
-        const [validated, errors] = validate(artifact, downloadArtifactResponseSchema);
-        if (errors !== null || validated === null) {
-          return res.internalError({ body: errors! });
+        if (validateDownload && !downloadArtifactResponseSchema.is(artifact)) {
+          return res.internalError({ body: 'Artifact failed to validate.' });
         } else {
-          return res.ok((validated as unknown) as HttpResponseOptions);
+          return res.ok(artifact);
         }
       };
 
@@ -88,9 +87,9 @@ export function registerDownloadExceptionListRoute(
       } else {
         logger.debug(`Cache MISS artifact ${id}`);
         return scopedSOClient
-          .get<InternalArtifactSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
-          .then((artifact: SavedObject<InternalArtifactSchema>) => {
-            const body = Buffer.from(artifact.attributes.body, 'base64').toString();
+          .get<InternalArtifactCompleteSchema>(ArtifactConstants.SAVED_OBJECT_TYPE, id)
+          .then((artifact: SavedObject<InternalArtifactCompleteSchema>) => {
+            const body = Buffer.from(artifact.attributes.body, 'base64');
             cache.set(id, body);
             return buildAndValidateResponse(artifact.attributes.identifier, body);
           })

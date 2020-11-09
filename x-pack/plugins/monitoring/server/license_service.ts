@@ -33,20 +33,19 @@ export class LicenseService {
     let rawLicense: Readonly<ILicense> | undefined;
     let licenseSubscription: Subscription | undefined = license$.subscribe((nextRawLicense) => {
       rawLicense = nextRawLicense;
+      if (!rawLicense?.isAvailable) {
+        log.warn(
+          `X-Pack Monitoring Cluster Alerts will not be available: ${rawLicense?.getUnavailableReason()}`
+        );
+      }
     });
-
-    if (!rawLicense?.isAvailable) {
-      log.warn(
-        `X-Pack Monitoring Cluster Alerts will not be available: ${rawLicense?.getUnavailableReason()}`
-      );
-    }
 
     return {
       refresh,
       license$,
       getMessage: () => rawLicense?.getUnavailableReason() || 'N/A',
       getMonitoringFeature: () => rawLicense?.getFeature('monitoring') || defaultLicenseFeature,
-      getWatcherFeature: () => rawLicense?.getFeature('monitoring') || defaultLicenseFeature,
+      getWatcherFeature: () => rawLicense?.getFeature('watcher') || defaultLicenseFeature,
       getSecurityFeature: () => rawLicense?.getFeature('security') || defaultLicenseFeature,
       stop: () => {
         if (licenseSubscription) {

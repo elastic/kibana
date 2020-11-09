@@ -14,8 +14,8 @@ import cytoscape from 'cytoscape';
 import React, { MouseEvent } from 'react';
 import { Buttons } from './Buttons';
 import { Info } from './Info';
-import { ServiceMetricFetcher } from './ServiceMetricFetcher';
-import { popoverMinWidth } from '../cytoscapeOptions';
+import { ServiceStatsFetcher } from './ServiceStatsFetcher';
+import { popoverWidth } from '../cytoscape_options';
 
 interface ContentsProps {
   isService: boolean;
@@ -31,23 +31,24 @@ interface ContentsProps {
 // This method of detecting IE is from a Stack Overflow answer:
 // https://stackoverflow.com/a/21825207
 //
-// @ts-ignore `documentMode` is not recognized as a valid property of `document`.
+// @ts-expect-error `documentMode` is not recognized as a valid property of `document`.
 const isIE11 = !!window.MSInputMethodContext && !!document.documentMode;
 
-const FlexColumnGroup = (props: {
+function FlexColumnGroup(props: {
   children: React.ReactNode;
   style: React.CSSProperties;
   direction: 'column';
   gutterSize: 's';
-}) => {
+}) {
   if (isIE11) {
     const { direction, gutterSize, ...rest } = props;
     return <div {...rest} />;
   }
   return <EuiFlexGroup {...props} />;
-};
-const FlexColumnItem = (props: { children: React.ReactNode }) =>
-  isIE11 ? <div {...props} /> : <EuiFlexItem {...props} />;
+}
+function FlexColumnItem(props: { children: React.ReactNode }) {
+  return isIE11 ? <div {...props} /> : <EuiFlexItem {...props} />;
+}
 
 export function Contents({
   selectedNodeData,
@@ -60,7 +61,7 @@ export function Contents({
     <FlexColumnGroup
       direction="column"
       gutterSize="s"
-      style={{ minWidth: popoverMinWidth }}
+      style={{ width: popoverWidth }}
     >
       <FlexColumnItem>
         <EuiTitle size="xxs">
@@ -68,16 +69,12 @@ export function Contents({
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
       </FlexColumnItem>
-      {/* //TODO [APM ML] add service health stats here:
-      isService && (
-        <FlexColumnItem>
-          <ServiceHealth serviceNodeData={selectedNodeData} />
-          <EuiHorizontalRule margin="xs" />
-        </FlexColumnItem>
-      )*/}
       <FlexColumnItem>
         {isService ? (
-          <ServiceMetricFetcher serviceName={selectedNodeServiceName} />
+          <ServiceStatsFetcher
+            serviceName={selectedNodeServiceName}
+            serviceAnomalyStats={selectedNodeData.serviceAnomalyStats}
+          />
         ) : (
           <Info {...selectedNodeData} />
         )}

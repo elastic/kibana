@@ -5,13 +5,14 @@
  */
 
 import numeral from '@elastic/numeral';
-import { LegacyAPICaller } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { MLCATEGORY } from '../../../common/constants/field_types';
 import { AnalysisConfig } from '../../../common/types/anomaly_detection_jobs';
 import { fieldsServiceProvider } from '../fields_service';
 import { MlInfoResponse } from '../../../common/types/ml_server_info';
+import type { MlClient } from '../../lib/ml_client';
 
-interface ModelMemoryEstimationResult {
+export interface ModelMemoryEstimationResult {
   /**
    * Result model memory limit
    */
@@ -29,15 +30,15 @@ interface ModelMemoryEstimationResult {
 /**
  * Response of the _estimate_model_memory endpoint.
  */
-export interface ModelMemoryEstimate {
+export interface ModelMemoryEstimateResponse {
   model_memory_estimate: string;
 }
 
 /**
  * Retrieves overall and max bucket cardinalities.
  */
-const cardinalityCheckProvider = (callAsCurrentUser: LegacyAPICaller) => {
-  const fieldsService = fieldsServiceProvider(callAsCurrentUser);
+const cardinalityCheckProvider = (client: IScopedClusterClient) => {
+  const fieldsService = fieldsServiceProvider(client);
 
   return async (
     analysisConfig: AnalysisConfig,
@@ -123,8 +124,11 @@ const cardinalityCheckProvider = (callAsCurrentUser: LegacyAPICaller) => {
   };
 };
 
-export function calculateModelMemoryLimitProvider(callAsCurrentUser: LegacyAPICaller) {
-  const getCardinalities = cardinalityCheckProvider(callAsCurrentUser);
+export function calculateModelMemoryLimitProvider(
+  client: IScopedClusterClient,
+  mlClient: MlClient
+) {
+  const getCardinalities = cardinalityCheckProvider(client);
 
   /**
    * Retrieves an estimated size of the model memory limit used in the job config
@@ -140,7 +144,7 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: LegacyAPICa
     latestMs: number,
     allowMMLGreaterThanMax = false
   ): Promise<ModelMemoryEstimationResult> {
-    const info = await callAsCurrentUser<MlInfoResponse>('ml.info');
+    const { body: info } = await mlClient.info<MlInfoResponse>();
     const maxModelMemoryLimit = info.limits.max_model_memory_limit?.toUpperCase();
     const effectiveMaxModelMemoryLimit = info.limits.effective_max_model_memory_limit?.toUpperCase();
 
@@ -153,28 +157,27 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: LegacyAPICa
       latestMs
     );
 
-    const estimatedModelMemoryLimit = (
-      await callAsCurrentUser<ModelMemoryEstimate>('ml.estimateModelMemory', {
-        body: {
-          analysis_config: analysisConfig,
-          overall_cardinality: overallCardinality,
-          max_bucket_cardinality: maxBucketCardinality,
-        },
-      })
-    ).model_memory_estimate.toUpperCase();
+    const { body } = await mlClient.estimateModelMemory<ModelMemoryEstimateResponse>({
+      body: {
+        analysis_config: analysisConfig,
+        overall_cardinality: overallCardinality,
+        max_bucket_cardinality: maxBucketCardinality,
+      },
+    });
+    const estimatedModelMemoryLimit = body.model_memory_estimate.toUpperCase();
 
     let modelMemoryLimit = estimatedModelMemoryLimit;
     let mmlCappedAtMax = false;
     // if max_model_memory_limit has been set,
     // make sure the estimated value is not greater than it.
     if (allowMMLGreaterThanMax === false) {
-      // @ts-ignore
+      // @ts-expect-error
       const mmlBytes = numeral(estimatedModelMemoryLimit).value();
       if (maxModelMemoryLimit !== undefined) {
-        // @ts-ignore
+        // @ts-expect-error
         const maxBytes = numeral(maxModelMemoryLimit).value();
         if (mmlBytes > maxBytes) {
-          // @ts-ignore
+          // @ts-expect-error
           modelMemoryLimit = `${Math.floor(maxBytes / numeral('1MB').value())}MB`;
           mmlCappedAtMax = true;
         }
@@ -183,10 +186,10 @@ export function calculateModelMemoryLimitProvider(callAsCurrentUser: LegacyAPICa
       // if we've not already capped the estimated mml at the hard max server setting
       // ensure that the estimated mml isn't greater than the effective max mml
       if (mmlCappedAtMax === false && effectiveMaxModelMemoryLimit !== undefined) {
-        // @ts-ignore
+        // @ts-expect-error
         const effectiveMaxMmlBytes = numeral(effectiveMaxModelMemoryLimit).value();
         if (mmlBytes > effectiveMaxMmlBytes) {
-          // @ts-ignore
+          // @ts-expect-error
           modelMemoryLimit = `${Math.floor(effectiveMaxMmlBytes / numeral('1MB').value())}MB`;
         }
       }

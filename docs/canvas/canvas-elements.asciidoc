@@ -44,7 +44,7 @@ image::images/canvas-map-embed.gif[]
 
 . To use the customization options, click the panel menu, then select one of the following options:
 
-* *Edit map* &mdash; Opens <<maps,Maps>> or <<visualize,Visualize>> so that you can edit the original saved object.
+* *Edit map* &mdash; Opens <<maps,Maps>> or <<create-panels,Dashboard>> so that you can edit the original saved object.
 
 * *Edit panel title* &mdash; Adds a title to the saved object.
 

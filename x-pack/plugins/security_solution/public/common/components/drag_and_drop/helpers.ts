@@ -9,6 +9,7 @@ import { DropResult } from 'react-beautiful-dnd';
 import { Dispatch } from 'redux';
 import { ActionCreator } from 'typescript-fsa';
 
+import { alertsHeaders } from '../../../detections/components/alerts_table/default_config';
 import { BrowserField, BrowserFields, getAllFieldsByName } from '../../containers/source';
 import { dragAndDropActions } from '../../store/actions';
 import { IdToDataProvider } from '../../store/drag_and_drop/model';
@@ -17,6 +18,7 @@ import { timelineActions } from '../../../timelines/store/timeline';
 import { DEFAULT_COLUMN_MIN_WIDTH } from '../../../timelines/components/timeline/body/constants';
 import { addContentToTimeline } from '../../../timelines/components/timeline/data_providers/helpers';
 import { DataProvider } from '../../../timelines/components/timeline/data_providers/data_provider';
+import { TimelineId } from '../../../../common/types/timeline';
 
 export const draggableIdPrefix = 'draggableId';
 
@@ -182,6 +184,11 @@ export const addProviderToTimeline = ({
   }
 };
 
+const linkFields: Record<string, string> = {
+  'signal.rule.name': 'signal.rule.id',
+  'event.module': 'rule.reference',
+};
+
 export const addFieldToTimelineColumns = ({
   upsertColumn = timelineActions.upsertColumn,
   browserFields,
@@ -192,6 +199,10 @@ export const addFieldToTimelineColumns = ({
   const fieldId = getFieldIdFromDraggable(result);
   const allColumns = getAllFieldsByName(browserFields);
   const column = allColumns[fieldId];
+  const initColumnHeader =
+    timelineId === TimelineId.detectionsPage || timelineId === TimelineId.detectionsRulesDetailsPage
+      ? alertsHeaders.find((c) => c.id === fieldId) ?? {}
+      : {};
 
   if (column != null) {
     dispatch(
@@ -202,9 +213,11 @@ export const addFieldToTimelineColumns = ({
           description: isString(column.description) ? column.description : undefined,
           example: isString(column.example) ? column.example : undefined,
           id: fieldId,
+          linkField: linkFields[fieldId] ?? undefined,
           type: column.type,
           aggregatable: column.aggregatable,
           width: DEFAULT_COLUMN_MIN_WIDTH,
+          ...initColumnHeader,
         },
         id: timelineId,
         index: result.destination != null ? result.destination.index : 0,
@@ -258,8 +271,8 @@ export const allowTopN = ({
     'string',
   ].includes(fieldType);
 
-  // TODO: remove this explicit whitelist when the ECS documentation includes alerts
-  const isWhitelistedNonBrowserField = [
+  // TODO: remove this explicit allowlist when the ECS documentation includes alerts
+  const isAllowlistedNonBrowserField = [
     'signal.ancestors.depth',
     'signal.ancestors.id',
     'signal.ancestors.rule',
@@ -330,7 +343,7 @@ export const allowTopN = ({
     'signal.status',
   ].includes(fieldName);
 
-  return isWhitelistedNonBrowserField || (isAggregatable && isAllowedType);
+  return isAllowlistedNonBrowserField || (isAggregatable && isAllowedType);
 };
 
 export const getTimelineIdFromColumnDroppableId = (droppableId: string) =>

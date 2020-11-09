@@ -127,7 +127,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                   grow={false}
                 >
                   <ExplorerLink
-                    endDate={32503680000000}
+                    endDate="3000-01-01T00:00:00.000Z"
                     linkName="View in Machine Learning"
                     score={
                       Object {
@@ -195,7 +195,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
                         "time": 1560664800000,
                       }
                     }
-                    startDate={0}
+                    startDate="2020-07-07T08:20:18.966Z"
                   />
                 </EuiFlexItem>
               </EuiFlexGroup>,

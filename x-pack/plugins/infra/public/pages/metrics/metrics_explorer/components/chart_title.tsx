@@ -6,11 +6,16 @@
 
 import React, { Fragment } from 'react';
 import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { MetricsExplorerSeries } from '../../../../../common/http_api';
 
 interface Props {
   series: MetricsExplorerSeries;
 }
+
+const ALL_TITLE = i18n.translate('xpack.infra.metricsExplorer.everything', {
+  defaultMessage: 'Everything',
+});
 
 export const ChartTitle = ({ series }: Props) => {
   if (series.keys != null) {
@@ -21,7 +26,7 @@ export const ChartTitle = ({ series }: Props) => {
           <Fragment key={name}>
             <EuiFlexItem grow={false}>
               <EuiText size="m" color={keys.length - 1 > i ? 'subdued' : 'default'}>
-                <strong>{name}</strong>
+                <strong>{name === '*' ? ALL_TITLE : name}</strong>
               </EuiText>
             </EuiFlexItem>
             {keys.length - 1 > i && (

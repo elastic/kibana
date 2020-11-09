@@ -5,7 +5,7 @@
  */
 
 import { Transaction } from '../../../../../../typings/es_schemas/ui/transaction';
-// @ts-ignore
+// @ts-expect-error
 import configureStore from '../../../../../store/config/configureStore';
 import { getDiscoverQuery } from '../DiscoverTransactionLink';
 

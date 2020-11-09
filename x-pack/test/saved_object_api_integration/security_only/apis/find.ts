@@ -4,17 +4,27 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SPACES } from '../../common/lib/spaces';
+import { AUTHENTICATION } from '../../common/lib/authentication';
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import { TestUser } from '../../common/lib/types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { findTestSuiteFactory, getTestCases, FindTestDefinition } from '../../common/suites/find';
+import { findTestSuiteFactory, getTestCases } from '../../common/suites/find';
 
-const createTestCases = () => {
-  const cases = getTestCases();
+const {
+  DEFAULT: { spaceId: DEFAULT_SPACE_ID },
+  SPACE_1: { spaceId: SPACE_1_ID },
+  SPACE_2: { spaceId: SPACE_2_ID },
+} = SPACES;
+
+const createTestCases = (crossSpaceSearch?: string[]) => {
+  const cases = getTestCases({ crossSpaceSearch });
+
   const normalTypes = [
     cases.singleNamespaceType,
     cases.multiNamespaceType,
     cases.namespaceAgnosticType,
+    cases.eachType,
     cases.pageBeyondTotal,
     cases.unknownSearchField,
     cases.filterWithNamespaceAgnosticType,
@@ -39,39 +49,47 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
 
   const { addTests, createTestDefinitions } = findTestSuiteFactory(esArchiver, supertest);
-  const createTests = () => {
-    const { normalTypes, hiddenAndUnknownTypes, allTypes } = createTestCases();
+  const createTests = (user: TestUser) => {
+    const defaultCases = createTestCases();
+    const crossSpaceCases = createTestCases([DEFAULT_SPACE_ID, SPACE_1_ID, SPACE_2_ID]);
+
+    if (user.username === AUTHENTICATION.SUPERUSER.username) {
+      return {
+        defaultCases: createTestDefinitions(defaultCases.allTypes, false, { user }),
+        crossSpace: createTestDefinitions(
+          crossSpaceCases.allTypes,
+          { statusCode: 400, reason: 'cross_namespace_not_permitted' },
+          { user }
+        ),
+      };
+    }
+
+    const isAuthorizedGlobally = user.authorizedAtSpaces.includes('*');
+
     return {
-      unauthorized: createTestDefinitions(allTypes, true),
-      authorized: [
-        createTestDefinitions(normalTypes, false),
-        createTestDefinitions(hiddenAndUnknownTypes, true),
-      ].flat(),
-      superuser: createTestDefinitions(allTypes, false),
+      defaultCases: isAuthorizedGlobally
+        ? [
+            createTestDefinitions(defaultCases.normalTypes, false, { user }),
+            createTestDefinitions(defaultCases.hiddenAndUnknownTypes, {
+              statusCode: 200,
+              reason: 'unauthorized',
+            }),
+          ].flat()
+        : createTestDefinitions(defaultCases.allTypes, { statusCode: 200, reason: 'unauthorized' }),
+      crossSpace: createTestDefinitions(
+        crossSpaceCases.allTypes,
+        { statusCode: 400, reason: 'cross_namespace_not_permitted' },
+        { user }
+      ),
     };
   };
 
   describe('_find', () => {
     getTestScenarios().security.forEach(({ users }) => {
-      const { unauthorized, authorized, superuser } = createTests();
-      const _addTests = (user: TestUser, tests: FindTestDefinition[]) => {
-        addTests(user.description, { user, tests });
-      };
-
-      [
-        users.noAccess,
-        users.legacyAll,
-        users.allAtDefaultSpace,
-        users.readAtDefaultSpace,
-        users.allAtSpace1,
-        users.readAtSpace1,
-      ].forEach((user) => {
-        _addTests(user, unauthorized);
+      Object.values(users).forEach((user) => {
+        const { defaultCases, crossSpace } = createTests(user);
+        addTests(`${user.description}`, { user, tests: [...defaultCases, ...crossSpace] });
       });
-      [users.dualAll, users.dualRead, users.allGlobally, users.readGlobally].forEach((user) => {
-        _addTests(user, authorized);
-      });
-      _addTests(users.superuser, superuser);
     });
   });
 }

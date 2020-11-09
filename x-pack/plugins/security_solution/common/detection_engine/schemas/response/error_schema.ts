@@ -6,9 +6,7 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import { rule_id, status_code, message } from '../common/schemas';
-/* eslint-enable @typescript-eslint/camelcase */
 
 // We use id: t.string intentionally and _never_ the id from global schemas as
 // sometimes echo back out the id that the user gave us and it is not guaranteed

@@ -8,8 +8,8 @@ import { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { act } from '@testing-library/react';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
-import { Capabilities, ScopedHistory } from 'src/core/public';
-import { Feature } from '../../../../../features/public';
+import { Capabilities } from 'src/core/public';
+import { KibanaFeature } from '../../../../../features/public';
 import { Role } from '../../../../common/model';
 import { DocumentationLinksService } from '../documentation_links';
 import { EditRolePage } from './edit_role_page';
@@ -27,11 +27,11 @@ import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 
 const buildFeatures = () => {
   return [
-    new Feature({
+    new KibanaFeature({
       id: 'feature1',
       name: 'Feature 1',
-      icon: 'addDataApp',
       app: ['feature1App'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['feature1App'],
@@ -51,11 +51,11 @@ const buildFeatures = () => {
         },
       },
     }),
-    new Feature({
+    new KibanaFeature({
       id: 'feature2',
       name: 'Feature 2',
-      icon: 'addDataApp',
       app: ['feature2App'],
+      category: { id: 'foo', label: 'foo' },
       privileges: {
         all: {
           app: ['feature2App'],
@@ -75,7 +75,7 @@ const buildFeatures = () => {
         },
       },
     }),
-  ] as Feature[];
+  ] as KibanaFeature[];
 };
 
 const buildBuiltinESPrivileges = () => {
@@ -187,7 +187,7 @@ function getProps({
     docLinks: new DocumentationLinksService(docLinks),
     fatalErrors,
     uiCapabilities: buildUICapabilities(canManageSpaces),
-    history: (scopedHistoryMock.create() as unknown) as ScopedHistory,
+    history: scopedHistoryMock.create(),
   };
 }
 

@@ -5,11 +5,18 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+import {
+  EuiPopover,
+  EuiButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiText,
+} from '@elastic/eui';
 import './add_message_variables.scss';
+import { ActionVariable } from '../../types';
 
 interface Props {
-  messageVariables: string[] | undefined;
+  messageVariables?: ActionVariable[];
   paramsProperty: string;
   onSelectEventHandler: (variable: string) => void;
 }
@@ -22,17 +29,22 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
   const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
 
   const getMessageVariables = () =>
-    messageVariables?.map((variable: string, i: number) => (
+    messageVariables?.map((variable: ActionVariable, i: number) => (
       <EuiContextMenuItem
-        key={variable}
+        key={variable.name}
         data-test-subj={`variableMenuButton-${i}`}
         icon="empty"
         onClick={() => {
-          onSelectEventHandler(variable);
+          onSelectEventHandler(variable.name);
           setIsVariablesPopoverOpen(false);
         }}
       >
-        {`{{${variable}}}`}
+        <>
+          <EuiText size="m">{`{{${variable.name}}}`}</EuiText>
+          <EuiText size="m" color="subdued">
+            <div className="euiTextColor--subdued">{variable.description}</div>
+          </EuiText>
+        </>
       </EuiContextMenuItem>
     ));
 
@@ -49,6 +61,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         <EuiButtonIcon
           id={`${paramsProperty}AddVariableButton`}
           data-test-subj={`${paramsProperty}AddVariableButton`}
+          isDisabled={(messageVariables?.length ?? 0) === 0}
           title={addVariableButtonTitle}
           onClick={() => setIsVariablesPopoverOpen(true)}
           iconType="indexOpen"

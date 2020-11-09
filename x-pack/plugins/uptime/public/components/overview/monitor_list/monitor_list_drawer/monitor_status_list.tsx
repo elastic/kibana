@@ -5,33 +5,32 @@
  */
 
 import React from 'react';
-import { get, upperFirst } from 'lodash';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { LocationLink } from '../../../common/location_link';
 import { MonitorStatusRow } from './monitor_status_row';
-import { Check } from '../../../../../common/runtime_types';
+import { Ping } from '../../../../../common/runtime_types';
 import { STATUS, UNNAMED_LOCATION } from '../../../../../common/constants';
 
 interface MonitorStatusListProps {
   /**
-   * Recent List of checks performed on monitor
+   * Recent List of pings performed on monitor
    */
-  checks: Check[];
+  summaryPings: Ping[];
 }
 
-export const MonitorStatusList = ({ checks }: MonitorStatusListProps) => {
+export const MonitorStatusList = ({ summaryPings }: MonitorStatusListProps) => {
   const upChecks: Set<string> = new Set();
   const downChecks: Set<string> = new Set();
 
-  checks.forEach((check: Check) => {
+  summaryPings.forEach((ping: Ping) => {
     // Doing this way because name is either string or null, get() default value only works on undefined value
-    const location = get(check, 'observer.geo.name', null) || UNNAMED_LOCATION;
+    const location = ping.observer?.geo?.name ?? UNNAMED_LOCATION;
 
-    if (check.monitor.status === STATUS.UP) {
-      upChecks.add(upperFirst(location));
-    } else if (check.monitor.status === STATUS.DOWN) {
-      downChecks.add(upperFirst(location));
+    if (ping.monitor.status === STATUS.UP) {
+      upChecks.add(location);
+    } else if (ping.monitor.status === STATUS.DOWN) {
+      downChecks.add(location);
     }
   });
 

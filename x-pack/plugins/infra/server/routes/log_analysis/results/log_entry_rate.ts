@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { InfraBackendLibs } from '../../../lib/infra_types';
 import {
   LOG_ANALYSIS_GET_LOG_ENTRY_RATE_PATH,
@@ -13,8 +13,9 @@ import {
   GetLogEntryRateSuccessResponsePayload,
 } from '../../../../common/http_api/log_analysis';
 import { createValidationFunction } from '../../../../common/runtime_types';
-import { NoLogAnalysisResultsIndexError, getLogEntryRateBuckets } from '../../../lib/log_analysis';
+import { getLogEntryRateBuckets } from '../../../lib/log_analysis';
 import { assertHasInfraMlPlugins } from '../../../utils/request_context';
+import { isMlPrivilegesError } from '../../../lib/log_analysis/errors';
 
 export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
   framework.registerRoute(
@@ -27,7 +28,7 @@ export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
-        data: { sourceId, timeRange, bucketDuration },
+        data: { sourceId, timeRange, bucketDuration, datasets },
       } = request.body;
 
       try {
@@ -38,7 +39,8 @@ export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
           sourceId,
           timeRange.startTime,
           timeRange.endTime,
-          bucketDuration
+          bucketDuration,
+          datasets
         );
 
         return response.ok({
@@ -55,8 +57,13 @@ export const initGetLogEntryRateRoute = ({ framework }: InfraBackendLibs) => {
           throw error;
         }
 
-        if (error instanceof NoLogAnalysisResultsIndexError) {
-          return response.notFound({ body: { message: error.message } });
+        if (isMlPrivilegesError(error)) {
+          return response.customError({
+            statusCode: 403,
+            body: {
+              message: error.message,
+            },
+          });
         }
 
         return response.customError({

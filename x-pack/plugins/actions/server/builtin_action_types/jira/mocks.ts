@@ -4,12 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  ExternalService,
-  PushToServiceApiParams,
-  ExecutorSubActionPushParams,
-  MapRecord,
-} from '../case/types';
+import { ExternalService, PushToServiceApiParams, ExecutorSubActionPushParams } from './types';
+
+import { MapRecord } from '../case/types';
 
 const createMock = (): jest.Mocked<ExternalService> => {
   const service = {
@@ -40,6 +37,56 @@ const createMock = (): jest.Mocked<ExternalService> => {
       })
     ),
     createComment: jest.fn(),
+    findIncidents: jest.fn(),
+    getCapabilities: jest.fn(),
+    getIssueTypes: jest.fn().mockImplementation(() => [
+      {
+        id: '10006',
+        name: 'Task',
+      },
+      {
+        id: '10007',
+        name: 'Bug',
+      },
+    ]),
+    getFieldsByIssueType: jest.fn().mockImplementation(() => ({
+      summary: { allowedValues: [], defaultValue: {} },
+      priority: {
+        allowedValues: [
+          {
+            name: 'Medium',
+            id: '3',
+          },
+        ],
+        defaultValue: { name: 'Medium', id: '3' },
+      },
+    })),
+    getIssues: jest.fn().mockImplementation(() => [
+      {
+        id: '10267',
+        key: 'RJ-107',
+        title: 'Test title',
+      },
+    ]),
+    getIssue: jest.fn().mockImplementation(() => ({
+      id: '10267',
+      key: 'RJ-107',
+      title: 'Test title',
+    })),
+    getFields: jest.fn().mockImplementation(() => ({
+      description: {
+        allowedValues: [],
+        defaultValue: {},
+        required: true,
+        schema: { type: 'string' },
+      },
+      summary: {
+        allowedValues: [],
+        defaultValue: {},
+        required: true,
+        schema: { type: 'string' },
+      },
+    })),
   };
 
   service.createComment.mockImplementationOnce(() =>
@@ -64,7 +111,6 @@ const createMock = (): jest.Mocked<ExternalService> => {
 const externalServiceMock = {
   create: createMock,
 };
-
 const mapping: Map<string, Partial<MapRecord>> = new Map();
 
 mapping.set('title', {
@@ -96,6 +142,10 @@ const executorParams: ExecutorSubActionPushParams = {
   updatedBy: { fullName: 'Elastic User', username: 'elastic' },
   title: 'Incident title',
   description: 'Incident description',
+  labels: ['kibana', 'elastic'],
+  priority: 'High',
+  issueType: '10006',
+  parent: null,
   comments: [
     {
       commentId: 'case-comment-1',
@@ -118,7 +168,7 @@ const executorParams: ExecutorSubActionPushParams = {
 
 const apiParams: PushToServiceApiParams = {
   ...executorParams,
-  externalCase: { summary: 'Incident title', description: 'Incident description' },
+  externalObject: { summary: 'Incident title', description: 'Incident description' },
 };
 
 export { externalServiceMock, mapping, executorParams, apiParams };

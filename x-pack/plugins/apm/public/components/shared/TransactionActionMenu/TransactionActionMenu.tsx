@@ -6,10 +6,8 @@
 
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { FunctionComponent, useMemo, useState, MouseEvent } from 'react';
-import url from 'url';
-import { Filter } from '../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import React, { useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import {
   ActionMenu,
   ActionMenuDivider,
@@ -19,32 +17,33 @@ import {
   SectionSubtitle,
   SectionTitle,
 } from '../../../../../observability/public';
+import { Filter } from '../../../../common/custom_link/custom_link_types';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useFetcher } from '../../../hooks/useFetcher';
-import { useLocation } from '../../../hooks/useLocation';
+import { useLicense } from '../../../hooks/useLicense';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { CustomLinkFlyout } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout';
+import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
 import { CustomLink } from './CustomLink';
 import { CustomLinkPopover } from './CustomLink/CustomLinkPopover';
 import { getSections } from './sections';
-import { useLicense } from '../../../hooks/useLicense';
-import { convertFiltersToQuery } from '../../app/Settings/CustomizeUI/CustomLink/CustomLinkFlyout/helper';
 
 interface Props {
   readonly transaction: Transaction;
 }
 
-const ActionMenuButton = ({ onClick }: { onClick: () => void }) => (
-  <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onClick}>
-    {i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
-      defaultMessage: 'Actions',
-    })}
-  </EuiButtonEmpty>
-);
+function ActionMenuButton({ onClick }: { onClick: () => void }) {
+  return (
+    <EuiButtonEmpty iconType="arrowDown" iconSide="right" onClick={onClick}>
+      {i18n.translate('xpack.apm.transactionActionMenu.actionsButtonLabel', {
+        defaultMessage: 'Actions',
+      })}
+    </EuiButtonEmpty>
+  );
+}
 
-export const TransactionActionMenu: FunctionComponent<Props> = ({
-  transaction,
-}: Props) => {
+export function TransactionActionMenu({ transaction }: Props) {
   const license = useLicense();
   const hasValidLicense = license?.isActive && license?.hasAtLeast('gold');
 
@@ -84,40 +83,7 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
     basePath: core.http.basePath,
     location,
     urlParams,
-  }).map((sectionList) =>
-    sectionList.map((section) => ({
-      ...section,
-      actions: section.actions.map((action) => {
-        const { href } = action;
-
-        // use navigateToApp as a temporary workaround for faster navigation between observability apps.
-        // see https://github.com/elastic/kibana/issues/65682
-
-        return {
-          ...action,
-          onClick: (event: MouseEvent) => {
-            const parsed = url.parse(href);
-
-            const appPathname = core.http.basePath.remove(
-              parsed.pathname ?? ''
-            );
-
-            const [, , app, ...rest] = appPathname.split('/');
-
-            if (app === 'uptime' || app === 'metrics' || app === 'logs') {
-              event.preventDefault();
-              const search = parsed.search || '';
-
-              const path = `${rest.join('/')}${search}`;
-              core.application.navigateToApp(app, {
-                path,
-              });
-            }
-          },
-        };
-      }),
-    }))
-  );
+  });
 
   const closePopover = () => {
     setIsActionPopoverOpen(false);
@@ -186,7 +152,6 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
                               key={action.key}
                               label={action.label}
                               href={action.href}
-                              onClick={action.onClick}
                             />
                           ))}
                         </SectionLinks>
@@ -211,4 +176,4 @@ export const TransactionActionMenu: FunctionComponent<Props> = ({
       </ActionMenu>
     </>
   );
-};
+}

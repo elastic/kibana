@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-readFromDocValues?: boolean;
+get readFromDocValues(): boolean;
 ```

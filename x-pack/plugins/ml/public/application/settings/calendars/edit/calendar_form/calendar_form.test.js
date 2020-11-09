@@ -8,6 +8,9 @@ import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
 import { CalendarForm } from './calendar_form';
 
+jest.mock('../../../../contexts/kibana/use_create_url', () => ({
+  useCreateAndNavigateToMlLink: jest.fn(),
+}));
 const testProps = {
   calendarId: '',
   canCreateCalendar: true,
@@ -31,6 +34,7 @@ const testProps = {
   selectedGroupOptions: [],
   selectedJobOptions: [],
   showNewEventModal: jest.fn(),
+  isGlobalCalendar: false,
 };
 
 describe('CalendarForm', () => {

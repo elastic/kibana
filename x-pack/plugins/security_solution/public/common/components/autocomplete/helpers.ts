@@ -8,7 +8,7 @@ import dateMath from '@elastic/datemath';
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { IFieldType } from '../../../../../../../src/plugins/data/common';
-import { Ipv4Address } from '../../../../../../../src/plugins/kibana_utils/public';
+
 import {
   EXCEPTION_OPERATORS,
   isOperator,
@@ -17,7 +17,14 @@ import {
   doesNotExistOperator,
 } from './operators';
 import { GetGenericComboBoxPropsReturn, OperatorOption } from './types';
+import * as i18n from './translations';
 
+/**
+ * Returns the appropriate operators given a field type
+ *
+ * @param field IFieldType selected field
+ *
+ */
 export const getOperators = (field: IFieldType | undefined): OperatorOption[] => {
   if (field == null) {
     return [isOperator];
@@ -30,30 +37,81 @@ export const getOperators = (field: IFieldType | undefined): OperatorOption[] =>
   }
 };
 
-export function validateParams(params: string | undefined, type: string) {
-  // Box would show error state if empty otherwise
-  if (params == null || params === '') {
-    return true;
+/**
+ * Determines if empty value is ok
+ *
+ * @param param the value being checked
+ * @param field the selected field
+ * @param isRequired whether or not an empty value is allowed
+ * @param touched has field been touched by user
+ * @returns undefined if valid, string with error message if invalid,
+ * null if no checks matched
+ */
+export const checkEmptyValue = (
+  param: string | undefined,
+  field: IFieldType | undefined,
+  isRequired: boolean,
+  touched: boolean
+): string | undefined | null => {
+  if (isRequired && touched && (param == null || param.trim() === '')) {
+    return i18n.FIELD_REQUIRED_ERR;
   }
 
-  switch (type) {
+  if (
+    field == null ||
+    (isRequired && !touched) ||
+    (!isRequired && (param == null || param === ''))
+  ) {
+    return undefined;
+  }
+
+  return null;
+};
+
+/**
+ * Very basic validation for values
+ *
+ * @param param the value being checked
+ * @param field the selected field
+ * @param isRequired whether or not an empty value is allowed
+ * @param touched has field been touched by user
+ * @returns undefined if valid, string with error message if invalid
+ */
+export const paramIsValid = (
+  param: string | undefined,
+  field: IFieldType | undefined,
+  isRequired: boolean,
+  touched: boolean
+): string | undefined => {
+  if (field == null) {
+    return undefined;
+  }
+
+  const emptyValueError = checkEmptyValue(param, field, isRequired, touched);
+  if (emptyValueError !== null) {
+    return emptyValueError;
+  }
+
+  switch (field.type) {
     case 'date':
-      const moment = dateMath.parse(params);
-      return Boolean(moment && moment.isValid());
-    case 'ip':
-      try {
-        return Boolean(new Ipv4Address(params));
-      } catch (e) {
-        return false;
-      }
+      const moment = dateMath.parse(param ?? '');
+      const isDate = Boolean(moment && moment.isValid());
+      return isDate ? undefined : i18n.DATE_ERR;
     case 'number':
-      const val = parseFloat(params);
-      return typeof val === 'number' && !isNaN(val);
+      const isNum = param != null && param.trim() !== '' && !isNaN(+param);
+      return isNum ? undefined : i18n.NUMBER_ERR;
     default:
-      return true;
+      return undefined;
   }
-}
+};
 
+/**
+ * Determines the options, selected values and option labels for EUI combo box
+ *
+ * @param options options user can select from
+ * @param selectedOptions user selection if any
+ * @param getLabel helper function to know which property to use for labels
+ */
 export function getGenericComboBoxProps<T>({
   options,
   selectedOptions,
@@ -66,11 +124,12 @@ export function getGenericComboBoxProps<T>({
   const newLabels = options.map(getLabel);
   const newComboOptions: EuiComboBoxOptionOption[] = newLabels.map((label) => ({ label }));
   const newSelectedComboOptions = selectedOptions
+    .map(getLabel)
     .filter((option) => {
-      return options.indexOf(option) !== -1;
+      return newLabels.indexOf(option) !== -1;
     })
     .map((option) => {
-      return newComboOptions[options.indexOf(option)];
+      return newComboOptions[newLabels.indexOf(option)];
     });
 
   return {

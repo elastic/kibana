@@ -5,7 +5,7 @@
  */
 
 import { reduceFields } from '../../utils/build_query/reduce_fields';
-import { cloudFieldsMap, hostFieldsMap } from '../ecs_fields';
+import { cloudFieldsMap, hostFieldsMap, agentFieldsMap } from '../ecs_fields';
 
 import { buildFieldsTermAggregation } from './helpers';
 import { HostOverviewRequestOptions } from './types';
@@ -19,13 +19,14 @@ export const buildHostOverviewQuery = ({
   },
   timerange: { from, to },
 }: HostOverviewRequestOptions) => {
-  const esFields = reduceFields(fields, { ...hostFieldsMap, ...cloudFieldsMap });
+  const esFields = reduceFields(fields, { ...hostFieldsMap, ...cloudFieldsMap, ...agentFieldsMap });
 
   const filter = [
     { term: { 'host.name': hostName } },
     {
       range: {
         [timestamp]: {
+          format: 'strict_date_optional_time',
           gte: from,
           lte: to,
         },

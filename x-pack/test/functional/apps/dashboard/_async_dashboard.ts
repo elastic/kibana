@@ -35,8 +35,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.addSampleDataSet('flights');
-      const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
-      expect(isInstalled).to.be(true);
+      await retry.tryForTime(10000, async () => {
+        const isInstalled = await PageObjects.home.isSampleDataSetInstalled('flights');
+        expect(isInstalled).to.be(true);
+      });
+
       // add the range of the sample data so we can pick it in the quick pick list
       const SAMPLE_DATA_RANGE = `[
         {

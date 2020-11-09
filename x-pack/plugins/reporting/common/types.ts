@@ -6,6 +6,13 @@
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 export { ReportingConfigType } from '../server/config';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { LayoutParams } from '../server/lib/layouts';
+export { LayoutParams };
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export { ReportDocument, ReportSource } from '../server/lib/store/report';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+export { BaseParams } from '../server/types';
 
 export type JobId = string;
 export type JobStatus =
@@ -15,44 +22,42 @@ export type JobStatus =
   | 'processing'
   | 'failed';
 
-export interface SourceJob {
-  _id: JobId;
-  _source: {
-    status: JobStatus;
-    output: {
-      max_size_reached: boolean;
-      csv_contains_formulas: boolean;
-    };
-    payload: {
-      type: string;
-      title: string;
-    };
-  };
-}
-
 export interface JobContent {
   content: string;
 }
 
-export interface JobSummary {
-  id: JobId;
-  status: JobStatus;
-  title: string;
-  type: string;
-  maxSizeReached: boolean;
-  csvContainsFormulas: boolean;
+export interface ReportApiJSON {
+  id: string;
+  index: string;
+  kibana_name: string;
+  kibana_id: string;
+  browser_type: string | undefined;
+  created_at: string;
+  priority?: number;
+  jobtype: string;
+  created_by: string | false;
+  timeout?: number;
+  output?: {
+    content_type: string;
+    size: number;
+    warnings?: string[];
+  };
+  process_expiration?: string;
+  completed_at: string | undefined;
+  payload: {
+    layout?: LayoutParams;
+    title: string;
+    browserTimezone?: string;
+  };
+  meta: {
+    layout?: string;
+    objectType: string;
+  };
+  max_attempts: number;
+  started_at: string | undefined;
+  attempts: number;
+  status: string;
 }
-
-export interface JobStatusBuckets {
-  completed: JobSummary[];
-  failed: JobSummary[];
-}
-
-type DownloadLink = string;
-export type DownloadReportFn = (jobId: JobId) => DownloadLink;
-
-type ManagementLink = string;
-export type ManagementLinkFn = () => ManagementLink;
 
 export interface PollerOptions {
   functionToPoll: () => Promise<any>;

@@ -5,8 +5,6 @@
  */
 
 import PropTypes from 'prop-types';
-import rison from 'rison-node';
-
 import React, { Component } from 'react';
 
 import {
@@ -18,10 +16,9 @@ import {
   EuiLink,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { formatDate, formatNumber } from '@elastic/eui/lib/services/format';
+import { formatNumber } from '@elastic/eui/lib/services/format';
 
 import { FORECAST_REQUEST_STATE } from '../../../../../../../common/constants/states';
-import { TIME_FORMAT } from '../../../../../../../common/constants/time_format';
 import { addItemToRecentlyAccessed } from '../../../../../util/recently_accessed';
 import { mlForecastService } from '../../../../../services/forecast_service';
 import { i18n } from '@kbn/i18n';
@@ -30,13 +27,20 @@ import {
   getLatestDataOrBucketTimestamp,
   isTimeSeriesViewJob,
 } from '../../../../../../../common/util/job_utils';
+import { withKibana } from '../../../../../../../../../../src/plugins/kibana_react/public';
+import {
+  ML_APP_URL_GENERATOR,
+  ML_PAGES,
+} from '../../../../../../../common/constants/ml_url_generator';
+import { PLUGIN_ID } from '../../../../../../../common/constants/app';
+import { timeFormatter } from '../../../../../../../common/util/date_utils';
 
 const MAX_FORECASTS = 500;
 
 /**
  * Table component for rendering the lists of forecasts run on an ML job.
  */
-export class ForecastsTable extends Component {
+export class ForecastsTableUI extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -78,7 +82,17 @@ export class ForecastsTable extends Component {
     }
   }
 
-  openSingleMetricView(forecast) {
+  async openSingleMetricView(forecast) {
+    const {
+      services: {
+        application: { navigateToApp },
+
+        share: {
+          urlGenerators: { getUrlGenerator },
+        },
+      },
+    } = this.props.kibana;
+
     // Creates the link to the Single Metric Viewer.
     // Set the total time range from the start of the job data to the end of the forecast,
     const dataCounts = this.props.job.data_counts;
@@ -93,31 +107,7 @@ export class ForecastsTable extends Component {
         ? new Date(forecast.forecast_end_timestamp).toISOString()
         : new Date(resultLatest).toISOString();
 
-    const _g = rison.encode({
-      ml: {
-        jobIds: [this.props.job.job_id],
-      },
-      refreshInterval: {
-        display: 'Off',
-        pause: false,
-        value: 0,
-      },
-      time: {
-        from,
-        to,
-        mode: 'absolute',
-      },
-    });
-
-    const appState = {
-      query: {
-        query_string: {
-          analyze_wildcard: true,
-          query: '*',
-        },
-      },
-    };
-
+    let mlTimeSeriesExplorer = {};
     if (forecast !== undefined) {
       // Set the zoom to show duration before the forecast equal to the length of the forecast.
       const forecastDurationMs =
@@ -126,8 +116,7 @@ export class ForecastsTable extends Component {
         forecast.forecast_start_timestamp - forecastDurationMs,
         jobEarliest
       );
-
-      appState.mlTimeSeriesExplorer = {
+      mlTimeSeriesExplorer = {
         forecastId: forecast.forecast_id,
         zoom: {
           from: new Date(zoomFrom).toISOString(),
@@ -136,11 +125,39 @@ export class ForecastsTable extends Component {
       };
     }
 
-    const _a = rison.encode(appState);
-
-    const url = `?_g=${_g}&_a=${_a}`;
-    addItemToRecentlyAccessed('timeseriesexplorer', this.props.job.job_id, url);
-    window.open(`#/timeseriesexplorer${url}`, '_self');
+    const mlUrlGenerator = getUrlGenerator(ML_APP_URL_GENERATOR);
+    const singleMetricViewerForecastLink = await mlUrlGenerator.createUrl({
+      page: ML_PAGES.SINGLE_METRIC_VIEWER,
+      pageState: {
+        timeRange: {
+          from,
+          to,
+          mode: 'absolute',
+        },
+        refreshInterval: {
+          display: 'Off',
+          pause: true,
+          value: 0,
+        },
+        jobIds: [this.props.job.job_id],
+        query: {
+          query_string: {
+            analyze_wildcard: true,
+            query: '*',
+          },
+        },
+        ...mlTimeSeriesExplorer,
+      },
+      excludeBasePath: true,
+    });
+    addItemToRecentlyAccessed(
+      'timeseriesexplorer',
+      this.props.job.job_id,
+      singleMetricViewerForecastLink
+    );
+    await navigateToApp(PLUGIN_ID, {
+      path: singleMetricViewerForecastLink,
+    });
   }
 
   render() {
@@ -201,7 +218,7 @@ export class ForecastsTable extends Component {
           defaultMessage: 'Created',
         }),
         dataType: 'date',
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: timeFormatter,
         textOnly: true,
         sortable: true,
         scope: 'row',
@@ -212,7 +229,7 @@ export class ForecastsTable extends Component {
           defaultMessage: 'From',
         }),
         dataType: 'date',
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: timeFormatter,
         textOnly: true,
         sortable: true,
       },
@@ -222,7 +239,7 @@ export class ForecastsTable extends Component {
           defaultMessage: 'To',
         }),
         dataType: 'date',
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: timeFormatter,
         textOnly: true,
         sortable: true,
       },
@@ -260,7 +277,7 @@ export class ForecastsTable extends Component {
         name: i18n.translate('xpack.ml.jobsList.jobDetails.forecastsTable.expiresLabel', {
           defaultMessage: 'Expires',
         }),
-        render: (date) => formatDate(date, TIME_FORMAT),
+        render: timeFormatter,
         textOnly: true,
         sortable: true,
       },
@@ -292,7 +309,7 @@ export class ForecastsTable extends Component {
             {
               defaultMessage: 'View forecast created at {createdDate}',
               values: {
-                createdDate: formatDate(forecast.forecast_create_timestamp, TIME_FORMAT),
+                createdDate: timeFormatter(forecast.forecast_create_timestamp),
               },
             }
           );
@@ -301,7 +318,7 @@ export class ForecastsTable extends Component {
             <EuiButtonIcon
               onClick={() => this.openSingleMetricView(forecast)}
               isDisabled={forecast.forecast_status !== FORECAST_REQUEST_STATE.FINISHED}
-              iconType="stats"
+              iconType="visLine"
               aria-label={viewForecastAriaLabel}
             />
           );
@@ -322,6 +339,8 @@ export class ForecastsTable extends Component {
     );
   }
 }
-ForecastsTable.propTypes = {
+ForecastsTableUI.propTypes = {
   job: PropTypes.object.isRequired,
 };
+
+export const ForecastsTable = withKibana(ForecastsTableUI);

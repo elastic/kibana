@@ -5,20 +5,20 @@
  */
 
 import moment from 'moment';
-import { badRequest } from 'boom';
+import { badRequest } from '@hapi/boom';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 interface PipelineOptions {
   id: string;
-  description: string;
+  description?: string;
   pipeline: string;
   username?: string;
   settings?: Record<string, any>;
 }
 
 interface DownstreamPipeline {
-  description: string;
+  description?: string;
   pipeline: string;
   settings?: Record<string, any>;
 }
@@ -27,7 +27,7 @@ interface DownstreamPipeline {
  */
 export class Pipeline {
   public readonly id: string;
-  public readonly description: string;
+  public readonly description?: string;
   public readonly username?: string;
   public readonly pipeline: string;
   private readonly settings: Record<string, any>;

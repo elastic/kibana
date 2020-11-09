@@ -18,6 +18,7 @@ exports[`EditFilterListToolbar renders the toolbar with no items selected 1`] = 
             />,
             <EuiButton
               color="danger"
+              data-test-subj="mlFilterListDeleteItemButton"
               disabled={true}
               onClick={[MockFunction]}
               size="s"
@@ -54,6 +55,7 @@ exports[`EditFilterListToolbar renders the toolbar with one item selected 1`] = 
             />,
             <EuiButton
               color="danger"
+              data-test-subj="mlFilterListDeleteItemButton"
               disabled={false}
               onClick={[MockFunction]}
               size="s"

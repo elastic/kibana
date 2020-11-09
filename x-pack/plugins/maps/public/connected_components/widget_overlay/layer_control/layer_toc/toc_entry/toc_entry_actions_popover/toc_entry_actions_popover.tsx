@@ -158,7 +158,7 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
           : i18n.translate('xpack.maps.layerTocActions.showLayerTitle', {
               defaultMessage: 'Show layer',
             }),
-        icon: <EuiIcon type={this.props.layer.isVisible() ? 'eye' : 'eyeClosed'} size="m" />,
+        icon: <EuiIcon type={this.props.layer.isVisible() ? 'eyeClosed' : 'eye'} size="m" />,
         'data-test-subj': 'layerVisibilityToggleButton',
         toolTipContent: null,
         onClick: () => {
@@ -220,13 +220,12 @@ export class TOCEntryActionsPopover extends Component<Props, State> {
   render() {
     return (
       <EuiPopover
-        id="contextMenu"
+        id={this.props.layer.getId()}
         className="mapLayTocActions"
         button={this._renderPopoverToggleButton()}
         isOpen={this.state.isPopoverOpen}
         closePopover={this._closePopover}
         panelPaddingSize="none"
-        withTitle
         anchorPosition="leftUp"
         anchorClassName="mapLayTocActions__popoverAnchor"
       >

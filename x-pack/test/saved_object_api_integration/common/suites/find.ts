@@ -7,21 +7,25 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import querystring from 'querystring';
-import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
-import { SPACES } from '../lib/spaces';
-import { expectResponses, getUrlPrefix } from '../lib/saved_object_test_utils';
-import { ExpectResponseBody, TestCase, TestDefinition, TestSuite } from '../lib/types';
+import { SAVED_OBJECT_TEST_CASES, CONFLICT_TEST_CASES } from '../lib/saved_object_test_cases';
+import { SPACES, ALL_SPACES_ID } from '../lib/spaces';
+import {
+  getUrlPrefix,
+  isUserAuthorizedAtSpace,
+  getRedactedNamespaces,
+  expectResponses,
+} from '../lib/saved_object_test_utils';
+import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },
-  SPACE_1: { spaceId: SPACE_1_ID },
-  SPACE_2: { spaceId: SPACE_2_ID },
 } = SPACES;
 
 export interface FindTestDefinition extends TestDefinition {
   request: { query: string };
 }
 export type FindTestSuite = TestSuite<FindTestDefinition>;
+
 export interface FindTestCase {
   title: string;
   query: string;
@@ -31,173 +35,282 @@ export interface FindTestCase {
     perPage?: number;
     total?: number;
   };
-  failure?: 400 | 403;
+  failure?: {
+    statusCode: 200 | 400 | 403; // if the user searches for types and/or namespaces they are not authorized for, they will get a 200 result with those types/namespaces omitted
+    reason: 'unauthorized' | 'cross_namespace_not_permitted' | 'bad_request';
+  };
   typeUseInQueryField?: string;
 }
 
-export const getTestCases = (spaceId?: string): Record<string, FindTestCase> => ({
-  singleNamespaceType: {
-    title: 'find single-namespace type',
-    query: 'type=isolatedtype&fields=title',
-    successResult: {
-      savedObjects:
-        spaceId === SPACE_1_ID
-          ? CASES.SINGLE_NAMESPACE_SPACE_1
-          : spaceId === SPACE_2_ID
-          ? CASES.SINGLE_NAMESPACE_SPACE_2
-          : CASES.SINGLE_NAMESPACE_DEFAULT_SPACE,
-    },
-  },
-  multiNamespaceType: {
-    title: 'find multi-namespace type',
-    query: 'type=sharedtype&fields=title',
-    successResult: {
-      savedObjects:
-        spaceId === SPACE_1_ID
-          ? [CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1, CASES.MULTI_NAMESPACE_ONLY_SPACE_1]
-          : spaceId === SPACE_2_ID
-          ? CASES.MULTI_NAMESPACE_ONLY_SPACE_2
-          : CASES.MULTI_NAMESPACE_DEFAULT_AND_SPACE_1,
-    },
-  },
-  namespaceAgnosticType: {
-    title: 'find namespace-agnostic type',
-    query: 'type=globaltype&fields=title',
-    successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
-  },
-  hiddenType: { title: 'find hidden type', query: 'type=hiddentype&fields=name' },
-  unknownType: { title: 'find unknown type', query: 'type=wigwags' },
-  pageBeyondTotal: {
-    title: 'find page beyond total',
-    query: 'type=isolatedtype&page=100&per_page=100',
-    successResult: { page: 100, perPage: 100, total: 1, savedObjects: [] },
-  },
-  unknownSearchField: {
-    title: 'find unknown search field',
-    query: 'type=url&search_fields=a',
-  },
-  filterWithNamespaceAgnosticType: {
-    title: 'filter with namespace-agnostic type',
-    query: 'type=globaltype&filter=globaltype.attributes.title:*global*',
-    successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
-    typeUseInQueryField: 'globaltype',
-  },
-  filterWithHiddenType: {
-    title: 'filter with hidden type',
-    query: `type=hiddentype&fields=name&filter=hiddentype.attributes.title:'hello'`,
-    typeUseInQueryField: 'hiddentype',
-  },
-  filterWithUnknownType: {
-    title: 'filter with unknown type',
-    query: `type=wigwags&filter=wigwags.attributes.title:'unknown'`,
-    typeUseInQueryField: 'wigwags',
-  },
-  filterWithDisallowedType: {
-    title: 'filter with disallowed type',
-    query: `type=globaltype&filter=dashboard.title:'Requests'`,
-    failure: 400,
-    typeUseInQueryField: 'dashboard',
-  },
-  aggsWithNamespaceAgnosticType: {
-    title: 'aggs with namespace-agnostic type',
-    query: `type=globaltype&aggs=${encodeURIComponent(
-      JSON.stringify({
-        type_count: { max: { field: 'globaltype.attributes.version' } },
-      })
-    )}`,
-    successResult: { savedObjects: CASES.NAMESPACE_AGNOSTIC },
-    typeUseInQueryField: 'globaltype',
-  },
-  aggsWithHiddenType: {
-    title: 'aggs with hidden type',
-    query: `type=hiddentype&fields=name&aggs=${encodeURIComponent(
-      JSON.stringify({
-        type_count: { max: { field: 'hiddentype.attributes.title' } },
-      })
-    )}`,
-    typeUseInQueryField: 'hiddentype',
-  },
-  aggsWithUnknownType: {
-    title: 'aggs with unknown type',
-    query: `type=wigwags&aggs=${encodeURIComponent(
-      JSON.stringify({
-        type_count: { max: { field: 'wigwags.attributes.version' } },
-      })
-    )}`,
-    typeUseInQueryField: 'wigwags',
-  },
-  aggsWithDisallowedType: {
-    title: 'aggs with disallowed type',
-    query: `type=globaltype&aggs=${encodeURIComponent(
-      JSON.stringify({
-        type_count: { max: { field: 'dashboard.attributes.version' } },
-      })
-    )}`,
-    failure: 400,
-    typeUseInQueryField: 'dashboard',
-  },
-});
-export const createRequest = ({ query }: FindTestCase) => ({ query });
-const getTestTitle = ({ failure, title }: FindTestCase) => {
-  let description = 'success';
-  if (failure === 400) {
-    description = 'bad request';
-  } else if (failure === 403) {
-    description = 'forbidden';
+const TEST_CASES = [
+  ...Object.values(SAVED_OBJECT_TEST_CASES),
+  ...Object.values(CONFLICT_TEST_CASES),
+];
+
+export const getTestCases = (
+  { currentSpace, crossSpaceSearch }: { currentSpace?: string; crossSpaceSearch?: string[] } = {
+    currentSpace: undefined,
+    crossSpaceSearch: undefined,
   }
-  return `${description} ["${title}"]`;
+): Record<string, FindTestCase> => {
+  const crossSpaceIds =
+    crossSpaceSearch?.filter((s) => s !== (currentSpace ?? DEFAULT_SPACE_ID)) ?? []; // intentionally exclude the current space
+  const isCrossSpaceSearch = crossSpaceIds.length > 0;
+  const isWildcardSearch = crossSpaceIds.includes('*');
+
+  const namespacesQueryParam = isCrossSpaceSearch
+    ? `&namespaces=${crossSpaceIds.join('&namespaces=')}`
+    : '';
+
+  const buildTitle = (title: string) =>
+    crossSpaceSearch ? `${title} (cross-space${isWildcardSearch ? ' with wildcard' : ''})` : title;
+
+  type CasePredicate = (testCase: TestCase) => boolean;
+  const getExpectedSavedObjects = (predicate: CasePredicate) => {
+    if (isCrossSpaceSearch) {
+      // all other cross-space tests are written to test that we exclude the current space.
+      // the wildcard scenario verifies current space functionality
+      if (isWildcardSearch) {
+        return TEST_CASES.filter(predicate);
+      }
+
+      return TEST_CASES.filter((t) => {
+        const hasOtherNamespaces =
+          !t.expectedNamespaces || // namespace-agnostic types do not have an expectedNamespaces field
+          t.expectedNamespaces.some(
+            (ns) => ns === ALL_SPACES_ID || ns !== (currentSpace ?? DEFAULT_SPACE_ID)
+          );
+        return hasOtherNamespaces && predicate(t);
+      });
+    }
+    return TEST_CASES.filter(
+      (t) =>
+        (!t.expectedNamespaces ||
+          t.expectedNamespaces.includes(ALL_SPACES_ID) ||
+          t.expectedNamespaces.includes(currentSpace ?? DEFAULT_SPACE_ID)) &&
+        predicate(t)
+    );
+  };
+
+  return {
+    singleNamespaceType: {
+      title: buildTitle('find single-namespace type'),
+      query: `type=isolatedtype&fields=title${namespacesQueryParam}`,
+      successResult: {
+        savedObjects: getExpectedSavedObjects((t) => t.type === 'isolatedtype'),
+      },
+    },
+    multiNamespaceType: {
+      title: buildTitle('find multi-namespace type'),
+      query: `type=sharedtype&fields=title${namespacesQueryParam}`,
+      successResult: {
+        // expected depends on which spaces the user is authorized against...
+        savedObjects: getExpectedSavedObjects((t) => t.type === 'sharedtype'),
+      },
+    },
+    namespaceAgnosticType: {
+      title: buildTitle('find namespace-agnostic type'),
+      query: `type=globaltype&fields=title${namespacesQueryParam}`,
+      successResult: { savedObjects: SAVED_OBJECT_TEST_CASES.NAMESPACE_AGNOSTIC },
+    },
+    hiddenType: {
+      title: buildTitle('find hidden type'),
+      query: `type=hiddentype&fields=name${namespacesQueryParam}`,
+    },
+    unknownType: {
+      title: buildTitle('find unknown type'),
+      query: `type=wigwags${namespacesQueryParam}`,
+    },
+    eachType: {
+      title: buildTitle('find each type'),
+      query: `type=isolatedtype&type=sharedtype&type=globaltype&type=hiddentype&type=wigwags${namespacesQueryParam}`,
+      successResult: {
+        savedObjects: getExpectedSavedObjects((t) =>
+          ['isolatedtype', 'sharedtype', 'globaltype'].includes(t.type)
+        ),
+      },
+    },
+    pageBeyondTotal: {
+      title: buildTitle('find page beyond total'),
+      query: `type=isolatedtype&page=100&per_page=100${namespacesQueryParam}`,
+      successResult: {
+        page: 100,
+        perPage: 100,
+        total: -1,
+        savedObjects: [],
+      },
+    },
+    unknownSearchField: {
+      title: buildTitle('find unknown search field'),
+      query: `type=url&search_fields=a${namespacesQueryParam}`,
+    },
+    filterWithNamespaceAgnosticType: {
+      title: buildTitle('filter with namespace-agnostic type'),
+      query: `type=globaltype&filter=globaltype.attributes.title:*global*${namespacesQueryParam}`,
+      successResult: { savedObjects: SAVED_OBJECT_TEST_CASES.NAMESPACE_AGNOSTIC },
+      typeUseInQueryField: 'globaltype',
+    },
+    filterWithHiddenType: {
+      title: buildTitle('filter with hidden type'),
+      query: `type=hiddentype&fields=name&filter=hiddentype.attributes.title:'hello'${namespacesQueryParam}`,
+      typeUseInQueryField: 'hiddentype',
+    },
+    filterWithUnknownType: {
+      title: buildTitle('filter with unknown type'),
+      query: `type=wigwags&filter=wigwags.attributes.title:'unknown'${namespacesQueryParam}`,
+      typeUseInQueryField: 'wigwags',
+    },
+    filterWithDisallowedType: {
+      title: buildTitle('filter with disallowed type'),
+      query: `type=globaltype&filter=dashboard.title:'Requests'${namespacesQueryParam}`,
+      failure: {
+        statusCode: 400,
+        reason: 'bad_request',
+      },
+      typeUseInQueryField: 'dashboard',
+    },
+    aggsWithNamespaceAgnosticType: {
+      title: 'aggs with namespace-agnostic type',
+      query: `type=globaltype&aggs=${encodeURIComponent(
+        JSON.stringify({
+          type_count: { max: { field: 'globaltype.attributes.version' } },
+        })
+      )}`,
+      successResult: { savedObjects: SAVED_OBJECT_TEST_CASES.NAMESPACE_AGNOSTIC },
+      typeUseInQueryField: 'globaltype',
+    },
+    aggsWithHiddenType: {
+      title: 'aggs with hidden type',
+      query: `type=hiddentype&fields=name&aggs=${encodeURIComponent(
+        JSON.stringify({
+          type_count: { max: { field: 'hiddentype.attributes.title' } },
+        })
+      )}`,
+      typeUseInQueryField: 'hiddentype',
+    },
+    aggsWithUnknownType: {
+      title: 'aggs with unknown type',
+      query: `type=wigwags&aggs=${encodeURIComponent(
+        JSON.stringify({
+          type_count: { max: { field: 'wigwags.attributes.version' } },
+        })
+      )}`,
+      typeUseInQueryField: 'wigwags',
+    },
+    aggsWithDisallowedType: {
+      title: 'aggs with disallowed type',
+      query: `type=globaltype&aggs=${encodeURIComponent(
+        JSON.stringify({
+          type_count: { max: { field: 'dashboard.attributes.version' } },
+        })
+      )}`,
+      failure: {
+        statusCode: 400,
+        reason: 'bad_request',
+      },
+      typeUseInQueryField: 'dashboard',
+    },
+  };
 };
 
+function objectComparator(a: { id: string }, b: { id: string }) {
+  return a.id > b.id ? 1 : a.id < b.id ? -1 : 0;
+}
+
+export const createRequest = ({ query }: FindTestCase) => ({ query });
+const getTestTitle = ({ failure, title }: FindTestCase) =>
+  `${failure?.reason || 'success'} ["${title}"]`;
+
 export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>) {
-  const expectForbidden = expectResponses.forbidden('find');
-  const expectResponseBody = (testCase: FindTestCase): ExpectResponseBody => async (
-    response: Record<string, any>
-  ) => {
+  const expectForbidden = expectResponses.forbiddenTypes('find');
+  const expectResponseBody = (
+    testCase: FindTestCase,
+    user?: TestUser
+  ): ExpectResponseBody => async (response: Record<string, any>) => {
     const { failure, successResult = {}, query } = testCase;
     const parsedQuery = querystring.parse(query);
-    if (failure === 403) {
+    if (failure?.statusCode === 200) {
+      if (failure?.reason === 'unauthorized') {
+        // if the user is completely unauthorized, they will receive an empty response body
+        const expected = {
+          page: parsedQuery.page || 1,
+          per_page: parsedQuery.per_page || 20,
+          total: 0,
+          saved_objects: [],
+        };
+        expect(response.body).to.eql(expected);
+      } else {
+        throw new Error(`Unexpected failure reason: ${failure.reason}`);
+      }
+    } else if (failure?.statusCode === 403) {
       const type = parsedQuery.type;
       await expectForbidden(type)(response);
-    } else if (failure === 400) {
-      const type = testCase.typeUseInQueryField ?? 'unknown type';
-      expect(response.body.error).to.eql('Bad Request');
-      expect(response.body.statusCode).to.eql(failure);
-      expect(response.body.message).to.eql(`This type ${type} is not allowed: Bad Request`);
+    } else if (failure?.statusCode === 400) {
+      if (failure.reason === 'bad_request') {
+        const type = (parsedQuery.filter as string).split('.')[0];
+        expect(response.body.error).to.eql('Bad Request');
+        expect(response.body.statusCode).to.eql(failure.statusCode);
+        expect(response.body.message).to.eql(`This type ${type} is not allowed: Bad Request`);
+      } else if (failure.reason === 'cross_namespace_not_permitted') {
+        expect(response.body.error).to.eql('Bad Request');
+        expect(response.body.statusCode).to.eql(failure.statusCode);
+        expect(response.body.message).to.eql(
+          `_find across namespaces is not permitted when the Spaces plugin is disabled.: Bad Request`
+        );
+      } else {
+        throw new Error(`Unexpected failure reason: ${failure.reason}`);
+      }
     } else {
       // 2xx
       expect(response.body).not.to.have.property('error');
       const { page = 1, perPage = 20, total, savedObjects = [] } = successResult;
       const savedObjectsArray = Array.isArray(savedObjects) ? savedObjects : [savedObjects];
+      const authorizedSavedObjects = savedObjectsArray.filter(
+        (so) =>
+          !so.expectedNamespaces ||
+          so.expectedNamespaces.some((x) => isUserAuthorizedAtSpace(user, x))
+      );
       expect(response.body.page).to.eql(page);
       expect(response.body.per_page).to.eql(perPage);
-      expect(response.body.total).to.eql(total || savedObjectsArray.length);
-      for (let i = 0; i < savedObjectsArray.length; i++) {
+
+      // Negative totals are skipped for test simplifications
+      if (!total || total >= 0) {
+        expect(response.body.total).to.eql(total || authorizedSavedObjects.length);
+      }
+
+      authorizedSavedObjects.sort(objectComparator);
+      response.body.saved_objects.sort(objectComparator);
+
+      for (let i = 0; i < authorizedSavedObjects.length; i++) {
         const object = response.body.saved_objects[i];
-        const { type: expectedType, id: expectedId } = savedObjectsArray[i];
-        expect(object.type).to.eql(expectedType);
-        expect(object.id).to.eql(expectedId);
+        const expected = authorizedSavedObjects[i];
+        const expectedNamespaces = getRedactedNamespaces(user, expected.expectedNamespaces);
+        expect(object.type).to.eql(expected.type);
+        expect(object.id).to.eql(expected.id);
         expect(object.updated_at).to.match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+        expect(object.namespaces).to.eql(expectedNamespaces);
         // don't test attributes, version, or references
       }
     }
   };
   const createTestDefinitions = (
     testCases: FindTestCase | FindTestCase[],
-    forbidden: boolean,
+    failure: FindTestCase['failure'] | false,
     options?: {
+      user?: TestUser;
       responseBodyOverride?: ExpectResponseBody;
     }
   ): FindTestDefinition[] => {
     let cases = Array.isArray(testCases) ? testCases : [testCases];
-    if (forbidden) {
+    if (failure) {
       // override the expected result in each test case
-      cases = cases.map((x) => ({ ...x, failure: 403 }));
+      cases = cases.map((x) => ({ ...x, failure }));
     }
     return cases.map((x) => ({
       title: getTestTitle(x),
-      responseStatusCode: x.failure ?? 200,
+      responseStatusCode: x.failure?.statusCode ?? 200,
       request: createRequest(x),
-      responseBody: options?.responseBodyOverride || expectResponseBody(x),
+      responseBody: options?.responseBodyOverride || expectResponseBody(x, options?.user),
     }));
   };
 
@@ -214,6 +327,7 @@ export function findTestSuiteFactory(esArchiver: any, supertest: SuperTest<any>)
       for (const test of tests) {
         it(`should return ${test.responseStatusCode} ${test.title}`, async () => {
           const query = test.request.query ? `?${test.request.query}` : '';
+
           await supertest
             .get(`${getUrlPrefix(spaceId)}/api/saved_objects/_find${query}`)
             .auth(user?.username, user?.password)

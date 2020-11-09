@@ -12,8 +12,8 @@ import { getTopSeverityJobs } from './get_top_severity';
 import { AnomalyScore } from './anomaly_score';
 
 interface Args {
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   anomalies: Anomalies | null;
   isLoading: boolean;
   narrowDateRange: NarrowDateRange;

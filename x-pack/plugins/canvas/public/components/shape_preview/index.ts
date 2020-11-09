@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-
-import { ShapePreview as Component } from './shape_preview';
-
-export const ShapePreview = pure(Component);
+export { ShapePreview } from './shape_preview';

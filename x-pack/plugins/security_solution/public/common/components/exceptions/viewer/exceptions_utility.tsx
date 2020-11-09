@@ -6,11 +6,11 @@
 
 import React from 'react';
 import { EuiText, EuiLink, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n/react';
 import styled from 'styled-components';
 
 import * as i18n from '../translations';
-import { ExceptionsPagination, FilterOptions } from '../types';
+import { ExceptionsPagination } from '../types';
 import {
   UtilityBar,
   UtilityBarSection,
@@ -29,14 +29,16 @@ const MyUtilities = styled(EuiFlexGroup)`
 
 interface ExceptionsViewerUtilityProps {
   pagination: ExceptionsPagination;
-  filterOptions: FilterOptions;
+  showEndpointListsOnly: boolean;
+  showDetectionsListsOnly: boolean;
   ruleSettingsUrl: string;
   onRefreshClick: () => void;
 }
 
 const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> = ({
   pagination,
-  filterOptions,
+  showEndpointListsOnly,
+  showDetectionsListsOnly,
   ruleSettingsUrl,
   onRefreshClick,
 }): JSX.Element => (
@@ -65,7 +67,7 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <StyledText size="s">
-        {filterOptions.showEndpointList && (
+        {showEndpointListsOnly && (
           <FormattedMessage
             id="xpack.securitySolution.exceptions.viewer.exceptionEndpointDetailsDescription"
             defaultMessage="All exceptions to this rule are applied to the endpoint and the detection rule. View {ruleSettings} for more details."
@@ -82,7 +84,7 @@ const ExceptionsViewerUtilityComponent: React.FC<ExceptionsViewerUtilityProps> =
             }}
           />
         )}
-        {filterOptions.showDetectionsList && (
+        {showDetectionsListsOnly && (
           <FormattedMessage
             id="xpack.securitySolution.exceptions.viewer.exceptionDetectionDetailsDescription"
             defaultMessage="All exceptions to this rule are applied to the detection rule, not the endpoint. View {ruleSettings} for more details."

@@ -25,7 +25,7 @@ describe('I18n engine', () => {
   let i18n: typeof i18nModule;
 
   beforeEach(() => {
-    i18n = require.requireActual('./i18n');
+    i18n = jest.requireActual('./i18n');
   });
 
   afterEach(() => {

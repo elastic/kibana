@@ -18,6 +18,7 @@
  */
 
 export * from './defer';
+export * from './field_wildcard';
 export * from './of';
 export * from './ui';
 export * from './state_containers';
@@ -28,3 +29,4 @@ export { distinctUntilChangedWithInitialValue } from './distinct_until_changed_w
 export { url } from './url';
 export { now } from './now';
 export { calculateObjectHash } from './calculate_object_hash';
+export * from './persistable_state';

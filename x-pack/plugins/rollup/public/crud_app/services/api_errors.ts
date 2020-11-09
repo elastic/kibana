@@ -4,12 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IHttpFetchError } from 'src/core/public';
 import { getNotifications, getFatalErrors } from '../../kibana_services';
 
-function createToastConfig(error: any, errorTitle: string) {
-  // Expect an error in the shape provided by http service.
+function createToastConfig(error: IHttpFetchError, errorTitle: string) {
   if (error && error.body) {
+    // Error body shape is defined by the API.
     const { error: errorString, statusCode, message } = error.body;
+
     return {
       title: errorTitle,
       text: `${statusCode}: ${errorString}. ${message}`,
@@ -17,7 +19,7 @@ function createToastConfig(error: any, errorTitle: string) {
   }
 }
 
-export function showApiWarning(error: any, errorTitle: string) {
+export function showApiWarning(error: IHttpFetchError, errorTitle: string) {
   const toastConfig = createToastConfig(error, errorTitle);
 
   if (toastConfig) {
@@ -29,7 +31,7 @@ export function showApiWarning(error: any, errorTitle: string) {
   return getFatalErrors().add(error, errorTitle);
 }
 
-export function showApiError(error: any, errorTitle: string) {
+export function showApiError(error: IHttpFetchError, errorTitle: string) {
   const toastConfig = createToastConfig(error, errorTitle);
 
   if (toastConfig) {

@@ -12,6 +12,7 @@ const bucketsA = [
   {
     doc_count: 3,
     aggregatedValue: { value: 1.0, values: [{ key: 95.0, value: 1.0 }] },
+    key_as_string: new Date(1577858400000).toISOString(),
   },
 ];
 
@@ -37,6 +38,13 @@ const bucketsC = [
   },
 ];
 
+const previewBucketsA = Array.from(Array(60), (_, i) => bucketsA[i % 2]); // Repeat bucketsA to a total length of 60
+const previewBucketsB = Array.from(Array(60), (_, i) => bucketsB[i % 2]);
+const previewBucketsWithNulls = [
+  ...Array.from(Array(10), (_, i) => ({ aggregatedValue: { value: null } })),
+  ...previewBucketsA.slice(10),
+];
+
 export const basicMetricResponse = {
   aggregations: {
     aggregatedIntervals: {
@@ -57,6 +65,20 @@ export const emptyMetricResponse = {
   aggregations: {
     aggregatedIntervals: {
       buckets: [],
+    },
+  },
+};
+
+export const emptyRateResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: [
+        {
+          doc_count: 2,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          aggregatedValue_max: { value: null },
+        },
+      ],
     },
   },
 };
@@ -132,6 +154,53 @@ export const changedSourceIdResponse = {
   aggregations: {
     aggregatedIntervals: {
       buckets: bucketsC,
+    },
+  },
+};
+
+export const basicMetricPreviewResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: previewBucketsA,
+    },
+  },
+};
+
+export const alternateMetricPreviewResponse = {
+  aggregations: {
+    aggregatedIntervals: {
+      buckets: previewBucketsWithNulls,
+    },
+  },
+};
+
+export const basicCompositePreviewResponse = {
+  aggregations: {
+    groupings: {
+      after_key: { groupBy0: 'foo' },
+      buckets: [
+        {
+          key: {
+            groupBy0: 'a',
+          },
+          aggregatedIntervals: {
+            buckets: previewBucketsA,
+          },
+        },
+        {
+          key: {
+            groupBy0: 'b',
+          },
+          aggregatedIntervals: {
+            buckets: previewBucketsB,
+          },
+        },
+      ],
+    },
+  },
+  hits: {
+    total: {
+      value: 2,
     },
   },
 };

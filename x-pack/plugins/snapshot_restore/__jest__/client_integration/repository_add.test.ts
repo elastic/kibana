@@ -11,15 +11,8 @@ import { RepositoryType } from '../../common/types';
 import { setupEnvironment, pageHelpers, nextTick } from './helpers';
 import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 
-jest.mock('ui/new_platform');
-
 const { setup } = pageHelpers.repositoryAdd;
 const repositoryTypes = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
-
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
-});
 
 describe('<RepositoryAdd />', () => {
   let testBed: RepositoryAddTestBed;

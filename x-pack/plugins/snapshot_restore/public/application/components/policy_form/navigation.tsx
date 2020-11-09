@@ -11,12 +11,14 @@ interface Props {
   currentStep: number;
   maxCompletedStep: number;
   updateCurrentStep: (step: number) => void;
+  isFormValid: boolean;
 }
 
 export const PolicyNavigation: React.FunctionComponent<Props> = ({
   currentStep,
   maxCompletedStep,
   updateCurrentStep,
+  isFormValid,
 }) => {
   const { i18n } = useServices();
 
@@ -27,6 +29,7 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       }),
       isComplete: maxCompletedStep >= 1,
       isSelected: currentStep === 1,
+      disabled: !isFormValid && currentStep !== 1,
       onClick: () => updateCurrentStep(1),
     },
     {
@@ -35,7 +38,7 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       }),
       isComplete: maxCompletedStep >= 2,
       isSelected: currentStep === 2,
-      disabled: maxCompletedStep < 1,
+      disabled: maxCompletedStep < 1 || (!isFormValid && currentStep !== 2),
       onClick: () => updateCurrentStep(2),
     },
     {
@@ -44,7 +47,7 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       }),
       isComplete: maxCompletedStep >= 3,
       isSelected: currentStep === 3,
-      disabled: maxCompletedStep < 2,
+      disabled: maxCompletedStep < 2 || (!isFormValid && currentStep !== 3),
       onClick: () => updateCurrentStep(3),
     },
     {
@@ -53,7 +56,7 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       }),
       isComplete: maxCompletedStep >= 3,
       isSelected: currentStep === 4,
-      disabled: maxCompletedStep < 3,
+      disabled: maxCompletedStep < 3 || (!isFormValid && currentStep !== 4),
       onClick: () => updateCurrentStep(4),
     },
   ];

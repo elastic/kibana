@@ -20,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     testFiles: [
+      require.resolve('./test_suites/platform'),
       require.resolve('./test_suites/task_manager'),
       require.resolve('./test_suites/event_log'),
       require.resolve('./test_suites/licensed_feature_usage'),
@@ -42,6 +43,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.eventLog.enabled=true',
         '--xpack.eventLog.logEntries=true',
         '--xpack.eventLog.indexEntries=true',
+        '--xpack.task_manager.monitored_aggregated_stats_refresh_rate=5000',
         ...plugins.map(
           (pluginDir) => `--plugin-path=${path.resolve(__dirname, 'plugins', pluginDir)}`
         ),

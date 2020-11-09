@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useState, useCallback, useContext } from 'react';
+import React, { useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { encode } from 'rison-node';
 import moment from 'moment';
@@ -26,6 +26,7 @@ import {
 import { LogColumnConfiguration } from '../../../../../utils/source_configuration';
 import { LogEntryContextMenu } from '../../../../../components/logging/log_text_stream/log_entry_context_menu';
 import { useLinkProps } from '../../../../../hooks/use_link_props';
+import { useUiTracker } from '../../../../../../../observability/public';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'dateTime' as const;
@@ -39,13 +40,10 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   tiebreaker: number;
   context: LogEntryContext;
 }> = ({ id, dataset, message, timestamp, timeRange, tiebreaker, context }) => {
+  const trackMetric = useUiTracker({ app: 'infra_logs' });
   const [, { setContextEntry }] = useContext(ViewLogInContext.Context);
-  // the dataset must be encoded for the field column and the empty value must
-  // be turned into a user-friendly value
-  const encodedDatasetFieldValue = useMemo(
-    () => JSON.stringify(getFriendlyNameForPartitionId(dataset)),
-    [dataset]
-  );
+  // handle special cases for the dataset value
+  const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
 
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const setHovered = useCallback(() => setIsHovered(true), []);
@@ -88,7 +86,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
         <LogEntryMessageColumn
           columnValue={{
             columnId: messageColumnId,
-            message: [{ field: 'message', value: message, highlights: [] }],
+            message: [{ field: 'message', value: [message], highlights: [] }],
           }}
           highlights={noHighlights}
           isActiveHighlight={false}
@@ -100,7 +98,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
           columnValue={{
             columnId: datasetColumnId,
             field: 'event.dataset',
-            value: encodedDatasetFieldValue,
+            value: [humanFriendlyDataset],
             highlights: [],
           }}
           highlights={noHighlights}
@@ -133,6 +131,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
                     cursor: { time: timestamp, tiebreaker },
                     columns: [],
                   };
+                  trackMetric({ metric: 'view_in_context__categories' });
 
                   setContextEntry(logEntry);
                 },

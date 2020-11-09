@@ -17,75 +17,102 @@
  * under the License.
  */
 
-import { errors as esErrors } from 'elasticsearch';
-
+import { errors as esErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { decorateEsError } from './decorate_es_error';
 import { SavedObjectsErrorHelpers } from './errors';
 
 describe('savedObjectsClient/decorateEsError', () => {
   it('always returns the same error it receives', () => {
-    const error = new Error();
+    const error = new esErrors.ResponseError(elasticsearchClientMock.createApiResponse());
     expect(decorateEsError(error)).toBe(error);
   });
 
-  it('makes es.ConnectionFault a SavedObjectsClient/EsUnavailable error', () => {
-    const error = new esErrors.ConnectionFault();
+  it('makes ConnectionError a SavedObjectsClient/EsUnavailable error', () => {
+    const error = new esErrors.ConnectionError(
+      'reason',
+      elasticsearchClientMock.createApiResponse()
+    );
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
   });
 
-  it('makes es.ServiceUnavailable a SavedObjectsClient/EsUnavailable error', () => {
-    const error = new esErrors.ServiceUnavailable();
+  it('makes ServiceUnavailable a SavedObjectsClient/EsUnavailable error', () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({ statusCode: 503 })
+    );
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
   });
 
-  it('makes es.NoConnections a SavedObjectsClient/EsUnavailable error', () => {
-    const error = new esErrors.NoConnections();
+  it('makes NoLivingConnectionsError a SavedObjectsClient/EsUnavailable error', () => {
+    const error = new esErrors.NoLivingConnectionsError(
+      'reason',
+      elasticsearchClientMock.createApiResponse()
+    );
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
   });
 
-  it('makes es.RequestTimeout a SavedObjectsClient/EsUnavailable error', () => {
-    const error = new esErrors.RequestTimeout();
+  it('makes TimeoutError a SavedObjectsClient/EsUnavailable error', () => {
+    const error = new esErrors.TimeoutError('reason', elasticsearchClientMock.createApiResponse());
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(SavedObjectsErrorHelpers.isEsUnavailableError(error)).toBe(true);
   });
 
-  it('makes es.Conflict a SavedObjectsClient/Conflict error', () => {
-    const error = new esErrors.Conflict();
+  it('makes Conflict a SavedObjectsClient/Conflict error', () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({ statusCode: 409 })
+    );
     expect(SavedObjectsErrorHelpers.isConflictError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(SavedObjectsErrorHelpers.isConflictError(error)).toBe(true);
   });
 
-  it('makes es.AuthenticationException a SavedObjectsClient/NotAuthorized error', () => {
-    const error = new esErrors.AuthenticationException();
+  it('makes TooManyRequests a SavedObjectsClient/tooManyRequests error', () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({ statusCode: 429 })
+    );
+    expect(SavedObjectsErrorHelpers.isTooManyRequestsError(error)).toBe(false);
+    expect(decorateEsError(error)).toBe(error);
+    expect(SavedObjectsErrorHelpers.isTooManyRequestsError(error)).toBe(true);
+  });
+
+  it('makes NotAuthorized a SavedObjectsClient/NotAuthorized error', () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({ statusCode: 401 })
+    );
     expect(SavedObjectsErrorHelpers.isNotAuthorizedError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(SavedObjectsErrorHelpers.isNotAuthorizedError(error)).toBe(true);
   });
 
-  it('makes es.Forbidden a SavedObjectsClient/Forbidden error', () => {
-    const error = new esErrors.Forbidden();
+  it('makes Forbidden a SavedObjectsClient/Forbidden error', () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({ statusCode: 403 })
+    );
     expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
   });
 
-  it('makes es.RequestEntityTooLarge a SavedObjectsClient/RequestEntityTooLarge error', () => {
-    const error = new esErrors.RequestEntityTooLarge();
+  it('makes RequestEntityTooLarge a SavedObjectsClient/RequestEntityTooLarge error', () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({ statusCode: 413 })
+    );
     expect(SavedObjectsErrorHelpers.isRequestEntityTooLargeError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(SavedObjectsErrorHelpers.isRequestEntityTooLargeError(error)).toBe(true);
   });
 
-  it('discards es.NotFound errors and returns a generic NotFound error', () => {
-    const error = new esErrors.NotFound();
+  it('discards NotFound errors and returns a generic NotFound error', () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({ statusCode: 404 })
+    );
     expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(false);
     const genericError = decorateEsError(error);
     expect(genericError).not.toBe(error);
@@ -93,8 +120,10 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(SavedObjectsErrorHelpers.isNotFoundError(genericError)).toBe(true);
   });
 
-  it('makes es.BadRequest a SavedObjectsClient/BadRequest error', () => {
-    const error = new esErrors.BadRequest();
+  it('makes BadRequest a SavedObjectsClient/BadRequest error', () => {
+    const error = new esErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({ statusCode: 400 })
+    );
     expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(false);
     expect(decorateEsError(error)).toBe(error);
     expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(true);
@@ -102,10 +131,16 @@ describe('savedObjectsClient/decorateEsError', () => {
 
   describe('when es.BadRequest has a reason', () => {
     it('makes a SavedObjectsClient/esCannotExecuteScriptError error when script context is disabled', () => {
-      const error = new esErrors.BadRequest();
-      (error as Record<string, any>).body = {
-        error: { reason: 'cannot execute scripts using [update] context' },
-      };
+      const error = new esErrors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 400,
+          body: {
+            error: {
+              reason: 'cannot execute scripts using [update] context',
+            },
+          },
+        })
+      );
       expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(false);
       expect(decorateEsError(error)).toBe(error);
       expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(true);
@@ -113,10 +148,16 @@ describe('savedObjectsClient/decorateEsError', () => {
     });
 
     it('makes a SavedObjectsClient/esCannotExecuteScriptError error when inline scripts are disabled', () => {
-      const error = new esErrors.BadRequest();
-      (error as Record<string, any>).body = {
-        error: { reason: 'cannot execute [inline] scripts' },
-      };
+      const error = new esErrors.ResponseError(
+        elasticsearchClientMock.createApiResponse({
+          statusCode: 400,
+          body: {
+            error: {
+              reason: 'cannot execute [inline] scripts',
+            },
+          },
+        })
+      );
       expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(false);
       expect(decorateEsError(error)).toBe(error);
       expect(SavedObjectsErrorHelpers.isEsCannotExecuteScriptError(error)).toBe(true);
@@ -124,8 +165,9 @@ describe('savedObjectsClient/decorateEsError', () => {
     });
 
     it('makes a SavedObjectsClient/BadRequest error for any other reason', () => {
-      const error = new esErrors.BadRequest();
-      (error as Record<string, any>).body = { error: { reason: 'some other reason' } };
+      const error = new esErrors.ResponseError(
+        elasticsearchClientMock.createApiResponse({ statusCode: 400 })
+      );
       expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(false);
       expect(decorateEsError(error)).toBe(error);
       expect(SavedObjectsErrorHelpers.isBadRequestError(error)).toBe(true);
@@ -133,7 +175,7 @@ describe('savedObjectsClient/decorateEsError', () => {
   });
 
   it('returns other errors as Boom errors', () => {
-    const error = new Error();
+    const error = new esErrors.ResponseError(elasticsearchClientMock.createApiResponse());
     expect(error).not.toHaveProperty('isBoom');
     expect(decorateEsError(error)).toBe(error);
     expect(error).toHaveProperty('isBoom');

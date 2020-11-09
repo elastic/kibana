@@ -20,7 +20,7 @@ export enum Shape {
   WHEEL = 'wheel',
 }
 
-interface Arguments {
+export interface Arguments {
   barColor: string;
   barWeight: number;
   font: Style;
@@ -30,6 +30,10 @@ interface Arguments {
   valueColor: string;
   valueWeight: number;
 }
+
+export type Output = Arguments & {
+  value: number;
+};
 
 export function progress(): ExpressionFunctionDefinition<
   'progress',

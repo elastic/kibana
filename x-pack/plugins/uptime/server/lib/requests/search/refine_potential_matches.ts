@@ -5,8 +5,7 @@
  */
 
 import { QueryContext } from './query_context';
-import { CursorDirection } from '../../../../common/runtime_types';
-import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
+import { MonitorSummary, Ping } from '../../../../common/runtime_types';
 
 /**
  * Determines whether the provided check groups are the latest complete check groups for their associated monitor ID's.
@@ -19,80 +18,90 @@ import { MonitorGroups, MonitorLocCheckGroup } from './fetch_page';
 export const refinePotentialMatches = async (
   queryContext: QueryContext,
   potentialMatchMonitorIDs: string[]
-): Promise<MonitorGroups[]> => {
+): Promise<MonitorSummary[]> => {
   if (potentialMatchMonitorIDs.length === 0) {
     return [];
   }
 
-  const queryResult = await query(queryContext, potentialMatchMonitorIDs);
-  const recentGroupsMatchingStatus = await fullyMatchingIds(queryResult, queryContext.statusFilter);
-
-  // Return the monitor groups filtering out potential matches that weren't current
-  const matches: MonitorGroups[] = potentialMatchMonitorIDs
-    .map((id: string) => {
-      return { id, groups: recentGroupsMatchingStatus.get(id) || [] };
-    })
-    .filter((mrg) => mrg.groups.length > 0);
-
-  // Sort matches by ID
-  matches.sort((a: MonitorGroups, b: MonitorGroups) => {
-    return a.id === b.id ? 0 : a.id > b.id ? 1 : -1;
-  });
-
-  if (queryContext.pagination.cursorDirection === CursorDirection.BEFORE) {
-    matches.reverse();
-  }
-  return matches;
+  const { body: queryResult } = await query(queryContext, potentialMatchMonitorIDs);
+  return await fullyMatchingIds(queryResult, queryContext.statusFilter);
 };
 
-export const fullyMatchingIds = (queryResult: any, statusFilter?: string) => {
-  const matching = new Map<string, MonitorLocCheckGroup[]>();
-  MonitorLoop: for (const monBucket of queryResult.aggregations.monitor.buckets) {
-    const monitorId: string = monBucket.key;
-    const groups: MonitorLocCheckGroup[] = [];
+export const fullyMatchingIds = (queryResult: any, statusFilter?: string): MonitorSummary[] => {
+  const summaries: MonitorSummary[] = [];
 
+  for (const monBucket of queryResult.aggregations.monitor.buckets) {
     // Did at least one location match?
     let matched = false;
+
+    const summaryPings: Ping[] = [];
+
     for (const locBucket of monBucket.location.buckets) {
-      const location = locBucket.key;
-      const latestSource = locBucket.summaries.latest.hits.hits[0]._source;
-      const latestStillMatchingSource = locBucket.latest_matching.top.hits.hits[0]?._source;
+      const latest = locBucket.summaries.latest.hits.hits[0];
+      // It is possible for no latest summary to exist in this bucket if only partial
+      // non-summary docs exist
+      if (!latest) {
+        continue;
+      }
+
+      const latestStillMatching = locBucket.latest_matching.top.hits.hits[0];
       // If the most recent document still matches the most recent document matching the current filters
       // we can include this in the result
       //
       // We just check if the timestamp is greater. Note this may match an incomplete check group
       // that has not yet sent a summary doc
       if (
-        latestStillMatchingSource &&
-        latestStillMatchingSource['@timestamp'] >= latestSource['@timestamp']
+        latestStillMatching &&
+        latestStillMatching._source['@timestamp'] >= latest._source['@timestamp']
       ) {
         matched = true;
       }
-      const checkGroup = latestSource.monitor.check_group;
-      const status = latestSource.summary.down > 0 ? 'down' : 'up';
 
-      // This monitor doesn't match, so just skip ahead and don't add it to the output
-      // Only skip in case of up statusFilter, for a monitor to be up, all checks should be up
-      if (statusFilter === 'up' && statusFilter !== status) {
-        continue MonitorLoop;
-      }
-
-      groups.push({
-        monitorId,
-        location,
-        checkGroup,
-        status,
-        summaryTimestamp: new Date(latestSource['@timestamp']),
+      summaryPings.push({
+        docId: latest._id,
+        timestamp: latest._source['@timestamp'],
+        ...latest._source,
       });
     }
 
-    // If one location matched, include data from all locations in the result set
-    if (matched) {
-      matching.set(monitorId, groups);
+    const someDown = summaryPings.some((p) => (p.summary?.down ?? 0) > 0);
+    const statusFilterOk = !statusFilter ? true : statusFilter === 'up' ? !someDown : someDown;
+
+    if (matched && statusFilterOk) {
+      summaries.push(summaryPingsToSummary(summaryPings));
     }
   }
 
-  return matching;
+  return summaries;
+};
+
+export const summaryPingsToSummary = (summaryPings: Ping[]): MonitorSummary => {
+  summaryPings.sort((a, b) =>
+    a.timestamp > b.timestamp ? 1 : a.timestamp === b.timestamp ? 0 : -1
+  );
+  const latest = summaryPings[summaryPings.length - 1];
+  return {
+    monitor_id: latest.monitor.id,
+    state: {
+      timestamp: latest.timestamp,
+      monitor: {
+        name: latest.monitor?.name,
+      },
+      url: latest.url ?? {},
+      summary: {
+        up: summaryPings.reduce((acc, p) => (p.summary?.up ?? 0) + acc, 0),
+        down: summaryPings.reduce((acc, p) => (p.summary?.down ?? 0) + acc, 0),
+        status: summaryPings.some((p) => (p.summary?.down ?? 0) > 0) ? 'down' : 'up',
+      },
+      summaryPings,
+      tls: latest.tls,
+      // easier to ensure to use '' for an empty geo name in terms of types
+      observer: {
+        geo: { name: summaryPings.map((p) => p.observer?.geo?.name ?? '').filter((n) => n !== '') },
+      },
+      service: summaryPings.find((p) => p.service?.name)?.service,
+    },
+  };
 };
 
 export const query = async (
@@ -113,7 +122,11 @@ export const query = async (
       },
       aggs: {
         monitor: {
-          terms: { field: 'monitor.id', size: potentialMatchMonitorIDs.length },
+          terms: {
+            field: 'monitor.id',
+            size: potentialMatchMonitorIDs.length,
+            order: { _key: queryContext.cursorOrder() },
+          },
           aggs: {
             location: {
               terms: { field: 'observer.geo.name', missing: 'N/A', size: 100 },
@@ -125,14 +138,6 @@ export const query = async (
                     latest: {
                       top_hits: {
                         sort: [{ '@timestamp': 'desc' }],
-                        _source: {
-                          includes: [
-                            'monitor.check_group',
-                            '@timestamp',
-                            'summary.up',
-                            'summary.down',
-                          ],
-                        },
                         size: 1,
                       },
                     },
@@ -144,10 +149,8 @@ export const query = async (
                   aggs: {
                     top: {
                       top_hits: {
+                        _source: ['@timestamp'],
                         sort: [{ '@timestamp': 'desc' }],
-                        _source: {
-                          includes: ['monitor.check_group', '@timestamp'],
-                        },
                         size: 1,
                       },
                     },

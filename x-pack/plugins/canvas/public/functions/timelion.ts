@@ -135,10 +135,13 @@ export function timelionFunctionFactory(initialize: InitializeArguments): () => 
 
           return {
             type: 'datatable',
+            meta: {
+              source: 'timelion',
+            },
             columns: [
-              { name: '@timestamp', type: 'date' },
-              { name: 'value', type: 'number' },
-              { name: 'label', type: 'string' },
+              { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
+              { id: 'value', name: 'value', meta: { type: 'number' } },
+              { id: 'label', name: 'label', meta: { type: 'string' } },
             ],
             rows,
           };

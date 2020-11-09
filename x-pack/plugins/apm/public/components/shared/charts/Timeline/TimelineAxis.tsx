@@ -8,9 +8,9 @@ import React, { ReactNode } from 'react';
 import { inRange } from 'lodash';
 import { Sticky } from 'react-sticky';
 import { XAxis, XYPlot } from 'react-vis';
+import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/useTheme';
 import { px } from '../../../../style/variables';
-import { getDurationFormatter } from '../../../../utils/formatters';
 import { Mark } from './';
 import { LastTickValue } from './LastTickValue';
 import { Marker } from './Marker';
@@ -42,11 +42,11 @@ interface TimelineAxisProps {
   topTraceDuration: number;
 }
 
-export const TimelineAxis = ({
+export function TimelineAxis({
   plotValues,
   marks = [],
   topTraceDuration,
-}: TimelineAxisProps) => {
+}: TimelineAxisProps) {
   const theme = useTheme();
   const { margins, tickValues, width, xDomain, xMax, xScale } = plotValues;
   const tickFormatter = getDurationFormatter(xMax);
@@ -107,4 +107,4 @@ export const TimelineAxis = ({
       }}
     </Sticky>
   );
-};
+}

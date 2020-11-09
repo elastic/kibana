@@ -12,7 +12,7 @@ describe('getTimezoneOffsetInMs', () => {
   let originalTimezone: moment.MomentZone | null;
 
   beforeAll(() => {
-    // @ts-ignore moment types do not define defaultZone but it's there
+    // @ts-expect-error moment types do not define defaultZone but it's there
     originalTimezone = moment.defaultZone;
   });
 

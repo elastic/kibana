@@ -52,16 +52,12 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
 
   const serializedComponentTemplate = serializeComponentTemplate(
     stripEmptyFields(componentTemplate, {
-      types: ['string', 'object'],
+      types: ['string'],
     }) as ComponentTemplateDeserialized
   );
 
   const {
-    template: {
-      mappings: serializedMappings,
-      settings: serializedSettings,
-      aliases: serializedAliases,
-    },
+    template: serializedTemplate,
     _meta: serializedMeta,
     version: serializedVersion,
   } = serializedComponentTemplate;
@@ -94,7 +90,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {getDescriptionText(serializedSettings)}
+              {getDescriptionText(serializedTemplate?.settings)}
             </EuiDescriptionListDescription>
 
             {/* Mappings */}
@@ -105,7 +101,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {getDescriptionText(serializedMappings)}
+              {getDescriptionText(serializedTemplate?.mappings)}
             </EuiDescriptionListDescription>
 
             {/* Aliases */}
@@ -116,7 +112,7 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(({ componen
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              {getDescriptionText(serializedAliases)}
+              {getDescriptionText(serializedTemplate?.aliases)}
             </EuiDescriptionListDescription>
           </EuiDescriptionList>
         </EuiFlexItem>

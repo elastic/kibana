@@ -11,7 +11,7 @@ export interface ModuleJob {
   config: Omit<Job, 'job_id'>;
 }
 
-export interface ModuleDataFeed {
+export interface ModuleDatafeed {
   id: string;
   config: Omit<Datafeed, 'datafeed_id'>;
 }
@@ -30,6 +30,7 @@ export interface KibanaObject {
   title: string;
   config: KibanaObjectConfig;
   exists?: boolean;
+  error?: any;
 }
 
 export interface KibanaObjects {
@@ -48,7 +49,7 @@ export interface Module {
   defaultIndexPattern: string;
   query: any;
   jobs: ModuleJob[];
-  datafeeds: ModuleDataFeed[];
+  datafeeds: ModuleDatafeed[];
   kibana: KibanaObjects;
 }
 

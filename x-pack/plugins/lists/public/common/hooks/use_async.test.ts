@@ -95,4 +95,36 @@ describe('useAsync', () => {
 
     expect(result.current.loading).toBe(false);
   });
+
+  it('multiple start calls reset state', async () => {
+    let resolve: (result: string) => void;
+    fn.mockImplementation(() => new Promise((_resolve) => (resolve = _resolve)));
+
+    const { result, waitForNextUpdate } = renderHook(() => useAsync(fn));
+
+    act(() => {
+      result.current.start(args);
+    });
+
+    expect(result.current.loading).toBe(true);
+
+    act(() => resolve('result'));
+    await waitForNextUpdate();
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.result).toBe('result');
+
+    act(() => {
+      result.current.start(args);
+    });
+
+    expect(result.current.loading).toBe(true);
+    expect(result.current.result).toBe(undefined);
+
+    act(() => resolve('result'));
+    await waitForNextUpdate();
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.result).toBe('result');
+  });
 });

@@ -16,6 +16,7 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { Action } from '../state_management';
 import { ChartSwitch } from './chart_switch';
+import { PaletteOutput } from 'src/plugins/charts/public';
 
 describe('chart_switch', () => {
   function generateVisualization(id: string): jest.Mocked<Visualization> {
@@ -46,6 +47,16 @@ describe('chart_switch', () => {
     };
   }
 
+  /**
+   * There are three visualizations. Each one has the same suggestion behavior:
+   *
+   * visA: suggests an empty state
+   * visB: suggests an empty state
+   * visC:
+   *  - Never switches to subvisC2
+   *  - Allows a switch to subvisC3
+   *  - Allows a switch to subvisC1
+   */
   function mockVisualizations() {
     return {
       visA: generateVisualization('visA'),
@@ -292,6 +303,49 @@ describe('chart_switch', () => {
     expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toEqual('alert');
   });
 
+  it('should support multi-layer suggestions without data loss', () => {
+    const dispatch = jest.fn();
+    const visualizations = mockVisualizations();
+    const frame = mockFrame(['a', 'b']);
+
+    const datasourceMap = mockDatasourceMap();
+    datasourceMap.testDatasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
+      {
+        state: {},
+        table: {
+          columns: [
+            {
+              columnId: 'a',
+              operation: {
+                label: '',
+                dataType: 'string',
+                isBucketed: true,
+              },
+            },
+          ],
+          isMultiRow: true,
+          layerId: 'a',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: ['a', 'b'],
+      },
+    ]);
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visA"
+        visualizationState={{}}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+        datasourceMap={datasourceMap}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    expect(getMenuItem('visB', component).prop('betaBadgeIconType')).toBeUndefined();
+  });
+
   it('should indicate data loss if no data will be used', () => {
     const dispatch = jest.fn();
     const visualizations = mockVisualizations();
@@ -396,6 +450,39 @@ describe('chart_switch', () => {
     );
   });
 
+  it('should query main palette from active chart and pass into suggestions', () => {
+    const dispatch = jest.fn();
+    const visualizations = mockVisualizations();
+    const mockPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    visualizations.visA.getMainPalette = jest.fn(() => mockPalette);
+    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+    const frame = mockFrame(['a', 'b', 'c']);
+    const currentVisState = {};
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visA"
+        visualizationState={currentVisState}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    switchTo('visB', component);
+
+    expect(visualizations.visA.getMainPalette).toHaveBeenCalledWith(currentVisState);
+
+    expect(visualizations.visB.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        keptLayerIds: ['a'],
+        mainPalette: mockPalette,
+      })
+    );
+  });
+
   it('should not remove layers when switching between subtypes', () => {
     const dispatch = jest.fn();
     const frame = mockFrame(['a', 'b', 'c']);
@@ -424,6 +511,34 @@ describe('chart_switch', () => {
         initialState: 'switched',
       })
     );
+    expect(frame.removeLayers).not.toHaveBeenCalled();
+  });
+
+  it('should not remove layers and initialize with existing state when switching between subtypes without data', () => {
+    const dispatch = jest.fn();
+    const frame = mockFrame(['a']);
+    frame.datasourceLayers.a.getTableSpec = jest.fn().mockReturnValue([]);
+    const visualizations = mockVisualizations();
+    visualizations.visC.getSuggestions = jest.fn().mockReturnValue([]);
+    visualizations.visC.switchVisualizationType = jest.fn(() => 'switched');
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visC"
+        visualizationState={{ type: 'subvisC1' }}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    switchTo('subvisC3', component);
+
+    expect(visualizations.visC.switchVisualizationType).toHaveBeenCalledWith('subvisC3', {
+      type: 'subvisC1',
+    });
     expect(frame.removeLayers).not.toHaveBeenCalled();
   });
 

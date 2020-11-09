@@ -7,22 +7,20 @@
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
 
-import { CreateCommentsArray, createComments } from './create_comments';
-
-export type DefaultCreateCommentsArrayC = t.Type<CreateCommentsArray, CreateCommentsArray, unknown>;
+import { CreateCommentsArray, createComment } from './create_comment';
 
 /**
  * Types the DefaultCreateComments as:
  *   - If null or undefined, then a default array of type entry will be set
  */
-export const DefaultCreateCommentsArray: DefaultCreateCommentsArrayC = new t.Type<
+export const DefaultCreateCommentsArray = new t.Type<
   CreateCommentsArray,
   CreateCommentsArray,
   unknown
 >(
   'DefaultCreateComments',
-  t.array(createComments).is,
+  t.array(createComment).is,
   (input): Either<t.Errors, CreateCommentsArray> =>
-    input == null ? t.success([]) : t.array(createComments).decode(input),
+    input == null ? t.success([]) : t.array(createComment).decode(input),
   t.identity
 );

@@ -16,7 +16,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { formatPercentageUsage, formatNumber } from '../../../lib/format_number';
-import { ClusterStatus } from '..//cluster_status';
+import { ClusterStatus } from '../cluster_status';
 import { EuiMonitoringTable } from '../../table';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
@@ -24,10 +24,14 @@ import { LOGSTASH_SYSTEM_ID } from '../../../../common/constants';
 import { SetupModeBadge } from '../../setup_mode/badge';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+import { AlertsStatus } from '../../../alerts/status';
+import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
+import { SetupModeFeature } from '../../../../common/enums';
 
 export class Listing extends PureComponent {
   getColumns() {
     const setupMode = this.props.setupMode;
+    const alerts = this.props.alerts;
 
     return [
       {
@@ -38,7 +42,7 @@ export class Listing extends PureComponent {
         sortable: true,
         render: (name, node) => {
           let setupModeStatus = null;
-          if (setupMode && setupMode.enabled) {
+          if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
             const list = get(setupMode, 'data.byUuid', {});
             const uuid = get(node, 'logstash.uuid');
             const status = list[uuid] || {};
@@ -69,6 +73,28 @@ export class Listing extends PureComponent {
               <div>{node.logstash.http_address}</div>
               {setupModeStatus}
             </div>
+          );
+        },
+      },
+      {
+        name: i18n.translate('xpack.monitoring.logstash.nodes.alertsColumnTitle', {
+          defaultMessage: 'Alerts',
+        }),
+        field: 'isOnline',
+        width: '175px',
+        sortable: true,
+        render: () => {
+          return (
+            <AlertsStatus
+              showBadge={true}
+              alerts={alerts}
+              nextStepsFilter={(nextStep) => {
+                if (nextStep.text.includes('Logstash nodes')) {
+                  return false;
+                }
+                return true;
+              }}
+            />
           );
         },
       },
@@ -141,7 +167,7 @@ export class Listing extends PureComponent {
   }
 
   render() {
-    const { stats, sorting, pagination, onTableChange, data, setupMode } = this.props;
+    const { stats, alerts, sorting, pagination, onTableChange, data, setupMode } = this.props;
     const columns = this.getColumns();
     const flattenedData = data.map((item) => ({
       ...item,
@@ -154,7 +180,7 @@ export class Listing extends PureComponent {
     }));
 
     let setupModeCallOut = null;
-    if (setupMode.enabled && setupMode.data) {
+    if (isSetupModeFeatureEnabled(SetupModeFeature.MetricbeatMigration)) {
       setupModeCallOut = (
         <ListingCallOut
           setupModeData={setupMode.data}
@@ -176,7 +202,7 @@ export class Listing extends PureComponent {
             </h1>
           </EuiScreenReaderOnly>
           <EuiPanel>
-            <ClusterStatus stats={stats} />
+            <ClusterStatus stats={stats} alerts={alerts} />
           </EuiPanel>
           <EuiSpacer size="m" />
           {setupModeCallOut}

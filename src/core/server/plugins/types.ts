@@ -20,12 +20,13 @@
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
+import { PathConfigType } from '@kbn/utils';
 
 import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
 import { LoggerFactory } from '../logging';
 import { KibanaConfigType } from '../kibana_config';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
-import { PathConfigType } from '../path';
+import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CoreSetup, CoreStart } from '..';
 
 /**
@@ -93,6 +94,12 @@ export type PluginName = string;
 /** @public */
 export type PluginOpaqueId = symbol;
 
+/** @internal */
+export interface PluginDependencies {
+  asNames: ReadonlyMap<PluginName, PluginName[]>;
+  asOpaqueIds: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
+}
+
 /**
  * Describes the set of required and optional properties plugin can define in its
  * mandatory JSON manifest file.
@@ -135,6 +142,18 @@ export interface PluginManifest {
    * for this plugin to function properly.
    */
   readonly requiredPlugins: readonly PluginName[];
+
+  /**
+   * List of plugin ids that this plugin's UI code imports modules from that are
+   * not in `requiredPlugins`.
+   *
+   * @remarks
+   * The plugins listed here will be loaded in the browser, even if the plugin is
+   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * "core" and plugins already listed in `requiredPlugins` do not need to be
+   * duplicated here.
+   */
+  readonly requiredBundles: readonly string[];
 
   /**
    * An optional list of the other plugins that if installed and enabled **may be**
@@ -191,12 +210,28 @@ export interface DiscoveredPlugin {
    * not required for this plugin to work properly.
    */
   readonly optionalPlugins: readonly PluginName[];
+
+  /**
+   * List of plugin ids that this plugin's UI code imports modules from that are
+   * not in `requiredPlugins`.
+   *
+   * @remarks
+   * The plugins listed here will be loaded in the browser, even if the plugin is
+   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
+   * "core" and plugins already listed in `requiredPlugins` do not need to be
+   * duplicated here.
+   */
+  readonly requiredBundles: readonly PluginName[];
 }
 
 /**
  * @internal
  */
 export interface InternalPluginInfo {
+  /**
+   * Bundles that must be loaded for this plugoin
+   */
+  readonly requiredBundles: readonly string[];
   /**
    * Path to the target/public directory of the plugin which should be
    * served
@@ -227,8 +262,9 @@ export interface Plugin<
 export const SharedGlobalConfigKeys = {
   // We can add more if really needed
   kibana: ['index', 'autocompleteTerminateAfter', 'autocompleteTimeout'] as const,
-  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout', 'startupTimeout'] as const,
+  elasticsearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,
+  savedObjects: ['maxImportPayloadBytes'] as const,
 };
 
 /**
@@ -238,6 +274,7 @@ export type SharedGlobalConfig = RecursiveReadonly<{
   kibana: Pick<KibanaConfigType, typeof SharedGlobalConfigKeys.kibana[number]>;
   elasticsearch: Pick<ElasticsearchConfigType, typeof SharedGlobalConfigKeys.elasticsearch[number]>;
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
+  savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;
 
 /**
@@ -250,6 +287,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   env: {
     mode: EnvironmentMode;
     packageInfo: Readonly<PackageInfo>;
+    instanceUuid: string;
   };
   logger: LoggerFactory;
   config: {

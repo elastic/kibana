@@ -4,6 +4,8 @@
 
 ## DataPublicPluginStart interface
 
+Data plugin public Start contract
+
 <b>Signature:</b>
 
 ```typescript
@@ -14,11 +16,11 @@ export interface DataPublicPluginStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [actions](./kibana-plugin-plugins-data-public.datapublicpluginstart.actions.md) | <code>{</code><br/><code>        createFiltersFromValueClickAction: typeof createFiltersFromValueClickAction;</code><br/><code>        createFiltersFromRangeSelectAction: typeof createFiltersFromRangeSelectAction;</code><br/><code>    }</code> |  |
-|  [autocomplete](./kibana-plugin-plugins-data-public.datapublicpluginstart.autocomplete.md) | <code>AutocompleteStart</code> |  |
-|  [fieldFormats](./kibana-plugin-plugins-data-public.datapublicpluginstart.fieldformats.md) | <code>FieldFormatsStart</code> |  |
-|  [indexPatterns](./kibana-plugin-plugins-data-public.datapublicpluginstart.indexpatterns.md) | <code>IndexPatternsContract</code> |  |
-|  [query](./kibana-plugin-plugins-data-public.datapublicpluginstart.query.md) | <code>QueryStart</code> |  |
-|  [search](./kibana-plugin-plugins-data-public.datapublicpluginstart.search.md) | <code>ISearchStart</code> |  |
-|  [ui](./kibana-plugin-plugins-data-public.datapublicpluginstart.ui.md) | <code>{</code><br/><code>        IndexPatternSelect: React.ComponentType&lt;IndexPatternSelectProps&gt;;</code><br/><code>        SearchBar: React.ComponentType&lt;StatefulSearchBarProps&gt;;</code><br/><code>    }</code> |  |
+|  [actions](./kibana-plugin-plugins-data-public.datapublicpluginstart.actions.md) | <code>DataPublicPluginStartActions</code> | filter creation utilities [DataPublicPluginStartActions](./kibana-plugin-plugins-data-public.datapublicpluginstartactions.md) |
+|  [autocomplete](./kibana-plugin-plugins-data-public.datapublicpluginstart.autocomplete.md) | <code>AutocompleteStart</code> | autocomplete service [AutocompleteStart](./kibana-plugin-plugins-data-public.autocompletestart.md) |
+|  [fieldFormats](./kibana-plugin-plugins-data-public.datapublicpluginstart.fieldformats.md) | <code>FieldFormatsStart</code> | field formats service [FieldFormatsStart](./kibana-plugin-plugins-data-public.fieldformatsstart.md) |
+|  [indexPatterns](./kibana-plugin-plugins-data-public.datapublicpluginstart.indexpatterns.md) | <code>IndexPatternsContract</code> | index patterns service [IndexPatternsContract](./kibana-plugin-plugins-data-public.indexpatternscontract.md) |
+|  [query](./kibana-plugin-plugins-data-public.datapublicpluginstart.query.md) | <code>QueryStart</code> | query service [QueryStart](./kibana-plugin-plugins-data-public.querystart.md) |
+|  [search](./kibana-plugin-plugins-data-public.datapublicpluginstart.search.md) | <code>ISearchStart</code> | search service [ISearchStart](./kibana-plugin-plugins-data-public.isearchstart.md) |
+|  [ui](./kibana-plugin-plugins-data-public.datapublicpluginstart.ui.md) | <code>DataPublicPluginStartUi</code> | prewired UI components [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md) |
 

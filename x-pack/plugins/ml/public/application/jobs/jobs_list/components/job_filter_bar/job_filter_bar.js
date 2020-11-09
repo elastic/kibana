@@ -9,7 +9,12 @@ import React, { Component, Fragment } from 'react';
 
 import { ml } from '../../../../services/ml_api_service';
 import { JobGroup } from '../job_group';
-import { getSelectedJobIdFromUrl, clearSelectedJobIdFromUrl } from '../utils';
+import {
+  getGroupQueryText,
+  getSelectedIdFromUrl,
+  clearSelectedJobIdFromUrl,
+  getJobQueryText,
+} from '../utils';
 
 import { EuiSearchBar, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -54,15 +59,23 @@ export class JobFilterBar extends Component {
 
   componentDidMount() {
     // If job id is selected in url, filter table to that id
-    const selectedId = getSelectedJobIdFromUrl(window.location.href);
-    if (selectedId !== undefined) {
+    let defaultQueryText;
+    const { jobId, groupIds } = getSelectedIdFromUrl(window.location.href);
+
+    if (groupIds !== undefined) {
+      defaultQueryText = getGroupQueryText(groupIds);
+    } else if (jobId !== undefined) {
+      defaultQueryText = getJobQueryText(jobId);
+    }
+
+    if (defaultQueryText !== undefined) {
       this.setState(
         {
-          selectedId,
+          defaultQueryText,
         },
         () => {
           // trigger onChange with query for job id to trigger table filter
-          const query = EuiSearchBar.Query.parse(selectedId);
+          const query = EuiSearchBar.Query.parse(defaultQueryText);
           this.onChange({ query });
         }
       );
@@ -87,7 +100,7 @@ export class JobFilterBar extends Component {
   };
 
   render() {
-    const { error, selectedId } = this.state;
+    const { error, defaultQueryText } = this.state;
     const filters = [
       {
         type: 'field_value_toggle_group',
@@ -147,7 +160,7 @@ export class JobFilterBar extends Component {
     return (
       <EuiFlexGroup direction="column">
         <EuiFlexItem data-test-subj="mlJobListSearchBar" grow={false}>
-          {selectedId === undefined && (
+          {defaultQueryText === undefined && (
             <EuiSearchBar
               box={{
                 incremental: true,
@@ -157,12 +170,12 @@ export class JobFilterBar extends Component {
               className="mlJobFilterBar"
             />
           )}
-          {selectedId !== undefined && (
+          {defaultQueryText !== undefined && (
             <EuiSearchBar
               box={{
                 incremental: true,
               }}
-              defaultQuery={selectedId}
+              defaultQuery={defaultQueryText}
               filters={filters}
               onChange={this.onChange}
               className="mlJobFilterBar"

@@ -105,6 +105,41 @@ describe('RoleComboBox', () => {
 
     wrapper.find(EuiComboBox).setState({ isListOpen: true });
 
-    expect(findTestSubject(wrapper, 'rolesDropdown-renderOption')).toMatchInlineSnapshot(`null`);
+    expect(findTestSubject(wrapper, 'rolesDropdown-renderOption')).toMatchInlineSnapshot(`
+      Array [
+        <div
+          className="euiText euiText--medium"
+          data-test-subj="rolesDropdown-renderOption"
+        >
+          <EuiTextColor
+            color="default"
+            component="div"
+          >
+            <div
+              className="euiTextColor euiTextColor--default"
+            >
+              role-1
+               
+            </div>
+          </EuiTextColor>
+        </div>,
+        <div
+          className="euiText euiText--medium"
+          data-test-subj="rolesDropdown-renderOption"
+        >
+          <EuiTextColor
+            color="default"
+            component="div"
+          >
+            <div
+              className="euiTextColor euiTextColor--default"
+            >
+              role-2
+               
+            </div>
+          </EuiTextColor>
+        </div>,
+      ]
+    `);
   });
 });

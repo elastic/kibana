@@ -17,14 +17,13 @@
  * under the License.
  */
 
-import path from 'path';
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 
 import { Keystore } from '../../legacy/server/keystore';
-import { getDataPath } from '../../core/server/path';
+import { getKeystore } from '../../cli_keystore/get_keystore';
 
-export function readKeystore(dataPath = getDataPath()) {
-  const keystore = new Keystore(path.join(dataPath, 'kibana.keystore'));
+export function readKeystore(keystorePath = getKeystore()) {
+  const keystore = new Keystore(keystorePath);
   keystore.load();
 
   const keys = Object.keys(keystore.data);

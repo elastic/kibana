@@ -25,8 +25,8 @@ LargeScore.displayName = 'LargeScore';
 
 export const createDescriptionList = (
   score: Anomaly,
-  startDate: number,
-  endDate: number,
+  startDate: string,
+  endDate: string,
   interval: string,
   narrowDateRange: NarrowDateRange
 ): DescriptionList[] => {

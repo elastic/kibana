@@ -47,14 +47,14 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
 }) => {
   const ruleName = `${value}`;
   const ruleId = linkValue;
-  const { search } = useFormatUrl(SecurityPageName.alerts);
+  const { search } = useFormatUrl(SecurityPageName.detections);
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
   const content = truncate ? <TruncatableText>{value}</TruncatableText> : value;
 
   const goToRuleDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+      navigateToApp(`${APP_ID}:${SecurityPageName.detections}`, {
         path: getRuleDetailsUrl(ruleId ?? '', search),
       });
     },
@@ -70,7 +70,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     >
       <LinkAnchor
         onClick={goToRuleDetails}
-        href={getUrlForApp(`${APP_ID}:${SecurityPageName.alerts}`, {
+        href={getUrlForApp(`${APP_ID}:${SecurityPageName.detections}`, {
           path: getRuleDetailsUrl(ruleId, search),
         })}
       >
@@ -150,7 +150,7 @@ export const renderEventModule = ({
   );
 };
 
-export const renderRulReference = ({
+export const renderUrl = ({
   contextId,
   eventId,
   fieldName,
@@ -165,23 +165,23 @@ export const renderRulReference = ({
   truncate?: boolean;
   value: string | number | null | undefined;
 }) => {
-  const referenceUrlName = `${value}`;
+  const urlName = `${value}`;
 
   const content = truncate ? <TruncatableText>{value}</TruncatableText> : value;
 
-  return isString(value) && referenceUrlName.length > 0 ? (
+  return isString(value) && urlName.length > 0 ? (
     <DefaultDraggable
       field={fieldName}
-      id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${referenceUrlName}`}
+      id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${urlName}`}
       tooltipContent={value}
       value={value}
     >
-      {!isUrlInvalid(referenceUrlName) && (
-        <EuiLink target="_blank" href={referenceUrlName}>
+      {!isUrlInvalid(urlName) && (
+        <EuiLink target="_blank" href={urlName}>
           {content}
         </EuiLink>
       )}
-      {isUrlInvalid(referenceUrlName) && <>{content}</>}
+      {isUrlInvalid(urlName) && <>{content}</>}
     </DefaultDraggable>
   ) : (
     getEmptyTagValue()

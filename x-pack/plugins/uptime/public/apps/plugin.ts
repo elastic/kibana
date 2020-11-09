@@ -12,10 +12,10 @@ import {
   AppMountParameters,
 } from 'kibana/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../../src/core/public';
-import { UMFrontendLibs } from '../lib/lib';
-import { PLUGIN } from '../../common/constants';
-import { FeatureCatalogueCategory } from '../../../../../src/plugins/home/public';
-import { HomePublicPluginSetup } from '../../../../../src/plugins/home/public';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../../src/plugins/home/public';
 import { EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -26,22 +26,20 @@ import {
   DataPublicPluginStart,
 } from '../../../../../src/plugins/data/public';
 import { alertTypeInitializers } from '../lib/alert_types';
-import { kibanaService } from '../state/kibana_service';
-import { fetchIndexStatus } from '../state/api';
-import { ObservabilityPluginSetup } from '../../../observability/public';
-import { fetchUptimeOverviewData } from './uptime_overview_fetcher';
+import { FetchDataParams, ObservabilityPluginSetup } from '../../../observability/public';
+import { PLUGIN } from '../../common/constants/plugin';
 
 export interface ClientPluginsSetup {
   data: DataPublicPluginSetup;
-  home: HomePublicPluginSetup;
+  home?: HomePublicPluginSetup;
   observability: ObservabilityPluginSetup;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginSetup;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
 }
 
 export interface ClientPluginsStart {
   embeddable: EmbeddableStart;
   data: DataPublicPluginStart;
-  triggers_actions_ui: TriggersAndActionsUIPublicPluginStart;
+  triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
 }
 
 export type ClientSetup = void;
@@ -61,56 +59,57 @@ export class UptimePlugin
         title: PLUGIN.TITLE,
         description: PLUGIN.DESCRIPTION,
         icon: 'uptimeApp',
-        path: '/app/uptime#/',
-        showOnHomePage: true,
+        path: '/app/uptime',
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
       });
     }
+    const getUptimeDataHelper = async () => {
+      const [coreStart] = await core.getStartServices();
+      const { UptimeDataHelper } = await import('./uptime_overview_fetcher');
 
+      return UptimeDataHelper(coreStart);
+    };
     plugins.observability.dashboard.register({
       appName: 'uptime',
       hasData: async () => {
-        const status = await fetchIndexStatus();
+        const dataHelper = await getUptimeDataHelper();
+        const status = await dataHelper.indexStatus();
         return status.docCount > 0;
       },
-      fetchData: fetchUptimeOverviewData,
+      fetchData: async (params: FetchDataParams) => {
+        const dataHelper = await getUptimeDataHelper();
+        return await dataHelper.overviewData(params);
+      },
     });
 
     core.application.register({
-      appRoute: '/app/uptime#/',
       id: PLUGIN.ID,
-      euiIconType: 'uptimeApp',
+      euiIconType: 'logoObservability',
       order: 8400,
       title: PLUGIN.TITLE,
       category: DEFAULT_APP_CATEGORIES.observability,
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
-        const { getKibanaFrameworkAdapter } = await import(
-          '../lib/adapters/framework/new_platform_adapter'
-        );
 
-        const { element } = params;
+        const { renderApp } = await import('./render_app');
 
-        const libs: UMFrontendLibs = {
-          framework: getKibanaFrameworkAdapter(coreStart, plugins, corePlugins),
-        };
-        return libs.framework.render(element);
+        return renderApp(coreStart, plugins, corePlugins, params);
       },
     });
   }
 
   public start(start: CoreStart, plugins: ClientPluginsStart): void {
-    kibanaService.core = start;
     alertTypeInitializers.forEach((init) => {
       const alertInitializer = init({
         core: start,
         plugins,
       });
       if (
-        plugins.triggers_actions_ui &&
-        !plugins.triggers_actions_ui.alertTypeRegistry.has(alertInitializer.id)
+        plugins.triggersActionsUi &&
+        !plugins.triggersActionsUi.alertTypeRegistry.has(alertInitializer.id)
       ) {
-        plugins.triggers_actions_ui.alertTypeRegistry.register(alertInitializer);
+        plugins.triggersActionsUi.alertTypeRegistry.register(alertInitializer);
       }
     });
   }

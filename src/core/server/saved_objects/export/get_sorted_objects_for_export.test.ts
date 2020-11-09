@@ -20,7 +20,7 @@
 import { exportSavedObjectsToStream } from './get_sorted_objects_for_export';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { Readable } from 'stream';
-import { createPromiseFromStreams, createConcatStream } from '../../../../legacy/utils/streams';
+import { createPromiseFromStreams, createConcatStream } from '../../utils/streams';
 
 async function readStreamToCompletion(stream: Readable) {
   return createPromiseFromStreams([stream, createConcatStream([])]);
@@ -107,7 +107,101 @@ describe('getSortedObjectsForExport()', () => {
         "calls": Array [
           Array [
             Object {
-              "namespace": undefined,
+              "hasReference": undefined,
+              "hasReferenceOperator": undefined,
+              "namespaces": undefined,
+              "perPage": 500,
+              "search": undefined,
+              "type": Array [
+                "index-pattern",
+                "search",
+              ],
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
+  });
+
+  test('omits the `namespaces` property from the export', async () => {
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 2,
+      saved_objects: [
+        {
+          id: '2',
+          type: 'search',
+          attributes: {},
+          namespaces: ['foo', 'bar'],
+          score: 0,
+          references: [
+            {
+              name: 'name',
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+        {
+          id: '1',
+          type: 'index-pattern',
+          attributes: {},
+          namespaces: ['foo', 'bar'],
+          score: 0,
+          references: [],
+        },
+      ],
+      per_page: 1,
+      page: 0,
+    });
+    const exportStream = await exportSavedObjectsToStream({
+      savedObjectsClient,
+      exportSizeLimit: 500,
+      types: ['index-pattern', 'search'],
+    });
+
+    const response = await readStreamToCompletion(exportStream);
+
+    expect(response).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "1",
+          "references": Array [],
+          "type": "index-pattern",
+        },
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "name",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "search",
+        },
+        Object {
+          "exportedCount": 2,
+          "missingRefCount": 0,
+          "missingReferences": Array [],
+        },
+      ]
+    `);
+    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "hasReference": undefined,
+              "hasReferenceOperator": undefined,
+              "namespaces": undefined,
               "perPage": 500,
               "search": undefined,
               "type": Array [
@@ -257,9 +351,99 @@ describe('getSortedObjectsForExport()', () => {
         "calls": Array [
           Array [
             Object {
-              "namespace": undefined,
+              "hasReference": undefined,
+              "hasReferenceOperator": undefined,
+              "namespaces": undefined,
               "perPage": 500,
               "search": "foo",
+              "type": Array [
+                "index-pattern",
+                "search",
+              ],
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      }
+    `);
+  });
+
+  test('exports selected types with references when present', async () => {
+    savedObjectsClient.find.mockResolvedValueOnce({
+      total: 1,
+      saved_objects: [
+        {
+          id: '2',
+          type: 'search',
+          attributes: {},
+          score: 1,
+          references: [
+            {
+              name: 'name',
+              type: 'index-pattern',
+              id: '1',
+            },
+          ],
+        },
+      ],
+      per_page: 1,
+      page: 0,
+    });
+    const exportStream = await exportSavedObjectsToStream({
+      savedObjectsClient,
+      exportSizeLimit: 500,
+      types: ['index-pattern', 'search'],
+      hasReference: [
+        {
+          id: '1',
+          type: 'index-pattern',
+        },
+      ],
+    });
+
+    const response = await readStreamToCompletion(exportStream);
+
+    expect(response).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "attributes": Object {},
+          "id": "2",
+          "references": Array [
+            Object {
+              "id": "1",
+              "name": "name",
+              "type": "index-pattern",
+            },
+          ],
+          "type": "search",
+        },
+        Object {
+          "exportedCount": 1,
+          "missingRefCount": 0,
+          "missingReferences": Array [],
+        },
+      ]
+    `);
+    expect(savedObjectsClient.find).toMatchInlineSnapshot(`
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "hasReference": Array [
+                Object {
+                  "id": "1",
+                  "type": "index-pattern",
+                },
+              ],
+              "hasReferenceOperator": "OR",
+              "namespaces": undefined,
+              "perPage": 500,
+              "search": undefined,
               "type": Array [
                 "index-pattern",
                 "search",
@@ -346,7 +530,11 @@ describe('getSortedObjectsForExport()', () => {
         "calls": Array [
           Array [
             Object {
-              "namespace": "foo",
+              "hasReference": undefined,
+              "hasReferenceOperator": undefined,
+              "namespaces": Array [
+                "foo",
+              ],
               "perPage": 500,
               "search": undefined,
               "type": Array [
@@ -573,6 +761,33 @@ describe('getSortedObjectsForExport()', () => {
         `);
   });
 
+  test('modifies return results to redact `namespaces` attribute', async () => {
+    const createSavedObject = (obj: any) => ({ ...obj, attributes: {}, references: [] });
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        createSavedObject({ type: 'multi', id: '1', namespaces: ['foo'] }),
+        createSavedObject({ type: 'multi', id: '2', namespaces: ['bar'] }),
+        createSavedObject({ type: 'other', id: '3' }),
+      ],
+    });
+    const exportStream = await exportSavedObjectsToStream({
+      exportSizeLimit: 10000,
+      savedObjectsClient,
+      objects: [
+        { type: 'multi', id: '1' },
+        { type: 'multi', id: '2' },
+        { type: 'other', id: '3' },
+      ],
+    });
+    const response = await readStreamToCompletion(exportStream);
+    expect(response).toEqual([
+      createSavedObject({ type: 'multi', id: '1' }),
+      createSavedObject({ type: 'multi', id: '2' }),
+      createSavedObject({ type: 'other', id: '3' }),
+      expect.objectContaining({ exportedCount: 3 }),
+    ]);
+  });
+
   test('includes nested dependencies when passed in', async () => {
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
       saved_objects: [
@@ -722,6 +937,19 @@ describe('getSortedObjectsForExport()', () => {
 
     expect(exportSavedObjectsToStream(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Can't specify both \\"search\\" and \\"objects\\" properties when exporting"`
+    );
+  });
+
+  test('rejects when both objects and references are passed in', () => {
+    const exportOpts = {
+      exportSizeLimit: 1,
+      savedObjectsClient,
+      objects: [{ type: 'index-pattern', id: '1' }],
+      hasReference: [{ type: 'index-pattern', id: '1' }],
+    };
+
+    expect(exportSavedObjectsToStream(exportOpts)).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Can't specify both \\"references\\" and \\"objects\\" properties when exporting"`
     );
   });
 });

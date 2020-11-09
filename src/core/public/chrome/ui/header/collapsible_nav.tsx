@@ -31,7 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { Fragment, useRef } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem } from '../..';
 import { AppCategory } from '../../../../types';
@@ -79,15 +79,15 @@ interface Props {
   basePath: HttpStart['basePath'];
   id: string;
   isLocked: boolean;
-  isOpen: boolean;
+  isNavOpen: boolean;
   homeHref: string;
-  legacyMode: boolean;
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   storage?: Storage;
   onIsLockedUpdate: OnIsLockedUpdate;
   closeNav: () => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
+  navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
 }
 
@@ -95,13 +95,13 @@ export function CollapsibleNav({
   basePath,
   id,
   isLocked,
-  isOpen,
+  isNavOpen,
   homeHref,
-  legacyMode,
   storage = window.localStorage,
   onIsLockedUpdate,
   closeNav,
   navigateToApp,
+  navigateToUrl,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
@@ -116,7 +116,6 @@ export function CollapsibleNav({
   const readyForEUI = (link: ChromeNavLink, needsIcon: boolean = false) => {
     return createEuiListItem({
       link,
-      legacyMode,
       appId,
       dataTestSubj: 'collapsibleNavAppLink',
       navigateToApp,
@@ -132,7 +131,7 @@ export function CollapsibleNav({
       aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
         defaultMessage: 'Primary',
       })}
-      isOpen={isOpen}
+      isOpen={isNavOpen}
       isDocked={isLocked}
       onClose={closeNav}
     >
@@ -148,7 +147,6 @@ export function CollapsibleNav({
                 listItems={[
                   createEuiListItem({
                     link: customNavLink,
-                    legacyMode,
                     basePath,
                     navigateToApp,
                     dataTestSubj: 'collapsibleNavCustomNavLink',
@@ -221,17 +219,21 @@ export function CollapsibleNav({
             listItems={recentlyAccessed.map((link) => {
               // TODO #64541
               // Can remove icon from recent links completely
-              const { iconType, ...hydratedLink } = createRecentNavLink(link, navLinks, basePath);
+              const { iconType, onClick, ...hydratedLink } = createRecentNavLink(
+                link,
+                navLinks,
+                basePath,
+                navigateToUrl
+              );
 
               return {
                 ...hydratedLink,
                 'data-test-subj': 'collapsibleNavAppLink--recent',
                 onClick: (event) => {
-                  if (isModifiedOrPrevented(event)) {
-                    return;
+                  if (!isModifiedOrPrevented(event)) {
+                    closeNav();
+                    onClick(event);
                   }
-
-                  closeNav();
                 },
               };
             })}

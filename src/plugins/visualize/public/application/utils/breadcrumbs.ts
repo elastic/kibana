@@ -21,6 +21,18 @@ import { i18n } from '@kbn/i18n';
 
 import { VisualizeConstants } from '../visualize_constants';
 
+const appPrefixes: Record<string, any> = {
+  dashboards: {
+    text: i18n.translate('visualize.dashboard.prefix.breadcrumb', {
+      defaultMessage: 'Dashboard',
+    }),
+  },
+};
+
+const defaultEditText = i18n.translate('visualize.editor.defaultEditBreadcrumbText', {
+  defaultMessage: 'Edit',
+});
+
 export function getLandingBreadcrumbs() {
   return [
     {
@@ -43,7 +55,12 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
-export function getEditBreadcrumbs(text: string) {
+export function getBreadcrumbsPrefixedWithApp(originatingApp: string) {
+  const originatingAppBreadcrumb = appPrefixes[originatingApp];
+  return [originatingAppBreadcrumb, ...getLandingBreadcrumbs(), { text: defaultEditText }];
+}
+
+export function getEditBreadcrumbs(text: string = defaultEditText) {
   return [
     ...getLandingBreadcrumbs(),
     {

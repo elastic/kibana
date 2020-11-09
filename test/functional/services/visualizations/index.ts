@@ -19,3 +19,4 @@
 
 export { PieChartProvider } from './pie_chart';
 export { ElasticChartProvider } from './elastic_chart';
+export { VegaDebugInspectorViewProvider } from './vega_debug_inspector';

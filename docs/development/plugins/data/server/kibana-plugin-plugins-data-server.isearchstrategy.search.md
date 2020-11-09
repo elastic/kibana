@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-search: ISearch<T>;
+search: (request: SearchStrategyRequest, options: ISearchOptions, deps: SearchStrategyDependencies) => Observable<SearchStrategyResponse>;
 ```

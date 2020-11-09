@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const cpu: SnapshotModel = {
+export const cpu: MetricsUIAggregation = {
   cpu_with_limit: {
     avg: {
       field: 'kubernetes.pod.cpu.usage.limit.pct',

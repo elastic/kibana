@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { OperationDefinition } from './index';
-import { FormattedIndexPatternColumn } from './column_types';
+import { FormattedIndexPatternColumn, FieldBasedIndexPatternColumn } from './column_types';
 
 const supportedTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
 
@@ -21,15 +21,18 @@ function ofName(name: string) {
   });
 }
 
-export interface CardinalityIndexPatternColumn extends FormattedIndexPatternColumn {
+export interface CardinalityIndexPatternColumn
+  extends FormattedIndexPatternColumn,
+    FieldBasedIndexPatternColumn {
   operationType: 'cardinality';
 }
 
-export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn> = {
+export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternColumn, 'field'> = {
   type: OPERATION_TYPE,
   displayName: i18n.translate('xpack.lens.indexPattern.cardinality', {
     defaultMessage: 'Unique count',
   }),
+  input: 'field',
   getPossibleOperationForField: ({ aggregationRestrictions, aggregatable, type }) => {
     if (
       supportedTypes.has(type) &&
@@ -51,7 +54,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   },
   buildColumn({ suggestedPriority, field, previousColumn }) {
     return {
-      label: ofName(field.name),
+      label: ofName(field.displayName),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
@@ -59,7 +62,11 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
       params:
-        previousColumn && previousColumn.dataType === 'number' ? previousColumn.params : undefined,
+        previousColumn?.dataType === 'number' &&
+        previousColumn.params &&
+        'format' in previousColumn.params
+          ? previousColumn.params
+          : undefined,
     };
   },
   toEsAggsConfig: (column, columnId) => ({
@@ -75,7 +82,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
   onFieldChange: (oldColumn, indexPattern, field) => {
     return {
       ...oldColumn,
-      label: ofName(field.name),
+      label: ofName(field.displayName),
       sourceField: field.name,
     };
   },

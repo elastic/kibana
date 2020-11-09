@@ -13,11 +13,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { asAbsoluteDateTime } from '../../../../../common/utils/formatters';
 import { useTheme } from '../../../../hooks/useTheme';
 import { Maybe } from '../../../../../typings/common';
 import { Annotation } from '../../../../../common/annotations';
 import { PlotValues, SharedPlot } from './plotUtils';
-import { asAbsoluteDateTime } from '../../../../utils/formatters';
 
 interface Props {
   annotations: Annotation[];
@@ -26,7 +26,7 @@ interface Props {
   overlay: Maybe<HTMLElement>;
 }
 
-export const AnnotationsPlot = ({ plotValues, annotations }: Props) => {
+export function AnnotationsPlot({ plotValues, annotations }: Props) {
   const theme = useTheme();
   const tickValues = annotations.map((annotation) => annotation['@timestamp']);
 
@@ -70,4 +70,4 @@ export const AnnotationsPlot = ({ plotValues, annotations }: Props) => {
       ))}
     </>
   );
-};
+}

@@ -1,10 +1,10 @@
 {
-  "id": "alerts-fixtures",
+  "id": "alertsFixtures",
   "version": "1.0.0",
   "kibanaVersion": "kibana",
   "configPath": ["xpack"],
-  "requiredPlugins": ["taskManager", "features", "actions", "alerts"],
-  "optionalPlugins": ["spaces"],
+  "requiredPlugins": ["taskManager", "features", "actions", "alerts", "encryptedSavedObjects"],
+  "optionalPlugins": ["security",  "spaces"],
   "server": true,
   "ui": false
 }

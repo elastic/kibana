@@ -19,7 +19,7 @@
 
 import path from 'path';
 import { format as formatUrl } from 'url';
-import { OPTIMIZE_BUNDLE_DIR, esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
+import { esTestConfig, kbnTestConfig, kibanaServerTestUser } from '@kbn/test';
 import { services } from './services';
 
 export default function () {
@@ -38,23 +38,19 @@ export default function () {
     },
 
     kbnTestServer: {
-      buildArgs: ['--optimize.useBundleCache=true'],
-      sourceArgs: [
-        '--no-base-path',
-        '--env.name=development',
-        `--optimize.bundleDir=${OPTIMIZE_BUNDLE_DIR}`,
-      ],
+      buildArgs: [],
+      sourceArgs: ['--no-base-path', '--env.name=development'],
       serverArgs: [
         '--logging.json=false',
         `--server.port=${kbnTestConfig.getPort()}`,
-        `--optimize.watchPort=${kbnTestConfig.getPort() + 10}`,
-        '--optimize.watchPrebuild=true',
         '--status.allowAnonymous=true',
-        '--optimize.enabled=true',
         `--elasticsearch.hosts=${formatUrl(servers.elasticsearch)}`,
         `--elasticsearch.username=${kibanaServerTestUser.username}`,
         `--elasticsearch.password=${kibanaServerTestUser.password}`,
         `--home.disableWelcomeScreen=true`,
+        // Needed for async search functional tests to introduce a delay
+        `--data.search.aggs.shardDelay.enabled=true`,
+        `--security.showInsecureClusterWarning=false`,
         '--telemetry.banner=false',
         '--telemetry.optIn=false',
         // These are *very* important to have them pointing to staging

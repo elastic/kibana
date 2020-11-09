@@ -13,25 +13,36 @@ import {
   Plugin,
   PluginInitializerContext,
 } from 'kibana/public';
+import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
 } from '../../../../src/plugins/home/public';
 import { UI_SETTINGS } from '../../../../src/plugins/data/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { MonitoringPluginDependencies, MonitoringConfig } from './types';
+import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
+import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
 import {
-  MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-  KIBANA_ALERTING_ENABLED,
+  ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+  ALERT_THREAD_POOL_WRITE_REJECTIONS,
+  ALERT_DETAILS,
 } from '../common/constants';
 
+interface MonitoringSetupPluginDependencies {
+  home?: HomePublicPluginSetup;
+  cloud?: { isCloudEnabled: boolean };
+  triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
+}
+
 export class MonitoringPlugin
-  implements Plugin<boolean, void, MonitoringPluginDependencies, MonitoringPluginDependencies> {
+  implements
+    Plugin<boolean, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies> {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public setup(
-    core: CoreSetup<MonitoringPluginDependencies>,
-    plugins: object & { home?: HomePublicPluginSetup; cloud?: { isCloudEnabled: boolean } }
+  public async setup(
+    core: CoreSetup<MonitoringStartPluginDependencies>,
+    plugins: MonitoringSetupPluginDependencies
   ) {
     const { home } = plugins;
     const id = 'monitoring';
@@ -48,27 +59,32 @@ export class MonitoringPlugin
     if (home) {
       home.featureCatalogue.register({
         id,
-        title,
+        title: i18n.translate('xpack.monitoring.featureCatalogueTitle', {
+          defaultMessage: 'Monitor the stack',
+        }),
         icon,
         path: '/app/monitoring',
         showOnHomePage: true,
         category: FeatureCatalogueCategory.ADMIN,
-        description: i18n.translate('xpack.monitoring.monitoringDescription', {
-          defaultMessage: 'Track the real-time health and performance of your Elastic Stack.',
+        description: i18n.translate('xpack.monitoring.featureCatalogueDescription', {
+          defaultMessage: 'Track the real-time health and performance of your deployment.',
         }),
+        order: 610,
       });
     }
+
+    await this.registerAlertsAsync(plugins);
 
     const app: App = {
       id,
       title,
-      order: 9002,
+      order: 9030,
       euiIconType: icon,
       category: DEFAULT_APP_CATEGORIES.management,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const { AngularApp } = await import('./angular');
-        const deps: MonitoringPluginDependencies = {
+        const deps: MonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           kibanaLegacy: pluginsStart.kibanaLegacy,
           element: params.element,
@@ -77,11 +93,11 @@ export class MonitoringPlugin
           isCloud: Boolean(plugins.cloud?.isCloudEnabled),
           pluginInitializerContext: this.initializerContext,
           externalConfig: this.getExternalConfig(),
+          triggersActionsUi: plugins.triggersActionsUi,
+          usageCollection: plugins.usageCollection,
         };
 
-        pluginsStart.kibanaLegacy.loadFontAwesome();
         this.setInitialTimefilter(deps);
-        this.overrideAlertingEmailDefaults(deps);
 
         const monitoringApp = new AngularApp(deps);
         const removeHistoryListener = params.history.listen((location) => {
@@ -105,7 +121,7 @@ export class MonitoringPlugin
 
   public stop() {}
 
-  private setInitialTimefilter({ core: coreContext, data }: MonitoringPluginDependencies) {
+  private setInitialTimefilter({ core: coreContext, data }: MonitoringStartPluginDependencies) {
     const { timefilter } = data.query.timefilter;
     const { uiSettings } = coreContext;
     const refreshInterval = { value: 10000, pause: false };
@@ -116,26 +132,7 @@ export class MonitoringPlugin
       UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS,
       JSON.stringify(refreshInterval)
     );
-    uiSettings.overrideLocalDefault('timepicker:timeDefaults', JSON.stringify(time));
-  }
-
-  private overrideAlertingEmailDefaults({ core: coreContext }: MonitoringPluginDependencies) {
-    const { uiSettings } = coreContext;
-    if (KIBANA_ALERTING_ENABLED && !uiSettings.get(MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS)) {
-      uiSettings.overrideLocalDefault(
-        MONITORING_CONFIG_ALERTING_EMAIL_ADDRESS,
-        JSON.stringify({
-          name: i18n.translate('xpack.monitoring.alertingEmailAddress.name', {
-            defaultMessage: 'Alerting email address',
-          }),
-          value: '',
-          description: i18n.translate('xpack.monitoring.alertingEmailAddress.description', {
-            defaultMessage: `The default email address to receive alerts from Stack Monitoring`,
-          }),
-          category: ['monitoring'],
-        })
-      );
-    }
+    uiSettings.overrideLocalDefault(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS, JSON.stringify(time));
   }
 
   private getExternalConfig() {
@@ -147,4 +144,41 @@ export class MonitoringPlugin
       ['showCgroupMetricsLogstash', monitoring.ui.container.logstash.enabled],
     ];
   }
+
+  private registerAlertsAsync = async (plugins: MonitoringSetupPluginDependencies) => {
+    const { createCpuUsageAlertType } = await import('./alerts/cpu_usage_alert');
+    const { createMissingMonitoringDataAlertType } = await import(
+      './alerts/missing_monitoring_data_alert'
+    );
+    const { createLegacyAlertTypes } = await import('./alerts/legacy_alert');
+    const { createDiskUsageAlertType } = await import('./alerts/disk_usage_alert');
+    const { createThreadPoolRejectionsAlertType } = await import(
+      './alerts/thread_pool_rejections_alert'
+    );
+    const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
+
+    const {
+      triggersActionsUi: { alertTypeRegistry },
+    } = plugins;
+    alertTypeRegistry.register(createCpuUsageAlertType());
+    alertTypeRegistry.register(createDiskUsageAlertType());
+    alertTypeRegistry.register(createMemoryUsageAlertType());
+    alertTypeRegistry.register(createMissingMonitoringDataAlertType());
+    alertTypeRegistry.register(
+      createThreadPoolRejectionsAlertType(
+        ALERT_THREAD_POOL_SEARCH_REJECTIONS,
+        ALERT_DETAILS[ALERT_THREAD_POOL_SEARCH_REJECTIONS]
+      )
+    );
+    alertTypeRegistry.register(
+      createThreadPoolRejectionsAlertType(
+        ALERT_THREAD_POOL_WRITE_REJECTIONS,
+        ALERT_DETAILS[ALERT_THREAD_POOL_WRITE_REJECTIONS]
+      )
+    );
+    const legacyAlertTypes = createLegacyAlertTypes();
+    for (const legacyAlertType of legacyAlertTypes) {
+      alertTypeRegistry.register(legacyAlertType);
+    }
+  };
 }

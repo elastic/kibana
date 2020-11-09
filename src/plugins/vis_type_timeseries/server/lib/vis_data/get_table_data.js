@@ -30,7 +30,6 @@ export async function getTableData(req, panel) {
     searchStrategy,
     capabilities,
   } = await req.framework.searchStrategyRegistry.getViableStrategy(req, panelIndexPattern);
-  const searchRequest = searchStrategy.getSearchRequest(req);
   const esQueryConfig = await getEsQueryConfig(req);
   const { indexPatternObject } = await getIndexPatternObject(req, panelIndexPattern);
 
@@ -41,13 +40,18 @@ export async function getTableData(req, panel) {
 
   try {
     const body = buildRequestBody(req, panel, esQueryConfig, indexPatternObject, capabilities);
-    const [resp] = await searchRequest.search([
+    const [resp] = await searchStrategy.search(req, [
       {
         body,
         index: panelIndexPattern,
       },
     ]);
-    const buckets = get(resp, 'aggregations.pivot.buckets', []);
+
+    const buckets = get(
+      resp.rawResponse ? resp.rawResponse : resp,
+      'aggregations.pivot.buckets',
+      []
+    );
 
     return {
       ...meta,

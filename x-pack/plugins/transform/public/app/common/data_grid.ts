@@ -4,12 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import type { PostTransformsPreviewRequestSchema } from '../../../common/api_schemas/transforms';
+
 import { PivotQuery } from './request';
-import { PreviewRequestBody } from './transform';
 
 export const INIT_MAX_COLUMNS = 20;
 
-export const getPivotPreviewDevConsoleStatement = (request: PreviewRequestBody) => {
+export const getPivotPreviewDevConsoleStatement = (request: PostTransformsPreviewRequestSchema) => {
   return `POST _transform/_preview\n${JSON.stringify(request, null, 2)}\n`;
 };
 

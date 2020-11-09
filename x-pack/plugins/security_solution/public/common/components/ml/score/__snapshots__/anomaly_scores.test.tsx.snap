@@ -7,7 +7,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
     responsive={false}
   >
     <AnomalyScore
-      endDate={32503680000000}
+      endDate="3000-01-01T00:00:00.000Z"
       index={0}
       interval="day"
       jobKey="job-1-16.193669439507826-process.name-du"
@@ -79,10 +79,10 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
           "time": 1560664800000,
         }
       }
-      startDate={0}
+      startDate="2020-07-07T08:20:18.966Z"
     />
     <AnomalyScore
-      endDate={32503680000000}
+      endDate="3000-01-01T00:00:00.000Z"
       index={1}
       interval="day"
       jobKey="job-2-16.193669439507826-process.name-ls"
@@ -154,7 +154,7 @@ exports[`anomaly_scores renders correctly against snapshot 1`] = `
           "time": 1560664800000,
         }
       }
-      startDate={0}
+      startDate="2020-07-07T08:20:18.966Z"
     />
   </EuiFlexGroup>
 </Fragment>

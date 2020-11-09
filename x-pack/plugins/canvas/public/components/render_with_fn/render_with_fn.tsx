@@ -5,9 +5,10 @@
  */
 
 import React, { useState, useEffect, useRef, FC, useCallback } from 'react';
-import { useDebounce } from 'react-use';
 
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { isEqual } from 'lodash';
+
+import { useNotifyService } from '../../services';
 import { RenderToDom } from '../render_to_dom';
 import { ErrorStrings } from '../../../i18n';
 import { RendererHandlers } from '../../../types';
@@ -39,8 +40,7 @@ export const RenderWithFn: FC<Props> = ({
   width,
   height,
 }) => {
-  const { services } = useKibana();
-  const onError = services.canvas.notify.error;
+  const { error: onError } = useNotifyService();
 
   const [domNode, setDomNode] = useState<HTMLElement | null>(null);
 
@@ -74,7 +74,7 @@ export const RenderWithFn: FC<Props> = ({
     firstRender.current = true;
   }, [domNode]);
 
-  useDebounce(() => handlers.current.resize({ height, width }), 150, [height, width]);
+  useEffect(() => handlers.current.resize({ height, width }), [height, width]);
 
   useEffect(
     () => () => {
@@ -84,8 +84,12 @@ export const RenderWithFn: FC<Props> = ({
   );
 
   const render = useCallback(() => {
+    if (!isEqual(handlers.current, incomingHandlers)) {
+      handlers.current = incomingHandlers;
+    }
+
     renderFn(renderTarget.current!, config, handlers.current);
-  }, [renderTarget, config, renderFn]);
+  }, [renderTarget, config, renderFn, incomingHandlers]);
 
   useEffect(() => {
     if (!domNode) {

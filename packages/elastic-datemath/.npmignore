@@ -1,6 +1,2 @@
-/src
-/test
 /tsconfig.json
-/.babelrc
-/yarn.lock
 /__tests__

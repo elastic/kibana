@@ -57,7 +57,8 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
       // load metrics explorer data after default view loaded, unless we're not loading a view
       loadData();
     }
-  }, [loadData, currentView, shouldLoadDefault]);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  }, [loadData, shouldLoadDefault]);
 
   return (
     <EuiErrorBoundary>

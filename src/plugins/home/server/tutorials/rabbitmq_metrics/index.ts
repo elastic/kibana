@@ -36,6 +36,7 @@ export function rabbitmqMetricsSpecProvider(context: TutorialContext): TutorialS
     name: i18n.translate('home.tutorials.rabbitmqMetrics.nameTitle', {
       defaultMessage: 'RabbitMQ metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.rabbitmqMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from the RabbitMQ server.',

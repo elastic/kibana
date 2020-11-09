@@ -6,27 +6,21 @@
 
 /* eslint-disable no-console */
 
-import yaml from 'js-yaml';
 import axios, { AxiosRequestConfig, AxiosError } from 'axios';
-import fs from 'fs';
 import { union, difference, once } from 'lodash';
-import path from 'path';
 import { argv } from 'yargs';
 
-const config = yaml.safeLoad(
-  fs.readFileSync(
-    path.join(__filename, '../../../../../../config/kibana.dev.yml'),
-    'utf8'
-  )
-);
-
-const KIBANA_INDEX = config['kibana.index'] as string;
-const TASK_MANAGER_INDEX = config['xpack.task_manager.index'] as string;
-const KIBANA_ROLE_SUFFIX = argv.roleSuffix as string;
+const KIBANA_ROLE_SUFFIX = argv.roleSuffix as string | undefined;
 const ELASTICSEARCH_USERNAME = (argv.username as string) || 'elastic';
-const ELASTICSEARCH_PASSWORD = (argv.password ||
-  config['elasticsearch.password']) as string;
-const KIBANA_BASE_URL = (argv.kibanaUrl as string) || 'http://localhost:5601';
+const ELASTICSEARCH_PASSWORD = argv.password as string | undefined;
+const KIBANA_BASE_URL = argv.kibanaUrl as string | undefined;
+
+console.log({
+  KIBANA_ROLE_SUFFIX,
+  ELASTICSEARCH_USERNAME,
+  ELASTICSEARCH_PASSWORD,
+  KIBANA_BASE_URL,
+});
 
 interface User {
   username: string;
@@ -76,33 +70,26 @@ init().catch((e) => {
 });
 
 async function init() {
-  const version = await getKibanaVersion();
-  console.log(`Connected to Kibana ${version}`);
-
-  const isKibanaLocal = KIBANA_BASE_URL.startsWith('http://localhost');
-
-  // kibana.index must be different from `.kibana`
-  if (isKibanaLocal && KIBANA_INDEX === '.kibana') {
+  if (!ELASTICSEARCH_PASSWORD) {
     console.log(
-      'kibana.dev.yml: Please use a custom "kibana.index". Example: "kibana.index: .kibana-john"'
+      'Please specify credentials for elasticsearch: `--username elastic --password abcd` '
     );
     return;
   }
 
-  if (isKibanaLocal && !KIBANA_INDEX.startsWith('.kibana')) {
+  if (!KIBANA_BASE_URL) {
     console.log(
-      'kibana.dev.yml: "kibana.index" must be prefixed with `.kibana`. Example: "kibana.index: .kibana-john"'
+      'Please specify the url for Kibana: `--kibana-url http://localhost:5601` '
     );
     return;
   }
 
   if (
-    isKibanaLocal &&
-    TASK_MANAGER_INDEX &&
-    !TASK_MANAGER_INDEX.startsWith('.kibana')
+    !KIBANA_BASE_URL.startsWith('https://') &&
+    !KIBANA_BASE_URL.startsWith('http://')
   ) {
     console.log(
-      'kibana.dev.yml: "xpack.task_manager.index" must be prefixed with `.kibana`. Example: "xpack.task_manager.index: .kibana-task-manager-john"'
+      'Kibana url must be prefixed with http(s):// `--kibana-url http://localhost:5601`'
     );
     return;
   }
@@ -114,35 +101,108 @@ async function init() {
     return;
   }
 
+  const version = await getKibanaVersion();
+  console.log(`Connected to Kibana ${version}`);
+
   const isEnabled = await isSecurityEnabled();
   if (!isEnabled) {
     console.log('Security must be enabled!');
     return;
   }
 
+  const APM_READ_ROLE = `apm_read_${KIBANA_ROLE_SUFFIX}`;
   const KIBANA_READ_ROLE = `kibana_read_${KIBANA_ROLE_SUFFIX}`;
   const KIBANA_WRITE_ROLE = `kibana_write_${KIBANA_ROLE_SUFFIX}`;
+  const APM_USER_ROLE = 'apm_user';
 
   // create roles
-  await createRole({ roleName: KIBANA_READ_ROLE, privilege: 'read' });
-  await createRole({ roleName: KIBANA_WRITE_ROLE, privilege: 'all' });
+  await createRole({
+    roleName: APM_READ_ROLE,
+    kibanaPrivileges: { feature: { apm: ['read'] } },
+  });
+  await createRole({
+    roleName: KIBANA_READ_ROLE,
+    kibanaPrivileges: {
+      feature: {
+        // core
+        discover: ['read'],
+        dashboard: ['read'],
+        canvas: ['read'],
+        ml: ['read'],
+        maps: ['read'],
+        graph: ['read'],
+        visualize: ['read'],
 
-  // read/write access to all apps + apm index access
+        // observability
+        logs: ['read'],
+        infrastructure: ['read'],
+        apm: ['read'],
+        uptime: ['read'],
+
+        // security
+        siem: ['read'],
+
+        // management
+        dev_tools: ['read'],
+        advancedSettings: ['read'],
+        indexPatterns: ['read'],
+        savedObjectsManagement: ['read'],
+        stackAlerts: ['read'],
+        ingestManager: ['read'],
+        actions: ['read'],
+      },
+    },
+  });
+  await createRole({
+    roleName: KIBANA_WRITE_ROLE,
+    kibanaPrivileges: {
+      feature: {
+        // core
+        discover: ['all'],
+        dashboard: ['all'],
+        canvas: ['all'],
+        ml: ['all'],
+        maps: ['all'],
+        graph: ['all'],
+        visualize: ['all'],
+
+        // observability
+        logs: ['all'],
+        infrastructure: ['all'],
+        apm: ['all'],
+        uptime: ['all'],
+
+        // security
+        siem: ['all'],
+
+        // management
+        dev_tools: ['all'],
+        advancedSettings: ['all'],
+        indexPatterns: ['all'],
+        savedObjectsManagement: ['all'],
+        stackAlerts: ['all'],
+        ingestManager: ['all'],
+        actions: ['all'],
+      },
+    },
+  });
+
+  // read access only to APM + apm index access
   await createOrUpdateUser({
-    username: 'apm_write_user',
-    roles: ['apm_user', KIBANA_WRITE_ROLE],
+    username: 'apm_read_user',
+    roles: [APM_USER_ROLE, APM_READ_ROLE],
   });
 
   // read access to all apps + apm index access
   await createOrUpdateUser({
-    username: 'apm_read_user',
-    roles: ['apm_user', KIBANA_READ_ROLE],
+    username: 'kibana_read_user',
+    roles: [APM_USER_ROLE, KIBANA_READ_ROLE],
   });
 
-  // read/write access to all apps (no apm index access)
+  // read/write access to all apps + apm index access
   await createOrUpdateUser({
     username: 'kibana_write_user',
-    roles: [KIBANA_WRITE_ROLE],
+    roles: [APM_USER_ROLE, KIBANA_WRITE_ROLE],
   });
 }
 
@@ -159,7 +219,12 @@ async function isSecurityEnabled() {
 
 async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
   const kibanaBasePath = await getKibanaBasePath();
-  const reqOptions = {
+
+  if (!ELASTICSEARCH_PASSWORD) {
+    throw new Error('Missing `--password`');
+  }
+
+  const { data } = await axios.request({
     ...options,
     baseURL: KIBANA_BASE_URL + kibanaBasePath,
     auth: {
@@ -167,18 +232,18 @@ async function callKibana<T>(options: AxiosRequestConfig): Promise<T> {
       password: ELASTICSEARCH_PASSWORD,
     },
     headers: { 'kbn-xsrf': 'true', ...options.headers },
-  };
-
-  const { data } = await axios.request(reqOptions);
+  });
   return data;
 }
 
+type Privilege = [] | ['read'] | ['all'];
+
 async function createRole({
   roleName,
-  privilege,
+  kibanaPrivileges,
 }: {
   roleName: string;
-  privilege: 'read' | 'all';
+  kibanaPrivileges: { base?: Privilege; feature?: Record<string, Privilege> };
 }) {
   const role = await getRole(roleName);
   if (role) {
@@ -192,11 +257,21 @@ async function createRole({
     data: {
       metadata: { version: 1 },
       elasticsearch: { cluster: [], indices: [] },
-      kibana: [{ base: [privilege], feature: {}, spaces: ['*'] }],
+      kibana: [
+        {
+          base: kibanaPrivileges.base ?? [],
+          feature: kibanaPrivileges.feature ?? {},
+          spaces: ['*'],
+        },
+      ],
     },
   });
 
-  console.log(`Created role "${roleName}" with privilege "${privilege}"`);
+  console.log(
+    `Created role "${roleName}" with privilege "${JSON.stringify(
+      kibanaPrivileges
+    )}"`
+  );
 }
 
 async function createOrUpdateUser(newUser: User) {

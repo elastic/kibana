@@ -4,7 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fireEvent, render, wait, RenderResult } from '@testing-library/react';
+import {
+  fireEvent,
+  render,
+  waitFor,
+  RenderResult,
+} from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import * as apmApi from '../../../../../services/rest/createCallApmApi';
@@ -35,9 +40,8 @@ const data = [
 ];
 
 describe('CustomLink', () => {
-  let callApmApiSpy: jest.SpyInstance<any, never>;
   beforeAll(() => {
-    callApmApiSpy = jest.spyOn(apmApi, 'callApmApi').mockReturnValue({});
+    jest.spyOn(apmApi, 'callApmApi').mockReturnValue({});
   });
   afterAll(() => {
     jest.resetAllMocks();
@@ -103,7 +107,7 @@ describe('CustomLink', () => {
       ]);
     });
 
-    it('checks if create custom link button is available and working', async () => {
+    it('checks if create custom link button is available and working', () => {
       const { queryByText, getByText } = render(
         <LicenseContext.Provider value={goldLicense}>
           <MockApmPluginContextWrapper>
@@ -115,7 +119,6 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(getByText('Create custom link'));
       });
-      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
       expect(queryByText('Create link')).toBeInTheDocument();
     });
   });
@@ -133,7 +136,7 @@ describe('CustomLink', () => {
       });
     });
 
-    const openFlyout = async () => {
+    const openFlyout = () => {
       const component = render(
         <LicenseContext.Provider value={goldLicense}>
           <MockApmPluginContextWrapper>
@@ -145,15 +148,12 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(component.getByText('Create custom link'));
       });
-      await wait(() =>
-        expect(component.queryByText('Create link')).toBeInTheDocument()
-      );
-      await wait(() => expect(callApmApiSpy).toHaveBeenCalled());
+      expect(component.queryByText('Create link')).toBeInTheDocument();
       return component;
     };
 
     it('creates a custom link', async () => {
-      const component = await openFlyout();
+      const component = openFlyout();
       const labelInput = component.getByTestId('label');
       act(() => {
         fireEvent.change(labelInput, {
@@ -167,7 +167,7 @@ describe('CustomLink', () => {
         });
       });
       await act(async () => {
-        await wait(() => fireEvent.submit(component.getByText('Save')));
+        fireEvent.submit(component.getByText('Save'));
       });
       expect(saveCustomLinkSpy).toHaveBeenCalledTimes(1);
     });
@@ -186,11 +186,12 @@ describe('CustomLink', () => {
       act(() => {
         fireEvent.click(editButtons[0]);
       });
-      expect(component.queryByText('Create link')).toBeInTheDocument();
+      await waitFor(() =>
+        expect(component.queryByText('Create link')).toBeInTheDocument()
+      );
       await act(async () => {
-        await wait(() => fireEvent.click(component.getByText('Delete')));
+        fireEvent.click(component.getByText('Delete'));
       });
-      expect(callApmApiSpy).toHaveBeenCalled();
       expect(refetch).toHaveBeenCalled();
     });
 
@@ -200,8 +201,8 @@ describe('CustomLink', () => {
           fireEvent.click(component.getByText('Add another filter'));
         }
       };
-      it('checks if add filter button is disabled after all elements have been added', async () => {
-        const component = await openFlyout();
+      it('checks if add filter button is disabled after all elements have been added', () => {
+        const component = openFlyout();
         expect(component.getAllByText('service.name').length).toEqual(1);
         addFilterField(component, 1);
         expect(component.getAllByText('service.name').length).toEqual(2);
@@ -211,8 +212,8 @@ describe('CustomLink', () => {
         addFilterField(component, 2);
         expect(component.getAllByText('service.name').length).toEqual(4);
       });
-      it('removes items already selected', async () => {
-        const component = await openFlyout();
+      it('removes items already selected', () => {
+        const component = openFlyout();
 
         const addFieldAndCheck = (
           fieldName: string,

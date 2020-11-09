@@ -37,6 +37,7 @@ export function elasticsearchLogsSpecProvider(context: TutorialContext): Tutoria
     name: i18n.translate('home.tutorials.elasticsearchLogs.nameTitle', {
       defaultMessage: 'Elasticsearch logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     isBeta: true,
     shortDescription: i18n.translate('home.tutorials.elasticsearchLogs.shortDescription', {
@@ -64,6 +65,7 @@ export function elasticsearchLogsSpecProvider(context: TutorialContext): Tutoria
       },
     },
     completionTimeMinutes: 10,
+    previewImagePath: '/plugins/home/assets/elasticsearch_logs/screenshot.png',
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),

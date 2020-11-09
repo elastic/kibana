@@ -17,20 +17,20 @@
  * under the License.
  */
 
-import React, { memo, BaseSyntheticEvent, KeyboardEvent } from 'react';
+import React, { memo, useState, BaseSyntheticEvent, KeyboardEvent } from 'react';
 import classNames from 'classnames';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
   EuiPopover,
-  keyCodes,
+  keys,
   EuiIcon,
   EuiSpacer,
   EuiButtonEmpty,
   EuiPopoverProps,
   EuiButtonGroup,
-  EuiButtonGroupOption,
+  EuiButtonGroupOptionProps,
 } from '@elastic/eui';
 
 import { legendColors, LegendItem } from './models';
@@ -62,19 +62,20 @@ const VisLegendItemComponent = ({
   setColor,
   getColor,
 }: Props) => {
+  const [idToSelectedMap, setIdToSelectedMap] = useState({});
   /**
    * Keydown listener for a legend entry.
    * This will close the details panel of this legend entry when pressing Escape.
    */
   const onLegendEntryKeydown = (event: KeyboardEvent) => {
-    if (event.keyCode === keyCodes.ESCAPE) {
+    if (event.key === keys.ESCAPE) {
       event.preventDefault();
       event.stopPropagation();
       onSelect(null)();
     }
   };
 
-  const filterOptions: EuiButtonGroupOption[] = [
+  const filterOptions: EuiButtonGroupOptionProps[] = [
     {
       id: 'filterIn',
       label: i18n.translate('visTypeVislib.vislib.legend.filterForValueButtonAriaLabel', {
@@ -96,6 +97,7 @@ const VisLegendItemComponent = ({
   ];
 
   const handleFilterChange = (id: string) => {
+    setIdToSelectedMap({ filterIn: id === 'filterIn', filterOut: id === 'filterOut' });
     onFilter(item, id !== 'filterIn');
   };
 
@@ -112,6 +114,7 @@ const VisLegendItemComponent = ({
         options={filterOptions}
         onChange={handleFilterChange}
         data-test-subj={`legend-${item.label}-filters`}
+        idToSelectedMap={idToSelectedMap}
       />
       <EuiSpacer size="s" />
     </>
@@ -182,6 +185,7 @@ const VisLegendItemComponent = ({
               onClick={setColor(item.label, color)}
               onKeyPress={setColor(item.label, color)}
               className={classNames('visLegend__valueColorPickerDot', {
+                // eslint-disable-next-line @typescript-eslint/naming-convention
                 'visLegend__valueColorPickerDot-isSelected': color === getColor(item.label),
               })}
               style={{ color }}

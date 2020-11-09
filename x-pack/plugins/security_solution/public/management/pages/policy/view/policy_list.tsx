@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useMemo, CSSProperties, useState } from 
 import {
   EuiBasicTable,
   EuiText,
+  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiTableFieldDataColumnType,
@@ -20,8 +21,8 @@ import {
   EuiOverlayMask,
   EuiConfirmModal,
   EuiCallOut,
-  EuiSpacer,
   EuiButton,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
@@ -29,24 +30,25 @@ import { useDispatch } from 'react-redux';
 import { useLocation, useHistory } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
 import styled from 'styled-components';
+import { ApplicationStart } from 'src/core/public';
 import { CreateStructuredSelector } from '../../../../common/store';
 import * as selectors from '../store/policy_list/selectors';
 import { usePolicyListSelector } from './policy_hooks';
 import { PolicyListAction } from '../store/policy_list';
+import { useToasts } from '../../../../common/lib/kibana';
 import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Immutable, PolicyData } from '../../../../../common/endpoint/types';
 import { useNavigateByRouterEventHandler } from '../../../../common/hooks/endpoint/use_navigate_by_router_event_handler';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
-import { ManagementPageView } from '../../../components/management_page_view';
 import { PolicyEmptyState } from '../../../components/management_empty_state';
-import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { FormattedDateAndTime } from '../../../../common/components/endpoint/formatted_date_time';
 import { SecurityPageName } from '../../../../app/types';
 import { useFormatUrl } from '../../../../common/components/link_to';
 import { getPolicyDetailPath, getPoliciesPath } from '../../../common/routing';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
-import { CreatePackageConfigRouteState } from '../../../../../../ingest_manager/public';
+import { CreatePackagePolicyRouteState } from '../../../../../../fleet/public';
 import { MANAGEMENT_APP_ID } from '../../../common/constants';
+import { AdministrationListPage } from '../../../components/administration_list_page';
 
 interface TableChangeCallbackArguments {
   page: { index: number; size: number };
@@ -121,10 +123,11 @@ const PolicyLink: React.FC<{ name: string; route: string; href: string }> = ({
 
 const selector = (createStructuredSelector as CreateStructuredSelector)(selectors);
 export const PolicyList = React.memo(() => {
-  const { services, notifications } = useKibana();
+  const { services } = useKibana<{ application: ApplicationStart }>();
+  const toasts = useToasts();
   const history = useHistory();
   const location = useLocation();
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.management);
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
   const [showDelete, setShowDelete] = useState<boolean>(false);
   const [policyIdToDelete, setPolicyIdToDelete] = useState<string>('');
@@ -143,7 +146,7 @@ export const PolicyList = React.memo(() => {
     endpointPackageVersion,
   } = usePolicyListSelector(selector);
 
-  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackageConfigRouteState>(
+  const handleCreatePolicyClick = useNavigateToAppEventHandler<CreatePackagePolicyRouteState>(
     'ingestManager',
     {
       // We redirect to Ingest's Integaration page if we can't get the package version, and
@@ -164,13 +167,12 @@ export const PolicyList = React.memo(() => {
 
   useEffect(() => {
     if (apiError) {
-      notifications.toasts.danger({
+      toasts.addDanger({
         title: apiError.error,
-        body: apiError.message,
-        toastLifeTimeMs: 10000,
+        text: apiError.message,
       });
     }
-  }, [apiError, dispatch, notifications.toasts]);
+  }, [apiError, dispatch, toasts]);
 
   // Handle showing update statuses
   useEffect(() => {
@@ -178,31 +180,29 @@ export const PolicyList = React.memo(() => {
       if (deleteStatus === true) {
         setPolicyIdToDelete('');
         setShowDelete(false);
-        notifications.toasts.success({
-          toastLifeTimeMs: 10000,
+        toasts.addSuccess({
           title: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteSuccessToast', {
             defaultMessage: 'Success!',
           }),
-          body: (
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails"
-              defaultMessage="Policy has been deleted."
-            />
+          text: i18n.translate(
+            'xpack.securitySolution.endpoint.policyList.deleteSuccessToastDetails',
+            {
+              defaultMessage: 'Policy has been deleted.',
+            }
           ),
         });
       } else {
-        notifications.toasts.danger({
-          toastLifeTimeMs: 10000,
+        toasts.addDanger({
           title: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToast', {
             defaultMessage: 'Failed!',
           }),
-          body: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToastBody', {
+          text: i18n.translate('xpack.securitySolution.endpoint.policyList.deleteFailedToastBody', {
             defaultMessage: 'Failed to delete policy',
           }),
         });
       }
     }
-  }, [notifications.toasts, deleteStatus]);
+  }, [toasts, deleteStatus]);
 
   const paginationSetup = useMemo(() => {
     return {
@@ -222,11 +222,11 @@ export const PolicyList = React.memo(() => {
   );
 
   const handleDeleteOnClick = useCallback(
-    ({ policyId, agentConfigId }: { policyId: string; agentConfigId: string }) => {
+    ({ policyId, agentPolicyId }: { policyId: string; agentPolicyId: string }) => {
       dispatch({
         type: 'userOpenedPolicyListDeleteModal',
         payload: {
-          agentConfigId,
+          agentPolicyId,
         },
       });
       setPolicyIdToDelete(policyId);
@@ -319,9 +319,8 @@ export const PolicyList = React.memo(() => {
         }),
         render(pkg: Immutable<PackageData>) {
           return i18n.translate('xpack.securitySolution.endpoint.policyList.versionField', {
-            defaultMessage: '{title} v{version}',
+            defaultMessage: 'v{version}',
             values: {
-              title: pkg.title,
               version: pkg.version,
             },
           });
@@ -337,27 +336,27 @@ export const PolicyList = React.memo(() => {
               return (
                 <TableRowActions
                   items={[
-                    <EuiContextMenuItem icon="link" key="agentConfigLink">
+                    <EuiContextMenuItem icon="link" key="agentPolicyLink">
                       <LinkToApp
-                        data-test-subj="agentConfigLink"
+                        data-test-subj="agentPolicyLink"
                         appId="ingestManager"
-                        appPath={`#/configs/${item.config_id}`}
-                        href={`${services.application.getUrlForApp('ingestManager')}#/configs/${
-                          item.config_id
+                        appPath={`#/policies/${item.policy_id}`}
+                        href={`${services.application.getUrlForApp('ingestManager')}#/policies/${
+                          item.policy_id
                         }`}
                       >
                         <FormattedMessage
-                          id="xpack.securitySolution.endpoint.policyList.agentConfigAction"
-                          defaultMessage="View Agent Configuration"
+                          id="xpack.securitySolution.endpoint.policyList.agentPolicyAction"
+                          defaultMessage="View Agent Policy"
                         />
                       </LinkToApp>
                     </EuiContextMenuItem>,
                     <DangerEuiContextMenuItem
                       data-test-subj="policyDeleteButton"
                       icon="trash"
-                      key="policyDeletAction"
+                      key="policyDeleteAction"
                       onClick={() => {
-                        handleDeleteOnClick({ agentConfigId: item.config_id, policyId: item.id });
+                        handleDeleteOnClick({ agentPolicyId: item.policy_id, policyId: item.id });
                       }}
                     >
                       <FormattedMessage
@@ -376,6 +375,22 @@ export const PolicyList = React.memo(() => {
     [services.application, handleDeleteOnClick, formatUrl, search]
   );
 
+  const bodyContent = useMemo(() => {
+    return policyItems && policyItems.length > 0 ? (
+      <EuiBasicTable
+        items={[...policyItems]}
+        columns={columns}
+        loading={loading}
+        pagination={paginationSetup}
+        onChange={handleTableChange}
+        data-test-subj="policyTable"
+        hasActions={false}
+      />
+    ) : (
+      <PolicyEmptyState loading={loading} onActionClick={handleCreatePolicyClick} />
+    );
+  }, [policyItems, loading, columns, handleCreatePolicyClick, handleTableChange, paginationSetup]);
+
   return (
     <>
       {showDelete && (
@@ -388,13 +403,22 @@ export const PolicyList = React.memo(() => {
           }}
         />
       )}
-      <ManagementPageView
-        viewType="list"
+      <AdministrationListPage
         data-test-subj="policyListPage"
-        headerLeft={i18n.translate('xpack.securitySolution.endpoint.policyList.viewTitle', {
-          defaultMessage: 'Policies',
-        })}
-        headerRight={
+        beta={false}
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.policyList.pageTitle"
+            defaultMessage="Policies"
+          />
+        }
+        subtitle={
+          <FormattedMessage
+            id="xpack.securitySolution.policyList.pageSubTitle"
+            defaultMessage="View and configure protections"
+          />
+        }
+        actions={
           <EuiButton
             iconType="plusInCircle"
             onClick={handleCreatePolicyClick}
@@ -406,47 +430,21 @@ export const PolicyList = React.memo(() => {
             />
           </EuiButton>
         }
-        bodyHeader={
-          policyItems &&
-          policyItems.length > 0 && (
-            <EuiText color="subdued" data-test-subj="policyTotalCount">
+      >
+        {policyItems && policyItems.length > 0 && (
+          <>
+            <EuiText color="subdued" data-test-subj="policyTotalCount" size="xs">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.policyList.viewTitleTotalCount"
                 defaultMessage="{totalItemCount, plural, one {# Policy} other {# Policies}}"
                 values={{ totalItemCount }}
               />
             </EuiText>
-          )
-        }
-      >
-        {useMemo(() => {
-          return (
-            <>
-              {policyItems && policyItems.length > 0 ? (
-                <EuiBasicTable
-                  items={[...policyItems]}
-                  columns={columns}
-                  loading={loading}
-                  pagination={paginationSetup}
-                  onChange={handleTableChange}
-                  data-test-subj="policyTable"
-                  hasActions={false}
-                />
-              ) : (
-                <PolicyEmptyState loading={loading} onActionClick={handleCreatePolicyClick} />
-              )}
-            </>
-          );
-        }, [
-          policyItems,
-          loading,
-          columns,
-          handleCreatePolicyClick,
-          handleTableChange,
-          paginationSetup,
-        ])}
-        <SpyRoute pageName={SecurityPageName.management} />
-      </ManagementPageView>
+            <EuiHorizontalRule margin="xs" />
+          </>
+        )}
+        {bodyContent}
+      </AdministrationListPage>
     </>
   );
 });

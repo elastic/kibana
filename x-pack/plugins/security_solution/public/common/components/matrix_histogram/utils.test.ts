@@ -13,7 +13,7 @@ import {
 } from './utils';
 import { UpdateDateRange } from '../charts/common';
 import { Position } from '@elastic/charts';
-import { MatrixOverTimeHistogramData } from '../../../graphql/types';
+import { MatrixHistogramData } from '../../../../common/search_strategy';
 import { BarchartConfigs } from './types';
 
 describe('utils', () => {
@@ -22,8 +22,8 @@ describe('utils', () => {
       let configs: BarchartConfigs;
       beforeAll(() => {
         configs = getBarchartConfigs({
-          from: 0,
-          to: 0,
+          from: '2020-07-07T08:20:18.966Z',
+          to: '2020-07-08T08:20:18.966Z',
           onBrushEnd: jest.fn() as UpdateDateRange,
         });
       });
@@ -53,8 +53,8 @@ describe('utils', () => {
       beforeAll(() => {
         configs = getBarchartConfigs({
           chartHeight: mockChartHeight,
-          from: 0,
-          to: 0,
+          from: '2020-07-07T08:20:18.966Z',
+          to: '2020-07-08T08:20:18.966Z',
           onBrushEnd: jest.fn() as UpdateDateRange,
           yTickFormatter: mockYTickFormatter,
           showLegend: false,
@@ -77,7 +77,7 @@ describe('utils', () => {
 
   describe('formatToChartDataItem', () => {
     test('it should format data correctly', () => {
-      const data: [string, MatrixOverTimeHistogramData[]] = [
+      const data: [string, MatrixHistogramData[]] = [
         'g1',
         [
           { x: 1, y: 2, g: 'g1' },

@@ -168,8 +168,8 @@ describe('update timelines', () => {
     });
   });
 
-  describe('Manipulate template timeline', () => {
-    describe('Update an existing template timeline', () => {
+  describe('Manipulate timeline template', () => {
+    describe('Update an existing timeline template', () => {
       beforeEach(async () => {
         jest.doMock('../saved_object', () => {
           return {
@@ -209,25 +209,25 @@ describe('update timelines', () => {
         );
       });
 
-      test('should Update existing template timeline with template timelineId', async () => {
+      test('should Update existing timeline template with timeline templateId', async () => {
         expect(mockGetTemplateTimeline.mock.calls[0][1]).toEqual(
           updateTemplateTimelineWithTimelineId.timeline.templateTimelineId
         );
       });
 
-      test('should Update existing template timeline with timelineId', async () => {
+      test('should Update existing timeline template with timelineId', async () => {
         expect(mockPersistTimeline.mock.calls[0][1]).toEqual(
           updateTemplateTimelineWithTimelineId.timelineId
         );
       });
 
-      test('should Update existing template timeline with timeline version', async () => {
+      test('should Update existing timeline template with timeline version', async () => {
         expect(mockPersistTimeline.mock.calls[0][2]).toEqual(
           updateTemplateTimelineWithTimelineId.version
         );
       });
 
-      test('should Update existing template timeline witn given timeline', async () => {
+      test('should Update existing timeline template witn given timeline', async () => {
         expect(mockPersistTimeline.mock.calls[0][3]).toEqual(
           updateTemplateTimelineWithTimelineId.timeline
         );
@@ -241,7 +241,7 @@ describe('update timelines', () => {
         expect(mockPersistNote).not.toBeCalled();
       });
 
-      test('returns 200 when create template timeline successfully', async () => {
+      test('returns 200 when create timeline template successfully', async () => {
         const response = await server.inject(
           getUpdateTimelinesRequest(updateTemplateTimelineWithTimelineId),
           context
@@ -250,7 +250,7 @@ describe('update timelines', () => {
       });
     });
 
-    describe("Update a template timeline that doesn't exist", () => {
+    describe("Update a timeline template that doesn't exist", () => {
       beforeEach(() => {
         jest.doMock('../saved_object', () => {
           return {

@@ -1,18 +1,82 @@
-def withPostBuildReporting(Closure closure) {
+def withPostBuildReporting(Map params, Closure closure) {
   try {
     closure()
   } finally {
-    catchErrors {
-      runErrorReporter()
+    def parallelWorkspaces = []
+    try {
+      parallelWorkspaces = getParallelWorkspaces()
+    } catch(ex) {
+      print ex
     }
 
-    catchErrors {
-      runbld.junit()
+    if (params.runErrorReporter) {
+      catchErrors {
+        runErrorReporter([pwd()] + parallelWorkspaces)
+      }
     }
 
     catchErrors {
       publishJunit()
     }
+
+    catchErrors {
+      def parallelWorkspace = "${env.WORKSPACE}/parallel"
+      if (fileExists(parallelWorkspace)) {
+        dir(parallelWorkspace) {
+          def workspaceTasks = [:]
+
+          parallelWorkspaces.each { workspaceDir ->
+            workspaceTasks[workspaceDir] = {
+              dir(workspaceDir) {
+                catchErrors {
+                  runbld.junit()
+                }
+              }
+            }
+          }
+
+          if (workspaceTasks) {
+            parallel(workspaceTasks)
+          }
+        }
+      }
+    }
+  }
+}
+
+def getParallelWorkspaces() {
+  def workspaces = []
+  def parallelWorkspace = "${env.WORKSPACE}/parallel"
+  if (fileExists(parallelWorkspace)) {
+    dir(parallelWorkspace) {
+      // findFiles only returns files if you use glob, so look for a file that should be in every valid workspace
+      workspaces = findFiles(glob: '*/kibana/package.json')
+        .collect {
+          // get the paths to the kibana directories for the parallel workspaces
+          return parallelWorkspace + '/' + it.path.tokenize('/').dropRight(1).join('/')
+        }
+    }
+  }
+
+  return workspaces
+}
+
+def notifyOnError(Closure closure) {
+  try {
+    closure()
+  } catch (ex) {
+    // If this is the first failed step, it's likely that the error hasn't propagated up far enough to mark the build as a failure
+    currentBuild.result = 'FAILURE'
+    catchErrors {
+      githubPr.sendComment(false)
+    }
+    catchErrors {
+      // an empty map is a valid config, but is falsey, so let's use .has()
+      if (buildState.has('SLACK_NOTIFICATION_CONFIG')) {
+        slackNotifications.sendFailedBuild(buildState.get('SLACK_NOTIFICATION_CONFIG'))
+      }
+    }
+    throw ex
   }
 }
 
@@ -24,6 +88,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
   def esPort = "61${parallelId}2"
   def esTransportPort = "61${parallelId}3"
   def ingestManagementPackageRegistryPort = "61${parallelId}4"
+  def alertingProxyPort = "61${parallelId}5"
 
   withEnv([
     "CI_GROUP=${parallelId}",
@@ -36,6 +101,7 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
     "TEST_ES_TRANSPORT_PORT=${esTransportPort}",
     "KBN_NP_PLUGINS_BUILT=true",
     "INGEST_MANAGEMENT_PACKAGE_REGISTRY_PORT=${ingestManagementPackageRegistryPort}",
+    "ALERTING_PROXY_PORT=${alertingProxyPort}"
   ] + additionalEnvs) {
     closure()
   }
@@ -43,7 +109,9 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
 
 def functionalTestProcess(String name, Closure closure) {
   return {
-    withFunctionalTestEnv(["JOB=${name}"], closure)
+    notifyOnError {
+      withFunctionalTestEnv(["JOB=${name}"], closure)
+    }
   }
 }
 
@@ -151,13 +219,12 @@ def withGcsArtifactUpload(workerName, closure) {
 def publishJunit() {
   junit(testResults: 'target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
 
-  // junit() is weird about paths for security reasons, so we need to actually change to an upper directory first
   dir(env.WORKSPACE) {
     junit(testResults: 'parallel/*/kibana/target/junit/**/*.xml', allowEmptyResults: true, keepLongStdio: true)
   }
 }
 
-def sendMail() {
+def sendMail(Map params = [:]) {
   // If the build doesn't have a result set by this point, there haven't been any errors and it can be marked as a success
   // The e-mail plugin for the infra e-mail depends upon this being set
   currentBuild.result = currentBuild.result ?: 'SUCCESS'
@@ -166,7 +233,7 @@ def sendMail() {
   if (buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
     node('flyweight') {
       sendInfraMail()
-      sendKibanaMail()
+      sendKibanaMail(params)
     }
   }
 }
@@ -182,12 +249,14 @@ def sendInfraMail() {
   }
 }
 
-def sendKibanaMail() {
+def sendKibanaMail(Map params = [:]) {
+  def config = [to: 'build-kibana@elastic.co'] + params
+
   catchErrors {
     def buildStatus = buildUtils.getBuildStatus()
     if(params.NOTIFY_ON_FAILURE && buildStatus != 'SUCCESS' && buildStatus != 'ABORTED') {
       emailext(
-        to: 'build-kibana@elastic.co',
+        config.to,
         subject: "${env.JOB_NAME} - Build # ${env.BUILD_NUMBER} - ${buildStatus}",
         body: '${SCRIPT,template="groovy-html.template"}',
         mimeType: 'text/html',
@@ -204,40 +273,52 @@ def bash(script, label) {
 }
 
 def doSetup() {
-  retryWithDelay(2, 15) {
-    try {
-      runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
-    } catch (ex) {
+  notifyOnError {
+    retryWithDelay(2, 15) {
       try {
-        // Setup expects this directory to be missing, so we need to remove it before we do a retry
-        bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
-      } finally {
-        throw ex
+        runbld("./test/scripts/jenkins_setup.sh", "Setup Build Environment and Dependencies")
+      } catch (ex) {
+        try {
+          // Setup expects this directory to be missing, so we need to remove it before we do a retry
+          bash("rm -rf ../elasticsearch", "Remove elasticsearch sibling directory, if it exists")
+        } finally {
+          throw ex
+        }
       }
     }
   }
 }
 
 def buildOss(maxWorkers = '') {
-  withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
-    runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+  notifyOnError {
+    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+      runbld("./test/scripts/jenkins_build_kibana.sh", "Build OSS/Default Kibana")
+    }
   }
 }
 
 def buildXpack(maxWorkers = '') {
-  withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
-    runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+  notifyOnError {
+    withEnv(["KBN_OPTIMIZER_MAX_WORKERS=${maxWorkers}"]) {
+      runbld("./test/scripts/jenkins_xpack_build_kibana.sh", "Build X-Pack Kibana")
+    }
   }
 }
 
 def runErrorReporter() {
+  return runErrorReporter([pwd()])
+}
+
+def runErrorReporter(workspaces) {
   def status = buildUtils.getBuildStatus()
   def dryRun = status != "ABORTED" ? "" : "--no-github-update"
+
+  def globs = workspaces.collect { "'${it}/target/junit/**/*.xml'" }.join(" ")
 
   bash(
     """
       source src/dev/ci_setup/setup_env.sh
-      node scripts/report_failed_tests ${dryRun}
+      node scripts/report_failed_tests ${dryRun} ${globs}
     """,
     "Report failed tests, if necessary"
   )
@@ -294,7 +375,9 @@ def withCiTaskQueue(Map options = [:], Closure closure) {
 def scriptTask(description, script) {
   return {
     withFunctionalTestEnv {
-      runbld(script, description)
+      notifyOnError {
+        runbld(script, description)
+      }
     }
   }
 }

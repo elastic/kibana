@@ -5,76 +5,71 @@
  */
 
 import React from 'react';
-import { MockedProvider } from 'react-apollo/test-utils';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
-import { wait } from '../../lib/helpers';
-import { mockIndexPattern, TestProviders } from '../../mock';
+import '../../mock/match_media';
+import { waitFor } from '@testing-library/react';
+import { TestProviders } from '../../mock';
 import { useMountAppended } from '../../utils/use_mount_appended';
 
 import { mockEventViewerResponse } from './mock';
 import { StatefulEventsViewer } from '.';
-import { useFetchIndexPatterns } from '../../../alerts/containers/detection_engine/rules/fetch_index_patterns';
-import { mockBrowserFields } from '../../containers/source/mock';
 import { eventsDefaultModel } from './default_model';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useTimelineEvents } from '../../../timelines/containers';
 
-const mockUseFetchIndexPatterns: jest.Mock = useFetchIndexPatterns as jest.Mock;
-jest.mock('../../../alerts/containers/detection_engine/rules/fetch_index_patterns');
-mockUseFetchIndexPatterns.mockImplementation(() => [
-  {
-    browserFields: mockBrowserFields,
-    indexPatterns: mockIndexPattern,
-  },
-]);
+jest.mock('../../../timelines/containers', () => ({
+  useTimelineEvents: jest.fn(),
+}));
+
+jest.mock('../../components/url_state/normalize_time_range.ts');
 
 const mockUseResizeObserver: jest.Mock = useResizeObserver as jest.Mock;
 jest.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
-const from = 1566943856794;
-const to = 1566857456791;
+const from = '2019-08-27T22:10:56.794Z';
+const to = '2019-08-26T22:10:56.791Z';
 
+const testProps = {
+  defaultModel: eventsDefaultModel,
+  end: to,
+  indexNames: [],
+  id: 'test-stateful-events-viewer',
+  scopeId: SourcererScopeName.default,
+  start: from,
+};
 describe('StatefulEventsViewer', () => {
   const mount = useMountAppended();
+
+  (useTimelineEvents as jest.Mock).mockReturnValue([false, mockEventViewerResponse]);
 
   test('it renders the events viewer', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
 
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find('[data-test-subj="events-viewer-panel"]').first().exists()).toBe(true);
+      expect(wrapper.find('[data-test-subj="events-viewer-panel"]').first().exists()).toBe(true);
+    });
   });
 
   // InspectButtonContainer controls displaying InspectButton components
   test('it renders InspectButtonContainer', async () => {
     const wrapper = mount(
       <TestProviders>
-        <MockedProvider mocks={mockEventViewerResponse} addTypename={false}>
-          <StatefulEventsViewer
-            defaultModel={eventsDefaultModel}
-            end={to}
-            id={'test-stateful-events-viewer'}
-            start={from}
-          />
-        </MockedProvider>
+        <StatefulEventsViewer {...testProps} />
       </TestProviders>
     );
 
-    await wait();
-    wrapper.update();
+    await waitFor(() => {
+      wrapper.update();
 
-    expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);
+      expect(wrapper.find(`InspectButtonContainer`).exists()).toBe(true);
+    });
   });
 });

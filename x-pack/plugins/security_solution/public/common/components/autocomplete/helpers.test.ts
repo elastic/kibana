@@ -3,9 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import moment from 'moment';
+import '../../../common/mock/match_media';
+import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks';
 
-import { getField } from '../../../../../../../src/plugins/data/common/index_patterns/fields/fields.mocks.ts';
-
+import * as i18n from './translations';
 import {
   EXCEPTION_OPERATORS,
   isOperator,
@@ -13,9 +15,11 @@ import {
   existsOperator,
   doesNotExistOperator,
 } from './operators';
-import { getOperators, validateParams, getGenericComboBoxProps } from './helpers';
+import { getOperators, checkEmptyValue, paramIsValid, getGenericComboBoxProps } from './helpers';
 
 describe('helpers', () => {
+  // @ts-ignore
+  moment.suppressDeprecationWarnings = true;
   describe('#getOperators', () => {
     test('it returns "isOperator" if passed in field is "undefined"', () => {
       const operator = getOperators(undefined);
@@ -52,53 +56,120 @@ describe('helpers', () => {
     });
   });
 
-  describe('#validateParams', () => {
-    test('returns true if value is undefined', () => {
-      const isValid = validateParams(undefined, 'date');
+  describe('#checkEmptyValue', () => {
+    test('returns no errors if no field has been selected', () => {
+      const isValid = checkEmptyValue('', undefined, true, false);
 
-      expect(isValid).toBeTruthy();
+      expect(isValid).toBeUndefined();
     });
 
-    test('returns true if value is empty string', () => {
-      const isValid = validateParams('', 'date');
+    test('returns error string if user has touched a required input and left empty', () => {
+      const isValid = checkEmptyValue(undefined, getField('@timestamp'), true, true);
 
-      expect(isValid).toBeTruthy();
+      expect(isValid).toEqual(i18n.FIELD_REQUIRED_ERR);
     });
 
-    test('returns true if type is "date" and value is valid', () => {
-      const isValid = validateParams('1994-11-05T08:15:30-05:00', 'date');
+    test('returns no errors if required input is empty but user has not yet touched it', () => {
+      const isValid = checkEmptyValue(undefined, getField('@timestamp'), true, false);
 
-      expect(isValid).toBeTruthy();
+      expect(isValid).toBeUndefined();
     });
 
-    test('returns false if type is "date" and value is not valid', () => {
-      const isValid = validateParams('1593478826', 'date');
+    test('returns no errors if user has touched an input that is not required and left empty', () => {
+      const isValid = checkEmptyValue(undefined, getField('@timestamp'), false, true);
 
-      expect(isValid).toBeFalsy();
+      expect(isValid).toBeUndefined();
     });
 
-    test('returns true if type is "ip" and value is valid', () => {
-      const isValid = validateParams('126.45.211.34', 'ip');
+    test('returns no errors if user has touched an input that is not required and left empty string', () => {
+      const isValid = checkEmptyValue('', getField('@timestamp'), false, true);
 
-      expect(isValid).toBeTruthy();
+      expect(isValid).toBeUndefined();
     });
 
-    test('returns false if type is "ip" and value is not valid', () => {
-      const isValid = validateParams('hellooo', 'ip');
+    test('returns null if input value is not empty string or undefined', () => {
+      const isValid = checkEmptyValue('hellooo', getField('@timestamp'), false, true);
 
-      expect(isValid).toBeFalsy();
+      expect(isValid).toBeNull();
+    });
+  });
+
+  describe('#paramIsValid', () => {
+    test('returns no errors if no field has been selected', () => {
+      const isValid = paramIsValid('', undefined, true, false);
+
+      expect(isValid).toBeUndefined();
     });
 
-    test('returns true if type is "number" and value is valid', () => {
-      const isValid = validateParams('123', 'number');
+    test('returns error string if user has touched a required input and left empty', () => {
+      const isValid = paramIsValid(undefined, getField('@timestamp'), true, true);
 
-      expect(isValid).toBeTruthy();
+      expect(isValid).toEqual(i18n.FIELD_REQUIRED_ERR);
     });
 
-    test('returns false if type is "number" and value is not valid', () => {
-      const isValid = validateParams('not a number', 'number');
+    test('returns no errors if required input is empty but user has not yet touched it', () => {
+      const isValid = paramIsValid(undefined, getField('@timestamp'), true, false);
 
-      expect(isValid).toBeFalsy();
+      expect(isValid).toBeUndefined();
+    });
+
+    test('returns no errors if user has touched an input that is not required and left empty', () => {
+      const isValid = paramIsValid(undefined, getField('@timestamp'), false, true);
+
+      expect(isValid).toBeUndefined();
+    });
+
+    test('returns no errors if user has touched an input that is not required and left empty string', () => {
+      const isValid = paramIsValid('', getField('@timestamp'), false, true);
+
+      expect(isValid).toBeUndefined();
+    });
+
+    test('returns no errors if field is of type date and value is valid', () => {
+      const isValid = paramIsValid(
+        '1994-11-05T08:15:30-05:00',
+        getField('@timestamp'),
+        false,
+        true
+      );
+
+      expect(isValid).toBeUndefined();
+    });
+
+    test('returns errors if filed is of type date and value is not valid', () => {
+      const isValid = paramIsValid('1593478826', getField('@timestamp'), false, true);
+
+      expect(isValid).toEqual(i18n.DATE_ERR);
+    });
+
+    test('returns no errors if field is of type number and value is an integer', () => {
+      const isValid = paramIsValid('4', getField('bytes'), true, true);
+
+      expect(isValid).toBeUndefined();
+    });
+
+    test('returns no errors if field is of type number and value is a float', () => {
+      const isValid = paramIsValid('4.3', getField('bytes'), true, true);
+
+      expect(isValid).toBeUndefined();
+    });
+
+    test('returns no errors if field is of type number and value is a long', () => {
+      const isValid = paramIsValid('-9223372036854775808', getField('bytes'), true, true);
+
+      expect(isValid).toBeUndefined();
+    });
+
+    test('returns errors if field is of type number and value is "hello"', () => {
+      const isValid = paramIsValid('hello', getField('bytes'), true, true);
+
+      expect(isValid).toEqual(i18n.NUMBER_ERR);
+    });
+
+    test('returns errors if field is of type number and value is "123abc"', () => {
+      const isValid = paramIsValid('123abc', getField('bytes'), true, true);
+
+      expect(isValid).toEqual(i18n.NUMBER_ERR);
     });
   });
 

@@ -14,7 +14,8 @@ import {
   deleteSignalsIndex,
   deleteAllRulesStatuses,
   getSimpleRule,
-  waitFor,
+  waitForRuleSuccess,
+  createRule,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -63,22 +64,9 @@ export default ({ getService }: FtrProviderContext): void => {
        this pops up again elsewhere.
       */
     it('should return a single rule status when a single rule is loaded from a find status with defaults added', async () => {
-      // add a single rule
-      const { body: resBody } = await supertest
-        .post(DETECTION_ENGINE_RULES_URL)
-        .set('kbn-xsrf', 'true')
-        .send(getSimpleRule())
-        .expect(200);
+      const resBody = await createRule(supertest, getSimpleRule());
 
-      // wait for Task Manager to execute the rule and update status
-      await waitFor(async () => {
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_find_statuses`)
-          .set('kbn-xsrf', 'true')
-          .send({ ids: [resBody.id] })
-          .expect(200);
-        return body[resBody.id].current_status?.status === 'succeeded';
-      });
+      await waitForRuleSuccess(supertest, resBody.id);
 
       // query the single rule from _find
       const { body } = await supertest

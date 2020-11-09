@@ -5,6 +5,12 @@
  */
 
 import { KibanaRequest } from 'kibana/server';
+import { PLUGIN_ID } from '../constants/app';
+
+export const apmUserMlCapabilities = {
+  canGetJobs: false,
+  canAccessML: false,
+};
 
 export const userMlCapabilities = {
   canAccessML: false,
@@ -67,18 +73,53 @@ export function getDefaultCapabilities(): MlCapabilities {
 }
 
 export function getPluginPrivileges() {
+  const apmUserMlCapabilitiesKeys = Object.keys(apmUserMlCapabilities);
   const userMlCapabilitiesKeys = Object.keys(userMlCapabilities);
   const adminMlCapabilitiesKeys = Object.keys(adminMlCapabilities);
-  const allMlCapabilities = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+  const allMlCapabilitiesKeys = [...adminMlCapabilitiesKeys, ...userMlCapabilitiesKeys];
+  // TODO: include ML in base privileges for the `8.0` release: https://github.com/elastic/kibana/issues/71422
+  const savedObjects = ['index-pattern', 'dashboard', 'search', 'visualization', 'ml-job'];
+  const privilege = {
+    app: [PLUGIN_ID, 'kibana'],
+    excludeFromBasePrivileges: true,
+    management: {
+      insightsAndAlerting: ['jobsListLink'],
+    },
+    catalogue: [PLUGIN_ID],
+  };
 
   return {
-    user: {
-      ui: userMlCapabilitiesKeys,
-      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
-    },
     admin: {
-      ui: allMlCapabilities,
-      api: allMlCapabilities.map((k) => `ml:${k}`),
+      ...privilege,
+      api: allMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
+      ui: allMlCapabilitiesKeys,
+      savedObject: {
+        all: savedObjects,
+        read: savedObjects,
+      },
+    },
+    user: {
+      ...privilege,
+      api: userMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      catalogue: [PLUGIN_ID],
+      management: { insightsAndAlerting: [] },
+      ui: userMlCapabilitiesKeys,
+      savedObject: {
+        all: [],
+        read: savedObjects,
+      },
+    },
+    apmUser: {
+      excludeFromBasePrivileges: true,
+      app: [],
+      catalogue: [],
+      savedObject: {
+        all: [],
+        read: ['ml-job'],
+      },
+      api: apmUserMlCapabilitiesKeys.map((k) => `ml:${k}`),
+      ui: apmUserMlCapabilitiesKeys,
     },
   };
 }

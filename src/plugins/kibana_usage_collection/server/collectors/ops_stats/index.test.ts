@@ -21,6 +21,7 @@ import { Subject } from 'rxjs';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
+  createCollectorFetchContextMock,
 } from '../../../../usage_collection/server/usage_collection.mock';
 
 import { registerOpsStatsCollector } from './';
@@ -36,9 +37,10 @@ describe('telemetry_ops_stats', () => {
   });
 
   const metrics$ = new Subject<OpsMetrics>();
-  const callCluster = jest.fn();
+  const mockedFetchContext = createCollectorFetchContextMock();
 
   const metric: OpsMetrics = {
+    collected_at: new Date('2020-01-01 01:00:00'),
     process: {
       memory: {
         heap: {
@@ -91,7 +93,7 @@ describe('telemetry_ops_stats', () => {
   test('should return something when there is a metric', async () => {
     metrics$.next(metric);
     expect(collector.isReady()).toBe(true);
-    expect(await collector.fetch(callCluster)).toMatchSnapshot({
+    expect(await collector.fetch(mockedFetchContext)).toMatchSnapshot({
       concurrent_connections: 20,
       os: {
         load: {

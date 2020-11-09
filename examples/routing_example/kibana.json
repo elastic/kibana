@@ -1,0 +1,9 @@
+{
+  "id": "routingExample",
+  "version": "0.0.1",
+  "kibanaVersion": "kibana",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["developerExamples"],
+  "optionalPlugins": []
+}

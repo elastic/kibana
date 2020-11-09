@@ -17,57 +17,68 @@
  * under the License.
  */
 
+import { of } from 'rxjs';
 import es from './index';
-
 import tlConfigFn from '../fixtures/tl_config';
 import * as aggResponse from './lib/agg_response_to_series_list';
 import buildRequest from './lib/build_request';
 import createDateAgg from './lib/create_date_agg';
 import esResponse from '../fixtures/es_response';
 
-import Bluebird from 'bluebird';
 import _ from 'lodash';
-import { expect } from 'chai';
 import sinon from 'sinon';
 import invoke from '../helpers/invoke_series_fn.js';
 import { UI_SETTINGS } from '../../../../data/server';
 
-function stubRequestAndServer(response, indexPatternSavedObjects = []) {
-  return {
-    esDataClient: sinon.stub().returns({
-      callAsCurrentUser: function () {
-        return Bluebird.resolve(response);
-      },
-    }),
-    savedObjectsClient: {
-      find: function () {
-        return Bluebird.resolve({
-          saved_objects: indexPatternSavedObjects,
-        });
-      },
-    },
-  };
-}
-
 describe('es', () => {
   let tlConfig;
 
+  function stubRequestAndServer(response, indexPatternSavedObjects = []) {
+    return {
+      context: { search: { search: jest.fn().mockReturnValue(of(response)) } },
+      savedObjectsClient: {
+        find: function () {
+          return Promise.resolve({
+            saved_objects: indexPatternSavedObjects,
+          });
+        },
+      },
+    };
+  }
+
   describe('seriesList processor', () => {
-    it('throws an error then the index is missing', () => {
+    test('throws an error then the index is missing', () => {
       tlConfig = stubRequestAndServer({
-        _shards: { total: 0 },
+        rawResponse: {
+          _shards: { total: 0 },
+        },
       });
       return invoke(es, [5], tlConfig)
         .then(expect.fail)
         .catch((e) => {
-          expect(e).to.be.an('error');
+          expect(e instanceof Error).toBeTruthy();
         });
     });
 
-    it('returns a seriesList', () => {
-      tlConfig = stubRequestAndServer(esResponse);
+    test('should call data search with sessionId', async () => {
+      tlConfig = {
+        ...stubRequestAndServer({ rawResponse: esResponse }),
+        request: {
+          body: {
+            sessionId: 1,
+          },
+        },
+      };
+
+      await invoke(es, [5], tlConfig);
+
+      expect(tlConfig.context.search.search.mock.calls[0][1]).toHaveProperty('sessionId', 1);
+    });
+
+    test('returns a seriesList', () => {
+      tlConfig = stubRequestAndServer({ rawResponse: esResponse });
       return invoke(es, [5], tlConfig).then((r) => {
-        expect(r.output.type).to.eql('seriesList');
+        expect(r.output.type).toEqual('seriesList');
       });
     });
   });
@@ -85,43 +96,51 @@ describe('es', () => {
       agg = createDateAgg(config, tlConfig);
     });
 
-    it('creates a date_histogram with meta.type of time_buckets', () => {
-      expect(agg.time_buckets.meta.type).to.eql('time_buckets');
-      expect(agg.time_buckets.date_histogram).to.be.an('object');
+    test('creates a date_histogram with meta.type of time_buckets', () => {
+      expect(agg.time_buckets.meta.type).toEqual('time_buckets');
+      expect(typeof agg.time_buckets.date_histogram).toBe('object');
     });
 
-    it('has extended_bounds that match tlConfig', () => {
-      expect(agg.time_buckets.date_histogram.extended_bounds.min).to.equal(tlConfig.time.from);
-      expect(agg.time_buckets.date_histogram.extended_bounds.max).to.equal(tlConfig.time.to);
+    test('has extended_bounds that match tlConfig', () => {
+      expect(agg.time_buckets.date_histogram.extended_bounds.min).toEqual(tlConfig.time.from);
+      expect(agg.time_buckets.date_histogram.extended_bounds.max).toEqual(tlConfig.time.to);
     });
 
-    it('sets the timezone', () => {
-      expect(agg.time_buckets.date_histogram.time_zone).to.equal('Etc/UTC');
+    test('sets the timezone', () => {
+      expect(agg.time_buckets.date_histogram.time_zone).toEqual('Etc/UTC');
     });
 
-    it('sets the field and interval', () => {
-      expect(agg.time_buckets.date_histogram.field).to.equal('@timestamp');
-      expect(agg.time_buckets.date_histogram.interval).to.equal('1y');
+    test('sets the field', () => {
+      expect(agg.time_buckets.date_histogram.field).toEqual('@timestamp');
     });
 
-    it('sets min_doc_count to 0', () => {
-      expect(agg.time_buckets.date_histogram.min_doc_count).to.equal(0);
+    test('sets the interval for calendar_interval correctly', () => {
+      expect(agg.time_buckets.date_histogram).toHaveProperty('calendar_interval', '1y');
+    });
+
+    test('sets the interval for fixed_interval correctly', () => {
+      const a = createDateAgg({ timefield: '@timestamp', interval: '24h' }, tlConfig);
+      expect(a.time_buckets.date_histogram).toHaveProperty('fixed_interval', '24h');
+    });
+
+    test('sets min_doc_count to 0', () => {
+      expect(agg.time_buckets.date_histogram.min_doc_count).toEqual(0);
     });
 
     describe('metric aggs', () => {
       const emptyScriptedFields = [];
 
-      it('adds a metric agg for each metric', () => {
+      test('adds a metric agg for each metric', () => {
         config.metric = ['sum:beer', 'avg:bytes', 'percentiles:bytes'];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
-        expect(agg.time_buckets.aggs['sum(beer)']).to.eql({ sum: { field: 'beer' } });
-        expect(agg.time_buckets.aggs['avg(bytes)']).to.eql({ avg: { field: 'bytes' } });
-        expect(agg.time_buckets.aggs['percentiles(bytes)']).to.eql({
+        expect(agg.time_buckets.aggs['sum(beer)']).toEqual({ sum: { field: 'beer' } });
+        expect(agg.time_buckets.aggs['avg(bytes)']).toEqual({ avg: { field: 'bytes' } });
+        expect(agg.time_buckets.aggs['percentiles(bytes)']).toEqual({
           percentiles: { field: 'bytes' },
         });
       });
 
-      it('adds a scripted metric agg for each scripted metric', () => {
+      test('adds a scripted metric agg for each scripted metric', () => {
         config.metric = ['avg:scriptedBytes'];
         const scriptedFields = [
           {
@@ -131,7 +150,7 @@ describe('es', () => {
           },
         ];
         agg = createDateAgg(config, tlConfig, scriptedFields);
-        expect(agg.time_buckets.aggs['avg(scriptedBytes)']).to.eql({
+        expect(agg.time_buckets.aggs['avg(scriptedBytes)']).toEqual({
           avg: {
             script: {
               source: 'doc["bytes"].value',
@@ -141,11 +160,11 @@ describe('es', () => {
         });
       });
 
-      it('has a special `count` metric that uses a script', () => {
+      test('has a special `count` metric that uses a script', () => {
         config.metric = ['count'];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
-        expect(agg.time_buckets.aggs.count.bucket_script).to.be.an('object');
-        expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).to.eql('_count');
+        expect(typeof agg.time_buckets.aggs.count.bucket_script).toBe('object');
+        expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).toEqual('_count');
       });
     });
   });
@@ -164,43 +183,43 @@ describe('es', () => {
       };
     });
 
-    it('sets the index on the request', () => {
+    test('sets the index on the request', () => {
       config.index = 'beer';
       const request = fn(config, tlConfig, emptyScriptedFields);
 
-      expect(request.index).to.equal('beer');
+      expect(request.params.index).toEqual('beer');
     });
 
-    it('always sets body.size to 0', () => {
+    test('always sets body.size to 0', () => {
       const request = fn(config, tlConfig, emptyScriptedFields);
 
-      expect(request.body.size).to.equal(0);
+      expect(request.params.body.size).toEqual(0);
     });
 
-    it('creates a filters agg that contains each of the queries passed', () => {
+    test('creates a filters agg that contains each of the queries passed', () => {
       config.q = ['foo', 'bar'];
       const request = fn(config, tlConfig, emptyScriptedFields);
 
-      expect(request.body.aggs.q.meta.type).to.equal('split');
+      expect(request.params.body.aggs.q.meta.type).toEqual('split');
 
-      const filters = request.body.aggs.q.filters.filters;
-      expect(filters.foo.query_string.query).to.eql('foo');
-      expect(filters.bar.query_string.query).to.eql('bar');
+      const filters = request.params.body.aggs.q.filters.filters;
+      expect(filters.foo.query_string.query).toEqual('foo');
+      expect(filters.bar.query_string.query).toEqual('bar');
     });
 
     describe('timeouts', () => {
-      it('sets the timeout on the request', () => {
+      test('sets the timeout on the request', () => {
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields, 30000);
 
-        expect(request.timeout).to.equal('30000ms');
+        expect(request.params.timeout).toEqual('30000ms');
       });
 
-      it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
+      test('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields, 0);
 
-        expect(request).to.not.have.property('timeout');
+        expect(request.params).not.toHaveProperty('timeout');
       });
     });
 
@@ -215,20 +234,20 @@ describe('es', () => {
         sandbox.restore();
       });
 
-      it('sets ignore_throttled=true on the request', () => {
+      test('sets ignore_throttled=true on the request', () => {
         config.index = 'beer';
         tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        expect(request.ignore_throttled).to.equal(true);
+        expect(request.params.ignore_throttled).toEqual(true);
       });
 
-      it('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
+      test('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {
         tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = true;
         config.index = 'beer';
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        expect(request.ignore_throttled).to.equal(false);
+        expect(request.params.ignore_throttled).toEqual(false);
       });
     });
 
@@ -259,24 +278,24 @@ describe('es', () => {
         });
       });
 
-      it('adds the contents of body.extended.es.filter to a filter clause of the bool', () => {
+      test('adds the contents of body.extended.es.filter to a filter clause of the bool', () => {
         config.kibana = true;
         const request = fn(config, tlConfig, emptyScriptedFields);
-        const filter = request.body.query.bool.filter.bool;
-        expect(filter.must.length).to.eql(1);
-        expect(filter.must_not.length).to.eql(2);
+        const filter = request.params.body.query.bool.filter.bool;
+        expect(filter.must.length).toEqual(1);
+        expect(filter.must_not.length).toEqual(2);
       });
 
-      it('does not include filters if config.kibana = false', () => {
+      test('does not include filters if config.kibana = false', () => {
         config.kibana = false;
         const request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.body.query.bool.filter).to.eql(undefined);
+        expect(request.params.body.query.bool.filter).toEqual(undefined);
       });
 
-      it('adds a time filter to the bool querys must clause', () => {
+      test('adds a time filter to the bool querys must clause', () => {
         let request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.body.query.bool.must.length).to.eql(1);
-        expect(request.body.query.bool.must[0]).to.eql({
+        expect(request.params.body.query.bool.must.length).toEqual(1);
+        expect(request.params.body.query.bool.must[0]).toEqual({
           range: {
             '@timestamp': {
               format: 'strict_date_optional_time',
@@ -288,27 +307,27 @@ describe('es', () => {
 
         config.kibana = true;
         request = fn(config, tlConfig, emptyScriptedFields);
-        expect(request.body.query.bool.must.length).to.eql(1);
+        expect(request.params.body.query.bool.must.length).toEqual(1);
       });
     });
 
     describe('config.split', () => {
-      it('adds terms aggs, in order, under the filters agg', () => {
+      test('adds terms aggs, in order, under the filters agg', () => {
         config.split = ['beer:5', 'wine:10'];
         const request = fn(config, tlConfig, emptyScriptedFields);
 
-        const aggs = request.body.aggs.q.aggs;
+        const aggs = request.params.body.aggs.q.aggs;
 
-        expect(aggs.beer.meta.type).to.eql('split');
-        expect(aggs.beer.terms.field).to.eql('beer');
-        expect(aggs.beer.terms.size).to.eql(5);
+        expect(aggs.beer.meta.type).toEqual('split');
+        expect(aggs.beer.terms.field).toEqual('beer');
+        expect(aggs.beer.terms.size).toEqual(5);
 
-        expect(aggs.beer.aggs.wine.meta.type).to.eql('split');
-        expect(aggs.beer.aggs.wine.terms.field).to.eql('wine');
-        expect(aggs.beer.aggs.wine.terms.size).to.eql(10);
+        expect(aggs.beer.aggs.wine.meta.type).toEqual('split');
+        expect(aggs.beer.aggs.wine.terms.field).toEqual('wine');
+        expect(aggs.beer.aggs.wine.terms.size).toEqual(10);
       });
 
-      it('adds scripted terms aggs, in order, under the filters agg', () => {
+      test('adds scripted terms aggs, in order, under the filters agg', () => {
         config.split = ['scriptedBeer:5', 'scriptedWine:10'];
         const scriptedFields = [
           {
@@ -324,21 +343,21 @@ describe('es', () => {
         ];
         const request = fn(config, tlConfig, scriptedFields);
 
-        const aggs = request.body.aggs.q.aggs;
+        const aggs = request.params.body.aggs.q.aggs;
 
-        expect(aggs.scriptedBeer.meta.type).to.eql('split');
-        expect(aggs.scriptedBeer.terms.script).to.eql({
+        expect(aggs.scriptedBeer.meta.type).toEqual('split');
+        expect(aggs.scriptedBeer.terms.script).toEqual({
           source: 'doc["beer"].value',
           lang: 'painless',
         });
-        expect(aggs.scriptedBeer.terms.size).to.eql(5);
+        expect(aggs.scriptedBeer.terms.size).toEqual(5);
 
-        expect(aggs.scriptedBeer.aggs.scriptedWine.meta.type).to.eql('split');
-        expect(aggs.scriptedBeer.aggs.scriptedWine.terms.script).to.eql({
+        expect(aggs.scriptedBeer.aggs.scriptedWine.meta.type).toEqual('split');
+        expect(aggs.scriptedBeer.aggs.scriptedWine.terms.script).toEqual({
           source: 'doc["wine"].value',
           lang: 'painless',
         });
-        expect(aggs.scriptedBeer.aggs.scriptedWine.terms.size).to.eql(10);
+        expect(aggs.scriptedBeer.aggs.scriptedWine.terms.size).toEqual(10);
       });
     });
   });
@@ -352,14 +371,14 @@ describe('es', () => {
     describe('timeBucketsToPairs', () => {
       const fn = aggResponse.timeBucketsToPairs;
 
-      it('Should convert a single metric agg', () => {
+      test('Should convert a single metric agg', () => {
         const buckets = [
           { key: 1000, count: { value: 3 } },
           { key: 2000, count: { value: 14 } },
           { key: 3000, count: { value: 15 } },
         ];
 
-        expect(fn(buckets)).to.eql({
+        expect(fn(buckets)).toEqual({
           count: [
             [1000, 3],
             [2000, 14],
@@ -368,14 +387,14 @@ describe('es', () => {
         });
       });
 
-      it('Should convert multiple metric aggs', () => {
+      test('Should convert multiple metric aggs', () => {
         const buckets = [
           { key: 1000, count: { value: 3 }, max: { value: 92 } },
           { key: 2000, count: { value: 14 }, max: { value: 65 } },
           { key: 3000, count: { value: 15 }, max: { value: 35 } },
         ];
 
-        expect(fn(buckets)).to.eql({
+        expect(fn(buckets)).toEqual({
           count: [
             [1000, 3],
             [2000, 14],
@@ -389,7 +408,7 @@ describe('es', () => {
         });
       });
 
-      it('Should convert percentiles metric aggs', () => {
+      test('Should convert percentiles metric aggs', () => {
         const buckets = [
           {
             key: 1000,
@@ -405,7 +424,7 @@ describe('es', () => {
           },
         ];
 
-        expect(fn(buckets)).to.eql({
+        expect(fn(buckets)).toEqual({
           'percentiles:50.0': [
             [1000, NaN],
             [2000, 25],
@@ -430,8 +449,8 @@ describe('es', () => {
       });
     });
 
-    it('should throw an error', () => {
-      expect(aggResponse.default(esResponse.aggregations, config)).to.eql([
+    test('should throw an error', () => {
+      expect(aggResponse.default(esResponse.aggregations, config)).toEqual([
         {
           data: [
             [1000, 264],

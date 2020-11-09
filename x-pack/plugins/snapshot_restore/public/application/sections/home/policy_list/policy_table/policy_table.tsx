@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 
 import { SlmPolicy } from '../../../../../../common/types';
-import { Error } from '../../../../../shared_imports';
+import { UseRequestResponse } from '../../../../../shared_imports';
 import { UIM_POLICY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import {
@@ -30,13 +30,12 @@ import {
   PolicyDeleteProvider,
 } from '../../../../components';
 import { linkToAddPolicy, linkToEditPolicy } from '../../../../services/navigation';
-import { SendRequestResponse } from '../../../../../shared_imports';
 
 import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   policies: SlmPolicy[];
-  reload: () => Promise<SendRequestResponse<any, Error>>;
+  reload: UseRequestResponse['resendRequest'];
   openPolicyDetailsUrl: (name: SlmPolicy['name']) => string;
   onPolicyDeleted: (policiesDeleted: Array<SlmPolicy['name']>) => void;
   onPolicyExecuted: () => void;
@@ -64,7 +63,6 @@ export const PolicyTable: React.FunctionComponent<Props> = ({
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
               <EuiLink
                 {...reactRouterNavigate(history, openPolicyDetailsUrl(name), () =>
                   uiMetricService.trackUiMetric(UIM_POLICY_SHOW_DETAILS_CLICK)

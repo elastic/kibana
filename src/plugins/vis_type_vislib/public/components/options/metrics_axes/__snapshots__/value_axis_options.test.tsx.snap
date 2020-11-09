@@ -102,7 +102,7 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
     value=""
   />
   <LabelOptions
-    axisFilterCheckboxName="yAxisFilterLabelsCheckboxValueAxis-1"
+    axisFilterCheckboxName="yAxisFilterLabelsCheckbox-ValueAxis-1"
     axisLabels={
       Object {
         "color": "black",
@@ -124,6 +124,8 @@ exports[`ValueAxisOptions component should init with the default set of props 1`
     className="visEditorSidebar__section visEditorSidebar__collapsible"
     id="yAxisOptionsAccordionValueAxis-1"
     initialIsOpen={false}
+    isLoading={false}
+    isLoadingMessage={false}
     paddingSize="none"
   >
     <EuiSpacer

@@ -36,8 +36,8 @@ export async function mountApp({
   element,
   setBreadcrumbs,
   I18nContext,
-  ELASTIC_WEBSITE_URL,
-  DOC_LINK_VERSION,
+  ELASTIC_WEBSITE_URL, // eslint-disable-line @typescript-eslint/naming-convention
+  DOC_LINK_VERSION, // eslint-disable-line @typescript-eslint/naming-convention
   history,
   getUrlForApp,
 }: {

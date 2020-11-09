@@ -51,6 +51,15 @@ import {
 const PLUGIN_NAME = '@kbn/optimizer';
 
 /**
+ * sass-loader creates about a 40% overhead on the overall optimizer runtime, and
+ * so this constant is used to indicate to assignBundlesToWorkers() that there is
+ * extra work done in a bundle that has a lot of scss imports. The value is
+ * arbitrary and just intended to weigh the bundles so that they are distributed
+ * across mulitple workers on machines with lots of cores.
+ */
+const EXTRA_SCSS_WORK_UNITS = 100;
+
+/**
  * Create an Observable<CompilerMsg> for a specific child compiler + bundle
  */
 const observeCompiler = (
@@ -101,16 +110,30 @@ const observeCompiler = (
 
       const bundleRefExportIds: string[] = [];
       const referencedFiles = new Set<string>();
-      let normalModuleCount = 0;
+      let moduleCount = 0;
+      let workUnits = stats.compilation.fileDependencies.size;
+
+      if (bundle.manifestPath) {
+        referencedFiles.add(bundle.manifestPath);
+      }
 
       for (const module of stats.compilation.modules) {
         if (isNormalModule(module)) {
-          normalModuleCount += 1;
+          moduleCount += 1;
           const path = getModulePath(module);
           const parsedPath = parseFilePath(path);
 
           if (!parsedPath.dirs.includes('node_modules')) {
             referencedFiles.add(path);
+
+            if (path.endsWith('.scss')) {
+              workUnits += EXTRA_SCSS_WORK_UNITS;
+
+              for (const depPath of module.buildInfo.fileDependencies) {
+                referencedFiles.add(depPath);
+              }
+            }
+
             continue;
           }
 
@@ -127,11 +150,16 @@ const observeCompiler = (
         }
 
         if (module instanceof BundleRefModule) {
-          bundleRefExportIds.push(module.exportId);
+          bundleRefExportIds.push(module.ref.exportId);
           continue;
         }
 
-        if (isExternalModule(module) || isIgnoredModule(module) || isConcatenatedModule(module)) {
+        if (isConcatenatedModule(module)) {
+          moduleCount += module.modules.length;
+          continue;
+        }
+
+        if (isExternalModule(module) || isIgnoredModule(module)) {
           continue;
         }
 
@@ -154,15 +182,16 @@ const observeCompiler = (
       );
 
       bundle.cache.set({
-        bundleRefExportIds,
+        bundleRefExportIds: bundleRefExportIds.sort(ascending((p) => p)),
         optimizerCacheKey: workerConfig.optimizerCacheKey,
         cacheKey: bundle.createCacheKey(files, mtimes),
-        moduleCount: normalModuleCount,
+        moduleCount,
+        workUnits,
         files,
       });
 
       return compilerMsgs.compilerSuccess({
-        moduleCount: normalModuleCount,
+        moduleCount,
       });
     })
   );

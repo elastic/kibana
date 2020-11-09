@@ -8,7 +8,7 @@ import { RawKibanaPrivileges, RoleKibanaPrivilege } from '../../../../common/mod
 import { KibanaPrivilege } from './kibana_privilege';
 import { PrivilegeCollection } from './privilege_collection';
 import { SecuredFeature } from './secured_feature';
-import { Feature } from '../../../../../features/common';
+import { KibanaFeature } from '../../../../../features/common';
 import { isGlobalPrivilegeDefinition } from '../edit_role/privilege_utils';
 
 function toBasePrivilege(entry: [string, string[]]): [string, KibanaPrivilege] {
@@ -29,7 +29,7 @@ export class KibanaPrivileges {
 
   private feature: ReadonlyMap<string, SecuredFeature>;
 
-  constructor(rawKibanaPrivileges: RawKibanaPrivileges, features: Feature[]) {
+  constructor(rawKibanaPrivileges: RawKibanaPrivileges, features: KibanaFeature[]) {
     this.global = recordsToBasePrivilegeMap(rawKibanaPrivileges.global);
     this.spaces = recordsToBasePrivilegeMap(rawKibanaPrivileges.space);
     this.feature = new Map(

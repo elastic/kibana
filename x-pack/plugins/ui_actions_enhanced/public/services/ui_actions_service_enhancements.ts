@@ -5,22 +5,39 @@
  */
 
 import { ActionFactoryRegistry } from '../types';
-import { ActionFactory, ActionFactoryDefinition } from '../dynamic_actions';
+import {
+  ActionFactory,
+  ActionFactoryDefinition,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+  SerializedEvent,
+} from '../dynamic_actions';
 import { DrilldownDefinition } from '../drilldowns';
 import { ILicense } from '../../../licensing/common/types';
+import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
+import { LicensingPluginSetup, LicensingPluginStart } from '../../../licensing/public';
+import { SavedObjectReference } from '../../../../../src/core/types';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
+
+import { DynamicActionsState } from '../../common/types';
+
+export { DynamicActionsState };
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
-  readonly getLicenseInfo: () => ILicense;
+  readonly getLicense: () => ILicense;
+  readonly featureUsageSetup: LicensingPluginSetup['featureUsage'];
+  readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'];
 }
 
-export class UiActionsServiceEnhancements {
+export class UiActionsServiceEnhancements
+  implements PersistableStateDefinition<DynamicActionsState> {
   protected readonly actionFactories: ActionFactoryRegistry;
-  protected readonly getLicenseInfo: () => ILicense;
+  protected readonly deps: Omit<UiActionsServiceEnhancementsParams, 'actionFactories'>;
 
-  constructor({ actionFactories = new Map(), getLicenseInfo }: UiActionsServiceEnhancementsParams) {
+  constructor({ actionFactories = new Map(), ...deps }: UiActionsServiceEnhancementsParams) {
     this.actionFactories = actionFactories;
-    this.getLicenseInfo = getLicenseInfo;
+    this.deps = deps;
   }
 
   /**
@@ -28,22 +45,28 @@ export class UiActionsServiceEnhancements {
    * serialize/deserialize dynamic actions.
    */
   public readonly registerActionFactory = <
-    Config extends object = object,
-    FactoryContext extends object = object,
-    ActionContext extends object = object
+    Config extends BaseActionConfig = BaseActionConfig,
+    SupportedTriggers extends TriggerId = TriggerId,
+    FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+      triggers: SupportedTriggers[];
+    },
+    ActionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
   >(
-    definition: ActionFactoryDefinition<Config, FactoryContext, ActionContext>
+    definition: ActionFactoryDefinition<Config, SupportedTriggers, FactoryContext, ActionContext>
   ) => {
     if (this.actionFactories.has(definition.id)) {
       throw new Error(`ActionFactory [actionFactory.id = ${definition.id}] already registered.`);
     }
 
-    const actionFactory = new ActionFactory<Config, FactoryContext, ActionContext>(
-      definition,
-      this.getLicenseInfo
-    );
+    const actionFactory = new ActionFactory<
+      Config,
+      SupportedTriggers,
+      FactoryContext,
+      ActionContext
+    >(definition, this.deps);
 
     this.actionFactories.set(actionFactory.id, actionFactory as ActionFactory<any, any, any>);
+    this.registerFeatureUsage(definition);
   };
 
   public readonly getActionFactory = (actionFactoryId: string): ActionFactory => {
@@ -54,6 +77,10 @@ export class UiActionsServiceEnhancements {
     }
 
     return actionFactory;
+  };
+
+  public readonly hasActionFactory = (actionFactoryId: string): boolean => {
+    return this.actionFactories.has(actionFactoryId);
   };
 
   /**
@@ -67,10 +94,15 @@ export class UiActionsServiceEnhancements {
    * Convenience method to register a {@link DrilldownDefinition | drilldown}.
    */
   public readonly registerDrilldown = <
-    Config extends object = object,
-    ExecutionContext extends object = object
+    Config extends BaseActionConfig = BaseActionConfig,
+    SupportedTriggers extends TriggerId = TriggerId,
+    FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+      triggers: SupportedTriggers[];
+    },
+    ExecutionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
   >({
     id: factoryId,
+    isBeta,
     order,
     CollectConfig,
     createConfig,
@@ -80,15 +112,32 @@ export class UiActionsServiceEnhancements {
     execute,
     getHref,
     minimalLicense,
-  }: DrilldownDefinition<Config, ExecutionContext>): void => {
-    const actionFactory: ActionFactoryDefinition<Config, object, ExecutionContext> = {
+    licenseFeatureName,
+    supportedTriggers,
+    isCompatible,
+    telemetry,
+    extract,
+    inject,
+  }: DrilldownDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>): void => {
+    const actionFactory: ActionFactoryDefinition<
+      Config,
+      SupportedTriggers,
+      FactoryContext,
+      ExecutionContext
+    > = {
       id: factoryId,
+      isBeta,
       minimalLicense,
+      licenseFeatureName,
       order,
       CollectConfig,
       createConfig,
       isConfigValid,
       getDisplayName,
+      supportedTriggers,
+      telemetry,
+      extract,
+      inject,
       getIconType: () => euiIcon,
       isCompatible: async () => true,
       create: (serializedAction) => ({
@@ -98,9 +147,56 @@ export class UiActionsServiceEnhancements {
         getDisplayName: () => serializedAction.name,
         execute: async (context) => await execute(serializedAction.config, context),
         getHref: getHref ? async (context) => getHref(serializedAction.config, context) : undefined,
+        isCompatible: isCompatible
+          ? async (context) => isCompatible(serializedAction.config, context)
+          : undefined,
       }),
-    } as ActionFactoryDefinition<Config, object, ExecutionContext>;
+    } as ActionFactoryDefinition<Config, SupportedTriggers, FactoryContext, ExecutionContext>;
 
     this.registerActionFactory(actionFactory);
+  };
+
+  private registerFeatureUsage = (definition: ActionFactoryDefinition<any, any, any>): void => {
+    if (!definition.minimalLicense || !definition.licenseFeatureName) return;
+    this.deps.featureUsageSetup.register(definition.licenseFeatureName, definition.minimalLicense);
+  };
+
+  public readonly telemetry = (state: DynamicActionsState, telemetry: Record<string, any> = {}) => {
+    let telemetryData = telemetry;
+    state.events.forEach((event: SerializedEvent) => {
+      if (this.actionFactories.has(event.action.factoryId)) {
+        telemetryData = this.actionFactories
+          .get(event.action.factoryId)!
+          .telemetry(event, telemetryData);
+      }
+    });
+    return telemetryData;
+  };
+
+  public readonly extract = (state: DynamicActionsState) => {
+    const references: SavedObjectReference[] = [];
+    const newState = {
+      events: state.events.map((event: SerializedEvent) => {
+        const result = this.actionFactories.has(event.action.factoryId)
+          ? this.actionFactories.get(event.action.factoryId)!.extract(event)
+          : {
+              state: event,
+              references: [],
+            };
+        references.push(...result.references);
+        return result.state;
+      }),
+    };
+    return { state: newState, references };
+  };
+
+  public readonly inject = (state: DynamicActionsState, references: SavedObjectReference[]) => {
+    return {
+      events: state.events.map((event: SerializedEvent) => {
+        return this.actionFactories.has(event.action.factoryId)
+          ? this.actionFactories.get(event.action.factoryId)!.inject(event, references)
+          : event;
+      }),
+    };
   };
 }

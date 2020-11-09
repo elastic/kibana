@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import {
   getLogSourceStatusRequestParamsRT,
   getLogSourceStatusSuccessResponsePayloadRT,
@@ -31,16 +31,17 @@ export const initLogSourceStatusRoutes = ({
       const { sourceId } = request.params;
 
       try {
-        const logIndicesExist = await sourceStatus.hasLogIndices(requestContext, sourceId);
-        const logIndexFields = logIndicesExist
-          ? await fields.getFields(requestContext, sourceId, InfraIndexType.LOGS)
-          : [];
+        const logIndexStatus = await sourceStatus.getLogIndexStatus(requestContext, sourceId);
+        const logIndexFields =
+          logIndexStatus !== 'missing'
+            ? await fields.getFields(requestContext, sourceId, InfraIndexType.LOGS)
+            : [];
 
         return response.ok({
           body: getLogSourceStatusSuccessResponsePayloadRT.encode({
             data: {
-              logIndicesExist,
               logIndexFields,
+              logIndexStatus,
             },
           }),
         });

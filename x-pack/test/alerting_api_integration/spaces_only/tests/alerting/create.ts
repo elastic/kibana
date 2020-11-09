@@ -6,7 +6,13 @@
 
 import expect from '@kbn/expect';
 import { Spaces } from '../../scenarios';
-import { checkAAD, getUrlPrefix, getTestAlertData, ObjectRemover } from '../../../common/lib';
+import {
+  checkAAD,
+  getUrlPrefix,
+  getTestAlertData,
+  ObjectRemover,
+  getConsumerUnauthorizedErrorMessage,
+} from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -69,7 +75,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         ],
         enabled: true,
         alertTypeId: 'test.noop',
-        consumer: 'bar',
+        consumer: 'alertsFixture',
         params: {},
         createdBy: null,
         schedule: { interval: '1m' },
@@ -81,6 +87,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         mutedInstanceIds: [],
         createdAt: response.body.createdAt,
         updatedAt: response.body.updatedAt,
+        executionStatus: response.body.executionStatus,
       });
       expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
       expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
@@ -99,6 +106,24 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         spaceId: Spaces.space1.id,
         type: 'alert',
         id: response.body.id,
+      });
+    });
+
+    it('should handle create alert request appropriately when consumer is unknown', async () => {
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert`)
+        .set('kbn-xsrf', 'foo')
+        .send(getTestAlertData({ consumer: 'some consumer patrick invented' }));
+
+      expect(response.status).to.eql(403);
+      expect(response.body).to.eql({
+        error: 'Forbidden',
+        message: getConsumerUnauthorizedErrorMessage(
+          'create',
+          'test.noop',
+          'some consumer patrick invented'
+        ),
+        statusCode: 403,
       });
     });
 

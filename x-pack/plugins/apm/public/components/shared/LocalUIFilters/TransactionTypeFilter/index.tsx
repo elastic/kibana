@@ -4,30 +4,31 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React from 'react';
 import {
-  EuiTitle,
   EuiHorizontalRule,
+  EuiRadioGroup,
   EuiSpacer,
-  EuiSelect,
+  EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
 import { useUrlParams } from '../../../../hooks/useUrlParams';
-import { history } from '../../../../utils/history';
 import { fromQuery, toQuery } from '../../Links/url_helpers';
 
 interface Props {
   transactionTypes: string[];
 }
 
-const TransactionTypeFilter = ({ transactionTypes }: Props) => {
+function TransactionTypeFilter({ transactionTypes }: Props) {
+  const history = useHistory();
   const {
     urlParams: { transactionType },
   } = useUrlParams();
 
   const options = transactionTypes.map((type) => ({
-    text: type,
-    value: type,
+    id: type,
+    label: type,
   }));
 
   return (
@@ -42,16 +43,15 @@ const TransactionTypeFilter = ({ transactionTypes }: Props) => {
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" />
       <EuiSpacer size="s" />
-      <EuiSelect
+      <EuiRadioGroup
         options={options}
-        value={transactionType}
-        compressed={true}
-        onChange={(event) => {
+        idSelected={transactionType}
+        onChange={(selectedTransactionType) => {
           const newLocation = {
             ...history.location,
             search: fromQuery({
               ...toQuery(history.location.search),
-              transactionType: event.target.value,
+              transactionType: selectedTransactionType,
             }),
           };
           history.push(newLocation);
@@ -59,6 +59,6 @@ const TransactionTypeFilter = ({ transactionTypes }: Props) => {
       />
     </>
   );
-};
+}
 
 export { TransactionTypeFilter };

@@ -81,10 +81,16 @@ export const createNoteResolvers = (
       return true;
     },
     async persistNote(root, args, { req }) {
-      return libs.note.persistNote(req, args.noteId || null, args.version || null, {
-        ...args.note,
-        timelineId: args.note.timelineId || null,
-      });
+      return libs.note.persistNote(
+        req,
+        args.noteId || null,
+        args.version || null,
+        {
+          ...args.note,
+          timelineId: args.note.timelineId || null,
+        },
+        true
+      );
     },
   },
 });

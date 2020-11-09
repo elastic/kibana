@@ -12,6 +12,11 @@ export interface GetQueryFilterOptions {
   filter: string;
 }
 
+export interface GetQueryFilterWithListIdOptions {
+  filter: string;
+  listId: string;
+}
+
 export interface GetQueryFilterReturn {
   bool: { must: DslQuery[]; filter: Filter[]; should: never[]; must_not: Filter[] };
 }
@@ -29,4 +34,13 @@ export const getQueryFilter = ({ filter }: GetQueryFilterOptions): GetQueryFilte
   };
 
   return esQuery.buildEsQuery(undefined, kqlQuery, [], config);
+};
+
+export const getQueryFilterWithListId = ({
+  filter,
+  listId,
+}: GetQueryFilterWithListIdOptions): GetQueryFilterReturn => {
+  const filterWithListId =
+    filter.trim() !== '' ? `list_id: ${listId} AND (${filter})` : `list_id: ${listId}`;
+  return getQueryFilter({ filter: filterWithListId });
 };

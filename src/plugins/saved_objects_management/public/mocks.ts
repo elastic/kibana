@@ -18,12 +18,14 @@
  */
 
 import { actionServiceMock } from './services/action_service.mock';
+import { columnServiceMock } from './services/column_service.mock';
 import { serviceRegistryMock } from './services/service_registry.mock';
 import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
 
 const createSetupContractMock = (): jest.Mocked<SavedObjectsManagementPluginSetup> => {
   const mock = {
     actions: actionServiceMock.createSetup(),
+    columns: columnServiceMock.createSetup(),
     serviceRegistry: serviceRegistryMock.create(),
   };
   return mock;
@@ -32,6 +34,7 @@ const createSetupContractMock = (): jest.Mocked<SavedObjectsManagementPluginSetu
 const createStartContractMock = (): jest.Mocked<SavedObjectsManagementPluginStart> => {
   const mock = {
     actions: actionServiceMock.createStart(),
+    columns: columnServiceMock.createStart(),
   };
   return mock;
 };

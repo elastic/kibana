@@ -17,23 +17,19 @@
  * under the License.
  */
 
-import { SavedObjectsClientContract, ChromeStart, OverlayStart } from 'kibana/public';
-import { DataPublicPluginStart, IndexPatternsContract } from '../../../../plugins/data/public';
-import { SavedObjectLoader } from '../../../../plugins/saved_objects/public';
+import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectLoader, SavedObjectsStart } from '../../../../plugins/saved_objects/public';
 import { createSavedDashboardClass } from './saved_dashboard';
 
 interface Services {
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: IndexPatternsContract;
-  search: DataPublicPluginStart['search'];
-  chrome: ChromeStart;
-  overlays: OverlayStart;
+  savedObjects: SavedObjectsStart;
 }
 
 /**
  * @param services
  */
-export function createSavedDashboardLoader(services: Services) {
-  const SavedDashboard = createSavedDashboardClass(services);
-  return new SavedObjectLoader(SavedDashboard, services.savedObjectsClient, services.chrome);
+export function createSavedDashboardLoader({ savedObjects, savedObjectsClient }: Services) {
+  const SavedDashboard = createSavedDashboardClass(savedObjects);
+  return new SavedObjectLoader(SavedDashboard, savedObjectsClient);
 }

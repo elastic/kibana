@@ -3,13 +3,11 @@
 exports[`MonitorStatusBar component renders 1`] = `
 Array [
   <div>
-    <div
-      class="euiText euiText--medium"
+    <h2
+      class="euiTitle euiTitle--small"
     >
-      <h2>
-        Up in 2 Locations
-      </h2>
-    </div>
+      Up in 2 locations
+    </h2>
   </div>,
   <div
     class="euiSpacer euiSpacer--l"
@@ -54,7 +52,7 @@ Array [
         target="_blank"
       >
          
-        <div
+        <span
           data-euiicon-type="popout"
         />
       </a>

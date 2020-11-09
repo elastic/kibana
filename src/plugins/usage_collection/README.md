@@ -8,9 +8,13 @@ To integrate with the telemetry services for usage collection of your feature, t
 
 ## Creating and Registering Usage Collector
 
-All you need to provide is a `type` for organizing your fields, `schema` field to define the expected types of usage fields reported, and a `fetch` method for returning your usage data. Then you need to make the Telemetry service aware of the collector by registering it.
+Your usage collector needs to provide 
+- a `type` for organizing your fields, 
+- `schema` field to define the expected types of usage fields reported, 
+- a `fetch` method for returning your usage data, and
+- an `isReady` method (that returns true or false) for letting the telemetry service know if it needs to wait for any asynchronous action (initialization of clients or other services) before calling the `fetch` method. 
 
-### New Platform
+Then you need to make the Telemetry service aware of the collector by registering it.
 
 1. Make sure `usageCollection` is in your optional Plugins:
 
@@ -39,10 +43,9 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
     ```
 
 3. Creating and registering a Usage Collector. Ideally collectors would be defined in a separate directory `server/collectors/register.ts`.
-
     ```ts
     // server/collectors/register.ts
-    import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+    import { UsageCollectionSetup, CollectorFetchContext } from 'src/plugins/usage_collection/server';
     import { APICluster } from 'kibana/server';
 
     interface Usage {
@@ -65,9 +68,11 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
             total: 'long',
           },
         },
-        fetch: async (callCluster: APICluster) => {
+        isReady: () => isCollectorFetchReady, // Method to return `true`/`false` or Promise(`true`/`false`) to confirm if the collector is ready for the `fetch` method to be called.
+        
+        fetch: async (collectorFetchContext: CollectorFetchContext) => {
 
-        // query ES and get some data
+        // query ES or saved objects and get some data
         // summarize the data into a model
         // return the modeled object that includes whatever you want to track
 
@@ -87,10 +92,15 @@ All you need to provide is a `type` for organizing your fields, `schema` field t
 Some background: 
 
 - `MY_USAGE_TYPE` can be any string. It usually matches the plugin name. As a safety mechanism, we double check there are no duplicates at the moment of registering the collector.
-- The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a Kibana Metricbeat module, the Beat calls Kibana's stats API to invoke usage collection.
-In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest`, where the request headers are expected to have read privilege on the entire `.kibana' index.
 
-Note: there will be many cases where you won't need to use the `callCluster` function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS, or use other clients like a custom SavedObjects client. In that case it's up to the plugin to initialize those clients like the example below:
+- `isReady` (added in v7.2.0 and v6.8.4) is a way for a usage collector to announce that some async process must finish first before it can return data in the `fetch` method (e.g. a client needs to ne initialized, or the task manager needs to run a task first). If any collector reports that it is not ready when we call its `fetch` method, we reset a flag to try again and, after a set amount of time, collect data from those collectors that are ready and skip any that are not. This means that if a collector returns `true` for `isReady` and it actually isn't ready to return data, there won't be telemetry data from that collector in that telemetry report (usually once per day). You should consider what it means if your collector doesn't return data in the first few documents when Kibana starts or, if we should wait for any other reason (e.g. the task manager needs to run your task first). If you need to tell telemetry collection to wait, you should implement this function with custom logic. If your `fetch` method can run without the need of any previous dependencies, then you can return true for `isReady` as shown in the example below.
+
+- The `fetch` method needs to support multiple contexts in which it is called. For example, when stats are pulled from a Kibana Metricbeat module, the Beat calls Kibana's stats API to invoke usage collection.
+In this case, the `fetch` method is called as a result of an HTTP API request and `callCluster` wraps `callWithRequest` or `esClient` wraps `asCurrentUser`, where the request headers are expected to have read privilege on the entire `.kibana' index. The `fetch` method also exposes the saved objects client that will have the correct scope when the collectors' `fetch` method is called.
+
+Note: there will be many cases where you won't need to use the `callCluster`, `esClient` or `soClient` function that gets passed in to your `fetch` method at all. Your feature might have an accumulating value in server memory, or read something from the OS.
+
+In the case of using a custom SavedObjects client, it is up to the plugin to initialize the client to save the data and it is strongly recommended to scope that client to the `kibana_system` user.
 
 ```ts
 // server/plugin.ts
@@ -101,7 +111,7 @@ class Plugin {
   private savedObjectsRepository?: ISavedObjectsRepository;
 
   public setup(core: CoreSetup, plugins: { usageCollection?: UsageCollectionSetup }) {
-    registerMyPluginUsageCollector(() => this.savedObjectsRepository, plugins.usageCollection);
+    registerMyPluginUsageCollector(plugins.usageCollection);
   }
 
   public start(core: CoreStart) {
@@ -139,7 +149,15 @@ The `schema` field is a proscribed data model assists with detecting changes in 
 The `AllowedSchemaTypes` is the list of allowed schema types for the usage fields getting reported:
 
 ```
-'keyword', 'text', 'number', 'boolean', 'long', 'date', 'float'
+'long', 'integer', 'short', 'byte', 'double', 'float', 'keyword', 'text', 'boolean', 'date'
+```
+
+### Arrays
+
+If any of your properties is an array, the schema definition must follow the convention below:
+
+```
+{ type: 'array', items: {...mySchemaDefinitionOfTheEntriesInTheArray} }
 ```
 
 ### Example
@@ -147,13 +165,15 @@ The `AllowedSchemaTypes` is the list of allowed schema types for the usage field
 ```ts
 export const myCollector = makeUsageCollector<Usage>({
   type: 'my_working_collector',
-  isReady: () => true,
+  isReady: () => true, // `fetch` doesn't require any validation for dependencies to be met
   fetch() {
     return {
       my_greeting: 'hello',
       some_obj: {
         total: 123,
       },
+      some_array: ['value1', 'value2'],
+      some_array_of_obj: [{total: 123}],
     };
   },
   schema: {
@@ -162,8 +182,20 @@ export const myCollector = makeUsageCollector<Usage>({
     },
     some_obj: {
       total: {
-        type: 'number',
+        type: 'long',
       },
+    },
+    some_array: {
+      type: 'array',
+      items: { type: 'keyword' }    
+    },
+    some_array_of_obj: {
+      type: 'array',
+      items: { 
+        total: {
+          type: 'long',
+        },
+      },   
     },
   },
 });
@@ -179,7 +211,7 @@ New fields added to the telemetry payload currently mean that telemetry cluster 
 
 There are a few ways you can test that your usage collector is working properly.
 
-1. The `/api/stats?extended=true` HTTP API in Kibana (added in 6.4.0) will call the fetch methods of all the registered collectors, and add them to a stats object you can see in a browser or in curl. To test that your usage collector has been registered correctly and that it has the model of data you expected it to have, call that HTTP API manually and you should see a key in the `usage` object of the response named after your usage collector's `type` field. This method tests the Metricbeat scenario described above where `callCluster` wraps `callWithRequest`.
+1. The `/api/stats?extended=true&legacy=true` HTTP API in Kibana (added in 6.4.0) will call the fetch methods of all the registered collectors, and add them to a stats object you can see in a browser or in curl. To test that your usage collector has been registered correctly and that it has the model of data you expected it to have, call that HTTP API manually and you should see a key in the `usage` object of the response named after your usage collector's `type` field. This method tests the Metricbeat scenario described above where `callCluster` wraps `callWithRequest`.
 2. There is a dev script in x-pack that will give a sample of a payload of data that gets sent up to the telemetry cluster for the sending phase of telemetry. Collected data comes from:
     - The `.monitoring-*` indices, when Monitoring is enabled. Monitoring enhances the sent payload of telemetry by producing usage data potentially of multiple clusters that exist in the monitoring data. Monitoring data is time-based, and the time frame of collection is the last 15 minutes.
     - Live-pulled from ES API endpoints. This will get just real-time stats without context of historical data.
@@ -204,6 +236,10 @@ There are a few ways you can test that your usage collector is working properly.
 
 
 # UI Metric app
+
+The UI metrics implementation in its current state is not useful. We are working on improving the implementation to enable teams to use the data to visualize and gather information from what is being reported. Please refer to the telemetry team if you are interested in adding ui_metrics to your plugin.
+
+**Until a better implementation is introduced, please defer from adding any new ui metrics.**
 
 ## Purpose
 
@@ -300,4 +336,9 @@ These saved objects are automatically consumed by the stats API and surfaced und
 By storing these metrics and their counts as key-value pairs, we can add more metrics without having
 to worry about exceeding the 1000-field soft limit in Elasticsearch.
 
-The only caveat is that it makes it harder to consume in Kibana when analysing each entry in the array separately. In the telemetry team we are working to find a solution to this. We are building a new way of reporting telemetry called [Pulse](../../../rfcs/text/0008_pulse.md) that will help on making these UI-Metrics easier to consume.
+The only caveat is that it makes it harder to consume in Kibana when analysing each entry in the array separately. In the telemetry team we are working to find a solution to this.
+
+# Routes registered by this plugin
+
+- `/api/ui_metric/report`: Used by `ui_metrics` usage collector instances to report their usage data to the server
+- `/api/stats`: Get the metrics and usage ([details](./server/routes/stats/README.md))

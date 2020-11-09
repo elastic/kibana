@@ -131,4 +131,28 @@ describe('HeaderSection', () => {
         .exists()
     ).toBe(true);
   });
+
+  test('it renders an inspect button when an `id` is provided', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection id="an id" title="Test title">
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(true);
+  });
+
+  test('it does NOT an inspect button when an `id` is NOT provided', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection title="Test title">
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(false);
+  });
 });

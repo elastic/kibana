@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
-  const PageObjects = getPageObjects(['common', 'infraHome', 'security']);
+  const PageObjects = getPageObjects(['common', 'error', 'infraHome', 'security']);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
   const globalNav = getService('globalNav');
@@ -58,7 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Logs');
+        expect(navLinks).to.eql(['Overview', 'Logs', 'Stack Management']);
       });
 
       describe('logs landing page without data', () => {
@@ -121,7 +121,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows logs navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Logs');
+        expect(navLinks).to.eql(['Overview', 'Logs', 'Stack Management']);
       });
 
       describe('logs landing page without data', () => {
@@ -187,19 +187,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(navLinks).to.not.contain('Logs');
       });
 
-      it(`logs app is inaccessible and Application Not Found message is rendered`, async () => {
-        await PageObjects.common.navigateToApp('infraLogs');
-        await testSubjects.existOrFail('~appNotFoundPageContent');
-        await PageObjects.common.navigateToUrlWithBrowserHistory(
-          'infraLogs',
-          '/stream',
-          undefined,
-          {
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
-        );
-        await testSubjects.existOrFail('~appNotFoundPageContent');
+      it(`logs app is inaccessible and returns a 403`, async () => {
+        await PageObjects.common.navigateToActualUrl('infraLogs', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
+        });
+        PageObjects.error.expectForbidden();
       });
     });
   });

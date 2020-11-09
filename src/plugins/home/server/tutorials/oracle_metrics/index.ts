@@ -36,6 +36,7 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
     name: i18n.translate('home.tutorials.oracleMetrics.nameTitle', {
       defaultMessage: 'oracle metrics',
     }),
+    moduleName,
     isBeta: false,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.oracleMetrics.shortDescription', {
@@ -50,6 +51,7 @@ export function oracleMetricsSpecProvider(context: TutorialContext): TutorialSch
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-' + moduleName + '.html',
       },
     }),
+    euiIconType: '/plugins/home/assets/logos/oracle.svg',
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.oracleMetrics.artifacts.application.label', {

@@ -20,43 +20,15 @@
 import { Observable } from 'rxjs';
 import { Adapters } from '../types';
 import { IContainer } from '../containers/i_container';
-import { ViewMode } from '../types';
 import { TriggerContextMapping } from '../../../../ui_actions/public';
+import { EmbeddableInput } from '../../../common/types';
 
 export interface EmbeddableError {
   name: string;
   message: string;
 }
 
-export interface EmbeddableInput {
-  viewMode?: ViewMode;
-  title?: string;
-  /**
-   * Note this is not a saved object id. It is used to uniquely identify this
-   * Embeddable instance from others (e.g. inside a container).  It's possible to
-   * have two Embeddables where everything else is the same but the id.
-   */
-  id: string;
-  lastReloadRequestTime?: number;
-  hidePanelTitles?: boolean;
-
-  /**
-   * Reserved key for enhancements added by other plugins.
-   */
-  enhancements?: unknown;
-
-  /**
-   * List of action IDs that this embeddable should not render.
-   */
-  disabledActions?: string[];
-
-  /**
-   * Whether this embeddable should not execute triggers.
-   */
-  disableTriggers?: boolean;
-
-  [key: string]: unknown;
-}
+export { EmbeddableInput };
 
 export interface EmbeddableOutput {
   // Whether the embeddable is actively loading.
@@ -112,6 +84,11 @@ export interface IEmbeddable<
    * Extra abilities added to Embeddable by `*_enhanced` plugins.
    */
   enhancements?: object;
+
+  /**
+   * If this embeddable has encountered a fatal error, that error will be stored here
+   **/
+  fatalError?: Error;
 
   /**
    * A functional representation of the isContainer variable, but helpful for typescript to

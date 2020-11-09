@@ -40,24 +40,28 @@ it('parses kibana.json files of plugins found in pluginDirs', () => {
         "extraPublicDirs": Array [],
         "id": "bar",
         "isUiPlugin": true,
+        "manifestPath": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/plugins/bar/kibana.json,
       },
       Object {
         "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/plugins/foo,
         "extraPublicDirs": Array [],
         "id": "foo",
         "isUiPlugin": true,
+        "manifestPath": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/plugins/foo/kibana.json,
       },
       Object {
         "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/plugins/nested/baz,
         "extraPublicDirs": Array [],
         "id": "baz",
         "isUiPlugin": false,
+        "manifestPath": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/plugins/nested/baz/kibana.json,
       },
       Object {
         "directory": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/test_plugins/test_baz,
         "extraPublicDirs": Array [],
         "id": "test_baz",
         "isUiPlugin": false,
+        "manifestPath": <absolute path>/packages/kbn-optimizer/src/__fixtures__/mock_repo/test_plugins/test_baz/kibana.json,
       },
     ]
   `);

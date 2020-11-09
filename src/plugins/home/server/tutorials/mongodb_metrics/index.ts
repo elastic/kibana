@@ -36,6 +36,7 @@ export function mongodbMetricsSpecProvider(context: TutorialContext): TutorialSc
     name: i18n.translate('home.tutorials.mongodbMetrics.nameTitle', {
       defaultMessage: 'MongoDB metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mongodbMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from MongoDB.',

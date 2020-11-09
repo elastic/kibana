@@ -74,7 +74,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
   };
 
   const onSearchComboChange = (value: string) => {
-    if (value) {
+    if (value !== undefined) {
       field.clearErrors(VALIDATION_TYPES.ARRAY_ITEM);
     }
   };
@@ -87,8 +87,8 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
       error={errorMessage}
       isInvalid={isInvalid}
       fullWidth
-      data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
+      {...rest}
     >
       <EuiComboBox
         noSuggestions

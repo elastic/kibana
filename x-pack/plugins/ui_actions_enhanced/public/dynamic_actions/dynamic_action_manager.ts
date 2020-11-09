@@ -18,6 +18,7 @@ import {
 } from '../../../../../src/plugins/kibana_utils/common';
 import { StartContract } from '../plugin';
 import { SerializedAction, SerializedEvent } from './types';
+import { dynamicActionGrouping } from './dynamic_action_grouping';
 
 const compareEvents = (
   a: ReadonlyArray<{ eventId: string }>,
@@ -34,7 +35,13 @@ export interface DynamicActionManagerParams {
   storage: ActionStorage;
   uiActions: Pick<
     StartContract,
-    'registerAction' | 'attachAction' | 'unregisterAction' | 'detachAction' | 'getActionFactory'
+    | 'registerAction'
+    | 'attachAction'
+    | 'unregisterAction'
+    | 'detachAction'
+    | 'hasAction'
+    | 'getActionFactory'
+    | 'hasActionFactory'
   >;
   isCompatible: <C = unknown>(context: C) => Promise<boolean>;
 }
@@ -73,23 +80,44 @@ export class DynamicActionManager {
 
     const actionId = this.generateActionId(eventId);
 
+    if (!uiActions.hasActionFactory(action.factoryId)) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        `Action factory for action [action.factoryId = ${action.factoryId}] doesn't exist. Skipping action [action.name = ${action.name}] revive.`
+      );
+      return;
+    }
+
     const factory = uiActions.getActionFactory(event.action.factoryId);
-    const actionDefinition: ActionDefinition = factory.create(action as SerializedAction<object>);
+    const actionDefinition: ActionDefinition = factory.create(action as SerializedAction);
+
     uiActions.registerAction({
       ...actionDefinition,
       id: actionId,
+      grouping: dynamicActionGrouping,
       isCompatible: async (context) => {
         if (!(await isCompatible(context))) return false;
         if (!actionDefinition.isCompatible) return true;
         return actionDefinition.isCompatible(context);
       },
     });
-    for (const trigger of triggers) uiActions.attachAction(trigger as any, actionId);
+
+    const supportedTriggers = factory.supportedTriggers();
+    for (const trigger of triggers) {
+      if (!supportedTriggers.includes(trigger as any))
+        throw new Error(
+          `Can't attach [action=${actionId}] to [trigger=${trigger}]. Supported triggers for this action: ${supportedTriggers.join(
+            ','
+          )}`
+        );
+      uiActions.attachAction(trigger as any, actionId);
+    }
   }
 
   protected killAction({ eventId, triggers }: SerializedEvent) {
     const { uiActions } = this.params;
     const actionId = this.generateActionId(eventId);
+    if (!uiActions.hasAction(actionId)) return;
 
     for (const trigger of triggers) uiActions.detachAction(trigger as any, actionId);
     uiActions.unregisterAction(actionId);
@@ -147,6 +175,7 @@ export class DynamicActionManager {
     try {
       const events = await this.params.storage.list();
       for (const event of events) this.reviveAction(event);
+
       this.ui.transitions.finishFetching(events);
     } catch (error) {
       this.ui.transitions.failFetching(error instanceof Error ? error : { message: String(error) });
@@ -185,10 +214,7 @@ export class DynamicActionManager {
    * @param action Dynamic action for which to create an event.
    * @param triggers List of triggers to which action should react.
    */
-  public async createEvent(
-    action: SerializedAction<unknown>,
-    triggers: Array<keyof TriggerContextMapping>
-  ) {
+  public async createEvent(action: SerializedAction, triggers: Array<keyof TriggerContextMapping>) {
     const event: SerializedEvent = {
       eventId: uuidv4(),
       triggers,
@@ -221,7 +247,7 @@ export class DynamicActionManager {
    */
   public async updateEvent(
     eventId: string,
-    action: SerializedAction<unknown>,
+    action: SerializedAction,
     triggers: Array<keyof TriggerContextMapping>
   ) {
     const event: SerializedEvent = {

@@ -60,24 +60,26 @@ export function deserializeComponentTemplate(
     _meta,
     _kbnMeta: {
       usedBy: indexTemplatesToUsedBy[name] || [],
+      isManaged: Boolean(_meta?.managed === true),
     },
   };
 
   return deserializedComponentTemplate;
 }
 
-export function deserializeComponenTemplateList(
+export function deserializeComponentTemplateList(
   componentTemplateEs: ComponentTemplateFromEs,
   indexTemplatesEs: TemplateFromEs[]
 ) {
   const { name, component_template: componentTemplate } = componentTemplateEs;
-  const { template } = componentTemplate;
+  const { template, _meta } = componentTemplate;
 
   const indexTemplatesToUsedBy = getIndexTemplatesToUsedBy(indexTemplatesEs);
 
   const componentTemplateListItem: ComponentTemplateListItem = {
     name,
     usedBy: indexTemplatesToUsedBy[name] || [],
+    isManaged: Boolean(_meta?.managed === true),
     hasSettings: hasEntries(template.settings),
     hasMappings: hasEntries(template.mappings),
     hasAliases: hasEntries(template.aliases),

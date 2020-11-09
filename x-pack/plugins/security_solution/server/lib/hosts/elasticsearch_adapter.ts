@@ -4,14 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, getOr, has, head, set } from 'lodash/fp';
+import { set } from '@elastic/safer-lodash-set/fp';
+import { get, getOr, has, head } from 'lodash/fp';
 
-import { FirstLastSeenHost, HostItem, HostsData, HostsEdges } from '../../graphql/types';
+import {
+  EndpointFields,
+  FirstLastSeenHost,
+  HostItem,
+  HostsData,
+  HostsEdges,
+} from '../../graphql/types';
 import { inspectStringifyObject } from '../../utils/build_query';
 import { hostFieldsMap } from '../ecs_fields';
 import { FrameworkAdapter, FrameworkRequest } from '../framework';
 import { TermAggregation } from '../types';
-
 import { buildHostOverviewQuery } from './query.detail_host.dsl';
 import { buildHostsQuery } from './query.hosts.dsl';
 import { buildLastFirstSeenHostQuery } from './query.last_first_seen_host.dsl';
@@ -19,17 +25,22 @@ import {
   HostAggEsData,
   HostAggEsItem,
   HostBuckets,
-  HostOverviewRequestOptions,
   HostEsData,
   HostLastFirstSeenRequestOptions,
+  HostOverviewRequestOptions,
   HostsAdapter,
   HostsRequestOptions,
   HostValue,
 } from './types';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../common/constants';
+import { EndpointAppContext } from '../../endpoint/types';
+import { getHostData } from '../../endpoint/routes/metadata/handlers';
 
 export class ElasticsearchHostsAdapter implements HostsAdapter {
-  constructor(private readonly framework: FrameworkAdapter) {}
+  constructor(
+    private readonly framework: FrameworkAdapter,
+    private readonly endpointContext: EndpointAppContext
+  ) {}
 
   public async getHosts(
     request: FrameworkRequest,
@@ -83,8 +94,47 @@ export class ElasticsearchHostsAdapter implements HostsAdapter {
       dsl: [inspectStringifyObject(dsl)],
       response: [inspectStringifyObject(response)],
     };
+    const formattedHostItem = formatHostItem(options.fields, aggregations);
+    const ident = // endpoint-generated ID, NOT elastic-agent-id
+      formattedHostItem.agent && formattedHostItem.agent.id
+        ? Array.isArray(formattedHostItem.agent.id)
+          ? formattedHostItem.agent.id[0]
+          : formattedHostItem.agent.id
+        : null;
+    const endpoint: EndpointFields | null = await this.getHostEndpoint(request, ident);
+    return { inspect, _id: options.hostName, ...formattedHostItem, endpoint };
+  }
 
-    return { inspect, _id: options.hostName, ...formatHostItem(options.fields, aggregations) };
+  public async getHostEndpoint(
+    request: FrameworkRequest,
+    id: string | null
+  ): Promise<EndpointFields | null> {
+    const logger = this.endpointContext.logFactory.get('metadata');
+    try {
+      const agentService = this.endpointContext.service.getAgentService();
+      if (agentService === undefined) {
+        throw new Error('agentService not available');
+      }
+      const metadataRequestContext = {
+        endpointAppContextService: this.endpointContext.service,
+        logger,
+        requestHandlerContext: request.context,
+      };
+      const endpointData =
+        id != null && metadataRequestContext.endpointAppContextService.getAgentService() != null
+          ? await getHostData(metadataRequestContext, id)
+          : null;
+      return endpointData != null && endpointData.metadata
+        ? {
+            endpointPolicy: endpointData.metadata.Endpoint.policy.applied.name,
+            policyStatus: endpointData.metadata.Endpoint.policy.applied.status,
+            sensorVersion: endpointData.metadata.agent.version,
+          }
+        : null;
+    } catch (err) {
+      logger.warn(JSON.stringify(err, null, 2));
+      return null;
+    }
   }
 
   public async getHostFirstLastSeen(

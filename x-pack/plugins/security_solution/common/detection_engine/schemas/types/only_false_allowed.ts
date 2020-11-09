@@ -13,7 +13,7 @@ import { Either } from 'fp-ts/lib/Either';
  *   - If true is sent in then this will return an error
  *   - If false is sent in then this will allow it only false
  */
-export const OnlyFalseAllowed = new t.Type<boolean, boolean, unknown>(
+export const OnlyFalseAllowed = new t.Type<boolean, boolean | undefined, unknown>(
   'DefaultBooleanTrue',
   t.boolean.is,
   (input, context): Either<t.Errors, boolean> => {
@@ -29,5 +29,3 @@ export const OnlyFalseAllowed = new t.Type<boolean, boolean, unknown>(
   },
   t.identity
 );
-
-export type OnlyFalseAllowedC = typeof OnlyFalseAllowed;

@@ -4,6 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const load: SnapshotModel = { load: { avg: { field: 'system.load.5' } } };
+export const load: MetricsUIAggregation = { load: { avg: { field: 'system.load.5' } } };

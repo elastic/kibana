@@ -36,6 +36,7 @@ export function googlecloudMetricsSpecProvider(context: TutorialContext): Tutori
     name: i18n.translate('home.tutorials.googlecloudMetrics.nameTitle', {
       defaultMessage: 'Google Cloud metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.googlecloudMetrics.shortDescription', {
       defaultMessage:

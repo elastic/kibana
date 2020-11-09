@@ -49,7 +49,7 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                   size="xxl"
                   type="securityApp"
                 >
-                  <div
+                  <span
                     color="subdued"
                     data-euiicon-type="securityApp"
                     size="xxl"
@@ -68,7 +68,9 @@ exports[`<RolesGridPage /> renders permission denied if required 1`] = `
                   <span
                     className="euiTextColor euiTextColor--subdued"
                   >
-                    <EuiTitle>
+                    <EuiTitle
+                      size="m"
+                    >
                       <h2
                         className="euiTitle euiTitle--medium"
                       >

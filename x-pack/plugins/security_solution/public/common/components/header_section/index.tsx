@@ -13,12 +13,18 @@ import { Subtitle } from '../subtitle';
 
 interface HeaderProps {
   border?: boolean;
+  height?: number;
 }
 
 const Header = styled.header.attrs(() => ({
   className: 'siemHeaderSection',
 }))<HeaderProps>`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
+  ${({ height }) =>
+    height &&
+    css`
+      height: ${height}px;
+    `}
+  margin-bottom: ${({ height, theme }) => (height ? 0 : theme.eui.euiSizeL)};
   user-select: text;
 
   ${({ border }) =>
@@ -32,27 +38,31 @@ Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
   children?: React.ReactNode;
+  height?: number;
   id?: string;
   split?: boolean;
   subtitle?: string | React.ReactNode;
   title: string | React.ReactNode;
   titleSize?: EuiTitleSize;
   tooltip?: string;
+  growLeftSplit?: boolean;
 }
 
 const HeaderSectionComponent: React.FC<HeaderSectionProps> = ({
   border,
   children,
+  height,
   id,
   split,
   subtitle,
   title,
   titleSize = 'm',
   tooltip,
+  growLeftSplit = true,
 }) => (
-  <Header border={border}>
+  <Header data-test-subj="header-section" border={border} height={height}>
     <EuiFlexGroup alignItems="center">
-      <EuiFlexItem>
+      <EuiFlexItem grow={growLeftSplit}>
         <EuiFlexGroup alignItems="center" responsive={false}>
           <EuiFlexItem>
             <EuiTitle size={titleSize}>

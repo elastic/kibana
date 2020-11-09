@@ -9,10 +9,16 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'remoteClusters']);
+  const security = getService('security');
 
   describe('Home page', function () {
     before(async () => {
+      await security.testUser.setRoles(['global_ccr_role']);
       await pageObjects.common.navigateToApp('remoteClusters');
+    });
+
+    after(async () => {
+      await security.testUser.restoreDefaults();
     });
 
     it('Loads the app', async () => {

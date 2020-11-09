@@ -56,4 +56,26 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       );
     });
   });
+
+  describe('handles time', () => {
+    const end = new Date('2020-07-08T22:07:27.235Z').valueOf();
+    const timerange = {
+      end,
+      start: end - 5 * 60 * 1000,
+    };
+    const searchBody = getElasticsearchMetricQuery(
+      expressionParams,
+      timefield,
+      undefined,
+      undefined,
+      timerange
+    );
+    test('by rounding timestamps to the nearest timeUnit', () => {
+      const rangeFilter = searchBody.query.bool.filter.find((filter) =>
+        filter.hasOwnProperty('range')
+      )?.range[timefield];
+      expect(rangeFilter?.lte).toBe(1594246020000);
+      expect(rangeFilter?.gte).toBe(1594245720000);
+    });
+  });
 });

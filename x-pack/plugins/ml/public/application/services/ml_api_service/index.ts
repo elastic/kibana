@@ -14,6 +14,7 @@ import { filters } from './filters';
 import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
+import { savedObjectsApiProvider } from './saved_objects';
 import { MlServerDefaults, MlServerLimits } from '../../../../common/types/ml_server_info';
 
 import { MlCapabilitiesResponse } from '../../../../common/types/capabilities';
@@ -27,7 +28,10 @@ import {
   ModelSnapshot,
 } from '../../../../common/types/anomaly_detection_jobs';
 import { ES_AGGREGATION } from '../../../../common/constants/aggregation_types';
-import { FieldRequestConfig } from '../../datavisualizer/index_based/common';
+import {
+  FieldHistogramRequestConfig,
+  FieldRequestConfig,
+} from '../../datavisualizer/index_based/common';
 import { DataRecognizerConfigResponse, Module } from '../../../../common/types/modules';
 import { getHttp } from '../../util/dependency_cache';
 
@@ -59,7 +63,7 @@ export interface BucketSpanEstimatorResponse {
   name: string;
   ms: number;
   error?: boolean;
-  message?: { msg: string } | string;
+  message?: string;
 }
 
 export interface GetTimeFieldRangeResponse {
@@ -369,6 +373,16 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
     },
 
+    checkIndexExists({ index }: { index: string }) {
+      const body = JSON.stringify({ index });
+
+      return httpService.http<{ exists: boolean }>({
+        path: `${basePath()}/index_exists`,
+        method: 'POST',
+        body,
+      });
+    },
+
     getFieldCaps({ index, fields }: { index: string; fields: string[] }) {
       const body = JSON.stringify({
         ...(index !== undefined ? { index } : {}),
@@ -472,7 +486,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       earliest?: number;
       latest?: number;
       samplerShardSize?: number;
-      interval?: string;
+      interval?: number;
       fields?: FieldRequestConfig[];
       maxExamples?: number;
     }) {
@@ -489,6 +503,30 @@ export function mlApiServicesProvider(httpService: HttpService) {
 
       return httpService.http<any>({
         path: `${basePath()}/data_visualizer/get_field_stats/${indexPatternTitle}`,
+        method: 'POST',
+        body,
+      });
+    },
+
+    getVisualizerFieldHistograms({
+      indexPatternTitle,
+      query,
+      fields,
+      samplerShardSize,
+    }: {
+      indexPatternTitle: string;
+      query: any;
+      fields: FieldHistogramRequestConfig[];
+      samplerShardSize?: number;
+    }) {
+      const body = JSON.stringify({
+        query,
+        fields,
+        samplerShardSize,
+      });
+
+      return httpService.http<any>({
+        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPatternTitle}`,
         method: 'POST',
         body,
       });
@@ -728,5 +766,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     results: resultsApiProvider(httpService),
     jobs: jobsApiProvider(httpService),
     fileDatavisualizer,
+    savedObjects: savedObjectsApiProvider(httpService),
   };
 }

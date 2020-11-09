@@ -3,35 +3,378 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { flatten, merge, sortBy, sum } from 'lodash';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { AGENT_NAMES } from '../../../../common/agent_name';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { ValuesType } from 'utility-types';
+import { flatten, merge, sortBy, sum, pickBy } from 'lodash';
+import { AggregationOptionsByType } from '../../../../typings/elasticsearch/aggregations';
+import { ProcessorEvent } from '../../../../common/processor_event';
+import { TelemetryTask } from '.';
+import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
   AGENT_NAME,
   AGENT_VERSION,
+  CLIENT_GEO_COUNTRY_ISO_CODE,
+  CLOUD_AVAILABILITY_ZONE,
+  CLOUD_PROVIDER,
+  CLOUD_REGION,
+  CONTAINER_ID,
   ERROR_GROUP_ID,
-  TRANSACTION_NAME,
+  HOST_NAME,
+  OBSERVER_HOSTNAME,
   PARENT_ID,
+  POD_NAME,
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
   SERVICE_FRAMEWORK_NAME,
   SERVICE_FRAMEWORK_VERSION,
   SERVICE_LANGUAGE_NAME,
   SERVICE_LANGUAGE_VERSION,
+  SERVICE_NAME,
   SERVICE_RUNTIME_NAME,
   SERVICE_RUNTIME_VERSION,
+  SERVICE_VERSION,
+  TRANSACTION_NAME,
+  TRANSACTION_RESULT,
+  TRANSACTION_TYPE,
   USER_AGENT_ORIGINAL,
 } from '../../../../common/elasticsearch_fieldnames';
-import { Span } from '../../../../typings/es_schemas/ui/span';
 import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-import { TelemetryTask } from '.';
+import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { Span } from '../../../../typings/es_schemas/ui/span';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { APMTelemetry } from '../types';
 
 const TIME_RANGES = ['1d', 'all'] as const;
 type TimeRange = typeof TIME_RANGES[number];
 
+const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
+const timeout = '5m';
+
 export const tasks: TelemetryTask[] = [
+  {
+    name: 'aggregated_transactions',
+    // Record the number of metric documents we can expect in different scenarios. We simulate this by requesting data for 1m,
+    // adding a composite aggregation on a number of fields and counting the number of buckets. The resulting count is an
+    // approximation of the amount of metric documents that will be created. We record both the expected metric document count plus
+    // the transaction count for that time range.
+    executor: async ({ indices, search }) => {
+      async function getBucketCountFromPaginatedQuery(
+        sources: Array<
+          ValuesType<AggregationOptionsByType['composite']['sources']>[string]
+        >,
+        prevResult?: {
+          transaction_count: number;
+          expected_metric_document_count: number;
+        },
+        after?: any
+      ): Promise<{
+        transaction_count: number;
+        expected_metric_document_count: number;
+        ratio: number;
+      }> {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        let { expected_metric_document_count } = prevResult ?? {
+          transaction_count: 0,
+          expected_metric_document_count: 0,
+        };
+
+        const params = {
+          index: [indices['apm_oss.transactionIndices']],
+          body: {
+            size: 0,
+            timeout,
+            query: {
+              bool: {
+                filter: [
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+                  { range: { '@timestamp': { gte: start, lt: end } } },
+                ],
+              },
+            },
+            track_total_hits: true,
+            aggs: {
+              transaction_metric_groups: {
+                composite: {
+                  ...(after ? { after } : {}),
+                  size: 10000,
+                  sources: sources.map((source, index) => {
+                    return {
+                      [index]: source,
+                    };
+                  }),
+                },
+              },
+            },
+          },
+        };
+
+        const result = await search(params);
+
+        let nextAfter: any;
+
+        if (result.aggregations) {
+          nextAfter = result.aggregations.transaction_metric_groups.after_key;
+          expected_metric_document_count +=
+            result.aggregations.transaction_metric_groups.buckets.length;
+        }
+
+        if (nextAfter) {
+          return await getBucketCountFromPaginatedQuery(
+            sources,
+            {
+              expected_metric_document_count,
+              transaction_count: result.hits.total.value,
+            },
+            nextAfter
+          );
+        }
+
+        return {
+          expected_metric_document_count,
+          transaction_count: result.hits.total.value,
+          ratio: expected_metric_document_count / result.hits.total.value,
+        };
+      }
+
+      // fixed date range for reliable results
+      const lastTransaction = (
+        await search({
+          index: indices['apm_oss.transactionIndices'],
+          body: {
+            query: {
+              bool: {
+                filter: [
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
+                ],
+              },
+            },
+            size: 1,
+            sort: {
+              '@timestamp': 'desc',
+            },
+          },
+        })
+      ).hits.hits[0] as { _source: { '@timestamp': string } };
+
+      if (!lastTransaction) {
+        return {};
+      }
+
+      const end =
+        new Date(lastTransaction._source['@timestamp']).getTime() -
+        5 * 60 * 1000;
+
+      const start = end - 60 * 1000;
+
+      const simpleTermFields = [
+        TRANSACTION_NAME,
+        TRANSACTION_RESULT,
+        TRANSACTION_TYPE,
+        AGENT_NAME,
+        SERVICE_ENVIRONMENT,
+        SERVICE_VERSION,
+        HOST_NAME,
+        CONTAINER_ID,
+        POD_NAME,
+      ].map((field) => ({ terms: { field, missing_bucket: true } }));
+
+      const observerHostname = {
+        terms: { field: OBSERVER_HOSTNAME, missing_bucket: true },
+      };
+
+      const baseFields = [
+        ...simpleTermFields,
+        // user_agent.name only for page-load transactions
+        {
+          terms: {
+            script: `
+              if (doc['transaction.type'].value == 'page-load' && doc['user_agent.name'].size() > 0) {
+                return doc['user_agent.name'].value;
+              }
+
+              return null;
+            `,
+            missing_bucket: true,
+          },
+        },
+        // transaction.root
+        {
+          terms: {
+            script: `return doc['parent.id'].size() == 0`,
+            missing_bucket: true,
+          },
+        },
+      ];
+
+      const results = {
+        current_implementation: await getBucketCountFromPaginatedQuery([
+          ...baseFields,
+          observerHostname,
+        ]),
+        with_country: await getBucketCountFromPaginatedQuery([
+          ...baseFields,
+          observerHostname,
+          {
+            terms: {
+              script: `
+                if (doc['transaction.type'].value == 'page-load' && doc['client.geo.country_iso_code'].size() > 0) {
+                  return doc['client.geo.country_iso_code'].value;
+                }
+                return null;
+              `,
+              missing_bucket: true,
+            },
+          },
+        ]),
+        no_observer_name: await getBucketCountFromPaginatedQuery(baseFields),
+      };
+
+      return {
+        aggregated_transactions: results,
+      };
+    },
+  },
+  {
+    name: 'cloud',
+    executor: async ({ indices, search }) => {
+      function getBucketKeys({
+        buckets,
+      }: {
+        buckets: Array<{
+          doc_count: number;
+          key: string | number;
+        }>;
+      }) {
+        return buckets.map((bucket) => bucket.key as string);
+      }
+
+      const az = 'availability_zone';
+      const region = 'region';
+      const provider = 'provider';
+
+      const response = await search({
+        index: [
+          indices['apm_oss.errorIndices'],
+          indices['apm_oss.metricsIndices'],
+          indices['apm_oss.spanIndices'],
+          indices['apm_oss.transactionIndices'],
+        ],
+        body: {
+          size: 0,
+          timeout,
+          aggs: {
+            [az]: {
+              terms: {
+                field: CLOUD_AVAILABILITY_ZONE,
+              },
+            },
+            [provider]: {
+              terms: {
+                field: CLOUD_PROVIDER,
+              },
+            },
+            [region]: {
+              terms: {
+                field: CLOUD_REGION,
+              },
+            },
+          },
+        },
+      });
+
+      const { aggregations } = response;
+
+      if (!aggregations) {
+        return { cloud: { [az]: [], [provider]: [], [region]: [] } };
+      }
+      const cloud = {
+        [az]: getBucketKeys(aggregations[az]),
+        [provider]: getBucketKeys(aggregations[provider]),
+        [region]: getBucketKeys(aggregations[region]),
+      };
+      return { cloud };
+    },
+  },
+  {
+    name: 'environments',
+    executor: async ({ indices, search }) => {
+      const response = await search({
+        index: [indices['apm_oss.transactionIndices']],
+        body: {
+          query: {
+            bool: {
+              filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }],
+            },
+          },
+          aggs: {
+            environments: {
+              terms: {
+                field: SERVICE_ENVIRONMENT,
+                size: 5,
+              },
+            },
+            service_environments: {
+              composite: {
+                size: 1000,
+                sources: [
+                  {
+                    [SERVICE_ENVIRONMENT]: {
+                      terms: {
+                        field: SERVICE_ENVIRONMENT,
+                        missing_bucket: true,
+                      },
+                    },
+                  },
+                  {
+                    [SERVICE_NAME]: {
+                      terms: {
+                        field: SERVICE_NAME,
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      });
+
+      const topEnvironments =
+        response.aggregations?.environments.buckets.map(
+          (bucket) => bucket.key
+        ) ?? [];
+      const serviceEnvironments: Record<string, Array<string | null>> = {};
+
+      const buckets = response.aggregations?.service_environments.buckets ?? [];
+
+      buckets.forEach((bucket) => {
+        const serviceName = bucket.key['service.name'];
+        const environment = bucket.key['service.environment'] as string | null;
+
+        const environments = serviceEnvironments[serviceName] ?? [];
+
+        serviceEnvironments[serviceName] = environments.concat(environment);
+      });
+
+      const servicesWithoutEnvironment = Object.keys(
+        pickBy(serviceEnvironments, (environments) =>
+          environments.includes(null)
+        )
+      );
+
+      const servicesWithMultipleEnvironments = Object.keys(
+        pickBy(serviceEnvironments, (environments) => environments.length > 1)
+      );
+
+      return {
+        environments: {
+          services_without_environment: servicesWithoutEnvironment.length,
+          services_with_multiple_environments:
+            servicesWithMultipleEnvironments.length,
+          top_environments: topEnvironments as string[],
+        },
+      };
+    },
+  },
   {
     name: 'processor_events',
     executor: async ({ indices, search }) => {
@@ -46,15 +389,14 @@ export const tasks: TelemetryTask[] = [
 
       type ProcessorEvent = keyof typeof indicesByProcessorEvent;
 
-      const jobs: Array<{
+      interface Job {
         processorEvent: ProcessorEvent;
         timeRange: TimeRange;
-      }> = flatten(
-        (Object.keys(
-          indicesByProcessorEvent
-        ) as ProcessorEvent[]).map((processorEvent) =>
-          TIME_RANGES.map((timeRange) => ({ processorEvent, timeRange }))
-        )
+      }
+
+      const events = Object.keys(indicesByProcessorEvent) as ProcessorEvent[];
+      const jobs: Job[] = events.flatMap((processorEvent) =>
+        TIME_RANGES.map((timeRange) => ({ processorEvent, timeRange }))
       );
 
       const allData = await jobs.reduce((prevJob, current) => {
@@ -65,21 +407,12 @@ export const tasks: TelemetryTask[] = [
             index: indicesByProcessorEvent[processorEvent],
             body: {
               size: 0,
+              timeout,
               query: {
                 bool: {
                   filter: [
                     { term: { [PROCESSOR_EVENT]: processorEvent } },
-                    ...(timeRange !== 'all'
-                      ? [
-                          {
-                            range: {
-                              '@timestamp': {
-                                gte: `now-${timeRange}`,
-                              },
-                            },
-                          },
-                        ]
-                      : []),
+                    ...(timeRange === '1d' ? [range1d] : []),
                   ],
                 },
               },
@@ -92,6 +425,7 @@ export const tasks: TelemetryTask[] = [
               ? await search({
                   index: indicesByProcessorEvent[processorEvent],
                   body: {
+                    timeout,
                     query: {
                       bool: {
                         filter: [
@@ -145,6 +479,7 @@ export const tasks: TelemetryTask[] = [
           index: indices.apmAgentConfigurationIndex,
           body: {
             size: 0,
+            timeout,
             track_total_hits: true,
           },
         })
@@ -174,6 +509,7 @@ export const tasks: TelemetryTask[] = [
               ],
               body: {
                 size: 0,
+                timeout,
                 query: {
                   bool: {
                     filter: [
@@ -182,13 +518,7 @@ export const tasks: TelemetryTask[] = [
                           [AGENT_NAME]: agentName,
                         },
                       },
-                      {
-                        range: {
-                          '@timestamp': {
-                            gte: 'now-1d',
-                          },
-                        },
-                      },
+                      range1d,
                     ],
                   },
                 },
@@ -234,6 +564,7 @@ export const tasks: TelemetryTask[] = [
             },
           },
           size: 1,
+          timeout,
           sort: {
             '@timestamp': 'desc',
           },
@@ -267,15 +598,18 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'groupings',
     executor: async ({ search, indices }) => {
-      const range1d = { range: { '@timestamp': { gte: 'now-1d' } } };
       const errorGroupsCount = (
         await search({
           index: indices['apm_oss.errorIndices'],
           body: {
             size: 0,
+            timeout,
             query: {
               bool: {
-                filter: [{ term: { [PROCESSOR_EVENT]: 'error' } }, range1d],
+                filter: [
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.error } },
+                  range1d,
+                ],
               },
             },
             aggs: {
@@ -305,10 +639,11 @@ export const tasks: TelemetryTask[] = [
           index: indices['apm_oss.transactionIndices'],
           body: {
             size: 0,
+            timeout,
             query: {
               bool: {
                 filter: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                   range1d,
                 ],
               },
@@ -342,7 +677,7 @@ export const tasks: TelemetryTask[] = [
             query: {
               bool: {
                 filter: [
-                  { term: { [PROCESSOR_EVENT]: 'transaction' } },
+                  { term: { [PROCESSOR_EVENT]: ProcessorEvent.transaction } },
                   range1d,
                 ],
                 must_not: {
@@ -352,6 +687,7 @@ export const tasks: TelemetryTask[] = [
             },
             track_total_hits: true,
             size: 0,
+            timeout,
           },
         })
       ).hits.total.value;
@@ -365,6 +701,7 @@ export const tasks: TelemetryTask[] = [
           ],
           body: {
             size: 0,
+            timeout,
             query: {
               bool: {
                 filter: [range1d],
@@ -402,17 +739,17 @@ export const tasks: TelemetryTask[] = [
   {
     name: 'integrations',
     executor: async ({ transportRequest }) => {
-      const apmJobs = ['*-high_mean_response_time'];
+      const apmJobs = ['apm-*', '*-high_mean_response_time'];
 
       const response = (await transportRequest({
         method: 'get',
         path: `/_ml/anomaly_detectors/${apmJobs.join(',')}`,
-      })) as { data?: { count: number } };
+      })) as { body?: { count: number } };
 
       return {
         integrations: {
           ml: {
-            all_jobs_count: response.data?.count ?? 0,
+            all_jobs_count: response.body?.count ?? 0,
           },
         },
       };
@@ -434,12 +771,10 @@ export const tasks: TelemetryTask[] = [
           ],
           body: {
             size: 0,
+            timeout,
             query: {
               bool: {
-                filter: [
-                  { term: { [AGENT_NAME]: agentName } },
-                  { range: { '@timestamp': { gte: 'now-1d' } } },
-                ],
+                filter: [{ term: { [AGENT_NAME]: agentName } }, range1d],
               },
             },
             sort: {
@@ -636,15 +971,15 @@ export const tasks: TelemetryTask[] = [
       return {
         indices: {
           shards: {
-            total: response._shards.total,
+            total: response._shards?.total ?? 0,
           },
           all: {
             total: {
               docs: {
-                count: response._all.total.docs.count,
+                count: response._all?.total?.docs?.count ?? 0,
               },
               store: {
-                size_in_bytes: response._all.total.store.size_in_bytes,
+                size_in_bytes: response._all?.total?.store?.size_in_bytes ?? 0,
               },
             },
           },
@@ -658,9 +993,10 @@ export const tasks: TelemetryTask[] = [
       const allAgentsCardinalityResponse = await search({
         body: {
           size: 0,
+          timeout,
           query: {
             bool: {
-              filter: [{ range: { '@timestamp': { gte: 'now-1d' } } }],
+              filter: [range1d],
             },
           },
           aggs: {
@@ -681,15 +1017,16 @@ export const tasks: TelemetryTask[] = [
       const rumAgentCardinalityResponse = await search({
         body: {
           size: 0,
+          timeout,
           query: {
             bool: {
-              filter: [
-                { range: { '@timestamp': { gte: 'now-1d' } } },
-                { terms: { [AGENT_NAME]: ['rum-js', 'js-base'] } },
-              ],
+              filter: [range1d, { terms: { [AGENT_NAME]: RUM_AGENT_NAMES } }],
             },
           },
           aggs: {
+            [CLIENT_GEO_COUNTRY_ISO_CODE]: {
+              cardinality: { field: CLIENT_GEO_COUNTRY_ISO_CODE },
+            },
             [TRANSACTION_NAME]: {
               cardinality: {
                 field: TRANSACTION_NAME,
@@ -706,6 +1043,18 @@ export const tasks: TelemetryTask[] = [
 
       return {
         cardinality: {
+          client: {
+            geo: {
+              country_iso_code: {
+                rum: {
+                  '1d':
+                    rumAgentCardinalityResponse.aggregations?.[
+                      CLIENT_GEO_COUNTRY_ISO_CODE
+                    ].value,
+                },
+              },
+            },
+          },
           transaction: {
             name: {
               all_agents: {

@@ -7,13 +7,13 @@
 import del from 'del';
 import { readdirSync } from 'fs';
 import { resolve as resolvePath } from 'path';
-import { LevelLogger } from '../../lib';
+import { GenericLevelLogger } from '../../lib/level_logger';
 import { asyncMap } from './util';
 
 /**
  * Delete any file in the `dir` that is not in the expectedPaths
  */
-export async function clean(dir: string, expectedPaths: string[], logger: LevelLogger) {
+export async function clean(dir: string, expectedPaths: string[], logger: GenericLevelLogger) {
   let filenames: string[];
   try {
     filenames = await readdirSync(dir);
@@ -29,7 +29,7 @@ export async function clean(dir: string, expectedPaths: string[], logger: LevelL
   await asyncMap(filenames, async (filename) => {
     const path = resolvePath(dir, filename);
     if (!expectedPaths.includes(path)) {
-      logger.warn(`Deleting unexpected file ${path}`);
+      logger.warning(`Deleting unexpected file ${path}`);
       await del(path, { force: true });
     }
   });

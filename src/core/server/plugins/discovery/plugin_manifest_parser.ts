@@ -58,6 +58,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     ui: true,
     server: true,
     extraPublicDirs: true,
+    requiredBundles: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -115,7 +116,7 @@ export async function parseManifest(
     );
   }
 
-  if (!isCamelCase(manifest.id)) {
+  if (!packageInfo.dist && !isCamelCase(manifest.id)) {
     log.warn(`Expect plugin "id" in camelCase, but found: ${manifest.id}`);
   }
 
@@ -191,6 +192,7 @@ export async function parseManifest(
     configPath: manifest.configPath || snakeCase(manifest.id),
     requiredPlugins: Array.isArray(manifest.requiredPlugins) ? manifest.requiredPlugins : [],
     optionalPlugins: Array.isArray(manifest.optionalPlugins) ? manifest.optionalPlugins : [],
+    requiredBundles: Array.isArray(manifest.requiredBundles) ? manifest.requiredBundles : [],
     ui: includesUiPlugin,
     server: includesServerPlugin,
     extraPublicDirs: manifest.extraPublicDirs,

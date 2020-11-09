@@ -7,6 +7,11 @@
     "uiActions",
     "licensing"
   ],
-  "server": false,
-  "ui": true
+  "server": true,
+  "ui": true,
+  "requiredBundles": [
+    "kibanaUtils",
+    "kibanaReact",
+    "data"
+  ]
 }

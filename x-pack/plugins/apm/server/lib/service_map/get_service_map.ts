@@ -4,23 +4,32 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { chunk } from 'lodash';
+import { Logger } from 'kibana/server';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { getServicesProjection } from '../../../common/projections/services';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getServicesProjection } from '../../projections/services';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { PromiseReturnType } from '../../../typings/common';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import { getEnvironmentUiFilterES } from '../helpers/convert_ui_filters/get_environment_ui_filter_es';
 import { transformServiceMapResponses } from './transform_service_map_responses';
 import { getServiceMapFromTraceIds } from './get_service_map_from_trace_ids';
 import { getTraceSampleIds } from './get_trace_sample_ids';
+import {
+  getServiceAnomalies,
+  ServiceAnomaliesResponse,
+  DEFAULT_ANOMALIES,
+} from './get_service_anomalies';
 
 export interface IEnvOptions {
   setup: Setup & SetupTimeRange;
   serviceName?: string;
   environment?: string;
+  searchAggregatedTransactions: boolean;
+  logger: Logger;
 }
 
 async function getConnectionData({
@@ -70,13 +79,26 @@ async function getConnectionData({
 }
 
 async function getServicesData(options: IEnvOptions) {
-  const { setup } = options;
+  const { setup, searchAggregatedTransactions } = options;
 
   const projection = getServicesProjection({
-    setup: { ...setup, uiFiltersES: [] },
+    setup: { ...setup, esFilter: [] },
+    searchAggregatedTransactions,
   });
 
-  const { filter } = projection.body.query.bool;
+  let { filter } = projection.body.query.bool;
+
+  if (options.serviceName) {
+    filter = filter.concat({
+      term: {
+        [SERVICE_NAME]: options.serviceName,
+      },
+    });
+  }
+
+  if (options.environment) {
+    filter = filter.concat(getEnvironmentUiFilterES(options.environment));
+  }
 
   const params = mergeProjection(projection, {
     body: {
@@ -84,13 +106,7 @@ async function getServicesData(options: IEnvOptions) {
       query: {
         bool: {
           ...projection.body.query.bool,
-          filter: options.serviceName
-            ? filter.concat({
-                term: {
-                  [SERVICE_NAME]: options.serviceName,
-                },
-              })
-            : filter,
+          filter,
         },
       },
       aggs: {
@@ -111,9 +127,9 @@ async function getServicesData(options: IEnvOptions) {
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   return (
     response.aggregations?.services.buckets.map((bucket) => {
@@ -132,13 +148,26 @@ export type ServicesResponse = PromiseReturnType<typeof getServicesData>;
 export type ServiceMapAPIResponse = PromiseReturnType<typeof getServiceMap>;
 
 export async function getServiceMap(options: IEnvOptions) {
-  const [connectionData, servicesData] = await Promise.all([
+  const { logger } = options;
+  const anomaliesPromise: Promise<ServiceAnomaliesResponse> = getServiceAnomalies(
+    options
+
+    // always catch error to avoid breaking service maps if there is a problem with ML
+  ).catch((error) => {
+    logger.warn(`Unable to retrieve anomalies for service maps.`);
+    logger.error(error);
+    return DEFAULT_ANOMALIES;
+  });
+
+  const [connectionData, servicesData, anomalies] = await Promise.all([
     getConnectionData(options),
     getServicesData(options),
+    anomaliesPromise,
   ]);
 
   return transformServiceMapResponses({
     ...connectionData,
     services: servicesData,
+    anomalies,
   });
 }

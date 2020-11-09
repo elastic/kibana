@@ -8,7 +8,7 @@ import { IRouter } from 'kibana/server';
 
 import { EXCEPTION_LIST_URL } from '../../common/constants';
 import { buildRouteValidation, buildSiemResponse, transformError } from '../siem_server_deps';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 import {
   CreateExceptionListSchemaDecoded,
   createExceptionListSchema,
@@ -21,7 +21,7 @@ export const createExceptionListRoute = (router: IRouter): void => {
   router.post(
     {
       options: {
-        tags: ['access:lists'],
+        tags: ['access:lists-all'],
       },
       path: EXCEPTION_LIST_URL,
       validate: {
@@ -36,13 +36,13 @@ export const createExceptionListRoute = (router: IRouter): void => {
       try {
         const {
           name,
-          _tags,
           tags,
           meta,
           namespace_type: namespaceType,
           description,
           list_id: listId,
           type,
+          version,
         } = request.body;
         const exceptionLists = getExceptionListClient(context);
         const exceptionList = await exceptionLists.getExceptionList({
@@ -57,14 +57,15 @@ export const createExceptionListRoute = (router: IRouter): void => {
           });
         } else {
           const createdList = await exceptionLists.createExceptionList({
-            _tags,
             description,
+            immutable: false,
             listId,
             meta,
             name,
             namespaceType,
             tags,
             type,
+            version,
           });
           const [validated, errors] = validate(createdList, exceptionListSchema);
           if (errors != null) {

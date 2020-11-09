@@ -17,6 +17,8 @@
  * under the License.
  */
 
+import { PANEL_TYPES } from './panel_types';
+
 /**
  * UI Restrictions keys
  * @constant
@@ -55,4 +57,13 @@ export type TimeseriesUIRestrictions = {
  */
 export const DEFAULT_UI_RESTRICTION: UIRestrictions = {
   '*': true,
+};
+
+/** limit on the number of series for the panel
+ * @constant
+ * @public
+ */
+export const limitOfSeries = {
+  [PANEL_TYPES.GAUGE]: 1,
+  [PANEL_TYPES.METRIC]: 2,
 };

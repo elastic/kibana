@@ -37,7 +37,7 @@ const wsState: any = {
       iconClass: 'fa-heart',
     },
   ],
-  blacklist: [
+  blocklist: [
     {
       x: 491.3880229084531,
       y: 572.375603969653,

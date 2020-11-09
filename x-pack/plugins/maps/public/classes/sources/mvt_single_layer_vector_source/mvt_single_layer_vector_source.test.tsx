@@ -45,7 +45,7 @@ describe('canFormatFeatureProperties', () => {
   });
 });
 
-describe('filterAndFormatPropertiesToHtml', () => {
+describe('getTooltipProperties', () => {
   const descriptorWithFields = {
     ...descriptor,
     fields: [
@@ -67,7 +67,7 @@ describe('filterAndFormatPropertiesToHtml', () => {
 
   it('should get tooltipproperties', async () => {
     const source = new MVTSingleLayerVectorSource(descriptorWithFields);
-    const tooltipProperties = await source.filterAndFormatPropertiesToHtml({
+    const tooltipProperties = await source.getTooltipProperties({
       foo: 'bar',
       fooz: 123,
     });
@@ -84,7 +84,7 @@ describe('getImmutableSourceProperties', () => {
     const source = new MVTSingleLayerVectorSource(descriptor);
     const properties = await source.getImmutableProperties();
     expect(properties).toEqual([
-      { label: 'Data source', value: '.pbf vector tiles' },
+      { label: 'Data source', value: 'Vector tiles' },
       { label: 'Url', value: 'https://example.com/{x}/{y}/{z}.pbf' },
     ]);
   });

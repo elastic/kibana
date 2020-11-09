@@ -18,4 +18,3 @@
  */
 
 export { ManagementApp } from './management_app';
-export { managementSections } from './management_sections';

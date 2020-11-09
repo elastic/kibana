@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { getProperty, IndexMapping } from '../../../mappings';
 
 const TOP_LEVEL_FIELDS = ['_id', '_score'];
@@ -67,10 +67,15 @@ export function getSortingParams(
   }
 
   const [typeField] = types;
-  const key = `${typeField}.${sortField}`;
-  const field = getProperty(mappings, key);
+  let key = `${typeField}.${sortField}`;
+  let field = getProperty(mappings, key);
   if (!field) {
-    throw Boom.badRequest(`Unknown sort field ${sortField}`);
+    // type field does not exist, try checking the root properties
+    key = sortField;
+    field = getProperty(mappings, sortField);
+    if (!field) {
+      throw Boom.badRequest(`Unknown sort field ${sortField}`);
+    }
   }
 
   return {

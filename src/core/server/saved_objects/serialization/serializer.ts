@@ -17,8 +17,6 @@
  * under the License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import uuid from 'uuid';
 import { decodeVersion, encodeVersion } from '../version';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
@@ -64,7 +62,7 @@ export class SavedObjectsSerializer {
    */
   public rawToSavedObject(doc: SavedObjectsRawDoc): SavedObjectSanitizedDoc {
     const { _id, _source, _seq_no, _primary_term } = doc;
-    const { type, namespace, namespaces } = _source;
+    const { type, namespace, namespaces, originId } = _source;
 
     const version =
       _seq_no != null || _primary_term != null
@@ -76,6 +74,7 @@ export class SavedObjectsSerializer {
       id: this.trimIdPrefix(namespace, type, _id),
       ...(namespace && this.registry.isSingleNamespace(type) && { namespace }),
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
+      ...(originId && { originId }),
       attributes: _source[type],
       references: _source.references || [],
       ...(_source.migrationVersion && { migrationVersion: _source.migrationVersion }),
@@ -95,8 +94,10 @@ export class SavedObjectsSerializer {
       type,
       namespace,
       namespaces,
+      originId,
       attributes,
       migrationVersion,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
       updated_at,
       version,
       references,
@@ -107,6 +108,7 @@ export class SavedObjectsSerializer {
       references,
       ...(namespace && this.registry.isSingleNamespace(type) && { namespace }),
       ...(namespaces && this.registry.isMultiNamespace(type) && { namespaces }),
+      ...(originId && { originId }),
       ...(migrationVersion && { migrationVersion }),
       ...(updated_at && { updated_at }),
     };

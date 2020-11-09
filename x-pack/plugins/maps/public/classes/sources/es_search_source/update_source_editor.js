@@ -18,10 +18,10 @@ import {
   getSourceFields,
   supportsGeoTileAgg,
 } from '../../../index_pattern_util';
-import { SORT_ORDER } from '../../../../common/constants';
+import { SortDirection, indexPatterns } from '../../../../../../../src/plugins/data/public';
 import { ESDocField } from '../../fields/es_doc_field';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
+
 import { ScalingForm } from './scaling_form';
 
 export class UpdateSourceEditor extends Component {
@@ -42,6 +42,8 @@ export class UpdateSourceEditor extends Component {
     termFields: null,
     sortFields: null,
     supportsClustering: false,
+    mvtDisabledReason: null,
+    clusteringDisabledReason: null,
   };
 
   componentDidMount() {
@@ -97,6 +99,7 @@ export class UpdateSourceEditor extends Component {
     this.setState({
       supportsClustering: supportsGeoTileAgg(geoField),
       clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
+      mvtDisabledReason: null,
       sourceFields: sourceFields,
       termFields: getTermsFields(indexPattern.fields), //todo change term fields to use fields
       sortFields: indexPattern.fields.filter(
@@ -180,13 +183,13 @@ export class UpdateSourceEditor extends Component {
                 text: i18n.translate('xpack.maps.source.esSearch.ascendingLabel', {
                   defaultMessage: 'ascending',
                 }),
-                value: SORT_ORDER.ASC,
+                value: SortDirection.asc,
               },
               {
                 text: i18n.translate('xpack.maps.source.esSearch.descendingLabel', {
                   defaultMessage: 'descending',
                 }),
-                value: SORT_ORDER.DESC,
+                value: SortDirection.desc,
               },
             ]}
             value={this.props.sortOrder}

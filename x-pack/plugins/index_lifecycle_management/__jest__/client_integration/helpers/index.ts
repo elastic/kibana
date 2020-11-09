@@ -4,4 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export type TestSubjects = 'waitForSnapshotField' | 'savePolicyButton';
+export type TestSubjects =
+  | 'snapshotPolicyCombobox'
+  | 'savePolicyButton'
+  | 'customPolicyCallout'
+  | 'noPoliciesCallout'
+  | 'policiesErrorCallout'
+  | 'rolloverSwitch'
+  | 'rolloverSettingsRequired'
+  | 'hot-selectedMaxSizeStored'
+  | 'hot-selectedMaxSizeStoredUnits'
+  | 'hot-selectedMaxDocuments'
+  | 'hot-selectedMaxAge'
+  | 'hot-selectedMaxAgeUnits'
+  | 'freezeSwitch'
+  | string;

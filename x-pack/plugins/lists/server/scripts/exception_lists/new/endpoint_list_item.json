@@ -1,0 +1,22 @@
+{
+  "item_id": "simple_list_item",
+  "tags": ["user added string for a tag", "malware"],
+  "type": "simple",
+  "description": "This is a sample endpoint type exception",
+  "name": "Sample Endpoint Exception List",
+  "os_types": ["linux"],
+  "entries": [
+    {
+      "field": "actingProcess.file.signer",
+      "operator": "included",
+      "type": "match",
+      "value": "test"
+    },
+    {
+      "field": "host.name",
+      "operator": "included",
+      "type": "match_any",
+      "value": ["some host", "another host"]
+    }
+  ]
+}

@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set, find } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { get, find } from 'lodash';
 import { checkParam } from '../error_missing_required';
 import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 
@@ -30,7 +31,7 @@ async function findSupportedBasicLicenseCluster(
     ignoreUnavailable: true,
     filterPath: 'hits.hits._source.cluster_uuid',
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: {
         bool: {
           filter: [

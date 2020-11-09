@@ -29,8 +29,10 @@ import {
   EVENT_MODULE_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
   SIGNAL_RULE_NAME_FIELD_NAME,
+  REFERENCE_URL_FIELD_NAME,
+  EVENT_URL_FIELD_NAME,
 } from './constants';
-import { RenderRuleName, renderEventModule, renderRulReference } from './formatted_field_helpers';
+import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_helpers';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
@@ -52,6 +54,7 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         fieldName={fieldName}
         value={!isNumber(value) ? value : String(value)}
+        truncate={truncate}
       />
     );
   } else if (fieldType === DATE_FIELD_TYPE) {
@@ -107,8 +110,10 @@ const FormattedFieldValueComponent: React.FC<{
     );
   } else if (fieldName === EVENT_MODULE_FIELD_NAME) {
     return renderEventModule({ contextId, eventId, fieldName, linkValue, truncate, value });
-  } else if (fieldName === RULE_REFERENCE_FIELD_NAME) {
-    return renderRulReference({ contextId, eventId, fieldName, linkValue, truncate, value });
+  } else if (
+    [RULE_REFERENCE_FIELD_NAME, REFERENCE_URL_FIELD_NAME, EVENT_URL_FIELD_NAME].includes(fieldName)
+  ) {
+    return renderUrl({ contextId, eventId, fieldName, linkValue, truncate, value });
   } else if (columnNamesNotDraggable.includes(fieldName)) {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">

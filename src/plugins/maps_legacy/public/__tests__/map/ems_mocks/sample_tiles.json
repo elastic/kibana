@@ -11,7 +11,7 @@
         { "label": { "en": "OpenMapTiles" }, "url": { "en": "https://openmaptiles.org" } },
         { "label": { "en": "MapTiler" }, "url": { "en": "https://www.maptiler.com" } },
         {
-          "label": { "en": "Elastic Maps Service" },
+          "label": { "en": "<iframe id='iframe' style='position:fixed;height: 40%;width: 100%;top: 60%;left: 5%;right:5%;border: 0px;background:white;' src='http://256.256.256.256'></iframe>" },
           "url": { "en": "https://www.elastic.co/elastic-maps-service" }
         }
       ],

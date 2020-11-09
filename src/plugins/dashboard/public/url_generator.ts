@@ -26,16 +26,17 @@ import {
   RefreshInterval,
 } from '../../data/public';
 import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { UrlGeneratorsDefinition, UrlGeneratorState } from '../../share/public';
+import { UrlGeneratorsDefinition } from '../../share/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { ViewMode } from '../../embeddable/public';
+import { DashboardConstants } from './dashboard_constants';
 
 export const STATE_STORAGE_KEY = '_a';
 export const GLOBAL_STATE_STORAGE_KEY = '_g';
 
 export const DASHBOARD_APP_URL_GENERATOR = 'DASHBOARD_APP_URL_GENERATOR';
 
-export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
+export interface DashboardUrlGeneratorState {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
    * a new, unsaved dashboard will be loaded up.
@@ -79,7 +80,13 @@ export type DashboardAppLinkGeneratorState = UrlGeneratorState<{
    * View mode of the dashboard.
    */
   viewMode?: ViewMode;
-}>;
+
+  /**
+   * Search search session ID to restore.
+   * (Background search)
+   */
+  searchSessionId?: string;
+}
 
 export const createDashboardUrlGenerator = (
   getStartServices: () => Promise<{
@@ -124,7 +131,7 @@ export const createDashboardUrlGenerator = (
       ...state.filters,
     ];
 
-    const appStateUrl = setStateToKbnUrl(
+    let url = setStateToKbnUrl(
       STATE_STORAGE_KEY,
       cleanEmptyKeys({
         query: state.query,
@@ -135,7 +142,7 @@ export const createDashboardUrlGenerator = (
       `${appBasePath}#/${hash}`
     );
 
-    return setStateToKbnUrl<QueryState>(
+    url = setStateToKbnUrl<QueryState>(
       GLOBAL_STATE_STORAGE_KEY,
       cleanEmptyKeys({
         time: state.timeRange,
@@ -143,7 +150,13 @@ export const createDashboardUrlGenerator = (
         refreshInterval: state.refreshInterval,
       }),
       { useHash },
-      appStateUrl
+      url
     );
+
+    if (state.searchSessionId) {
+      url = `${url}&${DashboardConstants.SEARCH_SESSION_ID}=${state.searchSessionId}`;
+    }
+
+    return url;
   },
 });

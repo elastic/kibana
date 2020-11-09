@@ -21,5 +21,15 @@ export const getEmptyCreateDocumentResponseMock = (): CreateDocumentResponse => 
 });
 
 export const getCallClusterMock = (
-  callCluster: unknown = getEmptyCreateDocumentResponseMock()
-): LegacyAPICaller => jest.fn().mockResolvedValue(callCluster);
+  response: unknown = getEmptyCreateDocumentResponseMock()
+): LegacyAPICaller => jest.fn().mockResolvedValue(response);
+
+export const getCallClusterMockMultiTimes = (
+  responses: unknown[] = [getEmptyCreateDocumentResponseMock()]
+): LegacyAPICaller => {
+  const returnJest = jest.fn();
+  responses.forEach((response) => {
+    returnJest.mockResolvedValueOnce(response);
+  });
+  return returnJest;
+};

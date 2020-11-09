@@ -25,7 +25,23 @@ describe('createOnPreResponseHandler', () => {
       },
     });
   });
-  it('sets license.signature header after refresh for non-error responses', async () => {
+  it('sets license.signature header immediately for 429 error responses', async () => {
+    const refresh = jest.fn();
+    const license$ = new BehaviorSubject(licenseMock.createLicense({ signature: 'foo' }));
+    const toolkit = httpServiceMock.createOnPreResponseToolkit();
+
+    const interceptor = createOnPreResponseHandler(refresh, license$);
+    await interceptor(httpServerMock.createKibanaRequest(), { statusCode: 429 }, toolkit);
+
+    expect(refresh).toHaveBeenCalledTimes(0);
+    expect(toolkit.next).toHaveBeenCalledTimes(1);
+    expect(toolkit.next).toHaveBeenCalledWith({
+      headers: {
+        'kbn-license-sig': 'foo',
+      },
+    });
+  });
+  it('sets license.signature header after refresh for other error responses', async () => {
     const updatedLicense = licenseMock.createLicense({ signature: 'bar' });
     const license$ = new BehaviorSubject(licenseMock.createLicense({ signature: 'foo' }));
     const refresh = jest.fn().mockImplementation(

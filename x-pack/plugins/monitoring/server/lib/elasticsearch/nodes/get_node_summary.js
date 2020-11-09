@@ -17,15 +17,23 @@ export function handleResponse(clusterState, shardStats, nodeUuid) {
   return (response) => {
     let nodeSummary = {};
     const nodeStatsHits = get(response, 'hits.hits', []);
-    const nodes = nodeStatsHits.map((hit) => hit._source.source_node); // using [0] value because query results are sorted desc per timestamp
+    const nodes = nodeStatsHits.map((hit) =>
+      get(hit, '_source.elasticsearch.node', hit._source.source_node)
+    ); // using [0] value because query results are sorted desc per timestamp
     const node = nodes[0] || getDefaultNodeFromId(nodeUuid);
-    const sourceStats = get(response, 'hits.hits[0]._source.node_stats');
+    const sourceStats =
+      get(response, 'hits.hits[0]._source.elasticsearch.node.stats') ||
+      get(response, 'hits.hits[0]._source.node_stats');
     const clusterNode = get(clusterState, ['nodes', nodeUuid]);
     const stats = {
       resolver: nodeUuid,
-      node_ids: nodes.map((node) => node.uuid),
+      node_ids: nodes.map((node) => node.id || node.uuid),
       attributes: node.attributes,
-      transport_address: node.transport_address,
+      transport_address: get(
+        response,
+        'hits.hits[0]._source.service.address',
+        node.transport_address
+      ),
       name: node.name,
       type: node.type,
     };
@@ -45,10 +53,17 @@ export function handleResponse(clusterState, shardStats, nodeUuid) {
         totalShards: _shardStats.shardCount,
         indexCount: _shardStats.indexCount,
         documents: get(sourceStats, 'indices.docs.count'),
-        dataSize: get(sourceStats, 'indices.store.size_in_bytes'),
-        freeSpace: get(sourceStats, 'fs.total.available_in_bytes'),
-        totalSpace: get(sourceStats, 'fs.total.total_in_bytes'),
-        usedHeap: get(sourceStats, 'jvm.mem.heap_used_percent'),
+        dataSize:
+          get(sourceStats, 'indices.store.size_in_bytes') ||
+          get(sourceStats, 'indices.store.size.bytes'),
+        freeSpace:
+          get(sourceStats, 'fs.total.available_in_bytes') ||
+          get(sourceStats, 'fs.summary.available.bytes'),
+        totalSpace:
+          get(sourceStats, 'fs.total.total_in_bytes') || get(sourceStats, 'fs.summary.total.bytes'),
+        usedHeap:
+          get(sourceStats, 'jvm.mem.heap_used_percent') ||
+          get(sourceStats, 'jvm.mem.heap.used.pct'),
         status: i18n.translate('xpack.monitoring.es.nodes.onlineStatusLabel', {
           defaultMessage: 'Online',
         }),
@@ -94,7 +109,7 @@ export function getNodeSummary(
     size: 1,
     ignoreUnavailable: true,
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({ type: 'node_stats', start, end, clusterUuid, metric, filters }),
     },
   };

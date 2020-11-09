@@ -10,7 +10,7 @@ import { RuleAlertAction } from './types';
 export const transformRuleToAlertAction = ({
   group,
   id,
-  action_type_id,
+  action_type_id, // eslint-disable-line @typescript-eslint/naming-convention
   params,
 }: RuleAlertAction): AlertAction => ({
   group,

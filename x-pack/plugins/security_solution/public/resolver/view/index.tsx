@@ -7,40 +7,29 @@
 
 import React, { useMemo } from 'react';
 import { Provider } from 'react-redux';
-import { ResolverMap } from './map';
-import { storeFactory } from '../store';
+import { resolverStoreFactory } from '../store';
 import { StartServices } from '../../types';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { DataAccessLayer, ResolverProps } from '../types';
+import { dataAccessLayerFactory } from '../data_access_layer/factory';
+import { ResolverWithoutProviders } from './resolver_without_providers';
 
 /**
- * The top level, unconnected, Resolver component.
+ * The `Resolver` component to use. This sets up the DataAccessLayer provider. Use `ResolverWithoutProviders` in tests or in other scenarios where you want to provide a different (or fake) data access layer.
  */
-export const Resolver = React.memo(function ({
-  className,
-  databaseDocumentID,
-}: {
-  /**
-   * Used by `styled-components`.
-   */
-  className?: string;
-  /**
-   * The `_id` value of an event in ES.
-   * Used as the origin of the Resolver graph.
-   */
-  databaseDocumentID?: string;
-}) {
+export const Resolver = React.memo((props: ResolverProps) => {
   const context = useKibana<StartServices>();
-  const store = useMemo(() => {
-    return storeFactory(context);
-  }, [context]);
+  const dataAccessLayer: DataAccessLayer = useMemo(() => dataAccessLayerFactory(context), [
+    context,
+  ]);
 
-  /**
-   * Setup the store and use `Provider` here. This allows the ResolverMap component to
-   * dispatch actions and read from state.
-   */
+  const store = useMemo(() => {
+    return resolverStoreFactory(dataAccessLayer);
+  }, [dataAccessLayer]);
+
   return (
     <Provider store={store}>
-      <ResolverMap className={className} databaseDocumentID={databaseDocumentID} />
+      <ResolverWithoutProviders {...props} />
     </Provider>
   );
 });

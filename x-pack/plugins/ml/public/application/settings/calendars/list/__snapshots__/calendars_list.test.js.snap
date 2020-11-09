@@ -7,6 +7,7 @@ exports[`CalendarsList Renders calendar list with calendars 1`] = `
   />
   <EuiPage
     className="mlCalendarList"
+    data-test-subj="mlPageCalendarManagement"
   >
     <EuiPageBody>
       <EuiPageContent

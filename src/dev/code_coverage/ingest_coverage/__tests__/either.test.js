@@ -53,7 +53,7 @@ describe(`either datatype functions`, () => {
       expect(sut.inspect()).to.be('Right(undefined)');
     });
   });
-  describe(`'fromNullable`, () => {
+  describe(`fromNullable`, () => {
     it(`should continue processing if a truthy is calculated`, () => {
       attempt({ detail: 'x' }).fold(
         () => {},
@@ -62,6 +62,20 @@ describe(`either datatype functions`, () => {
     });
     it(`should drop processing if a falsey is calculated`, () => {
       attempt(false).fold(expectNull, () => {});
+    });
+  });
+  describe(`predicate fns`, () => {
+    it(`right.isRight() is true`, () => {
+      expect(Either.right('a').isRight()).to.be(true);
+    });
+    it(`right.isLeft() is false`, () => {
+      expect(Either.right('a').isLeft()).to.be(false);
+    });
+    it(`left.isLeft() is true`, () => {
+      expect(Either.left().isLeft()).to.be(true);
+    });
+    it(`left.isRight() is true`, () => {
+      expect(Either.left().isRight()).to.be(false);
     });
   });
 });

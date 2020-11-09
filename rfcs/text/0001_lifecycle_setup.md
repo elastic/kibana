@@ -124,7 +124,7 @@ all services and plugins, and then adding an empty `start` where it is
 necessary. Functionality can then be moved from `setup`->`start` on a
 case-by-case.
 
-If this change doesn't happen for awhile, then it might make sense to follow
+If this change doesn't happen for a while, then it might make sense to follow
 the reverse process to ensure the least impact.
 
 The migration guide will be updated to reflect the `setup` and `start`

@@ -4,26 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useCallback, useMemo } from 'react';
+import { isEmpty } from 'lodash/fp';
+import React, { useEffect, useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 
-import { NO_ALERT_INDEX } from '../../../../common/constants';
-import { useWithSource } from '../../../common/containers/source';
-import { useSignalIndex } from '../../../alerts/containers/detection_engine/alerts/use_signal_index';
 import { inputsModel, inputsSelectors, State } from '../../../common/store';
 import { timelineActions, timelineSelectors } from '../../store/timeline';
 import { ColumnHeaderOptions, TimelineModel } from '../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { defaultHeaders } from './body/column_headers/default_headers';
-import {
-  OnChangeItemsPerPage,
-  OnDataProviderRemoved,
-  OnDataProviderEdited,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-} from './events';
+import { OnChangeItemsPerPage } from './events';
 import { Timeline } from './timeline';
+import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 
 export interface OwnProps {
   id: string;
@@ -33,102 +27,51 @@ export interface OwnProps {
 
 export type Props = OwnProps & PropsFromRedux;
 
+const isTimerangeSame = (prevProps: Props, nextProps: Props) =>
+  prevProps.end === nextProps.end &&
+  prevProps.start === nextProps.start &&
+  prevProps.timerangeKind === nextProps.timerangeKind;
+
 const StatefulTimelineComponent = React.memo<Props>(
   ({
     columns,
     createTimeline,
     dataProviders,
-    eventType,
     end,
     filters,
     graphEventId,
     id,
     isLive,
+    isSaving,
     isTimelineExists,
     itemsPerPage,
     itemsPerPageOptions,
     kqlMode,
     kqlQueryExpression,
     onClose,
-    onDataProviderEdited,
     removeColumn,
-    removeProvider,
     show,
     showCallOutUnauthorizedMsg,
     sort,
     start,
     status,
     timelineType,
-    updateDataProviderEnabled,
-    updateDataProviderExcluded,
+    timerangeKind,
     updateItemsPerPage,
     upsertColumn,
     usersViewing,
   }) => {
-    const { loading, signalIndexExists, signalIndexName } = useSignalIndex();
-
-    const indexToAdd = useMemo<string[]>(() => {
-      if (
-        eventType &&
-        signalIndexExists &&
-        signalIndexName != null &&
-        ['signal', 'alert', 'all'].includes(eventType)
-      ) {
-        return [signalIndexName];
-      }
-      return [NO_ALERT_INDEX]; // Following index does not exist so we won't show any events;
-    }, [eventType, signalIndexExists, signalIndexName]);
-
-    const onDataProviderRemoved: OnDataProviderRemoved = useCallback(
-      (providerId: string, andProviderId?: string) =>
-        removeProvider!({ id, providerId, andProviderId }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
-    );
-
-    const onToggleDataProviderEnabled: OnToggleDataProviderEnabled = useCallback(
-      ({ providerId, enabled, andProviderId }) =>
-        updateDataProviderEnabled!({
-          id,
-          enabled,
-          providerId,
-          andProviderId,
-        }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
-    );
-
-    const onToggleDataProviderExcluded: OnToggleDataProviderExcluded = useCallback(
-      ({ providerId, excluded, andProviderId }) =>
-        updateDataProviderExcluded!({
-          id,
-          excluded,
-          providerId,
-          andProviderId,
-        }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
-    );
-
-    const onDataProviderEditedLocal: OnDataProviderEdited = useCallback(
-      ({ andProviderId, excluded, field, operator, providerId, value }) =>
-        onDataProviderEdited!({
-          andProviderId,
-          excluded,
-          field,
-          id,
-          operator,
-          providerId,
-          value,
-        }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
-    );
+    const {
+      browserFields,
+      docValueFields,
+      loading,
+      indexPattern,
+      selectedPatterns,
+    } = useSourcererScope(SourcererScopeName.timeline);
 
     const onChangeItemsPerPage: OnChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) => updateItemsPerPage!({ id, itemsPerPage: itemsChangedPerPage }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id]
+      [id, updateItemsPerPage]
     );
 
     const toggleColumn = useCallback(
@@ -150,66 +93,62 @@ const StatefulTimelineComponent = React.memo<Props>(
           });
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [columns, id]
+      [columns, id, removeColumn, upsertColumn]
     );
 
     useEffect(() => {
       if (createTimeline != null && !isTimelineExists) {
-        createTimeline({ id, columns: defaultHeaders, show: false });
+        createTimeline({ id, columns: defaultHeaders, indexNames: selectedPatterns, show: false });
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-
-    const { indexPattern, browserFields } = useWithSource('default', indexToAdd);
 
     return (
       <Timeline
         browserFields={browserFields}
         columns={columns}
         dataProviders={dataProviders!}
+        docValueFields={docValueFields}
         end={end}
-        eventType={eventType}
         filters={filters}
         graphEventId={graphEventId}
         id={id}
         indexPattern={indexPattern}
-        indexToAdd={indexToAdd}
+        indexNames={selectedPatterns}
         isLive={isLive}
+        isSaving={isSaving}
         itemsPerPage={itemsPerPage!}
         itemsPerPageOptions={itemsPerPageOptions!}
         kqlMode={kqlMode}
         kqlQueryExpression={kqlQueryExpression}
-        loadingIndexName={loading}
+        loadingSourcerer={loading}
         onChangeItemsPerPage={onChangeItemsPerPage}
         onClose={onClose}
-        onDataProviderEdited={onDataProviderEditedLocal}
-        onDataProviderRemoved={onDataProviderRemoved}
-        onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-        onToggleDataProviderExcluded={onToggleDataProviderExcluded}
         show={show!}
         showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
         sort={sort!}
         start={start}
         status={status}
         toggleColumn={toggleColumn}
+        timelineType={timelineType}
+        timerangeKind={timerangeKind}
         usersViewing={usersViewing}
       />
     );
   },
   (prevProps, nextProps) => {
     return (
-      prevProps.eventType === nextProps.eventType &&
-      prevProps.end === nextProps.end &&
+      isTimerangeSame(prevProps, nextProps) &&
       prevProps.graphEventId === nextProps.graphEventId &&
       prevProps.id === nextProps.id &&
       prevProps.isLive === nextProps.isLive &&
+      prevProps.isSaving === nextProps.isSaving &&
+      prevProps.isTimelineExists === nextProps.isTimelineExists &&
       prevProps.itemsPerPage === nextProps.itemsPerPage &&
       prevProps.kqlMode === nextProps.kqlMode &&
       prevProps.kqlQueryExpression === nextProps.kqlQueryExpression &&
       prevProps.show === nextProps.show &&
       prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-      prevProps.start === nextProps.start &&
       prevProps.timelineType === nextProps.timelineType &&
       prevProps.status === nextProps.status &&
       deepEqual(prevProps.columns, nextProps.columns) &&
@@ -240,15 +179,21 @@ const makeMapStateToProps = () => {
       graphEventId,
       itemsPerPage,
       itemsPerPageOptions,
+      isSaving,
       kqlMode,
       show,
       sort,
       status,
       timelineType,
     } = timeline;
-    const kqlQueryExpression = getKqlQueryTimeline(state, id)!;
-
+    const kqlQueryTimeline = getKqlQueryTimeline(state, id)!;
     const timelineFilter = kqlMode === 'filter' ? filters || [] : [];
+
+    // return events on empty search
+    const kqlQueryExpression =
+      isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) && timelineType === 'template'
+        ? ' '
+        : kqlQueryTimeline;
     return {
       columns,
       dataProviders,
@@ -258,6 +203,7 @@ const makeMapStateToProps = () => {
       graphEventId,
       id,
       isLive: input.policy.kind === 'interval',
+      isSaving,
       isTimelineExists: getTimeline(state, id) != null,
       itemsPerPage,
       itemsPerPageOptions,
@@ -269,6 +215,7 @@ const makeMapStateToProps = () => {
       start: input.timerange.from,
       status,
       timelineType,
+      timerangeKind: input.timerange.kind,
     };
   };
   return mapStateToProps;
@@ -277,13 +224,8 @@ const makeMapStateToProps = () => {
 const mapDispatchToProps = {
   addProvider: timelineActions.addProvider,
   createTimeline: timelineActions.createTimeline,
-  onDataProviderEdited: timelineActions.dataProviderEdited,
   removeColumn: timelineActions.removeColumn,
-  removeProvider: timelineActions.removeProvider,
   updateColumns: timelineActions.updateColumns,
-  updateDataProviderEnabled: timelineActions.updateDataProviderEnabled,
-  updateDataProviderExcluded: timelineActions.updateDataProviderExcluded,
-  updateDataProviderKqlQuery: timelineActions.updateDataProviderKqlQuery,
   updateHighlightedDropAndProviderId: timelineActions.updateHighlightedDropAndProviderId,
   updateItemsPerPage: timelineActions.updateItemsPerPage,
   updateItemsPerPageOptions: timelineActions.updateItemsPerPageOptions,

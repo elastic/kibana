@@ -17,8 +17,7 @@
  * under the License.
  */
 
-import { LogLevel } from '../log_level';
-import { LogRecord } from '../log_record';
+import { LogLevel, LogRecord } from '@kbn/logging';
 import { JsonLayout } from './json_layout';
 
 const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 30, 22, 11));
@@ -98,21 +97,27 @@ test('`format()` correctly formats record with meta-data', () => {
         timestamp,
         pid: 5355,
         meta: {
-          from: 'v7',
-          to: 'v8',
+          version: {
+            from: 'v7',
+            to: 'v8',
+          },
         },
       })
     )
   ).toStrictEqual({
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
-    context: 'context-with-meta',
-    level: 'DEBUG',
+    log: {
+      level: 'DEBUG',
+      logger: 'context-with-meta',
+    },
     message: 'message-with-meta',
-    meta: {
+    version: {
       from: 'v7',
       to: 'v8',
     },
-    pid: 5355,
+    process: {
+      pid: 5355,
+    },
   });
 });
 
@@ -122,36 +127,131 @@ test('`format()` correctly formats error record with meta-data', () => {
   expect(
     JSON.parse(
       layout.format({
-        context: 'error-with-meta',
         level: LogLevel.Debug,
+        context: 'error-with-meta',
         error: {
           message: 'Some error message',
-          name: 'Some error name',
+          name: 'Some error type',
           stack: 'Some error stack',
         },
         message: 'Some error message',
         timestamp,
         pid: 5355,
         meta: {
-          from: 'v7',
-          to: 'v8',
+          version: {
+            from: 'v7',
+            to: 'v8',
+          },
         },
       })
     )
   ).toStrictEqual({
     '@timestamp': '2012-02-01T09:30:22.011-05:00',
-    context: 'error-with-meta',
-    level: 'DEBUG',
+    log: {
+      level: 'DEBUG',
+      logger: 'error-with-meta',
+    },
     error: {
       message: 'Some error message',
-      name: 'Some error name',
-      stack: 'Some error stack',
+      type: 'Some error type',
+      stack_trace: 'Some error stack',
     },
     message: 'Some error message',
-    meta: {
+    version: {
       from: 'v7',
       to: 'v8',
     },
-    pid: 5355,
+    process: {
+      pid: 5355,
+    },
+  });
+});
+
+test('format() meta can override @timestamp', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          '@timestamp': '2099-05-01T09:30:22.011-05:00',
+        },
+      })
+    )
+  ).toStrictEqual({
+    '@timestamp': '2099-05-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+    },
+  });
+});
+
+test('format() meta can merge override logs', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        timestamp,
+        message: 'foo',
+        level: LogLevel.Error,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          log: {
+            kbn_custom_field: 'hello',
+          },
+        },
+      })
+    )
+  ).toStrictEqual({
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'ERROR',
+      logger: 'bar',
+      kbn_custom_field: 'hello',
+    },
+    process: {
+      pid: 3,
+    },
+  });
+});
+
+test('format() meta can override log level objects', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        timestamp,
+        context: '123',
+        message: 'foo',
+        level: LogLevel.Error,
+        pid: 3,
+        meta: {
+          log: {
+            level: 'FATAL',
+          },
+        },
+      })
+    )
+  ).toStrictEqual({
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'FATAL',
+      logger: '123',
+    },
+    process: {
+      pid: 3,
+    },
   });
 });

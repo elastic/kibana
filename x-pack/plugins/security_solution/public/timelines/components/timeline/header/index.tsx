@@ -9,15 +9,8 @@ import React from 'react';
 import { FilterManager, IIndexPattern } from 'src/plugins/data/public';
 import deepEqual from 'fast-deep-equal';
 
-import { showGraphView } from '../body/helpers';
 import { DataProviders } from '../data_providers';
 import { DataProvider } from '../data_providers/data_provider';
-import {
-  OnDataProviderEdited,
-  OnDataProviderRemoved,
-  OnToggleDataProviderEnabled,
-  OnToggleDataProviderExcluded,
-} from '../events';
 import { StatefulSearchOrFilter } from '../search_or_filter';
 import { BrowserFields } from '../../../../common/containers/source';
 
@@ -32,31 +25,23 @@ interface Props {
   dataProviders: DataProvider[];
   filterManager: FilterManager;
   graphEventId?: string;
-  id: string;
   indexPattern: IIndexPattern;
-  onDataProviderEdited: OnDataProviderEdited;
-  onDataProviderRemoved: OnDataProviderRemoved;
-  onToggleDataProviderEnabled: OnToggleDataProviderEnabled;
-  onToggleDataProviderExcluded: OnToggleDataProviderExcluded;
   show: boolean;
   showCallOutUnauthorizedMsg: boolean;
   status: TimelineStatusLiteralWithNull;
+  timelineId: string;
 }
 
 const TimelineHeaderComponent: React.FC<Props> = ({
   browserFields,
-  id,
   indexPattern,
   dataProviders,
   filterManager,
   graphEventId,
-  onDataProviderEdited,
-  onDataProviderRemoved,
-  onToggleDataProviderEnabled,
-  onToggleDataProviderExcluded,
   show,
   showCallOutUnauthorizedMsg,
   status,
+  timelineId,
 }) => (
   <>
     {showCallOutUnauthorizedMsg && (
@@ -71,29 +56,25 @@ const TimelineHeaderComponent: React.FC<Props> = ({
     {status === TimelineStatus.immutable && (
       <EuiCallOut
         data-test-subj="timelineImmutableCallOut"
-        title={i18n.CALL_OUT_IMMUTIABLE}
+        title={i18n.CALL_OUT_IMMUTABLE}
         color="primary"
-        iconType="info"
+        iconType="alert"
         size="s"
       />
     )}
-    {show && !showGraphView(graphEventId) && (
+    {show && !graphEventId && (
       <>
         <DataProviders
           browserFields={browserFields}
-          id={id}
+          timelineId={timelineId}
           dataProviders={dataProviders}
-          onDataProviderEdited={onDataProviderEdited}
-          onDataProviderRemoved={onDataProviderRemoved}
-          onToggleDataProviderEnabled={onToggleDataProviderEnabled}
-          onToggleDataProviderExcluded={onToggleDataProviderExcluded}
         />
 
         <StatefulSearchOrFilter
           browserFields={browserFields}
           filterManager={filterManager}
           indexPattern={indexPattern}
-          timelineId={id}
+          timelineId={timelineId}
         />
       </>
     )}
@@ -104,16 +85,12 @@ export const TimelineHeader = React.memo(
   TimelineHeaderComponent,
   (prevProps, nextProps) =>
     deepEqual(prevProps.browserFields, nextProps.browserFields) &&
-    prevProps.id === nextProps.id &&
     deepEqual(prevProps.indexPattern, nextProps.indexPattern) &&
     deepEqual(prevProps.dataProviders, nextProps.dataProviders) &&
     prevProps.filterManager === nextProps.filterManager &&
     prevProps.graphEventId === nextProps.graphEventId &&
-    prevProps.onDataProviderEdited === nextProps.onDataProviderEdited &&
-    prevProps.onDataProviderRemoved === nextProps.onDataProviderRemoved &&
-    prevProps.onToggleDataProviderEnabled === nextProps.onToggleDataProviderEnabled &&
-    prevProps.onToggleDataProviderExcluded === nextProps.onToggleDataProviderExcluded &&
     prevProps.show === nextProps.show &&
     prevProps.showCallOutUnauthorizedMsg === nextProps.showCallOutUnauthorizedMsg &&
-    prevProps.status === nextProps.status
+    prevProps.status === nextProps.status &&
+    prevProps.timelineId === nextProps.timelineId
 );

@@ -16,28 +16,32 @@ export function Loader(props: { load: () => Promise<unknown>; loadDeps: unknown[
   const prevRequest = useRef<Promise<unknown> | undefined>(undefined);
   const nextRequest = useRef<(() => void) | undefined>(undefined);
 
-  useEffect(function performLoad() {
-    if (prevRequest.current) {
-      nextRequest.current = performLoad;
-      return;
-    }
+  useEffect(
+    function performLoad() {
+      if (prevRequest.current) {
+        nextRequest.current = performLoad;
+        return;
+      }
 
-    setIsProcessing(true);
-    prevRequest.current = props
-      .load()
-      .catch(() => {})
-      .then(() => {
-        const reload = nextRequest.current;
-        prevRequest.current = undefined;
-        nextRequest.current = undefined;
+      setIsProcessing(true);
+      prevRequest.current = props
+        .load()
+        .catch(() => {})
+        .then(() => {
+          const reload = nextRequest.current;
+          prevRequest.current = undefined;
+          nextRequest.current = undefined;
 
-        if (reload) {
-          reload();
-        } else {
-          setIsProcessing(false);
-        }
-      });
-  }, props.loadDeps);
+          if (reload) {
+            reload();
+          } else {
+            setIsProcessing(false);
+          }
+        });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    props.loadDeps
+  );
 
   if (!isProcessing) {
     return null;

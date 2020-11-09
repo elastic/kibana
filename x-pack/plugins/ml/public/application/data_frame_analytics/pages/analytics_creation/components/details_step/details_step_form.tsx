@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useRef } from 'react';
+import React, { FC, Fragment, useRef, useEffect, useState } from 'react';
+import { debounce } from 'lodash';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -21,6 +22,18 @@ import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/us
 import { JOB_ID_MAX_LENGTH } from '../../../../../../../common/constants/validation';
 import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
+import { ml } from '../../../../../services/ml_api_service';
+import { extractErrorMessage } from '../../../../../../../common/util/errors';
+
+const DEFAULT_RESULTS_FIELD = 'ml';
+
+const indexNameExistsMessage = i18n.translate(
+  'xpack.ml.dataframe.analytics.create.destinationIndexHelpText',
+  {
+    defaultMessage:
+      'An index with this name already exists. Be aware that running this analytics job will modify this destination index.',
+  }
+);
 
 export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   actions,
@@ -28,12 +41,12 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   setCurrentStep,
 }) => {
   const {
-    services: { docLinks },
+    services: { docLinks, notifications },
   } = useMlKibana();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
 
   const { setFormState } = actions;
-  const { form, isJobCreated } = state;
+  const { form, cloneJob, hasSwitchedToEditor, isJobCreated } = state;
   const {
     createIndexPattern,
     description,
@@ -47,7 +60,17 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     jobIdExists,
     jobIdInvalidMaxLength,
     jobIdValid,
+    resultsField,
   } = form;
+
+  const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
+    cloneJob === undefined && hasSwitchedToEditor === false
+  );
+  const [useResultsFieldDefault, setUseResultsFieldDefault] = useState<boolean>(
+    (cloneJob === undefined && hasSwitchedToEditor === false && resultsField === undefined) ||
+      (cloneJob !== undefined && resultsField === DEFAULT_RESULTS_FIELD)
+  );
+
   const forceInput = useRef<HTMLInputElement | null>(null);
 
   const isStepInvalid =
@@ -57,6 +80,44 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     destinationIndexNameEmpty === true ||
     destinationIndexNameValid === false ||
     (destinationIndexPatternTitleExists === true && createIndexPattern === true);
+
+  const debouncedIndexCheck = debounce(async () => {
+    try {
+      const { exists } = await ml.checkIndexExists({ index: destinationIndex });
+      setFormState({ destinationIndexNameExists: exists });
+    } catch (e) {
+      notifications.toasts.addDanger(
+        i18n.translate('xpack.ml.dataframe.analytics.create.errorCheckingIndexExists', {
+          defaultMessage: 'The following error occurred getting the existing index names: {error}',
+          values: { error: extractErrorMessage(e) },
+        })
+      );
+    }
+  }, 400);
+
+  useEffect(() => {
+    if (destinationIndexNameValid === true) {
+      debouncedIndexCheck();
+    } else if (
+      typeof destinationIndex === 'string' &&
+      destinationIndex.trim() === '' &&
+      destinationIndexNameExists === true
+    ) {
+      setFormState({ destinationIndexNameExists: false });
+    }
+
+    return () => {
+      debouncedIndexCheck.cancel();
+    };
+  }, [destinationIndex]);
+
+  useEffect(() => {
+    if (destIndexSameAsId === true && !jobIdEmpty && jobIdValid) {
+      setFormState({ destinationIndex: jobId });
+    } else if (destIndexSameAsId === false && hasSwitchedToEditor === false) {
+      setFormState({ destinationIndex: '' });
+    }
+  }, [destIndexSameAsId, jobId]);
 
   return (
     <Fragment>
@@ -143,58 +204,114 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
       </EuiFormRow>
       <EuiFormRow
         fullWidth
-        label={i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexLabel', {
-          defaultMessage: 'Destination index',
-        })}
-        isInvalid={
-          destinationIndexNameEmpty || (!destinationIndexNameEmpty && !destinationIndexNameValid)
-        }
         helpText={
-          destinationIndexNameExists &&
-          i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexHelpText', {
-            defaultMessage:
-              'An index with this name already exists. Be aware that running this analytics job will modify this destination index.',
-          })
-        }
-        error={
-          !destinationIndexNameEmpty &&
-          !destinationIndexNameValid && [
-            <Fragment>
-              {i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexInvalidError', {
-                defaultMessage: 'Invalid destination index name.',
-              })}
-              <br />
-              <EuiLink
-                href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-create-index.html#indices-create-index`}
-                target="_blank"
-              >
-                {i18n.translate(
-                  'xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink',
-                  {
-                    defaultMessage: 'Learn more about index name limitations.',
-                  }
-                )}
-              </EuiLink>
-            </Fragment>,
-          ]
+          destIndexSameAsId === true && destinationIndexNameExists && indexNameExistsMessage
         }
       >
-        <EuiFieldText
-          fullWidth
+        <EuiSwitch
           disabled={isJobCreated}
-          placeholder="destination index"
-          value={destinationIndex}
-          onChange={(e) => setFormState({ destinationIndex: e.target.value })}
-          aria-label={i18n.translate(
-            'xpack.ml.dataframe.analytics.create.destinationIndexInputAriaLabel',
-            {
-              defaultMessage: 'Choose a unique destination index name.',
-            }
-          )}
-          isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
-          data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
+          name="mlDataFrameAnalyticsDestIndexSameAsId"
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.DestIndexSameAsIdLabel', {
+            defaultMessage: 'Destination index same as job ID',
+          })}
+          checked={destIndexSameAsId === true}
+          onChange={() => setDestIndexSameAsId(!destIndexSameAsId)}
+          data-test-subj="mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch"
         />
       </EuiFormRow>
+      {destIndexSameAsId === false && (
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexLabel', {
+            defaultMessage: 'Destination index',
+          })}
+          isInvalid={
+            destinationIndexNameEmpty || (!destinationIndexNameEmpty && !destinationIndexNameValid)
+          }
+          helpText={destinationIndexNameExists && indexNameExistsMessage}
+          error={
+            !destinationIndexNameEmpty &&
+            !destinationIndexNameValid && [
+              <Fragment>
+                {i18n.translate(
+                  'xpack.ml.dataframe.analytics.create.destinationIndexInvalidError',
+                  {
+                    defaultMessage: 'Invalid destination index name.',
+                  }
+                )}
+                <br />
+                <EuiLink
+                  href={`${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/indices-create-index.html#indices-create-index`}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink',
+                    {
+                      defaultMessage: 'Learn more about index name limitations.',
+                    }
+                  )}
+                </EuiLink>
+              </Fragment>,
+            ]
+          }
+        >
+          <EuiFieldText
+            fullWidth
+            disabled={isJobCreated}
+            placeholder="destination index"
+            value={destinationIndex}
+            onChange={(e) => setFormState({ destinationIndex: e.target.value })}
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.destinationIndexInputAriaLabel',
+              {
+                defaultMessage: 'Choose a unique destination index name.',
+              }
+            )}
+            isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
+            data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
+          />
+        </EuiFormRow>
+      )}
+      <EuiFormRow fullWidth>
+        <EuiSwitch
+          disabled={isJobCreated}
+          name="mlDataFrameAnalyticsUseResultsFieldDefault"
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.UseResultsFieldDefaultLabel', {
+            defaultMessage: 'Use results field default value "{defaultValue}"',
+            values: { defaultValue: DEFAULT_RESULTS_FIELD },
+          })}
+          checked={useResultsFieldDefault === true}
+          onChange={() => setUseResultsFieldDefault(!useResultsFieldDefault)}
+          data-test-subj="mlAnalyticsCreateJobWizardUseResultsFieldDefault"
+        />
+      </EuiFormRow>
+      {useResultsFieldDefault === false && (
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldLabel', {
+            defaultMessage: 'Results field',
+          })}
+          helpText={i18n.translate('xpack.ml.dataframe.analytics.create.resultsFieldHelpText', {
+            defaultMessage:
+              'Defines the name of the field in which to store the results of the analysis. Defaults to ml.',
+          })}
+        >
+          <EuiFieldText
+            disabled={isJobCreated}
+            placeholder="results field"
+            value={resultsField}
+            onChange={(e) => setFormState({ resultsField: e.target.value })}
+            aria-label={i18n.translate(
+              'xpack.ml.dataframe.analytics.create.resultsFieldInputAriaLabel',
+              {
+                defaultMessage:
+                  'The name of the field in which to store the results of the analysis.',
+              }
+            )}
+            data-test-subj="mlAnalyticsCreateJobWizardResultsFieldInput"
+          />
+        </EuiFormRow>
+      )}
       <EuiFormRow
         fullWidth
         isInvalid={

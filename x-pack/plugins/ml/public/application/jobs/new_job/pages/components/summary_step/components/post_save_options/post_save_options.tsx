@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { JobRunner } from '../../../../../common/job_runner';
 import { useMlKibana } from '../../../../../../../contexts/kibana';
-import { getErrorMessage } from '../../../../../../../../../common/util/errors';
+import { extractErrorMessage } from '../../../../../../../../../common/util/errors';
 
 // @ts-ignore
 import { CreateWatchFlyout } from '../../../../../../jobs_list/components/create_watch_flyout/index';
@@ -70,7 +70,7 @@ export const PostSaveOptions: FC<Props> = ({ jobRunner }) => {
               defaultMessage: `Error starting job`,
             }
           ),
-          text: getErrorMessage(error),
+          text: extractErrorMessage(error),
         });
       }
     }

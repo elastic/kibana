@@ -7,7 +7,7 @@
 import { handleResponse } from '../get_clusters_state';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import { set } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
 
 const clusters = [
   {

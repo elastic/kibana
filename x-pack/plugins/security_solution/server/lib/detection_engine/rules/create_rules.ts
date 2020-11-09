@@ -6,10 +6,9 @@
 
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { Alert } from '../../../../../alerts/common';
-import { APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
 import { CreateRulesOptions } from './types';
 import { addTags } from './add_tags';
-import { hasListsFeature } from '../feature_flags';
 
 export const createRules = async ({
   alertsClient,
@@ -18,6 +17,7 @@ export const createRules = async ({
   buildingBlockType,
   description,
   enabled,
+  eventCategoryOverride,
   falsePositives,
   from,
   query,
@@ -43,6 +43,14 @@ export const createRules = async ({
   severityMapping,
   tags,
   threat,
+  threatFilters,
+  threatIndex,
+  threatLanguage,
+  concurrentSearches,
+  itemsPerSearch,
+  threatQuery,
+  threatMapping,
+  threshold,
   timestampOverride,
   to,
   type,
@@ -52,14 +60,12 @@ export const createRules = async ({
   exceptionsList,
   actions,
 }: CreateRulesOptions): Promise<Alert> => {
-  // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
-  const exceptionsListParam = hasListsFeature() ? { exceptionsList } : {};
   return alertsClient.create({
     data: {
       name,
       tags: addTags(tags, ruleId, immutable),
       alertTypeId: SIGNALS_ID,
-      consumer: APP_ID,
+      consumer: SERVER_APP_ID,
       params: {
         anomalyThreshold,
         author,
@@ -67,6 +73,7 @@ export const createRules = async ({
         description,
         ruleId,
         index,
+        eventCategoryOverride,
         falsePositives,
         from,
         immutable,
@@ -87,13 +94,21 @@ export const createRules = async ({
         severity,
         severityMapping,
         threat,
+        threshold,
+        threatFilters,
+        threatIndex,
+        threatQuery,
+        concurrentSearches,
+        itemsPerSearch,
+        threatMapping,
+        threatLanguage,
         timestampOverride,
         to,
         type,
         references,
         note,
         version,
-        ...exceptionsListParam,
+        exceptionsList,
       },
       schedule: { interval },
       enabled,

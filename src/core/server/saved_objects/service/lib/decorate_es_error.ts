@@ -17,65 +17,71 @@
  * under the License.
  */
 
-import * as legacyElasticsearch from 'elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { get } from 'lodash';
 
-const {
-  ConnectionFault,
-  ServiceUnavailable,
-  NoConnections,
-  RequestTimeout,
-  Conflict,
-  // @ts-expect-error
-  401: NotAuthorized,
-  // @ts-expect-error
-  403: Forbidden,
-  // @ts-expect-error
-  413: RequestEntityTooLarge,
-  NotFound,
-  BadRequest,
-} = legacyElasticsearch.errors;
+const responseErrors = {
+  isServiceUnavailable: (statusCode: number) => statusCode === 503,
+  isConflict: (statusCode: number) => statusCode === 409,
+  isNotAuthorized: (statusCode: number) => statusCode === 401,
+  isForbidden: (statusCode: number) => statusCode === 403,
+  isRequestEntityTooLarge: (statusCode: number) => statusCode === 413,
+  isNotFound: (statusCode: number) => statusCode === 404,
+  isBadRequest: (statusCode: number) => statusCode === 400,
+  isTooManyRequests: (statusCode: number) => statusCode === 429,
+};
+const { ConnectionError, NoLivingConnectionsError, TimeoutError } = esErrors;
 const SCRIPT_CONTEXT_DISABLED_REGEX = /(?:cannot execute scripts using \[)([a-z]*)(?:\] context)/;
 const INLINE_SCRIPTS_DISABLED_MESSAGE = 'cannot execute [inline] scripts';
 
 import { SavedObjectsErrorHelpers } from './errors';
 
-export function decorateEsError(error: Error) {
+type EsErrors =
+  | esErrors.ConnectionError
+  | esErrors.NoLivingConnectionsError
+  | esErrors.TimeoutError
+  | esErrors.ResponseError;
+
+export function decorateEsError(error: EsErrors) {
   if (!(error instanceof Error)) {
     throw new Error('Expected an instance of Error');
   }
 
   const { reason } = get(error, 'body.error', { reason: undefined }) as { reason?: string };
   if (
-    error instanceof ConnectionFault ||
-    error instanceof ServiceUnavailable ||
-    error instanceof NoConnections ||
-    error instanceof RequestTimeout
+    error instanceof ConnectionError ||
+    error instanceof NoLivingConnectionsError ||
+    error instanceof TimeoutError ||
+    responseErrors.isServiceUnavailable(error.statusCode)
   ) {
     return SavedObjectsErrorHelpers.decorateEsUnavailableError(error, reason);
   }
 
-  if (error instanceof Conflict) {
+  if (responseErrors.isConflict(error.statusCode)) {
     return SavedObjectsErrorHelpers.decorateConflictError(error, reason);
   }
 
-  if (error instanceof NotAuthorized) {
+  if (responseErrors.isNotAuthorized(error.statusCode)) {
     return SavedObjectsErrorHelpers.decorateNotAuthorizedError(error, reason);
   }
 
-  if (error instanceof Forbidden) {
+  if (responseErrors.isForbidden(error.statusCode)) {
     return SavedObjectsErrorHelpers.decorateForbiddenError(error, reason);
   }
 
-  if (error instanceof RequestEntityTooLarge) {
+  if (responseErrors.isRequestEntityTooLarge(error.statusCode)) {
     return SavedObjectsErrorHelpers.decorateRequestEntityTooLargeError(error, reason);
   }
 
-  if (error instanceof NotFound) {
+  if (responseErrors.isNotFound(error.statusCode)) {
     return SavedObjectsErrorHelpers.createGenericNotFoundError();
   }
 
-  if (error instanceof BadRequest) {
+  if (responseErrors.isTooManyRequests(error.statusCode)) {
+    return SavedObjectsErrorHelpers.decorateTooManyRequestsError(error, reason);
+  }
+
+  if (responseErrors.isBadRequest(error.statusCode)) {
     if (
       SCRIPT_CONTEXT_DISABLED_REGEX.test(reason || '') ||
       reason === INLINE_SCRIPTS_DISABLED_MESSAGE

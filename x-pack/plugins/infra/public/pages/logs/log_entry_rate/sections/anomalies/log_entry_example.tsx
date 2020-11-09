@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useState, useContext } from 'react';
 import moment from 'moment';
 import { encode } from 'rison-node';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +28,7 @@ import { useLinkProps } from '../../../../../hooks/use_link_props';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import { partitionField } from '../../../../../../common/log_analysis/job_parameters';
 import { getEntitySpecificSingleMetricViewerLink } from '../../../../../components/logging/log_analysis_results/analyze_in_ml_button';
-import { LogEntryRateExample } from '../../../../../../common/http_api/log_analysis/results';
+import { LogEntryExample } from '../../../../../../common/http_api/log_analysis/results';
 import {
   LogColumnConfiguration,
   isTimestampLogColumnConfiguration,
@@ -36,6 +36,8 @@ import {
   isMessageLogColumnConfiguration,
 } from '../../../../../utils/source_configuration';
 import { localizedDate } from '../../../../../../common/formatters/datetime';
+import { LogEntryAnomaly } from '../../../../../../common/http_api';
+import { LogFlyout } from '../../../../../containers/logs/log_flyout';
 
 export const exampleMessageScale = 'medium' as const;
 export const exampleTimestampFormat = 'time' as const;
@@ -43,6 +45,13 @@ export const exampleTimestampFormat = 'time' as const;
 const MENU_LABEL = i18n.translate('xpack.infra.logAnomalies.logEntryExamplesMenuLabel', {
   defaultMessage: 'View actions for log entry',
 });
+
+const VIEW_DETAILS_LABEL = i18n.translate(
+  'xpack.infra.logs.analysis.logEntryExamplesViewDetailsLabel',
+  {
+    defaultMessage: 'View details',
+  }
+);
 
 const VIEW_IN_STREAM_LABEL = i18n.translate(
   'xpack.infra.logs.analysis.logEntryExamplesViewInStreamLabel',
@@ -58,19 +67,19 @@ const VIEW_ANOMALY_IN_ML_LABEL = i18n.translate(
   }
 );
 
-type Props = LogEntryRateExample & {
+type Props = LogEntryExample & {
   timeRange: TimeRange;
-  jobId: string;
+  anomaly: LogEntryAnomaly;
 };
 
-export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
+export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   id,
   dataset,
   message,
   timestamp,
   tiebreaker,
   timeRange,
-  jobId,
+  anomaly,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -79,12 +88,10 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
   const setItemIsHovered = useCallback(() => setIsHovered(true), []);
   const setItemIsNotHovered = useCallback(() => setIsHovered(false), []);
 
-  // the dataset must be encoded for the field column and the empty value must
-  // be turned into a user-friendly value
-  const encodedDatasetFieldValue = useMemo(
-    () => JSON.stringify(getFriendlyNameForPartitionId(dataset)),
-    [dataset]
-  );
+  const { setFlyoutVisibility, setFlyoutId } = useContext(LogFlyout.Context);
+
+  // handle special cases for the dataset value
+  const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
 
   const viewInStreamLinkProps = useLinkProps({
     app: 'logs',
@@ -107,8 +114,9 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
   });
 
   const viewAnomalyInMachineLearningLinkProps = useLinkProps(
-    getEntitySpecificSingleMetricViewerLink(jobId, timeRange, {
+    getEntitySpecificSingleMetricViewerLink(anomaly.jobId, timeRange, {
       [partitionField]: dataset,
+      ...(anomaly.categoryId ? { mlcategory: anomaly.categoryId } : {}),
     })
   );
 
@@ -118,6 +126,13 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
     }
 
     return [
+      {
+        label: VIEW_DETAILS_LABEL,
+        onClick: () => {
+          setFlyoutId(id);
+          setFlyoutVisibility(true);
+        },
+      },
       {
         label: VIEW_IN_STREAM_LABEL,
         onClick: viewInStreamLinkProps.onClick,
@@ -129,7 +144,13 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
         href: viewAnomalyInMachineLearningLinkProps.href,
       },
     ];
-  }, [viewInStreamLinkProps, viewAnomalyInMachineLearningLinkProps]);
+  }, [
+    id,
+    setFlyoutId,
+    setFlyoutVisibility,
+    viewInStreamLinkProps,
+    viewAnomalyInMachineLearningLinkProps,
+  ]);
 
   return (
     <LogEntryRowWrapper
@@ -144,7 +165,7 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
         <LogEntryMessageColumn
           columnValue={{
             columnId: messageColumnId,
-            message: [{ field: 'message', value: message, highlights: [] }],
+            message: [{ field: 'message', value: [message], highlights: [] }],
           }}
           highlights={noHighlights}
           isActiveHighlight={false}
@@ -156,7 +177,7 @@ export const LogEntryRateExampleMessage: React.FunctionComponent<Props> = ({
           columnValue={{
             columnId: datasetColumnId,
             field: 'event.dataset',
-            value: encodedDatasetFieldValue,
+            value: [humanFriendlyDataset],
             highlights: [],
           }}
           highlights={noHighlights}
@@ -233,11 +254,11 @@ export const exampleMessageColumnConfigurations: LogColumnConfiguration[] = [
   },
 ];
 
-export const LogEntryRateExampleMessageHeaders: React.FunctionComponent<{
+export const LogEntryExampleMessageHeaders: React.FunctionComponent<{
   dateTime: number;
 }> = ({ dateTime }) => {
   return (
-    <LogEntryRateExampleMessageHeadersWrapper>
+    <LogEntryExampleMessageHeadersWrapper>
       <>
         {exampleMessageColumnConfigurations.map((columnConfiguration) => {
           if (isTimestampLogColumnConfiguration(columnConfiguration)) {
@@ -280,11 +301,11 @@ export const LogEntryRateExampleMessageHeaders: React.FunctionComponent<{
           {null}
         </LogColumnHeader>
       </>
-    </LogEntryRateExampleMessageHeadersWrapper>
+    </LogEntryExampleMessageHeadersWrapper>
   );
 };
 
-const LogEntryRateExampleMessageHeadersWrapper = euiStyled(LogColumnHeadersWrapper)`
+const LogEntryExampleMessageHeadersWrapper = euiStyled(LogColumnHeadersWrapper)`
   border-bottom: none;
   box-shadow: none;
   padding-right: 0;

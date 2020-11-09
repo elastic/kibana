@@ -16,12 +16,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { TutorialService, TutorialServiceSetup } from './tutorial_service';
 
 const createSetupMock = (): jest.Mocked<TutorialServiceSetup> => {
   const setup = {
     setVariable: jest.fn(),
+    registerDirectoryNotice: jest.fn(),
+    registerDirectoryHeaderLink: jest.fn(),
+    registerModuleNotice: jest.fn(),
   };
   return setup;
 };
@@ -30,6 +33,9 @@ const createMock = (): jest.Mocked<PublicMethodsOf<TutorialService>> => {
   const service = {
     setup: jest.fn(),
     getVariables: jest.fn(() => ({})),
+    getDirectoryNotices: jest.fn(() => []),
+    getDirectoryHeaderLinks: jest.fn(() => []),
+    getModuleNotices: jest.fn(() => []),
   };
   service.setup.mockImplementation(createSetupMock);
   return service;

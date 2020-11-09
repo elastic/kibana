@@ -17,9 +17,10 @@
  * under the License.
  */
 
-import * as _ from 'lodash';
+import { cloneDeep } from 'lodash';
 import * as ts from 'typescript';
 import { parsedWorkingCollector } from './__fixture__/parsed_working_collector';
+import { parsedIndexedInterfaceWithNoMatchingSchema } from './__fixture__/parsed_indexed_interface_with_not_matching_schema';
 import { checkCompatibleTypeDescriptor, checkMatchingMapping } from './check_collector_integrity';
 import * as path from 'path';
 import { readFile } from 'fs';
@@ -42,8 +43,8 @@ describe('checkMatchingMapping', () => {
   describe('Collector change', () => {
     it('returns diff on mismatching parsedCollections and stored mapping', async () => {
       const mockSchema = await parseJsonFile('mock_schema.json');
-      const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
-      const fieldMapping = { type: 'number' };
+      const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
+      const fieldMapping = { type: 'long' };
       malformedParsedCollector[1].schema.value.flat = fieldMapping;
 
       const diffs = checkMatchingMapping([malformedParsedCollector], mockSchema);
@@ -58,11 +59,11 @@ describe('checkMatchingMapping', () => {
 
     it('returns diff on unknown parsedCollections', async () => {
       const mockSchema = await parseJsonFile('mock_schema.json');
-      const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
+      const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
       const collectorName = 'New Collector in town!';
-      const collectorMapping = { some_usage: { type: 'number' } };
+      const collectorMapping = { some_usage: { type: 'long' } };
       malformedParsedCollector[1].collectorName = collectorName;
-      malformedParsedCollector[1].schema.value = { some_usage: { type: 'number' } };
+      malformedParsedCollector[1].schema.value = { some_usage: { type: 'long' } };
 
       const diffs = checkMatchingMapping([malformedParsedCollector], mockSchema);
       expect(diffs).toEqual({
@@ -82,9 +83,23 @@ describe('checkCompatibleTypeDescriptor', () => {
     expect(incompatibles).toHaveLength(0);
   });
 
+  it('returns diff on indexed interface with no matching schema', () => {
+    const incompatibles = checkCompatibleTypeDescriptor([
+      parsedIndexedInterfaceWithNoMatchingSchema,
+    ]);
+    expect(incompatibles).toHaveLength(1);
+    const { diff, message } = incompatibles[0];
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    expect(diff).toEqual({ '.@@INDEX@@.count_2.kind': 'number' });
+    expect(message).toHaveLength(1);
+    expect(message).toEqual([
+      'incompatible Type key (Usage..@@INDEX@@.count_2): expected (undefined) got ("number").',
+    ]);
+  });
+
   describe('Interface Change', () => {
     it('returns diff on incompatible type descriptor with mapping', () => {
-      const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
+      const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
       malformedParsedCollector[1].fetch.typeDescriptor.flat.kind = ts.SyntaxKind.BooleanKeyword;
       const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
       expect(incompatibles).toHaveLength(1);
@@ -101,14 +116,14 @@ describe('checkCompatibleTypeDescriptor', () => {
 
   describe('Mapping change', () => {
     it('returns no diff when mapping change between text and keyword', () => {
-      const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
+      const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
       malformedParsedCollector[1].schema.value.flat.type = 'text';
       const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
       expect(incompatibles).toHaveLength(0);
     });
 
     it('returns diff on incompatible type descriptor with mapping', () => {
-      const malformedParsedCollector = _.cloneDeep(parsedWorkingCollector);
+      const malformedParsedCollector = cloneDeep(parsedWorkingCollector);
       malformedParsedCollector[1].schema.value.flat.type = 'boolean';
       const incompatibles = checkCompatibleTypeDescriptor([malformedParsedCollector]);
       expect(incompatibles).toHaveLength(1);

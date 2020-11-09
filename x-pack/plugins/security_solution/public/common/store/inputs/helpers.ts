@@ -9,6 +9,22 @@ import { get } from 'lodash/fp';
 import { InputsModel, TimeRange, Refetch, RefetchKql, InspectQuery } from './model';
 import { InputsModelId } from './constants';
 
+export const updateInputFullScreen = (
+  inputId: InputsModelId,
+  fullScreen: boolean,
+  state: InputsModel
+): InputsModel => ({
+  ...state,
+  global: {
+    ...state.global,
+    fullScreen: inputId === 'global' ? fullScreen : state.global.fullScreen,
+  },
+  timeline: {
+    ...state.timeline,
+    fullScreen: inputId === 'timeline' ? fullScreen : state.timeline.fullScreen,
+  },
+});
+
 export const updateInputTimerange = (
   inputId: InputsModelId,
   timerange: TimeRange,

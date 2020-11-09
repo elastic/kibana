@@ -8,43 +8,51 @@ import { EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
+import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
-import { useUrlParams } from '../../../hooks/useUrlParams';
 import { EuiTabLink } from '../../shared/EuiTabLink';
 import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceNodeOverviewLink } from '../../shared/Links/apm/ServiceNodeOverviewLink';
+import { ServiceOverviewLink } from '../../shared/Links/apm/service_overview_link';
 import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceMetrics } from '../ServiceMetrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
+import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../TransactionOverview';
-import { RumOverview } from '../RumDashboard';
-import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
 
 interface Props {
+  serviceName: string;
   tab:
-    | 'transactions'
     | 'errors'
     | 'metrics'
     | 'nodes'
+    | 'overview'
     | 'service-map'
-    | 'rum-overview';
+    | 'transactions';
 }
 
-export function ServiceDetailTabs({ tab }: Props) {
-  const { urlParams } = useUrlParams();
-  const { serviceName } = urlParams;
+export function ServiceDetailTabs({ serviceName, tab }: Props) {
   const { agentName } = useAgentName();
-  const { serviceMapEnabled } = useApmPluginContext().config;
+  const { uiSettings } = useApmPluginContext().core;
 
-  if (!serviceName) {
-    // this never happens, urlParams type is not accurate enough
-    throw new Error('Service name was not defined');
-  }
+  const overviewTab = {
+    link: (
+      <ServiceOverviewLink serviceName={serviceName}>
+        {i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
+          defaultMessage: 'Overview',
+        })}
+      </ServiceOverviewLink>
+    ),
+    render: () => (
+      <ServiceOverview agentName={agentName} serviceName={serviceName} />
+    ),
+    name: 'overview',
+  };
 
   const transactionsTab = {
     link: (
@@ -54,7 +62,7 @@ export function ServiceDetailTabs({ tab }: Props) {
         })}
       </TransactionOverviewLink>
     ),
-    render: () => <TransactionOverview />,
+    render: () => <TransactionOverview serviceName={serviceName} />,
     name: 'transactions',
   };
 
@@ -67,40 +75,10 @@ export function ServiceDetailTabs({ tab }: Props) {
       </ErrorOverviewLink>
     ),
     render: () => {
-      return <ErrorGroupOverview />;
+      return <ErrorGroupOverview serviceName={serviceName} />;
     },
     name: 'errors',
   };
-
-  const tabs = [transactionsTab, errorsTab];
-
-  if (isJavaAgentName(agentName)) {
-    const nodesListTab = {
-      link: (
-        <ServiceNodeOverviewLink serviceName={serviceName}>
-          {i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
-            defaultMessage: 'JVMs',
-          })}
-        </ServiceNodeOverviewLink>
-      ),
-      render: () => <ServiceNodeOverview />,
-      name: 'nodes',
-    };
-    tabs.push(nodesListTab);
-  } else if (agentName && !isRumAgentName(agentName)) {
-    const metricsTab = {
-      link: (
-        <MetricOverviewLink serviceName={serviceName}>
-          {i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
-            defaultMessage: 'Metrics',
-          })}
-        </MetricOverviewLink>
-      ),
-      render: () => <ServiceMetrics agentName={agentName} />,
-      name: 'metrics',
-    };
-    tabs.push(metricsTab);
-  }
 
   const serviceMapTab = {
     link: (
@@ -114,22 +92,40 @@ export function ServiceDetailTabs({ tab }: Props) {
     name: 'service-map',
   };
 
-  if (serviceMapEnabled) {
-    tabs.push(serviceMapTab);
+  const tabs = [transactionsTab, errorsTab, serviceMapTab];
+
+  if (uiSettings.get(enableServiceOverview)) {
+    tabs.unshift(overviewTab);
   }
 
-  if (isRumAgentName(agentName)) {
-    tabs.push({
+  if (isJavaAgentName(agentName)) {
+    const nodesListTab = {
       link: (
-        <RumOverviewLink serviceName={serviceName}>
-          {i18n.translate('xpack.apm.home.rumTabLabel', {
-            defaultMessage: 'Real User Monitoring',
+        <ServiceNodeOverviewLink serviceName={serviceName}>
+          {i18n.translate('xpack.apm.serviceDetails.nodesTabLabel', {
+            defaultMessage: 'JVMs',
           })}
-        </RumOverviewLink>
+        </ServiceNodeOverviewLink>
       ),
-      render: () => <RumOverview />,
-      name: 'rum-overview',
-    });
+      render: () => <ServiceNodeOverview serviceName={serviceName} />,
+      name: 'nodes',
+    };
+    tabs.push(nodesListTab);
+  } else if (agentName && !isRumAgentName(agentName)) {
+    const metricsTab = {
+      link: (
+        <MetricOverviewLink serviceName={serviceName}>
+          {i18n.translate('xpack.apm.serviceDetails.metricsTabLabel', {
+            defaultMessage: 'Metrics',
+          })}
+        </MetricOverviewLink>
+      ),
+      render: () => (
+        <ServiceMetrics agentName={agentName} serviceName={serviceName} />
+      ),
+      name: 'metrics',
+    };
+    tabs.push(metricsTab);
   }
 
   const selectedTab = tabs.find((serviceTab) => serviceTab.name === tab);

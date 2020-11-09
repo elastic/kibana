@@ -21,7 +21,11 @@ import { IRouter } from 'src/core/server';
 import { registerImportRoute } from './import';
 import { registerExportRoute } from './export';
 
-export const registerRoutes = (router: IRouter, kibanaVersion: string) => {
+export const registerRoutes = (
+  router: IRouter,
+  kibanaVersion: string,
+  maxImportPayloadBytes: number
+) => {
   registerExportRoute(router, kibanaVersion);
-  registerImportRoute(router);
+  registerImportRoute(router, maxImportPayloadBytes);
 };

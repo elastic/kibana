@@ -11,21 +11,22 @@ import { IFieldType, IIndexPattern } from '../../../../../../../../src/plugins/d
 import { useKibana } from '../../../../common/lib/kibana';
 import { OperatorTypeEnum } from '../../../../lists_plugin_deps';
 
-export type UseFieldValueAutocompleteReturn = [
-  boolean,
-  string[],
-  (args: {
-    fieldSelected: IFieldType | undefined;
-    value: string | string[] | undefined;
-    patterns: IIndexPattern | undefined;
-    signal: AbortSignal;
-  }) => void
-];
+interface FuncArgs {
+  fieldSelected: IFieldType | undefined;
+  value: string | string[] | undefined;
+  searchQuery: string;
+  patterns: IIndexPattern | undefined;
+}
+
+type Func = (args: FuncArgs) => void;
+
+export type UseFieldValueAutocompleteReturn = [boolean, boolean, string[], Func | null];
 
 export interface UseFieldValueAutocompleteProps {
   selectedField: IFieldType | undefined;
   operatorType: OperatorTypeEnum;
   fieldValue: string | string[] | undefined;
+  query: string;
   indexPattern: IIndexPattern | undefined;
 }
 /**
@@ -36,67 +37,82 @@ export const useFieldValueAutocomplete = ({
   selectedField,
   operatorType,
   fieldValue,
+  query,
   indexPattern,
 }: UseFieldValueAutocompleteProps): UseFieldValueAutocompleteReturn => {
   const { services } = useKibana();
   const [isLoading, setIsLoading] = useState(false);
+  const [isSuggestingValues, setIsSuggestingValues] = useState(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const updateSuggestions = useRef(
-    debounce(
-      async ({
-        fieldSelected,
-        value,
-        patterns,
-        signal,
-      }: {
-        fieldSelected: IFieldType | undefined;
-        value: string | string[] | undefined;
-        patterns: IIndexPattern | undefined;
-        signal: AbortSignal;
-      }) => {
-        if (fieldSelected == null || patterns == null) {
-          return;
-        }
-
-        setIsLoading(true);
-
-        // Fields of type boolean should only display two options
-        if (fieldSelected.type === 'boolean') {
-          setIsLoading(false);
-          setSuggestions(['true', 'false']);
-          return;
-        }
-
-        const newSuggestions = await services.data.autocomplete.getValueSuggestions({
-          indexPattern: patterns,
-          field: fieldSelected,
-          query: '',
-          signal,
-        });
-
-        setIsLoading(false);
-        setSuggestions(newSuggestions);
-      },
-      500
-    )
-  );
+  const updateSuggestions = useRef<Func | null>(null);
 
   useEffect(() => {
+    let isSubscribed = true;
     const abortCtrl = new AbortController();
 
+    const fetchSuggestions = debounce(
+      async ({ fieldSelected, value, searchQuery, patterns }: FuncArgs) => {
+        try {
+          if (isSubscribed) {
+            if (fieldSelected == null || patterns == null) {
+              return;
+            }
+
+            if (fieldSelected.type === 'boolean') {
+              setIsSuggestingValues(false);
+              return;
+            }
+
+            setIsLoading(true);
+
+            const field =
+              fieldSelected.subType != null && fieldSelected.subType.nested != null
+                ? {
+                    ...fieldSelected,
+                    name: `${fieldSelected.subType.nested.path}.${fieldSelected.name}`,
+                  }
+                : fieldSelected;
+
+            const newSuggestions = await services.data.autocomplete.getValueSuggestions({
+              indexPattern: patterns,
+              field,
+              query: searchQuery,
+              signal: abortCtrl.signal,
+            });
+
+            if (newSuggestions.length === 0) {
+              setIsSuggestingValues(false);
+            }
+
+            setIsLoading(false);
+            setSuggestions([...newSuggestions]);
+          }
+        } catch (error) {
+          if (isSubscribed) {
+            setSuggestions([]);
+            setIsLoading(false);
+          }
+        }
+      },
+      500
+    );
+
     if (operatorType !== OperatorTypeEnum.EXISTS) {
-      updateSuggestions.current({
+      fetchSuggestions({
         fieldSelected: selectedField,
         value: fieldValue,
+        searchQuery: query,
         patterns: indexPattern,
-        signal: abortCtrl.signal,
       });
     }
 
+    updateSuggestions.current = fetchSuggestions;
+
     return (): void => {
+      isSubscribed = false;
       abortCtrl.abort();
     };
-  }, [updateSuggestions, selectedField, operatorType, fieldValue, indexPattern]);
+  }, [services.data.autocomplete, selectedField, operatorType, fieldValue, indexPattern, query]);
 
-  return [isLoading, suggestions, updateSuggestions.current];
+  return [isLoading, isSuggestingValues, suggestions, updateSuggestions.current];
 };

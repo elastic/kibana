@@ -17,3 +17,5 @@ export const plugin: PluginInitializer<MapsPluginSetup, MapsPluginStart> = (
 };
 
 export { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+
+export { RenderTooltipContentParams } from './classes/tooltips/tooltip_property';

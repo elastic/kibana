@@ -8,11 +8,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CreateCustomLinkButton } from './CreateCustomLinkButton';
 
-export const EmptyPrompt = ({
+export function EmptyPrompt({
   onCreateCustomLinkClick,
 }: {
   onCreateCustomLinkClick: () => void;
-}) => {
+}) {
   return (
     <EuiEmptyPrompt
       iconType="link"
@@ -43,4 +43,4 @@ export const EmptyPrompt = ({
       actions={<CreateCustomLinkButton onClick={onCreateCustomLinkClick} />}
     />
   );
-};
+}

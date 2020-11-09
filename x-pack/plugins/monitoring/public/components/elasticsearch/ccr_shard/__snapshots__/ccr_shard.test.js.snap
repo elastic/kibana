@@ -142,6 +142,8 @@ exports[`CcrShard that it renders normally 1`] = `
       }
       id="ccrLatestStat"
       initialIsOpen={false}
+      isLoading={false}
+      isLoadingMessage={false}
       paddingSize="l"
     >
       <EuiTitle

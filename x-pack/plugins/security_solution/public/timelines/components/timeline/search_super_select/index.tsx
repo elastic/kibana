@@ -4,19 +4,41 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiInputPopover, EuiSelectableOption, EuiSuperSelect } from '@elastic/eui';
+import { EuiInputPopover, EuiSelectableOption, EuiFieldText } from '@elastic/eui';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { createGlobalStyle } from 'styled-components';
+import styled from 'styled-components';
 
 import { OpenTimelineResult } from '../../open_timeline/types';
 import { SelectableTimeline } from '../selectable_timeline';
 import * as i18n from '../translations';
 import { TimelineType, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 
-const SearchTimelineSuperSelectGlobalStyle = createGlobalStyle`
-  .euiPopover__panel.euiPopover__panel-isOpen.timeline-search-super-select-popover__popoverPanel {
-    visibility: hidden;
-    z-index: 0;
+const StyledEuiFieldText = styled(EuiFieldText)`
+  padding-left: 12px;
+  padding-right: 40px;
+
+  &[readonly] {
+    cursor: pointer;
+    background-size: 0 100%;
+    background-repeat: no-repeat;
+
+    // To match EuiFieldText focus state
+    &:focus {
+      background-color: #fff;
+      background-image: linear-gradient(
+        to top,
+        #006bb4,
+        #006bb4 2px,
+        transparent 2px,
+        transparent 100%
+      );
+      background-size: 100% 100%;
+    }
+  }
+
+  & + .euiFormControlLayoutIcons {
+    left: unset;
+    right: 12px;
   }
 `;
 
@@ -28,13 +50,6 @@ interface SearchTimelineSuperSelectProps {
   timelineType?: TimelineTypeLiteral;
   onTimelineChange: (timelineTitle: string, timelineId: string | null) => void;
 }
-
-const basicSuperSelectOptions = [
-  {
-    value: '-1',
-    inputDisplay: i18n.DEFAULT_TIMELINE_TITLE,
-  },
-];
 
 const getBasicSelectableOptions = (timelineId: string) => [
   {
@@ -52,7 +67,7 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
   hideUntitled = false,
   timelineId,
   timelineTitle,
-  timelineType = TimelineType.default,
+  timelineType = TimelineType.template,
   onTimelineChange,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -67,26 +82,15 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
 
   const superSelect = useMemo(
     () => (
-      <EuiSuperSelect
+      <StyledEuiFieldText
+        readOnly
         disabled={isDisabled}
         onFocus={handleOpenPopover}
-        options={
-          timelineId == null
-            ? basicSuperSelectOptions
-            : [
-                {
-                  value: timelineId,
-                  inputDisplay: timelineTitle,
-                },
-              ]
-        }
-        valueOfSelected={timelineId == null ? '-1' : timelineId}
-        itemLayoutAlign="top"
-        hasDividers={false}
-        popoverClassName="timeline-search-super-select-popover"
+        value={timelineTitle ?? i18n.DEFAULT_TIMELINE_TITLE}
+        icon="arrowDown"
       />
     ),
-    [handleOpenPopover, isDisabled, timelineId, timelineTitle]
+    [handleOpenPopover, isDisabled, timelineTitle]
   );
 
   const handleGetSelectableOptions = useCallback(
@@ -102,14 +106,16 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
               description: t.description,
               favorite: t.favorite,
               label: t.title,
-              id: t.savedObjectId,
+              id: timelineType === TimelineType.template ? t.templateTimelineId : t.savedObjectId,
               key: `${t.title}-${index}`,
               title: t.title,
-              checked: t.savedObjectId === timelineId ? 'on' : undefined,
+              checked: [t.savedObjectId, t.templateTimelineId].includes(timelineId)
+                ? 'on'
+                : undefined,
             } as EuiSelectableOption)
         ),
     ],
-    [hideUntitled, timelineId]
+    [hideUntitled, timelineId, timelineType]
   );
 
   return (
@@ -126,7 +132,6 @@ const SearchTimelineSuperSelectComponent: React.FC<SearchTimelineSuperSelectProp
         onTimelineChange={onTimelineChange}
         timelineType={timelineType}
       />
-      <SearchTimelineSuperSelectGlobalStyle />
     </EuiInputPopover>
   );
 };

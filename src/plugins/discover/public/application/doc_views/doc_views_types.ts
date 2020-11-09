@@ -18,6 +18,7 @@
  */
 import { ComponentType } from 'react';
 import { IScope } from 'angular';
+import { SearchResponse } from 'elasticsearch';
 import { IndexPattern } from '../../../../data/public';
 
 export interface AngularDirective {
@@ -27,7 +28,7 @@ export interface AngularDirective {
 
 export type AngularScope = IScope;
 
-export type ElasticSearchHit = Record<string, string | number | Record<string, unknown>>;
+export type ElasticSearchHit<T = unknown> = SearchResponse<T>['hits']['hits'][number];
 
 export interface FieldMapping {
   filterable?: boolean;

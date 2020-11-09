@@ -1,0 +1,6 @@
+{
+  "id": "geo_shape_list",
+  "name": "Simple list with geo shapes",
+  "description": "This list has geo shapes",
+  "type": "geo_shape"
+}

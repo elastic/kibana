@@ -44,7 +44,7 @@ export function getKibanas(req, kbnIndexPattern, { clusterUuid }) {
       collapse: {
         field: 'kibana_stats.kibana.uuid',
       },
-      sort: [{ timestamp: { order: 'desc' } }],
+      sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
       _source: [
         'timestamp',
         'kibana_stats.process.memory.resident_set_size_in_bytes',

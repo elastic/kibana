@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getExceptionListSchemaMock } from './exception_list_schema.mock';
 import { ExceptionListSchema, exceptionListSchema } from './exception_list_schema';
@@ -25,6 +25,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "id"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -36,6 +37,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "list_id"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.list_id;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -49,6 +51,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "name"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.name;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -60,23 +63,21 @@ describe('exception_list_schema', () => {
     expect(message.schema).toEqual({});
   });
 
-  // TODO: Should this throw an error? "namespace_type" gets auto-populated
-  // with default "single", is that desired behavior?
-  test.skip('it should NOT accept an undefined for "namespace_type"', () => {
+  test('it should accept an undefined for "namespace_type" and make "namespace_type" that of "single"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.namespace_type;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
 
-    expect(getPaths(left(message.errors))).toEqual([
-      'Invalid value "undefined" supplied to "namespace_type"',
-    ]);
-    expect(message.schema).toEqual({});
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect((message.schema as ExceptionListSchema).namespace_type).toEqual('single');
   });
 
   test('it should NOT accept an undefined for "description"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.description;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -101,6 +102,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "created_at"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.created_at;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -114,6 +116,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "created_by"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.created_by;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -127,6 +130,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "tie_breaker_id"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.tie_breaker_id;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -140,6 +144,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "type"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -153,6 +158,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "updated_at"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.updated_at;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -166,6 +172,7 @@ describe('exception_list_schema', () => {
 
   test('it should NOT accept an undefined for "updated_by"', () => {
     const payload = getExceptionListSchemaMock();
+    // @ts-expect-error
     delete payload.updated_by;
     const decoded = exceptionListSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

@@ -13,6 +13,7 @@ import {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateResponse,
+  SavedObjectsCheckConflictsObject,
   SavedObjectsClientContract,
   SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
@@ -21,10 +22,13 @@ import {
   SavedObjectsUpdateResponse,
   SavedObjectsAddToNamespacesOptions,
   SavedObjectsDeleteFromNamespacesOptions,
+  SavedObjectsRemoveReferencesToOptions,
   ISavedObjectTypeRegistry,
+  SavedObjectsRemoveReferencesToResponse,
 } from 'src/core/server';
 import { AuthenticatedUser } from '../../../security/common/model';
 import { EncryptedSavedObjectsService } from '../crypto';
+import { getDescriptorNamespace } from './get_descriptor_namespace';
 
 interface EncryptedSavedObjectsClientOptions {
   baseClient: SavedObjectsClientContract;
@@ -47,9 +51,12 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     public readonly errors = options.baseClient.errors
   ) {}
 
-  // only include namespace in AAD descriptor if the specified type is single-namespace
-  private getDescriptorNamespace = (type: string, namespace?: string) =>
-    this.options.baseTypeRegistry.isSingleNamespace(type) ? namespace : undefined;
+  public async checkConflicts(
+    objects: SavedObjectsCheckConflictsObject[] = [],
+    options?: SavedObjectsBaseOptions
+  ) {
+    return await this.options.baseClient.checkConflicts(objects, options);
+  }
 
   public async create<T>(
     type: string,
@@ -63,14 +70,23 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // Saved objects with encrypted attributes should have IDs that are hard to guess especially
     // since IDs are part of the AAD used during encryption, that's why we control them within this
     // wrapper and don't allow consumers to specify their own IDs directly.
-    if (options.id) {
+
+    // only allow a specified ID if we're overwriting an existing ESO with a Version
+    // this helps us ensure that the document really was previously created using ESO
+    // and not being used to get around the specified ID limitation
+    const canSpecifyID = options.overwrite && options.version;
+    if (options.id && !canSpecifyID) {
       throw new Error(
         'Predefined IDs are not allowed for saved objects with encrypted attributes.'
       );
     }
 
-    const id = generateID();
-    const namespace = this.getDescriptorNamespace(type, options.namespace);
+    const id = options.id ?? generateID();
+    const namespace = getDescriptorNamespace(
+      this.options.baseTypeRegistry,
+      type,
+      options.namespace
+    );
     return await this.handleEncryptedAttributesInResponse(
       await this.options.baseClient.create(
         type,
@@ -88,7 +104,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
   public async bulkCreate<T>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
-    options?: SavedObjectsBaseOptions
+    options?: SavedObjectsBaseOptions & Pick<SavedObjectsCreateOptions, 'overwrite'>
   ) {
     // We encrypt attributes for every object in parallel and that can potentially exhaust libuv or
     // NodeJS thread pool. If it turns out to be a problem, we can consider switching to the
@@ -101,15 +117,20 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
         // Saved objects with encrypted attributes should have IDs that are hard to guess especially
         // since IDs are part of the AAD used during encryption, that's why we control them within this
-        // wrapper and don't allow consumers to specify their own IDs directly.
-        if (object.id) {
+        // wrapper and don't allow consumers to specify their own IDs directly unless overwriting the original document.
+        const canSpecifyID = options?.overwrite && object.version;
+        if (object.id && !canSpecifyID) {
           throw new Error(
             'Predefined IDs are not allowed for saved objects with encrypted attributes.'
           );
         }
 
-        const id = generateID();
-        const namespace = this.getDescriptorNamespace(object.type, options?.namespace);
+        const id = object.id ?? generateID();
+        const namespace = getDescriptorNamespace(
+          this.options.baseTypeRegistry,
+          object.type,
+          options?.namespace
+        );
         return {
           ...object,
           id,
@@ -124,8 +145,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
     return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.bulkCreate<T>(encryptedObjects, options),
-      objects,
-      options?.namespace
+      objects
     );
   }
 
@@ -138,11 +158,15 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     // sequential processing.
     const encryptedObjects = await Promise.all(
       objects.map(async (object) => {
-        const { type, id, attributes } = object;
+        const { type, id, attributes, namespace: objectNamespace } = object;
         if (!this.options.service.isRegistered(type)) {
           return object;
         }
-        const namespace = this.getDescriptorNamespace(type, options?.namespace);
+        const namespace = getDescriptorNamespace(
+          this.options.baseTypeRegistry,
+          type,
+          objectNamespace ?? options?.namespace
+        );
         return {
           ...object,
           attributes: await this.options.service.encryptAttributes(
@@ -156,8 +180,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
 
     return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.bulkUpdate(encryptedObjects, options),
-      objects,
-      options?.namespace
+      objects
     );
   }
 
@@ -168,8 +191,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   public async find<T, A>(options: SavedObjectsFindOptions) {
     return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.find<T, A>(options),
-      undefined,
-      options.namespace
+      undefined
     );
   }
 
@@ -179,8 +201,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
   ) {
     return await this.handleEncryptedAttributesInBulkResponse(
       await this.options.baseClient.bulkGet<T>(objects, options),
-      undefined,
-      options?.namespace
+      undefined
     );
   }
 
@@ -188,7 +209,7 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     return await this.handleEncryptedAttributesInResponse(
       await this.options.baseClient.get<T>(type, id, options),
       undefined as unknown,
-      this.getDescriptorNamespace(type, options?.namespace)
+      getDescriptorNamespace(this.options.baseTypeRegistry, type, options?.namespace)
     );
   }
 
@@ -201,7 +222,11 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     if (!this.options.service.isRegistered(type)) {
       return await this.options.baseClient.update(type, id, attributes, options);
     }
-    const namespace = this.getDescriptorNamespace(type, options?.namespace);
+    const namespace = getDescriptorNamespace(
+      this.options.baseTypeRegistry,
+      type,
+      options?.namespace
+    );
     return this.handleEncryptedAttributesInResponse(
       await this.options.baseClient.update(
         type,
@@ -232,6 +257,14 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
     options?: SavedObjectsDeleteFromNamespacesOptions
   ) {
     return await this.options.baseClient.deleteFromNamespaces(type, id, namespaces, options);
+  }
+
+  public async removeReferencesTo(
+    type: string,
+    id: string,
+    options: SavedObjectsRemoveReferencesToOptions = {}
+  ): Promise<SavedObjectsRemoveReferencesToResponse> {
+    return await this.options.baseClient.removeReferencesTo(type, id, options);
   }
 
   /**
@@ -270,7 +303,6 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
    * response portion isn't registered, it is returned as is.
    * @param response Raw response returned by the underlying base client.
    * @param [objects] Optional list of saved objects with original attributes.
-   * @param [namespace] Optional namespace that was used for the saved objects operation.
    */
   private async handleEncryptedAttributesInBulkResponse<
     T,
@@ -279,12 +311,16 @@ export class EncryptedSavedObjectsClientWrapper implements SavedObjectsClientCon
       | SavedObjectsFindResponse<T>
       | SavedObjectsBulkUpdateResponse<T>,
     O extends Array<SavedObjectsBulkCreateObject<T>> | Array<SavedObjectsBulkUpdateObject<T>>
-  >(response: R, objects?: O, namespace?: string) {
+  >(response: R, objects?: O) {
     for (const [index, savedObject] of response.saved_objects.entries()) {
       await this.handleEncryptedAttributesInResponse(
         savedObject,
         objects?.[index].attributes ?? undefined,
-        this.getDescriptorNamespace(savedObject.type, namespace)
+        getDescriptorNamespace(
+          this.options.baseTypeRegistry,
+          savedObject.type,
+          savedObject.namespaces ? savedObject.namespaces[0] : undefined
+        )
       );
     }
 

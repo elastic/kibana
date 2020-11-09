@@ -11,6 +11,8 @@ import {
 } from './embeddable_action_storage';
 import { UiActionsEnhancedSerializedEvent } from '../../../ui_actions_enhanced/public';
 import { of } from '../../../../../src/plugins/kibana_utils/public';
+// use real const to make test fail in case someone accidentally changes it
+import { APPLY_FILTER_TRIGGER } from '../../../../../src/plugins/ui_actions/public';
 
 class TestEmbeddable extends Embeddable<EmbeddableWithDynamicActionsInput> {
   public readonly type = 'test';
@@ -537,6 +539,44 @@ describe('EmbeddableActionStorage', () => {
       await storage.remove('EVENT_ID2');
 
       expect(await storage.list()).toEqual([]);
+    });
+  });
+
+  describe('migrate', () => {
+    test('DASHBOARD_TO_DASHBOARD_DRILLDOWN triggers migration', async () => {
+      const embeddable = new TestEmbeddable();
+      const OTHER_TRIGGER = 'OTHER_TRIGGER';
+      embeddable.updateInput({
+        enhancements: {
+          dynamicActions: {
+            events: [
+              {
+                eventId: '1',
+                triggers: [OTHER_TRIGGER],
+                action: {
+                  factoryId: 'DASHBOARD_TO_DASHBOARD_DRILLDOWN',
+                  name: '',
+                  config: {},
+                },
+              },
+              {
+                eventId: '2',
+                triggers: [OTHER_TRIGGER],
+                action: {
+                  factoryId: 'SOME_OTHER',
+                  name: '',
+                  config: {},
+                },
+              },
+            ],
+          },
+        },
+      });
+      const storage = new EmbeddableActionStorage(embeddable);
+
+      const [event1, event2] = await storage.list();
+      expect(event1.triggers).toEqual([APPLY_FILTER_TRIGGER]);
+      expect(event2.triggers).toEqual([OTHER_TRIGGER]);
     });
   });
 });

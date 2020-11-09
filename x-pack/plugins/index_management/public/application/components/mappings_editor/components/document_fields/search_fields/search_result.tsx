@@ -8,9 +8,8 @@ import VirtualList from 'react-tiny-virtual-list';
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 
-import { SearchResult as SearchResultType } from '../../../types';
-import { useDispatch } from '../../../mappings_state';
-import { State } from '../../../reducer';
+import { SearchResult as SearchResultType, State } from '../../../types';
+import { useDispatch } from '../../../mappings_state_context';
 import { SearchResultItem } from './search_result_item';
 
 interface Props {

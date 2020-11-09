@@ -33,6 +33,11 @@ interface Usage {
   flat?: string;
   my_str?: string;
   my_objects: MyObject;
+  my_array?: MyObject[];
+  my_str_array?: string[];
+  my_index_signature_prop?: {
+    [key: string]: number;
+  };
 }
 
 const SOME_NUMBER: number = 123;
@@ -54,6 +59,13 @@ export const myCollector = makeUsageCollector<Usage>({
           total: SOME_NUMBER,
           type: true,
         },
+        my_array: [
+          {
+            total: SOME_NUMBER,
+            type: true,
+          },
+        ],
+        my_str_array: ['hello', 'world'],
       };
     } catch (err) {
       return {
@@ -73,9 +85,25 @@ export const myCollector = makeUsageCollector<Usage>({
     },
     my_objects: {
       total: {
-        type: 'number',
+        type: 'long',
       },
       type: { type: 'boolean' },
+    },
+    my_array: {
+      type: 'array',
+      items: {
+        total: {
+          type: 'long',
+        },
+        type: { type: 'boolean' },
+      },
+    },
+    my_str_array: { type: 'array', items: { type: 'keyword' } },
+    my_index_signature_prop: {
+      count: { type: 'long' },
+      avg: { type: 'float' },
+      max: { type: 'long' },
+      min: { type: 'long' },
     },
   },
 });

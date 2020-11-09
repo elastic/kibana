@@ -10,7 +10,6 @@ jest.mock('./lib/send_email', () => ({
 
 import { Logger } from '../../../../../src/core/server';
 
-import { ActionType, ActionTypeExecutorOptions } from '../types';
 import { actionsConfigMock } from '../actions_config.mock';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { createActionTypeRegistry } from './index.test';
@@ -21,6 +20,8 @@ import {
   ActionTypeConfigType,
   ActionTypeSecretsType,
   getActionType,
+  EmailActionType,
+  EmailActionTypeExecutorOptions,
 } from './email';
 
 const sendEmailMock = sendEmail as jest.Mock;
@@ -29,13 +30,17 @@ const ACTION_TYPE_ID = '.email';
 
 const services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: EmailActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeEach(() => {
   jest.resetAllMocks();
   const { actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<
+    ActionTypeConfigType,
+    ActionTypeSecretsType,
+    ActionParamsType
+  >(ACTION_TYPE_ID);
 });
 
 describe('actionTypeRegistry.get() works', () => {
@@ -50,6 +55,7 @@ describe('config validation', () => {
     const config: Record<string, unknown> = {
       service: 'gmail',
       from: 'bob@example.com',
+      hasAuth: true,
     };
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
@@ -61,6 +67,7 @@ describe('config validation', () => {
     delete config.service;
     config.host = 'elastic.co';
     config.port = 8080;
+    config.hasAuth = true;
     expect(validateConfig(actionType, config)).toEqual({
       ...config,
       service: null,
@@ -116,56 +123,56 @@ describe('config validation', () => {
   const NODEMAILER_AOL_SERVICE = 'AOL';
   const NODEMAILER_AOL_SERVICE_HOST = 'smtp.aol.com';
 
-  test('config validation handles email host whitelisting', () => {
+  test('config validation handles email host in allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        isWhitelistedHostname: (hostname) => hostname === NODEMAILER_AOL_SERVICE_HOST,
+        isHostnameAllowed: (hostname) => hostname === NODEMAILER_AOL_SERVICE_HOST,
       },
     });
     const baseConfig = {
       from: 'bob@example.com',
     };
-    const whitelistedConfig1 = {
+    const allowedHosts1 = {
       ...baseConfig,
       service: NODEMAILER_AOL_SERVICE,
     };
-    const whitelistedConfig2 = {
+    const allowedHosts2 = {
       ...baseConfig,
       host: NODEMAILER_AOL_SERVICE_HOST,
       port: 42,
     };
-    const notWhitelistedConfig1 = {
+    const notAllowedHosts1 = {
       ...baseConfig,
       service: 'gmail',
     };
 
-    const notWhitelistedConfig2 = {
+    const notAllowedHosts2 = {
       ...baseConfig,
       host: 'smtp.gmail.com',
       port: 42,
     };
 
-    const validatedConfig1 = validateConfig(actionType, whitelistedConfig1);
-    expect(validatedConfig1.service).toEqual(whitelistedConfig1.service);
-    expect(validatedConfig1.from).toEqual(whitelistedConfig1.from);
+    const validatedConfig1 = validateConfig(actionType, allowedHosts1);
+    expect(validatedConfig1.service).toEqual(allowedHosts1.service);
+    expect(validatedConfig1.from).toEqual(allowedHosts1.from);
 
-    const validatedConfig2 = validateConfig(actionType, whitelistedConfig2);
-    expect(validatedConfig2.host).toEqual(whitelistedConfig2.host);
-    expect(validatedConfig2.port).toEqual(whitelistedConfig2.port);
-    expect(validatedConfig2.from).toEqual(whitelistedConfig2.from);
+    const validatedConfig2 = validateConfig(actionType, allowedHosts2);
+    expect(validatedConfig2.host).toEqual(allowedHosts2.host);
+    expect(validatedConfig2.port).toEqual(allowedHosts2.port);
+    expect(validatedConfig2.from).toEqual(allowedHosts2.from);
 
     expect(() => {
-      validateConfig(actionType, notWhitelistedConfig1);
+      validateConfig(actionType, notAllowedHosts1);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the whitelistedHosts configuration"`
+      `"error validating action type config: [service] value 'gmail' resolves to host 'smtp.gmail.com' which is not in the allowedHosts configuration"`
     );
 
     expect(() => {
-      validateConfig(actionType, notWhitelistedConfig2);
+      validateConfig(actionType, notAllowedHosts2);
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: [host] value 'smtp.gmail.com' is not in the whitelistedHosts configuration"`
+      `"error validating action type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
     );
   });
 });
@@ -228,6 +235,7 @@ describe('execute()', () => {
       port: 42,
       secure: true,
       from: 'bob@example.com',
+      hasAuth: true,
     };
     const secrets: ActionTypeSecretsType = {
       user: 'bob',
@@ -242,7 +250,7 @@ describe('execute()', () => {
     };
 
     const actionId = 'some-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: EmailActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -264,6 +272,8 @@ describe('execute()', () => {
               "message": "a message to you",
               "subject": "the subject",
             },
+            "hasAuth": true,
+            "proxySettings": undefined,
             "routing": Object {
               "bcc": Array [
                 "jimmy@example.com",
@@ -292,6 +302,7 @@ describe('execute()', () => {
       port: 42,
       secure: true,
       from: 'bob@example.com',
+      hasAuth: false,
     };
     const secrets: ActionTypeSecretsType = {
       user: null,
@@ -306,7 +317,7 @@ describe('execute()', () => {
     };
 
     const actionId = 'some-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: EmailActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -321,6 +332,8 @@ describe('execute()', () => {
           "message": "a message to you",
           "subject": "the subject",
         },
+        "hasAuth": false,
+        "proxySettings": undefined,
         "routing": Object {
           "bcc": Array [
             "jimmy@example.com",
@@ -349,6 +362,7 @@ describe('execute()', () => {
       port: 42,
       secure: true,
       from: 'bob@example.com',
+      hasAuth: false,
     };
     const secrets: ActionTypeSecretsType = {
       user: null,
@@ -363,7 +377,7 @@ describe('execute()', () => {
     };
 
     const actionId = 'some-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: EmailActionTypeExecutorOptions = {
       actionId,
       config,
       params,

@@ -8,14 +8,21 @@ jest.mock('./lib/post_pagerduty', () => ({
   postPagerduty: jest.fn(),
 }));
 
-import { getActionType } from './pagerduty';
-import { ActionType, Services, ActionTypeExecutorOptions } from '../types';
+import { Services } from '../types';
 import { validateConfig, validateSecrets, validateParams } from '../lib';
 import { postPagerduty } from './lib/post_pagerduty';
 import { createActionTypeRegistry } from './index.test';
 import { Logger } from '../../../../../src/core/server';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
+import {
+  ActionParamsType,
+  ActionTypeConfigType,
+  ActionTypeSecretsType,
+  getActionType,
+  PagerDutyActionType,
+  PagerDutyActionTypeExecutorOptions,
+} from './pagerduty';
 
 const postPagerdutyMock = postPagerduty as jest.Mock;
 
@@ -23,12 +30,16 @@ const ACTION_TYPE_ID = '.pagerduty';
 
 const services: Services = actionsMock.createServices();
 
-let actionType: ActionType;
+let actionType: PagerDutyActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
   const { logger, actionTypeRegistry } = createActionTypeRegistry();
-  actionType = actionTypeRegistry.get(ACTION_TYPE_ID);
+  actionType = actionTypeRegistry.get<
+    ActionTypeConfigType,
+    ActionTypeSecretsType,
+    ActionParamsType
+  >(ACTION_TYPE_ID);
   mockedLogger = logger;
 });
 
@@ -53,12 +64,12 @@ describe('validateConfig()', () => {
     );
   });
 
-  test('should validate and pass when the pagerduty url is whitelisted', () => {
+  test('should validate and pass when the pagerduty url is added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: (url) => {
+        ensureUriAllowed: (url) => {
           expect(url).toEqual('https://events.pagerduty.com/v2/enqueue');
         },
       },
@@ -69,13 +80,13 @@ describe('validateConfig()', () => {
     ).toEqual({ apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
   });
 
-  test('config validation returns an error if the specified URL isnt whitelisted', () => {
+  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
-        ensureWhitelistedUri: (_) => {
-          throw new Error(`target url is not whitelisted`);
+        ensureUriAllowed: (_) => {
+          throw new Error(`target url is not added to allowedHosts`);
         },
       },
     });
@@ -83,7 +94,7 @@ describe('validateConfig()', () => {
     expect(() => {
       validateConfig(actionType, { apiUrl: 'https://events.pagerduty.com/v2/enqueue' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type config: error configuring pagerduty action: target url is not whitelisted"`
+      `"error validating action type config: error configuring pagerduty action: target url is not added to allowedHosts"`
     );
   });
 });
@@ -158,6 +169,16 @@ describe('validateParams()', () => {
       });
     }).toThrowError(`error validating action params: error parsing timestamp "${timestamp}"`);
   });
+
+  test('should validate and throw error when dedupKey is missing on resolve', () => {
+    expect(() => {
+      validateParams(actionType, {
+        eventAction: 'resolve',
+      });
+    }).toThrowError(
+      `error validating action params: DedupKey is required when eventAction is "resolve"`
+    );
+  });
 });
 
 describe('execute()', () => {
@@ -167,7 +188,7 @@ describe('execute()', () => {
 
   test('should succeed with minimal valid params', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -175,7 +196,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -188,7 +209,6 @@ describe('execute()', () => {
       Object {
         "apiUrl": "https://events.pagerduty.com/v2/enqueue",
         "data": Object {
-          "dedup_key": "action:some-action-id",
           "event_action": "trigger",
           "payload": Object {
             "severity": "info",
@@ -219,7 +239,7 @@ describe('execute()', () => {
     const config = {
       apiUrl: 'the-api-url',
     };
-    const params = {
+    const params: ActionParamsType = {
       eventAction: 'trigger',
       dedupKey: 'a-dedup-key',
       summary: 'the summary',
@@ -236,7 +256,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -284,7 +304,7 @@ describe('execute()', () => {
     const config = {
       apiUrl: 'the-api-url',
     };
-    const params = {
+    const params: ActionParamsType = {
       eventAction: 'acknowledge',
       dedupKey: 'a-dedup-key',
       summary: 'the summary',
@@ -301,7 +321,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -340,7 +360,7 @@ describe('execute()', () => {
     const config = {
       apiUrl: 'the-api-url',
     };
-    const params = {
+    const params: ActionParamsType = {
       eventAction: 'resolve',
       dedupKey: 'a-dedup-key',
       summary: 'the summary',
@@ -357,7 +377,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -390,7 +410,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury throws', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -398,7 +418,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -418,7 +438,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury returns 429', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -426,7 +446,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -446,7 +466,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury returns 501', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -454,7 +474,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -474,7 +494,7 @@ describe('execute()', () => {
 
   test('should fail when sendPagerdury returns 418', async () => {
     const secrets = { routingKey: 'super-secret' };
-    const config = {};
+    const config = { apiUrl: null };
     const params = {};
 
     postPagerdutyMock.mockImplementation(() => {
@@ -482,7 +502,7 @@ describe('execute()', () => {
     });
 
     const actionId = 'some-action-id';
-    const executorOptions: ActionTypeExecutorOptions = {
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
       actionId,
       config,
       params,
@@ -495,6 +515,63 @@ describe('execute()', () => {
         "actionId": "some-action-id",
         "message": "error posting pagerduty event: unexpected status 418",
         "status": "error",
+      }
+    `);
+  });
+
+  test('should not set a default dedupkey to ensure each execution is a unique PagerDuty incident', async () => {
+    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const secrets = {
+      routingKey: 'super-secret',
+    };
+    const config = {
+      apiUrl: 'the-api-url',
+    };
+    const params: ActionParamsType = {
+      eventAction: 'trigger',
+      summary: 'the summary',
+      source: 'the-source',
+      severity: 'critical',
+      timestamp: randoDate,
+    };
+
+    postPagerdutyMock.mockImplementation(() => {
+      return { status: 202, data: 'data-here' };
+    });
+
+    const actionId = 'some-action-id';
+    const executorOptions: PagerDutyActionTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+    };
+    const actionResponse = await actionType.executor(executorOptions);
+    const { apiUrl, data, headers } = postPagerdutyMock.mock.calls[0][0];
+    expect({ apiUrl, data, headers }).toMatchInlineSnapshot(`
+      Object {
+        "apiUrl": "the-api-url",
+        "data": Object {
+          "event_action": "trigger",
+          "payload": Object {
+            "severity": "critical",
+            "source": "the-source",
+            "summary": "the summary",
+            "timestamp": "1963-09-23T01:23:45.000Z",
+          },
+        },
+        "headers": Object {
+          "Content-Type": "application/json",
+          "X-Routing-Key": "super-secret",
+        },
+      }
+    `);
+    expect(actionResponse).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-action-id",
+        "data": "data-here",
+        "status": "ok",
       }
     `);
   });

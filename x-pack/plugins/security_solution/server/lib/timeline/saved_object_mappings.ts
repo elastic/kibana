@@ -64,6 +64,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
         kqlQuery: {
           type: 'text',
         },
+        type: {
+          type: 'text',
+        },
         queryMatch: {
           properties: {
             field: {
@@ -100,6 +103,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
             kqlQuery: {
               type: 'text',
             },
+            type: {
+              type: 'text',
+            },
             queryMatch: {
               properties: {
                 field: {
@@ -128,6 +134,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
     },
     eventType: {
       type: 'keyword',
+    },
+    excludedRowRendererIds: {
+      type: 'text',
     },
     favorite: {
       properties: {
@@ -203,6 +212,9 @@ export const timelineSavedObjectMappings: SavedObjectsType['mappings'] = {
           type: 'text',
         },
       },
+    },
+    indexNames: {
+      type: 'text',
     },
     kqlMode: {
       type: 'keyword',

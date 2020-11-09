@@ -19,6 +19,7 @@ import { VectorLayer } from '../../layers/vector_layer/vector_layer';
 // @ts-expect-error
 import { createDefaultLayerDescriptor } from '../../sources/es_search_source';
 import { RenderWizardArguments } from '../../layers/layer_wizard_registry';
+import { FileUploadComponentProps } from '../../../../../file_upload/public';
 
 export const INDEX_SETUP_STEP_ID = 'INDEX_SETUP_STEP_ID';
 export const INDEXING_STEP_ID = 'INDEXING_STEP_ID';
@@ -32,17 +33,20 @@ enum INDEXING_STAGE {
 
 interface State {
   indexingStage: INDEXING_STAGE | null;
+  fileUploadComponent: React.ComponentType<FileUploadComponentProps> | null;
 }
 
 export class ClientFileCreateSourceEditor extends Component<RenderWizardArguments, State> {
   private _isMounted: boolean = false;
 
-  state = {
+  state: State = {
     indexingStage: null,
+    fileUploadComponent: null,
   };
 
   componentDidMount() {
     this._isMounted = true;
+    this._loadFileUploadComponent();
   }
 
   componentWillUnmount() {
@@ -56,6 +60,13 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
     ) {
       this.setState({ indexingStage: INDEXING_STAGE.TRIGGERED });
       this.props.startStepLoading();
+    }
+  }
+
+  async _loadFileUploadComponent() {
+    const fileUploadComponent = await getFileUploadComponent();
+    if (this._isMounted) {
+      this.setState({ fileUploadComponent });
     }
   }
 
@@ -145,7 +156,11 @@ export class ClientFileCreateSourceEditor extends Component<RenderWizardArgument
   };
 
   render() {
-    const FileUpload = getFileUploadComponent();
+    if (!this.state.fileUploadComponent) {
+      return null;
+    }
+
+    const FileUpload = this.state.fileUploadComponent;
     return (
       <EuiPanel>
         <FileUpload

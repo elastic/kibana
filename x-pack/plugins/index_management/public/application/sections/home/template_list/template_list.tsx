@@ -17,12 +17,14 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButton,
+  EuiLink,
 } from '@elastic/eui';
 
 import { UIM_TEMPLATE_LIST_LOAD } from '../../../../../common/constants';
 import { TemplateListItem } from '../../../../../common';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadIndexTemplates } from '../../../services/api';
+import { documentationService } from '../../../services/documentation';
 import { useServices } from '../../../app_context';
 import {
   getTemplateEditLink,
@@ -34,14 +36,21 @@ import { TemplateTable } from './template_table';
 import { TemplateDetails } from './template_details';
 import { LegacyTemplateTable } from './legacy_templates/template_table';
 import { FilterListButton, Filters } from './components';
+import { attemptToURIDecode } from '../../../../shared_imports';
 
-type FilterName = 'composable' | 'system';
+type FilterName = 'managed' | 'cloudManaged' | 'system';
 interface MatchParams {
   templateName?: string;
 }
 
-const stripOutSystemTemplates = (templates: TemplateListItem[]): TemplateListItem[] =>
-  templates.filter((template) => !template.name.startsWith('.'));
+function filterTemplates(templates: TemplateListItem[], types: string[]): TemplateListItem[] {
+  return templates.filter((template) => {
+    if (template._kbnMeta.type === 'default') {
+      return true;
+    }
+    return types.includes(template._kbnMeta.type);
+  });
+}
 
 export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
   match: {
@@ -51,14 +60,20 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   history,
 }) => {
   const { uiMetricService } = useServices();
-  const { error, isLoading, data: allTemplates, sendRequest: reload } = useLoadIndexTemplates();
+  const { error, isLoading, data: allTemplates, resendRequest: reload } = useLoadIndexTemplates();
 
   const [filters, setFilters] = useState<Filters<FilterName>>({
-    composable: {
-      name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewComposableTemplateLabel', {
-        defaultMessage: 'Composable templates',
+    managed: {
+      name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewManagedTemplateLabel', {
+        defaultMessage: 'Managed templates',
       }),
       checked: 'on',
+    },
+    cloudManaged: {
+      name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewCloudManagedTemplateLabel', {
+        defaultMessage: 'Cloud-managed templates',
+      }),
+      checked: 'off',
     },
     system: {
       name: i18n.translate('xpack.idxMgmt.indexTemplatesList.viewSystemTemplateLabel', {
@@ -70,22 +85,23 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
 
   const filteredTemplates = useMemo(() => {
     if (!allTemplates) {
+      // If templates are not fetched, return empty arrays.
       return { templates: [], legacyTemplates: [] };
     }
 
-    return filters.system.checked === 'on'
-      ? allTemplates
-      : {
-          templates: stripOutSystemTemplates(allTemplates.templates),
-          legacyTemplates: stripOutSystemTemplates(allTemplates.legacyTemplates),
-        };
-  }, [allTemplates, filters.system.checked]);
+    const visibleTemplateTypes = Object.entries(filters)
+      .filter(([name, _filter]) => _filter.checked === 'on')
+      .map(([name]) => name);
 
-  const showComposableTemplateTable = filters.composable.checked === 'on';
+    return {
+      templates: filterTemplates(allTemplates.templates, visibleTemplateTypes),
+      legacyTemplates: filterTemplates(allTemplates.legacyTemplates, visibleTemplateTypes),
+    };
+  }, [allTemplates, filters]);
 
   const selectedTemplate = Boolean(templateName)
     ? {
-        name: templateName!,
+        name: attemptToURIDecode(templateName!),
         isLegacy: getIsLegacyFromQueryParams(location),
       }
     : null;
@@ -109,14 +125,28 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
   const renderHeader = () => (
     <EuiFlexGroup alignItems="center" gutterSize="s">
       <EuiFlexItem grow={true}>
-        <EuiTitle size="s">
-          <EuiText color="subdued">
-            <FormattedMessage
-              id="xpack.idxMgmt.home.indexTemplatesDescription"
-              defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices."
-            />
-          </EuiText>
-        </EuiTitle>
+        <EuiText color="subdued">
+          <FormattedMessage
+            id="xpack.idxMgmt.home.indexTemplatesDescription"
+            defaultMessage="Use index templates to automatically apply settings, mappings, and aliases to indices. {learnMoreLink}"
+            values={{
+              learnMoreLink: (
+                <EuiLink
+                  href={documentationService.getTemplatesDocumentationLink()}
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate(
+                    'xpack.idxMgmt.home.indexTemplatesDescription.learnMoreLinkText',
+                    {
+                      defaultMessage: 'Learn more.',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <FilterListButton<FilterName> filters={filters} onChange={setFilters} />
@@ -138,8 +168,8 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
     </EuiFlexGroup>
   );
 
-  const renderTemplatesTable = () =>
-    showComposableTemplateTable ? (
+  const renderTemplatesTable = () => {
+    return (
       <>
         <EuiSpacer size="l" />
         <TemplateTable
@@ -150,7 +180,8 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
           history={history as ScopedHistory}
         />
       </>
-    ) : null;
+    );
+  };
 
   const renderLegacyTemplatesTable = () => (
     <>

@@ -19,13 +19,12 @@
 import { first } from 'rxjs/operators';
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from 'kibana/server';
 
-import { readLegacyEsConfig } from '../../../legacy/core_plugins/console_legacy';
-
 import { ProxyConfigCollection } from './lib';
-import { SpecDefinitionsService } from './services';
+import { SpecDefinitionsService, EsLegacyConfigService } from './services';
 import { ConfigType } from './config';
-import { registerProxyRoute } from './routes/api/console/proxy';
-import { registerSpecDefinitionsRoute } from './routes/api/console/spec_definitions';
+
+import { registerRoutes } from './routes';
+
 import { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
 
 export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
@@ -33,11 +32,13 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
 
   specDefinitionsService = new SpecDefinitionsService();
 
+  esLegacyConfigService = new EsLegacyConfigService();
+
   constructor(private readonly ctx: PluginInitializerContext<ConfigType>) {
     this.log = this.ctx.logger.get();
   }
 
-  async setup({ http, capabilities, getStartServices }: CoreSetup) {
+  async setup({ http, capabilities, getStartServices, elasticsearch }: CoreSetup) {
     capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
@@ -46,30 +47,31 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     }));
 
     const config = await this.ctx.config.create().pipe(first()).toPromise();
-
-    const { elasticsearch } = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
-
+    const globalConfig = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
     const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
+
+    this.esLegacyConfigService.setup(elasticsearch.legacy.config$);
 
     const router = http.createRouter();
 
-    registerProxyRoute({
+    registerRoutes({
+      router,
       log: this.log,
-      proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),
-      readLegacyESConfig: (): ESConfigForProxy => {
-        const legacyConfig = readLegacyEsConfig();
-        return {
-          ...elasticsearch,
-          ...legacyConfig,
-        };
+      services: {
+        esLegacyConfigService: this.esLegacyConfigService,
+        specDefinitionService: this.specDefinitionsService,
       },
-      pathFilters: proxyPathFilters,
-      router,
-    });
-
-    registerSpecDefinitionsRoute({
-      router,
-      services: { specDefinitions: this.specDefinitionsService },
+      proxy: {
+        proxyConfigCollection: new ProxyConfigCollection(config.proxyConfig),
+        readLegacyESConfig: async (): Promise<ESConfigForProxy> => {
+          const legacyConfig = await this.esLegacyConfigService.readConfig();
+          return {
+            ...globalConfig.elasticsearch,
+            ...legacyConfig,
+          };
+        },
+        pathFilters: proxyPathFilters,
+      },
     });
 
     return {
@@ -81,5 +83,9 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     return {
       ...this.specDefinitionsService.start(),
     };
+  }
+
+  stop() {
+    this.esLegacyConfigService.stop();
   }
 }

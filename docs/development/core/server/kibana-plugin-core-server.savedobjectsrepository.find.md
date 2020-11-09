@@ -7,14 +7,14 @@
 <b>Signature:</b>
 
 ```typescript
-find<T = unknown, A = unknown>({ search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, preference, aggs, }: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
+find<T = unknown, A = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T, A>>;
 ```
 
 ## Parameters
 
 |  Parameter | Type | Description |
 |  --- | --- | --- |
-|  { search, defaultSearchOperator, searchFields, hasReference, page, perPage, sortField, sortOrder, fields, namespace, type, filter, preference, aggs, } | <code>SavedObjectsFindOptions</code> |  |
+|  options | <code>SavedObjectsFindOptions</code> |  |
 
 <b>Returns:</b>
 

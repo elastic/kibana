@@ -4,11 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ConfigurationBlock } from '../../../../../../legacy/plugins/beats_management/common/domain_types';
-import {
-  ReturnTypeBulkUpsert,
-  ReturnTypeList,
-} from '../../../../../../legacy/plugins/beats_management/common/return_types';
+import { ConfigurationBlock } from '../../../../common/domain_types';
+import { ReturnTypeBulkUpsert, ReturnTypeList } from '../../../../common/return_types';
 import { FrontendConfigBlocksAdapter } from './adapter_types';
 
 export class MemoryConfigBlocksAdapter implements FrontendConfigBlocksAdapter {

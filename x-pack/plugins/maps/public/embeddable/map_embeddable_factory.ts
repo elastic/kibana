@@ -12,7 +12,13 @@ import {
   IContainer,
 } from '../../../../../src/plugins/embeddable/public';
 import '../index.scss';
-import { getExistingMapPath, MAP_SAVED_OBJECT_TYPE, APP_ICON } from '../../common/constants';
+import {
+  getExistingMapPath,
+  MAP_SAVED_OBJECT_TYPE,
+  APP_ICON,
+  APP_ID,
+  MAP_PATH,
+} from '../../common/constants';
 import { LayerDescriptor } from '../../common/descriptor_types';
 import { MapEmbeddableInput } from './types';
 import { lazyLoadMapModules } from '../lazy_load_bundle';
@@ -48,7 +54,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
     const {
       addLayerWithoutDataSync,
       createMapStore,
-      getIndexPatternService,
+      getIndexPatternsFromIds,
       getQueryableUniqueIndexPatternIds,
     } = await lazyLoadMapModules();
     const store = createMapStore();
@@ -66,17 +72,7 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       );
     }
 
-    const promises = queryableIndexPatternIds.map(async (indexPatternId) => {
-      try {
-        // @ts-ignore
-        return await getIndexPatternService().get(indexPatternId);
-      } catch (error) {
-        // Unable to load index pattern, better to not throw error so map embeddable can render
-        // Error will be surfaced by map embeddable since it too will be unable to locate the index pattern
-        return null;
-      }
-    });
-    const indexPatterns = await Promise.all(promises);
+    const indexPatterns = await getIndexPatternsFromIds(queryableIndexPatternIds);
     return _.compact(indexPatterns) as IIndexPattern[];
   }
 
@@ -113,7 +109,10 @@ export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
       {
         layerList,
         title: savedMap.title,
+        description: savedMap.description,
         editUrl: getHttp().basePath.prepend(getExistingMapPath(savedObjectId)),
+        editApp: APP_ID,
+        editPath: `/${MAP_PATH}/${savedObjectId}`,
         indexPatterns,
         editable: await this.isEditable(),
         settings,

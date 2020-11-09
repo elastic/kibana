@@ -6,32 +6,29 @@
 import React, { useEffect, useRef } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import { useForm, Form, SerializerFunc } from '../../shared_imports';
-import { GenericObject } from '../../types';
-import { Types, useDispatch } from '../../mappings_state';
+import { useForm, Form } from '../../shared_imports';
+import { GenericObject, MappingsConfiguration } from '../../types';
+import { useDispatch } from '../../mappings_state_context';
 import { DynamicMappingSection } from './dynamic_mapping_section';
 import { SourceFieldSection } from './source_field_section';
 import { MetaFieldSection } from './meta_field_section';
 import { RoutingSection } from './routing_section';
 import { configurationFormSchema } from './configuration_form_schema';
 
-type MappingsConfiguration = Types['MappingsConfiguration'];
-
 interface Props {
   value?: MappingsConfiguration;
 }
 
-const stringifyJson = (json: GenericObject) =>
-  Object.keys(json).length ? JSON.stringify(json, null, 2) : '{\n\n}';
-
-const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
+const formSerializer = (formData: GenericObject) => {
   const {
     dynamicMapping: {
       enabled: dynamicMappingsEnabled,
       throwErrorsForUnmappedFields,
+      /* eslint-disable @typescript-eslint/naming-convention */
       numeric_detection,
       date_detection,
       dynamic_date_formats,
+      /* eslint-enable @typescript-eslint/naming-convention */
     },
     sourceField,
     metaField,
@@ -40,31 +37,32 @@ const formSerializer: SerializerFunc<MappingsConfiguration> = (formData) => {
 
   const dynamic = dynamicMappingsEnabled ? true : throwErrorsForUnmappedFields ? 'strict' : false;
 
-  let parsedMeta;
-  try {
-    parsedMeta = JSON.parse(metaField);
-  } catch {
-    parsedMeta = {};
-  }
-
-  return {
+  const serialized = {
     dynamic,
     numeric_detection,
     date_detection,
     dynamic_date_formats,
-    _source: { ...sourceField },
-    _meta: parsedMeta,
+    _source: sourceField,
+    _meta: metaField,
     _routing,
   };
+
+  return serialized;
 };
 
 const formDeserializer = (formData: GenericObject) => {
   const {
     dynamic,
+    /* eslint-disable @typescript-eslint/naming-convention */
     numeric_detection,
     date_detection,
     dynamic_date_formats,
-    _source: { enabled, includes, excludes },
+    /* eslint-enable @typescript-eslint/naming-convention */
+    _source: { enabled, includes, excludes } = {} as {
+      enabled?: boolean;
+      includes?: string[];
+      excludes?: string[];
+    },
     _meta,
     _routing,
   } = formData;
@@ -82,15 +80,15 @@ const formDeserializer = (formData: GenericObject) => {
       includes,
       excludes,
     },
-    metaField: stringifyJson(_meta),
+    metaField: _meta ?? {},
     _routing,
   };
 };
 
 export const ConfigurationForm = React.memo(({ value }: Props) => {
-  const isMounted = useRef<boolean | undefined>(undefined);
+  const isMounted = useRef(false);
 
-  const { form } = useForm<MappingsConfiguration>({
+  const { form } = useForm({
     schema: configurationFormSchema,
     serializer: formSerializer,
     deserializer: formDeserializer,
@@ -98,49 +96,43 @@ export const ConfigurationForm = React.memo(({ value }: Props) => {
     id: 'configurationForm',
   });
   const dispatch = useDispatch();
+  const { subscribe, submit, reset, getFormData } = form;
 
   useEffect(() => {
-    const subscription = form.subscribe(({ data, isValid, validate }) => {
+    const subscription = subscribe(({ data, isValid, validate }) => {
       dispatch({
         type: 'configuration.update',
         value: {
           data,
           isValid,
           validate,
-          submitForm: form.submit,
+          submitForm: submit,
         },
-      });
+      } as any);
     });
 
     return subscription.unsubscribe;
-  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [dispatch, subscribe, submit]);
 
   useEffect(() => {
-    if (isMounted.current === undefined) {
-      // On mount: don't reset the form
-      isMounted.current = true;
-      return;
-    } else if (isMounted.current === false) {
-      // When we save the snapshot on unMount we update the "defaultValue" in our state
-      // wich updates the "value" prop here on the component.
-      // To avoid resetting the form at this stage, we exit early.
-      return;
+    if (isMounted.current) {
+      // If the value has changed (it probably means that we have loaded a new JSON)
+      // we need to reset the form to update the fields values.
+      reset({ resetValues: true, defaultValue: value });
     }
-
-    // If the value has changed (it probably means that we have loaded a new JSON)
-    // we need to reset the form to update the fields values.
-    form.reset({ resetValues: true });
-  }, [value]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [value, reset]);
 
   useEffect(() => {
+    isMounted.current = true;
+
     return () => {
       isMounted.current = false;
 
       // Save a snapshot of the form state so we can get back to it when navigating back to the tab
-      const configurationData = form.getFormData();
-      dispatch({ type: 'configuration.save', value: configurationData });
+      const configurationData = getFormData();
+      dispatch({ type: 'configuration.save', value: configurationData as any });
     };
-  }, [dispatch]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [getFormData, dispatch]);
 
   return (
     <Form

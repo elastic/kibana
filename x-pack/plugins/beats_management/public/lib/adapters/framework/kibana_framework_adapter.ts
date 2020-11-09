@@ -22,7 +22,6 @@ import {
 import {
   ManagementSetup,
   RegisterManagementAppArgs,
-  ManagementSectionId,
 } from '../../../../../../../src/plugins/management/public';
 import { LicensingPluginSetup } from '../../../../../licensing/public';
 import { BeatsManagementConfigType } from '../../../../common';
@@ -105,7 +104,7 @@ export class KibanaFrameworkAdapter implements FrameworkAdapter {
   }
 
   public registerManagementUI(mount: RegisterManagementAppArgs['mount']) {
-    const section = this.management.sections.getSection(ManagementSectionId.Ingest);
+    const section = this.management.sections.section.ingest;
     section.registerApp({
       id: 'beats_management',
       title: i18n.translate('xpack.beatsManagement.centralManagementLinkLabel', {

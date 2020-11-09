@@ -3,10 +3,11 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { IFieldType } from 'src/plugins/data/public';
+import { pctToDecimal, decimalToPct } from '../../../../common/utils/corrected_percent_convert';
 import {
   WhenExpression,
   OfExpression,
@@ -76,6 +77,8 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     threshold = [],
   } = expression;
 
+  const isMetricPct = useMemo(() => metric && metric.endsWith('.pct'), [metric]);
+
   const updateAggType = useCallback(
     (at: string) => {
       setAlertParams(expressionId, {
@@ -102,13 +105,21 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
   );
 
   const updateThreshold = useCallback(
-    (t) => {
+    (enteredThreshold) => {
+      const t = isMetricPct
+        ? enteredThreshold.map((v: number) => pctToDecimal(v))
+        : enteredThreshold;
       if (t.join() !== expression.threshold.join()) {
         setAlertParams(expressionId, { ...expression, threshold: t });
       }
     },
-    [expressionId, expression, setAlertParams]
+    [expressionId, expression, isMetricPct, setAlertParams]
   );
+
+  const displayedThreshold = useMemo(() => {
+    if (isMetricPct) return threshold.map((v) => decimalToPct(v));
+    return threshold;
+  }, [threshold, isMetricPct]);
 
   return (
     <>
@@ -149,13 +160,22 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
             <StyledExpression>
               <ThresholdExpression
                 thresholdComparator={comparator || Comparator.GT}
-                threshold={threshold}
+                threshold={displayedThreshold}
                 customComparators={customComparators}
                 onChangeSelectedThresholdComparator={updateComparator}
                 onChangeSelectedThreshold={updateThreshold}
                 errors={errors}
               />
             </StyledExpression>
+            {isMetricPct && (
+              <div
+                style={{
+                  alignSelf: 'center',
+                }}
+              >
+                <EuiText size={'s'}>%</EuiText>
+              </div>
+            )}
           </StyledExpressionRow>
         </EuiFlexItem>
         {canDelete && (

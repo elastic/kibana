@@ -184,7 +184,6 @@ export const LegendControls = ({
         closePopover={handleCancelClick}
         id="legendControls"
         button={buttonComponent}
-        withTitle
       >
         <EuiPopoverTitle>Legend Options</EuiPopoverTitle>
         <EuiForm style={{ width: 500 }}>
@@ -266,7 +265,7 @@ export const LegendControls = ({
             fullWidth
             label={
               <SwatchLabel
-                color={first(paletteColors) as any}
+                color={first(paletteColors)!}
                 label={i18n.translate('xpack.infra.legendControls.minLabel', {
                   defaultMessage: 'Minimum',
                 })}
@@ -294,7 +293,7 @@ export const LegendControls = ({
             display="columnCompressed"
             label={
               <SwatchLabel
-                color={last(paletteColors) as any}
+                color={last(paletteColors)!}
                 label={i18n.translate('xpack.infra.legendControls.maxLabel', {
                   defaultMessage: 'Maxium',
                 })}

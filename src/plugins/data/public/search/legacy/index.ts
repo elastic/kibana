@@ -17,5 +17,4 @@
  * under the License.
  */
 
-export { fetchSoon } from './fetch_soon';
-export { getEsClient, LegacyApiCaller } from './es_client';
+export * from './call_msearch';

@@ -43,15 +43,15 @@ export const searchSavedObjectType: SavedObjectsType = {
   },
   mappings: {
     properties: {
-      columns: { type: 'keyword', index: false },
+      columns: { type: 'keyword', index: false, doc_values: false },
       description: { type: 'text' },
-      hits: { type: 'integer', index: false },
+      hits: { type: 'integer', index: false, doc_values: false },
       kibanaSavedObjectMeta: {
         properties: {
           searchSourceJSON: { type: 'text', index: false },
         },
       },
-      sort: { type: 'keyword', index: false },
+      sort: { type: 'keyword', index: false, doc_values: false },
       title: { type: 'text' },
       version: { type: 'integer' },
     },

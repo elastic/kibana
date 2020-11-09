@@ -8,8 +8,8 @@ import { PluginInitializer } from 'src/core/public';
 import { FeaturesPlugin, FeaturesPluginSetup, FeaturesPluginStart } from './plugin';
 
 export {
-  Feature,
-  FeatureConfig,
+  KibanaFeature,
+  KibanaFeatureConfig,
   FeatureKibanaPrivileges,
   SubFeatureConfig,
   SubFeaturePrivilegeConfig,

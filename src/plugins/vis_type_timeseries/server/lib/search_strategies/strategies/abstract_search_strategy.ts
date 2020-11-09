@@ -18,13 +18,15 @@
  */
 
 import {
-  LegacyAPICaller,
+  RequestHandlerContext,
   FakeRequest,
   IUiSettingsClient,
   SavedObjectsClientContract,
 } from 'kibana/server';
+
 import { Framework } from '../../../plugin';
 import { IndexPatternsFetcher } from '../../../../../data/server';
+import { VisPayload } from '../../../../common/types';
 
 /**
  * ReqFacade is a regular KibanaRequest object extended with additional service
@@ -32,42 +34,51 @@ import { IndexPatternsFetcher } from '../../../../../data/server';
  *
  * This will be replaced by standard KibanaRequest and RequestContext objects in a later version.
  */
-export type ReqFacade = FakeRequest & {
+export interface ReqFacade<T = unknown> extends FakeRequest {
+  requestContext: RequestHandlerContext;
   framework: Framework;
-  payload: unknown;
+  payload: T;
   pre: {
     indexPatternsService?: IndexPatternsFetcher;
   };
   getUiSettingsService: () => IUiSettingsClient;
   getSavedObjectsClient: () => SavedObjectsClientContract;
-  server: {
-    plugins: {
-      elasticsearch: {
-        getCluster: () => {
-          callWithRequest: (req: ReqFacade, endpoint: string, params: any) => Promise<any>;
-        };
-      };
-    };
-  };
   getEsShardTimeout: () => Promise<number>;
-};
+}
 
 export class AbstractSearchStrategy {
-  public getCallWithRequestInstance: (req: ReqFacade) => LegacyAPICaller;
-  public getSearchRequest: (req: ReqFacade) => any;
+  public indexType?: string;
+  public additionalParams: any;
 
-  constructor(
-    server: any,
-    callWithRequestFactory: (server: any, req: ReqFacade) => LegacyAPICaller,
-    SearchRequest: any
-  ) {
-    this.getCallWithRequestInstance = (req) => callWithRequestFactory(server, req);
+  constructor(type?: string, additionalParams: any = {}) {
+    this.indexType = type;
+    this.additionalParams = additionalParams;
+  }
 
-    this.getSearchRequest = (req) => {
-      const callWithRequest = this.getCallWithRequestInstance(req);
+  async search(req: ReqFacade<VisPayload>, bodies: any[], options = {}) {
+    const requests: any[] = [];
+    const { sessionId } = req.payload;
 
-      return new SearchRequest(req, callWithRequest);
-    };
+    bodies.forEach((body) => {
+      requests.push(
+        req.requestContext
+          .search!.search(
+            {
+              params: {
+                ...body,
+                ...this.additionalParams,
+              },
+              indexType: this.indexType,
+            },
+            {
+              sessionId,
+              ...options,
+            }
+          )
+          .toPromise()
+      );
+    });
+    return Promise.all(requests);
   }
 
   async getFieldsForWildcard(req: ReqFacade, indexPattern: string, capabilities: any) {
@@ -75,6 +86,7 @@ export class AbstractSearchStrategy {
 
     return await indexPatternsService!.getFieldsForWildcard({
       pattern: indexPattern,
+      fieldCapsOptions: { allow_no_indices: true },
     });
   }
 

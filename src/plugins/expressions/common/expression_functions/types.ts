@@ -21,6 +21,20 @@ import { UnwrapPromiseOrReturn } from '@kbn/utility-types';
 import { ArgumentType } from './arguments';
 import { TypeToString } from '../types/common';
 import { ExecutionContext } from '../execution/types';
+import {
+  ExpressionFunctionClog,
+  ExpressionFunctionFont,
+  ExpressionFunctionKibanaContext,
+  ExpressionFunctionKibana,
+  ExpressionFunctionVarSet,
+  ExpressionFunctionVar,
+  ExpressionFunctionTheme,
+  ExpressionFunctionCumulativeSum,
+  ExpressionFunctionDerivative,
+  ExpressionFunctionMovingAverage,
+} from './specs';
+import { ExpressionAstFunction } from '../ast';
+import { PersistableStateDefinition } from '../../../kibana_utils/common';
 
 /**
  * `ExpressionFunctionDefinition` is the interface plugins have to implement to
@@ -29,14 +43,19 @@ import { ExecutionContext } from '../execution/types';
 export interface ExpressionFunctionDefinition<
   Name extends string,
   Input,
-  Arguments,
+  Arguments extends Record<string, any>,
   Output,
   Context extends ExecutionContext = ExecutionContext
-> {
+> extends PersistableStateDefinition<ExpressionAstFunction['arguments']> {
   /**
    * The name of the function, as will be used in expression.
    */
   name: Name;
+
+  /**
+   * if set to true function will be disabled (but its migrate function will still be available)
+   */
+  disabled?: boolean;
 
   /**
    * Name of type of value this function outputs.
@@ -93,4 +112,29 @@ export interface ExpressionFunctionDefinition<
 /**
  * Type to capture every possible expression function definition.
  */
-export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<any, any, any, any>;
+export type AnyExpressionFunctionDefinition = ExpressionFunctionDefinition<
+  string,
+  any,
+  Record<string, any>,
+  any
+>;
+
+/**
+ * A mapping of `ExpressionFunctionDefinition`s for functions which the
+ * Expressions services provides out-of-the-box. Any new functions registered
+ * by the Expressions plugin should have their types added here.
+ *
+ * @public
+ */
+export interface ExpressionFunctionDefinitions {
+  clog: ExpressionFunctionClog;
+  font: ExpressionFunctionFont;
+  kibana_context: ExpressionFunctionKibanaContext;
+  kibana: ExpressionFunctionKibana;
+  var_set: ExpressionFunctionVarSet;
+  var: ExpressionFunctionVar;
+  theme: ExpressionFunctionTheme;
+  cumulative_sum: ExpressionFunctionCumulativeSum;
+  derivative: ExpressionFunctionDerivative;
+  moving_average: ExpressionFunctionMovingAverage;
+}

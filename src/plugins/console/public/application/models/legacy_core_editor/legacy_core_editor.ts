@@ -251,7 +251,7 @@ export class LegacyCoreEditor implements CoreEditor {
     });
   }
 
-  // eslint-disable-next-line @typescript-eslint/camelcase
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   private DO_NOT_USE_onPaste(text: string) {
     if (text && curl.detectCURL(text)) {
       const curlInput = curl.parseCURL(text);
@@ -391,7 +391,9 @@ export class LegacyCoreEditor implements CoreEditor {
           /[a-zA-Z_0-9\.\$\-\u00A2-\uFFFF]/, // adds support for dot character
         ],
         getCompletions: (
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           DO_NOT_USE_1: IAceEditor,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           DO_NOT_USE_2: IAceEditSession,
           pos: { row: number; column: number },
           prefix: string,
@@ -405,5 +407,9 @@ export class LegacyCoreEditor implements CoreEditor {
         },
       },
     ]);
+  }
+
+  destroy() {
+    this.editor.destroy();
   }
 }

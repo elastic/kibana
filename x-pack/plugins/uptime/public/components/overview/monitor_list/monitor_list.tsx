@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { HistogramPoint } from '../../../../common/runtime_types';
+import { HistogramPoint, X509Expiry } from '../../../../common/runtime_types';
 import { MonitorSummary } from '../../../../common/runtime_types';
 import { MonitorListStatusColumn } from './monitor_list_status_column';
 import { ExpandedRowMap } from './types';
@@ -31,6 +31,8 @@ import { MonitorList } from '../../../state/reducers/monitor_list';
 import { CertStatusColumn } from './cert_status_column';
 import { MonitorListHeader } from './monitor_list_header';
 import { URL_LABEL } from '../../common/translations';
+import { EnableMonitorAlert } from './columns/enable_alert';
+import { STATUS_ALERT_COLUMN } from './translations';
 
 interface Props extends MonitorListProps {
   pageSize: number;
@@ -49,7 +51,13 @@ export const noItemsMessage = (loading: boolean, filters?: string) => {
   return !!filters ? labels.NO_MONITOR_ITEM_SELECTED : labels.NO_DATA_MESSAGE;
 };
 
-export const MonitorListComponent: React.FC<Props> = ({
+export const MonitorListComponent: ({
+  filters,
+  monitorList: { list, error, loading },
+  linkParameters,
+  pageSize,
+  setPageSize,
+}: Props) => any = ({
   filters,
   monitorList: { list, error, loading },
   linkParameters,
@@ -69,7 +77,7 @@ export const MonitorListComponent: React.FC<Props> = ({
         ...map,
         [id]: (
           <MonitorListDrawer
-            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)}
+            summary={items.find(({ monitor_id: monitorId }) => monitorId === id)!}
           />
         ),
       };
@@ -79,14 +87,18 @@ export const MonitorListComponent: React.FC<Props> = ({
   const columns = [
     {
       align: 'left' as const,
-      field: 'state.monitor.status',
+      field: 'state.summary.status',
       name: labels.STATUS_COLUMN_LABEL,
       mobileOptions: {
         fullWidth: true,
       },
-      render: (status: string, { state: { timestamp, checks } }: MonitorSummary) => {
+      render: (status: string, { state: { timestamp, summaryPings } }: MonitorSummary) => {
         return (
-          <MonitorListStatusColumn status={status} timestamp={timestamp} checks={checks ?? []} />
+          <MonitorListStatusColumn
+            status={status}
+            timestamp={timestamp}
+            summaryPings={summaryPings ?? []}
+          />
         );
       },
     },
@@ -116,9 +128,9 @@ export const MonitorListComponent: React.FC<Props> = ({
     },
     {
       align: 'left' as const,
-      field: 'state.tls',
+      field: 'state.tls.server.x509',
       name: labels.TLS_COLUMN_LABEL,
-      render: (tls: any) => <CertStatusColumn cert={tls?.[0]} />,
+      render: (x509: X509Expiry) => <CertStatusColumn expiry={x509} />,
     },
     {
       align: 'center' as const,
@@ -127,8 +139,20 @@ export const MonitorListComponent: React.FC<Props> = ({
       mobileOptions: {
         show: false,
       },
-      render: (histogramSeries: HistogramPoint[] | null) => (
-        <MonitorBarSeries histogramSeries={histogramSeries} />
+      render: (histogramSeries: HistogramPoint[] | null, summary: MonitorSummary) => (
+        <MonitorBarSeries histogramSeries={histogramSeries} minInterval={summary.minInterval!} />
+      ),
+    },
+    {
+      align: 'center' as const,
+      field: '',
+      name: STATUS_ALERT_COLUMN,
+      width: '150px',
+      render: (item: MonitorSummary) => (
+        <EnableMonitorAlert
+          monitorId={item.monitor_id}
+          monitorName={item.state.monitor.name || item.monitor_id}
+        />
       ),
     },
     {
@@ -163,7 +187,7 @@ export const MonitorListComponent: React.FC<Props> = ({
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={labels.getDescriptionLabel(items.length)}
-        error={error?.message}
+        error={error?.body?.message || error?.message}
         loading={loading}
         isExpandable={true}
         hasActions={true}

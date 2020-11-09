@@ -10,51 +10,60 @@ import { schema } from '@kbn/config-schema';
  * Used to validate GET requests for a complete resolver tree.
  */
 export const validateTree = {
-  params: schema.object({ id: schema.string() }),
+  params: schema.object({ id: schema.string({ minLength: 1 }) }),
   query: schema.object({
-    children: schema.number({ defaultValue: 10, min: 0, max: 100 }),
-    ancestors: schema.number({ defaultValue: 3, min: 0, max: 5 }),
-    events: schema.number({ defaultValue: 100, min: 0, max: 1000 }),
-    alerts: schema.number({ defaultValue: 100, min: 0, max: 1000 }),
+    children: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
+    ancestors: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
+    events: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
+    alerts: schema.number({ defaultValue: 1000, min: 0, max: 10000 }),
     afterEvent: schema.maybe(schema.string()),
     afterAlert: schema.maybe(schema.string()),
     afterChild: schema.maybe(schema.string()),
-    legacyEndpointID: schema.maybe(schema.string()),
+    legacyEndpointID: schema.maybe(schema.string({ minLength: 1 })),
   }),
 };
 
 /**
- * Used to validate GET requests for non process events for a specific event.
+ * Used to validate POST requests for `/resolver/events` api.
  */
 export const validateEvents = {
-  params: schema.object({ id: schema.string() }),
   query: schema.object({
-    events: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+    // keeping the max as 10k because the limit in ES for a single query is also 10k
+    limit: schema.number({ defaultValue: 1000, min: 1, max: 10000 }),
     afterEvent: schema.maybe(schema.string()),
-    legacyEndpointID: schema.maybe(schema.string()),
   }),
+  body: schema.nullable(
+    schema.object({
+      filter: schema.maybe(schema.string()),
+    })
+  ),
 };
 
 /**
  * Used to validate GET requests for alerts for a specific process.
  */
 export const validateAlerts = {
-  params: schema.object({ id: schema.string() }),
+  params: schema.object({ id: schema.string({ minLength: 1 }) }),
   query: schema.object({
-    alerts: schema.number({ defaultValue: 100, min: 1, max: 1000 }),
+    alerts: schema.number({ defaultValue: 1000, min: 1, max: 10000 }),
     afterAlert: schema.maybe(schema.string()),
-    legacyEndpointID: schema.maybe(schema.string()),
+    legacyEndpointID: schema.maybe(schema.string({ minLength: 1 })),
   }),
+  body: schema.nullable(
+    schema.object({
+      filter: schema.maybe(schema.string()),
+    })
+  ),
 };
 
 /**
  * Used to validate GET requests for the ancestors of a process event.
  */
 export const validateAncestry = {
-  params: schema.object({ id: schema.string() }),
+  params: schema.object({ id: schema.string({ minLength: 1 }) }),
   query: schema.object({
-    ancestors: schema.number({ defaultValue: 0, min: 0, max: 10 }),
-    legacyEndpointID: schema.maybe(schema.string()),
+    ancestors: schema.number({ defaultValue: 200, min: 0, max: 10000 }),
+    legacyEndpointID: schema.maybe(schema.string({ minLength: 1 })),
   }),
 };
 
@@ -62,11 +71,11 @@ export const validateAncestry = {
  * Used to validate GET requests for children of a specified process event.
  */
 export const validateChildren = {
-  params: schema.object({ id: schema.string() }),
+  params: schema.object({ id: schema.string({ minLength: 1 }) }),
   query: schema.object({
-    children: schema.number({ defaultValue: 10, min: 1, max: 100 }),
+    children: schema.number({ defaultValue: 200, min: 1, max: 10000 }),
     afterChild: schema.maybe(schema.string()),
-    legacyEndpointID: schema.maybe(schema.string()),
+    legacyEndpointID: schema.maybe(schema.string({ minLength: 1 })),
   }),
 };
 

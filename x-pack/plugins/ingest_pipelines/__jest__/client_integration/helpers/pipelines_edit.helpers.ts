@@ -5,10 +5,10 @@
  */
 
 import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_utils';
-import { BASE_PATH } from '../../../common/constants';
-import { PipelinesEdit } from '../../../public/application/sections/pipelines_edit'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { PipelinesEdit } from '../../../public/application/sections/pipelines_edit';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
+import { getEditPath, ROUTES } from '../../../public/application/services/navigation';
 
 export type PipelinesEditTestBed = TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
@@ -29,8 +29,8 @@ export const PIPELINE_TO_EDIT = {
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}edit/${PIPELINE_TO_EDIT.name}`],
-    componentRoutePath: `${BASE_PATH}edit/:name`,
+    initialEntries: [getEditPath({ pipelineName: PIPELINE_TO_EDIT.name })],
+    componentRoutePath: ROUTES.edit,
   },
   doMountAsync: true,
 };

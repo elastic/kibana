@@ -4,21 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EuiAccordion } from '@elastic/eui';
 import React from 'react';
 import styled from 'styled-components';
-import { EuiAccordion } from '@elastic/eui';
 import {
-  IStackframe,
-  IStackframeWithLineContext,
+  Stackframe as StackframeType,
+  StackframeWithLineContext,
 } from '../../../../typings/es_schemas/raw/fields/stackframe';
 import {
   borderRadius,
   fontFamilyCode,
   fontSize,
 } from '../../../style/variables';
-import { FrameHeading } from './FrameHeading';
 import { Context } from './Context';
+import { FrameHeading } from './FrameHeading';
 import { Variables } from './Variables';
+import { px, units } from '../../../style/variables';
 
 const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
   position: relative;
@@ -32,8 +33,13 @@ const ContextContainer = styled.div<{ isLibraryFrame: boolean }>`
       : theme.eui.euiColorLightestShade};
 `;
 
+// Indent the non-context frames the same amount as the accordion control
+const NoContextFrameHeadingWrapper = styled.div`
+  margin-left: ${px(units.unit + units.half + units.quarter)};
+`;
+
 interface Props {
-  stackframe: IStackframe;
+  stackframe: StackframeType;
   codeLanguage?: string;
   id: string;
   initialIsOpen?: boolean;
@@ -49,14 +55,24 @@ export function Stackframe({
 }: Props) {
   if (!hasLineContext(stackframe)) {
     return (
-      <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
+      <NoContextFrameHeadingWrapper>
+        <FrameHeading
+          codeLanguage={codeLanguage}
+          stackframe={stackframe}
+          isLibraryFrame={isLibraryFrame}
+        />
+      </NoContextFrameHeadingWrapper>
     );
   }
 
   return (
     <EuiAccordion
       buttonContent={
-        <FrameHeading stackframe={stackframe} isLibraryFrame={isLibraryFrame} />
+        <FrameHeading
+          codeLanguage={codeLanguage}
+          stackframe={stackframe}
+          isLibraryFrame={isLibraryFrame}
+        />
       }
       id={id}
       initialIsOpen={initialIsOpen}
@@ -74,7 +90,7 @@ export function Stackframe({
 }
 
 function hasLineContext(
-  stackframe: IStackframe
-): stackframe is IStackframeWithLineContext {
+  stackframe: StackframeType
+): stackframe is StackframeWithLineContext {
   return stackframe.line?.hasOwnProperty('context') || false;
 }

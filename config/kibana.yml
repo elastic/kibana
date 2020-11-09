@@ -27,11 +27,6 @@
 # The URLs of the Elasticsearch instances to use for all your queries.
 #elasticsearch.hosts: ["http://localhost:9200"]
 
-# When this setting's value is true Kibana uses the hostname specified in the server.host
-# setting. When the value of this setting is false, Kibana uses the hostname of the host
-# that connects to this Kibana instance.
-#elasticsearch.preserveHost: true
-
 # Kibana uses an index in Elasticsearch to store saved searches, visualizations and
 # dashboards. Kibana creates a new index if the index doesn't already exist.
 #kibana.index: ".kibana"
@@ -81,14 +76,11 @@
 # Time in milliseconds for Elasticsearch to wait for responses from shards. Set to 0 to disable.
 #elasticsearch.shardTimeout: 30000
 
-# Time in milliseconds to wait for Elasticsearch at Kibana startup before retrying.
-#elasticsearch.startupTimeout: 5000
-
 # Logs queries sent to Elasticsearch. Requires logging.verbose set to true.
 #elasticsearch.logQueries: false
 
 # Specifies the path where Kibana creates the process ID file.
-#pid.file: /var/run/kibana.pid
+#pid.file: /run/kibana/kibana.pid
 
 # Enables you to specify a file where Kibana stores log output.
 #logging.dest: stdout

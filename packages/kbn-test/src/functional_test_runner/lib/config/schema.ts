@@ -38,14 +38,7 @@ const urlPartsSchema = () =>
       password: Joi.string(),
       pathname: Joi.string().regex(/^\//, 'start with a /'),
       hash: Joi.string().regex(/^\//, 'start with a /'),
-      ssl: Joi.object()
-        .keys({
-          enabled: Joi.boolean().default(false),
-          certificate: Joi.string().optional(),
-          certificateAuthorities: Joi.string().optional(),
-          key: Joi.string().optional(),
-        })
-        .default(),
+      certificateAuthorities: Joi.array().items(Joi.binary()).optional(),
     })
     .default();
 
@@ -148,7 +141,7 @@ export const schema = Joi.object()
 
     browser: Joi.object()
       .keys({
-        type: Joi.string().valid('chrome', 'firefox', 'ie', 'msedge').default('chrome'),
+        type: Joi.string().valid('chrome', 'firefox', 'msedge').default('chrome'),
 
         logPollingMs: Joi.number().default(100),
         acceptInsecureCerts: Joi.boolean().default(false),
@@ -262,7 +255,7 @@ export const schema = Joi.object()
     // settings for the find service
     layout: Joi.object()
       .keys({
-        fixedHeaderHeight: Joi.number().default(50),
+        fixedHeaderHeight: Joi.number().default(100),
       })
       .default(),
 

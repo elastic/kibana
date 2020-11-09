@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiPopover, EuiButton } from '@elastic/eui';
@@ -25,7 +24,8 @@ export const ActionsPopoverComponent = ({
 }: ActionsPopoverProps) => {
   const popoverId = `${summary.monitor_id}_popover`;
 
-  const monitorUrl: string | undefined = get(summary, 'state.url.full', undefined);
+  const monitorUrl: string | undefined = summary?.state?.url?.full;
+
   const isPopoverOpen: boolean =
     !!popoverState && popoverState.open && popoverState.id === popoverId;
   return (

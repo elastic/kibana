@@ -17,8 +17,8 @@ describe('score_interval_to_datetime', () => {
 
   test('converts a second interval to plus or minus (+/-) one hour', () => {
     const expected: FromTo = {
-      from: new Date('2019-06-25T04:31:59.345Z').valueOf(),
-      to: new Date('2019-06-25T06:31:59.345Z').valueOf(),
+      from: '2019-06-25T04:31:59.345Z',
+      to: '2019-06-25T06:31:59.345Z',
     };
     anomalies.anomalies[0].time = new Date('2019-06-25T05:31:59.345Z').valueOf();
     expect(scoreIntervalToDateTime(anomalies.anomalies[0], 'second')).toEqual(expected);
@@ -26,8 +26,8 @@ describe('score_interval_to_datetime', () => {
 
   test('converts a minute interval to plus or minus (+/-) one hour', () => {
     const expected: FromTo = {
-      from: new Date('2019-06-25T04:31:59.345Z').valueOf(),
-      to: new Date('2019-06-25T06:31:59.345Z').valueOf(),
+      from: '2019-06-25T04:31:59.345Z',
+      to: '2019-06-25T06:31:59.345Z',
     };
     anomalies.anomalies[0].time = new Date('2019-06-25T05:31:59.345Z').valueOf();
     expect(scoreIntervalToDateTime(anomalies.anomalies[0], 'minute')).toEqual(expected);
@@ -35,8 +35,8 @@ describe('score_interval_to_datetime', () => {
 
   test('converts a hour interval to plus or minus (+/-) one hour', () => {
     const expected: FromTo = {
-      from: new Date('2019-06-25T04:31:59.345Z').valueOf(),
-      to: new Date('2019-06-25T06:31:59.345Z').valueOf(),
+      from: '2019-06-25T04:31:59.345Z',
+      to: '2019-06-25T06:31:59.345Z',
     };
     anomalies.anomalies[0].time = new Date('2019-06-25T05:31:59.345Z').valueOf();
     expect(scoreIntervalToDateTime(anomalies.anomalies[0], 'hour')).toEqual(expected);
@@ -44,8 +44,8 @@ describe('score_interval_to_datetime', () => {
 
   test('converts a day interval to plus or minus (+/-) one day', () => {
     const expected: FromTo = {
-      from: new Date('2019-06-24T05:31:59.345Z').valueOf(),
-      to: new Date('2019-06-26T05:31:59.345Z').valueOf(),
+      from: '2019-06-24T05:31:59.345Z',
+      to: '2019-06-26T05:31:59.345Z',
     };
     anomalies.anomalies[0].time = new Date('2019-06-25T05:31:59.345Z').valueOf();
     expect(scoreIntervalToDateTime(anomalies.anomalies[0], 'day')).toEqual(expected);

@@ -15,7 +15,7 @@ import {
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { CLIENT_ALERT_TYPES } from '../../../../common/constants';
+import { CLIENT_ALERT_TYPES } from '../../../../common/constants/alerts';
 import { ToggleFlyoutTranslations } from './translations';
 import { ToggleAlertFlyoutButtonProps } from './alerts_containers';
 
@@ -93,7 +93,6 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     panels = [
       {
         id: ALERT_CONTEXT_MAIN_PANEL_ID,
-        title: 'main panel',
         items: [...selectionItems, managementContextItem],
       },
     ];
@@ -101,7 +100,6 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
     panels = [
       {
         id: ALERT_CONTEXT_MAIN_PANEL_ID,
-        title: 'main panel',
         items: [
           {
             'aria-label': ToggleFlyoutTranslations.openAlertContextPanelAriaLabel,
@@ -140,6 +138,7 @@ export const ToggleAlertFlyoutButtonComponent: React.FC<Props> = ({
       closePopover={() => setIsOpen(false)}
       isOpen={isOpen}
       ownFocus
+      panelPaddingSize="none"
     >
       <EuiContextMenu initialPanelId={0} panels={panels} />
     </EuiPopover>

@@ -58,5 +58,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./jobs'));
     loadTestFile(require.resolve('./results'));
     loadTestFile(require.resolve('./data_frame_analytics'));
+    loadTestFile(require.resolve('./filters'));
+    loadTestFile(require.resolve('./calendars'));
+    loadTestFile(require.resolve('./annotations'));
   });
 }

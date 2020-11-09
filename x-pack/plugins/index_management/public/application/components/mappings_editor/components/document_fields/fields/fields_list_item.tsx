@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { NormalizedField, NormalizedFields } from '../../../types';
-import { getTypeLabelFromType } from '../../../lib';
+import { getTypeLabelFromField } from '../../../lib';
 import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';
 
 import { FieldsList } from './fields_list';
@@ -67,6 +67,7 @@ function FieldListItemComponent(
     isExpanded,
     path,
   } = field;
+
   // When there aren't any "child" fields (the maxNestedDepth === 0), there is no toggle icon on the left of any field.
   // For that reason, we need to compensate and substract some indent to left align on the page.
   const substractIndentAmount = maxNestedDepth === 0 ? CHILD_FIELD_INDENT_SIZE * 0.5 : 0;
@@ -193,6 +194,7 @@ function FieldListItemComponent(
   return (
     <li
       className={classNames('mappingsEditor__fieldsListItem', {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'mappingsEditor__fieldsListItem--dottedLine': hasDottedLine,
       })}
       data-test-subj={`fieldsListItem ${dataTestSubj}`}
@@ -201,13 +203,17 @@ function FieldListItemComponent(
       <div
         style={{ paddingLeft: `${indent}px` }}
         className={classNames('mappingsEditor__fieldsListItem__field', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--enabled': areActionButtonsVisible,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--highlighted': isHighlighted,
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'mappingsEditor__fieldsListItem__field--dim': isDimmed,
         })}
       >
         <div
           className={classNames('mappingsEditor__fieldsListItem__wrapper', {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             'mappingsEditor__fieldsListItem__wrapper--indent':
               treeDepth === 0 && maxNestedDepth === 0,
           })}
@@ -216,8 +222,11 @@ function FieldListItemComponent(
             gutterSize="s"
             alignItems="center"
             className={classNames('mappingsEditor__fieldsListItem__content', {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'mappingsEditor__fieldsListItem__content--toggle': hasChildFields || hasMultiFields,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'mappingsEditor__fieldsListItem__content--multiField': isMultiField,
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               'mappingsEditor__fieldsListItem__content--indent':
                 !hasChildFields && !hasMultiFields && maxNestedDepth > treeDepth,
             })}
@@ -272,10 +281,10 @@ function FieldListItemComponent(
                   ? i18n.translate('xpack.idxMgmt.mappingsEditor.multiFieldBadgeLabel', {
                       defaultMessage: '{dataType} multi-field',
                       values: {
-                        dataType: getTypeLabelFromType(source.type),
+                        dataType: getTypeLabelFromField(source),
                       },
                     })
-                  : getTypeLabelFromType(source.type)}
+                  : getTypeLabelFromField(source)}
               </EuiBadge>
             </EuiFlexItem>
 

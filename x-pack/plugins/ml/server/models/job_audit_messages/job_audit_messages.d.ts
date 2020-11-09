@@ -4,11 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
+import type { MlClient } from '../../lib/ml_client';
+import type { JobSavedObjectService } from '../../saved_objects';
 
 export function jobAuditMessagesProvider(
-  callAsCurrentUser: LegacyAPICaller
+  client: IScopedClusterClient,
+  mlClient: MlClient
 ): {
-  getJobAuditMessages: (jobId?: string, from?: string) => any;
+  getJobAuditMessages: (
+    jobSavedObjectService: JobSavedObjectService,
+    jobId?: string,
+    from?: string
+  ) => any;
   getAuditMessagesSummary: (jobIds?: string[]) => any;
 };

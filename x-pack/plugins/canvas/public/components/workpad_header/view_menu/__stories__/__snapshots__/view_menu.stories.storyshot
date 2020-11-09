@@ -1,0 +1,129 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/WorkpadHeader/ViewMenu edit mode 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownLeft"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      aria-label="View options"
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonContent euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          View
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/ViewMenu read only mode 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownLeft"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      aria-label="View options"
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonContent euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          View
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/ViewMenu with autoplay enabled 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownLeft"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      aria-label="View options"
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonContent euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          View
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/WorkpadHeader/ViewMenu with refresh enabled 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownLeft"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <button
+      aria-label="View options"
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+      onClick={[Function]}
+      type="button"
+    >
+      <span
+        className="euiButtonContent euiButtonEmpty__content"
+      >
+        <span
+          className="euiButtonEmpty__text"
+        >
+          View
+        </span>
+      </span>
+    </button>
+  </div>
+</div>
+`;

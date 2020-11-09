@@ -129,9 +129,17 @@ export default new Datasource('es', {
 
     const body = buildRequest(config, tlConfig, scriptedFields, esShardTimeout);
 
-    const { callAsCurrentUser: callWithRequest } = tlConfig.esDataClient();
-    const resp = await callWithRequest('search', body);
-    if (!resp._shards.total) {
+    const resp = await tlConfig.context.search
+      .search(
+        body,
+        {
+          sessionId: tlConfig.request?.body.sessionId,
+        },
+        tlConfig.context
+      )
+      .toPromise();
+
+    if (!resp.rawResponse._shards.total) {
       throw new Error(
         i18n.translate('timelion.serverSideErrors.esFunction.indexNotFoundErrorMessage', {
           defaultMessage: 'Elasticsearch index not found: {index}',
@@ -143,7 +151,7 @@ export default new Datasource('es', {
     }
     return {
       type: 'seriesList',
-      list: toSeriesList(resp.aggregations, config),
+      list: toSeriesList(resp.rawResponse.aggregations, config),
     };
   },
 });

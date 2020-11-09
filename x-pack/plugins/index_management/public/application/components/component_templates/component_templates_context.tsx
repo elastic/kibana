@@ -5,7 +5,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { HttpSetup, DocLinksStart, NotificationsSetup } from 'src/core/public';
+import { HttpSetup, DocLinksStart, NotificationsSetup, CoreStart } from 'src/core/public';
 
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { getApi, getUseRequest, getSendRequest, getDocumentation, getBreadcrumbs } from './lib';
@@ -19,6 +19,7 @@ interface Props {
   docLinks: DocLinksStart;
   toasts: NotificationsSetup['toasts'];
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  getUrlForApp: CoreStart['application']['getUrlForApp'];
 }
 
 interface Context {
@@ -29,6 +30,7 @@ interface Context {
   breadcrumbs: ReturnType<typeof getBreadcrumbs>;
   trackMetric: (type: 'loaded' | 'click' | 'count', eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
+  getUrlForApp: CoreStart['application']['getUrlForApp'];
 }
 
 export const ComponentTemplatesProvider = ({
@@ -38,7 +40,15 @@ export const ComponentTemplatesProvider = ({
   value: Props;
   children: React.ReactNode;
 }) => {
-  const { httpClient, apiBasePath, trackMetric, docLinks, toasts, setBreadcrumbs } = value;
+  const {
+    httpClient,
+    apiBasePath,
+    trackMetric,
+    docLinks,
+    toasts,
+    setBreadcrumbs,
+    getUrlForApp,
+  } = value;
 
   const useRequest = getUseRequest(httpClient);
   const sendRequest = getSendRequest(httpClient);
@@ -49,7 +59,16 @@ export const ComponentTemplatesProvider = ({
 
   return (
     <ComponentTemplatesContext.Provider
-      value={{ api, documentation, trackMetric, toasts, httpClient, apiBasePath, breadcrumbs }}
+      value={{
+        api,
+        documentation,
+        trackMetric,
+        toasts,
+        httpClient,
+        apiBasePath,
+        breadcrumbs,
+        getUrlForApp,
+      }}
     >
       {children}
     </ComponentTemplatesContext.Provider>

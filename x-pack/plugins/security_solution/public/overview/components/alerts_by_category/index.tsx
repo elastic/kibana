@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 
 import { DEFAULT_NUMBER_FORMAT, APP_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translations';
-import { MatrixHistogramContainer } from '../../../common/components/matrix_histogram';
+import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
 import {
@@ -19,14 +19,14 @@ import {
   IIndexPattern,
   Query,
 } from '../../../../../../../src/plugins/data/public';
-import { HostsTableType, HostsType } from '../../../hosts/store/model';
+import { HostsTableType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
 import {
   alertsStackByOptions,
   histogramConfigs,
 } from '../../../common/components/alerts_viewer/histogram_configs';
-import { MatrixHisrogramConfigs } from '../../../common/components/matrix_histogram/types';
+import { MatrixHistogramConfigs } from '../../../common/components/matrix_histogram/types';
 import { getTabsOnHostsUrl } from '../../../common/components/link_to/redirect_to_hosts';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SecurityPageName } from '../../../app/types';
@@ -43,6 +43,7 @@ interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'se
   filters?: Filter[];
   hideHeaderChildren?: boolean;
   indexPattern: IIndexPattern;
+  indexNames: string[];
   query?: Query;
 }
 
@@ -52,6 +53,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   from,
   hideHeaderChildren = false,
   indexPattern,
+  indexNames,
   query = DEFAULT_QUERY,
   setQuery,
   to,
@@ -93,7 +95,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
     [goToHostAlerts, formatUrl]
   );
 
-  const alertsByCategoryHistogramConfigs: MatrixHisrogramConfigs = useMemo(
+  const alertsByCategoryHistogramConfigs: MatrixHistogramConfigs = useMemo(
     () => ({
       ...histogramConfigs,
       defaultStackByOption:
@@ -107,7 +109,7 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
   );
 
   return (
-    <MatrixHistogramContainer
+    <MatrixHistogram
       endDate={to}
       filterQuery={convertToBuildEsQuery({
         config: esQuery.getEsQueryConfig(kibana.services.uiSettings),
@@ -117,10 +119,9 @@ const AlertsByCategoryComponent: React.FC<Props> = ({
       })}
       headerChildren={hideHeaderChildren ? null : alertsCountViewAlertsButton}
       id={ID}
+      indexNames={indexNames}
       setQuery={setQuery}
-      sourceId="default"
       startDate={from}
-      type={HostsType.page}
       {...alertsByCategoryHistogramConfigs}
     />
   );

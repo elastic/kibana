@@ -22,3 +22,12 @@ export const certificateFormTranslations = {
     }
   ),
 };
+
+export const alertFormI18n = {
+  inputPlaceHolder: i18n.translate(
+    'xpack.uptime.sourceConfiguration.alertDefaultForm.selectConnector',
+    {
+      defaultMessage: 'Please select one or more connectors',
+    }
+  ),
+};

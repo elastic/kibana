@@ -20,6 +20,7 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { labelDateFormatter } from '../../../components/lib/label_date_formatter';
 
 import {
   Axis,
@@ -29,6 +30,7 @@ import {
   AnnotationDomainTypes,
   LineAnnotation,
   TooltipType,
+  StackMode,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
@@ -67,22 +69,22 @@ export const TimeSeries = ({
   onBrush,
   xAxisFormatter,
   annotations,
-  enableHistogramMode,
 }) => {
   const chartRef = useRef();
-  const updateCursor = (_, cursor) => {
-    if (chartRef.current) {
-      chartRef.current.dispatchExternalPointerEvent(cursor);
-    }
-  };
 
   useEffect(() => {
+    const updateCursor = (_, cursor) => {
+      if (chartRef.current) {
+        chartRef.current.dispatchExternalPointerEvent(cursor);
+      }
+    };
+
     eventBus.on(ACTIVE_CURSOR, updateCursor);
 
     return () => {
       eventBus.off(ACTIVE_CURSOR, undefined, updateCursor);
     };
-  }, []); // eslint-disable-line
+  }, []);
 
   const tooltipFormatter = decorateFormatter(xAxisFormatter);
   const uiSettings = getUISettings();
@@ -95,7 +97,7 @@ export const TimeSeries = ({
   // If the color isn't configured by the user, use the color mapping service
   // to assign a color from the Kibana palette. Colors will be shared across the
   // session, including dashboards.
-  const { colors, theme: themeService } = getChartsSetup();
+  const { legacyColors: colors, theme: themeService } = getChartsSetup();
   const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   colors.mappedColors.mapKeys(series.filter(({ color }) => !color).map(({ label }) => label));
@@ -139,6 +141,7 @@ export const TimeSeries = ({
           type: tooltipMode === 'show_focused' ? TooltipType.Follow : TooltipType.VerticalCursor,
           headerFormatter: tooltipFormatter,
         }}
+        externalPointerEvents={{ tooltip: { visible: false } }}
       />
 
       {annotations.map(({ id, data, icon, color }) => {
@@ -163,6 +166,7 @@ export const TimeSeries = ({
           {
             id,
             label,
+            labelFormatted,
             bars,
             lines,
             data,
@@ -176,36 +180,42 @@ export const TimeSeries = ({
             useDefaultGroupDomain,
             y1AccessorFormat,
             y0AccessorFormat,
+            tickFormat,
           },
           sortIndex
         ) => {
           const stackAccessors = getStackAccessors(stack);
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
+          const isStacked = stack !== STACKED_OPTIONS.NONE;
           const key = `${id}-${label}`;
           // Only use color mapping if there is no color from the server
           const finalColor = color ?? colors.mappedColors.mapping[label];
-
+          let seriesName = label.toString();
+          if (labelFormatted) {
+            seriesName = labelDateFormatter(labelFormatted);
+          }
           if (bars?.show) {
             return (
               <BarSeriesDecorator
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={label.toString()}
+                name={seriesName}
                 data={data}
                 hideInLegend={hideInLegend}
                 bars={bars}
                 color={finalColor}
                 stackAccessors={stackAccessors}
-                stackAsPercentage={isPercentage}
+                stackMode={isPercentage ? StackMode.Percentage : undefined}
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
                 timeZone={timeZone}
-                enableHistogramMode={enableHistogramMode}
+                enableHistogramMode={isStacked}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
+                tickFormat={tickFormat}
               />
             );
           }
@@ -216,22 +226,23 @@ export const TimeSeries = ({
                 key={key}
                 seriesId={id}
                 seriesGroupId={groupId}
-                name={label.toString()}
+                name={seriesName}
                 data={data}
                 hideInLegend={hideInLegend}
                 lines={lines}
                 color={finalColor}
                 stackAccessors={stackAccessors}
-                stackAsPercentage={isPercentage}
+                stackMode={isPercentage ? StackMode.Percentage : undefined}
                 points={points}
                 xScaleType={xScaleType}
                 yScaleType={yScaleType}
                 timeZone={timeZone}
-                enableHistogramMode={enableHistogramMode}
+                enableHistogramMode={isStacked}
                 useDefaultGroupDomain={useDefaultGroupDomain}
                 sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
+                tickFormat={tickFormat}
               />
             );
           }
@@ -248,8 +259,10 @@ export const TimeSeries = ({
           position={position}
           domain={domain}
           hide={hide}
-          showGridLines={showGrid}
-          gridLineStyle={GRID_LINE_CONFIG}
+          gridLine={{
+            ...GRID_LINE_CONFIG,
+            visible: showGrid,
+          }}
           tickFormat={tickFormatter}
         />
       ))}
@@ -259,8 +272,10 @@ export const TimeSeries = ({
         position={Position.Bottom}
         title={xAxisLabel}
         tickFormat={xAxisFormatter}
-        showGridLines={showGrid}
-        gridLineStyle={GRID_LINE_CONFIG}
+        gridLine={{
+          ...GRID_LINE_CONFIG,
+          visible: showGrid,
+        }}
       />
     </Chart>
   );
@@ -283,5 +298,4 @@ TimeSeries.propTypes = {
   onBrush: PropTypes.func,
   xAxisFormatter: PropTypes.func,
   annotations: PropTypes.array,
-  enableHistogramMode: PropTypes.bool.isRequired,
 };

@@ -1,17 +1,17 @@
 {
-  "item_id": "endpoint_list_item",
-  "_tags": ["endpoint", "process", "malware", "os:windows"],
-  "tags": ["user added string for a tag", "malware"],
-  "type": "simple",
-  "description": "This is a sample change here this list",
-  "name": "Sample Endpoint Exception List update change",
-  "comments": [{ "comment": "this is a newly added comment" }],
+  "comments": [],
+  "description": "Test comments - exception list item",
   "entries": [
     {
-      "field": "event.category",
-      "operator": "included",
-      "type": "match_any",
-      "value": ["process", "malware"]
+      "field": "host.name",
+      "type": "match",
+      "value": "rock01",
+      "operator": "included"
     }
-  ]
+  ],
+  "item_id": "993f43f7-325d-4df3-9338-964e77c37053",
+  "name": "Test comments - exception list item",
+  "namespace_type": "single",
+  "tags": [],
+  "type": "simple"
 }

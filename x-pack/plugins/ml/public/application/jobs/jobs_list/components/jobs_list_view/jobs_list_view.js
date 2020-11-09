@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { isEqual } from 'lodash';
 
 import { ml } from '../../../../services/ml_api_service';
 import { checkForAutoStartDatafeed, filterJobs, loadFullJob } from '../utils';
@@ -34,7 +35,6 @@ import { NodeAvailableWarning } from '../../../../components/node_available_warn
 import { DatePickerWrapper } from '../../../../components/navigation_menu/date_picker_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade';
 import { RefreshJobsListButton } from '../refresh_jobs_list_button';
-import { isEqual } from 'lodash';
 
 import { DELETING_JOBS_REFRESH_INTERVAL_MS } from '../../../../../../common/constants/jobs_list';
 
@@ -63,9 +63,14 @@ export class JobsListView extends Component {
     this.showDeleteJobModal = () => {};
     this.showStartDatafeedModal = () => {};
     this.showCreateWatchFlyout = () => {};
+    // work around to keep track of whether the component is mounted
+    // used to block timeouts for results polling
+    // which can run after unmounting
+    this._isMounted = false;
   }
 
   componentDidMount() {
+    this._isMounted = true;
     this.refreshJobSummaryList(true);
 
     if (this.props.isManagementTable !== true) {
@@ -87,6 +92,7 @@ export class JobsListView extends Component {
     if (this.props.isManagementTable === undefined) {
       deletingJobsRefreshTimeout = null;
     }
+    this._isMounted = false;
   }
 
   openAutoStartDatafeedModal() {
@@ -232,7 +238,7 @@ export class JobsListView extends Component {
   };
 
   async refreshJobSummaryList(forceRefresh = false) {
-    if (forceRefresh === true || this.props.blockRefresh !== true) {
+    if (this._isMounted && (forceRefresh === true || this.props.blockRefresh !== true)) {
       // Set loading to true for jobs_list table for initial job loading
       if (this.state.loading === null) {
         this.setState({ loading: true });
@@ -240,6 +246,12 @@ export class JobsListView extends Component {
 
       const expandedJobsIds = Object.keys(this.state.itemIdToExpandedRowMap);
       try {
+        let spaces = {};
+        if (this.props.isManagementTable) {
+          const allSpaces = await ml.savedObjects.jobsSpaces();
+          spaces = allSpaces['anomaly-detector'];
+        }
+
         const jobs = await ml.jobs.jobsSummary(expandedJobsIds);
         const fullJobsList = {};
         const jobsSummaryList = jobs.map((job) => {
@@ -248,6 +260,10 @@ export class JobsListView extends Component {
             delete job.fullJob;
           }
           job.latestTimestampSortValue = job.latestTimestampMs || 0;
+          job.spaces =
+            this.props.isManagementTable && spaces && spaces[job.id] !== undefined
+              ? spaces[job.id]
+              : [];
           return job;
         });
         const filteredJobsSummaryList = filterJobs(jobsSummaryList, this.state.filterClauses);
@@ -283,6 +299,10 @@ export class JobsListView extends Component {
   }
 
   async checkDeletingJobTasks(forceRefresh = false) {
+    if (this._isMounted === false) {
+      return;
+    }
+
     const { jobIds: taskJobIds } = await ml.jobs.deletingJobTasks();
 
     const taskListHasChanged =

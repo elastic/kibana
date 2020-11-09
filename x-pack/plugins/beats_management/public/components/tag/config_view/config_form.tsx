@@ -8,10 +8,7 @@ import { i18n } from '@kbn/i18n';
 import Formsy from 'formsy-react';
 import { get } from 'lodash';
 import React from 'react';
-import {
-  ConfigBlockSchema,
-  ConfigurationBlock,
-} from '../../../../../../legacy/plugins/beats_management/common/domain_types';
+import { ConfigBlockSchema, ConfigurationBlock } from '../../../../common/domain_types';
 import {
   FormsyEuiCodeEditor,
   FormsyEuiFieldText,

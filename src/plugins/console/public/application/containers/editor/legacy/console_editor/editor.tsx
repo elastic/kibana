@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { useUIAceKeyboardMode } from '../../../../../../../es_ui_shared/public';
+import { ace } from '../../../../../../../es_ui_shared/public';
 // @ts-ignore
 import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
 import { ConsoleMenu } from '../../../../components';
@@ -37,6 +37,8 @@ import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
+
+const { useUIAceKeyboardMode } = ace;
 
 export interface EditorProps {
   initialTextValue: string;
@@ -65,9 +67,8 @@ const inputId = 'ConAppInputTextarea';
 
 function EditorUI({ initialTextValue }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService },
+    services: { history, notifications, settings: settingsService, esHostService },
     docLinkVersion,
-    elasticsearchUrl,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
@@ -181,6 +182,9 @@ function EditorUI({ initialTextValue }: EditorProps) {
       unsubscribeResizer();
       clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
+      if (editorInstanceRef.current) {
+        editorInstanceRef.current.getCoreEditor().destroy();
+      }
     };
   }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
 
@@ -230,7 +234,7 @@ function EditorUI({ initialTextValue }: EditorProps) {
           <EuiFlexItem>
             <ConsoleMenu
               getCurl={() => {
-                return editorInstanceRef.current!.getRequestsAsCURL(elasticsearchUrl);
+                return editorInstanceRef.current!.getRequestsAsCURL(esHostService.getHost());
               }}
               getDocumentation={() => {
                 return getDocumentation(editorInstanceRef.current!, docLinkVersion);

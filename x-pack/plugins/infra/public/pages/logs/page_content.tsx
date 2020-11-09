@@ -10,6 +10,7 @@ import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { useMount } from 'react-use';
 
+import { AlertDropdown } from '../../alerting/log_threshold';
 import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
 import { DocumentTitle } from '../../components/document_title';
 import { Header } from '../../components/header';
@@ -23,7 +24,6 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
-import { AlertDropdown } from '../../components/alerting/logs/alert_dropdown';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -42,10 +42,10 @@ export const LogsPageContent: React.FunctionComponent = () => {
     pathname: '/stream',
   };
 
-  const logRateTab = {
+  const anomaliesTab = {
     app: 'logs',
-    title: logRateTabTitle,
-    pathname: '/log-rate',
+    title: anomaliesTabTitle,
+    pathname: '/anomalies',
   };
 
   const logCategoriesTab = {
@@ -77,7 +77,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
       <AppNavigation aria-label={pageTitle}>
         <EuiFlexGroup gutterSize={'none'} alignItems={'center'}>
           <EuiFlexItem>
-            <RoutedTabs tabs={[streamTab, logRateTab, logCategoriesTab, settingsTab]} />
+            <RoutedTabs tabs={[streamTab, anomaliesTab, logCategoriesTab, settingsTab]} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <AlertDropdown />
@@ -96,10 +96,11 @@ export const LogsPageContent: React.FunctionComponent = () => {
       </AppNavigation>
       <Switch>
         <Route path={streamTab.pathname} component={StreamPage} />
-        <Route path={logRateTab.pathname} component={LogEntryRatePage} />
+        <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />
         <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
         <Route path={settingsTab.pathname} component={LogsSettingsPage} />
-        <RedirectWithQueryParams from={'/analysis'} to={logRateTab.pathname} exact />
+        <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
+        <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
       </Switch>
     </ColumnarPage>
@@ -114,8 +115,8 @@ const streamTabTitle = i18n.translate('xpack.infra.logs.index.streamTabTitle', {
   defaultMessage: 'Stream',
 });
 
-const logRateTabTitle = i18n.translate('xpack.infra.logs.index.logRateBetaBadgeTitle', {
-  defaultMessage: 'Log Rate',
+const anomaliesTabTitle = i18n.translate('xpack.infra.logs.index.anomaliesTabTitle', {
+  defaultMessage: 'Anomalies',
 });
 
 const logCategoriesTabTitle = i18n.translate('xpack.infra.logs.index.logCategoriesBetaBadgeTitle', {

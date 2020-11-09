@@ -17,14 +17,14 @@ export class StyleMeta {
   }
 
   getRangeFieldMetaDescriptor(fieldName: string): RangeFieldMeta | null {
-    return this._descriptor && this._descriptor.fieldMeta[fieldName]
-      ? this._descriptor.fieldMeta[fieldName].range
+    return this._descriptor.fieldMeta[fieldName] && this._descriptor.fieldMeta[fieldName].range
+      ? this._descriptor.fieldMeta[fieldName].range!
       : null;
   }
 
   getCategoryFieldMetaDescriptor(fieldName: string): CategoryFieldMeta | null {
-    return this._descriptor && this._descriptor.fieldMeta[fieldName]
-      ? this._descriptor.fieldMeta[fieldName].categories
+    return this._descriptor.fieldMeta[fieldName] && this._descriptor.fieldMeta[fieldName].categories
+      ? this._descriptor.fieldMeta[fieldName].categories!
       : null;
   }
 

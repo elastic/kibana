@@ -125,6 +125,38 @@ describe('update rules schema', () => {
     expect(message.schema).toEqual({});
   });
 
+  test('name cannot be an empty string', () => {
+    const payload: UpdateRulesSchema = {
+      description: 'some description',
+      name: '',
+      risk_score: 50,
+      severity: 'low',
+      type: 'query',
+    };
+
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "name"']);
+    expect(message.schema).toEqual({});
+  });
+
+  test('description cannot be an empty string', () => {
+    const payload: UpdateRulesSchema = {
+      description: '',
+      name: 'rule name',
+      risk_score: 50,
+      severity: 'low',
+      type: 'query',
+    };
+
+    const decoded = updateRulesSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+    expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "description"']);
+    expect(message.schema).toEqual({});
+  });
+
   test('[rule_id, description, from, to, name] does not validate', () => {
     const payload: Partial<UpdateRulesSchema> = {
       rule_id: 'rule-1',
@@ -664,6 +696,7 @@ describe('update rules schema', () => {
   });
 
   test('defaults max signals to 100', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { max_signals, ...noMaxSignals } = getUpdateRulesSchemaMock();
     const payload: UpdateRulesSchema = {
       ...noMaxSignals,
@@ -1448,11 +1481,15 @@ describe('update rules schema', () => {
         exceptions_list: [
           {
             id: 'some_uuid',
+            list_id: 'list_id_single',
             namespace_type: 'single',
+            type: 'detection',
           },
           {
-            id: 'some_uuid',
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
             namespace_type: 'agnostic',
+            type: 'endpoint',
           },
         ],
       };
@@ -1532,6 +1569,8 @@ describe('update rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "exceptions_list,list_id"',
+        'Invalid value "undefined" supplied to "exceptions_list,type"',
         'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
       ]);
       expect(message.schema).toEqual({});

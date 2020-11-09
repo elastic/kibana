@@ -38,7 +38,7 @@ export function toFunctionFactory(initialize: InitializeArguments): () => ToFunc
           throw errors.missingType();
         }
 
-        return castProvider(initialize.typesRegistry.toJS())(input, args.type);
+        return castProvider(initialize.types)(input, args.type);
       },
     };
   };

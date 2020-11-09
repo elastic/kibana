@@ -21,6 +21,14 @@ export const createJobIdFilters = (jobId: string) => [
   },
 ];
 
+export const createJobIdsFilters = (jobIds: string[]) => [
+  {
+    terms: {
+      job_id: jobIds,
+    },
+  },
+];
+
 export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   {
     range: {
@@ -32,7 +40,20 @@ export const createTimeRangeFilters = (startTime: number, endTime: number) => [
   },
 ];
 
-export const createResultTypeFilters = (resultTypes: Array<'model_plot' | 'record'>) => [
+export const createLogTimeRangeFilters = (startTime: number, endTime: number) => [
+  {
+    range: {
+      log_time: {
+        gte: startTime,
+        lte: endTime,
+      },
+    },
+  },
+];
+
+export const createResultTypeFilters = (
+  resultTypes: Array<'categorizer_stats' | 'model_plot' | 'record'>
+) => [
   {
     terms: {
       result_type: resultTypes,
@@ -47,3 +68,14 @@ export const createCategoryIdFilters = (categoryIds: number[]) => [
     },
   },
 ];
+
+export const createDatasetsFilters = (datasets?: string[]) =>
+  datasets && datasets.length > 0
+    ? [
+        {
+          terms: {
+            partition_field_value: datasets,
+          },
+        },
+      ]
+    : [];

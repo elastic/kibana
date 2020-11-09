@@ -5,11 +5,24 @@
  */
 
 import crypto from 'crypto';
+import type { Duration } from 'moment';
 import { schema, Type, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { Logger } from '../../../../src/core/server';
+import { Logger, config as coreConfig } from '../../../../src/core/server';
+import type { AuthenticationProvider } from '../common/types';
 
 export type ConfigType = ReturnType<typeof createConfig>;
+type RawConfigType = TypeOf<typeof ConfigSchema>;
+
+interface ProvidersCommonConfigType {
+  enabled: Type<boolean>;
+  showInSelector: Type<boolean>;
+  order: Type<number>;
+  description?: Type<string>;
+  hint?: Type<string>;
+  icon?: Type<string>;
+  session?: Type<{ idleTimeout?: Duration | null; lifespan?: Duration | null }>;
+}
 
 const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =>
   schema.conditional(
@@ -21,10 +34,6 @@ const providerOptionsSchema = (providerType: string, optionsSchema: Type<any>) =
     schema.never()
   );
 
-type ProvidersCommonConfigType = Record<
-  'enabled' | 'showInSelector' | 'order' | 'description' | 'hint' | 'icon',
-  Type<any>
->;
 function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonConfigType> = {}) {
   return {
     enabled: schema.boolean({ defaultValue: true }),
@@ -34,6 +43,10 @@ function getCommonProviderSchemaProperties(overrides: Partial<ProvidersCommonCon
     hint: schema.maybe(schema.string()),
     icon: schema.maybe(schema.string()),
     accessAgreement: schema.maybe(schema.object({ message: schema.string() })),
+    session: schema.object({
+      idleTimeout: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+      lifespan: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+    }),
     ...overrides,
   };
 }
@@ -96,7 +109,7 @@ const providersConfigSchema = schema.object(
         schema.object({
           ...getCommonProviderSchemaProperties(),
           realm: schema.string(),
-          maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+          maxRedirectURLSize: schema.maybe(schema.byteSize()),
           useRelayStateDeepLink: schema.boolean({ defaultValue: false }),
         })
       )
@@ -147,8 +160,16 @@ export const ConfigSchema = schema.object({
     schema.string({ minLength: 32, defaultValue: 'a'.repeat(32) })
   ),
   session: schema.object({
-    idleTimeout: schema.nullable(schema.duration()),
-    lifespan: schema.nullable(schema.duration()),
+    idleTimeout: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+    lifespan: schema.maybe(schema.oneOf([schema.duration(), schema.literal(null)])),
+    cleanupInterval: schema.duration({
+      defaultValue: '1h',
+      validate(value) {
+        if (value.asSeconds() < 10) {
+          return 'the value must be greater or equal to 10 seconds.';
+        }
+      },
+    }),
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
   sameSiteCookies: schema.maybe(
@@ -167,6 +188,7 @@ export const ConfigSchema = schema.object({
             hint: undefined,
             icon: undefined,
             accessAgreement: undefined,
+            session: { idleTimeout: undefined, lifespan: undefined },
           },
         },
         token: undefined,
@@ -181,7 +203,7 @@ export const ConfigSchema = schema.object({
       'saml',
       schema.object({
         realm: schema.string(),
-        maxRedirectURLSize: schema.byteSize({ defaultValue: '2kb' }),
+        maxRedirectURLSize: schema.maybe(schema.byteSize()),
       })
     ),
     http: schema.object({
@@ -190,13 +212,34 @@ export const ConfigSchema = schema.object({
       schemes: schema.arrayOf(schema.string(), { defaultValue: ['apikey'] }),
     }),
   }),
-  audit: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
+  audit: schema.object(
+    {
+      enabled: schema.boolean({ defaultValue: false }),
+      appender: schema.maybe(coreConfig.logging.appenders),
+      ignore_filters: schema.maybe(
+        schema.arrayOf(
+          schema.object({
+            actions: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            categories: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            types: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            outcomes: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+            spaces: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+          })
+        )
+      ),
+    },
+    {
+      validate: (auditConfig) => {
+        if (auditConfig.ignore_filters && !auditConfig.appender) {
+          return 'xpack.security.audit.ignore_filters can only be used with the ECS audit logger. To enable the ECS audit logger, specify where you want to write the audit events using xpack.security.audit.appender.';
+        }
+      },
+    }
+  ),
 });
 
 export function createConfig(
-  config: TypeOf<typeof ConfigSchema>,
+  config: RawConfigType,
   logger: Logger,
   { isTLSEnabled }: { isTLSEnabled: boolean }
 ) {
@@ -247,13 +290,19 @@ export function createConfig(
     type: keyof ProvidersConfigType;
     name: string;
     order: number;
+    hasAccessAgreement: boolean;
   }> = [];
   for (const [type, providerGroup] of Object.entries(providers)) {
-    for (const [name, { enabled, order }] of Object.entries(providerGroup ?? {})) {
+    for (const [name, { enabled, order, accessAgreement }] of Object.entries(providerGroup ?? {})) {
       if (!enabled) {
         delete providerGroup![name];
       } else {
-        sortedProviders.push({ type: type as any, name, order });
+        sortedProviders.push({
+          type: type as any,
+          name,
+          order,
+          hasAccessAgreement: !!accessAgreement?.message,
+        });
       }
     }
   }
@@ -279,7 +328,33 @@ export function createConfig(
       sortedProviders: Object.freeze(sortedProviders),
       http: config.authc.http,
     },
+    session: getSessionConfig(config.session, providers),
     encryptionKey,
     secureCookies,
+  };
+}
+
+function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
+  return {
+    cleanupInterval: session.cleanupInterval,
+    getExpirationTimeouts({ type, name }: AuthenticationProvider) {
+      // Both idle timeout and lifespan from the provider specific session config can have three
+      // possible types of values: `Duration`, `null` and `undefined`. The `undefined` type means that
+      // provider doesn't override session config and we should fall back to the global one instead.
+      const providerSessionConfig = providers[type as keyof ProvidersConfigType]?.[name]?.session;
+
+      const [idleTimeout, lifespan] = [
+        [session.idleTimeout, providerSessionConfig?.idleTimeout],
+        [session.lifespan, providerSessionConfig?.lifespan],
+      ].map(([globalTimeout, providerTimeout]) => {
+        const timeout = providerTimeout === undefined ? globalTimeout ?? null : providerTimeout;
+        return timeout && timeout.asMilliseconds() > 0 ? timeout : null;
+      });
+
+      return {
+        idleTimeout,
+        lifespan,
+      };
+    },
   };
 }

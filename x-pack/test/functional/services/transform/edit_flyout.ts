@@ -35,6 +35,12 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
       );
     },
 
+    // for now we expect this to be used only for opening the accordion
+    async openTransformEditAccordionAdvancedSettings() {
+      await testSubjects.click('transformEditAccordionAdvancedSettings');
+      await testSubjects.existOrFail('transformEditAccordionAdvancedSettingsContent');
+    },
+
     async setTransformEditFlyoutInputValue(input: string, value: string) {
       await testSubjects.setValue(`transformEditFlyout${input}Input`, value, {
         clearWithKeyboard: true,

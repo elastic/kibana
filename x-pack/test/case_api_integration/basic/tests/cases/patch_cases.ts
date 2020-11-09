@@ -33,6 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       const { body: patchedCases } = await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -52,6 +53,45 @@ export default ({ getService }: FtrProviderContext): void => {
         ...postCaseResp(postedCase.id),
         closed_by: defaultUser,
         status: 'closed',
+        updated_by: defaultUser,
+      });
+    });
+
+    it('should patch a case with new connector', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      const { body: patchedCases } = await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              connector: {
+                id: 'jira',
+                name: 'Jira',
+                type: '.jira',
+                fields: { issueType: 'Task', priority: null, parent: null },
+              },
+            },
+          ],
+        })
+        .expect(200);
+
+      const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
+      expect(data).to.eql({
+        ...postCaseResp(postedCase.id),
+        connector: {
+          id: 'jira',
+          name: 'Jira',
+          type: '.jira',
+          fields: { issueType: 'Task', priority: null, parent: null },
+        },
         updated_by: defaultUser,
       });
     });
@@ -78,6 +118,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -99,6 +140,7 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .send(postCaseReq)
         .expect(200);
+
       await supertest
         .patch(CASES_URL)
         .set('kbn-xsrf', 'true')
@@ -108,6 +150,55 @@ export default ({ getService }: FtrProviderContext): void => {
               id: postedCase.id,
               version: postedCase.version,
               status: true,
+            },
+          ],
+        })
+        .expect(400);
+    });
+
+    it('unhappy path - 400s when bad connector type sent', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              connector: { id: 'none', name: 'none', type: '.not-exists', fields: null },
+            },
+          ],
+        })
+        .expect(400);
+    });
+
+    it('unhappy path - 400s when bad connector sent', async () => {
+      const { body: postedCase } = await supertest
+        .post(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send(postCaseReq)
+        .expect(200);
+
+      await supertest
+        .patch(CASES_URL)
+        .set('kbn-xsrf', 'true')
+        .send({
+          cases: [
+            {
+              id: postedCase.id,
+              version: postedCase.version,
+              connector: {
+                id: 'none',
+                name: 'none',
+                type: '.jira',
+                fields: { unsupported: 'value' },
+              },
             },
           ],
         })

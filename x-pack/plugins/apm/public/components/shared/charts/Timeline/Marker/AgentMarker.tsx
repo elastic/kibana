@@ -7,9 +7,9 @@
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
+import { asDuration } from '../../../../../../common/utils/formatters';
 import { useTheme } from '../../../../../hooks/useTheme';
 import { px, units } from '../../../../../style/variables';
-import { asDuration } from '../../../../../utils/formatters';
 import { Legend } from '../../Legend';
 import { AgentMark } from '../../../../app/TransactionDetails/WaterfallWithSummmary/WaterfallContainer/Marks/get_agent_marks';
 
@@ -27,7 +27,7 @@ interface Props {
   mark: AgentMark;
 }
 
-export const AgentMarker: React.FC<Props> = ({ mark }) => {
+export function AgentMarker({ mark }: Props) {
   const theme = useTheme();
 
   return (
@@ -46,4 +46,4 @@ export const AgentMarker: React.FC<Props> = ({ mark }) => {
       </EuiToolTip>
     </>
   );
-};
+}

@@ -17,8 +17,9 @@
  * under the License.
  */
 
-import { EuiIcon, EuiLink, EuiFormHelpText, EuiFormControlLayoutDelimited } from '@elastic/eui';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n/react';
+import moment from 'moment';
+import { EuiFormControlLayoutDelimited } from '@elastic/eui';
+import { InjectedIntl, injectI18n } from '@kbn/i18n/react';
 import { get } from 'lodash';
 import React from 'react';
 import { useKibana } from '../../../../../kibana_react/public';
@@ -41,8 +42,17 @@ interface Props {
 
 function RangeValueInputUI(props: Props) {
   const kibana = useKibana();
-  const dataMathDocLink = kibana.services.docLinks!.links.date.dateMath;
   const type = props.field ? props.field.type : 'string';
+  const tzConfig = kibana.services.uiSettings!.get('dateFormat:tz');
+
+  const formatDateChange = (value: string | number | boolean) => {
+    if (typeof value !== 'string' && typeof value !== 'number') return value;
+
+    const momentParsedValue = moment(value).tz(tzConfig);
+    if (momentParsedValue.isValid()) return momentParsedValue?.format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+
+    return value;
+  };
 
   const onFromChange = (value: string | number | boolean) => {
     if (typeof value !== 'string' && typeof value !== 'number') {
@@ -71,6 +81,9 @@ function RangeValueInputUI(props: Props) {
             type={type}
             value={props.value ? props.value.from : undefined}
             onChange={onFromChange}
+            onBlur={(value) => {
+              onFromChange(formatDateChange(value));
+            }}
             placeholder={props.intl.formatMessage({
               id: 'data.filter.filterEditor.rangeStartInputPlaceholder',
               defaultMessage: 'Start of the range',
@@ -83,6 +96,9 @@ function RangeValueInputUI(props: Props) {
             type={type}
             value={props.value ? props.value.to : undefined}
             onChange={onToChange}
+            onBlur={(value) => {
+              onToChange(formatDateChange(value));
+            }}
             placeholder={props.intl.formatMessage({
               id: 'data.filter.filterEditor.rangeEndInputPlaceholder',
               defaultMessage: 'End of the range',
@@ -90,19 +106,6 @@ function RangeValueInputUI(props: Props) {
           />
         }
       />
-      {type === 'date' ? (
-        <EuiFormHelpText>
-          <EuiLink target="_blank" href={dataMathDocLink}>
-            <FormattedMessage
-              id="data.filter.filterEditor.dateFormatHelpLinkLabel"
-              defaultMessage="Accepted date formats"
-            />{' '}
-            <EuiIcon type="popout" size="s" />
-          </EuiLink>
-        </EuiFormHelpText>
-      ) : (
-        ''
-      )}
     </div>
   );
 }

@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import { EuiDataGridColumn } from '@elastic/eui';
 
 import { IndexPattern } from '../../../../../../../../../../src/plugins/data/public';
+
+import { DataLoader } from '../../../../../datavisualizer/index_based/data_loader';
 
 import {
   useColorRange,
@@ -16,7 +18,7 @@ import {
   COLOR_RANGE_SCALE,
 } from '../../../../../components/color_range_legend';
 import {
-  fetchChartsData,
+  getFieldType,
   getDataGridSchemasFromFieldTypes,
   showDataGridColumnChartErrorMessageToast,
   useDataGrid,
@@ -24,12 +26,16 @@ import {
   UseIndexDataReturnType,
 } from '../../../../../components/data_grid';
 import { SavedSearchQuery } from '../../../../../contexts/ml';
-import { ml } from '../../../../../services/ml_api_service';
 import { getToastNotifications } from '../../../../../util/dependency_cache';
 
 import { getIndexData, getIndexFields, DataFrameAnalyticsConfig } from '../../../../common';
-import { DEFAULT_RESULTS_FIELD, FEATURE_INFLUENCE } from '../../../../common/constants';
-import { sortExplorationResultsFields, ML__ID_COPY } from '../../../../common/fields';
+import { FEATURE_INFLUENCE } from '../../../../common/constants';
+import { DEFAULT_RESULTS_FIELD } from '../../../../../../../common/constants/data_frame_analytics';
+import {
+  sortExplorationResultsFields,
+  ML__ID_COPY,
+  ML__INCREMENTAL_ID,
+} from '../../../../common/fields';
 
 import { getFeatureCount, getOutlierScoreFieldName } from './common';
 
@@ -41,17 +47,21 @@ export const useOutlierData = (
   const needsDestIndexFields =
     indexPattern !== undefined && indexPattern.title === jobConfig?.source.index[0];
 
-  const columns: EuiDataGridColumn[] = [];
+  const columns = useMemo(() => {
+    const newColumns: EuiDataGridColumn[] = [];
 
-  if (jobConfig !== undefined && indexPattern !== undefined) {
-    const resultsField = jobConfig.dest.results_field;
-    const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
-    columns.push(
-      ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
-        sortExplorationResultsFields(a.id, b.id, jobConfig)
-      )
-    );
-  }
+    if (jobConfig !== undefined && indexPattern !== undefined) {
+      const resultsField = jobConfig.dest.results_field;
+      const { fieldTypes } = getIndexFields(jobConfig, needsDestIndexFields);
+      newColumns.push(
+        ...getDataGridSchemasFromFieldTypes(fieldTypes, resultsField).sort((a: any, b: any) =>
+          sortExplorationResultsFields(a.id, b.id, jobConfig)
+        )
+      );
+    }
+
+    return newColumns;
+  }, [jobConfig, indexPattern]);
 
   const dataGrid = useDataGrid(
     columns,
@@ -59,7 +69,7 @@ export const useOutlierData = (
     // reduce default selected rows from 20 to 8 for performance reasons.
     8,
     // by default, hide feature-influence columns and the doc id copy
-    (d) => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY
+    (d) => !d.includes(`.${FEATURE_INFLUENCE}.`) && d !== ML__ID_COPY && d !== ML__INCREMENTAL_ID
   );
 
   useEffect(() => {
@@ -73,20 +83,37 @@ export const useOutlierData = (
     }
   }, [jobConfig && jobConfig.id]);
 
+  // The pattern using `didCancel` allows us to abort out of date remote request.
+  // We wrap `didCancel` in a object so we can mutate the value as it's being
+  // passed on to `getIndexData`.
   useEffect(() => {
-    getIndexData(jobConfig, dataGrid, searchQuery);
+    const options = { didCancel: false };
+    getIndexData(jobConfig, dataGrid, searchQuery, options);
+    return () => {
+      options.didCancel = true;
+    };
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobConfig && jobConfig.id, dataGrid.pagination, searchQuery, dataGrid.sortingColumns]);
+
+  const dataLoader = useMemo(
+    () =>
+      indexPattern !== undefined
+        ? new DataLoader(indexPattern, getToastNotifications())
+        : undefined,
+    [indexPattern]
+  );
 
   const fetchColumnChartsData = async function () {
     try {
-      if (jobConfig !== undefined) {
-        const columnChartsData = await fetchChartsData(
-          jobConfig.dest.index,
-          ml.esSearch,
-          searchQuery,
-          columns.filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+      if (jobConfig !== undefined && dataLoader !== undefined) {
+        const columnChartsData = await dataLoader.loadFieldHistograms(
+          columns
+            .filter((cT) => dataGrid.visibleColumns.includes(cT.id))
+            .map((cT) => ({
+              fieldName: cT.id,
+              type: getFieldType(cT.schema),
+            })),
+          searchQuery
         );
         dataGrid.setColumnCharts(columnChartsData);
       }
@@ -100,11 +127,13 @@ export const useOutlierData = (
       fetchColumnChartsData();
     }
     // custom comparison
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     dataGrid.chartsVisible,
     jobConfig?.dest.index,
-    JSON.stringify([searchQuery, dataGrid.visibleColumns]),
+    // Only trigger when search or the visible columns changes.
+    // We're only interested in the visible columns but not their order, that's
+    // why we sort for comparison (and copying it via spread to avoid sort in place).
+    JSON.stringify([searchQuery, [...dataGrid.visibleColumns].sort()]),
   ]);
 
   const colorRange = useColorRange(
@@ -124,12 +153,17 @@ export const useOutlierData = (
       const split = columnId.split('.');
       let backgroundColor;
 
+      const featureNames = fullItem[`${resultsField}.${FEATURE_INFLUENCE}.feature_name`];
+
       // column with feature values get color coded by its corresponding influencer value
-      if (
-        fullItem[resultsField] !== undefined &&
-        fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`] !== undefined
-      ) {
-        backgroundColor = colorRange(fullItem[resultsField][`${FEATURE_INFLUENCE}.${columnId}`]);
+      if (Array.isArray(featureNames)) {
+        const featureIndex = featureNames.indexOf(columnId);
+
+        if (featureIndex > -1) {
+          backgroundColor = colorRange(
+            fullItem[`${resultsField}.${FEATURE_INFLUENCE}.influence`][featureIndex]
+          );
+        }
       }
 
       // column with influencer values get color coded by its own value

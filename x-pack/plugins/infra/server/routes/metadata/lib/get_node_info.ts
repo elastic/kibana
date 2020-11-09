@@ -4,7 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { first, set, startsWith } from 'lodash';
+import { set } from '@elastic/safer-lodash-set';
+import { first, startsWith } from 'lodash';
 import { RequestHandlerContext } from 'src/core/server';
 import { KibanaFramework } from '../../../lib/adapters/framework/kibana_framework_adapter';
 import { InfraSourceConfiguration } from '../../../lib/sources';
@@ -19,7 +20,8 @@ export const getNodeInfo = async (
   requestContext: RequestHandlerContext,
   sourceConfiguration: InfraSourceConfiguration,
   nodeId: string,
-  nodeType: InventoryItemType
+  nodeType: InventoryItemType,
+  timeRange: { from: number; to: number }
 ): Promise<InfraMetadataInfo> => {
   // If the nodeType is a Kubernetes pod then we need to get the node info
   // from a host record instead of a pod. This is due to the fact that any host
@@ -32,7 +34,8 @@ export const getNodeInfo = async (
       requestContext,
       sourceConfiguration,
       nodeId,
-      nodeType
+      nodeType,
+      timeRange
     );
     if (kubernetesNodeName) {
       return getNodeInfo(
@@ -40,12 +43,14 @@ export const getNodeInfo = async (
         requestContext,
         sourceConfiguration,
         kubernetesNodeName,
-        'host'
+        'host',
+        timeRange
       );
     }
     return {};
   }
   const fields = findInventoryFields(nodeType, sourceConfiguration.fields);
+  const timestampField = sourceConfiguration.fields.timestamp;
   const params = {
     allowNoIndices: true,
     ignoreUnavailable: true,
@@ -54,9 +59,21 @@ export const getNodeInfo = async (
     body: {
       size: 1,
       _source: ['host.*', 'cloud.*'],
+      sort: [{ [timestampField]: 'desc' }],
       query: {
         bool: {
-          filter: [{ match: { [fields.id]: nodeId } }],
+          filter: [
+            { match: { [fields.id]: nodeId } },
+            {
+              range: {
+                [timestampField]: {
+                  gte: timeRange.from,
+                  lte: timeRange.to,
+                  format: 'epoch_millis',
+                },
+              },
+            },
+          ],
         },
       },
     },

@@ -12,12 +12,10 @@ import { language } from '../common/schemas';
  * Types the DefaultLanguageString as:
  *   - If null or undefined, then a default of the string "kuery" will be used
  */
-export const DefaultLanguageString = new t.Type<string, string, unknown>(
+export const DefaultLanguageString = new t.Type<string, string | undefined, unknown>(
   'DefaultLanguageString',
   t.string.is,
   (input, context): Either<t.Errors, string> =>
     input == null ? t.success('kuery') : language.validate(input, context),
   t.identity
 );
-
-export type DefaultLanguageStringC = typeof DefaultLanguageString;

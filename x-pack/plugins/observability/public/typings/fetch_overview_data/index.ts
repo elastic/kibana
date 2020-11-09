@@ -5,12 +5,11 @@
  */
 
 import { ObservabilityApp } from '../../../typings/common';
+import { UXMetrics } from '../../components/shared/core_web_vitals';
 
-interface Stat {
+export interface Stat {
   type: 'number' | 'percent' | 'bytesPerSecond';
-  label: string;
   value: number;
-  color?: string;
 }
 
 export interface Coordinates {
@@ -18,40 +17,53 @@ export interface Coordinates {
   y?: number;
 }
 
-interface Series {
-  label: string;
+export interface Series {
   coordinates: Coordinates[];
-  color?: string;
 }
 
 export interface FetchDataParams {
-  // The start timestamp in milliseconds of the queried time interval
-  startTime: string;
-  // The end timestamp in milliseconds of the queried time interval
-  endTime: string;
-  // The aggregation bucket size in milliseconds if applicable to the data source
+  absoluteTime: { start: number; end: number };
+  relativeTime: { start: string; end: string };
   bucketSize: string;
+  serviceName?: string;
 }
+
+export interface HasDataParams {
+  absoluteTime: { start: number; end: number };
+}
+
+export interface UXHasDataResponse {
+  hasData: boolean;
+  serviceName: string | number | undefined;
+}
+
+export type HasDataResponse = UXHasDataResponse | boolean;
 
 export type FetchData<T extends FetchDataResponse = FetchDataResponse> = (
   fetchDataParams: FetchDataParams
 ) => Promise<T>;
 
-export type HasData = () => Promise<boolean>;
+export type HasData = (params?: HasDataParams) => Promise<HasDataResponse>;
 
-export interface DataHandler<T extends ObservabilityApp = ObservabilityApp> {
+export type ObservabilityFetchDataPlugins = Exclude<
+  ObservabilityApp,
+  'observability' | 'stack_monitoring'
+>;
+
+export interface DataHandler<
+  T extends ObservabilityFetchDataPlugins = ObservabilityFetchDataPlugins
+> {
   fetchData: FetchData<ObservabilityFetchDataResponse[T]>;
   hasData: HasData;
 }
 
 export interface FetchDataResponse {
-  title: string;
   appLink: string;
 }
 
 export interface LogsFetchDataResponse extends FetchDataResponse {
-  stats: Record<string, Stat>;
-  series: Record<string, Series>;
+  stats: Record<string, Stat & { label: string }>;
+  series: Record<string, Series & { label: string }>;
 }
 
 export interface MetricsFetchDataResponse extends FetchDataResponse {
@@ -90,9 +102,14 @@ export interface ApmFetchDataResponse extends FetchDataResponse {
   };
 }
 
+export interface UxFetchDataResponse extends FetchDataResponse {
+  coreWebVitals: UXMetrics;
+}
+
 export interface ObservabilityFetchDataResponse {
   apm: ApmFetchDataResponse;
   infra_metrics: MetricsFetchDataResponse;
   infra_logs: LogsFetchDataResponse;
   uptime: UptimeFetchDataResponse;
+  ux: UxFetchDataResponse;
 }

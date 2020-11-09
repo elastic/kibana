@@ -4,10 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+/* eslint-disable no-duplicate-imports */
+
 import { Store } from 'redux';
+import { Middleware, Dispatch } from 'redux';
 import { BBox } from 'rbush';
+import { Provider } from 'react-redux';
 import { ResolverAction } from './store/actions';
-import { ResolverEvent, ResolverRelatedEvents, ResolverTree } from '../../common/endpoint/types';
+import {
+  ResolverRelatedEvents,
+  ResolverTree,
+  ResolverEntityIndex,
+  SafeResolverEvent,
+  ResolverPaginatedEvents,
+} from '../../common/endpoint/types';
 
 /**
  * Redux state for the Resolver feature. Properties on this interface are populated via multiple reducers using redux's `combineReducers`.
@@ -30,29 +40,31 @@ export interface ResolverState {
 }
 
 /**
- * Piece of redux state that models an animation for the camera.
+ * Piece of `redux` state that models an animation for the camera.
  */
 export interface ResolverUIState {
   /**
-   * The ID attribute of the resolver's aria-activedescendent.
+   * The `nodeID` for the process that is selected (in the `aria-activedescendent` sense of being selected.)
    */
-  readonly activeDescendantId: string | null;
+  readonly ariaActiveDescendant: string | null;
   /**
-   * The ID attribute of the resolver's currently selected descendant.
+   * `nodeID` of the selected node
    */
-  readonly selectedDescendantId: string | null;
+  readonly selectedNode: string | null;
+
   /**
-   * The entity_id of the process for the resolver's currently selected descendant.
+   * The `search` part of the URL.
    */
-  readonly processEntityIdOfSelectedDescendant: string | null;
+  readonly locationSearch?: string;
+
   /**
-   * Which panel the ui should display
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
    */
-  readonly panelToDisplay: string | null;
+  readonly resolverComponentInstanceID?: string;
 }
 
 /**
- * Piece of redux state that models an animation for the camera.
+ * Piece of `redux` state that models an animation for the camera.
  */
 export interface CameraAnimationState {
   /**
@@ -76,7 +88,7 @@ export interface CameraAnimationState {
 }
 
 /**
- * The redux state for the `useCamera` hook.
+ * The `redux` state for the `useCamera` hook.
  */
 export type CameraState = {
   /**
@@ -96,7 +108,7 @@ export type CameraState = {
   readonly translationNotCountingCurrentPanning: Vector2;
 
   /**
-   * The world coordinates that the pointing device was last over. This is used during mousewheel zoom.
+   * The world coordinates that the pointing device was last over. This is used during mouse-wheel zoom.
    */
   readonly latestFocusedWorldCoordinates: Vector2 | null;
 } & (
@@ -143,7 +155,7 @@ export type CameraState = {
 export type IndexedEntity = IndexedEdgeLineSegment | IndexedProcessNode;
 
 /**
- * The entity stored in rbush for resolver edge lines.
+ * The entity stored in `rbush` for resolver edge lines.
  */
 export interface IndexedEdgeLineSegment extends BBox {
   type: 'edgeLine';
@@ -151,12 +163,28 @@ export interface IndexedEdgeLineSegment extends BBox {
 }
 
 /**
- * The entity store in rbush for resolver process nodes.
+ * The entity store in `rbush` for resolver process nodes.
  */
 export interface IndexedProcessNode extends BBox {
   type: 'processNode';
-  entity: ResolverEvent;
+  entity: SafeResolverEvent;
   position: Vector2;
+}
+
+/**
+ * A type describing the shape of section titles and entries for description lists
+ */
+export type SectionData = Array<{
+  sectionTitle: string;
+  entries: Array<{ title: string; description: string }>;
+}>;
+
+/**
+ * The two query parameters we read/write on to control which view the table presents:
+ */
+export interface CrumbInfo {
+  crumbId: string;
+  crumbEvent: string;
 }
 
 /**
@@ -167,47 +195,124 @@ export interface VisibleEntites {
   connectingEdgeLineSegments: EdgeLineSegment[];
 }
 
-/**
- * State for `data` reducer which handles receiving Resolver data from the backend.
- */
-export interface DataState {
-  readonly relatedEvents: Map<string, ResolverRelatedEvents>;
-  readonly relatedEventsReady: Map<string, boolean>;
+export interface TreeFetcherParameters {
   /**
    * The `_id` for an ES document. Used to select a process that we'll show the graph for.
    */
-  readonly databaseDocumentID?: string;
-  /**
-   * The id used for the pending request, if there is one.
-   */
-  readonly pendingRequestDatabaseDocumentID?: string;
+  databaseDocumentID: string;
 
   /**
-   * The parameters and response from the last successful request.
+   * The indices that the backend will use to search for the document ID.
    */
-  readonly lastResponse?: {
+  indices: string[];
+}
+
+/**
+ * Used by the `data` concern to keep track of related events when showing the 'nodeEventsInCategory' panel.
+ */
+export interface NodeEventsInCategoryState {
+  /**
+   * The nodeID that `events` are related to.
+   */
+  nodeID: string;
+  /**
+   * The category that `events` have in common.
+   */
+  eventCategory: string;
+  /**
+   * Events with `event.category` that include `eventCategory` and that are related to `nodeID`.
+   */
+  events: SafeResolverEvent[];
+  /**
+   * The cursor, if any, that can be used to retrieve more events.
+   */
+  cursor: null | string;
+
+  /**
+   * The cursor, if any, that was last used to fetch additional related events.
+   */
+
+  lastCursorRequested?: null | string;
+
+  /**
+   * Flag for showing an error message when fetching additional related events.
+   */
+  error?: boolean;
+}
+
+/**
+ * State for `data` reducer which handles receiving Resolver data from the back-end.
+ */
+export interface DataState {
+  /**
+   * @deprecated Use the API
+   */
+  readonly relatedEvents: Map<string, ResolverRelatedEvents>;
+
+  /**
+   * Used when the panelView is `nodeEventsInCategory`.
+   * Store the `nodeEventsInCategory` data for the current panel view. If the panel view or parameters change, the reducer may delete this.
+   * If new data is returned for the panel view, this may be updated.
+   */
+  readonly nodeEventsInCategory?: NodeEventsInCategoryState;
+
+  /**
+   * Used when the panelView is `eventDetail`.
+   *
+   */
+  readonly currentRelatedEvent: {
+    loading: boolean;
+    data: SafeResolverEvent | null;
+  };
+
+  readonly tree?: {
     /**
-     * The id used in the request.
+     * The parameters passed from the resolver properties
      */
-    readonly databaseDocumentID: string;
-  } & (
-    | {
-        /**
-         * If a response with a success code was received, this is `true`.
-         */
-        readonly successful: true;
-        /**
-         * The ResolverTree parsed from the response.
-         */
-        readonly result: ResolverTree;
-      }
-    | {
-        /**
-         * If the request threw an exception or the response had a failure code, this will be false.
-         */
-        readonly successful: false;
-      }
-  );
+    readonly currentParameters?: TreeFetcherParameters;
+
+    /**
+     * The id used for the pending request, if there is one.
+     */
+    readonly pendingRequestParameters?: TreeFetcherParameters;
+    /**
+     * The parameters and response from the last successful request.
+     */
+    readonly lastResponse?: {
+      /**
+       * The id used in the request.
+       */
+      readonly parameters: TreeFetcherParameters;
+    } & (
+      | {
+          /**
+           * If a response with a success code was received, this is `true`.
+           */
+          readonly successful: true;
+          /**
+           * The ResolverTree parsed from the response.
+           */
+          readonly result: ResolverTree;
+        }
+      | {
+          /**
+           * If the request threw an exception or the response had a failure code, this will be false.
+           */
+          readonly successful: false;
+        }
+    );
+  };
+
+  /**
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
+   * Used to prevent collisions in things like query parameters.
+   */
+  readonly resolverComponentInstanceID?: string;
+
+  /**
+   * The `search` part of the URL.
+   */
+  readonly locationSearch?: string;
 }
 
 /**
@@ -220,11 +325,11 @@ export type Vector2 = readonly [number, number];
  */
 export interface AABB {
   /**
-   * Vector who's `x` component is the _left_ side of the AABB and who's `y` component is the _bottom_ side of the AABB.
+   * Vector whose `x` component represents the minimum side of the box and whose 'y' component represents the maximum side of the box.
    **/
   readonly minimum: Vector2;
   /**
-   * Vector who's `x` component is the _right_ side of the AABB and who's `y` component is the _bottom_ side of the AABB.
+   * Vector who's `x` component is the _right_ side of the `AABB` and who's `y` component is the _bottom_ side of the `AABB`.
    **/
   readonly maximum: Vector2;
 }
@@ -244,14 +349,14 @@ export type Matrix3 = readonly [
   number
 ];
 
-type eventSubtypeFull =
+type EventSubtypeFull =
   | 'creation_event'
   | 'fork_event'
   | 'exec_event'
   | 'already_running'
   | 'termination_event';
 
-type eventTypeFull = 'process_event';
+type EventTypeFull = 'process_event';
 
 /**
  * The 'events' which contain process data and are used to model Resolver.
@@ -262,8 +367,8 @@ export interface ProcessEvent {
   readonly machine_id: string;
   readonly data_buffer: {
     timestamp_utc: string;
-    event_subtype_full: eventSubtypeFull;
-    event_type_full: eventTypeFull;
+    event_subtype_full: EventSubtypeFull;
+    event_type_full: EventTypeFull;
     node_id: number;
     source_id?: number;
     process_name: string;
@@ -273,47 +378,27 @@ export interface ProcessEvent {
 }
 
 /**
- * A map of Process Ids that indicate which processes are adjacent to a given process along
- * directions in two axes: up/down and previous/next.
- */
-export interface AdjacentProcessMap {
-  readonly self: string;
-  parent: string | null;
-  firstChild: string | null;
-  previousSibling: string | null;
-  nextSibling: string | null;
-  /**
-   * To support aria-level, this must be >= 1
-   */
-  level: number;
-}
-
-/**
- * A represention of a process tree with indices for O(1) access to children and values by id.
+ * A representation of a process tree with indices for O(1) access to children and values by id.
  */
 export interface IndexedProcessTree {
   /**
-   * Map of ID to a process's children
+   * Map of ID to a process's ordered children
    */
-  idToChildren: Map<string | undefined, ResolverEvent[]>;
+  idToChildren: Map<string | undefined, SafeResolverEvent[]>;
   /**
    * Map of ID to process
    */
-  idToProcess: Map<string, ResolverEvent>;
-  /**
-   * Map of ID to adjacent processes
-   */
-  idToAdjacent: Map<string, AdjacentProcessMap>;
+  idToProcess: Map<string, SafeResolverEvent>;
 }
 
 /**
- * A map of ProcessEvents (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
+ * A map of `ProcessEvents` (representing process nodes) to the 'width' of their subtrees as calculated by `widthsOfProcessSubtrees`
  */
-export type ProcessWidths = Map<ResolverEvent, number>;
+export type ProcessWidths = Map<SafeResolverEvent, number>;
 /**
  * Map of ProcessEvents (representing process nodes) to their positions. Calculated by `processPositions`
  */
-export type ProcessPositions = Map<ResolverEvent, Vector2>;
+export type ProcessPositions = Map<SafeResolverEvent, Vector2>;
 
 export type DurationTypes =
   | 'millisecond'
@@ -337,39 +422,41 @@ export type DurationTypes =
  * duration value and description string
  */
 export interface DurationDetails {
-  duration: number;
+  duration: number | '<1';
   durationType: DurationTypes;
 }
 /**
  * Values shared between two vertices joined by an edge line.
  */
 export interface EdgeLineMetadata {
+  /**
+   * Represents a time duration for this edge line segment. Used to show a time duration in the UI.
+   * This is only ever present on one of the segments in an edge.
+   */
   elapsedTime?: DurationDetails;
-  // A string of the two joined process nodes concatted together.
-  uniqueId: string;
+  /**
+   * Used to represent a react key value for the edge line.
+   */
+  reactKey: string;
 }
-/**
- * A tuple of 2 vector2 points forming a polyline. Used to connect process nodes in the graph.
- */
-export type EdgeLinePoints = Vector2[];
 
 /**
- * Edge line components including the points joining the edgeline and any optional associated metadata
+ * Edge line components including the points joining the edge-line and any optional associated metadata
  */
 export interface EdgeLineSegment {
-  points: EdgeLinePoints;
+  points: [Vector2, Vector2];
   metadata: EdgeLineMetadata;
 }
 
 /**
- * Used to provide precalculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
+ * Used to provide pre-calculated info from `widthsOfProcessSubtrees`. These 'width' values are used in the layout of the graph.
  */
 export type ProcessWithWidthMetadata = {
-  process: ResolverEvent;
+  process: SafeResolverEvent;
   width: number;
 } & (
   | {
-      parent: ResolverEvent;
+      parent: SafeResolverEvent;
       parentWidth: number;
       isOnlyChild: boolean;
       firstChildWidth: number;
@@ -403,9 +490,26 @@ export interface SideEffectors {
    * A function which returns the time since epoch in milliseconds. Injected because mocking Date is tedious.
    */
   timestamp: () => number;
+  /**
+   * Use instead of `window.requestAnimationFrame`
+   **/
   requestAnimationFrame: typeof window.requestAnimationFrame;
+  /**
+   * Use instead of `window.cancelAnimationFrame`
+   **/
   cancelAnimationFrame: typeof window.cancelAnimationFrame;
+  /**
+   * Use instead of the `ResizeObserver` global.
+   */
   ResizeObserver: ResizeObserverConstructor;
+  /**
+   * Use this instead of the Clipboard API's `writeText` method.
+   */
+  writeTextToClipboard(text: string): Promise<void>;
+  /**
+   * Use this instead of `Element.prototype.getBoundingClientRect` .
+   */
+  getBoundingClientRect(element: Element): DOMRect;
 }
 
 export interface SideEffectSimulator {
@@ -425,11 +529,21 @@ export interface SideEffectSimulator {
      * Trigger `ResizeObserver` callbacks for `element` and update the mocked value for `getBoundingClientRect`.
      */
     simulateElementResize: (element: Element, contentRect: DOMRect) => void;
+
+    /**
+     * Get the most recently written clipboard text. This is only updated when `confirmTextWrittenToClipboard` is called.
+     */
+    clipboardText: string;
+
+    /**
+     * Call this to resolve the promise returned by `writeText`.
+     */
+    confirmTextWrittenToClipboard: () => void;
   };
   /**
    * Mocked `SideEffectors`.
    */
-  mock: jest.Mocked<Omit<SideEffectors, 'ResizeObserver'>> & Pick<SideEffectors, 'ResizeObserver'>;
+  mock: SideEffectors;
 }
 
 /**
@@ -450,11 +564,239 @@ export type ResolverStore = Store<ResolverState, ResolverAction>;
  */
 export interface IsometricTaxiLayout {
   /**
-   * A map of events to position. each event represents its own node.
+   * A map of events to position. Each event represents its own node.
    */
-  processNodePositions: Map<ResolverEvent, Vector2>;
+  processNodePositions: Map<SafeResolverEvent, Vector2>;
+
   /**
-   * A map of edgline segments, which graphically connect nodes.
+   * A map of edge-line segments, which graphically connect nodes.
    */
   edgeLineSegments: EdgeLineSegment[];
+
+  /**
+   * defines the aria levels for nodes.
+   */
+  ariaLevels: Map<SafeResolverEvent, number>;
 }
+
+/**
+ * An object with methods that can be used to access data from the Kibana server.
+ * This is injected into Resolver.
+ * This allows tests to provide a mock data access layer.
+ * In the future, other implementations of Resolver could provide different data access layers.
+ */
+export interface DataAccessLayer {
+  /**
+   * Fetch related events for an entity ID
+   */
+  relatedEvents: (entityID: string) => Promise<ResolverRelatedEvents>;
+
+  /**
+   * Return events that have `process.entity_id` that includes `entityID` and that have
+   * a `event.category` that includes `category`.
+   */
+  eventsWithEntityIDAndCategory: (
+    entityID: string,
+    category: string,
+    after?: string
+  ) => Promise<ResolverPaginatedEvents>;
+
+  /**
+   * Return up to one event that has an `event.id` that includes `eventID`.
+   */
+  event: (eventID: string) => Promise<SafeResolverEvent | null>;
+
+  /**
+   * Fetch a ResolverTree for a entityID
+   */
+  resolverTree: (entityID: string, signal: AbortSignal) => Promise<ResolverTree>;
+
+  /**
+   * Get entities matching a document.
+   */
+  entities: (parameters: {
+    /** _id of the document to find an entity in. */
+    _id: string;
+    /** indices to search in */
+    indices: string[];
+    /** signal to abort the request */
+    signal: AbortSignal;
+  }) => Promise<ResolverEntityIndex>;
+}
+
+/**
+ * The externally provided React props.
+ */
+export interface ResolverProps {
+  /**
+   * Used by `styled-components`.
+   */
+  className?: string;
+  /**
+   * The `_id` value of an event in ES.
+   * Used as the origin of the Resolver graph.
+   */
+  databaseDocumentID: string;
+
+  /**
+   * An ID that is used to differentiate this Resolver instance from others concurrently running on the same page.
+   * Used to prevent collisions in things like query parameters.
+   */
+  resolverComponentInstanceID: string;
+
+  /**
+   * Indices that the backend should use to find the originating document.
+   */
+  indices: string[];
+}
+
+/**
+ * Used by `SpyMiddleware`.
+ */
+export interface SpyMiddlewareStateActionPair {
+  /** An action dispatched, `state` is the state that the reducer returned when handling this action.
+   */
+  action: ResolverAction;
+  /**
+   * A resolver state that was returned by the reducer when handling `action`.
+   */
+  state: ResolverState;
+}
+
+/**
+ * A wrapper object that has a middleware along with an async generator that returns the actions dispatched to the store (along with state.)
+ */
+export interface SpyMiddleware {
+  /**
+   * A middleware to use with `applyMiddleware`.
+   */
+  middleware: Middleware<{}, ResolverState, Dispatch<ResolverAction>>;
+  /**
+   * A generator that returns all state and action pairs that pass through the middleware.
+   */
+  actions: () => AsyncGenerator<SpyMiddlewareStateActionPair, never, unknown>;
+
+  /**
+   * Prints actions to the console.
+   * Call the returned function to stop debugging.
+   */
+  debugActions: () => () => void;
+}
+
+/**
+ * values of this type are exposed by the Security Solution plugin's setup phase.
+ */
+export interface ResolverPluginSetup {
+  /**
+   * Provide access to the instance of the `react-redux` `Provider` that Resolver recognizes.
+   */
+  Provider: typeof Provider;
+  /**
+   * Takes a `DataAccessLayer`, which could be a mock one, and returns an redux Store.
+   * All data acess (e.g. HTTP requests) are done through the store.
+   */
+  storeFactory: (dataAccessLayer: DataAccessLayer) => Store<ResolverState, ResolverAction>;
+
+  /**
+   * The Resolver component without the required Providers.
+   * You must wrap this component in: `I18nProvider`, `Router` (from react-router,) `KibanaContextProvider`,
+   * and the `Provider` component provided by this object.
+   */
+  ResolverWithoutProviders: React.MemoExoticComponent<
+    React.ForwardRefExoticComponent<ResolverProps & React.RefAttributes<unknown>>
+  >;
+
+  /**
+   * A collection of mock objects that can be used in examples or in testing.
+   */
+  mocks: {
+    /**
+     * Mock `DataAccessLayer`s. All of Resolver's HTTP access is provided by a `DataAccessLayer`.
+     */
+    dataAccessLayer: {
+      /**
+       * A mock `DataAccessLayer` that returns a tree that has no ancestor nodes but which has 2 children nodes.
+       * The origin has 2 related registry events
+       */
+      noAncestorsTwoChildrenWithRelatedEventsOnOrigin: () => { dataAccessLayer: DataAccessLayer };
+    };
+  };
+}
+
+/**
+ * Parameters to control what panel content is shown. Can be encoded and decoded from the URL using methods in
+ * `models/location_search`
+ */
+export type PanelViewAndParameters =
+  | {
+      /**
+       * The panel will show a index view (e.g. a list) of the nodes.
+       */
+      panelView: 'nodes';
+    }
+  | {
+      /**
+       * The panel will show the details of a single node.
+       */
+      panelView: 'nodeDetail';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node that will be shown in detail
+         */
+        nodeID: string;
+      };
+    }
+  | {
+      /**
+       * The panel will show a index view of the all events related to a specific node.
+       * This may show a summary of aggregation of the events related to the node.
+       */
+      panelView: 'nodeEvents';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node whose events will be shown.
+         */
+        nodeID: string;
+      };
+    }
+  | {
+      /**
+       * The panel will show an index view of the events related to a specific node. Only events in a specific category will be shown.
+       */
+      panelView: 'nodeEventsInCategory';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node whose events will be shown.
+         */
+        nodeID: string;
+        /**
+         * A parameter used to filter the events. For example, events that don't contain `eventCategory` in their `event.category` field may be hidden.
+         */
+        eventCategory: string;
+      };
+    }
+  | {
+      /**
+       * The panel will show details about a particular event. This is meant as a subview of 'nodeEventsInCategory'.
+       */
+      panelView: 'eventDetail';
+      panelParameters: {
+        /**
+         * The nodeID (e.g. `process.entity_id`) for the node related to the event being shown.
+         */
+        nodeID: string;
+        /**
+         * Used to associate this view (via breadcrumbs) with a parent `nodeEventsInCategory` view.
+         * e.g. The user views the `nodeEventsInCategory` panel and follows a link to the `eventDetail` view. The `eventDetail` view can
+         * use `eventCategory` to populate breadcrumbs and allow the user to return to the previous view.
+         *
+         * This cannot be inferred from the event itself, as an event may have any number of eventCategories.
+         */
+        eventCategory: string;
+
+        /**
+         * `event.id` that uniquely identifies the event to show.
+         */
+        eventID: string;
+      };
+    };

@@ -6,7 +6,7 @@
 
 import { IRouter } from 'kibana/server';
 import { schema } from '@kbn/config-schema';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { get } from 'lodash';
 import { LicenseState, verifyApiAccess } from '../lib/license_state';
 
@@ -42,6 +42,7 @@ export function registerExploreRoute({
         response
       ) => {
         verifyApiAccess(licenseState);
+        licenseState.notifyUsage('Graph');
         try {
           return response.ok({
             body: {

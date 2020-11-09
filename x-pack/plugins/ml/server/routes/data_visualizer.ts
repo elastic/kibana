@@ -4,11 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RequestHandlerContext } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 import { wrapError } from '../client/error_wrapper';
 import { DataVisualizer } from '../models/data_visualizer';
-import { Field } from '../models/data_visualizer/data_visualizer';
+import { Field, HistogramField } from '../models/data_visualizer/data_visualizer';
 import {
+  dataVisualizerFieldHistogramsSchema,
   dataVisualizerFieldStatsSchema,
   dataVisualizerOverallStatsSchema,
   indexPatternTitleSchema,
@@ -16,7 +17,7 @@ import {
 import { RouteInitialization } from '../types';
 
 function getOverallStats(
-  context: RequestHandlerContext,
+  client: IScopedClusterClient,
   indexPatternTitle: string,
   query: object,
   aggregatableFields: string[],
@@ -26,7 +27,7 @@ function getOverallStats(
   earliestMs: number,
   latestMs: number
 ) {
-  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
+  const dv = new DataVisualizer(client);
   return dv.getOverallStats(
     indexPatternTitle,
     query,
@@ -40,7 +41,7 @@ function getOverallStats(
 }
 
 function getStatsForFields(
-  context: RequestHandlerContext,
+  client: IScopedClusterClient,
   indexPatternTitle: string,
   query: any,
   fields: Field[],
@@ -51,7 +52,7 @@ function getStatsForFields(
   interval: number,
   maxExamples: number
 ) {
-  const dv = new DataVisualizer(context.ml!.mlClient.callAsCurrentUser);
+  const dv = new DataVisualizer(client);
   return dv.getStatsForFields(
     indexPatternTitle,
     query,
@@ -65,10 +66,68 @@ function getStatsForFields(
   );
 }
 
+function getHistogramsForFields(
+  client: IScopedClusterClient,
+  indexPatternTitle: string,
+  query: any,
+  fields: HistogramField[],
+  samplerShardSize: number
+) {
+  const dv = new DataVisualizer(client);
+  return dv.getHistogramsForFields(indexPatternTitle, query, fields, samplerShardSize);
+}
+
 /**
  * Routes for the index data visualizer.
  */
-export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization) {
+export function dataVisualizerRoutes({ router, routeGuard }: RouteInitialization) {
+  /**
+   * @apiGroup DataVisualizer
+   *
+   * @api {post} /api/ml/data_visualizer/get_field_histograms/:indexPatternTitle Get histograms for fields
+   * @apiName GetHistogramsForFields
+   * @apiDescription Returns the histograms on a list fields in the specified index pattern.
+   *
+   * @apiSchema (params) indexPatternTitleSchema
+   * @apiSchema (body) dataVisualizerFieldHistogramsSchema
+   *
+   * @apiSuccess {Object} fieldName histograms by field, keyed on the name of the field.
+   */
+  router.post(
+    {
+      path: '/api/ml/data_visualizer/get_field_histograms/{indexPatternTitle}',
+      validate: {
+        params: indexPatternTitleSchema,
+        body: dataVisualizerFieldHistogramsSchema,
+      },
+      options: {
+        tags: ['access:ml:canAccessML'],
+      },
+    },
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
+      try {
+        const {
+          params: { indexPatternTitle },
+          body: { query, fields, samplerShardSize },
+        } = request;
+
+        const results = await getHistogramsForFields(
+          client,
+          indexPatternTitle,
+          query,
+          fields,
+          samplerShardSize
+        );
+
+        return response.ok({
+          body: results,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
   /**
    * @apiGroup DataVisualizer
    *
@@ -92,7 +151,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -109,7 +168,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         } = request;
 
         const results = await getStatsForFields(
-          context,
+          client,
           indexPatternTitle,
           query,
           fields,
@@ -157,7 +216,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         tags: ['access:ml:canAccessML'],
       },
     },
-    mlLicense.basicLicenseAPIGuard(async (context, request, response) => {
+    routeGuard.basicLicenseAPIGuard(async ({ client, request, response }) => {
       try {
         const {
           params: { indexPatternTitle },
@@ -173,7 +232,7 @@ export function dataVisualizerRoutes({ router, mlLicense }: RouteInitialization)
         } = request;
 
         const results = await getOverallStats(
-          context,
+          client,
           indexPatternTitle,
           query,
           aggregatableFields,

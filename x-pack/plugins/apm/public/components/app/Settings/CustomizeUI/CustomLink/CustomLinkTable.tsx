@@ -24,10 +24,7 @@ interface Props {
   onCustomLinkSelected: (customLink: CustomLink) => void;
 }
 
-export const CustomLinkTable = ({
-  items = [],
-  onCustomLinkSelected,
-}: Props) => {
+export function CustomLinkTable({ items = [], onCustomLinkSelected }: Props) {
   const [searchTerm, setSearchTerm] = useState('');
 
   const columns = [
@@ -121,20 +118,22 @@ export const CustomLinkTable = ({
       />
     </>
   );
-};
+}
 
-const NoResultFound = ({ value }: { value: string }) => (
-  <EuiFlexGroup justifyContent="spaceAround">
-    <EuiFlexItem grow={false}>
-      <EuiText size="s">
-        {i18n.translate(
-          'xpack.apm.settings.customizeUI.customLink.table.noResultFound',
-          {
-            defaultMessage: `No results for "{value}".`,
-            values: { value },
-          }
-        )}
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+function NoResultFound({ value }: { value: string }) {
+  return (
+    <EuiFlexGroup justifyContent="spaceAround">
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          {i18n.translate(
+            'xpack.apm.settings.customizeUI.customLink.table.noResultFound',
+            {
+              defaultMessage: `No results for "{value}".`,
+              values: { value },
+            }
+          )}
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}

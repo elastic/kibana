@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginInitializerContext } from 'src/core/server';
 import { ExpressionsServerPlugin } from './plugin';
 
 export { ExpressionsServerSetup, ExpressionsServerStart } from './plugin';
@@ -34,6 +34,8 @@ export {
   AnyExpressionFunctionDefinition,
   AnyExpressionTypeDefinition,
   ArgumentType,
+  buildExpression,
+  buildExpressionFunction,
   Datatable,
   DatatableColumn,
   DatatableColumnType,
@@ -48,10 +50,13 @@ export {
   ExecutorState,
   ExpressionAstArgument,
   ExpressionAstExpression,
+  ExpressionAstExpressionBuilder,
   ExpressionAstFunction,
+  ExpressionAstFunctionBuilder,
   ExpressionAstNode,
   ExpressionFunction,
   ExpressionFunctionDefinition,
+  ExpressionFunctionDefinitions,
   ExpressionFunctionKibana,
   ExpressionFunctionParameter,
   ExpressionImage,
@@ -81,12 +86,9 @@ export {
   IInterpreterRenderHandlers,
   InterpreterErrorType,
   IRegistry,
+  isExpressionAstBuilder,
   KIBANA_CONTEXT_NAME,
   KibanaContext,
-  KibanaDatatable,
-  KibanaDatatableColumn,
-  KibanaDatatableColumnMeta,
-  KibanaDatatableRow,
   KnownTypeToString,
   Overflow,
   parse,

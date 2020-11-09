@@ -30,6 +30,7 @@ export const IGNORE_FILE_GLOBS = [
   'docs/**/*',
   '**/bin/**/*',
   '**/+([A-Z_]).md',
+  '**/+([A-Z_]).asciidoc',
   '**/LICENSE',
   '**/*.txt',
   '**/Gruntfile.js',
@@ -39,7 +40,7 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/canvas/canvas_plugin_src/**/*',
   'x-pack/plugins/monitoring/public/lib/jquery_flot/**/*',
   '**/.*',
-  '**/{webpackShims,__mocks__}/**/*',
+  '**/__mocks__/**/*',
   'x-pack/docs/**/*',
   'src/core/server/core_app/assets/fonts/**/*',
   'src/dev/code_coverage/ingest_coverage/integration_tests/mocks/**/*',
@@ -49,17 +50,18 @@ export const IGNORE_FILE_GLOBS = [
   'vars/*',
   '.ci/pipeline-library/**/*',
 
-  // Files in this directory must match a pre-determined name in some cases.
-  'x-pack/plugins/canvas/.storybook/*',
-
   // filename must match language code which requires capital letters
   '**/translations/*.json',
 
-  // filename is required by storybook
-  'packages/kbn-storybook/storybook_config/preview-head.html',
+  // Storybook has predetermined filesnames
+  '**/preview-body.html',
+  '**/preview-head.html',
 
   // filename required by api-extractor
   'api-documenter.json',
+
+  // filename must match upstream filenames from lodash
+  'packages/elastic-safer-lodash-set/**/*',
 
   // TODO fix file names in APM to remove these
   'x-pack/plugins/apm/public/**/*',
@@ -67,6 +69,8 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/plugins/apm/e2e/**/*',
 
   'x-pack/plugins/maps/server/fonts/**/*',
+  // packages for the ingest manager's api integration tests could be valid semver which has dashes
+  'x-pack/test/ingest_manager_api_integration/apis/fixtures/test_packages/**/*',
 ];
 
 /**
@@ -93,7 +97,6 @@ export const KEBAB_CASE_DIRECTORY_GLOBS = ['packages/*', 'x-pack'];
  */
 export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
-  '**/webpackShims',
   'src/babel-*',
   'packages/*',
   'packages/kbn-ui-framework/generator-kui',
@@ -101,7 +104,16 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'test/functional/fixtures/es_archiver/visualize_source-filters',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'x-pack/dev-tools',
+  'packages/kbn-optimizer/src/__fixtures__/mock_repo/x-pack',
 ];
+
+/**
+ * These patterns identify files which should have the extension stripped
+ * to reveal the actual name that should be checked.
+ *
+ * @type {Array}
+ */
+export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!
@@ -118,12 +130,6 @@ export const IGNORE_DIRECTORY_GLOBS = [
  * @type {Array}
  */
 export const TEMPORARILY_IGNORED_PATHS = [
-  'src/legacy/core_plugins/console/public/src/directives/helpExample.txt',
-  'src/legacy/core_plugins/console/public/src/sense_editor/theme-sense-dark.js',
-  'src/legacy/core_plugins/tests_bundle/webpackShims/angular-mocks.js',
-  'src/legacy/core_plugins/tile_map/public/__tests__/scaledCircleMarkers.png',
-  'src/legacy/core_plugins/tile_map/public/__tests__/shadedCircleMarkers.png',
-  'src/legacy/core_plugins/tile_map/public/__tests__/shadedGeohashGrid.png',
   'src/fixtures/config_upgrade_from_4.0.0_to_4.0.1-snapshot.json',
   'src/core/server/core_app/assets/favicons/android-chrome-192x192.png',
   'src/core/server/core_app/assets/favicons/android-chrome-256x256.png',
@@ -137,35 +143,10 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/core/server/core_app/assets/favicons/mstile-310x150.png',
   'src/core/server/core_app/assets/favicons/mstile-310x310.png',
   'src/core/server/core_app/assets/favicons/safari-pinned-tab.svg',
-  'src/legacy/ui/public/styles/bootstrap/component-animations.less',
-  'src/legacy/ui/public/styles/bootstrap/input-groups.less',
-  'src/legacy/ui/public/styles/bootstrap/list-group.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/background-variant.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/border-radius.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/center-block.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/grid-framework.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/hide-text.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/list-group.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/nav-divider.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/nav-vertical-align.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/progress-bar.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/reset-filter.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/reset-text.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/responsive-visibility.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/tab-focus.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/table-row.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/text-emphasis.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/text-overflow.less',
-  'src/legacy/ui/public/styles/bootstrap/mixins/vendor-prefixes.less',
-  'src/legacy/ui/public/styles/bootstrap/progress-bars.less',
-  'src/legacy/ui/public/styles/bootstrap/responsive-utilities.less',
   'test/functional/apps/management/exports/_import_objects-conflicts.json',
   'packages/kbn-ui-framework/doc_site/src/images/elastic-logo.svg',
   'packages/kbn-ui-framework/doc_site/src/images/hint-arrow.svg',
   'packages/kbn-ui-framework/doc_site/src/images/react-logo.svg',
-  'webpackShims/elasticsearch-browser.js',
-  'webpackShims/moment-timezone.js',
-  'webpackShims/ui-bootstrap.js',
   'x-pack/legacy/plugins/index_management/public/lib/editSettings.js',
   'x-pack/legacy/plugins/license_management/public/store/reducers/licenseManagement.js',
   'x-pack/plugins/monitoring/public/components/sparkline/__mocks__/plugins/xpack_main/jquery_flot.js',
@@ -173,12 +154,12 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/plugins/monitoring/public/icons/health-green.svg',
   'x-pack/plugins/monitoring/public/icons/health-red.svg',
   'x-pack/plugins/monitoring/public/icons/health-yellow.svg',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Italic.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Medium.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/fonts/roboto/Roboto-Regular.ttf',
-  'x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/img/logo-grey.png',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/noto/NotoSansCJKtc-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Italic.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Medium.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/fonts/roboto/Roboto-Regular.ttf',
+  'x-pack/plugins/reporting/server/export_types/common/assets/img/logo-grey.png',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/data.json.gz',
   'x-pack/test/functional/es_archives/monitoring/beats-with-restarted-instance/mappings.json',
   'x-pack/test/functional/es_archives/monitoring/logstash-pipelines/data.json.gz',

@@ -12,7 +12,7 @@ import { FunctionFactory } from '../../../types';
 export const help: FunctionHelp<FunctionFactory<typeof rowCount>> = {
   help: i18n.translate('xpack.canvas.functions.rowCountHelpText', {
     defaultMessage:
-      'Returns the number of rows. Pair with {plyFn} to get the count of unique column ' +
+      'Returns the number of rows. Pairs with {plyFn} to get the count of unique column ' +
       'values, or combinations of unique column values.',
     values: {
       plyFn: '`ply`',

@@ -12,6 +12,7 @@ import { default as createTestConfig } from './config';
 export default async function (context: FtrConfigProviderContext) {
   return createTestConfig(context).then((config) => {
     config.testFiles = [require.resolve('./apis/security/security_trial')];
+    config.junit.reportName = 'X-Pack API Integration Tests (Security Trial)';
     return config;
   });
 }

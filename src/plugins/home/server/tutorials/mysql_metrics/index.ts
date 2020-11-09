@@ -36,6 +36,7 @@ export function mysqlMetricsSpecProvider(context: TutorialContext): TutorialSche
     name: i18n.translate('home.tutorials.mysqlMetrics.nameTitle', {
       defaultMessage: 'MySQL metrics',
     }),
+    moduleName,
     category: TutorialsCategory.METRICS,
     shortDescription: i18n.translate('home.tutorials.mysqlMetrics.shortDescription', {
       defaultMessage: 'Fetch internal metrics from MySQL.',

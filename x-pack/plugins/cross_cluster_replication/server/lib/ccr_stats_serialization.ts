@@ -12,7 +12,7 @@ import {
   AutoFollowStats,
   AutoFollowStatsFromEs,
 } from '../../common/types';
-
+/* eslint-disable @typescript-eslint/naming-convention */
 export const deserializeRecentAutoFollowErrors = ({
   timestamp,
   leader_index,

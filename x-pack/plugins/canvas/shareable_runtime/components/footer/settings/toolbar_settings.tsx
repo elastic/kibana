@@ -8,7 +8,7 @@ import React, { FC } from 'react';
 import { EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { useCanvasShareableState, setToolbarAutohideAction } from '../../../context';
 
-export type onSetAutohideFn = (isAutohide: boolean) => void;
+export type OnSetAutohideFn = (isAutohide: boolean) => void;
 
 export interface Props {
   /**
@@ -20,7 +20,7 @@ export interface Props {
   /**
    * The handler to invoke when autohide is set.
    */
-  onSetAutohide: onSetAutohideFn;
+  onSetAutohide: OnSetAutohideFn;
 }
 
 /**
@@ -52,7 +52,7 @@ export const ToolbarSettings: FC<Pick<Props, 'onSetAutohide'>> = ({ onSetAutohid
   const { toolbar } = settings;
   const { isAutohide } = toolbar;
 
-  const onSetAutohideFn: onSetAutohideFn = (autohide: boolean) => {
+  const onSetAutohideFn: OnSetAutohideFn = (autohide: boolean) => {
     onSetAutohide(autohide);
     dispatch(setToolbarAutohideAction(autohide));
   };

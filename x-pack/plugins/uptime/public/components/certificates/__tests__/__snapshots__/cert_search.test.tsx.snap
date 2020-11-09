@@ -27,7 +27,7 @@ exports[`CertificatesSearch renders expected elements for valid props 1`] = `
         <span
           class="euiFormControlLayoutCustomIcon"
         >
-          <div
+          <span
             aria-hidden="true"
             class="euiFormControlLayoutCustomIcon__icon"
             data-euiicon-type="search"

@@ -19,7 +19,7 @@
 import React from 'react';
 import { last } from 'lodash';
 
-import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { MultiValueRow } from './multi_value_row';
 
 interface PercentileRankValuesProps {
@@ -52,19 +52,20 @@ export const PercentileRankValues = (props: PercentileRankValuesProps) => {
     disableDeleteRow: boolean;
     disableAddRow: boolean;
   }) => (
-    <MultiValueRow
-      key={`percentileRankValue__item${rowModel.id}`}
-      onAdd={onAddValue}
-      onChange={onChangeValue}
-      onDelete={onDeleteValue}
-      disableDelete={disableDeleteRow}
-      disableAdd={disableAddRow}
-      model={rowModel}
-    />
+    <EuiFlexItem key={`percentileRankValue__item${rowModel.id}`}>
+      <MultiValueRow
+        onAdd={onAddValue}
+        onChange={onChangeValue}
+        onDelete={onDeleteValue}
+        disableDelete={disableDeleteRow}
+        disableAdd={disableAddRow}
+        model={rowModel}
+      />
+    </EuiFlexItem>
   );
 
   return (
-    <EuiFlexGroup direction="column" responsive={false} gutterSize="xs">
+    <EuiFlexGroup direction="column" gutterSize="s">
       {showOnlyLastRow &&
         renderRow({
           rowModel: {

@@ -55,6 +55,10 @@ exports[`buildOSSFeatures returns the dashboard feature augmented with appropria
 Array [
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "api": Array [],
       "app": Array [
         "dashboards",
@@ -67,8 +71,8 @@ Array [
       "savedObject": Object {
         "all": Array [
           "dashboard",
-          "url",
           "query",
+          "url",
         ],
         "read": Array [
           "index-pattern",
@@ -78,6 +82,7 @@ Array [
           "canvas-workpad",
           "lens",
           "map",
+          "tag",
         ],
       },
       "ui": Array [
@@ -107,9 +112,11 @@ Array [
           "visualization",
           "timelion-sheet",
           "canvas-workpad",
+          "lens",
           "map",
           "dashboard",
           "query",
+          "tag",
         ],
       },
       "ui": Array [
@@ -179,6 +186,10 @@ exports[`buildOSSFeatures returns the discover feature augmented with appropriat
 Array [
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "api": Array [],
       "app": Array [
         "discover",
@@ -315,6 +326,7 @@ Array [
         "edit",
         "delete",
         "copyIntoSpace",
+        "shareIntoSpace",
       ],
     },
     "privilegeId": "all",
@@ -403,6 +415,10 @@ exports[`buildOSSFeatures returns the visualize feature augmented with appropria
 Array [
   Object {
     "privilege": Object {
+      "alerting": Object {
+        "all": Array [],
+        "read": Array [],
+      },
       "api": Array [],
       "app": Array [
         "visualize",
@@ -423,6 +439,7 @@ Array [
         "read": Array [
           "index-pattern",
           "search",
+          "tag",
         ],
       },
       "ui": Array [
@@ -453,6 +470,7 @@ Array [
           "visualization",
           "query",
           "lens",
+          "tag",
         ],
       },
       "ui": Array [

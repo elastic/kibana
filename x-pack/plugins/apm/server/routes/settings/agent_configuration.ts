@@ -5,7 +5,7 @@
  */
 
 import * as t from 'io-ts';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getServiceNames } from '../../lib/settings/agent_configuration/get_service_names';
 import { createOrUpdateConfiguration } from '../../lib/settings/agent_configuration/create_or_update_configuration';
@@ -22,6 +22,7 @@ import {
   agentConfigurationIntakeRt,
 } from '../../../common/agent_configuration/runtime_types/agent_configuration_intake_rt';
 import { jsonRt } from '../../../common/runtime_types/json_rt';
+import { getSearchAggregatedTransactions } from '../../lib/helpers/aggregated_transactions';
 
 // get list of configurations
 export const agentConfigurationRoute = createRoute(() => ({
@@ -136,15 +137,19 @@ export const createOrUpdateAgentConfigurationRoute = createRoute(() => ({
   },
 }));
 
+const searchParamsRt = t.intersection([
+  t.type({ service: serviceRt }),
+  t.partial({ etag: t.string, mark_as_applied_by_agent: t.boolean }),
+]);
+
+export type AgentConfigSearchParams = t.TypeOf<typeof searchParamsRt>;
+
 // Lookup single configuration (used by APM Server)
 export const agentConfigurationSearchRoute = createRoute(() => ({
   method: 'POST',
   path: '/api/apm/settings/agent-configuration/search',
   params: {
-    body: t.intersection([
-      t.type({ service: serviceRt }),
-      t.partial({ etag: t.string, mark_as_applied_by_agent: t.boolean }),
-    ]),
+    body: searchParamsRt,
   },
   handler: async ({ context, request }) => {
     const {
@@ -195,8 +200,12 @@ export const listAgentConfigurationServicesRoute = createRoute(() => ({
   path: '/api/apm/settings/agent-configuration/services',
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
     return await getServiceNames({
       setup,
+      searchAggregatedTransactions,
     });
   },
 }));
@@ -210,7 +219,15 @@ export const listAgentConfigurationEnvironmentsRoute = createRoute(() => ({
   handler: async ({ context, request }) => {
     const setup = await setupRequest(context, request);
     const { serviceName } = context.params.query;
-    return await getEnvironments({ serviceName, setup });
+    const searchAggregatedTransactions = await getSearchAggregatedTransactions(
+      setup
+    );
+
+    return await getEnvironments({
+      serviceName,
+      setup,
+      searchAggregatedTransactions,
+    });
   },
 }));
 

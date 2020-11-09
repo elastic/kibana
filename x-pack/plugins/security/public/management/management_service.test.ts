@@ -8,8 +8,9 @@ import { BehaviorSubject } from 'rxjs';
 import {
   ManagementApp,
   ManagementSetup,
-  ManagementStart,
+  DefinedSections,
 } from '../../../../../src/plugins/management/public';
+import { createManagementSectionMock } from '../../../../../src/plugins/management/public/mocks';
 import { SecurityLicenseFeatures } from '../../common/licensing/license_features';
 import { ManagementService } from './management_service';
 import { usersManagementApp } from './users';
@@ -21,7 +22,7 @@ import { rolesManagementApp } from './roles';
 import { apiKeysManagementApp } from './api_keys';
 import { roleMappingsManagementApp } from './role_mappings';
 
-const mockSection = { registerApp: jest.fn() };
+const mockSection = createManagementSectionMock();
 
 describe('ManagementService', () => {
   describe('setup()', () => {
@@ -32,8 +33,10 @@ describe('ManagementService', () => {
 
       const managementSetup: ManagementSetup = {
         sections: {
-          register: jest.fn(),
-          getSection: jest.fn().mockReturnValue(mockSection),
+          register: jest.fn(() => mockSection),
+          section: {
+            security: mockSection,
+          } as DefinedSections,
         },
       };
 
@@ -75,7 +78,10 @@ describe('ManagementService', () => {
   });
 
   describe('start()', () => {
-    function startService(initialFeatures: Partial<SecurityLicenseFeatures>) {
+    function startService(
+      initialFeatures: Partial<SecurityLicenseFeatures>,
+      canManageSecurity: boolean = true
+    ) {
       const { fatalErrors, getStartServices } = coreMock.createSetup();
 
       const licenseSubject = new BehaviorSubject<SecurityLicenseFeatures>(
@@ -88,8 +94,10 @@ describe('ManagementService', () => {
 
       const managementSetup: ManagementSetup = {
         sections: {
-          register: jest.fn(),
-          getSection: jest.fn().mockReturnValue(mockSection),
+          register: jest.fn(() => mockSection),
+          section: {
+            security: mockSection,
+          } as DefinedSections,
         },
       };
 
@@ -101,10 +109,11 @@ describe('ManagementService', () => {
         management: managementSetup,
       });
 
-      const getMockedApp = () => {
+      const getMockedApp = (id: string) => {
         // All apps are enabled by default.
         let enabled = true;
         return ({
+          id,
           get enabled() {
             return enabled;
           },
@@ -116,25 +125,27 @@ describe('ManagementService', () => {
           }),
         } as unknown) as jest.Mocked<ManagementApp>;
       };
+      mockSection.getApp = jest.fn().mockImplementation((id) => mockApps.get(id));
       const mockApps = new Map<string, jest.Mocked<ManagementApp>>([
-        [usersManagementApp.id, getMockedApp()],
-        [rolesManagementApp.id, getMockedApp()],
-        [apiKeysManagementApp.id, getMockedApp()],
-        [roleMappingsManagementApp.id, getMockedApp()],
+        [usersManagementApp.id, getMockedApp(usersManagementApp.id)],
+        [rolesManagementApp.id, getMockedApp(rolesManagementApp.id)],
+        [apiKeysManagementApp.id, getMockedApp(apiKeysManagementApp.id)],
+        [roleMappingsManagementApp.id, getMockedApp(roleMappingsManagementApp.id)],
       ] as Array<[string, jest.Mocked<ManagementApp>]>);
 
-      const managementStart: ManagementStart = {
-        sections: {
-          getSection: jest
-            .fn()
-            .mockReturnValue({ getApp: jest.fn().mockImplementation((id) => mockApps.get(id)) }),
-          getAllSections: jest.fn(),
-          getSectionsEnabled: jest.fn(),
-        },
-      };
-
       service.start({
-        management: managementStart,
+        capabilities: {
+          management: {
+            security: {
+              users: canManageSecurity,
+              roles: canManageSecurity,
+              role_mappings: canManageSecurity,
+              api_keys: canManageSecurity,
+            },
+          },
+          navLinks: {},
+          catalogue: {},
+        },
       });
 
       return {
@@ -179,6 +190,19 @@ describe('ManagementService', () => {
 
       updateFeatures({ showLinks: false, showRoleMappingsManagement: false });
 
+      for (const [, mockApp] of mockApps) {
+        expect(mockApp.enabled).toBe(false);
+      }
+    });
+
+    it('apps are disabled if capabilities are false', () => {
+      const { mockApps } = startService(
+        {
+          showLinks: true,
+          showRoleMappingsManagement: true,
+        },
+        false
+      );
       for (const [, mockApp] of mockApps) {
         expect(mockApp.enabled).toBe(false);
       }

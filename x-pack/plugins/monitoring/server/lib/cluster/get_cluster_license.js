@@ -18,7 +18,7 @@ export function getClusterLicense(req, esIndexPattern, clusterUuid) {
     ignoreUnavailable: true,
     filterPath: 'hits.hits._source.license',
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         type: 'cluster_stats',
         clusterUuid,

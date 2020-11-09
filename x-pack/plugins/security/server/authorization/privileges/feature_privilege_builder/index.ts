@@ -5,7 +5,7 @@
  */
 
 import { flatten } from 'lodash';
-import { Feature, FeatureKibanaPrivileges } from '../../../../../features/server';
+import { KibanaFeature, FeatureKibanaPrivileges } from '../../../../../features/server';
 import { Actions } from '../../actions';
 import { FeaturePrivilegeApiBuilder } from './api';
 import { FeaturePrivilegeAppBuilder } from './app';
@@ -14,6 +14,7 @@ import { FeaturePrivilegeBuilder } from './feature_privilege_builder';
 import { FeaturePrivilegeManagementBuilder } from './management';
 import { FeaturePrivilegeNavlinkBuilder } from './navlink';
 import { FeaturePrivilegeSavedObjectBuilder } from './saved_object';
+import { FeaturePrivilegeAlertingBuilder } from './alerting';
 import { FeaturePrivilegeUIBuilder } from './ui';
 export { FeaturePrivilegeBuilder };
 
@@ -26,10 +27,11 @@ export const featurePrivilegeBuilderFactory = (actions: Actions): FeaturePrivile
     new FeaturePrivilegeNavlinkBuilder(actions),
     new FeaturePrivilegeSavedObjectBuilder(actions),
     new FeaturePrivilegeUIBuilder(actions),
+    new FeaturePrivilegeAlertingBuilder(actions),
   ];
 
   return {
-    getActions(privilege: FeatureKibanaPrivileges, feature: Feature) {
+    getActions(privilege: FeatureKibanaPrivileges, feature: KibanaFeature) {
       return flatten(builders.map((builder) => builder.getActions(privilege, feature)));
     },
   };

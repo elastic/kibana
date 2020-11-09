@@ -8,7 +8,13 @@ import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_PREPACKAGED_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllAlerts, deleteSignalsIndex } from '../../utils';
+import {
+  createSignalsIndex,
+  deleteAllAlerts,
+  deleteAllTimelines,
+  deleteSignalsIndex,
+  waitFor,
+} from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -40,6 +46,7 @@ export default ({ getService }: FtrProviderContext): void => {
       afterEach(async () => {
         await deleteSignalsIndex(supertest);
         await deleteAllAlerts(es);
+        await deleteAllTimelines(es);
       });
 
       it('should contain two output keys of rules_installed and rules_updated', async () => {
@@ -49,7 +56,12 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
-        expect(Object.keys(body)).to.eql(['rules_installed', 'rules_updated']);
+        expect(Object.keys(body)).to.eql([
+          'rules_installed',
+          'rules_updated',
+          'timelines_installed',
+          'timelines_updated',
+        ]);
       });
 
       it('should create the prepackaged rules and return a count greater than zero', async () => {
@@ -79,6 +91,16 @@ export default ({ getService }: FtrProviderContext): void => {
           .send()
           .expect(200);
 
+        // NOTE: I call the GET call until eventually it becomes consistent and that the number of rules to install are zero.
+        // This is to reduce flakiness where it can for a short period of time try to install the same rule the same rule twice.
+        await waitFor(async () => {
+          const { body } = await supertest
+            .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+          return body.rules_not_installed === 0;
+        });
+
         const { body } = await supertest
           .put(DETECTION_ENGINE_PREPACKAGED_URL)
           .set('kbn-xsrf', 'true')
@@ -86,6 +108,30 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200);
 
         expect(body.rules_installed).to.eql(0);
+      });
+
+      it('should be possible to call the API twice and the second time the number of timelines installed should be zero', async () => {
+        await supertest
+          .put(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        await waitFor(async () => {
+          const { body } = await supertest
+            .get(`${DETECTION_ENGINE_PREPACKAGED_URL}/_status`)
+            .set('kbn-xsrf', 'true')
+            .expect(200);
+          return body.timelines_not_installed === 0;
+        });
+
+        const { body } = await supertest
+          .put(DETECTION_ENGINE_PREPACKAGED_URL)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200);
+
+        expect(body.timelines_installed).to.eql(0);
       });
     });
   });

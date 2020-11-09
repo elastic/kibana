@@ -7,7 +7,7 @@
 <b>Signature:</b>
 
 ```typescript
-export interface IIndexPatternFieldList extends Array<Field> 
+export interface IIndexPatternFieldList extends Array<IndexPatternField> 
 ```
 
 ## Methods
@@ -15,8 +15,12 @@ export interface IIndexPatternFieldList extends Array<Field>
 |  Method | Description |
 |  --- | --- |
 |  [add(field)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.add.md) |  |
+|  [getAll()](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.getall.md) |  |
 |  [getByName(name)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.getbyname.md) |  |
 |  [getByType(type)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.getbytype.md) |  |
 |  [remove(field)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.remove.md) |  |
+|  [removeAll()](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.removeall.md) |  |
+|  [replaceAll(specs)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.replaceall.md) |  |
+|  [toSpec(options)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.tospec.md) |  |
 |  [update(field)](./kibana-plugin-plugins-data-public.iindexpatternfieldlist.update.md) |  |
 

@@ -45,6 +45,7 @@ export interface MultiContent<T extends object> {
   updateContentAt: (id: keyof T, content: Content) => void;
   saveSnapshotAndRemoveContent: (id: keyof T) => void;
   getData: () => T;
+  getSingleContentData: <K extends keyof T>(contentId: K) => T[K];
   validate: () => Promise<boolean>;
   validation: Validation<T>;
 }
@@ -93,7 +94,7 @@ export function useMultiContent<T extends object>({
     const activeContentData: Partial<T> = {};
 
     for (const [id, _content] of Object.entries(contents.current)) {
-      if (validation.contents[id as keyof T]) {
+      if (validation.contents[id as keyof T] !== false) {
         const contentData = (_content as Content).getData();
 
         // Replace the getData() handler with the cached value
@@ -109,9 +110,22 @@ export function useMultiContent<T extends object>({
     };
   }, [stateData, validation]);
 
+  /**
+   * Read a single content data.
+   */
+  const getSingleContentData = useCallback(
+    <K extends keyof T>(contentId: K): T[K] => {
+      if (contents.current[contentId]) {
+        return contents.current[contentId].getData();
+      }
+      return stateData[contentId];
+    },
+    [stateData]
+  );
+
   const updateContentValidity = useCallback(
     (updatedData: { [key in keyof T]?: boolean | undefined }): boolean | undefined => {
-      let allContentValidity: boolean | undefined;
+      let isAllContentValid: boolean | undefined = validation.isValid;
 
       setValidation((prev) => {
         if (
@@ -120,7 +134,7 @@ export function useMultiContent<T extends object>({
           )
         ) {
           // No change in validation, nothing to update
-          allContentValidity = prev.isValid;
+          isAllContentValid = prev.isValid;
           return prev;
         }
 
@@ -129,25 +143,25 @@ export function useMultiContent<T extends object>({
           ...updatedData,
         };
 
-        allContentValidity = Object.values(nextContentsValidityState).some(
+        isAllContentValid = Object.values(nextContentsValidityState).some(
           (_isValid) => _isValid === undefined
         )
           ? undefined
           : Object.values(nextContentsValidityState).every(Boolean);
 
         return {
-          isValid: allContentValidity,
+          isValid: isAllContentValid,
           contents: nextContentsValidityState,
         };
       });
 
-      return allContentValidity;
+      return isAllContentValid;
     },
-    []
+    [validation.isValid]
   );
 
   /**
-   * Validate the multi-content active content(s) in the DOM
+   * Validate the content(s) currently in the DOM
    */
   const validate = useCallback(async () => {
     if (Object.keys(contents.current).length === 0) {
@@ -163,7 +177,7 @@ export function useMultiContent<T extends object>({
     }
 
     return Boolean(updateContentValidity(updatedValidation));
-  }, [updateContentValidity]);
+  }, [validation.isValid, updateContentValidity]);
 
   /**
    * Update a content. It replaces the content in our "contents" map and update
@@ -186,7 +200,7 @@ export function useMultiContent<T extends object>({
         });
       }
     },
-    [updateContentValidity, onChange]
+    [updateContentValidity, onChange, getData, validate]
   );
 
   /**
@@ -211,6 +225,7 @@ export function useMultiContent<T extends object>({
 
   return {
     getData,
+    getSingleContentData,
     validate,
     validation,
     updateContentAt,

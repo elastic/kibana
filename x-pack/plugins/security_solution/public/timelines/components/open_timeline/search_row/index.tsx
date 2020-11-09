@@ -9,12 +9,12 @@ import {
   EuiFilterButton,
   EuiFlexGroup,
   EuiFlexItem,
-  // @ts-ignore
   EuiSearchBar,
 } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
+import { TimelineType } from '../../../../../common/types/timeline';
 import * as i18n from '../translations';
 import { OpenTimelineProps } from '../types';
 
@@ -39,13 +39,8 @@ type Props = Pick<
   | 'onQueryChange'
   | 'onToggleOnlyFavorites'
   | 'query'
-  | 'totalSearchResultsCount'
+  | 'timelineType'
 > & { children?: JSX.Element | null };
-
-const searchBox = {
-  placeholder: i18n.SEARCH_PLACEHOLDER,
-  incremental: false,
-};
 
 /**
  * Renders the row containing the search input and Only Favorites filter
@@ -56,10 +51,20 @@ export const SearchRow = React.memo<Props>(
     onlyFavorites,
     onQueryChange,
     onToggleOnlyFavorites,
-    query,
-    totalSearchResultsCount,
     children,
+    timelineType,
   }) => {
+    const searchBox = useMemo(
+      () => ({
+        placeholder:
+          timelineType === TimelineType.default
+            ? i18n.SEARCH_PLACEHOLDER
+            : i18n.SEARCH_TEMPLATE_PLACEHOLDER,
+        incremental: false,
+      }),
+      [timelineType]
+    );
+
     return (
       <SearchRowContainer>
         <SearchRowFlexGroup gutterSize="s">

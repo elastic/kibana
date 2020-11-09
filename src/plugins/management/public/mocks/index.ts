@@ -17,10 +17,10 @@
  * under the License.
  */
 
-import { ManagementSetup, ManagementStart } from '../types';
+import { ManagementSetup, ManagementStart, DefinedSections } from '../types';
 import { ManagementSection } from '../index';
 
-const createManagementSectionMock = () =>
+export const createManagementSectionMock = () =>
   (({
     disable: jest.fn(),
     enable: jest.fn(),
@@ -29,19 +29,22 @@ const createManagementSectionMock = () =>
     getEnabledItems: jest.fn().mockReturnValue([]),
   } as unknown) as ManagementSection);
 
-const createSetupContract = (): DeeplyMockedKeys<ManagementSetup> => ({
+const createSetupContract = (): ManagementSetup => ({
   sections: {
-    register: jest.fn(),
-    getSection: jest.fn().mockReturnValue(createManagementSectionMock()),
+    register: jest.fn(() => createManagementSectionMock()),
+    section: ({
+      ingest: createManagementSectionMock(),
+      data: createManagementSectionMock(),
+      insightsAndAlerting: createManagementSectionMock(),
+      security: createManagementSectionMock(),
+      kibana: createManagementSectionMock(),
+      stack: createManagementSectionMock(),
+    } as unknown) as DefinedSections,
   },
 });
 
-const createStartContract = (): DeeplyMockedKeys<ManagementStart> => ({
-  sections: {
-    getSection: jest.fn(),
-    getAllSections: jest.fn(),
-    getSectionsEnabled: jest.fn(),
-  },
+const createStartContract = (): ManagementStart => ({
+  sections: {},
 });
 
 export const managementPluginMock = {

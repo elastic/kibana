@@ -2,7 +2,6 @@
 
 exports[`ElasticIndex write writes documents in bulk to the index 1`] = `
 Array [
-  "bulk",
   Object {
     "body": Array [
       Object {

@@ -10,7 +10,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
-  const config = getService('config');
   const PageObjects = getPageObjects(['common', 'settings', 'security', 'spaceSelector']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
@@ -69,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Stack Management');
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`allows settings to be changed`, async () => {
@@ -125,7 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows Management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Stack Management');
+        expect(navLinks).to.eql(['Stack Management']);
       });
 
       it(`does not allow settings to be changed`, async () => {
@@ -174,20 +173,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await security.user.delete('no_advanced_settings_privileges_user');
       });
 
-      it('shows Management navlink', async () => {
+      it('does not show Management navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('Stack Management');
+        expect(navLinks).to.eql(['Overview', 'Discover']);
       });
 
-      it(`does not allow navigation to advanced settings; redirects to management home`, async () => {
+      it(`does not allow navigation to advanced settings; shows "not found" error`, async () => {
         await PageObjects.common.navigateToUrl('management', 'kibana/settings', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
           shouldUseHashForSubUrl: false,
         });
-        await testSubjects.existOrFail('managementHome', {
-          timeout: config.get('timeouts.waitFor'),
-        });
+        await testSubjects.existOrFail('appNotFoundPageContent');
       });
     });
   });

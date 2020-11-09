@@ -247,28 +247,52 @@ exports[`ExplainCollectionEnabled should explain about xpack.monitoring.collecti
             onClick={[Function]}
             type="button"
           >
-            <button
-              className="euiButton euiButton--primary euiButton--fill"
+            <EuiButtonDisplay
+              baseClassName="euiButton"
               data-test-subj="enableCollectionEnabled"
+              element="button"
+              fill={true}
               onClick={[Function]}
               type="button"
             >
-              <span
-                className="euiButton__content"
+              <button
+                className="euiButton euiButton--primary euiButton--fill"
+                data-test-subj="enableCollectionEnabled"
+                onClick={[Function]}
+                style={
+                  Object {
+                    "minWidth": undefined,
+                  }
+                }
+                type="button"
               >
-                <span
-                  className="euiButton__text"
+                <EuiButtonContent
+                  className="euiButton__content"
+                  iconSide="left"
+                  textProps={
+                    Object {
+                      "className": "euiButton__text",
+                    }
+                  }
                 >
-                  <FormattedMessage
-                    defaultMessage="Turn on monitoring"
-                    id="xpack.monitoring.noData.explanations.collectionEnabled.turnOnMonitoringButtonLabel"
-                    values={Object {}}
+                  <span
+                    className="euiButtonContent euiButton__content"
                   >
-                    Turn on monitoring
-                  </FormattedMessage>
-                </span>
-              </span>
-            </button>
+                    <span
+                      className="euiButton__text"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Turn on monitoring"
+                        id="xpack.monitoring.noData.explanations.collectionEnabled.turnOnMonitoringButtonLabel"
+                        values={Object {}}
+                      >
+                        Turn on monitoring
+                      </FormattedMessage>
+                    </span>
+                  </span>
+                </EuiButtonContent>
+              </button>
+            </EuiButtonDisplay>
           </EuiButton>
         </div>
       </EuiFlexItem>

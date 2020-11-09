@@ -19,7 +19,6 @@ import { mlServicesMock, mlAuthzMock as mockMlAuthzFactory } from '../../../mach
 import { buildMlAuthz } from '../../../machine_learning/authz';
 import { importRulesRoute } from './import_rules_route';
 import * as createRulesStreamFromNdJson from '../../rules/create_rules_stream_from_ndjson';
-import { setFeatureFlagsForTestsOnly, unSetFeatureFlagsForTestsOnly } from '../../feature_flags';
 import {
   getImportRulesWithIdSchemaMock,
   ruleIdsToNdJsonString,
@@ -29,14 +28,6 @@ import {
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
 describe('import_rules_route', () => {
-  beforeAll(() => {
-    setFeatureFlagsForTestsOnly();
-  });
-
-  afterAll(() => {
-    unSetFeatureFlagsForTestsOnly();
-  });
-
   let config: ReturnType<typeof createMockConfig>;
   let server: ReturnType<typeof serverMock.create>;
   let request: ReturnType<typeof requestMock.create>;
@@ -62,6 +53,18 @@ describe('import_rules_route', () => {
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
+    });
+
+    test('returns 500 if more than 10,000 rules are imported', async () => {
+      const ruleIds = new Array(10001).fill(undefined).map((_, index) => `rule-${index}`);
+      const multiRequest = getImportRulesRequest(buildHapiStream(ruleIdsToNdJsonString(ruleIds)));
+      const response = await server.inject(multiRequest, context);
+
+      expect(response.status).toEqual(500);
+      expect(response.body).toEqual({
+        message: "Can't import more than 10000 rules",
+        status_code: 500,
+      });
     });
 
     test('returns 404 if alertClient is not available on the route', async () => {
@@ -238,11 +241,26 @@ describe('import_rules_route', () => {
       });
     });
 
+    test('returns 200 if many rules are imported successfully', async () => {
+      const ruleIds = new Array(9999).fill(undefined).map((_, index) => `rule-${index}`);
+      const multiRequest = getImportRulesRequest(buildHapiStream(ruleIdsToNdJsonString(ruleIds)));
+      const response = await server.inject(multiRequest, context);
+
+      expect(response.status).toEqual(200);
+      expect(response.body).toEqual({
+        errors: [],
+        success: true,
+        success_count: 9999,
+      });
+    });
+
     test('returns 200 with errors if all rules are missing rule_ids and import fails on validation', async () => {
       const rulesWithoutRuleIds = ['rule-1', 'rule-2'].map((ruleId) =>
         getImportRulesWithIdSchemaMock(ruleId)
       );
+      // @ts-expect-error
       delete rulesWithoutRuleIds[0].rule_id;
+      // @ts-expect-error
       delete rulesWithoutRuleIds[1].rule_id;
       const badPayload = buildHapiStream(rulesToNdJsonString(rulesWithoutRuleIds));
       const badRequest = getImportRulesRequest(badPayload);

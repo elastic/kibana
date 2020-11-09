@@ -474,9 +474,9 @@ exports[`Timeline rendering renders correctly against snapshot 1`] = `
                           "auditbeat-*",
                           "endgame-*",
                           "filebeat-*",
+                          "logs-*",
                           "packetbeat-*",
                           "winlogbeat-*",
-                          "logs-*",
                         ],
                         "name": "event.end",
                         "searchable": true,
@@ -646,34 +646,7 @@ In other use cases the message field can be used to concatenate different values
               dataProviders={
                 Array [
                   Object {
-                    "and": Array [
-                      Object {
-                        "and": Array [],
-                        "enabled": true,
-                        "excluded": false,
-                        "id": "id-Provider 2",
-                        "kqlQuery": "",
-                        "name": "Provider 2",
-                        "queryMatch": Object {
-                          "field": "name",
-                          "operator": ":",
-                          "value": "Provider 2",
-                        },
-                      },
-                      Object {
-                        "and": Array [],
-                        "enabled": true,
-                        "excluded": false,
-                        "id": "id-Provider 3",
-                        "kqlQuery": "",
-                        "name": "Provider 3",
-                        "queryMatch": Object {
-                          "field": "name",
-                          "operator": ":",
-                          "value": "Provider 3",
-                        },
-                      },
-                    ],
+                    "and": Array [],
                     "enabled": true,
                     "excluded": false,
                     "id": "id-Provider 1",
@@ -804,10 +777,17 @@ In other use cases the message field can be used to concatenate different values
                   },
                 ]
               }
-              end={1521862432253}
-              eventType="raw"
+              docValueFields={Array []}
+              end="2018-03-24T03:33:52.253Z"
               filters={Array []}
-              id="foo"
+              id="test"
+              indexNames={
+                Array [
+                  "filebeat-*",
+                  "auditbeat-*",
+                  "packetbeat-*",
+                ]
+              }
               indexPattern={
                 Object {
                   "fields": Array [
@@ -899,8 +879,8 @@ In other use cases the message field can be used to concatenate different values
                   "title": "filebeat-*,auditbeat-*,packetbeat-*",
                 }
               }
-              indexToAdd={Array []}
               isLive={false}
+              isSaving={false}
               itemsPerPage={5}
               itemsPerPageOptions={
                 Array [
@@ -911,13 +891,9 @@ In other use cases the message field can be used to concatenate different values
               }
               kqlMode="search"
               kqlQueryExpression=""
-              loadingIndexName={false}
+              loadingSourcerer={false}
               onChangeItemsPerPage={[MockFunction]}
               onClose={[MockFunction]}
-              onDataProviderEdited={[MockFunction]}
-              onDataProviderRemoved={[MockFunction]}
-              onToggleDataProviderEnabled={[MockFunction]}
-              onToggleDataProviderExcluded={[MockFunction]}
               show={true}
               showCallOutUnauthorizedMsg={false}
               sort={
@@ -926,8 +902,10 @@ In other use cases the message field can be used to concatenate different values
                   "sortDirection": "desc",
                 }
               }
-              start={1521830963132}
+              start="2018-03-23T18:49:23.132Z"
               status="active"
+              timelineType="default"
+              timerangeKind="absolute"
               toggleColumn={[MockFunction]}
               usersViewing={
                 Array [

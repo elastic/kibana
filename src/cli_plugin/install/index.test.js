@@ -18,7 +18,8 @@
  */
 
 import sinon from 'sinon';
-import index from './index';
+
+import { installCommand } from './index';
 
 describe('kibana cli', function () {
   describe('plugin installer', function () {
@@ -41,7 +42,7 @@ describe('kibana cli', function () {
       it('should define the command', function () {
         sinon.spy(program, 'command');
 
-        index(program);
+        installCommand(program);
         expect(program.command.calledWith('install <plugin/url>')).toBe(true);
 
         program.command.restore();
@@ -50,7 +51,7 @@ describe('kibana cli', function () {
       it('should define the description', function () {
         sinon.spy(program, 'description');
 
-        index(program);
+        installCommand(program);
         expect(program.description.calledWith('install a plugin')).toBe(true);
 
         program.description.restore();
@@ -59,9 +60,9 @@ describe('kibana cli', function () {
       it('should define the command line options', function () {
         const spy = sinon.spy(program, 'option');
 
-        const options = [/-q/, /-s/, /-c/, /-t/, /-d/];
+        const options = [/-q/, /-s/, /-c/, /-t/];
 
-        index(program);
+        installCommand(program);
 
         for (let i = 0; i < spy.callCount; i++) {
           const call = spy.getCall(i);
@@ -80,7 +81,7 @@ describe('kibana cli', function () {
       it('should call the action function', function () {
         sinon.spy(program, 'action');
 
-        index(program);
+        installCommand(program);
         expect(program.action.calledOnce).toBe(true);
 
         program.action.restore();

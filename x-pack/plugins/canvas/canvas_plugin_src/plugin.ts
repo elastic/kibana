@@ -5,6 +5,7 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { CanvasSetup } from '../public';
 import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
 import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
@@ -12,7 +13,6 @@ import { Start as InspectorStart } from '../../../../src/plugins/inspector/publi
 
 import { functions } from './functions/browser';
 import { typeFunctions } from './expression_types';
-// @ts-expect-error: untyped local
 import { renderFunctions, renderFunctionFactories } from './renderers';
 import { initializeElements } from './elements';
 // @ts-expect-error untyped local
@@ -33,6 +33,7 @@ export interface StartDeps {
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
   inspector: InspectorStart;
+  charts: ChartsPluginStart;
 }
 
 export type SetupInitializer<T> = (core: CoreSetup<StartDeps>, plugins: SetupDeps) => T;

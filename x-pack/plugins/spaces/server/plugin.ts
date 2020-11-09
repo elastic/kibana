@@ -107,6 +107,7 @@ export class Plugin {
       getStartServices: core.getStartServices,
       getImportExportObjectLimit: core.savedObjects.getImportExportObjectLimit,
       spacesService,
+      authorization: plugins.security ? plugins.security.authz : null,
     });
 
     const internalRouter = core.http.createRouter();

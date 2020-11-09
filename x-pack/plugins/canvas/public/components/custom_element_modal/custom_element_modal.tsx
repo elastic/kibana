@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable react/forbid-elements */
 import React, { PureComponent } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -130,7 +129,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
               <EuiFormRow
                 label={strings.getNameInputLabel()}
                 helpText={strings.getCharactersRemainingDescription(MAX_NAME_LENGTH - name.length)}
-                compressed
+                display="rowCompressed"
               >
                 <EuiFieldText
                   value={name}
@@ -162,7 +161,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
               <EuiFormRow
                 className="canvasCustomElementForm__thumbnail"
                 label={strings.getImageInputLabel()}
-                compressed
+                display="rowCompressed"
               >
                 <EuiFilePicker
                   initialPromptText={strings.getImageFilePickerPlaceholder()}

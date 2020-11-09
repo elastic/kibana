@@ -12,6 +12,7 @@ import {
 } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
 import { platformService } from '../services';
+
 /*
   Remove any top level keys from the workpad which will be rejected by validation
 */
@@ -21,6 +22,7 @@ const validKeys = [
   'assets',
   'colors',
   'css',
+  'variables',
   'height',
   'id',
   'isWriteable',
@@ -43,17 +45,17 @@ const sanitizeWorkpad = function (workpad) {
 };
 
 const getApiPath = function () {
-  const basePath = platformService.getService().coreStart.http.basePath.get();
+  const basePath = platformService.getService().getBasePath();
   return `${basePath}${API_ROUTE_WORKPAD}`;
 };
 
 const getApiPathStructures = function () {
-  const basePath = platformService.getService().coreStart.http.basePath.get();
+  const basePath = platformService.getService().getBasePath();
   return `${basePath}${API_ROUTE_WORKPAD_STRUCTURES}`;
 };
 
 const getApiPathAssets = function () {
-  const basePath = platformService.getService().coreStart.http.basePath.get();
+  const basePath = platformService.getService().getBasePath();
   return `${basePath}${API_ROUTE_WORKPAD_ASSETS}`;
 };
 
@@ -61,6 +63,7 @@ export function create(workpad) {
   return fetch.post(getApiPath(), {
     ...sanitizeWorkpad({ ...workpad }),
     assets: workpad.assets || {},
+    variables: workpad.variables || [],
   });
 }
 
@@ -73,7 +76,7 @@ export async function createFromTemplate(templateId) {
 export function get(workpadId) {
   return fetch.get(`${getApiPath()}/${workpadId}`).then(({ data: workpad }) => {
     // shim old workpads with new properties
-    return { css: DEFAULT_WORKPAD_CSS, ...workpad };
+    return { css: DEFAULT_WORKPAD_CSS, variables: [], ...workpad };
   });
 }
 

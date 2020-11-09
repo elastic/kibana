@@ -18,7 +18,7 @@
  */
 import { ISearchSource, EsQuerySortValue, SortDirection } from '../../../../../../../data/public';
 import { convertTimeValueToIso } from './date_conversion';
-import { EsHitRecordList } from '../context';
+import { EsHitRecordList, EsHitRecord } from '../context';
 import { IntervalValue } from './generate_intervals';
 import { EsQuerySearchAfter } from './get_es_query_search_after';
 
@@ -43,7 +43,8 @@ export async function fetchHitsInInterval(
   interval: IntervalValue[],
   searchAfter: EsQuerySearchAfter,
   maxCount: number,
-  nanosValue: string
+  nanosValue: string,
+  anchorId: string
 ): Promise<EsHitRecordList> {
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
@@ -61,10 +62,19 @@ export async function fetchHitsInInterval(
     .setField('size', maxCount)
     .setField('query', {
       query: {
-        constant_score: {
-          filter: {
-            range: {
-              [timeField]: range,
+        bool: {
+          must: {
+            constant_score: {
+              filter: {
+                range: {
+                  [timeField]: range,
+                },
+              },
+            },
+          },
+          must_not: {
+            ids: {
+              values: [anchorId],
             },
           },
         },
@@ -76,5 +86,6 @@ export async function fetchHitsInInterval(
     .setField('version', true)
     .fetch();
 
-  return response.hits ? response.hits.hits : [];
+  // TODO: There's a difference in the definition of SearchResponse and EsHitRecord
+  return ((response.hits?.hits as unknown) as EsHitRecord[]) || [];
 }

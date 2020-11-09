@@ -18,16 +18,16 @@
  */
 
 import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import { isEqual } from 'lodash';
 
-import { OverlayRef } from 'kibana/public';
-import { Query } from 'src/plugins/data/public';
+import { AppMountParameters, OverlayRef } from 'kibana/public';
+import _ from 'lodash';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../kibana_react/public';
 import {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,
-  SavedVisInstance,
+  VisualizeEditorVisInstance,
 } from '../types';
 import { APP_NAME } from '../visualize_constants';
 import { getTopNavConfig } from '../utils';
@@ -40,9 +40,12 @@ interface VisualizeTopNavProps {
   setHasUnsavedChanges: (value: boolean) => void;
   hasUnappliedChanges: boolean;
   originatingApp?: string;
-  savedVisInstance: SavedVisInstance;
+  visInstance: VisualizeEditorVisInstance;
+  setOriginatingApp?: (originatingApp: string | undefined) => void;
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
+  embeddableId?: string;
+  onAppLeave: AppMountParameters['onAppLeave'];
 }
 
 const TopNav = ({
@@ -53,29 +56,31 @@ const TopNav = ({
   setHasUnsavedChanges,
   hasUnappliedChanges,
   originatingApp,
-  savedVisInstance,
+  setOriginatingApp,
+  visInstance,
   stateContainer,
   visualizationIdFromUrl,
+  embeddableId,
+  onAppLeave,
 }: VisualizeTopNavProps) => {
   const { services } = useKibana<VisualizeServices>();
   const { TopNavMenu } = services.navigation.ui;
-  const { embeddableHandler, vis } = savedVisInstance;
+  const { setHeaderActionMenu, visualizeCapabilities } = services;
+  const { embeddableHandler, vis } = visInstance;
   const [inspectorSession, setInspectorSession] = useState<OverlayRef>();
   const openInspector = useCallback(() => {
     const session = embeddableHandler.openInspector();
     setInspectorSession(session);
   }, [embeddableHandler]);
-
-  const updateQuery = useCallback(
-    ({ query }: { query?: Query }) => {
-      if (!isEqual(currentAppState.query, query)) {
-        stateContainer.transitions.set('query', query || currentAppState.query);
-      } else {
-        savedVisInstance.embeddableHandler.reload();
+  const handleRefresh = useCallback(
+    (_payload: any, isUpdate?: boolean) => {
+      if (isUpdate === false) {
+        visInstance.embeddableHandler.reload();
       }
     },
-    [currentAppState.query, savedVisInstance.embeddableHandler, stateContainer.transitions]
+    [visInstance.embeddableHandler]
   );
+  const stateTransfer = services.embeddable.getStateTransfer();
 
   const config = useMemo(() => {
     if (isEmbeddableRendered) {
@@ -86,9 +91,13 @@ const TopNav = ({
           hasUnappliedChanges,
           openInspector,
           originatingApp,
-          savedVisInstance,
+          setOriginatingApp,
+          visInstance,
           stateContainer,
           visualizationIdFromUrl,
+          stateTransfer,
+          embeddableId,
+          onAppLeave,
         },
         services
       );
@@ -100,10 +109,14 @@ const TopNav = ({
     hasUnappliedChanges,
     openInspector,
     originatingApp,
-    savedVisInstance,
+    visInstance,
+    setOriginatingApp,
     stateContainer,
     visualizationIdFromUrl,
     services,
+    embeddableId,
+    stateTransfer,
+    onAppLeave,
   ]);
   const [indexPattern, setIndexPattern] = useState(vis.data.indexPattern);
   const showDatePicker = () => {
@@ -123,6 +136,33 @@ const TopNav = ({
       }
     };
   }, [inspectorSession]);
+
+  useEffect(() => {
+    onAppLeave((actions) => {
+      // Confirm when the user has made any changes to an existing visualizations
+      // or when the user has configured something without saving
+      if (
+        ((originatingApp && originatingApp === 'dashboards') || originatingApp === 'canvas') &&
+        (hasUnappliedChanges || hasUnsavedChanges)
+      ) {
+        return actions.confirm(
+          i18n.translate('visualize.confirmModal.confirmTextDescription', {
+            defaultMessage: 'Leave Visualize editor with unsaved changes?',
+          }),
+          i18n.translate('visualize.confirmModal.title', {
+            defaultMessage: 'Unsaved changes',
+          })
+        );
+      }
+      return actions.default();
+    });
+  }, [
+    onAppLeave,
+    hasUnappliedChanges,
+    hasUnsavedChanges,
+    visualizeCapabilities.save,
+    originatingApp,
+  ]);
 
   useEffect(() => {
     if (!vis.data.indexPattern) {
@@ -145,8 +185,8 @@ const TopNav = ({
     <TopNavMenu
       appName={APP_NAME}
       config={config}
-      query={currentAppState.query}
-      onQuerySubmit={updateQuery}
+      setMenuMountPoint={setHeaderActionMenu}
+      onQuerySubmit={handleRefresh}
       savedQueryId={currentAppState.savedQuery}
       onSavedQueryIdChange={stateContainer.transitions.updateSavedQuery}
       indexPatterns={indexPattern ? [indexPattern] : undefined}
@@ -166,6 +206,7 @@ const TopNav = ({
      */
     <TopNavMenu
       appName={APP_NAME}
+      setMenuMountPoint={setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : undefined}
       showSearchBar
       showSaveQuery={false}

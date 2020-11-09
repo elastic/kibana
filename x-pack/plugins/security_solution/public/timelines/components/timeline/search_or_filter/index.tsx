@@ -24,11 +24,14 @@ import {
   inputsModel,
   inputsSelectors,
 } from '../../../../common/store';
+import { TimelineEventsType } from '../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { KqlMode, TimelineModel, EventType } from '../../../../timelines/store/timeline/model';
+import { KqlMode, TimelineModel } from '../../../../timelines/store/timeline/model';
 import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { sourcererActions } from '../../../../common/store/sourcerer';
 
 interface OwnProps {
   browserFields: BrowserFields;
@@ -62,7 +65,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     timelineId,
     to,
     toStr,
-    updateEventType,
+    updateEventTypeAndIndexesName,
     updateKqlMode,
     updateReduxTime,
   }) => {
@@ -78,8 +81,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
             serializedQuery: convertKueryToElasticSearchQuery(expression, indexPattern),
           },
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [indexPattern, timelineId]
+      [applyKqlFilterQuery, indexPattern, timelineId]
     );
 
     const setFilterQueryDraftFromKueryExpression = useCallback(
@@ -91,8 +93,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
             expression,
           },
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [timelineId]
+      [timelineId, setKqlFilterQueryDraft]
     );
 
     const setFiltersInTimeline = useCallback(
@@ -101,8 +102,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           filters: newFilters,
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [timelineId]
+      [timelineId, setFilters]
     );
 
     const setSavedQueryInTimeline = useCallback(
@@ -111,18 +111,17 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           id: timelineId,
           savedQueryId: newSavedQueryId,
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [timelineId]
+      [timelineId, setSavedQueryId]
     );
 
-    const handleUpdateEventType = useCallback(
-      (newEventType: EventType) =>
-        updateEventType({
+    const handleUpdateEventTypeAndIndexesName = useCallback(
+      (newEventType: TimelineEventsType, indexNames: string[]) =>
+        updateEventTypeAndIndexesName({
           id: timelineId,
           eventType: newEventType,
+          indexNames,
         }),
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [timelineId]
+      [timelineId, updateEventTypeAndIndexesName]
     );
 
     return (
@@ -148,7 +147,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         timelineId={timelineId}
         to={to}
         toStr={toStr}
-        updateEventType={handleUpdateEventType}
+        updateEventTypeAndIndexesName={handleUpdateEventTypeAndIndexesName}
         updateKqlMode={updateKqlMode!}
         updateReduxTime={updateReduxTime}
       />
@@ -216,8 +215,24 @@ const mapDispatchToProps = (dispatch: Dispatch) => ({
         filterQuery,
       })
     ),
-  updateEventType: ({ id, eventType }: { id: string; eventType: EventType }) =>
-    dispatch(timelineActions.updateEventType({ id, eventType })),
+  updateEventTypeAndIndexesName: ({
+    id,
+    eventType,
+    indexNames,
+  }: {
+    id: string;
+    eventType: TimelineEventsType;
+    indexNames: string[];
+  }) => {
+    dispatch(timelineActions.updateEventType({ id, eventType }));
+    dispatch(timelineActions.updateIndexNames({ id, indexNames }));
+    dispatch(
+      sourcererActions.setSelectedIndexPatterns({
+        id: SourcererScopeName.timeline,
+        selectedPatterns: indexNames,
+      })
+    );
+  },
   updateKqlMode: ({ id, kqlMode }: { id: string; kqlMode: KqlMode }) =>
     dispatch(timelineActions.updateKqlMode({ id, kqlMode })),
   setKqlFilterQueryDraft: ({

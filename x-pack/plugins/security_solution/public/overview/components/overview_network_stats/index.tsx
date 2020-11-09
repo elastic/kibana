@@ -9,16 +9,18 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import React from 'react';
 import styled from 'styled-components';
 
-import { OverviewNetworkData } from '../../../graphql/types';
+import { NetworkOverviewStrategyResponse } from '../../../../common/search_strategy';
 import { FormattedStat, StatGroup } from '../types';
 import { StatValue } from '../stat_value';
 
 interface OverviewNetworkProps {
-  data: OverviewNetworkData;
+  data: NetworkOverviewStrategyResponse['overviewNetwork'];
   loading: boolean;
 }
 
-export const getOverviewNetworkStats = (data: OverviewNetworkData): FormattedStat[] => [
+export const getOverviewNetworkStats = (
+  data: NetworkOverviewStrategyResponse['overviewNetwork']
+): FormattedStat[] => [
   {
     count: data.auditbeatSocket ?? 0,
     title: (

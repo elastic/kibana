@@ -8,7 +8,7 @@ import * as t from 'io-ts';
 import { isObject } from 'lodash/fp';
 
 export const formatErrors = (errors: t.Errors): string[] => {
-  return errors.map((error) => {
+  const err = errors.map((error) => {
     if (error.message != null) {
       return error.message;
     } else {
@@ -26,4 +26,6 @@ export const formatErrors = (errors: t.Errors): string[] => {
       return `Invalid value "${value}" supplied to "${suppliedValue}"`;
     }
   });
+
+  return [...new Set(err)];
 };

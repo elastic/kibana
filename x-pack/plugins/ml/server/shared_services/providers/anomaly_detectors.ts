@@ -4,31 +4,37 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { LegacyAPICaller, KibanaRequest } from 'kibana/server';
+import { KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
-import { SharedServicesChecks } from '../shared_services';
+import { GetGuards } from '../shared_services';
 
 export interface AnomalyDetectorsProvider {
   anomalyDetectorsProvider(
-    callAsCurrentUser: LegacyAPICaller,
-    request: KibanaRequest
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
   ): {
     jobs(jobId?: string): Promise<{ count: number; jobs: Job[] }>;
   };
 }
 
-export function getAnomalyDetectorsProvider({
-  isFullLicense,
-  getHasMlCapabilities,
-}: SharedServicesChecks): AnomalyDetectorsProvider {
+export function getAnomalyDetectorsProvider(getGuards: GetGuards): AnomalyDetectorsProvider {
   return {
-    anomalyDetectorsProvider(callAsCurrentUser: LegacyAPICaller, request: KibanaRequest) {
-      const hasMlCapabilities = getHasMlCapabilities(request);
+    anomalyDetectorsProvider(
+      request: KibanaRequest,
+      savedObjectsClient: SavedObjectsClientContract
+    ) {
       return {
         async jobs(jobId?: string) {
-          isFullLicense();
-          await hasMlCapabilities(['canGetJobs']);
-          return callAsCurrentUser('ml.jobs', jobId !== undefined ? { jobId } : {});
+          return await getGuards(request, savedObjectsClient)
+            .isFullLicense()
+            .hasMlCapabilities(['canGetJobs'])
+            .ok(async ({ mlClient }) => {
+              const { body } = await mlClient.getJobs<{
+                count: number;
+                jobs: Job[];
+              }>(jobId !== undefined ? { job_id: jobId } : undefined);
+              return body;
+            });
         },
       };
     },

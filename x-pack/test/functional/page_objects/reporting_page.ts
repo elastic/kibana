@@ -4,17 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import http, { IncomingMessage } from 'http';
-import { FtrProviderContext } from 'test/functional/ftr_provider_context';
-import { parse } from 'url';
+import expect from '@kbn/expect';
+import { format as formatUrl } from 'url';
+import supertestAsPromised from 'supertest-as-promised';
+
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export function ReportingPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
+  const config = getService('config');
   const log = getService('log');
   const retry = getService('retry');
+  const security = getService('security');
   const testSubjects = getService('testSubjects');
-
-  const PageObjects = getPageObjects(['common', 'security' as any, 'share', 'timePicker']); // FIXME: Security PageObject is not Typescript
+  const PageObjects = getPageObjects(['security', 'share', 'timePicker']);
 
   class ReportingPage {
     async forceSharedItemsContainerSize({ width }: { width: number }) {
@@ -43,45 +46,23 @@ export function ReportingPageProvider({ getService, getPageObjects }: FtrProvide
       `);
     }
 
-    getResponse(url: string): Promise<IncomingMessage> {
-      log.debug(`getResponse for ${url}`);
-      const auth = 'test_user:changeme'; // FIXME not sure why there is no config that can be read for this
-      const headers = {
-        Authorization: `Basic ${Buffer.from(auth).toString('base64')}`,
-      };
-      const parsedUrl = parse(url);
-      return new Promise((resolve, reject) => {
-        http
-          .get(
-            {
-              hostname: parsedUrl.hostname,
-              path: parsedUrl.path,
-              port: parsedUrl.port,
-              headers,
-            },
-            (res: IncomingMessage) => {
-              resolve(res);
-            }
-          )
-          .on('error', (e: Error) => {
-            log.error(e);
-            reject(e);
-          });
+    async getResponse(fullUrl: string): Promise<supertestAsPromised.Response> {
+      log.debug(`getResponse for ${fullUrl}`);
+      const kibanaServerConfig = config.get('servers.kibana');
+      const baseURL = formatUrl({
+        ...kibanaServerConfig,
+        auth: false,
       });
+      const urlWithoutBase = fullUrl.replace(baseURL, '');
+      const res = await security.testUserSupertest.get(urlWithoutBase);
+      return res;
     }
 
     async getRawPdfReportData(url: string): Promise<Buffer> {
-      const data: Buffer[] = []; // List of Buffer objects
       log.debug(`getRawPdfReportData for ${url}`);
-
-      return new Promise(async (resolve, reject) => {
-        const response = await this.getResponse(url).catch(reject);
-
-        if (response) {
-          response.on('data', (chunk: Buffer) => data.push(chunk));
-          response.on('end', () => resolve(Buffer.concat(data)));
-        }
-      });
+      const response = await this.getResponse(url);
+      expect(response.body).to.be.a(Buffer);
+      return response.body as Buffer;
     }
 
     async openCsvReportingPanel() {

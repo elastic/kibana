@@ -4,27 +4,38 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Unionize } from 'utility-types';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { Unionize, Overwrite } from 'utility-types';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getMetricsDateHistogramParams } from '../helpers/metrics';
 import { ChartBase } from './types';
 import { transformDataToMetricsChart } from './transform_metrics_chart';
-import { getMetricsProjection } from '../../../common/projections/metrics';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
+import { getMetricsProjection } from '../../projections/metrics';
+import { mergeProjection } from '../../projections/util/merge_projection';
 import { AggregationOptionsByType } from '../../../typings/elasticsearch/aggregations';
+import { APMEventESSearchRequest } from '../helpers/create_es_client/create_apm_event_client';
 
-interface Aggs {
-  [key: string]: Unionize<{
-    min: AggregationOptionsByType['min'];
-    max: AggregationOptionsByType['max'];
-    sum: AggregationOptionsByType['sum'];
-    avg: AggregationOptionsByType['avg'];
-  }>;
-}
+type MetricsAggregationMap = Unionize<{
+  min: AggregationOptionsByType['min'];
+  max: AggregationOptionsByType['max'];
+  sum: AggregationOptionsByType['sum'];
+  avg: AggregationOptionsByType['avg'];
+}>;
+
+type MetricAggs = Record<string, MetricsAggregationMap>;
+
+export type GenericMetricsRequest = Overwrite<
+  APMEventESSearchRequest,
+  {
+    body: {
+      aggs: {
+        timeseriesData: {
+          date_histogram: AggregationOptionsByType['date_histogram'];
+          aggs: MetricAggs;
+        };
+      } & MetricAggs;
+    };
+  }
+>;
 
 interface Filter {
   exists?: {
@@ -35,7 +46,7 @@ interface Filter {
   };
 }
 
-export async function fetchAndTransformMetrics<T extends Aggs>({
+export async function fetchAndTransformMetrics<T extends MetricAggs>({
   setup,
   serviceName,
   serviceNodeName,
@@ -43,14 +54,14 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
   aggs,
   additionalFilters = [],
 }: {
-  setup: Setup & SetupTimeRange & SetupUIFilters;
+  setup: Setup & SetupTimeRange;
   serviceName: string;
   serviceNodeName?: string;
   chartBase: ChartBase;
   aggs: T;
   additionalFilters?: Filter[];
 }) {
-  const { start, end, client } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
   const projection = getMetricsProjection({
     setup,
@@ -58,7 +69,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
     serviceNodeName,
   });
 
-  const params = mergeProjection(projection, {
+  const params: GenericMetricsRequest = mergeProjection(projection, {
     body: {
       size: 0,
       query: {
@@ -68,7 +79,11 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
       },
       aggs: {
         timeseriesData: {
-          date_histogram: getMetricsDateHistogramParams(start, end),
+          date_histogram: getMetricsDateHistogramParams(
+            start,
+            end,
+            config['xpack.apm.metricsInterval']
+          ),
           aggs,
         },
         ...aggs,
@@ -76,7 +91,7 @@ export async function fetchAndTransformMetrics<T extends Aggs>({
     },
   });
 
-  const response = await client.search(params);
+  const response = await apmEventClient.search(params);
 
   return transformDataToMetricsChart(response, chartBase);
 }

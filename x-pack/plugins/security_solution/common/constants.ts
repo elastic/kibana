@@ -8,6 +8,7 @@ export const APP_ID = 'securitySolution';
 export const SERVER_APP_ID = 'siem';
 export const APP_NAME = 'Security';
 export const APP_ICON = 'securityAnalyticsApp';
+export const APP_ICON_SOLUTION = 'logoSecurity';
 export const APP_PATH = `/app/security`;
 export const ADD_DATA_PATH = `/app/home#/tutorial_directory/security`;
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern';
@@ -32,26 +33,35 @@ export const DEFAULT_INTERVAL_PAUSE = true;
 export const DEFAULT_INTERVAL_TYPE = 'manual';
 export const DEFAULT_INTERVAL_VALUE = 300000; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
+export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled';
+export const GLOBAL_HEADER_HEIGHT = 98; // px
+export const FILTERS_GLOBAL_HEIGHT = 109; // px
+export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled';
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51';
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*';
+export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true;
+export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000; // ms
+export const DEFAULT_RULE_REFRESH_IDLE_VALUE = 2700000; // ms
 
 export enum SecurityPageName {
-  alerts = 'alerts',
+  detections = 'detections',
   overview = 'overview',
   hosts = 'hosts',
   network = 'network',
   timelines = 'timelines',
   case = 'case',
-  management = 'management',
+  administration = 'administration',
 }
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}/overview`;
-export const APP_ALERTS_PATH = `${APP_PATH}/alerts`;
+export const APP_DETECTIONS_PATH = `${APP_PATH}/detections`;
 export const APP_HOSTS_PATH = `${APP_PATH}/hosts`;
 export const APP_NETWORK_PATH = `${APP_PATH}/network`;
 export const APP_TIMELINES_PATH = `${APP_PATH}/timelines`;
 export const APP_CASES_PATH = `${APP_PATH}/cases`;
-export const APP_MANAGEMENT_PATH = `${APP_PATH}/management`;
+export const APP_MANAGEMENT_PATH = `${APP_PATH}/administration`;
+
+export const DETECTIONS_SUB_PLUGIN_ID = `${APP_ID}:${SecurityPageName.detections}`;
 
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
 export const DEFAULT_INDEX_PATTERN = [
@@ -59,13 +69,16 @@ export const DEFAULT_INDEX_PATTERN = [
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
+  'logs-*',
   'packetbeat-*',
   'winlogbeat-*',
-  'logs-*',
 ];
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed';
+
+/** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
+export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh';
 
 /** This Kibana Advanced Setting specifies the URL of the News feed widget */
 export const NEWS_FEED_URL_SETTING = 'securitySolution:newsFeedUrl';
@@ -117,6 +130,7 @@ export const TIMELINE_URL = '/api/timeline';
 export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft`;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export`;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import`;
+export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged`;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -135,6 +149,13 @@ export const UNAUTHENTICATED_USER = 'Unauthenticated';
   Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum';
+
+/*
+  Machine Learning constants
+ */
+export const ML_GROUP_ID = 'security';
+export const LEGACY_ML_GROUP_ID = 'siem';
+export const ML_GROUP_IDS = [ML_GROUP_ID, LEGACY_ML_GROUP_ID];
 
 /*
   Rule notifications options
@@ -165,14 +186,4 @@ export const showAllOthersBucket: string[] = [
   'user.name',
 ];
 
-/**
- * CreateTemplateTimelineBtn
- * https://github.com/elastic/kibana/pull/66613
- * Remove the comment here to enable template timeline
- */
-export const disableTemplate = false;
-
-/*
- * This should be set to true after https://github.com/elastic/kibana/pull/67496 is merged
- */
-export const enableElasticFilter = false;
+export const ENABLE_NEW_TIMELINE = false;

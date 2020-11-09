@@ -22,7 +22,7 @@ import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
 import { ANALYTICS_STEPS } from '../../page';
 
 function getStringValue(value: number | undefined) {
-  return value !== undefined ? `${value}` : UNSET_CONFIG_ITEM;
+  return typeof value === 'number' ? `${value}` : UNSET_CONFIG_ITEM;
 }
 
 export interface ListItems {
@@ -45,6 +45,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     jobType,
     lambda,
     method,
+    maxNumThreads,
     maxTrees,
     modelMemoryLimit,
     nNeighbors,
@@ -134,7 +135,12 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
         title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.numTopClasses', {
           defaultMessage: 'Top classes',
         }),
-        description: `${numTopClasses}`,
+        description:
+          numTopClasses === -1
+            ? i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.allClasses', {
+                defaultMessage: 'All classes',
+              })
+            : getStringValue(numTopClasses),
       });
     }
 
@@ -214,6 +220,15 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
     );
   }
 
+  if (maxNumThreads !== undefined) {
+    advancedFirstCol.push({
+      title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.maxNumThreads', {
+        defaultMessage: 'Maximum number of threads',
+      }),
+      description: `${maxNumThreads}`,
+    });
+  }
+
   return (
     <Fragment>
       <EuiTitle size="xs">
@@ -239,7 +254,7 @@ export const AdvancedStepDetails: FC<{ setCurrentStep: any; state: State }> = ({
       <EuiTitle size="xs">
         <h3>
           {i18n.translate('xpack.ml.dataframe.analytics.create.hyperParametersDetailsTitle', {
-            defaultMessage: 'Hyper parameters',
+            defaultMessage: 'Hyperparameters',
           })}
         </h3>
       </EuiTitle>

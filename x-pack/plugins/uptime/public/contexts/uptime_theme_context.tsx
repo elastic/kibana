@@ -9,7 +9,7 @@ import React, { createContext, useMemo } from 'react';
 import euiDarkVars from '@elastic/eui/dist/eui_theme_dark.json';
 import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
-import { UptimeAppColors } from '../uptime_app';
+import { UptimeAppColors } from '../apps/uptime_app';
 
 export interface UptimeThemeContextValues {
   colors: UptimeAppColors;
@@ -31,6 +31,7 @@ const defaultContext: UptimeThemeContextValues = {
     success: euiLightVars.euiColorSuccess,
     warning: euiLightVars.euiColorWarning,
     gray: euiLightVars.euiColorLightShade,
+    lightestShade: euiLightVars.euiColorLightestShade,
   },
   chartTheme: {
     baseTheme: LIGHT_THEME,
@@ -54,6 +55,7 @@ export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMo
       range: euiDarkVars.euiFocusBackgroundColor,
       success: euiDarkVars.euiColorSuccess,
       warning: euiDarkVars.euiColorWarning,
+      lightestShade: euiDarkVars.euiColorLightestShade,
     };
   } else {
     colors = {
@@ -63,6 +65,7 @@ export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMo
       range: euiLightVars.euiFocusBackgroundColor,
       success: euiLightVars.euiColorSuccess,
       warning: euiLightVars.euiColorWarning,
+      lightestShade: euiLightVars.euiColorLightestShade,
     };
   }
   const value = useMemo(() => {

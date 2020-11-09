@@ -75,6 +75,7 @@ export class EditDescriptionPopover extends Component {
           }
         )}
         isDisabled={this.props.canCreateFilter === false}
+        data-test-subj="mlFilterListEditDescriptionButton"
       />
     );
 
@@ -101,6 +102,7 @@ export class EditDescriptionPopover extends Component {
                   name="filter_list_description"
                   value={value}
                   onChange={this.onChange}
+                  data-test-subj={'mlFilterListDescriptionInput'}
                 />
               </EuiFormRow>
             </EuiForm>

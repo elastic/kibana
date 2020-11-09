@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { mountWithIntl, nextTick } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/find_test_subject';
 
@@ -12,7 +13,6 @@ import { findTestSubject } from 'test_utils/find_test_subject';
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
 import 'test_utils/stub_web_worker';
-import { ScopedHistory } from 'kibana/public';
 
 import { EditRoleMappingPage } from '.';
 import { NoCompatibleRealms, SectionLoading, PermissionDenied } from '../components';
@@ -28,7 +28,7 @@ import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';
 import { RoleComboBox } from '../../role_combo_box';
 
 describe('EditRoleMappingPage', () => {
-  const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
+  const history = scopedHistoryMock.create();
   let rolesAPI: PublicMethodsOf<RolesAPIClient>;
 
   beforeEach(() => {

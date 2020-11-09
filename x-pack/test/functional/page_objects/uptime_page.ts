@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function UptimePageProvider({ getPageObjects, getService }: FtrProviderContext) {
-  const pageObjects = getPageObjects(['common', 'timePicker']);
+  const pageObjects = getPageObjects(['timePicker', 'header']);
   const { common: commonService, monitor, navigation } = getService('uptime');
   const retry = getService('retry');
 
@@ -39,9 +39,11 @@ export function UptimePageProvider({ getPageObjects, getService }: FtrProviderCo
       if (monitorIdToCheck) {
         await commonService.monitorIdExists(monitorIdToCheck);
       }
+      await pageObjects.header.waitUntilLoadingHasFinished();
     }
 
     public async loadDataAndGoToMonitorPage(dateStart: string, dateEnd: string, monitorId: string) {
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await this.setDateRange(dateStart, dateEnd);
       await navigation.goToMonitor(monitorId);
     }

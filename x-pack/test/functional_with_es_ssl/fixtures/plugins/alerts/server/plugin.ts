@@ -9,16 +9,48 @@ import {
   PluginSetupContract as AlertingSetup,
   AlertType,
 } from '../../../../../../plugins/alerts/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../plugins/features/server';
 
 // this plugin's dependendencies
 export interface AlertingExampleDeps {
   alerts: AlertingSetup;
+  features: FeaturesPluginSetup;
 }
 
 export class AlertingFixturePlugin implements Plugin<void, void, AlertingExampleDeps> {
-  public setup(core: CoreSetup, { alerts }: AlertingExampleDeps) {
+  public setup(core: CoreSetup, { alerts, features }: AlertingExampleDeps) {
     createNoopAlertType(alerts);
     createAlwaysFiringAlertType(alerts);
+    createFailingAlertType(alerts);
+    features.registerKibanaFeature({
+      id: 'alerting_fixture',
+      name: 'alerting_fixture',
+      app: [],
+      category: { id: 'foo', label: 'foo' },
+      alerting: ['test.always-firing', 'test.noop', 'test.failing'],
+      privileges: {
+        all: {
+          alerting: {
+            all: ['test.always-firing', 'test.noop', 'test.failing'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+        read: {
+          alerting: {
+            all: ['test.always-firing', 'test.noop', 'test.failing'],
+          },
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: [],
+        },
+      },
+    });
   }
 
   public start() {}
@@ -32,7 +64,7 @@ function createNoopAlertType(alerts: AlertingSetup) {
     actionGroups: [{ id: 'default', name: 'Default' }],
     defaultActionGroupId: 'default',
     async executor() {},
-    producer: 'alerting',
+    producer: 'alerts',
   };
   alerts.registerType(noopAlertType);
 }
@@ -46,7 +78,8 @@ function createAlwaysFiringAlertType(alerts: AlertingSetup) {
       { id: 'default', name: 'Default' },
       { id: 'other', name: 'Other' },
     ],
-    producer: 'alerting',
+    defaultActionGroupId: 'default',
+    producer: 'alerts',
     async executor(alertExecutorOptions: any) {
       const { services, state, params } = alertExecutorOptions;
 
@@ -64,4 +97,23 @@ function createAlwaysFiringAlertType(alerts: AlertingSetup) {
     },
   };
   alerts.registerType(alwaysFiringAlertType);
+}
+
+function createFailingAlertType(alerts: AlertingSetup) {
+  const failingAlertType: any = {
+    id: 'test.failing',
+    name: 'Test: Failing',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alerts',
+    defaultActionGroupId: 'default',
+    async executor() {
+      throw new Error('Failed to execute alert type');
+    },
+  };
+  alerts.registerType(failingAlertType);
 }

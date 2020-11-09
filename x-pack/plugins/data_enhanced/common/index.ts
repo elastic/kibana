@@ -4,4 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { EnhancedSearchParams, IEnhancedEsSearchRequest } from './search';
+export {
+  ENHANCED_ES_SEARCH_STRATEGY,
+  EQL_SEARCH_STRATEGY,
+  EqlRequestParams,
+  EqlSearchStrategyRequest,
+  EqlSearchStrategyResponse,
+  IAsyncSearchRequest,
+  IEnhancedEsSearchRequest,
+  IAsyncSearchOptions,
+  doPartialSearch,
+  throwOnEsError,
+} from './search';

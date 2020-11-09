@@ -24,31 +24,25 @@
 
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { BehaviorSubject } from 'rxjs';
+
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
-import { docValidator, PropertyValidators } from '../../validation';
-import {
-  buildActiveMappings,
-  CallCluster,
-  IndexMigrator,
-  MigrationResult,
-  MigrationStatus,
-} from '../core';
+import { buildActiveMappings, IndexMigrator, MigrationResult, MigrationStatus } from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
+import { MigrationEsClient } from '../core/';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
 
 export interface KibanaMigratorOptions {
-  callCluster: CallCluster;
+  client: MigrationEsClient;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectsMigrationConfigType;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
-  savedObjectValidations: PropertyValidators;
 }
 
 export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
@@ -62,7 +56,7 @@ export interface KibanaMigratorStatus {
  * Manages the shape of mappings and documents in the Kibana index.
  */
 export class KibanaMigrator {
-  private readonly callCluster: CallCluster;
+  private readonly client: MigrationEsClient;
   private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
@@ -80,15 +74,14 @@ export class KibanaMigrator {
    * Creates an instance of KibanaMigrator.
    */
   constructor({
-    callCluster,
+    client,
     typeRegistry,
     kibanaConfig,
     savedObjectsConfig,
-    savedObjectValidations,
     kibanaVersion,
     logger,
   }: KibanaMigratorOptions) {
-    this.callCluster = callCluster;
+    this.client = client;
     this.kibanaConfig = kibanaConfig;
     this.savedObjectsConfig = savedObjectsConfig;
     this.typeRegistry = typeRegistry;
@@ -98,7 +91,6 @@ export class KibanaMigrator {
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion,
       typeRegistry,
-      validateDoc: docValidator(savedObjectValidations || {}),
       log: this.log,
     });
     // Building the active mappings (and associated md5sums) is an expensive
@@ -128,9 +120,17 @@ export class KibanaMigrator {
     Array<{ status: string }>
   > {
     if (this.migrationResult === undefined || rerun) {
-      this.status$.next({ status: 'running' });
+      // Reruns are only used by CI / EsArchiver. Publishing status updates on reruns results in slowing down CI
+      // unnecessarily, so we skip it in this case.
+      if (!rerun) {
+        this.status$.next({ status: 'running' });
+      }
+
       this.migrationResult = this.runMigrationsInternal().then((result) => {
-        this.status$.next({ status: 'completed', result });
+        // Similar to above, don't publish status updates when rerunning in CI.
+        if (!rerun) {
+          this.status$.next({ status: 'completed', result });
+        }
         return result;
       });
     }
@@ -153,7 +153,7 @@ export class KibanaMigrator {
     const migrators = Object.keys(indexMap).map((index) => {
       return new IndexMigrator({
         batchSize: this.savedObjectsConfig.batchSize,
-        callCluster: this.callCluster,
+        client: this.client,
         documentMigrator: this.documentMigrator,
         index,
         log: this.log,

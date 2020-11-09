@@ -17,12 +17,23 @@
  * under the License.
  */
 
+import './inspector_panel.scss';
 import { i18n } from '@kbn/i18n';
-import React, { Component } from 'react';
+import React, { Component, Suspense } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
-import { Adapters, InspectorViewDescription } from '../types';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiLoadingSpinner,
+} from '@elastic/eui';
+import { IUiSettingsClient } from 'kibana/public';
+import { InspectorViewDescription } from '../types';
+import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
+import { KibanaContextProvider } from '../../../kibana_react/public';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {
   return (
@@ -39,6 +50,9 @@ interface InspectorPanelProps {
   adapters: Adapters;
   title?: string;
   views: InspectorViewDescription[];
+  dependencies: {
+    uiSettings: IUiSettingsClient;
+  };
 }
 
 interface InspectorPanelState {
@@ -93,19 +107,21 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
 
   renderSelectedPanel() {
     return (
-      <this.state.selectedView.component
-        adapters={this.props.adapters}
-        title={this.props.title || ''}
-      />
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <this.state.selectedView.component
+          adapters={this.props.adapters}
+          title={this.props.title || ''}
+        />
+      </Suspense>
     );
   }
 
   render() {
-    const { views, title } = this.props;
+    const { views, title, dependencies } = this.props;
     const { selectedView } = this.state;
 
     return (
-      <React.Fragment>
+      <KibanaContextProvider services={dependencies}>
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={true}>
@@ -122,8 +138,10 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>{this.renderSelectedPanel()}</EuiFlyoutBody>
-      </React.Fragment>
+        <EuiFlyoutBody className="insInspectorPanel__flyoutBody">
+          {this.renderSelectedPanel()}
+        </EuiFlyoutBody>
+      </KibanaContextProvider>
     );
   }
 }

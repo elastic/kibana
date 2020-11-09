@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { MonitorSummary } from '../../../../../../common/runtime_types';
+import { MonitorSummary, makePing } from '../../../../../../common/runtime_types';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { IntegrationGroup, extractSummaryValues } from '../actions_popover/integration_group';
 
@@ -17,7 +17,8 @@ describe('IntegrationGroup', () => {
       monitor_id: '12345',
       state: {
         summary: {},
-        checks: [],
+        monitor: {},
+        summaryPings: [],
         timestamp: '123',
         url: {},
       },
@@ -46,6 +47,12 @@ describe('IntegrationGroup', () => {
       mockSummary = {
         state: {
           timestamp: 'foo',
+          summaryPings: [],
+          monitor: {},
+          summary: {
+            up: 0,
+            down: 0,
+          },
           url: {},
         },
       };
@@ -76,22 +83,25 @@ describe('IntegrationGroup', () => {
     });
 
     it('finds pod uid', () => {
-      mockSummary.state.checks = [
-        { kubernetes: { pod: { uid: 'myuid' } }, monitor: { status: 'up' }, timestamp: 123 },
+      mockSummary.state.summaryPings = [
+        {
+          ...makePing({}),
+          kubernetes: { pod: { uid: 'myuid' } },
+        },
       ];
 
       expect(extractSummaryValues(mockSummary)).toMatchInlineSnapshot(`
         Object {
           "containerId": undefined,
           "domain": "",
-          "ip": undefined,
+          "ip": "127.0.0.1",
           "podUid": "myuid",
         }
       `);
     });
 
     it('does not throw for missing kubernetes fields', () => {
-      mockSummary.state.checks = [];
+      mockSummary.state.summaryPings = [];
 
       expect(extractSummaryValues(mockSummary)).toMatchInlineSnapshot(`
         Object {
@@ -104,22 +114,25 @@ describe('IntegrationGroup', () => {
     });
 
     it('finds container id', () => {
-      mockSummary.state.checks = [
-        { container: { id: 'mycontainer' }, monitor: { status: 'up' }, timestamp: 123 },
+      mockSummary.state.summaryPings = [
+        {
+          ...makePing({}),
+          container: { id: 'mycontainer' },
+        },
       ];
 
       expect(extractSummaryValues(mockSummary)).toMatchInlineSnapshot(`
         Object {
           "containerId": "mycontainer",
           "domain": "",
-          "ip": undefined,
+          "ip": "127.0.0.1",
           "podUid": undefined,
         }
       `);
     });
 
     it('finds ip field', () => {
-      mockSummary.state.checks = [{ monitor: { ip: '127.0.0.1', status: 'up' }, timestamp: 123 }];
+      mockSummary.state.summaryPings = [makePing({ ip: '127.0.0.1', status: 'up' })];
 
       expect(extractSummaryValues(mockSummary)).toMatchInlineSnapshot(`
         Object {

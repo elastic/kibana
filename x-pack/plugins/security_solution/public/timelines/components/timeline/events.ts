@@ -7,26 +7,8 @@
 import { ColumnHeaderOptions } from '../../../timelines/store/timeline/model';
 import { ColumnId } from './body/column_id';
 import { SortDirection } from './body/sort';
-import { QueryOperator } from './data_providers/data_provider';
+import { DataProvider, QueryOperator } from './data_providers/data_provider';
 
-/** Invoked when a user clicks the close button to remove a data provider */
-export type OnDataProviderRemoved = (providerId: string, andProviderId?: string) => void;
-
-/** Invoked when a user temporarily disables or re-enables a data provider */
-export type OnToggleDataProviderEnabled = (toggled: {
-  providerId: string;
-  enabled: boolean;
-  andProviderId?: string;
-}) => void;
-
-/** Invoked when a user toggles negation ("boolean NOT") of a data provider */
-export type OnToggleDataProviderExcluded = (excluded: {
-  providerId: string;
-  excluded: boolean;
-  andProviderId?: string;
-}) => void;
-
-/** Invoked when a user edits the properties of a data provider */
 export type OnDataProviderEdited = ({
   andProviderId,
   excluded,
@@ -35,6 +17,7 @@ export type OnDataProviderEdited = ({
   operator,
   providerId,
   value,
+  type,
 }: {
   andProviderId?: string;
   excluded: boolean;
@@ -43,10 +26,8 @@ export type OnDataProviderEdited = ({
   operator: QueryOperator;
   providerId: string;
   value: string | number;
+  type: DataProvider['type'];
 }) => void;
-
-/** Invoked when a user change the kql query of our data provider */
-export type OnChangeDataProviderKqlQuery = (edit: { providerId: string; kqlQuery: string }) => void;
 
 /** Invoked when a user selects a new minimap time range */
 export type OnRangeSelected = (range: string) => void;
@@ -65,9 +46,7 @@ export type OnColumnResized = ({ columnId, delta }: { columnId: ColumnId; delta:
 export type OnChangeItemsPerPage = (itemsPerPage: number) => void;
 
 /** Invoked when a user clicks to load more item */
-export type OnLoadMore = (cursor: string, tieBreaker: string) => void;
-
-export type OnChangeDroppableAndProvider = (providerId: string) => void;
+export type OnChangePage = (nextPage: number) => void;
 
 /** Invoked when a user pins an event */
 export type OnPinEvent = (eventId: string) => void;

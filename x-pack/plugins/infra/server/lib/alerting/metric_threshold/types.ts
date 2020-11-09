@@ -35,7 +35,7 @@ interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
 }
 
 interface CountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: 'count';
+  aggType: Aggregators.COUNT;
   metric: never;
 }
 

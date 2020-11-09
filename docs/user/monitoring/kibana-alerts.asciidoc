@@ -1,0 +1,63 @@
+[role="xpack"]
+[[kibana-alerts]]
+= {kib} Alerts
+
+The {stack} {monitor-features} provide
+<<alerting-getting-started,{kib} alerts>> out-of-the box to notify you of
+potential issues in the {stack}. These alerts are preconfigured based on the
+best practices recommended by Elastic. However, you can tailor them to meet your 
+specific needs.
+
+When you open *{stack-monitor-app}*, the preconfigured {kib} alerts are
+created automatically. If you collect monitoring data from multiple clusters,
+these alerts can search, detect, and notify on various conditions across the
+clusters. The alerts are visible alongside your existing {watcher} cluster
+alerts. You can view details about the alerts that are active and view health
+and performance data for {es}, {ls}, and Beats in real time, as well as
+analyze past performance. You can also modify active alerts.
+
+[role="screenshot"]
+image::user/monitoring/images/monitoring-kibana-alerts.png["Kibana alerts in the Stack Monitoring app"]
+
+To review and modify all the available alerts, use
+<<managing-alerts-and-actions,*{alerts-ui}*>> in *{stack-manage-app}*.
+
+[discrete]
+[[kibana-alerts-cpu-threshold]]
+== CPU threshold
+
+This alert is triggered when a node runs a consistently high CPU load. By
+default, the trigger condition is set at 85% or more averaged over the last 5
+minutes. The alert is grouped across all the nodes of the cluster by running
+checks on a schedule time of 1 minute with a re-notify internal of 1 day. 
+
+[discrete]
+[[kibana-alerts-disk-usage-threshold]]
+== Disk usage threshold
+
+This alert is triggered when a node is nearly at disk capacity. By
+default, the trigger condition is set at 80% or more averaged over the last 5
+minutes. The alert is grouped across all the nodes of the cluster by running
+checks on a schedule time of 1 minute with a re-notify internal of 1 day. 
+
+[discrete]
+[[kibana-alerts-jvm-memory-threshold]]
+== JVM memory threshold
+
+This alert is triggered when a node runs a consistently high JVM memory usage. By
+default, the trigger condition is set at 85% or more averaged over the last 5
+minutes. The alert is grouped across all the nodes of the cluster by running
+checks on a schedule time of 1 minute with a re-notify internal of 1 day. 
+
+[discrete]
+[[kibana-alerts-missing-monitoring-data]]
+== Missing monitoring data
+
+This alert is triggered when any stack products nodes or instances stop sending
+monitoring data. By default, the trigger condition is set to missing for 15 minutes
+looking back 1 day. The alert is grouped across all the nodes of the cluster by running
+checks on a schedule time of 1 minute with a re-notify internal of 6 hours. 
+
+NOTE: Some action types are subscription features, while others are free.
+For a comparison of the Elastic subscription levels, see the alerting section of
+the {subscriptions}[Subscriptions page].

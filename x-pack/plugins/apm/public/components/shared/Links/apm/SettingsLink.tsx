@@ -6,8 +6,8 @@
 import React from 'react';
 import { APMLink, APMLinkExtendProps } from './APMLink';
 
-const SettingsLink = (props: APMLinkExtendProps) => {
+function SettingsLink(props: APMLinkExtendProps) {
   return <APMLink path="/settings" {...props} />;
-};
+}
 
 export { SettingsLink };

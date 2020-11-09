@@ -32,6 +32,8 @@ import { getDocLinks } from '../../util/dependency_cache';
 
 import { VALIDATION_STATUS } from '../../../../common/constants/validation';
 import { getMostSevereMessageStatus } from '../../../../common/util/validation_utils';
+import { toastNotificationServiceProvider } from '../../services/toast_notification_service';
+import { withKibana } from '../../../../../../../src/plugins/kibana_react/public';
 
 const defaultIconType = 'questionInCircle';
 const getDefaultState = () => ({
@@ -182,7 +184,7 @@ Modal.propType = {
   title: PropTypes.string,
 };
 
-export class ValidateJob extends Component {
+export class ValidateJobUI extends Component {
   constructor(props) {
     super(props);
     this.state = getDefaultState();
@@ -209,25 +211,40 @@ export class ValidateJob extends Component {
     if (typeof job === 'object') {
       let shouldShowLoadingIndicator = true;
 
-      this.props.mlJobService.validateJob({ duration, fields, job }).then((data) => {
-        shouldShowLoadingIndicator = false;
-        this.setState({
-          ...this.state,
-          ui: {
-            ...this.state.ui,
-            iconType: statusToEuiIconType(getMostSevereMessageStatus(data.messages)),
-            isLoading: false,
-            isModalVisible: true,
-          },
-          data,
-          title: job.job_id,
-        });
-        if (typeof this.props.setIsValid === 'function') {
-          this.props.setIsValid(
-            data.messages.some((m) => m.status === VALIDATION_STATUS.ERROR) === false
+      this.props.ml
+        .validateJob({ duration, fields, job })
+        .then((messages) => {
+          shouldShowLoadingIndicator = false;
+          this.setState({
+            ...this.state,
+            ui: {
+              ...this.state.ui,
+              iconType: statusToEuiIconType(getMostSevereMessageStatus(messages)),
+              isLoading: false,
+              isModalVisible: true,
+            },
+            data: {
+              messages,
+              success: true,
+            },
+            title: job.job_id,
+          });
+          if (typeof this.props.setIsValid === 'function') {
+            this.props.setIsValid(
+              messages.some((m) => m.status === VALIDATION_STATUS.ERROR) === false
+            );
+          }
+        })
+        .catch((error) => {
+          const { toasts } = this.props.kibana.services.notifications;
+          const toastNotificationService = toastNotificationServiceProvider(toasts);
+          toastNotificationService.displayErrorToast(
+            error,
+            i18n.translate('xpack.ml.jobService.validateJobErrorTitle', {
+              defaultMessage: 'Job Validation Error',
+            })
           );
-        }
-      });
+        });
 
       // wait for 250ms before triggering the loading indicator
       // to avoid flickering when there's a loading time below
@@ -335,15 +352,17 @@ export class ValidateJob extends Component {
     );
   }
 }
-ValidateJob.propTypes = {
+ValidateJobUI.propTypes = {
   fields: PropTypes.object,
   fill: PropTypes.bool,
   getDuration: PropTypes.func,
   getJobConfig: PropTypes.func.isRequired,
   isCurrentJobConfig: PropTypes.bool,
   isDisabled: PropTypes.bool,
-  mlJobService: PropTypes.object.isRequired,
+  ml: PropTypes.object.isRequired,
   embedded: PropTypes.bool,
   setIsValid: PropTypes.func,
   idFilterList: PropTypes.array,
 };
+
+export const ValidateJob = withKibana(ValidateJobUI);

@@ -6,7 +6,7 @@
   position: absolute;
   top: $euiSize * -1.25;
   left: 50%;
-  background-color: $euiColorLightestShade;
+  background-color: $euiFormBackgroundColor;
   margin: 0;
   border-radius: $euiBorderRadius $euiBorderRadius 0 0;
 
@@ -23,4 +23,12 @@
 .canvasToolbar__controls {
   padding: $euiSizeM;
   height: 100%;
+}
+
+.canvasToolbar__container {
+  width: 100%;
+  height: $euiSizeXL * 2;
+  background-color: darken($euiColorLightestShade, 5%);
+  position: relative;
+  z-index: 200;
 }

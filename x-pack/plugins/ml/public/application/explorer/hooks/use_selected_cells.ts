@@ -9,12 +9,10 @@ import { useUrlState } from '../../util/url_state';
 import { SWIMLANE_TYPE } from '../explorer_constants';
 import { AppStateSelectedCells } from '../explorer_utils';
 
-export const useSelectedCells = (): [
-  AppStateSelectedCells | undefined,
-  (swimlaneSelectedCells: AppStateSelectedCells) => void
-] => {
-  const [appState, setAppState] = useUrlState('_a');
-
+export const useSelectedCells = (
+  appState: any,
+  setAppState: ReturnType<typeof useUrlState>[1]
+): [AppStateSelectedCells | undefined, (swimlaneSelectedCells: AppStateSelectedCells) => void] => {
   // keep swimlane selection, restore selectedCells from AppState
   const selectedCells = useMemo(() => {
     return appState?.mlExplorerSwimlane?.selectedType !== undefined
@@ -62,7 +60,7 @@ export const useSelectedCells = (): [
         setAppState('mlExplorerSwimlane', mlExplorerSwimlane);
       }
     },
-    [appState?.mlExplorerSwimlane, selectedCells]
+    [appState?.mlExplorerSwimlane, selectedCells, setAppState]
   );
 
   return [selectedCells, setSelectedCells];

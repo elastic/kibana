@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-flattenHit: any;
+flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
 ```

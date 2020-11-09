@@ -9,6 +9,12 @@ import { renderWithIntl, shallowWithIntl } from 'test_utils/enzyme_helpers';
 import { AvailabilityReporting } from '../availability_reporting';
 import { StatusTag } from '../location_status_tags';
 
+jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
+  return {
+    htmlIdGenerator: () => () => `generated-id`,
+  };
+});
+
 describe('AvailabilityReporting component', () => {
   let allLocations: StatusTag[];
 

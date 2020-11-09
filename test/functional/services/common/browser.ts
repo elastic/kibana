@@ -22,9 +22,9 @@ import { Key, Origin } from 'selenium-webdriver';
 // @ts-ignore internal modules are not typed
 import { LegacyActionSequence } from 'selenium-webdriver/lib/actions';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { modifyUrl } from '@kbn/std';
 
 import Jimp from 'jimp';
-import { modifyUrl } from '../../../../src/core/utils';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
@@ -33,8 +33,6 @@ export type Browser = ProvidedType<typeof BrowserProvider>;
 export async function BrowserProvider({ getService }: FtrProviderContext) {
   const log = getService('log');
   const { driver, browserType } = await getService('__webdriver__').init();
-
-  const isW3CEnabled = (driver as any).executor_.w3c === true;
 
   return new (class BrowserService {
     /**
@@ -53,19 +51,12 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     public readonly isFirefox: boolean = browserType === Browsers.Firefox;
 
-    public readonly isInternetExplorer: boolean = browserType === Browsers.InternetExplorer;
-
-    /**
-     * Is WebDriver instance W3C compatible
-     */
-    isW3CEnabled = isW3CEnabled;
-
     /**
      * Returns instance of Actions API based on driver w3c flag
      * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#actions
      */
     public getActions() {
-      return this.isW3CEnabled ? driver.actions() : driver.actions({ bridge: true });
+      return driver.actions();
     }
 
     /**
@@ -164,17 +155,20 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      */
     public async getCurrentUrl() {
       // strip _t=Date query param when url is read
-      let current: string;
-      if (this.isInternetExplorer) {
-        current = await driver.executeScript('return window.document.location.href');
-      } else {
-        current = await driver.getCurrentUrl();
-      }
+      const current = await driver.getCurrentUrl();
       const currentWithoutTime = modifyUrl(current, (parsed) => {
         delete (parsed.query as any)._t;
         return void 0;
       });
       return currentWithoutTime;
+    }
+
+    /**
+     * Gets the page/document title of the focused window/frame.
+     * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#getTitle
+     */
+    public async getTitle() {
+      return await driver.getTitle();
     }
 
     /**
@@ -214,15 +208,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async moveMouseTo(point: { x: number; y: number }): Promise<void> {
-      if (this.isW3CEnabled) {
-        await this.getActions().move({ x: 0, y: 0 }).perform();
-        await this.getActions().move({ x: point.x, y: point.y, origin: Origin.POINTER }).perform();
-      } else {
-        await this.getActions()
-          .pause(this.getActions().mouse)
-          .move({ x: point.x, y: point.y, origin: Origin.POINTER })
-          .perform();
-      }
+      await this.getActions().move({ x: 0, y: 0 }).perform();
+      await this.getActions().move({ x: point.x, y: point.y, origin: Origin.POINTER }).perform();
     }
 
     /**
@@ -237,44 +224,20 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       from: { offset?: { x: any; y: any }; location: any },
       to: { offset?: { x: any; y: any }; location: any }
     ) {
-      if (this.isW3CEnabled) {
-        // The offset should be specified in pixels relative to the center of the element's bounding box
-        const getW3CPoint = (data: any) => {
-          if (!data.offset) {
-            data.offset = {};
-          }
-          return data.location instanceof WebElementWrapper
-            ? { x: data.offset.x || 0, y: data.offset.y || 0, origin: data.location._webElement }
-            : { x: data.location.x, y: data.location.y, origin: Origin.POINTER };
-        };
-
-        const startPoint = getW3CPoint(from);
-        const endPoint = getW3CPoint(to);
-        await this.getActions().move({ x: 0, y: 0 }).perform();
-        return await this.getActions().move(startPoint).press().move(endPoint).release().perform();
-      } else {
-        // The offset should be specified in pixels relative to the top-left corner of the element's bounding box
-        const getOffset: any = (offset: { x: number; y: number }) =>
-          offset ? { x: offset.x || 0, y: offset.y || 0 } : { x: 0, y: 0 };
-
-        if (from.location instanceof WebElementWrapper === false) {
-          throw new Error('Dragging point should be WebElementWrapper instance');
-        } else if (typeof to.location.x === 'number') {
-          return await this.getActions()
-            .move({ origin: from.location._webElement })
-            .press()
-            .move({ x: to.location.x, y: to.location.y, origin: Origin.POINTER })
-            .release()
-            .perform();
-        } else {
-          return await new LegacyActionSequence(driver)
-            .mouseMove(from.location._webElement, getOffset(from.offset))
-            .mouseDown()
-            .mouseMove(to.location._webElement, getOffset(to.offset))
-            .mouseUp()
-            .perform();
+      // The offset should be specified in pixels relative to the center of the element's bounding box
+      const getW3CPoint = (data: any) => {
+        if (!data.offset) {
+          data.offset = {};
         }
-      }
+        return data.location instanceof WebElementWrapper
+          ? { x: data.offset.x || 0, y: data.offset.y || 0, origin: data.location._webElement }
+          : { x: data.location.x, y: data.location.y, origin: Origin.POINTER };
+      };
+
+      const startPoint = getW3CPoint(from);
+      const endPoint = getW3CPoint(to);
+      await this.getActions().move({ x: 0, y: 0 }).perform();
+      return await this.getActions().move(startPoint).press().move(endPoint).release().perform();
     }
 
     /**
@@ -341,19 +304,11 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * @return {Promise<void>}
      */
     public async clickMouseButton(point: { x: number; y: number }) {
-      if (this.isW3CEnabled) {
-        await this.getActions().move({ x: 0, y: 0 }).perform();
-        await this.getActions()
-          .move({ x: point.x, y: point.y, origin: Origin.POINTER })
-          .click()
-          .perform();
-      } else {
-        await this.getActions()
-          .pause(this.getActions().mouse)
-          .move({ x: point.x, y: point.y, origin: Origin.POINTER })
-          .click()
-          .perform();
-      }
+      await this.getActions().move({ x: 0, y: 0 }).perform();
+      await this.getActions()
+        .move({ x: point.x, y: point.y, origin: Origin.POINTER })
+        .click()
+        .perform();
     }
 
     /**
@@ -519,10 +474,20 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
       return parseInt(scrollSize, 10);
     }
 
+    public async scrollTop() {
+      await driver.executeScript('document.documentElement.scrollTop = 0');
+    }
+
     // return promise with REAL scroll position
     public async setScrollTop(scrollSize: number | string) {
       await driver.executeScript('document.body.scrollTop = ' + scrollSize);
       return this.getScrollTop();
+    }
+
+    public async setScrollToById(elementId: string, xCoord: number, yCoord: number) {
+      await driver.executeScript(
+        `document.getElementById("${elementId}").scrollTo(${xCoord},${yCoord})`
+      );
     }
 
     public async setScrollLeft(scrollSize: number | string) {
@@ -533,6 +498,18 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     public async switchToFrame(idOrElement: number | WebElementWrapper) {
       const _id = idOrElement instanceof WebElementWrapper ? idOrElement._webElement : idOrElement;
       await driver.switchTo().frame(_id);
+    }
+
+    public async checkBrowserPermission(permission: string): Promise<boolean> {
+      const result: any = await driver.executeAsyncScript(
+        `navigator.permissions.query({name:'${permission}'}).then(arguments[0])`
+      );
+
+      return Boolean(result?.state === 'granted');
+    }
+
+    public getClipboardValue(): Promise<string> {
+      return driver.executeAsyncScript('navigator.clipboard.readText().then(arguments[0])');
     }
   })();
 }

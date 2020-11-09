@@ -4,7 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get } from 'lodash';
+/**
+ * TODO:
+ * IMPORTANT: Please see how {@link BreadcrumbService} is set up for an example of how these services should be set up
+ * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
+ */
 
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 import { UiStatsMetricType } from '@kbn/analytics';
@@ -12,18 +16,16 @@ import { UiStatsMetricType } from '@kbn/analytics';
 import {
   UIM_APP_NAME,
   UIM_CONFIG_COLD_PHASE,
-  UIM_CONFIG_WARM_PHASE,
-  UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_FREEZE_INDEX,
-  PHASE_HOT,
-  PHASE_WARM,
-  PHASE_COLD,
-  PHASE_INDEX_PRIORITY,
+  UIM_CONFIG_SET_PRIORITY,
+  UIM_CONFIG_WARM_PHASE,
+  defaultSetPriority,
+  defaultPhaseIndexPriority,
 } from '../constants';
 
-import { defaultColdPhase, defaultWarmPhase, defaultHotPhase } from '../store/defaults';
+import { Phases } from '../../../common/types';
 
-export let trackUiMetric = (metricType: UiStatsMetricType, eventName: string) => {};
+export let trackUiMetric = (metricType: UiStatsMetricType, eventName: string | string[]) => {};
 
 export function init(usageCollection?: UsageCollectionSetup): void {
   if (usageCollection) {
@@ -31,49 +33,51 @@ export function init(usageCollection?: UsageCollectionSetup): void {
   }
 }
 
-export function getUiMetricsForPhases(phases: any): any {
+export function getUiMetricsForPhases(phases: Phases): string[] {
   const phaseUiMetrics = [
     {
       metric: UIM_CONFIG_COLD_PHASE,
-      isTracked: () => Boolean(phases[PHASE_COLD]),
+      isTracked: () => Boolean(phases.cold),
     },
     {
       metric: UIM_CONFIG_WARM_PHASE,
-      isTracked: () => Boolean(phases[PHASE_WARM]),
+      isTracked: () => Boolean(phases.warm),
     },
     {
       metric: UIM_CONFIG_SET_PRIORITY,
       isTracked: () => {
-        const phaseToDefaultIndexPriorityMap = {
-          [PHASE_HOT]: defaultHotPhase[PHASE_INDEX_PRIORITY],
-          [PHASE_WARM]: defaultWarmPhase[PHASE_INDEX_PRIORITY],
-          [PHASE_COLD]: defaultColdPhase[PHASE_INDEX_PRIORITY],
-        };
-
         // We only care about whether the user has interacted with the priority of *any* phase at all.
-        return [PHASE_HOT, PHASE_WARM, PHASE_COLD].some((phase) => {
-          // If the priority is different than the default, we'll consider it a user interaction,
-          // even if the user has set it to undefined.
-          return (
-            phases[phase] &&
-            get(phases[phase], 'actions.set_priority.priority') !==
-              phaseToDefaultIndexPriorityMap[phase]
-          );
-        });
+        const isHotPhasePriorityChanged =
+          phases.hot &&
+          phases.hot.actions.set_priority &&
+          phases.hot.actions.set_priority.priority !== parseInt(defaultSetPriority, 10);
+
+        const isWarmPhasePriorityChanged =
+          phases.warm &&
+          phases.warm.actions.set_priority &&
+          phases.warm.actions.set_priority.priority !== parseInt(defaultPhaseIndexPriority, 10);
+
+        const isColdPhasePriorityChanged =
+          phases.cold &&
+          phases.cold.actions.set_priority &&
+          phases.cold.actions.set_priority.priority !== parseInt(defaultPhaseIndexPriority, 10);
+        // If the priority is different than the default, we'll consider it a user interaction,
+        // even if the user has set it to undefined.
+        return (
+          isHotPhasePriorityChanged || isWarmPhasePriorityChanged || isColdPhasePriorityChanged
+        );
       },
     },
     {
       metric: UIM_CONFIG_FREEZE_INDEX,
-      isTracked: () => phases[PHASE_COLD] && get(phases[PHASE_COLD], 'actions.freeze'),
+      isTracked: () => phases.cold && phases.cold.actions.freeze,
     },
   ];
 
-  const trackedUiMetrics = phaseUiMetrics.reduce((tracked: any, { metric, isTracked }) => {
+  return phaseUiMetrics.reduce((tracked: string[], { metric, isTracked }) => {
     if (isTracked()) {
       tracked.push(metric);
     }
     return tracked;
   }, []);
-
-  return trackedUiMetrics;
 }

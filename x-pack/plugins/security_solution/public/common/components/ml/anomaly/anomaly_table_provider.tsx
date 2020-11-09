@@ -15,8 +15,8 @@ interface ChildrenArgs {
 
 interface Props {
   influencers?: InfluencerInput[];
-  startDate: number;
-  endDate: number;
+  startDate: string;
+  endDate: string;
   criteriaFields?: CriteriaFields[];
   children: (args: ChildrenArgs) => React.ReactNode;
   skip: boolean;

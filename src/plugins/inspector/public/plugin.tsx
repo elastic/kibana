@@ -22,8 +22,9 @@ import * as React from 'react';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { toMountPoint } from '../../kibana_react/public';
 import { InspectorViewRegistry } from './view_registry';
-import { Adapters, InspectorOptions, InspectorSession } from './types';
+import { InspectorOptions, InspectorSession } from './types';
 import { InspectorPanel } from './ui/inspector_panel';
+import { Adapters } from '../common';
 
 import { getRequestsViewDescription, getDataViewDescription } from './views';
 
@@ -69,7 +70,7 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
   public async setup(core: CoreSetup) {
     this.views = new InspectorViewRegistry();
 
-    this.views.register(getDataViewDescription(core.uiSettings));
+    this.views.register(getDataViewDescription());
     this.views.register(getRequestsViewDescription());
 
     return {
@@ -100,7 +101,14 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
       }
 
       return core.overlays.openFlyout(
-        toMountPoint(<InspectorPanel views={views} adapters={adapters} title={options.title} />),
+        toMountPoint(
+          <InspectorPanel
+            views={views}
+            adapters={adapters}
+            title={options.title}
+            dependencies={{ uiSettings: core.uiSettings }}
+          />
+        ),
         {
           'data-test-subj': 'inspectorPanel',
           closeButtonAriaLabel: closeButtonLabel,

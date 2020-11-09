@@ -4,8 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ActionFactoryDefinition } from '../dynamic_actions';
+import {
+  ActionFactoryDefinition,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+  SerializedEvent,
+} from '../dynamic_actions';
 import { LicenseType } from '../../../licensing/public';
+import { TriggerContextMapping, TriggerId } from '../../../../../src/plugins/ui_actions/public';
+import { ActionExecutionContext } from '../../../../../src/plugins/ui_actions/public';
+import { PersistableStateDefinition } from '../../../../../src/plugins/kibana_utils/common';
 
 /**
  * This is a convenience interface to register a drilldown. Drilldown has
@@ -20,20 +28,38 @@ import { LicenseType } from '../../../licensing/public';
  * and provided to the `execute` function of the drilldown. This object contains
  * information about the action user performed.
  */
+
 export interface DrilldownDefinition<
-  Config extends object = object,
-  ExecutionContext extends object = object
-> {
+  Config extends BaseActionConfig = BaseActionConfig,
+  SupportedTriggers extends TriggerId = TriggerId,
+  FactoryContext extends BaseActionFactoryContext<SupportedTriggers> = {
+    triggers: SupportedTriggers[];
+  },
+  ExecutionContext extends TriggerContextMapping[SupportedTriggers] = TriggerContextMapping[SupportedTriggers]
+> extends PersistableStateDefinition<SerializedEvent> {
   /**
    * Globally unique identifier for this drilldown.
    */
   id: string;
 
   /**
-   * Minimal licence level
+   * Is this action factory not GA?
+   * Adds a beta badge on a list item representing this ActionFactory
+   */
+  readonly isBeta?: boolean;
+
+  /**
+   * Minimal license level
    * Empty means no restrictions
    */
   minimalLicense?: LicenseType;
+
+  /**
+   * Required when `minimalLicense` is used.
+   * Is a user-facing string. Has to be unique. Doesn't need i18n.
+   * The feature's name will be displayed to Cloud end-users when they're billed based on their feature usage.
+   */
+  licenseFeatureName?: string;
 
   /**
    * Determines the display order of the drilldowns in the flyout picker.
@@ -44,7 +70,12 @@ export interface DrilldownDefinition<
   /**
    * Function that returns default config for this drilldown.
    */
-  createConfig: ActionFactoryDefinition<Config, object, ExecutionContext>['createConfig'];
+  createConfig: ActionFactoryDefinition<
+    Config,
+    SupportedTriggers,
+    FactoryContext,
+    ExecutionContext
+  >['createConfig'];
 
   /**
    * `UiComponent` that collections config for this drilldown. You can create
@@ -65,13 +96,23 @@ export interface DrilldownDefinition<
    * export const CollectConfig = uiToReactComponent(ReactCollectConfig);
    * ```
    */
-  CollectConfig: ActionFactoryDefinition<Config, object, ExecutionContext>['CollectConfig'];
+  CollectConfig: ActionFactoryDefinition<
+    Config,
+    SupportedTriggers,
+    FactoryContext,
+    ExecutionContext
+  >['CollectConfig'];
 
   /**
    * A validator function for the config object. Should always return a boolean
    * given any input.
    */
-  isConfigValid: ActionFactoryDefinition<Config, object, ExecutionContext>['isConfigValid'];
+  isConfigValid: ActionFactoryDefinition<
+    Config,
+    SupportedTriggers,
+    FactoryContext,
+    ExecutionContext
+  >['isConfigValid'];
 
   /**
    * Name of EUI icon to display when showing this drilldown to user.
@@ -85,6 +126,15 @@ export interface DrilldownDefinition<
   getDisplayName: () => string;
 
   /**
+   * isCompatible during execution
+   * Could be used to prevent drilldown from execution
+   */
+  isCompatible?(
+    config: Config,
+    context: ExecutionContext | ActionExecutionContext<ExecutionContext>
+  ): Promise<boolean>;
+
+  /**
    * Implements the "navigation" action of the drilldown. This happens when
    * user clicks something in the UI that executes a trigger to which this
    * drilldown was attached.
@@ -93,10 +143,22 @@ export interface DrilldownDefinition<
    * @param context Object that represents context in which the underlying
    *  `UIAction` of this drilldown is being executed in.
    */
-  execute(config: Config, context: ExecutionContext): void;
+  execute(
+    config: Config,
+    context: ExecutionContext | ActionExecutionContext<ExecutionContext>
+  ): void;
 
   /**
    * A link where drilldown should navigate on middle click or Ctrl + click.
    */
-  getHref?(config: Config, context: ExecutionContext): Promise<string | undefined>;
+  getHref?(
+    config: Config,
+    context: ExecutionContext | ActionExecutionContext<ExecutionContext>
+  ): Promise<string | undefined>;
+
+  /**
+   * List of triggers supported by this drilldown type
+   * This is used in trigger picker when configuring drilldown
+   */
+  supportedTriggers(): SupportedTriggers[];
 }

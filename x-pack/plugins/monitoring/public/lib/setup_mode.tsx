@@ -8,9 +8,12 @@ import React from 'react';
 import { render } from 'react-dom';
 import { get, includes } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { Legacy } from '../legacy_shims';
 import { ajaxErrorHandlersProvider } from './ajax_error_handler';
 import { SetupModeEnterButton } from '../components/setup_mode/enter_button';
+import { SetupModeFeature } from '../../common/enums';
+import { ISetupModeContext } from '../components/setup_mode/setup_mode_context';
 
 function isOnPage(hash: string) {
   return includes(window.location.hash, hash);
@@ -39,11 +42,13 @@ interface ISetupModeState {
   enabled: boolean;
   data: any;
   callback?: (() => void) | null;
+  hideBottomBar: boolean;
 }
 const setupModeState: ISetupModeState = {
   enabled: false,
   data: null,
   callback: null,
+  hideBottomBar: false,
 };
 
 export const getSetupModeState = () => setupModeState;
@@ -91,15 +96,11 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
   const data = await fetchCollectionData(uuid, fetchWithoutClusterUuid);
   setupModeState.data = data;
   const hasPermissions = get(data, '_meta.hasPermissions', false);
-  if (Legacy.shims.isCloud || !hasPermissions) {
+  if (!hasPermissions) {
     let text: string = '';
     if (!hasPermissions) {
       text = i18n.translate('xpack.monitoring.setupMode.notAvailablePermissions', {
         defaultMessage: 'You do not have the necessary permissions to do this.',
-      });
-    } else {
-      text = i18n.translate('xpack.monitoring.setupMode.notAvailableCloud', {
-        defaultMessage: 'This feature is not available on cloud.',
       });
     }
 
@@ -111,7 +112,7 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
         text,
       });
     });
-    return toggleSetupMode(false); // eslint-disable-line no-use-before-define
+    return toggleSetupMode(false);
   }
   notifySetupModeDataChange();
 
@@ -126,6 +127,15 @@ export const updateSetupModeData = async (uuid?: string, fetchWithoutClusterUuid
       setNewlyDiscoveredClusterUuid(liveClusterUuid);
     }
   }
+};
+
+export const hideBottomBar = () => {
+  setupModeState.hideBottomBar = true;
+  notifySetupModeDataChange();
+};
+export const showBottomBar = () => {
+  setupModeState.hideBottomBar = false;
+  notifySetupModeDataChange();
 };
 
 export const disableElasticsearchInternalCollection = async () => {
@@ -152,7 +162,7 @@ export const toggleSetupMode = (inSetupMode: boolean) => {
   setupModeState.enabled = inSetupMode;
   globalState.inSetupMode = inSetupMode;
   globalState.save();
-  setSetupModeMenuItem(); // eslint-disable-line  no-use-before-define
+  setSetupModeMenuItem();
   notifySetupModeDataChange();
 
   if (inSetupMode) {
@@ -169,10 +179,19 @@ export const setSetupModeMenuItem = () => {
   }
 
   const globalState = angularState.injector.get('globalState');
-  const enabled = !globalState.inSetupMode && !Legacy.shims.isCloud;
+  const enabled = !globalState.inSetupMode;
+
+  const services = {
+    usageCollection: Legacy.shims.usageCollection,
+  };
+  const I18nContext = Legacy.shims.I18nContext;
 
   render(
-    <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />,
+    <KibanaContextProvider services={services}>
+      <I18nContext>
+        <SetupModeEnterButton enabled={enabled} toggleSetupMode={toggleSetupMode} />
+      </I18nContext>
+    </KibanaContextProvider>,
     document.getElementById('setupModeNav')
   );
 };
@@ -188,11 +207,14 @@ export const initSetupModeState = async ($scope: any, $injector: any, callback?:
 
   const globalState = $injector.get('globalState');
   if (globalState.inSetupMode) {
-    await toggleSetupMode(true);
+    toggleSetupMode(true);
   }
 };
 
-export const isInSetupMode = () => {
+export const isInSetupMode = (context?: ISetupModeContext) => {
+  if (context?.setupModeSupported === false) {
+    return false;
+  }
   if (setupModeState.enabled) {
     return true;
   }
@@ -200,4 +222,16 @@ export const isInSetupMode = () => {
   const $injector = angularState.injector || Legacy.shims.getAngularInjector();
   const globalState = $injector.get('globalState');
   return globalState.inSetupMode;
+};
+
+export const isSetupModeFeatureEnabled = (feature: SetupModeFeature) => {
+  if (!setupModeState.enabled) {
+    return false;
+  }
+  if (feature === SetupModeFeature.MetricbeatMigration) {
+    if (Legacy.shims.isCloud) {
+      return false;
+    }
+  }
+  return true;
 };

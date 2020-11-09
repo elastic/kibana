@@ -19,6 +19,21 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 import { buildSearchBody, useEsDocSearch, ElasticRequestState } from './use_es_doc_search';
 import { DocProps } from './doc';
+import { Observable } from 'rxjs';
+
+const mockSearchResult = new Observable();
+
+jest.mock('../../../kibana_services', () => ({
+  getServices: () => ({
+    data: {
+      search: {
+        search: jest.fn(() => {
+          return mockSearchResult;
+        }),
+      },
+    },
+  }),
+}));
 
 describe('Test of <Doc /> helper / hook', () => {
   test('buildSearchBody', () => {
@@ -53,7 +68,6 @@ describe('Test of <Doc /> helper / hook', () => {
     const props = {
       id: '1',
       index: 'index1',
-      esClient: { search: jest.fn(() => new Promise(() => {})) },
       indexPatternId: 'xyz',
       indexPatternService,
     } as DocProps;

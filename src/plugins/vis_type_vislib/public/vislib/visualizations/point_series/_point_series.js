@@ -54,18 +54,18 @@ export class PointSeries {
     }, 0);
   }
 
-  getGroupedNum(data) {
+  getGroupedNum(seriesId) {
     let i = 0;
     const stacks = [];
     for (const seri of this.baseChart.chartConfig.series) {
       const valueAxis = seri.valueAxis || this.baseChart.handler.valueAxes[0].id;
       const isStacked = seri.mode === 'stacked';
       if (!isStacked) {
-        if (seri.data === data) return i;
+        if (seri.data.rawId === seriesId) return i;
         i++;
       } else {
         if (!(valueAxis in stacks)) stacks[valueAxis] = i++;
-        if (seri.data === data) return stacks[valueAxis];
+        if (seri.data.rawId === seriesId) return stacks[valueAxis];
       }
     }
     return 0;

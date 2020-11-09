@@ -4,34 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiEmptyPrompt, EuiCode } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import React from 'react';
-
 import { euiStyled } from '../../../../../observability/public';
+import {
+  missingMlPrivilegesTitle,
+  missingMlSetupPrivilegesDescription,
+} from './missing_privileges_messages';
 import { UserManagementLink } from './user_management_link';
 
 export const MissingSetupPrivilegesPrompt: React.FunctionComponent = () => (
   <EmptyPrompt
-    title={
-      <h2>
-        <FormattedMessage
-          id="xpack.infra.logs.analysis.missingMlSetupPrivilegesTitle"
-          defaultMessage="Additional Machine Learning privileges required"
-        />
-      </h2>
-    }
-    body={
-      <p>
-        <FormattedMessage
-          id="xpack.infra.logs.analysis.missingMlSetupPrivilegesBody"
-          defaultMessage="This feature makes use of Machine Learning jobs, which require the {machineLearningAdminRole} role in order to be set up."
-          values={{
-            machineLearningAdminRole: <EuiCode>machine_learning_admin</EuiCode>,
-          }}
-        />
-      </p>
-    }
+    title={<h2>{missingMlPrivilegesTitle}</h2>}
+    body={<p>{missingMlSetupPrivilegesDescription}</p>}
     actions={<UserManagementLink />}
   />
 );

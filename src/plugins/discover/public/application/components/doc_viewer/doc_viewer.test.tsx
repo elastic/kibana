@@ -19,7 +19,6 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
-// @ts-ignore
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDocViewsRegistry } from '../../../kibana_services';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';

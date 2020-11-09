@@ -11,7 +11,9 @@ import {
   elasticsearchServiceMock,
   savedObjectsClientMock,
 } from '../../../../src/core/server/mocks';
+import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';
 
+export { actionsAuthorizationMock };
 export { actionsClientMock };
 
 const createSetupMock = () => {
@@ -26,6 +28,9 @@ const createStartMock = () => {
     isActionTypeEnabled: jest.fn(),
     isActionExecutable: jest.fn(),
     getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientMock.create()),
+    getActionsAuthorizationWithRequest: jest
+      .fn()
+      .mockReturnValue(actionsAuthorizationMock.create()),
     preconfiguredActions: [],
   };
   return mock;
@@ -38,8 +43,9 @@ const createServicesMock = () => {
     }
   > = {
     callCluster: elasticsearchServiceMock.createLegacyScopedClusterClient().callAsCurrentUser,
-    getScopedCallCluster: jest.fn(),
+    getLegacyScopedClusterClient: jest.fn(),
     savedObjectsClient: savedObjectsClientMock.create(),
+    scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient().asCurrentUser,
   };
   return mock;
 };

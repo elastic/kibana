@@ -4,17 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { HttpSetup } from 'kibana/public';
 import { isString, startsWith } from 'lodash';
 import LRU from 'lru-cache';
 import hash from 'object-hash';
-import { HttpSetup, HttpFetchOptions } from 'kibana/public';
-
-export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
-  pathname: string;
-  isCachable?: boolean;
-  method?: string;
-  body?: any;
-};
+import { FetchOptions } from '../../../common/fetch_options';
 
 function fetchOptionsWithDebug(fetchOptions: FetchOptions) {
   const debugEnabled =

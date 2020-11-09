@@ -59,6 +59,7 @@ import {
   TagsOrUndefined,
   ToOrUndefined,
   ThreatOrUndefined,
+  ThresholdOrUndefined,
   TypeOrUndefined,
   ReferencesOrUndefined,
   PerPageOrUndefined,
@@ -83,7 +84,18 @@ import {
   TimestampOverrideOrUndefined,
   BuildingBlockTypeOrUndefined,
   RuleNameOverrideOrUndefined,
+  EventCategoryOverrideOrUndefined,
 } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  ThreatIndexOrUndefined,
+  ThreatQueryOrUndefined,
+  ThreatMappingOrUndefined,
+  ThreatFiltersOrUndefined,
+  ThreatLanguageOrUndefined,
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
+} from '../../../../common/detection_engine/schemas/types/threat_mapping';
+
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
 import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
@@ -95,7 +107,7 @@ export interface RuleAlertType extends Alert {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface IRuleStatusAttributes extends Record<string, any> {
+export interface IRuleStatusSOAttributes extends Record<string, any> {
   alertId: string; // created alert id.
   statusDate: StatusDate;
   lastFailureAt: LastFailureAt | null | undefined;
@@ -109,21 +121,35 @@ export interface IRuleStatusAttributes extends Record<string, any> {
   searchAfterTimeDurations: string[] | null | undefined;
 }
 
+export interface IRuleStatusResponseAttributes {
+  alert_id: string; // created alert id.
+  status_date: StatusDate;
+  last_failure_at: LastFailureAt | null | undefined;
+  last_failure_message: LastFailureMessage | null | undefined;
+  last_success_at: LastSuccessAt | null | undefined;
+  last_success_message: LastSuccessMessage | null | undefined;
+  status: JobStatus | null | undefined;
+  last_look_back_date: string | null | undefined;
+  gap: string | null | undefined;
+  bulk_create_time_durations: string[] | null | undefined;
+  search_after_time_durations: string[] | null | undefined;
+}
+
 export interface RuleStatusResponse {
   [key: string]: {
-    current_status: IRuleStatusAttributes | null | undefined;
-    failures: IRuleStatusAttributes[] | null | undefined;
+    current_status: IRuleStatusResponseAttributes | null | undefined;
+    failures: IRuleStatusResponseAttributes[] | null | undefined;
   };
 }
 
 export interface IRuleSavedAttributesSavedObjectAttributes
-  extends IRuleStatusAttributes,
+  extends IRuleStatusSOAttributes,
     SavedObjectAttributes {}
 
 export interface IRuleStatusSavedObject {
   type: string;
   id: string;
-  attributes: Array<SavedObject<IRuleStatusAttributes & SavedObjectAttributes>>;
+  attributes: Array<SavedObject<IRuleStatusSOAttributes & SavedObjectAttributes>>;
   references: unknown[];
   updated_at: string;
   version: string;
@@ -179,6 +205,7 @@ export interface CreateRulesOptions {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   query: QueryOrUndefined;
@@ -204,6 +231,14 @@ export interface CreateRulesOptions {
   severityMapping: SeverityMapping;
   tags: Tags;
   threat: Threat;
+  threshold: ThresholdOrUndefined;
+  threatFilters: ThreatFiltersOrUndefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
@@ -223,6 +258,7 @@ export interface UpdateRulesOptions {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   query: QueryOrUndefined;
@@ -247,6 +283,14 @@ export interface UpdateRulesOptions {
   severityMapping: SeverityMapping;
   tags: Tags;
   threat: Threat;
+  threshold: ThresholdOrUndefined;
+  threatFilters: ThreatFiltersOrUndefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
   type: Type;
@@ -265,6 +309,7 @@ export interface PatchRulesOptions {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
   enabled: EnabledOrUndefined;
+  eventCategoryOverride: EventCategoryOverrideOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;
@@ -288,6 +333,14 @@ export interface PatchRulesOptions {
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  threshold: ThresholdOrUndefined;
+  threatFilters: ThreatFiltersOrUndefined;
+  threatIndex: ThreatIndexOrUndefined;
+  threatQuery: ThreatQueryOrUndefined;
+  threatMapping: ThreatMappingOrUndefined;
+  threatLanguage: ThreatLanguageOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: ToOrUndefined;
   type: TypeOrUndefined;

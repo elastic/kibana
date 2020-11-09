@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './chart_switch.scss';
 import React, { useState, useMemo } from 'react';
 import {
   EuiIcon,
@@ -11,14 +12,19 @@ import {
   EuiPopoverTitle,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
-  EuiButton,
+  EuiFieldSearch,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSelectableMessage,
 } from '@elastic/eui';
 import { flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n/react';
 import { Visualization, FramePublicAPI, Datasource } from '../../../types';
 import { Action } from '../state_management';
 import { getSuggestions, switchToSuggestion, Suggestion } from '../suggestion_helpers';
 import { trackUiEvent } from '../../../lens_ui_telemetry';
+import { ToolbarButton } from '../../../shared_components';
 
 interface VisualizationSelection {
   visualizationId: string;
@@ -65,14 +71,12 @@ function VisualizationSummary(props: Props) {
   return (
     <>
       {description.icon && (
-        <EuiIcon size="xl" className="lnsChartSwitch__summaryIcon" type={description.icon} />
+        <EuiIcon size="l" className="lnsChartSwitch__summaryIcon" type={description.icon} />
       )}
       {description.label}
     </>
   );
 }
-
-import './chart_switch.scss';
 
 export function ChartSwitch(props: Props) {
   const [flyoutOpen, setFlyoutOpen] = useState<boolean>(false);
@@ -140,7 +144,7 @@ export function ChartSwitch(props: Props) {
       dataLoss = 'nothing';
     } else if (!topSuggestion) {
       dataLoss = 'everything';
-    } else if (layers.length > 1) {
+    } else if (layers.length > 1 && layers.length !== topSuggestion.keptLayerIds.length) {
       dataLoss = 'layers';
     } else if (topSuggestion.columns !== layers[0][1].getTableSpec().length) {
       dataLoss = 'columns';
@@ -161,14 +165,28 @@ export function ChartSwitch(props: Props) {
         : () => {
             return switchVisType(
               subVisualizationId,
-              newVisualization.initialize(props.framePublicAPI)
+              newVisualization.initialize(
+                props.framePublicAPI,
+                props.visualizationId === newVisualization.id
+                  ? props.visualizationState
+                  : undefined,
+                props.visualizationId &&
+                  props.visualizationMap[props.visualizationId].getMainPalette
+                  ? props.visualizationMap[props.visualizationId].getMainPalette!(
+                      props.visualizationState
+                    )
+                  : undefined
+              )
             );
           },
       keptLayerIds: topSuggestion ? topSuggestion.keptLayerIds : [],
       datasourceState: topSuggestion ? topSuggestion.datasourceState : undefined,
       datasourceId: topSuggestion ? topSuggestion.datasourceId : undefined,
+      sameDatasources: dataLoss === 'nothing' && props.visualizationId === newVisualization.id,
     };
   }
+
+  const [searchTerm, setSearchTerm] = useState('');
 
   const visualizationTypes = useMemo(
     () =>
@@ -178,19 +196,28 @@ export function ChartSwitch(props: Props) {
           v.visualizationTypes.map((t) => ({
             visualizationId: v.id,
             ...t,
-            icon: t.largeIcon || t.icon,
+            icon: t.icon,
           }))
         )
-      ).map((visualizationType) => ({
-        ...visualizationType,
-        selection: getSelection(visualizationType.visualizationId, visualizationType.id),
-      })),
+      )
+        .filter(
+          (visualizationType) =>
+            visualizationType.label.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (visualizationType.fullLabel &&
+              visualizationType.fullLabel.toLowerCase().includes(searchTerm.toLowerCase()))
+        )
+        .map((visualizationType) => ({
+          ...visualizationType,
+          selection: getSelection(visualizationType.visualizationId, visualizationType.id),
+        })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       flyoutOpen,
       props.visualizationMap,
       props.framePublicAPI,
       props.visualizationId,
       props.visualizationState,
+      searchTerm,
     ]
   );
 
@@ -202,31 +229,43 @@ export function ChartSwitch(props: Props) {
       panelClassName="lnsChartSwitch__popoverPanel"
       panelPaddingSize="s"
       button={
-        <EuiButton
-          className="lnsChartSwitch__triggerButton"
+        <ToolbarButton
           onClick={() => setFlyoutOpen(!flyoutOpen)}
           data-test-subj="lnsChartSwitchPopover"
-          iconSide="right"
-          iconType="arrowDown"
-          color="text"
+          fontWeight="bold"
         >
           <VisualizationSummary {...props} />
-        </EuiButton>
+        </ToolbarButton>
       }
       isOpen={flyoutOpen}
       closePopover={() => setFlyoutOpen(false)}
       anchorPosition="downLeft"
     >
       <EuiPopoverTitle>
-        {i18n.translate('xpack.lens.configPanel.selectVisualization', {
-          defaultMessage: 'Select a visualization',
-        })}
+        <EuiFlexGroup alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            {i18n.translate('xpack.lens.configPanel.chartType', {
+              defaultMessage: 'Chart type',
+            })}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFieldSearch
+              compressed
+              fullWidth={false}
+              className="lnsChartSwitch__search"
+              value={searchTerm}
+              data-test-subj="lnsChartSwitchSearch"
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPopoverTitle>
       <EuiKeyPadMenu>
         {(visualizationTypes || []).map((v) => (
           <EuiKeyPadMenuItem
             key={`${v.visualizationId}:${v.id}`}
             label={<span data-test-subj="visTypeTitle">{v.label}</span>}
+            title={v.fullLabel}
             role="menuitem"
             data-test-subj={`lnsChartSwitchPopover_${v.id}`}
             onClick={() => commitSelection(v.selection)}
@@ -250,6 +289,17 @@ export function ChartSwitch(props: Props) {
           </EuiKeyPadMenuItem>
         ))}
       </EuiKeyPadMenu>
+      {searchTerm && (visualizationTypes || []).length === 0 && (
+        <EuiSelectableMessage>
+          <FormattedMessage
+            id="xpack.lens.chartSwitch.noResults"
+            defaultMessage="No results found for {term}."
+            values={{
+              term: <strong>{searchTerm}</strong>,
+            }}
+          />
+        </EuiSelectableMessage>
+      )}
     </EuiPopover>
   );
 
@@ -259,17 +309,26 @@ export function ChartSwitch(props: Props) {
 function getTopSuggestion(
   props: Props,
   visualizationId: string,
-  newVisualization: Visualization<unknown, unknown>,
+  newVisualization: Visualization<unknown>,
   subVisualizationId?: string
 ): Suggestion | undefined {
-  const suggestions = getSuggestions({
+  const mainPalette =
+    props.visualizationId &&
+    props.visualizationMap[props.visualizationId] &&
+    props.visualizationMap[props.visualizationId].getMainPalette
+      ? props.visualizationMap[props.visualizationId].getMainPalette!(props.visualizationState)
+      : undefined;
+  const unfilteredSuggestions = getSuggestions({
     datasourceMap: props.datasourceMap,
     datasourceStates: props.datasourceStates,
     visualizationMap: { [visualizationId]: newVisualization },
     activeVisualizationId: props.visualizationId,
     visualizationState: props.visualizationState,
     subVisualizationId,
-  }).filter((suggestion) => {
+    activeData: props.framePublicAPI.activeData,
+    mainPalette,
+  });
+  const suggestions = unfilteredSuggestions.filter((suggestion) => {
     // don't use extended versions of current data table on switching between visualizations
     // to avoid confusing the user.
     return (

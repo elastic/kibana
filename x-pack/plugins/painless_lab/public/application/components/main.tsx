@@ -7,7 +7,6 @@
 import React, { useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NavType } from 'src/core/public';
 import { formatRequestPayload, formatJson } from '../lib/format';
 import { exampleScript } from '../constants';
 import { PayloadFormat } from '../types';
@@ -22,10 +21,7 @@ export const Main: React.FunctionComponent = () => {
   const {
     store: { payload, validation },
     updatePayload,
-    services: {
-      http,
-      chrome: { getIsNavDrawerLocked$, getNavType$ },
-    },
+    services: { http },
     links,
   } = useAppContext();
 
@@ -42,25 +38,6 @@ export const Main: React.FunctionComponent = () => {
   const toggleRequestFlyout = () => {
     setRequestFlyoutOpen(!isRequestFlyoutOpen);
   };
-
-  const [isNavDrawerLocked, setIsNavDrawerLocked] = useState(false);
-  const [isNavLegacy, setIsNavLegacy] = useState(false);
-
-  useEffect(() => {
-    const subscription = getIsNavDrawerLocked$().subscribe((newIsNavDrawerLocked: boolean) => {
-      setIsNavDrawerLocked(newIsNavDrawerLocked);
-    });
-
-    return () => subscription.unsubscribe();
-  });
-
-  useEffect(() => {
-    const subscription = getNavType$().subscribe((navType: NavType) => {
-      setIsNavLegacy(navType === 'legacy');
-    });
-
-    return () => subscription.unsubscribe();
-  });
 
   return (
     <div className="painlessLabMainContainer">
@@ -87,8 +64,6 @@ export const Main: React.FunctionComponent = () => {
         isLoading={inProgress}
         toggleRequestFlyout={toggleRequestFlyout}
         isRequestFlyoutOpen={isRequestFlyoutOpen}
-        isNavDrawerLocked={isNavDrawerLocked}
-        isNavLegacy={isNavLegacy}
         reset={() => updatePayload({ code: exampleScript })}
       />
 

@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import './expression.scss';
+
 import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
@@ -23,12 +25,15 @@ import {
 import { VisualizationContainer } from '../visualization_container';
 import { EmptyPlaceholder } from '../shared_components';
 import { desanitizeFilterContext } from '../utils';
+import { LensIconChartDatatable } from '../assets/chart_datatable';
+
 export interface DatatableColumns {
   columnIds: string[];
 }
 
 interface Args {
   title: string;
+  description?: string;
   columns: DatatableColumns & { type: 'lens_datatable_columns' };
 }
 
@@ -67,6 +72,10 @@ export const datatable: ExpressionFunctionDefinition<
       help: i18n.translate('xpack.lens.datatable.titleLabel', {
         defaultMessage: 'Title',
       }),
+    },
+    description: {
+      types: ['string'],
+      help: '',
     },
     columns: {
       types: ['lens_datatable_columns'],
@@ -157,15 +166,15 @@ export function DatatableComponent(props: DatatableRenderProps) {
   const formatters: Record<string, ReturnType<FormatFactory>> = {};
 
   firstTable.columns.forEach((column) => {
-    formatters[column.id] = props.formatFactory(column.formatHint);
+    formatters[column.id] = props.formatFactory(column.meta?.params);
   });
 
+  const { onClickValue } = props;
   const handleFilterClick = useMemo(
     () => (field: string, value: unknown, colIndex: number, negate: boolean = false) => {
       const col = firstTable.columns[colIndex];
-      const isDateHistogram = col.meta?.type === 'date_histogram';
-      const timeFieldName =
-        negate && isDateHistogram ? undefined : col?.meta?.aggConfigParams?.field;
+      const isDate = col.meta?.type === 'date';
+      const timeFieldName = negate && isDate ? undefined : col?.meta?.field;
       const rowIndex = firstTable.rows.findIndex((row) => row[field] === value);
 
       const data: LensFilterEvent['data'] = {
@@ -180,14 +189,17 @@ export function DatatableComponent(props: DatatableRenderProps) {
         ],
         timeFieldName,
       };
-      props.onClickValue(desanitizeFilterContext(data));
+      onClickValue(desanitizeFilterContext(data));
     },
-    [firstTable]
+    [firstTable, onClickValue]
   );
 
   const bucketColumns = firstTable.columns
     .filter((col) => {
-      return col?.meta?.type && props.getType(col.meta.type)?.type === 'buckets';
+      return (
+        col?.meta?.sourceParams?.type &&
+        props.getType(col.meta.sourceParams.type as string)?.type === 'buckets'
+      );
     })
     .map((col) => col.id);
 
@@ -199,11 +211,14 @@ export function DatatableComponent(props: DatatableRenderProps) {
       ));
 
   if (isEmpty) {
-    return <EmptyPlaceholder icon="visTable" />;
+    return <EmptyPlaceholder icon={LensIconChartDatatable} />;
   }
 
   return (
-    <VisualizationContainer>
+    <VisualizationContainer
+      reportTitle={props.args.title}
+      reportDescription={props.args.description}
+    >
       <EuiBasicTable
         className="lnsDataTable"
         data-test-subj="lnsDataTable"
@@ -218,7 +233,7 @@ export function DatatableComponent(props: DatatableRenderProps) {
               name: (col && col.name) || '',
               render: (value: unknown) => {
                 const formattedValue = formatters[field]?.convert(value);
-                const fieldName = col?.meta?.aggConfigParams?.field;
+                const fieldName = col?.meta?.field;
 
                 if (filterable) {
                   return (

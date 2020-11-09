@@ -2,11 +2,14 @@
 
 exports[`PingHistogram component renders the component without errors 1`] = `
 Array [
-  <h2
-    class="euiTitle euiTitle--xsmall"
+  <h3
+    class="euiTitle euiTitle--small"
   >
     Pings over time
-  </h2>,
+  </h3>,
+  <div
+    class="euiSpacer euiSpacer--m"
+  />,
   <div
     aria-label="Bar Chart showing uptime status over time from a year ago to a year ago."
     style="height:100%;opacity:1;transition:opacity 0.2s"
@@ -270,7 +273,7 @@ exports[`PingHistogram component shallow renders the component without errors 1`
               "y": 1,
             },
           ],
-          "interval": "1s",
+          "minInterval": 60,
         }
       }
     />

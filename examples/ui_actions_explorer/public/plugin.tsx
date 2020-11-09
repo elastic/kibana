@@ -23,7 +23,6 @@ import {
   PHONE_TRIGGER,
   USER_TRIGGER,
   COUNTRY_TRIGGER,
-  createPhoneUserAction,
   lookUpWeatherAction,
   viewInMapsAction,
   createEditUserAction,
@@ -37,7 +36,8 @@ import {
   ACTION_CALL_PHONE_NUMBER,
   ACTION_TRAVEL_GUIDE,
   ACTION_VIEW_IN_MAPS,
-  ACTION_PHONE_USER,
+  ACTION_TRIGGER_PHONE_USER,
+  createTriggerPhoneTriggerAction,
 } from './actions/actions';
 import { DeveloperExamplesSetup } from '../../developer_examples/public';
 import image from './ui_actions.png';
@@ -64,7 +64,7 @@ declare module '../../../src/plugins/ui_actions/public' {
     [ACTION_CALL_PHONE_NUMBER]: PhoneContext;
     [ACTION_TRAVEL_GUIDE]: CountryContext;
     [ACTION_VIEW_IN_MAPS]: CountryContext;
-    [ACTION_PHONE_USER]: UserContext;
+    [ACTION_TRIGGER_PHONE_USER]: UserContext;
   }
 }
 
@@ -84,7 +84,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
 
     deps.uiActions.addTriggerAction(
       USER_TRIGGER,
-      createPhoneUserAction(async () => (await startServices)[1].uiActions)
+      createTriggerPhoneTriggerAction(async () => (await startServices)[1].uiActions)
     );
     deps.uiActions.addTriggerAction(
       USER_TRIGGER,

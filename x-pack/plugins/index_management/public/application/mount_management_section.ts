@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { i18n } from '@kbn/i18n';
 import { CoreSetup } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public/';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
 
-import { IngestManagerSetup } from '../../../ingest_manager/public';
+import { IngestManagerSetup } from '../../../fleet/public';
+import { PLUGIN } from '../../common/constants';
 import { ExtensionsService } from '../services';
-import { IndexMgmtMetricsType } from '../types';
+import { IndexMgmtMetricsType, StartDependencies } from '../types';
 import { AppDependencies } from './app_context';
 import { breadcrumbService } from './services/breadcrumbs';
 import { documentationService } from './services/documentation';
@@ -26,15 +28,24 @@ interface InternalServices {
 }
 
 export async function mountManagementSection(
-  coreSetup: CoreSetup,
+  coreSetup: CoreSetup<StartDependencies>,
   usageCollection: UsageCollectionSetup,
   services: InternalServices,
   params: ManagementAppMountParams,
   ingestManager?: IngestManagerSetup
 ) {
   const { element, setBreadcrumbs, history } = params;
-  const [core] = await coreSetup.getStartServices();
-  const { docLinks, fatalErrors, application } = core;
+  const [core, startDependencies] = await coreSetup.getStartServices();
+  const {
+    docLinks,
+    fatalErrors,
+    application,
+    chrome: { docTitle },
+    uiSettings,
+  } = core;
+
+  const { urlGenerators } = startDependencies.share;
+  docTitle.change(PLUGIN.getI18nName(i18n));
 
   breadcrumbService.setup(setBreadcrumbs);
   documentationService.setup(docLinks);
@@ -51,7 +62,14 @@ export async function mountManagementSection(
     services,
     history,
     setBreadcrumbs,
+    uiSettings,
+    urlGenerators,
   };
 
-  return renderApp(element, { core, dependencies: appDependencies });
+  const unmountAppCallback = renderApp(element, { core, dependencies: appDependencies });
+
+  return () => {
+    docTitle.reset();
+    unmountAppCallback();
+  };
 }

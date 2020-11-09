@@ -17,6 +17,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const find = getService('find');
+  const retry = getService('retry');
+  const comboBox = getService('comboBox');
 
   describe('Connectors', function () {
     before(async () => {
@@ -37,6 +39,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const connectorName = generateUniqueKey();
 
       await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+      await testSubjects.click('.index-card');
+
+      await find.clickByCssSelector('[data-test-subj="backButton"]');
 
       await testSubjects.click('.slack-card');
 
@@ -63,18 +69,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should edit a connector', async () => {
       const connectorName = generateUniqueKey();
       const updatedConnectorName = `${connectorName}updated`;
-
-      await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-      await testSubjects.click('.slack-card');
-
-      await testSubjects.setValue('nameInput', connectorName);
-
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
-
-      await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
-
-      await pageObjects.common.closeToast();
+      await createConnector(connectorName);
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
 
@@ -87,7 +82,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
 
-      await find.clickByCssSelector('[data-test-subj="saveEditedActionButton"]:not(disabled)');
+      await find.clickByCssSelector(
+        '[data-test-subj="saveAndCloseEditedActionButton"]:not(disabled)'
+      );
 
       const toastTitle = await pageObjects.common.closeToast();
       expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
@@ -103,19 +100,89 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ]);
     });
 
+    it('should test a connector and display a successful result', async () => {
+      const connectorName = generateUniqueKey();
+      const indexName = generateUniqueKey();
+      await createIndexConnector(connectorName, indexName);
+
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+
+      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeEdit.length).to.eql(1);
+
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+
+      await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+
+      // test success
+      await testSubjects.setValue('documentsJsonEditor', '{ "key": "value" }');
+
+      await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
+
+      await retry.try(async () => {
+        await testSubjects.find('executionSuccessfulResult');
+      });
+
+      await find.clickByCssSelector(
+        '[data-test-subj="cancelSaveEditedConnectorButton"]:not(disabled)'
+      );
+    });
+
+    it('should test a connector and display a failure result', async () => {
+      const connectorName = generateUniqueKey();
+      const indexName = generateUniqueKey();
+      await createIndexConnector(connectorName, indexName);
+
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+
+      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeEdit.length).to.eql(1);
+
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+
+      await find.clickByCssSelector('[data-test-subj="testConnectorTab"]');
+
+      await testSubjects.setValue('documentsJsonEditor', '{ "": "value" }');
+
+      await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
+
+      await retry.try(async () => {
+        const executionFailureResultCallout = await testSubjects.find('executionFailureResult');
+        expect(await executionFailureResultCallout.getVisibleText()).to.match(
+          /error indexing documents/
+        );
+      });
+
+      await find.clickByCssSelector(
+        '[data-test-subj="cancelSaveEditedConnectorButton"]:not(disabled)'
+      );
+    });
+
+    it('should reset connector when canceling an edit', async () => {
+      const connectorName = generateUniqueKey();
+      await createConnector(connectorName);
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+
+      const searchResultsBeforeEdit = await pageObjects.triggersActionsUI.getConnectorsList();
+      expect(searchResultsBeforeEdit.length).to.eql(1);
+
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+
+      await testSubjects.setValue('nameInput', 'some test name to cancel');
+      await testSubjects.click('cancelSaveEditedConnectorButton');
+
+      await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedConnectorButton"]');
+
+      await pageObjects.triggersActionsUI.searchConnectors(connectorName);
+
+      await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
+      const nameInputAfterCancel = await testSubjects.find('nameInput');
+      const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
+      expect(textAfterCancel).to.eql(connectorName);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
     it('should delete a connector', async () => {
-      async function createConnector(connectorName: string) {
-        await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-        await testSubjects.click('.slack-card');
-
-        await testSubjects.setValue('nameInput', connectorName);
-
-        await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
-
-        await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
-        await pageObjects.common.closeToast();
-      }
       const connectorName = generateUniqueKey();
       await createConnector(connectorName);
 
@@ -141,19 +208,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should bulk delete connectors', async () => {
-      async function createConnector(connectorName: string) {
-        await pageObjects.triggersActionsUI.clickCreateConnectorButton();
-
-        await testSubjects.click('.slack-card');
-
-        await testSubjects.setValue('nameInput', connectorName);
-
-        await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
-
-        await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
-        await pageObjects.common.closeToast();
-      }
-
       const connectorName = generateUniqueKey();
       await createConnector(connectorName);
 
@@ -195,7 +249,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should not be able to edit a preconfigured connector', async () => {
-      const preconfiguredConnectorName = 'xyztest';
+      const preconfiguredConnectorName = 'test-preconfigured-email';
 
       await pageObjects.triggersActionsUI.searchConnectors(preconfiguredConnectorName);
 
@@ -205,7 +259,33 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="connectorsTableCell-name"] button');
 
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
-      expect(await testSubjects.exists('saveEditedActionButton')).to.be(false);
+      expect(await testSubjects.exists('saveAndCloseEditedActionButton')).to.be(false);
     });
   });
+
+  async function createConnector(connectorName: string) {
+    await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+    await testSubjects.click('.slack-card');
+
+    await testSubjects.setValue('nameInput', connectorName);
+
+    await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+
+    await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
+    await pageObjects.common.closeToast();
+  }
+
+  async function createIndexConnector(connectorName: string, indexName: string) {
+    await pageObjects.triggersActionsUI.clickCreateConnectorButton();
+
+    await testSubjects.click('.index-card');
+
+    await testSubjects.setValue('nameInput', connectorName);
+
+    await comboBox.set('connectorIndexesComboBox', indexName);
+
+    await find.clickByCssSelector('[data-test-subj="saveNewActionButton"]:not(disabled)');
+    await pageObjects.common.closeToast();
+  }
 };

@@ -13,7 +13,6 @@ import { LicensingPluginSetup, ILicense } from '../../licensing/public';
  * @public
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MapsLegacyLicensingSetupDependencies {
   licensing: LicensingPluginSetup;
   mapsLegacy: any;
@@ -27,12 +26,10 @@ export type MapsLegacyLicensingStart = ReturnType<MapsLegacyLicensing['start']>;
 export class MapsLegacyLicensing
   implements Plugin<MapsLegacyLicensingSetup, MapsLegacyLicensingStart> {
   public setup(core: CoreSetup, plugins: MapsLegacyLicensingSetupDependencies) {
-    const {
-      licensing,
-      mapsLegacy: { serviceSettings },
-    } = plugins;
+    const { licensing, mapsLegacy } = plugins;
     if (licensing) {
-      licensing.license$.subscribe((license: ILicense) => {
+      licensing.license$.subscribe(async (license: ILicense) => {
+        const serviceSettings = await mapsLegacy.getServiceSettings();
         const { uid, isActive } = license;
         if (isActive && license.hasAtLeast('basic')) {
           serviceSettings.setQueryParams({ license: uid });

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 
-import { LegacyAPICaller } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
@@ -21,12 +21,15 @@ const mockSearchResponse = {
   search: mockTimeRange,
 };
 
-const callWithRequestFactory = (resp: any): LegacyAPICaller => {
-  return (path: string) => {
-    return new Promise((resolve) => {
-      resolve(resp[path]);
-    }) as Promise<any>;
+const mlClusterClientFactory = (response: any): IScopedClusterClient => {
+  const callAs = {
+    fieldCaps: () => Promise.resolve({ body: response.fieldCaps }),
+    search: () => Promise.resolve({ body: response.search }),
   };
+  return ({
+    asCurrentUser: callAs,
+    asInternalUser: callAs,
+  } as unknown) as IScopedClusterClient;
 };
 
 function getMinimalValidJob() {
@@ -46,7 +49,7 @@ function getMinimalValidJob() {
 describe('ML - isValidTimeField', () => {
   it('called without job config argument triggers Promise rejection', (done) => {
     isValidTimeField(
-      callWithRequestFactory(mockSearchResponse),
+      mlClusterClientFactory(mockSearchResponse),
       (undefined as unknown) as CombinedJob
     ).then(
       () => done(new Error('Promise should not resolve for this test without job argument.')),
@@ -55,7 +58,7 @@ describe('ML - isValidTimeField', () => {
   });
 
   it('time_field `@timestamp`', (done) => {
-    isValidTimeField(callWithRequestFactory(mockSearchResponse), getMinimalValidJob()).then(
+    isValidTimeField(mlClusterClientFactory(mockSearchResponse), getMinimalValidJob()).then(
       (valid) => {
         expect(valid).toBe(true);
         done();
@@ -74,7 +77,7 @@ describe('ML - isValidTimeField', () => {
     };
 
     isValidTimeField(
-      callWithRequestFactory(mockSearchResponseNestedDate),
+      mlClusterClientFactory(mockSearchResponseNestedDate),
       mockJobConfigNestedDate
     ).then(
       (valid) => {
@@ -89,7 +92,7 @@ describe('ML - isValidTimeField', () => {
 describe('ML - validateTimeRange', () => {
   it('called without arguments', (done) => {
     validateTimeRange(
-      callWithRequestFactory(mockSearchResponse),
+      mlClusterClientFactory(mockSearchResponse),
       (undefined as unknown) as CombinedJob
     ).then(
       () => done(new Error('Promise should not resolve for this test without job argument.')),
@@ -98,7 +101,7 @@ describe('ML - validateTimeRange', () => {
   });
 
   it('called with non-valid job argument #2, missing datafeed_config', (done) => {
-    validateTimeRange(callWithRequestFactory(mockSearchResponse), ({
+    validateTimeRange(mlClusterClientFactory(mockSearchResponse), ({
       analysis_config: {},
     } as unknown) as CombinedJob).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
@@ -109,7 +112,7 @@ describe('ML - validateTimeRange', () => {
   it('called with non-valid job argument #3, missing datafeed_config.indices', (done) => {
     const job = { analysis_config: {}, datafeed_config: {} };
     validateTimeRange(
-      callWithRequestFactory(mockSearchResponse),
+      mlClusterClientFactory(mockSearchResponse),
       (job as unknown) as CombinedJob
     ).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
@@ -120,7 +123,7 @@ describe('ML - validateTimeRange', () => {
   it('called with non-valid job argument #4, missing data_description', (done) => {
     const job = { analysis_config: {}, datafeed_config: { indices: [] } };
     validateTimeRange(
-      callWithRequestFactory(mockSearchResponse),
+      mlClusterClientFactory(mockSearchResponse),
       (job as unknown) as CombinedJob
     ).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
@@ -131,7 +134,7 @@ describe('ML - validateTimeRange', () => {
   it('called with non-valid job argument #5, missing data_description.time_field', (done) => {
     const job = { analysis_config: {}, data_description: {}, datafeed_config: { indices: [] } };
     validateTimeRange(
-      callWithRequestFactory(mockSearchResponse),
+      mlClusterClientFactory(mockSearchResponse),
       (job as unknown) as CombinedJob
     ).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
@@ -140,11 +143,12 @@ describe('ML - validateTimeRange', () => {
   });
 
   it('invalid time field', () => {
-    const mockSearchResponseInvalid = _.cloneDeep(mockSearchResponse);
+    const mockSearchResponseInvalid = cloneDeep(mockSearchResponse);
+    // @ts-expect-error creating intentionally invalid data
     mockSearchResponseInvalid.fieldCaps = undefined;
     const duration = { start: 0, end: 1 };
     return validateTimeRange(
-      callWithRequestFactory(mockSearchResponseInvalid),
+      mlClusterClientFactory(mockSearchResponseInvalid),
       getMinimalValidJob(),
       duration
     ).then((messages) => {
@@ -158,7 +162,7 @@ describe('ML - validateTimeRange', () => {
     jobShortTimeRange.analysis_config.bucket_span = '1s';
     const duration = { start: 0, end: 1 };
     return validateTimeRange(
-      callWithRequestFactory(mockSearchResponse),
+      mlClusterClientFactory(mockSearchResponse),
       jobShortTimeRange,
       duration
     ).then((messages) => {
@@ -170,7 +174,7 @@ describe('ML - validateTimeRange', () => {
   it('too short time range, 25x bucket span is more than 2h', () => {
     const duration = { start: 0, end: 1 };
     return validateTimeRange(
-      callWithRequestFactory(mockSearchResponse),
+      mlClusterClientFactory(mockSearchResponse),
       getMinimalValidJob(),
       duration
     ).then((messages) => {
@@ -182,7 +186,7 @@ describe('ML - validateTimeRange', () => {
   it('time range between 2h and 25x bucket span', () => {
     const duration = { start: 0, end: 8000000 };
     return validateTimeRange(
-      callWithRequestFactory(mockSearchResponse),
+      mlClusterClientFactory(mockSearchResponse),
       getMinimalValidJob(),
       duration
     ).then((messages) => {
@@ -194,7 +198,7 @@ describe('ML - validateTimeRange', () => {
   it('valid time range', () => {
     const duration = { start: 0, end: 100000000 };
     return validateTimeRange(
-      callWithRequestFactory(mockSearchResponse),
+      mlClusterClientFactory(mockSearchResponse),
       getMinimalValidJob(),
       duration
     ).then((messages) => {
@@ -206,7 +210,7 @@ describe('ML - validateTimeRange', () => {
   it('invalid time range, start time is before the UNIX epoch', () => {
     const duration = { start: -1, end: 100000000 };
     return validateTimeRange(
-      callWithRequestFactory(mockSearchResponse),
+      mlClusterClientFactory(mockSearchResponse),
       getMinimalValidJob(),
       duration
     ).then((messages) => {

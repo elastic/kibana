@@ -16,22 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 import { AbstractSearchStrategy } from './abstract_search_strategy';
-import { SearchRequest } from '../search_requests/search_request';
 import { DefaultSearchCapabilities } from '../default_search_capabilities';
-
-const callWithRequestFactory = (server, request) => {
-  const { callWithRequest } = request.server.plugins.elasticsearch.getCluster('data');
-
-  return callWithRequest;
-};
 
 export class DefaultSearchStrategy extends AbstractSearchStrategy {
   name = 'default';
-
-  constructor(server) {
-    super(server, callWithRequestFactory, SearchRequest);
-  }
 
   checkForViability(req) {
     return {

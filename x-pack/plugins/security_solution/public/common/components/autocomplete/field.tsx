@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { EuiComboBoxOptionOption, EuiComboBox } from '@elastic/eui';
 
 import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
@@ -17,7 +17,9 @@ interface OperatorProps {
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;
+  fieldTypeFilter?: string[];
   fieldInputWidth?: number;
+  isRequired?: boolean;
   onChange: (a: IFieldType[]) => void;
 }
 
@@ -28,13 +30,24 @@ export const FieldComponent: React.FC<OperatorProps> = ({
   isLoading = false,
   isDisabled = false,
   isClearable = false,
-  fieldInputWidth = 190,
+  isRequired = false,
+  fieldTypeFilter = [],
+  fieldInputWidth,
   onChange,
 }): JSX.Element => {
-  const getLabel = useCallback((field): string => field.name, []);
-  const optionsMemo = useMemo((): IFieldType[] => (indexPattern ? indexPattern.fields : []), [
-    indexPattern,
-  ]);
+  const [touched, setIsTouched] = useState(false);
+  const getLabel = useCallback(({ name }): string => name, []);
+  const optionsMemo = useMemo((): IFieldType[] => {
+    if (indexPattern != null) {
+      if (fieldTypeFilter.length > 0) {
+        return indexPattern.fields.filter(({ type }) => fieldTypeFilter.includes(type));
+      } else {
+        return indexPattern.fields;
+      }
+    } else {
+      return [];
+    }
+  }, [fieldTypeFilter, indexPattern]);
   const selectedOptionsMemo = useMemo((): IFieldType[] => (selectedField ? [selectedField] : []), [
     selectedField,
   ]);
@@ -55,6 +68,10 @@ export const FieldComponent: React.FC<OperatorProps> = ({
     onChange(newValues);
   };
 
+  const handleTouch = useCallback((): void => {
+    setIsTouched(true);
+  }, [setIsTouched]);
+
   return (
     <EuiComboBox
       placeholder={placeholder}
@@ -64,9 +81,12 @@ export const FieldComponent: React.FC<OperatorProps> = ({
       isLoading={isLoading}
       isDisabled={isDisabled}
       isClearable={isClearable}
+      isInvalid={isRequired ? touched && selectedField == null : false}
+      onFocus={handleTouch}
       singleSelection={{ asPlainText: true }}
       data-test-subj="fieldAutocompleteComboBox"
-      style={{ width: `${fieldInputWidth}px` }}
+      style={fieldInputWidth ? { width: `${fieldInputWidth}px` } : {}}
+      fullWidth
     />
   );
 };

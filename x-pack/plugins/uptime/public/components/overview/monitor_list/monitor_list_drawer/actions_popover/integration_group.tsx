@@ -27,9 +27,12 @@ interface IntegrationGroupProps {
 
 export const extractSummaryValues = (summary: Pick<MonitorSummary, 'state'>) => {
   const domain = summary.state.url?.domain ?? '';
-  const podUid = summary.state.checks?.[0]?.kubernetes?.pod.uid ?? undefined;
-  const containerId = summary.state.checks?.[0]?.container?.id ?? undefined;
-  const ip = summary.state.checks?.[0]?.monitor.ip ?? undefined;
+
+  const firstCheck = summary.state.summaryPings?.[0];
+
+  const podUid = firstCheck?.kubernetes?.pod?.uid ?? undefined;
+  const containerId = firstCheck?.container?.id ?? undefined;
+  const ip = firstCheck?.monitor.ip ?? undefined;
 
   return {
     domain,
@@ -64,16 +67,17 @@ export const IntegrationGroup = ({ summary }: IntegrationGroupProps) => {
             href={getApmHref(summary, basePath, dateRangeStart, dateRangeEnd)}
             iconType="apmApp"
             message={i18n.translate('xpack.uptime.apmIntegrationAction.text', {
-              defaultMessage: 'Check APM for domain',
+              defaultMessage: 'Show APM Data',
               description:
-                'A message explaining that when the user clicks the associated link, it will navigate to the APM app and search for the selected domain',
+                'A message explaining that when the user clicks the associated link, it will navigate to the APM app',
             })}
             tooltipContent={i18n.translate(
               'xpack.uptime.monitorList.observabilityIntegrationsColumn.apmIntegrationLink.tooltip',
               {
-                defaultMessage: 'Click here to check APM for the domain "{domain}".',
+                defaultMessage:
+                  'Click here to check APM for the domain "{domain}" or explicitly defined "service name".',
                 description:
-                  'A messsage shown in a tooltip explaining that the nested anchor tag will navigate to the APM app and search for the given URL domain.',
+                  'A messsage shown in a tooltip explaining that the nested anchor tag will navigate to the APM app and search for the given URL domain or explicitly defined service name.',
                 values: {
                   domain,
                 },

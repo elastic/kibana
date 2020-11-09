@@ -10,7 +10,6 @@ import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../server/lib/al
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { AlertTypeModel } from '../../../../triggers_actions_ui/public/types';
 import { validateMetricThreshold } from './components/validation';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
 
 export function createInventoryMetricAlertType(): AlertTypeModel {
   return {
@@ -18,7 +17,13 @@ export function createInventoryMetricAlertType(): AlertTypeModel {
     name: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertName', {
       defaultMessage: 'Inventory',
     }),
+    description: i18n.translate('xpack.infra.metrics.inventory.alertFlyout.alertDescription', {
+      defaultMessage: 'Alert when the inventory exceeds a defined threshold.',
+    }),
     iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/observability/${docLinks.DOC_LINK_VERSION}/infrastructure-threshold-alert.html`;
+    },
     alertParamsExpression: React.lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(

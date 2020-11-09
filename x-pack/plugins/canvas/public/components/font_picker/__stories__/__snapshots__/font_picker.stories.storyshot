@@ -1,0 +1,132 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/FontPicker default 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <input
+      defaultValue=""
+      type="hidden"
+    />
+    <div
+      className="euiFormControlLayout euiFormControlLayout--compressed"
+    >
+      <div
+        className="euiFormControlLayout__childrenWrapper"
+      >
+        <span
+          className="euiScreenReaderOnly"
+          id="generated-id"
+        >
+          Select an option: 
+          , is selected
+        </span>
+        <button
+          aria-haspopup="true"
+          aria-labelledby="undefined generated-id"
+          className="euiSuperSelectControl euiSuperSelectControl--compressed"
+          onClick={[Function]}
+          onKeyDown={[Function]}
+          type="button"
+        />
+        <div
+          className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+        >
+          <span
+            className="euiFormControlLayoutCustomIcon"
+          >
+            <span
+              aria-hidden="true"
+              className="euiFormControlLayoutCustomIcon__icon"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/FontPicker with value 1`] = `
+<div
+  className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+  onKeyDown={[Function]}
+  onMouseDown={[Function]}
+  onMouseUp={[Function]}
+  onTouchEnd={[Function]}
+  onTouchStart={[Function]}
+>
+  <div
+    className="euiPopover__anchor"
+  >
+    <input
+      type="hidden"
+      value="'American Typewriter', 'Courier New', Courier, Monaco, mono"
+    />
+    <div
+      className="euiFormControlLayout euiFormControlLayout--compressed"
+    >
+      <div
+        className="euiFormControlLayout__childrenWrapper"
+      >
+        <span
+          className="euiScreenReaderOnly"
+          id="generated-id"
+        >
+          Select an option: 
+          <div
+            style={
+              Object {
+                "fontFamily": "'American Typewriter', 'Courier New', Courier, Monaco, mono",
+              }
+            }
+          >
+            American Typewriter
+          </div>
+          , is selected
+        </span>
+        <button
+          aria-haspopup="true"
+          aria-labelledby="undefined generated-id"
+          className="euiSuperSelectControl euiSuperSelectControl--compressed"
+          onClick={[Function]}
+          onKeyDown={[Function]}
+          type="button"
+        >
+          <div
+            style={
+              Object {
+                "fontFamily": "'American Typewriter', 'Courier New', Courier, Monaco, mono",
+              }
+            }
+          >
+            American Typewriter
+          </div>
+        </button>
+        <div
+          className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+        >
+          <span
+            className="euiFormControlLayoutCustomIcon"
+          >
+            <span
+              aria-hidden="true"
+              className="euiFormControlLayoutCustomIcon__icon"
+              data-euiicon-type="arrowDown"
+            />
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

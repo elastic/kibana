@@ -107,7 +107,7 @@ export const LogsPageProviders: React.FunctionComponent = ({ children }) => {
   const { sourceStatus } = useLogSourceContext();
 
   // The providers assume the source is loaded, so short-circuit them otherwise
-  if (!sourceStatus?.logIndicesExist) {
+  if (sourceStatus?.logIndexStatus === 'missing') {
     return <>{children}</>;
   }
 

@@ -10,26 +10,50 @@ import {
   RequestHandler,
   RequestHandlerContext,
   SavedObjectsClientContract,
+  LegacyAPICaller,
 } from 'kibana/server';
-import { CallCluster } from 'src/legacy/core_plugins/elasticsearch';
-import { wrapEsError } from '../../../../../legacy/server/lib/create_router/error_wrappers';
 
+import { TRANSFORM_STATE } from '../../../common/constants';
+import { TransformId } from '../../../common/types/transform';
 import {
-  TransformEndpointRequest,
-  TransformEndpointResult,
-  TransformId,
-  TRANSFORM_STATE,
-  DeleteTransformEndpointRequest,
-  DeleteTransformStatus,
-  ResultData,
-} from '../../../common';
+  transformIdParamSchema,
+  ResponseStatus,
+  TransformIdParamSchema,
+} from '../../../common/api_schemas/common';
+import {
+  deleteTransformsRequestSchema,
+  DeleteTransformsRequestSchema,
+  DeleteTransformsResponseSchema,
+} from '../../../common/api_schemas/delete_transforms';
+import {
+  startTransformsRequestSchema,
+  StartTransformsRequestSchema,
+  StartTransformsResponseSchema,
+} from '../../../common/api_schemas/start_transforms';
+import {
+  stopTransformsRequestSchema,
+  StopTransformsRequestSchema,
+  StopTransformsResponseSchema,
+} from '../../../common/api_schemas/stop_transforms';
+import {
+  postTransformsUpdateRequestSchema,
+  PostTransformsUpdateRequestSchema,
+  PostTransformsUpdateResponseSchema,
+} from '../../../common/api_schemas/update_transforms';
+import {
+  GetTransformsResponseSchema,
+  postTransformsPreviewRequestSchema,
+  PostTransformsPreviewRequestSchema,
+  putTransformsRequestSchema,
+  PutTransformsRequestSchema,
+  PutTransformsResponseSchema,
+} from '../../../common/api_schemas/transforms';
 
 import { RouteDependencies } from '../../types';
 
 import { addBasePath } from '../index';
 
-import { isRequestTimeout, fillResultsWithTimeouts, wrapError } from './error_utils';
-import { deleteTransformSchema, schemaTransformId, SchemaTransformId } from './schema';
+import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
 import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
 import { IIndexPattern } from '../../../../../../src/plugins/data/common/index_patterns';
 
@@ -47,6 +71,16 @@ interface StopOptions {
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   const { router, license } = routeDependencies;
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {get} /api/transform/transforms Get transforms
+   * @apiName GetTransforms
+   * @apiDescription Returns transforms
+   *
+   * @apiSchema (params) jobAuditMessagesJobIdSchema
+   * @apiSchema (query) jobAuditMessagesQuerySchema
+   */
   router.get(
     { path: addBasePath('transforms'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -62,16 +96,24 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
-  router.get(
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {get} /api/transform/transforms/:transformId Get transform
+   * @apiName GetTransform
+   * @apiDescription Returns a single transform
+   *
+   * @apiSchema (params) transformIdParamSchema
+   */
+  router.get<TransformIdParamSchema, undefined, undefined>(
     {
       path: addBasePath('transforms/{transformId}'),
-      validate: schemaTransformId,
+      validate: { params: transformIdParamSchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { transformId } = req.params as SchemaTransformId;
-      const options = {
-        ...(transformId !== undefined ? { transformId } : {}),
-      };
+    license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
+      const { transformId } = req.params;
+      const options = transformId !== undefined ? { transformId } : {};
       try {
         const transforms = await getTransforms(
           options,
@@ -83,6 +125,14 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {get} /api/transform/transforms/_stats Get transforms stats
+   * @apiName GetTransformsStats
+   * @apiDescription Returns transforms stats
+   */
   router.get(
     { path: addBasePath('transforms/_stats'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
@@ -98,13 +148,23 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
       }
     })
   );
-  router.get(
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {get} /api/transform/transforms/:transformId/_stats Get transform stats
+   * @apiName GetTransformStats
+   * @apiDescription Returns stats for a single transform
+   *
+   * @apiSchema (params) transformIdParamSchema
+   */
+  router.get<TransformIdParamSchema, undefined, undefined>(
     {
       path: addBasePath('transforms/{transformId}/_stats'),
-      validate: schemaTransformId,
+      validate: { params: transformIdParamSchema },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { transformId } = req.params as SchemaTransformId;
+    license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
+      const { transformId } = req.params;
       const options = {
         ...(transformId !== undefined ? { transformId } : {}),
       };
@@ -120,134 +180,198 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
     })
   );
   registerTransformsAuditMessagesRoutes(routeDependencies);
-  router.put(
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {put} /api/transform/transforms/:transformId Put transform
+   * @apiName PutTransform
+   * @apiDescription Creates a transform
+   *
+   * @apiSchema (params) transformIdParamSchema
+   * @apiSchema (body) putTransformsRequestSchema
+   */
+  router.put<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
     {
       path: addBasePath('transforms/{transformId}'),
       validate: {
-        ...schemaTransformId,
-        body: schema.maybe(schema.any()),
+        params: transformIdParamSchema,
+        body: putTransformsRequestSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { transformId } = req.params as SchemaTransformId;
+    license.guardApiRoute<TransformIdParamSchema, undefined, PutTransformsRequestSchema>(
+      async (ctx, req, res) => {
+        const { transformId } = req.params;
 
-      const response: {
-        transformsCreated: Array<{ transform: string }>;
-        errors: any[];
-      } = {
-        transformsCreated: [],
-        errors: [],
-      };
+        const response: PutTransformsResponseSchema = {
+          transformsCreated: [],
+          errors: [],
+        };
 
-      await ctx
-        .transform!.dataClient.callAsCurrentUser('transform.createTransform', {
-          body: req.body,
-          transformId,
-        })
-        .then(() => response.transformsCreated.push({ transform: transformId }))
-        .catch((e) =>
-          response.errors.push({
-            id: transformId,
-            error: wrapEsError(e),
+        await ctx
+          .transform!.dataClient.callAsCurrentUser('transform.createTransform', {
+            body: req.body,
+            transformId,
           })
-        );
+          .then(() => response.transformsCreated.push({ transform: transformId }))
+          .catch((e) =>
+            response.errors.push({
+              id: transformId,
+              error: wrapEsError(e),
+            })
+          );
 
-      return res.ok({ body: response });
-    })
+        return res.ok({ body: response });
+      }
+    )
   );
-  router.post(
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/transforms/:transformId/_update Post transform update
+   * @apiName PostTransformUpdate
+   * @apiDescription Updates a transform
+   *
+   * @apiSchema (params) transformIdParamSchema
+   * @apiSchema (body) postTransformsUpdateRequestSchema
+   */
+  router.post<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
     {
       path: addBasePath('transforms/{transformId}/_update'),
       validate: {
-        ...schemaTransformId,
-        body: schema.maybe(schema.any()),
+        params: transformIdParamSchema,
+        body: postTransformsUpdateRequestSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const { transformId } = req.params as SchemaTransformId;
+    license.guardApiRoute<TransformIdParamSchema, undefined, PostTransformsUpdateRequestSchema>(
+      async (ctx, req, res) => {
+        const { transformId } = req.params;
 
-      try {
-        return res.ok({
-          body: await ctx.transform!.dataClient.callAsCurrentUser('transform.updateTransform', {
-            body: req.body,
-            transformId,
-          }),
-        });
-      } catch (e) {
-        return res.customError(wrapError(e));
+        try {
+          return res.ok({
+            body: (await ctx.transform!.dataClient.callAsCurrentUser('transform.updateTransform', {
+              body: req.body,
+              transformId,
+            })) as PostTransformsUpdateResponseSchema,
+          });
+        } catch (e) {
+          return res.customError(wrapError(e));
+        }
       }
-    })
+    )
   );
-  router.post(
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/delete_transforms Post delete transforms
+   * @apiName DeleteTransforms
+   * @apiDescription Deletes transforms
+   *
+   * @apiSchema (body) deleteTransformsRequestSchema
+   */
+  router.post<undefined, undefined, DeleteTransformsRequestSchema>(
     {
       path: addBasePath('delete_transforms'),
       validate: {
-        body: deleteTransformSchema,
+        body: deleteTransformsRequestSchema,
       },
     },
-    license.guardApiRoute(async (ctx, req, res) => {
-      const {
-        transformsInfo,
-        deleteDestIndex,
-        deleteDestIndexPattern,
-        forceDelete,
-      } = req.body as DeleteTransformEndpointRequest;
+    license.guardApiRoute<undefined, undefined, DeleteTransformsRequestSchema>(
+      async (ctx, req, res) => {
+        try {
+          const body = await deleteTransforms(req.body, ctx, res);
 
-      try {
-        const body = await deleteTransforms(
-          transformsInfo,
-          deleteDestIndex,
-          deleteDestIndexPattern,
-          forceDelete,
-          ctx,
-          license,
-          res
-        );
+          if (body && body.status) {
+            if (body.status === 404) {
+              return res.notFound();
+            }
+            if (body.status === 403) {
+              return res.forbidden();
+            }
+          }
 
-        if (body && body.status) {
-          if (body.status === 404) {
-            return res.notFound();
-          }
-          if (body.status === 403) {
-            return res.forbidden();
-          }
+          return res.ok({
+            body,
+          });
+        } catch (e) {
+          return res.customError(wrapError(wrapEsError(e)));
         }
-
-        return res.ok({
-          body,
-        });
-      } catch (e) {
-        return res.customError(wrapError(wrapEsError(e)));
       }
-    })
+    )
   );
-  router.post(
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/transforms/_preview Preview transform
+   * @apiName PreviewTransform
+   * @apiDescription Previews transform
+   *
+   * @apiSchema (body) postTransformsPreviewRequestSchema
+   */
+  router.post<undefined, undefined, PostTransformsPreviewRequestSchema>(
     {
       path: addBasePath('transforms/_preview'),
       validate: {
-        body: schema.maybe(schema.any()),
+        body: postTransformsPreviewRequestSchema,
       },
     },
-    license.guardApiRoute(previewTransformHandler)
+    license.guardApiRoute<undefined, undefined, PostTransformsPreviewRequestSchema>(
+      previewTransformHandler
+    )
   );
-  router.post(
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/start_transforms Start transforms
+   * @apiName PostStartTransforms
+   * @apiDescription Starts transform
+   *
+   * @apiSchema (body) startTransformsRequestSchema
+   */
+  router.post<undefined, undefined, StartTransformsRequestSchema>(
     {
       path: addBasePath('start_transforms'),
       validate: {
-        body: schema.maybe(schema.any()),
+        body: startTransformsRequestSchema,
       },
     },
-    license.guardApiRoute(startTransformsHandler)
+    license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
+      startTransformsHandler
+    )
   );
-  router.post(
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/stop_transforms Stop transforms
+   * @apiName PostStopTransforms
+   * @apiDescription Stops transform
+   *
+   * @apiSchema (body) stopTransformsRequestSchema
+   */
+  router.post<undefined, undefined, StopTransformsRequestSchema>(
     {
       path: addBasePath('stop_transforms'),
       validate: {
-        body: schema.maybe(schema.any()),
+        body: stopTransformsRequestSchema,
       },
     },
-    license.guardApiRoute(stopTransformsHandler)
+    license.guardApiRoute<undefined, undefined, StopTransformsRequestSchema>(stopTransformsHandler)
   );
+
+  /**
+   * @apiGroup Transforms
+   *
+   * @api {post} /api/transform/es_search Transform ES Search Proxy
+   * @apiName PostTransformEsSearchProxy
+   * @apiDescription ES Search Proxy
+   *
+   * @apiSchema (body) any
+   */
   router.post(
     {
       path: addBasePath('es_search'),
@@ -267,7 +391,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   );
 }
 
-const getTransforms = async (options: { transformId?: string }, callAsCurrentUser: CallCluster) => {
+const getTransforms = async (
+  options: { transformId?: string },
+  callAsCurrentUser: LegacyAPICaller
+): Promise<GetTransformsResponseSchema> => {
   return await callAsCurrentUser('transform.getTransforms', options);
 };
 
@@ -294,22 +421,25 @@ async function deleteDestIndexPatternById(
 }
 
 async function deleteTransforms(
-  transformsInfo: TransformEndpointRequest[],
-  deleteDestIndex: boolean | undefined,
-  deleteDestIndexPattern: boolean | undefined,
-  shouldForceDelete: boolean = false,
+  reqBody: DeleteTransformsRequestSchema,
   ctx: RequestHandlerContext,
-  license: RouteDependencies['license'],
   response: KibanaResponseFactory
 ) {
-  const results: Record<string, DeleteTransformStatus> = {};
+  const { transformsInfo } = reqBody;
+
+  // Cast possible undefineds as booleans
+  const deleteDestIndex = !!reqBody.deleteDestIndex;
+  const deleteDestIndexPattern = !!reqBody.deleteDestIndexPattern;
+  const shouldForceDelete = !!reqBody.forceDelete;
+
+  const results: DeleteTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     let destinationIndex: string | undefined;
 
-    const transformDeleted: ResultData = { success: false };
-    const destIndexDeleted: ResultData = { success: false };
-    const destIndexPatternDeleted: ResultData = {
+    const transformDeleted: ResponseStatus = { success: false };
+    const destIndexDeleted: ResponseStatus = { success: false };
+    const destIndexPatternDeleted: ResponseStatus = {
       success: false,
     };
     const transformId = transformInfo.id;
@@ -405,7 +535,11 @@ async function deleteTransforms(
   return results;
 }
 
-const previewTransformHandler: RequestHandler = async (ctx, req, res) => {
+const previewTransformHandler: RequestHandler<
+  undefined,
+  undefined,
+  PostTransformsPreviewRequestSchema
+> = async (ctx, req, res) => {
   try {
     return res.ok({
       body: await ctx.transform!.dataClient.callAsCurrentUser('transform.getTransformsPreview', {
@@ -417,8 +551,12 @@ const previewTransformHandler: RequestHandler = async (ctx, req, res) => {
   }
 };
 
-const startTransformsHandler: RequestHandler = async (ctx, req, res) => {
-  const transformsInfo = req.body as TransformEndpointRequest[];
+const startTransformsHandler: RequestHandler<
+  undefined,
+  undefined,
+  StartTransformsRequestSchema
+> = async (ctx, req, res) => {
+  const transformsInfo = req.body;
 
   try {
     return res.ok({
@@ -430,15 +568,15 @@ const startTransformsHandler: RequestHandler = async (ctx, req, res) => {
 };
 
 async function startTransforms(
-  transformsInfo: TransformEndpointRequest[],
-  callAsCurrentUser: CallCluster
+  transformsInfo: StartTransformsRequestSchema,
+  callAsCurrentUser: LegacyAPICaller
 ) {
-  const results: TransformEndpointResult = {};
+  const results: StartTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;
     try {
-      await callAsCurrentUser('transform.startTransform', { transformId } as SchemaTransformId);
+      await callAsCurrentUser('transform.startTransform', { transformId });
       results[transformId] = { success: true };
     } catch (e) {
       if (isRequestTimeout(e)) {
@@ -455,8 +593,12 @@ async function startTransforms(
   return results;
 }
 
-const stopTransformsHandler: RequestHandler = async (ctx, req, res) => {
-  const transformsInfo = req.body as TransformEndpointRequest[];
+const stopTransformsHandler: RequestHandler<
+  undefined,
+  undefined,
+  StopTransformsRequestSchema
+> = async (ctx, req, res) => {
+  const transformsInfo = req.body;
 
   try {
     return res.ok({
@@ -468,10 +610,10 @@ const stopTransformsHandler: RequestHandler = async (ctx, req, res) => {
 };
 
 async function stopTransforms(
-  transformsInfo: TransformEndpointRequest[],
-  callAsCurrentUser: CallCluster
+  transformsInfo: StopTransformsRequestSchema,
+  callAsCurrentUser: LegacyAPICaller
 ) {
-  const results: TransformEndpointResult = {};
+  const results: StopTransformsResponseSchema = {};
 
   for (const transformInfo of transformsInfo) {
     const transformId = transformInfo.id;

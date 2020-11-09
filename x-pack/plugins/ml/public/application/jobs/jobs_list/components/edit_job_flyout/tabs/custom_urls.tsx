@@ -160,13 +160,16 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
   };
 
   onTestButtonClick = () => {
-    const { toasts } = this.props.kibana.services.notifications;
+    const {
+      http: { basePath },
+      notifications: { toasts },
+    } = this.props.kibana.services;
     const job = this.props.job;
     buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings)
       .then((customUrl) => {
         getTestUrl(job, customUrl)
           .then((testUrl) => {
-            openCustomUrlWindow(testUrl, customUrl);
+            openCustomUrlWindow(testUrl, customUrl, basePath.get());
           })
           .catch((resp) => {
             // eslint-disable-next-line no-console

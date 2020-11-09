@@ -18,20 +18,20 @@
  */
 import request from 'request';
 import supertest from 'supertest';
+import { REPO_ROOT } from '@kbn/dev-utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { BehaviorSubject } from 'rxjs';
 
 import { CoreContext } from '../core_context';
 import { HttpService } from './http_service';
 import { KibanaRequest } from './router';
-
 import { Env } from '../config';
-import { getEnvOptions } from '../config/__mocks__/env';
-import { configServiceMock } from '../config/config_service.mock';
+
 import { contextServiceMock } from '../context/context_service.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-
+import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { httpServerMock } from './http_server.mocks';
+
 import { createCookieSessionStorageFactory } from './cookie_session_storage';
 
 let server: HttpService;
@@ -63,12 +63,16 @@ configService.atPath.mockReturnValue(
       whitelist: [],
     },
     customResponseHeaders: {},
+    requestId: {
+      allowFromAnyIp: true,
+      ipAllowlist: [],
+    },
   } as any)
 );
 
 beforeEach(() => {
   logger = loggingSystemMock.create();
-  env = Env.createDefault(getEnvOptions());
+  env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
   coreContext = { coreId: Symbol(), env, logger, configService: configService as any };
   server = new HttpService(coreContext);

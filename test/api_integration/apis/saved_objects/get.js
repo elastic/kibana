@@ -56,6 +56,7 @@ export default function ({ getService }) {
                   id: '91200a00-9efd-11e7-acb3-3dab96693fab',
                 },
               ],
+              namespaces: ['default'],
             });
             expect(resp.body.migrationVersion).to.be.ok();
           }));

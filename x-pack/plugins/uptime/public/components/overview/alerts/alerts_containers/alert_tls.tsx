@@ -24,6 +24,3 @@ export const AlertTls: React.FC<{}> = () => {
     />
   );
 };
-
-// eslint-disable-next-line import/no-default-export
-export { AlertTls as default };

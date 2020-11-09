@@ -8,17 +8,18 @@ import { Filter } from '../../../../../../../src/plugins/data/public';
 
 import { DataProvider } from '../../components/timeline/data_providers/data_provider';
 import { Sort } from '../../components/timeline/body/sort';
-import {
-  PinnedEvent,
-  TimelineNonEcsData,
+import { PinnedEvent } from '../../../graphql/types';
+import { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
+import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+import type {
+  TimelineEventsType,
   TimelineType,
   TimelineStatus,
-} from '../../../graphql/types';
-import { KueryFilterQuery, SerializedFilterQuery } from '../../../common/store/types';
+  RowRendererId,
+} from '../../../../common/types/timeline';
 
 export const DEFAULT_PAGE_COUNT = 2; // Eui Pager will not render unless this is a minimum of 2 pages
 export type KqlMode = 'filter' | 'search';
-export type EventType = 'all' | 'raw' | 'alert' | 'signal';
 
 export type ColumnHeaderType = 'not-filtered' | 'text-filter';
 
@@ -51,9 +52,11 @@ export interface TimelineModel {
   /** A summary of the events and notes in this timeline */
   description: string;
   /** Typoe of event you want to see in this timeline */
-  eventType?: EventType;
+  eventType?: TimelineEventsType;
   /** A map of events in this timeline to the chronologically ordered notes (in this timeline) associated with the event */
   eventIdToNoteIds: Record<string, string[]>;
+  /** A list of Ids of excluded Row Renderers */
+  excludedRowRendererIds: RowRendererId[];
   filters?: Filter[];
   /** When non-empty, display a graph view for this event */
   graphEventId?: string;
@@ -63,6 +66,8 @@ export interface TimelineModel {
   highlightedDropAndProviderId: string;
   /** Uniquely identifies the timeline */
   id: string;
+  /** TO DO sourcerer @X define this */
+  indexNames: string[];
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
   /** Events to be rendered as loading **/
@@ -87,9 +92,9 @@ export interface TimelineModel {
   title: string;
   /** timelineType: default | template */
   timelineType: TimelineType;
-  /** an unique id for template timeline */
+  /** an unique id for timeline template */
   templateTimelineId: string | null;
-  /** null for default timeline, number for template timeline */
+  /** null for default timeline, number for timeline template */
   templateTimelineVersion: number | null;
   /** Notes added to the timeline itself. Notes added to events are stored (separately) in `eventIdToNote` */
   noteIds: string[];
@@ -98,8 +103,8 @@ export interface TimelineModel {
   pinnedEventsSaveObject: Record<string, PinnedEvent>;
   /** Specifies the granularity of the date range (e.g. 1 Day / Week / Month) applicable to the mini-map */
   dateRange: {
-    start: number;
-    end: number;
+    start: string;
+    end: string;
   };
   savedQueryId?: string | null;
   /** Events selected on this timeline -- eventId to TimelineNonEcsData[] mapping of data required for batch actions **/
@@ -108,8 +113,6 @@ export interface TimelineModel {
   show: boolean;
   /** When true, shows checkboxes enabling selection. Selected events store in selectedEventIds **/
   showCheckboxes: boolean;
-  /** When true, shows additional rowRenderers below the PlainRowRenderer **/
-  showRowRenderers: boolean;
   /**  Specifies which column the timeline is sorted on, and the direction (ascending / descending) */
   sort: Sort;
   /** status: active | draft */
@@ -131,9 +134,11 @@ export type SubsetTimelineModel = Readonly<
     | 'description'
     | 'eventType'
     | 'eventIdToNoteIds'
+    | 'excludedRowRendererIds'
     | 'graphEventId'
     | 'highlightedDropAndProviderId'
     | 'historyIds'
+    | 'indexNames'
     | 'isFavorite'
     | 'isLive'
     | 'isSelectAllChecked'
@@ -153,7 +158,6 @@ export type SubsetTimelineModel = Readonly<
     | 'selectedEventIds'
     | 'show'
     | 'showCheckboxes'
-    | 'showRowRenderers'
     | 'sort'
     | 'width'
     | 'isSaving'

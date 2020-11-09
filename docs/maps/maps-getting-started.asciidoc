@@ -50,7 +50,7 @@ In this tutorial, you'll learn to:
 
 The first thing to do is to create a new map.
 
-. If you haven't already, open the menu, then click *{kib} > Maps*.
+. If you haven't already, open the main menu, then click *Maps*.
 . On the maps list page, click *Create map*.
 . Set the time range to *Last 7 days*.
 +
@@ -68,40 +68,17 @@ The first layer you'll add is a choropleth layer to shade world countries
 by web log traffic. Darker shades symbolize countries with more web log traffic,
 and lighter shades symbolize countries with less traffic.
 
-==== Add a vector layer to display world country boundaries
-
 . Click *Add layer*.
-. Select the *EMS Boundaries* layer.
+. Select *Choropleth*.
 . From the *Layer* dropdown menu, select *World Countries*.
+. Under *Statistics source*, set *Index pattern* to *kibana_sample_data_logs*.
+. Set *Join field* to *geo.src*.
 . Click the *Add layer* button.
 . Set *Name* to `Total Requests by Country`.
 . Set *Opacity* to 50%.
 . Click *Add* under *Tooltip fields*.
 . In the popover, select *ISO 3166-1 alpha-2 code* and *name* and click *Add*.
-
-===== Join the vector layer with the sample web log index
-
-You now have a vector layer containing the world countries.
-To symbolize countries by web traffic, you'll need to augment the world country features with the count of Elasticsearch weblog documents originating from each country.
-To do this, you'll create a <<terms-join, term join>> to link the vector source *World Countries* to
-the {es} index `kibana_sample_data_logs` on the shared key iso2 = geo.src.
-
-. Click plus image:maps/images/gs_plus_icon.png[] next to the *Term Joins* label.
-. Click *Join --select--*
-. Set *Left field* to *ISO 3166-1 alpha-2 code*.
-. Set *Right source* to *kibana_sample_data_logs*.
-. Set *Right field* to *geo.src*.
-. Click *and use metric count*.
-. Set *Custom label* to *web logs count*.
-
-===== Set the layer style
-
-All of the world countries are still a single color because the layer is using <<maps-vector-style-static, static styling>>.
-To shade the world countries based on which country is sending the most requests, you'll need to use <<maps-vector-style-data-driven, data driven styling>>.
-
-. Under *Fill color*, change the selected value from *Solid* to *By value*.
-. In the field select input, select *web logs count*.
-. Select the grey color ramp.
+. Under *Fill color*, select the grey color ramp.
 . Under *Border color*, change the selected color to *white*.
 . Click *Save & close*.
 +
@@ -127,7 +104,7 @@ This layer displays web log documents as points.
 The layer is only visible when users zoom in the map past zoom level 9.
 
 . Click *Add layer*.
-. Click the *Documents* layer.
+. Select *Documents*.
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Name* to `Actual Requests`.
@@ -161,7 +138,7 @@ image::maps/images/grid_metrics_both.png[]
 ===== Add the layer
 
 . Click *Add layer*.
-. Click the *Clusters and grids* layer.
+. Select *Clusters and grids*.
 . Set *Index pattern* to *kibana_sample_data_logs*.
 . Click the *Add layer* button.
 . Set *Name* to `Total Requests and Bytes`.
@@ -211,7 +188,7 @@ You have completed the steps for re-creating the sample data map.
 === Add the map to a dashboard
 You can add your saved map to a {kibana-ref}/dashboard.html[dashboard] and view your geospatial data alongside bar charts, pie charts, and other visualizations.
 
-. Open the menu, then go to *Dashboard*.
+. Open the main menu, then click *Dashboard*.
 . Click *Create dashboard*.
 . Set the time range to *Last 7 days*.
 . Click *Add*.

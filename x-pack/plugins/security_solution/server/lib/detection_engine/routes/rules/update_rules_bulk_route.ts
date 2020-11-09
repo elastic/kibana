@@ -13,6 +13,7 @@ import {
   UpdateRulesBulkSchemaDecoded,
 } from '../../../../../common/detection_engine/schemas/request/update_rules_bulk_schema';
 import { rulesBulkSchema } from '../../../../../common/detection_engine/schemas/response/rules_bulk_schema';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { SetupPlugins } from '../../../../plugin';
@@ -50,7 +51,13 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
         return siemResponse.error({ statusCode: 404 });
       }
 
-      const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+      const mlAuthz = buildMlAuthz({
+        license: context.licensing.license,
+        ml,
+        request,
+        savedObjectsClient,
+      });
+
       const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
       const rules = await Promise.all(
         request.body.map(async (payloadRule) => {
@@ -61,6 +68,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
             building_block_type: buildingBlockType,
             description,
             enabled,
+            event_category_override: eventCategoryOverride,
             false_positives: falsePositives,
             from,
             query: queryOrUndefined,
@@ -88,6 +96,14 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
             to,
             type,
             threat,
+            threshold,
+            threat_filters: threatFilters,
+            threat_index: threatIndex,
+            threat_query: threatQuery,
+            threat_mapping: threatMapping,
+            threat_language: threatLanguage,
+            concurrent_searches: concurrentSearches,
+            items_per_search: itemsPerSearch,
             throttle,
             timestamp_override: timestampOverride,
             references,
@@ -107,13 +123,10 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               });
             }
 
-            const query =
-              type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+            const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
             const language =
-              type !== 'machine_learning' && languageOrUndefined == null
-                ? 'kuery'
-                : languageOrUndefined;
+              !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined;
 
             // TODO: Fix these either with an is conversion or by better typing them within io-ts
             const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
@@ -128,6 +141,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               buildingBlockType,
               description,
               enabled,
+              eventCategoryOverride,
               falsePositives,
               from,
               query,
@@ -156,6 +170,14 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
               to,
               type,
               threat,
+              threshold,
+              threatFilters,
+              threatIndex,
+              threatQuery,
+              threatMapping,
+              threatLanguage,
+              concurrentSearches,
+              itemsPerSearch,
               timestampOverride,
               references,
               note,
@@ -180,12 +202,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
                 search: rule.id,
                 searchFields: ['alertId'],
               });
-              return transformValidateBulkError(
-                rule.id,
-                rule,
-                ruleActions,
-                ruleStatuses.saved_objects[0]
-              );
+              return transformValidateBulkError(rule.id, rule, ruleActions, ruleStatuses);
             } else {
               return getIdBulkError({ id, ruleId });
             }

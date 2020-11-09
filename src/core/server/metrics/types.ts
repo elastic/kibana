@@ -20,14 +20,15 @@
 import { Observable } from 'rxjs';
 import { OpsProcessMetrics, OpsOsMetrics, OpsServerMetrics } from './collectors';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MetricsServiceSetup {}
 /**
  * APIs to retrieves metrics gathered and exposed by the core platform.
  *
  * @public
  */
-export interface MetricsServiceStart {
+export interface MetricsServiceSetup {
+  /** Interval metrics are collected in milliseconds */
+  readonly collectionInterval: number;
+
   /**
    * Retrieve an observable emitting the {@link OpsMetrics} gathered.
    * The observable will emit an initial value during core's `start` phase, and a new value every fixed interval of time,
@@ -42,6 +43,12 @@ export interface MetricsServiceStart {
    */
   getOpsMetrics$: () => Observable<OpsMetrics>;
 }
+/**
+ * {@inheritdoc MetricsServiceSetup}
+ *
+ * @public
+ */
+export type MetricsServiceStart = MetricsServiceSetup;
 
 export type InternalMetricsServiceSetup = MetricsServiceSetup;
 export type InternalMetricsServiceStart = MetricsServiceStart;
@@ -53,6 +60,8 @@ export type InternalMetricsServiceStart = MetricsServiceStart;
  * @public
  */
 export interface OpsMetrics {
+  /** Time metrics were recorded at. */
+  collected_at: Date;
   /** Process related metrics */
   process: OpsProcessMetrics;
   /** OS related metrics */

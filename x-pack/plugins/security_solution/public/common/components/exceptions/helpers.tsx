@@ -12,11 +12,7 @@ import uuid from 'uuid';
 
 import * as i18n from './translations';
 import {
-  FormattedEntry,
   BuilderEntry,
-  EmptyListEntry,
-  DescriptionListItem,
-  FormattedBuilderEntry,
   CreateExceptionListItemBuilderSchema,
   ExceptionsBuilderExceptionItem,
 } from './types';
@@ -24,20 +20,27 @@ import { EXCEPTION_OPERATORS, isOperator } from '../autocomplete/operators';
 import { OperatorOption } from '../autocomplete/types';
 import {
   CommentsArray,
+  Comment,
+  CreateComment,
   Entry,
   ExceptionListItemSchema,
   NamespaceType,
   OperatorTypeEnum,
   CreateExceptionListItemSchema,
+  comment,
   entry,
   entriesNested,
   createExceptionListItemSchema,
   exceptionListItemSchema,
-} from '../../../lists_plugin_deps';
-import { IFieldType, IIndexPattern } from '../../../../../../../src/plugins/data/common';
-
-export const isListType = (item: BuilderEntry): item is EmptyListEntry =>
-  item.type === OperatorTypeEnum.LIST;
+  UpdateExceptionListItemSchema,
+  EntryNested,
+  OsTypeArray,
+} from '../../../shared_imports';
+import { IIndexPattern } from '../../../../../../../src/plugins/data/common';
+import { validate } from '../../../../common/validate';
+import { Ecs } from '../../../../common/ecs';
+import { CodeSignature } from '../../../../common/ecs/file';
+import { WithCopyToClipboard } from '../../lib/clipboard/with_copy_to_clipboard';
 
 /**
  * Returns the operator type, may not need this if using io-ts types
@@ -64,7 +67,7 @@ export const getOperatorType = (item: BuilderEntry): OperatorTypeEnum => {
  * @param item a single ExceptionItem entry
  */
 export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption => {
-  if (entriesNested.is(item)) {
+  if (item.type === 'nested') {
     return isOperator;
   } else {
     const operatorType = getOperatorType(item);
@@ -76,45 +79,11 @@ export const getExceptionOperatorSelect = (item: BuilderEntry): OperatorOption =
   }
 };
 
-export const getExceptionOperatorFromSelect = (value: string): OperatorOption => {
-  const operator = EXCEPTION_OPERATORS.filter(({ message }) => message === value);
-  return operator[0] ?? isOperator;
-};
-
 /**
- * Formats ExceptionItem entries into simple field, operator, value
- * for use in rendering items in table
+ * Returns the fields corresponding value for an entry
  *
- * @param entries an ExceptionItem's entries
+ * @param item a single ExceptionItem entry
  */
-export const getFormattedEntries = (entries: BuilderEntry[]): FormattedEntry[] => {
-  const formattedEntries = entries.map((item) => {
-    if (entriesNested.is(item)) {
-      const parent = {
-        fieldName: item.field,
-        operator: undefined,
-        value: undefined,
-        isNested: false,
-      };
-      return item.entries.reduce<FormattedEntry[]>(
-        (acc, nestedEntry) => {
-          const formattedEntry = formatEntry({
-            isNested: true,
-            parent: item.field,
-            item: nestedEntry,
-          });
-          return [...acc, { ...formattedEntry }];
-        },
-        [parent]
-      );
-    } else {
-      return formatEntry({ isNested: false, item });
-    }
-  });
-
-  return formattedEntries.flat();
-};
-
 export const getEntryValue = (item: BuilderEntry): string | string[] | undefined => {
   switch (item.type) {
     case OperatorTypeEnum.MATCH:
@@ -130,83 +99,18 @@ export const getEntryValue = (item: BuilderEntry): string | string[] | undefined
 };
 
 /**
- * Helper method for `getFormattedEntries`
+ * Formats os value array to a displayable string
  */
-export const formatEntry = ({
-  isNested,
-  parent,
-  item,
-}: {
-  isNested: boolean;
-  parent?: string;
-  item: BuilderEntry;
-}): FormattedEntry => {
-  const operator = getExceptionOperatorSelect(item);
-  const value = getEntryValue(item);
-
-  return {
-    fieldName: isNested ? `${parent}.${item.field}` : item.field ?? '',
-    operator: operator.message,
-    value,
-    isNested,
-  };
-};
-
-export const getOperatingSystems = (tags: string[]): string => {
-  const osMatches = tags
-    .filter((tag) => tag.startsWith('os:'))
-    .map((os) => capitalize(os.substring(3).trim()))
+export const formatOperatingSystems = (osTypes: string[]): string => {
+  return osTypes
+    .filter((os) => ['linux', 'macos', 'windows'].includes(os))
+    .map((os) => {
+      if (os === 'macos') {
+        return 'macOS';
+      }
+      return capitalize(os);
+    })
     .join(', ');
-
-  return osMatches;
-};
-
-export const getTagsInclude = ({
-  tags,
-  regex,
-}: {
-  tags: string[];
-  regex: RegExp;
-}): [boolean, string | null] => {
-  const matches: string[] | null = tags.join(';').match(regex);
-  const match = matches != null ? matches[1] : null;
-  return [matches != null, match];
-};
-
-/**
- * Formats ExceptionItem information for description list component
- *
- * @param exceptionItem an ExceptionItem
- */
-export const getDescriptionListContent = (
-  exceptionItem: ExceptionListItemSchema
-): DescriptionListItem[] => {
-  const details = [
-    {
-      title: i18n.OPERATING_SYSTEM,
-      value: getOperatingSystems(exceptionItem._tags),
-    },
-    {
-      title: i18n.DATE_CREATED,
-      value: moment(exceptionItem.created_at).format('MMMM Do YYYY @ HH:mm:ss'),
-    },
-    {
-      title: i18n.CREATED_BY,
-      value: exceptionItem.created_by,
-    },
-    {
-      title: i18n.COMMENT,
-      value: exceptionItem.description,
-    },
-  ];
-
-  return details.reduce<DescriptionListItem[]>((acc, { value, title }) => {
-    if (value != null && value.trim() !== '') {
-      return [...acc, { title, description: value }];
-    } else {
-      return acc;
-    }
-  }, []);
 };
 
 /**
@@ -215,90 +119,31 @@ export const getDescriptionListContent = (
  * @param comments ExceptionItem.comments
  */
 export const getFormattedComments = (comments: CommentsArray): EuiCommentProps[] =>
-  comments.map((comment) => ({
-    username: comment.created_by,
-    timestamp: moment(comment.created_at).format('on MMM Do YYYY @ HH:mm:ss'),
+  comments.map((commentItem) => ({
+    username: commentItem.created_by,
+    timestamp: moment(commentItem.created_at).format('on MMM Do YYYY @ HH:mm:ss'),
     event: i18n.COMMENT_EVENT,
-    timelineIcon: <EuiAvatar size="l" name={comment.created_by.toUpperCase()} />,
-    children: <EuiText size="s">{comment.comment}</EuiText>,
+    timelineIcon: <EuiAvatar size="l" name={commentItem.created_by.toUpperCase()} />,
+    children: <EuiText size="s">{commentItem.comment}</EuiText>,
+    actions: (
+      <WithCopyToClipboard
+        data-test-subj="copy-to-clipboard"
+        text={commentItem.comment}
+        titleSummary={i18n.ADD_TO_CLIPBOARD}
+      />
+    ),
   }));
 
-export const getFormattedBuilderEntries = (
-  indexPattern: IIndexPattern,
-  entries: BuilderEntry[]
-): FormattedBuilderEntry[] => {
-  const { fields } = indexPattern;
-  return entries.map((item) => {
-    if (entriesNested.is(item)) {
-      return {
-        parent: item.field,
-        operator: isOperator,
-        nested: getFormattedBuilderEntries(indexPattern, item.entries),
-        field: undefined,
-        value: undefined,
-      };
-    } else {
-      const [selectedField] = fields.filter(
-        ({ name }) => item.field != null && item.field === name
-      );
-      return {
-        field: selectedField,
-        operator: getExceptionOperatorSelect(item),
-        value: getEntryValue(item),
-      };
-    }
-  });
-};
-
-export const getValueFromOperator = (
-  field: IFieldType | undefined,
-  selectedOperator: OperatorOption
-): Entry => {
-  const fieldValue = field != null ? field.name : '';
-  switch (selectedOperator.type) {
-    case 'match':
-      return {
-        field: fieldValue,
-        type: OperatorTypeEnum.MATCH,
-        operator: selectedOperator.operator,
-        value: '',
-      };
-    case 'match_any':
-      return {
-        field: fieldValue,
-        type: OperatorTypeEnum.MATCH_ANY,
-        operator: selectedOperator.operator,
-        value: [],
-      };
-    case 'list':
-      return {
-        field: fieldValue,
-        type: OperatorTypeEnum.LIST,
-        operator: selectedOperator.operator,
-        list: { id: '', type: 'ip' },
-      };
-    default:
-      return {
-        field: fieldValue,
-        type: OperatorTypeEnum.EXISTS,
-        operator: selectedOperator.operator,
-      };
-  }
-};
-
 export const getNewExceptionItem = ({
-  listType,
   listId,
   namespaceType,
   ruleName,
 }: {
-  listType: 'detection' | 'endpoint';
   listId: string;
   namespaceType: NamespaceType;
   ruleName: string;
 }): CreateExceptionListItemBuilderSchema => {
   return {
-    _tags: [listType],
     comments: [],
     description: `${ruleName} - exception list item`,
     entries: [
@@ -326,11 +171,22 @@ export const filterExceptionItems = (
 ): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
   return exceptions.reduce<Array<ExceptionListItemSchema | CreateExceptionListItemSchema>>(
     (acc, exception) => {
-      const entries = exception.entries.filter((t) => entry.is(t) || entriesNested.is(t));
+      const entries = exception.entries.filter((t) => {
+        const [validatedEntry] = validate(t, entry);
+        const [validatedNestedEntry] = validate(t, entriesNested);
+
+        if (validatedEntry != null || validatedNestedEntry != null) {
+          return true;
+        }
+
+        return false;
+      });
+
       const item = { ...exception, entries };
+
       if (exceptionListItemSchema.is(item)) {
         return [...acc, item];
-      } else if (createExceptionListItemSchema.is(item) && item.meta != null) {
+      } else if (createExceptionListItemSchema.is(item)) {
         const { meta, ...rest } = item;
         const itemSansMetaId: CreateExceptionListItemSchema = { ...rest, meta: undefined };
         return [...acc, itemSansMetaId];
@@ -339,5 +195,309 @@ export const filterExceptionItems = (
       }
     },
     []
+  );
+};
+
+export const formatExceptionItemForUpdate = (
+  exceptionItem: ExceptionListItemSchema
+): UpdateExceptionListItemSchema => {
+  /* eslint-disable @typescript-eslint/naming-convention */
+  const {
+    created_at,
+    created_by,
+    list_id,
+    tie_breaker_id,
+    updated_at,
+    updated_by,
+    /* eslint-enable @typescript-eslint/naming-convention */
+    ...fieldsToUpdate
+  } = exceptionItem;
+  return {
+    ...fieldsToUpdate,
+  };
+};
+
+/**
+ * Maps "event." fields to "signal.original_event.". This is because when a rule is created
+ * the "event" field is copied over to "original_event". When the user creates an exception,
+ * they expect it to match against the original_event's fields, not the signal event's.
+ * @param exceptionItems new or existing ExceptionItem[]
+ */
+export const prepareExceptionItemsForBulkClose = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+    if (item.entries !== undefined) {
+      const newEntries = item.entries.map((itemEntry: Entry | EntryNested) => {
+        return {
+          ...itemEntry,
+          field: itemEntry.field.startsWith('event.')
+            ? itemEntry.field.replace(/^event./, 'signal.original_event.')
+            : itemEntry.field,
+        };
+      });
+      return {
+        ...item,
+        entries: newEntries,
+      };
+    } else {
+      return item;
+    }
+  });
+};
+
+/**
+ * Adds new and existing comments to all new exceptionItems if not present already
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param comments new Comment
+ */
+export const enrichNewExceptionItemsWithComments = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  comments: Array<Comment | CreateComment>
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+    return {
+      ...item,
+      comments,
+    };
+  });
+};
+
+/**
+ * Adds new and existing comments to exceptionItem
+ * @param exceptionItem existing ExceptionItem
+ * @param comments array of comments that can include existing
+ * and new comments
+ */
+export const enrichExistingExceptionItemWithComments = (
+  exceptionItem: ExceptionListItemSchema | CreateExceptionListItemSchema,
+  comments: Array<Comment | CreateComment>
+): ExceptionListItemSchema | CreateExceptionListItemSchema => {
+  const formattedComments = comments.map((item) => {
+    if (comment.is(item)) {
+      const { id, comment: existingComment } = item;
+      return {
+        id,
+        comment: existingComment,
+      };
+    } else {
+      return {
+        comment: item.comment,
+      };
+    }
+  });
+
+  return {
+    ...exceptionItem,
+    comments: formattedComments,
+  };
+};
+
+/**
+ * Adds provided osTypes to all exceptionItems if not present already
+ * @param exceptionItems new or existing ExceptionItem[]
+ * @param osTypes array of os values
+ */
+export const enrichExceptionItemsWithOS = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  osTypes: OsTypeArray
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptionItems.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+    return {
+      ...item,
+      os_types: osTypes,
+    };
+  });
+};
+
+/**
+ * Returns given exceptionItems with all hash-related entries lowercased
+ */
+export const lowercaseHashValues = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+): Array<ExceptionListItemSchema | CreateExceptionListItemSchema> => {
+  return exceptionItems.map((item) => {
+    const newEntries = item.entries.map((itemEntry) => {
+      if (itemEntry.field.includes('.hash')) {
+        if (itemEntry.type === 'match') {
+          return {
+            ...itemEntry,
+            value: itemEntry.value.toLowerCase(),
+          };
+        } else if (itemEntry.type === 'match_any') {
+          return {
+            ...itemEntry,
+            value: itemEntry.value.map((val) => val.toLowerCase()),
+          };
+        }
+      }
+      return itemEntry;
+    });
+    return {
+      ...item,
+      entries: newEntries,
+    };
+  });
+};
+
+export const entryHasListType = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>
+) => {
+  for (const { entries } of exceptionItems) {
+    for (const exceptionEntry of entries ?? []) {
+      if (getOperatorType(exceptionEntry) === OperatorTypeEnum.LIST) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+/**
+ * Returns the value for `file.Ext.code_signature` which
+ * can be an object or array of objects
+ */
+export const getCodeSignatureValue = (
+  alertData: Ecs
+): Array<{ subjectName: string; trusted: string }> => {
+  const { file } = alertData;
+  const codeSignature = file && file.Ext && file.Ext.code_signature;
+
+  // Pre 7.10 file.Ext.code_signature was mistakenly populated as
+  // a single object with subject_name and trusted.
+  if (Array.isArray(codeSignature) && codeSignature.length > 0) {
+    return codeSignature.map((signature) => ({
+      subjectName: (signature.subject_name && signature.subject_name[0]) ?? '',
+      trusted: (signature.trusted && signature.trusted[0]) ?? '',
+    }));
+  } else {
+    const signature: CodeSignature | undefined = !Array.isArray(codeSignature)
+      ? codeSignature
+      : undefined;
+    const subjectName: string | undefined =
+      signature && signature.subject_name && signature.subject_name[0];
+    const trusted: string | undefined = signature && signature.trusted && signature.trusted[0];
+
+    return [
+      {
+        subjectName: subjectName ?? '',
+        trusted: trusted ?? '',
+      },
+    ];
+  }
+};
+
+/**
+ * Returns the default values from the alert data to autofill new endpoint exceptions
+ */
+export const getPrepopulatedItem = ({
+  listId,
+  ruleName,
+  codeSignature,
+  filePath,
+  sha256Hash,
+  eventCode,
+  listNamespace = 'agnostic',
+}: {
+  listId: string;
+  listNamespace?: NamespaceType;
+  ruleName: string;
+  codeSignature: { subjectName: string; trusted: string };
+  filePath: string;
+  sha256Hash: string;
+  eventCode: string;
+}): ExceptionsBuilderExceptionItem => {
+  return {
+    ...getNewExceptionItem({ listId, namespaceType: listNamespace, ruleName }),
+    entries: [
+      {
+        field: 'file.Ext.code_signature',
+        type: 'nested',
+        entries: [
+          {
+            field: 'subject_name',
+            operator: 'included',
+            type: 'match',
+            value: codeSignature != null ? codeSignature.subjectName : '',
+          },
+          {
+            field: 'trusted',
+            operator: 'included',
+            type: 'match',
+            value: codeSignature != null ? codeSignature.trusted : '',
+          },
+        ],
+      },
+      {
+        field: 'file.path.caseless',
+        operator: 'included',
+        type: 'match',
+        value: filePath ?? '',
+      },
+      {
+        field: 'file.hash.sha256',
+        operator: 'included',
+        type: 'match',
+        value: sha256Hash ?? '',
+      },
+      {
+        field: 'event.code',
+        operator: 'included',
+        type: 'match',
+        value: eventCode ?? '',
+      },
+    ],
+  };
+};
+
+/**
+ * Determines whether or not any entries within the given exceptionItems contain values not in the specified ECS mapping
+ */
+export const entryHasNonEcsType = (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  indexPatterns: IIndexPattern
+): boolean => {
+  const doesFieldNameExist = (exceptionEntry: Entry): boolean => {
+    return indexPatterns.fields.some(({ name }) => name === exceptionEntry.field);
+  };
+
+  if (exceptionItems.length === 0) {
+    return false;
+  }
+  for (const { entries } of exceptionItems) {
+    for (const exceptionEntry of entries ?? []) {
+      if (exceptionEntry.type === 'nested') {
+        for (const nestedExceptionEntry of exceptionEntry.entries) {
+          if (doesFieldNameExist(nestedExceptionEntry) === false) {
+            return true;
+          }
+        }
+      } else if (doesFieldNameExist(exceptionEntry) === false) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
+/**
+ * Returns the default values from the alert data to autofill new endpoint exceptions
+ */
+export const defaultEndpointExceptionItems = (
+  listId: string,
+  ruleName: string,
+  alertEcsData: Ecs
+): ExceptionsBuilderExceptionItem[] => {
+  const { file, event: alertEvent } = alertEcsData;
+
+  return getCodeSignatureValue(alertEcsData).map((codeSignature) =>
+    getPrepopulatedItem({
+      listId,
+      ruleName,
+      filePath: file && file.path ? file.path[0] : '',
+      sha256Hash: file && file.hash && file.hash.sha256 ? file.hash.sha256[0] : '',
+      eventCode: alertEvent && alertEvent.code ? alertEvent.code[0] : '',
+      codeSignature,
+    })
   );
 };

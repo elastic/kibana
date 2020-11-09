@@ -5,7 +5,9 @@
  */
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { RENDER_AS, SORT_ORDER, SCALING_TYPES } from '../constants';
+import { Query } from 'src/plugins/data/public';
+import { SortDirection } from 'src/plugins/data/common/search';
+import { RENDER_AS, SCALING_TYPES } from '../constants';
 import { MapExtent, MapQuery } from './map_descriptor';
 import { Filter, TimeRange } from '../../../../../src/plugins/data/common';
 
@@ -22,7 +24,7 @@ export type MapFilters = {
 
 type ESSearchSourceSyncMeta = {
   sortField: string;
-  sortOrder: SORT_ORDER;
+  sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
   topHitsSplitField: string;
   topHitsSize: number;
@@ -38,20 +40,25 @@ export type VectorSourceRequestMeta = MapFilters & {
   applyGlobalQuery: boolean;
   fieldNames: string[];
   geogridPrecision?: number;
-  sourceQuery: MapQuery;
+  sourceQuery?: MapQuery;
   sourceMeta: VectorSourceSyncMeta;
+};
+
+export type VectorJoinSourceRequestMeta = MapFilters & {
+  applyGlobalQuery: boolean;
+  fieldNames: string[];
+  sourceQuery?: Query;
 };
 
 export type VectorStyleRequestMeta = MapFilters & {
   dynamicStyleFields: string[];
   isTimeAware: boolean;
   sourceQuery: MapQuery;
-  timeFilters: unknown;
+  timeFilters: TimeRange;
 };
 
 export type ESSearchSourceResponseMeta = {
   areResultsTrimmed?: boolean;
-  sourceType?: string;
 
   // top hits meta
   areEntitiesTrimmed?: boolean;
@@ -60,9 +67,28 @@ export type ESSearchSourceResponseMeta = {
 };
 
 // Partial because objects are justified downstream in constructors
-export type DataMeta = Partial<VectorSourceRequestMeta> &
-  Partial<VectorStyleRequestMeta> &
-  Partial<ESSearchSourceResponseMeta>;
+export type DataMeta = Partial<
+  VectorSourceRequestMeta &
+    VectorJoinSourceRequestMeta &
+    VectorStyleRequestMeta &
+    ESSearchSourceResponseMeta
+>;
+
+type NumericalStyleFieldData = {
+  avg: number;
+  max: number;
+  min: number;
+  std_deviation: number;
+};
+
+type CategoricalStyleFieldData = {
+  buckets: Array<{ key: string; doc_count: number }>;
+};
+
+export type StyleMetaData = {
+  // key is field name for field requiring style meta
+  [key: string]: NumericalStyleFieldData | CategoricalStyleFieldData;
+};
 
 export type DataRequestDescriptor = {
   dataId: string;

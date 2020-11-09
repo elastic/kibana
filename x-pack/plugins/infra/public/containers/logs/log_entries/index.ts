@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { useEffect, useState, useReducer, useCallback } from 'react';
+import { useMountedState } from 'react-use';
 import createContainer from 'constate';
 import { pick, throttle } from 'lodash';
 import { TimeKey, timeKeyIsBetween } from '../../../../common/time';
@@ -14,6 +15,7 @@ import {
   LogEntriesBaseRequest,
 } from '../../../../common/http_api';
 import { fetchLogEntries } from './api/fetch_log_entries';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 const DESIRED_BUFFER_PAGES = 2;
 const LIVE_STREAM_INTERVAL = 5000;
@@ -144,15 +146,21 @@ const useFetchEntriesEffect = (
   dispatch: Dispatch,
   props: LogEntriesProps
 ) => {
+  const { services } = useKibanaContextForPlugin();
+  const isMounted = useMountedState();
   const [prevParams, cachePrevParams] = useState<LogEntriesProps | undefined>();
   const [startedStreaming, setStartedStreaming] = useState(false);
+  const dispatchIfMounted = useCallback((action) => (isMounted() ? dispatch(action) : undefined), [
+    dispatch,
+    isMounted,
+  ]);
 
   const runFetchNewEntriesRequest = async (overrides: Partial<LogEntriesProps> = {}) => {
     if (!props.startTimestamp || !props.endTimestamp) {
       return;
     }
 
-    dispatch({ type: Action.FetchingNewEntries });
+    dispatchIfMounted({ type: Action.FetchingNewEntries });
 
     try {
       const commonFetchArgs: LogEntriesBaseRequest = {
@@ -172,14 +180,16 @@ const useFetchEntriesEffect = (
             before: 'last',
           };
 
-      const { data: payload } = await fetchLogEntries(fetchArgs);
-      dispatch({ type: Action.ReceiveNewEntries, payload });
+      const { data: payload } = await fetchLogEntries(fetchArgs, services.http.fetch);
+      dispatchIfMounted({ type: Action.ReceiveNewEntries, payload });
 
       // Move position to the bottom if it's the first load.
       // Do it in the next tick to allow the `dispatch` to fire
       if (!props.timeKey && payload.bottomCursor) {
         setTimeout(() => {
-          props.jumpToTargetPosition(payload.bottomCursor!);
+          if (isMounted()) {
+            props.jumpToTargetPosition(payload.bottomCursor!);
+          }
         });
       } else if (
         props.timeKey &&
@@ -190,7 +200,7 @@ const useFetchEntriesEffect = (
         props.jumpToTargetPosition(payload.topCursor);
       }
     } catch (e) {
-      dispatch({ type: Action.ErrorOnNewEntries });
+      dispatchIfMounted({ type: Action.ErrorOnNewEntries });
     }
   };
 
@@ -208,7 +218,7 @@ const useFetchEntriesEffect = (
       return;
     }
 
-    dispatch({ type: Action.FetchingMoreEntries });
+    dispatchIfMounted({ type: Action.FetchingMoreEntries });
 
     try {
       const commonFetchArgs: LogEntriesBaseRequest = {
@@ -228,16 +238,16 @@ const useFetchEntriesEffect = (
             after: state.bottomCursor,
           };
 
-      const { data: payload } = await fetchLogEntries(fetchArgs);
+      const { data: payload } = await fetchLogEntries(fetchArgs, services.http.fetch);
 
-      dispatch({
+      dispatchIfMounted({
         type: getEntriesBefore ? Action.ReceiveEntriesBefore : Action.ReceiveEntriesAfter,
         payload,
       });
 
       return payload.bottomCursor;
     } catch (e) {
-      dispatch({ type: Action.ErrorOnMoreEntries });
+      dispatchIfMounted({ type: Action.ErrorOnMoreEntries });
     }
   };
 
@@ -320,7 +330,7 @@ const useFetchEntriesEffect = (
       after: props.endTimestamp > prevParams.endTimestamp,
     };
 
-    dispatch({ type: Action.ExpandRange, payload: shouldExpand });
+    dispatchIfMounted({ type: Action.ExpandRange, payload: shouldExpand });
   };
 
   const expandRangeEffectDependencies = [

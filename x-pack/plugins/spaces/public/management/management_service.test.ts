@@ -18,21 +18,18 @@ describe('ManagementService', () => {
       const mockKibanaSection = ({
         registerApp: jest.fn(),
       } as unknown) as ManagementSection;
+      const managementMockSetup = managementPluginMock.createSetupContract();
+      managementMockSetup.sections.section.kibana = mockKibanaSection;
       const deps = {
-        management: managementPluginMock.createSetupContract(),
+        management: managementMockSetup,
         getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
           PluginsStart
         >['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
 
-      deps.management.sections.getSection.mockReturnValue(mockKibanaSection);
-
       const service = new ManagementService();
       service.setup(deps);
-
-      expect(deps.management.sections.getSection).toHaveBeenCalledTimes(1);
-      expect(deps.management.sections.getSection).toHaveBeenCalledWith('kibana');
 
       expect(mockKibanaSection.registerApp).toHaveBeenCalledTimes(1);
       expect(mockKibanaSection.registerApp).toHaveBeenCalledWith({
@@ -63,19 +60,16 @@ describe('ManagementService', () => {
       const mockKibanaSection = ({
         registerApp: jest.fn().mockReturnValue(mockSpacesManagementPage),
       } as unknown) as ManagementSection;
+      const managementMockSetup = managementPluginMock.createSetupContract();
+      managementMockSetup.sections.section.kibana = mockKibanaSection;
 
       const deps = {
-        management: managementPluginMock.createSetupContract(),
+        management: managementMockSetup,
         getStartServices: coreMock.createSetup().getStartServices as CoreSetup<
           PluginsStart
         >['getStartServices'],
         spacesManager: spacesManagerMock.create(),
       };
-
-      deps.management.sections.getSection.mockImplementation((id) => {
-        if (id === 'kibana') return mockKibanaSection;
-        throw new Error(`unexpected getSection call: ${id}`);
-      });
 
       const service = new ManagementService();
       service.setup(deps);

@@ -7,8 +7,13 @@
 import React from 'react';
 import { PingHistogramComponent, PingHistogramComponentProps } from '../ping_histogram';
 import { renderWithRouter, shallowWithRouter, MountWithReduxProvider } from '../../../../lib';
+import moment from 'moment';
 
 describe('PingHistogram component', () => {
+  beforeAll(() => {
+    moment.prototype.fromNow = jest.fn(() => 'a year ago');
+  });
+
   const props: PingHistogramComponentProps = {
     absoluteStartDate: 1548697920000,
     absoluteEndDate: 1548700920000,
@@ -39,7 +44,7 @@ describe('PingHistogram component', () => {
         { x: 1581068989000, downCount: 3, upCount: 36, y: 1 },
         { x: 1581069019000, downCount: 1, upCount: 11, y: 1 },
       ],
-      interval: '1s',
+      minInterval: 60,
     },
   };
 

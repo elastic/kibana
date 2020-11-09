@@ -20,4 +20,4 @@
 export * from './types';
 export { isFilterable, isNestedField } from './utils';
 export * from './field_list';
-export * from './field';
+export * from './index_pattern_field';

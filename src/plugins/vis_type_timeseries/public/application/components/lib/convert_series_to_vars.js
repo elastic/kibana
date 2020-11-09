@@ -17,9 +17,11 @@
  * under the License.
  */
 
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { getLastValue } from '../../../../../../plugins/vis_type_timeseries/common/get_last_value';
 import { createTickFormatter } from './tick_formatter';
+import { labelDateFormatter } from './label_date_formatter';
 import moment from 'moment';
 
 export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig = null) => {
@@ -51,8 +53,20 @@ export const convertSeriesToVars = (series, model, dateFormat = 'lll', getConfig
             }),
           },
         };
-        _.set(variables, varName, data);
-        _.set(variables, `${_.snakeCase(row.label)}.label`, row.label);
+        set(variables, varName, data);
+        set(variables, `${_.snakeCase(row.label)}.label`, row.label);
+
+        /**
+         * Handle the case when a field has "key_as_string" value.
+         * Common case is the value is a date string (e.x. "2020-08-21T20:36:58.000Z") or a boolean stringified value ("true"/"false").
+         * Try to convert the value into a moment object and format it with "dateFormat" from UI settings,
+         * if the "key_as_string" value is recognized by a known format in Moments.js https://momentjs.com/docs/#/parsing/string/ .
+         * If not, return a formatted value from elasticsearch
+         */
+        if (row.labelFormatted) {
+          const val = labelDateFormatter(row.labelFormatted, dateFormat);
+          set(variables, `${_.snakeCase(row.label)}.formatted`, val);
+        }
       });
   });
   return variables;

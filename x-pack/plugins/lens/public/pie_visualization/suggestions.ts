@@ -15,7 +15,7 @@ function shouldReject({ table, keptLayerIds }: SuggestionRequest<PieVisualizatio
     keptLayerIds.length > 1 ||
     (keptLayerIds.length && table.layerId !== keptLayerIds[0]) ||
     table.changeType === 'reorder' ||
-    table.columns.some((col) => col.operation.dataType === 'date')
+    table.columns.some((col) => col.operation.scale === 'interval') // Histograms are not good for pie
   );
 }
 
@@ -23,6 +23,7 @@ export function suggestions({
   table,
   state,
   keptLayerIds,
+  mainPalette,
 }: SuggestionRequest<PieVisualizationState>): Array<
   VisualizationSuggestion<PieVisualizationState>
 > {
@@ -57,6 +58,7 @@ export function suggestions({
       score: state && state.shape !== 'treemap' ? 0.6 : 0.4,
       state: {
         shape: newShape,
+        palette: mainPalette || state?.palette,
         layers: [
           state?.layers[0]
             ? {
@@ -108,6 +110,7 @@ export function suggestions({
       score: state?.shape === 'treemap' ? 0.7 : 0.5,
       state: {
         shape: 'treemap',
+        palette: mainPalette || state?.palette,
         layers: [
           state?.layers[0]
             ? {

@@ -16,10 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { uniq } from 'lodash';
 
 import { ValidationVisOptionsProps } from '../../common';
 import { BasicOptions, SwitchOption } from '../../../../../charts/public';
@@ -30,6 +31,10 @@ import { ChartTypes } from '../../../utils/collections';
 
 function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>) {
   const { stateParams, setValue, vis } = props;
+
+  const currentChartTypes = useMemo(() => uniq(stateParams.seriesParams.map(({ type }) => type)), [
+    stateParams.seriesParams,
+  ]);
 
   return (
     <>
@@ -68,7 +73,7 @@ function PointSeriesOptions(props: ValidationVisOptionsProps<BasicVislibParams>)
           />
         )}
 
-        {vis.type.name === ChartTypes.HISTOGRAM && (
+        {currentChartTypes.includes(ChartTypes.HISTOGRAM) && (
           <SwitchOption
             data-test-subj="showValuesOnChart"
             label={i18n.translate('visTypeVislib.editors.pointSeries.showLabels', {

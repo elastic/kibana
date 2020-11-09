@@ -40,6 +40,9 @@ and/or config/kibana.dev.yml files.
 
 Running the script with `--clear` will delete the index first.
 
+If you're using an Elasticsearch instance without TLS verification (if you have `elasticsearch.ssl.verificationMode: none` set in your kibana.yml)
+you can run the script with `env NODE_TLS_REJECT_UNAUTHORIZED=0` to avoid TLS connection errors.
+
 After running the script you should see sample telemetry data in the "xpack-phone-home" index.
 
 ### Updating Data Telemetry Mappings
@@ -50,17 +53,17 @@ added to the cluster's mapping. The mapping is defined in
 
 The mapping for the telemetry data is here under `stack_stats.kibana.plugins.apm`.
 
-The mapping used there can be generated with the output of the [`getTelemetryMapping`](../common/apm_telemetry.ts) function.
+The mapping used there corresponds with the the [`apmSchema`](../server/lib/apm_telemetry/schema.ts) object. The telemetry tooling parses this file to generate its schemas, so some operations in this file (like doing a `reduce` or `map` over an array of properties) will not work.
 
-To make a change to the mapping, edit this function, run the tests to update the snapshots, then use the `merge_telemetry_mapping` script to merge the data into the telemetry repository.
+The `schema` property of the `makeUsageCollector` call in the [`createApmTelemetry` function](../server/lib/apm_telemetry/index.ts) contains the `apmSchema`.
 
-If the [telemetry repository](https://github.com/elastic/telemetry) is cloned as a sibling to the kibana directory, you can run the following from x-pack/plugins/apm:
+When adding a task, the key of the task and the `took` properties need to be added under the `tasks` properties in the mapping, as when tasks run they report the time they took.
 
-```bash
-node ./scripts/merge-telemetry-mapping.js ../../../../telemetry/config/templates/xpack-phone-home.json
-```
+The queries for the stats are in the [collect data telemetry tasks](../server/lib/apm_telemetry/collect_data_telemetry/tasks.ts).
 
-this will replace the contents of the mapping in the repository checkout with the updated mapping. You can then [follow the telemetry team's instructions](https://github.com/elastic/telemetry#mappings) for opening a pull request with the mapping changes.
+The collection tasks also use the [`APMDataTelemetry` type](../server/lib/apm_telemetry/types.ts) which also needs to be updated with any changes to the fields.
+
+Running `node scripts/telemetry_check --fix` from the root Kibana directory will update the schemas which should automatically notify the Infra team when a pull request is opened so they can update the mapping in the telemetry clusters.
 
 ## Behavioral Telemetry
 

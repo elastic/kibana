@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import _ from 'lodash';
+import { cloneDeep } from 'lodash';
 
-import { LegacyAPICaller } from 'kibana/server';
+import { IScopedClusterClient } from 'kibana/server';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
@@ -20,37 +20,44 @@ const mockResponses = {
   fieldCaps: mockFieldCaps,
 };
 
-// mock callWithRequestFactory
-const callWithRequestFactory = (responses: Record<string, any>, fail = false): LegacyAPICaller => {
-  return (requestName: string) => {
-    return new Promise((resolve, reject) => {
-      const response = responses[requestName];
-      if (fail) {
-        reject(response);
-      } else {
-        resolve(response);
-      }
-    }) as Promise<any>;
+// mock mlClusterClientFactory
+const mlClusterClientFactory = (
+  responses: Record<string, any>,
+  fail = false
+): IScopedClusterClient => {
+  const callAs = {
+    search: () => Promise.resolve({ body: responses.search }),
+    fieldCaps: () => Promise.resolve({ body: responses.fieldCaps }),
   };
+
+  const callAsFail = {
+    search: () => Promise.reject({ body: {} }),
+    fieldCaps: () => Promise.reject({ body: {} }),
+  };
+
+  return ({
+    asCurrentUser: fail === false ? callAs : callAsFail,
+    asInternalUser: fail === false ? callAs : callAsFail,
+  } as unknown) as IScopedClusterClient;
 };
 
 describe('ML - validateCardinality', () => {
   it('called without arguments', (done) => {
-    validateCardinality(callWithRequestFactory(mockResponses)).then(
+    validateCardinality(mlClusterClientFactory(mockResponses)).then(
       () => done(new Error('Promise should not resolve for this test without job argument.')),
       () => done()
     );
   });
 
   it('called with non-valid job argument #1, missing analysis_config', (done) => {
-    validateCardinality(callWithRequestFactory(mockResponses), {} as CombinedJob).then(
+    validateCardinality(mlClusterClientFactory(mockResponses), {} as CombinedJob).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
   });
 
   it('called with non-valid job argument #2, missing datafeed_config', (done) => {
-    validateCardinality(callWithRequestFactory(mockResponses), {
+    validateCardinality(mlClusterClientFactory(mockResponses), {
       analysis_config: {},
     } as CombinedJob).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
@@ -60,7 +67,7 @@ describe('ML - validateCardinality', () => {
 
   it('called with non-valid job argument #3, missing datafeed_config.indices', (done) => {
     const job = { analysis_config: {}, datafeed_config: {} } as CombinedJob;
-    validateCardinality(callWithRequestFactory(mockResponses), job).then(
+    validateCardinality(mlClusterClientFactory(mockResponses), job).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
@@ -71,7 +78,7 @@ describe('ML - validateCardinality', () => {
       analysis_config: {},
       datafeed_config: { indices: [] },
     } as unknown) as CombinedJob;
-    validateCardinality(callWithRequestFactory(mockResponses), job).then(
+    validateCardinality(mlClusterClientFactory(mockResponses), job).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
@@ -83,7 +90,7 @@ describe('ML - validateCardinality', () => {
       data_description: {},
       datafeed_config: { indices: [] },
     } as unknown) as CombinedJob;
-    validateCardinality(callWithRequestFactory(mockResponses), job).then(
+    validateCardinality(mlClusterClientFactory(mockResponses), job).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
@@ -95,7 +102,7 @@ describe('ML - validateCardinality', () => {
       datafeed_config: { indices: [] },
       data_description: { time_field: '@timestamp' },
     } as unknown) as CombinedJob;
-    validateCardinality(callWithRequestFactory(mockResponses), job).then(
+    validateCardinality(mlClusterClientFactory(mockResponses), job).then(
       () => done(new Error('Promise should not resolve for this test without valid job argument.')),
       () => done()
     );
@@ -110,7 +117,7 @@ describe('ML - validateCardinality', () => {
       },
     } as unknown) as CombinedJob;
 
-    return validateCardinality(callWithRequestFactory(mockResponses), job).then((messages) => {
+    return validateCardinality(mlClusterClientFactory(mockResponses), job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual([]);
     });
@@ -138,10 +145,10 @@ describe('ML - validateCardinality', () => {
     test: (ids: string[]) => void
   ) => {
     const job = getJobConfig(fieldName);
-    const mockCardinality = _.cloneDeep(mockResponses);
+    const mockCardinality = cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
     return validateCardinality(
-      callWithRequestFactory(mockCardinality),
+      mlClusterClientFactory(mockCardinality),
       (job as unknown) as CombinedJob
     ).then((messages) => {
       const ids = messages.map((m) => m.id);
@@ -153,7 +160,7 @@ describe('ML - validateCardinality', () => {
     const job = getJobConfig('partition_field_name');
     job.analysis_config.detectors[0].partition_field_name = '_source';
     return validateCardinality(
-      callWithRequestFactory(mockResponses),
+      mlClusterClientFactory(mockResponses),
       (job as unknown) as CombinedJob
     ).then((messages) => {
       const ids = messages.map((m) => m.id);
@@ -164,7 +171,7 @@ describe('ML - validateCardinality', () => {
   it(`field 'airline' aggregatable`, () => {
     const job = getJobConfig('partition_field_name');
     return validateCardinality(
-      callWithRequestFactory(mockResponses),
+      mlClusterClientFactory(mockResponses),
       (job as unknown) as CombinedJob
     ).then((messages) => {
       const ids = messages.map((m) => m.id);
@@ -174,7 +181,7 @@ describe('ML - validateCardinality', () => {
 
   it('field not aggregatable', () => {
     const job = getJobConfig('partition_field_name');
-    return validateCardinality(callWithRequestFactory({}), (job as unknown) as CombinedJob).then(
+    return validateCardinality(mlClusterClientFactory({}), (job as unknown) as CombinedJob).then(
       (messages) => {
         const ids = messages.map((m) => m.id);
         expect(ids).toStrictEqual(['field_not_aggregatable']);
@@ -189,7 +196,7 @@ describe('ML - validateCardinality', () => {
       partition_field_name: 'airline',
     });
     return validateCardinality(
-      callWithRequestFactory({}, true),
+      mlClusterClientFactory({}, true),
       (job as unknown) as CombinedJob
     ).then((messages) => {
       const ids = messages.map((m) => m.id);
@@ -243,9 +250,9 @@ describe('ML - validateCardinality', () => {
   it(`disabled model_plot, over field cardinality of ${cardinality} doesn't trigger a warning`, () => {
     const job = (getJobConfig('over_field_name') as unknown) as CombinedJob;
     job.model_plot_config = { enabled: false };
-    const mockCardinality = _.cloneDeep(mockResponses);
+    const mockCardinality = cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job).then((messages) => {
+    return validateCardinality(mlClusterClientFactory(mockCardinality), job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['success_cardinality']);
     });
@@ -254,9 +261,9 @@ describe('ML - validateCardinality', () => {
   it(`enabled model_plot, over field cardinality of ${cardinality} triggers a model plot warning`, () => {
     const job = (getJobConfig('over_field_name') as unknown) as CombinedJob;
     job.model_plot_config = { enabled: true };
-    const mockCardinality = _.cloneDeep(mockResponses);
+    const mockCardinality = cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job).then((messages) => {
+    return validateCardinality(mlClusterClientFactory(mockCardinality), job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['cardinality_model_plot_high']);
     });
@@ -265,9 +272,9 @@ describe('ML - validateCardinality', () => {
   it(`disabled model_plot, by field cardinality of ${cardinality} triggers a field cardinality warning`, () => {
     const job = (getJobConfig('by_field_name') as unknown) as CombinedJob;
     job.model_plot_config = { enabled: false };
-    const mockCardinality = _.cloneDeep(mockResponses);
+    const mockCardinality = cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job).then((messages) => {
+    return validateCardinality(mlClusterClientFactory(mockCardinality), job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['cardinality_by_field']);
     });
@@ -276,9 +283,9 @@ describe('ML - validateCardinality', () => {
   it(`enabled model_plot, by field cardinality of ${cardinality} triggers a model plot warning and field cardinality warning`, () => {
     const job = (getJobConfig('by_field_name') as unknown) as CombinedJob;
     job.model_plot_config = { enabled: true };
-    const mockCardinality = _.cloneDeep(mockResponses);
+    const mockCardinality = cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job).then((messages) => {
+    return validateCardinality(mlClusterClientFactory(mockCardinality), job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['cardinality_model_plot_high', 'cardinality_by_field']);
     });
@@ -287,9 +294,9 @@ describe('ML - validateCardinality', () => {
   it(`enabled model_plot with terms, by field cardinality of ${cardinality} triggers just field cardinality warning`, () => {
     const job = (getJobConfig('by_field_name') as unknown) as CombinedJob;
     job.model_plot_config = { enabled: true, terms: 'AAL,AAB' };
-    const mockCardinality = _.cloneDeep(mockResponses);
+    const mockCardinality = cloneDeep(mockResponses);
     mockCardinality.search.aggregations.airline_cardinality.value = cardinality;
-    return validateCardinality(callWithRequestFactory(mockCardinality), job).then((messages) => {
+    return validateCardinality(mlClusterClientFactory(mockCardinality), job).then((messages) => {
       const ids = messages.map((m) => m.id);
       expect(ids).toStrictEqual(['cardinality_by_field']);
     });

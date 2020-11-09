@@ -17,6 +17,8 @@ import { left } from 'fp-ts/lib/Either';
 import {
   getAddPrepackagedRulesSchemaMock,
   getAddPrepackagedRulesSchemaDecodedMock,
+  getAddPrepackagedThreatMatchRulesSchemaMock,
+  getAddPrepackagedThreatMatchRulesSchemaDecodedMock,
 } from './add_prepackaged_rules_schema.mock';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
@@ -618,6 +620,7 @@ describe('add prepackaged rules schema', () => {
 
   test('rule_id is required', () => {
     const payload: AddPrepackagedRulesSchema = getAddPrepackagedRulesSchemaMock();
+    // @ts-expect-error
     delete payload.rule_id;
 
     const decoded = addPrepackagedRulesSchema.decode(payload);
@@ -678,6 +681,7 @@ describe('add prepackaged rules schema', () => {
   });
 
   test('defaults max signals to 100', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { max_signals, ...noMaxSignals } = getAddPrepackagedRulesSchemaMock();
     const payload: AddPrepackagedRulesSchema = {
       ...noMaxSignals,
@@ -1446,11 +1450,15 @@ describe('add prepackaged rules schema', () => {
         exceptions_list: [
           {
             id: 'some_uuid',
+            list_id: 'list_id_single',
             namespace_type: 'single',
+            type: 'detection',
           },
           {
-            id: 'some_uuid',
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
             namespace_type: 'agnostic',
+            type: 'endpoint',
           },
         ],
       };
@@ -1533,6 +1541,8 @@ describe('add prepackaged rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "exceptions_list,list_id"',
+        'Invalid value "undefined" supplied to "exceptions_list,type"',
         'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
       ]);
       expect(message.schema).toEqual({});
@@ -1586,6 +1596,18 @@ describe('add prepackaged rules schema', () => {
         exceptions_list: [],
         filters: [],
       };
+      expect(message.schema).toEqual(expected);
+    });
+  });
+
+  describe('threat_mapping', () => {
+    test('You can set a threat query, index, mapping, filters on a pre-packaged rule', () => {
+      const payload = getAddPrepackagedThreatMatchRulesSchemaMock();
+      const decoded = addPrepackagedRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getAddPrepackagedThreatMatchRulesSchemaDecodedMock();
+      expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
     });
   });

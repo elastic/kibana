@@ -8,12 +8,9 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { processFilters, useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { SWIMLANE_TYPE } from '../../application/explorer/explorer_constants';
-import {
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneServices,
-} from './anomaly_swimlane_embeddable';
 import { CoreStart, IUiSettingsClient } from 'kibana/public';
 import { MlStartDependencies } from '../../plugin';
+import { AnomalySwimlaneEmbeddableInput, AnomalySwimlaneServices } from '..';
 
 describe('useSwimlaneInputResolver', () => {
   let embeddableInput: BehaviorSubject<Partial<AnomalySwimlaneEmbeddableInput>>;

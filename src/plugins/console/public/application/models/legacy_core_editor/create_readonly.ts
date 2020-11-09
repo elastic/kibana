@@ -74,7 +74,6 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
     }
   };
 
-  // eslint-disable-next-line
   (function setupSession(session) {
     session.setMode('ace/mode/text');
     (session as any).setFoldStyle('markbeginend');

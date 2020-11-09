@@ -18,4 +18,3 @@
  */
 
 export { SkipBottomButton } from './skip_bottom_button';
-export { createSkipBottomButtonDirective } from './skip_bottom_button_directive';

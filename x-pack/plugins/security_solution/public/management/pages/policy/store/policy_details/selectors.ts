@@ -11,6 +11,7 @@ import {
   Immutable,
   NewPolicyData,
   PolicyConfig,
+  PolicyData,
   UIPolicyConfig,
 } from '../../../../../../common/endpoint/types';
 import { factory as policyConfigFactory } from '../../../../../../common/endpoint/models/policy_config';
@@ -21,14 +22,26 @@ import { ManagementRoutePolicyDetailsParams } from '../../../../types';
 export const policyDetails = (state: Immutable<PolicyDetailsState>) => state.policyItem;
 
 /**
+ * Given a Policy Data (package policy) object, return back a new object with only the field
+ * needed for an Update/Create API action
+ * @param policy
+ */
+export const getPolicyDataForUpdate = (
+  policy: PolicyData | Immutable<PolicyData>
+): NewPolicyData | Immutable<NewPolicyData> => {
+  // eslint-disable-next-line @typescript-eslint/naming-convention
+  const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
+  return newPolicy;
+};
+
+/**
  * Return only the policy structure accepted for update/create
  */
 export const policyDetailsForUpdate: (
   state: Immutable<PolicyDetailsState>
 ) => Immutable<NewPolicyData> | undefined = createSelector(policyDetails, (policy) => {
   if (policy) {
-    const { id, revision, created_by, created_at, updated_by, updated_at, ...newPolicy } = policy;
-    return newPolicy;
+    return getPolicyDataForUpdate(policy);
   }
 });
 
@@ -90,14 +103,19 @@ export const policyConfig: (s: PolicyDetailsState) => UIPolicyConfig = createSel
   (windows, mac, linux) => {
     return {
       windows: {
+        advanced: windows.advanced,
         events: windows.events,
         malware: windows.malware,
+        popup: windows.popup,
       },
       mac: {
+        advanced: mac.advanced,
         events: mac.events,
         malware: mac.malware,
+        popup: mac.popup,
       },
       linux: {
+        advanced: linux.advanced,
         events: linux.events,
       },
     };

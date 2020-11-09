@@ -115,8 +115,8 @@ describe('<AccountManagementPage>', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('EuiFieldText[data-test-subj="currentPassword"]')).toHaveLength(1);
-    expect(wrapper.find('EuiFieldText[data-test-subj="newPassword"]')).toHaveLength(1);
+    expect(wrapper.find('EuiFieldPassword[data-test-subj="currentPassword"]')).toHaveLength(1);
+    expect(wrapper.find('EuiFieldPassword[data-test-subj="newPassword"]')).toHaveLength(1);
   });
 
   it(`does not display change password form for users in the saml realm`, async () => {

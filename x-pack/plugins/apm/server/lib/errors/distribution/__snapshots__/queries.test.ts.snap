@@ -2,6 +2,11 @@
 
 exports[`error distribution queries fetches an error distribution 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "distribution": Object {
@@ -21,11 +26,6 @@ Object {
         "filter": Array [
           Object {
             "term": Object {
-              "processor.event": "error",
-            },
-          },
-          Object {
-            "term": Object {
               "service.name": "serviceName",
             },
           },
@@ -40,7 +40,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -48,12 +48,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`error distribution queries fetches an error distribution with a group id 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "distribution": Object {
@@ -73,11 +77,6 @@ Object {
         "filter": Array [
           Object {
             "term": Object {
-              "processor.event": "error",
-            },
-          },
-          Object {
-            "term": Object {
               "service.name": "serviceName",
             },
           },
@@ -92,7 +91,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
           Object {
@@ -105,6 +104,5 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;

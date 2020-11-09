@@ -511,7 +511,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                             size="m"
                                             type="cross"
                                           >
-                                            <div
+                                            <span
                                               className="euiSwitch__icon"
                                               data-euiicon-type="cross"
                                               size="m"
@@ -522,7 +522,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                             size="m"
                                             type="check"
                                           >
-                                            <div
+                                            <span
                                               className="euiSwitch__icon euiSwitch__icon--checked"
                                               data-euiicon-type="check"
                                               size="m"
@@ -1186,7 +1186,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                     size="m"
                                     type="cross"
                                   >
-                                    <div
+                                    <span
                                       className="euiSwitch__icon"
                                       data-euiicon-type="cross"
                                       size="m"
@@ -1197,7 +1197,7 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                                     size="m"
                                     type="check"
                                   >
-                                    <div
+                                    <span
                                       className="euiSwitch__icon euiSwitch__icon--checked"
                                       data-euiicon-type="check"
                                       size="m"
@@ -1268,43 +1268,71 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
                     iconType="check"
                     onClick={[Function]}
                   >
-                    <button
+                    <EuiButtonDisplay
                       aria-describedby="staticGenerator_removeClustersErrorTitle staticGenerator_removeClustersErrorList"
-                      className="euiButton euiButton--secondary euiButton--fill"
+                      baseClassName="euiButton"
+                      color="secondary"
                       data-test-subj="remoteClusterFormSaveButton"
                       disabled={false}
+                      element="button"
+                      fill={true}
+                      iconType="check"
+                      isDisabled={false}
                       onClick={[Function]}
                       type="button"
                     >
-                      <span
-                        className="euiButton__content"
+                      <button
+                        aria-describedby="staticGenerator_removeClustersErrorTitle staticGenerator_removeClustersErrorList"
+                        className="euiButton euiButton--secondary euiButton--fill"
+                        data-test-subj="remoteClusterFormSaveButton"
+                        disabled={false}
+                        onClick={[Function]}
+                        style={
+                          Object {
+                            "minWidth": undefined,
+                          }
+                        }
+                        type="button"
                       >
-                        <EuiIcon
-                          aria-hidden="true"
-                          className="euiButton__icon"
-                          size="m"
-                          type="check"
+                        <EuiButtonContent
+                          className="euiButton__content"
+                          iconSide="left"
+                          iconType="check"
+                          textProps={
+                            Object {
+                              "className": "euiButton__text",
+                            }
+                          }
                         >
-                          <div
-                            aria-hidden="true"
-                            className="euiButton__icon"
-                            data-euiicon-type="check"
-                            size="m"
-                          />
-                        </EuiIcon>
-                        <span
-                          className="euiButton__text"
-                        >
-                          <FormattedMessage
-                            defaultMessage="Save"
-                            id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
-                            values={Object {}}
+                          <span
+                            className="euiButtonContent euiButton__content"
                           >
-                            Save
-                          </FormattedMessage>
-                        </span>
-                      </span>
-                    </button>
+                            <EuiIcon
+                              className="euiButtonContent__icon"
+                              size="m"
+                              type="check"
+                            >
+                              <span
+                                className="euiButtonContent__icon"
+                                data-euiicon-type="check"
+                                size="m"
+                              />
+                            </EuiIcon>
+                            <span
+                              className="euiButton__text"
+                            >
+                              <FormattedMessage
+                                defaultMessage="Save"
+                                id="xpack.remoteClusters.remoteClusterForm.saveButtonLabel"
+                                values={Object {}}
+                              >
+                                Save
+                              </FormattedMessage>
+                            </span>
+                          </span>
+                        </EuiButtonContent>
+                      </button>
+                    </EuiButtonDisplay>
                   </EuiButton>
                 </div>
               </EuiFlexItem>
@@ -1326,21 +1354,31 @@ exports[`RemoteClusterForm proxy mode renders correct connection settings when u
               onClick={[Function]}
               type="button"
             >
-              <span
+              <EuiButtonContent
                 className="euiButtonEmpty__content"
+                iconSide="left"
+                textProps={
+                  Object {
+                    "className": "euiButtonEmpty__text",
+                  }
+                }
               >
                 <span
-                  className="euiButtonEmpty__text"
+                  className="euiButtonContent euiButtonEmpty__content"
                 >
-                  <FormattedMessage
-                    defaultMessage="Show request"
-                    id="xpack.remoteClusters.remoteClusterForm.showRequestButtonLabel"
-                    values={Object {}}
+                  <span
+                    className="euiButtonEmpty__text"
                   >
-                    Show request
-                  </FormattedMessage>
+                    <FormattedMessage
+                      defaultMessage="Show request"
+                      id="xpack.remoteClusters.remoteClusterForm.showRequestButtonLabel"
+                      values={Object {}}
+                    >
+                      Show request
+                    </FormattedMessage>
+                  </span>
                 </span>
-              </span>
+              </EuiButtonContent>
             </button>
           </EuiButtonEmpty>
         </div>
@@ -1480,11 +1518,11 @@ Array [
                         <span
                           class="euiSwitch__track"
                         >
-                          <div
+                          <span
                             class="euiSwitch__icon"
                             data-euiicon-type="cross"
                           />
-                          <div
+                          <span
                             class="euiSwitch__icon euiSwitch__icon--checked"
                             data-euiicon-type="check"
                           />
@@ -1697,11 +1735,11 @@ Array [
                     <span
                       class="euiSwitch__track"
                     >
-                      <div
+                      <span
                         class="euiSwitch__icon"
                         data-euiicon-type="cross"
                       />
-                      <div
+                      <span
                         class="euiSwitch__icon euiSwitch__icon--checked"
                         data-euiicon-type="check"
                       />
@@ -1743,11 +1781,10 @@ Array [
             type="button"
           >
             <span
-              class="euiButton__content"
+              class="euiButtonContent euiButton__content"
             >
-              <div
-                aria-hidden="true"
-                class="euiButton__icon"
+              <span
+                class="euiButtonContent__icon"
                 data-euiicon-type="check"
               />
               <span
@@ -1768,7 +1805,7 @@ Array [
         type="button"
       >
         <span
-          class="euiButtonEmpty__content"
+          class="euiButtonContent euiButtonEmpty__content"
         >
           <span
             class="euiButtonEmpty__text"
@@ -1948,11 +1985,11 @@ Array [
             <span
               class="euiSwitch__track"
             >
-              <div
+              <span
                 class="euiSwitch__icon"
                 data-euiicon-type="cross"
               />
-              <div
+              <span
                 class="euiSwitch__icon euiSwitch__icon--checked"
                 data-euiicon-type="check"
               />

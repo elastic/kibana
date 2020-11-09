@@ -3,7 +3,8 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["home", "management", "data"],
-  "optionalPlugins": ["dashboard", "visualizations", "discover"],
-  "extraPublicDirs": ["public/lib"]
+  "requiredPlugins": ["management", "data"],
+  "optionalPlugins": ["dashboard", "visualizations", "discover", "home", "savedObjectsTaggingOss"],
+  "extraPublicDirs": ["public/lib"],
+  "requiredBundles": ["kibanaReact", "home"]
 }

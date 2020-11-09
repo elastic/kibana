@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import uuidv4 from 'uuid/v4';
-import { BeatTag, CMBeat } from '../../../../legacy/plugins/beats_management/common/domain_types';
+import { BeatTag, CMBeat } from '../../common/domain_types';
 import { CMTagsAdapter } from './adapters/tags/adapter_types';
 import { ElasticsearchLib } from './elasticsearch';
 

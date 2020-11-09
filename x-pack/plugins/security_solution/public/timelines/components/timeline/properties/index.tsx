@@ -6,7 +6,6 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 
-import { useDispatch, useSelector } from 'react-redux';
 import { TimelineStatusLiteral, TimelineTypeLiteral } from '../../../../../common/types/timeline';
 import { useThrottledResizeObserver } from '../../../../common/components/utils';
 import { Note } from '../../../../common/lib/note';
@@ -17,25 +16,8 @@ import { AssociateNote, UpdateNote } from '../../notes/helpers';
 import { TimelineProperties } from './styles';
 import { PropertiesRight } from './properties_right';
 import { PropertiesLeft } from './properties_left';
-import { AllCasesModal } from '../../../../cases/components/all_cases_modal';
-import { SecurityPageName } from '../../../../app/types';
-import * as i18n from './translations';
-import { State } from '../../../../common/store';
-import { timelineSelectors } from '../../../store/timeline';
-import { setInsertTimeline } from '../../../store/timeline/actions';
-import { useKibana } from '../../../../common/lib/kibana';
-import { APP_ID } from '../../../../../common/constants';
-import { getCaseDetailsUrl } from '../../../../common/components/link_to';
+import { useAllCasesModal } from '../../../../cases/components/use_all_cases_modal';
 
-type CreateTimeline = ({
-  id,
-  show,
-  timelineType,
-}: {
-  id: string;
-  show?: boolean;
-  timelineType?: TimelineTypeLiteral;
-}) => void;
 type UpdateIsFavorite = ({ id, isFavorite }: { id: string; isFavorite: boolean }) => void;
 type UpdateTitle = ({ id, title }: { id: string; title: string }) => void;
 type UpdateDescription = ({ id, description }: { id: string; description: string }) => void;
@@ -43,7 +25,6 @@ type ToggleLock = ({ linkToId }: { linkToId: InputsModelId }) => void;
 
 interface Props {
   associateNote: AssociateNote;
-  createTimeline: CreateTimeline;
   description: string;
   getNotesByIds: (noteIds: string[]) => Note[];
   graphEventId?: string;
@@ -78,7 +59,6 @@ const settingsWidth = 55;
 export const Properties = React.memo<Props>(
   ({
     associateNote,
-    createTimeline,
     description,
     getNotesByIds,
     graphEventId,
@@ -97,12 +77,10 @@ export const Properties = React.memo<Props>(
     updateTitle,
     usersViewing,
   }) => {
-    const { navigateToApp } = useKibana().services.application;
     const { ref, width = 0 } = useThrottledResizeObserver(300);
     const [showActions, setShowActions] = useState(false);
     const [showNotes, setShowNotes] = useState(false);
     const [showTimelineModal, setShowTimelineModal] = useState(false);
-    const dispatch = useDispatch();
 
     const onButtonClick = useCallback(() => setShowActions(!showActions), [showActions]);
     const onToggleShowNotes = useCallback(() => setShowNotes(!showNotes), [showNotes]);
@@ -114,32 +92,8 @@ export const Properties = React.memo<Props>(
       setShowTimelineModal(true);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
-    const [showCaseModal, setShowCaseModal] = useState(false);
-    const onCloseCaseModal = useCallback(() => setShowCaseModal(false), []);
-    const onOpenCaseModal = useCallback(() => setShowCaseModal(true), []);
-    const currentTimeline = useSelector((state: State) =>
-      timelineSelectors.selectTimeline(state, timelineId)
-    );
 
-    const onRowClick = useCallback(
-      (id: string) => {
-        onCloseCaseModal();
-
-        navigateToApp(`${APP_ID}:${SecurityPageName.case}`, {
-          path: getCaseDetailsUrl({ id }),
-        }).then(() =>
-          dispatch(
-            setInsertTimeline({
-              graphEventId,
-              timelineId,
-              timelineSavedObjectId: currentTimeline.savedObjectId,
-              timelineTitle: title.length > 0 ? title : i18n.UNTITLED_TIMELINE,
-            })
-          )
-        );
-      },
-      [currentTimeline, dispatch, graphEventId, navigateToApp, onCloseCaseModal, timelineId, title]
-    );
+    const { Modal: AllCasesModal, onOpenModal: onOpenCaseModal } = useAllCasesModal({ timelineId });
 
     const datePickerWidth = useMemo(
       () =>
@@ -206,11 +160,7 @@ export const Properties = React.memo<Props>(
           updateNote={updateNote}
           usersViewing={usersViewing}
         />
-        <AllCasesModal
-          onCloseCaseModal={onCloseCaseModal}
-          showCaseModal={showCaseModal}
-          onRowClick={onRowClick}
-        />
+        <AllCasesModal />
       </TimelineProperties>
     );
   }

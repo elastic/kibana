@@ -80,21 +80,19 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`logs app is inaccessible and Application Not Found message is rendered`, async () => {
-        await PageObjects.common.navigateToApp('infraLogs', {
+        await PageObjects.common.navigateToActualUrl('infraLogs', '', {
+          ensureCurrentUrl: false,
+          shouldLoginIfPrompted: false,
           basePath: '/s/custom_space',
         });
-        await testSubjects.existOrFail('~appNotFoundPageContent');
-        await PageObjects.common.navigateToUrlWithBrowserHistory(
-          'infraLogs',
-          '/stream',
-          undefined,
-          {
-            basePath: '/s/custom_space',
-            ensureCurrentUrl: false,
-            shouldLoginIfPrompted: false,
-          }
+        const messageText = await PageObjects.common.getJsonBodyText();
+        expect(messageText).to.eql(
+          JSON.stringify({
+            statusCode: 404,
+            error: 'Not Found',
+            message: 'Not Found',
+          })
         );
-        await testSubjects.existOrFail('~appNotFoundPageContent');
       });
     });
   });

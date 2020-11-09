@@ -32,6 +32,8 @@ export const useAsync = <Args extends unknown[], Result>(
   const start = useCallback(
     (...args: Args) => {
       setLoading(true);
+      setResult(undefined);
+      setError(undefined);
       fn(...args)
         .then((r) => isMounted() && setResult(r))
         .catch((e) => isMounted() && setError(e))

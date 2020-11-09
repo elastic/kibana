@@ -46,7 +46,7 @@ export const ReadonlySettings: React.FunctionComponent<Props> = ({
       case 'ftp':
         return (
           <FormattedMessage
-            id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlWhitelistDescription"
+            id="xpack.snapshotRestore.repositoryForm.typeReadonly.urlAllowedDescription"
             defaultMessage="This URL must be registered in the {settingKey} setting."
             values={{
               settingKey: <EuiCode>repositories.url.allowed_urls</EuiCode>,

@@ -9,13 +9,15 @@ import React, { ReactNode } from 'react';
 import { withTheme, EuiTheme } from '../../../../../../observability/public';
 
 interface Props {
+  'data-test-subj'?: string;
   label: string;
   onClick: () => void;
   theme: EuiTheme | undefined;
   children: ReactNode;
 }
 
-export const DropdownButton = withTheme(({ onClick, label, theme, children }: Props) => {
+export const DropdownButton = withTheme((props: Props) => {
+  const { onClick, label, theme, children } = props;
   return (
     <EuiFlexGroup
       alignItems="center"
@@ -39,6 +41,7 @@ export const DropdownButton = withTheme(({ onClick, label, theme, children }: Pr
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj={props['data-test-subj']}
           color="text"
           iconType="arrowDown"
           onClick={onClick}

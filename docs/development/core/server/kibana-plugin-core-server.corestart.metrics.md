@@ -4,6 +4,7 @@
 
 ## CoreStart.metrics property
 
+[MetricsServiceStart](./kibana-plugin-core-server.metricsservicestart.md)
 
 <b>Signature:</b>
 

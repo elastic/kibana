@@ -18,9 +18,15 @@
  */
 
 import { snakeCase } from 'lodash';
-import { Logger, LegacyAPICaller } from 'kibana/server';
+import {
+  Logger,
+  LegacyAPICaller,
+  ElasticsearchClient,
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from 'kibana/server';
 import { Collector, CollectorOptions } from './collector';
-import { UsageCollector } from './usage_collector';
+import { UsageCollector, UsageCollectorOptions } from './usage_collector';
 
 interface CollectorSetConfig {
   logger: Logger;
@@ -39,10 +45,22 @@ export class CollectorSet {
     this.maximumWaitTimeForAllCollectorsInS = maximumWaitTimeForAllCollectorsInS || 60;
   }
 
-  public makeStatsCollector = <T, U>(options: CollectorOptions<T, U>) => {
+  public makeStatsCollector = <
+    T,
+    U,
+    O extends CollectorOptions<T, U> = CollectorOptions<T, U> // Used to allow extra properties (the Collector constructor extends the class with the additional options provided)
+  >(
+    options: O
+  ) => {
     return new Collector(this.logger, options);
   };
-  public makeUsageCollector = <T, U = T>(options: CollectorOptions<T, U>) => {
+  public makeUsageCollector = <
+    T,
+    U = T,
+    O extends UsageCollectorOptions<T, U> = UsageCollectorOptions<T, U>
+  >(
+    options: O
+  ) => {
     return new UsageCollector(this.logger, options);
   };
 
@@ -76,21 +94,27 @@ export class CollectorSet {
   };
 
   public areAllCollectorsReady = async (collectorSet: CollectorSet = this) => {
-    // Kept this for runtime validation in JS code.
     if (!(collectorSet instanceof CollectorSet)) {
       throw new Error(
         `areAllCollectorsReady method given bad collectorSet parameter: ` + typeof collectorSet
       );
     }
 
-    const collectorTypesNotReady: string[] = [];
-    let allReady = true;
-    for (const collector of collectorSet.collectors.values()) {
-      if (!(await collector.isReady())) {
-        allReady = false;
-        collectorTypesNotReady.push(collector.type);
-      }
-    }
+    const collectors = [...collectorSet.collectors.values()];
+    const collectorsWithStatus = await Promise.all(
+      collectors.map(async (collector) => {
+        return {
+          isReady: await collector.isReady(),
+          collector,
+        };
+      })
+    );
+
+    const collectorsTypesNotReady = collectorsWithStatus
+      .filter((collectorWithStatus) => collectorWithStatus.isReady === false)
+      .map((collectorWithStatus) => collectorWithStatus.collector.type);
+
+    const allReady = collectorsTypesNotReady.length === 0;
 
     if (!allReady && this.maximumWaitTimeForAllCollectorsInS >= 0) {
       const nowTimestamp = +new Date();
@@ -100,10 +124,11 @@ export class CollectorSet {
       const timeLeftInMS = this.maximumWaitTimeForAllCollectorsInS * 1000 - timeWaitedInMS;
       if (timeLeftInMS <= 0) {
         this.logger.debug(
-          `All collectors are not ready (waiting for ${collectorTypesNotReady.join(',')}) ` +
+          `All collectors are not ready (waiting for ${collectorsTypesNotReady.join(',')}) ` +
             `but we have waited the required ` +
             `${this.maximumWaitTimeForAllCollectorsInS}s and will return data from all collectors that are ready.`
         );
+
         return true;
       } else {
         this.logger.debug(`All collectors are not ready. Waiting for ${timeLeftInMS}ms longer.`);
@@ -117,23 +142,28 @@ export class CollectorSet {
 
   public bulkFetch = async (
     callCluster: LegacyAPICaller,
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract | ISavedObjectsRepository,
     collectors: Map<string, Collector<any, any>> = this.collectors
   ) => {
-    const responses = [];
-    for (const collector of collectors.values()) {
-      this.logger.debug(`Fetching data from ${collector.type} collector`);
-      try {
-        responses.push({
-          type: collector.type,
-          result: await collector.fetch(callCluster),
-        });
-      } catch (err) {
-        this.logger.warn(err);
-        this.logger.warn(`Unable to fetch data from ${collector.type} collector`);
-      }
-    }
+    const responses = await Promise.all(
+      [...collectors.values()].map(async (collector) => {
+        this.logger.debug(`Fetching data from ${collector.type} collector`);
+        try {
+          return {
+            type: collector.type,
+            result: await collector.fetch({ callCluster, esClient, soClient }),
+          };
+        } catch (err) {
+          this.logger.warn(err);
+          this.logger.warn(`Unable to fetch data from ${collector.type} collector`);
+        }
+      })
+    );
 
-    return responses;
+    return responses.filter(
+      (response): response is { type: string; result: unknown } => typeof response !== 'undefined'
+    );
   };
 
   /*
@@ -144,9 +174,18 @@ export class CollectorSet {
     return this.makeCollectorSetFromArray(filtered);
   };
 
-  public bulkFetchUsage = async (callCluster: LegacyAPICaller) => {
+  public bulkFetchUsage = async (
+    callCluster: LegacyAPICaller,
+    esClient: ElasticsearchClient,
+    savedObjectsClient: SavedObjectsClientContract | ISavedObjectsRepository
+  ) => {
     const usageCollectors = this.getFilteredCollectorSet((c) => c instanceof UsageCollector);
-    return await this.bulkFetch(callCluster, usageCollectors.collectors);
+    return await this.bulkFetch(
+      callCluster,
+      esClient,
+      savedObjectsClient,
+      usageCollectors.collectors
+    );
   };
 
   // convert an array of fetched stats results into key/object

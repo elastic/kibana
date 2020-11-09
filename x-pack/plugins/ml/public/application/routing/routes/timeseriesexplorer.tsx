@@ -6,10 +6,12 @@
 
 import { isEqual } from 'lodash';
 import React, { FC, useCallback, useEffect, useState } from 'react';
-import { usePrevious } from 'react-use';
+import usePrevious from 'react-use/lib/usePrevious';
 import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
+
+import { NavigateToPath } from '../../contexts/kibana';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -34,15 +36,19 @@ import { MlRoute, PageLoader, PageProps } from '../router';
 import { useRefresh } from '../use_refresh';
 import { useResolver } from '../use_resolver';
 import { basicResolvers } from '../resolvers';
-import { ANOMALY_DETECTION_BREADCRUMB, ML_BREADCRUMB } from '../breadcrumbs';
+import { getBreadcrumbWithUrlForApp } from '../breadcrumbs';
 import { useTimefilter } from '../../contexts/kibana';
+import { useToastNotificationService } from '../../services/toast_notification_service';
 
-export const timeSeriesExplorerRoute: MlRoute = {
+export const timeSeriesExplorerRouteFactory = (
+  navigateToPath: NavigateToPath,
+  basePath: string
+): MlRoute => ({
   path: '/timeseriesexplorer',
   render: (props, deps) => <PageWrapper {...props} deps={deps} />,
   breadcrumbs: [
-    ML_BREADCRUMB,
-    ANOMALY_DETECTION_BREADCRUMB,
+    getBreadcrumbWithUrlForApp('ML_BREADCRUMB', navigateToPath, basePath),
+    getBreadcrumbWithUrlForApp('ANOMALY_DETECTION_BREADCRUMB', navigateToPath, basePath),
     {
       text: i18n.translate('xpack.ml.anomalyDetection.singleMetricViewerLabel', {
         defaultMessage: 'Single Metric Viewer',
@@ -50,7 +56,7 @@ export const timeSeriesExplorerRoute: MlRoute = {
       href: '',
     },
   ],
-};
+});
 
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { context, results } = useResolver('', undefined, deps.config, {
@@ -83,16 +89,18 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   config,
   jobsWithTimeRange,
 }) => {
+  const toastNotificationService = useToastNotificationService();
   const [appState, setAppState] = useUrlState('_a');
   const [globalState, setGlobalState] = useUrlState('_g');
   const [lastRefresh, setLastRefresh] = useState(0);
   const previousRefresh = usePrevious(lastRefresh);
   const [selectedJobId, setSelectedJobId] = useState<string>();
   const timefilter = useTimefilter({ timeRangeSelector: true, autoRefreshSelector: true });
+  const [invalidTimeRangeError, setInValidTimeRangeError] = useState<boolean>(false);
 
   const refresh = useRefresh();
   useEffect(() => {
-    if (refresh !== undefined) {
+    if (refresh !== undefined && refresh.lastRefresh !== lastRefresh) {
       setLastRefresh(refresh?.lastRefresh);
 
       if (refresh.timeRange !== undefined) {
@@ -103,7 +111,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         });
       }
     }
-  }, [refresh?.lastRefresh]);
+  }, [refresh?.lastRefresh, lastRefresh, setGlobalState]);
 
   // We cannot simply infer bounds from the globalState's `time` attribute
   // with `moment` since it can contain custom strings such as `now-15m`.
@@ -112,6 +120,9 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const [bounds, setBounds] = useState<TimeRangeBounds | undefined>(undefined);
   useEffect(() => {
     if (globalState?.time !== undefined) {
+      if (globalState.time.mode === 'invalid') {
+        setInValidTimeRangeError(true);
+      }
       timefilter.setTime({
         from: globalState.time.from,
         to: globalState.time.to,
@@ -137,18 +148,6 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   // `previousSelectedJobIds` to avoid wiping appState.
   const previousSelectedJobIds = usePrevious(selectedJobIds);
   const isJobChange = !isEqual(previousSelectedJobIds, selectedJobIds);
-
-  // Use a side effect to clear appState when changing jobs.
-  useEffect(() => {
-    if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
-      setLastRefresh(Date.now());
-      appStateHandler(APP_STATE_ACTION.CLEAR);
-    }
-    const validatedJobId = validateJobSelection(jobsWithTimeRange, selectedJobIds, setGlobalState);
-    if (typeof validatedJobId === 'string') {
-      setSelectedJobId(validatedJobId);
-    }
-  }, [JSON.stringify(selectedJobIds)]);
 
   // Next we get globalState and appState information to pass it on as props later.
   // If a job change is going on, we fall back to defaults (as if appState was already cleared),
@@ -207,8 +206,20 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
 
       setAppState('mlTimeSeriesExplorer', mlTimeSeriesExplorer);
     },
-    [JSON.stringify([appState, globalState])]
+    [JSON.stringify(appState?.mlTimeSeriesExplorer), setAppState]
   );
+
+  // Use a side effect to clear appState when changing jobs.
+  useEffect(() => {
+    if (selectedJobIds !== undefined && previousSelectedJobIds !== undefined) {
+      setLastRefresh(Date.now());
+      appStateHandler(APP_STATE_ACTION.CLEAR);
+    }
+    const validatedJobId = validateJobSelection(jobsWithTimeRange, selectedJobIds, setGlobalState);
+    if (typeof validatedJobId === 'string') {
+      setSelectedJobId(validatedJobId);
+    }
+  }, [JSON.stringify(selectedJobIds)]);
 
   const boundsMinMs = bounds?.min?.valueOf();
   const boundsMaxMs = bounds?.max?.valueOf();
@@ -284,6 +295,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   return (
     <TimeSeriesExplorer
       {...{
+        toastNotificationService,
         appStateHandler,
         autoZoomDuration,
         bounds,
@@ -298,6 +310,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
         tableSeverity: tableSeverity.val,
         timefilter,
         zoom: zoomProp,
+        invalidTimeRangeError,
       }}
     />
   );

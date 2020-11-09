@@ -34,7 +34,7 @@ export const NOT_A_FAVORITE = i18n.translate(
 export const TIMELINE_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.properties.timelineTitleAriaLabel',
   {
-    defaultMessage: 'Timeline title',
+    defaultMessage: 'Title',
   }
 );
 
@@ -49,6 +49,13 @@ export const UNTITLED_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.untitledTimelinePlaceholder',
   {
     defaultMessage: 'Untitled timeline',
+  }
+);
+
+export const UNTITLED_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.timeline.properties.untitledTemplatePlaceholder',
+  {
+    defaultMessage: 'Untitled template',
   }
 );
 
@@ -144,6 +151,13 @@ export const ATTACH_TO_EXISTING_CASE = i18n.translate(
   }
 );
 
+export const ATTACH_TIMELINE_TO_CASE_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.timeline.properties.attachTimelineToCaseTooltip',
+  {
+    defaultMessage: 'Please provide a title for your timeline in order to attach it to a case',
+  }
+);
+
 export const STREAM_LIVE = i18n.translate(
   'xpack.securitySolution.timeline.properties.streamLiveButtonLabel',
   {
@@ -178,5 +192,12 @@ export const UNLOCK_SYNC_MAIN_DATE_PICKER_ARIA = i18n.translate(
   'xpack.securitySolution.timeline.properties.unlockDatePickerDescription',
   {
     defaultMessage: 'Unlock date picker to global date picker',
+  }
+);
+
+export const OPTIONAL = i18n.translate(
+  'xpack.securitySolution.timeline.properties.timelineDescriptionOptional',
+  {
+    defaultMessage: 'Optional',
   }
 );

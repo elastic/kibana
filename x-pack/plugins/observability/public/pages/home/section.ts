@@ -4,19 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { i18n } from '@kbn/i18n';
-
-interface ISection {
-  id: string;
-  title: string;
-  icon: string;
-  description: string;
-  href?: string;
-  target?: '_blank';
-}
+import { ISection } from '../../typings/section';
 
 export const appsSection: ISection[] = [
   {
-    id: 'logs',
+    id: 'infra_logs',
     title: i18n.translate('xpack.observability.section.apps.logs.title', {
       defaultMessage: 'Logs',
     }),
@@ -25,20 +17,22 @@ export const appsSection: ISection[] = [
       defaultMessage:
         'Centralize logs from any source. Search, tail, automate anomaly detection, and visualize trends so you can take action quicker.',
     }),
+    href: 'https://www.elastic.co',
   },
   {
     id: 'apm',
     title: i18n.translate('xpack.observability.section.apps.apm.title', {
       defaultMessage: 'APM',
     }),
-    icon: 'logoAPM',
+    icon: 'logoObservability',
     description: i18n.translate('xpack.observability.section.apps.apm.description', {
       defaultMessage:
         'Trace transactions through a distributed architecture and map your services’ interactions to easily spot performance bottlenecks.',
     }),
+    href: 'https://www.elastic.co',
   },
   {
-    id: 'metrics',
+    id: 'infra_metrics',
     title: i18n.translate('xpack.observability.section.apps.metrics.title', {
       defaultMessage: 'Metrics',
     }),
@@ -47,6 +41,7 @@ export const appsSection: ISection[] = [
       defaultMessage:
         'Analyze metrics from your infrastructure, apps, and services. Discover trends, forecast behavior, get alerts on anomalies, and more.',
     }),
+    href: 'https://www.elastic.co',
   },
   {
     id: 'uptime',
@@ -58,5 +53,6 @@ export const appsSection: ISection[] = [
       defaultMessage:
         'Proactively monitor the availability of your sites and services. Receive alerts and resolve issues faster to optimize your users’ experience.',
     }),
+    href: 'https://www.elastic.co',
   },
 ];

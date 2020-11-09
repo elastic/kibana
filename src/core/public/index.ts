@@ -61,7 +61,6 @@ import {
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
 import { I18nStart } from './i18n';
-import { InjectedMetadataSetup, InjectedMetadataStart, LegacyNavLink } from './injected_metadata';
 import { NotificationsSetup, NotificationsStart } from './notifications';
 import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
@@ -69,7 +68,6 @@ import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
 import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
-export { PackageInfo, EnvironmentMode } from '../server/types';
 import {
   IContextContainer,
   IContextProvider,
@@ -79,17 +77,9 @@ import {
   HandlerParameters,
 } from './context';
 
+export { PackageInfo, EnvironmentMode } from '../server/types';
 export { CoreContext, CoreSystem } from './core_system';
-export {
-  DEFAULT_APP_CATEGORIES,
-  getFlattenedObject,
-  URLMeaningfulParts,
-  modifyUrl,
-  isRelativeUrl,
-  Freezable,
-  deepFreeze,
-  assertNever,
-} from '../utils';
+export { DEFAULT_APP_CATEGORIES } from '../utils';
 export {
   AppCategory,
   UiSettingsParams,
@@ -106,7 +96,6 @@ export {
   ApplicationStart,
   App,
   PublicAppInfo,
-  AppBase,
   AppMount,
   AppMountDeprecated,
   AppUnmount,
@@ -122,8 +111,6 @@ export {
   AppUpdatableFields,
   AppUpdater,
   ScopedHistory,
-  LegacyApp,
-  PublicLegacyAppInfo,
   NavigateToAppOptions,
 } from './application';
 
@@ -140,20 +127,25 @@ export {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectAttributeSingle,
+  SavedObjectError,
   SavedObjectReference,
   SavedObjectsBaseOptions,
   SavedObjectsFindOptions,
+  SavedObjectsFindOptionsReference,
   SavedObjectsMigrationVersion,
   SavedObjectsClientContract,
   SavedObjectsClient,
   SimpleSavedObject,
   SavedObjectsImportResponse,
+  SavedObjectsImportSuccess,
   SavedObjectsImportConflictError,
+  SavedObjectsImportAmbiguousConflictError,
   SavedObjectsImportUnsupportedTypeError,
   SavedObjectsImportMissingReferencesError,
   SavedObjectsImportUnknownError,
   SavedObjectsImportError,
   SavedObjectsImportRetry,
+  SavedObjectsNamespaceType,
 } from './saved_objects';
 
 export {
@@ -226,7 +218,7 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform. Use the legacy platform API instead.
+   * in the new platform.
    * @deprecated
    * */
   injectedMetadata: {
@@ -281,42 +273,12 @@ export interface CoreStart {
   /**
    * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
    * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform. Use the legacy platform API instead.
+   * in the new platform.
    * @deprecated
    * */
   injectedMetadata: {
     getInjectedVar: (name: string, defaultValue?: any) => unknown;
   };
-}
-
-/**
- * Setup interface exposed to the legacy platform via the `ui/new_platform` module.
- *
- * @remarks
- * Some methods are not supported in the legacy platform and while present to make this type compatibile with
- * {@link CoreSetup}, unsupported methods will throw exceptions when called.
- *
- * @public
- * @deprecated
- */
-export interface LegacyCoreSetup extends CoreSetup<any, any> {
-  /** @deprecated */
-  injectedMetadata: InjectedMetadataSetup;
-}
-
-/**
- * Start interface exposed to the legacy platform via the `ui/new_platform` module.
- *
- * @remarks
- * Some methods are not supported in the legacy platform and while present to make this type compatibile with
- * {@link CoreStart}, unsupported methods will throw exceptions when called.
- *
- * @public
- * @deprecated
- */
-export interface LegacyCoreStart extends CoreStart {
-  /** @deprecated */
-  injectedMetadata: InjectedMetadataStart;
 }
 
 export {
@@ -352,7 +314,6 @@ export {
   HttpSetup,
   HttpStart,
   I18nStart,
-  LegacyNavLink,
   NotificationsSetup,
   NotificationsStart,
   Plugin,

@@ -183,7 +183,12 @@ function indexEventDoc(esContext: EsContext, doc: Doc): void {
 // whew, the thing that actually writes the event log document!
 async function indexLogEventDoc(esContext: EsContext, doc: unknown) {
   esContext.logger.debug(`writing to event log: ${JSON.stringify(doc)}`);
-  await esContext.waitTillReady();
+  const success = await esContext.waitTillReady();
+  if (!success) {
+    esContext.logger.debug(`event log did not initialize correctly, event not written`);
+    return;
+  }
+
   await esContext.esAdapter.indexDocument(doc);
   esContext.logger.debug(`writing to event log complete`);
 }

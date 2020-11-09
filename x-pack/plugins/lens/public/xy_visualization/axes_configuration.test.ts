@@ -5,13 +5,13 @@
  */
 
 import { LayerArgs } from './types';
-import { KibanaDatatable } from '../../../../../src/plugins/expressions/public';
+import { Datatable } from '../../../../../src/plugins/expressions/public';
 import { getAxesConfiguration } from './axes_configuration';
 
 describe('axes_configuration', () => {
-  const tables: Record<string, KibanaDatatable> = {
+  const tables: Record<string, Datatable> = {
     first: {
-      type: 'kibana_datatable',
+      type: 'datatable',
       rows: [
         {
           xAccessorId: 1585758120000,
@@ -99,48 +99,60 @@ describe('axes_configuration', () => {
           id: 'xAccessorId',
           name: 'order_date per minute',
           meta: {
-            type: 'date_histogram',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {
-              field: 'order_date',
-              timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
-              useNormalizedEsInterval: true,
-              scaleMetricValues: false,
-              interval: '1m',
-              drop_partials: false,
-              min_doc_count: 0,
-              extended_bounds: {},
+            type: 'date',
+            field: 'order_date',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'date_histogram',
+              params: {
+                field: 'order_date',
+                timeRange: { from: '2020-04-01T16:14:16.246Z', to: '2020-04-01T17:15:41.263Z' },
+                useNormalizedEsInterval: true,
+                scaleMetricValues: false,
+                interval: '1m',
+                drop_partials: false,
+                min_doc_count: 0,
+                extended_bounds: {},
+              },
             },
+            params: { params: { id: 'date', params: { pattern: 'HH:mm' } } },
           },
-          formatHint: { id: 'date', params: { pattern: 'HH:mm' } },
         },
         {
           id: 'splitAccessorId',
           name: 'Top values of category.keyword',
           meta: {
-            type: 'terms',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {
-              field: 'category.keyword',
-              orderBy: 'yAccessorId',
-              order: 'desc',
-              size: 3,
-              otherBucket: false,
-              otherBucketLabel: 'Other',
-              missingBucket: false,
-              missingBucketLabel: 'Missing',
+            type: 'string',
+            field: 'category.keyword',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'terms',
+              params: {
+                field: 'category.keyword',
+                orderBy: 'yAccessorId',
+                order: 'desc',
+                size: 3,
+                otherBucket: false,
+                otherBucketLabel: 'Other',
+                missingBucket: false,
+                missingBucketLabel: 'Missing',
+              },
             },
-          },
-          formatHint: {
-            id: 'terms',
             params: {
-              id: 'string',
-              otherBucketLabel: 'Other',
-              missingBucketLabel: 'Missing',
-              parsedUrl: {
-                origin: 'http://localhost:5601',
-                pathname: '/jiy/app/kibana',
-                basePath: '/jiy',
+              id: 'terms',
+              params: {
+                id: 'string',
+                otherBucketLabel: 'Other',
+                missingBucketLabel: 'Missing',
+                parsedUrl: {
+                  origin: 'http://localhost:5601',
+                  pathname: '/jiy/app/kibana',
+                  basePath: '/jiy',
+                },
               },
             },
           },
@@ -149,41 +161,57 @@ describe('axes_configuration', () => {
           id: 'yAccessorId',
           name: 'Count of records',
           meta: {
-            type: 'count',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: 'number',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'count',
+            },
+            params: { id: 'number' },
           },
-          formatHint: { id: 'number' },
         },
         {
           id: 'yAccessorId2',
           name: 'Other column',
           meta: {
-            type: 'average',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: 'number',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'average',
+            },
+            params: { id: 'bytes' },
           },
-          formatHint: { id: 'bytes' },
         },
         {
           id: 'yAccessorId3',
           name: 'Other column',
           meta: {
-            type: 'average',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: 'number',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'average',
+            },
+            params: { id: 'currency' },
           },
-          formatHint: { id: 'currency' },
         },
         {
           id: 'yAccessorId4',
           name: 'Other column',
           meta: {
-            type: 'average',
-            indexPatternId: 'indexPatternId',
-            aggConfigParams: {},
+            type: 'number',
+            source: 'esaggs',
+            index: 'indexPatternId',
+            sourceParams: {
+              indexPatternId: 'indexPatternId',
+              type: 'average',
+            },
+            params: { id: 'currency' },
           },
-          formatHint: { id: 'currency' },
         },
       ],
     },
@@ -199,11 +227,12 @@ describe('axes_configuration', () => {
     xScaleType: 'ordinal',
     yScaleType: 'linear',
     isHistogram: false,
+    palette: { type: 'palette', name: 'default' },
   };
 
   it('should map auto series to left axis', () => {
     const formatFactory = jest.fn();
-    const groups = getAxesConfiguration([sampleLayer], tables, formatFactory, false);
+    const groups = getAxesConfiguration([sampleLayer], false, tables, formatFactory);
     expect(groups.length).toEqual(1);
     expect(groups[0].position).toEqual('left');
     expect(groups[0].series[0].accessor).toEqual('yAccessorId');
@@ -213,7 +242,7 @@ describe('axes_configuration', () => {
   it('should map auto series to right axis if formatters do not match', () => {
     const formatFactory = jest.fn();
     const twoSeriesLayer = { ...sampleLayer, accessors: ['yAccessorId', 'yAccessorId2'] };
-    const groups = getAxesConfiguration([twoSeriesLayer], tables, formatFactory, false);
+    const groups = getAxesConfiguration([twoSeriesLayer], false, tables, formatFactory);
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
     expect(groups[1].position).toEqual('right');
@@ -227,7 +256,7 @@ describe('axes_configuration', () => {
       ...sampleLayer,
       accessors: ['yAccessorId', 'yAccessorId2', 'yAccessorId3'],
     };
-    const groups = getAxesConfiguration([threeSeriesLayer], tables, formatFactory, false);
+    const groups = getAxesConfiguration([threeSeriesLayer], false, tables, formatFactory);
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
     expect(groups[1].position).toEqual('right');
@@ -240,9 +269,9 @@ describe('axes_configuration', () => {
     const formatFactory = jest.fn();
     const groups = getAxesConfiguration(
       [{ ...sampleLayer, yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }] }],
+      false,
       tables,
-      formatFactory,
-      false
+      formatFactory
     );
     expect(groups.length).toEqual(1);
     expect(groups[0].position).toEqual('right');
@@ -260,9 +289,9 @@ describe('axes_configuration', () => {
           yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
+      false,
       tables,
-      formatFactory,
-      false
+      formatFactory
     );
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
@@ -284,9 +313,9 @@ describe('axes_configuration', () => {
           yConfig: [{ forAccessor: 'yAccessorId', axisMode: 'right' }],
         },
       ],
+      false,
       tables,
-      formatFactory,
-      false
+      formatFactory
     );
     expect(formatFactory).toHaveBeenCalledTimes(2);
     expect(formatFactory).toHaveBeenCalledWith({ id: 'number' });

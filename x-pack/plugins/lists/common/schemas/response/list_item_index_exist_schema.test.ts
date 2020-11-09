@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getListItemIndexExistSchemaResponseMock } from './list_item_index_exist_schema.mock';
 import { ListItemIndexExistSchema, listItemIndexExistSchema } from './list_item_index_exist_schema';
@@ -25,6 +25,7 @@ describe('list_item_index_exist_schema', () => {
 
   test('it should NOT accept an undefined for "list_index"', () => {
     const payload = getListItemIndexExistSchemaResponseMock();
+    // @ts-expect-error
     delete payload.list_index;
     const decoded = listItemIndexExistSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -38,6 +39,7 @@ describe('list_item_index_exist_schema', () => {
 
   test('it should NOT accept an undefined for "list_item_index"', () => {
     const payload = getListItemIndexExistSchemaResponseMock();
+    // @ts-expect-error
     delete payload.list_item_index;
     const decoded = listItemIndexExistSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

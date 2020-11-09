@@ -19,7 +19,7 @@ import {
 import { ComponentStrings } from '../../../../../i18n/components';
 
 import { Clipboard } from '../../../clipboard';
-import { OnCopyFn } from './share_website_flyout';
+import { OnCopyFn } from './flyout';
 
 const { ShareWebsiteSnippetsStep: strings } = ComponentStrings;
 

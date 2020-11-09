@@ -18,24 +18,18 @@
  */
 import React from 'react';
 import { EuiLoadingSpinner, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n/react';
 
 export function LoadingSpinner() {
   return (
-    <I18nProvider>
-      <>
-        <EuiTitle size="s" data-test-subj="loadingSpinnerText">
-          <h2>
-            <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
-      </>
-    </I18nProvider>
+    <div className="dscOverlay">
+      <EuiTitle size="s" data-test-subj="loadingSpinnerText">
+        <h2>
+          <FormattedMessage id="discover.searchingTitle" defaultMessage="Searching" />
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <EuiLoadingSpinner size="l" data-test-subj="loadingSpinner" />
+    </div>
   );
-}
-
-export function createLoadingSpinnerDirective(reactDirective: any) {
-  return reactDirective(LoadingSpinner);
 }

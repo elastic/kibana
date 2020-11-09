@@ -171,7 +171,7 @@ describe('LoginForm', () => {
       '/some-base-path/app/home#/?_g=()'
     )}`;
     const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
-    coreStartMock.http.post.mockResolvedValue({});
+    coreStartMock.http.post.mockResolvedValue({ location: '/some-base-path/app/home#/?_g=()' });
 
     const wrapper = mountWithIntl(
       <LoginForm
@@ -180,7 +180,7 @@ describe('LoginForm', () => {
         loginAssistanceMessage=""
         selector={{
           enabled: false,
-          providers: [{ type: 'basic', name: 'basic', usesLoginForm: true }],
+          providers: [{ type: 'basic', name: 'basic1', usesLoginForm: true }],
         }}
       />
     );
@@ -198,7 +198,14 @@ describe('LoginForm', () => {
 
     expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
     expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
-      body: JSON.stringify({ username: 'username1', password: 'password1' }),
+      body: JSON.stringify({
+        providerType: 'basic',
+        providerName: 'basic1',
+        currentURL: `https://some-host/login?next=${encodeURIComponent(
+          '/some-base-path/app/home#/?_g=()'
+        )}`,
+        params: { username: 'username1', password: 'password1' },
+      }),
     });
 
     expect(window.location.href).toBe('/some-base-path/app/home#/?_g=()');
@@ -363,7 +370,7 @@ describe('LoginForm', () => {
       });
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
-      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login_with', {
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
@@ -407,14 +414,63 @@ describe('LoginForm', () => {
       });
 
       expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
-      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login_with', {
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
         body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
       });
 
       expect(window.location.href).toBe(currentURL);
       expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(failureReason, {
         title: 'Could not perform login.',
+        toastMessage: 'Oh no!',
       });
+    });
+
+    it('shows error with message in the `body`', async () => {
+      const currentURL = `https://some-host/login?next=${encodeURIComponent(
+        '/some-base-path/app/kibana#/home?_g=()'
+      )}`;
+
+      const coreStartMock = coreMock.createStart({ basePath: '/some-base-path' });
+      coreStartMock.http.post.mockRejectedValue({
+        body: { message: 'Oh no! But with much more details!' },
+        message: 'Oh no!',
+      });
+
+      window.location.href = currentURL;
+      const wrapper = mountWithIntl(
+        <LoginForm
+          http={coreStartMock.http}
+          notifications={coreStartMock.notifications}
+          loginAssistanceMessage=""
+          selector={{
+            enabled: true,
+            providers: [
+              { type: 'basic', name: 'basic', usesLoginForm: true },
+              { type: 'saml', name: 'saml1', usesLoginForm: false },
+            ],
+          }}
+        />
+      );
+
+      expectPageMode(wrapper, PageMode.Selector);
+
+      wrapper.findWhere((node) => node.key() === 'saml1').simulate('click');
+
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+
+      expect(coreStartMock.http.post).toHaveBeenCalledTimes(1);
+      expect(coreStartMock.http.post).toHaveBeenCalledWith('/internal/security/login', {
+        body: JSON.stringify({ providerType: 'saml', providerName: 'saml1', currentURL }),
+      });
+
+      expect(window.location.href).toBe(currentURL);
+      expect(coreStartMock.notifications.toasts.addError).toHaveBeenCalledWith(
+        new Error('Oh no! But with much more details!'),
+        { title: 'Could not perform login.', toastMessage: 'Oh no!' }
+      );
     });
 
     it('properly switches to login form', async () => {

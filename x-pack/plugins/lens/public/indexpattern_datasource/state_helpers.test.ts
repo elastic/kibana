@@ -452,22 +452,32 @@ describe('state_helpers', () => {
 
   describe('getColumnOrder', () => {
     it('should work for empty columns', () => {
-      expect(getColumnOrder({})).toEqual([]);
+      expect(
+        getColumnOrder({
+          indexPatternId: '',
+          columnOrder: [],
+          columns: {},
+        })
+      ).toEqual([]);
     });
 
     it('should work for one column', () => {
       expect(
         getColumnOrder({
-          col1: {
-            label: 'Value of timestamp',
-            dataType: 'string',
-            isBucketed: false,
+          columnOrder: [],
+          indexPatternId: '',
+          columns: {
+            col1: {
+              label: 'Value of timestamp',
+              dataType: 'string',
+              isBucketed: false,
 
-            // Private
-            operationType: 'date_histogram',
-            sourceField: 'timestamp',
-            params: {
-              interval: 'h',
+              // Private
+              operationType: 'date_histogram',
+              sourceField: 'timestamp',
+              params: {
+                interval: 'h',
+              },
             },
           },
         })
@@ -477,41 +487,45 @@ describe('state_helpers', () => {
     it('should put any number of aggregations before metrics', () => {
       expect(
         getColumnOrder({
-          col1: {
-            label: 'Top values of category',
-            dataType: 'string',
-            isBucketed: true,
+          columnOrder: [],
+          indexPatternId: '',
+          columns: {
+            col1: {
+              label: 'Top values of category',
+              dataType: 'string',
+              isBucketed: true,
 
-            // Private
-            operationType: 'terms',
-            sourceField: 'category',
-            params: {
-              size: 5,
-              orderBy: {
-                type: 'alphabetical',
+              // Private
+              operationType: 'terms',
+              sourceField: 'category',
+              params: {
+                size: 5,
+                orderBy: {
+                  type: 'alphabetical',
+                },
+                orderDirection: 'asc',
               },
-              orderDirection: 'asc',
             },
-          },
-          col2: {
-            label: 'Average of bytes',
-            dataType: 'number',
-            isBucketed: false,
+            col2: {
+              label: 'Average of bytes',
+              dataType: 'number',
+              isBucketed: false,
 
-            // Private
-            operationType: 'avg',
-            sourceField: 'bytes',
-          },
-          col3: {
-            label: 'Date histogram of timestamp',
-            dataType: 'date',
-            isBucketed: true,
+              // Private
+              operationType: 'avg',
+              sourceField: 'bytes',
+            },
+            col3: {
+              label: 'Date histogram of timestamp',
+              dataType: 'date',
+              isBucketed: true,
 
-            // Private
-            operationType: 'date_histogram',
-            sourceField: 'timestamp',
-            params: {
-              interval: '1d',
+              // Private
+              operationType: 'date_histogram',
+              sourceField: 'timestamp',
+              params: {
+                interval: '1d',
+              },
             },
           },
         })
@@ -521,44 +535,48 @@ describe('state_helpers', () => {
     it('should reorder aggregations based on suggested priority', () => {
       expect(
         getColumnOrder({
-          col1: {
-            label: 'Top values of category',
-            dataType: 'string',
-            isBucketed: true,
+          indexPatternId: '',
+          columnOrder: [],
+          columns: {
+            col1: {
+              label: 'Top values of category',
+              dataType: 'string',
+              isBucketed: true,
 
-            // Private
-            operationType: 'terms',
-            sourceField: 'category',
-            params: {
-              size: 5,
-              orderBy: {
-                type: 'alphabetical',
+              // Private
+              operationType: 'terms',
+              sourceField: 'category',
+              params: {
+                size: 5,
+                orderBy: {
+                  type: 'alphabetical',
+                },
+                orderDirection: 'asc',
               },
-              orderDirection: 'asc',
+              suggestedPriority: 2,
             },
-            suggestedPriority: 2,
-          },
-          col2: {
-            label: 'Average of bytes',
-            dataType: 'number',
-            isBucketed: false,
+            col2: {
+              label: 'Average of bytes',
+              dataType: 'number',
+              isBucketed: false,
 
-            // Private
-            operationType: 'avg',
-            sourceField: 'bytes',
-            suggestedPriority: 0,
-          },
-          col3: {
-            label: 'Date histogram of timestamp',
-            dataType: 'date',
-            isBucketed: true,
+              // Private
+              operationType: 'avg',
+              sourceField: 'bytes',
+              suggestedPriority: 0,
+            },
+            col3: {
+              label: 'Date histogram of timestamp',
+              dataType: 'date',
+              isBucketed: true,
 
-            // Private
-            operationType: 'date_histogram',
-            sourceField: 'timestamp',
-            suggestedPriority: 1,
-            params: {
-              interval: '1d',
+              // Private
+              operationType: 'date_histogram',
+              sourceField: 'timestamp',
+              suggestedPriority: 1,
+              params: {
+                interval: '1d',
+              },
             },
           },
         })
@@ -570,15 +588,18 @@ describe('state_helpers', () => {
     const indexPattern: IndexPattern = {
       id: 'test',
       title: '',
+      hasRestrictions: true,
       fields: [
         {
           name: 'fieldA',
+          displayName: 'fieldA',
           aggregatable: true,
           searchable: true,
           type: 'string',
         },
         {
           name: 'fieldB',
+          displayName: 'fieldB',
           aggregatable: true,
           searchable: true,
           type: 'number',
@@ -590,12 +611,14 @@ describe('state_helpers', () => {
         },
         {
           name: 'fieldC',
+          displayName: 'fieldC',
           aggregatable: false,
           searchable: true,
           type: 'date',
         },
         {
           name: 'fieldD',
+          displayName: 'fieldD',
           aggregatable: true,
           searchable: true,
           type: 'date',
@@ -609,6 +632,7 @@ describe('state_helpers', () => {
         },
         {
           name: 'fieldE',
+          displayName: 'fieldE',
           aggregatable: true,
           searchable: true,
           type: 'date',

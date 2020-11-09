@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
+import { EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { MonitorLocation } from '../../../../../common/runtime_types';
 
@@ -43,7 +43,7 @@ export const StatusByLocations = ({ locations }: StatusByLocationsProps) => {
   }
 
   return (
-    <EuiText>
+    <EuiTitle size="s">
       <h2>
         {locations.length <= 1 ? (
           <FormattedMessage
@@ -52,7 +52,7 @@ export const StatusByLocations = ({ locations }: StatusByLocationsProps) => {
               status,
               loc: statusMessage,
             }}
-            defaultMessage="{status} in {loc} Location"
+            defaultMessage="{status} in {loc} location"
           />
         ) : (
           <FormattedMessage
@@ -61,10 +61,10 @@ export const StatusByLocations = ({ locations }: StatusByLocationsProps) => {
               status,
               loc: statusMessage,
             }}
-            defaultMessage="{status} in {loc} Locations"
+            defaultMessage="{status} in {loc} locations"
           />
         )}
       </h2>
-    </EuiText>
+    </EuiTitle>
   );
 };

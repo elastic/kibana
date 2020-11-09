@@ -31,6 +31,7 @@ describe('SlackActionFields renders', () => {
         editActionConfig={() => {}}
         editActionSecrets={() => {}}
         docLinks={deps!.docLinks}
+        readOnly={false}
       />
     );
 
@@ -42,5 +43,55 @@ describe('SlackActionFields renders', () => {
     expect(wrapper.find('[data-test-subj="slackWebhookUrlInput"]').first().prop('value')).toBe(
       'http:\\test'
     );
+  });
+
+  test('should display a message on create to remember credentials', () => {
+    const actionConnector = {
+      actionTypeId: '.email',
+      config: {},
+      secrets: {},
+    } as SlackActionConnector;
+    const deps = {
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
+    };
+    const wrapper = mountWithIntl(
+      <SlackActionFields
+        action={actionConnector}
+        errors={{ index: [], webhookUrl: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        docLinks={deps!.docLinks}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toEqual(0);
+  });
+
+  test('should display a message on edit to re-enter credentials', () => {
+    const actionConnector = {
+      secrets: {
+        webhookUrl: 'http:\\test',
+      },
+      id: 'test',
+      actionTypeId: '.email',
+      name: 'email',
+      config: {},
+    } as SlackActionConnector;
+    const deps = {
+      docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart,
+    };
+    const wrapper = mountWithIntl(
+      <SlackActionFields
+        action={actionConnector}
+        errors={{ index: [], webhookUrl: [] }}
+        editActionConfig={() => {}}
+        editActionSecrets={() => {}}
+        docLinks={deps!.docLinks}
+        readOnly={false}
+      />
+    );
+    expect(wrapper.find('[data-test-subj="reenterValuesMessage"]').length).toBeGreaterThan(0);
+    expect(wrapper.find('[data-test-subj="rememberValuesMessage"]').length).toEqual(0);
   });
 });

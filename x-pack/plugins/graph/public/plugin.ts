@@ -23,6 +23,7 @@ import { checkLicense } from '../common/check_license';
 import {
   FeatureCatalogueCategory,
   HomePublicPluginSetup,
+  HomePublicPluginStart,
 } from '../../../../src/plugins/home/public';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
 import { ConfigSchema } from '../config';
@@ -38,6 +39,7 @@ export interface GraphPluginStartDependencies {
   data: DataPublicPluginStart;
   savedObjects: SavedObjectsStart;
   kibanaLegacy: KibanaLegacyStart;
+  home?: HomePublicPluginStart;
 }
 
 export class GraphPlugin
@@ -56,13 +58,18 @@ export class GraphPlugin
       home.featureCatalogue.register({
         id: 'graph',
         title: 'Graph',
+        subtitle: i18n.translate('xpack.graph.pluginSubtitle', {
+          defaultMessage: 'Reveal patterns and relationships.',
+        }),
         description: i18n.translate('xpack.graph.pluginDescription', {
           defaultMessage: 'Surface and analyze relevant relationships in your Elasticsearch data.',
         }),
         icon: 'graphApp',
         path: '/app/graph',
-        showOnHomePage: true,
+        showOnHomePage: false,
         category: FeatureCatalogueCategory.DATA,
+        solutionId: 'kibana',
+        order: 600,
       });
     }
 
@@ -74,7 +81,7 @@ export class GraphPlugin
       title: 'Graph',
       order: 6000,
       appRoute: '/app/graph',
-      euiIconType: 'graphApp',
+      euiIconType: 'logoKibana',
       category: DEFAULT_APP_CATEGORIES.kibana,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
@@ -108,12 +115,16 @@ export class GraphPlugin
     });
   }
 
-  start(core: CoreStart) {
+  start(core: CoreStart, { home }: GraphPluginStartDependencies) {
     if (this.licensing === null) {
       throw new Error('Start called before setup');
     }
     this.licensing.license$.subscribe((license) => {
-      toggleNavLink(checkLicense(license), core.chrome.navLinks);
+      const licenseInformation = checkLicense(license);
+      toggleNavLink(licenseInformation, core.chrome.navLinks);
+      if (home && !licenseInformation.enableAppLink) {
+        home.featureCatalogue.removeFeature('graph');
+      }
     });
   }
 

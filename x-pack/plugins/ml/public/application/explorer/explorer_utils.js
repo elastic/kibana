@@ -8,7 +8,7 @@
  * utils for Anomaly Explorer.
  */
 
-import { chain, get, union, uniq } from 'lodash';
+import { get, union, sortBy, uniq } from 'lodash';
 import moment from 'moment-timezone';
 
 import {
@@ -16,6 +16,7 @@ import {
   ANOMALIES_TABLE_DEFAULT_QUERY_SIZE,
 } from '../../../common/constants/search';
 import { getEntityFieldList } from '../../../common/util/anomaly_utils';
+import { extractErrorMessage } from '../../../common/util/errors';
 import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
@@ -34,6 +35,7 @@ import {
   SWIMLANE_TYPE,
   VIEW_BY_JOB_LABEL,
 } from './explorer_constants';
+import { ANNOTATION_EVENT_USER } from '../../../common/constants/annotations';
 
 // create new job objects based on standard job config objects
 // new job objects just contain job id, bucket span in seconds and a selected flag.
@@ -196,7 +198,7 @@ export function getSelectionTimeRange(selectedCells, interval, bounds) {
     latestMs = bounds.max.valueOf();
     if (selectedCells.times[1] !== undefined) {
       // Subtract 1 ms so search does not include start of next bucket.
-      latestMs = (selectedCells.times[1] + interval) * 1000 - 1;
+      latestMs = selectedCells.times[1] * 1000 - 1;
     }
   }
 
@@ -277,17 +279,17 @@ export function getViewBySwimlaneOptions({
   const selectedJobIds = selectedJobs.map((d) => d.id);
 
   // Unique influencers for the selected job(s).
-  const viewByOptions = chain(
-    mlJobService.jobs.reduce((reducedViewByOptions, job) => {
-      if (selectedJobIds.some((jobId) => jobId === job.job_id)) {
-        return reducedViewByOptions.concat(job.analysis_config.influencers || []);
-      }
-      return reducedViewByOptions;
-    }, [])
-  )
-    .uniq()
-    .sortBy((fieldName) => fieldName.toLowerCase())
-    .value();
+  const viewByOptions = sortBy(
+    uniq(
+      mlJobService.jobs.reduce((reducedViewByOptions, job) => {
+        if (selectedJobIds.some((jobId) => jobId === job.job_id)) {
+          return reducedViewByOptions.concat(job.analysis_config.influencers || []);
+        }
+        return reducedViewByOptions;
+      }, [])
+    ),
+    (fieldName) => fieldName.toLowerCase()
+  );
 
   viewByOptions.push(VIEW_BY_JOB_LABEL);
   let viewBySwimlaneOptions = viewByOptions;
@@ -390,16 +392,27 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
 
   return new Promise((resolve) => {
     ml.annotations
-      .getAnnotations({
+      .getAnnotations$({
         jobIds,
         earliestMs: timeRange.earliestMs,
         latestMs: timeRange.latestMs,
         maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
+        fields: [
+          {
+            field: 'event',
+            missing: ANNOTATION_EVENT_USER,
+          },
+        ],
       })
       .toPromise()
       .then((resp) => {
         if (resp.error !== undefined || resp.annotations === undefined) {
-          return resolve([]);
+          const errorMessage = extractErrorMessage(resp.error);
+          return resolve({
+            annotationsData: [],
+            aggregations: {},
+            error: errorMessage !== '' ? errorMessage : undefined,
+          });
         }
 
         const annotationsData = [];
@@ -410,21 +423,25 @@ export function loadAnnotationsTableData(selectedCells, selectedJobs, interval, 
           }
         });
 
-        return resolve(
-          annotationsData
+        return resolve({
+          annotationsData: annotationsData
             .sort((a, b) => {
               return a.timestamp - b.timestamp;
             })
             .map((d, i) => {
-              d.key = String.fromCharCode(65 + i);
+              d.key = (i + 1).toString();
               return d;
-            })
-        );
+            }),
+          aggregations: resp.aggregations,
+        });
       })
       .catch((resp) => {
-        console.log('Error loading list of annotations for jobs list:', resp);
-        // Silently fail and just return an empty array for annotations to not break the UI.
-        return resolve([]);
+        const errorMessage = extractErrorMessage(resp);
+        return resolve({
+          annotationsData: [],
+          aggregations: {},
+          error: errorMessage !== '' ? errorMessage : undefined,
+        });
       });
   });
 }

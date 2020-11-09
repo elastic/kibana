@@ -12,7 +12,6 @@ import {
   SYMBOLIZE_AS_TYPES,
   VECTOR_STYLES,
   STYLE_TYPE,
-  LAYER_STYLE_TYPE,
 } from '../constants';
 
 // Non-static/dynamic options
@@ -95,7 +94,7 @@ export type ColorStylePropertyDescriptor =
   | ColorDynamicStylePropertyDescriptor;
 
 export type IconDynamicOptions = {
-  iconPaletteId?: string;
+  iconPaletteId: string | null;
   customIconStops?: IconStop[];
   useCustomIconMap?: boolean;
   field?: StylePropertyField;
@@ -193,9 +192,47 @@ export type StyleDescriptor = {
   type: string;
 };
 
+export type RangeFieldMeta = {
+  min: number;
+  max: number;
+  delta: number;
+  isMinOutsideStdRange?: boolean;
+  isMaxOutsideStdRange?: boolean;
+};
+
+export type Category = {
+  key: string;
+  count: number;
+};
+
+export type CategoryFieldMeta = {
+  categories: Category[];
+};
+
+export type GeometryTypes = {
+  isPointsOnly: boolean;
+  isLinesOnly: boolean;
+  isPolygonsOnly: boolean;
+};
+
+export type StyleMetaDescriptor = {
+  geometryTypes?: GeometryTypes;
+  fieldMeta: {
+    [key: string]: {
+      range?: RangeFieldMeta;
+      categories?: CategoryFieldMeta;
+    };
+  };
+};
+
 export type VectorStyleDescriptor = StyleDescriptor & {
-  type: LAYER_STYLE_TYPE.VECTOR;
   properties: VectorStylePropertiesDescriptor;
+  isTimeAware: boolean;
+  __styleMeta?: StyleMetaDescriptor;
+};
+
+export type HeatmapStyleDescriptor = StyleDescriptor & {
+  colorRampName: string;
 };
 
 export type StylePropertyOptions =

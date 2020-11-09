@@ -43,7 +43,7 @@ describe('BannersList', () => {
     ]);
 
     expect(mount(<BannersList banners$={banners$} />).html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"0\\" class=\\"kbnGlobalBannerList__item\\"><h1>Hello!</h1></div></div>"`
+      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"0\\" class=\\"kbnGlobalBannerList__item\\" data-test-subj=\\"global-banner-item\\"><h1>Hello!</h1></div></div>"`
     );
   });
 
@@ -85,7 +85,7 @@ describe('BannersList', () => {
 
     // Two new banners should be rendered
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"1\\" class=\\"kbnGlobalBannerList__item\\"><h1>First Banner!</h1></div><div data-test-priority=\\"0\\" class=\\"kbnGlobalBannerList__item\\"><h1>Second banner!</h1></div></div>"`
+      `"<div class=\\"kbnGlobalBannerList\\"><div data-test-priority=\\"1\\" class=\\"kbnGlobalBannerList__item\\" data-test-subj=\\"global-banner-item\\"><h1>First Banner!</h1></div><div data-test-priority=\\"0\\" class=\\"kbnGlobalBannerList__item\\" data-test-subj=\\"global-banner-item\\"><h1>Second banner!</h1></div></div>"`
     );
     // Original banner should be unmounted
     expect(unmount).toHaveBeenCalled();

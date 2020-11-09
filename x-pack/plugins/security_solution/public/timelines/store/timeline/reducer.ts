@@ -25,6 +25,7 @@ import {
   removeProvider,
   setEventsDeleted,
   setEventsLoading,
+  setExcludedRowRendererIds,
   setFilters,
   setInsertTimeline,
   setKqlFilterQueryDraft,
@@ -39,9 +40,11 @@ import {
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
+  updateDataProviderType,
   updateDescription,
   updateEventType,
   updateHighlightedDropAndProviderId,
+  updateIndexNames,
   updateIsFavorite,
   updateIsLive,
   updateIsLoading,
@@ -74,6 +77,7 @@ import {
   setLoadingTimelineEvents,
   setSelectedTimelineEvents,
   unPinTimelineEvent,
+  updateExcludedRowRenderersIds,
   updateHighlightedDropAndProvider,
   updateKqlFilterQueryDraft,
   updateTimelineColumns,
@@ -88,6 +92,7 @@ import {
   updateTimelineProviderExcluded,
   updateTimelineProviderProperties,
   updateTimelineProviderKqlQuery,
+  updateTimelineProviderType,
   updateTimelineProviders,
   updateTimelineRange,
   updateTimelineShowTimeline,
@@ -127,13 +132,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
         id,
         dataProviders,
         dateRange,
+        excludedRowRendererIds,
         show,
         columns,
         itemsPerPage,
+        indexNames,
         kqlQuery,
         sort,
         showCheckboxes,
-        showRowRenderers,
         timelineType = TimelineType.default,
         filters,
       }
@@ -144,14 +150,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
           columns,
           dataProviders,
           dateRange,
+          excludedRowRendererIds,
           filters,
           id,
           itemsPerPage,
+          indexNames,
           kqlQuery,
           sort,
           show,
           showCheckboxes,
-          showRowRenderers,
           timelineById: state.timelineById,
           timelineType,
         }),
@@ -304,6 +311,14 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       },
     },
   }))
+  .case(setExcludedRowRendererIds, (state, { id, excludedRowRendererIds }) => ({
+    ...state,
+    timelineById: updateExcludedRowRenderersIds({
+      id,
+      excludedRowRendererIds,
+      timelineById: state.timelineById,
+    }),
+  }))
   .case(setSelected, (state, { id, eventIds, isSelected, isSelectAllChecked }) => ({
     ...state,
     timelineById: setSelectedTimelineEvents({
@@ -374,7 +389,7 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
     ...state,
     timelineById: updateTimelineKqlMode({ id, kqlMode, timelineById: state.timelineById }),
   }))
-  .case(updateTitle, (state, { id, title }) => ({
+  .case(updateTitle, (state, { id, title, disableAutoSave }) => ({
     ...state,
     timelineById: updateTimelineTitle({ id, title, timelineById: state.timelineById }),
   }))
@@ -427,7 +442,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       }),
     })
   )
-
+  .case(updateDataProviderType, (state, { id, type, providerId, andProviderId }) => ({
+    ...state,
+    timelineById: updateTimelineProviderType({
+      id,
+      type,
+      providerId,
+      timelineById: state.timelineById,
+      andProviderId,
+    }),
+  }))
   .case(updateDataProviderKqlQuery, (state, { id, kqlQuery, providerId }) => ({
     ...state,
     timelineById: updateTimelineProviderKqlQuery({
@@ -499,5 +523,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(setInsertTimeline, (state, insertTimeline) => ({
     ...state,
     insertTimeline,
+  }))
+  .case(updateIndexNames, (state, { id, indexNames }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        indexNames,
+      },
+    },
   }))
   .build();

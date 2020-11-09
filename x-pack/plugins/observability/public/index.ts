@@ -15,7 +15,9 @@ export const plugin: PluginInitializer<ObservabilityPluginSetup, ObservabilityPl
   return new Plugin(context);
 };
 
-export * from './components/action_menu';
+export * from './components/shared/action_menu/';
+
+export { UXMetrics, CoreVitals, formatToSec } from './components/shared/core_web_vitals/';
 
 export {
   useTrackPageview,
@@ -26,3 +28,6 @@ export {
 } from './hooks/use_track_metric';
 
 export * from './typings';
+
+export { useChartTheme } from './hooks/use_chart_theme';
+export { useTheme } from './hooks/use_theme';

@@ -48,7 +48,7 @@ const wrapWithLastRefreshArg = <T extends (...a: any[]) => any>(func: T, context
   };
 };
 const memoize = <T extends (...a: any[]) => any>(func: T, context?: any) => {
-  return memoizeOne(wrapWithLastRefreshArg<T>(func, context), memoizeIsEqual);
+  return memoizeOne(wrapWithLastRefreshArg<T>(func, context) as any, memoizeIsEqual);
 };
 
 const memoizedAnomalyDataChange = memoize<typeof anomalyDataChange>(anomalyDataChange);
@@ -200,6 +200,7 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
         if (selectedCells !== undefined && Array.isArray(anomalyChartRecords)) {
           memoizedAnomalyDataChange(
             lastRefresh,
+            swimlaneContainerWidth,
             anomalyChartRecords,
             timerange.earliestMs,
             timerange.latestMs,
@@ -208,6 +209,7 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
         } else {
           memoizedAnomalyDataChange(
             lastRefresh,
+            swimlaneContainerWidth,
             [],
             timerange.earliestMs,
             timerange.latestMs,
@@ -258,12 +260,12 @@ const loadExplorerDataProvider = (anomalyTimelineService: AnomalyTimelineService
           { influencers, viewBySwimlaneState }
         ): Partial<ExplorerState> => {
           return {
-            annotationsData,
-            influencers,
+            annotations: annotationsData,
+            influencers: influencers as any,
             loading: false,
             viewBySwimlaneDataLoading: false,
             overallSwimlaneData: overallState,
-            viewBySwimlaneData: viewBySwimlaneState,
+            viewBySwimlaneData: viewBySwimlaneState as any,
             tableData,
             swimlaneLimit: isViewBySwimLaneData(viewBySwimlaneState)
               ? viewBySwimlaneState.cardinality

@@ -4,19 +4,22 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getRumOverviewProjection } from '../../../common/projections/rum_overview';
-import { mergeProjection } from '../../../common/projections/util/merge_projection';
-import {
-  Setup,
-  SetupTimeRange,
-  SetupUIFilters,
-} from '../helpers/setup_request';
+import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { mergeProjection } from '../../projections/util/merge_projection';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import {
   CLIENT_GEO_COUNTRY_ISO_CODE,
   USER_AGENT_DEVICE,
   USER_AGENT_NAME,
   USER_AGENT_OS,
+  TRANSACTION_DURATION,
 } from '../../../common/elasticsearch_fieldnames';
+import {
+  getPLDChartSteps,
+  MICRO_TO_SEC,
+  microToSec,
+} from './get_page_load_distribution';
 
 export const getBreakdownField = (breakdown: string) => {
   switch (breakdown) {
@@ -32,29 +35,36 @@ export const getBreakdownField = (breakdown: string) => {
   }
 };
 
-export const getPageLoadDistBreakdown = async (
-  setup: Setup & SetupTimeRange & SetupUIFilters,
-  minDuration: number,
-  maxDuration: number,
-  breakdown: string
-) => {
-  const stepValue = (maxDuration - minDuration) / 50;
-  const stepValues = [];
+export const getPageLoadDistBreakdown = async ({
+  setup,
+  minPercentile,
+  maxPercentile,
+  breakdown,
+  urlQuery,
+}: {
+  setup: Setup & SetupTimeRange;
+  minPercentile: number;
+  maxPercentile: number;
+  breakdown: string;
+  urlQuery?: string;
+}) => {
+  // convert secs to micros
+  const stepValues = getPLDChartSteps({
+    maxDuration: (maxPercentile ? +maxPercentile : 50) * MICRO_TO_SEC,
+    minDuration: minPercentile ? +minPercentile * MICRO_TO_SEC : 0,
+  });
 
-  for (let i = 1; i < 51; i++) {
-    stepValues.push((stepValue * i + minDuration).toFixed(2));
-  }
-
-  const projection = getRumOverviewProjection({
+  const projection = getRumPageLoadTransactionsProjection({
     setup,
+    urlQuery,
   });
 
   const params = mergeProjection(projection, {
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
     body: {
       size: 0,
-      query: {
-        bool: projection.body.query.bool,
-      },
       aggs: {
         breakdowns: {
           terms: {
@@ -64,9 +74,12 @@ export const getPageLoadDistBreakdown = async (
           aggs: {
             page_dist: {
               percentile_ranks: {
-                field: 'transaction.duration.us',
+                field: TRANSACTION_DURATION,
                 values: stepValues,
                 keyed: false,
+                hdr: {
+                  number_of_significant_value_digits: 3,
+                },
               },
             },
           },
@@ -75,9 +88,9 @@ export const getPageLoadDistBreakdown = async (
     },
   });
 
-  const { client } = setup;
+  const { apmEventClient } = setup;
 
-  const { aggregations } = await client.search(params);
+  const { aggregations } = await apmEventClient.search(params);
 
   const pageDistBreakdowns = aggregations?.breakdowns.buckets;
 
@@ -86,7 +99,7 @@ export const getPageLoadDistBreakdown = async (
       name: String(key),
       data: pageDist.values?.map(({ key: pKey, value }, index: number, arr) => {
         return {
-          x: Math.round(pKey / 1000),
+          x: microToSec(pKey),
           y: index === 0 ? value : value - arr[index - 1].value,
         };
       }),

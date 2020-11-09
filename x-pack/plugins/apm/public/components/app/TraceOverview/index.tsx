@@ -11,7 +11,7 @@ import { TraceList } from './TraceList';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { useTrackPageview } from '../../../../../observability/public';
 import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 import { APIReturnType } from '../../../services/rest/createCallApmApi';
 
 type TracesAPIResponse = APIReturnType<'/api/apm/traces'>;
@@ -48,7 +48,7 @@ export function TraceOverview() {
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
       filterNames: ['transactionResult', 'host', 'containerId', 'podName'],
-      projection: PROJECTION.TRACES,
+      projection: Projection.traces,
     };
 
     return config;

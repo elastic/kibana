@@ -71,13 +71,28 @@ export const getFieldMeta = (field: Field, isMultiField?: boolean): FieldMeta =>
   };
 };
 
-export const getTypeLabelFromType = (type: DataType) =>
-  TYPE_DEFINITION[type] ? TYPE_DEFINITION[type].label : `${TYPE_DEFINITION.other.label}: ${type}`;
+const getTypeLabel = (type?: DataType): string => {
+  return type && TYPE_DEFINITION[type]
+    ? TYPE_DEFINITION[type].label
+    : `${TYPE_DEFINITION.other.label}: ${type}`;
+};
+
+export const getTypeLabelFromField = (field: Field) => {
+  const { type, runtime_type: runtimeType } = field;
+  const typeLabel = getTypeLabel(type);
+
+  if (type === 'runtime') {
+    const runtimeTypeLabel = getTypeLabel(runtimeType);
+    return `${typeLabel} ${runtimeTypeLabel}`;
+  }
+
+  return typeLabel;
+};
 
 export const getFieldConfig = <T = unknown>(
   param: ParameterName,
   prop?: string
-): FieldConfig<any, T> => {
+): FieldConfig<T> => {
   if (prop !== undefined) {
     if (
       !(PARAMETERS_DEFINITION[param] as any).props ||
@@ -199,7 +214,7 @@ export const getTypeMetaFromSource = (
  *
  * @param fieldsToNormalize The "properties" object from the mappings (or "fields" object for `text` and `keyword` types)
  */
-export const normalize = (fieldsToNormalize: Fields): NormalizedFields => {
+export const normalize = (fieldsToNormalize: Fields = {}): NormalizedFields => {
   let maxNestedDepth = 0;
 
   const normalizeFields = (

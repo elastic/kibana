@@ -5,29 +5,29 @@
  */
 
 import { encode } from 'rison-node';
-import { i18n } from '@kbn/i18n';
-import { SearchResponse } from 'src/plugins/data/public';
-import { DEFAULT_SOURCE_ID } from '../../common/constants';
-import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
+import { SearchResponse } from 'elasticsearch';
 import {
   FetchData,
-  LogsFetchDataResponse,
-  HasData,
   FetchDataParams,
+  HasData,
+  LogsFetchDataResponse,
 } from '../../../observability/public';
+import { DEFAULT_SOURCE_ID } from '../../common/constants';
 import { callFetchLogSourceConfigurationAPI } from '../containers/logs/log_source/api/fetch_log_source_configuration';
 import { callFetchLogSourceStatusAPI } from '../containers/logs/log_source/api/fetch_log_source_status';
+import { InfraClientCoreSetup, InfraClientStartDeps } from '../types';
 
 interface StatsAggregation {
-  buckets: Array<{ key: string; doc_count: number }>;
-}
-
-interface SeriesAggregation {
   buckets: Array<{
-    key_as_string: string;
-    key: number;
+    key: string;
     doc_count: number;
-    dataset: StatsAggregation;
+    series: {
+      buckets: Array<{
+        key_as_string: string;
+        key: number;
+        doc_count: number;
+      }>;
+    };
   }>;
 }
 
@@ -44,7 +44,7 @@ export function getLogsHasDataFetcher(
   return async () => {
     const [core] = await getStartServices();
     const sourceStatus = await callFetchLogSourceStatusAPI(DEFAULT_SOURCE_ID, core.http.fetch);
-    return sourceStatus.data.logIndicesExist;
+    return sourceStatus.data.logIndexStatus === 'available';
   };
 }
 
@@ -69,15 +69,11 @@ export function getLogsOverviewDataFetcher(
       data
     );
 
-    const timeSpanInMinutes =
-      (Date.parse(params.endTime).valueOf() - Date.parse(params.startTime).valueOf()) / (1000 * 60);
+    const timeSpanInMinutes = (params.absoluteTime.end - params.absoluteTime.start) / (1000 * 60);
 
     return {
-      title: i18n.translate('xpack.infra.logs.logOverview.logOverviewTitle', {
-        defaultMessage: 'Logs',
-      }),
-      appLink: `/app/logs/stream?logPosition=(end:${encode(params.endTime)},start:${encode(
-        params.startTime
+      appLink: `/app/logs/stream?logPosition=(end:${encode(params.relativeTime.end)},start:${encode(
+        params.relativeTime.start
       )})`,
       stats: normalizeStats(stats, timeSpanInMinutes),
       series: normalizeSeries(series),
@@ -91,7 +87,7 @@ async function fetchLogsOverview(
   dataPlugin: InfraClientStartDeps['data']
 ): Promise<StatsAndSeries> {
   return new Promise((resolve, reject) => {
-    let esResponse: SearchResponse = {};
+    let esResponse: SearchResponse<any> | undefined;
 
     dataPlugin.search
       .search({
@@ -108,8 +104,8 @@ async function fetchLogsOverview(
         (response) => (esResponse = response.rawResponse),
         (error) => reject(error),
         () => {
-          if (esResponse.aggregations) {
-            resolve(processLogsOverviewAggregations(esResponse.aggregations));
+          if (esResponse?.aggregations) {
+            resolve(processLogsOverviewAggregations(esResponse!.aggregations));
           } else {
             resolve({ stats: {}, series: {} });
           }
@@ -122,8 +118,8 @@ function buildLogOverviewQuery(logParams: LogParams, params: FetchDataParams) {
   return {
     range: {
       [logParams.timestampField]: {
-        gt: params.startTime,
-        lte: params.endTime,
+        gt: new Date(params.absoluteTime.start).toISOString(),
+        lte: new Date(params.absoluteTime.end).toISOString(),
         format: 'strict_date_optional_time',
       },
     },
@@ -136,18 +132,13 @@ function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataPar
       terms: {
         field: 'event.dataset',
         size: 4,
-      },
-    },
-    series: {
-      date_histogram: {
-        field: logParams.timestampField,
-        fixed_interval: params.bucketSize,
+        missing: 'unknown',
       },
       aggs: {
-        dataset: {
-          terms: {
-            field: 'event.dataset',
-            size: 4,
+        series: {
+          date_histogram: {
+            field: logParams.timestampField,
+            fixed_interval: params.bucketSize,
           },
         },
       },
@@ -157,34 +148,27 @@ function buildLogOverviewAggregations(logParams: LogParams, params: FetchDataPar
 
 function processLogsOverviewAggregations(aggregations: {
   stats: StatsAggregation;
-  series: SeriesAggregation;
 }): StatsAndSeries {
-  const processedStats = aggregations.stats.buckets.reduce<StatsAndSeries['stats']>(
-    (result, bucket) => {
-      result[bucket.key] = {
-        type: 'number',
-        label: bucket.key,
-        value: bucket.doc_count,
-      };
+  const processedStats: StatsAndSeries['stats'] = {};
+  const processedSeries: StatsAndSeries['series'] = {};
 
-      return result;
-    },
-    {}
-  );
+  aggregations.stats.buckets.forEach((stat) => {
+    const label = stat.key;
 
-  const processedSeries = aggregations.series.buckets.reduce<StatsAndSeries['series']>(
-    (result, bucket) => {
-      const x = bucket.key; // the timestamp of the bucket
-      bucket.dataset.buckets.forEach((b) => {
-        const label = b.key;
-        result[label] = result[label] || { label, coordinates: [] };
-        result[label].coordinates.push({ x, y: b.doc_count });
+    processedStats[stat.key] = {
+      type: 'number',
+      label,
+      value: stat.doc_count,
+    };
+
+    stat.series.buckets.forEach((series) => {
+      processedSeries[label] = processedSeries[label] || { label, coordinates: [] };
+      processedSeries[label].coordinates.push({
+        x: series.key,
+        y: series.doc_count,
       });
-
-      return result;
-    },
-    {}
-  );
+    });
+  });
 
   return {
     stats: processedStats,

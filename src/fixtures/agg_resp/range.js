@@ -31,7 +31,7 @@ export default {
     hits: [],
   },
   aggregations: {
-    '1': {
+    1: {
       buckets: {
         '*-1024.0': {
           to: 1024,

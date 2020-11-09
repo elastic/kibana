@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SnapshotModel } from '../../../types';
+import { MetricsUIAggregation } from '../../../types';
 
-export const rx: SnapshotModel = {
+export const rx: MetricsUIAggregation = {
   rx: {
     avg: {
       field: 'aws.ec2.network.in.bytes_per_sec',

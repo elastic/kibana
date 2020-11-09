@@ -21,7 +21,23 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 
 function getSeriId(seri) {
-  return seri.id && seri.id.indexOf('.') !== -1 ? seri.id.split('.')[0] : seri.id;
+  if (!seri.id) {
+    return;
+  }
+  // Ideally the format should be either ID or "ID.SERIES"
+  // but for some values the SERIES components gets a bit more complex
+
+  // Float values are serialized as strings tuples (i.e. ['99.1']) rather than regular numbers (99.1)
+  // so the complete ids are in the format ID.['SERIES']: hence the specific brackets handler
+  const bracketsMarker = seri.id.indexOf('[');
+  if (bracketsMarker > -1) {
+    return seri.id.substring(0, bracketsMarker);
+  }
+  // Here's the dot check is enough
+  if (seri.id.indexOf('.') > -1) {
+    return seri.id.split('.')[0];
+  }
+  return seri.id;
 }
 
 const createSeriesFromParams = (cfg, seri) => {

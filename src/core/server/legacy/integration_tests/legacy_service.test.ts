@@ -16,13 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import * as kbnTestServer from '../../../../test_utils/kbn_server';
+import * as kbnTestServer from '../../../test_helpers/kbn_server';
 
 describe('legacy service', () => {
   describe('http server', () => {
     let root: ReturnType<typeof kbnTestServer.createRoot>;
     beforeEach(() => {
-      root = kbnTestServer.createRoot({ migrations: { skip: true } });
+      root = kbnTestServer.createRoot({
+        migrations: { skip: true },
+        plugins: { initialize: false },
+      });
     }, 30000);
 
     afterEach(async () => await root.shutdown());

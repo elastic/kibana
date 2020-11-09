@@ -9,6 +9,7 @@ import React from 'react';
 
 import { asArrayIfExists } from '../../../common/lib/helpers';
 import { getMockNetflowData } from '../../../common/mock';
+import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock/test_providers';
 import { ID_FIELD_NAME } from '../../../common/components/event_details/event_id';
 import { DESTINATION_IP_FIELD_NAME, SOURCE_IP_FIELD_NAME } from '../ip';
@@ -771,7 +772,7 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-content-source.ip"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
       '192.168.1.2'
     );
   });
@@ -822,7 +823,7 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find('[data-test-subj="draggable-content-source.ip"]').first().text()).toEqual(
+    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
       '192.168.1.2'
     );
   });
@@ -873,9 +874,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="draggable-content-destination.ip"]').first().text()
-    ).toEqual('10.1.2.3');
+    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
+      '10.1.2.3'
+    );
   });
 
   test('it renders the expected destination IP when type is `destination`, but the length of the destinationIp and destinationPort port arrays is different', () => {
@@ -924,9 +925,9 @@ describe('SourceDestinationIp', () => {
       </TestProviders>
     );
 
-    expect(
-      wrapper.find('[data-test-subj="draggable-content-destination.ip"]').first().text()
-    ).toEqual('10.1.2.3');
+    expect(wrapper.find('[data-test-subj="draggable-truncatable-content"]').first().text()).toEqual(
+      '10.1.2.3'
+    );
   });
 
   test('it renders the expected source port when type is `source`, and both sourceIp and sourcePort are populated', () => {

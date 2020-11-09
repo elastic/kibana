@@ -7,39 +7,28 @@
 import { mount } from 'enzyme';
 import React from 'react';
 
+import { coreMock } from '../../../../../../../../src/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../../common/constants';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { convertKueryToElasticSearchQuery } from '../../../../common/lib/keury';
 import { mockIndexPattern, TestProviders } from '../../../../common/mock';
-import { createKibanaCoreStartMock } from '../../../../common/mock/kibana_core';
 import { QueryBar } from '../../../../common/components/query_bar';
-import { FilterManager } from '../../../../../../../../src/plugins/data/public';
+import { esFilters, FilterManager } from '../../../../../../../../src/plugins/data/public';
 import { mockDataProviders } from '../data_providers/mock/mock_data_providers';
 import { buildGlobalQuery } from '../helpers';
 
-import { QueryBarTimeline, QueryBarTimelineComponentProps, getDataProviderFilter } from './index';
+import {
+  QueryBarTimeline,
+  QueryBarTimelineComponentProps,
+  getDataProviderFilter,
+  TIMELINE_FILTER_DROP_AREA,
+} from './index';
 
-const mockUiSettingsForFilterManager = createKibanaCoreStartMock().uiSettings;
+const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('Timeline QueryBar ', () => {
-  // We are doing that because we need to wrapped this component with redux
-  // and redux does not like to be updated and since we need to update our
-  // child component (BODY) and we do not want to scare anyone with this error
-  // we are hiding it!!!
-  // eslint-disable-next-line no-console
-  const originalError = console.error;
-  beforeAll(() => {
-    // eslint-disable-next-line no-console
-    console.error = (...args: string[]) => {
-      if (/<Provider> does not support changing `store` on the fly/.test(args[0])) {
-        return;
-      }
-      originalError.call(console, ...args);
-    };
-  });
-
   const mockApplyKqlFilterQuery = jest.fn();
   const mockSetFilters = jest.fn();
   const mockSetKqlFilterQueryDraft = jest.fn();
@@ -55,19 +44,49 @@ describe('Timeline QueryBar ', () => {
   });
 
   test('check if we format the appropriate props to QueryBar', () => {
+    const filters = [
+      {
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        meta: {
+          alias: null,
+          controlledBy: TIMELINE_FILTER_DROP_AREA,
+          disabled: false,
+          index: undefined,
+          key: 'event.category',
+          negate: true,
+          params: { query: 'file' },
+          type: 'phrase',
+        },
+        query: { match: { 'event.category': { query: 'file', type: 'phrase' } } },
+      },
+      {
+        $state: { store: esFilters.FilterStateStore.APP_STATE },
+        meta: {
+          alias: null,
+          controlledBy: undefined,
+          disabled: false,
+          index: undefined,
+          key: 'event.category',
+          negate: true,
+          params: { query: 'process' },
+          type: 'phrase',
+        },
+        query: { match: { 'event.category': { query: 'process', type: 'phrase' } } },
+      },
+    ];
     const wrapper = mount(
       <TestProviders>
         <QueryBarTimeline
           applyKqlFilterQuery={mockApplyKqlFilterQuery}
           browserFields={mockBrowserFields}
           dataProviders={mockDataProviders}
-          filters={[]}
+          filters={filters}
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}
@@ -88,6 +107,8 @@ describe('Timeline QueryBar ', () => {
     expect(queryBarProps.dateRangeTo).toEqual('now');
     expect(queryBarProps.filterQuery).toEqual({ query: 'here: query', language: 'kuery' });
     expect(queryBarProps.savedQuery).toEqual(null);
+    expect(queryBarProps.filters).toHaveLength(1);
+    expect(queryBarProps.filters[0].query).toEqual(filters[1].query);
   });
 
   describe('#onChangeQuery', () => {
@@ -107,9 +128,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}
@@ -154,9 +175,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}
@@ -199,9 +220,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}
@@ -246,9 +267,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}
@@ -291,9 +312,9 @@ describe('Timeline QueryBar ', () => {
           filterManager={new FilterManager(mockUiSettingsForFilterManager)}
           filterQuery={{ expression: 'here: query', kind: 'kuery' }}
           filterQueryDraft={{ expression: 'here: query', kind: 'kuery' }}
-          from={0}
+          from={'2020-07-07T08:20:18.966Z'}
           fromStr={DEFAULT_FROM}
-          to={1}
+          to={'2020-07-08T08:20:18.966Z'}
           toStr={DEFAULT_TO}
           kqlMode="search"
           indexPattern={mockIndexPattern}

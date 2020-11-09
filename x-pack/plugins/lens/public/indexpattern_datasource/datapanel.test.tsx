@@ -84,39 +84,46 @@ const initialState: IndexPatternPrivateState = {
       id: '1',
       title: 'idx1',
       timeFieldName: 'timestamp',
+      hasRestrictions: false,
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'memory',
+          displayName: 'amemory',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'unsupported',
+          displayName: 'unsupported',
           type: 'geo',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'client',
+          displayName: 'client',
           type: 'ip',
           aggregatable: true,
           searchable: true,
@@ -128,9 +135,11 @@ const initialState: IndexPatternPrivateState = {
       id: '2',
       title: 'idx2',
       timeFieldName: 'timestamp',
+      hasRestrictions: true,
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
@@ -145,6 +154,7 @@ const initialState: IndexPatternPrivateState = {
         },
         {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
@@ -166,6 +176,7 @@ const initialState: IndexPatternPrivateState = {
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -182,21 +193,25 @@ const initialState: IndexPatternPrivateState = {
       id: '3',
       title: 'idx3',
       timeFieldName: 'timestamp',
+      hasRestrictions: false,
       fields: [
         {
           name: 'timestamp',
+          displayName: 'timestampLabel',
           type: 'date',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'bytes',
+          displayName: 'bytes',
           type: 'number',
           aggregatable: true,
           searchable: true,
         },
         {
           name: 'source',
+          displayName: 'source',
           type: 'string',
           aggregatable: true,
           searchable: true,
@@ -251,7 +266,7 @@ describe('IndexPattern Data Panel', () => {
         {...defaultProps}
         state={state}
         setState={setStateSpy}
-        dragDropContext={{ dragging: {}, setDragging: () => {} }}
+        dragDropContext={{ dragging: { id: '1' }, setDragging: () => {} }}
       />
     );
 
@@ -270,7 +285,7 @@ describe('IndexPattern Data Panel', () => {
           indexPatterns: {},
         }}
         setState={jest.fn()}
-        dragDropContext={{ dragging: {}, setDragging: () => {} }}
+        dragDropContext={{ dragging: { id: '1' }, setDragging: () => {} }}
         changeIndexPattern={jest.fn()}
       />
     );
@@ -302,7 +317,7 @@ describe('IndexPattern Data Panel', () => {
         ...defaultProps,
         changeIndexPattern: jest.fn(),
         setState,
-        dragDropContext: { dragging: {}, setDragging: () => {} },
+        dragDropContext: { dragging: { id: '1' }, setDragging: () => {} },
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
         state: {
           indexPatternRefs: [],
@@ -310,8 +325,20 @@ describe('IndexPattern Data Panel', () => {
           isFirstExistenceFetch: false,
           currentIndexPatternId: 'a',
           indexPatterns: {
-            a: { id: 'a', title: 'aaa', timeFieldName: 'atime', fields: [] },
-            b: { id: 'b', title: 'bbb', timeFieldName: 'btime', fields: [] },
+            a: {
+              id: 'a',
+              title: 'aaa',
+              timeFieldName: 'atime',
+              fields: [],
+              hasRestrictions: false,
+            },
+            b: {
+              id: 'b',
+              title: 'bbb',
+              timeFieldName: 'btime',
+              fields: [],
+              hasRestrictions: false,
+            },
           },
           layers: {
             1: {
@@ -324,8 +351,11 @@ describe('IndexPattern Data Panel', () => {
       };
     }
 
-    async function testExistenceLoading(stateChanges?: unknown, propChanges?: unknown) {
-      const props = testProps();
+    async function testExistenceLoading(
+      stateChanges?: unknown,
+      propChanges?: unknown,
+      props = testProps()
+    ) {
       const inst = mountWithIntl(<IndexPatternDataPanel {...props} />);
 
       await act(async () => {
@@ -536,6 +566,25 @@ describe('IndexPattern Data Panel', () => {
       expect(core.http.post).toHaveBeenCalledTimes(2);
       expect(overlapCount).toEqual(0);
     });
+
+    it("should default to empty dsl if query can't be parsed", async () => {
+      const props = {
+        ...testProps(),
+        query: {
+          language: 'kuery',
+          query: '@timestamp : NOT *',
+        },
+      };
+      await testExistenceLoading(undefined, undefined, props);
+
+      expect((props.core.http.post as jest.Mock).mock.calls[0][1].body).toContain(
+        JSON.stringify({
+          must_not: {
+            match_all: {},
+          },
+        })
+      );
+    });
   });
 
   describe('displaying field list', () => {
@@ -559,25 +608,55 @@ describe('IndexPattern Data Panel', () => {
           .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
           .find(FieldItem)
           .map((fieldItem) => fieldItem.prop('field').name)
-      ).toEqual(['bytes', 'memory']);
+      ).toEqual(['memory', 'bytes']);
       wrapper
         .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
         .find('button')
         .first()
         .simulate('click');
+      const emptyAccordion = wrapper.find('[data-test-subj="lnsIndexPatternEmptyFields"]');
+      expect(
+        emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)
+      ).toEqual(['client', 'source', 'timestamp']);
+      expect(
+        emptyAccordion.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+      ).toEqual(['client', 'source', 'timestampLabel']);
+    });
+
+    it('should show meta fields accordion', async () => {
+      const wrapper = mountWithIntl(
+        <InnerIndexPatternDataPanel
+          {...props}
+          indexPatterns={{
+            '1': {
+              ...props.indexPatterns['1'],
+              fields: [
+                ...props.indexPatterns['1'].fields,
+                { name: '_id', displayName: '_id', meta: true, type: 'string' },
+              ],
+            },
+          }}
+        />
+      );
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternMetaFields"]')
+        .find('button')
+        .first()
+        .simulate('click');
       expect(
         wrapper
-          .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
+          .find('[data-test-subj="lnsIndexPatternMetaFields"]')
           .find(FieldItem)
-          .map((fieldItem) => fieldItem.prop('field').name)
-      ).toEqual(['client', 'source', 'timestamp']);
+          .first()
+          .prop('field').name
+      ).toEqual('_id');
     });
 
     it('should display NoFieldsCallout when all fields are empty', async () => {
       const wrapper = mountWithIntl(
         <InnerIndexPatternDataPanel {...defaultProps} existingFields={{ idx1: {} }} />
       );
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(1);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
       expect(
         wrapper
           .find('[data-test-subj="lnsIndexPatternAvailableFields"]')
@@ -593,8 +672,8 @@ describe('IndexPattern Data Panel', () => {
         wrapper
           .find('[data-test-subj="lnsIndexPatternEmptyFields"]')
           .find(FieldItem)
-          .map((fieldItem) => fieldItem.prop('field').name)
-      ).toEqual(['bytes', 'client', 'memory', 'source', 'timestamp']);
+          .map((fieldItem) => fieldItem.prop('field').displayName)
+      ).toEqual(['amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 
     it('should display spinner for available fields accordion if existing fields are not loaded yet', async () => {
@@ -604,7 +683,7 @@ describe('IndexPattern Data Panel', () => {
           .length
       ).toEqual(1);
       wrapper.setProps({ existingFields: { idx1: {} } });
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(1);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
     });
 
     it('should filter down by name', () => {
@@ -634,10 +713,9 @@ describe('IndexPattern Data Panel', () => {
 
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'bytes',
-        'memory',
-      ]);
+      expect(
+        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+      ).toEqual(['amemory', 'bytes']);
     });
 
     it('should display no fields in groups when filtered by type Record', () => {
@@ -650,7 +728,7 @@ describe('IndexPattern Data Panel', () => {
       expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
         'Records',
       ]);
-      expect(wrapper.find(NoFieldsCallout).length).toEqual(2);
+      expect(wrapper.find(NoFieldsCallout).length).toEqual(3);
     });
 
     it('should toggle type if clicked again', () => {
@@ -664,14 +742,9 @@ describe('IndexPattern Data Panel', () => {
         .find('button')
         .first()
         .simulate('click');
-      expect(wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').name)).toEqual([
-        'Records',
-        'bytes',
-        'memory',
-        'client',
-        'source',
-        'timestamp',
-      ]);
+      expect(
+        wrapper.find(FieldItem).map((fieldItem) => fieldItem.prop('field').displayName)
+      ).toEqual(['Records', 'amemory', 'bytes', 'client', 'source', 'timestampLabel']);
     });
 
     it('should filter down by type and by name', () => {

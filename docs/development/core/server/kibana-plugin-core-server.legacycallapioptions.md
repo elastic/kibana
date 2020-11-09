@@ -4,6 +4,10 @@
 
 ## LegacyCallAPIOptions interface
 
+> Warning: This API is now obsolete.
+> 
+> 
+
 The set of options that defines how API call should be made and result be processed.
 
 <b>Signature:</b>

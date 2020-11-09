@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-
 import { PluginInitializer, PluginInitializerContext } from 'kibana/public';
 import { Plugin } from './plugin';
 import {
@@ -26,3 +25,6 @@ export { FORMATTERS } from '../common/formatters';
 export { InfraFormatterType } from './lib/lib';
 
 export type InfraAppId = 'logs' | 'metrics';
+
+// Shared components
+export { LazyLogStreamWrapper as LogStream } from './components/log_stream/lazy_log_stream_wrapper';

@@ -22,9 +22,12 @@
               }
             }
           },
-          "ancestors": {
+          "parents": {
             "properties": {
               "rule": {
+                "type": "keyword"
+              },
+              "index": {
                 "type": "keyword"
               },
               "id": {
@@ -35,6 +38,35 @@
               },
               "depth": {
                 "type": "long"
+              }
+            }
+          },
+          "ancestors": {
+            "properties": {
+              "rule": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "keyword"
+              },
+              "id": {
+                "type": "keyword"
+              },
+              "type": {
+                "type": "keyword"
+              },
+              "depth": {
+                "type": "long"
+              }
+            }
+          },
+          "group": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "index": {
+                "type": "integer"
               }
             }
           },
@@ -68,7 +100,7 @@
                 "type": "keyword"
               },
               "risk_score": {
-                "type": "keyword"
+                "type": "float"
               },
               "risk_score_mapping": {
                 "properties": {
@@ -174,6 +206,16 @@
                   }
                 }
               },
+              "threshold": {
+                "properties": {
+                  "field": {
+                    "type": "keyword"
+                  },
+                  "value": {
+                    "type": "float"
+                  }
+                }
+              },
               "note": {
                 "type": "text"
               },
@@ -214,6 +256,11 @@
           },
           "original_time": {
             "type": "date"
+          },
+          "original_signal": {
+            "type": "object",
+            "dynamic": false,
+            "enabled": false
           },
           "original_event": {
             "properties": {
@@ -286,6 +333,12 @@
           },
           "status": {
             "type": "keyword"
+          },
+          "threshold_count": {
+            "type": "float"
+          },
+          "depth": {
+            "type": "integer"
           }
         }
       }

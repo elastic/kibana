@@ -22,16 +22,14 @@ import { registerLanguage } from './lib/monaco_language_def';
 import { SetupRegistries } from './plugin_api';
 import { initRegistries, populateRegistries, destroyRegistries } from './registries';
 import { getDocumentationLinks } from './lib/documentation_links';
-// @ts-expect-error untyped component
 import { HelpMenu } from './components/help_menu/help_menu';
 import { createStore } from './store';
 
-/* eslint-enable */
 import { init as initStatsReporter } from './lib/ui_metric';
 
 import { CapabilitiesStrings } from '../i18n';
 
-import { startServices, services } from './services';
+import { startServices, services, ServicesProvider } from './services';
 // @ts-expect-error untyped local
 import { createHistory, destroyHistory } from './lib/history_provider';
 // @ts-expect-error untyped local
@@ -52,19 +50,16 @@ export const renderApp = (
 ) => {
   element.classList.add('canvas');
   element.classList.add('canvasContainerWrapper');
-  const canvasServices = Object.entries(services).reduce((reduction, [key, provider]) => {
-    reduction[key] = provider.getService();
-
-    return reduction;
-  }, {} as Record<string, any>);
 
   ReactDOM.render(
-    <KibanaContextProvider services={{ ...plugins, ...coreStart, canvas: canvasServices }}>
-      <I18nProvider>
-        <Provider store={canvasStore}>
-          <App />
-        </Provider>
-      </I18nProvider>
+    <KibanaContextProvider services={{ ...plugins, ...coreStart }}>
+      <ServicesProvider providers={services}>
+        <I18nProvider>
+          <Provider store={canvasStore}>
+            <App />
+          </Provider>
+        </I18nProvider>
+      </ServicesProvider>
     </KibanaContextProvider>,
     element
   );
@@ -90,7 +85,8 @@ export const initializeCanvas = async (
   const canvasFunctions = initFunctions({
     timefilter: setupPlugins.data.query.timefilter.timefilter,
     prependBasePath: coreSetup.http.basePath.prepend,
-    typesRegistry: setupPlugins.expressions.__LEGACY.types,
+    types: setupPlugins.expressions.getTypes(),
+    paletteService: await setupPlugins.charts.palettes.getPalettes(),
   });
 
   for (const fn of canvasFunctions) {
@@ -132,7 +128,10 @@ export const initializeCanvas = async (
       },
     ],
     content: (domNode) => {
-      ReactDOM.render(<HelpMenu />, domNode);
+      ReactDOM.render(
+        <HelpMenu functionRegistry={services.expressions.getService().getFunctions()} />,
+        domNode
+      );
       return () => ReactDOM.unmountComponentAtNode(domNode);
     },
   });

@@ -1,4 +1,7 @@
-ARG NODE_VERSION=10.21.0
+# NOTE: This Dockerfile is ONLY used to run certain tasks in CI. It is not used to run Kibana or as a distributable.
+# If you're looking for the Kibana Docker image distributable, please see: src/dev/build/tasks/os_packages/docker_generator/templates/dockerfile.template.ts
+
+ARG NODE_VERSION=10.22.1
 
 FROM node:${NODE_VERSION} AS base
 

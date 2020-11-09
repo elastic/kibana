@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSuperSelect, EuiToolTip } from '@elastic/eui';
-import React from 'react';
+import React, { useCallback } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 
 import {
@@ -15,7 +15,8 @@ import {
 } from '../../../../../../../../src/plugins/data/public';
 import { BrowserFields } from '../../../../common/containers/source';
 import { KueryFilterQuery, KueryFilterQueryKind } from '../../../../common/store';
-import { KqlMode, EventType } from '../../../../timelines/store/timeline/model';
+import { TimelineEventsType } from '../../../../../common/types/timeline';
+import { KqlMode } from '../../../../timelines/store/timeline/model';
 import { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { DataProvider } from '../data_providers/data_provider';
 import { QueryBarTimeline } from '../query_bar';
@@ -47,11 +48,11 @@ interface Props {
   applyKqlFilterQuery: (expression: string, kind: KueryFilterQueryKind) => void;
   browserFields: BrowserFields;
   dataProviders: DataProvider[];
-  eventType: EventType;
+  eventType: TimelineEventsType;
   filterManager: FilterManager;
   filterQuery: KueryFilterQuery;
   filterQueryDraft: KueryFilterQuery;
-  from: number;
+  from: string;
   fromStr: string;
   indexPattern: IIndexPattern;
   isRefreshPaused: boolean;
@@ -64,9 +65,9 @@ interface Props {
   setSavedQueryId: (savedQueryId: string | null) => void;
   filters: Filter[];
   savedQueryId: string | null;
-  to: number;
+  to: string;
   toStr: string;
-  updateEventType: (eventType: EventType) => void;
+  updateEventTypeAndIndexesName: (eventType: TimelineEventsType, indexNames: string[]) => void;
   updateReduxTime: DispatchUpdateReduxTime;
 }
 
@@ -114,60 +115,70 @@ export const SearchOrFilter = React.memo<Props>(
     setSavedQueryId,
     to,
     toStr,
-    updateEventType,
+    updateEventTypeAndIndexesName,
     updateKqlMode,
     updateReduxTime,
-  }) => (
-    <>
-      <SearchOrFilterContainer>
-        <EuiFlexGroup data-test-subj="timeline-search-or-filter" gutterSize="xs">
-          <ModeFlexItem grow={false}>
-            <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}>
-              <EuiSuperSelect
-                data-test-subj="timeline-select-search-or-filter"
-                hasDividers={true}
-                itemLayoutAlign="top"
-                itemClassName={timelineSelectModeItemsClassName}
-                onChange={(mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode })}
-                options={options}
-                popoverClassName={searchOrFilterPopoverClassName}
-                valueOfSelected={kqlMode}
+  }) => {
+    const handleChange = useCallback(
+      (mode: KqlMode) => updateKqlMode({ id: timelineId, kqlMode: mode }),
+      [timelineId, updateKqlMode]
+    );
+
+    return (
+      <>
+        <SearchOrFilterContainer>
+          <EuiFlexGroup data-test-subj="timeline-search-or-filter" gutterSize="xs">
+            <ModeFlexItem grow={false}>
+              <EuiToolTip content={i18n.FILTER_OR_SEARCH_WITH_KQL}>
+                <EuiSuperSelect
+                  data-test-subj="timeline-select-search-or-filter"
+                  hasDividers={true}
+                  itemLayoutAlign="top"
+                  itemClassName={timelineSelectModeItemsClassName}
+                  onChange={handleChange}
+                  options={options}
+                  popoverClassName={searchOrFilterPopoverClassName}
+                  valueOfSelected={kqlMode}
+                />
+              </EuiToolTip>
+            </ModeFlexItem>
+            <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
+              <QueryBarTimeline
+                applyKqlFilterQuery={applyKqlFilterQuery}
+                browserFields={browserFields}
+                dataProviders={dataProviders}
+                filters={filters}
+                filterManager={filterManager}
+                filterQuery={filterQuery}
+                filterQueryDraft={filterQueryDraft}
+                from={from}
+                fromStr={fromStr}
+                kqlMode={kqlMode}
+                indexPattern={indexPattern}
+                isRefreshPaused={isRefreshPaused}
+                refreshInterval={refreshInterval}
+                savedQueryId={savedQueryId}
+                setFilters={setFilters}
+                setKqlFilterQueryDraft={setKqlFilterQueryDraft}
+                setSavedQueryId={setSavedQueryId}
+                timelineId={timelineId}
+                to={to}
+                toStr={toStr}
+                updateReduxTime={updateReduxTime}
               />
-            </EuiToolTip>
-          </ModeFlexItem>
-          <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container">
-            <QueryBarTimeline
-              applyKqlFilterQuery={applyKqlFilterQuery}
-              browserFields={browserFields}
-              dataProviders={dataProviders}
-              filters={filters}
-              filterManager={filterManager}
-              filterQuery={filterQuery}
-              filterQueryDraft={filterQueryDraft}
-              from={from}
-              fromStr={fromStr}
-              kqlMode={kqlMode}
-              indexPattern={indexPattern}
-              isRefreshPaused={isRefreshPaused}
-              refreshInterval={refreshInterval}
-              savedQueryId={savedQueryId}
-              setFilters={setFilters}
-              setKqlFilterQueryDraft={setKqlFilterQueryDraft}
-              setSavedQueryId={setSavedQueryId}
-              timelineId={timelineId}
-              to={to}
-              toStr={toStr}
-              updateReduxTime={updateReduxTime}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <PickEventType eventType={eventType} onChangeEventType={updateEventType} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </SearchOrFilterContainer>
-      <SearchOrFilterGlobalStyle />
-    </>
-  )
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <PickEventType
+                eventType={eventType}
+                onChangeEventTypeAndIndexesName={updateEventTypeAndIndexesName}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </SearchOrFilterContainer>
+        <SearchOrFilterGlobalStyle />
+      </>
+    );
+  }
 );
 
 SearchOrFilter.displayName = 'SearchOrFilter';

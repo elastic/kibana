@@ -4,11 +4,10 @@
 
 ## DataPublicPluginStart.ui property
 
+prewired UI components [DataPublicPluginStartUi](./kibana-plugin-plugins-data-public.datapublicpluginstartui.md)
+
 <b>Signature:</b>
 
 ```typescript
-ui: {
-        IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-        SearchBar: React.ComponentType<StatefulSearchBarProps>;
-    };
+ui: DataPublicPluginStartUi;
 ```

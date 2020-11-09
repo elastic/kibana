@@ -11,6 +11,7 @@ import { LoadingPage } from './loading_page';
 
 export const SourceLoadingPage: React.FunctionComponent = () => (
   <LoadingPage
+    data-test-subj="sourceLoadingPage"
     message={
       <FormattedMessage
         id="xpack.infra.sourceLoadingPage.loadingDataSourcesMessage"

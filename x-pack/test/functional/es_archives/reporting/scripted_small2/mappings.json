@@ -1,0 +1,2217 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".kibana": {
+      }
+    },
+    "index": ".kibana_1",
+    "mappings": {
+      "_meta": {
+        "migrationMappingPropertyHashes": {
+          "action": "6e96ac5e648f57523879661ea72525b7",
+          "action_task_params": "a9d49f184ee89641044be0ca2950fa3a",
+          "alert": "7b44fba6773e37c806ce290ea9b7024e",
+          "apm-indices": "9bb9b2bf1fa636ed8619cbab5ce6a1dd",
+          "apm-telemetry": "3525d7c22c42bc80f5e6e9cb3f2b26a2",
+          "application_usage_totals": "c897e4310c5f24b07caaff3db53ae2c1",
+          "application_usage_transactional": "965839e75f809fefe04f92dc4d99722a",
+          "canvas-element": "7390014e1091044523666d97247392fc",
+          "canvas-workpad": "b0a1706d356228dbdcb4a17e6b9eb231",
+          "cases": "32aa96a6d3855ddda53010ae2048ac22",
+          "cases-comments": "c2061fb929f585df57425102fa928b4b",
+          "cases-configure": "42711cbb311976c0687853f4c1354572",
+          "cases-user-actions": "32277330ec6b721abe3b846cfd939a71",
+          "config": "ae24d22d5986d04124cc6568f771066f",
+          "dashboard": "d00f614b29a80360e1190193fd333bab",
+          "file-upload-telemetry": "0ed4d3e1983d1217a30982630897092e",
+          "graph-workspace": "cd7ba1330e6682e9cc00b78850874be1",
+          "index-pattern": "66eccb05066c5a89924f48a9e9736499",
+          "kql-telemetry": "d12a98a6f19a2d273696597547e064ee",
+          "lens": "d33c68a69ff1e78c9888dedd2164ac22",
+          "lens-ui-telemetry": "509bfa5978586998e05f9e303c07a327",
+          "map": "23d7aa4a720d4938ccde3983f87bd58d",
+          "maps-telemetry": "bfd39d88aadadb4be597ea984d433dbe",
+          "migrationVersion": "4a1746014a75ade3a714e1db5763276f",
+          "ml-telemetry": "257fd1d4b4fdbb9cb4b8a3b27da201e9",
+          "namespace": "2f4316de49999235636386fe51dc06c1",
+          "namespaces": "2f4316de49999235636386fe51dc06c1",
+          "query": "11aaeb7f5f7fa5bb43f25e18ce26e7d9",
+          "references": "7997cf5a56cc02bdc9c93361bde732b0",
+          "sample-data-telemetry": "7d3cfeb915303c9641c59681967ffeb4",
+          "search": "181661168bbadd1eff5902361e2a0d5c",
+          "telemetry": "36a616f7026dfa617d6655df850fe16d",
+          "timelion-sheet": "9a2a2748877c7a7b582fef201ab1d4cf",
+          "tsvb-validation-telemetry": "3a37ef6c8700ae6fc97d5c7da00e9215",
+          "type": "2f4316de49999235636386fe51dc06c1",
+          "ui-metric": "0d409297dc5ebe1e3a1da691c6ee32e3",
+          "updated_at": "00da57df13e94e9d98437d13ace4bfe0",
+          "upgrade-assistant-reindex-operation": "296a89039fc4260292be36b1b005d8f2",
+          "upgrade-assistant-telemetry": "56702cec857e0a9dacfb696655b4ff7b",
+          "uptime-dynamic-settings": "fcdb453a30092f022f2642db29523d80",
+          "url": "b675c3be8d76ecf029294d51dc7ec65d",
+          "visualization": "52d7a13ad68a150c4525b292d23e12cc"
+        }
+      },
+      "dynamic": "strict",
+      "properties": {
+        "action": {
+          "properties": {
+            "actionTypeId": {
+              "type": "keyword"
+            },
+            "config": {
+              "enabled": false,
+              "type": "object"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "secrets": {
+              "type": "binary"
+            }
+          }
+        },
+        "action_task_params": {
+          "properties": {
+            "actionId": {
+              "type": "keyword"
+            },
+            "apiKey": {
+              "type": "binary"
+            },
+            "params": {
+              "enabled": false,
+              "type": "object"
+            }
+          }
+        },
+        "alert": {
+          "properties": {
+            "actions": {
+              "properties": {
+                "actionRef": {
+                  "type": "keyword"
+                },
+                "actionTypeId": {
+                  "type": "keyword"
+                },
+                "group": {
+                  "type": "keyword"
+                },
+                "params": {
+                  "enabled": false,
+                  "type": "object"
+                }
+              },
+              "type": "nested"
+            },
+            "alertTypeId": {
+              "type": "keyword"
+            },
+            "apiKey": {
+              "type": "binary"
+            },
+            "apiKeyOwner": {
+              "type": "keyword"
+            },
+            "consumer": {
+              "type": "keyword"
+            },
+            "createdAt": {
+              "type": "date"
+            },
+            "createdBy": {
+              "type": "keyword"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "muteAll": {
+              "type": "boolean"
+            },
+            "mutedInstanceIds": {
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "params": {
+              "enabled": false,
+              "type": "object"
+            },
+            "schedule": {
+              "properties": {
+                "interval": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "scheduledTaskId": {
+              "type": "keyword"
+            },
+            "tags": {
+              "type": "keyword"
+            },
+            "throttle": {
+              "type": "keyword"
+            },
+            "updatedBy": {
+              "type": "keyword"
+            }
+          }
+        },
+        "apm-indices": {
+          "properties": {
+            "apm_oss": {
+              "properties": {
+                "errorIndices": {
+                  "type": "keyword"
+                },
+                "metricsIndices": {
+                  "type": "keyword"
+                },
+                "onboardingIndices": {
+                  "type": "keyword"
+                },
+                "sourcemapIndices": {
+                  "type": "keyword"
+                },
+                "spanIndices": {
+                  "type": "keyword"
+                },
+                "transactionIndices": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "apm-telemetry": {
+          "properties": {
+            "agents": {
+              "properties": {
+                "dotnet": {
+                  "properties": {
+                    "agent": {
+                      "properties": {
+                        "version": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "framework": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "language": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "runtime": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "go": {
+                  "properties": {
+                    "agent": {
+                      "properties": {
+                        "version": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "framework": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "language": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "runtime": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "java": {
+                  "properties": {
+                    "agent": {
+                      "properties": {
+                        "version": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "framework": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "language": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "runtime": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "js-base": {
+                  "properties": {
+                    "agent": {
+                      "properties": {
+                        "version": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "framework": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "language": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "runtime": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "nodejs": {
+                  "properties": {
+                    "agent": {
+                      "properties": {
+                        "version": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "framework": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "language": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "runtime": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "python": {
+                  "properties": {
+                    "agent": {
+                      "properties": {
+                        "version": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "framework": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "language": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "runtime": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "ruby": {
+                  "properties": {
+                    "agent": {
+                      "properties": {
+                        "version": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "framework": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "language": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "runtime": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "rum-js": {
+                  "properties": {
+                    "agent": {
+                      "properties": {
+                        "version": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "service": {
+                      "properties": {
+                        "framework": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "language": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        },
+                        "runtime": {
+                          "properties": {
+                            "composite": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "version": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "cardinality": {
+              "properties": {
+                "transaction": {
+                  "properties": {
+                    "name": {
+                      "properties": {
+                        "all_agents": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "rum": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "user_agent": {
+                  "properties": {
+                    "original": {
+                      "properties": {
+                        "all_agents": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "rum": {
+                          "properties": {
+                            "1d": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "counts": {
+              "properties": {
+                "agent_configuration": {
+                  "properties": {
+                    "all": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "error": {
+                  "properties": {
+                    "1d": {
+                      "type": "long"
+                    },
+                    "all": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "max_error_groups_per_service": {
+                  "properties": {
+                    "1d": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "max_transaction_groups_per_service": {
+                  "properties": {
+                    "1d": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "metric": {
+                  "properties": {
+                    "1d": {
+                      "type": "long"
+                    },
+                    "all": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "onboarding": {
+                  "properties": {
+                    "1d": {
+                      "type": "long"
+                    },
+                    "all": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "services": {
+                  "properties": {
+                    "1d": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "sourcemap": {
+                  "properties": {
+                    "1d": {
+                      "type": "long"
+                    },
+                    "all": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "span": {
+                  "properties": {
+                    "1d": {
+                      "type": "long"
+                    },
+                    "all": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "traces": {
+                  "properties": {
+                    "1d": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "transaction": {
+                  "properties": {
+                    "1d": {
+                      "type": "long"
+                    },
+                    "all": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "has_any_services": {
+              "type": "boolean"
+            },
+            "indices": {
+              "properties": {
+                "all": {
+                  "properties": {
+                    "total": {
+                      "properties": {
+                        "docs": {
+                          "properties": {
+                            "count": {
+                              "type": "long"
+                            }
+                          }
+                        },
+                        "store": {
+                          "properties": {
+                            "size_in_bytes": {
+                              "type": "long"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "shards": {
+                  "properties": {
+                    "total": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "integrations": {
+              "properties": {
+                "ml": {
+                  "properties": {
+                    "all_jobs_count": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "retainment": {
+              "properties": {
+                "error": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "metric": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "onboarding": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "span": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "transaction": {
+                  "properties": {
+                    "ms": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "services_per_agent": {
+              "properties": {
+                "dotnet": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "go": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "java": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "js-base": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "nodejs": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "python": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "ruby": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "rum-js": {
+                  "null_value": 0,
+                  "type": "long"
+                }
+              }
+            },
+            "tasks": {
+              "properties": {
+                "agent_configuration": {
+                  "properties": {
+                    "took": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "agents": {
+                  "properties": {
+                    "took": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "cardinality": {
+                  "properties": {
+                    "took": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "groupings": {
+                  "properties": {
+                    "took": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "indices_stats": {
+                  "properties": {
+                    "took": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "integrations": {
+                  "properties": {
+                    "took": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "processor_events": {
+                  "properties": {
+                    "took": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "services": {
+                  "properties": {
+                    "took": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                },
+                "versions": {
+                  "properties": {
+                    "took": {
+                      "properties": {
+                        "ms": {
+                          "type": "long"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "version": {
+              "properties": {
+                "apm_server": {
+                  "properties": {
+                    "major": {
+                      "type": "long"
+                    },
+                    "minor": {
+                      "type": "long"
+                    },
+                    "patch": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "application_usage_totals": {
+          "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "minutesOnScreen": {
+              "type": "float"
+            },
+            "numberOfClicks": {
+              "type": "long"
+            }
+          }
+        },
+        "application_usage_transactional": {
+          "properties": {
+            "appId": {
+              "type": "keyword"
+            },
+            "minutesOnScreen": {
+              "type": "float"
+            },
+            "numberOfClicks": {
+              "type": "long"
+            },
+            "timestamp": {
+              "type": "date"
+            }
+          }
+        },
+        "canvas-element": {
+          "dynamic": "false",
+          "properties": {
+            "@created": {
+              "type": "date"
+            },
+            "@timestamp": {
+              "type": "date"
+            },
+            "content": {
+              "type": "text"
+            },
+            "help": {
+              "type": "text"
+            },
+            "image": {
+              "type": "text"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "canvas-workpad": {
+          "dynamic": "false",
+          "properties": {
+            "@created": {
+              "type": "date"
+            },
+            "@timestamp": {
+              "type": "date"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "cases": {
+          "properties": {
+            "closed_at": {
+              "type": "date"
+            },
+            "closed_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "connector_id": {
+              "type": "keyword"
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "description": {
+              "type": "text"
+            },
+            "external_service": {
+              "properties": {
+                "connector_id": {
+                  "type": "keyword"
+                },
+                "connector_name": {
+                  "type": "keyword"
+                },
+                "external_id": {
+                  "type": "keyword"
+                },
+                "external_title": {
+                  "type": "text"
+                },
+                "external_url": {
+                  "type": "text"
+                },
+                "pushed_at": {
+                  "type": "date"
+                },
+                "pushed_by": {
+                  "properties": {
+                    "email": {
+                      "type": "keyword"
+                    },
+                    "full_name": {
+                      "type": "keyword"
+                    },
+                    "username": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "status": {
+              "type": "keyword"
+            },
+            "tags": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "keyword"
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "cases-comments": {
+          "properties": {
+            "comment": {
+              "type": "text"
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "pushed_at": {
+              "type": "date"
+            },
+            "pushed_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "cases-configure": {
+          "properties": {
+            "closure_type": {
+              "type": "keyword"
+            },
+            "connector_id": {
+              "type": "keyword"
+            },
+            "connector_name": {
+              "type": "keyword"
+            },
+            "created_at": {
+              "type": "date"
+            },
+            "created_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "updated_at": {
+              "type": "date"
+            },
+            "updated_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            }
+          }
+        },
+        "cases-user-actions": {
+          "properties": {
+            "action": {
+              "type": "keyword"
+            },
+            "action_at": {
+              "type": "date"
+            },
+            "action_by": {
+              "properties": {
+                "email": {
+                  "type": "keyword"
+                },
+                "full_name": {
+                  "type": "keyword"
+                },
+                "username": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "action_field": {
+              "type": "keyword"
+            },
+            "new_value": {
+              "type": "text"
+            },
+            "old_value": {
+              "type": "text"
+            }
+          }
+        },
+        "config": {
+          "dynamic": "true",
+          "properties": {
+            "buildNum": {
+              "type": "keyword"
+            },
+            "dateFormat:tz": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "defaultIndex": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "search:queryLanguage": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "dashboard": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "optionsJSON": {
+              "type": "text"
+            },
+            "panelsJSON": {
+              "type": "text"
+            },
+            "refreshInterval": {
+              "properties": {
+                "display": {
+                  "type": "keyword"
+                },
+                "pause": {
+                  "type": "boolean"
+                },
+                "section": {
+                  "type": "integer"
+                },
+                "value": {
+                  "type": "integer"
+                }
+              }
+            },
+            "timeFrom": {
+              "type": "keyword"
+            },
+            "timeRestore": {
+              "type": "boolean"
+            },
+            "timeTo": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "file-upload-telemetry": {
+          "properties": {
+            "filesUploadedTotalCount": {
+              "type": "long"
+            }
+          }
+        },
+        "graph-workspace": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "numLinks": {
+              "type": "integer"
+            },
+            "numVertices": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "wsState": {
+              "type": "text"
+            }
+          }
+        },
+        "index-pattern": {
+          "properties": {
+            "fieldFormatMap": {
+              "type": "text"
+            },
+            "fields": {
+              "type": "text"
+            },
+            "intervalName": {
+              "type": "keyword"
+            },
+            "notExpandable": {
+              "type": "boolean"
+            },
+            "sourceFilters": {
+              "type": "text"
+            },
+            "timeFieldName": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "type": {
+              "type": "keyword"
+            },
+            "typeMeta": {
+              "type": "keyword"
+            }
+          }
+        },
+        "infrastructure-ui-source": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "fields": {
+              "properties": {
+                "container": {
+                  "type": "keyword"
+                },
+                "host": {
+                  "type": "keyword"
+                },
+                "pod": {
+                  "type": "keyword"
+                },
+                "tiebreaker": {
+                  "type": "keyword"
+                },
+                "timestamp": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "logAlias": {
+              "type": "keyword"
+            },
+            "metricAlias": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "text"
+            }
+          }
+        },
+        "kql-telemetry": {
+          "properties": {
+            "optInCount": {
+              "type": "long"
+            },
+            "optOutCount": {
+              "type": "long"
+            }
+          }
+        },
+        "lens": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "expression": {
+              "index": false,
+              "type": "keyword"
+            },
+            "state": {
+              "type": "flattened"
+            },
+            "title": {
+              "type": "text"
+            },
+            "visualizationType": {
+              "type": "keyword"
+            }
+          }
+        },
+        "lens-ui-telemetry": {
+          "properties": {
+            "count": {
+              "type": "integer"
+            },
+            "date": {
+              "type": "date"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          }
+        },
+        "map": {
+          "properties": {
+            "bounds": {
+              "type": "geo_shape"
+            },
+            "description": {
+              "type": "text"
+            },
+            "layerListJSON": {
+              "type": "text"
+            },
+            "mapStateJSON": {
+              "type": "text"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "maps-telemetry": {
+          "properties": {
+            "attributesPerMap": {
+              "properties": {
+                "dataSourcesCount": {
+                  "properties": {
+                    "avg": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "emsVectorLayersCount": {
+                  "dynamic": "true",
+                  "type": "object"
+                },
+                "layerTypesCount": {
+                  "dynamic": "true",
+                  "type": "object"
+                },
+                "layersCount": {
+                  "properties": {
+                    "avg": {
+                      "type": "long"
+                    },
+                    "max": {
+                      "type": "long"
+                    },
+                    "min": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "indexPatternsWithGeoFieldCount": {
+              "type": "long"
+            },
+            "indexPatternsWithGeoPointFieldCount": {
+              "type": "long"
+            },
+            "indexPatternsWithGeoShapeFieldCount": {
+              "type": "long"
+            },
+            "mapsTotalCount": {
+              "type": "long"
+            },
+            "settings": {
+              "properties": {
+                "showMapVisualizationTypes": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "timeCaptured": {
+              "type": "date"
+            }
+          }
+        },
+        "migrationVersion": {
+          "dynamic": "true",
+          "properties": {
+            "dashboard": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "index-pattern": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            },
+            "search": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 256,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "ml-telemetry": {
+          "properties": {
+            "file_data_visualizer": {
+              "properties": {
+                "index_creation_count": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "namespace": {
+          "type": "keyword"
+        },
+        "namespaces": {
+          "type": "keyword"
+        },
+        "query": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "filters": {
+              "enabled": false,
+              "type": "object"
+            },
+            "query": {
+              "properties": {
+                "language": {
+                  "type": "keyword"
+                },
+                "query": {
+                  "index": false,
+                  "type": "keyword"
+                }
+              }
+            },
+            "timefilter": {
+              "enabled": false,
+              "type": "object"
+            },
+            "title": {
+              "type": "text"
+            }
+          }
+        },
+        "references": {
+          "properties": {
+            "id": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            },
+            "type": {
+              "type": "keyword"
+            }
+          },
+          "type": "nested"
+        },
+        "sample-data-telemetry": {
+          "properties": {
+            "installCount": {
+              "type": "long"
+            },
+            "unInstallCount": {
+              "type": "long"
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "columns": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "sort": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "server": {
+          "properties": {
+            "uuid": {
+              "type": "keyword"
+            }
+          }
+        },
+        "space": {
+          "properties": {
+            "_reserved": {
+              "type": "boolean"
+            },
+            "color": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "disabledFeatures": {
+              "type": "keyword"
+            },
+            "initials": {
+              "type": "keyword"
+            },
+            "name": {
+              "fields": {
+                "keyword": {
+                  "ignore_above": 2048,
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "telemetry": {
+          "properties": {
+            "allowChangingOptInStatus": {
+              "type": "boolean"
+            },
+            "enabled": {
+              "type": "boolean"
+            },
+            "lastReported": {
+              "type": "date"
+            },
+            "lastVersionChecked": {
+              "type": "keyword"
+            },
+            "reportFailureCount": {
+              "type": "integer"
+            },
+            "reportFailureVersion": {
+              "type": "keyword"
+            },
+            "sendUsageFrom": {
+              "type": "keyword"
+            },
+            "userHasSeenNotice": {
+              "type": "boolean"
+            }
+          }
+        },
+        "timelion-sheet": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "timelion_chart_height": {
+              "type": "integer"
+            },
+            "timelion_columns": {
+              "type": "integer"
+            },
+            "timelion_interval": {
+              "type": "keyword"
+            },
+            "timelion_other_interval": {
+              "type": "keyword"
+            },
+            "timelion_rows": {
+              "type": "integer"
+            },
+            "timelion_sheet": {
+              "type": "text"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "tsvb-validation-telemetry": {
+          "properties": {
+            "failedRequests": {
+              "type": "long"
+            }
+          }
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "ui-metric": {
+          "properties": {
+            "count": {
+              "type": "integer"
+            }
+          }
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "upgrade-assistant-reindex-operation": {
+          "properties": {
+            "errorMessage": {
+              "type": "keyword"
+            },
+            "indexName": {
+              "type": "keyword"
+            },
+            "lastCompletedStep": {
+              "type": "integer"
+            },
+            "locked": {
+              "type": "date"
+            },
+            "newIndexName": {
+              "type": "keyword"
+            },
+            "reindexOptions": {
+              "properties": {
+                "openAndClose": {
+                  "type": "boolean"
+                },
+                "queueSettings": {
+                  "properties": {
+                    "queuedAt": {
+                      "type": "long"
+                    },
+                    "startedAt": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "reindexTaskId": {
+              "type": "keyword"
+            },
+            "reindexTaskPercComplete": {
+              "type": "float"
+            },
+            "runningReindexCount": {
+              "type": "integer"
+            },
+            "status": {
+              "type": "integer"
+            }
+          }
+        },
+        "upgrade-assistant-telemetry": {
+          "properties": {
+            "features": {
+              "properties": {
+                "deprecation_logging": {
+                  "properties": {
+                    "enabled": {
+                      "null_value": true,
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            },
+            "ui_open": {
+              "properties": {
+                "cluster": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "indices": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "overview": {
+                  "null_value": 0,
+                  "type": "long"
+                }
+              }
+            },
+            "ui_reindex": {
+              "properties": {
+                "close": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "open": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "start": {
+                  "null_value": 0,
+                  "type": "long"
+                },
+                "stop": {
+                  "null_value": 0,
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "uptime-dynamic-settings": {
+          "properties": {
+            "certAgeThreshold": {
+              "type": "long"
+            },
+            "certExpirationThreshold": {
+              "type": "long"
+            },
+            "heartbeatIndices": {
+              "type": "keyword"
+            }
+          }
+        },
+        "url": {
+          "properties": {
+            "accessCount": {
+              "type": "long"
+            },
+            "accessDate": {
+              "type": "date"
+            },
+            "createDate": {
+              "type": "date"
+            },
+            "url": {
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              },
+              "type": "text"
+            }
+          }
+        },
+        "user-action": {
+          "properties": {
+            "count": {
+              "type": "integer"
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "savedSearchRefName": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "visState": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "auto_expand_replicas": "0-1",
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+    },
+    "index": "babynames",
+    "mappings": {
+      "properties": {
+        "date": {
+          "type": "date"
+        },
+        "gender": {
+          "type": "keyword"
+        },
+        "name": {
+          "type": "keyword"
+        },
+        "percent": {
+          "type": "float"
+        },
+        "value": {
+          "type": "integer"
+        },
+        "year": {
+          "type": "integer"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "number_of_replicas": "0",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

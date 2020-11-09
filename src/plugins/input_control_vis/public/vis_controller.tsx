@@ -18,8 +18,10 @@
  */
 
 import React from 'react';
+import { isEqual } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import { Subscription } from 'rxjs';
 import { I18nStart } from 'kibana/public';
 import { InputControlVis } from './components/vis/input_control_vis';
 import { getControlFactory } from './control/control_factory';
@@ -29,19 +31,21 @@ import { RangeControl } from './control/range_control_factory';
 import { ListControl } from './control/list_control_factory';
 import { InputControlVisDependencies } from './plugin';
 import { FilterManager, Filter } from '../../data/public';
-import { VisParams, Vis } from '../../visualizations/public';
+import { VisParams, ExprVis } from '../../visualizations/public';
 
 export const createInputControlVisController = (deps: InputControlVisDependencies) => {
   return class InputControlVisController {
     private I18nContext?: I18nStart['Context'];
+    private _isLoaded = false;
 
     controls: Array<RangeControl | ListControl>;
     queryBarUpdateHandler: () => void;
     filterManager: FilterManager;
     updateSubsciption: any;
+    timeFilterSubscription: Subscription;
     visParams?: VisParams;
 
-    constructor(public el: Element, public vis: Vis) {
+    constructor(public el: Element, public vis: ExprVis) {
       this.controls = [];
 
       this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
@@ -50,19 +54,32 @@ export const createInputControlVisController = (deps: InputControlVisDependencie
       this.updateSubsciption = this.filterManager
         .getUpdates$()
         .subscribe(this.queryBarUpdateHandler);
+      this.timeFilterSubscription = deps.data.query.timefilter.timefilter
+        .getTimeUpdate$()
+        .subscribe(() => {
+          if (this.visParams?.useTimeFilter) {
+            this._isLoaded = false;
+          }
+        });
     }
 
     async render(visData: any, visParams: VisParams) {
-      this.visParams = visParams;
-      this.controls = [];
-      this.controls = await this.initControls();
-      const [{ i18n }] = await deps.core.getStartServices();
-      this.I18nContext = i18n.Context;
+      if (!this.I18nContext) {
+        const [{ i18n }] = await deps.core.getStartServices();
+        this.I18nContext = i18n.Context;
+      }
+      if (!this._isLoaded || !isEqual(visParams, this.visParams)) {
+        this.visParams = visParams;
+        this.controls = [];
+        this.controls = await this.initControls();
+        this._isLoaded = true;
+      }
       this.drawVis();
     }
 
     destroy() {
       this.updateSubsciption.unsubscribe();
+      this.timeFilterSubscription.unsubscribe();
       unmountComponentAtNode(this.el);
       this.controls.forEach((control) => control.destroy());
     }

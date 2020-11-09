@@ -74,14 +74,11 @@ const wizardSections: { [id: string]: { id: WizardSection; label: string } } = {
 export const ComponentTemplateForm = ({
   defaultValue = {
     name: '',
-    template: {
-      settings: {},
-      mappings: {},
-      aliases: {},
-    },
+    template: {},
     _meta: {},
     _kbnMeta: {
       usedBy: [],
+      isManaged: false,
     },
   },
   isEditing,
@@ -137,22 +134,48 @@ export const ComponentTemplateForm = ({
     </>
   ) : null;
 
-  const buildComponentTemplateObject = (initialTemplate: ComponentTemplateDeserialized) => (
-    wizardData: WizardContent
-  ): ComponentTemplateDeserialized => {
-    const componentTemplate = {
-      ...initialTemplate,
-      name: wizardData.logistics.name,
-      version: wizardData.logistics.version,
-      _meta: wizardData.logistics._meta,
-      template: {
-        settings: wizardData.settings,
-        mappings: wizardData.mappings,
-        aliases: wizardData.aliases,
-      },
-    };
-    return componentTemplate;
+  /**
+   * If no mappings, settings or aliases are defined, it is better to not send an empty
+   * object for those values.
+   * @param componentTemplate The component template object to clean up
+   */
+  const cleanupComponentTemplateObject = (componentTemplate: ComponentTemplateDeserialized) => {
+    const outputTemplate = { ...componentTemplate };
+
+    if (outputTemplate.template.settings === undefined) {
+      delete outputTemplate.template.settings;
+    }
+
+    if (outputTemplate.template.mappings === undefined) {
+      delete outputTemplate.template.mappings;
+    }
+
+    if (outputTemplate.template.aliases === undefined) {
+      delete outputTemplate.template.aliases;
+    }
+
+    return outputTemplate;
   };
+
+  const buildComponentTemplateObject = useCallback(
+    (initialTemplate: ComponentTemplateDeserialized) => (
+      wizardData: WizardContent
+    ): ComponentTemplateDeserialized => {
+      const outputComponentTemplate = {
+        ...initialTemplate,
+        name: wizardData.logistics.name,
+        version: wizardData.logistics.version,
+        _meta: wizardData.logistics._meta,
+        template: {
+          settings: wizardData.settings,
+          mappings: wizardData.mappings,
+          aliases: wizardData.aliases,
+        },
+      };
+      return cleanupComponentTemplateObject(outputComponentTemplate);
+    },
+    []
+  );
 
   const onSaveComponentTemplate = useCallback(
     async (wizardData: WizardContent) => {
@@ -161,13 +184,13 @@ export const ComponentTemplateForm = ({
       // This will strip an empty string if "version" is not set, as well as an empty "_meta" object
       onSave(
         stripEmptyFields(componentTemplate, {
-          types: ['string', 'object'],
+          types: ['string'],
         }) as ComponentTemplateDeserialized
       );
 
       clearSaveError();
     },
-    [defaultValue, onSave, clearSaveError]
+    [buildComponentTemplateObject, defaultValue, onSave, clearSaveError]
   );
 
   return (

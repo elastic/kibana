@@ -4,14 +4,14 @@ def call(List<Closure> closures) {
 
 def check() {
   tasks([
+    kibanaPipeline.scriptTask('Check Telemetry Schema', 'test/scripts/checks/telemetry.sh'),
     kibanaPipeline.scriptTask('Check TypeScript Projects', 'test/scripts/checks/ts_projects.sh'),
     kibanaPipeline.scriptTask('Check Doc API Changes', 'test/scripts/checks/doc_api_changes.sh'),
     kibanaPipeline.scriptTask('Check Types', 'test/scripts/checks/type_check.sh'),
+    kibanaPipeline.scriptTask('Check Bundle Limits', 'test/scripts/checks/bundle_limits.sh'),
     kibanaPipeline.scriptTask('Check i18n', 'test/scripts/checks/i18n.sh'),
     kibanaPipeline.scriptTask('Check File Casing', 'test/scripts/checks/file_casing.sh'),
-    kibanaPipeline.scriptTask('Check Lockfile Symlinks', 'test/scripts/checks/lock_file_symlinks.sh'),
     kibanaPipeline.scriptTask('Check Licenses', 'test/scripts/checks/licenses.sh'),
-    kibanaPipeline.scriptTask('Verify Dependency Versions', 'test/scripts/checks/verify_dependency_versions.sh'),
     kibanaPipeline.scriptTask('Verify NOTICE', 'test/scripts/checks/verify_notice.sh'),
     kibanaPipeline.scriptTask('Test Projects', 'test/scripts/checks/test_projects.sh'),
     kibanaPipeline.scriptTask('Test Hardening', 'test/scripts/checks/test_hardening.sh'),
@@ -27,11 +27,9 @@ def lint() {
 
 def test() {
   tasks([
-    // These 4 tasks require isolation because of hard-coded, conflicting ports and such, so let's use Docker here
+    // These 2 tasks require isolation because of hard-coded, conflicting ports and such, so let's use Docker here
     kibanaPipeline.scriptTaskDocker('Jest Integration Tests', 'test/scripts/test/jest_integration.sh'),
     kibanaPipeline.scriptTaskDocker('Mocha Tests', 'test/scripts/test/mocha.sh'),
-    kibanaPipeline.scriptTaskDocker('Karma CI Tests', 'test/scripts/test/karma_ci.sh'),
-    kibanaPipeline.scriptTaskDocker('X-Pack Karma Tests', 'test/scripts/test/xpack_karma.sh'),
 
     kibanaPipeline.scriptTask('Jest Unit Tests', 'test/scripts/test/jest_unit.sh'),
     kibanaPipeline.scriptTask('API Integration Tests', 'test/scripts/test/api_integration.sh'),
@@ -42,7 +40,14 @@ def test() {
 }
 
 def functionalOss(Map params = [:]) {
-  def config = params ?: [ciGroups: true, firefox: true, accessibility: true, pluginFunctional: true, visualRegression: false]
+  def config = params ?: [
+    serverIntegration: true,
+    ciGroups: true,
+    firefox: true,
+    accessibility: true,
+    pluginFunctional: true,
+    visualRegression: false,
+  ]
 
   task {
     kibanaPipeline.buildOss(6)
@@ -66,6 +71,10 @@ def functionalOss(Map params = [:]) {
 
     if (config.visualRegression) {
       task(kibanaPipeline.functionalTestProcess('oss-visualRegression', './test/scripts/jenkins_visual_regression.sh'))
+    }
+
+    if (config.serverIntegration) {
+      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/server_integration.sh'))
     }
   }
 }
@@ -101,15 +110,16 @@ def functionalXpack(Map params = [:]) {
       task(kibanaPipeline.functionalTestProcess('xpack-visualRegression', './test/scripts/jenkins_xpack_visual_regression.sh'))
     }
 
-    if (config.pageLoadMetrics) {
-      task(kibanaPipeline.functionalTestProcess('xpack-pageLoadMetrics', './test/scripts/jenkins_xpack_page_load_metrics.sh'))
-    }
-
     if (config.savedObjectsFieldMetrics) {
       task(kibanaPipeline.functionalTestProcess('xpack-savedObjectsFieldMetrics', './test/scripts/jenkins_xpack_saved_objects_field_metrics.sh'))
     }
 
-    whenChanged(['x-pack/plugins/security_solution/', 'x-pack/test/security_solution_cypress/']) {
+    whenChanged([
+      'x-pack/plugins/security_solution/',
+      'x-pack/test/security_solution_cypress/',
+      'x-pack/plugins/triggers_actions_ui/public/application/sections/action_connector_form/',
+      'x-pack/plugins/triggers_actions_ui/public/application/context/actions_connectors_context.tsx',
+    ]) {
       task(kibanaPipeline.functionalTestProcess('xpack-securitySolutionCypress', './test/scripts/jenkins_security_solution_cypress.sh'))
     }
   }

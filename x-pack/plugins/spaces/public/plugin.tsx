@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, StartServicesAccessor } from 'src/core/public';
 import { HomePublicPluginSetup } from 'src/plugins/home/public';
 import { SavedObjectsManagementPluginSetup } from 'src/plugins/saved_objects_management/public';
 import { ManagementStart, ManagementSetup } from 'src/plugins/management/public';
@@ -15,6 +15,7 @@ import { SpacesManager } from './spaces_manager';
 import { initSpacesNavControl } from './nav_control';
 import { createSpacesFeatureCatalogueEntry } from './create_feature_catalogue_entry';
 import { CopySavedObjectsToSpaceService } from './copy_saved_objects_to_space';
+import { ShareSavedObjectsToSpaceService } from './share_saved_objects_to_space';
 import { AdvancedSettingsService } from './advanced_settings';
 import { ManagementService } from './management';
 import { spaceSelectorApp } from './space_selector';
@@ -52,7 +53,7 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
       this.managementService = new ManagementService();
       this.managementService.setup({
         management: plugins.management,
-        getStartServices: core.getStartServices as CoreSetup<PluginsStart>['getStartServices'],
+        getStartServices: core.getStartServices as StartServicesAccessor<PluginsStart>,
         spacesManager: this.spacesManager,
         securityLicense: plugins.security?.license,
       });
@@ -67,6 +68,13 @@ export class SpacesPlugin implements Plugin<SpacesPluginSetup, SpacesPluginStart
     }
 
     if (plugins.savedObjectsManagement) {
+      const shareSavedObjectsToSpaceService = new ShareSavedObjectsToSpaceService();
+      shareSavedObjectsToSpaceService.setup({
+        spacesManager: this.spacesManager,
+        notificationsSetup: core.notifications,
+        savedObjectsManagementSetup: plugins.savedObjectsManagement,
+        getStartServices: core.getStartServices as StartServicesAccessor<PluginsStart>,
+      });
       const copySavedObjectsToSpaceService = new CopySavedObjectsToSpaceService();
       copySavedObjectsToSpaceService.setup({
         spacesManager: this.spacesManager,

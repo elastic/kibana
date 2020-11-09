@@ -24,14 +24,9 @@ export NODE_OPTIONS="$NODE_OPTIONS --max-old-space-size=4096"
 ###
 export FORCE_COLOR=1
 
+### APM tracking
 ###
-### The @babel/register cache collects the build output from each file in
-### a map, in memory, and then when the process exits it writes that to the
-### babel cache file as a JSON encoded object. Stringifying that object
-### causes OOMs on CI regularly enough that we need to find another solution,
-### and until we do we need to disable the cache
-###
-export BABEL_DISABLE_CACHE=true
+export ELASTIC_APM_ENVIRONMENT=ci
 
 ###
 ### check that we seem to be in a kibana project
@@ -128,6 +123,7 @@ export PATH="$PATH:$yarnGlobalDir"
 # use a proxy to fetch chromedriver/geckodriver asset
 export GECKODRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export CHROMEDRIVER_CDNURL="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
+export RE2_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache"
 export CYPRESS_DOWNLOAD_MIRROR="https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/cypress"
 
 export CHECKS_REPORTER_ACTIVE=false

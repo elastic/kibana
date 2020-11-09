@@ -3,7 +3,6 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -32,56 +31,6 @@ interface PickFieldsConfig {
   summaryCountField?: string;
 }
 
-// type guards
-// Detector
-const isDetectorWithField = (arg: any): arg is Required<Pick<Detector, 'field'>> => {
-  return arg.hasOwnProperty('field');
-};
-const isDetectorWithByField = (arg: any): arg is Required<Pick<Detector, 'byField'>> => {
-  return arg.hasOwnProperty('byField');
-};
-const isDetectorWithOverField = (arg: any): arg is Required<Pick<Detector, 'overField'>> => {
-  return arg.hasOwnProperty('overField');
-};
-const isDetectorWithPartitionField = (
-  arg: any
-): arg is Required<Pick<Detector, 'partitionField'>> => {
-  return arg.hasOwnProperty('partitionField');
-};
-const isDetectorWithExcludeFrequent = (
-  arg: any
-): arg is Required<Pick<Detector, 'excludeFrequent'>> => {
-  return arg.hasOwnProperty('excludeFrequent');
-};
-const isDetectorWithDescription = (arg: any): arg is Required<Pick<Detector, 'description'>> => {
-  return arg.hasOwnProperty('description');
-};
-
-// DatafeedConfig
-const isDatafeedConfigWithQueryDelay = (
-  arg: any
-): arg is Required<Pick<DatafeedConfig, 'queryDelay'>> => {
-  return arg.hasOwnProperty('queryDelay');
-};
-const isDatafeedConfigWithFrequency = (
-  arg: any
-): arg is Required<Pick<DatafeedConfig, 'frequency'>> => {
-  return arg.hasOwnProperty('frequency');
-};
-const isDatafeedConfigWithScrollSize = (
-  arg: any
-): arg is Required<Pick<DatafeedConfig, 'scrollSize'>> => {
-  return arg.hasOwnProperty('scrollSize');
-};
-
-// PickFieldsConfig
-const isPickFieldsConfigWithSummaryCountField = (
-  arg: any
-): arg is Required<Pick<PickFieldsConfig, 'summaryCountField'>> => {
-  return arg.hasOwnProperty('summaryCountField');
-};
-
-// eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
@@ -184,77 +133,70 @@ export default function ({ getService }: FtrProviderContext) {
 
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
-        it('job creation loads the job management page', async () => {
+        it('loads the advanced wizard for the source data', async () => {
+          await ml.testExecution.logTestStep('job creation loads the job management page');
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToJobManagement();
-        });
 
-        it('job creation loads the new job source selection page', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation loads the new job source selection page'
+          );
           await ml.jobManagement.navigateToNewJobSourceSelection();
-        });
 
-        it('job creation loads the job type selection page', async () => {
+          await ml.testExecution.logTestStep('job creation loads the job type selection page');
           await ml.jobSourceSelection.selectSourceForAnomalyDetectionJob(testData.jobSource);
-        });
 
-        it('job creation loads the advanced job wizard page', async () => {
+          await ml.testExecution.logTestStep('job creation loads the advanced job wizard page');
           await ml.jobTypeSelection.selectAdvancedJob();
         });
 
-        it('job creation displays the configure datafeed step', async () => {
+        it('navigates through the advanced wizard and sets all needed fields', async () => {
+          await ml.testExecution.logTestStep('job creation displays the configure datafeed step');
           await ml.jobWizardCommon.assertConfigureDatafeedSectionExists();
-        });
 
-        it('job creation pre-fills the datafeed query editor', async () => {
+          await ml.testExecution.logTestStep('job creation pre-fills the datafeed query editor');
           await ml.jobWizardAdvanced.assertDatafeedQueryEditorExists();
           await ml.jobWizardAdvanced.assertDatafeedQueryEditorValue(defaultValues.datafeedQuery);
-        });
 
-        it('job creation inputs the query delay', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the query delay');
           await ml.jobWizardAdvanced.assertQueryDelayInputExists();
           await ml.jobWizardAdvanced.assertQueryDelayValue(defaultValues.queryDelay);
-          if (isDatafeedConfigWithQueryDelay(testData.datafeedConfig)) {
-            await ml.jobWizardAdvanced.setQueryDelay(testData.datafeedConfig.queryDelay);
+          if (testData.datafeedConfig.hasOwnProperty('queryDelay')) {
+            await ml.jobWizardAdvanced.setQueryDelay(testData.datafeedConfig.queryDelay!);
           }
-        });
 
-        it('job creation inputs the frequency', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the frequency');
           await ml.jobWizardAdvanced.assertFrequencyInputExists();
           await ml.jobWizardAdvanced.assertFrequencyValue(defaultValues.frequency);
-          if (isDatafeedConfigWithFrequency(testData.datafeedConfig)) {
-            await ml.jobWizardAdvanced.setFrequency(testData.datafeedConfig.frequency);
+          if (testData.datafeedConfig.hasOwnProperty('frequency')) {
+            await ml.jobWizardAdvanced.setFrequency(testData.datafeedConfig.frequency!);
           }
-        });
 
-        it('job creation inputs the scroll size', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the scroll size');
           await ml.jobWizardAdvanced.assertScrollSizeInputExists();
           await ml.jobWizardAdvanced.assertScrollSizeValue(defaultValues.scrollSize);
-          if (isDatafeedConfigWithScrollSize(testData.datafeedConfig)) {
-            await ml.jobWizardAdvanced.setScrollSize(testData.datafeedConfig.scrollSize);
+          if (testData.datafeedConfig.hasOwnProperty('scrollSize')) {
+            await ml.jobWizardAdvanced.setScrollSize(testData.datafeedConfig.scrollSize!);
           }
-        });
 
-        it('job creation pre-fills the time field', async () => {
+          await ml.testExecution.logTestStep('ob creation pre-fills the time field');
           await ml.jobWizardAdvanced.assertTimeFieldInputExists();
           await ml.jobWizardAdvanced.assertTimeFieldSelection([testData.expected.wizard.timeField]);
-        });
 
-        it('job creation displays the pick fields step', async () => {
+          await ml.testExecution.logTestStep('job creation displays the pick fields step');
           await ml.jobWizardCommon.advanceToPickFieldsSection();
-        });
 
-        it('job creation selects the summary count field', async () => {
+          await ml.testExecution.logTestStep('job creation selects the summary count field');
           await ml.jobWizardAdvanced.assertSummaryCountFieldInputExists();
-          if (isPickFieldsConfigWithSummaryCountField(testData.pickFieldsConfig)) {
+          if (testData.pickFieldsConfig.hasOwnProperty('summaryCountField')) {
             await ml.jobWizardAdvanced.selectSummaryCountField(
-              testData.pickFieldsConfig.summaryCountField
+              testData.pickFieldsConfig.summaryCountField!
             );
           } else {
             await ml.jobWizardAdvanced.assertSummaryCountFieldSelection([]);
           }
-        });
 
-        it('job creation adds detectors', async () => {
+          await ml.testExecution.logTestStep('job creation adds detectors');
           for (const detector of testData.pickFieldsConfig.detectors) {
             await ml.jobWizardAdvanced.openCreateDetectorModal();
             await ml.jobWizardAdvanced.assertDetectorFunctionInputExists();
@@ -273,167 +215,130 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.jobWizardAdvanced.assertDetectorDescriptionValue('');
 
             await ml.jobWizardAdvanced.selectDetectorFunction(detector.function);
-            if (isDetectorWithField(detector)) {
-              await ml.jobWizardAdvanced.selectDetectorField(detector.field);
+            if (detector.hasOwnProperty('field')) {
+              await ml.jobWizardAdvanced.selectDetectorField(detector.field!);
             }
-            if (isDetectorWithByField(detector)) {
-              await ml.jobWizardAdvanced.selectDetectorByField(detector.byField);
+            if (detector.hasOwnProperty('byField')) {
+              await ml.jobWizardAdvanced.selectDetectorByField(detector.byField!);
             }
-            if (isDetectorWithOverField(detector)) {
-              await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField);
+            if (detector.hasOwnProperty('overField')) {
+              await ml.jobWizardAdvanced.selectDetectorOverField(detector.overField!);
             }
-            if (isDetectorWithPartitionField(detector)) {
-              await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField);
+            if (detector.hasOwnProperty('partitionField')) {
+              await ml.jobWizardAdvanced.selectDetectorPartitionField(detector.partitionField!);
             }
-            if (isDetectorWithExcludeFrequent(detector)) {
-              await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent);
+            if (detector.hasOwnProperty('excludeFrequent')) {
+              await ml.jobWizardAdvanced.selectDetectorExcludeFrequent(detector.excludeFrequent!);
             }
-            if (isDetectorWithDescription(detector)) {
-              await ml.jobWizardAdvanced.setDetectorDescription(detector.description);
+            if (detector.hasOwnProperty('description')) {
+              await ml.jobWizardAdvanced.setDetectorDescription(detector.description!);
             }
 
             await ml.jobWizardAdvanced.confirmAddDetectorModal();
           }
-        });
 
-        it('job creation displays detector entries', async () => {
+          await ml.testExecution.logTestStep('job creation displays detector entries');
           for (const [index, detector] of testData.pickFieldsConfig.detectors.entries()) {
             await ml.jobWizardAdvanced.assertDetectorEntryExists(
               index,
               detector.identifier,
-              isDetectorWithDescription(detector) ? detector.description : undefined
+              detector.hasOwnProperty('description') ? detector.description! : undefined
             );
           }
-        });
 
-        it('job creation inputs the bucket span', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the bucket span');
           await ml.jobWizardCommon.assertBucketSpanInputExists();
           await ml.jobWizardCommon.setBucketSpan(testData.pickFieldsConfig.bucketSpan);
-        });
 
-        it('job creation inputs influencers', async () => {
+          await ml.testExecution.logTestStep('job creation inputs influencers');
           await ml.jobWizardCommon.assertInfluencerInputExists();
           await ml.jobWizardCommon.assertInfluencerSelection([]);
           for (const influencer of testData.pickFieldsConfig.influencers) {
             await ml.jobWizardCommon.addInfluencer(influencer);
           }
-        });
 
-        it('job creation inputs the model memory limit', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the model memory limit');
           await ml.jobWizardCommon.assertModelMemoryLimitInputExists({
             withAdvancedSection: false,
           });
           await ml.jobWizardCommon.setModelMemoryLimit(testData.pickFieldsConfig.memoryLimit, {
             withAdvancedSection: false,
           });
-        });
 
-        it('job creation displays the job details step', async () => {
+          await ml.testExecution.logTestStep('job creation displays the job details step');
           await ml.jobWizardCommon.advanceToJobDetailsSection();
-        });
 
-        it('job creation inputs the job id', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the job id');
           await ml.jobWizardCommon.assertJobIdInputExists();
           await ml.jobWizardCommon.setJobId(testData.jobId);
-        });
 
-        it('job creation inputs the job description', async () => {
+          await ml.testExecution.logTestStep('job creation inputs the job description');
           await ml.jobWizardCommon.assertJobDescriptionInputExists();
           await ml.jobWizardCommon.setJobDescription(testData.jobDescription);
-        });
 
-        it('job creation inputs job groups', async () => {
+          await ml.testExecution.logTestStep('job creation inputs job groups');
           await ml.jobWizardCommon.assertJobGroupInputExists();
           for (const jobGroup of testData.jobGroups) {
             await ml.jobWizardCommon.addJobGroup(jobGroup);
           }
           await ml.jobWizardCommon.assertJobGroupSelection(testData.jobGroups);
-        });
 
-        it('job creation opens the additional settings section', async () => {
+          await ml.testExecution.logTestStep('job creation opens the additional settings section');
           await ml.jobWizardCommon.ensureAdditionalSettingsSectionOpen();
-        });
 
-        it('job creation displays the model plot switch', async () => {
+          await ml.testExecution.logTestStep('job creation displays the model plot switch');
           await ml.jobWizardCommon.assertModelPlotSwitchExists({ withAdvancedSection: false });
-        });
 
-        it('job creation enables the dedicated index switch', async () => {
+          await ml.testExecution.logTestStep('job creation enables the dedicated index switch');
           await ml.jobWizardCommon.assertDedicatedIndexSwitchExists({ withAdvancedSection: false });
           await ml.jobWizardCommon.activateDedicatedIndexSwitch({ withAdvancedSection: false });
-        });
 
-        it('job creation displays the validation step', async () => {
+          await ml.testExecution.logTestStep('job creation displays the validation step');
           await ml.jobWizardCommon.advanceToValidationSection();
-        });
 
-        it('job creation displays the summary step', async () => {
+          await ml.testExecution.logTestStep('job creation displays the summary step');
           await ml.jobWizardCommon.advanceToSummarySection();
         });
 
-        it('job creation creates the job and finishes processing', async () => {
+        it('runs the job and displays it correctly in the job list', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation creates the job and finishes processing'
+          );
           await ml.jobWizardCommon.assertCreateJobButtonExists();
           await ml.jobWizardAdvanced.createJob();
           await ml.jobManagement.assertStartDatafeedModalExists();
           await ml.jobManagement.confirmStartDatafeedModal();
           await ml.jobManagement.waitForJobCompletion(testData.jobId);
-        });
 
-        it('job creation displays the created job in the job list', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation displays the created job in the job list'
+          );
           await ml.jobTable.refreshJobList();
-          await ml.jobTable.filterWithSearchString(testData.jobId);
-          const rows = await ml.jobTable.parseJobTable();
-          expect(rows.filter((row) => row.id === testData.jobId)).to.have.length(1);
-        });
+          await ml.jobTable.filterWithSearchString(testData.jobId, 1);
 
-        it('job creation displays details for the created job in the job list', async () => {
+          await ml.testExecution.logTestStep(
+            'job creation displays details for the created job in the job list'
+          );
           await ml.jobTable.assertJobRowFields(testData.jobId, {
             id: testData.jobId,
             description: testData.jobDescription,
             jobGroups: [...new Set(testData.jobGroups)].sort(),
-            recordCount: testData.expected.row.recordCount,
-            memoryStatus: testData.expected.row.memoryStatus,
-            jobState: testData.expected.row.jobState,
-            datafeedState: testData.expected.row.datafeedState,
-            latestTimestamp: testData.expected.row.latestTimestamp,
+            ...testData.expected.row,
           });
 
           await ml.jobTable.assertJobRowDetailsCounts(
             testData.jobId,
             {
               job_id: testData.jobId,
-              processed_record_count: testData.expected.counts.processed_record_count,
-              processed_field_count: testData.expected.counts.processed_field_count,
-              input_bytes: testData.expected.counts.input_bytes,
-              input_field_count: testData.expected.counts.input_field_count,
-              invalid_date_count: testData.expected.counts.invalid_date_count,
-              missing_field_count: testData.expected.counts.missing_field_count,
-              out_of_order_timestamp_count: testData.expected.counts.out_of_order_timestamp_count,
-              empty_bucket_count: testData.expected.counts.empty_bucket_count,
-              sparse_bucket_count: testData.expected.counts.sparse_bucket_count,
-              bucket_count: testData.expected.counts.bucket_count,
-              earliest_record_timestamp: testData.expected.counts.earliest_record_timestamp,
-              latest_record_timestamp: testData.expected.counts.latest_record_timestamp,
-              input_record_count: testData.expected.counts.input_record_count,
-              latest_bucket_timestamp: testData.expected.counts.latest_bucket_timestamp,
+              ...testData.expected.counts,
             },
             {
               job_id: testData.jobId,
-              result_type: testData.expected.modelSizeStats.result_type,
-              model_bytes_exceeded: testData.expected.modelSizeStats.model_bytes_exceeded,
-              total_by_field_count: testData.expected.modelSizeStats.total_by_field_count,
-              total_over_field_count: testData.expected.modelSizeStats.total_over_field_count,
-              total_partition_field_count:
-                testData.expected.modelSizeStats.total_partition_field_count,
-              bucket_allocation_failures_count:
-                testData.expected.modelSizeStats.bucket_allocation_failures_count,
-              memory_status: testData.expected.modelSizeStats.memory_status,
-              timestamp: testData.expected.modelSizeStats.timestamp,
+              ...testData.expected.modelSizeStats,
             }
           );
-        });
 
-        it('job creation has detector results', async () => {
+          await ml.testExecution.logTestStep('job creation has detector results');
           for (let i = 0; i < testData.pickFieldsConfig.detectors.length; i++) {
             await ml.api.assertDetectorResultsExist(testData.jobId, i);
           }

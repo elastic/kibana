@@ -15,6 +15,7 @@ import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/serv
 import { savedObjectsClientMock, loggingSystemMock } from 'src/core/server/mocks';
 import { eventLoggerMock } from '../../../event_log/server/mocks';
 import { ActionTypeDisabledError } from './errors';
+import { actionsClientMock } from '../mocks';
 
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -59,7 +60,7 @@ const actionExecutorInitializerParams = {
   logger: loggingSystemMock.create().get(),
   getServices: jest.fn().mockReturnValue(services),
   actionTypeRegistry,
-  getScopedSavedObjectsClient: () => savedObjectsClientMock.create(),
+  getActionsClientWithRequest: jest.fn(async () => actionsClientMock.create()),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   eventLogger: eventLoggerMock.create(),
   preconfiguredActions: [],
@@ -70,13 +71,13 @@ const taskRunnerFactoryInitializerParams = {
   logger: loggingSystemMock.create().get(),
   encryptedSavedObjectsClient: mockedEncryptedSavedObjectsClient,
   getBasePath: jest.fn().mockReturnValue(undefined),
-  getScopedSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
+  getUnsecuredSavedObjectsClient: jest.fn().mockReturnValue(services.savedObjectsClient),
 };
 
 beforeEach(() => {
   jest.resetAllMocks();
   actionExecutorInitializerParams.getServices.mockReturnValue(services);
-  taskRunnerFactoryInitializerParams.getScopedSavedObjectsClient.mockReturnValue(
+  taskRunnerFactoryInitializerParams.getUnsecuredSavedObjectsClient.mockReturnValue(
     services.savedObjectsClient
   );
 });

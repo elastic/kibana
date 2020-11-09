@@ -29,8 +29,6 @@ import {
 } from '../../embeddable_plugin_test_samples';
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from 'kibana/public';
-
-// eslint-disable-next-line
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();

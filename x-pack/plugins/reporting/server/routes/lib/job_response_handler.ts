@@ -6,10 +6,10 @@
 
 import { kibanaResponseFactory } from 'kibana/server';
 import { ReportingCore } from '../../';
-import { AuthenticatedUser } from '../../../../security/server';
-import { WHITELISTED_JOB_CONTENT_TYPES } from '../../../common/constants';
-import { jobsQueryFactory } from '../../lib/jobs_query';
+import { ALLOWED_JOB_CONTENT_TYPES } from '../../../common/constants';
+import { ReportingUser } from '../../types';
 import { getDocumentPayloadFactory } from './get_document_payload';
+import { jobsQueryFactory } from './jobs_query';
 
 interface JobResponseHandlerParams {
   docId: string;
@@ -27,7 +27,7 @@ export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
   return async function jobResponseHandler(
     res: typeof kibanaResponseFactory,
     validJobTypes: string[],
-    user: AuthenticatedUser | null,
+    user: ReportingUser,
     params: JobResponseHandlerParams,
     opts: JobResponseHandlerOpts = {}
   ) {
@@ -46,20 +46,20 @@ export function downloadJobResponseHandlerFactory(reporting: ReportingCore) {
       });
     }
 
-    const response = getDocumentPayload(doc);
+    const payload = getDocumentPayload(doc);
 
-    if (!WHITELISTED_JOB_CONTENT_TYPES.includes(response.contentType)) {
+    if (!payload.contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(payload.contentType)) {
       return res.badRequest({
-        body: `Unsupported content-type of ${response.contentType} specified by job output`,
+        body: `Unsupported content-type of ${payload.contentType} specified by job output`,
       });
     }
 
     return res.custom({
-      body: typeof response.content === 'string' ? Buffer.from(response.content) : response.content,
-      statusCode: response.statusCode,
+      body: typeof payload.content === 'string' ? Buffer.from(payload.content) : payload.content,
+      statusCode: payload.statusCode,
       headers: {
-        ...response.headers,
-        'content-type': response.contentType,
+        ...payload.headers,
+        'content-type': payload.contentType || '',
       },
     });
   };
@@ -71,7 +71,7 @@ export function deleteJobResponseHandlerFactory(reporting: ReportingCore) {
   return async function deleteJobResponseHander(
     res: typeof kibanaResponseFactory,
     validJobTypes: string[],
-    user: AuthenticatedUser | null,
+    user: ReportingUser,
     params: JobResponseHandlerParams
   ) {
     const { docId } = params;

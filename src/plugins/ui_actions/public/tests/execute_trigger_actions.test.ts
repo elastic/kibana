@@ -22,6 +22,7 @@ import { openContextMenu } from '../context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import { Trigger } from '../triggers';
 import { TriggerId, ActionType } from '../types';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('../context_menu');
 
@@ -36,13 +37,15 @@ const TEST_ACTION_TYPE = 'TEST_ACTION_TYPE' as ActionType;
 
 function createTestAction<C extends object>(
   type: string,
-  checkCompatibility: (context: C) => boolean
+  checkCompatibility: (context: C) => boolean,
+  autoExecutable = false
 ): Action<object> {
   return createAction<typeof TEST_ACTION_TYPE>({
     type: type as ActionType,
     id: type,
     isCompatible: (context: C) => Promise.resolve(checkCompatibility(context)),
     execute: (context) => executeFn(context),
+    shouldAutoExecute: () => Promise.resolve(autoExecutable),
   });
 }
 
@@ -57,6 +60,7 @@ const reset = () => {
 
   executeFn.mockReset();
   openContextMenuSpy.mockReset();
+  jest.useFakeTimers();
 };
 beforeEach(reset);
 
@@ -75,11 +79,13 @@ test('executes a single action mapped to a trigger', async () => {
   const start = doStart();
   await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
 
+  jest.runAllTimers();
+
   expect(executeFn).toBeCalledTimes(1);
-  expect(executeFn).toBeCalledWith(context);
+  expect(executeFn).toBeCalledWith(expect.objectContaining(context));
 });
 
-test('throws an error if there are no compatible actions to execute', async () => {
+test("doesn't throw an error if there are no compatible actions to execute", async () => {
   const { setup, doStart } = uiActions;
   const trigger: Trigger = {
     id: 'MY-TRIGGER' as TriggerId,
@@ -92,9 +98,7 @@ test('throws an error if there are no compatible actions to execute', async () =
   const start = doStart();
   await expect(
     start.executeTriggerActions('MY-TRIGGER' as TriggerId, context)
-  ).rejects.toMatchObject(
-    new Error('No compatible actions found to execute for trigger [triggerId = MY-TRIGGER].')
-  );
+  ).resolves.toBeUndefined();
 });
 
 test('does not execute an incompatible action', async () => {
@@ -116,6 +120,8 @@ test('does not execute an incompatible action', async () => {
     name: 'executeme',
   };
   await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
+
+  jest.runAllTimers();
 
   expect(executeFn).toBeCalledTimes(1);
 });
@@ -139,8 +145,12 @@ test('shows a context menu when more than one action is mapped to a trigger', as
   const context = {};
   await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
 
-  expect(executeFn).toBeCalledTimes(0);
-  expect(openContextMenu).toHaveBeenCalledTimes(1);
+  jest.runAllTimers();
+
+  await waitFor(() => {
+    expect(executeFn).toBeCalledTimes(0);
+    expect(openContextMenu).toHaveBeenCalledTimes(1);
+  });
 });
 
 test('passes whole action context to isCompatible()', async () => {
@@ -161,4 +171,54 @@ test('passes whole action context to isCompatible()', async () => {
 
   const context = { foo: 'bar' };
   await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
+  jest.runAllTimers();
+});
+
+test("doesn't show a context menu for auto executable actions", async () => {
+  const { setup, doStart } = uiActions;
+  const trigger: Trigger = {
+    id: 'MY-TRIGGER' as TriggerId,
+    title: 'My trigger',
+  };
+  const action1 = createTestAction('test1', () => true, true);
+  const action2 = createTestAction('test2', () => true, false);
+
+  setup.registerTrigger(trigger);
+  setup.addTriggerAction(trigger.id, action1);
+  setup.addTriggerAction(trigger.id, action2);
+
+  expect(openContextMenu).toHaveBeenCalledTimes(0);
+
+  const start = doStart();
+  const context = {};
+  await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
+
+  jest.runAllTimers();
+
+  await waitFor(() => {
+    expect(executeFn).toBeCalledTimes(2);
+    expect(openContextMenu).toHaveBeenCalledTimes(0);
+  });
+});
+
+test('passes trigger into execute', async () => {
+  const { setup, doStart } = uiActions;
+  const trigger = {
+    id: 'MY-TRIGGER' as TriggerId,
+    title: 'My trigger',
+  };
+  const action = createTestAction<{ foo: string }>('test', () => true);
+
+  setup.registerTrigger(trigger);
+  setup.addTriggerAction(trigger.id, action);
+
+  const start = doStart();
+
+  const context = { foo: 'bar' };
+  await start.executeTriggerActions('MY-TRIGGER' as TriggerId, context);
+  jest.runAllTimers();
+  expect(executeFn).toBeCalledWith({
+    ...context,
+    trigger,
+  });
 });

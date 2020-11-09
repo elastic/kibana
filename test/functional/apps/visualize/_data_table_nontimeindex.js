@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }) {
 
     before(async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickDataTable');
       await PageObjects.visualize.clickDataTable();
       log.debug('clickNewSearch');
@@ -97,7 +97,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should show correct data when using average pipeline aggregation', async () => {
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickDataTable();
       await PageObjects.visualize.clickNewSearch(
         PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
@@ -112,10 +112,9 @@ export default function ({ getService, getPageObjects }) {
       expect(data.trim().split('\n')).to.be.eql(['14,004 1,412.6']);
     });
 
-    // bug https://github.com/elastic/kibana/issues/68977
-    describe.skip('data table with date histogram', async () => {
+    describe('data table with date histogram', async () => {
       before(async () => {
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.clickDataTable();
         await PageObjects.visualize.clickNewSearch(
           PageObjects.visualize.index.LOGSTASH_NON_TIME_BASED
@@ -123,7 +122,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.clickBucket('Split rows');
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.selectField('@timestamp');
-        await PageObjects.visEditor.setInterval('Daily');
+        await PageObjects.visEditor.setInterval('Day');
         await PageObjects.visEditor.clickGo();
       });
 

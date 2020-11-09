@@ -6,35 +6,35 @@
 
 import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 import { loggingSystemMock, savedObjectsServiceMock } from 'src/core/server/mocks';
+import { securityMock } from '../../../security/server/mocks';
+import { alertsMock } from '../../../alerts/server/mocks';
 import { xpackMocks } from '../../../../mocks';
 import {
   AgentService,
   IngestManagerStartContract,
   ExternalCallback,
-} from '../../../ingest_manager/server';
-import { createPackageConfigServiceMock } from '../../../ingest_manager/server/mocks';
-import { ConfigType } from '../config';
+  PackageService,
+} from '../../../fleet/server';
+import { createPackagePolicyServiceMock } from '../../../fleet/server/mocks';
+import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
   EndpointAppContextService,
   EndpointAppContextServiceStartContract,
 } from './endpoint_app_context_services';
-import {
-  ManifestManagerMock,
-  getManifestManagerMock,
-} from './services/artifacts/manifest_manager/manifest_manager.mock';
+import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
+import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
 
 /**
  * Creates a mocked EndpointAppContext.
  */
 export const createMockEndpointAppContext = (
-  mockManifestManager?: ManifestManagerMock
+  mockManifestManager?: ManifestManager
 ): EndpointAppContext => {
   return {
     logFactory: loggingSystemMock.create(),
-    // @ts-ignore
-    config: createMockConfig() as ConfigType,
+    config: () => Promise.resolve(createMockConfig()),
     service: createMockEndpointAppContextService(mockManifestManager),
   };
 };
@@ -43,16 +43,15 @@ export const createMockEndpointAppContext = (
  * Creates a mocked EndpointAppContextService
  */
 export const createMockEndpointAppContextService = (
-  mockManifestManager?: ManifestManagerMock
+  mockManifestManager?: ManifestManager
 ): jest.Mocked<EndpointAppContextService> => {
-  return {
+  return ({
     start: jest.fn(),
     stop: jest.fn(),
     getAgentService: jest.fn(),
-    // @ts-ignore
-    getManifestManager: mockManifestManager ?? jest.fn(),
+    getManifestManager: jest.fn().mockReturnValue(mockManifestManager ?? jest.fn()),
     getScopedSavedObjectsClient: jest.fn(),
-  };
+  } as unknown) as jest.Mocked<EndpointAppContextService>;
 };
 
 /**
@@ -61,15 +60,33 @@ export const createMockEndpointAppContextService = (
 export const createMockEndpointAppContextServiceStartContract = (): jest.Mocked<
   EndpointAppContextServiceStartContract
 > => {
+  const factory = new AppClientFactory();
+  const config = createMockConfig();
+  factory.setup({ getSpaceId: () => 'mockSpace', config });
   return {
     agentService: createMockAgentService(),
+    packageService: createMockPackageService(),
+    logger: loggingSystemMock.create().get('mock_endpoint_app_context'),
     savedObjectsStart: savedObjectsServiceMock.createStartContract(),
-    // @ts-ignore
     manifestManager: getManifestManagerMock(),
+    appClientFactory: factory,
+    security: securityMock.createSetup(),
+    alerts: alertsMock.createStart(),
+    config,
     registerIngestCallback: jest.fn<
       ReturnType<IngestManagerStartContract['registerExternalCallback']>,
       Parameters<IngestManagerStartContract['registerExternalCallback']>
     >(),
+  };
+};
+
+/**
+ * Create mock PackageService
+ */
+
+export const createMockPackageService = (): jest.Mocked<PackageService> => {
+  return {
+    getInstalledEsAssetReferences: jest.fn(),
   };
 };
 
@@ -100,8 +117,9 @@ export const createMockIngestManagerStartContract = (
       getESIndexPattern: jest.fn().mockResolvedValue(indexPattern),
     },
     agentService: createMockAgentService(),
+    packageService: createMockPackageService(),
     registerExternalCallback: jest.fn((...args: ExternalCallback) => {}),
-    packageConfigService: createPackageConfigServiceMock(),
+    packagePolicyService: createPackagePolicyServiceMock(),
   };
 };
 

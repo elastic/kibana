@@ -33,7 +33,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
           </b>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.title"
-            defaultMessage="Elastic Endpoint Security Beta"
+            defaultMessage="Endpoint Security (beta)"
           />
         </>
       }
@@ -42,14 +42,14 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
         <p>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.message"
-            defaultMessage="Elastic Endpoint Security gives you the power to keep your endpoints safe from attack, as well as unparalleled visibility into any threat in your environment."
+            defaultMessage="Protect your hosts with threat prevention, detection, and deep security data visibility."
           />
         </p>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
         <EuiButton onClick={handleGetStartedClick} href={endpointsLink}>
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.tryButton"
-            defaultMessage="Try Elastic Endpoint Security Beta"
+            defaultMessage="Try Endpoint Security (beta)"
           />
         </EuiButton>
         <EuiButtonEmpty onClick={onDismiss}>

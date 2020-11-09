@@ -23,12 +23,12 @@ import { registerDeleteRoute } from '../delete';
 import { savedObjectsClientMock } from '../../../../../core/server/mocks';
 import { setupServer } from '../test_utils';
 
-type setupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
+type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
 describe('DELETE /api/saved_objects/{type}/{id}', () => {
-  let server: setupServerReturn['server'];
-  let httpSetup: setupServerReturn['httpSetup'];
-  let handlerContext: setupServerReturn['handlerContext'];
+  let server: SetupServerReturn['server'];
+  let httpSetup: SetupServerReturn['httpSetup'];
+  let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
 
   beforeEach(async () => {
@@ -58,6 +58,19 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
       .delete('/api/saved_objects/index-pattern/logstash-*')
       .expect(200);
 
-    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*');
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*', {
+      force: undefined,
+    });
+  });
+
+  it('can specify `force` option', async () => {
+    await supertest(httpSetup.server.listener)
+      .delete('/api/saved_objects/index-pattern/logstash-*')
+      .query({ force: true })
+      .expect(200);
+
+    expect(savedObjectsClient.delete).toHaveBeenCalledWith('index-pattern', 'logstash-*', {
+      force: true,
+    });
   });
 });

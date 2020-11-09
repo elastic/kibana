@@ -84,12 +84,18 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async postJob(apiPath: string) {
+    async postJob(apiPath: string): Promise<string> {
       log.debug(`ReportingAPI.postJob(${apiPath})`);
       const { body } = await supertest
         .post(removeWhitespace(apiPath))
         .set('kbn-xsrf', 'xxx')
         .expect(200);
+      return body.path;
+    },
+
+    async postJobJSON(apiPath: string, jobJSON: object = {}): Promise<string> {
+      log.debug(`ReportingAPI.postJobJSON((${apiPath}): ${JSON.stringify(jobJSON)})`);
+      const { body } = await supertest.post(apiPath).set('kbn-xsrf', 'xxx').send(jobJSON);
       return body.path;
     },
 
@@ -186,6 +192,7 @@ export function ReportingAPIProvider({ getService }: FtrProviderContext) {
 
 export const services = {
   ...xpackServices,
+  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
   usageAPI: apiIntegrationServices.usageAPI,
   reportingAPI: ReportingAPIProvider,
 };

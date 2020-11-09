@@ -6,7 +6,7 @@
 
 import { resolve } from 'path';
 
-// @ts-ignore
+// @ts-expect-error
 import madge from 'madge';
 import { createFailError, run } from '@kbn/dev-utils';
 

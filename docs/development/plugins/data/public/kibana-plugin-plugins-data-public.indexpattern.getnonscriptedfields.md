@@ -7,9 +7,9 @@
 <b>Signature:</b>
 
 ```typescript
-getNonScriptedFields(): Field[];
+getNonScriptedFields(): IndexPatternField[];
 ```
 <b>Returns:</b>
 
-`Field[]`
+`IndexPatternField[]`
 

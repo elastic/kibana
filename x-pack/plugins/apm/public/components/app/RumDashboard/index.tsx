@@ -4,79 +4,36 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { useRouteMatch } from 'react-router-dom';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { useTrackPageview } from '../../../../../observability/public';
-import { LocalUIFilters } from '../../shared/LocalUIFilters';
-import { PROJECTION } from '../../../../common/projections/typings';
+import { Projection } from '../../../../common/projections';
 import { RumDashboard } from './RumDashboard';
-import { ServiceNameFilter } from '../../shared/LocalUIFilters/ServiceNameFilter';
-import { useUrlParams } from '../../../hooks/useUrlParams';
-import { useFetcher } from '../../../hooks/useFetcher';
-import { RUM_AGENTS } from '../../../../common/agent_name';
+
+import { LocalUIFilters } from '../../shared/LocalUIFilters';
+import { URLFilter } from './URLFilter';
 
 export function RumOverview() {
-  useTrackPageview({ app: 'apm', path: 'rum_overview' });
-  useTrackPageview({ app: 'apm', path: 'rum_overview', delay: 15000 });
+  useTrackPageview({ app: 'ux', path: 'home' });
+  useTrackPageview({ app: 'ux', path: 'home', delay: 15000 });
 
   const localUIFiltersConfig = useMemo(() => {
     const config: React.ComponentProps<typeof LocalUIFilters> = {
-      filterNames: ['transactionUrl', 'location', 'device', 'os', 'browser'],
-      projection: PROJECTION.RUM_OVERVIEW,
+      filterNames: ['location', 'device', 'os', 'browser'],
+      projection: Projection.rumOverview,
     };
 
     return config;
   }, []);
 
-  const {
-    urlParams: { start, end },
-  } = useUrlParams();
-
-  const isRumServiceRoute = useRouteMatch(
-    '/services/:serviceName/rum-overview'
-  );
-
-  const { data } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi({
-          pathname: '/api/apm/services',
-          params: {
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify({ agentName: RUM_AGENTS }),
-            },
-          },
-        });
-      }
-    },
-    [start, end]
-  );
-
   return (
     <>
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
           <LocalUIFilters {...localUIFiltersConfig} showCount={true}>
-            {!isRumServiceRoute && (
-              <>
-                <ServiceNameFilter
-                  serviceNames={
-                    data?.items?.map((service) => service.serviceName) ?? []
-                  }
-                />
-                <EuiSpacer size="xl" />
-                <EuiHorizontalRule margin="none" />{' '}
-              </>
-            )}
+            <URLFilter />
+            <EuiSpacer size="s" />
           </LocalUIFilters>
         </EuiFlexItem>
         <EuiFlexItem grow={7}>

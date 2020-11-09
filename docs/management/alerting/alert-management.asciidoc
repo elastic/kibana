@@ -4,7 +4,7 @@
 
 beta[]
 
-The *Alerts* tab provides a cross-app view of alerting. Different {kib} apps like <<xpack-infra, Metrics>>, <<xpack-apm, APM>>, <<xpack-uptime, Uptime>>, and <<xpack-siem, SIEM>> can offer their own alerts, and the *Alerts* tab provides a central place to:
+The *Alerts* tab provides a cross-app view of alerting. Different {kib} apps like <<metrics-app,Metrics>>, <<xpack-apm,APM>>, <<uptime-app,Uptime>>, and <<xpack-siem,SIEM>> can offer their own alerts, and the *Alerts* tab provides a central place to:
 
 * <<create-edit-alerts, Create and edit>> alerts
 * <<controlling-alerts, Control alerts>> including enabling/disabling, muting/unmuting, and deleting
@@ -39,7 +39,7 @@ image::images/alerts-filter-by-action-type.png[Filtering the alert list by type 
 [[create-edit-alerts]]
 ==== Creating and editing alerts
 
-Many alerts must be created within the context of a {kib} app like <<xpack-infra, Metrics>>, <<xpack-apm, APM>>, or <<xpack-uptime, Uptime>>, but others are generic. Generic alert types can be created in the *Alerts* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting an alert type and configuring it's properties. Refer to <<alert-types>> for details on what types of alerts are available and how to configure them.
+Many alerts must be created within the context of a {kib} app like <<metrics-app, Metrics>>, <<xpack-apm, APM>>, or <<uptime-app, Uptime>>, but others are generic. Generic alert types can be created in the *Alerts* management UI by clicking the *Create* button. This will launch a flyout that guides you through selecting an alert type and configuring it's properties. Refer to <<alert-types>> for details on what types of alerts are available and how to configure them.
 
 After an alert is created, you can re-open the flyout and change an alerts properties by clicking the *Edit* button shown on each row of the alert listing.
 

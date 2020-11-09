@@ -12,7 +12,7 @@ import { ELASTICSEARCH, DATEMATH, MOMENTJS_TIMEZONE_URL } from '../../constants'
 
 export const help: FunctionHelp<FunctionFactory<ReturnType<typeof timelionFunctionFactory>>> = {
   help: i18n.translate('xpack.canvas.functions.timelionHelpText', {
-    defaultMessage: 'Use Timelion to extract one or more timeseries from many sources.',
+    defaultMessage: 'Uses Timelion to extract one or more time series from many sources.',
   }),
   args: {
     query: i18n.translate('xpack.canvas.functions.timelion.args.query', {

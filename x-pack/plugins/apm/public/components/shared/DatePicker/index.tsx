@@ -5,75 +5,37 @@
  */
 
 import { EuiSuperDatePicker } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { fromQuery, toQuery } from '../Links/url_helpers';
-import { history } from '../../../utils/history';
-import { useLocation } from '../../../hooks/useLocation';
+import React, { useEffect } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
+import { UI_SETTINGS } from '../../../../../../../src/plugins/data/common';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { useUrlParams } from '../../../hooks/useUrlParams';
 import { clearCache } from '../../../services/rest/callApi';
+import { fromQuery, toQuery } from '../Links/url_helpers';
+import { TimePickerQuickRange, TimePickerTimeDefaults } from './typings';
 
 export function DatePicker() {
+  const history = useHistory();
   const location = useLocation();
+  const { core, plugins } = useApmPluginContext();
+
+  const timePickerQuickRanges = core.uiSettings.get<TimePickerQuickRange[]>(
+    UI_SETTINGS.TIMEPICKER_QUICK_RANGES
+  );
+
+  const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
+    UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+  );
+
+  const commonlyUsedRanges = timePickerQuickRanges.map(
+    ({ from, to, display }) => ({
+      start: from,
+      end: to,
+      label: display,
+    })
+  );
+
   const { urlParams, refreshTimeRange } = useUrlParams();
-  const commonlyUsedRanges = [
-    {
-      start: 'now-15m',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last15MinutesLabel', {
-        defaultMessage: 'Last 15 minutes',
-      }),
-    },
-    {
-      start: 'now-30m',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last30MinutesLabel', {
-        defaultMessage: 'Last 30 minutes',
-      }),
-    },
-    {
-      start: 'now-1h',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last1HourLabel', {
-        defaultMessage: 'Last 1 hour',
-      }),
-    },
-    {
-      start: 'now-24h',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last24HoursLabel', {
-        defaultMessage: 'Last 24 hours',
-      }),
-    },
-    {
-      start: 'now-7d',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last7DaysLabel', {
-        defaultMessage: 'Last 7 days',
-      }),
-    },
-    {
-      start: 'now-30d',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last30DaysLabel', {
-        defaultMessage: 'Last 30 days',
-      }),
-    },
-    {
-      start: 'now-90d',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last90DaysLabel', {
-        defaultMessage: 'Last 90 days',
-      }),
-    },
-    {
-      start: 'now-1y',
-      end: 'now',
-      label: i18n.translate('xpack.apm.datePicker.last1YearLabel', {
-        defaultMessage: 'Last 1 year',
-      }),
-    },
-  ];
 
   function updateUrl(nextQuery: {
     rangeFrom?: string;
@@ -104,14 +66,48 @@ export function DatePicker() {
     updateUrl({ rangeFrom: start, rangeTo: end });
   }
 
-  const { rangeFrom, rangeTo, refreshPaused, refreshInterval } = urlParams;
+  useEffect(() => {
+    // set time if both to and from are given in the url
+    if (urlParams.rangeFrom && urlParams.rangeTo) {
+      plugins.data.query.timefilter.timefilter.setTime({
+        from: urlParams.rangeFrom,
+        to: urlParams.rangeTo,
+      });
+      return;
+    }
+
+    // read time from state and update the url
+    const timePickerSharedState = plugins.data.query.timefilter.timefilter.getTime();
+
+    history.replace({
+      ...location,
+      search: fromQuery({
+        ...toQuery(location.search),
+        rangeFrom:
+          urlParams.rangeFrom ??
+          timePickerSharedState.from ??
+          timePickerTimeDefaults.from,
+        rangeTo:
+          urlParams.rangeTo ??
+          timePickerSharedState.to ??
+          timePickerTimeDefaults.to,
+      }),
+    });
+  }, [
+    urlParams.rangeFrom,
+    urlParams.rangeTo,
+    plugins,
+    history,
+    location,
+    timePickerTimeDefaults,
+  ]);
 
   return (
     <EuiSuperDatePicker
-      start={rangeFrom}
-      end={rangeTo}
-      isPaused={refreshPaused}
-      refreshInterval={refreshInterval}
+      start={urlParams.rangeFrom}
+      end={urlParams.rangeTo}
+      isPaused={urlParams.refreshPaused}
+      refreshInterval={urlParams.refreshInterval}
       onTimeChange={onTimeChange}
       onRefresh={({ start, end }) => {
         clearCache();

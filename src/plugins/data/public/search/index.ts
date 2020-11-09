@@ -17,47 +17,33 @@
  * under the License.
  */
 
-export * from './aggs';
 export * from './expressions';
-export * from './tabify';
 
-export { ISearchSetup, ISearchStart, ISearchStrategy } from './types';
-
-export {
-  ISearch,
-  ISearchOptions,
-  IRequestTypesMap,
-  IResponseTypesMap,
-  ISearchGeneric,
-} from './i_search';
-
-export { IEsSearchResponse, IEsSearchRequest, ES_SEARCH_STRATEGY } from '../../common/search';
-
-export { ISyncSearchRequest, SYNC_SEARCH_STRATEGY } from './sync_search_strategy';
-export { esSearchStrategyProvider, getEsPreference } from './es_search';
-
-export { IKibanaSearchResponse, IKibanaSearchRequest } from '../../common/search';
+export { ISearchSetup, ISearchStart, ISearchStartSearchSource, SearchEnhancements } from './types';
 
 export {
-  SearchError,
-  FetchOptions,
-  SearchRequest,
-  SearchResponse,
-  getSearchErrorType,
+  ES_SEARCH_STRATEGY,
+  EsQuerySortValue,
+  extractReferences as extractSearchSourceReferences,
   getSearchParamsFromRequest,
-} from './fetch';
-
-export {
+  IEsSearchRequest,
+  IEsSearchResponse,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
+  injectReferences as injectSearchSourceReferences,
+  ISearchGeneric,
   ISearchSource,
+  parseSearchSourceJSON,
+  SearchError,
+  SearchRequest,
   SearchSource,
   SearchSourceDependencies,
   SearchSourceFields,
-  EsQuerySortValue,
   SortDirection,
-  extractReferences as extractSearchSourceReferences,
-  injectReferences as injectSearchSourceReferences,
-  parseSearchSourceJSON,
-} from './search_source';
+  ISessionService,
+} from '../../common/search';
 
-export { SearchInterceptor } from './search_interceptor';
-export { RequestTimeoutError } from './request_timeout_error';
+export { getEsPreference } from './es_search';
+
+export { SearchInterceptor, SearchInterceptorDeps } from './search_interceptor';
+export * from './errors';

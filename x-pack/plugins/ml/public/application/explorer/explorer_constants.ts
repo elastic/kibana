@@ -62,6 +62,11 @@ export const MAX_INFLUENCER_FIELD_NAMES = 50;
 export const VIEW_BY_JOB_LABEL = i18n.translate('xpack.ml.explorer.jobIdLabel', {
   defaultMessage: 'job ID',
 });
+
+export const OVERALL_LABEL = i18n.translate('xpack.ml.explorer.overallLabel', {
+  defaultMessage: 'Overall',
+});
+
 /**
  * Hard limitation for the size of terms
  * aggregations on influencers values.

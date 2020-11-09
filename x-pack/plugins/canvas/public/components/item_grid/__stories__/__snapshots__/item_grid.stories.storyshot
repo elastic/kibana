@@ -1,0 +1,152 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/ItemGrid color dot grid 1`] = `
+<div
+  className="item-grid-row"
+>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#fff",
+        }
+      }
+    />
+  </div>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#666",
+        }
+      }
+    />
+  </div>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#000",
+        }
+      }
+    />
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/ItemGrid complex grid 1`] = `
+<div
+  className="item-grid-row"
+>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#fff",
+        }
+      }
+    >
+      <span
+        color="#333"
+        data-euiicon-type="plusInCircle"
+      />
+    </div>
+  </div>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#666",
+        }
+      }
+    >
+      <span
+        color="#FFF"
+        data-euiicon-type="minusInCircle"
+      />
+    </div>
+  </div>
+  <div
+    className="canvasColorDot"
+  >
+    <div
+      className="canvasColorDot__background canvasCheckered"
+    />
+    <div
+      className="canvasColorDot__foreground"
+      style={
+        Object {
+          "background": "#000",
+        }
+      }
+    >
+      <span
+        color="#FFF"
+        data-euiicon-type="check"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/ItemGrid icon grid 1`] = `
+<div
+  className="item-grid-row"
+>
+  <span
+    data-euiicon-type="plusInCircle"
+  />
+  <span
+    data-euiicon-type="minusInCircle"
+  />
+  <span
+    data-euiicon-type="check"
+  />
+</div>
+`;
+
+exports[`Storyshots components/ItemGrid simple grid 1`] = `
+<div
+  className="item-grid-row"
+>
+  <div>
+    a
+  </div>
+  <div>
+    b
+  </div>
+  <div>
+    c
+  </div>
+</div>
+`;

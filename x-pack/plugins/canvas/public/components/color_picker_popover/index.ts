@@ -4,9 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { pure } from 'recompose';
-
-import { ColorPickerPopover as Component } from './color_picker_popover';
-
-export { Props } from './color_picker_popover';
-export const ColorPickerPopover = pure(Component);
+export { ColorPickerPopover, Props } from './color_picker_popover';

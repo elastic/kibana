@@ -6,15 +6,23 @@
     "features",
     "usageCollection",
     "spaces",
-    "home",
+    
     "data",
     "dataEnhanced",
     "visTypeTimeseries",
     "alerts",
-    "triggers_actions_ui"
+    "triggersActionsUi"
   ],
-  "optionalPlugins": ["ml", "observability"],
+  "optionalPlugins": ["ml", "observability", "home"],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "infra"]
+  "configPath": ["xpack", "infra"],
+  "requiredBundles": [
+    "observability",
+    "licenseManagement",
+    "kibanaUtils",
+    "kibanaReact",
+    "apm",
+    "home"
+  ]
 }

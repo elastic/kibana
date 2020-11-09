@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiPageBody, EuiPageContent, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 
@@ -51,23 +51,24 @@ export const TemplateCreate: React.FunctionComponent<RouteComponentProps> = ({ h
   return (
     <EuiPageBody>
       <EuiPageContent>
-        <EuiTitle size="l">
-          <h1 data-test-subj="pageTitle">
-            {isLegacy ? (
-              <FormattedMessage
-                id="xpack.idxMgmt.createTemplate.createLegacyTemplatePageTitle"
-                defaultMessage="Create legacy template"
-              />
-            ) : (
-              <FormattedMessage
-                id="xpack.idxMgmt.createTemplate.createTemplatePageTitle"
-                defaultMessage="Create template"
-              />
-            )}
-          </h1>
-        </EuiTitle>
-        <EuiSpacer size="l" />
         <TemplateForm
+          title={
+            <EuiTitle size="l">
+              <h1 data-test-subj="pageTitle">
+                {isLegacy ? (
+                  <FormattedMessage
+                    id="xpack.idxMgmt.createTemplate.createLegacyTemplatePageTitle"
+                    defaultMessage="Create legacy template"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.idxMgmt.createTemplate.createTemplatePageTitle"
+                    defaultMessage="Create template"
+                  />
+                )}
+              </h1>
+            </EuiTitle>
+          }
           onSave={onSave}
           isSaving={isSaving}
           saveError={saveError}

@@ -42,6 +42,7 @@ export type MapContext = {
 };
 
 export type MapSettings = {
+  autoFitToDataBounds: boolean;
   initialLocation: INITIAL_LOCATION;
   fixedLocation: {
     lat: number;

@@ -8,7 +8,7 @@ import { connect } from 'react-redux';
 import { compose, withProps } from 'recompose';
 import { getAppReady, getBasePath } from '../../state/selectors/app';
 import { appReady, appError } from '../../state/actions/app';
-import { withKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { withServices } from '../../services';
 
 import { App as Component } from './app';
 
@@ -45,8 +45,8 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
 
 export const App = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
-  withKibana,
+  withServices,
   withProps((props) => ({
-    onRouteChange: props.kibana.services.canvas.navLink.updatePath,
+    onRouteChange: props.services.navLink.updatePath,
   }))
 )(Component);

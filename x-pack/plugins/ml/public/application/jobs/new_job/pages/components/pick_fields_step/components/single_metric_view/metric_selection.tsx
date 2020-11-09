@@ -13,7 +13,7 @@ import { newJobCapsService } from '../../../../../../../services/new_job_capabil
 import { AggFieldPair } from '../../../../../../../../../common/types/fields';
 import { AnomalyChart, CHART_TYPE } from '../../../charts/anomaly_chart';
 import { getChartSettings } from '../../../charts/common/settings';
-import { mlMessageBarService } from '../../../../../../../components/messagebar';
+import { getToastNotificationService } from '../../../../../../../services/toast_notification_service';
 
 interface Props {
   setIsValid: (na: boolean) => void;
@@ -93,7 +93,7 @@ export const SingleMetricDetectors: FC<Props> = ({ setIsValid }) => {
           setLineChartData(resp);
         }
       } catch (error) {
-        mlMessageBarService.notify.error(error);
+        getToastNotificationService().displayErrorToast(error);
         setLineChartData({});
       }
       setLoadingData(false);

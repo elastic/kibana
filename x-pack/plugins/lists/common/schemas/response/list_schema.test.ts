@@ -7,7 +7,7 @@
 import { left } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { exactCheck, foldLeftRight, getPaths } from '../../siem_common_deps';
+import { exactCheck, foldLeftRight, getPaths } from '../../shared_imports';
 
 import { getListResponseMock } from './list_schema.mock';
 import { ListSchema, listSchema } from './list_schema';
@@ -25,6 +25,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "id"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.id;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -45,8 +46,31 @@ describe('list_schema', () => {
     expect(message.schema).toEqual(payload);
   });
 
+  test('it should accept an undefined for "serializer"', () => {
+    const payload = getListResponseMock();
+    delete payload.serializer;
+    const decoded = listSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
+  test('it should accept an undefined for "deserializer"', () => {
+    const payload = getListResponseMock();
+    delete payload.deserializer;
+    const decoded = listSchema.decode(payload);
+    const checked = exactCheck(payload, decoded);
+    const message = pipe(checked, foldLeftRight);
+
+    expect(getPaths(left(message.errors))).toEqual([]);
+    expect(message.schema).toEqual(payload);
+  });
+
   test('it should NOT accept an undefined for "created_at"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.created_at;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -60,6 +84,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "created_by"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.created_by;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -73,6 +98,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "tie_breaker_id"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.tie_breaker_id;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -86,6 +112,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "type"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.type;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -99,6 +126,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "updated_at"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.updated_at;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -112,6 +140,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "updated_by"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.updated_by;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -125,6 +154,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "name"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.name;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -138,6 +168,7 @@ describe('list_schema', () => {
 
   test('it should NOT accept an undefined for "description"', () => {
     const payload = getListResponseMock();
+    // @ts-expect-error
     delete payload.description;
     const decoded = listSchema.decode(payload);
     const checked = exactCheck(payload, decoded);

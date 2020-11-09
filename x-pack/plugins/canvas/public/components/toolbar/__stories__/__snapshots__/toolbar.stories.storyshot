@@ -1,0 +1,226 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/Toolbar element selected 1`] = `
+<div
+  className="canvasToolbar hide-for-sharing"
+>
+  <div
+    className="canvasToolbar__container"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasToolbar__controls"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          className="euiButtonEmpty euiButtonEmpty--text"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              className="euiButtonContent__icon"
+              data-euiicon-type="grid"
+              size="m"
+            />
+            <span
+              className="euiButtonEmpty__text"
+            >
+              My Canvas Workpad
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      />
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          aria-label="Previous Page"
+          className="euiButtonIcon euiButtonIcon--text"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            data-euiicon-type="arrowLeft"
+            size="m"
+          />
+        </button>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          className="euiButtonEmpty euiButtonEmpty--text"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              className="euiButtonEmpty__text"
+            >
+              Page 1
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          aria-label="Next Page"
+          className="euiButtonIcon euiButtonIcon--text"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            data-euiicon-type="arrowRight"
+            size="m"
+          />
+        </button>
+      </div>
+      <div
+        className="euiFlexItem"
+      />
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          className="euiButtonEmpty euiButtonEmpty--text"
+          data-test-subj="canvasExpressionEditorButton"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              className="euiButtonContent__icon"
+              data-euiicon-type="editorCodeBlock"
+              size="m"
+            />
+            <span
+              className="euiButtonEmpty__text"
+            >
+              Expression editor
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/Toolbar no element selected 1`] = `
+<div
+  className="canvasToolbar hide-for-sharing"
+>
+  <div
+    className="canvasToolbar__container"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive canvasToolbar__controls"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          className="euiButtonEmpty euiButtonEmpty--text"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              className="euiButtonContent__icon"
+              data-euiicon-type="grid"
+              size="m"
+            />
+            <span
+              className="euiButtonEmpty__text"
+            >
+              My Canvas Workpad
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      />
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          aria-label="Previous Page"
+          className="euiButtonIcon euiButtonIcon--text"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            data-euiicon-type="arrowLeft"
+            size="m"
+          />
+        </button>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          className="euiButtonEmpty euiButtonEmpty--text"
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            className="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              className="euiButtonEmpty__text"
+            >
+              Page 1
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          aria-label="Next Page"
+          className="euiButtonIcon euiButtonIcon--text"
+          disabled={true}
+          onClick={[Function]}
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            className="euiButtonIcon__icon"
+            data-euiicon-type="arrowRight"
+            size="m"
+          />
+        </button>
+      </div>
+      <div
+        className="euiFlexItem"
+      />
+    </div>
+  </div>
+</div>
+`;

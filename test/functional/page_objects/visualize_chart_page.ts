@@ -51,6 +51,10 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         .map((tick) => $(tick).text().trim());
     }
 
+    public async getYAxisLabelsAsNumbers() {
+      return (await this.getYAxisLabels()).map((label) => Number(label.replace(',', '')));
+    }
+
     /**
      * Gets the chart data and scales it based on chart height and label.
      * @param dataLabel data-label value
@@ -214,7 +218,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
     }
 
     public async expectError() {
-      await testSubjects.existOrFail('visLibVisualizeError');
+      await testSubjects.existOrFail('vislibVisualizeError');
     }
 
     public async getVisualizationRenderingCount() {
@@ -240,7 +244,7 @@ export function VisualizeChartPageProvider({ getService, getPageObjects }: FtrPr
         const firstCount = await this.getVisualizationRenderingCount();
         log.debug(`-- firstCount=${firstCount}`);
 
-        await common.sleep(1000);
+        await common.sleep(2000);
 
         const secondCount = await this.getVisualizationRenderingCount();
         log.debug(`-- secondCount=${secondCount}`);

@@ -7,6 +7,7 @@
 // import helpers first, this also sets up the mocks
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
 
+import { ReactElement } from 'react';
 import { act } from 'react-dom/test-utils';
 
 import * as fixtures from '../../test/fixtures';
@@ -16,9 +17,13 @@ import { DEFAULT_POLICY_SCHEDULE } from '../../public/application/constants';
 
 const { setup } = pageHelpers.policyAdd;
 
-jest.mock('ui/i18n', () => {
-  const I18nContext = ({ children }: any) => children;
-  return { I18nContext };
+// mock for EuiSelectable's virtualization
+jest.mock('react-virtualized-auto-sizer', () => {
+  return ({
+    children,
+  }: {
+    children: (dimensions: { width: number; height: number }) => ReactElement;
+  }) => children({ width: 100, height: 500 });
 });
 
 const POLICY_NAME = 'my_policy';
@@ -60,6 +65,11 @@ describe('<PolicyAdd />', () => {
       const { find } = testBed;
 
       expect(find('nextButton').props().disabled).toBe(true);
+    });
+
+    test('should not show repository-not-found warning', () => {
+      const { exists } = testBed;
+      expect(exists('repositoryNotFoundWarning')).toBe(false);
     });
 
     describe('form validation', () => {

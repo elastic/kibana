@@ -19,13 +19,6 @@ export class IndexAction extends BaseAction {
     const errors = {
       index: [],
     };
-    if (!this.index) {
-      errors.index.push(
-        i18n.translate('xpack.watcher.watchActions.index.indexIsRequiredValidationMessage', {
-          defaultMessage: 'Index name is required.',
-        })
-      );
-    }
     return errors;
   }
 

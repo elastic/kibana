@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
+  ENDPOINT_LIST_URL,
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_NAMESPACE,
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
   EXCEPTION_LIST_URL,
 } from '../../common/constants';
 import {
+  CreateEndpointListSchema,
   ExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
+  createEndpointListSchema,
   createExceptionListItemSchema,
   createExceptionListSchema,
   deleteExceptionListItemSchema,
@@ -26,9 +29,10 @@ import {
   updateExceptionListItemSchema,
   updateExceptionListSchema,
 } from '../../common/schemas';
-import { validate } from '../../common/siem_common_deps';
+import { validate } from '../../common/shared_imports';
 
 import {
+  AddEndpointExceptionListProps,
   AddExceptionListItemProps,
   AddExceptionListProps,
   ApiCallByIdProps,
@@ -245,42 +249,48 @@ export const fetchExceptionListById = async ({
  * Fetch an ExceptionList's ExceptionItems by providing a ExceptionList list_id
  *
  * @param http Kibana http service
- * @param listId ExceptionList list_id (not ID)
- * @param namespaceType ExceptionList namespace_type
+ * @param listIds ExceptionList list_ids (not ID)
+ * @param namespaceTypes ExceptionList namespace_types
  * @param filterOptions optional - filter by field or tags
  * @param pagination optional
  * @param signal to cancel request
  *
  * @throws An error if response is not OK
  */
-export const fetchExceptionListItemsByListId = async ({
+export const fetchExceptionListsItemsByListIds = async ({
   http,
-  listId,
-  namespaceType,
-  filterOptions = {
-    filter: '',
-    tags: [],
-  },
+  listIds,
+  namespaceTypes,
+  filterOptions,
   pagination,
   signal,
 }: ApiCallByListIdProps): Promise<FoundExceptionListItemSchema> => {
-  const namespace =
-    namespaceType === 'agnostic' ? EXCEPTION_LIST_NAMESPACE_AGNOSTIC : EXCEPTION_LIST_NAMESPACE;
-  const filters = [
-    ...(filterOptions.filter.length
-      ? [`${namespace}.attributes.entries.field:${filterOptions.filter}*`]
-      : []),
-    ...(filterOptions.tags.length
-      ? filterOptions.tags.map((t) => `${namespace}.attributes.tags:${t}`)
-      : []),
-  ];
+  const filters: string = filterOptions
+    .map<string>((filter, index) => {
+      const namespace = namespaceTypes[index];
+      const filterNamespace =
+        namespace === 'agnostic' ? EXCEPTION_LIST_NAMESPACE_AGNOSTIC : EXCEPTION_LIST_NAMESPACE;
+      const formattedFilters = [
+        ...(filter.filter.length
+          ? [`${filterNamespace}.attributes.entries.field:${filter.filter}*`]
+          : []),
+        ...(filter.tags.length
+          ? filter.tags.map((t) => `${filterNamespace}.attributes.tags:${t}`)
+          : []),
+      ];
+
+      return formattedFilters.join(' AND ');
+    })
+    .join(',');
 
   const query = {
-    list_id: listId,
-    namespace_type: namespaceType,
+    list_id: listIds.join(','),
+    namespace_type: namespaceTypes.join(','),
     page: pagination.page ? `${pagination.page}` : '1',
     per_page: pagination.perPage ? `${pagination.perPage}` : '20',
-    ...(filters.length ? { filter: filters.join(' AND ') } : {}),
+    sort_field: 'exception-list.created_at',
+    sort_order: 'desc',
+    ...(filters.trim() !== '' ? { filter: filters } : {}),
   };
   const [validatedRequest, errorsRequest] = validate(query, findExceptionListItemSchema);
 
@@ -438,5 +448,36 @@ export const deleteExceptionListItemById = async ({
     }
   } else {
     return Promise.reject(errorsRequest);
+  }
+};
+
+/**
+ * Add new Endpoint ExceptionList
+ *
+ * @param http Kibana http service
+ * @param signal to cancel request
+ *
+ * @throws An error if response is not OK
+ *
+ */
+export const addEndpointExceptionList = async ({
+  http,
+  signal,
+}: AddEndpointExceptionListProps): Promise<CreateEndpointListSchema> => {
+  try {
+    const response = await http.fetch<ExceptionListItemSchema>(ENDPOINT_LIST_URL, {
+      method: 'POST',
+      signal,
+    });
+
+    const [validatedResponse, errorsResponse] = validate(response, createEndpointListSchema);
+
+    if (errorsResponse != null || validatedResponse == null) {
+      return Promise.reject(errorsResponse);
+    } else {
+      return Promise.resolve(validatedResponse);
+    }
+  } catch (error) {
+    return Promise.reject(error);
   }
 };

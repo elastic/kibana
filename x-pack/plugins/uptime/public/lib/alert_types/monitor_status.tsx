@@ -4,53 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Provider as ReduxProvider } from 'react-redux';
 import React from 'react';
-import { isRight } from 'fp-ts/lib/Either';
-import { PathReporter } from 'io-ts/lib/PathReporter';
-import { AlertTypeModel } from '../../../../triggers_actions_ui/public';
+import { FormattedMessage } from '@kbn/i18n/react';
+import { AlertTypeModel, ValidationResult } from '../../../../triggers_actions_ui/public';
 import { AlertTypeInitializer } from '.';
-import { AtomicStatusCheckParamsType, StatusCheckParamsType } from '../../../common/runtime_types';
-import { MonitorStatusTitle } from './monitor_status_title';
-import { CLIENT_ALERT_TYPES } from '../../../common/constants';
-import { MonitorStatusTranslations } from './translations';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import { store } from '../../state';
 
-export const validate = (alertParams: unknown) => {
-  const errors: Record<string, any> = {};
-  const decoded = AtomicStatusCheckParamsType.decode(alertParams);
-  const oldDecoded = StatusCheckParamsType.decode(alertParams);
+import { CLIENT_ALERT_TYPES } from '../../../common/constants/alerts';
+import { MonitorStatusTranslations } from '../../../common/translations';
 
-  if (!isRight(decoded) && !isRight(oldDecoded)) {
-    return {
-      errors: {
-        typeCheckFailure: 'Provided parameters do not conform to the expected type.',
-        typeCheckParsingMessage: PathReporter.report(decoded),
-      },
-    };
-  }
-  if (isRight(decoded)) {
-    const { numTimes, timerangeCount } = decoded.right;
-    if (numTimes < 1) {
-      errors.invalidNumTimes = 'Number of alert check down times must be an integer greater than 0';
-    }
-    if (isNaN(timerangeCount)) {
-      errors.timeRangeStartValueNaN = 'Specified time range value must be a number';
-    }
-    if (timerangeCount <= 0) {
-      errors.invalidTimeRangeValue = 'Time range value must be greater than 0';
-    }
-  }
+const { defaultActionMessage, description } = MonitorStatusTranslations;
 
-  return { errors };
-};
+const MonitorStatusAlert = React.lazy(() => import('./lazy_wrapper/monitor_status'));
 
-const { defaultActionMessage } = MonitorStatusTranslations;
-
-const AlertMonitorStatus = React.lazy(() =>
-  import('../../components/overview/alerts/alerts_containers/alert_monitor_status')
-);
+let validateFunc: (alertParams: any) => ValidationResult;
 
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,
@@ -58,21 +24,30 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
 }): AlertTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   name: (
-    <ReduxProvider store={store}>
-      <MonitorStatusTitle />
-    </ReduxProvider>
+    <FormattedMessage
+      id="xpack.uptime.alerts.monitorStatus.title.label"
+      defaultMessage="Uptime monitor status"
+    />
   ),
+  description,
   iconClass: 'uptimeApp',
-  alertParamsExpression: (params: any) => {
-    return (
-      <ReduxProvider store={store}>
-        <KibanaContextProvider services={{ ...core, ...plugins }}>
-          <AlertMonitorStatus {...params} autocomplete={plugins.data.autocomplete} />
-        </KibanaContextProvider>
-      </ReduxProvider>
-    );
+  documentationUrl(docLinks) {
+    return `${docLinks.ELASTIC_WEBSITE_URL}guide/en/uptime/${docLinks.DOC_LINK_VERSION}/uptime-alerting.html#_monitor_status_alerts`;
   },
-  validate,
+  alertParamsExpression: (params: any) => (
+    <MonitorStatusAlert core={core} plugins={plugins} params={params} />
+  ),
+  validate: (alertParams: any) => {
+    if (!validateFunc) {
+      (async function loadValidate() {
+        const { validateMonitorStatusParams } = await import(
+          './lazy_wrapper/validate_monitor_status'
+        );
+        validateFunc = validateMonitorStatusParams;
+      })();
+    }
+    return validateFunc ? validateFunc(alertParams) : ({} as ValidationResult);
+  },
   defaultActionMessage,
   requiresAppContext: false,
 });

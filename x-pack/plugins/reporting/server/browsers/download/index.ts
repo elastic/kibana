@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { ensureBrowserDownloaded, ensureAllBrowsersDownloaded } from './ensure_downloaded';
+export { ensureBrowserDownloaded } from './ensure_downloaded';

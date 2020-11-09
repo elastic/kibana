@@ -19,7 +19,7 @@ export interface CoreStart
 |  [capabilities](./kibana-plugin-core-server.corestart.capabilities.md) | <code>CapabilitiesStart</code> | [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md) |
 |  [elasticsearch](./kibana-plugin-core-server.corestart.elasticsearch.md) | <code>ElasticsearchServiceStart</code> | [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |
 |  [http](./kibana-plugin-core-server.corestart.http.md) | <code>HttpServiceStart</code> | [HttpServiceStart](./kibana-plugin-core-server.httpservicestart.md) |
-|  [metrics](./kibana-plugin-core-server.corestart.metrics.md) | <code>MetricsServiceStart</code> |  |
+|  [metrics](./kibana-plugin-core-server.corestart.metrics.md) | <code>MetricsServiceStart</code> | [MetricsServiceStart](./kibana-plugin-core-server.metricsservicestart.md) |
 |  [savedObjects](./kibana-plugin-core-server.corestart.savedobjects.md) | <code>SavedObjectsServiceStart</code> | [SavedObjectsServiceStart](./kibana-plugin-core-server.savedobjectsservicestart.md) |
 |  [uiSettings](./kibana-plugin-core-server.corestart.uisettings.md) | <code>UiSettingsServiceStart</code> | [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |
 

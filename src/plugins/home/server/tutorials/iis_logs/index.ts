@@ -37,6 +37,7 @@ export function iisLogsSpecProvider(context: TutorialContext): TutorialSchema {
     name: i18n.translate('home.tutorials.iisLogs.nameTitle', {
       defaultMessage: 'IIS logs',
     }),
+    moduleName,
     category: TutorialsCategory.LOGGING,
     shortDescription: i18n.translate('home.tutorials.iisLogs.shortDescription', {
       defaultMessage: 'Collect and parse access and error logs created by the IIS HTTP server.',

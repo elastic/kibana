@@ -17,52 +17,12 @@
  * under the License.
  */
 
-import { resolve } from 'path';
-import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
-
 const { version } = require('../../package.json');
 const KIBANA_INSTALL_DIR =
   process.env.KIBANA_INSTALL_DIR ||
   `./build/oss/kibana-${version}-SNAPSHOT-${process.platform}-x86_64`;
 
-module.exports = function (grunt) {
-  function createKbnServerTask({ runBuild, flags = [] }) {
-    return {
-      options: {
-        wait: false,
-        ready: /http server running/,
-        quiet: false,
-        failOnError: false,
-      },
-      cmd: runBuild ? `./build/${runBuild}/bin/kibana` : process.execPath,
-      args: [
-        ...(runBuild ? [] : [require.resolve('../../scripts/kibana'), '--oss']),
-
-        '--logging.json=false',
-
-        ...flags,
-
-        // allow the user to override/inject flags by defining cli args starting with `--kbnServer.`
-        ...grunt.option.flags().reduce(function (flags, flag) {
-          if (flag.startsWith('--kbnServer.')) {
-            flags.push(`--${flag.slice(12)}`);
-          }
-
-          return flags;
-        }, []),
-      ],
-    };
-  }
-
-  const karmaTestServerFlags = [
-    '--env.name=development',
-    '--plugins.initialize=false',
-    '--optimize.bundleFilter=tests',
-    '--optimize.validateSyntaxOfNodeModules=false',
-    '--server.port=5610',
-    '--migrations.skip=true',
-  ];
-
+module.exports = function () {
   const NODE = 'node';
   const YARN = 'yarn';
   const scriptWithGithubChecks = ({ title, options, cmd, args }) =>
@@ -102,17 +62,6 @@ module.exports = function (grunt) {
       cmd: NODE,
       args: [
         'scripts/check_file_casing',
-        '--quiet', // only log errors, not warnings
-      ],
-    }),
-
-    // used by the test tasks
-    //    runs the check_lockfile_symlinks script to ensure manifests with non-dev dependencies have adjacent lockfile symlinks
-    checkLockfileSymlinks: scriptWithGithubChecks({
-      title: 'Check lockfile symlinks',
-      cmd: NODE,
-      args: [
-        'scripts/check_lockfile_symlinks',
         '--quiet', // only log errors, not warnings
       ],
     }),
@@ -177,37 +126,6 @@ module.exports = function (grunt) {
       ],
     }),
 
-    // used by the test:karma task
-    //    runs the kibana server to serve the browser test bundle
-    karmaTestServer: createKbnServerTask({
-      flags: [...karmaTestServerFlags],
-    }),
-    browserSCSS: createKbnServerTask({
-      flags: [...karmaTestServerFlags, '--optimize', '--optimize.enabled=false'],
-    }),
-
-    // used by the test:coverage task
-    //    runs the kibana server to serve the instrumented version of the browser test bundle
-    karmaTestCoverageServer: createKbnServerTask({
-      flags: [...karmaTestServerFlags, '--tests_bundle.instrument=true'],
-    }),
-
-    // used by the test:karma:debug task
-    //    runs the kibana server to serve the browser test bundle, but listens for changes
-    //    to the public/browser code and rebuilds the test bundle on changes
-    karmaTestDebugServer: createKbnServerTask({
-      flags: [
-        ...karmaTestServerFlags,
-        '--dev',
-        '--no-dev-config',
-        '--no-watch',
-        '--no-base-path',
-        '--optimize.watchPort=5611',
-        '--optimize.watchPrebuild=true',
-        '--optimize.bundleDir=' + resolve(__dirname, '../../data/optimize/testdev'),
-      ],
-    }),
-
     verifyNotice: scriptWithGithubChecks({
       title: 'Verify NOTICE.txt',
       options: {
@@ -245,7 +163,11 @@ module.exports = function (grunt) {
         '--config',
         'test/server_integration/http/ssl_redirect/config.js',
         '--config',
-        'test/server_integration/http/cache/config.js',
+        'test/server_integration/http/platform/config.ts',
+        '--config',
+        'test/server_integration/http/ssl_with_p12/config.js',
+        '--config',
+        'test/server_integration/http/ssl_with_p12_intermediate/config.js',
         '--bail',
         '--debug',
         '--kibana-install-dir',
@@ -273,7 +195,7 @@ module.exports = function (grunt) {
       args: [
         'scripts/functional_tests',
         '--config',
-        'test/plugin_functional/config.js',
+        'test/plugin_functional/config.ts',
         '--bail',
         '--debug',
       ],
@@ -309,20 +231,11 @@ module.exports = function (grunt) {
       args: ['scripts/check_licenses', '--dev'],
     }),
 
-    verifyDependencyVersions: gruntTaskWithGithubChecks(
-      'Verify dependency versions',
-      'verifyDependencyVersions'
-    ),
     test_jest: gruntTaskWithGithubChecks('Jest tests', 'test:jest'),
     test_jest_integration: gruntTaskWithGithubChecks(
       'Jest integration tests',
       'test:jest_integration'
     ),
     test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
-    test_karma_ci: gruntTaskWithGithubChecks('Browser tests', 'test:karma-ci'),
-
-    ...getFunctionalTestGroupRunConfigs({
-      kibanaInstallDir: KIBANA_INSTALL_DIR,
-    }),
   };
 };

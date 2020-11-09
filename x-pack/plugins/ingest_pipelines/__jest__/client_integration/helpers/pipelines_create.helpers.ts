@@ -5,10 +5,10 @@
  */
 
 import { registerTestBed, TestBedConfig, TestBed } from '../../../../../test_utils';
-import { BASE_PATH } from '../../../common/constants';
-import { PipelinesCreate } from '../../../public/application/sections/pipelines_create'; // eslint-disable-line @kbn/eslint/no-restricted-paths
+import { PipelinesCreate } from '../../../public/application/sections/pipelines_create';
 import { getFormActions, PipelineFormTestSubjects } from './pipeline_form.helpers';
 import { WithAppDependencies } from './setup_environment';
+import { getCreatePath, ROUTES } from '../../../public/application/services/navigation';
 
 export type PipelinesCreateTestBed = TestBed<PipelineFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;
@@ -16,8 +16,8 @@ export type PipelinesCreateTestBed = TestBed<PipelineFormTestSubjects> & {
 
 const testBedConfig: TestBedConfig = {
   memoryRouter: {
-    initialEntries: [`${BASE_PATH}/create`],
-    componentRoutePath: `${BASE_PATH}/create`,
+    initialEntries: [getCreatePath()],
+    componentRoutePath: ROUTES.create,
   },
   doMountAsync: true,
 };

@@ -119,6 +119,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
         >
           <EuiFieldText
             inputRef={this.initialsInputRef}
+            data-test-subj="spaceLetterInitial"
             name="spaceInitials"
             // allows input to be cleared or otherwise invalidated while user is editing the initials,
             // without defaulting to the derived initials provided by `getSpaceInitials`
@@ -163,6 +164,7 @@ export class CustomizeSpaceAvatar extends Component<Props, State> {
         >
           <EuiFilePicker
             display="default"
+            data-test-subj="uploadCustomImageFile"
             initialPromptText={i18n.translate(
               'xpack.spaces.management.customizeSpaceAvatar.selectImageUrl',
               {

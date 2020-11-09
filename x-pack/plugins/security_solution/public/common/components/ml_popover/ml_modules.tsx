@@ -12,6 +12,7 @@
 export const mlModules: string[] = [
   'siem_auditbeat',
   'siem_auditbeat_auth',
+  'siem_cloudtrail',
   'siem_packetbeat',
   'siem_winlogbeat',
   'siem_winlogbeat_auth',

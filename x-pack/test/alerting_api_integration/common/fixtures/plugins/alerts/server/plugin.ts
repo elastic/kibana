@@ -12,11 +12,15 @@ import { PluginSetupContract as FeaturesPluginSetup } from '../../../../../../..
 import { defineAlertTypes } from './alert_types';
 import { defineActionTypes } from './action_types';
 import { defineRoutes } from './routes';
+import { SpacesPluginSetup } from '../../../../../../../plugins/spaces/server';
+import { SecurityPluginSetup } from '../../../../../../../plugins/security/server';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
   actions: ActionsPluginSetup;
   alerts: AlertingPluginSetup;
+  spaces?: SpacesPluginSetup;
+  security?: SecurityPluginSetup;
 }
 
 export interface FixtureStartDeps {
@@ -24,11 +28,29 @@ export interface FixtureStartDeps {
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
-  public setup(core: CoreSetup<FixtureStartDeps>, { features, actions, alerts }: FixtureSetupDeps) {
-    features.registerFeature({
-      id: 'alerts',
+  public setup(
+    core: CoreSetup<FixtureStartDeps>,
+    { features, actions, alerts, spaces, security }: FixtureSetupDeps
+  ) {
+    features.registerKibanaFeature({
+      id: 'alertsFixture',
       name: 'Alerts',
       app: ['alerts', 'kibana'],
+      category: { id: 'foo', label: 'foo' },
+      alerting: [
+        'test.always-firing',
+        'test.cumulative-firing',
+        'test.never-firing',
+        'test.failing',
+        'test.authorization',
+        'test.validation',
+        'test.onlyContextVariables',
+        'test.onlyStateVariables',
+        'test.noop',
+        'test.unrestricted-noop',
+        'test.patternFiring',
+        'test.throw',
+      ],
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
@@ -36,8 +58,23 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             all: ['alert'],
             read: [],
           },
+          alerting: {
+            all: [
+              'test.always-firing',
+              'test.cumulative-firing',
+              'test.never-firing',
+              'test.failing',
+              'test.authorization',
+              'test.validation',
+              'test.onlyContextVariables',
+              'test.onlyStateVariables',
+              'test.noop',
+              'test.unrestricted-noop',
+              'test.patternFiring',
+              'test.throw',
+            ],
+          },
           ui: [],
-          api: ['alerting-read', 'alerting-all'],
         },
         read: {
           app: ['alerts', 'kibana'],
@@ -45,15 +82,30 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             all: [],
             read: ['alert'],
           },
+          alerting: {
+            read: [
+              'test.always-firing',
+              'test.cumulative-firing',
+              'test.never-firing',
+              'test.failing',
+              'test.authorization',
+              'test.validation',
+              'test.onlyContextVariables',
+              'test.onlyStateVariables',
+              'test.noop',
+              'test.unrestricted-noop',
+              'test.patternFiring',
+              'test.throw',
+            ],
+          },
           ui: [],
-          api: ['alerting-read'],
         },
       },
     });
 
     defineActionTypes(core, { actions });
     defineAlertTypes(core, { alerts });
-    defineRoutes(core);
+    defineRoutes(core, { spaces, security });
   }
 
   public start() {}

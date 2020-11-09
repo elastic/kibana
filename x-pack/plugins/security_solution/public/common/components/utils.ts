@@ -20,7 +20,7 @@ export const getDaysDiff = (minDate: moment.Moment, maxDate: moment.Moment) => {
   return diff;
 };
 
-export const histogramDateTimeFormatter = (domain: [number, number] | null, fixedDiff?: number) => {
+export const histogramDateTimeFormatter = (domain: [string, string] | null, fixedDiff?: number) => {
   const diff = fixedDiff ?? getDaysDiff(moment(domain![0]), moment(domain![1]));
   const format = niceTimeFormatByDay(diff);
   return timeFormatter(format);

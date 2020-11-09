@@ -1,6 +1,6 @@
 [role="xpack"]
 [[logstash-page]]
-== Logstash Monitoring Metrics
+= Logstash Monitoring Metrics
 ++++
 <titleabbrev>Logstash Metrics</titleabbrev>
 ++++

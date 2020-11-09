@@ -27,7 +27,7 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
           size="m"
           type="alert"
         >
-          <div
+          <span
             aria-hidden="true"
             className="euiCallOutHeader__icon"
             data-euiicon-type="alert"
@@ -61,7 +61,6 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
               values={
                 Object {
                   "scripFields": <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html"
                     target="_blank"
                   >
                     <FormattedMessage
@@ -75,7 +74,6 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                     />
                   </EuiLink>,
                   "scriptsInAggregation": <EuiLink
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source"
                     target="_blank"
                   >
                     <FormattedMessage
@@ -94,14 +92,11 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
               <span>
                 Please familiarize yourself with 
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html"
                   target="_blank"
                 >
-                  <a
+                  <button
                     className="euiLink euiLink--primary"
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-request-script-fields.html"
-                    rel="noopener"
-                    target="_blank"
+                    type="button"
                   >
                     <FormattedMessage
                       defaultMessage="script fields"
@@ -116,22 +111,19 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                     <EuiIcon
                       type="link"
                     >
-                      <div
+                      <span
                         data-euiicon-type="link"
                       />
                     </EuiIcon>
-                  </a>
+                  </button>
                 </EuiLink>
                  and with 
                 <EuiLink
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source"
                   target="_blank"
                 >
-                  <a
+                  <button
                     className="euiLink euiLink--primary"
-                    href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/search-aggregations.html#_values_source"
-                    rel="noopener"
-                    target="_blank"
+                    type="button"
                   >
                     <FormattedMessage
                       defaultMessage="scripts in aggregations"
@@ -146,11 +138,11 @@ exports[`ScriptingWarningCallOut should render normally 1`] = `
                     <EuiIcon
                       type="link"
                     >
-                      <div
+                      <span
                         data-euiicon-type="link"
                       />
                     </EuiIcon>
-                  </a>
+                  </button>
                 </EuiLink>
                  before using scripted fields.
               </span>

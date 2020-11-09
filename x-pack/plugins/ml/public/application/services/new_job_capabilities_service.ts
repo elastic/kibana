@@ -20,7 +20,7 @@ import {
 import { ml } from './ml_api_service';
 import { getIndexPatternAndSavedSearch } from '../util/index_utils';
 
-// called in the angular routing resolve block to initialize the
+// called in the routing resolve block to initialize the
 // newJobCapsService with the currently selected index pattern
 export function loadNewJobCapabilities(
   indexPatternId: string,

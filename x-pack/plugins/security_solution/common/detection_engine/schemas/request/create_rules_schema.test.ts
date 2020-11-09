@@ -16,6 +16,8 @@ import { left } from 'fp-ts/lib/Either';
 import {
   getCreateRulesSchemaMock,
   getCreateRulesSchemaDecodedMock,
+  getCreateThreatMatchRulesSchemaMock,
+  getCreateThreatMatchRulesSchemaDecodedMock,
 } from './create_rules_schema.mock';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 import { getListArrayMock } from '../types/lists.mock';
@@ -1229,6 +1231,34 @@ describe('create rules schema', () => {
       expect(message.schema).toEqual({});
     });
 
+    test('empty name is not valid', () => {
+      const payload: CreateRulesSchema = {
+        ...getCreateRulesSchemaMock(),
+        name: '',
+      };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "name"']);
+      expect(message.schema).toEqual({});
+    });
+
+    test('empty description is not valid', () => {
+      const payload: CreateRulesSchema = {
+        ...getCreateRulesSchemaMock(),
+        description: '',
+      };
+
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "" supplied to "description"',
+      ]);
+      expect(message.schema).toEqual({});
+    });
+
     test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, note] does validate', () => {
       const payload: CreateRulesSchema = {
         rule_id: 'rule-1',
@@ -1298,6 +1328,7 @@ describe('create rules schema', () => {
   });
 
   test('defaults max signals to 100', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { max_signals, ...noMaxSignals } = getCreateRulesSchemaMock();
     const payload: CreateRulesSchema = {
       ...noMaxSignals,
@@ -1453,6 +1484,7 @@ describe('create rules schema', () => {
   });
 
   test('it generates a uuid v4 whenever you omit the rule_id', () => {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
     const { rule_id, ...noRuleId } = getCreateRulesSchemaMock();
     const decoded = createRulesSchema.decode(noRuleId);
     const checked = exactCheck(noRuleId, decoded);
@@ -1513,11 +1545,15 @@ describe('create rules schema', () => {
         exceptions_list: [
           {
             id: 'some_uuid',
+            list_id: 'list_id_single',
             namespace_type: 'single',
+            type: 'detection',
           },
           {
-            id: 'some_uuid',
+            id: 'endpoint_list',
+            list_id: 'endpoint_list',
             namespace_type: 'agnostic',
+            type: 'endpoint',
           },
         ],
       };
@@ -1598,6 +1634,8 @@ describe('create rules schema', () => {
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
+        'Invalid value "undefined" supplied to "exceptions_list,list_id"',
+        'Invalid value "undefined" supplied to "exceptions_list,type"',
         'Invalid value "not a namespace type" supplied to "exceptions_list,namespace_type"',
       ]);
       expect(message.schema).toEqual({});
@@ -1650,6 +1688,36 @@ describe('create rules schema', () => {
         exceptions_list: [],
         filters: [],
       };
+      expect(message.schema).toEqual(expected);
+    });
+  });
+
+  describe('threat_mapping', () => {
+    test('You can set a threat query, index, mapping, filters when creating a rule', () => {
+      const payload = getCreateThreatMatchRulesSchemaMock();
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected = getCreateThreatMatchRulesSchemaDecodedMock();
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
+
+    test('You can set a threat query, index, mapping, filters, concurrent_searches, items_per_search with a when creating a rule', () => {
+      const payload: CreateRulesSchema = {
+        ...getCreateThreatMatchRulesSchemaMock(),
+        concurrent_searches: 10,
+        items_per_search: 10,
+      };
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected: CreateRulesSchemaDecoded = {
+        ...getCreateThreatMatchRulesSchemaDecodedMock(),
+        concurrent_searches: 10,
+        items_per_search: 10,
+      };
+      expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
     });
   });

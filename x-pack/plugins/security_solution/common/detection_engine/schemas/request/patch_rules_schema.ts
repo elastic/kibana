@@ -6,7 +6,6 @@
 
 import * as t from 'io-ts';
 
-/* eslint-disable @typescript-eslint/camelcase */
 import {
   description,
   anomaly_threshold,
@@ -33,6 +32,7 @@ import {
   enabled,
   tags,
   threat,
+  threshold,
   throttle,
   references,
   to,
@@ -46,9 +46,18 @@ import {
   timestamp_override,
   risk_score_mapping,
   severity_mapping,
+  event_category_override,
 } from '../common/schemas';
+import {
+  threat_index,
+  concurrent_searches,
+  items_per_search,
+  threat_query,
+  threat_filters,
+  threat_mapping,
+  threat_language,
+} from '../types/threat_mapping';
 import { listArrayOrUndefined } from '../types/lists';
-/* eslint-enable @typescript-eslint/camelcase */
 
 /**
  * All of the patch elements should default to undefined if not set
@@ -66,6 +75,7 @@ export const patchRulesSchema = t.exact(
     actions,
     anomaly_threshold,
     enabled,
+    event_category_override,
     false_positives,
     filters,
     from,
@@ -89,12 +99,20 @@ export const patchRulesSchema = t.exact(
     tags,
     to,
     threat,
+    threshold,
     throttle,
     timestamp_override,
     references,
     note,
     version,
     exceptions_list: listArrayOrUndefined,
+    threat_index,
+    threat_query,
+    threat_filters,
+    threat_mapping,
+    threat_language,
+    concurrent_searches,
+    items_per_search,
   })
 );
 

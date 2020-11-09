@@ -19,7 +19,6 @@ import {
   TaskManagerUtils,
 } from '../../../common/lib';
 
-// eslint-disable-next-line import/no-default-export
 export function alertTests({ getService }: FtrProviderContext, space: Space) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('legacyEs');
@@ -136,14 +135,11 @@ instanceStateValue: true
       await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
     });
 
-    it('should reschedule failing alerts using the alerting interval and not the Task Manager retry logic', async () => {
+    it('should reschedule failing alerts using the Task Manager retry logic with alert schedule interval', async () => {
       /*
-        Alerting does not use the Task Manager schedule and instead implements its own due to a current limitation
-        in TaskManager's ability to update an existing Task.
-        For this reason we need to handle the retry when Alert executors fail, as TaskManager doesn't understand that
-        alerting tasks are recurring tasks.
+        Alerts should set the Task Manager schedule interval with initial value.
       */
-      const alertIntervalInSeconds = 30;
+      const alertIntervalInSeconds = 10;
       const reference = alertUtils.generateReference();
       const response = await alertUtils.createAlwaysFailingAction({
         reference,
@@ -158,7 +154,8 @@ instanceStateValue: true
       await retry.try(async () => {
         const alertTask = (await getAlertingTaskById(response.body.scheduledTaskId)).docs[0];
         expect(alertTask.status).to.eql('idle');
-        // ensure the alert is rescheduled to a minute from now
+        expect(alertTask.schedule.interval).to.eql('10s');
+        // ensure the alert is rescheduled correctly
         ensureDatetimeIsWithinRange(
           Date.parse(alertTask.runAt),
           alertIntervalInSeconds * 1000,
@@ -343,6 +340,31 @@ instanceStateValue: true
           },
         },
       });
+    });
+
+    it('should notify feature usage when using a gold action type', async () => {
+      const testStart = new Date();
+      const reference = alertUtils.generateReference();
+      const response = await alertUtils.createAlwaysFiringAction({ reference });
+      expect(response.statusCode).to.eql(200);
+
+      // Wait for alert to run
+      await esTestIndexTool.waitForDocs('action:test.index-record', reference);
+
+      const {
+        body: { features },
+      } = await supertestWithoutAuth.get(`${getUrlPrefix(space.id)}/api/licensing/feature_usage`);
+      expect(features).to.be.an(Array);
+      const indexRecordFeature = features.find(
+        (feature: { name: string }) => feature.name === 'Connector: Test: Index Record'
+      );
+      expect(indexRecordFeature).to.be.ok();
+      expect(indexRecordFeature.last_used).to.be.a('string');
+      expect(new Date(indexRecordFeature.last_used).getTime()).to.be.greaterThan(
+        testStart.getTime()
+      );
+
+      await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
     });
   });
 }

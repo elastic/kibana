@@ -23,18 +23,24 @@ import {
   mockPersistedLogFactory,
 } from './query_string_input.test.mocks';
 
-import { EuiFieldText } from '@elastic/eui';
 import React from 'react';
-import { QueryLanguageSwitcher } from './language_switcher';
-import { QueryStringInput, QueryStringInputUI } from './query_string_input';
-import { coreMock } from '../../../../../core/public/mocks';
-import { dataPluginMock } from '../../mocks';
-const startMock = coreMock.createStart();
-import { stubIndexPatternWithFields } from '../../stubs';
-
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 import { I18nProvider } from '@kbn/i18n/react';
 import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/dom';
+import { render } from '@testing-library/react';
+
+import { EuiTextArea } from '@elastic/eui';
+
+import { QueryLanguageSwitcher } from './language_switcher';
+import { QueryStringInput } from './';
+import type QueryStringInputUI from './query_string_input';
+
+import { coreMock } from '../../../../../core/public/mocks';
+import { dataPluginMock } from '../../mocks';
+import { stubIndexPatternWithFields } from '../../stubs';
+import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
+
+const startMock = coreMock.createStart();
 
 const noop = () => {
   return;
@@ -94,16 +100,17 @@ describe('QueryStringInput', () => {
     jest.clearAllMocks();
   });
 
-  it('Should render the given query', () => {
-    const component = mount(
+  it('Should render the given query', async () => {
+    const { getByText } = render(
       wrapQueryStringInputInContext({
         query: kqlQuery,
         onSubmit: noop,
         indexPatterns: [stubIndexPatternWithFields],
       })
     );
-    expect(component.find(EuiFieldText).props().value).toBe(kqlQuery.query);
-    expect(component.find(QueryLanguageSwitcher).prop('language')).toBe(kqlQuery.language);
+
+    await waitFor(() => getByText(kqlQuery.query));
+    await waitFor(() => getByText('KQL'));
   });
 
   it('Should pass the query language to the language switcher', () => {
@@ -117,7 +124,7 @@ describe('QueryStringInput', () => {
     expect(component.find(QueryLanguageSwitcher).prop('language')).toBe(luceneQuery.language);
   });
 
-  it('Should disable autoFocus on EuiFieldText when disableAutoFocus prop is true', () => {
+  it('Should disable autoFocus on EuiTextArea when disableAutoFocus prop is true', () => {
     const component = mount(
       wrapQueryStringInputInContext({
         query: kqlQuery,
@@ -126,7 +133,7 @@ describe('QueryStringInput', () => {
         disableAutoFocus: true,
       })
     );
-    expect(component.find(EuiFieldText).prop('autoFocus')).toBeFalsy();
+    expect(component.find(EuiTextArea).prop('autoFocus')).toBeFalsy();
   });
 
   it('Should create a unique PersistedLog based on the appName and query language', () => {
@@ -179,11 +186,49 @@ describe('QueryStringInput', () => {
 
     const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
     const input = instance.inputRef;
-    const inputWrapper = component.find(EuiFieldText).find('input');
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
 
     expect(mockCallback).toHaveBeenCalledTimes(1);
     expect(mockCallback).toHaveBeenCalledWith({ query: 'response:200', language: 'kuery' });
+  });
+
+  it('Should fire onBlur callback on input blur', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onBlur: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith();
+  });
+
+  it('Should fire onChangeQueryInputFocus callback on input blur', () => {
+    const mockCallback = jest.fn();
+
+    const component = mount(
+      wrapQueryStringInputInContext({
+        query: kqlQuery,
+        onChangeQueryInputFocus: mockCallback,
+        indexPatterns: [stubIndexPatternWithFields],
+        disableAutoFocus: true,
+      })
+    );
+
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
+    inputWrapper.simulate('blur');
+
+    expect(mockCallback).toHaveBeenCalledTimes(1);
+    expect(mockCallback).toHaveBeenCalledWith(false);
   });
 
   it('Should use PersistedLog for recent search suggestions', async () => {
@@ -199,7 +244,7 @@ describe('QueryStringInput', () => {
 
     const instance = component.find('QueryStringInputUI').instance() as QueryStringInputUI;
     const input = instance.inputRef;
-    const inputWrapper = component.find(EuiFieldText).find('input');
+    const inputWrapper = component.find(EuiTextArea).find('textarea');
     inputWrapper.simulate('keyDown', { target: input, keyCode: 13, key: 'Enter', metaKey: true });
 
     expect(mockPersistedLog.add).toHaveBeenCalledWith('response:200');

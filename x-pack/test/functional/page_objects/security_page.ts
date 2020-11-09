@@ -17,7 +17,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
   const esArchiver = getService('esArchiver');
   const userMenu = getService('userMenu');
   const comboBox = getService('comboBox');
-  const PageObjects = getPageObjects(['common', 'header', 'settings', 'home', 'error']);
+  const PageObjects = getPageObjects(['common', 'header', 'error']);
 
   interface LoginOptions {
     expectSpaceSelector?: boolean;
@@ -88,10 +88,10 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
         if (await find.existsByCssSelector(rawDataTabLocator)) {
           await find.clickByCssSelector(rawDataTabLocator);
         }
-        await PageObjects.error.expectForbidden();
+        await testSubjects.existOrFail('ResetSessionButton');
       });
       log.debug(
-        `Finished login process, found forbidden message. currentUrl = ${await browser.getCurrentUrl()}`
+        `Finished login process, found reset session button message. currentUrl = ${await browser.getCurrentUrl()}`
       );
       return;
     }
@@ -429,10 +429,7 @@ export function SecurityPageProvider({ getService, getPageObjects }: FtrProvider
           const globalSpaceOption = await find.byCssSelector(`#spaceOption_\\*`);
           await globalSpaceOption.click();
 
-          await testSubjects.click('basePrivilegeComboBox');
-
-          const privilegeOption = await find.byCssSelector(`#basePrivilege_${privilegeName}`);
-          await privilegeOption.click();
+          await testSubjects.click(`basePrivilege_${privilegeName}`);
 
           await testSubjects.click('createSpacePrivilegeButton');
         }

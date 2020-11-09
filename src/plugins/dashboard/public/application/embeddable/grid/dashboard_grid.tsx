@@ -256,13 +256,16 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         expandedPanelId !== undefined && expandedPanelId === panel.explicitInput.id;
       const hidePanel = expandedPanelId !== undefined && expandedPanelId !== panel.explicitInput.id;
       const classes = classNames({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dshDashboardGrid__item--expanded': expandPanel,
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         'dshDashboardGrid__item--hidden': hidePanel,
       });
       return (
         <div
           style={{ zIndex: focusedPanelIndex === panel.explicitInput.id ? 2 : 'auto' }}
           className={classes}
+          // This key is required for the ReactGridLayout to work properly
           key={panel.explicitInput.id}
           data-test-subj="dashboardPanel"
           ref={(reactGridItem) => {
@@ -270,6 +273,8 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           }}
         >
           <EmbeddableChildPanel
+            // This key is used to force rerendering on embeddable type change while the id remains the same
+            key={panel.type}
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
             PanelComponent={this.props.PanelComponent}

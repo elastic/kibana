@@ -5,46 +5,36 @@
  */
 import {
   KibanaRequest,
-  OnPreAuthToolkit,
+  OnPreRoutingToolkit,
   LifecycleResponseFactory,
   CoreSetup,
 } from 'src/core/server';
-import { format } from 'url';
-import { DEFAULT_SPACE_ID } from '../../../common/constants';
-import { modifyUrl } from '../utils/url';
 import { getSpaceIdFromPath } from '../../../common';
 
 export interface OnRequestInterceptorDeps {
   http: CoreSetup['http'];
 }
 export function initSpacesOnRequestInterceptor({ http }: OnRequestInterceptorDeps) {
-  http.registerOnPreAuth(async function spacesOnPreAuthHandler(
+  http.registerOnPreRouting(async function spacesOnPreRoutingHandler(
     request: KibanaRequest,
     response: LifecycleResponseFactory,
-    toolkit: OnPreAuthToolkit
+    toolkit: OnPreRoutingToolkit
   ) {
     const serverBasePath = http.basePath.serverBasePath;
     const path = request.url.pathname;
 
     // If navigating within the context of a space, then we store the Space's URL Context on the request,
     // and rewrite the request to not include the space identifier in the URL.
-    const spaceId = getSpaceIdFromPath(path, serverBasePath);
+    const { spaceId, pathHasExplicitSpaceIdentifier } = getSpaceIdFromPath(path, serverBasePath);
 
-    if (spaceId !== DEFAULT_SPACE_ID) {
+    if (pathHasExplicitSpaceIdentifier) {
       const reqBasePath = `/s/${spaceId}`;
 
       http.basePath.set(request, reqBasePath);
 
-      const newLocation = (path && path.substr(reqBasePath.length)) || '/';
+      const newPathname = path.substr(reqBasePath.length) || '/';
 
-      const newUrl = modifyUrl(format(request.url), (parts) => {
-        return {
-          ...parts,
-          pathname: newLocation,
-        };
-      });
-
-      return toolkit.rewriteUrl(newUrl);
+      return toolkit.rewriteUrl(`${newPathname}${request.url.search}`);
     }
 
     return toolkit.next();

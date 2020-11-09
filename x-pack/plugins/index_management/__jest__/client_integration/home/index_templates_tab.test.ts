@@ -63,7 +63,6 @@ describe('Index Templates tab', () => {
         },
       },
     });
-    (template1 as any).hasSettings = true;
 
     const template2 = fixtures.getTemplate({
       name: `b${getRandomString()}`,
@@ -73,6 +72,7 @@ describe('Index Templates tab', () => {
     const template3 = fixtures.getTemplate({
       name: `.c${getRandomString()}`, // mock system template
       indexPatterns: ['template3Pattern1*', 'template3Pattern2', 'template3Pattern3'],
+      type: 'system',
     });
 
     const template4 = fixtures.getTemplate({
@@ -101,6 +101,7 @@ describe('Index Templates tab', () => {
       name: `.c${getRandomString()}`, // mock system template
       indexPatterns: ['template6Pattern1*', 'template6Pattern2', 'template6Pattern3'],
       isLegacy: true,
+      type: 'system',
     });
 
     const templates = [template1, template2, template3];
@@ -124,44 +125,49 @@ describe('Index Templates tab', () => {
       // Test composable table content
       tableCellsValues.forEach((row, i) => {
         const indexTemplate = templates[i];
-        const { name, indexPatterns, priority, ilmPolicy, composedOf, template } = indexTemplate;
+        const { name, indexPatterns, ilmPolicy, composedOf, template } = indexTemplate;
 
-        const hasContent = !!template.settings || !!template.mappings || !!template.aliases;
+        const hasContent = !!template?.settings || !!template?.mappings || !!template?.aliases;
         const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
         const composedOfString = composedOf ? composedOf.join(',') : '';
-        const priorityFormatted = priority ? priority.toString() : '';
 
-        expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
-          '', // Checkbox to select row
-          name,
-          indexPatterns.join(', '),
-          ilmPolicyName,
-          composedOfString,
-          priorityFormatted,
-          hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
-          '', // Column of actions
-        ]);
+        try {
+          expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
+            '', // Checkbox to select row
+            name,
+            indexPatterns.join(', '),
+            ilmPolicyName,
+            composedOfString,
+            hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
+            'EditDelete', // Column of actions
+          ]);
+        } catch (e) {
+          console.error(`Error in index template at row ${i}`); // eslint-disable-line no-console
+          throw e;
+        }
       });
 
       // Test legacy table content
       legacyTableCellsValues.forEach((row, i) => {
-        const template = legacyTemplates[i];
-        const { name, indexPatterns, order, ilmPolicy } = template;
+        const legacyIndexTemplate = legacyTemplates[i];
+        const { name, indexPatterns, ilmPolicy, template } = legacyIndexTemplate;
 
+        const hasContent = !!template?.settings || !!template?.mappings || !!template?.aliases;
         const ilmPolicyName = ilmPolicy && ilmPolicy.name ? ilmPolicy.name : '';
-        const orderFormatted = order ? order.toString() : order;
 
-        expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
-          '',
-          name,
-          indexPatterns.join(', '),
-          ilmPolicyName,
-          orderFormatted,
-          '',
-          '',
-          '',
-          '',
-        ]);
+        try {
+          expect(removeWhiteSpaceOnArrayValues(row)).toEqual([
+            '',
+            name,
+            indexPatterns.join(', '),
+            ilmPolicyName,
+            hasContent ? 'M S A' : 'None', // M S A -> Mappings Settings Aliases badges
+            'EditDelete', // Column of actions
+          ]);
+        } catch (e) {
+          console.error(`Error in legacy template at row ${i}`); // eslint-disable-line no-console
+          throw e;
+        }
       });
     });
 
@@ -211,7 +217,7 @@ describe('Index Templates tab', () => {
       await actions.clickTemplateAt(0);
       expect(exists('templateList')).toBe(true);
       expect(exists('templateDetails')).toBe(true);
-      expect(find('templateDetails.title').text()).toBe(templates[0].name);
+      expect(find('templateDetails.title').text().trim()).toBe(templates[0].name);
 
       // Close flyout
       await act(async () => {
@@ -223,7 +229,7 @@ describe('Index Templates tab', () => {
 
       expect(exists('templateList')).toBe(true);
       expect(exists('templateDetails')).toBe(true);
-      expect(find('templateDetails.title').text()).toBe(legacyTemplates[0].name);
+      expect(find('templateDetails.title').text().trim()).toBe(legacyTemplates[0].name);
     });
 
     describe('table row actions', () => {
@@ -460,7 +466,7 @@ describe('Index Templates tab', () => {
           const { find } = testBed;
           const [{ name }] = templates;
 
-          expect(find('templateDetails.title').text()).toEqual(name);
+          expect(find('templateDetails.title').text().trim()).toEqual(name);
         });
 
         it('should have a close button and be able to close flyout', async () => {
@@ -487,7 +493,7 @@ describe('Index Templates tab', () => {
       });
 
       describe('tabs', () => {
-        test('should have 4 tabs', async () => {
+        test('should have 5 tabs', async () => {
           const template = fixtures.getTemplate({
             name: `a${getRandomString()}`,
             indexPatterns: ['template1Pattern1*', 'template1Pattern2'],
@@ -518,35 +524,48 @@ describe('Index Templates tab', () => {
           const { find, actions, exists } = testBed;
 
           httpRequestsMockHelpers.setLoadTemplateResponse(template);
+          httpRequestsMockHelpers.setSimulateTemplateResponse({ simulateTemplate: 'response' });
 
           await actions.clickTemplateAt(0);
 
-          expect(find('templateDetails.tab').length).toBe(4);
+          expect(find('templateDetails.tab').length).toBe(5);
           expect(find('templateDetails.tab').map((t) => t.text())).toEqual([
             'Summary',
             'Settings',
             'Mappings',
             'Aliases',
+            'Preview',
           ]);
 
           // Summary tab should be initial active tab
           expect(exists('summaryTab')).toBe(true);
 
           // Navigate and verify all tabs
-          actions.selectDetailsTab('settings');
+          await actions.selectDetailsTab('settings');
           expect(exists('summaryTab')).toBe(false);
           expect(exists('settingsTabContent')).toBe(true);
 
-          actions.selectDetailsTab('aliases');
+          await actions.selectDetailsTab('aliases');
           expect(exists('summaryTab')).toBe(false);
           expect(exists('settingsTabContent')).toBe(false);
           expect(exists('aliasesTabContent')).toBe(true);
 
-          actions.selectDetailsTab('mappings');
+          await actions.selectDetailsTab('mappings');
           expect(exists('summaryTab')).toBe(false);
           expect(exists('settingsTabContent')).toBe(false);
           expect(exists('aliasesTabContent')).toBe(false);
           expect(exists('mappingsTabContent')).toBe(true);
+
+          await actions.selectDetailsTab('preview');
+          expect(exists('summaryTab')).toBe(false);
+          expect(exists('settingsTabContent')).toBe(false);
+          expect(exists('aliasesTabContent')).toBe(false);
+          expect(exists('mappingsTabContent')).toBe(false);
+          expect(exists('previewTabContent')).toBe(true);
+
+          expect(find('simulateTemplatePreview').text().replace(/\s/g, '')).toEqual(
+            JSON.stringify({ simulateTemplate: 'response' })
+          );
         });
 
         test('should show an info callout if data is not present', async () => {
@@ -562,17 +581,17 @@ describe('Index Templates tab', () => {
 
           await actions.clickTemplateAt(0);
 
-          expect(find('templateDetails.tab').length).toBe(4);
+          expect(find('templateDetails.tab').length).toBe(5);
           expect(exists('summaryTab')).toBe(true);
 
           // Navigate and verify callout message per tab
-          actions.selectDetailsTab('settings');
+          await actions.selectDetailsTab('settings');
           expect(exists('noSettingsCallout')).toBe(true);
 
-          actions.selectDetailsTab('mappings');
+          await actions.selectDetailsTab('mappings');
           expect(exists('noMappingsCallout')).toBe(true);
 
-          actions.selectDetailsTab('aliases');
+          await actions.selectDetailsTab('aliases');
           expect(exists('noAliasesCallout')).toBe(true);
         });
       });

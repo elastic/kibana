@@ -4,13 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { EsFieldName } from '../../../../../../../common/types/fields';
 import {
-  EsFieldName,
-  PERCENTILES_AGG_DEFAULT_PERCENTS,
+  PivotSupportedAggs,
   PIVOT_SUPPORTED_AGGS,
+} from '../../../../../../../common/types/pivot_aggs';
+import {
+  PERCENTILES_AGG_DEFAULT_PERCENTS,
   PivotAggsConfigWithUiSupport,
 } from '../../../../../common';
-import { PivotSupportedAggs } from '../../../../../common/pivot_aggs';
 import { getFilterAggConfig } from './filter_agg/config';
 
 /**

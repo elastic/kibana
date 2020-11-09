@@ -13,7 +13,6 @@ import qs from 'query-string';
 import {
   EuiButton,
   EuiCallOut,
-  EuiHealth,
   EuiLink,
   EuiCheckbox,
   EuiFlexGroup,
@@ -33,17 +32,16 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
-import { reactRouterNavigate } from '../../../../../shared_imports';
+import { reactRouterNavigate, attemptToURIDecode } from '../../../../../shared_imports';
 import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
-import { healthToColor } from '../../../../services';
-import { encodePathForReactRouter } from '../../../../services/routing';
+import { getDataStreamDetailsLink } from '../../../../services/routing';
+import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
-import { NoMatch, PageErrorForbidden } from '../../../../components';
+import { NoMatch, PageErrorForbidden, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
 const HEADERS = {
@@ -75,7 +73,7 @@ const HEADERS = {
 
 export class IndexTable extends Component {
   static getDerivedStateFromProps(props, state) {
-    // Deselct any indices which no longer exist, e.g. they've been deleted.
+    // Deselect any indices which no longer exist, e.g. they've been deleted.
     const { selectedIndicesMap } = state;
     const indexNames = props.indices.map((index) => index.name);
     const selectedIndexNames = Object.keys(selectedIndicesMap);
@@ -109,7 +107,7 @@ export class IndexTable extends Component {
     const { location, filterChanged } = this.props;
     const { filter } = qs.parse((location && location.search) || '');
     if (filter) {
-      const decodedFilter = decodeURIComponent(filter);
+      const decodedFilter = attemptToURIDecode(filter);
 
       try {
         const filter = EuiSearchBar.Query.parse(decodedFilter);
@@ -121,6 +119,11 @@ export class IndexTable extends Component {
   }
 
   componentWillUnmount() {
+    // When you deep-link to an index from the data streams tab, the hidden indices are toggled on.
+    // However, this state is lost when you navigate away. We need to clear the filter too, or else
+    // navigating back to this tab would just show an empty list because the backing indices
+    // would be hidden.
+    this.props.filterChanged('');
     clearInterval(this.interval);
   }
 
@@ -255,7 +258,7 @@ export class IndexTable extends Component {
     const { openDetailPanel, filterChanged, history } = this.props;
 
     if (fieldName === 'health') {
-      return <EuiHealth color={healthToColor(value)}>{value}</EuiHealth>;
+      return <DataHealth health={value} />;
     } else if (fieldName === 'name') {
       return (
         <Fragment>
@@ -276,7 +279,7 @@ export class IndexTable extends Component {
         <EuiLink
           data-test-subj="dataStreamLink"
           {...reactRouterNavigate(history, {
-            pathname: `/data_streams/${encodePathForReactRouter(value)}`,
+            pathname: getDataStreamDetailsLink(value),
             search: '?isDeepLink=true',
           })}
         >
@@ -494,14 +497,28 @@ export class IndexTable extends Component {
             <Fragment>
               <EuiFlexGroup alignItems="center">
                 <EuiFlexItem grow={true}>
-                  <EuiTitle size="s">
-                    <EuiText color="subdued">
-                      <FormattedMessage
-                        id="xpack.idxMgmt.home.idxMgmtDescription"
-                        defaultMessage="Update your Elasticsearch indices individually or in bulk."
-                      />
-                    </EuiText>
-                  </EuiTitle>
+                  <EuiText color="subdued">
+                    <FormattedMessage
+                      id="xpack.idxMgmt.home.idxMgmtDescription"
+                      defaultMessage="Update your Elasticsearch indices individually or in bulk. {learnMoreLink}"
+                      values={{
+                        learnMoreLink: (
+                          <EuiLink
+                            href={documentationService.getIdxMgmtDocumentationLink()}
+                            target="_blank"
+                            external
+                          >
+                            {i18n.translate(
+                              'xpack.idxMgmt.indexTableDescription.learnMoreLinkText',
+                              {
+                                defaultMessage: 'Learn more.',
+                              }
+                            )}
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiText>
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>

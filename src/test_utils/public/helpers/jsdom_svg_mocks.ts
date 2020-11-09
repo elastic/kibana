@@ -17,6 +17,20 @@
  * under the License.
  */
 
+export const setHTMLElementClientSizes = (width: number, height: number) => {
+  const spyWidth = jest.spyOn(window.HTMLElement.prototype, 'clientWidth', 'get');
+  spyWidth.mockReturnValue(width);
+  const spyHeight = jest.spyOn(window.HTMLElement.prototype, 'clientHeight', 'get');
+  spyHeight.mockReturnValue(height);
+
+  return {
+    mockRestore: () => {
+      spyWidth.mockRestore();
+      spyHeight.mockRestore();
+    },
+  };
+};
+
 export const setSVGElementGetBBox = (
   width: number,
   height: number,
@@ -37,6 +51,20 @@ export const setSVGElementGetBBox = (
   return {
     mockRestore: () => {
       SVGElementPrototype.getBBox = originalGetBBox;
+    },
+  };
+};
+
+export const setSVGElementGetComputedTextLength = (width: number) => {
+  const SVGElementPrototype = SVGElement.prototype as any;
+  const originalGetComputedTextLength = SVGElementPrototype.getComputedTextLength;
+
+  // getComputedTextLength is not in the SVGElement.prototype object by default, so we cannot use jest.spyOn for that case
+  SVGElementPrototype.getComputedTextLength = jest.fn(() => width);
+
+  return {
+    mockRestore: () => {
+      SVGElementPrototype.getComputedTextLength = originalGetComputedTextLength;
     },
   };
 };

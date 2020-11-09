@@ -6,6 +6,7 @@
 
 import {
   get,
+  getOr,
   has,
   merge as mergeObject,
   set,
@@ -58,15 +59,18 @@ import {
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderKqlQuery,
+  updateDataProviderType,
   updateDescription,
   updateKqlMode,
   updateProviders,
   updateRange,
   updateSort,
   upsertColumn,
+  updateIndexNames,
   updateTimeline,
   updateTitle,
   updateAutoSaveMsg,
+  setExcludedRowRendererIds,
   setFilters,
   setSavedQueryId,
   startTimelineSaving,
@@ -74,6 +78,7 @@ import {
   createTimeline,
   addTimeline,
   showCallOutUnauthorizedMsg,
+  saveTimeline,
 } from './actions';
 import { ColumnHeaderOptions, TimelineModel } from './model';
 import { epicPersistNote, timelineNoteActionsType } from './epic_note';
@@ -87,18 +92,23 @@ import { ActionTimeline, TimelineEpicDependencies } from './types';
 const timelineActionsType = [
   applyKqlFilterQuery.type,
   addProvider.type,
+  addTimeline.type,
   dataProviderEdited.type,
   removeColumn.type,
   removeProvider.type,
+  saveTimeline.type,
+  setExcludedRowRendererIds.type,
   setFilters.type,
   setSavedQueryId.type,
   updateColumns.type,
   updateDataProviderEnabled.type,
   updateDataProviderExcluded.type,
   updateDataProviderKqlQuery.type,
+  updateDataProviderType.type,
   updateDescription.type,
   updateEventType.type,
   updateKqlMode.type,
+  updateIndexNames.type,
   updateProviders.type,
   updateSort.type,
   updateTitle.type,
@@ -167,15 +177,15 @@ export const createTimelineEpic = <State>(): Epic<
           myEpicTimelineId.setTimelineVersion(addNewTimeline.version);
           myEpicTimelineId.setTemplateTimelineId(addNewTimeline.templateTimelineId);
           myEpicTimelineId.setTemplateTimelineVersion(addNewTimeline.templateTimelineVersion);
-          return true;
+          return getOr(false, 'payload.savedTimeline', action);
         } else if (
           timelineActionsType.includes(action.type) &&
           !timelineObj.isLoading &&
-          isItAtimelineAction(timelineId)
+          isItAtimelineAction(timelineId) &&
+          !get('payload.disableAutoSave', action)
         ) {
           return true;
         }
-        return false;
       }),
       debounceTime(500),
       mergeMap(([action]) => {
@@ -329,9 +339,11 @@ const timelineInput: TimelineInput = {
   dataProviders: null,
   description: null,
   eventType: null,
+  excludedRowRendererIds: null,
   filters: null,
   kqlMode: null,
   kqlQuery: null,
+  indexNames: null,
   title: null,
   timelineType: TimelineType.default,
   templateTimelineVersion: null,

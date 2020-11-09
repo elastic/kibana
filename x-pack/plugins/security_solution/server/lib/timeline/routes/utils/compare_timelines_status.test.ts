@@ -179,8 +179,8 @@ describe('CompareTimelinesStatus', () => {
     });
   });
 
-  describe('template timeline', () => {
-    describe('given template timeline exists', () => {
+  describe('timeline template', () => {
+    describe('given timeline template exists', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
       const mockGetTemplateTimeline: jest.Mock = jest.fn();
 
@@ -249,12 +249,12 @@ describe('CompareTimelinesStatus', () => {
         expect(timelineObj.isUpdatableViaImport).toEqual(true);
       });
 
-      test('should indicate we are handling a template timeline', () => {
+      test('should indicate we are handling a timeline template', () => {
         expect(timelineObj.isHandlingTemplateTimeline).toEqual(true);
       });
     });
 
-    describe('given template timeline does NOT exists', () => {
+    describe('given timeline template does NOT exists', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
       const mockGetTemplateTimeline: jest.Mock = jest.fn();
 
@@ -339,7 +339,7 @@ describe('CompareTimelinesStatus', () => {
         expect(error?.body).toEqual(UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE);
       });
 
-      test('should indicate we are handling a template timeline', () => {
+      test('should indicate we are handling a timeline template', () => {
         expect(timelineObj.isHandlingTemplateTimeline).toEqual(true);
       });
     });
@@ -427,7 +427,7 @@ describe('CompareTimelinesStatus', () => {
       });
     });
 
-    describe('template timeline', () => {
+    describe('timeline template', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
       const mockGetTemplateTimeline: jest.Mock = jest.fn();
       let timelineObj: TimelinesStatusType;
@@ -589,7 +589,7 @@ describe('CompareTimelinesStatus', () => {
       });
     });
 
-    describe('immutable template timeline', () => {
+    describe('immutable timeline template', () => {
       const mockGetTimeline: jest.Mock = jest.fn();
       const mockGetTemplateTimeline: jest.Mock = jest.fn();
       let timelineObj: TimelinesStatusType;
@@ -662,7 +662,7 @@ describe('CompareTimelinesStatus', () => {
     });
   });
 
-  describe('If create template timeline without template timeline id', () => {
+  describe('If create timeline template without timeline template id', () => {
     const mockGetTimeline: jest.Mock = jest.fn();
     const mockGetTemplateTimeline: jest.Mock = jest.fn();
 
@@ -724,7 +724,7 @@ describe('CompareTimelinesStatus', () => {
     });
   });
 
-  describe('Throw error if template timeline version is conflict when update via import', () => {
+  describe('Throw error if timeline template version is conflict when update via import', () => {
     const mockGetTimeline: jest.Mock = jest.fn();
     const mockGetTemplateTimeline: jest.Mock = jest.fn();
 

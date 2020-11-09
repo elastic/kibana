@@ -50,8 +50,6 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   ],
 };
 
-export { kbnBaseUrl } from '../common/kbn_base_url';
-
 class Plugin {
   public setup(core: CoreSetup) {}
 

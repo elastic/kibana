@@ -62,7 +62,12 @@ function CalendarsListHeaderUI({ totalCount, refreshCalendars, kibana }) {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" iconType="refresh" onClick={refreshCalendars}>
+              <EuiButtonEmpty
+                size="s"
+                iconType="refresh"
+                onClick={refreshCalendars}
+                data-test-subj="mlCalendarListRefreshButton"
+              >
                 <FormattedMessage
                   id="xpack.ml.settings.calendars.listHeader.refreshButtonLabel"
                   defaultMessage="Refresh"

@@ -144,7 +144,7 @@ describe('helpers', () => {
         hash: '5a35c984a9cdc1c6a25913f3d0b99b1aefc7257bc3b936c39db9fa0435edeed0',
         imageUrl:
           'https://aws1.discourse-cdn.com/elastic/original/3X/f/8/f8c3d0b9971cfcd0be349d973aa5799f71d280cc.png?blade=securitysolutionfeed',
-        linkUrl: 'https://discuss.elastic.co/c/siem?blade=securitysolutionfeed',
+        linkUrl: 'https://discuss.elastic.co/c/security?blade=securitysolutionfeed',
         publishOn: expect.any(Date),
         title: 'Got SIEM Questions?',
       },
@@ -284,7 +284,7 @@ describe('helpers', () => {
             },
             link_text: null,
             link_url: {
-              en: 'https://discuss.elastic.co/c/siem?blade=securitysolutionfeed',
+              en: 'https://discuss.elastic.co/c/security?blade=securitysolutionfeed',
               ja: translatedLinkUrl,
             },
             languages: null,

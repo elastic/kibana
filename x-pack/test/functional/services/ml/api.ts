@@ -5,21 +5,37 @@
  */
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test/types/ftr';
+import { IndexDocumentParams } from 'elasticsearch';
+import { Calendar, CalendarEvent } from '../../../../plugins/ml/server/models/calendar/index';
+import { Annotation } from '../../../../plugins/ml/common/types/annotations';
 import { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
-
 import { FtrProviderContext } from '../../ftr_provider_context';
-
 import { DATAFEED_STATE, JOB_STATE } from '../../../../plugins/ml/common/constants/states';
-import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/common';
+import { DATA_FRAME_TASK_STATE } from '../../../../plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/analytics_list/data_frame_task_state';
 import { Datafeed, Job } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
-
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
+import {
+  ML_ANNOTATIONS_INDEX_ALIAS_READ,
+  ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+} from '../../../../plugins/ml/common/constants/index_patterns';
+import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+
+interface EsIndexResult {
+  _index: string;
+  _id: string;
+  _version: number;
+  result: string;
+  _shards: any;
+  _seq_no: number;
+  _primary_term: number;
+}
 
 export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const es = getService('legacyEs');
   const log = getService('log');
   const retry = getService('retry');
   const esSupertest = getService('esSupertest');
+  const kbnSupertest = getService('supertest');
 
   return {
     async hasJobResults(jobId: string): Promise<boolean> {
@@ -254,7 +270,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async waitForDFAJobTrainingRecordCountToBePositive(analyticsId: string) {
       await retry.waitForWithTimeout(
         `'${analyticsId}' to have training_docs_count > 0`,
-        10 * 1000,
+        60 * 1000,
         async () => {
           const trainingRecordCount = await this.getDFAJobTrainingRecordCount(analyticsId);
           if (trainingRecordCount > 0) {
@@ -325,19 +341,102 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async getCalendar(calendarId: string) {
-      return await esSupertest.get(`/_ml/calendars/${calendarId}`).expect(200);
+    async getCalendar(calendarId: string, expectedCode = 200) {
+      return await esSupertest.get(`/_ml/calendars/${calendarId}`).expect(expectedCode);
     },
 
-    async createCalendar(calendarId: string, body = { description: '', job_ids: [] }) {
+    async createCalendar(
+      calendarId: string,
+      requestBody: Partial<Calendar> = { description: '', job_ids: [] }
+    ) {
       log.debug(`Creating calendar with id '${calendarId}'...`);
-      await esSupertest.put(`/_ml/calendars/${calendarId}`).send(body).expect(200);
+      await esSupertest.put(`/_ml/calendars/${calendarId}`).send(requestBody).expect(200);
+      await this.waitForCalendarToExist(calendarId);
+    },
 
-      await retry.waitForWithTimeout(`'${calendarId}' to be created`, 30 * 1000, async () => {
-        if (await this.getCalendar(calendarId)) {
+    async deleteCalendar(calendarId: string) {
+      log.debug(`Deleting calendar with id '${calendarId}'...`);
+      await esSupertest.delete(`/_ml/calendars/${calendarId}`);
+
+      await this.waitForCalendarNotToExist(calendarId);
+    },
+
+    async waitForCalendarToExist(calendarId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${calendarId}' to exist`, 5 * 1000, async () => {
+        if (await this.getCalendar(calendarId, 200)) {
           return true;
         } else {
-          throw new Error(`expected calendar '${calendarId}' to be created`);
+          throw new Error(errorMsg || `expected calendar '${calendarId}' to exist`);
+        }
+      });
+    },
+
+    async waitForCalendarNotToExist(calendarId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${calendarId}' to not exist`, 5 * 1000, async () => {
+        if (await this.getCalendar(calendarId, 404)) {
+          return true;
+        } else {
+          throw new Error(errorMsg || `expected calendar '${calendarId}' to not exist`);
+        }
+      });
+    },
+
+    async createCalendarEvents(calendarId: string, events: CalendarEvent[]) {
+      log.debug(`Creating events for calendar with id '${calendarId}'...`);
+      await esSupertest.post(`/_ml/calendars/${calendarId}/events`).send({ events }).expect(200);
+      await this.waitForEventsToExistInCalendar(calendarId, events);
+    },
+
+    async getCalendarEvents(calendarId: string, expectedCode = 200) {
+      return await esSupertest.get(`/_ml/calendars/${calendarId}/events`).expect(expectedCode);
+    },
+
+    assertAllEventsExistInCalendar: (
+      eventsToCheck: CalendarEvent[],
+      calendar: Calendar
+    ): boolean => {
+      const updatedCalendarEvents = calendar.events as CalendarEvent[];
+      let allEventsAreUpdated = true;
+      for (const eventToCheck of eventsToCheck) {
+        // if at least one of the events that we need to check is not in the updated events
+        // no need to continue
+        if (
+          updatedCalendarEvents.findIndex(
+            (updatedEvent) =>
+              updatedEvent.description === eventToCheck.description &&
+              updatedEvent.start_time === eventToCheck.start_time &&
+              updatedEvent.end_time === eventToCheck.end_time
+          ) < 0
+        ) {
+          allEventsAreUpdated = false;
+          break;
+        }
+      }
+      expect(allEventsAreUpdated).to.eql(
+        true,
+        `Expected calendar ${calendar.calendar_id} to contain events ${JSON.stringify(
+          eventsToCheck
+        )}`
+      );
+      return true;
+    },
+
+    async waitForEventsToExistInCalendar(
+      calendarId: string,
+      eventsToCheck: CalendarEvent[],
+      errorMsg?: string
+    ) {
+      await retry.waitForWithTimeout(`'${calendarId}' events to exist`, 5 * 1000, async () => {
+        // validate if calendar events have been updated with the requested events
+        const { body } = await this.getCalendarEvents(calendarId, 200);
+
+        if (this.assertAllEventsExistInCalendar(eventsToCheck, body)) {
+          return true;
+        } else {
+          throw new Error(
+            errorMsg ||
+              `expected events for calendar '${calendarId}' to have been updated correctly`
+          );
         }
       });
     },
@@ -369,13 +468,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createAnomalyDetectionJob(jobConfig: Job) {
       const jobId = jobConfig.job_id;
       log.debug(`Creating anomaly detection job with id '${jobId}'...`);
-      await esSupertest.put(`/_ml/anomaly_detectors/${jobId}`).send(jobConfig).expect(200);
+      await kbnSupertest
+        .put(`/api/ml/anomaly_detectors/${jobId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(jobConfig)
+        .expect(200);
 
       await this.waitForAnomalyDetectionJobToExist(jobId);
     },
 
     async getDatafeed(datafeedId: string) {
       return await esSupertest.get(`/_ml/datafeeds/${datafeedId}`).expect(200);
+      // return await kbnSupertest.get(`/api/ml/datafeeds/${datafeedId}`).expect(200);
     },
 
     async waitForDatafeedToExist(datafeedId: string) {
@@ -391,7 +495,11 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createDatafeed(datafeedConfig: Datafeed) {
       const datafeedId = datafeedConfig.datafeed_id;
       log.debug(`Creating datafeed with id '${datafeedId}'...`);
-      await esSupertest.put(`/_ml/datafeeds/${datafeedId}`).send(datafeedConfig).expect(200);
+      await kbnSupertest
+        .put(`/api/ml/datafeeds/${datafeedId}`)
+        .set(COMMON_REQUEST_HEADERS)
+        .send(datafeedConfig)
+        .expect(200);
 
       await this.waitForDatafeedToExist(datafeedId);
     },
@@ -479,8 +587,9 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createDataFrameAnalyticsJob(jobConfig: DataFrameAnalyticsConfig) {
       const { id: analyticsId, ...analyticsConfig } = jobConfig;
       log.debug(`Creating data frame analytic job with id '${analyticsId}'...`);
-      await esSupertest
-        .put(`/_ml/data_frame/analytics/${analyticsId}`)
+      await kbnSupertest
+        .put(`/api/ml/data_frame/analytics/${analyticsId}`)
+        .set(COMMON_REQUEST_HEADERS)
         .send(analyticsConfig)
         .expect(200);
 
@@ -514,6 +623,136 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
           }
         }
       );
+    },
+
+    async getFilter(filterId: string, expectedCode = 200) {
+      return await esSupertest.get(`/_ml/filters/${filterId}`).expect(expectedCode);
+    },
+
+    async createFilter(filterId: string, requestBody: object) {
+      log.debug(`Creating filter with id '${filterId}'...`);
+      await esSupertest.put(`/_ml/filters/${filterId}`).send(requestBody).expect(200);
+
+      await this.waitForFilterToExist(filterId, `expected filter '${filterId}' to be created`);
+    },
+
+    async deleteFilter(filterId: string) {
+      log.debug(`Deleting filter with id '${filterId}'...`);
+      await esSupertest.delete(`/_ml/filters/${filterId}`);
+
+      await this.waitForFilterToNotExist(filterId, `expected filter '${filterId}' to be deleted`);
+    },
+
+    async waitForFilterToExist(filterId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${filterId}' to exist`, 5 * 1000, async () => {
+        if (await this.getFilter(filterId, 200)) {
+          return true;
+        } else {
+          throw new Error(errorMsg || `expected filter '${filterId}' to exist`);
+        }
+      });
+    },
+
+    async waitForFilterToNotExist(filterId: string, errorMsg?: string) {
+      await retry.waitForWithTimeout(`'${filterId}' to not exist`, 5 * 1000, async () => {
+        if (await this.getFilter(filterId, 404)) {
+          return true;
+        } else {
+          throw new Error(errorMsg || `expected filter '${filterId}' to not exist`);
+        }
+      });
+    },
+
+    async getAnnotations(jobId: string) {
+      log.debug(`Fetching annotations for job '${jobId}'...`);
+
+      const results = await es.search<Annotation>({
+        index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+        body: {
+          query: {
+            match: {
+              job_id: jobId,
+            },
+          },
+        },
+      });
+      expect(results).to.not.be(undefined);
+      expect(results).to.have.property('hits');
+      return results.hits.hits;
+    },
+
+    async getAnnotationById(annotationId: string): Promise<Annotation | undefined> {
+      log.debug(`Fetching annotation '${annotationId}'...`);
+
+      const result = await es.search({
+        index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+        body: {
+          size: 1,
+          query: {
+            match: {
+              _id: annotationId,
+            },
+          },
+        },
+      });
+      // @ts-ignore due to outdated type for hits.total
+      if (result.hits.total.value === 1) {
+        return result?.hits?.hits[0]?._source as Annotation;
+      }
+      return undefined;
+    },
+
+    async indexAnnotation(annotationRequestBody: Partial<Annotation>) {
+      log.debug(`Indexing annotation '${JSON.stringify(annotationRequestBody)}'...`);
+      // @ts-ignore due to outdated type for IndexDocumentParams.type
+      const params: IndexDocumentParams<Partial<Annotation>> = {
+        index: ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
+        body: annotationRequestBody,
+        refresh: 'wait_for',
+      };
+      const results: EsIndexResult = await es.index(params);
+      await this.waitForAnnotationToExist(results._id);
+      return results;
+    },
+
+    async waitForAnnotationToExist(annotationId: string, errorMsg?: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if ((await this.getAnnotationById(annotationId)) !== undefined) {
+          return true;
+        } else {
+          throw new Error(errorMsg ?? `annotation '${annotationId}' should exist`);
+        }
+      });
+    },
+
+    async waitForAnnotationNotToExist(annotationId: string, errorMsg?: string) {
+      await retry.tryForTime(30 * 1000, async () => {
+        if ((await this.getAnnotationById(annotationId)) === undefined) {
+          return true;
+        } else {
+          throw new Error(errorMsg ?? `annotation '${annotationId}' should not exist`);
+        }
+      });
+    },
+
+    async runDFAJob(dfaId: string) {
+      log.debug(`Starting data frame analytics job '${dfaId}'...`);
+      const startResponse = await esSupertest
+        .post(`/_ml/data_frame/analytics/${dfaId}/_start`)
+        .set({ 'Content-Type': 'application/json' })
+        .expect(200)
+        .then((res: any) => res.body);
+
+      expect(startResponse)
+        .to.have.property('acknowledged')
+        .eql(true, 'Response for start data frame analytics job request should be acknowledged');
+    },
+
+    async createAndRunDFAJob(dfaConfig: DataFrameAnalyticsConfig) {
+      await this.createDataFrameAnalyticsJob(dfaConfig);
+      await this.runDFAJob(dfaConfig.id);
+      await this.waitForDFAJobTrainingRecordCountToBePositive(dfaConfig.id);
+      await this.waitForAnalyticsState(dfaConfig.id, DATA_FRAME_TASK_STATE.STOPPED);
     },
   };
 }

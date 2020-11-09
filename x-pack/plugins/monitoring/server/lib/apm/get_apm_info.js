@@ -73,7 +73,7 @@ export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, s
       'hits.hits.inner_hits.first_hit.hits.hits._source.beats_stats.metrics.libbeat.output.write.bytes',
     ],
     body: {
-      sort: { timestamp: { order: 'desc' } },
+      sort: { timestamp: { order: 'desc', unmapped_type: 'long' } },
       query: createQuery({
         start,
         end,
@@ -86,7 +86,7 @@ export async function getApmInfo(req, apmIndexPattern, { clusterUuid, apmUuid, s
         inner_hits: {
           name: 'first_hit',
           size: 1,
-          sort: { 'beats_stats.timestamp': 'asc' },
+          sort: { 'beats_stats.timestamp': { order: 'asc', unmapped_type: 'long' } },
         },
       },
     },

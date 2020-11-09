@@ -15,18 +15,19 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { $ElementType } from 'utility-types';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
+import { getAlertingCapabilities } from '../../alerting/get_alert_capabilities';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { EuiTabLink } from '../../shared/EuiTabLink';
+import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { ServiceOverviewLink } from '../../shared/Links/apm/ServiceOverviewLink';
+import { ServiceInventoryLink } from '../../shared/Links/apm/service_inventory_link';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
 import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { ServiceMap } from '../ServiceMap';
-import { ServiceOverview } from '../ServiceOverview';
+import { ServiceInventory } from '../service_inventory';
 import { TraceOverview } from '../TraceOverview';
-import { RumOverview } from '../RumDashboard';
-import { RumOverviewLink } from '../../shared/Links/apm/RumOverviewLink';
+import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 
 function getHomeTabs({
   serviceMapEnabled = true,
@@ -36,13 +37,13 @@ function getHomeTabs({
   const homeTabs = [
     {
       link: (
-        <ServiceOverviewLink>
+        <ServiceInventoryLink>
           {i18n.translate('xpack.apm.home.servicesTabLabel', {
             defaultMessage: 'Services',
           })}
-        </ServiceOverviewLink>
+        </ServiceInventoryLink>
       ),
-      render: () => <ServiceOverview />,
+      render: () => <ServiceInventory />,
       name: 'services',
     },
     {
@@ -72,18 +73,6 @@ function getHomeTabs({
     });
   }
 
-  homeTabs.push({
-    link: (
-      <RumOverviewLink>
-        {i18n.translate('xpack.apm.home.rumTabLabel', {
-          defaultMessage: 'Real User Monitoring',
-        })}
-      </RumOverviewLink>
-    ),
-    render: () => <RumOverview />,
-    name: 'rum-overview',
-  });
-
   return homeTabs;
 }
 
@@ -92,15 +81,24 @@ const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
 });
 
 interface Props {
-  tab: 'traces' | 'services' | 'service-map' | 'rum-overview';
+  tab: 'traces' | 'services' | 'service-map';
 }
 
 export function Home({ tab }: Props) {
-  const { config } = useApmPluginContext();
+  const { config, core, plugins } = useApmPluginContext();
+  const capabilities = core.application.capabilities;
+  const canAccessML = !!capabilities.ml?.canAccessML;
   const homeTabs = getHomeTabs(config);
   const selectedTab = homeTabs.find(
     (homeTab) => homeTab.name === tab
   ) as $ElementType<typeof homeTabs, number>;
+
+  const {
+    isAlertingAvailable,
+    canReadAlerts,
+    canSaveAlerts,
+    canReadAnomalies,
+  } = getAlertingCapabilities(plugins, core.application.capabilities);
 
   return (
     <div>
@@ -118,6 +116,20 @@ export function Home({ tab }: Props) {
               </EuiButtonEmpty>
             </SettingsLink>
           </EuiFlexItem>
+          {isAlertingAvailable && (
+            <EuiFlexItem grow={false}>
+              <AlertingPopoverAndFlyout
+                canReadAlerts={canReadAlerts}
+                canSaveAlerts={canSaveAlerts}
+                canReadAnomalies={canReadAnomalies}
+              />
+            </EuiFlexItem>
+          )}
+          {canAccessML && (
+            <EuiFlexItem grow={false}>
+              <AnomalyDetectionSetupLink />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <SetupInstructionsLink />
           </EuiFlexItem>

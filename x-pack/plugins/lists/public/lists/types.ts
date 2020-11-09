@@ -14,6 +14,7 @@ export interface ApiParams {
 export type ApiPayload<T extends ApiParams> = Omit<T, 'http' | 'signal'>;
 
 export interface FindListsParams extends ApiParams {
+  cursor?: string | undefined;
   pageSize: number | undefined;
   pageIndex: number | undefined;
 }

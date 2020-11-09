@@ -10,7 +10,11 @@ import {
   GetDataFrameAnalyticsStatsResponseError,
   GetDataFrameAnalyticsStatsResponseOk,
 } from '../../../../../services/ml_api_service/data_frame_analytics';
-import { REFRESH_ANALYTICS_LIST_STATE, refreshAnalyticsList$ } from '../../../../common';
+import {
+  getAnalysisType,
+  REFRESH_ANALYTICS_LIST_STATE,
+  refreshAnalyticsList$,
+} from '../../../../common';
 
 import {
   DATA_FRAME_MODE,
@@ -21,6 +25,7 @@ import {
   isDataFrameAnalyticsStopped,
 } from '../../components/analytics_list/common';
 import { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
+import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 
 export const isGetDataFrameAnalyticsStatsResponseOk = (
   arg: any
@@ -101,7 +106,8 @@ export const getAnalyticsFactory = (
     React.SetStateAction<GetDataFrameAnalyticsStatsResponseError | undefined>
   >,
   setIsInitialized: React.Dispatch<React.SetStateAction<boolean>>,
-  blockRefresh: boolean
+  blockRefresh: boolean,
+  isManagementTable: boolean
 ): GetAnalytics => {
   let concurrentLoads = 0;
 
@@ -117,6 +123,12 @@ export const getAnalyticsFactory = (
       try {
         const analyticsConfigs = await ml.dataFrameAnalytics.getDataFrameAnalytics();
         const analyticsStats = await ml.dataFrameAnalytics.getDataFrameAnalyticsStats();
+
+        let spaces: { [id: string]: string[] } = {};
+        if (isManagementTable) {
+          const allSpaces = await ml.savedObjects.jobsSpaces();
+          spaces = allSpaces['data-frame-analytics'];
+        }
 
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? getAnalyticsJobsStats(analyticsStats)
@@ -136,11 +148,14 @@ export const getAnalyticsFactory = (
 
             // Table with expandable rows requires `id` on the outer most level
             reducedtableRows.push({
+              checkpointing: {},
               config,
               id: config.id,
-              checkpointing: {},
+              job_type: getAnalysisType(config.analysis) as DataFrameAnalysisConfigType,
               mode: DATA_FRAME_MODE.BATCH,
+              state: stats.state,
               stats,
+              spaces: spaces[config.id] ?? [],
             });
             return reducedtableRows;
           },

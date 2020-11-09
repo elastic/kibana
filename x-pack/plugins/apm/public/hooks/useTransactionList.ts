@@ -4,53 +4,25 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo } from 'react';
-import { IUrlParams } from '../context/UrlParamsContext/types';
+import { useParams } from 'react-router-dom';
 import { useUiFilters } from '../context/UrlParamsContext';
-import { useFetcher } from './useFetcher';
+import { IUrlParams } from '../context/UrlParamsContext/types';
 import { APIReturnType } from '../services/rest/createCallApmApi';
-
-const getRelativeImpact = (
-  impact: number,
-  impactMin: number,
-  impactMax: number
-) =>
-  Math.max(
-    ((impact - impactMin) / Math.max(impactMax - impactMin, 1)) * 100,
-    1
-  );
+import { useFetcher } from './useFetcher';
 
 type TransactionsAPIResponse = APIReturnType<
   '/api/apm/services/{serviceName}/transaction_groups'
 >;
 
-function getWithRelativeImpact(items: TransactionsAPIResponse['items']) {
-  const impacts = items
-    .map(({ impact }) => impact)
-    .filter((impact) => impact !== null) as number[];
-
-  const impactMin = Math.min(...impacts);
-  const impactMax = Math.max(...impacts);
-
-  return items.map((item) => {
-    return {
-      ...item,
-      impactRelative:
-        item.impact !== null
-          ? getRelativeImpact(item.impact, impactMin, impactMax)
-          : null,
-    };
-  });
-}
-
-const DEFAULT_RESPONSE: TransactionsAPIResponse = {
-  items: [],
+const DEFAULT_RESPONSE: Partial<TransactionsAPIResponse> = {
+  items: undefined,
   isAggregationAccurate: true,
   bucketSize: 0,
 };
 
 export function useTransactionList(urlParams: IUrlParams) {
-  const { serviceName, transactionType, start, end } = urlParams;
+  const { serviceName } = useParams<{ serviceName?: string }>();
+  const { transactionType, start, end } = urlParams;
   const uiFilters = useUiFilters(urlParams);
   const { data = DEFAULT_RESPONSE, error, status } = useFetcher(
     (callApmApi) => {
@@ -72,16 +44,8 @@ export function useTransactionList(urlParams: IUrlParams) {
     [serviceName, start, end, transactionType, uiFilters]
   );
 
-  const memoizedData = useMemo(
-    () => ({
-      items: getWithRelativeImpact(data.items),
-      isAggregationAccurate: data.isAggregationAccurate,
-      bucketSize: data.bucketSize,
-    }),
-    [data]
-  );
   return {
-    data: memoizedData,
+    data,
     status,
     error,
   };

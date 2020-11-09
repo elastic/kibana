@@ -4,7 +4,7 @@
 
 ## OnPreResponseHandler type
 
-See [OnPreAuthToolkit](./kibana-plugin-core-server.onpreauthtoolkit.md)<!-- -->.
+See [OnPreRoutingToolkit](./kibana-plugin-core-server.onpreroutingtoolkit.md)<!-- -->.
 
 <b>Signature:</b>
 

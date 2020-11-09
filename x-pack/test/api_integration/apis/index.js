@@ -12,7 +12,7 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./security'));
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./monitoring'));
-    loadTestFile(require.resolve('./xpack_main'));
+    loadTestFile(require.resolve('./xpack_legacy'));
     loadTestFile(require.resolve('./features'));
     loadTestFile(require.resolve('./telemetry'));
     loadTestFile(require.resolve('./logstash'));
@@ -26,10 +26,9 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./security_solution'));
     loadTestFile(require.resolve('./short_urls'));
     loadTestFile(require.resolve('./lens'));
-    loadTestFile(require.resolve('./fleet'));
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./transform'));
-    loadTestFile(require.resolve('./endpoint'));
-    loadTestFile(require.resolve('./ingest_manager'));
+    loadTestFile(require.resolve('./lists'));
+    loadTestFile(require.resolve('./upgrade_assistant'));
   });
 }

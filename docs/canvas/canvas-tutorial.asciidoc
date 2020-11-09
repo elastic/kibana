@@ -1,8 +1,8 @@
 [role="xpack"]
 [[canvas-tutorial]]
-== Canvas tutorial
+== Tutorial: Create a workpad for monitoring sales
 
-To get up and running with Canvas, use the following tutorial where you'll create a display for monitoring sales at an eCommerce store.
+To get up and running with Canvas, add the Sample eCommerce orders data, then use the data to create a workpad for monitoring sales at an eCommerce store.
 
 [float]
 === Before you begin
@@ -14,7 +14,7 @@ For this tutorial, you'll need to add the <<add-sample-data, Sample eCommerce or
 
 Your first step to working with Canvas is to create a workpad.
 
-. Open the menu, then go to *Canvas*.
+. Open the main menu, then click *Canvas*.
 
 . On the *Canvas workpads* page, click *Create workpad*.
 
@@ -30,7 +30,7 @@ The default Elastic logo image appears on the page.
 . To replace the Elastic logo with your own image, select the image, then use the editor.
 
 [role="screenshot"]
-image::images/canvas-image-element.png[]
+image::images/canvas-image-element.png[Image showing how to add the image element]
 
 [float]
 === Customize your data with metrics
@@ -70,7 +70,7 @@ You're now looking at the raw data syntax that Canvas uses to display the elemen
 .. Click *Run*.
 
 [role="screenshot"]
-image::images/canvas-metric-element.png[]
+image::images/canvas-metric-element.png[Image showing changes to the Canvas workpad]
 
 [float]
 === Show off your data with charts
@@ -96,7 +96,7 @@ To show what your data can do, add charts, graphs, progress monitors, and more t
 .. From the *Y-axis* drop-down lists, select *Value*, then select *taxless_total_price*.
 
 [role="screenshot"]
-image::images/canvas-chart-element.png[]
+image::images/canvas-chart-element.png[Image showing Canvas workpad with sample data graph]
 
 [float]
 === Show how your data changes over time
@@ -110,22 +110,20 @@ To focus your data on a specific time range, add the time filter.
 . To use the date time field from the sample data, enter `order_date` in the *Column* field, then click *Set*.
 
 [role="screenshot"]
-image::images/canvas-timefilter-element.png[]
+image::images/canvas-timefilter-element.png[Image showing Canvas workpad with filtered sample data graph]
 
 To see how the data changes, set the time filter to *Last 7 days*. As you change the time filter options, the elements automatically update.
 
-Your workpad is now complete!
+Your workpad is complete!
 
 [float]
-=== Next steps
+=== What's next?
 Now that you know the Canvas basics, you're ready to explore on your own.
 
 Here are some things to try:
 
 * Play with the {kibana-ref}/add-sample-data.html[sample Canvas workpads].
 
-* Build presentations of your own live data with <<create-canvas-workpad,workpads>>.
-
-* Learn more about <<add-canvas-elements,elements>> &mdash; the building blocks of your workpad.
+* Build presentations of your own data with <<create-workpads,workpads>>.
 
 * Deep dive into the {kibana-ref}/canvas-function-reference.html[expression language and functions] that drive Canvas.

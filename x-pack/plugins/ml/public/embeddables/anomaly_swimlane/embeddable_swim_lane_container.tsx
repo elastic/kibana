@@ -4,42 +4,53 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useCallback, useState, useEffect } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
 import { CoreStart } from 'kibana/public';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { MlStartDependencies } from '../../plugin';
-import {
-  AnomalySwimlaneEmbeddableInput,
-  AnomalySwimlaneEmbeddableOutput,
-  AnomalySwimlaneServices,
-} from './anomaly_swimlane_embeddable';
+import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SwimlaneType } from '../../application/explorer/explorer_constants';
 import {
   isViewBySwimLaneData,
   SwimlaneContainer,
 } from '../../application/explorer/swimlane_container';
+import { AppStateSelectedCells } from '../../application/explorer/explorer_utils';
+import { MlDependencies } from '../../application/app';
+import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
+import {
+  AnomalySwimlaneEmbeddableInput,
+  AnomalySwimlaneEmbeddableOutput,
+  AnomalySwimlaneServices,
+} from '..';
 
 export interface ExplorerSwimlaneContainerProps {
   id: string;
+  embeddableContext: InstanceType<IAnomalySwimlaneEmbeddable>;
   embeddableInput: Observable<AnomalySwimlaneEmbeddableInput>;
-  services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices];
+  services: [CoreStart, MlDependencies, AnomalySwimlaneServices];
   refresh: Observable<any>;
-  onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
+  onInputChange: (input: Partial<AnomalySwimlaneEmbeddableInput>) => void;
+  onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
 }
 
 export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
   id,
+  embeddableContext,
   embeddableInput,
   services,
   refresh,
   onInputChange,
+  onOutputChange,
 }) => {
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [fromPage, setFromPage] = useState<number>(1);
+
+  const [{}, { uiActions }] = services;
+
+  const [selectedCells, setSelectedCells] = useState<AppStateSelectedCells | undefined>();
 
   const [
     swimlaneType,
@@ -56,6 +67,29 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
     services,
     chartWidth,
     fromPage
+  );
+
+  useEffect(() => {
+    onOutputChange({
+      perPage,
+      fromPage,
+      interval: swimlaneData?.interval,
+    });
+  }, [perPage, fromPage, swimlaneData]);
+
+  const onCellsSelection = useCallback(
+    (update?: AppStateSelectedCells) => {
+      setSelectedCells(update);
+
+      if (update) {
+        uiActions.getTrigger(SWIM_LANE_SELECTION_TRIGGER).exec({
+          embeddable: embeddableContext,
+          data: update,
+          updateCallback: setSelectedCells.bind(null, undefined),
+        });
+      }
+    },
+    [swimlaneData, perPage, fromPage, setSelectedCells]
   );
 
   if (error) {
@@ -82,15 +116,17 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
       data-test-subj="mlAnomalySwimlaneEmbeddableWrapper"
     >
       <SwimlaneContainer
+        id={id}
+        data-test-subj={`mlSwimLaneEmbeddable_${embeddableContext.id}`}
         timeBuckets={timeBuckets}
         swimlaneData={swimlaneData!}
         swimlaneType={swimlaneType as SwimlaneType}
         fromPage={fromPage}
         perPage={perPage}
         swimlaneLimit={isViewBySwimLaneData(swimlaneData) ? swimlaneData.cardinality : undefined}
-        onResize={(width) => {
-          setChartWidth(width);
-        }}
+        onResize={setChartWidth}
+        selection={selectedCells}
+        onCellsSelection={onCellsSelection}
         onPaginationChange={(update) => {
           if (update.fromPage) {
             setFromPage(update.fromPage);
@@ -111,3 +147,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
     </div>
   );
 };
+
+// required for dynamic import using React.lazy()
+// eslint-disable-next-line import/no-default-export
+export default EmbeddableSwimLaneContainer;

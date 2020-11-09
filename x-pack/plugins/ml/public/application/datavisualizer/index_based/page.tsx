@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { FC, Fragment, useEffect, useState } from 'react';
+import React, { FC, Fragment, useEffect, useMemo, useState } from 'react';
 import { merge } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 
@@ -31,6 +31,7 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { SavedSearchSavedObject } from '../../../../common/types/kibana';
 import { NavigationMenu } from '../../components/navigation_menu';
+import { DatePickerWrapper } from '../../components/navigation_menu/date_picker_wrapper';
 import { ML_JOB_FIELD_TYPES } from '../../../../common/constants/field_types';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
 import { isFullLicense } from '../../license';
@@ -43,6 +44,7 @@ import { kbnTypeToMLJobType } from '../../util/field_types_utils';
 import { useTimefilter } from '../../contexts/kibana';
 import { timeBasedIndexCheck, getQueryFromSavedSearch } from '../../util/index_utils';
 import { getTimeBucketsFromCache } from '../../util/time_buckets';
+import { getToastNotifications } from '../../util/dependency_cache';
 import { useUrlState } from '../../util/url_state';
 import { FieldRequestConfig, FieldVisConfig } from './common';
 import { ActionsPanel } from './components/actions_panel';
@@ -107,7 +109,10 @@ export const Page: FC = () => {
     autoRefreshSelector: true,
   });
 
-  const dataLoader = new DataLoader(currentIndexPattern, kibanaConfig);
+  const dataLoader = useMemo(() => new DataLoader(currentIndexPattern, getToastNotifications()), [
+    currentIndexPattern,
+  ]);
+
   const [globalState, setGlobalState] = useUrlState('_g');
   useEffect(() => {
     if (globalState?.time !== undefined) {
@@ -343,7 +348,7 @@ export const Page: FC = () => {
         earliest,
         latest,
         existMetricFields,
-        aggInterval.expression
+        aggInterval.asMilliseconds()
       );
 
       // Add the metric stats to the existing stats in the corresponding config.
@@ -502,7 +507,7 @@ export const Page: FC = () => {
       if (fieldData !== undefined) {
         const metricConfig: FieldVisConfig = {
           ...fieldData,
-          fieldFormat: field.format,
+          fieldFormat: currentIndexPattern.getFormatterForField(field),
           type: ML_JOB_FIELD_TYPES.NUMBER,
           loading: true,
           aggregatable: true,
@@ -612,7 +617,7 @@ export const Page: FC = () => {
 
       const nonMetricConfig = {
         ...fieldData,
-        fieldFormat: field.format,
+        fieldFormat: currentIndexPattern.getFormatterForField(field),
         aggregatable: field.aggregatable,
         scripted: field.scripted,
         loading: fieldData.existsInDocs,
@@ -651,20 +656,24 @@ export const Page: FC = () => {
                     <h1>{currentIndexPattern.title}</h1>
                   </EuiTitle>
                 </EuiPageContentHeaderSection>
-                {currentIndexPattern.timeFieldName !== undefined && (
-                  <EuiPageContentHeaderSection data-test-subj="mlDataVisualizerTimeRangeSelectorSection">
-                    <FullTimeRangeSelector
-                      indexPattern={currentIndexPattern}
-                      query={combinedQuery}
-                      disabled={false}
-                    />
-                  </EuiPageContentHeaderSection>
-                )}
+                <EuiPageContentHeaderSection data-test-subj="mlDataVisualizerTimeRangeSelectorSection">
+                  <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="s">
+                    {currentIndexPattern.timeFieldName !== undefined && (
+                      <EuiFlexItem grow={false}>
+                        <FullTimeRangeSelector
+                          indexPattern={currentIndexPattern}
+                          query={combinedQuery}
+                          disabled={false}
+                        />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem grow={false}>
+                      <DatePickerWrapper />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPageContentHeaderSection>
               </EuiPageContentHeader>
             </EuiFlexItem>
-            {showActionsPanel === true && (
-              <EuiFlexItem grow={false} style={{ width: wizardPanelWidth }} />
-            )}
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiPageContentBody>

@@ -18,17 +18,18 @@
  */
 
 import _ from 'lodash';
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { KibanaContextProvider } from '../../../../kibana_react/public';
 import { QueryStart, SavedQuery } from '../../query';
-import { SearchBarOwnProps, SearchBar } from './search_bar';
+import { SearchBar, SearchBarOwnProps } from './';
 import { useFilterManager } from './lib/use_filter_manager';
 import { useTimefilter } from './lib/use_timefilter';
 import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
-import { Filter, Query, TimeRange, UI_SETTINGS } from '../../../common';
+import { Filter, Query, TimeRange } from '../../../common';
+import { useQueryStringManager } from './lib/use_query_string_manager';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -65,8 +66,7 @@ const defaultOnRefreshChange = (queryService: QueryStart) => {
 const defaultOnQuerySubmit = (
   props: StatefulSearchBarProps,
   queryService: QueryStart,
-  currentQuery: Query,
-  setQueryStringState: Function
+  currentQuery: Query
 ) => {
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
 
@@ -78,7 +78,11 @@ const defaultOnQuerySubmit = (
       !_.isEqual(payload.query, currentQuery);
     if (isUpdate) {
       timefilter.setTime(payload.dateRange);
-      setQueryStringState(payload.query);
+      if (payload.query) {
+        queryService.queryString.setQuery(payload.query);
+      } else {
+        queryService.queryString.clearQuery();
+      }
     } else {
       // Refresh button triggered for an update
       if (props.onQuerySubmit)
@@ -121,36 +125,17 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
   return (props: StatefulSearchBarProps) => {
     const { useDefaultBehaviors } = props;
     // Handle queries
-    const queryRef = useRef(props.query);
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
-    const defaultQuery = {
-      query: '',
-      language:
-        storage.get('kibana.userQueryLanguage') ||
-        core.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
-    };
-    const [query, setQuery] = useState<Query>(props.query || defaultQuery);
-
-    useEffect(() => {
-      if (props.query !== queryRef.current) {
-        queryRef.current = props.query;
-        setQuery(props.query || defaultQuery);
-      }
-      /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [defaultQuery, props.query]);
-
-    useEffect(() => {
-      if (props.onQuerySubmit !== onQuerySubmitRef.current) {
-        onQuerySubmitRef.current = props.onQuerySubmit;
-      }
-      /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    }, [props.onQuerySubmit]);
 
     // handle service state updates.
     // i.e. filters being added from a visualization directly to filterManager.
     const { filters } = useFilterManager({
       filters: props.filters,
       filterManager: data.query.filterManager,
+    });
+    const { query } = useQueryStringManager({
+      query: props.query,
+      queryStringManager: data.query.queryString,
     });
     const { timeRange, refreshInterval } = useTimefilter({
       dateRangeFrom: props.dateRangeFrom,
@@ -163,10 +148,8 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
     // Fetch and update UI from saved query
     const { savedQuery, setSavedQuery, clearSavedQuery } = useSavedQuery({
       queryService: data.query,
-      setQuery,
       savedQueryId: props.savedQueryId,
       notifications: core.notifications,
-      defaultLanguage: defaultQuery.language,
     });
 
     // Fire onQuerySubmit on query or timerange change
@@ -210,7 +193,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
-          onQuerySubmit={defaultOnQuerySubmit(props, data.query, query, setQuery)}
+          onQuerySubmit={defaultOnQuerySubmit(props, data.query, query)}
           onClearSavedQuery={defaultOnClearSavedQuery(props, clearSavedQuery)}
           onSavedQueryUpdated={defaultOnSavedQueryUpdated(props, setSavedQuery)}
           onSaved={defaultOnSavedQueryUpdated(props, setSavedQuery)}

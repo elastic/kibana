@@ -29,19 +29,21 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_SUMMARY_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
+  UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
 } from '../../../../../../common/constants';
-import { SendRequestResponse } from '../../../../../shared_imports';
+import { UseRequestResponse } from '../../../../../shared_imports';
 import { TemplateDeleteModal, SectionLoading, SectionError, Error } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
-import { decodePathFromReactRouter } from '../../../../services/routing';
 import { useServices } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
-import { TabSummary } from './tabs';
+import { TemplateTypeIndicator } from '../components';
+import { TabSummary, TabPreview } from './tabs';
 
 const SUMMARY_TAB_ID = 'summary';
 const MAPPINGS_TAB_ID = 'mappings';
 const ALIASES_TAB_ID = 'aliases';
 const SETTINGS_TAB_ID = 'settings';
+const PREVIEW_TAB_ID = 'preview';
 
 const TABS = [
   {
@@ -68,6 +70,12 @@ const TABS = [
       defaultMessage: 'Aliases',
     }),
   },
+  {
+    id: PREVIEW_TAB_ID,
+    name: i18n.translate('xpack.idxMgmt.templateDetails.previewTabTitle', {
+      defaultMessage: 'Preview',
+    }),
+  },
 ];
 
 const tabToUiMetricMap: { [key: string]: string } = {
@@ -75,6 +83,7 @@ const tabToUiMetricMap: { [key: string]: string } = {
   [SETTINGS_TAB_ID]: UIM_TEMPLATE_DETAIL_PANEL_SETTINGS_TAB,
   [MAPPINGS_TAB_ID]: UIM_TEMPLATE_DETAIL_PANEL_MAPPINGS_TAB,
   [ALIASES_TAB_ID]: UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
+  [PREVIEW_TAB_ID]: UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
 };
 
 export interface Props {
@@ -82,7 +91,7 @@ export interface Props {
   onClose: () => void;
   editTemplate: (name: string, isLegacy?: boolean) => void;
   cloneTemplate: (name: string, isLegacy?: boolean) => void;
-  reload: () => Promise<SendRequestResponse>;
+  reload: UseRequestResponse['resendRequest'];
 }
 
 export const TemplateDetailsContent = ({
@@ -93,12 +102,8 @@ export const TemplateDetailsContent = ({
   reload,
 }: Props) => {
   const { uiMetricService } = useServices();
-  const decodedTemplateName = decodePathFromReactRouter(templateName);
-  const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(
-    decodedTemplateName,
-    isLegacy
-  );
-  const isCloudManaged = templateDetails?._kbnMeta.isCloudManaged ?? false;
+  const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(templateName, isLegacy);
+  const isCloudManaged = templateDetails?._kbnMeta.type === 'cloudManaged';
   const [templateToDelete, setTemplateToDelete] = useState<
     Array<{ name: string; isLegacy?: boolean }>
   >([]);
@@ -110,7 +115,13 @@ export const TemplateDetailsContent = ({
       <EuiFlyoutHeader>
         <EuiTitle size="m">
           <h2 id="templateDetailsFlyoutTitle" data-test-subj="title">
-            {decodedTemplateName}
+            {templateName}
+            {templateDetails && (
+              <>
+                &nbsp;
+                <TemplateTypeIndicator templateType={templateDetails._kbnMeta.type} />
+              </>
+            )}
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -145,15 +156,14 @@ export const TemplateDetailsContent = ({
     }
 
     if (templateDetails) {
-      const {
-        template: { settings, mappings, aliases },
-      } = templateDetails;
+      const { template: { settings, mappings, aliases } = {} } = templateDetails;
 
       const tabToComponentMap: Record<string, React.ReactNode> = {
         [SUMMARY_TAB_ID]: <TabSummary templateDetails={templateDetails} />,
         [SETTINGS_TAB_ID]: <TabSettings settings={settings} />,
         [MAPPINGS_TAB_ID]: <TabMappings mappings={mappings} />,
         [ALIASES_TAB_ID]: <TabAliases aliases={aliases} />,
+        [PREVIEW_TAB_ID]: <TabPreview templateDetails={templateDetails} />,
       };
 
       const tabContent = tabToComponentMap[activeTab];
@@ -163,16 +173,16 @@ export const TemplateDetailsContent = ({
           <EuiCallOut
             title={
               <FormattedMessage
-                id="xpack.idxMgmt.templateDetails.managedTemplateInfoTitle"
-                defaultMessage="Editing a managed template is not permitted"
+                id="xpack.idxMgmt.templateDetails.cloudManagedTemplateInfoTitle"
+                defaultMessage="Editing a cloud-managed template is not permitted."
               />
             }
             color="primary"
             size="s"
           >
             <FormattedMessage
-              id="xpack.idxMgmt.templateDetails.managedTemplateInfoDescription"
-              defaultMessage="Managed templates are critical for internal operations."
+              id="xpack.idxMgmt.templateDetails.cloudManagedTemplateInfoDescription"
+              defaultMessage="Cloud-managed templates are critical for internal operations."
             />
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -184,7 +194,13 @@ export const TemplateDetailsContent = ({
           {managedTemplateCallout}
 
           <EuiTabs>
-            {TABS.map((tab) => (
+            {TABS.filter((tab) => {
+              // Legacy index templates don't have the "simulate" template API
+              if (isLegacy && tab.id === PREVIEW_TAB_ID) {
+                return false;
+              }
+              return true;
+            }).map((tab) => (
               <EuiTab
                 onClick={() => {
                   uiMetricService.trackMetric('click', tabToUiMetricMap[tab.id]);
@@ -246,7 +262,6 @@ export const TemplateDetailsContent = ({
                 isOpen={isPopoverOpen}
                 closePopover={() => setIsPopOverOpen(false)}
                 panelPaddingSize="none"
-                withTitle
                 anchorPosition="rightUp"
                 repositionOnScroll
               >
@@ -282,8 +297,7 @@ export const TemplateDetailsContent = ({
                             defaultMessage: 'Delete',
                           }),
                           icon: 'trash',
-                          onClick: () =>
-                            setTemplateToDelete([{ name: decodedTemplateName, isLegacy }]),
+                          onClick: () => setTemplateToDelete([{ name: templateName, isLegacy }]),
                           disabled: isCloudManaged,
                         },
                       ],

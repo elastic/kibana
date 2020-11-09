@@ -12,33 +12,35 @@ import {
   ExceptionListSchema,
   ExceptionListSoSchema,
   ExceptionListType,
+  Immutable,
   ListId,
   MetaOrUndefined,
   Name,
   NamespaceType,
   Tags,
-  _Tags,
+  Version,
 } from '../../../common/schemas';
 
 import { getSavedObjectType, transformSavedObjectToExceptionList } from './utils';
 
 interface CreateExceptionListOptions {
-  _tags: _Tags;
   listId: ListId;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
   name: Name;
   description: Description;
+  immutable: Immutable;
   meta: MetaOrUndefined;
   user: string;
   tags: Tags;
   tieBreaker?: string;
   type: ExceptionListType;
+  version: Version;
 }
 
 export const createExceptionList = async ({
-  _tags,
   listId,
+  immutable,
   savedObjectsClient,
   namespaceType,
   name,
@@ -48,25 +50,28 @@ export const createExceptionList = async ({
   tags,
   tieBreaker,
   type,
+  version,
 }: CreateExceptionListOptions): Promise<ExceptionListSchema> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const dateNow = new Date().toISOString();
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
-    _tags,
     comments: undefined,
     created_at: dateNow,
     created_by: user,
     description,
     entries: undefined,
+    immutable,
     item_id: undefined,
     list_id: listId,
     list_type: 'list',
     meta,
     name,
+    os_types: [],
     tags,
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,
     updated_by: user,
+    version,
   });
-  return transformSavedObjectToExceptionList({ namespaceType, savedObject });
+  return transformSavedObjectToExceptionList({ savedObject });
 };

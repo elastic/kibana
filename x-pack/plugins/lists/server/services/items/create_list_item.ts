@@ -9,16 +9,21 @@ import { CreateDocumentResponse } from 'elasticsearch';
 import { LegacyAPICaller } from 'kibana/server';
 
 import {
+  DeserializerOrUndefined,
   IdOrUndefined,
   IndexEsListItemSchema,
   ListItemSchema,
   MetaOrUndefined,
+  SerializerOrUndefined,
   Type,
 } from '../../../common/schemas';
 import { transformListItemToElasticQuery } from '../utils';
+import { encodeHitVersion } from '../utils/encode_hit_version';
 
 export interface CreateListItemOptions {
+  deserializer: DeserializerOrUndefined;
   id: IdOrUndefined;
+  serializer: SerializerOrUndefined;
   listId: string;
   type: Type;
   value: string;
@@ -31,7 +36,9 @@ export interface CreateListItemOptions {
 }
 
 export const createListItem = async ({
+  deserializer,
   id,
+  serializer,
   listId,
   type,
   value,
@@ -41,33 +48,41 @@ export const createListItem = async ({
   meta,
   dateNow,
   tieBreaker,
-}: CreateListItemOptions): Promise<ListItemSchema> => {
+}: CreateListItemOptions): Promise<ListItemSchema | null> => {
   const createdAt = dateNow ?? new Date().toISOString();
   const tieBreakerId = tieBreaker ?? uuid.v4();
   const baseBody = {
     created_at: createdAt,
     created_by: user,
+    deserializer,
     list_id: listId,
     meta,
+    serializer,
     tie_breaker_id: tieBreakerId,
     updated_at: createdAt,
     updated_by: user,
   };
-  const body: IndexEsListItemSchema = {
-    ...baseBody,
-    ...transformListItemToElasticQuery({ type, value }),
-  };
+  const elasticQuery = transformListItemToElasticQuery({ serializer, type, value });
+  if (elasticQuery != null) {
+    const body: IndexEsListItemSchema = {
+      ...baseBody,
+      ...elasticQuery,
+    };
+    const response = await callCluster<CreateDocumentResponse>('index', {
+      body,
+      id,
+      index: listItemIndex,
+      refresh: 'wait_for',
+    });
 
-  const response = await callCluster<CreateDocumentResponse>('index', {
-    body,
-    id,
-    index: listItemIndex,
-  });
-
-  return {
-    id: response._id,
-    type,
-    value,
-    ...baseBody,
-  };
+    return {
+      _version: encodeHitVersion(response),
+      id: response._id,
+      type,
+      value,
+      ...baseBody,
+    };
+  } else {
+    return null;
+  }
 };

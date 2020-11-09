@@ -63,7 +63,7 @@ export interface Workspace {
   nodesMap: Record<string, WorkspaceNode>;
   nodes: WorkspaceNode[];
   edges: WorkspaceEdge[];
-  blacklistedNodes: WorkspaceNode[];
+  blocklistedNodes: WorkspaceNode[];
 
   getQuery(startNodes?: WorkspaceNode[], loose?: boolean): JsonObject;
   getSelectedOrAllNodes(): WorkspaceNode[];

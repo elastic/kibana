@@ -148,13 +148,15 @@ export class Join extends Component {
         </EuiFlexItem>
       );
       globalFilterCheckbox = (
-        <GlobalFilterCheckbox
-          applyGlobalQuery={right.applyGlobalQuery}
-          setApplyGlobalQuery={this._onApplyGlobalQueryChange}
-          label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
-            defaultMessage: `Apply global filter to join`,
-          })}
-        />
+        <EuiFlexItem>
+          <GlobalFilterCheckbox
+            applyGlobalQuery={right.applyGlobalQuery}
+            setApplyGlobalQuery={this._onApplyGlobalQueryChange}
+            label={i18n.translate('xpack.maps.layerPanel.join.applyGlobalQueryCheckboxLabel', {
+              defaultMessage: `Apply global filter to join`,
+            })}
+          />
+        </EuiFlexItem>
       );
     }
 

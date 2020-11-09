@@ -17,12 +17,9 @@
  * under the License.
  */
 
-import { relative } from 'path';
-
-import dedent from 'dedent';
 import getopts from 'getopts';
 
-import { Options } from './run';
+import { RunOptions } from './run';
 
 export interface Flags {
   verbose: boolean;
@@ -36,23 +33,52 @@ export interface Flags {
   [key: string]: undefined | boolean | string | string[];
 }
 
-export function getFlags(argv: string[], options: Options): Flags {
+export interface FlagOptions {
+  allowUnexpected?: boolean;
+  guessTypesForUnexpectedFlags?: boolean;
+  help?: string;
+  alias?: { [key: string]: string | string[] };
+  boolean?: string[];
+  string?: string[];
+  default?: { [key: string]: any };
+}
+
+export function mergeFlagOptions(global: FlagOptions = {}, local: FlagOptions = {}): FlagOptions {
+  return {
+    alias: {
+      ...global.alias,
+      ...local.alias,
+    },
+    boolean: [...(global.boolean || []), ...(local.boolean || [])],
+    string: [...(global.string || []), ...(local.string || [])],
+    default: {
+      ...global.default,
+      ...local.default,
+    },
+
+    help: local.help,
+
+    allowUnexpected: !!(global.allowUnexpected || local.allowUnexpected),
+    guessTypesForUnexpectedFlags: !!(global.allowUnexpected || local.allowUnexpected),
+  };
+}
+
+export function getFlags(argv: string[], flagOptions: RunOptions['flags'] = {}): Flags {
   const unexpectedNames = new Set<string>();
-  const flagOpts = options.flags || {};
 
   const { verbose, quiet, silent, debug, help, _, ...others } = getopts(argv, {
-    string: flagOpts.string,
-    boolean: [...(flagOpts.boolean || []), 'verbose', 'quiet', 'silent', 'debug', 'help'],
+    string: flagOptions.string,
+    boolean: [...(flagOptions.boolean || []), 'verbose', 'quiet', 'silent', 'debug', 'help'],
     alias: {
-      ...(flagOpts.alias || {}),
+      ...flagOptions.alias,
       v: 'verbose',
     },
-    default: flagOpts.default,
+    default: flagOptions.default,
     unknown: (name: string) => {
       unexpectedNames.add(name);
-      return flagOpts.guessTypesForUnexpectedFlags;
+      return !!flagOptions.guessTypesForUnexpectedFlags;
     },
-  } as any);
+  });
 
   const unexpected: string[] = [];
   for (const unexpectedName of unexpectedNames) {
@@ -118,33 +144,4 @@ export function getFlags(argv: string[], options: Options): Flags {
     unexpected,
     ...others,
   };
-}
-
-export function getHelp(options: Options) {
-  const usage = options.usage || `node ${relative(process.cwd(), process.argv[1])}`;
-
-  const optionHelp = (
-    dedent(options?.flags?.help || '') +
-    '\n' +
-    dedent`
-      --verbose, -v      Log verbosely
-      --debug            Log debug messages (less than verbose)
-      --quiet            Only log errors
-      --silent           Don't log anything
-      --help             Show this message
-    `
-  )
-    .split('\n')
-    .filter(Boolean)
-    .join('\n    ');
-
-  return `
-  ${usage}
-
-  ${dedent(options.description || 'Runs a dev task')
-    .split('\n')
-    .join('\n  ')}
-
-  Options:
-    ${optionHelp + '\n\n'}`;
 }

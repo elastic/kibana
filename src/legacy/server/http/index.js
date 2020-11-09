@@ -18,27 +18,17 @@
  */
 
 import { format } from 'url';
-import _ from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 
 import { registerHapiPlugins } from './register_hapi_plugins';
 import { setupBasePathProvider } from './setup_base_path_provider';
 
-export default async function (kbnServer, server, config) {
+export default async function (kbnServer, server) {
   server = kbnServer.server;
 
   setupBasePathProvider(kbnServer);
 
   await registerHapiPlugins(server);
-
-  // helper for creating view managers for servers
-  server.decorate('server', 'setupViews', function (path, engines) {
-    this.views({
-      path: path,
-      isCached: config.get('optimize.viewCaching'),
-      engines: _.assign({ pug: require('pug') }, engines || {}),
-    });
-  });
 
   server.route({
     method: 'GET',

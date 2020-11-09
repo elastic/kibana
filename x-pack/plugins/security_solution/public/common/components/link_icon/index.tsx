@@ -6,16 +6,16 @@
 
 import { EuiIcon, EuiLink, IconSize, IconType } from '@elastic/eui';
 import { LinkAnchorProps } from '@elastic/eui/src/components/link/link';
-import React from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import styled, { css } from 'styled-components';
 
 interface LinkProps {
+  ariaLabel?: string;
   color?: LinkAnchorProps['color'];
   disabled?: boolean;
   href?: string;
   iconSide?: 'left' | 'right';
   onClick?: Function;
-  ariaLabel?: string;
 }
 
 export const Link = styled(({ iconSide, children, ...rest }) => (
@@ -47,7 +47,7 @@ export const Link = styled(({ iconSide, children, ...rest }) => (
 Link.displayName = 'Link';
 
 export interface LinkIconProps extends LinkProps {
-  children: string;
+  children: string | ReactNode;
   iconSize?: IconSize;
   iconType: IconType;
   dataTestSubj?: string;
@@ -55,6 +55,7 @@ export interface LinkIconProps extends LinkProps {
 
 export const LinkIcon = React.memo<LinkIconProps>(
   ({
+    ariaLabel,
     children,
     color,
     dataTestSubj,
@@ -64,21 +65,41 @@ export const LinkIcon = React.memo<LinkIconProps>(
     iconSize = 's',
     iconType,
     onClick,
-    ariaLabel,
-  }) => (
-    <Link
-      className="siemLinkIcon"
-      color={color}
-      data-test-subj={dataTestSubj}
-      disabled={disabled}
-      href={href}
-      iconSide={iconSide}
-      onClick={onClick}
-      aria-label={ariaLabel ?? children}
-    >
-      <EuiIcon size={iconSize} type={iconType} />
-      <span className="siemLinkIcon__label">{children}</span>
-    </Link>
-  )
+  }) => {
+    const getChildrenString = useCallback((theChild: string | ReactNode): string => {
+      if (
+        typeof theChild === 'object' &&
+        theChild != null &&
+        'props' in theChild &&
+        theChild.props &&
+        theChild.props.children
+      ) {
+        return getChildrenString(theChild.props.children);
+      }
+      return theChild != null && Object.keys(theChild).length > 0 ? (theChild as string) : '';
+    }, []);
+    const aria = useMemo(() => {
+      if (ariaLabel) {
+        return ariaLabel;
+      }
+      return getChildrenString(children);
+    }, [ariaLabel, children, getChildrenString]);
+
+    return (
+      <Link
+        className="siemLinkIcon"
+        color={color}
+        data-test-subj={dataTestSubj}
+        disabled={disabled}
+        href={href}
+        iconSide={iconSide}
+        onClick={onClick}
+        aria-label={aria}
+      >
+        <EuiIcon size={iconSize} type={iconType} />
+        <span className="siemLinkIcon__label">{children}</span>
+      </Link>
+    );
+  }
 );
 LinkIcon.displayName = 'LinkIcon';

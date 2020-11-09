@@ -28,6 +28,7 @@ import { ActionInternal, Action, ActionDefinition, ActionContext } from '../acti
 import { Trigger, TriggerContext } from '../triggers/trigger';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import { TriggerContract } from '../triggers/trigger_contract';
+import { UiActionsExecutionService } from './ui_actions_execution_service';
 
 export interface UiActionsServiceParams {
   readonly triggers?: TriggerRegistry;
@@ -40,6 +41,7 @@ export interface UiActionsServiceParams {
 }
 
 export class UiActionsService {
+  public readonly executionService = new UiActionsExecutionService();
   protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;
@@ -97,6 +99,10 @@ export class UiActionsService {
     this.actions.delete(actionId);
   };
 
+  public readonly hasAction = (actionId: string): boolean => {
+    return this.actions.has(actionId);
+  };
+
   public readonly attachAction = <T extends TriggerId>(triggerId: T, actionId: string): void => {
     const trigger = this.triggers.get(triggerId);
 
@@ -140,7 +146,7 @@ export class UiActionsService {
     triggerId: T,
     // The action can accept partial or no context, but if it needs context not provided
     // by this type of trigger, typescript will complain. yay!
-    action: Action<TriggerContextMapping[T]>
+    action: ActionDefinition<TriggerContextMapping[T]> | Action<TriggerContextMapping[T]> // TODO: remove `Action` https://github.com/elastic/kibana/issues/74501
   ): void => {
     if (!this.actions.has(action.id)) this.registerAction(action);
     this.attachAction(triggerId, action.id);
@@ -176,7 +182,14 @@ export class UiActionsService {
     context: TriggerContextMapping[T]
   ): Promise<Array<Action<TriggerContextMapping[T]>>> => {
     const actions = this.getTriggerActions!(triggerId);
-    const isCompatibles = await Promise.all(actions.map((action) => action.isCompatible(context)));
+    const isCompatibles = await Promise.all(
+      actions.map((action) =>
+        action.isCompatible({
+          ...context,
+          trigger: this.getTrigger(triggerId),
+        })
+      )
+    );
     return actions.reduce(
       (acc: Array<Action<TriggerContextMapping[T]>>, action, i) =>
         isCompatibles[i] ? [...acc, action] : acc,

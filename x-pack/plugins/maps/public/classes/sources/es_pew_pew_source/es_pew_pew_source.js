@@ -5,16 +5,18 @@
  */
 
 import React from 'react';
-import uuid from 'uuid/v4';
+import turfBbox from '@turf/bbox';
+import { multiPoint } from '@turf/helpers';
 
 import { UpdateSourceEditor } from './update_source_editor';
 import { i18n } from '@kbn/i18n';
 import { SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { convertToLines } from './convert_to_lines';
-import { AbstractESAggSource, DEFAULT_METRIC } from '../es_agg_source';
-import { indexPatterns } from '../../../../../../../src/plugins/data/public';
+import { AbstractESAggSource } from '../es_agg_source';
 import { registerSource } from '../source_registry';
+import { turfBboxToBounds } from '../../../../common/elasticsearch_util';
+import { DataRequestAbortError } from '../../util/data_request';
 
 const MAX_GEOTILE_LEVEL = 29;
 
@@ -25,14 +27,14 @@ export const sourceTitle = i18n.translate('xpack.maps.source.pewPewTitle', {
 export class ESPewPewSource extends AbstractESAggSource {
   static type = SOURCE_TYPES.ES_PEW_PEW;
 
-  static createDescriptor({ indexPatternId, sourceGeoField, destGeoField, metrics }) {
+  static createDescriptor(descriptor) {
+    const normalizedDescriptor = AbstractESAggSource.createDescriptor(descriptor);
     return {
+      ...normalizedDescriptor,
       type: ESPewPewSource.type,
-      id: uuid(),
-      indexPatternId: indexPatternId,
-      sourceGeoField,
-      destGeoField,
-      metrics: metrics ? metrics : [DEFAULT_METRIC],
+      indexPatternId: descriptor.indexPatternId,
+      sourceGeoField: descriptor.sourceGeoField,
+      destGeoField: descriptor.destGeoField,
     };
   }
 
@@ -51,7 +53,7 @@ export class ESPewPewSource extends AbstractESAggSource {
     return true;
   }
 
-  isJoinable() {
+  showJoinEditor() {
     return false;
   }
 
@@ -158,27 +160,67 @@ export class ESPewPewSource extends AbstractESAggSource {
     };
   }
 
-  async _getGeoField() {
-    const indexPattern = await this.getIndexPattern();
-    const field = indexPattern.fields.getByName(this._descriptor.destGeoField);
-    const geoField = indexPatterns.isNestedField(field) ? undefined : field;
-    if (!geoField) {
-      throw new Error(
-        i18n.translate('xpack.maps.source.esSource.noGeoFieldErrorMessage', {
-          defaultMessage: `Index pattern {indexPatternTitle} no longer contains the geo field {geoField}`,
-          values: { indexPatternTitle: indexPattern.title, geoField: this._descriptor.geoField },
-        })
-      );
+  getGeoFieldName() {
+    return this._descriptor.destGeoField;
+  }
+
+  async getBoundsForFilters(boundsFilters, registerCancelCallback) {
+    const searchSource = await this.makeSearchSource(boundsFilters, 0);
+    searchSource.setField('aggs', {
+      destFitToBounds: {
+        geo_bounds: {
+          field: this._descriptor.destGeoField,
+        },
+      },
+      sourceFitToBounds: {
+        geo_bounds: {
+          field: this._descriptor.sourceGeoField,
+        },
+      },
+    });
+
+    const corners = [];
+    try {
+      const abortController = new AbortController();
+      registerCancelCallback(() => abortController.abort());
+      const esResp = await searchSource.fetch({ abortSignal: abortController.signal });
+      if (esResp.aggregations.destFitToBounds.bounds) {
+        corners.push([
+          esResp.aggregations.destFitToBounds.bounds.top_left.lon,
+          esResp.aggregations.destFitToBounds.bounds.top_left.lat,
+        ]);
+        corners.push([
+          esResp.aggregations.destFitToBounds.bounds.bottom_right.lon,
+          esResp.aggregations.destFitToBounds.bounds.bottom_right.lat,
+        ]);
+      }
+      if (esResp.aggregations.sourceFitToBounds.bounds) {
+        corners.push([
+          esResp.aggregations.sourceFitToBounds.bounds.top_left.lon,
+          esResp.aggregations.sourceFitToBounds.bounds.top_left.lat,
+        ]);
+        corners.push([
+          esResp.aggregations.sourceFitToBounds.bounds.bottom_right.lon,
+          esResp.aggregations.sourceFitToBounds.bounds.bottom_right.lat,
+        ]);
+      }
+    } catch (error) {
+      if (error.name === 'AbortError') {
+        throw new DataRequestAbortError();
+      }
+
+      return null;
     }
-    return geoField;
+
+    if (corners.length === 0) {
+      return null;
+    }
+
+    return turfBboxToBounds(turfBbox(multiPoint(corners)));
   }
 
   canFormatFeatureProperties() {
     return true;
-  }
-
-  async filterAndFormatPropertiesToHtml(properties) {
-    return await this.filterAndFormatPropertiesToHtmlForMetricFields(properties);
   }
 }
 

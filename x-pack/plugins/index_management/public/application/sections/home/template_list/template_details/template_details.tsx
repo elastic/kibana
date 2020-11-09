@@ -15,8 +15,6 @@ export const TemplateDetails = (props: Props) => {
       onClose={props.onClose}
       data-test-subj="templateDetails"
       aria-labelledby="templateDetailsFlyoutTitle"
-      size="m"
-      maxWidth={500}
     >
       <TemplateDetailsContent {...props} />
     </EuiFlyout>

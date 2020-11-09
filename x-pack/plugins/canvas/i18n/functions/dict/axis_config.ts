@@ -21,14 +21,14 @@ export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
   args: {
     max: i18n.translate('xpack.canvas.functions.axisConfig.args.maxHelpText', {
       defaultMessage:
-        'The maximum value displayed in the axis. Must be a number or a date in milliseconds since epoch or {ISO8601} string.',
+        'The maximum value displayed in the axis. Must be a number, a date in milliseconds since epoch, or an {ISO8601} string.',
       values: {
         ISO8601,
       },
     }),
     min: i18n.translate('xpack.canvas.functions.axisConfig.args.minHelpText', {
       defaultMessage:
-        'The minimum value displayed in the axis. Must be a number or a date in milliseconds since epoch or {ISO8601} string.',
+        'The minimum value displayed in the axis. Must be a number, a date in milliseconds since epoch, or an {ISO8601} string.',
       values: {
         ISO8601,
       },
@@ -40,14 +40,14 @@ export const help: FunctionHelp<FunctionFactory<typeof axisConfig>> = {
           .slice(0, -1)
           .map((position) => `\`"${position}"\``)
           .join(', '),
-        end: Object.values(Position).slice(-1)[0],
+        end: `\`"${Object.values(Position).slice(-1)[0]}"\``,
       },
     }),
     show: i18n.translate('xpack.canvas.functions.axisConfig.args.showHelpText', {
       defaultMessage: 'Show the axis labels?',
     }),
     tickSize: i18n.translate('xpack.canvas.functions.axisConfig.args.tickSizeHelpText', {
-      defaultMessage: 'The increment size between each tick. Use for `number` axes only',
+      defaultMessage: 'The increment size between each tick. Use for `number` axes only.',
     }),
   },
 };

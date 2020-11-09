@@ -17,8 +17,11 @@
  * under the License.
  */
 
-import expiry from 'expiry-js';
 import { resolve } from 'path';
+
+import expiry from 'expiry-js';
+
+import { fromRoot } from '../../core/server/utils';
 
 function generateUrls({ version, plugin }) {
   return [
@@ -46,20 +49,14 @@ export function parse(command, options, kbnPackage) {
     quiet: options.quiet || false,
     silent: options.silent || false,
     config: options.config || '',
-    optimize: options.optimize,
     plugin: command,
     version: kbnPackage.version,
-    pluginDir: options.pluginDir || '',
+    pluginDir: fromRoot('plugins'),
   };
 
   settings.urls = generateUrls(settings);
   settings.workingPath = resolve(settings.pluginDir, '.plugin.installing');
   settings.tempArchiveFile = resolve(settings.workingPath, 'archive.part');
-  settings.tempPackageFile = resolve(settings.workingPath, 'package.json');
-  settings.setPlugin = function (plugin) {
-    settings.plugin = plugin;
-    settings.pluginPath = resolve(settings.pluginDir, settings.plugin.name);
-  };
 
   return settings;
 }

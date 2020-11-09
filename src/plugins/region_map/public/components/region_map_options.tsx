@@ -37,11 +37,11 @@ const mapFieldForOption = ({ description, name }: FileLayerField) => ({
 });
 
 export type RegionMapOptionsProps = {
-  serviceSettings: IServiceSettings;
+  getServiceSettings: () => Promise<IServiceSettings>;
 } & VisOptionsProps<RegionMapVisParams>;
 
 function RegionMapOptions(props: RegionMapOptionsProps) {
-  const { serviceSettings, stateParams, vis, setValue } = props;
+  const { getServiceSettings, stateParams, vis, setValue } = props;
   const { vectorLayers } = vis.type.editorConfig.collections;
   const vectorLayerOptions = useMemo(() => vectorLayers.map(mapLayerForOption), [vectorLayers]);
   const fieldOptions = useMemo(
@@ -54,10 +54,11 @@ function RegionMapOptions(props: RegionMapOptionsProps) {
 
   const setEmsHotLink = useCallback(
     async (layer: VectorLayer) => {
+      const serviceSettings = await getServiceSettings();
       const emsHotLink = await serviceSettings.getEMSHotLink(layer);
       setValue('emsHotLink', emsHotLink);
     },
-    [setValue, serviceSettings]
+    [setValue, getServiceSettings]
   );
 
   const setLayer = useCallback(

@@ -13,7 +13,7 @@ import * as i18n from './translations';
 
 export const IndexPatternsMissingPromptComponent = () => {
   const { docLinks } = useKibana().services;
-  const kibanaBasePath = `${useBasePath()}/app/kibana`;
+  const kibanaBasePath = `${useBasePath()}/app`;
 
   return (
     <EuiEmptyPrompt
@@ -29,7 +29,7 @@ export const IndexPatternsMissingPromptComponent = () => {
               values={{
                 defaultIndex: (
                   <a
-                    href={`${kibanaBasePath}#/management/kibana/settings`}
+                    href={`${kibanaBasePath}/management/kibana/settings`}
                     rel="noopener noreferrer"
                     target="_blank"
                   >
@@ -61,7 +61,7 @@ export const IndexPatternsMissingPromptComponent = () => {
       }
       actions={
         <EuiButton
-          href={`${kibanaBasePath}#/management/kibana/indexPatterns`}
+          href={`${kibanaBasePath}/management/kibana/indexPatterns`}
           color="primary"
           target="_blank"
           fill

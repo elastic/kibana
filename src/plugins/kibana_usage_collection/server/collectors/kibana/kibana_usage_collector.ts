@@ -22,16 +22,29 @@ import { take } from 'rxjs/operators';
 import { SharedGlobalConfig } from 'kibana/server';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 import { KIBANA_STATS_TYPE } from '../../../common/constants';
-import { getSavedObjectsCounts } from './get_saved_object_counts';
+import { getSavedObjectsCounts, KibanaSavedObjectCounts } from './get_saved_object_counts';
+
+interface KibanaUsage extends KibanaSavedObjectCounts {
+  index: string;
+}
 
 export function getKibanaUsageCollector(
   usageCollection: UsageCollectionSetup,
   legacyConfig$: Observable<SharedGlobalConfig>
 ) {
-  return usageCollection.makeUsageCollector({
+  return usageCollection.makeUsageCollector<KibanaUsage, { usage: KibanaUsage }>({
     type: 'kibana',
     isReady: () => true,
-    async fetch(callCluster) {
+    schema: {
+      index: { type: 'keyword' },
+      dashboard: { total: { type: 'long' } },
+      visualization: { total: { type: 'long' } },
+      search: { total: { type: 'long' } },
+      index_pattern: { total: { type: 'long' } },
+      graph_workspace: { total: { type: 'long' } },
+      timelion_sheet: { total: { type: 'long' } },
+    },
+    async fetch({ callCluster }) {
       const {
         kibana: { index },
       } = await legacyConfig$.pipe(take(1)).toPromise();

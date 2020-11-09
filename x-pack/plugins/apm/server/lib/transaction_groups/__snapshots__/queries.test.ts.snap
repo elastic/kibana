@@ -1,220 +1,454 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`transaction group queries fetches top traces 1`] = `
-Object {
-  "body": Object {
-    "aggs": Object {
-      "transaction_groups": Object {
-        "aggs": Object {
-          "avg": Object {
-            "avg": Object {
-              "field": "transaction.duration.us",
-            },
-          },
-          "p95": Object {
-            "percentiles": Object {
-              "field": "transaction.duration.us",
-              "hdr": Object {
-                "number_of_significant_value_digits": 2,
+Array [
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "transaction_groups": Object {
+          "aggs": Object {
+            "count": Object {
+              "value_count": Object {
+                "field": "transaction.duration.us",
               },
-              "percents": Array [
-                95,
-              ],
+            },
+            "transaction_type": Object {
+              "top_hits": Object {
+                "_source": Array [
+                  "transaction.type",
+                ],
+                "size": 1,
+              },
             },
           },
-          "sample": Object {
-            "top_hits": Object {
-              "size": 1,
-              "sort": Array [
-                Object {
-                  "_score": "desc",
-                },
-                Object {
-                  "@timestamp": Object {
-                    "order": "desc",
+          "composite": Object {
+            "size": 10000,
+            "sources": Array [
+              Object {
+                "service.name": Object {
+                  "terms": Object {
+                    "field": "service.name",
                   },
                 },
-              ],
-            },
-          },
-          "sum": Object {
-            "sum": Object {
-              "field": "transaction.duration.us",
-            },
+              },
+              Object {
+                "transaction.name": Object {
+                  "terms": Object {
+                    "field": "transaction.name",
+                  },
+                },
+              },
+            ],
           },
         },
-        "composite": Object {
-          "size": 101,
-          "sources": Array [
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
             Object {
-              "service": Object {
-                "terms": Object {
-                  "field": "service.name",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
                 },
               },
             },
             Object {
-              "transaction": Object {
-                "terms": Object {
-                  "field": "transaction.name",
-                },
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+          ],
+          "must_not": Array [
+            Object {
+              "exists": Object {
+                "field": "parent.id",
               },
             },
           ],
         },
       },
+      "size": 0,
     },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "transaction_groups": Object {
+          "aggs": Object {
+            "avg": Object {
+              "avg": Object {
+                "field": "transaction.duration.us",
               },
             },
           },
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
+          "composite": Object {
+            "size": 10000,
+            "sources": Array [
+              Object {
+                "service.name": Object {
+                  "terms": Object {
+                    "field": "service.name",
+                  },
+                },
+              },
+              Object {
+                "transaction.name": Object {
+                  "terms": Object {
+                    "field": "transaction.name",
+                  },
+                },
+              },
+            ],
           },
-          Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
-            },
-          },
-        ],
-        "must_not": Array [
-          Object {
-            "exists": Object {
-              "field": "parent.id",
-            },
-          },
-        ],
-        "should": Array [
-          Object {
-            "term": Object {
-              "transaction.sampled": true,
-            },
-          },
-        ],
+        },
       },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+          ],
+          "must_not": Array [
+            Object {
+              "exists": Object {
+                "field": "parent.id",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
     },
-    "size": 0,
   },
-  "index": "myIndex",
-}
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "transaction_groups": Object {
+          "aggs": Object {
+            "sum": Object {
+              "sum": Object {
+                "field": "transaction.duration.us",
+              },
+            },
+          },
+          "composite": Object {
+            "size": 10000,
+            "sources": Array [
+              Object {
+                "service.name": Object {
+                  "terms": Object {
+                    "field": "service.name",
+                  },
+                },
+              },
+              Object {
+                "transaction.name": Object {
+                  "terms": Object {
+                    "field": "transaction.name",
+                  },
+                },
+              },
+            ],
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+          ],
+          "must_not": Array [
+            Object {
+              "exists": Object {
+                "field": "parent.id",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+]
 `;
 
 exports[`transaction group queries fetches top transactions 1`] = `
-Object {
-  "body": Object {
-    "aggs": Object {
-      "transaction_groups": Object {
-        "aggs": Object {
-          "avg": Object {
-            "avg": Object {
-              "field": "transaction.duration.us",
-            },
-          },
-          "p95": Object {
-            "percentiles": Object {
-              "field": "transaction.duration.us",
-              "hdr": Object {
-                "number_of_significant_value_digits": 2,
+Array [
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "transaction_groups": Object {
+          "aggs": Object {
+            "count": Object {
+              "value_count": Object {
+                "field": "transaction.duration.us",
               },
-              "percents": Array [
-                95,
-              ],
+            },
+            "transaction_type": Object {
+              "top_hits": Object {
+                "_source": Array [
+                  "transaction.type",
+                ],
+                "size": 1,
+              },
             },
           },
-          "sample": Object {
-            "top_hits": Object {
-              "size": 1,
-              "sort": Array [
-                Object {
-                  "_score": "desc",
-                },
-                Object {
-                  "@timestamp": Object {
-                    "order": "desc",
-                  },
-                },
-              ],
-            },
-          },
-          "sum": Object {
-            "sum": Object {
-              "field": "transaction.duration.us",
-            },
+          "terms": Object {
+            "field": "transaction.name",
+            "size": 101,
           },
         },
-        "composite": Object {
-          "size": 101,
-          "sources": Array [
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
             Object {
-              "transaction": Object {
-                "terms": Object {
-                  "field": "transaction.name",
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
                 },
+              },
+            },
+            Object {
+              "term": Object {
+                "transaction.type": "bar",
+              },
+            },
+            Object {
+              "term": Object {
+                "service.name": "foo",
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
               },
             },
           ],
         },
       },
-      "transactions": Object {
-        "terms": Object {
-          "field": "transaction.name",
-        },
-      },
+      "size": 0,
     },
-    "query": Object {
-      "bool": Object {
-        "filter": Array [
-          Object {
-            "range": Object {
-              "@timestamp": Object {
-                "format": "epoch_millis",
-                "gte": 1528113600000,
-                "lte": 1528977600000,
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "transaction_groups": Object {
+          "aggs": Object {
+            "avg": Object {
+              "avg": Object {
+                "field": "transaction.duration.us",
               },
             },
           },
-          Object {
-            "term": Object {
-              "processor.event": "transaction",
-            },
+          "terms": Object {
+            "field": "transaction.name",
+            "size": 101,
           },
-          Object {
-            "term": Object {
-              "transaction.type": "bar",
-            },
-          },
-          Object {
-            "term": Object {
-              "service.name": "foo",
-            },
-          },
-          Object {
-            "term": Object {
-              "my.custom.ui.filter": "foo-bar",
-            },
-          },
-        ],
-        "should": Array [
-          Object {
-            "term": Object {
-              "transaction.sampled": true,
-            },
-          },
-        ],
+        },
       },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "transaction.type": "bar",
+              },
+            },
+            Object {
+              "term": Object {
+                "service.name": "foo",
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
     },
-    "size": 0,
   },
-  "index": "myIndex",
-}
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "transaction_groups": Object {
+          "aggs": Object {
+            "sum": Object {
+              "sum": Object {
+                "field": "transaction.duration.us",
+              },
+            },
+          },
+          "terms": Object {
+            "field": "transaction.name",
+            "size": 101,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "transaction.type": "bar",
+              },
+            },
+            Object {
+              "term": Object {
+                "service.name": "foo",
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+  Object {
+    "apm": Object {
+      "events": Array [
+        "transaction",
+      ],
+    },
+    "body": Object {
+      "aggs": Object {
+        "transaction_groups": Object {
+          "aggs": Object {
+            "p95": Object {
+              "percentiles": Object {
+                "field": "transaction.duration.us",
+                "hdr": Object {
+                  "number_of_significant_value_digits": 2,
+                },
+                "percents": Array [
+                  95,
+                ],
+              },
+            },
+          },
+          "terms": Object {
+            "field": "transaction.name",
+            "size": 101,
+          },
+        },
+      },
+      "query": Object {
+        "bool": Object {
+          "filter": Array [
+            Object {
+              "range": Object {
+                "@timestamp": Object {
+                  "format": "epoch_millis",
+                  "gte": 1528113600000,
+                  "lte": 1528977600000,
+                },
+              },
+            },
+            Object {
+              "term": Object {
+                "transaction.type": "bar",
+              },
+            },
+            Object {
+              "term": Object {
+                "service.name": "foo",
+              },
+            },
+            Object {
+              "term": Object {
+                "service.environment": "test",
+              },
+            },
+          ],
+        },
+      },
+      "size": 0,
+    },
+  },
+]
 `;

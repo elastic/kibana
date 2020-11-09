@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }) {
 
     const initLineChart = async function () {
       log.debug('navigateToApp visualize');
-      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.navigateToNewAggBasedVisualization();
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
@@ -136,15 +136,8 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should request new data when autofresh is enabled', async () => {
-      // enable autorefresh
-      const interval = 3;
-      await PageObjects.timePicker.openQuickSelectTimeMenu();
-      await PageObjects.timePicker.inputValue(
-        'superDatePickerRefreshIntervalInput',
-        interval.toString()
-      );
-      await testSubjects.click('superDatePickerToggleRefreshButton');
-      await PageObjects.timePicker.closeQuickSelectTimeMenu();
+      const intervalS = 3;
+      await PageObjects.timePicker.startAutoRefresh(intervalS);
 
       // check inspector panel request stats for timestamp
       await inspector.open();
@@ -155,7 +148,7 @@ export default function ({ getService, getPageObjects }) {
       )[0][1];
 
       // pause to allow time for autorefresh to fire another request
-      await PageObjects.common.sleep(interval * 1000 * 1.5);
+      await PageObjects.common.sleep(intervalS * 1000 * 1.5);
 
       // get the latest timestamp from request stats
       const requestStatsAfter = await inspector.getTableData();
@@ -181,7 +174,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visChart.waitForVisualization();
     });
 
-    describe.skip('switch between Y axis scale types', () => {
+    describe('switch between Y axis scale types', () => {
       before(initLineChart);
       const axisId = 'ValueAxis-1';
 
@@ -191,57 +184,25 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visEditor.selectYAxisScaleType(axisId, 'log');
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '2',
-          '3',
-          '5',
-          '7',
-          '10',
-          '20',
-          '30',
-          '50',
-          '70',
-          '100',
-          '200',
-          '300',
-          '500',
-          '700',
-          '1,000',
-          '2,000',
-          '3,000',
-          '5,000',
-          '7,000',
-        ];
-        expect(labels).to.eql(expectedLabels);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const minLabel = 2;
+        const maxLabel = 5000;
+        const numberOfLabels = 10;
+        expect(labels.length).to.be.greaterThan(numberOfLabels);
+        expect(labels[0]).to.eql(minLabel);
+        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
       });
 
       it('should show filtered ticks on selecting log scale', async () => {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo();
-        const labels = await PageObjects.visChart.getYAxisLabels();
-        const expectedLabels = [
-          '2',
-          '3',
-          '5',
-          '7',
-          '10',
-          '20',
-          '30',
-          '50',
-          '70',
-          '100',
-          '200',
-          '300',
-          '500',
-          '700',
-          '1,000',
-          '2,000',
-          '3,000',
-          '5,000',
-          '7,000',
-        ];
-        expect(labels).to.eql(expectedLabels);
+        const labels = await PageObjects.visChart.getYAxisLabelsAsNumbers();
+        const minLabel = 2;
+        const maxLabel = 5000;
+        const numberOfLabels = 10;
+        expect(labels.length).to.be.greaterThan(numberOfLabels);
+        expect(labels[0]).to.eql(minLabel);
+        expect(labels[labels.length - 1]).to.be.greaterThan(maxLabel);
       });
 
       it('should show ticks on selecting square root scale', async () => {
@@ -283,7 +244,7 @@ export default function ({ getService, getPageObjects }) {
     describe('pipeline aggregations', () => {
       before(async () => {
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         log.debug('clickLineChart');
         await PageObjects.visualize.clickLineChart();
         await PageObjects.visualize.clickNewSearch();

@@ -671,35 +671,60 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
               iconType="plusInCircle"
               size="s"
             >
-              <button
+              <EuiButtonDisplay
                 aria-label="Create new visualization button"
-                className="euiButton euiButton--primary euiButton--small"
+                baseClassName="euiButton"
                 data-test-subj="addVisualizationButton"
+                element="button"
+                iconSide="left"
+                iconType="plusInCircle"
+                size="s"
                 type="button"
               >
-                <span
-                  className="euiButton__content"
+                <button
+                  aria-label="Create new visualization button"
+                  className="euiButton euiButton--primary euiButton--small"
+                  data-test-subj="addVisualizationButton"
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
+                  type="button"
                 >
-                  <EuiIcon
-                    aria-hidden="true"
-                    className="euiButton__icon"
-                    size="m"
-                    type="plusInCircle"
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="left"
+                    iconType="plusInCircle"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text",
+                      }
+                    }
                   >
-                    <div
-                      aria-hidden="true"
-                      className="euiButton__icon"
-                      data-euiicon-type="plusInCircle"
-                      size="m"
-                    />
-                  </EuiIcon>
-                  <span
-                    className="euiButton__text"
-                  >
-                    Create new
-                  </span>
-                </span>
-              </button>
+                    <span
+                      className="euiButtonContent euiButton__content"
+                    >
+                      <EuiIcon
+                        className="euiButtonContent__icon"
+                        size="m"
+                        type="plusInCircle"
+                      >
+                        <span
+                          className="euiButtonContent__icon"
+                          data-euiicon-type="plusInCircle"
+                          size="m"
+                        />
+                      </EuiIcon>
+                      <span
+                        className="euiButton__text"
+                      >
+                        Create new
+                      </span>
+                    </span>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
             </EuiButton>
           </p>
         </div>

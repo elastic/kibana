@@ -7,7 +7,7 @@
 import { functionWrapper } from '../../../__tests__/helpers/function_wrapper';
 import { elasticOutline } from '../../lib/elastic_outline';
 import { elasticLogo } from '../../lib/elastic_logo';
-import { repeatImage } from './repeatImage';
+import { repeatImage } from './repeat_image';
 
 describe('repeatImage', () => {
   const fn = functionWrapper(repeatImage);

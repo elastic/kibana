@@ -84,9 +84,9 @@ export function getTabs(
   fieldFilter: string,
   indexPatternListProvider: IndexPatternManagementStart['list']
 ) {
-  const totalCount = getCounts(indexPattern.fields, indexPattern.getSourceFiltering());
+  const totalCount = getCounts(indexPattern.fields.getAll(), indexPattern.getSourceFiltering());
   const filteredCount = getCounts(
-    indexPattern.fields,
+    indexPattern.fields.getAll(),
     indexPattern.getSourceFiltering(),
     fieldFilter
   );
@@ -116,8 +116,8 @@ export function getTabs(
   return tabs;
 }
 
-export function getPath(field: IndexPatternField) {
-  return `/patterns/${field.indexPattern?.id}/field/${field.name}`;
+export function getPath(field: IndexPatternField, indexPattern: IndexPattern) {
+  return `/patterns/${indexPattern?.id}/field/${encodeURIComponent(field.name)}`;
 }
 
 const allTypesDropDown = i18n.translate(

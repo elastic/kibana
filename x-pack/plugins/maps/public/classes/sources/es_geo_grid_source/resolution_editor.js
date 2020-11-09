@@ -9,7 +9,7 @@ import { GRID_RESOLUTION } from '../../../../common/constants';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const OPTIONS = [
+const BASE_OPTIONS = [
   {
     value: GRID_RESOLUTION.COARSE,
     text: i18n.translate('xpack.maps.source.esGrid.coarseDropdownOption', {
@@ -30,7 +30,18 @@ const OPTIONS = [
   },
 ];
 
-export function ResolutionEditor({ resolution, onChange }) {
+export function ResolutionEditor({ resolution, onChange, includeSuperFine }) {
+  const options = [...BASE_OPTIONS];
+
+  if (includeSuperFine) {
+    options.push({
+      value: GRID_RESOLUTION.SUPER_FINE,
+      text: i18n.translate('xpack.maps.source.esGrid.superFineDropDownOption', {
+        defaultMessage: 'super fine (beta)',
+      }),
+    });
+  }
+
   return (
     <EuiFormRow
       label={i18n.translate('xpack.maps.geoGrid.resolutionLabel', {
@@ -39,7 +50,7 @@ export function ResolutionEditor({ resolution, onChange }) {
       display="columnCompressed"
     >
       <EuiSelect
-        options={OPTIONS}
+        options={options}
         value={resolution}
         onChange={(e) => onChange(e.target.value)}
         compressed

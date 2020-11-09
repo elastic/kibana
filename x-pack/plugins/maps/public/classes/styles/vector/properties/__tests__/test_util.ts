@@ -5,7 +5,7 @@
  */
 
 // eslint-disable-next-line max-classes-per-file
-import { FIELD_ORIGIN } from '../../../../../../common/constants';
+import { FIELD_ORIGIN, LAYER_STYLE_TYPE } from '../../../../../../common/constants';
 import { StyleMeta } from '../../style_meta';
 import {
   CategoryFieldMeta,
@@ -14,29 +14,42 @@ import {
   StyleMetaDescriptor,
 } from '../../../../../../common/descriptor_types';
 import { AbstractField, IField } from '../../../../fields/field';
-import { IStyle, AbstractStyle } from '../../../style';
+import { IStyle } from '../../../style';
 
-class MockField extends AbstractField {
+export class MockField extends AbstractField {
+  private readonly _dataType: string;
+  private readonly _supportsAutoDomain: boolean;
+
+  constructor({
+    fieldName,
+    origin = FIELD_ORIGIN.SOURCE,
+    dataType = 'string',
+    supportsAutoDomain = true,
+  }: {
+    fieldName: string;
+    origin?: FIELD_ORIGIN;
+    dataType?: string;
+    supportsAutoDomain?: boolean;
+  }) {
+    super({ fieldName, origin });
+    this._dataType = dataType;
+    this._supportsAutoDomain = supportsAutoDomain;
+  }
+
   async getLabel(): Promise<string> {
     return this.getName() + '_label';
   }
+
+  async getDataType(): Promise<string> {
+    return this._dataType;
+  }
+
+  supportsAutoDomain(): boolean {
+    return this._supportsAutoDomain;
+  }
+
   supportsFieldMeta(): boolean {
     return true;
-  }
-}
-
-export class MockMbMap {
-  _paintPropertyCalls: unknown[];
-
-  constructor() {
-    this._paintPropertyCalls = [];
-  }
-  setPaintProperty(...args: unknown[]) {
-    this._paintPropertyCalls.push([...args]);
-  }
-
-  getPaintPropertyCalls(): unknown[] {
-    return this._paintPropertyCalls;
   }
 }
 
@@ -45,14 +58,21 @@ export const mockField: IField = new MockField({
   origin: FIELD_ORIGIN.SOURCE,
 });
 
-export class MockStyle extends AbstractStyle implements IStyle {
+export class MockStyle implements IStyle {
   private readonly _min: number;
   private readonly _max: number;
 
   constructor({ min = 0, max = 100 } = {}) {
-    super(null);
     this._min = min;
     this._max = max;
+  }
+
+  renderEditor() {
+    return null;
+  }
+
+  getType() {
+    return LAYER_STYLE_TYPE.VECTOR;
   }
 
   getStyleMeta(): StyleMeta {

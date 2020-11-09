@@ -10,8 +10,8 @@ import { IField } from '../fields/field';
 import {
   esFilters,
   Filter,
-  IFieldType,
   IndexPattern,
+  IndexPatternField,
 } from '../../../../../../src/plugins/data/public';
 
 export class ESTooltipProperty implements ITooltipProperty {
@@ -37,7 +37,7 @@ export class ESTooltipProperty implements ITooltipProperty {
     return this._tooltipProperty.getRawValue();
   }
 
-  _getIndexPatternField(): IFieldType | undefined {
+  _getIndexPatternField(): IndexPatternField | undefined {
     return this._indexPattern.fields.getByName(this._field.getRootName());
   }
 
@@ -56,10 +56,11 @@ export class ESTooltipProperty implements ITooltipProperty {
       }
     }
 
-    const htmlConverter = indexPatternField.format.getConverterFor('html');
+    const formatter = this._indexPattern.getFormatterForField(indexPatternField);
+    const htmlConverter = formatter.getConverterFor('html');
     return htmlConverter
       ? htmlConverter(this.getRawValue())
-      : indexPatternField.format.convert(this.getRawValue());
+      : formatter.convert(this.getRawValue());
   }
 
   isFilterable(): boolean {

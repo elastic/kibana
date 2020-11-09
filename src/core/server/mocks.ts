@@ -18,6 +18,8 @@
  */
 import { of } from 'rxjs';
 import { duration } from 'moment';
+import { ByteSizeValue } from '@kbn/config-schema';
+import type { MockedKeys } from '@kbn/utility-types/jest';
 import { PluginInitializerContext, CoreSetup, CoreStart, StartServicesAccessor } from '.';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { loggingServiceMock } from './logging/logging_service.mock';
@@ -31,16 +33,16 @@ import { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_object
 import { renderingMock } from './rendering/rendering_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { SharedGlobalConfig } from './plugins';
-import { InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
 import { metricsServiceMock } from './metrics/metrics_service.mock';
-import { uuidServiceMock } from './uuid/uuid_service.mock';
+import { environmentServiceMock } from './environment/environment_service.mock';
 import { statusServiceMock } from './status/status_service.mock';
+import { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 
+export { configServiceMock } from './config/mocks';
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';
-export { configServiceMock } from './config/config_service.mock';
 export { elasticsearchServiceMock } from './elasticsearch/elasticsearch_service.mock';
 export { httpServiceMock } from './http/http_service.mock';
 export { loggingSystemMock } from './logging/logging_system.mock';
@@ -51,6 +53,10 @@ export { typeRegistryMock as savedObjectsTypeRegistryMock } from './saved_object
 export { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 export { metricsServiceMock } from './metrics/metrics_service.mock';
 export { renderingMock } from './rendering/rendering_service.mock';
+export { statusServiceMock } from './status/status_service.mock';
+export { contextServiceMock } from './context/context_service.mock';
+export { capabilitiesServiceMock } from './capabilities/capabilities_service.mock';
+export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_service.mock';
 
 export function pluginInitializerContextConfigMock<T>(config: T) {
   const globalConfig: SharedGlobalConfig = {
@@ -63,9 +69,11 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       shardTimeout: duration('30s'),
       requestTimeout: duration('30s'),
       pingTimeout: duration('30s'),
-      startupTimeout: duration('30s'),
     },
     path: { data: '/tmp' },
+    savedObjects: {
+      maxImportPayloadBytes: new ByteSizeValue(26214400),
+    },
   };
 
   const mock: jest.Mocked<PluginInitializerContext<T>['config']> = {
@@ -94,6 +102,7 @@ function pluginInitializerContextMock<T>(config: T = {} as T) {
         buildSha: 'buildSha',
         dist: false,
       },
+      instanceUuid: 'instance-uuid',
     },
     config: pluginInitializerContextConfigMock<T>(config),
   };
@@ -130,8 +139,8 @@ function createCoreSetupMock({
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createSetupContract(),
     uiSettings: uiSettingsMock,
-    uuid: uuidServiceMock.createSetupContract(),
     logging: loggingServiceMock.createSetupContract(),
+    metrics: metricsServiceMock.createSetupContract(),
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),
@@ -148,36 +157,39 @@ function createCoreStartMock() {
     metrics: metricsServiceMock.createStartContract(),
     savedObjects: savedObjectsServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    coreUsageData: coreUsageDataServiceMock.createStartContract(),
   };
 
   return mock;
 }
 
 function createInternalCoreSetupMock() {
-  const setupDeps: InternalCoreSetup = {
+  const setupDeps = {
     capabilities: capabilitiesServiceMock.createSetupContract(),
     context: contextServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createInternalSetup(),
     http: httpServiceMock.createInternalSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     status: statusServiceMock.createInternalSetupContract(),
-    uuid: uuidServiceMock.createSetupContract(),
+    environment: environmentServiceMock.createSetupContract(),
     httpResources: httpResourcesMock.createSetupContract(),
     rendering: renderingMock.createSetupContract(),
     uiSettings: uiSettingsServiceMock.createSetupContract(),
     logging: loggingServiceMock.createInternalSetupContract(),
+    metrics: metricsServiceMock.createInternalSetupContract(),
   };
   return setupDeps;
 }
 
 function createInternalCoreStartMock() {
-  const startDeps: InternalCoreStart = {
+  const startDeps = {
     capabilities: capabilitiesServiceMock.createStartContract(),
-    elasticsearch: elasticsearchServiceMock.createStart(),
+    elasticsearch: elasticsearchServiceMock.createInternalStart(),
     http: httpServiceMock.createInternalStartContract(),
-    metrics: metricsServiceMock.createStartContract(),
+    metrics: metricsServiceMock.createInternalStartContract(),
     savedObjects: savedObjectsServiceMock.createInternalStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
+    coreUsageData: coreUsageDataServiceMock.createStartContract(),
   };
   return startDeps;
 }
@@ -189,6 +201,7 @@ function createCoreRequestHandlerContextMock() {
       typeRegistry: savedObjectsTypeRegistryMock.create(),
     },
     elasticsearch: {
+      client: elasticsearchServiceMock.createScopedClusterClient(),
       legacy: {
         client: elasticsearchServiceMock.createLegacyScopedClusterClient(),
       },

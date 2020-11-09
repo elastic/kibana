@@ -12,6 +12,7 @@ import {
   LogEntryRatePartition,
   LogEntryRateAnomaly,
 } from '../../../../common/http_api/log_analysis';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryRateAPI } from './service_calls/get_log_entry_rate';
 
@@ -41,19 +42,31 @@ export const useLogEntryRateResults = ({
   startTime,
   endTime,
   bucketDuration = 15 * 60 * 1000,
+  filteredDatasets,
 }: {
   sourceId: string;
   startTime: number;
   endTime: number;
   bucketDuration: number;
+  filteredDatasets?: string[];
 }) => {
+  const { services } = useKibanaContextForPlugin();
   const [logEntryRate, setLogEntryRate] = useState<LogEntryRateResults | null>(null);
 
   const [getLogEntryRateRequest, getLogEntryRate] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
       createPromise: async () => {
-        return await callGetLogEntryRateAPI(sourceId, startTime, endTime, bucketDuration);
+        return await callGetLogEntryRateAPI(
+          {
+            sourceId,
+            startTime,
+            endTime,
+            bucketDuration,
+            datasets: filteredDatasets,
+          },
+          services.http.fetch
+        );
       },
       onResolve: ({ data }) => {
         setLogEntryRate({
@@ -68,7 +81,7 @@ export const useLogEntryRateResults = ({
         setLogEntryRate(null);
       },
     },
-    [sourceId, startTime, endTime, bucketDuration]
+    [sourceId, startTime, endTime, bucketDuration, filteredDatasets]
   );
 
   const isLoading = useMemo(() => getLogEntryRateRequest.state === 'pending', [

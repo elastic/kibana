@@ -13,11 +13,11 @@ import {
   EuiTextColor,
   EuiIcon,
   EuiLink,
+  EuiBadge,
 } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
-import { ComponentTemplateListItem } from '../shared_imports';
+import { ComponentTemplateListItem, reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
 
@@ -106,6 +106,13 @@ export const ComponentTable: FunctionComponent<Props> = ({
       },
       filters: [
         {
+          type: 'is',
+          field: 'isManaged',
+          name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isManagedFilterLabel', {
+            defaultMessage: 'Managed',
+          }),
+        },
+        {
           type: 'field_value_toggle_group',
           field: 'usedBy.length',
           items: [
@@ -144,26 +151,38 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        render: (name: string) => (
-          /* eslint-disable-next-line @elastic/eui/href-or-on-click */
-          <EuiLink
-            {...reactRouterNavigate(
-              history,
-              {
-                pathname: encodeURI(`/component_templates/${encodeURIComponent(name)}`),
-              },
-              () => trackMetric('click', UIM_COMPONENT_TEMPLATE_DETAILS)
+        width: '20%',
+        render: (name: string, item: ComponentTemplateListItem) => (
+          <>
+            <EuiLink
+              {...reactRouterNavigate(
+                history,
+                {
+                  pathname: encodeURI(`/component_templates/${encodeURIComponent(name)}`),
+                },
+                () => trackMetric('click', UIM_COMPONENT_TEMPLATE_DETAILS)
+              )}
+              data-test-subj="templateDetailsLink"
+            >
+              {name}
+            </EuiLink>
+            {item.isManaged && (
+              <>
+                &nbsp;
+                <EuiBadge color="hollow" data-test-subj="isManagedBadge">
+                  {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.managedBadgeLabel', {
+                    defaultMessage: 'Managed',
+                  })}
+                </EuiBadge>
+              </>
             )}
-            data-test-subj="templateDetailsLink"
-          >
-            {name}
-          </EuiLink>
+          </>
         ),
       },
       {
         field: 'usedBy',
         name: i18n.translate('xpack.idxMgmt.componentTemplatesList.table.isInUseColumnTitle', {
-          defaultMessage: 'Index templates',
+          defaultMessage: 'Usage count',
         }),
         sortable: true,
         render: (usedBy: string[]) => {

@@ -20,7 +20,7 @@ import { Client } from 'elasticsearch';
 import { get } from 'lodash';
 
 import { LegacyElasticsearchErrorHelpers } from './errors';
-import { GetAuthHeaders, isRealRequest } from '../../http';
+import { GetAuthHeaders, isKibanaRequest, isRealRequest } from '../../http';
 import { filterHeaders, ensureRawRequest } from '../../http/router';
 import { Logger } from '../../logging';
 import { ScopeableRequest } from '../types';
@@ -87,6 +87,7 @@ const callAPI = async (
  *
  * See {@link LegacyClusterClient}.
  *
+ * @deprecated Use {@link IClusterClient}.
  * @public
  */
 export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser' | 'asScoped'>;
@@ -97,7 +98,7 @@ export type ILegacyClusterClient = Pick<LegacyClusterClient, 'callAsInternalUser
  * the actual user that is derived from the request headers (via `asScoped(...)`).
  *
  * See {@link LegacyClusterClient}.
- *
+ * @deprecated Use {@link ICustomClusterClient}.
  * @public
  */
 export type ILegacyCustomClusterClient = Pick<
@@ -107,6 +108,7 @@ export type ILegacyCustomClusterClient = Pick<
 
 /**
  * {@inheritDoc IClusterClient}
+ * @deprecated Use {@link IClusterClient}.
  * @public
  */
 export class LegacyClusterClient implements ILegacyClusterClient {
@@ -203,7 +205,10 @@ export class LegacyClusterClient implements ILegacyClusterClient {
     return new LegacyScopedClusterClient(
       this.callAsInternalUser,
       this.callAsCurrentUser,
-      filterHeaders(this.getHeaders(request), this.config.requestHeadersWhitelist)
+      filterHeaders(this.getHeaders(request), [
+        'x-opaque-id',
+        ...this.config.requestHeadersWhitelist,
+      ])
     );
   }
 
@@ -241,8 +246,9 @@ export class LegacyClusterClient implements ILegacyClusterClient {
       return request && request.headers ? request.headers : {};
     }
     const authHeaders = this.getAuthHeaders(request);
-    const headers = ensureRawRequest(request).headers;
+    const requestHeaders = ensureRawRequest(request).headers;
+    const requestIdHeaders = isKibanaRequest(request) ? { 'x-opaque-id': request.id } : {};
 
-    return { ...headers, ...authHeaders };
+    return { ...requestHeaders, ...requestIdHeaders, ...authHeaders };
   }
 }

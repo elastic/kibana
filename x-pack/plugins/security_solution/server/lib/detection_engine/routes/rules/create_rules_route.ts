@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqlRule } from '../../../../../common/detection_engine/utils';
 import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
@@ -24,6 +25,7 @@ import { transformError, buildSiemResponse } from '../utils';
 import { updateRulesNotifications } from '../../rules/update_rules_notifications';
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { PartialFilter } from '../../types';
+import { isMlRule } from '../../../../../common/machine_learning/helpers';
 
 export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
@@ -44,6 +46,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
       if (validationErrors.length) {
         return siemResponse.error({ statusCode: 400, body: validationErrors });
       }
+
       const {
         actions: actionsRest,
         anomaly_threshold: anomalyThreshold,
@@ -51,6 +54,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         building_block_type: buildingBlockType,
         description,
         enabled,
+        event_category_override: eventCategoryOverride,
         false_positives: falsePositives,
         from,
         query: queryOrUndefined,
@@ -75,6 +79,14 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         severity_mapping: severityMapping,
         tags,
         threat,
+        threshold,
+        threat_filters: threatFilters,
+        threat_index: threatIndex,
+        threat_query: threatQuery,
+        threat_mapping: threatMapping,
+        threat_language: threatLanguage,
+        concurrent_searches: concurrentSearches,
+        items_per_search: itemsPerSearch,
         throttle,
         timestamp_override: timestampOverride,
         to,
@@ -84,18 +96,16 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
         exceptions_list: exceptionsList,
       } = request.body;
       try {
-        const query =
-          type !== 'machine_learning' && queryOrUndefined == null ? '' : queryOrUndefined;
+        const query = !isMlRule(type) && queryOrUndefined == null ? '' : queryOrUndefined;
 
         const language =
-          type !== 'machine_learning' && languageOrUndefined == null
+          !isMlRule(type) && !isEqlRule(type) && languageOrUndefined == null
             ? 'kuery'
             : languageOrUndefined;
 
         // TODO: Fix these either with an is conversion or by better typing them within io-ts
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;
         const savedObjectsClient = context.core.savedObjects.client;
@@ -105,7 +115,12 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const mlAuthz = buildMlAuthz({ license: context.licensing.license, ml, request });
+        const mlAuthz = buildMlAuthz({
+          license: context.licensing.license,
+          ml,
+          request,
+          savedObjectsClient,
+        });
         throwHttpError(await mlAuthz.validateRuleType(type));
 
         const finalIndex = outputIndex ?? siemClient.getSignalsIndex();
@@ -125,6 +140,9 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
             });
           }
         }
+        // This will create the endpoint list if it does not exist yet
+        await context.lists?.getExceptionListClient().createEndpointList();
+
         const createdRule = await createRules({
           alertsClient,
           anomalyThreshold,
@@ -132,6 +150,7 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           buildingBlockType,
           description,
           enabled,
+          eventCategoryOverride,
           falsePositives,
           from,
           immutable: false,
@@ -159,6 +178,14 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
           to,
           type,
           threat,
+          threshold,
+          threatFilters,
+          threatIndex,
+          threatQuery,
+          threatMapping,
+          threatLanguage,
+          concurrentSearches,
+          itemsPerSearch,
           timestampOverride,
           references,
           note,

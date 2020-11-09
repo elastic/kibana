@@ -7,7 +7,6 @@
 import { Location } from 'history';
 import { IUrlParams } from './types';
 import {
-  getPathParams,
   removeUndefinedProps,
   getStart,
   getEnd,
@@ -16,7 +15,6 @@ import {
   toString,
 } from './helpers';
 import { toQuery } from '../../components/shared/Links/url_helpers';
-import { TIMEPICKER_DEFAULTS } from './constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { localUIFilterNames } from '../../../server/lib/ui_filters/local_ui_filters/config';
 import { pickKeys } from '../../../common/utils/pick_keys';
@@ -27,14 +25,6 @@ type TimeUrlParams = Pick<
 >;
 
 export function resolveUrlParams(location: Location, state: TimeUrlParams) {
-  const {
-    processorEvent,
-    serviceName,
-    serviceNodeName,
-    errorGroupId,
-    traceId: traceIdLink,
-  } = getPathParams(location.pathname);
-
   const query = toQuery(location.search);
 
   const {
@@ -51,12 +41,13 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     sortDirection,
     sortField,
     kuery,
-    refreshPaused = TIMEPICKER_DEFAULTS.refreshPaused,
-    refreshInterval = TIMEPICKER_DEFAULTS.refreshInterval,
-    rangeFrom = TIMEPICKER_DEFAULTS.rangeFrom,
-    rangeTo = TIMEPICKER_DEFAULTS.rangeTo,
+    refreshPaused,
+    refreshInterval,
+    rangeFrom,
+    rangeTo,
     environment,
     searchTerm,
+    percentile,
   } = query;
 
   const localUIFilters = pickKeys(query, ...localUIFilterNames);
@@ -67,8 +58,8 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     end: getEnd(state, rangeTo),
     rangeFrom,
     rangeTo,
-    refreshPaused: toBoolean(refreshPaused),
-    refreshInterval: toNumber(refreshInterval),
+    refreshPaused: refreshPaused ? toBoolean(refreshPaused) : undefined,
+    refreshInterval: refreshInterval ? toNumber(refreshInterval) : undefined,
 
     // query params
     sortDirection,
@@ -85,15 +76,7 @@ export function resolveUrlParams(location: Location, state: TimeUrlParams) {
     transactionName,
     transactionType,
     searchTerm: toString(searchTerm),
-
-    // path params
-    processorEvent,
-    serviceName,
-    traceIdLink,
-    errorGroupId,
-    serviceNodeName: serviceNodeName
-      ? decodeURIComponent(serviceNodeName)
-      : serviceNodeName,
+    percentile: toNumber(percentile),
 
     // ui filters
     environment,

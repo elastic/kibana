@@ -7,32 +7,49 @@
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Plugin } from 'src/core/public';
 
-import { ManagementSectionId } from '../../../../src/plugins/management/public';
 import { PLUGIN_ID } from '../common/constants';
 import { uiMetricService, apiService } from './application/services';
-import { Dependencies } from './types';
+import { SetupDependencies, StartDependencies } from './types';
+import { registerUrlGenerator } from './url_generator';
 
-export class IngestPipelinesPlugin implements Plugin {
-  public setup(coreSetup: CoreSetup, plugins: Dependencies): void {
-    const { management, usageCollection } = plugins;
-    const { http } = coreSetup;
+export class IngestPipelinesPlugin
+  implements Plugin<void, void, SetupDependencies, StartDependencies> {
+  public setup(coreSetup: CoreSetup<StartDependencies>, plugins: SetupDependencies): void {
+    const { management, usageCollection, share } = plugins;
+    const { http, getStartServices } = coreSetup;
 
     // Initialize services
     uiMetricService.setup(usageCollection);
     apiService.setup(http, uiMetricService);
 
-    management.sections.getSection(ManagementSectionId.Ingest).registerApp({
+    const pluginName = i18n.translate('xpack.ingestPipelines.appTitle', {
+      defaultMessage: 'Ingest Node Pipelines',
+    });
+
+    management.sections.section.ingest.registerApp({
       id: PLUGIN_ID,
       order: 1,
-      title: i18n.translate('xpack.ingestPipelines.appTitle', {
-        defaultMessage: 'Ingest Node Pipelines',
-      }),
+      title: pluginName,
       mount: async (params) => {
-        const { mountManagementSection } = await import('./application/mount_management_section');
+        const [coreStart] = await getStartServices();
 
-        return await mountManagementSection(coreSetup, params);
+        const {
+          chrome: { docTitle },
+        } = coreStart;
+
+        docTitle.change(pluginName);
+
+        const { mountManagementSection } = await import('./application/mount_management_section');
+        const unmountAppCallback = await mountManagementSection(coreSetup, params);
+
+        return () => {
+          docTitle.reset();
+          unmountAppCallback();
+        };
       },
     });
+
+    registerUrlGenerator(coreSetup, management, share);
   }
 
   public start() {}

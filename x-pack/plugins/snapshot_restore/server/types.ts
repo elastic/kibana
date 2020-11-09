@@ -7,12 +7,14 @@ import { LegacyScopedClusterClient, IRouter } from 'src/core/server';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { SecurityPluginSetup } from '../../security/server';
 import { CloudSetup } from '../../cloud/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
 import { License } from './services';
 import { wrapEsError } from './lib';
 import { isEsError } from './shared_imports';
 
 export interface Dependencies {
   licensing: LicensingPluginSetup;
+  features: FeaturesPluginSetup;
   security?: SecurityPluginSetup;
   cloud?: CloudSetup;
 }

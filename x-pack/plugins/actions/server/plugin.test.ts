@@ -8,6 +8,7 @@ import { PluginInitializerContext, RequestHandlerContext } from '../../../../src
 import { coreMock, httpServerMock } from '../../../../src/core/server/mocks';
 import { usageCollectionPluginMock } from '../../../../src/plugins/usage_collection/server/mocks';
 import { licensingMock } from '../../licensing/server/mocks';
+import { featuresPluginMock } from '../../features/server/mocks';
 import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
 import { taskManagerMock } from '../../task_manager/server/mocks';
 import { eventLogMock } from '../../event_log/server/mocks';
@@ -31,8 +32,10 @@ describe('Actions Plugin', () => {
       context = coreMock.createPluginInitializerContext<ActionsConfig>({
         enabled: true,
         enabledActionTypes: ['*'],
-        whitelistedHosts: ['*'],
+        allowedHosts: ['*'],
         preconfigured: {},
+        proxyRejectUnauthorizedCertificates: true,
+        rejectUnauthorized: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -43,6 +46,7 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
         usageCollection: usageCollectionPluginMock.createSetupContract(),
+        features: featuresPluginMock.createSetup(),
       };
     });
 
@@ -123,7 +127,9 @@ describe('Actions Plugin', () => {
         id: 'test',
         name: 'test',
         minimumLicenseRequired: 'basic',
-        async executor() {},
+        async executor(options) {
+          return { status: 'ok', actionId: options.actionId };
+        },
       };
 
       beforeEach(async () => {
@@ -181,7 +187,7 @@ describe('Actions Plugin', () => {
       const context = coreMock.createPluginInitializerContext<ActionsConfig>({
         enabled: true,
         enabledActionTypes: ['*'],
-        whitelistedHosts: ['*'],
+        allowedHosts: ['*'],
         preconfigured: {
           preconfiguredServerLog: {
             actionTypeId: '.server-log',
@@ -190,6 +196,8 @@ describe('Actions Plugin', () => {
             secrets: {},
           },
         },
+        proxyRejectUnauthorizedCertificates: true,
+        rejectUnauthorized: true,
       });
       plugin = new ActionsPlugin(context);
       coreSetup = coreMock.createSetup();
@@ -200,8 +208,10 @@ describe('Actions Plugin', () => {
         licensing: licensingMock.createSetup(),
         eventLog: eventLogMock.createSetup(),
         usageCollection: usageCollectionPluginMock.createSetupContract(),
+        features: featuresPluginMock.createSetup(),
       };
       pluginsStart = {
+        licensing: licensingMock.createStart(),
         taskManager: taskManagerMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
       };
@@ -212,7 +222,7 @@ describe('Actions Plugin', () => {
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, pluginsSetup);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginStart.isActionExecutable('preconfiguredServerLog', '.server-log')).toBe(true);
       });
@@ -227,7 +237,7 @@ describe('Actions Plugin', () => {
             usingEphemeralEncryptionKey: false,
           },
         });
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         await pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest());
       });
@@ -236,13 +246,57 @@ describe('Actions Plugin', () => {
         // coreMock.createSetup doesn't support Plugin generics
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         await plugin.setup(coreSetup as any, pluginsSetup);
-        const pluginStart = plugin.start(coreStart, pluginsStart);
+        const pluginStart = await plugin.start(coreStart, pluginsStart);
 
         expect(pluginsSetup.encryptedSavedObjects.usingEphemeralEncryptionKey).toEqual(true);
         await expect(
           pluginStart.getActionsClientWithRequest(httpServerMock.createKibanaRequest())
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Unable to create actions client due to the Encrypted Saved Objects plugin using an ephemeral encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in kibana.yml"`
+        );
+      });
+    });
+
+    describe('isActionTypeEnabled()', () => {
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        executor: jest.fn(),
+      };
+
+      it('passes through the notifyUsage option when set to true', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(actionType);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.isActionTypeEnabled('my-action-type', { notifyUsage: true });
+        expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
+          'Connector: My action type'
+        );
+      });
+    });
+
+    describe('isActionExecutable()', () => {
+      const actionType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        executor: jest.fn(),
+      };
+
+      it('passes through the notifyUsage option when set to true', async () => {
+        // coreMock.createSetup doesn't support Plugin generics
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const pluginSetup = await plugin.setup(coreSetup as any, pluginsSetup);
+        pluginSetup.registerType(actionType);
+        const pluginStart = plugin.start(coreStart, pluginsStart);
+
+        pluginStart.isActionExecutable('123', 'my-action-type', { notifyUsage: true });
+        expect(pluginsStart.licensing.featureUsage.notifyUsage).toHaveBeenCalledWith(
+          'Connector: My action type'
         );
       });
     });

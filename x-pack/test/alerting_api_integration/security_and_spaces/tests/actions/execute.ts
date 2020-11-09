@@ -11,8 +11,12 @@ import {
   ES_TEST_INDEX_NAME,
   getUrlPrefix,
   ObjectRemover,
+  getEventLog,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import { IValidatedEvent } from '../../../../../plugins/event_log/server';
+
+const NANOS_IN_MILLIS = 1000 * 1000;
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -73,17 +77,19 @@ export default function ({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to execute actions',
               });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.be.an('object');
               const searchResult = await esTestIndexTool.search(
@@ -106,6 +112,13 @@ export default function ({ getService }: FtrProviderContext) {
                 },
                 reference,
                 source: 'action:test.index-record',
+              });
+
+              await validateEventLog({
+                spaceId: space.id,
+                actionId: createdAction.id,
+                outcome: 'success',
+                message: `action executed: test.index-record:${createdAction.id}: My action`,
               });
               break;
             default:
@@ -143,19 +156,22 @@ export default function ({ getService }: FtrProviderContext) {
               },
             });
 
-          expect(response.statusCode).to.eql(404);
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to execute actions',
               });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
+              expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
                 statusCode: 404,
                 error: 'Not Found',
@@ -213,17 +229,19 @@ export default function ({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to execute actions',
               });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body).to.be.an('object');
               const searchResult = await esTestIndexTool.search(
@@ -264,17 +282,19 @@ export default function ({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to execute actions',
               });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(404);
               expect(response.body).to.eql({
                 statusCode: 404,
@@ -296,17 +316,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
-              expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
-              });
-              break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(400);
               expect(response.body).to.eql({
                 statusCode: 400,
@@ -329,7 +344,7 @@ export default function ({ getService }: FtrProviderContext) {
               actionTypeId: '.email',
               config: {
                 from: 'email-from-1@example.com',
-                // this host is specifically whitelisted in:
+                // this host is specifically added to allowedHosts in:
                 //    x-pack/test/alerting_api_integration/common/config.ts
                 host: 'some.non.existent.com',
                 port: 666,
@@ -372,17 +387,19 @@ export default function ({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to execute actions',
               });
               break;
             case 'global_read at space1':
             case 'superuser at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               break;
             default:
@@ -420,16 +437,18 @@ export default function ({ getService }: FtrProviderContext) {
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
+            case 'space_1_all_alerts_none_actions at space1':
             case 'space_1_all at space2':
-              expect(response.statusCode).to.eql(404);
+              expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
-                statusCode: 404,
-                error: 'Not Found',
-                message: 'Not Found',
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Unauthorized to execute actions',
               });
               break;
             case 'global_read at space1':
             case 'space_1_all at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
               expect(response.statusCode).to.eql(200);
               searchResult = await esTestIndexTool.search('action:test.authorization', reference);
               expect(searchResult.hits.total.value).to.eql(1);
@@ -480,4 +499,66 @@ export default function ({ getService }: FtrProviderContext) {
       });
     }
   });
+
+  interface ValidateEventLogParams {
+    spaceId: string;
+    actionId: string;
+    outcome: string;
+    message: string;
+    errorMessage?: string;
+  }
+
+  async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
+    const { spaceId, actionId, outcome, message, errorMessage } = params;
+
+    const events: IValidatedEvent[] = await retry.try(async () => {
+      return await getEventLog({
+        getService,
+        spaceId,
+        type: 'action',
+        id: actionId,
+        provider: 'actions',
+        actions: ['execute'],
+      });
+    });
+
+    expect(events.length).to.equal(1);
+
+    const event = events[0];
+
+    const duration = event?.event?.duration;
+    const eventStart = Date.parse(event?.event?.start || 'undefined');
+    const eventEnd = Date.parse(event?.event?.end || 'undefined');
+    const dateNow = Date.now();
+
+    expect(typeof duration).to.be('number');
+    expect(eventStart).to.be.ok();
+    expect(eventEnd).to.be.ok();
+
+    const durationDiff = Math.abs(
+      Math.round(duration! / NANOS_IN_MILLIS) - (eventEnd - eventStart)
+    );
+
+    // account for rounding errors
+    expect(durationDiff < 1).to.equal(true);
+    expect(eventStart <= eventEnd).to.equal(true);
+    expect(eventEnd <= dateNow).to.equal(true);
+
+    expect(event?.event?.outcome).to.equal(outcome);
+
+    expect(event?.kibana?.saved_objects).to.eql([
+      {
+        rel: 'primary',
+        type: 'action',
+        id: actionId,
+        namespace: spaceId,
+      },
+    ]);
+
+    expect(event?.message).to.eql(message);
+
+    if (errorMessage) {
+      expect(event?.error?.message).to.eql(errorMessage);
+    }
+  }
 }

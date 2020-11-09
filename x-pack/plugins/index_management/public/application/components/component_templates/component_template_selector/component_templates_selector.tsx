@@ -11,8 +11,12 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { ComponentTemplateListItem } from '../../../../../common';
-import { SectionError, SectionLoading } from '../shared_imports';
-import { ComponentTemplateDetailsFlyout } from '../component_template_details';
+import { SectionError, SectionLoading, GlobalFlyout } from '../shared_imports';
+import {
+  ComponentTemplateDetailsFlyoutContent,
+  defaultFlyoutProps,
+  ComponentTemplateDetailsProps,
+} from '../component_template_details';
 import { CreateButtonPopOver } from './components';
 import { ComponentTemplates } from './component_templates';
 import { ComponentTemplatesSelection } from './component_templates_selection';
@@ -20,10 +24,12 @@ import { useApi } from '../component_templates_context';
 
 import './component_templates_selector.scss';
 
+const { useGlobalFlyout } = GlobalFlyout;
+
 interface Props {
   onChange: (components: string[]) => void;
   onComponentsLoaded: (components: ComponentTemplateListItem[]) => void;
-  defaultValue: string[];
+  defaultValue?: string[];
   docUri: string;
   emptyPrompt?: {
     text?: string | JSX.Element;
@@ -53,6 +59,10 @@ export const ComponentTemplatesSelector = ({
   emptyPrompt: { text, showCreateButton } = {},
 }: Props) => {
   const { data: components, isLoading, error } = useApi().useLoadComponentTemplates();
+  const {
+    addContent: addContentToGlobalFlyout,
+    removeContent: removeContentFromGlobalFlyout,
+  } = useGlobalFlyout();
   const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const [componentsSelected, setComponentsSelected] = useState<ComponentTemplateListItem[]>([]);
   const isInitialized = useRef(false);
@@ -60,15 +70,20 @@ export const ComponentTemplatesSelector = ({
   const hasSelection = Object.keys(componentsSelected).length > 0;
   const hasComponents = components && components.length > 0 ? true : false;
 
+  const closeComponentTemplateDetails = () => {
+    setSelectedComponent(null);
+  };
+
   useEffect(() => {
     if (components) {
       if (
+        defaultValue &&
         defaultValue.length > 0 &&
         componentsSelected.length === 0 &&
         isInitialized.current === false
       ) {
-        // Once the components are loaded we check the ones selected
-        // from the defaultValue provided
+        // Once the components are fetched, we check the ones previously selected
+        // from the prop "defaultValue" passed.
         const nextComponentsSelected = defaultValue
           .map((name) => components.find((comp) => comp.name === name))
           .filter(Boolean) as ComponentTemplateListItem[];
@@ -88,6 +103,30 @@ export const ComponentTemplatesSelector = ({
     }
   }, [isLoading, error, components, onComponentsLoaded]);
 
+  useEffect(() => {
+    if (selectedComponent) {
+      // Open the flyout with the Component Template Details content
+      addContentToGlobalFlyout<ComponentTemplateDetailsProps>({
+        id: 'componentTemplateDetails',
+        Component: ComponentTemplateDetailsFlyoutContent,
+        props: {
+          onClose: closeComponentTemplateDetails,
+          componentTemplateName: selectedComponent,
+        },
+        flyoutProps: { ...defaultFlyoutProps, onClose: closeComponentTemplateDetails },
+        cleanUpFunc: () => {
+          setSelectedComponent(null);
+        },
+      });
+    }
+  }, [selectedComponent, addContentToGlobalFlyout]);
+
+  useEffect(() => {
+    if (!selectedComponent) {
+      removeContentFromGlobalFlyout('componentTemplateDetails');
+    }
+  }, [selectedComponent, removeContentFromGlobalFlyout]);
+
   const onSelectionReorder = (reorderedComponents: ComponentTemplateListItem[]) => {
     setComponentsSelected(reorderedComponents);
   };
@@ -96,7 +135,7 @@ export const ComponentTemplatesSelector = ({
     <SectionLoading>
       <FormattedMessage
         id="xpack.idxMgmt.componentTemplatesSelector.loadingComponentsDescription"
-        defaultMessage="Loading components…"
+        defaultMessage="Loading component templates…"
       />
     </SectionLoading>
   );
@@ -118,8 +157,10 @@ export const ComponentTemplatesSelector = ({
       {/* Selection */}
       <EuiFlexItem
         className={classNames('componentTemplatesSelector__selection', {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
           'componentTemplatesSelector__selection--is-empty': !hasSelection,
         })}
+        data-test-subj="componentTemplatesSelection"
       >
         {hasSelection ? (
           <>
@@ -136,7 +177,7 @@ export const ComponentTemplatesSelector = ({
                 }}
               />
             </div>
-            <div className="eui-yScrollWithShadows">
+            <div className="eui-yScrollWithShadows componentTemplatesSelector__selection__content">
               <ComponentTemplatesSelection
                 components={componentsSelected}
                 onReorder={onSelectionReorder}
@@ -160,12 +201,19 @@ export const ComponentTemplatesSelector = ({
             </div>
           </>
         ) : (
-          <div>
-            <FormattedMessage
-              id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel"
-              defaultMessage="No component selected."
-            />
-          </div>
+          <EuiText textAlign="center" data-test-subj="emptyPrompt">
+            <p>
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel-1"
+                defaultMessage="Add component template building blocks to this template."
+              />
+              <br />
+              <FormattedMessage
+                id="xpack.idxMgmt.componentTemplatesSelector.noComponentSelectedLabel-2"
+                defaultMessage="Component templates are applied in the order specified."
+              />
+            </p>
+          </EuiText>
         )}
       </EuiFlexItem>
 
@@ -198,30 +246,12 @@ export const ComponentTemplatesSelector = ({
     </EuiFlexGroup>
   );
 
-  const renderComponentDetails = () => {
-    if (!selectedComponent) {
-      return null;
-    }
-
-    return (
-      <ComponentTemplateDetailsFlyout
-        onClose={() => setSelectedComponent(null)}
-        componentTemplateName={selectedComponent}
-      />
-    );
-  };
-
   if (isLoading) {
     return renderLoading();
   } else if (error) {
     return renderError();
   } else if (hasComponents) {
-    return (
-      <>
-        {renderSelector()}
-        {renderComponentDetails()}
-      </>
-    );
+    return renderSelector();
   }
 
   // No components: render empty prompt
@@ -244,6 +274,7 @@ export const ComponentTemplatesSelector = ({
       </p>
     </EuiText>
   );
+
   return (
     <EuiEmptyPrompt
       iconType="managementApp"

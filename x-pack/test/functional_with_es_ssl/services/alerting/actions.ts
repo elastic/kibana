@@ -30,10 +30,11 @@ export class Actions {
   }) {
     this.log.debug(`creating action ${actionParams.name}`);
 
-    const { data: action, status: actionStatus, actionStatusText } = await this.axios.post(
-      `/api/actions/action`,
-      actionParams
-    );
+    const {
+      data: action,
+      status: actionStatus,
+      statusText: actionStatusText,
+    } = await this.axios.post(`/api/actions/action`, actionParams);
     if (actionStatus !== 200) {
       throw new Error(
         `Expected status code of 200, received ${actionStatus} ${actionStatusText}: ${util.inspect(

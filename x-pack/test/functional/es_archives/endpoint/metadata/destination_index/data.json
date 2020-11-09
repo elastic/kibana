@@ -1,0 +1,223 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "M92ScEJT9M9QusfIi3hpEb0AAAAAAAAA",
+    "index": "metrics-endpoint.metadata_current_default",
+    "source": {
+      "HostDetails": {
+        "@timestamp": 1579881969541,
+        "Endpoint": {
+          "policy": {
+            "applied": {
+              "id": "00000000-0000-0000-0000-000000000000",
+              "name": "Default",
+              "status": "failure"
+            }
+          },
+          "status": "enrolled"
+        },
+        "agent": {
+          "id": "3838df35-a095-4af4-8fce-0b6d78793f2e",
+          "name": "Elastic Endpoint",
+          "version": "6.8.0"
+        },
+        "elastic": {
+          "agent": {
+            "id": "023fa40c-411d-4188-a941-4147bfadd095"
+          }
+        },
+        "event": {
+          "action": "endpoint_metadata",
+          "category": [
+            "host"
+          ],
+          "created": 1579881969541,
+          "dataset": "endpoint.metadata",
+          "id": "32f5fda2-48e4-4fae-b89e-a18038294d16",
+          "ingested": "2020-09-09T18:25:15.853783Z",
+          "kind": "metric",
+          "module": "endpoint",
+          "type": [
+            "info"
+          ]
+        },
+        "host": {
+          "hostname": "rezzani-7.example.com",
+          "id": "fc0ff548-feba-41b6-8367-65e8790d0eaf",
+          "ip": [
+            "10.101.149.26",
+            "2606:a000:ffc0:39:11ef:37b9:3371:578c"
+          ],
+          "mac": [
+            "e2-6d-f9-0-46-2e"
+          ],
+          "name": "rezzani-7.example.com",
+          "os": {
+            "Ext": {
+              "variant": "Windows Pro"
+            },
+            "family": "Windows",
+            "full": "Windows 10",
+            "name": "windows 10.0",
+            "platform": "Windows",
+            "version": "10.0"
+          }
+        }
+      },
+      "agent": {
+        "id": "3838df35-a095-4af4-8fce-0b6d78793f2e"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "OU3RgCJaNnR90byeDEHutp8AAAAAAAAA",
+    "index": "metrics-endpoint.metadata_current_default",
+    "source": {
+      "HostDetails": {
+        "@timestamp": 1579881969541,
+        "Endpoint": {
+          "policy": {
+            "applied": {
+              "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+              "name": "Default",
+              "status": "failure"
+            }
+          },
+          "status": "enrolled"
+        },
+        "agent": {
+          "id": "963b081e-60d1-482c-befd-a5815fa8290f",
+          "name": "Elastic Endpoint",
+          "version": "6.6.1"
+        },
+        "elastic": {
+          "agent": {
+            "id": "11488bae-880b-4e7b-8d28-aac2aa9de816"
+          }
+        },
+        "event": {
+          "action": "endpoint_metadata",
+          "category": [
+            "host"
+          ],
+          "created": 1579881969541,
+          "dataset": "endpoint.metadata",
+          "id": "32f5fda2-48e4-4fae-b89e-a18038294d14",
+          "ingested": "2020-09-09T18:25:14.919526Z",
+          "kind": "metric",
+          "module": "endpoint",
+          "type": [
+            "info"
+          ]
+        },
+        "host": {
+          "architecture": "x86",
+          "hostname": "cadmann-4.example.com",
+          "id": "1fb3e58f-6ab0-4406-9d2a-91911207a712",
+          "ip": [
+            "10.192.213.130",
+            "10.70.28.129"
+          ],
+          "mac": [
+            "a9-71-6a-cc-93-85",
+            "f7-31-84-d3-21-68",
+            "2-95-12-39-ca-71"
+          ],
+          "name": "cadmann-4.example.com",
+          "os": {
+            "Ext": {
+              "variant": "Windows Pro"
+            },
+            "family": "Windows",
+            "full": "Windows 10",
+            "name": "windows 10.0",
+            "platform": "Windows",
+            "version": "10.0"
+          }
+        }
+      },
+      "agent": {
+        "id": "963b081e-60d1-482c-befd-a5815fa8290f"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "YjqDCEuI6JmLeLOSyZx_NhMAAAAAAAAA",
+    "index": "metrics-endpoint.metadata_current_default",
+    "source": {
+      "HostDetails": {
+        "@timestamp": 1579881969541,
+        "Endpoint": {
+          "policy": {
+            "applied": {
+              "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+              "name": "Default",
+              "status": "success"
+            }
+          },
+          "status": "enrolled"
+        },
+        "agent": {
+          "id": "b3412d6f-b022-4448-8fee-21cc936ea86b",
+          "name": "Elastic Endpoint",
+          "version": "6.0.0"
+        },
+        "elastic": {
+          "agent": {
+            "id": "92ac1ce0-e1f7-409e-8af6-f17e97b1fc71"
+          }
+        },
+        "event": {
+          "action": "endpoint_metadata",
+          "category": [
+            "host"
+          ],
+          "created": 1579881969541,
+          "dataset": "endpoint.metadata",
+          "id": "32f5fda2-48e4-4fae-b89e-a18038294d15",
+          "ingested": "2020-09-09T18:25:15.853404Z",
+          "kind": "metric",
+          "module": "endpoint",
+          "type": [
+            "info"
+          ]
+        },
+        "host": {
+          "architecture": "x86_64",
+          "hostname": "thurlow-9.example.com",
+          "id": "2f735e3d-be14-483b-9822-bad06e9045ca",
+          "ip": [
+            "10.46.229.234"
+          ],
+          "mac": [
+            "30-8c-45-55-69-b8",
+            "e5-36-7e-8f-a3-84",
+            "39-a1-37-20-18-74"
+          ],
+          "name": "thurlow-9.example.com",
+          "os": {
+            "Ext": {
+              "variant": "Windows Server"
+            },
+            "family": "Windows",
+            "full": "Windows Server 2016",
+            "name": "windows 10.0",
+            "platform": "Windows",
+            "version": "10.0"
+          }
+        }
+      },
+      "agent": {
+        "id": "b3412d6f-b022-4448-8fee-21cc936ea86b"
+      }
+    }
+  }
+}

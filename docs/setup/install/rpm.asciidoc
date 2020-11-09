@@ -153,13 +153,6 @@ https://artifacts.elastic.co/downloads/kibana/kibana-oss-{version}-x86_64.rpm
 
 endif::[]
 
-==== SysV `init` vs `systemd`
-
-include::init-systemd.asciidoc[]
-
-[[rpm-running-init]]
-include::rpm-init.asciidoc[]
-
 [[rpm-running-systemd]]
 include::systemd.asciidoc[]
 
@@ -205,12 +198,6 @@ locations for an RPM-based system:
     | Logs files location
     |  /var/log/kibana
     | path.logs
-
-| optimize
-  | Transpiled source code. Certain administrative actions (e.g. plugin install)
-    result in the source code being retranspiled on the fly.
-  | /var/lib/kibana/optimize
- d|
 
 | plugins
   | Plugin files location. Each plugin will be contained in a subdirectory.

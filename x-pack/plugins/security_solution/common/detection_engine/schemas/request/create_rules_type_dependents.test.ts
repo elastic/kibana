@@ -4,7 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getCreateRulesSchemaMock } from './create_rules_schema.mock';
+import {
+  getCreateRulesSchemaMock,
+  getCreateThreatMatchRulesSchemaMock,
+} from './create_rules_schema.mock';
 import { CreateRulesSchema } from './create_rules_schema';
 import { createRuleValidateTypeDependents } from './create_rules_type_dependents';
 
@@ -64,5 +67,94 @@ describe('create_rules_type_dependents', () => {
     delete schema.timeline_id;
     const errors = createRuleValidateTypeDependents(schema);
     expect(errors).toEqual(['when "timeline_title" exists, "timeline_id" must also exist']);
+  });
+
+  test('threshold is required when type is threshold and validates with it', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      type: 'threshold',
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['when "type" is "threshold", "threshold" is required']);
+  });
+
+  test('threshold.value is required and has to be bigger than 0 when type is threshold and validates with it', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      type: 'threshold',
+      threshold: {
+        field: '',
+        value: -1,
+      },
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
+  });
+
+  test('threat_index, threat_query, and threat_mapping are required when type is "threat_match" and validates with it', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
+      type: 'threat_match',
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "type" is "threat_match", "threat_index" is required',
+      'when "type" is "threat_match", "threat_query" is required',
+      'when "type" is "threat_match", "threat_mapping" is required',
+    ]);
+  });
+
+  test('validates with threat_index, threat_query, and threat_mapping when type is "threat_match"', () => {
+    const schema = getCreateThreatMatchRulesSchemaMock();
+    const { threat_filters: threatFilters, ...noThreatFilters } = schema;
+    const errors = createRuleValidateTypeDependents(noThreatFilters);
+    expect(errors).toEqual([]);
+  });
+
+  test('does NOT validate when threat_mapping is an empty array', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateThreatMatchRulesSchemaMock(),
+      threat_mapping: [],
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual(['threat_mapping" must have at least one element']);
+  });
+
+  test('validates with threat_index, threat_query, threat_mapping, and an optional threat_filters, when type is "threat_match"', () => {
+    const schema = getCreateThreatMatchRulesSchemaMock();
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([]);
+  });
+
+  test('validates that both "items_per_search" and "concurrent_searches" works when together', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateThreatMatchRulesSchemaMock(),
+      concurrent_searches: 10,
+      items_per_search: 10,
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([]);
+  });
+
+  test('does NOT validate when only "items_per_search" is present', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateThreatMatchRulesSchemaMock(),
+      items_per_search: 10,
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "items_per_search" exists, "concurrent_searches" must also exist',
+    ]);
+  });
+
+  test('does NOT validate when only "concurrent_searches" is present', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateThreatMatchRulesSchemaMock(),
+      concurrent_searches: 10,
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "concurrent_searches" exists, "items_per_search" must also exist',
+    ]);
   });
 });

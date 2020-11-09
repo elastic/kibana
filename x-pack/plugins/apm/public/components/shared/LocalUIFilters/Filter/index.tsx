@@ -66,14 +66,7 @@ interface Props {
 
 type Option = EuiSelectable['props']['options'][0];
 
-const Filter = ({
-  name,
-  title,
-  options,
-  onChange,
-  value,
-  showCount,
-}: Props) => {
+function Filter({ name, title, options, onChange, value, showCount }: Props) {
   const [showPopover, setShowPopover] = useState(false);
 
   const toggleShowPopover = () => setShowPopover((show) => !show);
@@ -120,7 +113,7 @@ const Filter = ({
           searchable={true}
         >
           {(list, search) => (
-            <SelectContainer>
+            <SelectContainer id={`local-filter-popover-${name}`}>
               <EuiFlexGroup direction="column" gutterSize="none">
                 <FlexItem grow={true}>
                   <EuiTitle size="xxxs" textTransform="uppercase">
@@ -166,16 +159,17 @@ const Filter = ({
       {value.length ? (
         <>
           <FilterBadgeList
+            name={name}
             onRemove={(val) => {
               onChange(value.filter((v) => val !== v));
             }}
             value={value}
           />
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
         </>
       ) : null}
     </>
   );
-};
+}
 
 export { Filter };

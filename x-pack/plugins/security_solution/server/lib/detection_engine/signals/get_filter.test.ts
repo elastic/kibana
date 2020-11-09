@@ -192,24 +192,28 @@ describe('get_filter', () => {
         index: ['auditbeat-*'],
         lists: [getExceptionListItemSchemaMock()],
       });
+
       expect(filter).toEqual({
         bool: {
+          must: [],
           filter: [
             {
               bool: {
-                filter: [
+                should: [
                   {
-                    bool: {
-                      minimum_should_match: 1,
-                      should: [
-                        {
-                          match: {
-                            'host.name': 'siem',
-                          },
-                        },
-                      ],
+                    match: {
+                      'host.name': 'siem',
                     },
                   },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+          must_not: [
+            {
+              bool: {
+                should: [
                   {
                     bool: {
                       filter: [
@@ -218,14 +222,14 @@ describe('get_filter', () => {
                             path: 'some.parentField',
                             query: {
                               bool: {
-                                minimum_should_match: 1,
                                 should: [
                                   {
-                                    match: {
+                                    match_phrase: {
                                       'some.parentField.nested.field': 'some value',
                                     },
                                   },
                                 ],
+                                minimum_should_match: 1,
                               },
                             },
                             score_mode: 'none',
@@ -233,18 +237,14 @@ describe('get_filter', () => {
                         },
                         {
                           bool: {
-                            must_not: {
-                              bool: {
-                                minimum_should_match: 1,
-                                should: [
-                                  {
-                                    match: {
-                                      'some.not.nested.field': 'some value',
-                                    },
-                                  },
-                                ],
+                            should: [
+                              {
+                                match_phrase: {
+                                  'some.not.nested.field': 'some value',
+                                },
                               },
-                            },
+                            ],
+                            minimum_should_match: 1,
                           },
                         },
                       ],
@@ -254,8 +254,6 @@ describe('get_filter', () => {
               },
             },
           ],
-          must: [],
-          must_not: [],
           should: [],
         },
       });

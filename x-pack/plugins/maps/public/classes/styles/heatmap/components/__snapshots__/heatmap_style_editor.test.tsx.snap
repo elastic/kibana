@@ -10,65 +10,119 @@ exports[`HeatmapStyleEditor is rendered 1`] = `
   label="Color range"
   labelType="label"
 >
-  <EuiSuperSelect
+  <EuiColorPalettePicker
     compressed={true}
-    fullWidth={false}
-    hasDividers={true}
-    isInvalid={false}
-    isLoading={false}
     onChange={[Function]}
-    options={
+    palettes={
       Array [
         Object {
-          "inputDisplay": <ColorGradient
-            colorRamp={
-              Array [
-                "rgb(65, 105, 225)",
-                "rgb(0, 256, 256)",
-                "rgb(0, 256, 0)",
-                "rgb(256, 256, 0)",
-                "rgb(256, 0, 0)",
-              ]
-            }
-          />,
-          "text": "theclassic",
-          "value": "theclassic",
-        },
-        Object {
-          "inputDisplay": <ColorGradient
-            colorRampName="Blues"
-          />,
+          "palette": Array [
+            "#ecf1f7",
+            "#d9e3ef",
+            "#c5d5e7",
+            "#b2c7df",
+            "#9eb9d8",
+            "#8bacd0",
+            "#769fc8",
+            "#6092c0",
+          ],
+          "type": "gradient",
           "value": "Blues",
         },
         Object {
-          "inputDisplay": <ColorGradient
-            colorRampName="Greens"
-          />,
+          "palette": Array [
+            "#e6f1ee",
+            "#cce4de",
+            "#b3d6cd",
+            "#9ac8bd",
+            "#80bbae",
+            "#65ad9e",
+            "#47a08f",
+            "#209280",
+          ],
+          "type": "gradient",
           "value": "Greens",
         },
         Object {
-          "inputDisplay": <ColorGradient
-            colorRampName="Greys"
-          />,
+          "palette": Array [
+            "#e0e4eb",
+            "#c2c9d5",
+            "#a6afbf",
+            "#8c95a5",
+            "#757c8b",
+            "#5e6471",
+            "#494d58",
+            "#343741",
+          ],
+          "type": "gradient",
           "value": "Greys",
         },
         Object {
-          "inputDisplay": <ColorGradient
-            colorRampName="Reds"
-          />,
+          "palette": Array [
+            "#fdeae5",
+            "#f9d5cc",
+            "#f4c0b4",
+            "#eeab9c",
+            "#e79685",
+            "#df816e",
+            "#d66c58",
+            "#cc5642",
+          ],
+          "type": "gradient",
           "value": "Reds",
         },
         Object {
-          "inputDisplay": <ColorGradient
-            colorRampName="Yellow to Red"
-          />,
+          "palette": Array [
+            "#f9eac5",
+            "#f6d9af",
+            "#f3c89a",
+            "#efb785",
+            "#eba672",
+            "#e89361",
+            "#e58053",
+            "#e7664c",
+          ],
+          "type": "gradient",
           "value": "Yellow to Red",
         },
         Object {
-          "inputDisplay": <ColorGradient
-            colorRampName="Green to Red"
-          />,
+          "palette": Array [
+            "#209280",
+            "#3aa38d",
+            "#54b399",
+            "#95b978",
+            "#df9352",
+            "#e7664c",
+            "#da5e47",
+            "#cc5642",
+          ],
+          "type": "gradient",
           "value": "Green to Red",
+        },
+        Object {
+          "palette": Array [
+            "#6092c0",
+            "#84a9cd",
+            "#a8bfda",
+            "#cad7e8",
+            "#f0d3b0",
+            "#ecb385",
+            "#ea8d69",
+            "#e7664c",
+          ],
+          "type": "gradient",
+          "value": "Blue to Red",
+        },
+        Object {
+          "palette": Array [
+            "rgb(65, 105, 225)",
+            "rgb(0, 256, 256)",
+            "rgb(0, 256, 0)",
+            "rgb(256, 256, 0)",
+            "rgb(256, 0, 0)",
+          ],
+          "type": "gradient",
+          "value": "theclassic",
         },
       ]
     }

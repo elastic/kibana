@@ -17,7 +17,10 @@
  * under the License.
  */
 
-import { REPO_ROOT, run, createFailError, createFlagError } from '@kbn/dev-utils';
+import Path from 'path';
+
+import { REPO_ROOT } from '@kbn/utils';
+import { run, createFailError, createFlagError } from '@kbn/dev-utils';
 import globby from 'globby';
 
 import { getFailures, TestFailure } from './get_failures';
@@ -27,6 +30,8 @@ import { getIssueMetadata } from './issue_metadata';
 import { readTestReport } from './test_report';
 import { addMessagesToReport } from './add_messages_to_report';
 import { getReportMessageIter } from './report_metadata';
+
+const DEFAULT_PATTERNS = [Path.resolve(REPO_ROOT, 'target/junit/**/*.xml')];
 
 export function runFailedTestsReporterCli() {
   run(
@@ -67,11 +72,17 @@ export function runFailedTestsReporterCli() {
         throw createFlagError('Missing --build-url or process.env.BUILD_URL');
       }
 
-      const reportPaths = await globby(['target/junit/**/*.xml'], {
-        cwd: REPO_ROOT,
+      const patterns = flags._.length ? flags._ : DEFAULT_PATTERNS;
+      log.info('Searching for reports at', patterns);
+      const reportPaths = await globby(patterns, {
         absolute: true,
       });
 
+      if (!reportPaths.length) {
+        throw createFailError(`Unable to find any junit reports with patterns [${patterns}]`);
+      }
+
+      log.info('found', reportPaths.length, 'junit reports', reportPaths);
       const newlyCreatedIssues: Array<{
         failure: TestFailure;
         newIssue: GithubIssueMini;

@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 
 import { ReindexStatus, REINDEX_OP_TYPE } from '../../../plugins/upgrade_assistant/common/types';
 import { generateNewIndexName } from '../../../plugins/upgrade_assistant/server/lib/reindexing/index_settings';
-import { getIndexStateFromClusterState } from '../../../plugins/upgrade_assistant/common/get_index_state_from_cluster_state';
+import { getIndexState } from '../../../plugins/upgrade_assistant/common/get_index_state';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -190,7 +190,7 @@ export default function ({ getService }) {
         expect(result.body.enqueued.length).to.equal(3);
         expect(result.body.errors.length).to.equal(0);
 
-        const [{ newIndexName: newTest1Name }] = result.body.enqueued;
+        const [{ newIndexName: nameOfIndexThatShouldBeClosed }] = result.body.enqueued;
 
         await assertQueueState(test1, 3);
         await waitForReindexToComplete(test1);
@@ -204,16 +204,12 @@ export default function ({ getService }) {
         await assertQueueState(undefined, 0);
 
         // Check that the closed index is still closed after reindexing
-        const clusterStateResponse = await es.cluster.state({
-          index: newTest1Name,
-          metric: 'metadata',
+        const resolvedIndices = await es.transport.request({
+          path: `_resolve/index/${nameOfIndexThatShouldBeClosed}`,
         });
 
-        const test1ReindexedState = getIndexStateFromClusterState(
-          newTest1Name,
-          clusterStateResponse
-        );
-        expect(test1ReindexedState).to.be('close');
+        const test1ReindexedState = getIndexState(nameOfIndexThatShouldBeClosed, resolvedIndices);
+        expect(test1ReindexedState).to.be('closed');
       } finally {
         await cleanupReindex(test1);
         await cleanupReindex(test2);

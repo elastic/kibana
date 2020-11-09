@@ -7,10 +7,16 @@
 import { get, omit } from 'lodash';
 // @ts-expect-error untyped local
 import { safeElementFromExpression, fromExpression } from '@kbn/interpreter/common';
-// @ts-expect-error untyped local
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
-import { State, CanvasWorkpad, CanvasPage, CanvasElement, ResolvedArgType } from '../../../types';
+import {
+  State,
+  CanvasWorkpad,
+  CanvasPage,
+  CanvasElement,
+  CanvasVariable,
+  ResolvedArgType,
+} from '../../../types';
 import {
   ExpressionContext,
   CanvasGroup,
@@ -47,6 +53,23 @@ export function getFullWorkpadPersisted(state: State) {
 
 export function getWorkpadPersisted(state: State) {
   return getWorkpad(state);
+}
+
+export function getWorkpadVariables(state: State) {
+  const workpad = getWorkpad(state);
+  return get(workpad, 'variables', []);
+}
+
+export function getWorkpadVariablesAsObject(state: State) {
+  const variables = getWorkpadVariables(state);
+  if (variables.length === 0) {
+    return {};
+  }
+
+  return (variables as CanvasVariable[]).reduce(
+    (vars: Record<string, any>, v: CanvasVariable) => ({ ...vars, [v.name]: v.value }),
+    {}
+  );
 }
 
 export function getWorkpadInfo(state: State): WorkpadInfo {
@@ -191,13 +214,13 @@ export function getGlobalFilters(state: State): string[] {
   }, []);
 }
 
-type onValueFunction = (
+type OnValueFunction = (
   argValue: ExpressionAstArgument,
   argNames?: string,
   args?: ExpressionAstFunction['arguments']
 ) => ExpressionAstArgument | ExpressionAstArgument[] | undefined;
 
-function buildGroupValues(args: ExpressionAstFunction['arguments'], onValue: onValueFunction) {
+function buildGroupValues(args: ExpressionAstFunction['arguments'], onValue: OnValueFunction) {
   const argNames = Object.keys(args);
 
   return argNames.reduce<ExpressionAstArgument[]>((values, argName) => {
@@ -326,7 +349,9 @@ export function getElements(
     return elements.map((el) => omit(el, ['ast']));
   }
 
-  return elements.map(appendAst);
+  const elementAppendAst = (elem: CanvasElement) => appendAst(elem);
+
+  return elements.map(elementAppendAst);
 }
 
 const augment = (type: string) => <T extends CanvasElement | CanvasGroup>(n: T): T => ({
@@ -470,8 +495,7 @@ export function getRenderedWorkpad(state: State) {
 
   const workpad = getWorkpad(state);
 
-  // eslint-disable-next-line no-unused-vars
-  const { pages, ...rest } = workpad;
+  const { pages, variables, ...rest } = workpad;
 
   return {
     pages: renderedPages,

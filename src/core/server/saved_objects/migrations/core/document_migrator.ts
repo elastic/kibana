@@ -60,7 +60,8 @@
  * given an empty migrationVersion property {} if no such property exists.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
+import { set } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import Semver from 'semver';
 import { Logger } from '../../../logging';
@@ -72,12 +73,9 @@ import { SavedObjectMigrationFn } from '../types';
 
 export type TransformFn = (doc: SavedObjectUnsanitizedDoc) => SavedObjectUnsanitizedDoc;
 
-type ValidateDoc = (doc: SavedObjectUnsanitizedDoc) => void;
-
 interface DocumentMigratorOptions {
   kibanaVersion: string;
   typeRegistry: ISavedObjectTypeRegistry;
-  validateDoc: ValidateDoc;
   log: Logger;
 }
 
@@ -112,19 +110,16 @@ export class DocumentMigrator implements VersionedTransformer {
    * @param {DocumentMigratorOptions} opts
    * @prop {string} kibanaVersion - The current version of Kibana
    * @prop {SavedObjectTypeRegistry} typeRegistry - The type registry to get type migrations from
-   * @prop {ValidateDoc} validateDoc - A function which, given a document throws an error if it is
-   *   not up to date. This is used to ensure we don't let unmigrated documents slip through.
    * @prop {Logger} log - The migration logger
    * @memberof DocumentMigrator
    */
-  constructor({ typeRegistry, kibanaVersion, log, validateDoc }: DocumentMigratorOptions) {
+  constructor({ typeRegistry, kibanaVersion, log }: DocumentMigratorOptions) {
     validateMigrationDefinition(typeRegistry);
 
     this.migrations = buildActiveMigrations(typeRegistry, log);
     this.transformDoc = buildDocumentTransform({
       kibanaVersion,
       migrations: this.migrations,
-      validateDoc,
     });
   }
 
@@ -230,20 +225,15 @@ function buildActiveMigrations(
  * Creates a function which migrates and validates any document that is passed to it.
  */
 function buildDocumentTransform({
-  kibanaVersion,
   migrations,
-  validateDoc,
 }: {
   kibanaVersion: string;
   migrations: ActiveMigrations;
-  validateDoc: ValidateDoc;
 }): TransformFn {
   return function transformAndValidate(doc: SavedObjectUnsanitizedDoc) {
     const result = doc.migrationVersion
       ? applyMigrations(doc, migrations)
       : markAsUpToDate(doc, migrations);
-
-    validateDoc(result);
 
     // In order to keep tests a bit more stable, we won't
     // tack on an empy migrationVersion to docs that have
@@ -291,7 +281,7 @@ function markAsUpToDate(doc: SavedObjectUnsanitizedDoc, migrations: ActiveMigrat
     ...doc,
     migrationVersion: props(doc).reduce((acc, prop) => {
       const version = propVersion(migrations, prop);
-      return version ? _.set(acc, prop, version) : acc;
+      return version ? set(acc, prop, version) : acc;
     }, {}),
   };
 }

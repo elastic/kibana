@@ -10,6 +10,7 @@ import * as labels from '../translations';
 import { AlertFieldNumber } from '../alert_field_number';
 
 interface Props {
+  isEnabled?: boolean;
   defaultNumTimes?: number;
   hasFilters: boolean;
   setAlertParams: (key: string, value: any) => void;
@@ -18,6 +19,7 @@ interface Props {
 export const DownNoExpressionSelect: React.FC<Props> = ({
   defaultNumTimes,
   hasFilters,
+  isEnabled,
   setAlertParams,
 }) => {
   const [numTimes, setNumTimes] = useState<number>(defaultNumTimes ?? 5);
@@ -41,6 +43,7 @@ export const DownNoExpressionSelect: React.FC<Props> = ({
       data-test-subj="xpack.uptime.alerts.monitorStatus.numTimesExpression"
       description={hasFilters ? labels.MATCHING_MONITORS_DOWN : labels.ANY_MONITOR_DOWN}
       id="ping-count"
+      isEnabled={isEnabled}
       value={`${numTimes} times`}
     />
   );

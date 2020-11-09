@@ -4,12 +4,17 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isNumber, get } from 'lodash/fp';
+import { isEmpty, get } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 
 import { escapeQueryValue, convertToBuildEsQuery } from '../../../common/lib/keury';
 
-import { DataProvider, DataProvidersAnd, EXISTS_OPERATOR } from './data_providers/data_provider';
+import {
+  DataProvider,
+  DataProviderType,
+  DataProvidersAnd,
+  EXISTS_OPERATOR,
+} from './data_providers/data_provider';
 import { BrowserFields } from '../../../common/containers/source';
 import {
   IIndexPattern,
@@ -17,6 +22,8 @@ import {
   EsQueryConfig,
   Filter,
 } from '../../../../../../../src/plugins/data/public';
+
+const isNumber = (value: string | number) => !isNaN(Number(value));
 
 const convertDateFieldToQuery = (field: string, value: string | number) =>
   `${field}: ${isNumber(value) ? value : new Date(value).valueOf()}`;
@@ -52,7 +59,8 @@ const buildQueryMatch = (
   browserFields: BrowserFields
 ) =>
   `${dataProvider.excluded ? 'NOT ' : ''}${
-    dataProvider.queryMatch.operator !== EXISTS_OPERATOR
+    dataProvider.queryMatch.operator !== EXISTS_OPERATOR &&
+    dataProvider.type !== DataProviderType.template
       ? checkIfFieldTypeIsDate(dataProvider.queryMatch.field, browserFields)
         ? convertDateFieldToQuery(dataProvider.queryMatch.field, dataProvider.queryMatch.value)
         : `${dataProvider.queryMatch.field} : ${
@@ -96,8 +104,6 @@ export const combineQueries = ({
   filters = [],
   kqlQuery,
   kqlMode,
-  start,
-  end,
   isEventViewer,
 }: {
   config: EsQueryConfig;
@@ -107,33 +113,26 @@ export const combineQueries = ({
   filters: Filter[];
   kqlQuery: Query;
   kqlMode: string;
-  start: number;
-  end: number;
   isEventViewer?: boolean;
 }): { filterQuery: string } | null => {
   const kuery: Query = { query: '', language: kqlQuery.language };
   if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters) && !isEventViewer) {
     return null;
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEventViewer) {
-    kuery.query = `@timestamp >= ${start} and @timestamp <= ${end}`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   } else if (isEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
-    kuery.query = `@timestamp >= ${start} and @timestamp <= ${end}`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   } else if (isEmpty(dataProviders) && !isEmpty(kqlQuery.query)) {
-    kuery.query = `(${kqlQuery.query}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+    kuery.query = `(${kqlQuery.query})`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
   } else if (!isEmpty(dataProviders) && isEmpty(kqlQuery)) {
-    kuery.query = `(${buildGlobalQuery(
-      dataProviders,
-      browserFields
-    )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+    kuery.query = `(${buildGlobalQuery(dataProviders, browserFields)})`;
     return {
       filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
     };
@@ -142,7 +141,7 @@ export const combineQueries = ({
   const postpend = (q: string) => `${!isEmpty(q) ? ` ${operatorKqlQuery} (${q})` : ''}`;
   kuery.query = `((${buildGlobalQuery(dataProviders, browserFields)})${postpend(
     kqlQuery.query as string
-  )}) and @timestamp >= ${start} and @timestamp <= ${end}`;
+  )})`;
   return {
     filterQuery: convertToBuildEsQuery({ config, queries: [kuery], indexPattern, filters }),
   };
@@ -155,3 +154,14 @@ export const combineQueries = ({
 export const STATEFUL_EVENT_CSS_CLASS_NAME = 'event-column-view';
 
 export const DEFAULT_ICON_BUTTON_WIDTH = 24;
+
+export const resolverIsShowing = (graphEventId: string | undefined): boolean =>
+  graphEventId != null && graphEventId !== '';
+
+export const showGlobalFilters = ({
+  globalFullScreen,
+  graphEventId,
+}: {
+  globalFullScreen: boolean;
+  graphEventId: string | undefined;
+}): boolean => (globalFullScreen && resolverIsShowing(graphEventId) ? false : true);

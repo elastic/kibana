@@ -4,44 +4,47 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/* eslint-disable @typescript-eslint/camelcase */
-
 import * as t from 'io-ts';
 
 import {
-  _tags,
+  _versionOrUndefined,
   created_at,
   created_by,
   description,
   exceptionListType,
   id,
+  immutable,
   list_id,
   metaOrUndefined,
   name,
   namespace_type,
+  osTypeArray,
   tags,
   tie_breaker_id,
   updated_at,
   updated_by,
+  version,
 } from '../common/schemas';
 
-// TODO: Should we use a partial here to reflect that this can JSON serialize meta as non existent?
 export const exceptionListSchema = t.exact(
   t.type({
-    _tags,
+    _version: _versionOrUndefined,
     created_at,
     created_by,
     description,
     id,
+    immutable,
     list_id,
     meta: metaOrUndefined,
     name,
     namespace_type,
+    os_types: osTypeArray,
     tags,
     tie_breaker_id,
     type: exceptionListType,
     updated_at,
     updated_by,
+    version,
   })
 );
 

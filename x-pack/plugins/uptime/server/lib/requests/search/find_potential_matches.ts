@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { get, set } from 'lodash';
-import { CursorDirection } from '../../../../common/runtime_types';
+import { set } from '@elastic/safer-lodash-set';
+import { get } from 'lodash';
 import { QueryContext } from './query_context';
 
 /**
@@ -19,7 +19,7 @@ export const findPotentialMatches = async (
   searchAfter: any,
   size: number
 ) => {
-  const queryResult = await query(queryContext, searchAfter, size);
+  const { body: queryResult } = await query(queryContext, searchAfter, size);
   const monitorIds: string[] = [];
   get<any>(queryResult, 'aggregations.monitors.buckets', []).forEach((b: any) => {
     const monitorId = b.key.monitor_id;
@@ -44,8 +44,6 @@ const query = async (queryContext: QueryContext, searchAfter: any, size: number)
 };
 
 const queryBody = async (queryContext: QueryContext, searchAfter: any, size: number) => {
-  const compositeOrder = cursorDirectionToOrder(queryContext.pagination.cursorDirection);
-
   const filters = await queryContext.dateAndCustomFilters();
 
   if (queryContext.statusFilter) {
@@ -66,7 +64,7 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
           size,
           sources: [
             {
-              monitor_id: { terms: { field: 'monitor.id', order: compositeOrder } },
+              monitor_id: { terms: { field: 'monitor.id', order: queryContext.cursorOrder() } },
             },
           ],
         },
@@ -79,8 +77,4 @@ const queryBody = async (queryContext: QueryContext, searchAfter: any, size: num
   }
 
   return body;
-};
-
-const cursorDirectionToOrder = (cd: CursorDirection): 'asc' | 'desc' => {
-  return CursorDirection[cd] === CursorDirection.AFTER ? 'asc' : 'desc';
 };

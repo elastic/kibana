@@ -12,6 +12,7 @@ class GithubCommitStatusTest extends KibanaBasePipelineTest {
 
   interface BuildState {
     Object get(String key)
+    Object has(String key)
   }
 
   interface GithubApi {
@@ -25,6 +26,7 @@ class GithubCommitStatusTest extends KibanaBasePipelineTest {
     buildStateMock = mock(BuildState)
     githubApiMock = mock(GithubApi)
 
+    when(buildStateMock.has('checkoutInfo')).thenReturn(true)
     when(buildStateMock.get('checkoutInfo')).thenReturn([ commit: 'COMMIT_HASH', ])
     when(githubApiMock.post(any(), any())).thenReturn(null)
 

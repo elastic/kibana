@@ -14,7 +14,7 @@ export interface INullableBaseStateContainer<State extends BaseState> extends Ba
 
 ## Remarks
 
-State container for stateSync() have to accept "null" for example, set() implementation could handle null and fallback to some default state this is required to handle edge case, when state in storage becomes empty and syncing is in progress. state container will be notified about about storage becoming empty with null passed in
+State container for `stateSync()` have to accept `null` for example, `set()` implementation could handle null and fallback to some default state this is required to handle edge case, when state in storage becomes empty and syncing is in progress. State container will be notified about about storage becoming empty with null passed in.
 
 ## Properties
 

@@ -5,14 +5,9 @@
  */
 
 jest.mock('../../../../kibana_services', () => {
-  const mockUiSettings = {
-    get: () => {
-      return undefined;
-    },
-  };
   return {
-    getUiSettings: () => {
-      return mockUiSettings;
+    getIsDarkMode() {
+      return false;
     },
   };
 });
@@ -26,7 +21,7 @@ jest.mock('uuid/v4', () => {
 import { createSecurityLayerDescriptors } from './create_layer_descriptors';
 
 describe('createLayerDescriptor', () => {
-  test('amp index', () => {
+  test('apm index', () => {
     expect(createSecurityLayerDescriptors('id', 'apm-*-transaction*')).toEqual([
       {
         __dataRequests: [],
@@ -37,6 +32,7 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
           filterByMapBounds: true,
           geoField: 'client.geo.location',
           id: '12345',
@@ -143,6 +139,7 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
           filterByMapBounds: true,
           geoField: 'server.geo.location',
           id: '12345',
@@ -249,6 +246,7 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
           destGeoField: 'server.geo.location',
           id: '12345',
           indexPatternId: 'id',
@@ -367,6 +365,7 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
           filterByMapBounds: true,
           geoField: 'source.geo.location',
           id: '12345',
@@ -473,6 +472,7 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
           filterByMapBounds: true,
           geoField: 'destination.geo.location',
           id: '12345',
@@ -579,6 +579,7 @@ describe('createLayerDescriptor', () => {
         maxZoom: 24,
         minZoom: 0,
         sourceDescriptor: {
+          applyGlobalQuery: true,
           destGeoField: 'destination.geo.location',
           id: '12345',
           indexPatternId: 'id',

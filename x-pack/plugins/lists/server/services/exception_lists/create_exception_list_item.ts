@@ -12,15 +12,15 @@ import {
   Description,
   EntriesArray,
   ExceptionListItemSchema,
+  ExceptionListItemType,
   ExceptionListSoSchema,
-  ExceptionListType,
   ItemId,
   ListId,
   MetaOrUndefined,
   Name,
   NamespaceType,
+  OsTypeArray,
   Tags,
-  _Tags,
 } from '../../../common/schemas';
 
 import {
@@ -30,7 +30,6 @@ import {
 } from './utils';
 
 interface CreateExceptionListItemOptions {
-  _tags: _Tags;
   comments: CreateCommentsArray;
   listId: ListId;
   itemId: ItemId;
@@ -43,11 +42,11 @@ interface CreateExceptionListItemOptions {
   user: string;
   tags: Tags;
   tieBreaker?: string;
-  type: ExceptionListType;
+  type: ExceptionListItemType;
+  osTypes: OsTypeArray;
 }
 
 export const createExceptionListItem = async ({
-  _tags,
   comments,
   entries,
   itemId,
@@ -55,6 +54,7 @@ export const createExceptionListItem = async ({
   savedObjectsClient,
   namespaceType,
   name,
+  osTypes,
   description,
   meta,
   user,
@@ -64,23 +64,28 @@ export const createExceptionListItem = async ({
 }: CreateExceptionListItemOptions): Promise<ExceptionListItemSchema> => {
   const savedObjectType = getSavedObjectType({ namespaceType });
   const dateNow = new Date().toISOString();
-  const transformedComments = transformCreateCommentsToComments({ comments, user });
+  const transformedComments = transformCreateCommentsToComments({
+    incomingComments: comments,
+    user,
+  });
   const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(savedObjectType, {
-    _tags,
     comments: transformedComments,
     created_at: dateNow,
     created_by: user,
     description,
     entries,
+    immutable: undefined,
     item_id: itemId,
     list_id: listId,
     list_type: 'item',
     meta,
     name,
+    os_types: osTypes as OsTypeArray,
     tags,
     tie_breaker_id: tieBreaker ?? uuid.v4(),
     type,
     updated_by: user,
+    version: undefined,
   });
-  return transformSavedObjectToExceptionListItem({ namespaceType, savedObject });
+  return transformSavedObjectToExceptionListItem({ savedObject });
 };

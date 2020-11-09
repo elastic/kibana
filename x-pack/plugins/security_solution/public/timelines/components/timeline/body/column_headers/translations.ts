@@ -18,6 +18,10 @@ export const FIELD = i18n.translate('xpack.securitySolution.timeline.fieldToolti
   defaultMessage: 'Field',
 });
 
+export const FULL_SCREEN = i18n.translate('xpack.securitySolution.timeline.fullScreenButton', {
+  defaultMessage: 'Full screen',
+});
+
 export const TYPE = i18n.translate('xpack.securitySolution.timeline.typeTooltip', {
   defaultMessage: 'Type',
 });

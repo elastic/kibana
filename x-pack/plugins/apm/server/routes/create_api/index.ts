@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { pick, difference } from 'lodash';
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { schema } from '@kbn/config-schema';
 import * as t from 'io-ts';
 import { PathReporter } from 'io-ts/lib/PathReporter';
@@ -140,7 +140,7 @@ export function createApi() {
                   // Only return values for parameters that have runtime types,
                   // but always include query as _debug is always set even if
                   // it's not defined in the route.
-                  // @ts-ignore
+                  // @ts-expect-error
                   params: pick(parsedParams, ...Object.keys(params), 'query'),
                   config,
                   logger,

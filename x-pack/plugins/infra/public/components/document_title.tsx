@@ -6,10 +6,10 @@
 
 import React from 'react';
 
-type titleProp = string | ((previousTitle: string) => string);
+type TitleProp = string | ((previousTitle: string) => string);
 
 interface DocumentTitleProps {
-  title: titleProp;
+  title: TitleProp;
 }
 
 interface DocumentTitleState {
@@ -47,7 +47,7 @@ const wrapWithSharedState = () => {
       return null;
     }
 
-    private getTitle(title: titleProp) {
+    private getTitle(title: TitleProp) {
       return typeof title === 'function' ? title(titles[this.state.index - 1]) : title;
     }
 

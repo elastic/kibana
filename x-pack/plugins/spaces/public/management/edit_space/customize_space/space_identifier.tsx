@@ -46,6 +46,7 @@ class SpaceIdentifierUI extends Component<Props, State> {
         >
           <EuiFieldText
             readOnly={!this.state.editing}
+            data-test-subj="spaceURLDisplay"
             placeholder={
               this.state.editing || !this.props.editable
                 ? undefined
@@ -105,7 +106,11 @@ class SpaceIdentifierUI extends Component<Props, State> {
           id="xpack.spaces.management.spaceIdentifier.urlIdentifierLabel"
           defaultMessage="URL identifier "
         />
-        <EuiLink onClick={this.onEditClick} aria-label={editLinkLabel}>
+        <EuiLink
+          data-test-subj="CustomizeOrReset"
+          onClick={this.onEditClick}
+          aria-label={editLinkLabel}
+        >
           {editLinkText}
         </EuiLink>
       </p>

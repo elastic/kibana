@@ -17,6 +17,7 @@ function createSetupMock() {
     authz: {
       actions: mockAuthz.actions,
       checkPrivilegesWithRequest: mockAuthz.checkPrivilegesWithRequest,
+      checkPrivilegesDynamicallyWithRequest: mockAuthz.checkPrivilegesDynamicallyWithRequest,
       mode: mockAuthz.mode,
     },
     registerSpacesService: jest.fn(),

@@ -10,7 +10,6 @@ import { readRules } from './read_rules';
 import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { calculateVersion } from './utils';
-import { hasListsFeature } from '../feature_flags';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 
 export const updateRules = async ({
@@ -19,6 +18,7 @@ export const updateRules = async ({
   buildingBlockType,
   savedObjectsClient,
   description,
+  eventCategoryOverride,
   falsePositives,
   enabled,
   query,
@@ -44,6 +44,14 @@ export const updateRules = async ({
   severityMapping,
   tags,
   threat,
+  threshold,
+  threatFilters,
+  threatIndex,
+  threatQuery,
+  threatMapping,
+  threatLanguage,
+  concurrentSearches,
+  itemsPerSearch,
   timestampOverride,
   to,
   type,
@@ -64,6 +72,7 @@ export const updateRules = async ({
     author,
     buildingBlockType,
     description,
+    eventCategoryOverride,
     falsePositives,
     query,
     language,
@@ -86,6 +95,14 @@ export const updateRules = async ({
     severityMapping,
     tags,
     threat,
+    threshold,
+    threatFilters,
+    threatIndex,
+    threatQuery,
+    threatMapping,
+    threatLanguage,
+    concurrentSearches,
+    itemsPerSearch,
     timestampOverride,
     to,
     type,
@@ -96,9 +113,6 @@ export const updateRules = async ({
     machineLearningJobId,
     exceptionsList,
   });
-
-  // TODO: Remove this and use regular exceptions_list once the feature is stable for a release
-  const exceptionsListParam = hasListsFeature() ? { exceptionsList } : {};
 
   const update = await alertsClient.update({
     id: rule.id,
@@ -133,6 +147,12 @@ export const updateRules = async ({
         severity,
         severityMapping,
         threat,
+        threshold,
+        threatFilters,
+        threatIndex,
+        threatQuery,
+        threatMapping,
+        threatLanguage,
         timestampOverride,
         to,
         type,
@@ -141,7 +161,7 @@ export const updateRules = async ({
         version: calculatedVersion,
         anomalyThreshold,
         machineLearningJobId,
-        ...exceptionsListParam,
+        exceptionsList,
       },
     },
   });

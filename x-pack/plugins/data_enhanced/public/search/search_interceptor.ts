@@ -4,53 +4,102 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApplicationStart, ToastsStart } from 'kibana/public';
-import { getLongQueryNotification } from './long_query_notification';
-import { SearchInterceptor } from '../../../../../src/plugins/data/public';
+import { throwError, from, Subscription } from 'rxjs';
+import { tap, takeUntil, finalize, catchError } from 'rxjs/operators';
+import {
+  TimeoutErrorMode,
+  IEsSearchResponse,
+  SearchInterceptor,
+  SearchInterceptorDeps,
+  UI_SETTINGS,
+} from '../../../../../src/plugins/data/public';
+import { AbortError, toPromise } from '../../../../../src/plugins/data/common';
+
+import {
+  IAsyncSearchRequest,
+  ENHANCED_ES_SEARCH_STRATEGY,
+  IAsyncSearchOptions,
+  doPartialSearch,
+  throwOnEsError,
+} from '../../common';
 
 export class EnhancedSearchInterceptor extends SearchInterceptor {
+  private uiSettingsSub: Subscription;
+  private searchTimeout: number;
+
   /**
-   * This class should be instantiated with a `requestTimeout` corresponding with how many ms after
-   * requests are initiated that they should automatically cancel.
-   * @param toasts The `core.notifications.toasts` service
-   * @param application The `core.application` service
-   * @param requestTimeout Usually config value `elasticsearch.requestTimeout`
+   * @internal
    */
-  constructor(toasts: ToastsStart, application: ApplicationStart, requestTimeout?: number) {
-    super(toasts, application, requestTimeout);
+  constructor(deps: SearchInterceptorDeps) {
+    super(deps);
+    this.searchTimeout = deps.uiSettings.get(UI_SETTINGS.SEARCH_TIMEOUT);
+
+    this.uiSettingsSub = deps.uiSettings
+      .get$(UI_SETTINGS.SEARCH_TIMEOUT)
+      .subscribe((timeout: number) => {
+        this.searchTimeout = timeout;
+      });
+  }
+
+  public stop() {
+    this.uiSettingsSub.unsubscribe();
+  }
+
+  protected getTimeoutMode() {
+    return this.application.capabilities.advancedSettings?.save
+      ? TimeoutErrorMode.CHANGE
+      : TimeoutErrorMode.CONTACT;
   }
 
   /**
    * Abort our `AbortController`, which in turn aborts any intercepted searches.
    */
   public cancelPending = () => {
-    this.hideToast();
     this.abortController.abort();
     this.abortController = new AbortController();
+    if (this.deps.usageCollector) this.deps.usageCollector.trackQueriesCancelled();
   };
 
-  /**
-   * Un-schedule timing out all of the searches intercepted.
-   */
-  public runBeyondTimeout = () => {
-    this.hideToast();
-    this.timeoutSubscriptions.forEach((subscription) => subscription.unsubscribe());
-    this.timeoutSubscriptions.clear();
-  };
+  public search(
+    request: IAsyncSearchRequest,
+    { pollInterval = 1000, ...options }: IAsyncSearchOptions = {}
+  ) {
+    let { id } = request;
 
-  protected showToast = () => {
-    if (this.longRunningToast) return;
-    this.longRunningToast = this.toasts.addInfo(
-      {
-        title: 'Your query is taking awhile',
-        text: getLongQueryNotification({
-          cancel: this.cancelPending,
-          runBeyondTimeout: this.runBeyondTimeout,
-        }),
-      },
-      {
-        toastLifeTimeMs: 1000000,
-      }
+    const { combinedSignal, timeoutSignal, cleanup } = this.setupAbortSignal({
+      abortSignal: options.abortSignal,
+      timeout: this.searchTimeout,
+    });
+    const abortedPromise = toPromise(combinedSignal);
+    const strategy = options?.strategy ?? ENHANCED_ES_SEARCH_STRATEGY;
+
+    this.pendingCount$.next(this.pendingCount$.getValue() + 1);
+
+    return doPartialSearch<IEsSearchResponse>(
+      () => this.runSearch(request, combinedSignal, strategy),
+      (requestId) => this.runSearch({ ...request, id: requestId }, combinedSignal, strategy),
+      (r) => !r.isRunning,
+      (response) => response.id,
+      id,
+      { pollInterval }
+    ).pipe(
+      tap((r) => {
+        id = r.id ?? id;
+      }),
+      throwOnEsError(),
+      takeUntil(from(abortedPromise.promise)),
+      catchError((e: AbortError) => {
+        if (id) {
+          this.deps.http.delete(`/internal/search/${strategy}/${id}`);
+        }
+
+        return throwError(this.handleSearchError(e, request, timeoutSignal, options));
+      }),
+      finalize(() => {
+        this.pendingCount$.next(this.pendingCount$.getValue() - 1);
+        cleanup();
+        abortedPromise.cleanup();
+      })
     );
-  };
+  }
 }

@@ -658,7 +658,7 @@ describe('helpers', () => {
       ).toBe(true);
     });
 
-    test('it returns true for a whitelisted non-BrowserField', () => {
+    test('it returns true for a allowlisted non-BrowserField', () => {
       expect(
         allowTopN({
           browserField: undefined,
@@ -717,11 +717,11 @@ describe('helpers', () => {
       ).toBe(false);
     });
 
-    test('it returns false for a non-whitelisted field when a BrowserField is not provided', () => {
+    test('it returns false for a non-allowlisted field when a BrowserField is not provided', () => {
       expect(
         allowTopN({
           browserField: undefined,
-          fieldName: 'non-whitelisted',
+          fieldName: 'non-allowlisted',
         })
       ).toBe(false);
     });

@@ -6,6 +6,7 @@
 
 import { DocLinksStart } from 'src/core/public';
 
+// eslint-disable-next-line @typescript-eslint/naming-convention
 export const getDocumentation = ({ ELASTIC_WEBSITE_URL, DOC_LINK_VERSION }: DocLinksStart) => {
   const docsBase = `${ELASTIC_WEBSITE_URL}guide/en`;
   const esDocsBase = `${docsBase}/elasticsearch/reference/${DOC_LINK_VERSION}`;

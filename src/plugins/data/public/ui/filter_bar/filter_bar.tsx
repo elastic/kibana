@@ -23,7 +23,7 @@ import classNames from 'classnames';
 import React, { useState } from 'react';
 
 import { FilterEditor } from './filter_editor';
-import { FilterItem } from './filter_item';
+import { FILTER_EDITOR_WIDTH, FilterItem } from './filter_item';
 import { FilterOptions } from './filter_options';
 import { useKibana } from '../../../../kibana_react/public';
 import { IIndexPattern } from '../..';
@@ -105,14 +105,13 @@ function FilterBarUI(props: Props) {
           isOpen={isAddFilterPopoverOpen}
           closePopover={() => setIsAddFilterPopoverOpen(false)}
           anchorPosition="downLeft"
-          withTitle
           panelPaddingSize="none"
           ownFocus={true}
           initialFocus=".filterEditor__hiddenItem"
           repositionOnScroll
         >
           <EuiFlexItem grow={false}>
-            <div style={{ width: 400 }}>
+            <div style={{ width: FILTER_EDITOR_WIDTH, maxWidth: '100%' }}>
               <FilterEditor
                 filter={newFilter}
                 indexPatterns={props.indexPatterns}

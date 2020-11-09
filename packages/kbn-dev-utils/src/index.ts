@@ -17,9 +17,10 @@
  * under the License.
  */
 
+export * from '@kbn/utils';
 export { withProcRunner, ProcRunner } from './proc_runner';
 export * from './tooling_log';
-export { createAbsolutePathSerializer } from './serializers';
+export * from './serializers';
 export {
   CA_CERT_PATH,
   ES_KEY_PATH,
@@ -33,9 +34,12 @@ export {
   KBN_P12_PATH,
   KBN_P12_PASSWORD,
 } from './certs';
-export { run, createFailError, createFlagError, combineErrors, isFailError, Flags } from './run';
-export { REPO_ROOT } from './repo_root';
-export { KbnClient } from './kbn_client';
+export * from './kbn_client';
+export * from './run';
 export * from './axios';
 export * from './stdio';
 export * from './ci_stats_reporter';
+export * from './plugin_list';
+export * from './plugins';
+export * from './streams';
+export * from './babel';

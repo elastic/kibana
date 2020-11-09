@@ -9,3 +9,12 @@ import { ImportListItemSchema } from './import_list_item_schema';
 export const getImportListItemSchemaMock = (): ImportListItemSchema => ({
   file: {},
 });
+
+/**
+ * This is useful for end to end tests, it will return a buffer given a string array
+ * of things to import.
+ * @param input Array of strings of things to import
+ */
+export const getImportListItemAsBuffer = (input: string[]): Buffer => {
+  return Buffer.from(input.join('\r\n'));
+};

@@ -18,20 +18,21 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray, take } from 'rxjs/operators';
+import { take } from 'rxjs/operators';
+import { allValuesFrom } from './rxjs_helpers';
 
 import { summarizeEventStream } from './event_stream_helpers';
 
 it('emits each state with each event, ignoring events when summarizer returns undefined', async () => {
   const event$ = Rx.of(1, 2, 3, 4, 5);
   const initial = 0;
-  const values = await summarizeEventStream(event$, initial, (state, event) => {
-    if (event % 2) {
-      return state + event;
-    }
-  })
-    .pipe(toArray())
-    .toPromise();
+  const values = await allValuesFrom(
+    summarizeEventStream(event$, initial, (state, event) => {
+      if (event % 2) {
+        return state + event;
+      }
+    })
+  );
 
   expect(values).toMatchInlineSnapshot(`
     Array [
@@ -57,15 +58,15 @@ it('emits each state with each event, ignoring events when summarizer returns un
 it('interleaves injected events when source is synchronous', async () => {
   const event$ = Rx.of(1, 7);
   const initial = 0;
-  const values = await summarizeEventStream(event$, initial, (state, event, injectEvent) => {
-    if (event < 5) {
-      injectEvent(event + 2);
-    }
+  const values = await allValuesFrom(
+    summarizeEventStream(event$, initial, (state, event, injectEvent) => {
+      if (event < 5) {
+        injectEvent(event + 2);
+      }
 
-    return state + event;
-  })
-    .pipe(toArray())
-    .toPromise();
+      return state + event;
+    })
+  );
 
   expect(values).toMatchInlineSnapshot(`
     Array [
@@ -95,15 +96,15 @@ it('interleaves injected events when source is synchronous', async () => {
 it('interleaves injected events when source is asynchronous', async () => {
   const event$ = Rx.of(1, 7, Rx.asyncScheduler);
   const initial = 0;
-  const values = await summarizeEventStream(event$, initial, (state, event, injectEvent) => {
-    if (event < 5) {
-      injectEvent(event + 2);
-    }
+  const values = await allValuesFrom(
+    summarizeEventStream(event$, initial, (state, event, injectEvent) => {
+      if (event < 5) {
+        injectEvent(event + 2);
+      }
 
-    return state + event;
-  })
-    .pipe(toArray())
-    .toPromise();
+      return state + event;
+    })
+  );
 
   expect(values).toMatchInlineSnapshot(`
     Array [
@@ -133,17 +134,17 @@ it('interleaves injected events when source is asynchronous', async () => {
 it('interleaves mulitple injected events in order', async () => {
   const event$ = Rx.of(1);
   const initial = 0;
-  const values = await summarizeEventStream(event$, initial, (state, event, injectEvent) => {
-    if (event < 10) {
-      injectEvent(10);
-      injectEvent(20);
-      injectEvent(30);
-    }
+  const values = await allValuesFrom(
+    summarizeEventStream(event$, initial, (state, event, injectEvent) => {
+      if (event < 10) {
+        injectEvent(10);
+        injectEvent(20);
+        injectEvent(30);
+      }
 
-    return state + event;
-  })
-    .pipe(toArray())
-    .toPromise();
+      return state + event;
+    })
+  );
 
   expect(values).toMatchInlineSnapshot(`
     Array [
@@ -179,9 +180,9 @@ it('stops an infinite stream when unsubscribed', async () => {
     return prev + event;
   });
 
-  const values = await summarizeEventStream(event$, initial, summarize)
-    .pipe(take(11), toArray())
-    .toPromise();
+  const values = await allValuesFrom(
+    summarizeEventStream(event$, initial, summarize).pipe(take(11))
+  );
 
   expect(values).toMatchInlineSnapshot(`
     Array [

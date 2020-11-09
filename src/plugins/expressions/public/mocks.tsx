@@ -20,10 +20,7 @@
 import React from 'react';
 import { ExpressionsSetup, ExpressionsStart, plugin as pluginInitializer } from '.';
 
-/* eslint-disable */
 import { coreMock } from '../../../core/public/mocks';
-import { bfetchPluginMock } from '../../bfetch/public/mocks';
-/* eslint-enable */
 
 export type Setup = jest.Mocked<ExpressionsSetup>;
 export type Start = jest.Mocked<ExpressionsStart>;
@@ -41,23 +38,6 @@ const createSetupContract = (): Setup => {
     registerRenderer: jest.fn(),
     registerType: jest.fn(),
     run: jest.fn(),
-    __LEGACY: {
-      functions: {
-        register: () => {},
-      } as any,
-      renderers: {
-        register: () => {},
-      } as any,
-      types: {
-        register: () => {},
-      } as any,
-      getExecutor: () => ({
-        interpreter: {
-          interpretAst: (() => {}) as any,
-        },
-      }),
-      loadLegacyServerFunctionWrappers: () => Promise.resolve(),
-    },
   };
   return setupContract;
 };
@@ -69,11 +49,8 @@ const createStartContract = (): Start => {
     ExpressionRenderHandler: jest.fn(),
     fork: jest.fn(),
     getFunction: jest.fn(),
-    getFunctions: jest.fn(),
     getRenderer: jest.fn(),
-    getRenderers: jest.fn(),
     getType: jest.fn(),
-    getTypes: jest.fn(),
     loader: jest.fn(),
     ReactExpressionRenderer: jest.fn((props) => <></>),
     render: jest.fn(),
@@ -86,9 +63,7 @@ const createPlugin = async () => {
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
   const plugin = pluginInitializer(pluginInitializerContext);
-  const setup = await plugin.setup(coreSetup, {
-    bfetch: bfetchPluginMock.createSetupContract(),
-  });
+  const setup = await plugin.setup(coreSetup);
 
   return {
     pluginInitializerContext,
@@ -96,10 +71,7 @@ const createPlugin = async () => {
     coreStart,
     plugin,
     setup,
-    doStart: async () =>
-      await plugin.start(coreStart, {
-        bfetch: bfetchPluginMock.createStartContract(),
-      }),
+    doStart: async () => await plugin.start(coreStart),
   };
 };
 

@@ -41,10 +41,13 @@ experimental[] Retrieve a paginated set of {kib} saved objects by various condit
   (Optional, array|string) The fields to perform the `simple_query_string` parsed query against.
 
 `fields`::
-  (Optional, array|string) The fields to return in the response.
+  (Optional, array|string) The fields to return in the `attributes` key of the response.
 
 `sort_field`::
-  (Optional, string) The field that sorts the response.
+  (Optional, string) Sorts the response. Includes "root" and "type" fields. "root" fields exist for all saved objects, such as "updated_at".
+  "type" fields are specific to an object type, such as fields returned in the `attributes` key of the response. When a single type is
+  defined in the `type` parameter, the "root" and "type" fields are allowed, and validity checks are made in that order. When multiple types
+  are defined in the `type` parameter, only "root" fields are allowed.
 
 `has_reference`::
   (Optional, object) Filters to objects that have a relationship with the type and ID combination.
@@ -73,7 +76,7 @@ Find index patterns with titles that start with `my`:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET "localhost:5601/api/saved_objects/_find?type=index-pattern&search_fields=title&search=my*"
+$ curl -X GET api/saved_objects/_find?type=index-pattern&search_fields=title&search=my*
 --------------------------------------------------
 // KIBANA
 
@@ -101,6 +104,6 @@ query parameter for each value:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET "localhost:5601/api/saved_objects/_find?fields=id&fields=title"
+$ curl -X GET api/saved_objects/_find?fields=id&fields=title
 --------------------------------------------------
 // KIBANA

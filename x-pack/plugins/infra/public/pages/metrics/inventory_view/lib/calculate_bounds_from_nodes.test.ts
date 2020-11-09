@@ -7,6 +7,7 @@ import { calculateBoundsFromNodes } from './calculate_bounds_from_nodes';
 import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
 const nodes: SnapshotNode[] = [
   {
+    name: 'host-01',
     path: [{ value: 'host-01', label: 'host-01' }],
     metrics: [
       {
@@ -18,6 +19,7 @@ const nodes: SnapshotNode[] = [
     ],
   },
   {
+    name: 'host-02',
     path: [{ value: 'host-02', label: 'host-02' }],
     metrics: [
       {

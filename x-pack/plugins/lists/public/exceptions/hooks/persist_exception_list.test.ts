@@ -6,16 +6,16 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 
+import { coreMock } from '../../../../../../src/core/public/mocks';
 import * as api from '../api';
 import { getCreateExceptionListSchemaMock } from '../../../common/schemas/request/create_exception_list_schema.mock';
 import { getUpdateExceptionListSchemaMock } from '../../../common/schemas/request/update_exception_list_schema.mock';
 import { getExceptionListSchemaMock } from '../../../common/schemas/response/exception_list_schema.mock';
-import { createKibanaCoreStartMock } from '../../common/mocks/kibana_core';
 import { PersistHookProps } from '../types';
 
 import { ReturnPersistExceptionList, usePersistExceptionList } from './persist_exception_list';
 
-const mockKibanaHttpService = createKibanaCoreStartMock().http;
+const mockKibanaHttpService = coreMock.createStart().http;
 
 describe('usePersistExceptionList', () => {
   const onError = jest.fn();

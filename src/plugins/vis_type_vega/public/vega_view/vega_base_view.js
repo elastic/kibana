@@ -22,14 +22,14 @@ import moment from 'moment';
 import dateMath from '@elastic/datemath';
 import { vega, vegaLite } from '../lib/vega';
 import { Utils } from '../data_model/utils';
-import { VISUALIZATION_COLORS } from '@elastic/eui';
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TooltipHandler } from './vega_tooltip';
 import { esFilters } from '../../../data/public';
 
 import { getEnableExternalUrls } from '../services';
 
-vega.scheme('elastic', VISUALIZATION_COLORS);
+vega.scheme('elastic', euiPaletteColorBlind());
 
 // Vega's extension functions are global. When called,
 // we forward execution to the instance-specific handler
@@ -63,6 +63,7 @@ export class VegaBaseView {
     this._parser = opts.vegaParser;
     this._serviceSettings = opts.serviceSettings;
     this._filterManager = opts.filterManager;
+    this._fireEvent = opts.fireEvent;
     this._timefilter = opts.timefilter;
     this._findIndex = opts.findIndex;
     this._view = null;
@@ -147,7 +148,7 @@ export class VegaBaseView {
             defaultMessage:
               'External URLs are not enabled. Add   {enableExternalUrls}   to {kibanaConfigFileName}',
             values: {
-              enableExternalUrls: 'vega.enableExternalUrls: true',
+              enableExternalUrls: 'vis_type_vega.enableExternalUrls: true',
               kibanaConfigFileName: 'kibana.yml',
             },
           })
@@ -192,16 +193,11 @@ export class VegaBaseView {
     // This might be due to https://github.com/jquery/jquery/issues/3808
     // Which is being fixed as part of jQuery 3.3.0
     const heightExtraPadding = 6;
-    const width = Math.max(0, this._$container.width() - this._parser.paddingWidth);
-    const height =
-      Math.max(0, this._$container.height() - this._parser.paddingHeight) - heightExtraPadding;
-    // Somehow the `height` signal in vega becomes zero if the height is set exactly to
-    // an even number. This is a dirty workaround for this.
-    // when vega itself is updated again, it should be checked whether this is still
-    // necessary.
-    const adjustedHeight = height + 0.00000001;
-    if (view.width() !== width || view.height() !== adjustedHeight) {
-      view.width(width).height(adjustedHeight);
+    const width = Math.max(0, this._$container.width());
+    const height = Math.max(0, this._$container.height()) - heightExtraPadding;
+
+    if (view.width() !== width || view.height() !== height) {
+      view.width(width).height(height);
       return true;
     }
     return false;
@@ -267,7 +263,8 @@ export class VegaBaseView {
   async addFilterHandler(query, index) {
     const indexId = await this._findIndex(index);
     const filter = esFilters.buildQueryFilter(query, indexId);
-    this._filterManager.addFilters(filter);
+
+    this._fireEvent({ name: 'applyFilter', data: { filters: [filter] } });
   }
 
   /**
@@ -302,7 +299,25 @@ export class VegaBaseView {
    * @param {number|string|Date} end
    */
   setTimeFilterHandler(start, end) {
-    this._timefilter.setTime(VegaBaseView._parseTimeRange(start, end));
+    const { from, to, mode } = VegaBaseView._parseTimeRange(start, end);
+
+    this._fireEvent({
+      name: 'applyFilter',
+      data: {
+        timeFieldName: '*',
+        filters: [
+          {
+            range: {
+              '*': {
+                mode,
+                gte: from,
+                lte: to,
+              },
+            },
+          },
+        ],
+      },
+    });
   }
 
   /**
@@ -364,6 +379,11 @@ export class VegaBaseView {
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
   setDebugValues(view, spec, vlspec) {
+    this._parser.searchAPI.inspectorAdapters?.vega.bindInspectValues({
+      view,
+      spec: vlspec || spec,
+    });
+
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {
         console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');

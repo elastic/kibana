@@ -22,6 +22,7 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { PersistedLog } from '../persisted_log';
 import { UI_SETTINGS } from '../../../common';
 
+/** @internal */
 export function getQueryLog(
   uiSettings: IUiSettingsClient,
   storage: IStorageWrapper,

@@ -17,13 +17,23 @@
  * under the License.
  */
 
-import { Request, ResponseObject, ResponseToolkit } from 'hapi';
-import Boom from 'boom';
+import { Request, ResponseObject, ResponseToolkit } from '@hapi/hapi';
+import Boom from '@hapi/boom';
 
 import { isConfigSchema } from '@kbn/config-schema';
 import { Logger } from '../../logging';
+import { LegacyElasticsearchErrorHelpers } from '../../elasticsearch/legacy/errors';
+import {
+  isUnauthorizedError as isElasticsearchUnauthorizedError,
+  UnauthorizedError as EsNotAuthorizedError,
+} from '../../elasticsearch/client/errors';
 import { KibanaRequest } from './request';
-import { KibanaResponseFactory, kibanaResponseFactory, IKibanaResponse } from './response';
+import {
+  KibanaResponseFactory,
+  kibanaResponseFactory,
+  IKibanaResponse,
+  ErrorHttpResponseOptions,
+} from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
 import { HapiResponseAdapter } from './response_adapter';
 import { RequestHandlerContext } from '../../../server';
@@ -263,10 +273,35 @@ export class Router implements IRouter {
       return hapiResponseAdapter.handle(kibanaResponse);
     } catch (e) {
       this.log.error(e);
+      // forward 401 errors from ES client
+      if (isElasticsearchUnauthorizedError(e)) {
+        return hapiResponseAdapter.handle(
+          kibanaResponseFactory.unauthorized(convertEsUnauthorized(e))
+        );
+      }
+      // forward 401 (boom) errors from legacy ES client
+      if (LegacyElasticsearchErrorHelpers.isNotAuthorizedError(e)) {
+        return e;
+      }
       return hapiResponseAdapter.toInternalError();
     }
   }
 }
+
+const convertEsUnauthorized = (e: EsNotAuthorizedError): ErrorHttpResponseOptions => {
+  const getAuthenticateHeaderValue = () => {
+    const header = Object.entries(e.headers).find(
+      ([key]) => key.toLowerCase() === 'www-authenticate'
+    );
+    return header ? header[1] : 'Basic realm="Authorization Required"';
+  };
+  return {
+    body: e.message,
+    headers: {
+      'www-authenticate': getAuthenticateHeaderValue(),
+    },
+  };
+};
 
 type WithoutHeadArgument<T> = T extends (first: any, ...rest: infer Params) => infer Return
   ? (...rest: Params) => Return

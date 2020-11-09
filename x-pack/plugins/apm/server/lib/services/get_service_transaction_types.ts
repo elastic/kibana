@@ -4,28 +4,44 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import {
-  PROCESSOR_EVENT,
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { rangeFilter } from '../../../common/utils/range_filter';
 import { Setup, SetupTimeRange } from '../helpers/setup_request';
+import {
+  getDocumentTypeFilterForAggregatedTransactions,
+  getProcessorEventForAggregatedTransactions,
+} from '../helpers/aggregated_transactions';
 
-export async function getServiceTransactionTypes(
-  serviceName: string,
-  setup: Setup & SetupTimeRange
-) {
-  const { start, end, client, indices } = setup;
+export async function getServiceTransactionTypes({
+  setup,
+  serviceName,
+  searchAggregatedTransactions,
+}: {
+  serviceName: string;
+  setup: Setup & SetupTimeRange;
+  searchAggregatedTransactions: boolean;
+}) {
+  const { start, end, apmEventClient } = setup;
 
   const params = {
-    index: indices['apm_oss.transactionIndices'],
+    apm: {
+      events: [
+        getProcessorEventForAggregatedTransactions(
+          searchAggregatedTransactions
+        ),
+      ],
+    },
     body: {
       size: 0,
       query: {
         bool: {
           filter: [
+            ...getDocumentTypeFilterForAggregatedTransactions(
+              searchAggregatedTransactions
+            ),
             { term: { [SERVICE_NAME]: serviceName } },
-            { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
             { range: rangeFilter(start, end) },
           ],
         },
@@ -38,7 +54,7 @@ export async function getServiceTransactionTypes(
     },
   };
 
-  const { aggregations } = await client.search(params);
+  const { aggregations } = await apmEventClient.search(params);
   const transactionTypes =
     aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
   return { transactionTypes };

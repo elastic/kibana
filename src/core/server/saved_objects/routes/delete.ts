@@ -29,11 +29,15 @@ export const registerDeleteRoute = (router: IRouter) => {
           type: schema.string(),
           id: schema.string(),
         }),
+        query: schema.object({
+          force: schema.maybe(schema.boolean()),
+        }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { type, id } = req.params;
-      const result = await context.core.savedObjects.client.delete(type, id);
+      const { force } = req.query;
+      const result = await context.core.savedObjects.client.delete(type, id, { force });
       return res.ok({ body: result });
     })
   );

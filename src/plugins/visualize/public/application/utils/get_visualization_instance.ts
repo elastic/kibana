@@ -17,47 +17,30 @@
  * under the License.
  */
 
-import { i18n } from '@kbn/i18n';
-import { VisSavedObject, VisualizeEmbeddableContract } from 'src/plugins/visualizations/public';
+import {
+  SerializedVis,
+  Vis,
+  VisSavedObject,
+  VisualizeEmbeddableContract,
+  VisualizeInput,
+} from 'src/plugins/visualizations/public';
 import { SearchSourceFields } from 'src/plugins/data/public';
 import { SavedObject } from 'src/plugins/saved_objects/public';
+import { cloneDeep } from 'lodash';
+import { ExpressionValueError } from 'src/plugins/expressions/public';
 import { createSavedSearchesLoader } from '../../../../discover/public';
 import { VisualizeServices } from '../types';
 
-export const getVisualizationInstance = async (
-  {
-    chrome,
+const createVisualizeEmbeddableAndLinkSavedSearch = async (
+  vis: Vis,
+  visualizeServices: VisualizeServices
+) => {
+  const {
     data,
-    overlays,
-    visualizations,
     createVisEmbeddableFromObject,
     savedObjects,
-    savedVisualizations,
-    toastNotifications,
-  }: VisualizeServices,
-  /**
-   * opts can be either a saved visualization id passed as string,
-   * or an object of new visualization params.
-   * Both come from url search query
-   */
-  opts?: Record<string, unknown> | string
-) => {
-  const savedVis: VisSavedObject = await savedVisualizations.get(opts);
-
-  if (typeof opts !== 'string') {
-    savedVis.searchSourceFields = { index: opts?.indexPattern } as SearchSourceFields;
-  }
-  const serializedVis = visualizations.convertToSerializedVis(savedVis);
-  let vis = await visualizations.createVis(serializedVis.type, serializedVis);
-
-  if (vis.type.setup) {
-    try {
-      vis = await vis.type.setup(vis);
-    } catch {
-      // skip this catch block
-    }
-  }
-
+    savedObjectsPublic,
+  } = visualizeServices;
   const embeddableHandler = (await createVisEmbeddableFromObject(vis, {
     timeRange: data.query.timefilter.timefilter.getTime(),
     filters: data.query.filterManager.getFilters(),
@@ -66,11 +49,9 @@ export const getVisualizationInstance = async (
 
   embeddableHandler.getOutput$().subscribe((output) => {
     if (output.error) {
-      toastNotifications.addError(output.error, {
-        title: i18n.translate('visualize.error.title', {
-          defaultMessage: 'Visualization error',
-        }),
-      });
+      data.search.showError(
+        ((output.error as unknown) as ExpressionValueError['error']).original || output.error
+      );
     }
   });
 
@@ -79,12 +60,71 @@ export const getVisualizationInstance = async (
   if (vis.data.savedSearchId) {
     savedSearch = await createSavedSearchesLoader({
       savedObjectsClient: savedObjects.client,
-      indexPatterns: data.indexPatterns,
-      search: data.search,
-      chrome,
-      overlays,
+      savedObjects: savedObjectsPublic,
     }).get(vis.data.savedSearchId);
   }
 
-  return { vis, savedVis, savedSearch, embeddableHandler };
+  return { savedSearch, embeddableHandler };
+};
+
+export const getVisualizationInstanceFromInput = async (
+  visualizeServices: VisualizeServices,
+  input: VisualizeInput
+) => {
+  const { visualizations } = visualizeServices;
+  const visState = input.savedVis as SerializedVis;
+  let vis = await visualizations.createVis(visState.type, cloneDeep(visState));
+  if (vis.type.setup) {
+    try {
+      vis = await vis.type.setup(vis);
+    } catch {
+      // skip this catch block
+    }
+  }
+  const { embeddableHandler, savedSearch } = await createVisualizeEmbeddableAndLinkSavedSearch(
+    vis,
+    visualizeServices
+  );
+  return {
+    vis,
+    embeddableHandler,
+    savedSearch,
+  };
+};
+
+export const getVisualizationInstance = async (
+  visualizeServices: VisualizeServices,
+  /**
+   * opts can be either a saved visualization id passed as string,
+   * or an object of new visualization params.
+   * Both come from url search query
+   */
+  opts?: Record<string, unknown> | string
+) => {
+  const { visualizations, savedVisualizations } = visualizeServices;
+  const savedVis: VisSavedObject = await savedVisualizations.get(opts);
+
+  if (typeof opts !== 'string') {
+    savedVis.searchSourceFields = { index: opts?.indexPattern } as SearchSourceFields;
+  }
+  const serializedVis = visualizations.convertToSerializedVis(savedVis);
+  let vis = await visualizations.createVis(serializedVis.type, serializedVis);
+  if (vis.type.setup) {
+    try {
+      vis = await vis.type.setup(vis);
+    } catch {
+      // skip this catch block
+    }
+  }
+
+  const { embeddableHandler, savedSearch } = await createVisualizeEmbeddableAndLinkSavedSearch(
+    vis,
+    visualizeServices
+  );
+  return {
+    vis,
+    embeddableHandler,
+    savedSearch,
+    savedVis,
+  };
 };

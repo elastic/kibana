@@ -8,5 +8,5 @@ import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import { functions } from '../canvas_plugin_src/functions/server';
 
 export function setupInterpreter(expressions: ExpressionsServerSetup) {
-  expressions.__LEGACY.register({ types: [], serverFunctions: functions });
+  functions.forEach((f) => expressions.registerFunction(f));
 }

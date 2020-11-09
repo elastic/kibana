@@ -4,8 +4,12 @@
 
 ## IndexPatternField.conflictDescriptions property
 
+Description of field type conflicts across different indices in the same index pattern
+
 <b>Signature:</b>
 
 ```typescript
-conflictDescriptions?: FieldSpecConflictDescriptions;
+get conflictDescriptions(): Record<string, string[]> | undefined;
+
+set conflictDescriptions(conflictDescriptions: Record<string, string[]> | undefined);
 ```

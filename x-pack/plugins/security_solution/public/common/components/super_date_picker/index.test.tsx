@@ -17,7 +17,7 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../mock';
-import { createUseUiSetting$Mock } from '../../mock/kibana_react';
+import { createUseUiSetting$Mock } from '../../lib/kibana/kibana_react.mock';
 import { createStore, State } from '../../store';
 
 import { SuperDatePicker, makeMapStateToProps } from '.';
@@ -139,7 +139,7 @@ describe('SIEM Super Date Picker', () => {
         expect(store.getState().inputs.global.timerange.toStr).toBe('now');
       });
 
-      test('Make Sure it is Today date', () => {
+      test('Make Sure it is Today date is an absolute date', () => {
         wrapper
           .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
           .first()
@@ -151,13 +151,27 @@ describe('SIEM Super Date Picker', () => {
           .first()
           .simulate('click');
         wrapper.update();
-        expect(store.getState().inputs.global.timerange.fromStr).toBe('now/d');
-        expect(store.getState().inputs.global.timerange.toStr).toBe('now/d');
+        expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
+      });
+
+      test('Make Sure it is This Week date is an absolute date', () => {
+        wrapper
+          .find('[data-test-subj="superDatePickerToggleQuickMenuButton"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+
+        wrapper
+          .find('[data-test-subj="superDatePickerCommonlyUsed_This_week"]')
+          .first()
+          .simulate('click');
+        wrapper.update();
+        expect(store.getState().inputs.global.timerange.kind).toBe('absolute');
       });
 
       test('Make Sure to (end date) is superior than from (start date)', () => {
-        expect(store.getState().inputs.global.timerange.to).toBeGreaterThan(
-          store.getState().inputs.global.timerange.from
+        expect(new Date(store.getState().inputs.global.timerange.to).valueOf()).toBeGreaterThan(
+          new Date(store.getState().inputs.global.timerange.from).valueOf()
         );
       });
     });
@@ -321,7 +335,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const clone = cloneDeep(state);
-        clone.inputs.global.timerange.from = 999;
+        clone.inputs.global.timerange.from = '2020-07-07T09:20:18.966Z';
         const props2 = mapStateToProps(clone, { id: 'global' });
         expect(props1.start).not.toBe(props2.start);
       });
@@ -330,7 +344,7 @@ describe('SIEM Super Date Picker', () => {
         const mapStateToProps = makeMapStateToProps();
         const props1 = mapStateToProps(state, { id: 'global' });
         const clone = cloneDeep(state);
-        clone.inputs.global.timerange.to = 999;
+        clone.inputs.global.timerange.to = '2020-07-08T09:20:18.966Z';
         const props2 = mapStateToProps(clone, { id: 'global' });
         expect(props1.end).not.toBe(props2.end);
       });

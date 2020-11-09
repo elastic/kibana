@@ -2,6 +2,11 @@
 
 exports[`error queries fetches a single error group 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
   "body": Object {
     "query": Object {
       "bool": Object {
@@ -9,11 +14,6 @@ Object {
           Object {
             "term": Object {
               "service.name": "serviceName",
-            },
-          },
-          Object {
-            "term": Object {
-              "processor.event": "error",
             },
           },
           Object {
@@ -32,7 +32,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -57,12 +57,16 @@ Object {
       },
     ],
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`error queries fetches multiple error groups 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "error_groups": Object {
@@ -105,11 +109,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "error",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -120,7 +119,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -128,12 +127,16 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;
 
 exports[`error queries fetches multiple error groups when sortField = latestOccurrenceAt 1`] = `
 Object {
+  "apm": Object {
+    "events": Array [
+      "error",
+    ],
+  },
   "body": Object {
     "aggs": Object {
       "error_groups": Object {
@@ -181,11 +184,6 @@ Object {
             },
           },
           Object {
-            "term": Object {
-              "processor.event": "error",
-            },
-          },
-          Object {
             "range": Object {
               "@timestamp": Object {
                 "format": "epoch_millis",
@@ -196,7 +194,7 @@ Object {
           },
           Object {
             "term": Object {
-              "my.custom.ui.filter": "foo-bar",
+              "service.environment": "test",
             },
           },
         ],
@@ -204,6 +202,5 @@ Object {
     },
     "size": 0,
   },
-  "index": "myIndex",
 }
 `;

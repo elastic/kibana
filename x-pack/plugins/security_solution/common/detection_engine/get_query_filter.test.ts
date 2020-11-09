@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getQueryFilter } from './get_query_filter';
-import { Filter } from 'src/plugins/data/public';
+import { getQueryFilter, buildExceptionFilter, buildEqlSearchRequest } from './get_query_filter';
+import { Filter, EsQueryConfig } from 'src/plugins/data/public';
 import { getExceptionListItemSchemaMock } from '../../../lists/common/schemas/response/exception_list_item_schema.mock';
 
 describe('get_filter', () => {
@@ -362,16 +362,107 @@ describe('get_filter', () => {
       expect(esQuery).toEqual({
         bool: {
           filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+          ],
+          must: [],
+          must_not: [
             {
               bool: {
-                filter: [
+                should: [
                   {
                     bool: {
-                      minimum_should_match: 1,
-                      should: [
+                      filter: [
                         {
-                          match: {
-                            'host.name': 'linux',
+                          nested: {
+                            path: 'some.parentField',
+                            query: {
+                              bool: {
+                                minimum_should_match: 1,
+                                should: [
+                                  {
+                                    match_phrase: {
+                                      'some.parentField.nested.field': 'some value',
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            score_mode: 'none',
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match_phrase: {
+                                  'some.not.nested.field': 'some value',
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+          should: [],
+        },
+      });
+    });
+
+    test('it should work with a list with multiple items', () => {
+      const esQuery = getQueryFilter(
+        'host.name: linux',
+        'kuery',
+        [],
+        ['auditbeat-*'],
+        [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()]
+      );
+      expect(esQuery).toEqual({
+        bool: {
+          filter: [
+            { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+          ],
+          must: [],
+          must_not: [
+            {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      filter: [
+                        {
+                          nested: {
+                            path: 'some.parentField',
+                            query: {
+                              bool: {
+                                minimum_should_match: 1,
+                                should: [
+                                  {
+                                    match_phrase: {
+                                      'some.parentField.nested.field': 'some value',
+                                    },
+                                  },
+                                ],
+                              },
+                            },
+                            score_mode: 'none',
+                          },
+                        },
+                        {
+                          bool: {
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match_phrase: {
+                                  'some.not.nested.field': 'some value',
+                                },
+                              },
+                            ],
                           },
                         },
                       ],
@@ -388,7 +479,7 @@ describe('get_filter', () => {
                                 minimum_should_match: 1,
                                 should: [
                                   {
-                                    match: {
+                                    match_phrase: {
                                       'some.parentField.nested.field': 'some value',
                                     },
                                   },
@@ -400,18 +491,14 @@ describe('get_filter', () => {
                         },
                         {
                           bool: {
-                            must_not: {
-                              bool: {
-                                minimum_should_match: 1,
-                                should: [
-                                  {
-                                    match: {
-                                      'some.not.nested.field': 'some value',
-                                    },
-                                  },
-                                ],
+                            minimum_should_match: 1,
+                            should: [
+                              {
+                                match_phrase: {
+                                  'some.not.nested.field': 'some value',
+                                },
                               },
-                            },
+                            ],
                           },
                         },
                       ],
@@ -421,8 +508,6 @@ describe('get_filter', () => {
               },
             },
           ],
-          must: [],
-          must_not: [],
           should: [],
         },
       });
@@ -453,6 +538,184 @@ describe('get_filter', () => {
           must_not: [],
           should: [],
         },
+      });
+    });
+
+    describe('when "excludeExceptions" is false', () => {
+      test('it should work with a list', () => {
+        const esQuery = getQueryFilter(
+          'host.name: linux',
+          'kuery',
+          [],
+          ['auditbeat-*'],
+          [getExceptionListItemSchemaMock()],
+          false
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            filter: [
+              { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            nested: {
+                              path: 'some.parentField',
+                              query: {
+                                bool: {
+                                  minimum_should_match: 1,
+                                  should: [
+                                    {
+                                      match_phrase: {
+                                        'some.parentField.nested.field': 'some value',
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                              score_mode: 'none',
+                            },
+                          },
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match_phrase: {
+                                    'some.not.nested.field': 'some value',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+        });
+      });
+
+      test('it should work with a list with multiple items', () => {
+        const esQuery = getQueryFilter(
+          'host.name: linux',
+          'kuery',
+          [],
+          ['auditbeat-*'],
+          [getExceptionListItemSchemaMock(), getExceptionListItemSchemaMock()],
+          false
+        );
+        expect(esQuery).toEqual({
+          bool: {
+            filter: [
+              { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            nested: {
+                              path: 'some.parentField',
+                              query: {
+                                bool: {
+                                  minimum_should_match: 1,
+                                  should: [
+                                    {
+                                      match_phrase: {
+                                        'some.parentField.nested.field': 'some value',
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                              score_mode: 'none',
+                            },
+                          },
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match_phrase: {
+                                    'some.not.nested.field': 'some value',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            nested: {
+                              path: 'some.parentField',
+                              query: {
+                                bool: {
+                                  minimum_should_match: 1,
+                                  should: [
+                                    {
+                                      match_phrase: {
+                                        'some.parentField.nested.field': 'some value',
+                                      },
+                                    },
+                                  ],
+                                },
+                              },
+                              score_mode: 'none',
+                            },
+                          },
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match_phrase: {
+                                    'some.not.nested.field': 'some value',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+        });
+      });
+
+      test('it should work with an empty list', () => {
+        const esQuery = getQueryFilter('host.name: linux', 'kuery', [], ['auditbeat-*'], [], false);
+        expect(esQuery).toEqual({
+          bool: {
+            filter: [
+              { bool: { minimum_should_match: 1, should: [{ match: { 'host.name': 'linux' } }] } },
+            ],
+            must: [],
+            must_not: [],
+            should: [],
+          },
+        });
       });
     });
 
@@ -643,6 +906,338 @@ describe('get_filter', () => {
           ],
           should: [],
           must_not: [],
+        },
+      });
+    });
+  });
+
+  describe('buildExceptionFilter', () => {
+    const config: EsQueryConfig = {
+      allowLeadingWildcards: true,
+      queryStringOptions: { analyze_wildcard: true },
+      ignoreFilterIfFieldNotInIndex: false,
+      dateFormatTZ: 'Zulu',
+    };
+    test('it should build a filter without chunking exception items', () => {
+      const exceptionFilter = buildExceptionFilter(
+        [
+          { language: 'kuery', query: 'host.name: linux and some.field: value' },
+          { language: 'kuery', query: 'user.name: name' },
+        ],
+        {
+          fields: [],
+          title: 'auditbeat-*',
+        },
+        config,
+        true,
+        2
+      );
+      expect(exceptionFilter).toEqual({
+        meta: {
+          alias: null,
+          negate: true,
+          disabled: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              'host.name': 'linux',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              'some.field': 'value',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      match: {
+                        'user.name': 'name',
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+
+    test('it should properly chunk exception items', () => {
+      const exceptionFilter = buildExceptionFilter(
+        [
+          { language: 'kuery', query: 'host.name: linux and some.field: value' },
+          { language: 'kuery', query: 'user.name: name' },
+          { language: 'kuery', query: 'file.path: /safe/path' },
+        ],
+        {
+          fields: [],
+          title: 'auditbeat-*',
+        },
+        config,
+        true,
+        2
+      );
+      expect(exceptionFilter).toEqual({
+        meta: {
+          alias: null,
+          negate: true,
+          disabled: false,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match: {
+                                    'host.name': 'linux',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                          {
+                            bool: {
+                              minimum_should_match: 1,
+                              should: [
+                                {
+                                  match: {
+                                    'some.field': 'value',
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              'user.name': 'name',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  should: [
+                    {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match: {
+                              'file.path': '/safe/path',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+  });
+
+  describe('buildEqlSearchRequest', () => {
+    test('should build a basic request with time range', () => {
+      const request = buildEqlSearchRequest(
+        'process where true',
+        ['testindex1', 'testindex2'],
+        'now-5m',
+        'now',
+        100,
+        undefined,
+        [],
+        undefined
+      );
+      expect(request).toEqual({
+        method: 'POST',
+        path: `/testindex1,testindex2/_eql/search?allow_no_indices=true`,
+        body: {
+          size: 100,
+          query: 'process where true',
+          filter: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+    });
+
+    test('should build a request with timestamp and event category overrides', () => {
+      const request = buildEqlSearchRequest(
+        'process where true',
+        ['testindex1', 'testindex2'],
+        'now-5m',
+        'now',
+        100,
+        'event.ingested',
+        [],
+        'event.other_category'
+      );
+      expect(request).toEqual({
+        method: 'POST',
+        path: `/testindex1,testindex2/_eql/search?allow_no_indices=true`,
+        event_category_field: 'event.other_category',
+        body: {
+          size: 100,
+          query: 'process where true',
+          filter: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    'event.ingested': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
+      });
+    });
+
+    test('should build a request with exceptions', () => {
+      const request = buildEqlSearchRequest(
+        'process where true',
+        ['testindex1', 'testindex2'],
+        'now-5m',
+        'now',
+        100,
+        undefined,
+        [getExceptionListItemSchemaMock()],
+        undefined
+      );
+      expect(request).toEqual({
+        method: 'POST',
+        path: `/testindex1,testindex2/_eql/search?allow_no_indices=true`,
+        body: {
+          size: 100,
+          query: 'process where true',
+          filter: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                      format: 'strict_date_optional_time',
+                    },
+                  },
+                },
+                {
+                  bool: {
+                    must_not: {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              filter: [
+                                {
+                                  nested: {
+                                    path: 'some.parentField',
+                                    query: {
+                                      bool: {
+                                        minimum_should_match: 1,
+                                        should: [
+                                          {
+                                            match_phrase: {
+                                              'some.parentField.nested.field': 'some value',
+                                            },
+                                          },
+                                        ],
+                                      },
+                                    },
+                                    score_mode: 'none',
+                                  },
+                                },
+                                {
+                                  bool: {
+                                    minimum_should_match: 1,
+                                    should: [
+                                      {
+                                        match_phrase: {
+                                          'some.not.nested.field': 'some value',
+                                        },
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
         },
       });
     });

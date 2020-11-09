@@ -60,6 +60,7 @@ interface ScrollableLogTextStreamViewProps {
   endDateExpression: string;
   updateDateRange: (range: { startDateExpression?: string; endDateExpression?: string }) => void;
   startLiveStreaming: () => void;
+  hideScrollbar?: boolean;
 }
 
 interface ScrollableLogTextStreamViewState {
@@ -146,6 +147,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
       setFlyoutVisibility,
       setContextEntry,
     } = this.props;
+    const hideScrollbar = this.props.hideScrollbar ?? true;
 
     const { targetId, items, isScrollLocked } = this.state;
     const hasItems = items.length > 0;
@@ -196,7 +198,7 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
                         width={width}
                         onVisibleChildrenChange={this.handleVisibleChildrenChange}
                         target={targetId}
-                        hideScrollbar={true}
+                        hideScrollbar={hideScrollbar}
                         data-test-subj={'logStream'}
                         isLocked={isScrollLocked}
                         entriesCount={items.length}
@@ -326,8 +328,6 @@ export class ScrollableLogTextStreamView extends React.PureComponent<
     }
   };
 
-  // this is actually a method but not recognized as such
-  // eslint-disable-next-line @typescript-eslint/member-ordering
   private handleVisibleChildrenChange = callWithoutRepeats(
     ({
       topChild,

@@ -24,13 +24,23 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 import React, { useState, ReactElement } from 'react';
 import ReactDOM from 'react-dom';
 import angular from 'angular';
+import deepEqual from 'fast-deep-equal';
 
-import { Subscription } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, pipe, Subscription, merge, EMPTY } from 'rxjs';
+import {
+  filter,
+  map,
+  debounceTime,
+  mapTo,
+  startWith,
+  switchMap,
+  distinctUntilChanged,
+  catchError,
+} from 'rxjs/operators';
 import { History } from 'history';
-import { SavedObjectSaveOpts } from 'src/plugins/saved_objects/public';
+import { SavedObjectSaveOpts, SavedObject } from 'src/plugins/saved_objects/public';
+import type { TagDecoratedSavedObject } from 'src/plugins/saved_objects_tagging_oss/public';
 import { NavigationPublicPluginStart as NavigationStart } from 'src/plugins/navigation/public';
-import { TimeRange } from 'src/plugins/data/public';
 import { DashboardEmptyScreen, DashboardEmptyScreenProps } from './dashboard_empty_screen';
 
 import {
@@ -38,11 +48,9 @@ import {
   esFilters,
   IndexPattern,
   IndexPatternsContract,
-  Query,
   QueryState,
   SavedQuery,
   syncQueryStateWithUrl,
-  UI_SETTINGS,
 } from '../../../data/public';
 import { getSavedObjectFinder, SaveResult, showSaveModal } from '../../../saved_objects/public';
 
@@ -64,7 +72,7 @@ import {
 import { NavAction, SavedDashboardPanel } from '../types';
 
 import { showOptionsPopover } from './top_nav/show_options_popover';
-import { DashboardSaveModal } from './top_nav/save_modal';
+import { DashboardSaveModal, SaveOptions } from './top_nav/save_modal';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { saveDashboard } from './lib';
 import { DashboardStateManager } from './dashboard_state_manager';
@@ -75,14 +83,20 @@ import { getDashboardTitle } from './dashboard_strings';
 import { DashboardAppScope } from './dashboard_app';
 import { convertSavedDashboardPanelToPanelState } from './lib/embeddable_saved_object_converters';
 import { RenderDeps } from './application';
-import { IKbnUrlStateStorage, unhashUrl } from '../../../kibana_utils/public';
+import {
+  IKbnUrlStateStorage,
+  removeQueryParam,
+  setStateToKbnUrl,
+  unhashUrl,
+  getQueryParams,
+} from '../../../kibana_utils/public';
 import {
   addFatalError,
   AngularHttpError,
   KibanaLegacyStart,
-  migrateLegacyQuery,
   subscribeWithScope,
 } from '../../../kibana_legacy/public';
+import { migrateLegacyQuery } from './lib/migrate_legacy_query';
 
 export interface DashboardAppControllerDependencies extends RenderDeps {
   $scope: DashboardAppScope;
@@ -114,6 +128,9 @@ interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTE
   [UrlParams.HIDE_FILTER_BAR]: boolean;
 }
 
+const getSearchSessionIdFromURL = (history: History): string | undefined =>
+  getQueryParams(history.location)[DashboardConstants.SEARCH_SESSION_ID] as string | undefined;
+
 export class DashboardAppController {
   // Part of the exposed plugin API - do not remove without careful consideration.
   appStatus: {
@@ -126,7 +143,6 @@ export class DashboardAppController {
     $route,
     $routeParams,
     dashboardConfig,
-    localStorage,
     indexPatterns,
     savedQueryService,
     embeddable,
@@ -134,12 +150,11 @@ export class DashboardAppController {
     dashboardCapabilities,
     scopedHistory,
     embeddableCapabilities: { visualizeCapabilities, mapsCapabilities },
-    data: { query: queryService },
+    data: { query: queryService, search: searchService },
     core: {
       notifications,
       overlays,
       chrome,
-      injectedMetadata,
       fatalErrors,
       uiSettings,
       savedObjects,
@@ -147,13 +162,15 @@ export class DashboardAppController {
       i18n: i18nStart,
     },
     history,
+    setHeaderActionMenu,
     kbnUrlStateStorage,
     usageCollection,
     navigation,
+    savedObjectsTagging,
   }: DashboardAppControllerDependencies) {
     const filterManager = queryService.filterManager;
-    const queryFilter = filterManager;
     const timefilter = queryService.timefilter.timefilter;
+    const queryStringManager = queryService.queryString;
     const isEmbeddedExternally = Boolean($routeParams.embed);
 
     // url param rules should only apply when embedded (e.g. url?embed=true)
@@ -171,6 +188,15 @@ export class DashboardAppController {
       chrome.docTitle.change(dash.title);
     }
 
+    let incomingEmbeddable = embeddable
+      .getStateTransfer(scopedHistory())
+      .getIncomingEmbeddablePackage();
+
+    // TS is picky with type guards, we can't just inline `() => false`
+    function defaultTaggingGuard(obj: SavedObject): obj is TagDecoratedSavedObject {
+      return false;
+    }
+
     const dashboardStateManager = new DashboardStateManager({
       savedDashboard: dash,
       hideWriteControls: dashboardConfig.getHideWriteControls(),
@@ -178,25 +204,36 @@ export class DashboardAppController {
       kbnUrlStateStorage,
       history,
       usageCollection,
+      hasTaggingCapabilities: savedObjectsTagging?.ui.hasTagDecoration ?? defaultTaggingGuard,
     });
 
     // sync initial app filters from state to filterManager
     // if there is an existing similar global filter, then leave it as global
     filterManager.setAppFilters(_.cloneDeep(dashboardStateManager.appState.filters));
+    queryStringManager.setQuery(migrateLegacyQuery(dashboardStateManager.appState.query));
+
     // setup syncing of app filters between appState and filterManager
     const stopSyncingAppFilters = connectToQueryState(
       queryService,
       {
-        set: ({ filters }) => dashboardStateManager.setFilters(filters || []),
-        get: () => ({ filters: dashboardStateManager.appState.filters }),
+        set: ({ filters, query }) => {
+          dashboardStateManager.setFilters(filters || []);
+          dashboardStateManager.setQuery(query || queryStringManager.getDefaultQuery());
+        },
+        get: () => ({
+          filters: dashboardStateManager.appState.filters,
+          query: dashboardStateManager.getQuery(),
+        }),
         state$: dashboardStateManager.appState$.pipe(
           map((state) => ({
             filters: state.filters,
+            query: queryStringManager.formatQuery(state.query),
           }))
         ),
       },
       {
         filters: esFilters.FilterStateStore.APP_STATE,
+        query: true,
       }
     );
 
@@ -252,11 +289,7 @@ export class DashboardAppController {
       navActions[TopNavIds.VISUALIZE]();
     };
 
-    const updateIndexPatterns = (container?: DashboardContainer) => {
-      if (!container || isErrorEmbeddable(container)) {
-        return;
-      }
-
+    function getDashboardIndexPatterns(container: DashboardContainer): IndexPattern[] {
       let panelIndexPatterns: IndexPattern[] = [];
       Object.values(container.getChildIds()).forEach((id) => {
         const embeddableInstance = container.getChild(id);
@@ -266,19 +299,40 @@ export class DashboardAppController {
         panelIndexPatterns.push(...embeddableIndexPatterns);
       });
       panelIndexPatterns = uniqBy(panelIndexPatterns, 'id');
+      return panelIndexPatterns;
+    }
 
-      if (panelIndexPatterns && panelIndexPatterns.length > 0) {
-        $scope.$evalAsync(() => {
-          $scope.indexPatterns = panelIndexPatterns;
+    const updateIndexPatternsOperator = pipe(
+      filter((container: DashboardContainer) => !!container && !isErrorEmbeddable(container)),
+      map(getDashboardIndexPatterns),
+      distinctUntilChanged((a, b) =>
+        deepEqual(
+          a.map((ip) => ip.id),
+          b.map((ip) => ip.id)
+        )
+      ),
+      // using switchMap for previous task cancellation
+      switchMap((panelIndexPatterns: IndexPattern[]) => {
+        return new Observable((observer) => {
+          if (panelIndexPatterns && panelIndexPatterns.length > 0) {
+            $scope.$evalAsync(() => {
+              if (observer.closed) return;
+              $scope.indexPatterns = panelIndexPatterns;
+              observer.complete();
+            });
+          } else {
+            indexPatterns.getDefault().then((defaultIndexPattern) => {
+              if (observer.closed) return;
+              $scope.$evalAsync(() => {
+                if (observer.closed) return;
+                $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
+                observer.complete();
+              });
+            });
+          }
         });
-      } else {
-        indexPatterns.getDefault().then((defaultIndexPattern) => {
-          $scope.$evalAsync(() => {
-            $scope.indexPatterns = [defaultIndexPattern as IndexPattern];
-          });
-        });
-      }
-    };
+      })
+    );
 
     const getEmptyScreenProps = (
       shouldShowEditHelp: boolean,
@@ -306,16 +360,28 @@ export class DashboardAppController {
       dashboardStateManager.getPanels().forEach((panel: SavedDashboardPanel) => {
         embeddablesMap[panel.panelIndex] = convertSavedDashboardPanelToPanelState(panel);
       });
-      let expandedPanelId;
-      if (dashboardContainer && !isErrorEmbeddable(dashboardContainer)) {
-        expandedPanelId = dashboardContainer.getInput().expandedPanelId;
+
+      // If the incoming embeddable state's id already exists in the embeddables map, replace the input, retaining the existing gridData for that panel.
+      if (incomingEmbeddable?.embeddableId && embeddablesMap[incomingEmbeddable.embeddableId]) {
+        const originalPanelState = embeddablesMap[incomingEmbeddable.embeddableId];
+        embeddablesMap[incomingEmbeddable.embeddableId] = {
+          gridData: originalPanelState.gridData,
+          type: incomingEmbeddable.type,
+          explicitInput: {
+            ...originalPanelState.explicitInput,
+            ...incomingEmbeddable.input,
+            id: incomingEmbeddable.embeddableId,
+          },
+        };
+        incomingEmbeddable = undefined;
       }
+
       const shouldShowEditHelp = getShouldShowEditHelp();
       const shouldShowViewHelp = getShouldShowViewHelp();
       const isEmptyInReadonlyMode = shouldShowUnauthorizedEmptyState();
       return {
         id: dashboardStateManager.savedDashboard.id || '',
-        filters: queryFilter.getFilters(),
+        filters: filterManager.getFilters(),
         hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
         query: $scope.model.query,
         timeRange: {
@@ -331,7 +397,7 @@ export class DashboardAppController {
         lastReloadRequestTime,
         title: dashboardStateManager.getTitle(),
         description: dashboardStateManager.getDescription(),
-        expandedPanelId,
+        expandedPanelId: dashboardStateManager.getExpandedPanelId(),
       };
     };
 
@@ -340,7 +406,7 @@ export class DashboardAppController {
       // https://github.com/angular/angular.js/wiki/Understanding-Scopes
       $scope.model = {
         query: dashboardStateManager.getQuery(),
-        filters: queryFilter.getFilters(),
+        filters: filterManager.getFilters(),
         timeRestore: dashboardStateManager.getTimeRestore(),
         title: dashboardStateManager.getTitle(),
         description: dashboardStateManager.getDescription(),
@@ -364,8 +430,13 @@ export class DashboardAppController {
     >(DASHBOARD_CONTAINER_TYPE);
 
     if (dashboardFactory) {
+      const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+      if (searchSessionIdFromURL) {
+        searchService.session.restore(searchSessionIdFromURL);
+      }
+      const searchSessionId = searchSessionIdFromURL ?? searchService.session.start();
       dashboardFactory
-        .create(getDashboardInput())
+        .create({ ...getDashboardInput(), searchSessionId })
         .then((container: DashboardContainer | ErrorEmbeddable | undefined) => {
           if (container && !isErrorEmbeddable(container)) {
             dashboardContainer = container;
@@ -383,11 +454,32 @@ export class DashboardAppController {
               ) : null;
             };
 
-            updateIndexPatterns(dashboardContainer);
-
-            outputSubscription = dashboardContainer.getOutput$().subscribe(() => {
-              updateIndexPatterns(dashboardContainer);
-            });
+            outputSubscription = merge(
+              // output of dashboard container itself
+              dashboardContainer.getOutput$(),
+              // plus output of dashboard container children,
+              // children may change, so make sure we subscribe/unsubscribe with switchMap
+              dashboardContainer.getOutput$().pipe(
+                map(() => dashboardContainer!.getChildIds()),
+                distinctUntilChanged(deepEqual),
+                switchMap((newChildIds: string[]) =>
+                  merge(
+                    ...newChildIds.map((childId) =>
+                      dashboardContainer!
+                        .getChild(childId)
+                        .getOutput$()
+                        .pipe(catchError(() => EMPTY))
+                    )
+                  )
+                )
+              )
+            )
+              .pipe(
+                mapTo(dashboardContainer),
+                startWith(dashboardContainer), // to trigger initial index pattern update
+                updateIndexPatternsOperator
+              )
+              .subscribe();
 
             inputSubscription = dashboardContainer.getInput$().subscribe(() => {
               let dirty = false;
@@ -398,12 +490,12 @@ export class DashboardAppController {
               if (
                 !esFilters.compareFilters(
                   container.getInput().filters,
-                  queryFilter.getFilters(),
+                  filterManager.getFilters(),
                   esFilters.COMPARE_ALL_OPTIONS
                 )
               ) {
                 // Add filters modifies the object passed to it, hence the clone deep.
-                queryFilter.addFilters(_.cloneDeep(container.getInput().filters));
+                filterManager.addFilters(_.cloneDeep(container.getInput().filters));
 
                 dashboardStateManager.applyFilters(
                   $scope.model.query,
@@ -426,22 +518,16 @@ export class DashboardAppController {
               refreshDashboardContainer();
             });
 
-            const incomingState = embeddable
-              .getStateTransfer(scopedHistory())
-              .getIncomingEmbeddablePackage();
-            if (incomingState) {
-              if ('id' in incomingState) {
-                container.addNewEmbeddable<EmbeddableInput>(incomingState.type, {
-                  savedObjectId: incomingState.id,
-                });
-              } else if ('input' in incomingState) {
-                const input = incomingState.input;
-                delete input.id;
-                const explicitInput = {
-                  savedVis: input,
-                };
-                container.addNewEmbeddable<EmbeddableInput>(incomingState.type, explicitInput);
-              }
+            // If the incomingEmbeddable does not yet exist in the panels listing, create a new panel using the container's addEmbeddable method.
+            if (
+              incomingEmbeddable &&
+              (!incomingEmbeddable.embeddableId ||
+                !container.getInput().panels[incomingEmbeddable.embeddableId])
+            ) {
+              container.addNewEmbeddable<EmbeddableInput>(
+                incomingEmbeddable.type,
+                incomingEmbeddable.input
+              );
             }
           }
 
@@ -462,17 +548,9 @@ export class DashboardAppController {
     });
 
     dashboardStateManager.applyFilters(
-      dashboardStateManager.getQuery() || {
-        query: '',
-        language:
-          localStorage.get('kibana.userQueryLanguage') ||
-          uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE),
-      },
-      queryFilter.getFilters()
+      dashboardStateManager.getQuery() || queryStringManager.getDefaultQuery(),
+      filterManager.getFilters()
     );
-
-    timefilter.disableTimeRangeSelector();
-    timefilter.disableAutoRefreshSelector();
 
     const landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
 
@@ -520,7 +598,7 @@ export class DashboardAppController {
         differences.filters = appStateDashboardInput.filters;
       }
 
-      Object.keys(_.omit(containerInput, ['filters'])).forEach((key) => {
+      Object.keys(_.omit(containerInput, ['filters', 'searchSessionId'])).forEach((key) => {
         const containerValue = (containerInput as { [key: string]: unknown })[key];
         const appStateValue = ((appStateDashboardInput as unknown) as { [key: string]: unknown })[
           key
@@ -538,25 +616,25 @@ export class DashboardAppController {
     const refreshDashboardContainer = () => {
       const changes = getChangesFromAppStateForContainerState();
       if (changes && dashboardContainer) {
-        dashboardContainer.updateInput(changes);
+        if (getSearchSessionIdFromURL(history)) {
+          // going away from a background search results
+          removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
+        }
+
+        dashboardContainer.updateInput({
+          ...changes,
+          searchSessionId: searchService.session.start(),
+        });
       }
     };
 
-    $scope.updateQueryAndFetch = function ({ query, dateRange }) {
-      if (dateRange) {
-        timefilter.setTime(dateRange);
-      }
-
-      const oldQuery = $scope.model.query;
-      if (_.isEqual(oldQuery, query)) {
+    $scope.handleRefresh = function (_payload, isUpdate) {
+      if (isUpdate === false) {
         // The user can still request a reload in the query bar, even if the
         // query is the same, and in that case, we have to explicitly ask for
         // a reload, since no state changes will cause it.
         lastReloadRequestTime = new Date().getTime();
         refreshDashboardContainer();
-      } else {
-        $scope.model.query = query;
-        dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
       }
     };
 
@@ -575,7 +653,7 @@ export class DashboardAppController {
       // Making this method sync broke the updates.
       // Temporary fix, until we fix the complex state in this file.
       setTimeout(() => {
-        queryFilter.setFilters(allFilters);
+        filterManager.setFilters(allFilters);
       }, 0);
     };
 
@@ -607,11 +685,6 @@ export class DashboardAppController {
     );
 
     $scope.indexPatterns = [];
-
-    $scope.$watch('model.query', (newQuery: Query) => {
-      const query = migrateLegacyQuery(newQuery) as Query;
-      $scope.updateQueryAndFetch({ query });
-    });
 
     $scope.$watch(
       () => dashboardCapabilities.saveQuery,
@@ -653,23 +726,22 @@ export class DashboardAppController {
         showFilterBar,
         indexPatterns: $scope.indexPatterns,
         showSaveQuery: $scope.showSaveQuery,
-        query: $scope.model.query,
         savedQuery: $scope.savedQuery,
         onSavedQueryIdChange,
         savedQueryId: dashboardStateManager.getSavedQueryId(),
         useDefaultBehaviors: true,
-        onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }): void => {
-          if (!payload.query) {
-            $scope.updateQueryAndFetch({ query: $scope.model.query, dateRange: payload.dateRange });
-          } else {
-            $scope.updateQueryAndFetch({ query: payload.query, dateRange: payload.dateRange });
-          }
-        },
+        onQuerySubmit: $scope.handleRefresh,
       };
     };
     const dashboardNavBar = document.getElementById('dashboardChrome');
     const updateNavBar = () => {
-      ReactDOM.render(<navigation.ui.TopNavMenu {...getNavBarProps()} />, dashboardNavBar);
+      ReactDOM.render(
+        <navigation.ui.TopNavMenu
+          {...getNavBarProps()}
+          {...(isEmbeddedExternally ? {} : { setMenuMountPoint: setHeaderActionMenu })}
+        />,
+        dashboardNavBar
+      );
     };
 
     const unmountNavBar = () => {
@@ -679,25 +751,11 @@ export class DashboardAppController {
     };
 
     $scope.timefilterSubscriptions$ = new Subscription();
-
+    const timeChanges$ = merge(timefilter.getRefreshIntervalUpdate$(), timefilter.getTimeUpdate$());
     $scope.timefilterSubscriptions$.add(
       subscribeWithScope(
         $scope,
-        timefilter.getRefreshIntervalUpdate$(),
-        {
-          next: () => {
-            updateState();
-            refreshDashboardContainer();
-          },
-        },
-        (error: AngularHttpError | Error | string) => addFatalError(fatalErrors, error)
-      )
-    );
-
-    $scope.timefilterSubscriptions$.add(
-      subscribeWithScope(
-        $scope,
-        timefilter.getTimeUpdate$(),
+        timeChanges$,
         {
           next: () => {
             updateState();
@@ -856,6 +914,15 @@ export class DashboardAppController {
       const currentTitle = dashboardStateManager.getTitle();
       const currentDescription = dashboardStateManager.getDescription();
       const currentTimeRestore = dashboardStateManager.getTimeRestore();
+
+      let currentTags: string[] = [];
+      if (savedObjectsTagging) {
+        const dashboard = dashboardStateManager.savedDashboard;
+        if (savedObjectsTagging.ui.hasTagDecoration(dashboard)) {
+          currentTags = dashboard.getTags();
+        }
+      }
+
       const onSave = ({
         newTitle,
         newDescription,
@@ -863,18 +930,16 @@ export class DashboardAppController {
         newTimeRestore,
         isTitleDuplicateConfirmed,
         onTitleDuplicate,
-      }: {
-        newTitle: string;
-        newDescription: string;
-        newCopyOnSave: boolean;
-        newTimeRestore: boolean;
-        isTitleDuplicateConfirmed: boolean;
-        onTitleDuplicate: () => void;
-      }) => {
+        newTags,
+      }: SaveOptions) => {
         dashboardStateManager.setTitle(newTitle);
         dashboardStateManager.setDescription(newDescription);
         dashboardStateManager.savedDashboard.copyOnSave = newCopyOnSave;
         dashboardStateManager.setTimeRestore(newTimeRestore);
+        if (savedObjectsTagging && newTags) {
+          dashboardStateManager.setTags(newTags);
+        }
+
         const saveOptions = {
           confirmOverwrite: false,
           isTitleDuplicateConfirmed,
@@ -886,6 +951,9 @@ export class DashboardAppController {
             dashboardStateManager.setTitle(currentTitle);
             dashboardStateManager.setDescription(currentDescription);
             dashboardStateManager.setTimeRestore(currentTimeRestore);
+            if (savedObjectsTagging) {
+              dashboardStateManager.setTags(currentTags);
+            }
           }
           return response;
         });
@@ -897,6 +965,8 @@ export class DashboardAppController {
           onClose={() => {}}
           title={currentTitle}
           description={currentDescription}
+          tags={currentTags}
+          savedObjectsTagging={savedObjectsTagging}
           timeRestore={currentTimeRestore}
           showCopyOnSave={dash.id ? true : false}
         />
@@ -1051,7 +1121,12 @@ export class DashboardAppController {
           allowEmbed: true,
           allowShortUrl:
             !dashboardConfig.getHideWriteControls() || dashboardCapabilities.createShortUrl,
-          shareableUrl: unhashUrl(window.location.href),
+          shareableUrl: setStateToKbnUrl(
+            '_a',
+            dashboardStateManager.getAppState(),
+            { useHash: false, storeInHashQuery: true },
+            unhashUrl(window.location.href)
+          ),
           objectId: dash.id,
           objectType: 'dashboard',
           sharingData: {
@@ -1070,14 +1145,16 @@ export class DashboardAppController {
 
     updateViewMode(dashboardStateManager.getViewMode());
 
+    const filterChanges = merge(filterManager.getUpdates$(), queryStringManager.getUpdates$()).pipe(
+      debounceTime(100)
+    );
+
     // update root source when filters update
-    const updateSubscription = queryFilter.getUpdates$().subscribe({
+    const updateSubscription = filterChanges.subscribe({
       next: () => {
-        $scope.model.filters = queryFilter.getFilters();
+        $scope.model.filters = filterManager.getFilters();
+        $scope.model.query = queryStringManager.getQuery();
         dashboardStateManager.applyFilters($scope.model.query, $scope.model.filters);
-        if (dashboardContainer) {
-          dashboardContainer.updateInput({ filters: $scope.model.filters });
-        }
       },
     });
 
@@ -1122,6 +1199,7 @@ export class DashboardAppController {
       if (dashboardContainer) {
         dashboardContainer.destroy();
       }
+      searchService.session.clear();
     });
   }
 }

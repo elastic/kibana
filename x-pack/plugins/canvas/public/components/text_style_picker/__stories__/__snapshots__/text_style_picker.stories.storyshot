@@ -1,0 +1,957 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Storyshots components/TextStylePicker default 1`] = `
+<div
+  style={
+    Object {
+      "width": 264,
+    }
+  }
+>
+  <div
+    className="canvasTextStylePicker"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem"
+      >
+        <div
+          className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+          onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <input
+              defaultValue=""
+              type="hidden"
+            />
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <span
+                  className="euiScreenReaderOnly"
+                  id="generated-id"
+                >
+                  Select an option: 
+                  , is selected
+                </span>
+                <button
+                  aria-haspopup="true"
+                  aria-labelledby="undefined generated-id"
+                  className="euiSuperSelectControl euiSuperSelectControl--compressed"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  type="button"
+                />
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+        >
+          <label
+            className="euiFormLabel euiFormControlLayout__prepend"
+          >
+            Size
+          </label>
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <select
+              className="euiSelect euiSelect--compressed euiSelect--inGroup"
+              onChange={[Function]}
+              onMouseUp={[Function]}
+              value={14}
+            >
+              <option
+                value={0}
+              >
+                0
+              </option>
+              <option
+                value={6}
+              >
+                6
+              </option>
+              <option
+                value={7}
+              >
+                7
+              </option>
+              <option
+                value={8}
+              >
+                8
+              </option>
+              <option
+                value={9}
+              >
+                9
+              </option>
+              <option
+                value={10}
+              >
+                10
+              </option>
+              <option
+                value={11}
+              >
+                11
+              </option>
+              <option
+                value={12}
+              >
+                12
+              </option>
+              <option
+                value={14}
+              >
+                14
+              </option>
+              <option
+                value={16}
+              >
+                16
+              </option>
+              <option
+                value={18}
+              >
+                18
+              </option>
+              <option
+                value={24}
+              >
+                24
+              </option>
+              <option
+                value={30}
+              >
+                30
+              </option>
+              <option
+                value={36}
+              >
+                36
+              </option>
+              <option
+                value={48}
+              >
+                48
+              </option>
+              <option
+                value={60}
+              >
+                60
+              </option>
+              <option
+                value={72}
+              >
+                72
+              </option>
+              <option
+                value={96}
+              >
+                96
+              </option>
+            </select>
+            <div
+              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                className="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+      >
+        <div
+          className="euiPopover euiPopover--anchorDownCenter"
+          id="color-picker-popover"
+          onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <button
+              aria-label="Font Color black"
+              className="euiLink euiLink--primary"
+              onClick={[Function]}
+              style={
+                Object {
+                  "fontSize": 0,
+                }
+              }
+              type="button"
+            >
+              <div
+                className="canvasColorDot"
+              >
+                <div
+                  className="canvasColorDot__background canvasCheckered"
+                />
+                <div
+                  className="canvasColorDot__foreground"
+                  style={Object {}}
+                />
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <fieldset
+          className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text canvasSidebar__buttonGroup"
+          disabled={false}
+        >
+          <legend
+            className="euiScreenReaderOnly"
+          >
+            Style options
+          </legend>
+          <div
+            className="euiButtonGroup__buttons"
+          >
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="bold"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorBold"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  Bold
+                </span>
+              </span>
+            </button>
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="italic"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorItalic"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  Italic
+                </span>
+              </span>
+            </button>
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="underline"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorUnderline"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  Underline
+                </span>
+              </span>
+            </button>
+          </div>
+        </fieldset>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <fieldset
+          className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text canvasSidebar__buttonGroup"
+          disabled={false}
+        >
+          <legend
+            className="euiScreenReaderOnly"
+          >
+            Alignment options
+          </legend>
+          <div
+            className="euiButtonGroup__buttons"
+          >
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="left"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignLeft"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  <input
+                    checked={true}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="left"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
+                  />
+                  Align left
+                </span>
+              </span>
+            </label>
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="center"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignCenter"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  <input
+                    checked={false}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="center"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
+                  />
+                  Align center
+                </span>
+              </span>
+            </label>
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="right"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignRight"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  <input
+                    checked={false}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="right"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
+                  />
+                  Align right
+                </span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Storyshots components/TextStylePicker interactive 1`] = `
+<div
+  style={
+    Object {
+      "width": 264,
+    }
+  }
+>
+  <div
+    className="canvasTextStylePicker"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem"
+      >
+        <div
+          className="euiPopover euiPopover--anchorDownCenter euiPopover--displayBlock euiSuperSelect"
+          onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <input
+              defaultValue=""
+              type="hidden"
+            />
+            <div
+              className="euiFormControlLayout euiFormControlLayout--compressed"
+            >
+              <div
+                className="euiFormControlLayout__childrenWrapper"
+              >
+                <span
+                  className="euiScreenReaderOnly"
+                  id="generated-id"
+                >
+                  Select an option: 
+                  , is selected
+                </span>
+                <button
+                  aria-haspopup="true"
+                  aria-labelledby="undefined generated-id"
+                  className="euiSuperSelectControl euiSuperSelectControl--compressed"
+                  onClick={[Function]}
+                  onKeyDown={[Function]}
+                  type="button"
+                />
+                <div
+                  className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                >
+                  <span
+                    className="euiFormControlLayoutCustomIcon"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="arrowDown"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          className="euiFormControlLayout euiFormControlLayout--compressed euiFormControlLayout--group"
+        >
+          <label
+            className="euiFormLabel euiFormControlLayout__prepend"
+          >
+            Size
+          </label>
+          <div
+            className="euiFormControlLayout__childrenWrapper"
+          >
+            <select
+              className="euiSelect euiSelect--compressed euiSelect--inGroup"
+              onChange={[Function]}
+              onMouseUp={[Function]}
+              value={14}
+            >
+              <option
+                value={0}
+              >
+                0
+              </option>
+              <option
+                value={6}
+              >
+                6
+              </option>
+              <option
+                value={7}
+              >
+                7
+              </option>
+              <option
+                value={8}
+              >
+                8
+              </option>
+              <option
+                value={9}
+              >
+                9
+              </option>
+              <option
+                value={10}
+              >
+                10
+              </option>
+              <option
+                value={11}
+              >
+                11
+              </option>
+              <option
+                value={12}
+              >
+                12
+              </option>
+              <option
+                value={14}
+              >
+                14
+              </option>
+              <option
+                value={16}
+              >
+                16
+              </option>
+              <option
+                value={18}
+              >
+                18
+              </option>
+              <option
+                value={24}
+              >
+                24
+              </option>
+              <option
+                value={30}
+              >
+                30
+              </option>
+              <option
+                value={36}
+              >
+                36
+              </option>
+              <option
+                value={48}
+              >
+                48
+              </option>
+              <option
+                value={60}
+              >
+                60
+              </option>
+              <option
+                value={72}
+              >
+                72
+              </option>
+              <option
+                value={96}
+              >
+                96
+              </option>
+            </select>
+            <div
+              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                className="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiSpacer euiSpacer--s"
+    />
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+        style={
+          Object {
+            "fontSize": 0,
+          }
+        }
+      >
+        <div
+          className="euiPopover euiPopover--anchorDownCenter"
+          id="color-picker-popover"
+          onKeyDown={[Function]}
+          onMouseDown={[Function]}
+          onMouseUp={[Function]}
+          onTouchEnd={[Function]}
+          onTouchStart={[Function]}
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <button
+              aria-label="Font Color black"
+              className="euiLink euiLink--primary"
+              onClick={[Function]}
+              style={
+                Object {
+                  "fontSize": 0,
+                }
+              }
+              type="button"
+            >
+              <div
+                className="canvasColorDot"
+              >
+                <div
+                  className="canvasColorDot__background canvasCheckered"
+                />
+                <div
+                  className="canvasColorDot__foreground"
+                  style={Object {}}
+                />
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <fieldset
+          className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text canvasSidebar__buttonGroup"
+          disabled={false}
+        >
+          <legend
+            className="euiScreenReaderOnly"
+          >
+            Style options
+          </legend>
+          <div
+            className="euiButtonGroup__buttons"
+          >
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="bold"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorBold"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  Bold
+                </span>
+              </span>
+            </button>
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="italic"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorItalic"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  Italic
+                </span>
+              </span>
+            </button>
+            <button
+              aria-pressed={false}
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              id="underline"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorUnderline"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  Underline
+                </span>
+              </span>
+            </button>
+          </div>
+        </fieldset>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <fieldset
+          className="euiButtonGroup euiButtonGroup--compressed euiButtonGroup--text canvasSidebar__buttonGroup"
+          disabled={false}
+        >
+          <legend
+            className="euiScreenReaderOnly"
+          >
+            Alignment options
+          </legend>
+          <div
+            className="euiButtonGroup__buttons"
+          >
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isSelected euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="left"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignLeft"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  <input
+                    checked={true}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="left"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
+                  />
+                  Align left
+                </span>
+              </span>
+            </label>
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="center"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignCenter"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  <input
+                    checked={false}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="center"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
+                  />
+                  Align center
+                </span>
+              </span>
+            </label>
+            <label
+              className="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton-isIconOnly"
+              disabled={false}
+              htmlFor="right"
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  data-euiicon-type="editorAlignRight"
+                  size="m"
+                />
+                <span
+                  className="euiButton__text euiScreenReaderOnly"
+                >
+                  <input
+                    checked={false}
+                    className="euiScreenReaderOnly"
+                    disabled={false}
+                    id="right"
+                    name="generated-id"
+                    onChange={[Function]}
+                    type="radio"
+                  />
+                  Align right
+                </span>
+              </span>
+            </label>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+</div>
+`;

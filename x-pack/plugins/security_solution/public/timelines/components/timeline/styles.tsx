@@ -8,7 +8,7 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { rgba } from 'polished';
 import styled, { createGlobalStyle } from 'styled-components';
 
-import { EventType } from '../../../timelines/store/timeline/model';
+import { TimelineEventsType } from '../../../../common/types/timeline';
 import { IS_TIMELINE_FIELD_DRAGGING_CLASS_NAME } from '../../../common/components/drag_and_drop/helpers';
 
 /**
@@ -91,10 +91,14 @@ export const EventsTrHeader = styled.div.attrs(({ className }) => ({
 
 export const EventsThGroupActions = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__thGroupActions ${className}`,
-}))<{ actionsColumnWidth: number }>`
+}))<{ actionsColumnWidth: number; isEventViewer: boolean }>`
   display: flex;
-  flex: 0 0 ${({ actionsColumnWidth }) => `${actionsColumnWidth}px`};
+  flex: 0 0
+    ${({ actionsColumnWidth, isEventViewer }) =>
+      `${!isEventViewer ? actionsColumnWidth + 4 : actionsColumnWidth}px`};
   min-width: 0;
+  padding-left: ${({ isEventViewer }) =>
+    !isEventViewer ? '4px;' : '0;'}; // match timeline event border
 `;
 
 export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
@@ -109,10 +113,10 @@ export const EventsThGroupData = styled.div.attrs(({ className = '' }) => ({
   }
 `;
 
-export const EventsTh = styled.div.attrs(({ className = '' }) => ({
+export const EventsTh = styled.div.attrs<{ role: string }>(({ className = '' }) => ({
   className: `siemEventsTable__th ${className}`,
   role: 'columnheader',
-}))`
+}))<{ role?: string }>`
   align-items: center;
   display: flex;
   flex-shrink: 0;
@@ -151,6 +155,11 @@ export const EventsThContent = styled.div.attrs(({ className = '' }) => ({
     width != null
       ? `${width}px`
       : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+
+  > button.euiButtonIcon,
+  > .euiToolTipAnchor > button.euiButtonIcon {
+    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+  }
 `;
 
 /* EVENTS BODY */
@@ -164,13 +173,22 @@ export const EventsTbody = styled.div.attrs(({ className = '' }) => ({
 
 export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
   className: `siemEventsTable__trGroup ${className}`,
-}))<{ className?: string; eventType: Omit<EventType, 'all'>; showLeftBorder: boolean }>`
+}))<{
+  className?: string;
+  eventType: Omit<TimelineEventsType, 'all'>;
+  isBuildingBlockType: boolean;
+  showLeftBorder: boolean;
+}>`
   border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorLightShade};
-  ${({ theme, eventType, showLeftBorder }) =>
+  ${({ theme, eventType, isBuildingBlockType, showLeftBorder }) =>
     showLeftBorder
       ? `border-left: 4px solid
     ${eventType === 'raw' ? theme.eui.euiColorLightShade : theme.eui.euiColorWarning}`
+      : ''};
+  ${({ isBuildingBlockType, showLeftBorder }) =>
+    isBuildingBlockType
+      ? `background: repeating-linear-gradient(127deg, rgba(245, 167, 0, 0.2), rgba(245, 167, 0, 0.2) 1px, rgba(245, 167, 0, 0.05) 2px, rgba(245, 167, 0, 0.05) 10px);`
       : ''};
 
   &:hover {
@@ -198,8 +216,13 @@ export const EventsTrSupplement = styled.div.attrs(({ className = '' }) => ({
 }))<{ className: string }>`
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
-  padding: 0 ${({ theme }) => theme.eui.paddingSizes.xs} 0
-    ${({ theme }) => theme.eui.paddingSizes.xl};
+  padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
+  .euiAccordion + div {
+    background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+    padding: 0 ${({ theme }) => theme.eui.paddingSizes.s};
+    border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+    border-radius: ${({ theme }) => theme.eui.paddingSizes.xs};
+  }
 `;
 
 export const EventsTdGroupActions = styled.div.attrs(({ className = '' }) => ({
@@ -249,6 +272,10 @@ export const EventsTdContent = styled.div.attrs(({ className }) => ({
     width != null
       ? `${width}px`
       : '100%'}; /* Using width: 100% instead of flex: 1 and max-width: 100% for IE11 */
+
+  button.euiButtonIcon {
+    margin-left: ${({ theme }) => `-${theme.eui.paddingSizes.xs}`};
+  }
 `;
 
 /**
@@ -334,6 +361,5 @@ export const EventsHeadingHandle = styled.div.attrs(({ className = '' }) => ({
  */
 
 export const EventsLoading = styled(EuiLoadingSpinner)`
-  margin: ${({ theme }) => theme.eui.euiSizeXS};
-  vertical-align: top;
+  vertical-align: middle;
 `;

@@ -6,7 +6,6 @@
 
 import * as t from 'io-ts';
 import { Either } from 'fp-ts/lib/Either';
-// eslint-disable-next-line @typescript-eslint/camelcase
 import { max_signals } from '../common/schemas';
 import { DEFAULT_MAX_SIGNALS } from '../../../constants';
 
@@ -16,11 +15,7 @@ import { DEFAULT_MAX_SIGNALS } from '../../../constants';
  *   - greater than 1
  *   - If undefined then it will use DEFAULT_MAX_SIGNALS (100) as the default
  */
-export const DefaultMaxSignalsNumber: DefaultMaxSignalsNumberC = new t.Type<
-  number,
-  number,
-  unknown
->(
+export const DefaultMaxSignalsNumber = new t.Type<number, number | undefined, unknown>(
   'DefaultMaxSignals',
   t.number.is,
   (input, context): Either<t.Errors, number> => {
@@ -28,5 +23,3 @@ export const DefaultMaxSignalsNumber: DefaultMaxSignalsNumberC = new t.Type<
   },
   t.identity
 );
-
-export type DefaultMaxSignalsNumberC = t.Type<number, number, unknown>;

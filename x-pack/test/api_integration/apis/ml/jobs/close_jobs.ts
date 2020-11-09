@@ -7,12 +7,11 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common';
+import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../plugins/ml/common/constants/states';
 import { MULTI_METRIC_JOB_CONFIG, SINGLE_METRIC_JOB_CONFIG, DATAFEED_CONFIG } from './common_jobs';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertestWithoutAuth');
@@ -48,8 +47,8 @@ export default ({ getService }: FtrProviderContext) => {
         responseCode: 200,
 
         responseBody: {
-          [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { statusCode: 409 } },
-          [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { statusCode: 409 } },
+          [SINGLE_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { status: 409 } },
+          [MULTI_METRIC_JOB_CONFIG.job_id]: { closed: false, error: { status: 409 } },
         },
       },
     },
@@ -64,8 +63,8 @@ export default ({ getService }: FtrProviderContext) => {
       },
       // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
       },
     },
     {
@@ -76,8 +75,8 @@ export default ({ getService }: FtrProviderContext) => {
       },
       // Note that the jobs and datafeeds are loaded async so the actual error message is not deterministic.
       expected: {
-        responseCode: 404,
-        error: 'Not Found',
+        responseCode: 403,
+        error: 'Forbidden',
       },
     },
   ];
@@ -163,9 +162,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expectedRspJobIds.forEach((id) => {
             expect(body[id].closed).to.eql(testData.expected.responseBody[id].closed);
-            expect(body[id].error.statusCode).to.eql(
-              testData.expected.responseBody[id].error.statusCode
-            );
+            expect(body[id].error.status).to.eql(testData.expected.responseBody[id].error.status);
           });
 
           // ensure jobs are still open

@@ -26,13 +26,13 @@ describe('connector_add_modal', () => {
       http: mocks.http,
       capabilities: {
         ...capabilities,
-        siem: {
-          'actions:show': true,
-          'actions:save': true,
-          'actions:delete': true,
+        actions: {
+          show: true,
+          save: true,
+          delete: true,
         },
       },
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
@@ -65,8 +65,7 @@ describe('connector_add_modal', () => {
 
     const wrapper = mountWithIntl(
       <ConnectorAddModal
-        addModalVisible={true}
-        setAddModalVisibility={() => {}}
+        onClose={() => {}}
         actionType={actionType}
         http={deps!.http}
         actionTypeRegistry={deps!.actionTypeRegistry}

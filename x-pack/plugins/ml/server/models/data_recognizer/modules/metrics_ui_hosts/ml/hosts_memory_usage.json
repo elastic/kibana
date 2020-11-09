@@ -1,0 +1,50 @@
+{
+  "job_type": "anomaly_detector",
+  "groups": [
+    "hosts",
+    "metrics"
+  ],
+  "description": "Metrics: Hosts - Identify unusual spikes in memory usage across hosts.",
+  "analysis_config": {
+    "bucket_span": "15m",
+    "detectors": [
+      {
+        "detector_description": "max('system.memory.actual.used.pct')",
+        "function": "max",
+        "field_name": "system.memory.actual.used.pct",
+        "custom_rules": [
+          {
+            "actions": [
+              "skip_result"
+            ],
+            "conditions": [
+              {
+                "applies_to": "actual",
+                "operator": "lt",
+                "value": 0.1
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "influencers": [
+      "host.name"
+    ]
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "analysis_limits": {
+    "model_memory_limit": "64mb"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-metrics-ui-hosts",
+    "custom_urls": [
+      {
+        "url_name": "Host Metrics",
+        "url_value": "metrics/detail/host/$host.name$?metricTime=(autoReload:!f,refreshInterval:5000,time:(from:%27$earliest$%27,interval:%3E%3D1m,to:%27$latest$%27))"
+      }
+    ]
+  }
+}

@@ -9,7 +9,7 @@ import { IRouter } from '../../../../../../../src/core/server';
 import { TIMELINE_URL } from '../../../../common/constants';
 
 import { SetupPlugins } from '../../../plugin';
-import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithExcess } from '../../../utils/build_validation/route_validation';
 import { ConfigType } from '../../..';
 
 import { transformError, buildSiemResponse } from '../../detection_engine/routes/utils';
@@ -28,13 +28,12 @@ export const updateTimelinesRoute = (
     {
       path: TIMELINE_URL,
       validate: {
-        body: buildRouteValidation(updateTimelineSchema),
+        body: buildRouteValidationWithExcess(updateTimelineSchema),
       },
       options: {
         tags: ['access:securitySolution'],
       },
     },
-    // eslint-disable-next-line complexity
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
