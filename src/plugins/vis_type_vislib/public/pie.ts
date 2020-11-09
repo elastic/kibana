@@ -43,7 +43,7 @@ export const pieVisTypeDefinition: BaseVisTypeOptions<PieVisParams> = {
   title: i18n.translate('visTypeVislib.pie.pieTitle', { defaultMessage: 'Pie' }),
   icon: 'visPie',
   description: i18n.translate('visTypeVislib.pie.pieDescription', {
-    defaultMessage: 'Compare parts of a whole',
+    defaultMessage: 'Compare parts of a whole.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   toExpressionAst,

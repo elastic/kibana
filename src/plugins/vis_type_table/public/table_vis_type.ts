@@ -33,7 +33,7 @@ export const tableVisTypeDefinition: BaseVisTypeOptions<TableVisParams> = {
   }),
   icon: 'visTable',
   description: i18n.translate('visTypeTable.tableVisDescription', {
-    defaultMessage: 'Display values in a table',
+    defaultMessage: 'Display values in a table.',
   }),
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter];

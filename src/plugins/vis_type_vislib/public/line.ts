@@ -45,7 +45,7 @@ export const lineVisTypeDefinition: BaseVisTypeOptions<BasicVislibParams> = {
   title: i18n.translate('visTypeVislib.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',
   description: i18n.translate('visTypeVislib.line.lineDescription', {
-    defaultMessage: 'Emphasize trends',
+    defaultMessage: 'Display data as a series of points.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   toExpressionAst,
