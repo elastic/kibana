@@ -12,7 +12,7 @@ import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
 } from 'src/plugins/expressions/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
+import { ExecutionContextSearch } from 'src/plugins/data/public';
 import { getOriginalRequestErrorMessage } from '../error_helper';
 
 export interface ExpressionWrapperProps {

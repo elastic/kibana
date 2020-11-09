@@ -17,11 +17,8 @@
  * under the License.
  */
 
-import {
-  KibanaContext,
-  Datatable,
-  ExpressionFunctionDefinition,
-} from '../../../../../plugins/expressions/common';
+import { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { KibanaContext } from './kibana_context_type';
 
 type Input = KibanaContext | null;
 type Output = Promise<Datatable>;
