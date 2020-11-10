@@ -44,6 +44,10 @@ describe('alertType', () => {
             "description": "The value that exceeded the threshold.",
             "name": "value",
           },
+          Object {
+            "description": "A string describing the threshold comparator and threshold",
+            "name": "function",
+          },
         ],
         "params": Array [
           Object {
