@@ -7,7 +7,7 @@ import { HttpSetup } from 'kibana/public';
 
 const INDEX_THRESHOLD_DATA_API_ROOT = '/api/triggers_actions_ui/data';
 
-export async function getMatchingIndicesForThresholdAlertType({
+export async function getMatchingIndices({
   pattern,
   http,
 }: {

@@ -9,10 +9,10 @@ import { HttpSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
   loadIndexPatterns,
-  getMatchingIndicesForThresholdAlertType,
+  getMatchingIndices,
   getESIndexFields,
   getSavedObjectsClient,
-} from '../lib/index_threshold_api';
+} from '../lib/indices_and_field_apis';
 
 export interface IOption {
   label: string;
@@ -39,7 +39,7 @@ export const getIndexOptions = async (
     return options;
   }
 
-  const matchingIndices = (await getMatchingIndicesForThresholdAlertType({
+  const matchingIndices = (await getMatchingIndices({
     pattern,
     http,
   })) as string[];
