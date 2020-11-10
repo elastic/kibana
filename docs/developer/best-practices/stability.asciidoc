@@ -43,30 +43,26 @@ dependency list!
 [discrete]
 === Test coverage
 
-Testing UI code is hard. Here are our heuristics for maintaining Kibana's quality with tests.
+Testing UI code is hard. We strive for [total automated test coverage](https://github.com/elastic/engineering/blob/master/kibana_dev_principles.md#automate-tests-through-ci) of our code and UX, but this is difficult to
+measure and we're constrained by time. During development, test coverage measurement is subjective
+and manual, based on our understanding of the feature. Code coverage reports indicate possible gaps,
+but it ultimately comes down to a judgment call. Here are some guidelines to help you ensure
+sufficient automated test coverage.
 
-**Priority 1:** Our first priority is to minimize the total number of poor user experiences caused by bugs, and to prevent bugs that can cause harm to the user. "Harm" includes direct problems like data loss and data entering a bad state, as well as indirect problems like making a poor business decision based on misinformation presented by the UI.
-
-**Priority 2:** Our second priority is to define all correct UX behavior and guard against any UX regressions.
-
-**We are constrained by time.** We don’t have enough time to test all possible input and output permutations of the UX. Just think of the different ways a form can be interacted with and respond to input. We must spend our time prudently to address the above priorities.
-
-With each feature we ship, we have a **hard requirement** for test coverage of common library code, popular UIs, critical code (e.g. payload de/serialization, server-side APIs), and critical features (e.g. visualization, security). We have a **soft requirement** for test coverage of everything else.
-
-**We can make an exception** for the soft requirement if there’s a business case for shipping a feature on time. This requires buy-in from a lead and a PM, and a written explanation in the PR to support forensics. Any time we make an exception we immediately follow up with a separate PR to add the missing test coverage. 
-
-**Bug fixes:** With each bug we fix, we add a test to cover it.
-
-**Measuring quality during development:** During development, test coverage measurement is subjective and manual, based on our understanding of the feature. Code coverage reports indicate possible gaps, but they don’t reliably measure UX coverage -- which is what we really care about.
-
-**Measuring quality after code ships:** After code ships, subsequent bug reports indicate we need to improve our sense of gauging adequate test coverage. If severe or many bug reports arise, then we’ll retro and identify the gaps in our culture and process.
-
-**Guiding questions for adding test coverage**
-
-* Is core library code and critical code covered by unit tests?
-* Are server-side APIs covered by API integration tests?
-* Have you identified critical features and covered their expected behavior with functional and integration tests?
-* Is the expected UX covered by functional and integration tests, including happy paths and failure cases?
+* Every PR should be accompanied by tests.
+* Check the before and after automated test coverage metrics. If coverage has gone down you might
+have missed some tests.
+* Cover failure cases, edge cases, and happy paths with your tests.
+* Pay special attention to code that could contain bugs that harm to the user. "Harm" includes
+direct problems like data loss and data entering a bad state, as well as indirect problems like
+making a poor business decision based on misinformation presented by the UI. For example, state
+migrations and security permissions are important areas to cover.
+* Pay special attention to public APIs, which may be used in unexpected ways. Any code you release
+for consumption by other plugins should be rigorously tested with many permutations.
+* Include end-to-end tests for areas where the logic spans global state, URLs, and multiple plugin APIs.
+* Every time a bug is reported, add a test to cover it.
+* Retrospectively gauge the quality of the code you ship by tracking how many bugs are reported for
+features that are released. How can you reduce this number by improving your testing approach?
 
 [discrete]
 === Browser coverage
