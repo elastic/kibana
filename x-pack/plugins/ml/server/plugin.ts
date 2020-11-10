@@ -17,6 +17,7 @@ import {
   SavedObjectsServiceStart,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+import { SpacesPluginSetup } from '../../spaces/server';
 import { PluginsSetup, RouteInitialization } from './types';
 import { PLUGIN_ID } from '../common/constants/app';
 import { MlCapabilities } from '../common/types/capabilities';
@@ -66,6 +67,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   private capabilities: CapabilitiesStart | null = null;
   private clusterClient: IClusterClient | null = null;
   private savedObjectsStart: SavedObjectsServiceStart | null = null;
+  private spacesPlugin: SpacesPluginSetup | undefined;
   private isMlReady: Promise<void>;
   private setMlReady: () => void = () => {};
 
@@ -77,6 +79,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
   }
 
   public setup(coreSetup: CoreSetup, plugins: PluginsSetup): MlPluginSetup {
+    this.spacesPlugin = plugins.spaces;
     const { admin, user, apmUser } = getPluginPrivileges();
 
     plugins.features.registerKibanaFeature({
@@ -136,6 +139,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         this.mlLicense,
         getMlSavedObjectsClient,
         getInternalSavedObjectsClient,
+        plugins.spaces,
         () => this.isMlReady
       ),
       mlLicense: this.mlLicense,
@@ -196,7 +200,10 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
 
     // check whether the job saved objects exist
     // and create them if needed.
-    const { initializeJobs } = jobSavedObjectsInitializationFactory(coreStart);
+    const { initializeJobs } = jobSavedObjectsInitializationFactory(
+      coreStart,
+      this.spacesPlugin !== undefined
+    );
     initializeJobs().finally(() => {
       this.setMlReady();
     });

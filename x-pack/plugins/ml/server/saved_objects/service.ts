@@ -21,6 +21,7 @@ export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFacto
 export function jobSavedObjectServiceFactory(
   savedObjectsClient: SavedObjectsClientContract,
   internalSavedObjectsClient: SavedObjectsClientContract,
+  spacesEnabled: boolean,
   isMlReady: () => Promise<void>
 ) {
   async function _getJobObjects(
@@ -45,7 +46,7 @@ export function jobSavedObjectServiceFactory(
     const options: SavedObjectsFindOptions = {
       type: ML_SAVED_OBJECT_TYPE,
       perPage: 10000,
-      ...(currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
+      ...(spacesEnabled === false || currentSpaceOnly === true ? {} : { namespaces: ['*'] }),
       searchFields,
       filter,
     };
@@ -127,7 +128,7 @@ export function jobSavedObjectServiceFactory(
     const options: SavedObjectsFindOptions = {
       type: ML_SAVED_OBJECT_TYPE,
       perPage: 10000,
-      namespaces: ['*'],
+      ...(spacesEnabled === false ? {} : { namespaces: ['*'] }),
       searchFields,
       filter,
     };

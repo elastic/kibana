@@ -17,7 +17,7 @@ import { ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
  *
  * @param core: CoreStart
  */
-export function jobSavedObjectsInitializationFactory(core: CoreStart) {
+export function jobSavedObjectsInitializationFactory(core: CoreStart, spacesEnabled: boolean) {
   const client = (core.elasticsearch.client as unknown) as IScopedClusterClient;
 
   /**
@@ -38,6 +38,7 @@ export function jobSavedObjectsInitializationFactory(core: CoreStart) {
       const jobSavedObjectService = jobSavedObjectServiceFactory(
         savedObjectsClient,
         savedObjectsClient,
+        spacesEnabled,
         () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
       );
 

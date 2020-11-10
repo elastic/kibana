@@ -12,6 +12,7 @@ import {
   RequestHandler,
   SavedObjectsClientContract,
 } from 'kibana/server';
+import { SpacesPluginSetup } from '../../../spaces/server';
 
 import { jobSavedObjectServiceFactory, JobSavedObjectService } from '../saved_objects';
 import { MlLicense } from '../../common/license';
@@ -34,17 +35,20 @@ export class RouteGuard {
   private _mlLicense: MlLicense;
   private _getMlSavedObjectClient: GetMlSavedObjectClient;
   private _getInternalSavedObjectClient: GetInternalSavedObjectClient;
+  private _spacesPlugin: SpacesPluginSetup | undefined;
   private _isMlReady: () => Promise<void>;
 
   constructor(
     mlLicense: MlLicense,
     getSavedObject: GetMlSavedObjectClient,
     getInternalSavedObject: GetInternalSavedObjectClient,
+    spacesPlugin: SpacesPluginSetup | undefined,
     isMlReady: () => Promise<void>
   ) {
     this._mlLicense = mlLicense;
     this._getMlSavedObjectClient = getSavedObject;
     this._getInternalSavedObjectClient = getInternalSavedObject;
+    this._spacesPlugin = spacesPlugin;
     this._isMlReady = isMlReady;
   }
 
@@ -76,6 +80,7 @@ export class RouteGuard {
       const jobSavedObjectService = jobSavedObjectServiceFactory(
         mlSavedObjectClient,
         internalSavedObjectsClient,
+        this._spacesPlugin !== undefined,
         this._isMlReady
       );
       const client = context.core.elasticsearch.client;
