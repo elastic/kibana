@@ -369,13 +369,6 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 **/*.scss  @elastic/kibana-design
 #CC# /packages/kbn-ui-framework/ @elastic/kibana-design
 
-# Core UI design
-/src/plugins/dashboard/**/*.scss @elastic/kibana-core-ui-designers
-/src/plugins/embeddable/**/*.scss @elastic/kibana-core-ui-designers
-/x-pack/plugins/canvas/**/*.scss @elastic/kibana-core-ui-designers
-/x-pack/plugins/spaces/**/*.scss @elastic/kibana-core-ui-designers
-/x-pack/plugins/security/**/*.scss @elastic/kibana-core-ui-designers
-
 # Observability design
 /x-pack/plugins/apm/**/*.scss @elastic/observability-design
 /x-pack/plugins/infra/**/*.scss @elastic/observability-design
