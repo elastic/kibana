@@ -4,10 +4,29 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { CoreStart } from 'kibana/server';
+import { SavedObjectsServiceStart, KibanaRequest } from 'kibana/server';
 import { SavedObjectsClient } from '../../../../../src/core/server';
 
-export function getInternalSavedObjectsClient(core: CoreStart) {
-  const savedObjectsRepo = core.savedObjects.createInternalRepository();
-  return new SavedObjectsClient(savedObjectsRepo);
+export function savedObjectClientsFactory(
+  getSavedObjectsStart: () => SavedObjectsServiceStart | null
+) {
+  return {
+    getMlSavedObjectsClient: (request: KibanaRequest) => {
+      const savedObjectsStart = getSavedObjectsStart();
+      if (savedObjectsStart === null) {
+        return null;
+      }
+      return savedObjectsStart.getScopedClient(request, {
+        includedHiddenTypes: ['ml-job'],
+      });
+    },
+    getInternalSavedObjectsClient: () => {
+      const savedObjectsStart = getSavedObjectsStart();
+      if (savedObjectsStart === null) {
+        return null;
+      }
+      const savedObjectsRepo = savedObjectsStart.createInternalRepository();
+      return new SavedObjectsClient(savedObjectsRepo);
+    },
+  };
 }

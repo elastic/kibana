@@ -9,3 +9,4 @@ export { JobObject, JobSavedObjectService, jobSavedObjectServiceFactory } from '
 export { checksFactory } from './checks';
 export { repairFactory } from './repair';
 export { jobSavedObjectsInitializationFactory } from './initialization';
+export { savedObjectClientsFactory } from './util';

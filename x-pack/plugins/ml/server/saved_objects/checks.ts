@@ -4,15 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
-import type { SpacesPluginSetup } from '../../../spaces/server';
+import { IScopedClusterClient } from 'kibana/server';
 import type { JobSavedObjectService } from './service';
 import { JobType } from '../../common/types/saved_objects';
 
 import { Job } from '../../common/types/anomaly_detection_jobs';
 import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
-import { spacesUtilsProvider } from '../lib/spaces_utils';
 
 interface JobSavedObjectStatus {
   jobId: string;
@@ -44,20 +42,10 @@ interface StatusResponse {
 
 export function checksFactory(
   client: IScopedClusterClient,
-  jobSavedObjectService: JobSavedObjectService,
-  request: KibanaRequest,
-  spacesPlugin?: SpacesPluginSetup
+  jobSavedObjectService: JobSavedObjectService
 ) {
-  const { getAllSpaces } = spacesUtilsProvider(spacesPlugin, request);
   async function checkStatus(): Promise<StatusResponse> {
-    const allSpaces = await getAllSpaces();
-    const allJobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
-    const jobObjects =
-      allSpaces === null
-        ? allJobObjects
-        : allJobObjects.filter((j) =>
-            j.namespaces?.some((s) => s === '*' || allSpaces.includes(s))
-          );
+    const jobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
 
     // load all non-space jobs and datafeeds
     const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>();
@@ -96,6 +84,8 @@ export function checksFactory(
         };
       }
     );
+
+    const allJobObjects = await jobSavedObjectService.getAllJobObjectsForAllSpaces();
 
     const nonSpaceADObjectIds = new Set(
       allJobObjects

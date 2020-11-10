@@ -28,19 +28,23 @@ type Handler = (handlerParams: {
 }) => ReturnType<RequestHandler>;
 
 type GetMlSavedObjectClient = (request: KibanaRequest) => SavedObjectsClientContract | null;
+type GetInternalSavedObjectClient = () => SavedObjectsClientContract | null;
 
 export class RouteGuard {
   private _mlLicense: MlLicense;
   private _getMlSavedObjectClient: GetMlSavedObjectClient;
+  private _getInternalSavedObjectClient: GetInternalSavedObjectClient;
   private _isMlReady: () => Promise<void>;
 
   constructor(
     mlLicense: MlLicense,
     getSavedObject: GetMlSavedObjectClient,
+    getInternalSavedObject: GetInternalSavedObjectClient,
     isMlReady: () => Promise<void>
   ) {
     this._mlLicense = mlLicense;
     this._getMlSavedObjectClient = getSavedObject;
+    this._getInternalSavedObjectClient = getInternalSavedObject;
     this._isMlReady = isMlReady;
   }
 
@@ -62,7 +66,8 @@ export class RouteGuard {
       }
 
       const mlSavedObjectClient = this._getMlSavedObjectClient(request);
-      if (mlSavedObjectClient === null) {
+      const internalSavedObjectsClient = this._getInternalSavedObjectClient();
+      if (mlSavedObjectClient === null || internalSavedObjectsClient === null) {
         return response.badRequest({
           body: { message: 'saved object client has not been initialized' },
         });
@@ -70,6 +75,7 @@ export class RouteGuard {
 
       const jobSavedObjectService = jobSavedObjectServiceFactory(
         mlSavedObjectClient,
+        internalSavedObjectsClient,
         this._isMlReady
       );
       const client = context.core.elasticsearch.client;

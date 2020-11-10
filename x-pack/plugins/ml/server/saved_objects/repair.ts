@@ -5,8 +5,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
-import type { SpacesPluginSetup } from '../../../spaces/server';
+import { IScopedClusterClient } from 'kibana/server';
 import type { JobObject, JobSavedObjectService } from './service';
 import { JobType } from '../../common/types/saved_objects';
 import { checksFactory } from './checks';
@@ -15,11 +14,9 @@ import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 
 export function repairFactory(
   client: IScopedClusterClient,
-  jobSavedObjectService: JobSavedObjectService,
-  request: KibanaRequest,
-  spacesPlugin?: SpacesPluginSetup
+  jobSavedObjectService: JobSavedObjectService
 ) {
-  const { checkStatus } = checksFactory(client, jobSavedObjectService, request, spacesPlugin);
+  const { checkStatus } = checksFactory(client, jobSavedObjectService);
 
   async function repairJobs(simulate: boolean = false) {
     type Result = Record<string, { success: boolean; error?: any }>;

@@ -4,7 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import type { SpacesPluginSetup } from '../../../spaces/server';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { checksFactory, repairFactory } from '../saved_objects';
@@ -13,10 +12,7 @@ import { jobsAndSpaces, repairJobObjects } from './schemas/saved_objects';
 /**
  * Routes for job saved object management
  */
-export function savedObjectsRoutes(
-  { router, routeGuard }: RouteInitialization,
-  spacesPlugin?: SpacesPluginSetup
-) {
+export function savedObjectsRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobSavedObjects
    *
@@ -33,9 +29,9 @@ export function savedObjectsRoutes(
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, response, jobSavedObjectService }) => {
       try {
-        const { checkStatus } = checksFactory(client, jobSavedObjectService, request, spacesPlugin);
+        const { checkStatus } = checksFactory(client, jobSavedObjectService);
         const status = await checkStatus();
 
         return response.ok({
@@ -71,7 +67,7 @@ export function savedObjectsRoutes(
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
       try {
         const { simulate } = request.query;
-        const { repairJobs } = repairFactory(client, jobSavedObjectService, request, spacesPlugin);
+        const { repairJobs } = repairFactory(client, jobSavedObjectService);
         const savedObjects = await repairJobs(simulate);
 
         return response.ok({
@@ -104,12 +100,7 @@ export function savedObjectsRoutes(
     routeGuard.fullLicenseAPIGuard(async ({ client, request, response, jobSavedObjectService }) => {
       try {
         const { simulate } = request.query;
-        const { initSavedObjects } = repairFactory(
-          client,
-          jobSavedObjectService,
-          request,
-          spacesPlugin
-        );
+        const { initSavedObjects } = repairFactory(client, jobSavedObjectService);
         const savedObjects = await initSavedObjects(simulate);
 
         return response.ok({
@@ -205,9 +196,9 @@ export function savedObjectsRoutes(
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ request, response, jobSavedObjectService, client }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ response, jobSavedObjectService, client }) => {
       try {
-        const { checkStatus } = checksFactory(client, jobSavedObjectService, request, spacesPlugin);
+        const { checkStatus } = checksFactory(client, jobSavedObjectService);
         const allStatuses = Object.values((await checkStatus()).savedObjects).flat();
 
         const body = allStatuses

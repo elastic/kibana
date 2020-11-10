@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient, CoreStart, SavedObjectsClient, KibanaRequest } from 'kibana/server';
-import { getInternalSavedObjectsClient } from './util';
+import { IScopedClusterClient, CoreStart, SavedObjectsClientContract } from 'kibana/server';
+import { savedObjectClientsFactory } from './util';
 import { repairFactory } from './repair';
 import { jobSavedObjectServiceFactory, JobObject } from './service';
 import { mlLog } from '../lib/log';
@@ -28,8 +28,15 @@ export function jobSavedObjectsInitializationFactory(core: CoreStart) {
    */
   async function initializeJobs() {
     try {
-      const savedObjectsClient = getInternalSavedObjectsClient(core);
+      const { getInternalSavedObjectsClient } = savedObjectClientsFactory(() => core.savedObjects);
+      const savedObjectsClient = getInternalSavedObjectsClient();
+      if (savedObjectsClient === null) {
+        mlLog.error('Internal saved object client not initialized!');
+        return;
+      }
+
       const jobSavedObjectService = jobSavedObjectServiceFactory(
+        savedObjectsClient,
         savedObjectsClient,
         () => Promise.resolve() // pretend isMlReady, to allow us to initialize the saved objects
       );
@@ -40,12 +47,7 @@ export function jobSavedObjectsInitializationFactory(core: CoreStart) {
       }
 
       mlLog.info('Initializing job saved objects');
-      const { initSavedObjects } = repairFactory(
-        client,
-        jobSavedObjectService,
-        {} as KibanaRequest, // request won't be used as this spaces plugin isn't being used.
-        undefined // spaces plugin isn't needed, as we'll be repairing all jobs
-      );
+      const { initSavedObjects } = repairFactory(client, jobSavedObjectService);
       const { jobs } = await initSavedObjects();
       mlLog.info(`${jobs.length} job saved objects initialized for * space`);
     } catch (error) {
@@ -53,7 +55,7 @@ export function jobSavedObjectsInitializationFactory(core: CoreStart) {
     }
   }
 
-  async function _needsInitializing(savedObjectsClient: SavedObjectsClient) {
+  async function _needsInitializing(savedObjectsClient: SavedObjectsClientContract) {
     if (await _jobSavedObjectsExist(savedObjectsClient)) {
       // at least one ml saved object exists
       // this has been initialized before
@@ -70,7 +72,7 @@ export function jobSavedObjectsInitializationFactory(core: CoreStart) {
     return false;
   }
 
-  async function _jobSavedObjectsExist(savedObjectsClient: SavedObjectsClient) {
+  async function _jobSavedObjectsExist(savedObjectsClient: SavedObjectsClientContract) {
     const options = {
       type: ML_SAVED_OBJECT_TYPE,
       perPage: 0,

@@ -15,7 +15,6 @@ import {
   CapabilitiesStart,
   IClusterClient,
   SavedObjectsServiceStart,
-  SavedObjectsClientContract,
 } from 'kibana/server';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
 import { PluginsSetup, RouteInitialization } from './types';
@@ -50,7 +49,11 @@ import { getPluginPrivileges } from '../common/types/capabilities';
 import { setupCapabilitiesSwitcher } from './lib/capabilities';
 import { registerKibanaSettings } from './lib/register_settings';
 import { trainedModelsRoutes } from './routes/trained_models';
-import { setupSavedObjects, jobSavedObjectsInitializationFactory } from './saved_objects';
+import {
+  setupSavedObjects,
+  jobSavedObjectsInitializationFactory,
+  savedObjectClientsFactory,
+} from './saved_objects';
 import { RouteGuard } from './lib/route_guard';
 
 export type MlPluginSetup = SharedServices;
@@ -123,18 +126,18 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     setupCapabilitiesSwitcher(coreSetup, plugins.licensing.license$, this.log);
     setupSavedObjects(coreSetup.savedObjects);
 
-    const getMlSavedObjectsClient = (request: KibanaRequest): SavedObjectsClientContract | null => {
-      if (this.savedObjectsStart === null) {
-        return null;
-      }
-      return this.savedObjectsStart.getScopedClient(request, {
-        includedHiddenTypes: ['ml-job'],
-      });
-    };
+    const { getInternalSavedObjectsClient, getMlSavedObjectsClient } = savedObjectClientsFactory(
+      () => this.savedObjectsStart
+    );
 
     const routeInit: RouteInitialization = {
       router: coreSetup.http.createRouter(),
-      routeGuard: new RouteGuard(this.mlLicense, getMlSavedObjectsClient, () => this.isMlReady),
+      routeGuard: new RouteGuard(
+        this.mlLicense,
+        getMlSavedObjectsClient,
+        getInternalSavedObjectsClient,
+        () => this.isMlReady
+      ),
       mlLicense: this.mlLicense,
     };
 
@@ -162,7 +165,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit, this.version);
-    savedObjectsRoutes(routeInit, plugins.spaces);
+    savedObjectsRoutes(routeInit);
     systemRoutes(routeInit, {
       spaces: plugins.spaces,
       cloud: plugins.cloud,
@@ -180,6 +183,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
         plugins.cloud,
         resolveMlCapabilities,
         () => this.clusterClient,
+        () => getInternalSavedObjectsClient(),
         () => this.isMlReady
       ),
     };
@@ -189,6 +193,8 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     this.capabilities = coreStart.capabilities;
     this.clusterClient = coreStart.elasticsearch.client;
     this.savedObjectsStart = coreStart.savedObjects;
+
+    // const;
 
     // check whether the job saved objects exist
     // and create them if needed.

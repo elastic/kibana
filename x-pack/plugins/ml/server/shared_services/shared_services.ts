@@ -63,20 +63,26 @@ export function createSharedServices(
   cloud: CloudSetup,
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null,
+  getInternalSavedObjectsClient: () => SavedObjectsClientContract | null,
   isMlReady: () => Promise<void>
 ): SharedServices {
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
-
   function getGuards(
     request: KibanaRequest,
     savedObjectsClient: SavedObjectsClientContract
   ): Guards {
+    const internalSavedObjectsClient = getInternalSavedObjectsClient();
+    if (internalSavedObjectsClient === null) {
+      throw new Error('Internal saved object client not initialized');
+    }
     const getRequestItems = getRequestItemsProvider(
       resolveMlCapabilities,
       getClusterClient,
       savedObjectsClient,
+      internalSavedObjectsClient,
       isMlReady
     );
+
     const { hasMlCapabilities, scopedClient, mlClient } = getRequestItems(request);
     const asyncGuards: Array<Promise<void>> = [];
 
@@ -114,6 +120,7 @@ function getRequestItemsProvider(
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null,
   savedObjectsClient: SavedObjectsClientContract,
+  internalSavedObjectsClient: SavedObjectsClientContract,
   isMlReady: () => Promise<void>
 ) {
   return (request: KibanaRequest) => {
@@ -125,7 +132,11 @@ function getRequestItemsProvider(
     // will not receive a real request object when being called from an alert.
     // instead a dummy request object will be supplied
     const clusterClient = getClusterClient();
-    const jobSavedObjectService = jobSavedObjectServiceFactory(savedObjectsClient, isMlReady);
+    const jobSavedObjectService = jobSavedObjectServiceFactory(
+      savedObjectsClient,
+      internalSavedObjectsClient,
+      isMlReady
+    );
 
     if (clusterClient === null) {
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);

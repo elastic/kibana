@@ -20,6 +20,7 @@ export type JobSavedObjectService = ReturnType<typeof jobSavedObjectServiceFacto
 
 export function jobSavedObjectServiceFactory(
   savedObjectsClient: SavedObjectsClientContract,
+  internalSavedObjectsClient: SavedObjectsClientContract,
   isMlReady: () => Promise<void>
 ) {
   async function _getJobObjects(
@@ -112,6 +113,16 @@ export function jobSavedObjectServiceFactory(
 
   async function getAllJobObjects(jobType?: JobType, currentSpaceOnly: boolean = true) {
     return await _getJobObjects(jobType, undefined, undefined, currentSpaceOnly);
+  }
+
+  async function getAllJobObjectsForAllSpaces(jobType?: JobType) {
+    return (
+      await internalSavedObjectsClient.find<JobObject>({
+        type: ML_SAVED_OBJECT_TYPE,
+        perPage: 10000,
+        namespaces: ['*'],
+      })
+    ).saved_objects;
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {
@@ -273,6 +284,7 @@ export function jobSavedObjectServiceFactory(
     assignJobsToSpaces,
     removeJobsFromSpaces,
     bulkCreateJobs,
+    getAllJobObjectsForAllSpaces,
   };
 }
 
