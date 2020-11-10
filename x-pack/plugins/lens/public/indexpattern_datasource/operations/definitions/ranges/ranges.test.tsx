@@ -30,6 +30,7 @@ import {
 } from './constants';
 import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '../shared_components';
+import { getFieldByNameFactory } from '../../../pure_helpers';
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
@@ -96,6 +97,9 @@ describe('ranges', () => {
           title: 'my_index_pattern',
           hasRestrictions: false,
           fields: [{ name: sourceField, type: 'number', displayName: sourceField }],
+          getFieldByName: getFieldByNameFactory([
+            { name: sourceField, type: 'number', displayName: sourceField },
+          ]),
         },
       },
       existingFields: {},
