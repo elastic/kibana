@@ -25,6 +25,7 @@ import { AbortError } from '../../common';
 import { SearchTimeoutError, PainlessError, TimeoutErrorMode } from './errors';
 import { searchServiceMock } from './mocks';
 import { ISearchStart } from '.';
+import { bfetchPluginMock } from '../../../bfetch/public/mocks';
 
 let searchInterceptor: SearchInterceptor;
 let mockCoreSetup: MockedKeys<CoreSetup>;
@@ -40,6 +41,7 @@ describe('SearchInterceptor', () => {
     mockCoreStart = coreMock.createStart();
     searchMock = searchServiceMock.createStartContract();
     searchInterceptor = new SearchInterceptor({
+      bfetch: bfetchPluginMock.createSetupContract(),
       toasts: mockCoreSetup.notifications.toasts,
       startServices: new Promise((resolve) => {
         resolve([mockCoreStart, {}, {}]);

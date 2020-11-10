@@ -30,6 +30,7 @@ import {
   StartServicesAccessor,
 } from 'src/core/server';
 import { first } from 'rxjs/operators';
+import { BfetchServerSetup } from 'src/plugins/bfetch/server';
 import {
   ISearchSetup,
   ISearchStart,
@@ -77,6 +78,7 @@ type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
+  bfetch: BfetchServerSetup;
   registerFunction: AggsSetupDependencies['registerFunction'];
   usageCollection?: UsageCollectionSetup;
 }
@@ -98,6 +100,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly searchSourceService = new SearchSourceService();
   private defaultSearchStrategyName: string = ES_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
+  private coreStart?: CoreStart;
 
   constructor(
     private initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -106,7 +109,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<{}, DataPluginStart>,
-    { registerFunction, usageCollection }: SearchServiceSetupDependencies
+    { bfetch, registerFunction, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
@@ -118,9 +121,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     registerSearchRoute(router);
     registerMsearchRoute(router, routeDependencies);
 
+    core.getStartServices().then(([coreStart]) => {
+      this.coreStart = coreStart;
+    });
+
     core.http.registerRouteHandlerContext('search', async (context, request) => {
-      const [coreStart] = await core.getStartServices();
-      return this.asScopedProvider(coreStart)(request);
+      return this.asScopedProvider(this.coreStart!)(request);
     });
 
     this.registerSearchStrategy(
@@ -130,6 +136,24 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.logger,
         usage
       )
+    );
+
+    bfetch.addBatchProcessingRoute<{ request: any; strategy?: string }, any>(
+      '/internal/bsearch',
+      (request) => {
+        const search = this.asScopedProvider(this.coreStart!)(request);
+
+        return {
+          onBatchItem: async ({ request: requestData, strategy }) => {
+            return search
+              .search(requestData, {
+                strategy,
+              })
+              .pipe(first())
+              .toPromise();
+          },
+        };
+      }
     );
 
     core.savedObjects.registerType(searchTelemetry);

@@ -23,14 +23,15 @@ import { catchError, finalize } from 'rxjs/operators';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
+import { BatchedFunc, BfetchPublicSetup } from 'src/plugins/bfetch/public';
 import {
   AbortError,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
-  ES_SEARCH_STRATEGY,
   ISessionService,
   getCombinedSignal,
+  ES_SEARCH_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
@@ -45,6 +46,7 @@ import {
 import { toMountPoint } from '../../../kibana_react/public';
 
 export interface SearchInterceptorDeps {
+  bfetch: BfetchPublicSetup;
   http: CoreSetup['http'];
   uiSettings: CoreSetup['uiSettings'];
   startServices: Promise<[CoreStart, any, unknown]>;
@@ -70,6 +72,10 @@ export class SearchInterceptor {
    * @internal
    */
   protected application!: CoreStart['application'];
+  protected batchedFetch?: BatchedFunc<
+    { request: IKibanaSearchRequest; strategy?: string },
+    IKibanaSearchResponse
+  >;
 
   /*
    * @internal
@@ -79,6 +85,10 @@ export class SearchInterceptor {
 
     this.deps.startServices.then(([coreStart]) => {
       this.application = coreStart.application;
+    });
+
+    this.batchedFetch = deps.bfetch.batchedFunction({
+      url: '/internal/bsearch',
     });
   }
 
@@ -130,16 +140,20 @@ export class SearchInterceptor {
     signal: AbortSignal,
     strategy?: string
   ): Promise<IKibanaSearchResponse> {
-    const { id, ...searchRequest } = request;
-    const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
-    const body = JSON.stringify(searchRequest);
+    if (this.batchedFetch) {
+      return this.batchedFetch({ request, strategy });
+    } else {
+      const { id, ...searchRequest } = request;
+      const path = trimEnd(`/internal/search/${strategy || ES_SEARCH_STRATEGY}/${id || ''}`, '/');
+      const body = JSON.stringify(searchRequest);
 
-    return this.deps.http.fetch({
-      method: 'POST',
-      path,
-      body,
-      signal,
-    });
+      return this.deps.http.fetch({
+        method: 'POST',
+        path,
+        body,
+        signal,
+      });
+    }
   }
 
   /**

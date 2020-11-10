@@ -10,6 +10,7 @@ import { CoreSetup, CoreStart } from 'kibana/public';
 import { AbortError, UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { SearchTimeoutError } from 'src/plugins/data/public';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
+import { bfetchPluginMock } from '../../../../../src/plugins/bfetch/public/mocks';
 
 const timeTravel = (msToRun = 0) => {
   jest.advanceTimersByTime(msToRun);
@@ -73,7 +74,10 @@ describe('EnhancedSearchInterceptor', () => {
       ]);
     });
 
+    const bfetchMock = bfetchPluginMock.createSetupContract();
+
     searchInterceptor = new EnhancedSearchInterceptor({
+      bfetch: bfetchMock,
       toasts: mockCoreSetup.notifications.toasts,
       startServices: mockPromise as any,
       http: mockCoreSetup.http,

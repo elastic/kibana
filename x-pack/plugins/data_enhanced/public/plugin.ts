@@ -6,12 +6,14 @@
 
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
+import { BfetchPublicSetup } from '../../../../src/plugins/bfetch/public';
 import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
 
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
 
 export interface DataEnhancedSetupDependencies {
+  bfetch: BfetchPublicSetup;
   data: DataPublicPluginSetup;
 }
 export interface DataEnhancedStartDependencies {
@@ -27,7 +29,7 @@ export class DataEnhancedPlugin
 
   public setup(
     core: CoreSetup<DataEnhancedStartDependencies>,
-    { data }: DataEnhancedSetupDependencies
+    { bfetch, data }: DataEnhancedSetupDependencies
   ) {
     data.autocomplete.addQuerySuggestionProvider(
       KUERY_LANGUAGE_NAME,
@@ -35,6 +37,7 @@ export class DataEnhancedPlugin
     );
 
     this.enhancedSearchInterceptor = new EnhancedSearchInterceptor({
+      bfetch,
       toasts: core.notifications.toasts,
       http: core.http,
       uiSettings: core.uiSettings,

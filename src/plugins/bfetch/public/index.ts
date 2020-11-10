@@ -23,6 +23,8 @@ import { BfetchPublicPlugin } from './plugin';
 export { BfetchPublicSetup, BfetchPublicStart, BfetchPublicContract } from './plugin';
 export { split } from './streaming';
 
+export { BatchedFunc } from './batching/create_streaming_batched_function';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchPublicPlugin(initializerContext);
 }
