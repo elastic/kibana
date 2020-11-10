@@ -346,7 +346,8 @@ export const queryTimelineById = <TCache>({
         );
 
         const overrideDaterange =
-          timeline.status === TimelineStatus.immutable && timelineType === TimelineType.template
+          timeline.status === TimelineStatus.immutable &&
+          timeline.timelineType === TimelineType.template
             ? {
                 ...timeline.dateRange,
                 start: DEFAULT_FROM_MOMENT.toISOString(),
@@ -358,7 +359,8 @@ export const queryTimelineById = <TCache>({
           onOpenTimeline({ ...timeline, dateRange: overrideDaterange });
         } else if (updateTimeline) {
           const { from, to } =
-            timeline.status === TimelineStatus.immutable
+            timeline.status === TimelineStatus.immutable &&
+            timeline.timelineType === TimelineType.template
               ? { from: overrideDaterange.start, to: overrideDaterange.end }
               : normalizeTimeRange({
                   from: getOr(null, 'dateRange.start', timeline),
