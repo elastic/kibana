@@ -41,14 +41,14 @@ export async function generate(encryptionConfig, command) {
     logger.log('No keys to write.  Use the --force flag to generate new keys.');
   } else {
     logger.log(safeDump(keys));
-  }
 
-  if (command.interactive) {
-    const write = await confirm('Write to kibana.yml?');
-    if (write) {
-      const kibanaYML = join(getConfigDirectory(), 'kibana.yml');
-      appendFileSync(kibanaYML, safeDump(keys));
-      logger.log(`Wrote ${Object.keys(keys).length} settings to kibana.yml.`);
+    if (command.interactive) {
+      const write = await confirm('Write to kibana.yml?');
+      if (write) {
+        const kibanaYML = join(getConfigDirectory(), 'kibana.yml');
+        appendFileSync(kibanaYML, safeDump(keys));
+        logger.log(`Wrote ${Object.keys(keys).length} settings to kibana.yml.`);
+      }
     }
   }
   if (command.force && !command.quiet) {
