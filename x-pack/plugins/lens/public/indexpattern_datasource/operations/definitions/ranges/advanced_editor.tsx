@@ -8,7 +8,7 @@ import './advanced_editor.scss';
 
 import React, { useState, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 import {
   EuiFlexGroup,
   EuiFlexItem,

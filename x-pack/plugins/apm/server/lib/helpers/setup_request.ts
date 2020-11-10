@@ -88,7 +88,8 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   const coreSetupRequest = {
     indices,
     apmEventClient: createApmEventClient({
-      context,
+      esClient: context.core.elasticsearch.legacy.client,
+      debug: context.params.query._debug,
       request,
       indices,
       options: { includeFrozen },

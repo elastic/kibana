@@ -6,7 +6,7 @@
 
 import { inflateSync } from 'zlib';
 import { savedObjectsClientMock } from 'src/core/server/mocks';
-import { createPackagePolicyServiceMock } from '../../../../../../ingest_manager/server/mocks';
+import { createPackagePolicyServiceMock } from '../../../../../../fleet/server/mocks';
 import { ArtifactConstants, ManifestConstants, isCompleteArtifact } from '../../../lib/artifacts';
 
 import { getManifestManagerMock, ManifestManagerMockType } from './manifest_manager.mock';
