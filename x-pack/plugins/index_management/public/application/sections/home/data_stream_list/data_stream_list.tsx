@@ -32,6 +32,7 @@ import { documentationService } from '../../../services/documentation';
 import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
+import { filterDataStreams } from '../../../lib/data_streams';
 
 interface MatchParams {
   dataStreamName?: string;
@@ -52,6 +53,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   } = useAppContext();
 
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
+  const [isIncludeManagedChecked, setIsIncludeManagedChecked] = useState(true);
   const { error, isLoading, data: dataStreams, resendRequest: reload } = useLoadDataStreams({
     includeStats: isIncludeStatsChecked,
   });
@@ -147,11 +149,13 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       />
     );
   } else if (Array.isArray(dataStreams) && dataStreams.length > 0) {
+    const filteredDataStreams = isIncludeManagedChecked
+      ? dataStreams
+      : filterDataStreams(dataStreams, isIncludeManagedChecked);
     content = (
       <>
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem>
-            {/* TODO: Add a switch for toggling on data streams created by Ingest Manager */}
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
@@ -202,6 +206,16 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={i18n.translate('xpack.idxMgmt.dataStreamListControls.viewManagedSwitchLabel', {
+                defaultMessage: 'View managed',
+              })}
+              checked={isIncludeManagedChecked}
+              onChange={(e) => setIsIncludeManagedChecked(e.target.checked)}
+              data-test-subj="viewManagedSwitch"
+            />
+          </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />
@@ -212,7 +226,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               ? `name="${attemptToURIDecode(dataStreamName)}"`
               : ''
           }
-          dataStreams={dataStreams}
+          dataStreams={filteredDataStreams}
           reload={reload}
           history={history as ScopedHistory}
           includeStats={isIncludeStatsChecked}

@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiInMemoryTable, EuiBasicTableColumn, EuiButton, EuiLink, EuiBadge } from '@elastic/eui';
 import { ScopedHistory } from 'kibana/public';
 
 import { DataStream } from '../../../../../../common/types';
@@ -16,6 +16,7 @@ import { getDataStreamDetailsLink, getIndexListUri } from '../../../../services/
 import { DataHealth } from '../../../../components';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
+import { isManagedByIngestManager } from '../../../../lib/data_streams';
 
 interface Props {
   dataStreams?: DataStream[];
@@ -44,14 +45,27 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
     }),
     truncateText: true,
     sortable: true,
-    render: (name: DataStream['name']) => {
+    render: (name: DataStream['name'], dataStream: DataStream) => {
       return (
-        <EuiLink
-          data-test-subj="nameLink"
-          {...reactRouterNavigate(history, getDataStreamDetailsLink(name))}
-        >
-          {name}
-        </EuiLink>
+        <Fragment>
+          <EuiLink
+            data-test-subj="nameLink"
+            {...reactRouterNavigate(history, getDataStreamDetailsLink(name))}
+          >
+            {name}
+          </EuiLink>
+          {isManagedByIngestManager(dataStream) ? (
+            <Fragment>
+              &nbsp;
+              <EuiBadge color="hollow">
+                <FormattedMessage
+                  id="xpack.idxMgmt.dataStreamList.table.managedDataStreamBadge"
+                  defaultMessage="Managed"
+                />
+              </EuiBadge>
+            </Fragment>
+          ) : null}
+        </Fragment>
       );
     },
   });
@@ -121,7 +135,7 @@ export const DataStreamTable: React.FunctionComponent<Props> = ({
         name: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteText', {
           defaultMessage: 'Delete',
         }),
-        description: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteDecription', {
+        description: i18n.translate('xpack.idxMgmt.dataStreamList.table.actionDeleteDescription', {
           defaultMessage: 'Delete this data stream',
         }),
         icon: 'trash',

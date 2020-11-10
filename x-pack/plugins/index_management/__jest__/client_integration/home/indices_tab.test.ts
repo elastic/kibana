@@ -74,7 +74,9 @@ describe('<IndexManagementHome />', () => {
       // The detail panel should still appear even if there are no data streams.
       httpRequestsMockHelpers.setLoadDataStreamsResponse([]);
 
-      httpRequestsMockHelpers.setLoadDataStreamResponse(createDataStreamPayload('dataStream1'));
+      httpRequestsMockHelpers.setLoadDataStreamResponse(
+        createDataStreamPayload({ name: 'dataStream1' })
+      );
 
       testBed = await setup({
         history: createMemoryHistory(),
