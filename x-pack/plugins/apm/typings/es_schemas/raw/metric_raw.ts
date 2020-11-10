@@ -64,6 +64,7 @@ type JVMMetric = SystemMetric & {
 };
 
 export type MetricRaw =
+  | BaseMetric
   | TransactionBreakdownMetric
   | SpanBreakdownMetric
   | SystemMetric

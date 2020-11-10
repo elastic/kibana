@@ -6,6 +6,7 @@
 
 import { APMBaseDoc } from './apm_base_doc';
 import { Stackframe } from './fields/stackframe';
+import { TimestampUs } from './fields/timestamp_us';
 
 interface Processor {
   name: 'transaction';
@@ -47,6 +48,7 @@ export interface SpanRaw extends APMBaseDoc {
       headers?: Record<string, unknown>;
     };
   };
+  timestamp: TimestampUs;
   transaction?: {
     id: string;
   };

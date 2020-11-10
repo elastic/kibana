@@ -12,6 +12,7 @@ import { Kubernetes } from './fields/kubernetes';
 import { Page } from './fields/page';
 import { Process } from './fields/process';
 import { Service } from './fields/service';
+import { TimestampUs } from './fields/timestamp_us';
 import { Url } from './fields/url';
 import { User } from './fields/user';
 import { UserAgent } from './fields/user_agent';
@@ -23,6 +24,7 @@ interface Processor {
 
 export interface TransactionRaw extends APMBaseDoc {
   processor: Processor;
+  timestamp: TimestampUs;
   trace: { id: string }; // trace is required
   transaction: {
     duration: { us: number };

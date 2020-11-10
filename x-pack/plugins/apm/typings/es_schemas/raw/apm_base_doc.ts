@@ -13,7 +13,6 @@ export interface APMBaseDoc {
     name: string;
     version: string;
   };
-  timestamp: { us: number };
   parent?: { id: string }; // parent ID is not available on root transactions
   trace?: { id: string };
   labels?: {

@@ -13,6 +13,7 @@ import { Page } from './fields/page';
 import { Process } from './fields/process';
 import { Service } from './fields/service';
 import { Stackframe } from './fields/stackframe';
+import { TimestampUs } from './fields/timestamp_us';
 import { Url } from './fields/url';
 import { User } from './fields/user';
 
@@ -40,6 +41,7 @@ interface Log {
 
 export interface ErrorRaw extends APMBaseDoc {
   processor: Processor;
+  timestamp: TimestampUs;
   transaction?: {
     id: string;
     sampled?: boolean;
