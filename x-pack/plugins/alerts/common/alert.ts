@@ -20,13 +20,12 @@ export interface IntervalSchedule extends SavedObjectAttributes {
 export const AlertExecutionStatusValues = ['ok', 'active', 'error', 'pending', 'unknown'] as const;
 export type AlertExecutionStatuses = typeof AlertExecutionStatusValues[number];
 
-export const AlertExecutionStatusErrorReasonValues = [
-  'read',
-  'decrypt',
-  'execute',
-  'unknown',
-] as const;
-export type AlertExecutionStatusErrorReasons = typeof AlertExecutionStatusErrorReasonValues[number];
+export enum AlertExecutionStatusErrorReasons {
+  Read = 'read',
+  Decrypt = 'decrypt',
+  Execute = 'execute',
+  Unknown = 'unknown',
+}
 
 export interface AlertExecutionStatus {
   status: AlertExecutionStatuses;
@@ -74,3 +73,24 @@ export interface Alert {
 }
 
 export type SanitizedAlert = Omit<Alert, 'apiKey'>;
+
+export enum HealthStatus {
+  OK = 'ok',
+  Warning = 'warn',
+  Error = 'error',
+}
+
+export interface AlertsHealth {
+  decryptionHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+  executionHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+  readHealth: {
+    status: HealthStatus;
+    timestamp: string;
+  };
+}

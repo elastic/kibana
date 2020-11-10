@@ -5,9 +5,7 @@
   "scripts": {
     "build": "../../node_modules/.bin/grunt prodBuild",
     "docSiteStart": "../../node_modules/.bin/grunt docSiteStart",
-    "docSiteBuild": "../../node_modules/.bin/grunt docSiteBuild",
-    "createComponent": "../../node_modules/.bin/yo ./generator-kui/app/component.js",
-    "documentComponent": "../../node_modules/.bin/yo ./generator-kui/app/documentation.js"
+    "docSiteBuild": "../../node_modules/.bin/grunt docSiteBuild"
   },
   "kibana": {
     "build": {

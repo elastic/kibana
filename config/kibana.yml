@@ -80,7 +80,7 @@
 #elasticsearch.logQueries: false
 
 # Specifies the path where Kibana creates the process ID file.
-#pid.file: /var/run/kibana.pid
+#pid.file: /run/kibana/kibana.pid
 
 # Enables you to specify a file where Kibana stores log output.
 #logging.dest: stdout
