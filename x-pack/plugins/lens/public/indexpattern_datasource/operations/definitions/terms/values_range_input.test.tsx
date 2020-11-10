@@ -10,9 +10,7 @@ import { shallow } from 'enzyme';
 import { EuiRange } from '@elastic/eui';
 import { ValuesRangeInput } from './values_range_input';
 
-jest.mock('react-use', () => ({
-  useDebounce: (fn: () => void) => fn(),
-}));
+jest.mock('react-use/lib/useDebounce', () => (fn: () => void) => fn());
 
 describe('ValuesRangeInput', () => {
   it('should render EuiRange correctly', () => {
