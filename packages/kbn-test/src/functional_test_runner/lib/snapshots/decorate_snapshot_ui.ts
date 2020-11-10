@@ -27,9 +27,9 @@ import path from 'path';
 import expect from '@kbn/expect';
 import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
-import { Suite, Test } from 'mocha';
 import { flatten, once } from 'lodash';
 import { Lifecycle } from 'packages/kbn-test/types/ftr';
+import { Suite, Test } from './mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
