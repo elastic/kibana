@@ -31,18 +31,17 @@ import {
 } from '@elastic/eui/src/components/basic_table/basic_table';
 import { EuiTableSortingType } from '@elastic/eui';
 import { goToSpecifiedPath } from '../../render_app';
-// @ts-expect-error
-import { addHelpMenuToAppChrome } from '../../../help_menu_util';
-import { APP_ID, MAP_PATH } from '../../../../common/constants';
+import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
   getUiSettings,
   getToasts,
   getCoreChrome,
   getNavigateToApp,
-} from '../../../kibana_services';
-import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
-import { getAppTitle } from '../../../../common/i18n_getters';
+  getSavedObjectsClient,
+} from '../../kibana_services';
+import { getAppTitle } from '../../../common/i18n_getters';
+import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
 
 export const EMPTY_FILTER = '';
 
@@ -60,7 +59,7 @@ interface State {
   showDeleteModal: boolean;
   showLimitError: boolean;
   filter: string;
-  items: SelectionItem[];
+  items: TableRow[];
   selectedIds: string[];
   page: number;
   perPage: number;
@@ -69,8 +68,10 @@ interface State {
   totalItems?: number;
 }
 
-interface SelectionItem {
+interface TableRow {
   id: string;
+  title: string;
+  description?: string;
 }
 
 export class MapsListView extends React.Component {
@@ -101,17 +102,20 @@ export class MapsListView extends React.Component {
 
   async initMapList() {
     this.fetchItems();
-    addHelpMenuToAppChrome();
     getCoreChrome().docTitle.change(getAppTitle());
     getCoreChrome().setBreadcrumbs([{ text: getAppTitle() }]);
   }
 
-  _find = (search: string) => getMapsSavedObjectLoader().find(search, this.state.listingLimit);
-
-  _delete = (ids: string[]) => getMapsSavedObjectLoader().delete(ids);
-
   debouncedFetch = _.debounce(async (filter) => {
-    const response = await this._find(filter);
+    const response = await getSavedObjectsClient().find<MapSavedObjectAttributes>({
+      type: MAP_SAVED_OBJECT_TYPE,
+      search: filter ? `${filter}*` : undefined,
+      perPage: this.state.listingLimit,
+      page: 1,
+      searchFields: ['title^3', 'description'],
+      defaultSearchOperator: 'AND',
+      fields: ['description', 'title'],
+    });
 
     if (!this._isMounted) {
       return;
@@ -123,7 +127,13 @@ export class MapsListView extends React.Component {
       this.setState({
         hasInitialFetchReturned: true,
         isFetchingItems: false,
-        items: response.hits,
+        items: response.savedObjects.map((savedObject) => {
+          return {
+            id: savedObject.id,
+            title: savedObject.attributes.title,
+            description: savedObject.attributes.description,
+          };
+        }),
         totalItems: response.total,
         showLimitError: response.total > this.state.listingLimit,
       });
@@ -141,7 +151,10 @@ export class MapsListView extends React.Component {
 
   deleteSelectedItems = async () => {
     try {
-      await this._delete(this.state.selectedIds);
+      const deletions = this.state.selectedIds.map((id) => {
+        return getSavedObjectsClient().delete(MAP_SAVED_OBJECT_TYPE, id);
+      });
+      await Promise.all(deletions);
     } catch (error) {
       getToasts().addDanger({
         title: i18n.translate('xpack.maps.mapListing.unableToDeleteToastTitle', {
@@ -165,7 +178,7 @@ export class MapsListView extends React.Component {
     this.setState({ showDeleteModal: true });
   };
 
-  onTableChange = ({ page, sort }: CriteriaWithPagination<SelectionItem>) => {
+  onTableChange = ({ page, sort }: CriteriaWithPagination<TableRow>) => {
     const { index: pageIndex, size: pageSize } = page;
 
     let { field: sortField, direction: sortDirection } = sort || {};
@@ -361,7 +374,7 @@ export class MapsListView extends React.Component {
           <EuiLink
             onClick={(e: MouseEvent) => {
               e.preventDefault();
-              goToSpecifiedPath(`/map/${record.id}`);
+              goToSpecifiedPath(`/${MAP_PATH}/${record.id}`);
             }}
             data-test-subj={`mapListingTitleLink-${record.title.split(' ').join('-')}`}
           >
@@ -388,7 +401,7 @@ export class MapsListView extends React.Component {
     let selection;
     if (!this.state.readOnly) {
       selection = {
-        onSelectionChange: (s: SelectionItem[]) => {
+        onSelectionChange: (s: TableRow[]) => {
           this.setState({
             selectedIds: s.map((item) => {
               return item.id;

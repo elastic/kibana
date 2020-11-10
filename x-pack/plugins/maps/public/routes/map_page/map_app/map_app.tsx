@@ -9,9 +9,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { AppLeaveAction, AppMountParameters } from 'kibana/public';
-import { EmbeddableStateTransfer, Adapters } from 'src/plugins/embeddable/public';
+import { Adapters } from 'src/plugins/embeddable/public';
 import { Subscription } from 'rxjs';
-import { DEFAULT_IS_LAYER_TOC_OPEN } from '../../../reducers/ui';
 import {
   getData,
   getCoreChrome,
@@ -19,19 +18,14 @@ import {
   getNavigation,
   getToasts,
 } from '../../../kibana_services';
-import { copyPersistentState } from '../../../reducers/util';
-import { getInitialLayers, getInitialLayersFromUrlParam } from '../../bootstrap/get_initial_layers';
-import { getInitialTimeFilters } from '../../bootstrap/get_initial_time_filters';
-import { getInitialRefreshConfig } from '../../bootstrap/get_initial_refresh_config';
-import { getInitialQuery } from '../../bootstrap/get_initial_query';
 import {
+  AppStateManager,
+  startAppStateSyncing,
   getGlobalState,
   updateGlobalState,
   startGlobalStateSyncing,
   MapsGlobalState,
-} from '../../state_syncing/global_sync';
-import { AppStateManager } from '../../state_syncing/app_state_manager';
-import { startAppStateSyncing } from '../../state_syncing/app_sync';
+} from '../url_state';
 import {
   esFilters,
   Filter,
@@ -44,26 +38,25 @@ import {
 } from '../../../../../../../src/plugins/data/public';
 import { MapContainer } from '../../../connected_components/map_container';
 import { getIndexPatternsFromIds } from '../../../index_pattern_util';
-import { getTopNavConfig } from './top_nav_config';
-import { getBreadcrumbs, unsavedChangesTitle, unsavedChangesWarning } from './get_breadcrumbs';
+import { getTopNavConfig } from '../top_nav_config';
+import { MapRefreshConfig, MapQuery } from '../../../../common/descriptor_types';
+import { goToSpecifiedPath } from '../../../render_app';
+import { MapSavedObjectAttributes } from '../../../../common/map_saved_object_type';
+import { getExistingMapPath } from '../../../../common/constants';
 import {
-  LayerDescriptor,
-  MapRefreshConfig,
-  MapCenterAndZoom,
-  MapQuery,
-} from '../../../../common/descriptor_types';
-import { MapSettings } from '../../../reducers/map';
-import { ISavedGisMap } from '../../bootstrap/services/saved_gis_map';
-import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
-import { goToSpecifiedPath } from '../../render_app';
+  getInitialQuery,
+  getInitialRefreshConfig,
+  getInitialTimeFilters,
+  SavedMap,
+  unsavedChangesTitle,
+  unsavedChangesWarning,
+} from '../saved_map';
 
 interface Props {
-  savedMapId?: string;
+  savedMap: SavedMap;
+  // saveCounter used to trigger MapApp render after SaveMap.save
+  saveCounter: number;
   onAppLeave: AppMountParameters['onAppLeave'];
-  stateTransfer: EmbeddableStateTransfer;
-  originatingApp?: string;
-  layerListConfigOnly: LayerDescriptor[];
-  replaceLayerList: (layerList: LayerDescriptor[]) => void;
   filters: Filter[];
   isFullScreen: boolean;
   isOpenSettingsDisabled: boolean;
@@ -86,22 +79,14 @@ interface Props {
   refreshConfig: MapRefreshConfig;
   setRefreshConfig: (refreshConfig: MapRefreshConfig) => void;
   isSaveDisabled: boolean;
-  clearUi: () => void;
-  setGotoWithCenter: (latLonZoom: MapCenterAndZoom) => void;
-  setMapSettings: (mapSettings: MapSettings) => void;
-  setIsLayerTOCOpen: (isLayerTOCOpen: boolean) => void;
-  setOpenTOCDetails: (openTOCDetails: string[]) => void;
   query: MapQuery | undefined;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
 interface State {
   initialized: boolean;
-  initialLayerListConfig?: LayerDescriptor[];
   indexPatterns: IndexPattern[];
   savedQuery?: SavedQuery;
-  originatingApp?: string;
-  savedMap?: ISavedGisMap;
 }
 
 export class MapApp extends React.Component<Props, State> {
@@ -117,8 +102,6 @@ export class MapApp extends React.Component<Props, State> {
     this.state = {
       indexPatterns: [],
       initialized: false,
-      // tracking originatingApp in state so the connection can be broken by users
-      originatingApp: props.originatingApp,
     };
   }
 
@@ -140,7 +123,7 @@ export class MapApp extends React.Component<Props, State> {
     this._initMap();
 
     this.props.onAppLeave((actions) => {
-      if (this._hasUnsavedChanges()) {
+      if (this.props.savedMap.hasUnsavedChanges()) {
         return actions.confirm(unsavedChangesWarning, unsavedChangesTitle);
       }
       return actions.default() as AppLeaveAction;
@@ -164,34 +147,10 @@ export class MapApp extends React.Component<Props, State> {
       this._globalSyncChangeMonitorSubscription.unsubscribe();
     }
 
-    getCoreChrome().setBreadcrumbs([]);
-  }
-
-  _hasUnsavedChanges = () => {
-    if (!this.state.savedMap) {
-      return false;
-    }
-
-    const savedLayerList = this.state.savedMap.getLayerList();
-    return !savedLayerList
-      ? !_.isEqual(this.props.layerListConfigOnly, this.state.initialLayerListConfig)
-      : // savedMap stores layerList as a JSON string using JSON.stringify.
-        // JSON.stringify removes undefined properties from objects.
-        // savedMap.getLayerList converts the JSON string back into Javascript array of objects.
-        // Need to perform the same process for layerListConfigOnly to compare apples to apples
-        // and avoid undefined properties in layerListConfigOnly triggering unsaved changes.
-        !_.isEqual(JSON.parse(JSON.stringify(this.props.layerListConfigOnly)), savedLayerList);
-  };
-
-  _setBreadcrumbs = (title: string) => {
-    const breadcrumbs = getBreadcrumbs({
-      title,
-      getHasUnsavedChanges: this._hasUnsavedChanges,
-      originatingApp: this.state.originatingApp,
-      getAppNameFromId: this.props.stateTransfer.getAppNameFromId,
+    this.props.onAppLeave((actions) => {
+      return actions.default();
     });
-    getCoreChrome().setBreadcrumbs(breadcrumbs);
-  };
+  }
 
   _updateFromGlobalState = ({
     changes,
@@ -262,12 +221,12 @@ export class MapApp extends React.Component<Props, State> {
     updateGlobalState(updatedGlobalState, !this.state.initialized);
   };
 
-  _initMapAndLayerSettings(savedMap: ISavedGisMap) {
+  _initMapAndLayerSettings(mapSavedObjectAttributes: MapSavedObjectAttributes) {
     const globalState: MapsGlobalState = getGlobalState();
 
     let savedObjectFilters = [];
-    if (savedMap.mapStateJSON) {
-      const mapState = JSON.parse(savedMap.mapStateJSON);
+    if (mapSavedObjectAttributes.mapStateJSON) {
+      const mapState = JSON.parse(mapSavedObjectAttributes.mapStateJSON);
       if (mapState.filters) {
         savedObjectFilters = mapState.filters;
       }
@@ -275,7 +234,7 @@ export class MapApp extends React.Component<Props, State> {
     const appFilters = this._appStateManager.getFilters() || [];
 
     const query = getInitialQuery({
-      mapStateJSON: savedMap.mapStateJSON,
+      mapStateJSON: mapSavedObjectAttributes.mapStateJSON,
       appState: this._appStateManager.getAppState(),
     });
     if (query) {
@@ -286,23 +245,17 @@ export class MapApp extends React.Component<Props, State> {
       filters: [..._.get(globalState, 'filters', []), ...appFilters, ...savedObjectFilters],
       query,
       time: getInitialTimeFilters({
-        mapStateJSON: savedMap.mapStateJSON,
+        mapStateJSON: mapSavedObjectAttributes.mapStateJSON,
         globalState,
       }),
     });
 
     this._onRefreshConfigChange(
       getInitialRefreshConfig({
-        mapStateJSON: savedMap.mapStateJSON,
+        mapStateJSON: mapSavedObjectAttributes.mapStateJSON,
         globalState,
       })
     );
-
-    const layerList = getInitialLayers(savedMap.layerListJSON, getInitialLayersFromUrlParam());
-    this.props.replaceLayerList(layerList);
-    this.setState({
-      initialLayerListConfig: copyPersistentState(layerList),
-    });
   }
 
   _onFiltersChange = (filters: Filter[]) => {
@@ -348,10 +301,9 @@ export class MapApp extends React.Component<Props, State> {
     });
   };
 
-  async _loadSavedMap(): Promise<ISavedGisMap | null> {
-    let savedMap: ISavedGisMap | null = null;
+  async _initMap() {
     try {
-      savedMap = await getMapsSavedObjectLoader().get(this.props.savedMapId);
+      await this.props.savedMap.whenReady();
     } catch (err) {
       if (this._isMounted) {
         getToasts().addWarning({
@@ -362,66 +314,41 @@ export class MapApp extends React.Component<Props, State> {
         });
         goToSpecifiedPath('/');
       }
-    }
-
-    return savedMap;
-  }
-
-  async _initMap() {
-    const savedMap = await this._loadSavedMap();
-    if (!this._isMounted || !savedMap) {
       return;
     }
 
-    this._setBreadcrumbs(savedMap.title);
-    getCoreChrome().docTitle.change(savedMap.title);
-    if (this.props.savedMapId) {
-      getCoreChrome().recentlyAccessed.add(savedMap.getFullPath(), savedMap.title, savedMap.id!);
+    if (!this._isMounted) {
+      return;
     }
 
-    this._initMapAndLayerSettings(savedMap);
-
-    this.props.clearUi();
-
-    if (savedMap.mapStateJSON) {
-      const mapState = JSON.parse(savedMap.mapStateJSON);
-      this.props.setGotoWithCenter({
-        lat: mapState.center.lat,
-        lon: mapState.center.lon,
-        zoom: mapState.zoom,
-      });
-      if (mapState.settings) {
-        this.props.setMapSettings(mapState.settings);
-      }
+    this.props.savedMap.setBreadcrumbs();
+    getCoreChrome().docTitle.change(this.props.savedMap.getTitle());
+    const savedObjectId = this.props.savedMap.getSavedObjectId();
+    if (savedObjectId) {
+      getCoreChrome().recentlyAccessed.add(
+        getExistingMapPath(savedObjectId),
+        this.props.savedMap.getTitle(),
+        savedObjectId
+      );
     }
 
-    if (savedMap.uiStateJSON) {
-      const uiState = JSON.parse(savedMap.uiStateJSON);
-      this.props.setIsLayerTOCOpen(_.get(uiState, 'isLayerTOCOpen', DEFAULT_IS_LAYER_TOC_OPEN));
-      this.props.setOpenTOCDetails(_.get(uiState, 'openTOCDetails', []));
-    }
+    this._initMapAndLayerSettings(this.props.savedMap.getAttributes());
 
-    this.setState({ initialized: true, savedMap });
+    this.setState({ initialized: true });
   }
 
   _renderTopNav() {
-    if (this.props.isFullScreen || !this.state.savedMap) {
+    if (this.props.isFullScreen) {
       return null;
     }
 
     const topNavConfig = getTopNavConfig({
-      savedMap: this.state.savedMap,
+      savedMap: this.props.savedMap,
       isOpenSettingsDisabled: this.props.isOpenSettingsDisabled,
       isSaveDisabled: this.props.isSaveDisabled,
       enableFullScreen: this.props.enableFullScreen,
       openMapSettings: this.props.openMapSettings,
       inspectorAdapters: this.props.inspectorAdapters,
-      setBreadcrumbs: this._setBreadcrumbs,
-      stateTransfer: this.props.stateTransfer,
-      originatingApp: this.state.originatingApp,
-      cutOriginatingAppConnection: () => {
-        this.setState({ originatingApp: undefined });
-      },
     });
 
     const { TopNavMenu } = getNavigation().ui;
@@ -485,7 +412,7 @@ export class MapApp extends React.Component<Props, State> {
   };
 
   render() {
-    if (!this.state.initialized || !this.state.savedMap) {
+    if (!this.state.initialized) {
       return null;
     }
 
@@ -496,8 +423,8 @@ export class MapApp extends React.Component<Props, State> {
         <div id="react-maps-root">
           <MapContainer
             addFilters={this._addFilter}
-            title={this.state.savedMap.title}
-            description={this.state.savedMap.description}
+            title={this.props.savedMap.getAttributes().title}
+            description={this.props.savedMap.getAttributes().description}
           />
         </div>
       </div>
