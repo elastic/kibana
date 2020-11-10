@@ -41,7 +41,10 @@ export function dataAccessLayerFactory(
           query: {},
           body: JSON.stringify({
             indexPatterns,
-            timerange,
+            timerange: {
+              from: timerange.from.toISOString(),
+              to: timerange.to.toISOString(),
+            },
             filter: {
               bool: {
                 filter: [
@@ -77,7 +80,10 @@ export function dataAccessLayerFactory(
       return context.services.http.post('/api/endpoint/resolver/events', {
         query: { afterEvent: after, limit: 25 },
         body: JSON.stringify({
-          timerange,
+          timerange: {
+            from: timerange.from.toISOString(),
+            to: timerange.to.toISOString(),
+          },
           indexPatterns,
           filter: {
             bool: {
@@ -109,7 +115,10 @@ export function dataAccessLayerFactory(
           query: { limit: 1 },
           body: JSON.stringify({
             indexPatterns,
-            timerange,
+            timerange: {
+              from: timerange.from.toISOString(),
+              to: timerange.to.toISOString(),
+            },
             filter: {
               bool: {
                 filter: [{ term: { 'event.id': eventID } }],
