@@ -24,7 +24,7 @@ export interface IWorkplaceSearchInitialData {
   account: IAccount;
 }
 
-export interface IConfiguredLimits {
+export interface ConfiguredLimits {
   customApiSource: {
     maxDocumentByteSize: number;
     totalFields: number;

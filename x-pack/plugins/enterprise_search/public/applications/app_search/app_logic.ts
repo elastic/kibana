@@ -7,14 +7,14 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { InitialAppData } from '../../../common/types';
-import { IConfiguredLimits, IAccount, IRole } from './types';
+import { ConfiguredLimits, IAccount, IRole } from './types';
 
 import { getRoleAbilities } from './utils/role';
 
 interface AppValues {
   hasInitialized: boolean;
   ilmEnabled: boolean;
-  configuredLimits: Partial<IConfiguredLimits>;
+  configuredLimits: Partial<ConfiguredLimits>;
   account: Partial<IAccount>;
   myRole: Partial<IRole>;
 }
