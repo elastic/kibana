@@ -241,9 +241,9 @@ const verifyAncestry = ({
         }
       );
 
-      expect(_.get(tree.origin?.data, '@timestamp')).to.be(
-        timestampSafeVersion(originLifecycleSorted[0])
-      );
+      const ts = timestampSafeVersion(tree.origin?.data);
+      expect(ts).to.not.be(undefined);
+      expect(ts).to.be(timestampSafeVersion(originLifecycleSorted[0]));
     }
 
     for (let i = 0; i < tree.ancestors.length; i++) {
