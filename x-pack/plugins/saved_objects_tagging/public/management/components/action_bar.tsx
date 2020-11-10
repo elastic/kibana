@@ -11,8 +11,6 @@ import {
   EuiFlexGroup,
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
-  EuiHorizontalRule,
-  EuiSpacer,
   EuiText,
   EuiLink,
   EuiIcon,
@@ -114,8 +112,6 @@ export const ActionBar: FC<ActionBarProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
-      <EuiHorizontalRule margin="none" />
     </div>
   );
 };
