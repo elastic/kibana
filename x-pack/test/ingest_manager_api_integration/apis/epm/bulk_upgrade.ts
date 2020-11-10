@@ -11,7 +11,7 @@ import {
   BulkInstallPackageInfo,
   BulkInstallPackagesResponse,
   IBulkInstallPackageHTTPError,
-} from '../../../../plugins/ingest_manager/common';
+} from '../../../../plugins/fleet/common';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

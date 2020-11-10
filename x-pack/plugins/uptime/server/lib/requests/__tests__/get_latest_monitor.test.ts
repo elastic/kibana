@@ -6,6 +6,7 @@
 
 import { getLatestMonitor } from '../get_latest_monitor';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
+import { elasticsearchServiceMock } from '../../../../../../../src/core/server/mocks';
 
 describe('getLatestMonitor', () => {
   let expectedGetLatestSearchParams: any;
@@ -44,29 +45,33 @@ describe('getLatestMonitor', () => {
       },
     };
     mockEsSearchResult = {
-      hits: {
-        hits: [
-          {
-            _id: 'fejwio32',
-            _source: {
-              '@timestamp': '123456',
-              monitor: {
-                duration: {
-                  us: 12345,
+      body: {
+        hits: {
+          hits: [
+            {
+              _id: 'fejwio32',
+              _source: {
+                '@timestamp': '123456',
+                monitor: {
+                  duration: {
+                    us: 12345,
+                  },
+                  id: 'testMonitor',
+                  status: 'down',
+                  type: 'http',
                 },
-                id: 'testMonitor',
-                status: 'down',
-                type: 'http',
               },
             },
-          },
-        ],
+          ],
+        },
       },
     };
   });
 
   it('returns data in expected shape', async () => {
-    const mockEsClient = jest.fn(async (_request: any, _params: any) => mockEsSearchResult);
+    const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockEsClient.search.mockResolvedValueOnce(mockEsSearchResult);
+
     const result = await getLatestMonitor({
       callES: mockEsClient,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
@@ -94,6 +99,6 @@ describe('getLatestMonitor', () => {
     expect(result.timestamp).toBe('123456');
     expect(result.monitor).not.toBeFalsy();
     expect(result?.monitor?.id).toBe('testMonitor');
-    expect(mockEsClient).toHaveBeenCalledWith('search', expectedGetLatestSearchParams);
+    expect(mockEsClient.search).toHaveBeenCalledWith(expectedGetLatestSearchParams);
   });
 });
