@@ -45,7 +45,7 @@ import { StopActionName } from '../action_stop';
 import { ItemIdToExpandedRowMap } from './common';
 import { useColumns } from './use_columns';
 import { ExpandedRow } from './expanded_row';
-import { transformFilters, filterTransforms } from './transform_search_bar';
+import { transformFilters, filterTransforms } from './transform_search_bar_filters';
 import { useTableSettings } from './use_table_settings';
 
 function getItemIdToExpandedRowMap(
