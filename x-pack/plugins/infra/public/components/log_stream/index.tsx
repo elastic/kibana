@@ -125,6 +125,10 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
             return;
           }
 
+          if (isLoadingMore) {
+            return;
+          }
+
           if (pagesBeforeStart < PAGE_THRESHOLD) {
             fetchPreviousEntries();
           } else if (pagesAfterEnd < PAGE_THRESHOLD) {
