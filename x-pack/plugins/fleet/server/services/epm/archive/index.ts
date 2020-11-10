@@ -37,26 +37,36 @@ export async function getArchivePackage({
 
 export async function unpackArchiveToCache(
   archiveBuffer: Buffer,
-  contentType: string,
-  filter = (entry: ArchiveEntry): boolean => true
+  contentType: string
 ): Promise<string[]> {
+  const entries = await unpackArchiveEntries(archiveBuffer, contentType);
+  const paths: string[] = [];
+  entries.forEach((entry) => {
+    const { path, buffer } = entry;
+    if (buffer) {
+      cacheSet(path, buffer);
+      paths.push(path);
+    }
+  });
+
+  return paths;
+}
+
+export async function unpackArchiveEntries(
+  archiveBuffer: Buffer,
+  contentType: string
+): Promise<ArchiveEntry[]> {
   const bufferExtractor = getBufferExtractor({ contentType });
   if (!bufferExtractor) {
     throw new PackageUnsupportedMediaTypeError(
       `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
     );
   }
-  const paths: string[] = [];
+  const entries: ArchiveEntry[] = [];
   try {
-    await bufferExtractor(archiveBuffer, filter, (entry: ArchiveEntry) => {
-      const { path, buffer } = entry;
-      // skip directories
-      if (path.endsWith('/')) return;
-      if (buffer) {
-        cacheSet(path, buffer);
-        paths.push(path);
-      }
-    });
+    const onlyFiles = ({ path }: ArchiveEntry): boolean => !path.endsWith('/');
+    const addToEntries = (entry: ArchiveEntry) => entries.push(entry);
+    await bufferExtractor(archiveBuffer, onlyFiles, addToEntries);
   } catch (error) {
     throw new PackageInvalidArchiveError(
       `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
@@ -65,12 +75,12 @@ export async function unpackArchiveToCache(
 
   // While unpacking a tar.gz file with unzipBuffer() will result in a thrown error in the try-catch above,
   // unpacking a zip file with untarBuffer() just results in nothing.
-  if (paths.length === 0) {
+  if (entries.length === 0) {
     throw new PackageInvalidArchiveError(
       `Archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
     );
   }
-  return paths;
+  return entries;
 }
 
 export const deletePackageCache = (name: string, version: string) => {
