@@ -7,111 +7,114 @@
 import _ from 'lodash';
 import { geoJsonCleanAndValidate } from './geo_json_clean_and_validate';
 import { i18n } from '@kbn/i18n';
-import { PatternReader } from './pattern_reader';
+import { JSONLoader } from '@loaders.gl/json';
+import { loadInBatches } from '@loaders.gl/core';
 
-// In local testing, performance improvements leveled off around this size
-export const FILE_BUFFER = 1024000;
-
-const readSlice = (fileReader, file, start, stop) => {
-  const blob = file.slice(start, stop);
-  fileReader.readAsBinaryString(blob);
-};
-
-let prevFileReader;
-let prevPatternReader;
 export const fileHandler = async ({
   file,
   setFileProgress,
   cleanAndValidate,
   getFileParseActive,
-  fileReader = new FileReader(),
 }) => {
-  if (!file) {
-    return Promise.reject(
-      new Error(
-        i18n.translate('xpack.fileUpload.fileParser.noFileProvided', {
-          defaultMessage: 'Error, no file provided',
-        })
-      )
-    );
-  }
-
-  // Halt any previous file reading & pattern checking activity
-  if (prevFileReader) {
-    prevFileReader.abort();
-  }
-  if (prevPatternReader) {
-    prevPatternReader.abortStream();
-  }
-
-  // Set up feature tracking
-  let featuresProcessed = 0;
-  const onFeatureRead = (feature) => {
-    // TODO: Add handling and tracking for cleanAndValidate fails
-    featuresProcessed++;
-    return cleanAndValidate(feature);
-  };
-
-  let start;
-  let stop = FILE_BUFFER;
-
-  prevFileReader = fileReader;
-
-  const filePromise = new Promise((resolve, reject) => {
-    const onStreamComplete = (fileResults) => {
-      if (!featuresProcessed) {
-        reject(
-          new Error(
-            i18n.translate('xpack.fileUpload.fileParser.noFeaturesDetected', {
-              defaultMessage: 'Error, no features detected',
-            })
-          )
-        );
-      } else {
-        resolve(fileResults);
-      }
-    };
-    const patternReader = new PatternReader({ onFeatureDetect: onFeatureRead, onStreamComplete });
-    prevPatternReader = patternReader;
-
-    fileReader.onloadend = ({ target: { readyState, result } }) => {
-      if (readyState === FileReader.DONE) {
-        if (!getFileParseActive() || !result) {
-          fileReader.abort();
-          patternReader.abortStream();
-          resolve(null);
-          return;
-        }
-        setFileProgress({
-          featuresProcessed,
-          bytesProcessed: stop || file.size,
-          totalBytes: file.size,
-        });
-        patternReader.writeDataToPatternStream(result);
-        if (!stop) {
-          return;
-        }
-
-        start = stop;
-        const newStop = stop + FILE_BUFFER;
-        // Check EOF
-        stop = newStop > file.size ? undefined : newStop;
-        readSlice(fileReader, file, start, stop);
-      }
-    };
-    fileReader.onerror = () => {
-      fileReader.abort();
-      patternReader.abortStream();
+  const filePromise = new Promise(async (resolve, reject) => {
+    if (!file) {
       reject(
         new Error(
-          i18n.translate('xpack.fileUpload.fileParser.errorReadingFile', {
-            defaultMessage: 'Error reading file',
+          i18n.translate('xpack.fileUpload.fileParser.noFileProvided', {
+            defaultMessage: 'Error, no file provided',
           })
         )
       );
-    };
+    }
+
+    let batches;
+    try {
+      batches = await loadInBatches(file, JSONLoader, {
+        json: {
+          jsonpaths: ['$.features'],
+          _rootObjectBatches: true,
+        },
+      });
+    } catch (e) {
+      console.log(e);
+    }
+
+    let featuresProcessed = 0;
+    const features = [];
+    const errors = [];
+    let boolCleaningErrs = false;
+    let boolGeometryErrs = false;
+    let parsedGeojson;
+    for await (const batch of batches) {
+      if (getFileParseActive()) {
+        switch (batch.batchType) {
+          case 'root-object-batch-complete':
+            if (featuresProcessed) {
+              parsedGeojson = { ...batch.container, features };
+            } else {
+              featuresProcessed++;
+              parsedGeojson = cleanAndValidate(batch.container);
+            }
+            break;
+          default:
+            for (const feature of batch.data) {
+              // Only add these errors once
+              // TODO: Give feedback on which features failed
+              let cleanFeature;
+              try {
+                cleanFeature = cleanAndValidate(feature);
+                if (cleanFeature) {
+                  features.push(cleanFeature);
+                }
+              } catch (e) {
+                if (!boolCleaningErrs) {
+                  boolCleaningErrs = true;
+                  errors.push(
+                    new Error(
+                      i18n.translate('xpack.fileUpload.fileParser.cleaningErrors', {
+                        defaultMessage: 'Some features with cleaning errors omitted',
+                      })
+                    )
+                  );
+                }
+              }
+              if ((!feature.geometry || !feature.geometry.type) && !boolGeometryErrs) {
+                boolGeometryErrs = true;
+                errors.push(
+                  new Error(
+                    i18n.translate('xpack.fileUpload.fileParser.featuresOmitted', {
+                      defaultMessage: 'Some features without geometry omitted',
+                    })
+                  )
+                );
+              }
+              featuresProcessed++;
+            }
+        }
+        setFileProgress({
+          featuresProcessed,
+          bytesProcessed: batch.bytesUsed,
+          totalBytes: file.size,
+        });
+      }
+    }
+
+    if (!featuresProcessed) {
+      reject(
+        new Error(
+          i18n.translate('xpack.fileUpload.fileParser.noFeaturesDetected', {
+            defaultMessage: 'Error, no features detected',
+          })
+        )
+      );
+    } else {
+      resolve({
+        errors,
+        parsedGeojson,
+      });
+    }
   });
-  readSlice(fileReader, file, start, stop);
+
   return filePromise;
 };
 

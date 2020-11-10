@@ -136,6 +136,8 @@
     "@kbn/ui-framework": "link:packages/kbn-ui-framework",
     "@kbn/ui-shared-deps": "link:packages/kbn-ui-shared-deps",
     "@kbn/utils": "link:packages/kbn-utils",
+    "@loaders.gl/core": "^2.3.1",
+    "@loaders.gl/json": "^2.3.1",
     "@slack/webhook": "^5.0.0",
     "@storybook/addons": "^6.0.16",
     "@turf/circle": "6.0.1",

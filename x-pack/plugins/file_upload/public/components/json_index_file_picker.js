@@ -10,7 +10,6 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 import { parseFile } from '../util/file_parser';
 import { MAX_FILE_SIZE } from '../../common/constants/file_import';
-import _ from 'lodash';
 
 const ACCEPTABLE_FILETYPES = ['json', 'geojson'];
 const acceptedFileTypeString = ACCEPTABLE_FILETYPES.map((type) => `.${type}`).join(',');
@@ -136,12 +135,12 @@ export class JsonIndexFilePicker extends Component {
 
   // It's necessary to throttle progress. Updates that are too frequent cause
   // issues (update failure) in the nested progress component
-  setFileProgress = _.debounce(({ featuresProcessed, bytesProcessed, totalBytes }) => {
+  setFileProgress = ({ featuresProcessed, bytesProcessed, totalBytes }) => {
     const percentageProcessed = parseInt((100 * bytesProcessed) / totalBytes);
     if (this.getFileParseActive()) {
       this.setState({ featuresProcessed, percentageProcessed });
     }
-  }, 150);
+  };
 
   async _parseFile(file) {
     const { currentFileTracker } = this.state;
