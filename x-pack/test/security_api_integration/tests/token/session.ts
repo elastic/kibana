@@ -4,15 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import request from 'request';
+import request, { Cookie } from 'request';
 import expect from '@kbn/expect';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-const delay = (ms) => new Promise((resolve) => setTimeout(() => resolve(), ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(() => resolve(), ms));
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
 
-  function extractSessionCookie(response) {
+  function extractSessionCookie(response: { headers: Record<string, string[]> }) {
     const cookie = (response.headers['set-cookie'] || []).find((header) =>
       header.startsWith('sid=')
     );
@@ -68,7 +69,7 @@ export default function ({ getService }) {
     });
 
     describe('API access with expired access token.', function () {
-      const expectNewSessionCookie = (originalCookie, newCookie) => {
+      const expectNewSessionCookie = (originalCookie: Cookie, newCookie: Cookie) => {
         if (!newCookie) {
           throw new Error('No session cookie set after token refresh');
         }
@@ -97,7 +98,7 @@ export default function ({ getService }) {
           .set('cookie', originalCookie.cookieString())
           .expect(200);
 
-        const firstNewCookie = extractSessionCookie(firstResponse);
+        const firstNewCookie = extractSessionCookie(firstResponse)!;
         expectNewSessionCookie(originalCookie, firstNewCookie);
 
         // Request with old cookie should return another valid cookie we can use to authenticate requests
@@ -108,7 +109,7 @@ export default function ({ getService }) {
           .set('Cookie', originalCookie.cookieString())
           .expect(200);
 
-        const secondNewCookie = extractSessionCookie(secondResponse);
+        const secondNewCookie = extractSessionCookie(secondResponse)!;
         expectNewSessionCookie(originalCookie, secondNewCookie);
 
         if (secondNewCookie.value === firstNewCookie.value) {
@@ -132,7 +133,7 @@ export default function ({ getService }) {
     });
 
     describe('API access with missing access token document.', () => {
-      let sessionCookie;
+      let sessionCookie: Cookie;
       beforeEach(async () => (sessionCookie = await createSessionCookie()));
 
       it('should clear cookie and redirect to login', async function () {
@@ -155,7 +156,7 @@ export default function ({ getService }) {
         const cookies = response.headers['set-cookie'];
         expect(cookies).to.have.length(1);
 
-        const cookie = request.cookie(cookies[0]);
+        const cookie = request.cookie(cookies[0])!;
         expect(cookie.key).to.be('sid');
         expect(cookie.value).to.be.empty();
         expect(cookie.path).to.be('/');
