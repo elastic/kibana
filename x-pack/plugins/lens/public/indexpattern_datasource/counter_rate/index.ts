@@ -61,13 +61,13 @@ export const counterRate: ExpressionFunctionCounterRate = {
 
   inputTypes: ['datatable'],
 
-  help: i18n.translate('expressions.functions.counterRate.help', {
+  help: i18n.translate('xpack.lens.functions.counterRate.help', {
     defaultMessage: 'Calculates the counter rate of a column in a data table',
   }),
 
   args: {
     by: {
-      help: i18n.translate('expressions.functions.counterRate.args.byHelpText', {
+      help: i18n.translate('xpack.lens.functions.counterRate.args.byHelpText', {
         defaultMessage: 'Column to split the counter rate calculation by',
       }),
       multi: true,
@@ -75,21 +75,21 @@ export const counterRate: ExpressionFunctionCounterRate = {
       required: false,
     },
     inputColumnId: {
-      help: i18n.translate('expressions.functions.counterRate.args.inputColumnIdHelpText', {
+      help: i18n.translate('xpack.lens.functions.counterRate.args.inputColumnIdHelpText', {
         defaultMessage: 'Column to calculate the counter rate of',
       }),
       types: ['string'],
       required: true,
     },
     outputColumnId: {
-      help: i18n.translate('expressions.functions.counterRate.args.outputColumnIdHelpText', {
+      help: i18n.translate('xpack.lens.functions.counterRate.args.outputColumnIdHelpText', {
         defaultMessage: 'Column to store the resulting counter rate in',
       }),
       types: ['string'],
       required: true,
     },
     outputColumnName: {
-      help: i18n.translate('expressions.functions.counterRate.args.outputColumnNameHelpText', {
+      help: i18n.translate('xpack.lens.functions.counterRate.args.outputColumnNameHelpText', {
         defaultMessage: 'Name of the column to store the resulting counter rate in',
       }),
       types: ['string'],
