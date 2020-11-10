@@ -641,7 +641,7 @@ export const EndpointList = () => {
               values={{ totalItemCount }}
             />
           </EuiText>
-          {totalItemCount > MAX_PAGINATED_ITEM && (
+          {totalItemCount > MAX_PAGINATED_ITEM && (pageIndex + 1) * pageSize >= MAX_PAGINATED_ITEM && (
             <EuiCallOut size="s" color="warning">
               <FormattedMessage
                 id="xpack.securitySolution.endpoint.list.maxItem"
