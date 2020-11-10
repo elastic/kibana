@@ -125,7 +125,7 @@ export function PieToolbar(props: VisualizationToolbarProps<PieVisualizationStat
         title={i18n.translate('xpack.lens.pieChart.valuesLabel', {
           defaultMessage: 'Labels',
         })}
-        type="values"
+        type="labels"
         groupPosition="left"
         buttonDataTestSubj="lnsLabelsButton"
       >
