@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface IAccount {
+export interface Account {
   id: string;
   groups: string[];
   isAdmin: boolean;
@@ -14,14 +14,14 @@ export interface IAccount {
   viewedOnboardingPage: boolean;
 }
 
-export interface IOrganization {
+export interface Organization {
   name: string;
   defaultOrgName: string;
 }
 
-export interface IWorkplaceSearchInitialData {
-  organization: IOrganization;
-  account: IAccount;
+export interface WorkplaceSearchInitialData {
+  organization: Organization;
+  account: Account;
 }
 
 export interface ConfiguredLimits {

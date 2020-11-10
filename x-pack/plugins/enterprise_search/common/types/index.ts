@@ -9,7 +9,7 @@ import {
   ConfiguredLimits as AppSearchConfiguredLimits,
 } from './app_search';
 import {
-  IWorkplaceSearchInitialData,
+  WorkplaceSearchInitialData,
   ConfiguredLimits as WorkplaceSearchConfiguredLimits,
 } from './workplace_search';
 
@@ -23,7 +23,7 @@ export interface InitialAppData {
     hasWorkplaceSearchAccess: boolean;
   };
   appSearch?: AppSearchAccount;
-  workplaceSearch?: IWorkplaceSearchInitialData;
+  workplaceSearch?: WorkplaceSearchInitialData;
 }
 
 export interface ConfiguredLimits {
