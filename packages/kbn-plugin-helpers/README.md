@@ -4,13 +4,20 @@ Just some helpers for kibana plugin devs.
 
 ## Installation
 
-To install the plugin helpers use `yarn` to link to the package from the Kibana project:
+To install the plugin helpers just create the needed npm scripts on your plugin's `package.json` (as exemplified below) which 
+is already the case if you use the new `node scripts/generate_plugin` script.
 
-```sh
-yarn add --dev link:../../kibana/packages/kbn-plugin-helpers
+```json
+{
+  "scripts" : {
+    "build": "yarn plugin-helpers build",
+    "plugin-helpers": "node ../../scripts/plugin_helpers",
+    "kbn": "node ../../scripts/kbn"
+  }
+}
 ```
 
-This will link the package from the repository into your plugin, but the `plugin-helpers` executable won't be available in your project until you run bootstrap again.
+This will make it possible to use the package from the repository into your plugin, but the `plugin-helpers` executable won't be available until you make sure you have run bootstrap at least once.
 
 ```sh
 yarn kbn bootstrap
@@ -18,24 +25,38 @@ yarn kbn bootstrap
 
 ## Usage
 
-This simple CLI has several tasks that plugin devs can run from to easily debug, test, or package kibana plugins.
+This simple CLI has a build task that plugin devs can run from to easily package Kibana plugins.
+
+Previously you could also use that tool to start and test your plugin. Currently you can run 
+your plugin along with Kibana running `yarn start` in the Kibana repository root folder. Finally to test 
+your plugin you should now configure and use your own tools.
 
 ```sh
 $ plugin-helpers help
 
-  Usage: plugin-helpers [options] [command]
+  Usage: plugin-helpers [command] [options]
 
   Commands:
+      build
+        Copies files from the source into a zip archive that can be distributed for
+        installation into production Kibana installs. The archive includes the non-
+        development npm dependencies and builds itself using raw files in the source
+        directory so make sure they are clean/up to date. The resulting archive can
+        be found at:
+  
+          build/{plugin.id}-{kibanaVersion}.zip
+  
+        Options:
+          --skip-archive        Don't create the zip file, just create the build/kibana directory
+          --kibana-version, -v  Kibana version that the
+    
 
-    start                       Start kibana and have it include this plugin
-    build [options] [files...]  Build a distributable archive
-    test                        Run the server and browser tests
-    test:mocha [files...]      Run the server tests using mocha
-
-  Options:
-
-    -h, --help     output usage information
-    -V, --version  output the version number
+  Global options:
+      --verbose, -v      Log verbosely
+      --debug            Log debug messages (less than verbose)
+      --quiet            Only log errors
+      --silent           Don't log anything
+      --help             Show this message
 
 ```
 
@@ -55,21 +76,13 @@ All configuration setting listed below can simply can be included in the json co
 
 ## Global settings
 
-### Settings for `start`
-
-Setting | Description
-------- | -----------
-`includePlugins` | Intended to be used in a config file, an array of additional plugin paths to include, absolute or relative to the plugin root
-`*` | Any options/flags included will be passed unmodified to the Kibana binary
-
 ### Settings for `build`
 
 Setting | Description
 ------- | -----------
+`serverSourcePatterns` | Defines the files that are built with babel and written to your distributable for your server plugin. It is ignored if `kibana.json` has none `server: true` setting defined.
 `skipArchive` | Don't create the zip file, leave the build path alone
-`buildDestination` | Target path for the build output, absolute or relative to the plugin root
 `skipInstallDependencies` | Don't install dependencies defined in package.json into build output
-`buildVersion` | Version for the build output
 `kibanaVersion` | Kibana version for the build output (added to package.json)
 
 ## TypeScript support
