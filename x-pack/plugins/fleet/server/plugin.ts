@@ -60,7 +60,6 @@ import {
   AgentService,
   packagePolicyService,
   PackageService,
-  agentPolicyService,
 } from './services';
 import {
   getAgentStatusById,
@@ -72,7 +71,6 @@ import { CloudSetup } from '../../cloud/server';
 import { agentCheckinState } from './services/agents/checkin/state';
 import { registerIngestManagerUsageCollector } from './collectors/register';
 import { getInstallation } from './services/epm/packages';
-import { AgentPolicyServiceInterface } from './services/agent_policy';
 
 export interface IngestManagerSetupDeps {
   licensing: LicensingPluginSetup;
@@ -132,7 +130,6 @@ export interface IngestManagerStartContract {
   esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
-  agentPolicyService: AgentPolicyServiceInterface;
   /**
    * Services for Ingest's package policies
    */
@@ -305,7 +302,6 @@ export class IngestManagerPlugin
       registerExternalCallback: (...args: ExternalCallback) => {
         return appContextService.addExternalCallback(...args);
       },
-      agentPolicyService,
     };
   }
 

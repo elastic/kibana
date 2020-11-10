@@ -14,7 +14,6 @@ import {
 
 export { default as apm } from 'elastic-apm-node';
 export { AgentService, ESIndexPatternService, getRegistryUrl, PackageService } from './services';
-export { AgentPolicyServiceInterface } from './services/agent_policy';
 export {
   IngestManagerSetupContract,
   IngestManagerSetupDeps,

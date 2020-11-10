@@ -569,8 +569,4 @@ class AgentPolicyService {
     return fullAgentPolicy;
   }
 }
-export type AgentPolicyServiceInterface = Omit<
-  AgentPolicyService,
-  'triggerAgentPolicyUpdatedEvent' | '_update'
->;
 export const agentPolicyService = new AgentPolicyService();

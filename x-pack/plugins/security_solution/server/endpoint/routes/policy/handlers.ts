@@ -45,7 +45,7 @@ export const getAgentPolicySummaryHandler = function (
         endpointAppContext,
         context.core.savedObjects.client,
         request.query.package_name,
-        request.query?.policy_name || undefined
+        request.query?.policy_id || undefined
       );
       const responseBody = {
         package: request.query.package_name,
@@ -53,8 +53,8 @@ export const getAgentPolicySummaryHandler = function (
       };
 
       const body: GetAgentSummaryResponse = {
-        summary_response: request.query?.policy_name
-          ? { ...responseBody, ...{ policy_name: request.query?.policy_name } }
+        summary_response: request.query?.policy_id
+          ? { ...responseBody, ...{ policy_id: request.query?.policy_id } }
           : responseBody,
       };
 

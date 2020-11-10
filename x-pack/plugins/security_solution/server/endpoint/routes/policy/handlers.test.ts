@@ -5,7 +5,6 @@
  */
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import {
-  createMockAgentPolicyService,
   createMockAgentService,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
@@ -26,9 +25,8 @@ import { SearchResponse } from 'elasticsearch';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
-import { Agent, AgentPolicy } from '../../../../../ingest_manager/common/types/models';
-import { AgentService } from '../../../../../ingest_manager/server/services';
-import { AgentPolicyServiceInterface } from '../../../../../ingest_manager/server';
+import { Agent } from '../../../../../fleet/common/types/models';
+import { AgentService } from '../../../../../fleet/server/services';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -100,7 +98,6 @@ describe('test policy response handler', () => {
 
   describe('test agent policy summary handler', () => {
     let mockAgentService: jest.Mocked<AgentService>;
-    let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
 
     const agentListResult = {
       agents: [
@@ -144,34 +141,15 @@ describe('test policy response handler', () => {
       perPage: 1,
     };
 
-    const agentPolicyListResult = {
-      items: [
-        ({
-          id: 'policy-1',
-        } as unknown) as AgentPolicy,
-      ],
-      total: 1,
-      page: 1,
-      perPage: 1,
-    };
-
-    const emptyAgentPolicyListResult = {
-      items: [],
-      total: 2,
-      page: 1,
-      perPage: 1,
-    };
-
     beforeEach(() => {
       mockScopedClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
       mockSavedObjectClient = savedObjectsClientMock.create();
-      mockAgentPolicyService = createMockAgentPolicyService();
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
       mockAgentService = createMockAgentService();
       endpointAppContextService.start({
         ...createMockEndpointAppContextServiceStartContract(),
-        ...{ agentPolicyService: mockAgentPolicyService, agentService: mockAgentService },
+        ...{ agentService: mockAgentService },
       });
     });
 
@@ -182,10 +160,6 @@ describe('test policy response handler', () => {
         .mockImplementationOnce(() => Promise.resolve(agentListResult))
         .mockImplementationOnce(() => Promise.resolve(emptyAgentListResult));
 
-      mockAgentPolicyService.list
-        .mockImplementationOnce(() => Promise.resolve(agentPolicyListResult))
-        .mockImplementationOnce(() => Promise.resolve(emptyAgentPolicyListResult));
-
       const policySummarysHandler = getAgentPolicySummaryHandler({
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
@@ -193,7 +167,7 @@ describe('test policy response handler', () => {
       });
 
       const mockRequest = httpServerMock.createKibanaRequest({
-        query: { policy_name: 'my-policy', package_name: 'endpoint' },
+        query: { policy_id: 'my-policy', package_name: 'endpoint' },
       });
 
       await policySummarysHandler(
@@ -204,45 +178,11 @@ describe('test policy response handler', () => {
       expect(mockResponse.ok).toBeCalled();
       expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
         summary_response: {
-          policy_name: 'my-policy',
+          policy_id: 'my-policy',
           package: 'endpoint',
           versions_count: { '8.0.0': 2, '8.1.0': 1 },
         },
       });
-      expect(mockAgentService.listAgents.mock.calls[0][1]?.kuery).toEqual(
-        'fleet-agents.packages:"endpoint" AND (fleet-agents.policy_id:policy-1)'
-      );
-    });
-
-    it('should return the empty agent summary when there is no policy for selected policy name', async () => {
-      mockAgentPolicyService.list.mockImplementationOnce(() =>
-        Promise.resolve(emptyAgentPolicyListResult)
-      );
-
-      const policySummaryHandler = getAgentPolicySummaryHandler({
-        logFactory: loggingSystemMock.create(),
-        service: endpointAppContextService,
-        config: () => Promise.resolve(createMockConfig()),
-      });
-
-      const mockRequest = httpServerMock.createKibanaRequest({
-        query: { policy_name: 'bad-policy', package_name: 'endpoint' },
-      });
-
-      await policySummaryHandler(
-        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
-        mockRequest,
-        mockResponse
-      );
-      expect(mockResponse.ok).toBeCalled();
-      expect(mockResponse.ok.mock.calls[0][0]?.body).toEqual({
-        summary_response: {
-          policy_name: 'bad-policy',
-          package: 'endpoint',
-          versions_count: {},
-        },
-      });
-      expect(mockAgentService.listAgents).toBeCalledTimes(0);
     });
 
     it('should return the agent summary', async () => {

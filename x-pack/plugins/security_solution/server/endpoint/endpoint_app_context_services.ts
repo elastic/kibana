@@ -68,7 +68,7 @@ export const createMetadataService = (packageService: PackageService): MetadataS
 };
 
 export type EndpointAppContextServiceStartContract = Partial<
-  Pick<IngestManagerStartContract, 'agentService' | 'packageService' | 'agentPolicyService'>
+  Pick<IngestManagerStartContract, 'agentService' | 'packageService'>
 > & {
   logger: Logger;
   manifestManager?: ManifestManager;
@@ -89,13 +89,11 @@ export class EndpointAppContextService {
   private manifestManager: ManifestManager | undefined;
   private savedObjectsStart: SavedObjectsServiceStart | undefined;
   private metadataService: MetadataService | undefined;
-  private agentPolicyService: AgentPolicyServiceInterface | undefined;
 
   public start(dependencies: EndpointAppContextServiceStartContract) {
     this.agentService = dependencies.agentService;
     this.manifestManager = dependencies.manifestManager;
     this.savedObjectsStart = dependencies.savedObjectsStart;
-    this.agentPolicyService = dependencies.agentPolicyService;
     this.metadataService = createMetadataService(dependencies.packageService!);
 
     if (this.manifestManager && dependencies.registerIngestCallback) {
@@ -114,10 +112,6 @@ export class EndpointAppContextService {
   }
 
   public stop() {}
-
-  public getAgentPolicyService(): AgentPolicyServiceInterface | undefined {
-    return this.agentPolicyService;
-  }
 
   public getAgentService(): AgentService | undefined {
     return this.agentService;
