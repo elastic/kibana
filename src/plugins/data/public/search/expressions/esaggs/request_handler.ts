@@ -43,6 +43,7 @@ import { buildTabularInspectorData } from './build_tabular_inspector_data';
 
 interface RequestHandlerParams {
   abortSignal?: AbortSignal;
+  addFilters?: FilterManager['addFilters'];
   aggs: IAggConfigs;
   deserializeFieldFormat: FormatFactory;
   filters?: Filter[];
@@ -51,7 +52,6 @@ interface RequestHandlerParams {
   metricsAtAllLevels?: boolean;
   partialRows?: boolean;
   query?: Query;
-  queryFilter?: Pick<FilterManager, 'addFilters'>;
   searchSessionId?: string;
   searchSource: ISearchSource;
   timeFields?: string[];
@@ -60,6 +60,7 @@ interface RequestHandlerParams {
 
 export const handleRequest = async ({
   abortSignal,
+  addFilters,
   aggs,
   deserializeFieldFormat,
   filters,
@@ -68,7 +69,6 @@ export const handleRequest = async ({
   metricsAtAllLevels,
   partialRows,
   query,
-  queryFilter,
   searchSessionId,
   searchSource,
   timeFields,
@@ -124,20 +124,23 @@ export const handleRequest = async ({
   requestSearchSource.setField('filter', filters);
   requestSearchSource.setField('query', query);
 
-  inspectorAdapters.requests.reset();
-  const request = inspectorAdapters.requests.start(
-    i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
-      defaultMessage: 'Data',
-    }),
-    {
-      description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
-        defaultMessage:
-          'This request queries Elasticsearch to fetch the data for the visualization.',
+  let request;
+  if (inspectorAdapters.requests) {
+    inspectorAdapters.requests.reset();
+    request = inspectorAdapters.requests.start(
+      i18n.translate('data.functions.esaggs.inspector.dataRequest.title', {
+        defaultMessage: 'Data',
       }),
-      searchSessionId,
-    }
-  );
-  request.stats(getRequestInspectorStats(requestSearchSource));
+      {
+        description: i18n.translate('data.functions.esaggs.inspector.dataRequest.description', {
+          defaultMessage:
+            'This request queries Elasticsearch to fetch the data for the visualization.',
+        }),
+        searchSessionId,
+      }
+    );
+    request.stats(getRequestInspectorStats(requestSearchSource));
+  }
 
   try {
     const response = await requestSearchSource.fetch({
@@ -145,16 +148,22 @@ export const handleRequest = async ({
       sessionId: searchSessionId,
     });
 
-    request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
+    if (request) {
+      request.stats(getResponseInspectorStats(response, searchSource)).ok({ json: response });
+    }
 
     (searchSource as any).rawResponse = response;
   } catch (e) {
     // Log any error during request to the inspector
-    request.error({ json: e });
+    if (request) {
+      request.error({ json: e });
+    }
     throw e;
   } finally {
     // Add the request body no matter if things went fine or not
-    request.json(await requestSearchSource.getSearchRequestBody());
+    if (request) {
+      request.json(await requestSearchSource.getSearchRequestBody());
+    }
   }
 
   // Note that rawResponse is not deeply cloned here, so downstream applications using courier
@@ -185,14 +194,16 @@ export const handleRequest = async ({
 
   const tabifiedResponse = tabifyAggResponse(aggs, response, tabifyParams);
 
-  inspectorAdapters.data.setTabularLoader(
-    () =>
-      buildTabularInspectorData(tabifiedResponse, {
-        queryFilter,
-        deserializeFieldFormat,
-      }),
-    { returnsFormattedValues: true }
-  );
+  if (inspectorAdapters.data) {
+    inspectorAdapters.data.setTabularLoader(
+      () =>
+        buildTabularInspectorData(tabifiedResponse, {
+          addFilters,
+          deserializeFieldFormat,
+        }),
+      { returnsFormattedValues: true }
+    );
+  }
 
   return tabifiedResponse;
 };

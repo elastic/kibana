@@ -73,7 +73,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
       adapters: nextProps.adapters,
       tabularData: null,
       tabularOptions: {},
-      tabularPromise: nextProps.adapters.data.getTabular(),
+      tabularPromise: nextProps.adapters.data!.getTabular(),
     };
   }
 
@@ -82,7 +82,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
       this.setState({
         tabularData: null,
         tabularOptions: {},
-        tabularPromise: this.props.adapters.data.getTabular(),
+        tabularPromise: this.props.adapters.data!.getTabular(),
       });
     }
   };
@@ -105,13 +105,13 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
 
   componentDidMount() {
     this._isMounted = true;
-    this.props.adapters.data.on('change', this.onUpdateData);
+    this.props.adapters.data!.on('change', this.onUpdateData);
     this.finishLoadingData();
   }
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.props.adapters.data.removeListener('change', this.onUpdateData);
+    this.props.adapters.data!.removeListener('change', this.onUpdateData);
   }
 
   componentDidUpdate() {

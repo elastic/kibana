@@ -90,19 +90,20 @@ export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
     const resolvedTimeRange = input?.timeRange && calculateBounds(input.timeRange);
 
     const response = await handleRequest({
-      searchSource,
+      abortSignal: (abortSignal as unknown) as AbortSignal,
+      addFilters: filterManager.addFilters,
       aggs,
-      indexPattern,
-      timeRange: get(input, 'timeRange', undefined),
-      query: get(input, 'query', undefined) as any,
+      deserializeFieldFormat: getFieldFormats().deserialize,
       filters: get(input, 'filters', undefined),
-      timeFields: args.timeFields,
+      indexPattern,
+      inspectorAdapters: inspectorAdapters as Adapters,
       metricsAtAllLevels: args.metricsAtAllLevels,
       partialRows: args.partialRows,
-      inspectorAdapters: inspectorAdapters as Adapters,
-      filterManager,
-      abortSignal: (abortSignal as unknown) as AbortSignal,
+      query: get(input, 'query', undefined) as any,
       searchSessionId: getSearchSessionId(),
+      searchSource,
+      timeFields: args.timeFields,
+      timeRange: get(input, 'timeRange', undefined),
     });
 
     const table: Datatable = {

@@ -37,11 +37,11 @@ import { createFilter } from '../create_filter';
 export async function buildTabularInspectorData(
   table: TabbedTable,
   {
+    addFilters,
     deserializeFieldFormat,
-    queryFilter,
   }: {
+    addFilters?: FilterManager['addFilters'];
     deserializeFieldFormat: FormatFactory;
-    queryFilter?: Pick<FilterManager, 'addFilters'>;
   }
 ): Promise<TabularData> {
   const aggConfigs = table.columns.map((column) => column.aggConfig);
@@ -71,7 +71,7 @@ export async function buildTabularInspectorData(
       name: col.name,
       field: `col-${colIndex}-${col.aggConfig.id}`,
       filter:
-        queryFilter &&
+        addFilters &&
         isCellContentFilterable &&
         ((value: TabularDataValue) => {
           const rowIndex = rows.findIndex(
@@ -80,11 +80,11 @@ export async function buildTabularInspectorData(
           const filter = createFilter(aggConfigs, table, colIndex, rowIndex, value.raw);
 
           if (filter) {
-            queryFilter.addFilters(filter);
+            addFilters(filter);
           }
         }),
       filterOut:
-        queryFilter &&
+        addFilters &&
         isCellContentFilterable &&
         ((value: TabularDataValue) => {
           const rowIndex = rows.findIndex(
@@ -100,7 +100,7 @@ export async function buildTabularInspectorData(
             } else {
               set(filter, 'meta.negate', notOther && notMissing);
             }
-            queryFilter.addFilters(filter);
+            addFilters(filter);
           }
         }),
     };
