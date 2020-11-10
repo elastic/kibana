@@ -14,6 +14,7 @@ import {
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
   EuiHorizontalRule,
+  EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TagBulkAction } from '../types';
@@ -115,7 +116,8 @@ export const ActionBar: FC<ActionBarProps> = ({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
-      <EuiHorizontalRule margin="xs" />
+      <EuiSpacer size="xs" />
+      <EuiHorizontalRule margin="none" />
     </div>
   );
 };
