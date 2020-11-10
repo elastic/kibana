@@ -10,9 +10,7 @@ import {
   SavedObjectsClientContract,
 } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
-
 import { AgentService, IngestManagerStartContract, PackageService } from '../../../fleet/server';
-
 import { PluginStartContract as AlertsPluginStartContract } from '../../../alerts/server';
 import { getPackagePolicyCreateCallback } from './ingest_integration';
 import { ManifestManager } from './services/artifacts';

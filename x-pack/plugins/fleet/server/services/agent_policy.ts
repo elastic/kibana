@@ -569,4 +569,5 @@ class AgentPolicyService {
     return fullAgentPolicy;
   }
 }
+
 export const agentPolicyService = new AgentPolicyService();

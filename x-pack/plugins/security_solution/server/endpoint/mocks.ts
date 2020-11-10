@@ -16,7 +16,6 @@ import {
   PackageService,
 } from '../../../fleet/server';
 import { createPackagePolicyServiceMock } from '../../../fleet/server/mocks';
-
 import { AppClientFactory } from '../client';
 import { createMockConfig } from '../lib/detection_engine/routes/__mocks__';
 import {
