@@ -18,8 +18,8 @@ export function ApiKeysPageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.getVisibleText('apiKeyAdminDescriptionCallOut');
     },
 
-    async getGoToConsoleButton() {
-      return await testSubjects.find('goToConsoleButton');
+    async getGoToAccountButton() {
+      return await testSubjects.find('goToAccountButton');
     },
 
     async apiKeysPermissionDeniedMessage() {

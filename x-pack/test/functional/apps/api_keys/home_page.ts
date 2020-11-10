@@ -34,8 +34,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const headers = await testSubjects.findAll('noApiKeysHeader');
       if (headers.length > 0) {
         expect(await headers[0].getVisibleText()).to.be('No API keys');
-        const goToConsoleButton = await pageObjects.apiKeys.getGoToConsoleButton();
-        expect(await goToConsoleButton.isDisplayed()).to.be(true);
+        const goToAccountButton = await pageObjects.apiKeys.getGoToAccountButton();
+        expect(await goToAccountButton.isDisplayed()).to.be(true);
       } else {
         // page may already contain EiTable with data, then check API Key Admin text
         const description = await pageObjects.apiKeys.getApiKeyAdminDesc();

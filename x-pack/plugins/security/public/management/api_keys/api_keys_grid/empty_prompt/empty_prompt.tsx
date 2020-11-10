@@ -44,17 +44,7 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({
         <p>
           <FormattedMessage
             id="xpack.security.management.apiKeys.table.emptyPromptDescription"
-            defaultMessage="You can create an {link} from Console."
-            values={{
-              link: (
-                <EuiLink href={`${docLinks.getCreateApiKeyDocUrl()}`} target="_blank">
-                  <FormattedMessage
-                    id="xpack.security.management.apiKeys.table.emptyPromptDocsLinkMessage"
-                    defaultMessage="API key"
-                  />
-                </EuiLink>
-              ),
-            }}
+            defaultMessage="You can create an API key from your account."
           />
         </p>
       </Fragment>
@@ -62,12 +52,12 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({
     actions={
       <EuiButton
         type="primary"
-        onClick={() => navigateToApp('dev_tools')}
-        data-test-subj="goToConsoleButton"
+        onClick={() => navigateToApp('security_account', { path: 'api-keys' })}
+        data-test-subj="goToAccountButton"
       >
         <FormattedMessage
           id="xpack.security.management.apiKeys.table.emptyPromptConsoleButtonMessage"
-          defaultMessage="Go to Console"
+          defaultMessage="Go to your account"
         />
       </EuiButton>
     }
