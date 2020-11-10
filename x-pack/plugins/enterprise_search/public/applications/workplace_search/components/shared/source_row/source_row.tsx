@@ -25,7 +25,7 @@ import {
 
 import { EuiLink } from '../../../../shared/react_router_helpers';
 import { SOURCE_STATUSES as statuses } from '../../../constants';
-import { IContentSourceDetails } from '../../../types';
+import { ContentSourceDetails } from '../../../types';
 import { ADD_SOURCE_PATH, SOURCE_DETAILS_PATH, getContentSourcePath } from '../../../routes';
 
 import { SourceIcon } from '../source_icon';
@@ -41,7 +41,7 @@ export interface ISourceRow {
 }
 
 interface SourceRowProps extends ISourceRow {
-  source: IContentSourceDetails;
+  source: ContentSourceDetails;
 }
 
 export const SourceRow: React.FC<SourceRowProps> = ({

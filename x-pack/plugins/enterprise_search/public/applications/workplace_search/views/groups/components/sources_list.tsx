@@ -8,12 +8,12 @@ import React from 'react';
 
 import { EuiFilterSelectItem } from '@elastic/eui';
 
-import { IContentSource } from '../../../types';
+import { ContentSource } from '../../../types';
 
 import { SourceOptionItem } from './source_option_item';
 
 interface SourcesListProps {
-  contentSources: IContentSource[];
+  contentSources: ContentSource[];
   filteredSources: string[];
   addFilteredSource(sourceId: string): void;
   removeFilteredSource(sourceId: string): void;

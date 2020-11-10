@@ -9,12 +9,12 @@ import React, { useState } from 'react';
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { MAX_TABLE_ROW_ICONS } from '../../../constants';
 
-import { IContentSource } from '../../../types';
+import { ContentSource } from '../../../types';
 
 import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
 
 interface GroupSourcesProps {
-  groupSources: IContentSource[];
+  groupSources: ContentSource[];
 }
 
 export const GroupSources: React.FC<GroupSourcesProps> = ({ groupSources }) => {

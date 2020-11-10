@@ -15,7 +15,7 @@ import {
   setSuccessMessage,
 } from '../../../shared/flash_messages';
 
-import { IContentSource, IGroup, IUser } from '../../types';
+import { ContentSource, Group, User } from '../../types';
 
 import { JSON_HEADER as headers } from '../../../../../common/constants';
 import { DEFAULT_META } from '../../../shared/constants';
@@ -24,12 +24,12 @@ import { Meta } from '../../../../../common/types';
 export const MAX_NAME_LENGTH = 40;
 
 interface GroupsServerData {
-  contentSources: IContentSource[];
-  users: IUser[];
+  contentSources: ContentSource[];
+  users: User[];
 }
 
 interface GroupsSearchResponse {
-  results: IGroup[];
+  results: Group[];
   meta: Meta;
 }
 
@@ -40,12 +40,12 @@ interface GroupsActions {
   removeFilteredSource(sourceId: string): string;
   addFilteredUser(userId: string): string;
   removeFilteredUser(userId: string): string;
-  setGroupUsers(allGroupUsers: IUser[]): IUser[];
+  setGroupUsers(allGroupUsers: User[]): User[];
   setAllGroupLoading(allGroupUsersLoading: boolean): boolean;
   setFilterValue(filterValue: string): string;
   setActivePage(activePage: number): number;
   setNewGroupName(newGroupName: string): string;
-  setNewGroup(newGroup: IGroup): IGroup;
+  setNewGroup(newGroup: Group): Group;
   setNewGroupFormErrors(errors: string[]): string[];
   openNewGroupModal(): void;
   closeNewGroupModal(): void;
@@ -63,21 +63,21 @@ interface GroupsActions {
 }
 
 interface GroupsValues {
-  groups: IGroup[];
-  contentSources: IContentSource[];
-  users: IUser[];
+  groups: Group[];
+  contentSources: ContentSource[];
+  users: User[];
   groupsDataLoading: boolean;
   groupListLoading: boolean;
   newGroupModalOpen: boolean;
   newGroupName: string;
-  newGroup: IGroup | null;
+  newGroup: Group | null;
   newGroupNameErrors: string[];
   filterSourcesDropdownOpen: boolean;
   filteredSources: string[];
   filterUsersDropdownOpen: boolean;
   filteredUsers: string[];
   allGroupUsersLoading: boolean;
-  allGroupUsers: IUser[];
+  allGroupUsers: User[];
   filterValue: string;
   groupsMeta: Meta;
   hasFiltersSet: boolean;
@@ -86,19 +86,19 @@ interface GroupsValues {
 export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
   path: ['enterprise_search', 'workplace_search', 'groups'],
   actions: {
-    onInitializeGroups: (data: IGroupsServerData) => data,
-    setSearchResults: (data: IGroupsSearchResponse) => data,
-    addFilteredSource: (sourceId: string) => sourceId,
-    removeFilteredSource: (sourceId: string) => sourceId,
-    addFilteredUser: (userId: string) => userId,
-    removeFilteredUser: (userId: string) => userId,
-    setGroupUsers: (allGroupUsers: IUser[]) => allGroupUsers,
+    onInitializeGroups: (data) => data,
+    setSearchResults: (data) => data,
+    addFilteredSource: (sourceId) => sourceId,
+    removeFilteredSource: (sourceId) => sourceId,
+    addFilteredUser: (userId) => userId,
+    removeFilteredUser: (userId) => userId,
+    setGroupUsers: (allGroupUsers) => allGroupUsers,
     setAllGroupLoading: (allGroupUsersLoading: boolean) => allGroupUsersLoading,
-    setFilterValue: (filterValue: string) => filterValue,
-    setActivePage: (activePage: number) => activePage,
-    setNewGroupName: (newGroupName: string) => newGroupName,
-    setNewGroup: (newGroup: IGroup) => newGroup,
-    setNewGroupFormErrors: (errors: string[]) => errors,
+    setFilterValue: (filterValue) => filterValue,
+    setActivePage: (activePage) => activePage,
+    setNewGroupName: (newGroupName) => newGroupName,
+    setNewGroup: (newGroup) => newGroup,
+    setNewGroupFormErrors: (errors) => errors,
     openNewGroupModal: () => true,
     closeNewGroupModal: () => true,
     closeFilterSourcesDropdown: () => true,
@@ -109,13 +109,13 @@ export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
     resetGroupsFilters: () => true,
     resetGroups: () => true,
     initializeGroups: () => true,
-    getSearchResults: (resetPagination?: boolean) => ({ resetPagination }),
-    fetchGroupUsers: (groupId: string) => ({ groupId }),
+    getSearchResults: (resetPagination) => ({ resetPagination }),
+    fetchGroupUsers: (groupId) => ({ groupId }),
     saveNewGroup: () => true,
   },
   reducers: {
     groups: [
-      [] as IGroup[],
+      [] as Group[],
       {
         setSearchResults: (_, { results }) => results,
       },

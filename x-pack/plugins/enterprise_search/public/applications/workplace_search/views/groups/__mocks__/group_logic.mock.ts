@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IGroupDetails, ISourcePriority } from '../../../types';
+import { GroupDetails, ISourcePriority } from '../../../types';
 
 export const mockGroupValues = {
-  group: {} as IGroupDetails,
+  group: {} as GroupDetails,
   dataLoading: true,
   manageUsersModalVisible: false,
   managerModalFormErrors: [],
