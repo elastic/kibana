@@ -14,7 +14,7 @@ import { getAppSearchUrl } from '../../../../shared/enterprise_search_url';
 import { SetAppSearchChrome as SetPageChrome } from '../../../../shared/kibana_chrome';
 import { CREATE_ENGINES_PATH } from '../../../routes';
 
-import { EngineOverviewHeader } from './header';
+import { EnginesOverviewHeader } from './header';
 
 import './empty_state.scss';
 
@@ -34,7 +34,7 @@ export const EmptyState: React.FC = () => {
   return (
     <>
       <SetPageChrome />
-      <EngineOverviewHeader />
+      <EnginesOverviewHeader />
       <EuiPageContent className="emptyState">
         <EuiEmptyPrompt
           className="emptyState__prompt"
