@@ -10,11 +10,13 @@ import { BucketNestingEditor } from './bucket_nesting_editor';
 import { IndexPatternColumn } from '../indexpattern';
 import { IndexPatternField } from '../types';
 
-const fieldMap = {
+const fieldMap: Record<string, IndexPatternField> = {
   a: { displayName: 'a' } as IndexPatternField,
   b: { displayName: 'b' } as IndexPatternField,
   c: { displayName: 'c' } as IndexPatternField,
 };
+
+const getFieldByName = (name: string): IndexPatternField | undefined => fieldMap[name];
 
 describe('BucketNestingEditor', () => {
   function mockCol(col: Partial<IndexPatternColumn> = {}): IndexPatternColumn {
@@ -39,7 +41,7 @@ describe('BucketNestingEditor', () => {
   it('should display the top level grouping when at the root', () => {
     const component = mount(
       <BucketNestingEditor
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         columnId="a"
         layer={{
           columnOrder: ['a', 'b', 'c'],
@@ -61,7 +63,7 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['b', 'a', 'c'],
           columns: {
@@ -83,7 +85,7 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['b', 'a', 'c'],
           columns: {
@@ -128,7 +130,7 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['a', 'b', 'c'],
           columns: {
@@ -149,7 +151,7 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['a', 'b', 'c'],
           columns: {
@@ -170,7 +172,7 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
@@ -194,7 +196,7 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
@@ -221,7 +223,7 @@ describe('BucketNestingEditor', () => {
     const component = mount(
       <BucketNestingEditor
         columnId="a"
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         layer={{
           columnOrder: ['c', 'a', 'b'],
           columns: {
@@ -247,7 +249,7 @@ describe('BucketNestingEditor', () => {
     const setColumns = jest.fn();
     const component = mount(
       <BucketNestingEditor
-        fieldMap={fieldMap}
+        getFieldByName={getFieldByName}
         columnId="b"
         layer={{
           columnOrder: ['c', 'a', 'b'],
