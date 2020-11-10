@@ -60,14 +60,20 @@ export const seriesStyle = {
 
 export const grayscalePalette = {
   type: 'palette',
-  colors: ['#FFFFFF', '#888888', '#000000'],
-  gradient: false,
+  name: 'custom',
+  params: {
+    colors: ['#FFFFFF', '#888888', '#000000'],
+    gradient: false,
+  },
 };
 
 export const gradientPalette = {
   type: 'palette',
-  colors: ['#FFFFFF', '#000000'],
-  gradient: true,
+  name: 'custom',
+  params: {
+    colors: ['#FFFFFF', '#000000'],
+    gradient: true,
+  },
 };
 
 export const xAxisConfig = {

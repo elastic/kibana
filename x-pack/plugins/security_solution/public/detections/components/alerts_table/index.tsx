@@ -46,6 +46,7 @@ import {
 } from '../../../common/components/toasters';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useSourcererScope } from '../../../common/containers/sourcerer';
+import { buildTimeRangeFilter } from './helpers';
 
 interface OwnProps {
   timelineId: TimelineIdLiteral;
@@ -105,13 +106,14 @@ export const AlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
           dataProviders: [],
           indexPattern: indexPatterns,
           browserFields,
-          filters: isEmpty(defaultFilters)
-            ? [...globalFilters, ...customFilters]
-            : [...(defaultFilters ?? []), ...globalFilters, ...customFilters],
+          filters: [
+            ...(defaultFilters ?? []),
+            ...globalFilters,
+            ...customFilters,
+            ...buildTimeRangeFilter(from, to),
+          ],
           kqlQuery: globalQuery,
           kqlMode: globalQuery.language,
-          start: from,
-          end: to,
           isEventViewer: true,
         });
       }

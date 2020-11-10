@@ -134,6 +134,8 @@ export {
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
+  mergeCapabilitiesWithFields,
+  getCapabilitiesForRollupIndices,
 } from './index_patterns';
 
 export {
@@ -206,6 +208,12 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
   // search
   ISearchOptions,
   IEsSearchRequest,
@@ -221,6 +229,7 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
+  SearchStrategyDependencies,
   getDefaultSearchParams,
   getShardTimeout,
   shimHitsTotal,

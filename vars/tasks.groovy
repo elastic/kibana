@@ -40,7 +40,14 @@ def test() {
 }
 
 def functionalOss(Map params = [:]) {
-  def config = params ?: [ciGroups: true, firefox: true, accessibility: true, pluginFunctional: true, visualRegression: false]
+  def config = params ?: [
+    serverIntegration: true,
+    ciGroups: true,
+    firefox: true,
+    accessibility: true,
+    pluginFunctional: true,
+    visualRegression: false,
+  ]
 
   task {
     kibanaPipeline.buildOss(6)
@@ -64,6 +71,10 @@ def functionalOss(Map params = [:]) {
 
     if (config.visualRegression) {
       task(kibanaPipeline.functionalTestProcess('oss-visualRegression', './test/scripts/jenkins_visual_regression.sh'))
+    }
+
+    if (config.serverIntegration) {
+      task(kibanaPipeline.scriptTaskDocker('serverIntegration', './test/scripts/server_integration.sh'))
     }
   }
 }

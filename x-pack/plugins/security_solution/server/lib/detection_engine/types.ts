@@ -44,6 +44,8 @@ import {
   ThreatQueryOrUndefined,
   ThreatMappingOrUndefined,
   ThreatLanguageOrUndefined,
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
 } from '../../../common/detection_engine/schemas/types/threat_mapping';
 
 import { LegacyCallAPIOptions } from '../../../../../../src/core/server';
@@ -93,6 +95,8 @@ export interface RuleTypeParams {
   references: References;
   version: Version;
   exceptionsList: ListArrayOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

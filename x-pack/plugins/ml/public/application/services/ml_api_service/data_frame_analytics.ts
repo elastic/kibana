@@ -135,10 +135,4 @@ export const dataFrameAnalytics = {
       method: 'GET',
     });
   },
-  getAnalyticsBaseline(analyticsId: string) {
-    return http<any>({
-      path: `${basePath()}/data_frame/analytics/${analyticsId}/baseline`,
-      method: 'POST',
-    });
-  },
 };

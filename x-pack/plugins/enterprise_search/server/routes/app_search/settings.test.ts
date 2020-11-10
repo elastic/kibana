@@ -14,7 +14,10 @@ describe('log settings routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'get' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/log_settings',
+      });
 
       registerSettingsRoutes({
         ...mockDependencies,
@@ -36,7 +39,11 @@ describe('log settings routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'put', payload: 'body' });
+      mockRouter = new MockRouter({
+        method: 'put',
+        path: '/api/app_search/log_settings',
+        payload: 'body',
+      });
 
       registerSettingsRoutes({
         ...mockDependencies,
@@ -45,6 +52,7 @@ describe('log settings routes', () => {
     });
 
     it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({});
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
         path: '/as/log_settings',
       });

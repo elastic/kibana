@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { PaletteOutput } from 'src/plugins/charts/public';
 import { DataType } from '../types';
 import { suggestions } from './suggestions';
 
@@ -311,7 +312,38 @@ describe('suggestions', () => {
       );
     });
 
-    it('should keep the layer settings when switching from treemap', () => {
+    it('should keep passed in palette', () => {
+      const mainPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+      const results = suggestions({
+        table: {
+          layerId: 'first',
+          isMultiRow: true,
+          columns: [
+            {
+              columnId: 'a',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'b',
+              operation: { label: 'Top 5', dataType: 'string' as DataType, isBucketed: true },
+            },
+            {
+              columnId: 'e',
+              operation: { label: 'Count', dataType: 'number' as DataType, isBucketed: false },
+            },
+          ],
+          changeType: 'initial',
+        },
+        state: undefined,
+        keptLayerIds: ['first'],
+        mainPalette,
+      });
+
+      expect(results[0].state.palette).toEqual(mainPalette);
+    });
+
+    it('should keep the layer settings and palette when switching from treemap', () => {
+      const palette: PaletteOutput = { type: 'palette', name: 'mock' };
       expect(
         suggestions({
           table: {
@@ -331,6 +363,7 @@ describe('suggestions', () => {
           },
           state: {
             shape: 'treemap',
+            palette,
             layers: [
               {
                 layerId: 'first',
@@ -351,6 +384,7 @@ describe('suggestions', () => {
         expect.objectContaining({
           state: {
             shape: 'donut',
+            palette,
             layers: [
               {
                 layerId: 'first',

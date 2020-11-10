@@ -61,6 +61,7 @@ export class AdvancedUiActionsPublicPlugin
         ((state: SerializedEvent) => {
           return { state, references: [] };
         }),
+      migrations: definition.migrations || {},
     });
   };
 

@@ -41,6 +41,7 @@ import {
   registerUiMetricUsageCollector,
   registerCspCollector,
   registerCoreUsageCollector,
+  registerLocalizationUsageCollector,
 } from './collectors';
 
 interface KibanaUsageCollectionPluginsDepsSetup {
@@ -104,5 +105,6 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     );
     registerCspCollector(usageCollection, coreSetup.http);
     registerCoreUsageCollector(usageCollection, getCoreUsageDataService);
+    registerLocalizationUsageCollector(usageCollection, coreSetup.i18n);
   }
 }
