@@ -18,6 +18,7 @@
  */
 
 export * from './types_service';
+export { VisGroups } from './types';
 export type { VisType } from './types';
 export type { BaseVisTypeOptions } from './base_vis_type';
 export type { ReactVisTypeOptions } from './react_vis_type';
