@@ -58,17 +58,15 @@ export function jobSavedObjectServiceFactory(
 
   async function _createJob(jobType: JobType, jobId: string, datafeedId?: string) {
     await isMlReady();
-    try {
-      await _deleteJob(jobType, jobId);
-    } catch (error) {
-      // fail silently
-      // the job object may or may not already exist, we'll overwrite it anyway.
-    }
-    await savedObjectsClient.create<JobObject>(ML_SAVED_OBJECT_TYPE, {
-      job_id: jobId,
-      datafeed_id: datafeedId ?? null,
-      type: jobType,
-    });
+    await savedObjectsClient.create<JobObject>(
+      ML_SAVED_OBJECT_TYPE,
+      {
+        job_id: jobId,
+        datafeed_id: datafeedId ?? null,
+        type: jobType,
+      },
+      { id: jobId, overwrite: true }
+    );
   }
 
   async function _bulkCreateJobs(jobs: JobObject[], namespaces?: string[]) {
@@ -76,6 +74,7 @@ export function jobSavedObjectServiceFactory(
     return await savedObjectsClient.bulkCreate<JobObject>(
       jobs.map((j) => ({
         type: ML_SAVED_OBJECT_TYPE,
+        id: j.job_id,
         attributes: j,
         initialNamespaces: namespaces,
       }))
