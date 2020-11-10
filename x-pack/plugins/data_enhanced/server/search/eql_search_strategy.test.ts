@@ -205,11 +205,7 @@ describe('EQL search strategy', () => {
 
         expect(response).toEqual(
           expect.objectContaining({
-            rawResponse: expect.objectContaining({
-              body: getMockEqlResponse().body,
-              meta: getMockEqlResponse().meta,
-              statusCode: getMockEqlResponse().statusCode,
-            }),
+            rawResponse: expect.objectContaining(getMockEqlResponse()),
           })
         );
       });
