@@ -120,7 +120,7 @@ export const metricsItems = schema.object({
   type: stringRequired,
   value: stringOptionalNullable,
   values: schema.maybe(schema.nullable(schema.arrayOf(schema.nullable(schema.string())))),
-  size: stringOptionalNullable,
+  size: stringOrNumberOptionalNullable,
   agg_with: stringOptionalNullable,
   order: stringOptionalNullable,
   order_by: stringOptionalNullable,
