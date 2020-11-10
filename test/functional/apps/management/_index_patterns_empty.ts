@@ -53,8 +53,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       log.debug(
         `\n\nNOTE: If this test fails make sure there aren't any non-system indices in the _cat/indices output (use esArchiver.unload on them)`
       );
-      // @ts-expect-error
       log.debug(
+        // @ts-expect-error
         await es.transport.request({
           path: '/_cat/indices',
           method: 'GET',
