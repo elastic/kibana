@@ -326,23 +326,6 @@ function createNewLayerWithMetricAggregation(
     field: dateField,
     indexPattern,
   });
-
-  // let layer: IndexPatternLayer = { indexPatternId: indexPattern.id, columns: {}, columnOrder: [] };
-  // layer = insertNewColumn({
-  //   op: 'date_histogram',
-  //   layer,
-  //   columnId: generateId(),
-  //   field: dateField,
-  //   indexPattern,
-  // });
-  // layer = insertNewColumn({
-  //   op: metricOperation.type,
-  //   layer,
-  //   columnId: generateId(),
-  //   field,
-  //   indexPattern,
-  // });
-  // return layer;
 }
 
 export function getDatasourceSuggestionsFromCurrentState(

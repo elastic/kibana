@@ -22,11 +22,9 @@ export interface FormattedIndexPatternColumn extends BaseIndexPatternColumn {
   params?: {
     format: {
       id: string;
-      params?:
-        | {
-            decimals: number;
-          }
-        | undefined;
+      params?: {
+        decimals: number;
+      };
     };
   };
 }

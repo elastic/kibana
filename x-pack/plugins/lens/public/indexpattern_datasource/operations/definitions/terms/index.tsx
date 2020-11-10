@@ -8,7 +8,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { IndexPatternColumn } from '../../../indexpattern';
-// import { updateColumnParam } from '../../../state_helpers';
 import { updateColumnParam } from '../../layer_helpers';
 import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';

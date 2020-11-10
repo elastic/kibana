@@ -281,7 +281,7 @@ describe('state_helpers', () => {
       ).toEqual(expect.objectContaining({ columnOrder: ['col1', 'col2'] }));
     });
 
-    it('should allow two metrics', () => {
+    it('should allow multiple metrics', () => {
       expect(
         insertNewColumn({
           layer: {

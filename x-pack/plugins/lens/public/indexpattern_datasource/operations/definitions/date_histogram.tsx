@@ -136,7 +136,7 @@ export const dateHistogramOperation: OperationDefinition<
       },
     };
   },
-  paramEditor: ({ state, setState, currentColumn, layerId, columnId, dateRange, data }) => {
+  paramEditor: ({ state, setState, currentColumn, layerId, dateRange, data }) => {
     const field =
       currentColumn &&
       state.indexPatterns[state.layers[layerId].indexPatternId].getFieldByName(

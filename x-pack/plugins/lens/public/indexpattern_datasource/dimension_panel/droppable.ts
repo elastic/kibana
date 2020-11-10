@@ -10,7 +10,7 @@ import {
   isDraggedOperation,
 } from '../../types';
 import { IndexPatternColumn } from '../indexpattern';
-import { insertNewColumn, replaceColumn } from '../operations';
+import { insertOrReplaceColumn } from '../operations';
 import { mergeLayer } from '../state_helpers';
 import { hasField, isDraggedField } from '../utils';
 import { IndexPatternPrivateState, IndexPatternField } from '../types';
@@ -145,23 +145,15 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
       selectedColumn.operationType
     );
 
-  const newLayer = selectedColumn
-    ? replaceColumn({
-        layer,
-        columnId,
-        indexPattern: currentIndexPattern,
-        op: fieldIsCompatibleWithCurrent
-          ? selectedColumn.operationType
-          : operationsForNewField.values().next().value,
-        field: droppedItem.field,
-      })
-    : insertNewColumn({
-        layer,
-        columnId,
-        indexPattern: currentIndexPattern,
-        op: operationsForNewField.values().next().value,
-        field: droppedItem.field,
-      });
+  const newLayer = insertOrReplaceColumn({
+    layer,
+    columnId,
+    indexPattern: currentIndexPattern,
+    op: fieldIsCompatibleWithCurrent
+      ? selectedColumn.operationType
+      : operationsForNewField.values().next().value,
+    field: droppedItem.field,
+  });
 
   trackUiEvent('drop_onto_dimension');
   const hasData = Object.values(state.layers).some(({ columns }) => columns.length);
