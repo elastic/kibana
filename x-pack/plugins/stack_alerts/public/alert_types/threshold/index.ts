@@ -12,10 +12,10 @@ import { AlertTypeModel, AlertsContextValue } from '../../../../triggers_actions
 export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, AlertsContextValue> {
   return {
     id: '.index-threshold',
-    name: i18n.translate('xpack.triggersActionsUI.indexThresholdAlert.nameText', {
+    name: i18n.translate('xpack.stackAlerts.threshold.ui.alertType.nameText', {
       defaultMessage: 'Index threshold',
     }),
-    description: i18n.translate('xpack.triggersActionsUI.indexThresholdAlert.descriptionText', {
+    description: i18n.translate('xpack.stackAlerts.threshold.ui.alertType.descriptionText', {
       defaultMessage: 'Alert when an aggregated query meets the threshold.',
     }),
     iconClass: 'alert',
@@ -25,7 +25,7 @@ export function getAlertType(): AlertTypeModel<IndexThresholdAlertParams, Alerts
     alertParamsExpression: lazy(() => import('./expression')),
     validate: validateExpression,
     defaultActionMessage: i18n.translate(
-      'xpack.triggersActionsUI.components.builtinAlertTypes.threshold.alertDefaultActionMessage',
+      'xpack.stackAlerts.threshold.ui.alertType.defaultActionMessage',
       {
         defaultMessage: `alert \\{\\{alertName\\}\\} group \\{\\{context.group\\}\\} value \\{\\{context.value\\}\\} exceeded threshold \\{\\{context.function\\}\\} over \\{\\{params.timeWindowSize\\}\\}\\{\\{params.timeWindowUnit\\}\\} on \\{\\{context.date\\}\\}`,
       }

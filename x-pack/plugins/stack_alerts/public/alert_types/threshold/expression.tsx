@@ -105,7 +105,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
   );
 
   const expressionErrorMessage = i18n.translate(
-    'xpack.triggersActionsUI.sections.alertAdd.threshold.fixErrorInExpressionBelowValidationMessage',
+    'xpack.stackAlerts.threshold.ui.alertParams.fixErrorInExpressionBelowValidationMessage',
     {
       defaultMessage: 'Expression contains errors.',
     }
@@ -158,7 +158,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         fullWidth
         label={
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.threshold.indicesToQueryLabel"
+            id="xpack.stackAlerts.threshold.ui.alertParams.indicesToQueryLabel"
             defaultMessage="Indices to query"
           />
         }
@@ -166,7 +166,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         error={errors.index}
         helpText={
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.threshold.howToBroadenSearchQueryDescription"
+            id="xpack.stackAlerts.threshold.ui.alertParams.howToBroadenSearchQueryDescription"
             defaultMessage="Use * to broaden your query."
           />
         }
@@ -232,7 +232,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
         fullWidth
         label={
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.threshold.timeFieldLabel"
+            id="xpack.stackAlerts.threshold.ui.alertParams.timeFieldLabel"
             defaultMessage="Time field"
           />
         }
@@ -283,7 +283,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.selectIndex"
+            id="xpack.stackAlerts.threshold.ui.selectIndex"
             defaultMessage="Select an index"
           />
         </h5>
@@ -295,12 +295,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
           <EuiExpression
             display="columns"
             data-test-subj="selectIndexExpression"
-            description={i18n.translate(
-              'xpack.triggersActionsUI.sections.alertAdd.threshold.indexLabel',
-              {
-                defaultMessage: 'index',
-              }
-            )}
+            description={i18n.translate('xpack.stackAlerts.threshold.ui.alertParams.indexLabel', {
+              defaultMessage: 'index',
+            })}
             value={index && index.length > 0 ? renderIndices(index) : firstFieldOption.text}
             isActive={indexPopoverOpen}
             onClick={() => {
@@ -320,12 +317,9 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
           <EuiPopoverTitle>
             <EuiFlexGroup alignItems="center" gutterSize="s">
               <EuiFlexItem>
-                {i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.threshold.indexButtonLabel',
-                  {
-                    defaultMessage: 'index',
-                  }
-                )}
+                {i18n.translate('xpack.stackAlerts.threshold.ui.alertParams.indexButtonLabel', {
+                  defaultMessage: 'index',
+                })}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
@@ -333,7 +327,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
                   iconType="cross"
                   color="danger"
                   aria-label={i18n.translate(
-                    'xpack.triggersActionsUI.sections.alertAdd.threshold.closeIndexPopoverLabel',
+                    'xpack.stackAlerts.threshold.ui.alertParams.closeIndexPopoverLabel',
                     {
                       defaultMessage: 'Close',
                     }
@@ -385,7 +379,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.sections.alertAdd.conditionPrompt"
+            id="xpack.stackAlerts.threshold.ui.conditionPrompt"
             defaultMessage="Define the condition"
           />
         </h5>
@@ -426,7 +420,7 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
               body={
                 <EuiText color="subdued">
                   <FormattedMessage
-                    id="xpack.triggersActionsUI.sections.alertAdd.previewAlertVisualizationDescription"
+                    id="xpack.stackAlerts.threshold.ui.previewAlertVisualizationDescription"
                     defaultMessage="Complete the expression to generate a preview."
                   />
                 </EuiText>

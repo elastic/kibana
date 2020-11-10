@@ -61,7 +61,7 @@ export const ExpressionWithPopover: ({
                 iconType="cross"
                 color="danger"
                 aria-label={i18n.translate(
-                  'xpack.triggersActionsUI.sections.alertAdd.geoThreshold.closePopoverLabel',
+                  'xpack.stackAlerts.geoThreshold.ui.expressionPopover.closePopoverLabel',
                   {
                     defaultMessage: 'Close',
                   }

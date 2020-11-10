@@ -156,7 +156,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         if (toastNotifications) {
           toastNotifications.addDanger({
             title: i18n.translate(
-              'xpack.triggersActionsUI.sections.alertAdd.unableToLoadVisualizationMessage',
+              'xpack.stackAlerts.threshold.ui.visualization.unableToLoadVisualizationMessage',
               { defaultMessage: 'Unable to load visualization' }
             ),
           });
@@ -205,7 +205,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         body={
           <EuiText color="subdued">
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertAdd.loadingAlertVisualizationDescription"
+              id="xpack.stackAlerts.threshold.ui.visualization.loadingAlertVisualizationDescription"
               defaultMessage="Loading alert visualization…"
             />
           </EuiText>
@@ -221,7 +221,7 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
         <EuiCallOut
           title={
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertAdd.errorLoadingAlertVisualizationTitle"
+              id="xpack.stackAlerts.threshold.ui.visualization.errorLoadingAlertVisualizationTitle"
               defaultMessage="Cannot load alert visualization"
               values={{}}
             />
@@ -311,14 +311,14 @@ export const ThresholdVisualization: React.FunctionComponent<Props> = ({
             size="s"
             title={
               <FormattedMessage
-                id="xpack.triggersActionsUI.sections.alertAdd.thresholdPreviewChart.noDataTitle"
+                id="xpack.stackAlerts.threshold.ui.visualization.thresholdPreviewChart.noDataTitle"
                 defaultMessage="No data matches this query"
               />
             }
             color="warning"
           >
             <FormattedMessage
-              id="xpack.triggersActionsUI.sections.alertAdd.thresholdPreviewChart.dataDoesNotExistTextMessage"
+              id="xpack.stackAlerts.threshold.ui.visualization.thresholdPreviewChart.dataDoesNotExistTextMessage"
               defaultMessage="Check that your time range and filters are correct."
             />
           </EuiCallOut>

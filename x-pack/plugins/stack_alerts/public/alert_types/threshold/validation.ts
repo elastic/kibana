@@ -39,21 +39,21 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
   validationResult.errors = errors;
   if (!index || index.length === 0) {
     errors.index.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredIndexText', {
+      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredIndexText', {
         defaultMessage: 'Index is required.',
       })
     );
   }
   if (!timeField) {
     errors.timeField.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredTimeFieldText', {
+      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredTimeFieldText', {
         defaultMessage: 'Time field is required.',
       })
     );
   }
   if (aggType && builtInAggregationTypes[aggType].fieldRequired && !aggField) {
     errors.aggField.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredAggFieldText', {
+      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredAggFieldText', {
         defaultMessage: 'Aggregation field is required.',
       })
     );
@@ -65,7 +65,7 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
     !termSize
   ) {
     errors.termSize.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredTermSizedText', {
+      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredTermSizedText', {
         defaultMessage: 'Term size is required.',
       })
     );
@@ -77,21 +77,21 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
     !termField
   ) {
     errors.termField.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredtTermFieldText', {
+      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredTermFieldText', {
         defaultMessage: 'Term field is required.',
       })
     );
   }
   if (!timeWindowSize) {
     errors.timeWindowSize.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredTimeWindowSizeText', {
+      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredTimeWindowSizeText', {
         defaultMessage: 'Time window size is required.',
       })
     );
   }
   if (!threshold || threshold.length === 0 || threshold[0] === undefined) {
     errors.threshold0.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold0Text', {
+      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredThreshold0Text', {
         defaultMessage: 'Threshold0 is required.',
       })
     );
@@ -104,14 +104,14 @@ export const validateExpression = (alertParams: IndexThresholdAlertParams): Vali
       (threshold && threshold.length < builtInComparators[thresholdComparator!].requiredValues))
   ) {
     errors.threshold1.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.requiredThreshold1Text', {
+      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.requiredThreshold1Text', {
         defaultMessage: 'Threshold1 is required.',
       })
     );
   }
   if (threshold && threshold.length === 2 && threshold[0] > threshold[1]) {
     errors.threshold1.push(
-      i18n.translate('xpack.triggersActionsUI.sections.addAlert.error.greaterThenThreshold0Text', {
+      i18n.translate('xpack.stackAlerts.threshold.ui.validation.error.greaterThenThreshold0Text', {
         defaultMessage: 'Threshold1 should be > Threshold0.',
       })
     );

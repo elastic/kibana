@@ -89,8 +89,11 @@ export const getFields = async (http: HttpSetup, indexes: string[]) => {
 };
 
 export const firstFieldOption = {
-  text: i18n.translate('xpack.triggersActionsUI.sections.alertAdd.threshold.timeFieldOptionLabel', {
-    defaultMessage: 'Select a field',
-  }),
+  text: i18n.translate(
+    'xpack.triggersActionsUI.sections.alertAdd.indexControls.timeFieldOptionLabel',
+    {
+      defaultMessage: 'Select a field',
+    }
+  ),
   value: '',
 };
