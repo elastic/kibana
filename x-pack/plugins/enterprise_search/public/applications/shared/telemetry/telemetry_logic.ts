@@ -9,18 +9,18 @@ import { kea, MakeLogicType } from 'kea';
 import { JSON_HEADER as headers } from '../../../../common/constants';
 import { HttpLogic } from '../http';
 
-export interface ISendTelemetry {
+interface SendTelemetry {
   action: 'viewed' | 'error' | 'clicked';
   metric: string; // e.g., 'setup_guide'
   product: 'enterprise_search' | 'app_search' | 'workplace_search';
 }
-export type TSendTelemetry = Omit<ISendTelemetry, 'product'>;
+export type SendTelemetryHelper = Omit<SendTelemetry, 'product'>;
 
 interface TelemetryActions {
-  sendTelemetry(args: ISendTelemetry): ISendTelemetry;
-  sendEnterpriseSearchTelemetry(args: TSendTelemetry): TSendTelemetry;
-  sendAppSearchTelemetry(args: TSendTelemetry): TSendTelemetry;
-  sendWorkplaceSearchTelemetry(args: TSendTelemetry): TSendTelemetry;
+  sendTelemetry(args: SendTelemetry): SendTelemetry;
+  sendEnterpriseSearchTelemetry(args: SendTelemetryHelper): SendTelemetryHelper;
+  sendAppSearchTelemetry(args: SendTelemetryHelper): SendTelemetryHelper;
+  sendWorkplaceSearchTelemetry(args: SendTelemetryHelper): SendTelemetryHelper;
 }
 
 export const TelemetryLogic = kea<MakeLogicType<TelemetryActions>>({
@@ -32,7 +32,7 @@ export const TelemetryLogic = kea<MakeLogicType<TelemetryActions>>({
     sendWorkplaceSearchTelemetry: ({ action, metric }) => ({ action, metric }),
   },
   listeners: ({ actions }) => ({
-    sendTelemetry: async ({ action, metric, product }: ISendTelemetry) => {
+    sendTelemetry: async ({ action, metric, product }: SendTelemetry) => {
       const { http } = HttpLogic.values;
       try {
         const body = JSON.stringify({ product, action, metric });
@@ -41,11 +41,11 @@ export const TelemetryLogic = kea<MakeLogicType<TelemetryActions>>({
         throw new Error('Unable to send telemetry');
       }
     },
-    sendEnterpriseSearchTelemetry: ({ action, metric }: TSendTelemetry) =>
+    sendEnterpriseSearchTelemetry: ({ action, metric }: SendTelemetryHelper) =>
       actions.sendTelemetry({ action, metric, product: 'enterprise_search' }),
-    sendAppSearchTelemetry: ({ action, metric }: TSendTelemetry) =>
+    sendAppSearchTelemetry: ({ action, metric }: SendTelemetryHelper) =>
       actions.sendTelemetry({ action, metric, product: 'app_search' }),
-    sendWorkplaceSearchTelemetry: ({ action, metric }: TSendTelemetry) =>
+    sendWorkplaceSearchTelemetry: ({ action, metric }: SendTelemetryHelper) =>
       actions.sendTelemetry({ action, metric, product: 'workplace_search' }),
   }),
 });
