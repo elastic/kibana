@@ -12,7 +12,7 @@ import {
   getMatchingIndices,
   getESIndexFields,
   getSavedObjectsClient,
-} from '../lib/indices_and_field_apis';
+} from '../lib/data_apis';
 
 export interface IOption {
   label: string;

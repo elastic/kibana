@@ -5,7 +5,7 @@
  */
 import { HttpSetup } from 'kibana/public';
 
-const INDEX_THRESHOLD_DATA_API_ROOT = '/api/triggers_actions_ui/data';
+const DATA_API_ROOT = '/api/triggers_actions_ui/data';
 
 export async function getMatchingIndices({
   pattern,
@@ -20,7 +20,7 @@ export async function getMatchingIndices({
   if (!pattern.endsWith('*')) {
     pattern = `${pattern}*`;
   }
-  const { indices } = await http.post(`${INDEX_THRESHOLD_DATA_API_ROOT}/_indices`, {
+  const { indices } = await http.post(`${DATA_API_ROOT}/_indices`, {
     body: JSON.stringify({ pattern }),
   });
   return indices;
@@ -41,7 +41,7 @@ export async function getESIndexFields({
     aggregatable: boolean;
   }>
 > {
-  const { fields } = await http.post(`${INDEX_THRESHOLD_DATA_API_ROOT}/_fields`, {
+  const { fields } = await http.post(`${DATA_API_ROOT}/_fields`, {
     body: JSON.stringify({ indexPatterns: indexes }),
   });
   return fields;
