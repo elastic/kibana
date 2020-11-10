@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import expect from '@kbn/expect';
+import { JsonObject } from 'src/plugins/kibana_utils/common';
 import { eventIDSafeVersion } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import { ResolverPaginatedEvents } from '../../../../plugins/security_solution/common/endpoint/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -41,23 +42,37 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('event route', () => {
+    let entityIDFilterArray: JsonObject[] | undefined;
     let entityIDFilter: string | undefined;
     before(async () => {
       resolverTrees = await resolver.createTrees(treeOptions);
       // we only requested a single alert so there's only 1 tree
       tree = resolverTrees.trees[0];
-      entityIDFilter = `process.entity_id:"${tree.origin.id}" and not event.category:"process"`;
+      entityIDFilterArray = [
+        { term: { 'process.entity_id': tree.origin.id } },
+        { term: { 'event.category': 'process' } },
+      ];
+      entityIDFilter = JSON.stringify({
+        bool: {
+          filter: entityIDFilterArray,
+        },
+      });
     });
     after(async () => {
       await resolver.deleteData(resolverTrees);
     });
 
     it('should filter events by event.id', async () => {
+      const filter = JSON.stringify({
+        bool: {
+          filter: [{ term: { 'event.id': tree.origin.relatedEvents[0]?.event?.id } }],
+        },
+      });
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          filter: `event.id:"${tree.origin.relatedEvents[0]?.event?.id}"`,
+          filter,
         })
         .expect(200);
       expect(body.events.length).to.eql(1);
@@ -66,11 +81,16 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should not find any events when given an invalid entity id', async () => {
+      const filter = JSON.stringify({
+        bool: {
+          filter: [{ term: { 'process.entity_id': '5555' } }],
+        },
+      });
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
         .set('kbn-xsrf', 'xxx')
         .send({
-          filter: 'process.entity_id:"5555"',
+          filter,
         })
         .expect(200);
       expect(body.nextEvent).to.eql(null);
@@ -91,7 +111,14 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should allow for the events to be filtered', async () => {
-      const filter = `event.category:"${RelatedEventCategory.Driver}" and ${entityIDFilter}`;
+      const filter = JSON.stringify({
+        bool: {
+          filter: [
+            { term: { 'event.category': RelatedEventCategory.Driver } },
+            ...(entityIDFilterArray ?? []),
+          ],
+        },
+      });
       const { body }: { body: ResolverPaginatedEvents } = await supertest
         .post(`/api/endpoint/resolver/events`)
         .set('kbn-xsrf', 'xxx')

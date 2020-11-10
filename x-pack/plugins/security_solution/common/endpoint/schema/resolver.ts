@@ -37,6 +37,7 @@ export const validateEvents = {
       from: schema.string(),
       to: schema.string(),
     }),
+    indexPatterns: schema.arrayOf(schema.string(), { minSize: 1 }),
     filter: schema.maybe(schema.string()),
   }),
 };
