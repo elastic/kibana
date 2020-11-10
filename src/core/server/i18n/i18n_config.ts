@@ -16,22 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RenderingService as Service } from '../rendering_service';
-import type { InternalRenderingServiceSetup } from '../types';
-import { mockRenderingServiceParams } from './params';
 
-type IRenderingService = PublicMethodsOf<Service>;
+import { schema, TypeOf } from '@kbn/config-schema';
 
-export const setupMock: jest.Mocked<InternalRenderingServiceSetup> = {
-  render: jest.fn(),
+export const config = {
+  path: 'i18n',
+  schema: schema.object({
+    locale: schema.string({ defaultValue: 'en' }),
+  }),
 };
-export const mockSetup = jest.fn().mockResolvedValue(setupMock);
-export const mockStop = jest.fn();
-export const mockRenderingService: jest.Mocked<IRenderingService> = {
-  setup: mockSetup,
-  stop: mockStop,
-};
-export const RenderingService = jest.fn<IRenderingService, [typeof mockRenderingServiceParams]>(
-  () => mockRenderingService
-);
+
+export type I18nConfigType = TypeOf<typeof config.schema>;

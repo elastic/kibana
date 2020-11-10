@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export const I18N_RC = '.i18nrc.json';
+import Fs from 'fs';
+import { promisify } from 'util';
+
+export const readFile = promisify(Fs.readFile);
