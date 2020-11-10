@@ -10,7 +10,7 @@ import supertestAsPromised from 'supertest-as-promised';
 import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
 import {
-  FullCreateSchema,
+  CreateRulesSchema,
   FullResponseSchema,
   QueryCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
@@ -109,7 +109,7 @@ export const getSimpleRuleUpdate = (ruleId = 'rule-1'): UpdateRulesSchema => ({
  * This is a representative ML rule payload as expected by the server
  * @param ruleId
  */
-export const getSimpleMlRule = (ruleId = 'rule-1'): FullCreateSchema => ({
+export const getSimpleMlRule = (ruleId = 'rule-1'): CreateRulesSchema => ({
   name: 'Simple ML Rule',
   description: 'Simple Machine Learning Rule',
   anomaly_threshold: 44,
@@ -189,7 +189,7 @@ export const getSignalStatusEmptyResponse = () => ({
 /**
  * This is a typical simple rule for testing that is easy for most basic testing
  */
-export const getSimpleRuleWithoutRuleId = (): FullCreateSchema => {
+export const getSimpleRuleWithoutRuleId = (): CreateRulesSchema => {
   const simpleRule = getSimpleRule();
   // eslint-disable-next-line @typescript-eslint/naming-convention
   const { rule_id, ...ruleWithoutId } = simpleRule;
@@ -388,7 +388,7 @@ export const getSimpleRuleAsNdjson = (ruleIds: string[], enabled = false): Buffe
  * testing upload features.
  * @param rule The rule to convert to ndjson
  */
-export const ruleToNdjson = (rule: FullCreateSchema): Buffer => {
+export const ruleToNdjson = (rule: CreateRulesSchema): Buffer => {
   const stringified = JSON.stringify(rule);
   return Buffer.from(`${stringified}\n`);
 };
@@ -585,7 +585,7 @@ export const getWebHookAction = () => ({
   name: 'Some connector',
 });
 
-export const getRuleWithWebHookAction = (id: string): FullCreateSchema => ({
+export const getRuleWithWebHookAction = (id: string): CreateRulesSchema => ({
   ...getSimpleRule(),
   throttle: 'rule',
   actions: [
@@ -728,7 +728,7 @@ export const countDownTest = async (
  */
 export const createRule = async (
   supertest: SuperTest<supertestAsPromised.Test>,
-  rule: FullCreateSchema
+  rule: CreateRulesSchema
 ): Promise<FullResponseSchema> => {
   const { body } = await supertest
     .post(DETECTION_ENGINE_RULES_URL)

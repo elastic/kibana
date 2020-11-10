@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FullCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
 
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule without an input index', async () => {
-        const rule: FullCreateSchema = {
+        const rule: CreateRulesSchema = {
           name: 'Simple Rule Query',
           description: 'Simple Rule Query',
           enabled: true,

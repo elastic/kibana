@@ -4,15 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fullCreateSchema, FullCreateSchema, SavedQueryCreateSchema } from './rule_schemas';
+import { createRulesSchema, CreateRulesSchema, SavedQueryCreateSchema } from './rule_schemas';
 import { exactCheck } from '../../../exact_check';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { foldLeftRight, getPaths } from '../../../test_utils';
 import { left } from 'fp-ts/lib/Either';
 import {
-  getCreateSavedQuerySchemaMock,
-  getCreateThreatMatchSchemaMock,
-  getFullCreateSchemaMock,
+  getCreateSavedQueryRulesSchemaMock,
+  getCreateThreatMatchRulesSchemaMock,
+  getCreateRulesSchemaMock,
 } from './rule_schemas.mock';
 import { getListArrayMock } from '../types/lists.mock';
 
@@ -20,7 +20,7 @@ describe('create rules schema', () => {
   test('empty objects do not validate', () => {
     const payload = {};
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(message.errors.length).toBeGreaterThan(0);
@@ -28,12 +28,12 @@ describe('create rules schema', () => {
   });
 
   test('made up values do not validate', () => {
-    const payload: FullCreateSchema & { madeUp: string } = {
-      ...getFullCreateSchemaMock(),
+    const payload: CreateRulesSchema & { madeUp: string } = {
+      ...getCreateRulesSchemaMock(),
       madeUp: 'hi',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "madeUp"']);
@@ -45,7 +45,7 @@ describe('create rules schema', () => {
       rule_id: 'rule-1',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(message.errors.length).toBeGreaterThan(0);
@@ -58,7 +58,7 @@ describe('create rules schema', () => {
       description: 'some description',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(message.errors.length).toBeGreaterThan(0);
@@ -72,7 +72,7 @@ describe('create rules schema', () => {
       from: 'now-5m',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(message.errors.length).toBeGreaterThan(0);
@@ -87,7 +87,7 @@ describe('create rules schema', () => {
       to: 'now',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(message.errors.length).toBeGreaterThan(0);
@@ -103,7 +103,7 @@ describe('create rules schema', () => {
       name: 'some-name',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(message.errors.length).toBeGreaterThan(0);
@@ -120,7 +120,7 @@ describe('create rules schema', () => {
       severity: 'low',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(message.errors.length).toBeGreaterThan(0);
@@ -138,7 +138,7 @@ describe('create rules schema', () => {
       type: 'query',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -159,7 +159,7 @@ describe('create rules schema', () => {
       type: 'query',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -181,7 +181,7 @@ describe('create rules schema', () => {
       index: ['index-1'],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -205,7 +205,7 @@ describe('create rules schema', () => {
       interval: '5m',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -227,7 +227,7 @@ describe('create rules schema', () => {
       language: 'kuery',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -237,7 +237,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score] does validate', () => {
-    const payload: FullCreateSchema = {
+    const payload: CreateRulesSchema = {
       rule_id: 'rule-1',
       risk_score: 50,
       description: 'some description',
@@ -252,7 +252,7 @@ describe('create rules schema', () => {
       language: 'kuery',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -260,7 +260,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, query, language, risk_score, output_index] does validate', () => {
-    const payload: FullCreateSchema = {
+    const payload: CreateRulesSchema = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -276,7 +276,7 @@ describe('create rules schema', () => {
       language: 'kuery',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -284,7 +284,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score] does validate', () => {
-    const payload: FullCreateSchema = {
+    const payload: CreateRulesSchema = {
       rule_id: 'rule-1',
       description: 'some description',
       from: 'now-5m',
@@ -297,7 +297,7 @@ describe('create rules schema', () => {
       risk_score: 50,
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -305,7 +305,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index] does validate', () => {
-    const payload: FullCreateSchema = {
+    const payload: CreateRulesSchema = {
       author: [],
       severity_mapping: [],
       risk_score_mapping: [],
@@ -322,7 +322,7 @@ describe('create rules schema', () => {
       type: 'query',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -330,12 +330,12 @@ describe('create rules schema', () => {
   });
 
   test('You can send in an empty array to threat', () => {
-    const payload: FullCreateSchema = {
-      ...getFullCreateSchemaMock(),
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
       threat: [],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -343,7 +343,7 @@ describe('create rules schema', () => {
   });
 
   test('[rule_id, description, from, to, index, name, severity, interval, type, filter, risk_score, output_index, threat] does validate', () => {
-    const payload: FullCreateSchema = {
+    const payload: CreateRulesSchema = {
       rule_id: 'rule-1',
       output_index: '.siem-signals',
       risk_score: 50,
@@ -374,7 +374,7 @@ describe('create rules schema', () => {
       ],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -382,12 +382,12 @@ describe('create rules schema', () => {
   });
 
   test('allows references to be sent as valid', () => {
-    const payload: FullCreateSchema = {
-      ...getFullCreateSchemaMock(),
+    const payload: CreateRulesSchema = {
+      ...getCreateRulesSchemaMock(),
       references: ['index-1'],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -395,12 +395,12 @@ describe('create rules schema', () => {
   });
 
   test('references cannot be numbers', () => {
-    const payload: Omit<FullCreateSchema, 'references'> & { references: number[] } = {
-      ...getFullCreateSchemaMock(),
+    const payload: Omit<CreateRulesSchema, 'references'> & { references: number[] } = {
+      ...getCreateRulesSchemaMock(),
       references: [5],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "references"']);
@@ -408,12 +408,12 @@ describe('create rules schema', () => {
   });
 
   test('indexes cannot be numbers', () => {
-    const payload: Omit<FullCreateSchema, 'index'> & { index: number[] } = {
-      ...getFullCreateSchemaMock(),
+    const payload: Omit<CreateRulesSchema, 'index'> & { index: number[] } = {
+      ...getCreateRulesSchemaMock(),
       index: [5],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "5" supplied to "index"']);
@@ -422,11 +422,11 @@ describe('create rules schema', () => {
 
   test('saved_query type can have filters with it', () => {
     const payload: SavedQueryCreateSchema = {
-      ...getCreateSavedQuerySchemaMock(),
+      ...getCreateSavedQueryRulesSchemaMock(),
       filters: [],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -435,11 +435,11 @@ describe('create rules schema', () => {
 
   test('filters cannot be a string', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       filters: 'some string',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -450,11 +450,11 @@ describe('create rules schema', () => {
 
   test('language validates with kuery', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       language: 'kuery',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -463,11 +463,11 @@ describe('create rules schema', () => {
 
   test('language validates with lucene', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       language: 'lucene',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -476,11 +476,11 @@ describe('create rules schema', () => {
 
   test('language does not validate with something made up', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       language: 'something-made-up',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -491,11 +491,11 @@ describe('create rules schema', () => {
 
   test('max_signals cannot be negative', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       max_signals: -1,
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -506,11 +506,11 @@ describe('create rules schema', () => {
 
   test('max_signals cannot be zero', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       max_signals: 0,
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "0" supplied to "max_signals"']);
@@ -519,11 +519,11 @@ describe('create rules schema', () => {
 
   test('max_signals can be 1', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       max_signals: 1,
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -532,11 +532,11 @@ describe('create rules schema', () => {
 
   test('You can optionally send in an array of tags', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       tags: ['tag_1', 'tag_2'],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -545,11 +545,11 @@ describe('create rules schema', () => {
 
   test('You cannot send in an array of tags that are numbers', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       tags: [0, 1, 2],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -562,7 +562,7 @@ describe('create rules schema', () => {
 
   test('You cannot send in an array of threat that are missing "framework"', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       threat: [
         {
           tactic: {
@@ -581,7 +581,7 @@ describe('create rules schema', () => {
       ],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -592,7 +592,7 @@ describe('create rules schema', () => {
 
   test('You cannot send in an array of threat that are missing "tactic"', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       threat: [
         {
           framework: 'fake',
@@ -607,7 +607,7 @@ describe('create rules schema', () => {
       ],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -618,7 +618,7 @@ describe('create rules schema', () => {
 
   test('You cannot send in an array of threat that are missing "technique"', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       threat: [
         {
           framework: 'fake',
@@ -631,7 +631,7 @@ describe('create rules schema', () => {
       ],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -642,11 +642,11 @@ describe('create rules schema', () => {
 
   test('You can optionally send in an array of false positives', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       false_positives: ['false_1', 'false_2'],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -655,11 +655,11 @@ describe('create rules schema', () => {
 
   test('You cannot send in an array of false positives that are numbers', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       false_positives: [5, 4],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -671,11 +671,11 @@ describe('create rules schema', () => {
 
   test('You cannot set the immutable to a number when trying to create a rule', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       immutable: 5,
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['invalid keys "immutable"']);
@@ -684,11 +684,11 @@ describe('create rules schema', () => {
 
   test('You cannot set the risk_score to 101', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       risk_score: 101,
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -699,11 +699,11 @@ describe('create rules schema', () => {
 
   test('You cannot set the risk_score to -1', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       risk_score: -1,
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "-1" supplied to "risk_score"']);
@@ -712,11 +712,11 @@ describe('create rules schema', () => {
 
   test('You can set the risk_score to 0', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       risk_score: 0,
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -725,11 +725,11 @@ describe('create rules schema', () => {
 
   test('You can set the risk_score to 100', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       risk_score: 100,
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -738,13 +738,13 @@ describe('create rules schema', () => {
 
   test('You can set meta to any object you want', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       meta: {
         somethingMadeUp: { somethingElse: true },
       },
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -753,11 +753,11 @@ describe('create rules schema', () => {
 
   test('You cannot create meta as a string', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       meta: 'should not work',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -767,13 +767,13 @@ describe('create rules schema', () => {
   });
 
   test('You can omit the query string when filters are present', () => {
-    const { query, ...noQuery } = getFullCreateSchemaMock();
+    const { query, ...noQuery } = getCreateRulesSchemaMock();
     const payload = {
       ...noQuery,
       filters: [],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -782,12 +782,12 @@ describe('create rules schema', () => {
 
   test('validates with timeline_id and timeline_title', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       timeline_id: 'timeline-id',
       timeline_title: 'timeline-title',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -796,11 +796,11 @@ describe('create rules schema', () => {
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       severity: 'junk',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual(['Invalid value "junk" supplied to "severity"']);
@@ -809,11 +809,11 @@ describe('create rules schema', () => {
 
   test('You cannot send in an array of actions that are missing "group"', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       actions: [{ id: 'id', action_type_id: 'action_type_id', params: {} }],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -824,11 +824,11 @@ describe('create rules schema', () => {
 
   test('You cannot send in an array of actions that are missing "id"', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       actions: [{ group: 'group', action_type_id: 'action_type_id', params: {} }],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -839,11 +839,11 @@ describe('create rules schema', () => {
 
   test('You cannot send in an array of actions that are missing "action_type_id"', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       actions: [{ group: 'group', id: 'id', params: {} }],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -854,11 +854,11 @@ describe('create rules schema', () => {
 
   test('You cannot send in an array of actions that are missing "params"', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       actions: [{ group: 'group', id: 'id', action_type_id: 'action_type_id' }],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -869,7 +869,7 @@ describe('create rules schema', () => {
 
   test('You cannot send in an array of actions that are including "actionTypeId"', () => {
     const payload = {
-      ...getFullCreateSchemaMock(),
+      ...getCreateRulesSchemaMock(),
       actions: [
         {
           group: 'group',
@@ -880,7 +880,7 @@ describe('create rules schema', () => {
       ],
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([
@@ -892,11 +892,11 @@ describe('create rules schema', () => {
   describe('note', () => {
     test('You can set note to a string', () => {
       const payload = {
-        ...getFullCreateSchemaMock(),
+        ...getCreateRulesSchemaMock(),
         note: '# documentation markdown here',
       };
 
-      const decoded = fullCreateSchema.decode(payload);
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -905,11 +905,11 @@ describe('create rules schema', () => {
 
     test('You can set note to an empty string', () => {
       const payload = {
-        ...getFullCreateSchemaMock(),
+        ...getCreateRulesSchemaMock(),
         note: '',
       };
 
-      const decoded = fullCreateSchema.decode(payload);
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -918,13 +918,13 @@ describe('create rules schema', () => {
 
     test('You cannot create note as an object', () => {
       const payload = {
-        ...getFullCreateSchemaMock(),
+        ...getCreateRulesSchemaMock(),
         note: {
           somethingHere: 'something else',
         },
       };
 
-      const decoded = fullCreateSchema.decode(payload);
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -935,11 +935,11 @@ describe('create rules schema', () => {
 
     test('empty name is not valid', () => {
       const payload = {
-        ...getFullCreateSchemaMock(),
+        ...getCreateRulesSchemaMock(),
         name: '',
       };
 
-      const decoded = fullCreateSchema.decode(payload);
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual(['Invalid value "" supplied to "name"']);
@@ -948,11 +948,11 @@ describe('create rules schema', () => {
 
     test('empty description is not valid', () => {
       const payload = {
-        ...getFullCreateSchemaMock(),
+        ...getCreateRulesSchemaMock(),
         description: '',
       };
 
-      const decoded = fullCreateSchema.decode(payload);
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -976,7 +976,7 @@ describe('create rules schema', () => {
         note: '# some markdown',
       };
 
-      const decoded = fullCreateSchema.decode(payload);
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -1007,7 +1007,7 @@ describe('create rules schema', () => {
       rule_id: 'rule-1',
     };
 
-    const decoded = fullCreateSchema.decode(payload);
+    const decoded = createRulesSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
@@ -1032,7 +1032,7 @@ describe('create rules schema', () => {
         exceptions_list: getListArrayMock(),
       };
 
-      const decoded = fullCreateSchema.decode(payload);
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -1056,7 +1056,7 @@ describe('create rules schema', () => {
         exceptions_list: [],
       };
 
-      const decoded = fullCreateSchema.decode(payload);
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -1080,7 +1080,7 @@ describe('create rules schema', () => {
         exceptions_list: [{ id: 'uuid_here', namespace_type: 'not a namespace type' }],
       };
 
-      const decoded = fullCreateSchema.decode(payload);
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([
@@ -1107,7 +1107,7 @@ describe('create rules schema', () => {
         note: '# some markdown',
       };
 
-      const decoded = fullCreateSchema.decode(payload);
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);
@@ -1117,8 +1117,8 @@ describe('create rules schema', () => {
 
   describe('threat_mapping', () => {
     test('You can set a threat query, index, mapping, filters when creating a rule', () => {
-      const payload = getCreateThreatMatchSchemaMock();
-      const decoded = fullCreateSchema.decode(payload);
+      const payload = getCreateThreatMatchRulesSchemaMock();
+      const decoded = createRulesSchema.decode(payload);
       const checked = exactCheck(payload, decoded);
       const message = pipe(checked, foldLeftRight);
       expect(getPaths(left(message.errors))).toEqual([]);

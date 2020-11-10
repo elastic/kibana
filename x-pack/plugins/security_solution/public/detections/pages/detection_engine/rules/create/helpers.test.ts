@@ -5,7 +5,7 @@
  */
 
 import { List } from '../../../../../../common/detection_engine/schemas/types';
-import { FullCreateSchema } from '../../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { CreateRulesSchema } from '../../../../../../common/detection_engine/schemas/request/rule_schemas';
 import { Rule } from '../../../../containers/detection_engine/rules';
 import {
   getListMock,
@@ -762,7 +762,7 @@ describe('helpers', () => {
           saved_id: '',
         },
       };
-      const result: FullCreateSchema = formatRule<FullCreateSchema>(
+      const result: CreateRulesSchema = formatRule<CreateRulesSchema>(
         mockDefineStepRuleWithoutSavedId,
         mockAbout,
         mockSchedule,
@@ -773,14 +773,14 @@ describe('helpers', () => {
     });
 
     test('returns rule without id if ruleId does not exist', () => {
-      const result: FullCreateSchema = formatRule<FullCreateSchema>(
+      const result: CreateRulesSchema = formatRule<CreateRulesSchema>(
         mockDefine,
         mockAbout,
         mockSchedule,
         mockActions
       );
 
-      expect(result).not.toHaveProperty<FullCreateSchema>('id');
+      expect(result).not.toHaveProperty<CreateRulesSchema>('id');
     });
   });
 

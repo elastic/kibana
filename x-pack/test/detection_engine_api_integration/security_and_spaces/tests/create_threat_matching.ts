@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { FullCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_STATUS_URL,
@@ -23,7 +23,7 @@ import {
   waitForSignalsToBePresent,
 } from '../../utils';
 
-import { getCreateThreatMatchSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
+import { getCreateThreatMatchRulesSchemaMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas.mock';
 import { getThreatMatchingSchemaPartialMock } from '../../../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema.mocks';
 
 // eslint-disable-next-line import/no-default-export
@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .send(getCreateThreatMatchSchemaMock())
+          .send(getCreateThreatMatchRulesSchemaMock())
           .expect(400);
 
         expect(body).to.eql({
@@ -63,13 +63,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should create a single rule with a rule_id', async () => {
-        const ruleResponse = await createRule(supertest, getCreateThreatMatchSchemaMock());
+        const ruleResponse = await createRule(supertest, getCreateThreatMatchRulesSchemaMock());
         const bodyToCompare = removeServerGeneratedProperties(ruleResponse);
         expect(bodyToCompare).to.eql(getThreatMatchingSchemaPartialMock());
       });
 
       it('should create a single rule with a rule_id and validate it ran successfully', async () => {
-        const ruleResponse = await createRule(supertest, getCreateThreatMatchSchemaMock());
+        const ruleResponse = await createRule(supertest, getCreateThreatMatchRulesSchemaMock());
         await waitForRuleSuccess(supertest, ruleResponse.id);
 
         const { body: statusBody } = await supertest
@@ -98,7 +98,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should be able to execute and get 10 signals when doing a specific query', async () => {
-        const rule: FullCreateSchema = {
+        const rule: CreateRulesSchema = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -132,7 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return 0 matches if the mapping does not match against anything in the mapping', async () => {
-        const rule: FullCreateSchema = {
+        const rule: CreateRulesSchema = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -166,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return 0 signals when using an AND and one of the clauses does not have data', async () => {
-        const rule: FullCreateSchema = {
+        const rule: CreateRulesSchema = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',
@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should return 0 signals when using an AND and one of the clauses has a made up value that does not exist', async () => {
-        const rule: FullCreateSchema = {
+        const rule: CreateRulesSchema = {
           description: 'Detecting root and admin users',
           name: 'Query with a rule id',
           severity: 'high',

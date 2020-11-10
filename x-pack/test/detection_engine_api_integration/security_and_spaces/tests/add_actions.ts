@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { FullCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext) => {
           .expect(200);
 
         // create a rule with the action attached and a meta field
-        const ruleWithAction: FullCreateSchema = {
+        const ruleWithAction: CreateRulesSchema = {
           ...getRuleWithWebHookAction(hookAction.id),
           meta: {},
         };

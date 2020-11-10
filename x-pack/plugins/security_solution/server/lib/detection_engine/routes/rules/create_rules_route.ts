@@ -26,17 +26,18 @@ import { updateRulesNotifications } from '../../rules/update_rules_notifications
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { addTags } from '../../rules/add_tags';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
-import { fullCreateSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
 import { newTransformValidate } from './validate';
 import { InternalRuleCreate } from '../../schemas/rule_schemas';
 import { typeSpecificSnakeToCamel } from '../../schemas/rule_converters';
+import { createRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/create_rules_type_dependents';
 
 export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void => {
   router.post(
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation(fullCreateSchema),
+        body: buildRouteValidation(createRulesSchema),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -44,6 +45,10 @@ export const createRulesRoute = (router: IRouter, ml: SetupPlugins['ml']): void 
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const validationErrors = createRuleValidateTypeDependents(request.body);
+      if (validationErrors.length) {
+        return siemResponse.error({ statusCode: 400, body: validationErrors });
+      }
       try {
         const alertsClient = context.alerting?.getAlertsClient();
         const clusterClient = context.core.elasticsearch.legacy.client;

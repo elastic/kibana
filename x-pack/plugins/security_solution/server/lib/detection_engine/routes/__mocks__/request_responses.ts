@@ -28,7 +28,7 @@ import { QuerySignalsSchemaDecoded } from '../../../../../common/detection_engin
 import { SetSignalsStatusSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/set_signal_status_schema';
 import { getListArrayMock } from '../../../../../common/detection_engine/schemas/types/lists.mock';
 import { EqlSearchResponse } from '../../../../../common/detection_engine/types';
-import { getFullCreateSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 
 export const typicalSetStatusSignalByIdsPayload = (): SetSignalsStatusSchemaDecoded => ({
   signal_ids: ['somefakeid1', 'somefakeid2'],
@@ -56,14 +56,14 @@ export const getUpdateRequest = () =>
   requestMock.create({
     method: 'put',
     path: DETECTION_ENGINE_RULES_URL,
-    body: getFullCreateSchemaMock(),
+    body: getCreateRulesSchemaMock(),
   });
 
 export const getPatchRequest = () =>
   requestMock.create({
     method: 'patch',
     path: DETECTION_ENGINE_RULES_URL,
-    body: getFullCreateSchemaMock(),
+    body: getCreateRulesSchemaMock(),
   });
 
 export const getReadRequest = () =>
@@ -83,21 +83,21 @@ export const getReadBulkRequest = () =>
   requestMock.create({
     method: 'post',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-    body: [getFullCreateSchemaMock()],
+    body: [getCreateRulesSchemaMock()],
   });
 
 export const getUpdateBulkRequest = () =>
   requestMock.create({
     method: 'put',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    body: [getFullCreateSchemaMock()],
+    body: [getCreateRulesSchemaMock()],
   });
 
 export const getPatchBulkRequest = () =>
   requestMock.create({
     method: 'patch',
     path: `${DETECTION_ENGINE_RULES_URL}/_bulk_update`,
-    body: [getFullCreateSchemaMock()],
+    body: [getCreateRulesSchemaMock()],
   });
 
 export const getDeleteBulkRequest = () =>
@@ -233,12 +233,12 @@ export const getCreateRequest = () =>
   requestMock.create({
     method: 'post',
     path: DETECTION_ENGINE_RULES_URL,
-    body: getFullCreateSchemaMock(),
+    body: getCreateRulesSchemaMock(),
   });
 
 // TODO: Replace this with the mocks version from the mocks file
 export const typicalMlRulePayload = () => {
-  const { query, language, index, ...mlParams } = getFullCreateSchemaMock();
+  const { query, language, index, ...mlParams } = getCreateRulesSchemaMock();
 
   return {
     ...mlParams,
@@ -266,7 +266,7 @@ export const createBulkMlRuleRequest = () => {
 
 // TODO: Replace this with a mocks file version
 export const createRuleWithActionsRequest = () => {
-  const payload = getFullCreateSchemaMock();
+  const payload = getCreateRulesSchemaMock();
 
   return requestMock.create({
     method: 'post',

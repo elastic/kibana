@@ -15,7 +15,7 @@ import {
   ThreatMatchUpdateSchema,
 } from './rule_schemas';
 
-export const getFullCreateSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema => ({
+export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -26,7 +26,7 @@ export const getFullCreateSchemaMock = (ruleId = 'rule-1'): QueryCreateSchema =>
   rule_id: ruleId,
 });
 
-export const getCreateSavedQuerySchemaMock = (ruleId = 'rule-1'): SavedQueryCreateSchema => ({
+export const getCreateSavedQueryRulesSchemaMock = (ruleId = 'rule-1'): SavedQueryCreateSchema => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -38,7 +38,9 @@ export const getCreateSavedQuerySchemaMock = (ruleId = 'rule-1'): SavedQueryCrea
   rule_id: ruleId,
 });
 
-export const getCreateThreatMatchSchemaMock = (ruleId = 'rule-1'): ThreatMatchCreateSchema => ({
+export const getCreateThreatMatchRulesSchemaMock = (
+  ruleId = 'rule-1'
+): ThreatMatchCreateSchema => ({
   description: 'Detecting root and admin users',
   name: 'Query with a rule id',
   query: 'user.name: root or user.name: admin',
@@ -80,7 +82,7 @@ export const getCreateThreatMatchSchemaMock = (ruleId = 'rule-1'): ThreatMatchCr
   ],
 });
 
-export const getCreateMachineLearningSchemaMock = (
+export const getCreateMachineLearningRulesSchemaMock = (
   ruleId = 'rule-1'
 ): MachineLearningCreateSchema => ({
   description: 'Detecting root and admin users',

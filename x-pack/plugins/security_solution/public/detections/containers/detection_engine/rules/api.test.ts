@@ -26,7 +26,7 @@ import { getUpdateRulesSchemaMock } from '../../../../../common/detection_engine
 import { getPatchRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/patch_rules_schema.mock';
 import { rulesMock } from './mock';
 import { buildEsQuery } from 'src/plugins/data/common';
-import { getFullCreateSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../../../common/lib/kibana');
@@ -42,7 +42,7 @@ describe('Detections Rules API', () => {
     });
 
     test('POSTs rule', async () => {
-      const payload = getFullCreateSchemaMock();
+      const payload = getCreateRulesSchemaMock();
       await createRule({ rule: payload, signal: abortCtrl.signal });
       expect(fetchMock).toHaveBeenCalledWith('/api/detection_engine/rules', {
         body:

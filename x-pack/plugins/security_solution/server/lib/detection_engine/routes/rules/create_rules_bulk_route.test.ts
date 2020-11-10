@@ -18,7 +18,7 @@ import {
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { createRulesBulkRoute } from './create_rules_bulk_route';
-import { getFullCreateSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
+import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 
@@ -133,7 +133,7 @@ describe('create_rules_bulk', () => {
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-        body: [getFullCreateSchemaMock(), getFullCreateSchemaMock()],
+        body: [getCreateRulesSchemaMock(), getCreateRulesSchemaMock()],
       });
       const response = await server.inject(request, context);
 
@@ -154,7 +154,7 @@ describe('create_rules_bulk', () => {
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-        body: [{ ...getFullCreateSchemaMock(), type: 'query' }],
+        body: [{ ...getCreateRulesSchemaMock(), type: 'query' }],
       });
       const result = server.validate(request);
 
@@ -165,7 +165,7 @@ describe('create_rules_bulk', () => {
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-        body: [{ from: 'now-7m', interval: '5m', ...getFullCreateSchemaMock() }],
+        body: [{ from: 'now-7m', interval: '5m', ...getCreateRulesSchemaMock() }],
       });
       const result = server.validate(request);
 
@@ -176,7 +176,7 @@ describe('create_rules_bulk', () => {
       const request = requestMock.create({
         method: 'post',
         path: `${DETECTION_ENGINE_RULES_URL}/_bulk_create`,
-        body: [{ ...getFullCreateSchemaMock(), type: 'unexpected_type' }],
+        body: [{ ...getCreateRulesSchemaMock(), type: 'unexpected_type' }],
       });
       const result = server.validate(request);
 
@@ -191,7 +191,7 @@ describe('create_rules_bulk', () => {
           {
             from: 'now-3755555555555555.67s',
             interval: '5m',
-            ...getFullCreateSchemaMock(),
+            ...getCreateRulesSchemaMock(),
           },
         ],
       });

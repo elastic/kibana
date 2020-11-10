@@ -339,8 +339,8 @@ export const machineLearningCreateSchema = t.intersection([
 ]);
 export type MachineLearningCreateSchema = t.TypeOf<typeof machineLearningCreateSchema>;
 
-export const fullCreateSchema = t.intersection([commonCreateParams, createTypeSpecific]);
-export type FullCreateSchema = t.TypeOf<typeof fullCreateSchema>;
+export const createRulesSchema = t.intersection([commonCreateParams, createTypeSpecific]);
+export type CreateRulesSchema = t.TypeOf<typeof createRulesSchema>;
 
 export const eqlUpdateSchema = t.intersection([
   eqlCreateParams,
