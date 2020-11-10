@@ -185,6 +185,18 @@ export const internalRuleCreate = t.type({
 });
 export type InternalRuleCreate = t.TypeOf<typeof internalRuleCreate>;
 
+export const internalRuleUpdate = t.type({
+  name,
+  tags,
+  schedule: t.type({
+    interval: t.string,
+  }),
+  actions: actionsCamel,
+  params: ruleParams,
+  throttle: throttleOrNull,
+});
+export type InternalRuleUpdate = t.TypeOf<typeof internalRuleUpdate>;
+
 export const internalRuleResponse = t.intersection([
   internalRuleCreate,
   t.type({

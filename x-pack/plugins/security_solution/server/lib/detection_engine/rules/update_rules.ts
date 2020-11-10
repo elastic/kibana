@@ -6,7 +6,7 @@
 
 /* eslint-disable complexity */
 
-import { DEFAULT_MAX_SIGNALS, SERVER_APP_ID, SIGNALS_ID } from '../../../../common/constants';
+import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
 import { PartialAlert } from '../../../../../alerts/server';
 import { readRules } from './read_rules';
@@ -14,7 +14,7 @@ import { UpdateRulesOptions } from './types';
 import { addTags } from './add_tags';
 import { ruleStatusSavedObjectsClientFactory } from '../signals/rule_status_saved_objects_client';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
-import { InternalRuleCreate } from '../schemas/rule_schemas';
+import { InternalRuleUpdate } from '../schemas/rule_schemas';
 
 export const updateRules = async ({
   alertsClient,
@@ -33,11 +33,10 @@ export const updateRules = async ({
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const throttle = ruleUpdate.throttle ?? null;
-  const newInternalRule: InternalRuleCreate = {
+  const enabled = ruleUpdate.enabled ?? true;
+  const newInternalRule: InternalRuleUpdate = {
     name: ruleUpdate.name,
     tags: addTags(ruleUpdate.tags ?? [], existingRule.params.ruleId, false),
-    alertTypeId: SIGNALS_ID,
-    consumer: SERVER_APP_ID,
     params: {
       author: ruleUpdate.author ?? [],
       buildingBlockType: ruleUpdate.building_block_type,
@@ -73,7 +72,6 @@ export const updateRules = async ({
       ...typeSpecificParams,
     },
     schedule: { interval: ruleUpdate.interval ?? '5m' },
-    enabled: ruleUpdate.enabled ?? true,
     actions: throttle === 'rule' ? (ruleUpdate.actions ?? []).map(transformRuleToAlertAction) : [],
     throttle: null,
   };
@@ -83,9 +81,9 @@ export const updateRules = async ({
     data: newInternalRule,
   });
 
-  if (existingRule.enabled && newInternalRule.enabled === false) {
+  if (existingRule.enabled && enabled === false) {
     await alertsClient.disable({ id: existingRule.id });
-  } else if (!existingRule.enabled && newInternalRule.enabled === true) {
+  } else if (!existingRule.enabled && enabled === true) {
     await alertsClient.enable({ id: existingRule.id });
 
     const ruleStatusClient = ruleStatusSavedObjectsClientFactory(savedObjectsClient);
@@ -106,5 +104,5 @@ export const updateRules = async ({
       });
     }
   }
-  return { ...update, enabled: newInternalRule.enabled };
+  return { ...update, enabled };
 };
