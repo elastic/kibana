@@ -4,9 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { isEmpty, isNumber } from 'lodash';
+import { produce } from 'immer';
+
+import { isEmpty, merge } from 'lodash';
 
 import { SerializedPolicy, SerializedActionWithAllocation } from '../../../../../common/types';
+
+import { defaultPolicy } from '../../../constants';
 
 import { FormInternal, DataAllocationMetaFields } from '../types';
 
@@ -16,8 +20,16 @@ const serializeAllocateAction = (
   originalActions: SerializedActionWithAllocation = {}
 ): SerializedActionWithAllocation => {
   const { allocate, migrate, ...rest } = newActions;
-  // First copy over all non-allocate and migrate actions.
-  const actions: SerializedActionWithAllocation = { allocate, migrate, ...rest };
+  // First copy over all non-require|include|exclude and migrate actions.
+  const actions: SerializedActionWithAllocation = { ...rest };
+
+  // We only set include, exclude and require here, so copy over all other values
+  if (allocate) {
+    const { include, exclude, require, ...restAllocate } = allocate;
+    if (!isEmpty(restAllocate)) {
+      actions.allocate = { ...restAllocate };
+    }
+  }
 
   switch (dataTierAllocationType) {
     case 'node_attrs':
@@ -63,123 +75,140 @@ const serializeAllocateAction = (
 export const createSerializer = (originalPolicy?: SerializedPolicy) => (
   data: FormInternal
 ): SerializedPolicy => {
-  const { _meta, ...policy } = data;
+  const { _meta, ...updatedPolicy } = data;
 
-  if (!policy.phases || !policy.phases.hot) {
-    policy.phases = { hot: { actions: {} } };
+  if (!updatedPolicy.phases || !updatedPolicy.phases.hot) {
+    updatedPolicy.phases = { hot: { actions: {} } };
   }
 
-  /**
-   * HOT PHASE SERIALIZATION
-   */
-  if (policy.phases.hot) {
-    policy.phases.hot.min_age = originalPolicy?.phases.hot?.min_age ?? '0ms';
-  }
+  return produce<SerializedPolicy>(originalPolicy ?? defaultPolicy, (draft) => {
+    // Copy over all updated fields
+    merge(draft, updatedPolicy);
 
-  if (policy.phases.hot?.actions) {
-    if (policy.phases.hot.actions?.rollover && _meta.hot.useRollover) {
-      if (policy.phases.hot.actions.rollover.max_age) {
-        policy.phases.hot.actions.rollover.max_age = `${policy.phases.hot.actions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
+    // Next copy over all meta fields and delete any fields that have been removed
+    // by fields exposed in the form. It is very important that we do not delete
+    // data that the form does not control! E.g., unfollow action in hot phase.
+
+    /**
+     * HOT PHASE SERIALIZATION
+     */
+    if (draft.phases.hot) {
+      draft.phases.hot.min_age = draft.phases.hot.min_age ?? '0ms';
+    }
+
+    if (draft.phases.hot?.actions) {
+      if (draft.phases.hot.actions?.rollover && _meta.hot.useRollover) {
+        if (draft.phases.hot.actions.rollover.max_age) {
+          draft.phases.hot.actions.rollover.max_age = `${draft.phases.hot.actions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
+        }
+
+        if (draft.phases.hot.actions.rollover.max_size) {
+          draft.phases.hot.actions.rollover.max_size = `${draft.phases.hot.actions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
+        }
+
+        if (_meta.hot.bestCompression && draft.phases.hot.actions?.forcemerge) {
+          draft.phases.hot.actions.forcemerge.index_codec = 'best_compression';
+        }
+      } else {
+        delete draft.phases.hot.actions.rollover;
+        delete draft.phases.hot.actions.forcemerge;
       }
 
-      if (policy.phases.hot.actions.rollover.max_size) {
-        policy.phases.hot.actions.rollover.max_size = `${policy.phases.hot.actions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
+      if (
+        !updatedPolicy.phases.hot!.actions?.set_priority &&
+        draft.phases.hot.actions.set_priority
+      ) {
+        delete draft.phases.hot.actions.set_priority;
+      }
+    }
+
+    /**
+     * WARM PHASE SERIALIZATION
+     */
+    if (_meta.warm.enabled) {
+      const warmPhase = draft.phases.warm!;
+      // If warm phase on rollover is enabled, delete min age field
+      // An index lifecycle switches to warm phase when rollover occurs, so you cannot specify a warm phase time
+      // They are mutually exclusive
+      if (
+        (!_meta.hot.useRollover || !_meta.warm.warmPhaseOnRollover) &&
+        updatedPolicy.phases.warm!.min_age
+      ) {
+        warmPhase.min_age = `${updatedPolicy.phases.warm!.min_age}${_meta.warm.minAgeUnit}`;
+      } else {
+        delete warmPhase.min_age;
       }
 
-      if (_meta.hot.bestCompression && policy.phases.hot.actions?.forcemerge) {
-        policy.phases.hot.actions.forcemerge.index_codec = 'best_compression';
+      warmPhase.actions = serializeAllocateAction(
+        _meta.warm,
+        updatedPolicy.phases.warm!.actions,
+        originalPolicy?.phases.warm?.actions
+      );
+
+      if (!updatedPolicy.phases.warm!.actions?.forcemerge) {
+        delete warmPhase.actions.forcemerge;
+      } else if (_meta.warm.bestCompression) {
+        warmPhase.actions.forcemerge!.index_codec = 'best_compression';
+      }
+
+      if (!updatedPolicy.phases.warm!.actions?.set_priority && warmPhase.actions.set_priority) {
+        delete warmPhase.actions.set_priority;
+      }
+
+      if (!updatedPolicy.phases.warm!.actions?.shrink) {
+        delete warmPhase.actions.shrink;
       }
     } else {
-      delete policy.phases.hot.actions?.rollover;
-    }
-  }
-
-  /**
-   * WARM PHASE SERIALIZATION
-   */
-  if (policy.phases.warm) {
-    // If warm phase on rollover is enabled, delete min age field
-    // An index lifecycle switches to warm phase when rollover occurs, so you cannot specify a warm phase time
-    // They are mutually exclusive
-    if (_meta.hot.useRollover && _meta.warm.warmPhaseOnRollover) {
-      delete policy.phases.warm.min_age;
-    } else if (
-      (!_meta.hot.useRollover || !_meta.warm.warmPhaseOnRollover) &&
-      policy.phases.warm.min_age
-    ) {
-      policy.phases.warm.min_age = `${policy.phases.warm.min_age}${_meta.warm.minAgeUnit}`;
+      delete draft.phases.warm;
     }
 
-    policy.phases.warm.actions = serializeAllocateAction(
-      _meta.warm,
-      policy.phases.warm.actions,
-      originalPolicy?.phases.warm?.actions
-    );
+    /**
+     * COLD PHASE SERIALIZATION
+     */
+    if (_meta.cold.enabled) {
+      const coldPhase = draft.phases.cold!;
 
-    if (
-      policy.phases.warm.actions.allocate &&
-      !policy.phases.warm.actions.allocate.require &&
-      !isNumber(policy.phases.warm.actions.allocate.number_of_replicas) &&
-      isEmpty(policy.phases.warm.actions.allocate.include) &&
-      isEmpty(policy.phases.warm.actions.allocate.exclude)
-    ) {
-      // remove allocate action if it does not define require or number of nodes
-      // and both include and exclude are empty objects (ES will fail to parse if we don't)
-      delete policy.phases.warm.actions.allocate;
+      if (updatedPolicy.phases.cold!.min_age) {
+        coldPhase.min_age = `${updatedPolicy.phases.cold!.min_age}${_meta.cold.minAgeUnit}`;
+      }
+
+      coldPhase.actions = serializeAllocateAction(
+        _meta.cold,
+        updatedPolicy.phases.cold!.actions,
+        originalPolicy?.phases.cold?.actions
+      );
+
+      if (_meta.cold.freezeEnabled) {
+        coldPhase.actions.freeze = {};
+      } else {
+        delete coldPhase.actions.freeze;
+      }
+
+      if (!updatedPolicy.phases.cold!.actions?.set_priority && coldPhase.actions.set_priority) {
+        delete coldPhase.actions.set_priority;
+      }
+    } else {
+      delete draft.phases.cold;
     }
 
-    if (_meta.warm.bestCompression && policy.phases.warm.actions?.forcemerge) {
-      policy.phases.warm.actions.forcemerge.index_codec = 'best_compression';
+    /**
+     * DELETE PHASE SERIALIZATION
+     */
+    if (_meta.delete.enabled) {
+      const deletePhase = draft.phases.delete!;
+      if (updatedPolicy.phases.delete!.min_age) {
+        deletePhase.min_age = `${updatedPolicy.phases.delete!.min_age}${_meta.delete.minAgeUnit}`;
+      }
+
+      if (originalPolicy?.phases.delete?.actions) {
+        const { wait_for_snapshot: __, ...rest } = originalPolicy.phases.delete.actions;
+        deletePhase.actions = {
+          ...deletePhase.actions,
+          ...rest,
+        };
+      }
+    } else {
+      delete draft.phases.delete;
     }
-  }
-
-  /**
-   * COLD PHASE SERIALIZATION
-   */
-  if (policy.phases.cold) {
-    if (policy.phases.cold.min_age) {
-      policy.phases.cold.min_age = `${policy.phases.cold.min_age}${_meta.cold.minAgeUnit}`;
-    }
-
-    policy.phases.cold.actions = serializeAllocateAction(
-      _meta.cold,
-      policy.phases.cold.actions,
-      originalPolicy?.phases.cold?.actions
-    );
-
-    if (
-      policy.phases.cold.actions.allocate &&
-      !policy.phases.cold.actions.allocate.require &&
-      !isNumber(policy.phases.cold.actions.allocate.number_of_replicas) &&
-      isEmpty(policy.phases.cold.actions.allocate.include) &&
-      isEmpty(policy.phases.cold.actions.allocate.exclude)
-    ) {
-      // remove allocate action if it does not define require or number of nodes
-      // and both include and exclude are empty objects (ES will fail to parse if we don't)
-      delete policy.phases.cold.actions.allocate;
-    }
-
-    if (_meta.cold.freezeEnabled) {
-      policy.phases.cold.actions.freeze = {};
-    }
-  }
-
-  /**
-   * DELETE PHASE SERIALIZATION
-   */
-  if (policy.phases.delete) {
-    if (policy.phases.delete.min_age) {
-      policy.phases.delete.min_age = `${policy.phases.delete.min_age}${_meta.delete.minAgeUnit}`;
-    }
-
-    if (originalPolicy?.phases.delete?.actions) {
-      const { wait_for_snapshot: __, ...rest } = originalPolicy.phases.delete.actions;
-      policy.phases.delete.actions = {
-        ...policy.phases.delete.actions,
-        ...rest,
-      };
-    }
-  }
-
-  return policy;
+  });
 };
