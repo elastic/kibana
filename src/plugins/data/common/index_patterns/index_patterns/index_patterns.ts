@@ -289,12 +289,7 @@ export class IndexPatternsService {
     const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
       const newFields = await this.getFieldsForWildcard(options);
-      // eslint-disable-next-line no-console
-      console.log('getFieldsForWildcard returns', JSON.stringify(newFields));
-      const result = this.fieldArrayToMap([...newFields, ...scriptdFields]);
-      // eslint-disable-next-line no-console
-      console.log('fieldArrayToMap returns', JSON.stringify(result));
-      return result;
+      return this.fieldArrayToMap([...newFields, ...scriptdFields]);
     } catch (err) {
       // eslint-disable-next-line no-console
       console.log('refreshFieldSpecMap ERROR', JSON.stringify(err));

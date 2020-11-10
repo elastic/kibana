@@ -80,7 +80,23 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
         meta_fields: metaFields,
       };
     }
+    // eslint-disable-next-line no-console
+    console.log('API client url', url);
+    // eslint-disable-next-line no-console
+    console.log('API client query', JSON.stringify(query));
 
-    return this._request(url, query).then((resp: any) => resp.fields);
+    return this._request(url, query)
+      .then((resp: any) => {
+        // eslint-disable-next-line no-console
+        console.log('API client url response', JSON.stringify(resp));
+        return resp.fields;
+      })
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.error('API client Error Message', e.message);
+        // eslint-disable-next-line no-console
+        console.error('API client Error', JSON.stringify(e));
+        throw new Error('API client ERROR');
+      });
   }
 }
