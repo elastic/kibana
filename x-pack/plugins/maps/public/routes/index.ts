@@ -4,9 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { MapEmbeddableInput } from './map_embeddable';
-
-export function mergeInputWithSavedMap(
-  input: MapEmbeddableInput,
-  savedmap: unknown
-): Partial<MapEmbeddableInput>;
+export { MapPage, SavedMap } from './map_page';
+export { ListPage } from './list_page';
