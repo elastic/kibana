@@ -17,4 +17,7 @@
  * under the License.
  */
 
-export { i18nMixin } from './i18n_mixin';
+import Fs from 'fs';
+import { promisify } from 'util';
+
+export const readFile = promisify(Fs.readFile);

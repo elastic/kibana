@@ -31,7 +31,8 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       .then((response: SupertestResponse) => response.body);
   }
 
-  describe('update', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/82804
+  describe.skip('update', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
