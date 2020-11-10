@@ -6,7 +6,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { ELogRetentionOptions, ILogRetention, ILogRetentionServer } from './types';
+import { LogRetentionOptions, LogRetention, LogRetentionServer } from './types';
 import { HttpLogic } from '../../../../shared/http';
 import { flashAPIErrors } from '../../../../shared/flash_messages';
 import { convertLogRetentionFromServerToClient } from './utils/convert_log_retention';
@@ -16,18 +16,18 @@ interface LogRetentionActions {
   closeModals(): { value: boolean };
   fetchLogRetention(): { value: boolean };
   saveLogRetention(
-    option: ELogRetentionOptions,
+    option: LogRetentionOptions,
     enabled: boolean
-  ): { option: ELogRetentionOptions; enabled: boolean };
-  setOpenedModal(option: ELogRetentionOptions): { option: ELogRetentionOptions };
-  toggleLogRetention(option: ELogRetentionOptions): { option: ELogRetentionOptions };
-  updateLogRetention(logRetention: ILogRetention): { logRetention: ILogRetention };
+  ): { option: LogRetentionOptions; enabled: boolean };
+  setOpenedModal(option: LogRetentionOptions): { option: LogRetentionOptions };
+  toggleLogRetention(option: LogRetentionOptions): { option: LogRetentionOptions };
+  updateLogRetention(logRetention: LogRetention): { logRetention: LogRetention };
 }
 
 interface LogRetentionValues {
-  logRetention: ILogRetention | null;
+  logRetention: LogRetention | null;
   isLogRetentionUpdating: boolean;
-  openedModal: ELogRetentionOptions | null;
+  openedModal: LogRetentionOptions | null;
 }
 
 export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetentionActions>>({
@@ -72,7 +72,7 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
         const { http } = HttpLogic.values;
         const response = await http.get('/api/app_search/log_settings');
         actions.updateLogRetention(
-          convertLogRetentionFromServerToClient(response as ILogRetentionServer)
+          convertLogRetentionFromServerToClient(response as LogRetentionServer)
         );
       } catch (e) {
         flashAPIErrors(e);
@@ -89,7 +89,7 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
           body: JSON.stringify(updateData),
         });
         actions.updateLogRetention(
-          convertLogRetentionFromServerToClient(response as ILogRetentionServer)
+          convertLogRetentionFromServerToClient(response as LogRetentionServer)
         );
       } catch (e) {
         flashAPIErrors(e);
