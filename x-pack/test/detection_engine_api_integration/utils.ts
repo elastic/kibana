@@ -12,6 +12,7 @@ import { SearchResponse } from 'elasticsearch';
 import {
   FullCreateSchema,
   FullResponseSchema,
+  QueryCreateSchema,
 } from '../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
 import {
@@ -77,7 +78,7 @@ export const removeServerGeneratedPropertiesIncludingRuleId = (
  * @param ruleId
  * @param enabled Enables the rule on creation or not. Defaulted to false to enable it on import
  */
-export const getSimpleRule = (ruleId = 'rule-1', enabled = true): FullCreateSchema => ({
+export const getSimpleRule = (ruleId = 'rule-1', enabled = true): QueryCreateSchema => ({
   name: 'Simple Rule Query',
   description: 'Simple Rule Query',
   enabled,

@@ -27,10 +27,10 @@ import { PartialAlert } from '../../../../../../alerts/server';
 import { SanitizedAlert } from '../../../../../../alerts/server/types';
 import { createRulesStreamFromNdJson } from '../../rules/create_rules_stream_from_ndjson';
 import { RuleAlertType } from '../../rules/types';
-import { CreateRulesBulkSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
+import { CreateRulesBulkSchema } from 'x-pack/plugins/security_solution/common/detection_engine/schemas/request';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
@@ -548,7 +548,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as CreateRulesBulkSchemaDecoded,
+        ] as CreateRulesBulkSchema,
         'rule_id'
       );
       const expected = ['value2', 'value3'];
@@ -562,7 +562,7 @@ describe('utils', () => {
           { rule_id: 'value3' },
           {},
           {},
-        ] as CreateRulesBulkSchemaDecoded,
+        ] as CreateRulesBulkSchema,
         'rule_id'
       );
       const expected: string[] = [];

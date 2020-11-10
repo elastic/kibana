@@ -69,7 +69,7 @@ export const updateRulesBulkRoute = (router: IRouter, ml: SetupPlugins['ml']) =>
             const rule = await updateRules({
               alertsClient,
               savedObjectsClient,
-              siemClient,
+              defaultOutputIndex: siemClient.getSignalsIndex(),
               ruleUpdate: payloadRule,
             });
             if (rule != null) {

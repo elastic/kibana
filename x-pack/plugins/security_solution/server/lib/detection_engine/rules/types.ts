@@ -102,7 +102,6 @@ import { Alert, SanitizedAlert } from '../../../../../alerts/common';
 import { SIGNALS_ID } from '../../../../common/constants';
 import { RuleTypeParams, PartialFilter } from '../types';
 import { ListArrayOrUndefined, ListArray } from '../../../../common/detection_engine/schemas/types';
-import { AppClient } from '../../../types';
 
 export interface RuleAlertType extends Alert {
   params: RuleTypeParams;
@@ -254,7 +253,7 @@ export interface CreateRulesOptions {
 export interface UpdateRulesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   alertsClient: AlertsClient;
-  siemClient: AppClient;
+  defaultOutputIndex: string;
   ruleUpdate: FullUpdateSchema;
 }
 

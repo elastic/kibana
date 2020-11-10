@@ -19,7 +19,7 @@ import { InternalRuleCreate } from '../schemas/rule_schemas';
 export const updateRules = async ({
   alertsClient,
   savedObjectsClient,
-  siemClient,
+  defaultOutputIndex,
   ruleUpdate,
 }: UpdateRulesOptions): Promise<PartialAlert | null> => {
   const existingRule = await readRules({
@@ -48,7 +48,7 @@ export const updateRules = async ({
       // Unlike the create route, immutable comes from the existing rule here
       immutable: existingRule.params.immutable,
       license: ruleUpdate.license,
-      outputIndex: ruleUpdate.output_index ?? siemClient.getSignalsIndex(),
+      outputIndex: ruleUpdate.output_index ?? defaultOutputIndex,
       timelineId: ruleUpdate.timeline_id,
       timelineTitle: ruleUpdate.timeline_title,
       meta: ruleUpdate.meta,

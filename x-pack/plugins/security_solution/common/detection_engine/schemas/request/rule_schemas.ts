@@ -342,6 +342,48 @@ export type MachineLearningCreateSchema = t.TypeOf<typeof machineLearningCreateS
 export const fullCreateSchema = t.intersection([commonCreateParams, createTypeSpecific]);
 export type FullCreateSchema = t.TypeOf<typeof fullCreateSchema>;
 
+export const eqlUpdateSchema = t.intersection([
+  eqlCreateParams,
+  commonCreateParams,
+  t.exact(t.partial({ id })),
+]);
+export type EqlUpdateSchema = t.TypeOf<typeof eqlUpdateSchema>;
+
+export const threatMatchUpdateSchema = t.intersection([
+  threatMatchCreateParams,
+  commonCreateParams,
+  t.exact(t.partial({ id })),
+]);
+export type ThreatMatchUpdateSchema = t.TypeOf<typeof threatMatchUpdateSchema>;
+
+export const queryUpdateSchema = t.intersection([
+  queryCreateParams,
+  commonCreateParams,
+  t.exact(t.partial({ id })),
+]);
+export type QueryUpdateSchema = t.TypeOf<typeof queryUpdateSchema>;
+
+export const savedQueryUpdateSchema = t.intersection([
+  savedQueryCreateParams,
+  commonCreateParams,
+  t.exact(t.partial({ id })),
+]);
+export type SavedQueryUpdateSchema = t.TypeOf<typeof savedQueryUpdateSchema>;
+
+export const thresholdUpdateSchema = t.intersection([
+  thresholdCreateParams,
+  commonCreateParams,
+  t.exact(t.partial({ id })),
+]);
+export type ThresholdUpdateSchema = t.TypeOf<typeof thresholdUpdateSchema>;
+
+export const machineLearningUpdateSchema = t.intersection([
+  machineLearningCreateParams,
+  commonCreateParams,
+  t.exact(t.partial({ id })),
+]);
+export type MachineLearningUpdateSchema = t.TypeOf<typeof machineLearningUpdateSchema>;
+
 const patchTypeSpecific = t.union([
   eqlPatchParams,
   threatMatchPatchParams,
