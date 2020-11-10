@@ -18,59 +18,63 @@ import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 import { AvgIndexPatternColumn } from './definitions/metrics';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from '../types';
 import { documentField } from '../document_field';
+import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../operations');
+
+const indexPatternFields = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'start_date',
+    displayName: 'start_date',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'dest',
+    displayName: 'dest',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+  documentField,
+];
 
 const indexPattern = {
   id: '1',
   title: 'my-fake-index-pattern',
   timeFieldName: 'timestamp',
   hasRestrictions: false,
-  fields: [
-    {
-      name: 'timestamp',
-      displayName: 'timestampLabel',
-      type: 'date',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'start_date',
-      displayName: 'start_date',
-      type: 'date',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'bytes',
-      displayName: 'bytes',
-      type: 'number',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'memory',
-      displayName: 'memory',
-      type: 'number',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'source',
-      displayName: 'source',
-      type: 'string',
-      aggregatable: true,
-      searchable: true,
-    },
-    {
-      name: 'dest',
-      displayName: 'dest',
-      type: 'string',
-      aggregatable: true,
-      searchable: true,
-    },
-    documentField,
-  ],
+  fields: indexPatternFields,
+  getFieldByName: getFieldByNameFactory(indexPatternFields),
 };
 
 describe('state_helpers', () => {
@@ -912,59 +916,61 @@ describe('state_helpers', () => {
   });
 
   describe('updateLayerIndexPattern', () => {
+    const fields = [
+      {
+        name: 'fieldA',
+        displayName: 'fieldA',
+        aggregatable: true,
+        searchable: true,
+        type: 'string',
+      },
+      {
+        name: 'fieldB',
+        displayName: 'fieldB',
+        aggregatable: true,
+        searchable: true,
+        type: 'number',
+        aggregationRestrictions: {
+          avg: {
+            agg: 'avg',
+          },
+        },
+      },
+      {
+        name: 'fieldC',
+        displayName: 'fieldC',
+        aggregatable: false,
+        searchable: true,
+        type: 'date',
+      },
+      {
+        name: 'fieldD',
+        displayName: 'fieldD',
+        aggregatable: true,
+        searchable: true,
+        type: 'date',
+        aggregationRestrictions: {
+          date_histogram: {
+            agg: 'date_histogram',
+            time_zone: 'CET',
+            calendar_interval: 'w',
+          },
+        },
+      },
+      {
+        name: 'fieldE',
+        displayName: 'fieldE',
+        aggregatable: true,
+        searchable: true,
+        type: 'date',
+      },
+    ];
     const newIndexPattern: IndexPattern = {
       id: 'test',
       title: '',
       hasRestrictions: true,
-      fields: [
-        {
-          name: 'fieldA',
-          displayName: 'fieldA',
-          aggregatable: true,
-          searchable: true,
-          type: 'string',
-        },
-        {
-          name: 'fieldB',
-          displayName: 'fieldB',
-          aggregatable: true,
-          searchable: true,
-          type: 'number',
-          aggregationRestrictions: {
-            avg: {
-              agg: 'avg',
-            },
-          },
-        },
-        {
-          name: 'fieldC',
-          displayName: 'fieldC',
-          aggregatable: false,
-          searchable: true,
-          type: 'date',
-        },
-        {
-          name: 'fieldD',
-          displayName: 'fieldD',
-          aggregatable: true,
-          searchable: true,
-          type: 'date',
-          aggregationRestrictions: {
-            date_histogram: {
-              agg: 'date_histogram',
-              time_zone: 'CET',
-              calendar_interval: 'w',
-            },
-          },
-        },
-        {
-          name: 'fieldE',
-          displayName: 'fieldE',
-          aggregatable: true,
-          searchable: true,
-          type: 'date',
-        },
-      ],
+      getFieldByName: getFieldByNameFactory(fields),
+      fields,
     };
 
     it('should switch index pattern id in layer', () => {

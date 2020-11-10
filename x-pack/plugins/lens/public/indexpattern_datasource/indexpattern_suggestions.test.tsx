@@ -13,9 +13,113 @@ import {
   getDatasourceSuggestionsForVisualizeField,
 } from './indexpattern_suggestions';
 import { documentField } from './document_field';
+import { getFieldByNameFactory } from './pure_helpers';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
+
+const fieldsOne = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'start_date',
+    displayName: 'start_date',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'dest',
+    displayName: 'dest',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+  documentField,
+];
+
+const fieldsTwo = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      date_histogram: {
+        agg: 'date_histogram',
+        fixed_interval: '1d',
+        delay: '7d',
+        time_zone: 'UTC',
+      },
+    },
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      // Ignored in the UI
+      histogram: {
+        agg: 'histogram',
+        interval: 1000,
+      },
+      avg: {
+        agg: 'avg',
+      },
+      max: {
+        agg: 'max',
+      },
+      min: {
+        agg: 'min',
+      },
+      sum: {
+        agg: 'sum',
+      },
+    },
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      terms: {
+        agg: 'terms',
+      },
+    },
+  },
+  documentField,
+];
 
 const expectedIndexPatterns = {
   1: {
@@ -23,113 +127,16 @@ const expectedIndexPatterns = {
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     hasRestrictions: false,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'start_date',
-        displayName: 'start_date',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'memory',
-        displayName: 'memory',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'dest',
-        displayName: 'dest',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-      },
-      documentField,
-    ],
+    fields: fieldsOne,
+    getFieldByName: getFieldByNameFactory(fieldsOne),
   },
   2: {
     id: '2',
     title: 'my-fake-restricted-pattern',
     hasRestrictions: true,
     timeFieldName: 'timestamp',
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          date_histogram: {
-            agg: 'date_histogram',
-            fixed_interval: '1d',
-            delay: '7d',
-            time_zone: 'UTC',
-          },
-        },
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          // Ignored in the UI
-          histogram: {
-            agg: 'histogram',
-            interval: 1000,
-          },
-          avg: {
-            agg: 'avg',
-          },
-          max: {
-            agg: 'max',
-          },
-          min: {
-            agg: 'min',
-          },
-          sum: {
-            agg: 'sum',
-          },
-        },
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          terms: {
-            agg: 'terms',
-          },
-        },
-      },
-      documentField,
-    ],
+    fields: fieldsTwo,
+    getFieldByName: getFieldByNameFactory(fieldsTwo),
   },
 };
 
@@ -338,6 +345,15 @@ describe('IndexPattern Data Source suggestions', () => {
                   searchable: true,
                 },
               ],
+              getFieldByName: getFieldByNameFactory([
+                {
+                  name: 'bytes',
+                  displayName: 'bytes',
+                  type: 'number',
+                  aggregatable: true,
+                  searchable: true,
+                },
+              ]),
             },
           },
           layers: {
@@ -549,6 +565,16 @@ describe('IndexPattern Data Source suggestions', () => {
                   searchable: true,
                 },
               ],
+
+              getFieldByName: getFieldByNameFactory([
+                {
+                  name: 'bytes',
+                  displayName: 'bytes',
+                  type: 'number',
+                  aggregatable: true,
+                  searchable: true,
+                },
+              ]),
             },
           },
           layers: {
@@ -1542,6 +1568,43 @@ describe('IndexPattern Data Source suggestions', () => {
 
     it('returns simplified versions of table with more than 2 columns', () => {
       const initialState = testInitialState();
+      const fields = [
+        {
+          name: 'field1',
+          displayName: 'field1',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'field2',
+          displayName: 'field2',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'field3',
+          displayName: 'field3Label',
+          type: 'string',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'field4',
+          displayName: 'field4',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        },
+        {
+          name: 'field5',
+          displayName: 'field5',
+          type: 'number',
+          aggregatable: true,
+          searchable: true,
+        },
+      ];
       const state: IndexPatternPrivateState = {
         indexPatternRefs: [],
         existingFields: {},
@@ -1551,43 +1614,8 @@ describe('IndexPattern Data Source suggestions', () => {
             id: '1',
             title: 'my-fake-index-pattern',
             hasRestrictions: false,
-            fields: [
-              {
-                name: 'field1',
-                displayName: 'field1',
-                type: 'string',
-                aggregatable: true,
-                searchable: true,
-              },
-              {
-                name: 'field2',
-                displayName: 'field2',
-                type: 'string',
-                aggregatable: true,
-                searchable: true,
-              },
-              {
-                name: 'field3',
-                displayName: 'field3Label',
-                type: 'string',
-                aggregatable: true,
-                searchable: true,
-              },
-              {
-                name: 'field4',
-                displayName: 'field4',
-                type: 'number',
-                aggregatable: true,
-                searchable: true,
-              },
-              {
-                name: 'field5',
-                displayName: 'field5',
-                type: 'number',
-                aggregatable: true,
-                searchable: true,
-              },
-            ],
+            fields,
+            getFieldByName: getFieldByNameFactory(fields),
           },
         },
         isFirstExistenceFetch: false,
@@ -1711,6 +1739,23 @@ describe('IndexPattern Data Source suggestions', () => {
                 searchable: true,
               },
             ],
+
+            getFieldByName: getFieldByNameFactory([
+              {
+                name: 'field1',
+                displayName: 'field1',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+              {
+                name: 'field2',
+                displayName: 'field2',
+                type: 'date',
+                aggregatable: true,
+                searchable: true,
+              },
+            ]),
           },
         },
         isFirstExistenceFetch: false,
@@ -1767,6 +1812,15 @@ describe('IndexPattern Data Source suggestions', () => {
                 searchable: true,
               },
             ],
+            getFieldByName: getFieldByNameFactory([
+              {
+                name: 'field1',
+                displayName: 'field1',
+                type: 'number',
+                aggregatable: true,
+                searchable: true,
+              },
+            ]),
           },
         },
         isFirstExistenceFetch: false,

@@ -18,6 +18,7 @@ import {
 } from '../../../../../../../src/plugins/data/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
 import { IndexPatternPrivateState } from '../../types';
+import { getFieldByNameFactory } from '../../pure_helpers';
 
 const dataStart = dataPluginMock.createStartContract();
 dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression(
@@ -66,6 +67,17 @@ describe('date_histogram', () => {
               searchable: true,
             },
           ],
+
+          getFieldByName: getFieldByNameFactory([
+            {
+              name: 'timestamp',
+              displayName: 'timestampLabel',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+            },
+          ]),
         },
         2: {
           id: '2',
@@ -81,6 +93,16 @@ describe('date_histogram', () => {
               searchable: true,
             },
           ],
+          getFieldByName: getFieldByNameFactory([
+            {
+              name: 'other_timestamp',
+              displayName: 'other_timestamp',
+              type: 'date',
+              esTypes: ['date'],
+              aggregatable: true,
+              searchable: true,
+            },
+          ]),
         },
       },
       layers: {
@@ -261,6 +283,22 @@ describe('date_histogram', () => {
               },
             },
           ],
+          getFieldByName: getFieldByNameFactory([
+            {
+              name: 'timestamp',
+              displayName: 'timestamp',
+              aggregatable: true,
+              searchable: true,
+              type: 'date',
+              aggregationRestrictions: {
+                date_histogram: {
+                  agg: 'date_histogram',
+                  time_zone: 'UTC',
+                  calendar_interval: '42w',
+                },
+              },
+            },
+          ]),
         }
       );
       expect(esAggsConfig).toEqual(
@@ -288,7 +326,7 @@ describe('date_histogram', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newDateField = indexPattern.fields.find((i) => i.name === 'start_date')!;
+      const newDateField = indexPattern.getFieldByName('start_date')!;
 
       const column = dateHistogramOperation.onFieldChange(oldColumn, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');
@@ -308,7 +346,7 @@ describe('date_histogram', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newDateField = indexPattern.fields.find((i) => i.name === 'start_date')!;
+      const newDateField = indexPattern.getFieldByName('start_date')!;
 
       const column = dateHistogramOperation.onFieldChange(oldColumn, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');
@@ -350,6 +388,22 @@ describe('date_histogram', () => {
               },
             },
           ],
+          getFieldByName: getFieldByNameFactory([
+            {
+              name: 'dateField',
+              displayName: 'dateField',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+              aggregationRestrictions: {
+                date_histogram: {
+                  agg: 'date_histogram',
+                  time_zone: 'CET',
+                  calendar_interval: 'w',
+                },
+              },
+            },
+          ]),
         }
       );
       expect(transferedColumn).toEqual(
@@ -387,6 +441,15 @@ describe('date_histogram', () => {
               searchable: true,
             },
           ],
+          getFieldByName: getFieldByNameFactory([
+            {
+              name: 'dateField',
+              displayName: 'dateField',
+              type: 'date',
+              aggregatable: true,
+              searchable: true,
+            },
+          ]),
         }
       );
       expect(transferedColumn).toEqual(
@@ -603,6 +666,18 @@ describe('date_histogram', () => {
                     },
                   },
                 ],
+                getFieldByName: getFieldByNameFactory([
+                  {
+                    ...state.indexPatterns[1].fields[0],
+                    aggregationRestrictions: {
+                      date_histogram: {
+                        agg: 'date_histogram',
+                        time_zone: 'UTC',
+                        calendar_interval: '1h',
+                      },
+                    },
+                  },
+                ]),
               },
             },
           }}

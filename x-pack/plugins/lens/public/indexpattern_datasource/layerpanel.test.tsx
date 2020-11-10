@@ -11,11 +11,126 @@ import { shallowWithIntl as shallow } from 'test_utils/enzyme_helpers';
 import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
 import { ChangeIndexPattern } from './change_indexpattern';
+import { getFieldByNameFactory } from './pure_helpers';
 
 interface IndexPatternPickerOption {
   label: string;
   checked?: 'on' | 'off';
 }
+
+const fieldsOne = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'unsupported',
+    displayName: 'unsupported',
+    type: 'geo',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+];
+
+const fieldsTwo = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      date_histogram: {
+        agg: 'date_histogram',
+        fixed_interval: '1d',
+        delay: '7d',
+        time_zone: 'UTC',
+      },
+    },
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      histogram: {
+        agg: 'histogram',
+        interval: 1000,
+      },
+      max: {
+        agg: 'max',
+      },
+      min: {
+        agg: 'min',
+      },
+      sum: {
+        agg: 'sum',
+      },
+    },
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      terms: {
+        agg: 'terms',
+      },
+    },
+  },
+];
+
+const fieldsThree = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+];
 
 const initialState: IndexPatternPrivateState = {
   indexPatternRefs: [
@@ -61,129 +176,24 @@ const initialState: IndexPatternPrivateState = {
       title: 'my-fake-index-pattern',
       timeFieldName: 'timestamp',
       hasRestrictions: false,
-      fields: [
-        {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'bytes',
-          displayName: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'memory',
-          displayName: 'memory',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'unsupported',
-          displayName: 'unsupported',
-          type: 'geo',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'source',
-          displayName: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-        },
-      ],
+      fields: fieldsOne,
+      getFieldByName: getFieldByNameFactory(fieldsOne),
     },
     '2': {
       id: '2',
       title: 'my-fake-restricted-pattern',
       hasRestrictions: true,
       timeFieldName: 'timestamp',
-      fields: [
-        {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-          aggregationRestrictions: {
-            date_histogram: {
-              agg: 'date_histogram',
-              fixed_interval: '1d',
-              delay: '7d',
-              time_zone: 'UTC',
-            },
-          },
-        },
-        {
-          name: 'bytes',
-          displayName: 'bytes',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-          aggregationRestrictions: {
-            histogram: {
-              agg: 'histogram',
-              interval: 1000,
-            },
-            max: {
-              agg: 'max',
-            },
-            min: {
-              agg: 'min',
-            },
-            sum: {
-              agg: 'sum',
-            },
-          },
-        },
-        {
-          name: 'source',
-          displayName: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-          aggregationRestrictions: {
-            terms: {
-              agg: 'terms',
-            },
-          },
-        },
-      ],
+      fields: fieldsTwo,
+      getFieldByName: getFieldByNameFactory(fieldsTwo),
     },
     '3': {
       id: '3',
       title: 'my-compatible-pattern',
       timeFieldName: 'timestamp',
       hasRestrictions: false,
-      fields: [
-        {
-          name: 'timestamp',
-          displayName: 'timestampLabel',
-          type: 'date',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'memory',
-          displayName: 'memory',
-          type: 'number',
-          aggregatable: true,
-          searchable: true,
-        },
-        {
-          name: 'source',
-          displayName: 'source',
-          type: 'string',
-          aggregatable: true,
-          searchable: true,
-        },
-      ],
+      fields: fieldsThree,
+      getFieldByName: getFieldByNameFactory(fieldsThree),
     },
   },
 };

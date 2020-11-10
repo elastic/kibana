@@ -129,7 +129,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
 
   const operationsForNewField = operationSupportMatrix.operationByField[droppedItem.field.name];
 
-  if (!operationsForNewField || operationsForNewField.length === 0) {
+  if (!operationsForNewField || operationsForNewField.size === 0) {
     return false;
   }
 
@@ -141,7 +141,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
   // Detects if we can change the field only, otherwise change field + operation
   const fieldIsCompatibleWithCurrent =
     selectedColumn &&
-    operationSupportMatrix.operationByField[droppedItem.field.name]?.includes(
+    operationSupportMatrix.operationByField[droppedItem.field.name]?.has(
       selectedColumn.operationType
     );
 
@@ -150,14 +150,16 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
         layer,
         columnId,
         indexPattern: currentIndexPattern,
-        op: fieldIsCompatibleWithCurrent ? selectedColumn.operationType : operationsForNewField[0],
+        op: fieldIsCompatibleWithCurrent
+          ? selectedColumn.operationType
+          : operationsForNewField.values().next().value,
         field: droppedItem.field,
       })
     : insertNewColumn({
         layer,
         columnId,
         indexPattern: currentIndexPattern,
-        op: operationsForNewField[0],
+        op: operationsForNewField.values().next().value,
         field: droppedItem.field,
       });
 

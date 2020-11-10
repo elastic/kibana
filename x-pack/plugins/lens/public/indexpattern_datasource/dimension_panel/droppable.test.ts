@@ -15,8 +15,45 @@ import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { IndexPatternColumn } from '../operations';
+import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../operations');
+
+const fields = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  documentField,
+];
 
 const expectedIndexPatterns = {
   foo: {
@@ -25,41 +62,8 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     hasExistence: true,
     hasRestrictions: false,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'memory',
-        displayName: 'memory',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      documentField,
-    ],
+    fields,
+    getFieldByName: getFieldByNameFactory(fields),
   },
 };
 

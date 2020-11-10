@@ -31,7 +31,7 @@ import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField, fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import { IndexPattern, IndexPatternField, IndexPatternLayer } from '../types';
+import { IndexPattern, IndexPatternLayer } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 
@@ -99,23 +99,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const ParamEditor = selectedOperationDefinition?.paramEditor;
 
-  const fieldMap: Record<string, IndexPatternField> = useMemo(() => {
-    const fields: Record<string, IndexPatternField> = {};
-    currentIndexPattern.fields.forEach((field) => {
-      fields[field.name] = field;
-    });
-    return fields;
-  }, [currentIndexPattern]);
-
   const possibleOperations = useMemo(() => {
     return Object.values(operationDefinitionMap)
       .sort((op1, op2) => {
         return op1.displayName.localeCompare(op2.displayName);
       })
       .map((def) => def.type)
-      .filter(
-        (type) => fieldByOperation[type]?.length || operationWithoutField.indexOf(type) !== -1
-      );
+      .filter((type) => fieldByOperation[type]?.size || operationWithoutField.has(type));
   }, [fieldByOperation, operationWithoutField]);
 
   // Operations are compatible if they match inputs. They are always compatible in
@@ -130,7 +120,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         (selectedColumn &&
           hasField(selectedColumn) &&
           definition.input === 'field' &&
-          fieldByOperation[operationType]?.indexOf(selectedColumn.sourceField) !== -1) ||
+          fieldByOperation[operationType]?.has(selectedColumn.sourceField)) ||
         (selectedColumn && !hasField(selectedColumn) && definition.input !== 'field'),
     };
   });
@@ -192,9 +182,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
-            const possibleFields = fieldByOperation[operationType] || [];
+            const possibleFields = fieldByOperation[operationType] || new Set();
 
-            if (possibleFields.length === 1) {
+            if (possibleFields.size === 1) {
               setState(
                 mergeLayer({
                   state,
@@ -204,7 +194,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     indexPattern: currentIndexPattern,
                     columnId,
                     op: operationType,
-                    field: fieldMap[possibleFields[0]],
+                    field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
                   }),
                 })
               );
@@ -226,7 +216,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
             indexPattern: currentIndexPattern,
             columnId,
             op: operationType,
-            field: hasField(selectedColumn) ? fieldMap[selectedColumn.sourceField] : undefined,
+            field: hasField(selectedColumn)
+              ? currentIndexPattern.getFieldByName(selectedColumn.sourceField)
+              : undefined,
           });
 
           setState(mergeLayer({ state, layerId, newLayer }));
@@ -279,7 +271,6 @@ export function DimensionEditor(props: DimensionEditorProps) {
               fieldIsInvalid={currentFieldIsInvalid}
               currentIndexPattern={currentIndexPattern}
               existingFields={state.existingFields}
-              fieldMap={fieldMap}
               operationSupportMatrix={operationSupportMatrix}
               selectedColumnOperationType={selectedColumn && selectedColumn.operationType}
               selectedColumnSourceField={
@@ -309,29 +300,29 @@ export function DimensionEditor(props: DimensionEditorProps) {
                     columnId,
                     indexPattern: currentIndexPattern,
                     op: choice.operationType,
-                    field: fieldMap[choice.field],
+                    field: currentIndexPattern.getFieldByName(choice.field)!,
                   });
                 } else {
                   // Finds a new operation
                   const compatibleOperations =
                     ('field' in choice && operationSupportMatrix.operationByField[choice.field]) ||
-                    [];
+                    new Set();
                   let operation;
-                  if (compatibleOperations.length > 0) {
+                  if (compatibleOperations.size > 0) {
                     operation =
                       incompatibleSelectedOperationType &&
-                      compatibleOperations.includes(incompatibleSelectedOperationType)
+                      compatibleOperations.has(incompatibleSelectedOperationType)
                         ? incompatibleSelectedOperationType
-                        : compatibleOperations[0];
+                        : compatibleOperations.values().next().value;
                   } else if ('field' in choice) {
                     operation = choice.operationType;
                   }
                   newLayer = insertOrReplaceColumn({
                     layer: state.layers[layerId],
                     columnId,
+                    field: currentIndexPattern.getFieldByName(choice.field),
                     indexPattern: currentIndexPattern,
                     op: operation as OperationType,
-                    field: fieldMap[choice.field],
                   });
                 }
 
@@ -394,12 +385,12 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
           {!incompatibleSelectedOperationType && !hideGrouping && (
             <BucketNestingEditor
-              fieldMap={fieldMap}
               layer={state.layers[props.layerId]}
               columnId={props.columnId}
               setColumns={(columnOrder) =>
                 setState(mergeLayer({ state, layerId, newLayer: { columnOrder } }))
               }
+              getFieldByName={currentIndexPattern.getFieldByName}
             />
           )}
 

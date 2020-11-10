@@ -62,7 +62,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     }
   },
   isTransferable: (column, newIndexPattern) => {
-    const newField = newIndexPattern.fields.find((field) => field.name === column.sourceField);
+    const newField = newIndexPattern.getFieldByName(column.sourceField);
 
     return Boolean(
       newField &&
