@@ -117,11 +117,7 @@ export function systemRoutes(
     },
     routeGuard.basicLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
-        // if spaces is disabled force isMlEnabledInSpace to be true
-        const { isMlEnabledInSpace } =
-          spaces !== undefined
-            ? spacesUtilsProvider(spaces, (request as unknown) as Request)
-            : { isMlEnabledInSpace: async () => true };
+        const { isMlEnabledInSpace } = spacesUtilsProvider(spaces, (request as unknown) as Request);
 
         const mlCapabilities = await resolveMlCapabilities(request);
         if (mlCapabilities === null) {

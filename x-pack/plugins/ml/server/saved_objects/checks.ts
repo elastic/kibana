@@ -4,14 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
-import { SearchResponse } from 'elasticsearch';
+import { IScopedClusterClient, KibanaRequest } from 'kibana/server';
+import type { SpacesPluginSetup } from '../../../spaces/server';
 import type { JobSavedObjectService } from './service';
-import { JobType, ML_SAVED_OBJECT_TYPE } from '../../common/types/saved_objects';
+import { JobType } from '../../common/types/saved_objects';
 
 import { Job } from '../../common/types/anomaly_detection_jobs';
 import { Datafeed } from '../../common/types/anomaly_detection_jobs';
 import { DataFrameAnalyticsConfig } from '../../common/types/data_frame_analytics';
+import { spacesUtilsProvider } from '../lib/spaces_utils';
 
 interface JobSavedObjectStatus {
   jobId: string;
@@ -32,14 +33,6 @@ interface JobStatus {
   };
 }
 
-interface SavedObjectJob {
-  [ML_SAVED_OBJECT_TYPE]: {
-    job_id: string;
-    type: JobType;
-  };
-  namespaces: string[];
-}
-
 interface StatusResponse {
   savedObjects: {
     [type in JobType]: JobSavedObjectStatus[];
@@ -51,10 +44,21 @@ interface StatusResponse {
 
 export function checksFactory(
   client: IScopedClusterClient,
-  jobSavedObjectService: JobSavedObjectService
+  jobSavedObjectService: JobSavedObjectService,
+  request: KibanaRequest,
+  spacesPlugin?: SpacesPluginSetup
 ) {
+  const { getAllSpaces } = spacesUtilsProvider(spacesPlugin, request);
   async function checkStatus(): Promise<StatusResponse> {
-    const jobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
+    const allSpaces = await getAllSpaces();
+    const allJobObjects = await jobSavedObjectService.getAllJobObjects(undefined, false);
+    const jobObjects =
+      allSpaces === null
+        ? allJobObjects
+        : allJobObjects.filter((j) =>
+            j.namespaces?.some((s) => s === '*' || allSpaces.includes(s))
+          );
+
     // load all non-space jobs and datafeeds
     const { body: adJobs } = await client.asInternalUser.ml.getJobs<{ jobs: Job[] }>();
     const { body: datafeeds } = await client.asInternalUser.ml.getDatafeeds<{
@@ -93,16 +97,15 @@ export function checksFactory(
       }
     );
 
-    const nonSpaceSavedObjects = await _loadAllJobSavedObjects();
     const nonSpaceADObjectIds = new Set(
-      nonSpaceSavedObjects
-        .filter(({ type }) => type === 'anomaly-detector')
-        .map(({ jobId }) => jobId)
+      allJobObjects
+        .filter(({ attributes }) => attributes.type === 'anomaly-detector')
+        .map(({ attributes }) => attributes.job_id)
     );
     const nonSpaceDFAObjectIds = new Set(
-      nonSpaceSavedObjects
-        .filter(({ type }) => type === 'data-frame-analytics')
-        .map(({ jobId }) => jobId)
+      allJobObjects
+        .filter(({ attributes }) => attributes.type === 'data-frame-analytics')
+        .map(({ attributes }) => attributes.job_id)
     );
 
     const adObjectIds = new Set(
@@ -159,36 +162,6 @@ export function checksFactory(
         'data-frame-analytics': dataFrameAnalytics,
       },
     };
-  }
-
-  async function _loadAllJobSavedObjects() {
-    const { body } = await client.asInternalUser.search<SearchResponse<SavedObjectJob>>({
-      index: '.kibana*',
-      size: 1000,
-      _source: ['ml-job.job_id', 'ml-job.type', 'namespaces'],
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: {
-                  type: ML_SAVED_OBJECT_TYPE,
-                },
-              },
-            ],
-          },
-        },
-      },
-    });
-
-    return body.hits.hits.map(({ _source }) => {
-      const { job_id: jobId, type } = _source[ML_SAVED_OBJECT_TYPE];
-      return {
-        jobId,
-        type,
-        spaces: _source.namespaces,
-      };
-    });
   }
 
   return { checkStatus };

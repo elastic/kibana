@@ -87,7 +87,7 @@ export function jobSavedObjectServiceFactory(
       throw new MLJobNotFound('job not found');
     }
 
-    await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id);
+    await savedObjectsClient.delete(ML_SAVED_OBJECT_TYPE, job.id, { force: true });
   }
 
   async function createAnomalyDetectionJob(jobId: string, datafeedId?: string) {

@@ -162,7 +162,7 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     notificationRoutes(routeInit);
     resultsServiceRoutes(routeInit);
     jobValidationRoutes(routeInit, this.version);
-    savedObjectsRoutes(routeInit);
+    savedObjectsRoutes(routeInit, plugins.spaces);
     systemRoutes(routeInit, {
       spaces: plugins.spaces,
       cloud: plugins.cloud,
