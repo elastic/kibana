@@ -6,7 +6,7 @@
 
 import * as rt from 'io-ts';
 import { concat, defer, of } from 'rxjs';
-import { concatMap, filter, map, shareReplay, take, tap, withLatestFrom } from 'rxjs/operators';
+import { concatMap, filter, map, shareReplay, take } from 'rxjs/operators';
 import {
   IEsSearchRequest,
   IKibanaSearchRequest,
@@ -58,12 +58,12 @@ export const logEntrySearchStrategyProvider = ({
   const esSearchStrategy = data.search.getSearchStrategy('ese');
 
   return {
-    search: (rawRequest, options, context) =>
+    search: (rawRequest, options, dependencies) =>
       defer(() => {
         const request = decodeOrThrow(asyncRequestRT)(rawRequest);
 
         const sourceConfiguration$ = defer(() =>
-          sources.getSourceConfiguration(context.core.savedObjects.client, request.params.sourceId)
+          sources.getSourceConfiguration(dependencies.savedObjectsClient, request.params.sourceId)
         ).pipe(shareReplay(1));
 
         const recoveredRequest$ = of(request).pipe(
@@ -91,7 +91,7 @@ export const logEntrySearchStrategyProvider = ({
 
         return concat(recoveredRequest$, initialRequest$).pipe(
           take(1),
-          concatMap((esRequest) => esSearchStrategy.search(esRequest, options, context)),
+          concatMap((esRequest) => esSearchStrategy.search(esRequest, options, dependencies)),
           map((esResponse) => ({
             ...esResponse,
             rawResponse: decodeOrThrow(getLogEntryResponseRT)(esResponse.rawResponse),
@@ -120,9 +120,9 @@ export const logEntrySearchStrategyProvider = ({
           )
         );
       }),
-    cancel: async (context, id) => {
+    cancel: async (id, options, dependencies) => {
       const { esRequestId } = decodeOrThrow(logEntrySearchRequestStateRT)(id);
-      return await esSearchStrategy.cancel?.(context, esRequestId);
+      return await esSearchStrategy.cancel?.(esRequestId, options, dependencies);
     },
   };
 };

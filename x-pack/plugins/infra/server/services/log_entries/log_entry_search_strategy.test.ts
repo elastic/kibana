@@ -5,9 +5,13 @@
  */
 
 import { of } from 'rxjs';
-import { IEsSearchResponse } from 'src/plugins/data/server';
+import {
+  elasticsearchServiceMock,
+  savedObjectsClientMock,
+  uiSettingsServiceMock,
+} from 'src/core/server/mocks';
+import { IEsSearchResponse, SearchStrategyDependencies } from 'src/plugins/data/server';
 import { dataPluginMock } from 'src/plugins/data/server/mocks';
-import { xpackMocks } from '../../../../../mocks';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import { logEntrySearchStrategyProvider } from './log_entry_search_strategy';
 
@@ -27,7 +31,11 @@ describe('LogEntry search strategy', () => {
     dataMock.search.getSearchStrategy.mockReturnValue(esSearchStrategyMock);
     const sourcesMock = createInfraSourcesMock();
     sourcesMock.getSourceConfiguration.mockResolvedValue(createSourceConfigurationMock());
-    const mockContext = xpackMocks.createRequestHandlerContext();
+    const mockDependencies: SearchStrategyDependencies = {
+      uiSettingsClient: uiSettingsServiceMock.createClient(),
+      esClient: elasticsearchServiceMock.createScopedClusterClient(),
+      savedObjectsClient: savedObjectsClientMock.create(),
+    };
 
     const logEntrySearchStrategy = logEntrySearchStrategyProvider({
       data: dataMock,
@@ -40,7 +48,7 @@ describe('LogEntry search strategy', () => {
           params: { sourceId: 'SOURCE_ID', logEntryId: 'LOG_ENTRY_ID' },
         },
         {},
-        mockContext
+        mockDependencies
       )
       .toPromise();
 
