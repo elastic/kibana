@@ -13,7 +13,8 @@ import {
   ILegacyClusterClient,
   Headers,
 } from '../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticatedUser } from '../../../common/model';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { Tokens } from '../tokens';
@@ -110,10 +111,20 @@ export abstract class BaseAuthenticationProvider {
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
-    return deepFreeze({
-      ...(await this.options.client
+    return this.authenticationInfoToAuthenticatedUser(
+      await this.options.client
         .asScoped({ headers: { ...request.headers, ...authHeaders } })
-        .callAsCurrentUser('shield.authenticate')),
+        .callAsCurrentUser('shield.authenticate')
+    );
+  }
+
+  /**
+   * Converts Elasticsearch Authentication result to a Kibana authenticated user.
+   * @param authenticationInfo Result returned from the `_authenticate` operation.
+   */
+  protected authenticationInfoToAuthenticatedUser(authenticationInfo: AuthenticationInfo) {
+    return deepFreeze({
+      ...authenticationInfo,
       authentication_provider: { type: this.type, name: this.options.name },
     } as AuthenticatedUser);
   }

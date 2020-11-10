@@ -6,13 +6,13 @@
 
 import Boom from '@hapi/boom';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import { AuthenticatedUser } from '../../../common/model';
 import { isInternalURL } from '../../../common/is_internal_url';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { Tokens, TokenPair } from '../tokens';
+import { Tokens, TokenPair, RefreshTokenResult } from '../tokens';
 import { AuthenticationProviderOptions, BaseAuthenticationProvider } from './base';
 
 /**
@@ -343,26 +343,22 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     const providerRealm = this.realm || stateRealm;
 
-    let accessToken;
-    let refreshToken;
-    let realm;
+    let result: {
+      access_token: string;
+      refresh_token: string;
+      realm: string;
+      authentication: AuthenticationInfo;
+    };
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/authenticate`.
-      const authenticateResponse = await this.options.client.callAsInternalUser(
-        'shield.samlAuthenticate',
-        {
-          body: {
-            ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
-            content: samlResponse,
-            ...(providerRealm ? { realm: providerRealm } : {}),
-          },
-        }
-      );
-
-      accessToken = authenticateResponse.access_token;
-      refreshToken = authenticateResponse.refresh_token;
-      realm = authenticateResponse.realm;
+      result = await this.options.client.callAsInternalUser('shield.samlAuthenticate', {
+        body: {
+          ids: !isIdPInitiatedLogin ? [stateRequestId] : [],
+          content: samlResponse,
+          ...(providerRealm ? { realm: providerRealm } : {}),
+        },
+      });
     } catch (err) {
       this.logger.debug(`Failed to log in with SAML response: ${err.message}`);
 
@@ -372,17 +368,6 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return isIdPInitiatedLogin && providerRealm
         ? AuthenticationResult.notHandled()
         : AuthenticationResult.failed(err);
-    }
-
-    // Now we need to retrieve full user information.
-    let user: Readonly<AuthenticatedUser>;
-    try {
-      user = await this.getUser(request, {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      });
-    } catch (err) {
-      this.logger.debug(`Failed to retrieve user using access token: ${err.message}`);
-      return AuthenticationResult.failed(err);
     }
 
     // IdP can pass `RelayState` with the deep link in Kibana during IdP initiated login and
@@ -408,7 +393,14 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     this.logger.debug('Login has been performed with SAML response.');
     return AuthenticationResult.redirectTo(
       redirectURLFromRelayState || stateRedirectURL || `${this.options.basePath.get(request)}/`,
-      { state: { accessToken, refreshToken, realm }, user }
+      {
+        state: {
+          accessToken: result.access_token,
+          refreshToken: result.refresh_token,
+          realm: result.realm,
+        },
+        user: this.authenticationInfoToAuthenticatedUser(result.authentication),
+      }
     );
   }
 
@@ -501,20 +493,17 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
    * @param request Request instance.
    * @param state State value previously stored by the provider.
    */
-  private async authenticateViaRefreshToken(
-    request: KibanaRequest,
-    { refreshToken, realm }: ProviderState
-  ) {
+  private async authenticateViaRefreshToken(request: KibanaRequest, state: ProviderState) {
     this.logger.debug('Trying to refresh access token.');
 
-    if (!refreshToken) {
+    if (!state.refreshToken) {
       this.logger.debug('Refresh token is not found in state.');
       return AuthenticationResult.notHandled();
     }
 
-    let refreshedTokenPair: TokenPair | null;
+    let refreshTokenResult: RefreshTokenResult | null;
     try {
-      refreshedTokenPair = await this.options.tokens.refresh(refreshToken);
+      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
       return AuthenticationResult.failed(err);
     }
@@ -524,7 +513,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     // handshake. Obviously we can't do that for AJAX requests, so we just reply with `400` and clear error message.
     // There are two reasons for `400` and not `401`: Elasticsearch search responds with `400` so it seems logical
     // to do the same on Kibana side and `401` would force user to logout and do full SLO if it's supported.
-    if (refreshedTokenPair === null) {
+    if (refreshTokenResult === null) {
       if (canStartNewSession(request)) {
         this.logger.debug(
           'Both access and refresh tokens are expired. Capturing redirect URL and re-initiating SAML handshake.'
@@ -537,26 +526,17 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       );
     }
 
-    try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader(
-          'Bearer',
-          refreshedTokenPair.accessToken
-        ).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
-
-      this.logger.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, {
-        authHeaders,
-        state: { realm: this.realm || realm, ...refreshedTokenPair },
-      });
-    } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate user using newly refreshed access token: ${err.message}`
-      );
-      return AuthenticationResult.failed(err);
-    }
+    this.logger.debug('Request has been authenticated via refreshed token.');
+    const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+        },
+        state: { accessToken, refreshToken, realm: this.realm || state.realm },
+      }
+    );
   }
 
   /**
