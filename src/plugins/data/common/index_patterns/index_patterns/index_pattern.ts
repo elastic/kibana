@@ -322,4 +322,36 @@ export class IndexPattern implements IIndexPattern {
       field.esTypes as ES_FIELD_TYPES[]
     );
   }
+
+  /**
+   * Get formatter for a given field name. Return undefined if none exists
+   * @param field
+   */
+  getFormatterForFieldNoDefault(fieldname: string) {
+    const formatSpec = this.fieldFormatMap[fieldname];
+    if (formatSpec?.id) {
+      return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
+    }
+  }
+  /**
+   * Helper function to extend field specs with e.g. customName
+   */
+  /*
+  I think this is the attribute builder
+  private getFieldSpecs(specs: IndexPatternFieldMap | undefined) {
+    if (!specs) {
+      return {};
+    }
+    if (!this.attributes?.fields) {
+      return specs;
+    }
+
+    for (const key of Object.keys(this.attributes?.fields)) {
+      if (specs[key] && this.attributes.fields[key].customName) {
+        specs[key].customName = this.attributes.fields[key].customName;
+      }
+    }
+    return specs;
+  }
+  */
 }
