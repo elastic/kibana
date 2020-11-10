@@ -28,7 +28,7 @@ import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data'
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { Agent, AgentPolicy } from '../../../../../ingest_manager/common/types/models';
 import { AgentService } from '../../../../../ingest_manager/server/services';
-import { AgentPolicyServiceInterface } from '../../../../../ingest_manager/server/services/agent_policy';
+import { AgentPolicyServiceInterface } from '../../../../../ingest_manager/server';
 
 describe('test policy response handler', () => {
   let endpointAppContextService: EndpointAppContextService;
@@ -98,7 +98,7 @@ describe('test policy response handler', () => {
     });
   });
 
-  describe('test policy summaries handler', () => {
+  describe('test agent policy summary handler', () => {
     let mockAgentService: jest.Mocked<AgentService>;
     let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
 

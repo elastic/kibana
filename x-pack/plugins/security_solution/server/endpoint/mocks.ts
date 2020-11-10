@@ -14,6 +14,7 @@ import {
   IngestManagerStartContract,
   ExternalCallback,
   PackageService,
+  AgentPolicyServiceInterface,
 } from '../../../ingest_manager/server';
 import { createPackagePolicyServiceMock } from '../../../ingest_manager/server/mocks';
 import { AppClientFactory } from '../client';
@@ -25,8 +26,6 @@ import {
 import { ManifestManager } from './services/artifacts/manifest_manager/manifest_manager';
 import { getManifestManagerMock } from './services/artifacts/manifest_manager/manifest_manager.mock';
 import { EndpointAppContext } from './types';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentPolicyServiceInterface } from '../../../ingest_manager/server/services/agent_policy';
 
 /**
  * Creates a mocked EndpointAppContext.

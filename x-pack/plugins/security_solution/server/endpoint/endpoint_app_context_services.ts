@@ -11,6 +11,7 @@ import {
 } from 'src/core/server';
 import { SecurityPluginSetup } from '../../../security/server';
 import {
+  AgentPolicyServiceInterface,
   AgentService,
   IngestManagerStartContract,
   PackageService,
@@ -28,8 +29,6 @@ import { ElasticsearchAssetType } from '../../../ingest_manager/common/types/mod
 import { metadataTransformPrefix } from '../../common/endpoint/constants';
 import { AppClientFactory } from '../client';
 import { ConfigType } from '../config';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { AgentPolicyServiceInterface } from '../../../ingest_manager/server/services/agent_policy';
 
 export interface MetadataService {
   queryStrategy(
