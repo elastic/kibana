@@ -284,12 +284,12 @@ export default function (providerContext: FtrProviderContext) {
             type: 'dashboard',
           },
           {
-            id: 'sample_search2',
-            type: 'search',
-          },
-          {
             id: 'sample_visualization',
             type: 'visualization',
+          },
+          {
+            id: 'sample_search2',
+            type: 'search',
           },
         ],
         installed_es: [

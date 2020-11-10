@@ -20,6 +20,8 @@ export function getAlertType(): AlertTypeModel<GeoThresholdAlertParams, AlertsCo
       defaultMessage: 'Alert when an entity enters or leaves a geo boundary.',
     }),
     iconClass: 'globe',
+    // TODO: Add documentation for geo threshold alert
+    documentationUrl: null,
     alertParamsExpression: lazy(() => import('./query_builder')),
     validate: validateExpression,
     requiresAppContext: false,

@@ -14,8 +14,8 @@ type TransactionsAPIResponse = APIReturnType<
   '/api/apm/services/{serviceName}/transaction_groups'
 >;
 
-const DEFAULT_RESPONSE: TransactionsAPIResponse = {
-  items: [],
+const DEFAULT_RESPONSE: Partial<TransactionsAPIResponse> = {
+  items: undefined,
   isAggregationAccurate: true,
   bucketSize: 0,
 };

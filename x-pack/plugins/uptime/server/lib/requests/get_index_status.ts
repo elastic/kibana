@@ -12,9 +12,11 @@ export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = asy
   dynamicSettings,
 }) => {
   const {
-    _shards: { total },
-    count,
-  } = await callES('count', { index: dynamicSettings.heartbeatIndices });
+    body: {
+      _shards: { total },
+      count,
+    },
+  } = await callES.count({ index: dynamicSettings.heartbeatIndices });
   return {
     indexExists: total > 0,
     docCount: count,

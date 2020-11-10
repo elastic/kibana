@@ -12,7 +12,7 @@ set -e
 
 # Adds port mock data to a threat list for testing.
 # Example: ./create_threat_data.sh
-# Example: ./create_threat_data.sh 1000 2000
+# Example: ./create_threat_data.sh 1 500
 
 START=${1:-1}
 END=${2:-1000}
@@ -22,7 +22,7 @@ do {
 curl -s -k \
   -H "Content-Type: application/json" \
   -u ${ELASTICSEARCH_USERNAME}:${ELASTICSEARCH_PASSWORD} \
-  -X PUT ${ELASTICSEARCH_URL}/mock-threat-list/_doc/$i \
+  -X PUT ${ELASTICSEARCH_URL}/mock-threat-list-1/_doc/$i \
   --data "
 {
    \"@timestamp\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\",

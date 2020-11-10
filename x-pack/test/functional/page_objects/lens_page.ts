@@ -222,8 +222,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
     async editMissingValues(option: string) {
       await retry.try(async () => {
-        await testSubjects.click('lnsMissingValuesButton');
-        await testSubjects.exists('lnsMissingValuesSelect');
+        await testSubjects.click('lnsValuesButton');
+        await testSubjects.exists('lnsValuesButton');
       });
       await testSubjects.click('lnsMissingValuesSelect');
       const optionSelector = await find.byCssSelector(`#${option}`);

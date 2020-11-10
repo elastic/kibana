@@ -16,7 +16,7 @@ import { AppLogic } from './app_logic';
 import { Layout } from '../shared/layout';
 import { WorkplaceSearchNav, WorkplaceSearchHeaderActions } from './components/layout';
 
-import { SETUP_GUIDE_PATH } from './routes';
+import { GROUPS_PATH, SETUP_GUIDE_PATH } from './routes';
 
 import { SetupGuide } from './views/setup_guide';
 import { ErrorState } from './views/error_state';
@@ -56,7 +56,7 @@ export const WorkplaceSearchConfigured: React.FC<IInitialAppData> = (props) => {
             <ErrorState />
           ) : (
             <Switch>
-              <Route path="/groups">
+              <Route path={GROUPS_PATH}>
                 <GroupsRouter />
               </Route>
               <Route>
