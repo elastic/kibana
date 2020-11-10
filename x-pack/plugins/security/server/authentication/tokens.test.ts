@@ -79,15 +79,18 @@ describe('Tokens', () => {
     });
 
     it('returns token pair if refresh API call succeeds', async () => {
-      const authentication = mockAuthenticatedUser();
+      const authenticationInfo = mockAuthenticatedUser();
       const tokenPair = { accessToken: 'access-token', refreshToken: 'refresh-token' };
       mockClusterClient.callAsInternalUser.mockResolvedValue({
         access_token: tokenPair.accessToken,
         refresh_token: tokenPair.refreshToken,
-        authentication,
+        authentication: authenticationInfo,
       });
 
-      await expect(tokens.refresh(refreshToken)).resolves.toEqual({ authentication, ...tokenPair });
+      await expect(tokens.refresh(refreshToken)).resolves.toEqual({
+        authenticationInfo,
+        ...tokenPair,
+      });
 
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledTimes(1);
       expect(mockClusterClient.callAsInternalUser).toHaveBeenCalledWith('shield.getAccessToken', {

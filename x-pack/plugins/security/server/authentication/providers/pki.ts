@@ -7,7 +7,7 @@
 import Boom from '@hapi/boom';
 import { DetailedPeerCertificate } from 'tls';
 import { KibanaRequest } from '../../../../../../src/core/server';
-import type { Authentication } from '../../elasticsearch';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
@@ -219,7 +219,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
 
     // We should collect entire certificate chain as an ordered array of certificates encoded as base64 strings.
     const certificateChain = this.getCertificateChain(peerCertificate);
-    let result: { access_token: string; authentication: Authentication };
+    let result: { access_token: string; authentication: AuthenticationInfo };
     try {
       result = await this.options.client.callAsInternalUser('shield.delegatePKI', {
         body: { x509_certificate_chain: certificateChain },
@@ -232,11 +232,18 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     this.logger.debug('Successfully retrieved access token in exchange to peer certificate chain.');
-    const { access_token: accessToken, authentication } = result;
-    return AuthenticationResult.succeeded(this.authenticationToAuthenticatedUser(authentication), {
-      authHeaders: { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() },
-      state: { accessToken, peerCertificateFingerprint256: peerCertificate.fingerprint256 },
-    });
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(result.authentication),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', result.access_token).toString(),
+        },
+        state: {
+          accessToken: result.access_token,
+          peerCertificateFingerprint256: peerCertificate.fingerprint256,
+        },
+      }
+    );
   }
 
   /**

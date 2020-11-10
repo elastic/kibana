@@ -6,7 +6,7 @@
 
 import { AuthenticatedUser } from '../../common/model';
 
-export type Authentication = Omit<AuthenticatedUser, 'authentication_provider'>;
+export type AuthenticationInfo = Omit<AuthenticatedUser, 'authentication_provider'>;
 export {
   ElasticsearchService,
   ElasticsearchServiceSetup,

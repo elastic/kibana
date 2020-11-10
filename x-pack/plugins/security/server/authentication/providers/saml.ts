@@ -7,7 +7,7 @@
 import Boom from '@hapi/boom';
 import { KibanaRequest } from '../../../../../../src/core/server';
 import { isInternalURL } from '../../../common/is_internal_url';
-import type { Authentication } from '../../elasticsearch';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { canRedirectRequest } from '../can_redirect_request';
@@ -338,7 +338,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
         : 'Login has been initiated by Identity Provider.'
     );
 
-    let result: { access_token: string; refresh_token: string; authentication: Authentication };
+    let result: { access_token: string; refresh_token: string; authentication: AuthenticationInfo };
     try {
       // This operation should be performed on behalf of the user with a privilege that normal
       // user usually doesn't have `cluster:admin/xpack/security/saml/authenticate`.
@@ -381,12 +381,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     this.logger.debug('Login has been performed with SAML response.');
-    const { access_token: accessToken, refresh_token: refreshToken, authentication } = result;
     return AuthenticationResult.redirectTo(
       redirectURLFromRelayState || stateRedirectURL || `${this.options.basePath.get(request)}/`,
       {
-        state: { accessToken, refreshToken, realm: this.realm },
-        user: this.authenticationToAuthenticatedUser(authentication),
+        state: {
+          accessToken: result.access_token,
+          refreshToken: result.refresh_token,
+          realm: this.realm,
+        },
+        user: this.authenticationInfoToAuthenticatedUser(result.authentication),
       }
     );
   }
@@ -514,13 +517,16 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     this.logger.debug('Request has been authenticated via refreshed token.');
-    const { accessToken, refreshToken, authentication } = refreshTokenResult;
-    return AuthenticationResult.succeeded(this.authenticationToAuthenticatedUser(authentication), {
-      authHeaders: {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      },
-      state: { accessToken, refreshToken, realm: this.realm },
-    });
+    const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+        },
+        state: { accessToken, refreshToken, realm: this.realm },
+      }
+    );
   }
 
   /**

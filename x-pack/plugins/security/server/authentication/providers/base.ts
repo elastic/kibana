@@ -14,7 +14,7 @@ import {
   Headers,
 } from '../../../../../../src/core/server';
 import type { AuthenticatedUser } from '../../../common/model';
-import type { Authentication } from '../../elasticsearch';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { Tokens } from '../tokens';
@@ -110,7 +110,7 @@ export abstract class BaseAuthenticationProvider {
    * @param [authHeaders] Optional `Headers` dictionary to send with the request.
    */
   protected async getUser(request: KibanaRequest, authHeaders: Headers = {}) {
-    return this.authenticationToAuthenticatedUser(
+    return this.authenticationInfoToAuthenticatedUser(
       await this.options.client
         .asScoped({ headers: { ...request.headers, ...authHeaders } })
         .callAsCurrentUser('shield.authenticate')
@@ -119,11 +119,11 @@ export abstract class BaseAuthenticationProvider {
 
   /**
    * Converts Elasticsearch Authentication result to a Kibana authenticated user.
-   * @param authentication Result returned from the `_authenticate` operation.
+   * @param authenticationInfo Result returned from the `_authenticate` operation.
    */
-  protected authenticationToAuthenticatedUser(authentication: Authentication) {
+  protected authenticationInfoToAuthenticatedUser(authenticationInfo: AuthenticationInfo) {
     return deepFreeze({
-      ...authentication,
+      ...authenticationInfo,
       authentication_provider: { type: this.type, name: this.options.name },
     } as AuthenticatedUser);
   }

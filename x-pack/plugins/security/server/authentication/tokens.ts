@@ -5,7 +5,7 @@
  */
 
 import { ILegacyClusterClient, Logger } from '../../../../../src/core/server';
-import type { Authentication } from '../elasticsearch';
+import type { AuthenticationInfo } from '../elasticsearch';
 import { getErrorStatusCode } from '../errors';
 
 /**
@@ -29,7 +29,7 @@ export interface TokenPair {
  * Represents the result of the token refresh operation.
  */
 export interface RefreshTokenResult extends TokenPair {
-  authentication: Authentication;
+  authenticationInfo: AuthenticationInfo;
 }
 
 /**
@@ -58,14 +58,14 @@ export class Tokens {
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
-        authentication,
+        authentication: authenticationInfo,
       } = await this.options.client.callAsInternalUser('shield.getAccessToken', {
         body: { grant_type: 'refresh_token', refresh_token: existingRefreshToken },
       });
 
       this.logger.debug('Access token has been successfully refreshed.');
 
-      return { accessToken, refreshToken, authentication };
+      return { accessToken, refreshToken, authenticationInfo };
     } catch (err) {
       this.logger.debug(`Failed to refresh access token: ${err.message}`);
 

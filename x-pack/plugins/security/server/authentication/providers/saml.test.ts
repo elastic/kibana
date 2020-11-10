@@ -860,7 +860,7 @@ describe('SAMLAuthenticationProvider', () => {
       mockOptions.tokens.refresh.mockResolvedValue({
         accessToken: 'new-access-token',
         refreshToken: 'new-refresh-token',
-        authentication: mockUser,
+        authenticationInfo: mockUser,
       });
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(

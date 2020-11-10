@@ -186,7 +186,7 @@ describe('TokenAuthenticationProvider', () => {
       mockOptions.tokens.refresh.mockResolvedValue({
         accessToken: 'newfoo',
         refreshToken: 'newbar',
-        authentication: user,
+        authenticationInfo: user,
       });
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(

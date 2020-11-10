@@ -63,14 +63,14 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
       const {
         access_token: accessToken,
         refresh_token: refreshToken,
-        authentication,
+        authentication: authenticationInfo,
       } = await this.options.client.callAsInternalUser('shield.getAccessToken', {
         body: { grant_type: 'password', username, password },
       });
 
       this.logger.debug('Get token API request to Elasticsearch successful');
       return AuthenticationResult.succeeded(
-        this.authenticationToAuthenticatedUser(authentication),
+        this.authenticationInfoToAuthenticatedUser(authenticationInfo),
         {
           authHeaders: {
             authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
@@ -215,13 +215,16 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     this.logger.debug('Request has been authenticated via refreshed token.');
-    const { accessToken, refreshToken, authentication } = refreshTokenResult;
-    return AuthenticationResult.succeeded(this.authenticationToAuthenticatedUser(authentication), {
-      authHeaders: {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      },
-      state: { accessToken, refreshToken },
-    });
+    const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+        },
+        state: { accessToken, refreshToken },
+      }
+    );
   }
 
   /**

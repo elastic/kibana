@@ -10,7 +10,7 @@ import {
   LegacyElasticsearchErrorHelpers,
   KibanaRequest,
 } from '../../../../../../src/core/server';
-import type { Authentication } from '../../elasticsearch';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
@@ -150,7 +150,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       access_token: string;
       refresh_token: string;
       kerberos_authentication_response_token?: string;
-      authentication: Authentication;
+      authentication: AuthenticationInfo;
     };
     try {
       tokens = await this.options.client.callAsInternalUser('shield.getAccessToken', {
@@ -206,7 +206,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     return AuthenticationResult.succeeded(
-      this.authenticationToAuthenticatedUser(tokens.authentication),
+      this.authenticationInfoToAuthenticatedUser(tokens.authentication),
       {
         authHeaders: {
           authorization: new HTTPAuthorizationHeader('Bearer', tokens.access_token).toString(),
@@ -271,11 +271,16 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     this.logger.debug('Request has been authenticated via refreshed token.');
-    const { accessToken, refreshToken, authentication } = refreshTokenResult;
-    return AuthenticationResult.succeeded(this.authenticationToAuthenticatedUser(authentication), {
-      authHeaders: { authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString() },
-      state: { accessToken, refreshToken },
-    });
+    const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+        },
+        state: { accessToken, refreshToken },
+      }
+    );
   }
 
   /**
