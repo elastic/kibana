@@ -216,6 +216,11 @@ export class SavedMap {
     return this._getStateTransfer().getAppNameFromId(appId);
   };
 
+  public getTags(): string[] {
+    // TODO call something like savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
+    return [];
+  }
+
   public hasSaveAndReturnConfig() {
     const hasOriginatingApp = !!this._originatingApp;
     const isNewMap = !this.getSavedObjectId();
