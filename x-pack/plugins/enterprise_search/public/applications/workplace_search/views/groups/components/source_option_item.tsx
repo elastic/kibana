@@ -15,11 +15,11 @@ import { IContentSource } from '../../../types';
 
 const MAX_LENGTH = 28;
 
-interface ISourceOptionItemProps {
+interface SourceOptionItemProps {
   source: IContentSource;
 }
 
-export const SourceOptionItem: React.FC<ISourceOptionItemProps> = ({ source }) => (
+export const SourceOptionItem: React.FC<SourceOptionItemProps> = ({ source }) => (
   <EuiFlexGroup gutterSize="xs" justifyContent="flexStart" alignItems="center">
     <EuiFlexItem grow={false}>
       <SourceIcon wrapped {...source} />

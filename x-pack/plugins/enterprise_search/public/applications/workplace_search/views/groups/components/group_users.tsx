@@ -13,13 +13,13 @@ import { IUser } from '../../../types';
 
 import { GroupRowUsersDropdown } from './group_row_users_dropdown';
 
-interface IGroupUsersProps {
+interface GroupUsersProps {
   groupUsers: IUser[];
   usersCount: number;
   groupId: string;
 }
 
-export const GroupUsers: React.FC<IGroupUsersProps> = ({ groupUsers, usersCount, groupId }) => {
+export const GroupUsers: React.FC<GroupUsersProps> = ({ groupUsers, usersCount, groupId }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const closePopover = () => setPopoverOpen(false);
   const togglePopover = () => setPopoverOpen(!popoverOpen);

@@ -14,7 +14,7 @@ import { ViewContentHeader } from '../view_content_header';
 
 import './content_section.scss';
 
-interface IContentSectionProps {
+interface ContentSectionProps {
   children: React.ReactNode;
   className?: string;
   title?: React.ReactNode;
@@ -25,7 +25,7 @@ interface IContentSectionProps {
   testSubj?: string;
 }
 
-export const ContentSection: React.FC<IContentSectionProps> = ({
+export const ContentSection: React.FC<ContentSectionProps> = ({
   children,
   className = '',
   title,

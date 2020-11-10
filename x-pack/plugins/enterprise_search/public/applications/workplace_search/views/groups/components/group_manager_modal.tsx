@@ -67,7 +67,7 @@ const EMPTY_STATE_BODY = i18n.translate(
   }
 );
 
-interface IGroupManagerModalProps {
+interface GroupManagerModalProps {
   children: React.ReactElement;
   label: string;
   allItems: object[];
@@ -77,7 +77,7 @@ interface IGroupManagerModalProps {
   saveItems(): void;
 }
 
-export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
+export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
   children,
   label,
   allItems,

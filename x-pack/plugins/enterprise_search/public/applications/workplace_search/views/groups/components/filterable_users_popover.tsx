@@ -15,7 +15,7 @@ import { IUser } from '../../../types';
 import { GroupsLogic } from '../groups_logic';
 import { FilterableUsersList } from './filterable_users_list';
 
-interface IIFilterableUsersPopoverProps {
+interface FilterableUsersPopoverProps {
   users: IUser[];
   selectedOptions?: string[];
   itemsClickable?: boolean;
@@ -26,7 +26,7 @@ interface IIFilterableUsersPopoverProps {
   closePopover(): void;
 }
 
-export const FilterableUsersPopover: React.FC<IIFilterableUsersPopoverProps> = ({
+export const FilterableUsersPopover: React.FC<FilterableUsersPopoverProps> = ({
   users,
   selectedOptions = [],
   itemsClickable,
