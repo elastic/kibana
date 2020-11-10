@@ -23,6 +23,7 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { createDashboardEditUrl } from '../..';
 
 import { ViewMode } from '../../../../embeddable/public';
 import { useKibana } from '../../../../kibana_react/public';
@@ -164,6 +165,7 @@ export function DashboardTopNav({
 
             if (id !== lastDashboardId) {
               redirectToDashboard({ id });
+              // dashboardStateManager.changeDashboardUrl(createDashboardEditUrl(id));
             } else {
               chrome.docTitle.change(dashboardStateManager.savedDashboard.lastSavedTitle);
               updateViewMode(ViewMode.VIEW);

@@ -134,7 +134,7 @@ export async function mountApp({
   const getDashboardEmbedSettings = (
     routeParams: ParsedQuery<string>
   ): DashboardEmbedSettings | undefined => {
-    if (!routeParams.embd) {
+    if (!routeParams.embed) {
       return undefined;
     }
     return {

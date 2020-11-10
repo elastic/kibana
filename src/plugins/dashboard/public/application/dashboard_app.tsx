@@ -179,7 +179,7 @@ const getDashboardContainerInput = ({
     isFullScreenMode: dashboardStateManager.getFullScreenMode(),
     isEmbeddedExternally,
     useMargins: dashboardStateManager.getUseMargins(),
-    // lastReloadRequestTime,
+    lastReloadRequestTime: 0,
     dashboardCapabilities,
     title: dashboardStateManager.getTitle(),
     description: dashboardStateManager.getDescription(),
@@ -314,76 +314,71 @@ const isActiveState = (
 };
 
 export function DashboardApp({
-  savedDashboardId,
-  history,
   redirectToDashboard,
+  savedDashboardId,
   embedSettings,
+  history,
 }: DashboardAppProps) {
   const {
+    data,
     core,
     chrome,
     onAppLeave,
-    // localStorage,
     embeddable,
-    data,
     uiSettings,
-    // savedObjects,
-    savedDashboards,
-    initializerContext,
-    indexPatterns,
-    // navigation,
-    dashboardCapabilities,
-    // savedObjectsClient,
-    // setHeaderActionMenu,
-    // navigateToDefaultApp,
-    // savedQueryService,
-    // navigateToLegacyKibanaUrl,
-    // addBasePath,
     scopedHistory,
-    // restorePreviousUrl,
-    // embeddableCapabilities,
-    savedObjectsTagging,
+    indexPatterns,
+    savedDashboards,
     usageCollection,
-    // share,
+    initializerContext,
+    dashboardCapabilities,
+    savedObjectsTagging,
   } = useKibana<DashboardAppServices>().services;
 
   const [state, setState] = useState<DashboardAppComponentState>({});
 
-  const refreshDashboardContainer = useCallback(() => {
-    if (!state.dashboardContainer || !state.dashboardStateManager) {
-      return;
-    }
-    const changes = getChangesFromAppStateForContainerState({
-      dashboardContainer: state.dashboardContainer,
-      appStateDashboardInput: getDashboardContainerInput({
-        isEmbeddedExternally: Boolean(embedSettings),
-        dashboardStateManager: state.dashboardStateManager,
-        searchSessionId: data.search.session.start(),
-        dashboardCapabilities,
-        query: data.query,
-      }),
-    });
-    if (changes) {
-      if (getSearchSessionIdFromURL(history)) {
-        // going away from a background search results
-        removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
+  const refreshDashboardContainer = useCallback(
+    (lastReloadRequestTime?: number) => {
+      if (!state.dashboardContainer || !state.dashboardStateManager) {
+        return;
       }
-
-      state.dashboardContainer.updateInput({
-        ...changes,
-        searchSessionId: data.search.session.start(),
+      const changes = getChangesFromAppStateForContainerState({
+        dashboardContainer: state.dashboardContainer,
+        appStateDashboardInput: getDashboardContainerInput({
+          isEmbeddedExternally: Boolean(embedSettings),
+          dashboardStateManager: state.dashboardStateManager,
+          searchSessionId: data.search.session.start(),
+          dashboardCapabilities,
+          query: data.query,
+        }),
       });
-      state.dashboardContainer.updateInput(changes);
-    }
-  }, [
-    history,
-    data.query,
-    embedSettings,
-    data.search.session,
-    dashboardCapabilities,
-    state.dashboardContainer,
-    state.dashboardStateManager,
-  ]);
+      if (changes) {
+        if (getSearchSessionIdFromURL(history)) {
+          // going away from a background search results
+          removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
+        }
+
+        if (lastReloadRequestTime) {
+          changes.lastReloadRequestTime = lastReloadRequestTime;
+        }
+
+        state.dashboardContainer.updateInput({
+          ...changes,
+          searchSessionId: data.search.session.start(),
+        });
+        state.dashboardContainer.updateInput(changes);
+      }
+    },
+    [
+      history,
+      data.query,
+      embedSettings,
+      data.search.session,
+      dashboardCapabilities,
+      state.dashboardContainer,
+      state.dashboardStateManager,
+    ]
+  );
 
   const addFromLibrary = useCallback(() => {
     if (state.dashboardContainer && !isErrorEmbeddable(state.dashboardContainer)) {
@@ -440,7 +435,12 @@ export function DashboardApp({
             savedDashboardId
           );
         }
-        setState((s) => ({ ...s, savedDashboard }));
+        setState((s) => ({
+          ...s,
+          savedDashboard,
+          dashboardContainer: undefined,
+          dashboardStateManager: undefined,
+        }));
       })
       .catch((error) => {
         // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
@@ -795,8 +795,10 @@ export function DashboardApp({
           redirectToDashboard={redirectToDashboard}
           timefilter={data.query.timefilter.timefilter}
           dashboardContainer={state.dashboardContainer}
-          refreshDashboardContainer={refreshDashboardContainer}
           dashboardStateManager={state.dashboardStateManager}
+          refreshDashboardContainer={() => {
+            refreshDashboardContainer(new Date().getTime());
+          }}
         />
       )}
       <div id="dashboardViewport" />
