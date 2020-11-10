@@ -238,6 +238,7 @@ const getSavedObjectTypes = (
           type: 'nested',
           enabled: false,
           properties: {
+            id: { type: 'keyword' },
             type: { type: 'keyword' },
             enabled: { type: 'boolean' },
             vars: { type: 'flattened' },

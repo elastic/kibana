@@ -62,8 +62,8 @@ class PackagePolicyService {
     }
     // Add ids to stream
     const packagePolicyId = options?.id || uuid.v4();
-    let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
-      assignStreamIdToInput(packagePolicyId, input)
+    let inputs = packagePolicy.inputs.map((input) =>
+      assignIdsToInputAndStream(packagePolicyId, input)
     );
 
     // Make sure the associated package is installed
@@ -137,7 +137,7 @@ class PackagePolicyService {
         const packagePolicyId = uuid.v4();
 
         const inputs = packagePolicy.inputs.map((input) =>
-          assignStreamIdToInput(packagePolicyId, input)
+          assignIdsToInputAndStream(packagePolicyId, input)
         );
 
         return {
@@ -275,7 +275,7 @@ class PackagePolicyService {
     }
 
     let inputs = await restOfPackagePolicy.inputs.map((input) =>
-      assignStreamIdToInput(oldPackagePolicy.id, input)
+      assignIdsToInputAndStream(oldPackagePolicy.id, input)
     );
 
     if (packagePolicy.package?.name) {
@@ -387,9 +387,13 @@ class PackagePolicyService {
   }
 }
 
-function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyInput) {
+function assignIdsToInputAndStream(
+  packagePolicyId: string,
+  input: NewPackagePolicyInput
+): PackagePolicyInput {
   return {
     ...input,
+    id: `${input.type}-${packagePolicyId}`,
     streams: input.streams.map((stream) => {
       return { ...stream, id: `${input.type}-${stream.data_stream.dataset}-${packagePolicyId}` };
     }),
