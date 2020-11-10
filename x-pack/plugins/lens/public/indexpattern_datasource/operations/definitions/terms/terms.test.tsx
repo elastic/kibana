@@ -7,7 +7,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiRange, EuiSelect } from '@elastic/eui';
+import { EuiRange, EuiSelect, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
@@ -16,8 +16,6 @@ import { ValuesRangeInput } from './values_range_input';
 import { TermsIndexPatternColumn } from '.';
 import { termsOperation } from '../index';
 import { IndexPatternPrivateState, IndexPattern } from '../../../types';
-import { EuiSwitch } from '@elastic/eui';
-import { EuiSwitchEvent } from '@elastic/eui';
 
 const defaultProps = {
   storage: {} as IStorageWrapper,

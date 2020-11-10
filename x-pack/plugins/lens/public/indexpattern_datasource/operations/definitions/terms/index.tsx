@@ -6,12 +6,16 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
-import { EuiSwitchEvent } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiPopover } from '@elastic/eui';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiSelect,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiSpacer,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiText,
+} from '@elastic/eui';
 import { IndexPatternColumn } from '../../../indexpattern';
 import { updateColumnParam } from '../../../state_helpers';
 import { DataType } from '../../../../types';
@@ -120,7 +124,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         }),
         missingBucket: column.params.otherBucket && column.params.missingBucket,
         missingBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.missingLabel', {
-          defaultMessage: 'Missing',
+          defaultMessage: '(missing value)',
         }),
       },
     };
@@ -263,7 +267,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
               <EuiSpacer size="m" />
               <EuiSwitch
                 label={i18n.translate('xpack.lens.indexPattern.terms.missingBucketDescription', {
-                  defaultMessage: 'Include missing values',
+                  defaultMessage: 'Include documents without this field',
                 })}
                 compressed
                 disabled={!currentColumn.params.otherBucket}
