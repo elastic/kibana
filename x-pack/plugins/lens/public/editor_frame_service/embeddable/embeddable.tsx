@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import {
+  ExecutionContextSearch,
   Filter,
   IIndexPattern,
   Query,
@@ -15,7 +16,6 @@ import {
   TimeRange,
   IndexPattern,
 } from 'src/plugins/data/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
 import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';
@@ -259,8 +259,10 @@ export class Embeddable
     if (!this.savedVis) {
       return;
     }
-    const promises = this.savedVis.references
-      .filter(({ type }) => type === 'index-pattern')
+    const promises = _.uniqBy(
+      this.savedVis.references.filter(({ type }) => type === 'index-pattern'),
+      'id'
+    )
       .map(async ({ id }) => {
         try {
           return await this.deps.indexPatternService.get(id);

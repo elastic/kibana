@@ -22,5 +22,5 @@
   "ui": true,
   "server": true,
   "extraPublicDirs": ["common/constants"],
-  "requiredBundles": ["kibanaReact", "kibanaUtils", "home"]
+  "requiredBundles": ["kibanaReact", "kibanaUtils", "home", "mapsOss"]
 }

@@ -34,3 +34,6 @@ export const LOAD_MORE =
   '[data-test-subj="events-viewer-panel"] [data-test-subj="TimelineMoreButton"';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
+
+export const EVENTS_VIEWER_PAGINATION =
+  '[data-test-subj="events-viewer-panel"] [data-test-subj="timeline-pagination"]';

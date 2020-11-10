@@ -26,6 +26,7 @@ import {
   IUiSettingsClient,
   OverlayStart,
   SavedObjectsStart,
+  DocLinksStart,
 } from '../../../core/public';
 import { TypesStart } from './vis_types';
 import { createGetterSetter } from '../../../plugins/kibana_utils/public';
@@ -59,6 +60,8 @@ export const [getSavedObjects, setSavedObjects] = createGetterSetter<SavedObject
 export const [getTypes, setTypes] = createGetterSetter<TypesStart>('Types');
 
 export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
+
+export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('DocLinks');
 
 export const [getFilterManager, setFilterManager] = createGetterSetter<FilterManager>(
   'FilterManager'

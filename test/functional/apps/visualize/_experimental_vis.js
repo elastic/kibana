@@ -27,7 +27,7 @@ export default ({ getService, getPageObjects }) => {
     describe('experimental visualizations', () => {
       beforeEach(async () => {
         log.debug('navigateToApp visualize');
-        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.navigateToNewAggBasedVisualization();
         await PageObjects.visualize.waitForVisualizationSelectPage();
       });
 
