@@ -33,20 +33,27 @@ export function getMapAttributeService(): MapAttributeService {
     MapByReferenceInput
   >(MAP_SAVED_OBJECT_TYPE, {
     saveMethod: async (attributes: MapSavedObjectAttributes, savedObjectId?: string) => {
-      const { attributes: attributesWithExtractedReferences, references } = extractReferences({
-        attributes,
+      // AttributeService "attributes" contains "references" as a child.
+      // SavedObjectClient "attributes" uses "references" as a sibling.
+      // https://github.com/elastic/kibana/issues/83133
+      const savedObjectClientReferences = attributes.references;
+      const savedObjectClientAttributes = { ...attributes };
+      delete savedObjectClientAttributes.references;
+      const { attributes: updatedAttributes, references } = extractReferences({
+        attributes: savedObjectClientAttributes,
+        references: savedObjectClientReferences,
       });
 
       const savedObject = await (savedObjectId
         ? getSavedObjectsClient().update<MapSavedObjectAttributes>(
             MAP_SAVED_OBJECT_TYPE,
             savedObjectId,
-            attributesWithExtractedReferences,
+            updatedAttributes,
             { references }
           )
         : getSavedObjectsClient().create<MapSavedObjectAttributes>(
             MAP_SAVED_OBJECT_TYPE,
-            attributesWithExtractedReferences,
+            updatedAttributes,
             { references }
           ));
       return { id: savedObject.id };

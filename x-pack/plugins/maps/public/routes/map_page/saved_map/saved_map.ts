@@ -33,7 +33,12 @@ import { getIsLayerTOCOpen, getOpenTOCDetails } from '../../../selectors/ui_sele
 import { getMapAttributeService } from '../../../map_attribute_service';
 import { OnSaveProps } from '../../../../../../../src/plugins/saved_objects/public';
 import { MapByReferenceInput, MapEmbeddableInput } from '../../../embeddable/types';
-import { getCoreChrome, getToasts, getIsAllowByValueEmbeddables } from '../../../kibana_services';
+import {
+  getCoreChrome,
+  getToasts,
+  getIsAllowByValueEmbeddables,
+  getSavedObjectsTagging,
+} from '../../../kibana_services';
 import { goToSpecifiedPath } from '../../../render_app';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { getInitialLayers } from './get_initial_layers';
@@ -252,9 +257,11 @@ export class SavedMap {
     newTitle,
     newCopyOnSave,
     returnToOrigin,
+    newTags,
     saveByReference,
   }: OnSaveProps & {
     returnToOrigin: boolean;
+    newTags?: string[];
     saveByReference: boolean;
   }) {
     if (!this._attributes) {
@@ -269,8 +276,17 @@ export class SavedMap {
 
     let updatedMapEmbeddableInput: MapEmbeddableInput;
     try {
+      const savedObjectsTagging = getSavedObjectsTagging();
+      // Attribute service deviates from Saved Object client by including references as a child to attributes in stead of a sibling
+      const attributes =
+        savedObjectsTagging && newTags
+          ? {
+              ...this._attributes,
+              references: savedObjectsTagging.ui.updateTagsReferences([], newTags),
+            }
+          : this._attributes;
       updatedMapEmbeddableInput = (await getMapAttributeService().wrapAttributes(
-        this._attributes,
+        attributes,
         saveByReference,
         newCopyOnSave ? undefined : this._mapEmbeddableInput
       )) as MapEmbeddableInput;
