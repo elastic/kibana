@@ -32,6 +32,7 @@ describe('Export timelines', () => {
       exportTimeline(timelineId);
 
       cy.wait('@export').then(({ response }) => {
+        // @ts-expect-error statusCode isn't typed properly
         cy.wrap(response.statusCode).should('eql', 200);
         cy.wrap(response.body).should('eql', $expectedExportedJson);
       });

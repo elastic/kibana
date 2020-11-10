@@ -30,6 +30,7 @@ describe('Cases connectors', () => {
     addServiceNowConnector(serviceNowConnector);
 
     cy.wait('@createConnector').then(({ response }) => {
+      // @ts-expect-error statusCode isn't typed properly
       cy.wrap(response.statusCode).should('eql', 200);
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
       cy.get(TOASTER).should('not.exist');
