@@ -31,11 +31,12 @@ export function handleEvents(
     } = req;
     try {
       const client = context.core.elasticsearch.client;
-      const query = new EventsQuery(
-        PaginationBuilder.createBuilder(limit, afterEvent),
-        eventsIndexPattern
-      );
-      const results = await query.search(client, body?.filter);
+      const query = new EventsQuery({
+        pagination: PaginationBuilder.createBuilder(limit, afterEvent),
+        indexPatterns: eventsIndexPattern,
+        timerange: body.timerange,
+      });
+      const results = await query.search(client, body.filter);
 
       return res.ok({
         body: createEvents(results, PaginationBuilder.buildCursorRequestLimit(limit, results)),
