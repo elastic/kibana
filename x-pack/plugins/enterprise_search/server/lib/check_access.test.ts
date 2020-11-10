@@ -50,138 +50,146 @@ describe('checkAccess', () => {
     spaces: mockSpaces,
   } as any;
 
-  describe('when security is disabled', () => {
-    it('should allow all access when enabled at the space', async () => {
-      const security = undefined;
-      mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(enabledSpace);
-      expect(await checkAccess({ ...mockDependencies, security })).toEqual({
-        hasAppSearchAccess: true,
-        hasWorkplaceSearchAccess: true,
-      });
-    });
-
-    it('should disallow access when disabled at the space', async () => {
-      const security = undefined;
+  describe('when the space is disabled', () => {
+    it('should deny all access', async () => {
       mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(disabledSpace);
-      expect(await checkAccess({ ...mockDependencies, security })).toEqual({
+      expect(await checkAccess({ ...mockDependencies })).toEqual({
         hasAppSearchAccess: false,
         hasWorkplaceSearchAccess: false,
       });
     });
   });
 
-  describe('when the user is a superuser', () => {
-    it('should allow all access when enabled at the space ', async () => {
-      const security = {
-        ...mockSecurity,
-        authz: {
-          mode: { useRbacForRequest: () => true },
-          checkPrivilegesWithRequest: () => ({
-            globally: () => ({
-              hasAllRequested: true,
-            }),
-          }),
-          actions: { ui: { get: () => {} } },
-        },
-      };
-      mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(enabledSpace);
-      expect(await checkAccess({ ...mockDependencies, security })).toEqual({
-        hasAppSearchAccess: true,
-        hasWorkplaceSearchAccess: true,
+  describe('when the spaces plugin is unavailable', () => {
+    describe('when security is disabled', () => {
+      it('should allow all access', async () => {
+        const spaces = undefined;
+        const security = undefined;
+        expect(await checkAccess({ ...mockDependencies, spaces, security })).toEqual({
+          hasAppSearchAccess: true,
+          hasWorkplaceSearchAccess: true,
+        });
       });
     });
 
-    it('should deny access when disabled at the space ', async () => {
-      const security = {
-        ...mockSecurity,
-        authz: {
-          mode: { useRbacForRequest: () => true },
-          checkPrivilegesWithRequest: () => ({
-            globally: () => ({
-              hasAllRequested: true,
-            }),
-          }),
-          actions: { ui: { get: () => {} } },
-        },
-      };
-      mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(disabledSpace);
-      expect(await checkAccess({ ...mockDependencies, security })).toEqual({
-        hasAppSearchAccess: false,
-        hasWorkplaceSearchAccess: false,
-      });
-    });
-
-    it('falls back to assuming a non-superuser role if auth credentials are missing', async () => {
-      const security = {
-        authz: {
-          ...mockSecurity.authz,
-          checkPrivilegesWithRequest: () => ({
-            globally: () => Promise.reject({ statusCode: 403 }),
-          }),
-        },
-      };
-      mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(enabledSpace);
-      expect(await checkAccess({ ...mockDependencies, security })).toEqual({
-        hasAppSearchAccess: false,
-        hasWorkplaceSearchAccess: false,
-      });
-    });
-
-    it('throws other authz errors', async () => {
-      const security = {
-        authz: {
-          ...mockSecurity.authz,
-          checkPrivilegesWithRequest: undefined,
-        },
-      };
-      mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(enabledSpace);
-      await expect(checkAccess({ ...mockDependencies, security })).rejects.toThrow();
-    });
-  });
-
-  describe('when the user is a non-superuser', () => {
-    describe('when enterpriseSearch.host is not set in kibana.yml', () => {
+    describe('when getActiveSpace returns 403 forbidden', () => {
       it('should deny all access', async () => {
-        const config = { host: undefined };
-        mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(enabledSpace);
-        expect(await checkAccess({ ...mockDependencies, config })).toEqual({
+        mockSpaces.spacesService.getActiveSpace.mockReturnValueOnce(
+          Promise.reject({ output: { statusCode: 403 } })
+        );
+        expect(await checkAccess({ ...mockDependencies })).toEqual({
           hasAppSearchAccess: false,
           hasWorkplaceSearchAccess: false,
         });
       });
     });
 
-    describe('when enterpriseSearch.host is set in kibana.yml', () => {
-      it('should make a http call and return the access response', async () => {
-        (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({
-          access: {
-            hasAppSearchAccess: false,
-            hasWorkplaceSearchAccess: true,
+    describe('when getActiveSpace throws', () => {
+      it('should re-throw', async () => {
+        mockSpaces.spacesService.getActiveSpace.mockReturnValueOnce(Promise.reject('Error'));
+        let expectedError = '';
+        try {
+          await checkAccess({ ...mockDependencies });
+        } catch (e) {
+          expectedError = e;
+        }
+        expect(expectedError).toEqual('Error');
+      });
+    });
+  });
+
+  describe('when the space is enabled', () => {
+    beforeEach(() => {
+      mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(enabledSpace);
+    });
+
+    describe('when security is disabled', () => {
+      it('should allow all access', async () => {
+        const security = undefined;
+        expect(await checkAccess({ ...mockDependencies, security })).toEqual({
+          hasAppSearchAccess: true,
+          hasWorkplaceSearchAccess: true,
+        });
+      });
+    });
+
+    describe('when the user is a superuser', () => {
+      it('should allow all access when enabled at the space ', async () => {
+        const security = {
+          ...mockSecurity,
+          authz: {
+            mode: { useRbacForRequest: () => true },
+            checkPrivilegesWithRequest: () => ({
+              globally: () => ({
+                hasAllRequested: true,
+              }),
+            }),
+            actions: { ui: { get: () => {} } },
           },
-        }));
-        mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(enabledSpace);
-        expect(await checkAccess(mockDependencies)).toEqual({
-          hasAppSearchAccess: false,
+        };
+        expect(await checkAccess({ ...mockDependencies, security })).toEqual({
+          hasAppSearchAccess: true,
           hasWorkplaceSearchAccess: true,
         });
       });
 
-      it('should not make a http call if disabled at the space', async () => {
-        (callEnterpriseSearchConfigAPI as jest.Mock).mockClear();
-        mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(disabledSpace);
-        expect(await checkAccess(mockDependencies)).toEqual({
+      it('falls back to assuming a non-superuser role if auth credentials are missing', async () => {
+        const security = {
+          authz: {
+            ...mockSecurity.authz,
+            checkPrivilegesWithRequest: () => ({
+              globally: () => Promise.reject({ statusCode: 403 }),
+            }),
+          },
+        };
+        expect(await checkAccess({ ...mockDependencies, security })).toEqual({
           hasAppSearchAccess: false,
           hasWorkplaceSearchAccess: false,
         });
-        expect(callEnterpriseSearchConfigAPI).not.toHaveBeenCalled();
       });
 
-      it('falls back to no access if no http response', async () => {
-        (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({}));
-        mockSpaces.spacesService.getActiveSpace.mockResolvedValueOnce(enabledSpace);
-        expect(await checkAccess(mockDependencies)).toEqual({
-          hasAppSearchAccess: false,
-          hasWorkplaceSearchAccess: false,
+      it('throws other authz errors', async () => {
+        const security = {
+          authz: {
+            ...mockSecurity.authz,
+            checkPrivilegesWithRequest: undefined,
+          },
+        };
+        await expect(checkAccess({ ...mockDependencies, security })).rejects.toThrow();
+      });
+    });
+
+    describe('when the user is a non-superuser', () => {
+      describe('when enterpriseSearch.host is not set in kibana.yml', () => {
+        it('should deny all access', async () => {
+          const config = { host: undefined };
+          expect(await checkAccess({ ...mockDependencies, config })).toEqual({
+            hasAppSearchAccess: false,
+            hasWorkplaceSearchAccess: false,
+          });
+        });
+      });
+
+      describe('when enterpriseSearch.host is set in kibana.yml', () => {
+        it('should make a http call and return the access response', async () => {
+          (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({
+            access: {
+              hasAppSearchAccess: false,
+              hasWorkplaceSearchAccess: true,
+            },
+          }));
+          expect(await checkAccess(mockDependencies)).toEqual({
+            hasAppSearchAccess: false,
+            hasWorkplaceSearchAccess: true,
+          });
+        });
+
+        it('falls back to no access if no http response', async () => {
+          (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({}));
+          expect(await checkAccess(mockDependencies)).toEqual({
+            hasAppSearchAccess: false,
+            hasWorkplaceSearchAccess: false,
+          });
         });
       });
     });
