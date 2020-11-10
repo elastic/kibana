@@ -6,8 +6,9 @@
 **_Tell {kib} where to find your data, then search and filter it for hidden insights and relationships._**
 
 You’ve added your data, and now you’re ready to dig in. You have questions about your data.
-What events were logged most recently? What pages on your website contain a
-specific word or phrase? What processes on your server take longer than 500 milliseconds to respond?
+What pages on your website contain a
+specific word or phrase? What events were logged most recently?
+What processes take longer than 500 milliseconds to respond?
 This tutorial shows you how to use *Discover* to quickly search large amounts of
 data and understand what’s going on at any given time.
 
@@ -17,7 +18,7 @@ You’ll learn to:
 search it with the {kib} Query Language, and filter the results.
 - **Explore** the details of your data, view individual documents, and create tables
 that summarize the contents of the data.
-- **Present** your findings in reports and visualizations.
+- **Present** your findings in a visualization.
 
 At the end of this tutorial, you’ll be ready to start exploring with your own
 data in *Discover*.
@@ -37,31 +38,34 @@ image::images/Discover-Start.png[Discover]
 
 [float]
 [[whats-you-goal-in-discover]]
-=== What’s your goal?
+=== Step 1. Define your goal
 
-When you start exploring your data in **Discover**, it's common to start with one or two goals:
+When you explore your data in **Discover**, it's common to start with one or two goals:
 
 - **Get an overview of what is happening.**
 For example, you might look for
-information on the overall health and performance of your ecommerce business.
-You want to periodically gather the data and then generate a report that you can share.
+information on the overall health and performance of your ecommerce business,
+and then share your findings in a report.
 
 - **Find an answer to a specific question.** You want
-to dig into your ecommerce data to
-determine which products, in what locations, and what day of the week to target your ads. You want to visualize
-this data and present it to your marketing team.
+to determine your customers' shopping preferences,
+and then visualize your findings on a dashboard.
+
+For this tutorial, your goal is to better manage your product inventory.  You want to
+know the top-selling products and on what day of the week these products sell the most.
 
 [float]
 [[find-the-data-you-want-to-use]]
-=== Step 1. Find the data you want to use
+=== Step 2. Find your data
 
-Tell {kib} where to find your data, then specify the time range in which to view that data.
+Tell {kib} where to find the data you want to explore, then specify the time range in which to view that data.
 
 . Open the main menu, and select **Discover**.
 
-. Select the data you want to work with by choosing an index pattern.
+. Select the data you want to work with.
 +
-{kib} requires an <<index-patterns,index pattern>> to tell it which {es} indices you want to work with.
+{kib} uses an <<index-patterns,index pattern>> to tell it where to find
+your {es} data.
 To view the ecommerce sample data, make sure the index pattern is set to **kibana_sample_data_ecommerce**.
 +
 [role="screenshot"]
@@ -78,11 +82,11 @@ click and drag the mouse over the histogram, and then click *Refresh*.
 
 [float]
 [[explore-fields-in-your-data]]
-=== Step 2. Explore the fields in your data
+=== Step 3. Explore the fields in your data
 
 **Discover** includes a table that shows all the documents that match your search.
-By default, the table includes columns for the time field and the document `_source`.
-You’ll modify this table to display only your fields of interest.
+By default, the table includes columns for the time field and the document `_source`,
+which can be overwhelming. You’ll modify this table to display only your fields of interest.
 
 . Scan through the list of **Available fields** to see
 what’s in your data. You can also search for a field by name.
@@ -94,7 +98,7 @@ image:images/filter-field.png[Fields list that displays the top five search resu
 
 . Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
 
-. Add `geoip.country_iso_code` and `day of week` so your document table looks like this:
+. Add `day of week` so your document table looks like this:
 +
 [role="screenshot"]
 image:images/document-table.png[Document table with fields for manufacturer, geo.country_iso_code, and day_of_week]
@@ -104,7 +108,7 @@ column header, and then use the move and sort controls.
 
 [float]
 [[search-in-discover]]
-=== Step 3. Search your data
+=== Step 4. Search your data
 
 One of the unique capabilities of **Discover** is the ability to combine
 free text search with filtering based on structured data.
@@ -113,7 +117,7 @@ build more complex queries, use the <<kuery-query,Kibana Query language>>.
 As you type, KQL prompts you with the fields you can search and the operators
 you can use to build a structured query.
 
-To search the ecommerce data for documents where the country matches US:
+Search the ecommerce data for documents where the country matches US:
 
 . Enter `g`, and then select *geoip.country_iso_code*.
 . Select *equals some value* and *US*, and then click *Update*.
@@ -123,14 +127,14 @@ To search the ecommerce data for documents where the country matches US:
 
 [float]
 [[filter-in-discover]]
-=== Step 4. Filter your data
+=== Step 5. Filter your data
 
 Whereas the query defines the set of documents you are interested in,
 filters enable you to zero in on different subsets of those documents.
 You can filter results to include or exclude specific fields,
 filter by data type, filter for a value in a range, and more.
 
-To exclude documents when day of week is Wednesday:
+Exclude documents where day of week is not Wednesday:
 
 . Click **Add filter**.
 . Set **Field** to *day_of_week*, **Operator** to *is not*, and **Value** to *Wednesday*.
@@ -141,9 +145,9 @@ click the close icon (x) next to its name in the filter bar.
 
 [float]
 [[look-inside-a-document]]
-=== Step 5.  Look inside a document
+=== Step 6.  Look inside a document
 
-Dive into an individual document and view the documents
+Dive into an individual document to view its fields and the documents
 that occurred before and after it.
 
 . In the document table, expand any document.
@@ -156,13 +160,13 @@ hover of its name for filters and other controls.
 
 . To view documents that occurred before or after the event you are looking at, click **View surrounding documents**.
 
-. To view document data as a separate page, click **View single document**.
+. For direct access to a particular document, click **View single document**.
 +
-For direct access to a particular document, you can bookmark and share the document link.
+You can bookmark this document and share the link.
 
 [float]
 [[save-your-search]]
-=== Step 6.  Save your search for later use
+=== Step 7.  Save your search for later use
 
 Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
 Saving a search saves the query and the filters.
@@ -172,30 +176,21 @@ Saving a search saves the query and the filters.
 . Give your search a title, and then click **Save**.
 
 [float]
-[[share-findings-in-a-report]]
-=== Step 7. Share your findings in a report
-
-Export your data into a spreadsheet.
-
-. In the toolbar, click **Share**, then **CSV Reports**.
-
-. Click **Generate CSV**.
-+
-Your report is available in **Stack Management > Reporting**.
-
-[float]
 === Step 8. Visualize your findings
 If a field can be {ref}/search-aggregations.html[aggregated], you can quickly
 visualize it from **Discover**.
 
-. From the **Available fields** list, click  `day_of_week`, and then click **Visualize**.
+. From the **Selected fields** list, click  `day_of_week`, and then click **Visualize**.
 +
 {kib} creates a visualization best suited for this field.
+
+. Drag `manufacturer.keyword` from the field list and drop it on
+the visualization builder pane.
 +
 [role="screenshot"]
 image:images/visualize-from-discover.png[Visualization that opens from Discover based on your data]
 
-. Customize the visualization and then save it for use in a dashboard or Canvas workpad.
+. Save your visualization for use on a dashboard.
 
 [float]
 === What’s next?
@@ -207,10 +202,11 @@ There’s much more you can do with your data.
 
 * <<kibana-discover-settings, Configure Discover>> to better meet your needs.
 In **Advanced Settings**, you can configure the number of documents to show,
-the columns that display by default, and more.
+the table columns that display by default, and more.
 
-* <<dashboard,Create a dashboard>> with even more awesome visualizations, like treemaps, metrics, and tables.
+* <<dashboard,Create a dashboard>> with even more visualizations of your findings, such as treemaps, metrics, and tables.
 
+* <<reporting-getting-started, Present your findings in a report>>.
 
 --
 
