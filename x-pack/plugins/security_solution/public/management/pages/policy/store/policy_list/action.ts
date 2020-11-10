@@ -6,10 +6,7 @@
 
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import { ServerApiError } from '../../../../../common/types';
-import {
-  GetAgentStatusResponse,
-  GetPackagesResponse,
-} from '../../../../../../../ingest_manager/common';
+import { GetAgentStatusResponse, GetPackagesResponse } from '../../../../../../../fleet/common';
 
 interface ServerReturnedPolicyListData {
   type: 'serverReturnedPolicyListData';

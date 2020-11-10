@@ -28,6 +28,7 @@ import {
   AlertExecutorOptions,
   SanitizedAlert,
   AlertExecutionStatus,
+  AlertExecutionStatusErrorReasons,
 } from '../types';
 import { promiseResult, map, Resultable, asOk, asErr, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -211,7 +212,7 @@ export class TaskRunner {
       event.event = event.event || {};
       event.event.outcome = 'failure';
       eventLogger.logEvent(event);
-      throw new ErrorWithReason('execute', err);
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Execute, err);
     }
 
     eventLogger.stopTiming(event);
@@ -288,7 +289,7 @@ export class TaskRunner {
     try {
       apiKey = await this.getApiKeyForAlertPermissions(alertId, spaceId);
     } catch (err) {
-      throw new ErrorWithReason('decrypt', err);
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Decrypt, err);
     }
     const [services, alertsClient] = this.getServicesWithSpaceLevelPermissions(spaceId, apiKey);
 
@@ -298,7 +299,7 @@ export class TaskRunner {
     try {
       alert = await alertsClient.get({ id: alertId });
     } catch (err) {
-      throw new ErrorWithReason('read', err);
+      throw new ErrorWithReason(AlertExecutionStatusErrorReasons.Read, err);
     }
 
     return {

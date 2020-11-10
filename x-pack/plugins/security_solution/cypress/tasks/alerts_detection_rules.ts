@@ -13,7 +13,6 @@ import {
   DELETE_RULE_BULK_BTN,
   LOAD_PREBUILT_RULES_BTN,
   LOADING_INITIAL_PREBUILT_RULES_TABLE,
-  LOADING_SPINNER,
   PAGINATION_POPOVER_BTN,
   RELOAD_PREBUILT_RULES_BTN,
   RULE_CHECKBOX,
@@ -26,6 +25,9 @@ import {
   EXPORT_ACTION_BTN,
   EDIT_RULE_ACTION_BTN,
   NEXT_BTN,
+  ASYNC_LOADING_PROGRESS,
+  RULE_AUTO_REFRESH_IDLE_MODAL,
+  RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE,
 } from '../screens/alerts_detection_rules';
 import { ALL_ACTIONS, DELETE_RULE } from '../screens/rule_details';
 
@@ -66,8 +68,8 @@ export const exportFirstRule = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click({ force: true });
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(ASYNC_LOADING_PROGRESS).should('exist');
+  cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
 };
 
 export const goToCreateNewRule = () => {
@@ -119,6 +121,32 @@ export const waitForRuleToBeActivated = () => {
 };
 
 export const waitForRulesToBeLoaded = () => {
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
+  cy.get(ASYNC_LOADING_PROGRESS).should('exist');
+  cy.get(ASYNC_LOADING_PROGRESS).should('not.exist');
+};
+
+// when using, ensure you've called cy.clock prior in test
+export const checkAutoRefresh = (ms: number, condition: string) => {
+  cy.get(ASYNC_LOADING_PROGRESS).should('not.be.visible');
+  cy.tick(ms);
+  cy.get(ASYNC_LOADING_PROGRESS).should(condition);
+};
+
+export const dismissAllRulesIdleModal = () => {
+  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL_CONTINUE)
+    .eq(1)
+    .should('exist')
+    .click({ force: true, multiple: true });
+  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should('not.be.visible');
+};
+
+export const checkAllRulesIdleModal = (condition: string) => {
+  cy.tick(2700000);
+  cy.get(RULE_AUTO_REFRESH_IDLE_MODAL).should(condition);
+};
+
+export const resetAllRulesIdleModalTimeout = () => {
+  cy.tick(2000000);
+  cy.window().trigger('mousemove', { force: true });
+  cy.tick(700000);
 };
