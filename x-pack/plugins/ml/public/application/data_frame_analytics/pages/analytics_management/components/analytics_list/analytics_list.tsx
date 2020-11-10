@@ -263,7 +263,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   };
 
   return (
-    <div data-test-subj="mlAnalyticsJobList EuiInMemoryTable">
+    <div data-test-subj="mlAnalyticsJobList">
       {modals}
       {!isManagementTable && <EuiSpacer size="m" />}
       <EuiFlexGroup justifyContent="spaceBetween">
