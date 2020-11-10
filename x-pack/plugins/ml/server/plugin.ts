@@ -194,8 +194,6 @@ export class MlServerPlugin implements Plugin<MlPluginSetup, MlPluginStart, Plug
     this.clusterClient = coreStart.elasticsearch.client;
     this.savedObjectsStart = coreStart.savedObjects;
 
-    // const;
-
     // check whether the job saved objects exist
     // and create them if needed.
     const { initializeJobs } = jobSavedObjectsInitializationFactory(coreStart);
