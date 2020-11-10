@@ -5,7 +5,7 @@
  */
 
 import { useMemo } from 'react';
-import { useSetState } from 'react-use';
+import useSetState from 'react-use/lib/useSetState';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
