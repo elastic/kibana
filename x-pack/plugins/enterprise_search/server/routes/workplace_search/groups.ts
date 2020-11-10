@@ -6,12 +6,9 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { IRouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 
-export function registerGroupsRoute({
-  router,
-  enterpriseSearchRequestHandler,
-}: IRouteDependencies) {
+export function registerGroupsRoute({ router, enterpriseSearchRequestHandler }: RouteDependencies) {
   router.get(
     {
       path: '/api/workplace_search/groups',
@@ -43,7 +40,7 @@ export function registerGroupsRoute({
 export function registerSearchGroupsRoute({
   router,
   enterpriseSearchRequestHandler,
-}: IRouteDependencies) {
+}: RouteDependencies) {
   router.post(
     {
       path: '/api/workplace_search/groups/search',
@@ -70,7 +67,7 @@ export function registerSearchGroupsRoute({
   );
 }
 
-export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: IRouteDependencies) {
+export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: RouteDependencies) {
   router.get(
     {
       path: '/api/workplace_search/groups/{id}',
@@ -129,7 +126,7 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: I
 export function registerGroupUsersRoute({
   router,
   enterpriseSearchRequestHandler,
-}: IRouteDependencies) {
+}: RouteDependencies) {
   router.get(
     {
       path: '/api/workplace_search/groups/{id}/group_users',
@@ -150,7 +147,7 @@ export function registerGroupUsersRoute({
 export function registerShareGroupRoute({
   router,
   enterpriseSearchRequestHandler,
-}: IRouteDependencies) {
+}: RouteDependencies) {
   router.post(
     {
       path: '/api/workplace_search/groups/{id}/share',
@@ -175,7 +172,7 @@ export function registerShareGroupRoute({
 export function registerAssignGroupRoute({
   router,
   enterpriseSearchRequestHandler,
-}: IRouteDependencies) {
+}: RouteDependencies) {
   router.post(
     {
       path: '/api/workplace_search/groups/{id}/assign',
@@ -200,7 +197,7 @@ export function registerAssignGroupRoute({
 export function registerBoostsGroupRoute({
   router,
   enterpriseSearchRequestHandler,
-}: IRouteDependencies) {
+}: RouteDependencies) {
   router.put(
     {
       path: '/api/workplace_search/groups/{id}/boosts',
