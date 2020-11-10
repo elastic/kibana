@@ -19,7 +19,7 @@ import {
 } from '../../../shared/flash_messages';
 import { GROUPS_PATH } from '../../routes';
 
-import { ContentSourceDetails, GroupDetails, User, ISourcePriority } from '../../types';
+import { ContentSourceDetails, GroupDetails, User, SourcePriority } from '../../types';
 
 export const MAX_NAME_LENGTH = 40;
 
@@ -65,8 +65,8 @@ interface GroupValues {
   selectedGroupSources: string[];
   selectedGroupUsers: string[];
   groupPrioritiesUnchanged: boolean;
-  activeSourcePriorities: ISourcePriority;
-  cachedSourcePriorities: ISourcePriority;
+  activeSourcePriorities: SourcePriority;
+  cachedSourcePriorities: SourcePriority;
 }
 
 export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
@@ -374,8 +374,8 @@ export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
   }),
 });
 
-const mapPriorities = (contentSources: IContentSourceDetails[]): ISourcePriority => {
-  const prioritiesMap = {} as ISourcePriority;
+const mapPriorities = (contentSources: ContentSourceDetails[]): SourcePriority => {
+  const prioritiesMap = {} as SourcePriority;
   contentSources.forEach(({ id, boost }) => {
     prioritiesMap[id] = boost;
   });

@@ -8,7 +8,7 @@ import React from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 
-import { TSpacerSize } from '../../../types';
+import { SpacerSizeTypes } from '../../../types';
 
 import { ViewContentHeader } from '../view_content_header';
 
@@ -21,7 +21,7 @@ interface ContentSectionProps {
   description?: React.ReactNode;
   action?: React.ReactNode;
   headerChildren?: React.ReactNode;
-  headerSpacer?: TSpacerSize;
+  headerSpacer?: SpacerSizeTypes;
   testSubj?: string;
 }
 

@@ -6,12 +6,8 @@
 
 export * from '../../../common/types/workplace_search';
 
-export type TSpacerSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
+export type SpacerSizeTypes = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
-export interface ISourcePriority {
+export interface SourcePriority {
   [id: string]: number;
-}
-
-export interface IComponentLoader {
-  text?: string;
 }

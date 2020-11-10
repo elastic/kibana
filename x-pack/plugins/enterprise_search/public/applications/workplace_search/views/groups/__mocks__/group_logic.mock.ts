@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { GroupDetails, ISourcePriority } from '../../../types';
+import { GroupDetails, SourcePriority } from '../../../types';
 
 export const mockGroupValues = {
   group: {} as GroupDetails,
@@ -17,6 +17,6 @@ export const mockGroupValues = {
   selectedGroupSources: [],
   selectedGroupUsers: [],
   groupPrioritiesUnchanged: true,
-  activeSourcePriorities: {} as ISourcePriority,
-  cachedSourcePriorities: {} as ISourcePriority,
+  activeSourcePriorities: {} as SourcePriority,
+  cachedSourcePriorities: {} as SourcePriority,
 };

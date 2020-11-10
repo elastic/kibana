@@ -7,7 +7,7 @@
 import { kea, MakeLogicType } from 'kea';
 import { HttpLogic } from '../../../shared/http';
 
-import { IFeedActivity } from './recent_activity';
+import { FeedActivity } from './recent_activity';
 
 interface OverviewServerData {
   hasUsers: boolean;
@@ -18,7 +18,7 @@ interface OverviewServerData {
   pendingInvitationsCount: number;
   accountsCount: number;
   personalSourcesCount: number;
-  activityFeed: IFeedActivity[];
+  activityFeed: FeedActivity[];
 }
 
 interface OverviewActions {
