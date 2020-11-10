@@ -463,10 +463,12 @@ export function LayerPanel(
                           prevState: props.visualizationState,
                         })
                       );
-                      setActiveDimension({
-                        ...activeDimension,
+                      // Many setActiveDimension calls may happen at once
+                      // so pick the last update value and update it
+                      setActiveDimension((prevActiveDimension) => ({
+                        ...prevActiveDimension,
                         isNew: false,
-                      });
+                      }));
                     },
                   }}
                 />
