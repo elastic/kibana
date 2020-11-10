@@ -14,14 +14,14 @@ import { shallow, ReactWrapper } from 'enzyme';
 import { mountAsync, mockHttpValues, setMockValues } from '../../../__mocks__';
 
 import { LoadingState, EmptyState } from './components';
-import { EngineTable } from './engine_table';
+import { EnginesTable } from './engines_table';
 
-import { EngineOverview } from './';
+import { EnginesOverview } from './';
 
-describe('EngineOverview', () => {
+describe('EnginesOverview', () => {
   describe('non-happy-path states', () => {
     it('isLoading', () => {
-      const wrapper = shallow(<EngineOverview />);
+      const wrapper = shallow(<EnginesOverview />);
 
       expect(wrapper.find(LoadingState)).toHaveLength(1);
     });
@@ -36,7 +36,7 @@ describe('EngineOverview', () => {
           }),
         },
       });
-      const wrapper = await mountAsync(<EngineOverview />, { i18n: true });
+      const wrapper = await mountAsync(<EnginesOverview />, { i18n: true });
 
       expect(wrapper.find(EmptyState)).toHaveLength(1);
     });
@@ -69,9 +69,9 @@ describe('EngineOverview', () => {
     });
 
     it('renders and calls the engines API', async () => {
-      const wrapper = await mountAsync(<EngineOverview />, { i18n: true });
+      const wrapper = await mountAsync(<EnginesOverview />, { i18n: true });
 
-      expect(wrapper.find(EngineTable)).toHaveLength(1);
+      expect(wrapper.find(EnginesTable)).toHaveLength(1);
       expect(mockApi).toHaveBeenNthCalledWith(1, '/api/app_search/engines', {
         query: {
           type: 'indexed',
@@ -86,9 +86,9 @@ describe('EngineOverview', () => {
           hasPlatinumLicense: true,
           http: { ...mockHttpValues.http, get: mockApi },
         });
-        const wrapper = await mountAsync(<EngineOverview />, { i18n: true });
+        const wrapper = await mountAsync(<EnginesOverview />, { i18n: true });
 
-        expect(wrapper.find(EngineTable)).toHaveLength(2);
+        expect(wrapper.find(EnginesTable)).toHaveLength(2);
         expect(mockApi).toHaveBeenNthCalledWith(2, '/api/app_search/engines', {
           query: {
             type: 'meta',
@@ -100,10 +100,10 @@ describe('EngineOverview', () => {
 
     describe('pagination', () => {
       const getTablePagination = (wrapper: ReactWrapper) =>
-        wrapper.find(EngineTable).prop('pagination');
+        wrapper.find(EnginesTable).prop('pagination');
 
       it('passes down page data from the API', async () => {
-        const wrapper = await mountAsync(<EngineOverview />, { i18n: true });
+        const wrapper = await mountAsync(<EnginesOverview />, { i18n: true });
         const pagination = getTablePagination(wrapper);
 
         expect(pagination.totalEngines).toEqual(100);
@@ -111,7 +111,7 @@ describe('EngineOverview', () => {
       });
 
       it('re-polls the API on page change', async () => {
-        const wrapper = await mountAsync(<EngineOverview />, { i18n: true });
+        const wrapper = await mountAsync(<EnginesOverview />, { i18n: true });
         await act(async () => getTablePagination(wrapper).onPaginate(5));
         wrapper.update();
 

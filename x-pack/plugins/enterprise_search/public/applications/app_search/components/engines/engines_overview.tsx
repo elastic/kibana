@@ -13,7 +13,6 @@ import {
   EuiTitle,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 
 import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chrome';
 import { SendAppSearchTelemetry as SendTelemetry } from '../../../shared/telemetry';
@@ -23,11 +22,11 @@ import { LicensingLogic } from '../../../shared/licensing';
 
 import { EngineIcon } from './assets/engine_icon';
 import { MetaEngineIcon } from './assets/meta_engine_icon';
+import { ENGINES_TITLE, META_ENGINES_TITLE } from './constants';
+import { EnginesOverviewHeader, LoadingState, EmptyState } from './components';
+import { EnginesTable } from './engines_table';
 
-import { EngineOverviewHeader, LoadingState, EmptyState } from './components';
-import { EngineTable } from './engine_table';
-
-import './engine_overview.scss';
+import './engines_overview.scss';
 
 interface IGetEnginesParams {
   type: string;
@@ -38,7 +37,7 @@ interface ISetEnginesCallbacks {
   setResultsTotal: React.Dispatch<React.SetStateAction<number>>;
 }
 
-export const EngineOverview: React.FC = () => {
+export const EnginesOverview: React.FC = () => {
   const { http } = useValues(HttpLogic);
   const { hasPlatinumLicense } = useValues(LicensingLogic);
 
@@ -88,21 +87,18 @@ export const EngineOverview: React.FC = () => {
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="engines_overview" />
 
-      <EngineOverviewHeader />
-      <EuiPageContent panelPaddingSize="s" className="engineOverview">
+      <EnginesOverviewHeader />
+      <EuiPageContent panelPaddingSize="s" className="enginesOverview">
         <FlashMessages />
         <EuiPageContentHeader>
           <EuiTitle size="s">
             <h2>
-              <EngineIcon />
-              {i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.engines', {
-                defaultMessage: 'Engines',
-              })}
+              <EngineIcon /> {ENGINES_TITLE}
             </h2>
           </EuiTitle>
         </EuiPageContentHeader>
         <EuiPageContentBody data-test-subj="appSearchEngines">
-          <EngineTable
+          <EnginesTable
             data={engines}
             pagination={{
               totalEngines: enginesTotal,
@@ -118,15 +114,12 @@ export const EngineOverview: React.FC = () => {
             <EuiPageContentHeader>
               <EuiTitle size="s">
                 <h2>
-                  <MetaEngineIcon />
-                  {i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.metaEngines', {
-                    defaultMessage: 'Meta Engines',
-                  })}
+                  <MetaEngineIcon /> {META_ENGINES_TITLE}
                 </h2>
               </EuiTitle>
             </EuiPageContentHeader>
             <EuiPageContentBody data-test-subj="appSearchMetaEngines">
-              <EngineTable
+              <EnginesTable
                 data={metaEngines}
                 pagination={{
                   totalEngines: metaEnginesTotal,
