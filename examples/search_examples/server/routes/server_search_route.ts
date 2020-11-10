@@ -39,8 +39,8 @@ export function registerServerSearchRoute(router: IRouter, data: DataPluginStart
       // Run a synchronous search server side, by enforcing a high keepalive and waiting for completion.
       // If you wish to run the search with polling (in basic+), you'd have to poll on the search API.
       // Please reach out to the @app-arch-team if you need this to be implemented.
-      const res = await data.search
-        .search(
+      const res = await context
+        .search!.search(
           {
             params: {
               index,
@@ -57,8 +57,7 @@ export function registerServerSearchRoute(router: IRouter, data: DataPluginStart
               keepAlive: '5m',
             },
           } as IEsSearchRequest,
-          {},
-          context
+          {}
         )
         .toPromise();
 

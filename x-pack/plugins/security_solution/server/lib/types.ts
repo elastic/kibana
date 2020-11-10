@@ -143,8 +143,13 @@ export interface MSearchHeader {
 export interface AggregationRequest {
   [aggField: string]: {
     terms?: {
-      field: string;
+      field?: string;
+      missing?: string;
       size?: number;
+      script?: {
+        source: string;
+        lang: string;
+      };
       order?: {
         [aggSortField: string]: SortRequestDirection;
       };

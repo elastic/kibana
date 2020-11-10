@@ -17,7 +17,8 @@ import {
   CaseUserActionsResponse,
   CasesResponse,
   CasesFindResponse,
-} from '../../../../case/common/api/cases';
+  CommentType,
+} from '../../../../case/common/api';
 import { UseGetCasesState, DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { ConnectorTypes } from '../../../../case/common/api/connectors';
 export { connectorsMock } from './configure/mock';
@@ -42,6 +43,7 @@ export const tags: string[] = ['coke', 'pepsi'];
 
 export const basicComment: Comment = {
   comment: 'Solve this fast!',
+  type: CommentType.user,
   id: basicCommentId,
   createdAt: basicCreatedAt,
   createdBy: elasticUser,

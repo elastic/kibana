@@ -92,7 +92,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect(res.error.text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Uploaded archive seems empty. Assumed content type was application/gzip, check if this matches the archive type."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Archive seems empty. Assumed content type was application/gzip, check if this matches the archive type."}'
       );
     });
 
@@ -105,7 +105,7 @@ export default function (providerContext: FtrProviderContext) {
         .send(buf)
         .expect(400);
       expect(res.error.text).to.equal(
-        '{"statusCode":400,"error":"Bad Request","message":"Error during extraction of uploaded package: Error: end of central directory record signature not found. Assumed content type was application/zip, check if this matches the archive type."}'
+        '{"statusCode":400,"error":"Bad Request","message":"Error during extraction of package: Error: end of central directory record signature not found. Assumed content type was application/zip, check if this matches the archive type."}'
       );
     });
 

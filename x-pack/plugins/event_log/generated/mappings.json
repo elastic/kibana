@@ -81,6 +81,10 @@
                         "instance_id": {
                             "type": "keyword",
                             "ignore_above": 1024
+                        },
+                        "action_group_id": {
+                            "type": "keyword",
+                            "ignore_above": 1024
                         }
                     }
                 },
