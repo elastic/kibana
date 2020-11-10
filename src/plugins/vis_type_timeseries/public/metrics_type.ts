@@ -25,15 +25,16 @@ import { EditorController } from './application';
 // @ts-ignore
 import { PANEL_TYPES } from '../common/panel_types';
 import { VisEditor } from './application/components/vis_editor_lazy';
-import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { VIS_EVENT_TO_TRIGGER, VisGroups } from '../../visualizations/public';
 
 export const metricsVisDefinition = {
   name: 'metrics',
   title: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsTitle', { defaultMessage: 'TSVB' }),
   description: i18n.translate('visTypeTimeseries.kbnVisTypes.metricsDescription', {
-    defaultMessage: 'Build time-series using a visual pipeline interface',
+    defaultMessage: 'Perform advanced analysis of your time series data.',
   }),
   icon: 'visVisualBuilder',
+  group: VisGroups.PROMOTED,
   visConfig: {
     defaults: {
       id: '61ca57f0-469d-11e7-af02-69e470af7417',

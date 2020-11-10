@@ -176,6 +176,7 @@ export interface AlertTypeModel<AlertParamsType = any, AlertsContextValue = any>
   name: string | JSX.Element;
   description: string;
   iconClass: string;
+  documentationUrl: string | ((docLinks: DocLinksStart) => string) | null;
   validate: (alertParams: AlertParamsType) => ValidationResult;
   alertParamsExpression:
     | React.FunctionComponent<any>

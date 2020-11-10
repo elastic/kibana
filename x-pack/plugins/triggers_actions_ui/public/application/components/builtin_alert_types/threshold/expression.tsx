@@ -281,7 +281,6 @@ export const IndexThresholdAlertTypeExpression: React.FunctionComponent<AlertTyp
           <EuiSpacer />
         </Fragment>
       ) : null}
-      <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage

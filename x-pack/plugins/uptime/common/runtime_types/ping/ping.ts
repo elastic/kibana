@@ -145,6 +145,7 @@ export const PingType = t.intersection([
         bytes: t.number,
         redirects: t.array(t.string),
         status_code: t.number,
+        headers: t.record(t.string, t.string),
       }),
       version: t.string,
     }),

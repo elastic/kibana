@@ -9,15 +9,17 @@ import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/p
 import { ManagementSetup } from '../../../../src/plugins/management/public';
 import { IndexManagementPluginSetup } from '../../index_management/public';
 import { CloudSetup } from '../../cloud/public';
+import { SharePluginSetup } from '../../../../src/plugins/share/public';
 
 import { BreadcrumbService } from './application/services/breadcrumbs';
 
-export interface PluginsDependencies {
+export interface SetupDependencies {
   usageCollection?: UsageCollectionSetup;
   management: ManagementSetup;
   cloud?: CloudSetup;
   indexManagement?: IndexManagementPluginSetup;
   home?: HomePublicPluginSetup;
+  share: SharePluginSetup;
 }
 
 export interface ClientConfigType {

@@ -7,6 +7,7 @@
 import _ from 'lodash';
 import { Ast } from '@kbn/interpreter/common';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
+import { Datatable } from 'src/plugins/expressions';
 import { PaletteOutput } from 'src/plugins/charts/public';
 import { VisualizeFieldContext } from '../../../../../../src/plugins/ui_actions/public';
 import {
@@ -50,6 +51,7 @@ export function getSuggestions({
   visualizationState,
   field,
   visualizeTriggerFieldContext,
+  activeData,
   mainPalette,
 }: {
   datasourceMap: Record<string, Datasource>;
@@ -66,6 +68,7 @@ export function getSuggestions({
   visualizationState: unknown;
   field?: unknown;
   visualizeTriggerFieldContext?: VisualizeFieldContext;
+  activeData?: Record<string, Datatable>;
   mainPalette?: PaletteOutput;
 }): Suggestion[] {
   const datasources = Object.entries(datasourceMap).filter(
@@ -87,7 +90,8 @@ export function getSuggestions({
         dataSourceSuggestions = datasource.getDatasourceSuggestionsForField(datasourceState, field);
       } else {
         dataSourceSuggestions = datasource.getDatasourceSuggestionsFromCurrentState(
-          datasourceState
+          datasourceState,
+          activeData
         );
       }
       return dataSourceSuggestions.map((suggestion) => ({ ...suggestion, datasourceId }));
