@@ -82,7 +82,8 @@ export const findThresholdSignals = async ({
     services,
     logger,
     filter,
-    pageSize: 0,
+    pageSize: 1,
+    sortOrder: 'desc',
     buildRuleMessage,
   });
 };

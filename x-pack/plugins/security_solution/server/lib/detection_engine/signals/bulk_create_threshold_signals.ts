@@ -8,7 +8,10 @@ import uuidv5 from 'uuid/v5';
 import { reduce, get, isEmpty } from 'lodash/fp';
 import set from 'set-value';
 
-import { Threshold } from '../../../../common/detection_engine/schemas/common/schemas';
+import {
+  Threshold,
+  TimestampOverrideOrUndefined,
+} from '../../../../common/detection_engine/schemas/common/schemas';
 import { Logger } from '../../../../../../../src/core/server';
 import { AlertServices } from '../../../../../alerts/server';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
@@ -30,6 +33,7 @@ interface BulkCreateThresholdSignalsParams {
   id: string;
   filter: unknown;
   signalsIndex: string;
+  timestampOverride: TimestampOverrideOrUndefined;
   name: string;
   createdAt: string;
   createdBy: string;
@@ -123,9 +127,11 @@ const getTransformedHits = (
   results: SignalSearchResponse,
   inputIndex: string,
   startedAt: Date,
+  logger: Logger,
   threshold: Threshold,
   ruleId: string,
-  filter: unknown
+  filter: unknown,
+  timestampOverride: TimestampOverrideOrUndefined
 ) => {
   if (isEmpty(threshold.field)) {
     const totalResults =
@@ -135,11 +141,16 @@ const getTransformedHits = (
       return [];
     }
 
+    const hit = results.hits.hits[0];
+    if (hit == null) {
+      logger.warn(`No hits returned, but totalResults >= threshold.value (${threshold.value})`);
+      return [];
+    }
+
     const source = {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
       threshold_count: totalResults,
-      // TODO: how to get signal query fields for this case???
-      // ...signalQueryFields,
+      ...getThresholdSignalQueryFields(hit, filter),
     };
 
     return [
@@ -164,7 +175,7 @@ const getTransformedHits = (
         }
 
         const source = {
-          '@timestamp': new Date().toISOString(), // TODO: use timestamp of latest event?
+          '@timestamp': get(timestampOverride ?? '@timestamp', hit._source),
           threshold_count: docCount,
           ...getThresholdSignalQueryFields(hit, filter),
         };
@@ -186,16 +197,20 @@ export const transformThresholdResultsToEcs = (
   inputIndex: string,
   startedAt: Date,
   filter: unknown,
+  logger: Logger,
   threshold: Threshold,
-  ruleId: string
+  ruleId: string,
+  timestampOverride: TimestampOverrideOrUndefined
 ): SignalSearchResponse => {
   const transformedHits = getTransformedHits(
     results,
     inputIndex,
     startedAt,
+    logger,
     threshold,
     ruleId,
-    filter
+    filter,
+    timestampOverride
   );
   const thresholdResults = {
     ...results,
@@ -219,8 +234,10 @@ export const bulkCreateThresholdSignals = async (
     params.inputIndexPattern.join(','),
     params.startedAt,
     params.filter,
+    params.logger,
     params.ruleParams.threshold!,
-    params.ruleParams.ruleId
+    params.ruleParams.ruleId,
+    params.timestampOverride
   );
   const buildRuleMessage = params.buildRuleMessage;
 

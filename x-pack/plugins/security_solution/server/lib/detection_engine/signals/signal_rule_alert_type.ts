@@ -369,6 +369,7 @@ export const signalRulesAlertType = ({
             id: alertId,
             inputIndexPattern: inputIndex,
             signalsIndex: outputIndex,
+            timestampOverride,
             startedAt,
             name,
             createdBy,

@@ -4,8 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default function ({ loadTestFile }) {
-  describe('token-based auth', function () {
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
+  describe('security APIs - Token', function () {
     this.tags('ciGroup6');
     loadTestFile(require.resolve('./login'));
     loadTestFile(require.resolve('./logout'));
