@@ -11,19 +11,19 @@ import { IConfiguredLimits, IAccount, IRole } from './types';
 
 import { getRoleAbilities } from './utils/role';
 
-export interface IAppValues {
+interface AppValues {
   hasInitialized: boolean;
   ilmEnabled: boolean;
   configuredLimits: Partial<IConfiguredLimits>;
   account: Partial<IAccount>;
   myRole: Partial<IRole>;
 }
-export interface IAppActions {
+interface AppActions {
   initializeAppData(props: IInitialAppData): Required<IInitialAppData>;
   setOnboardingComplete(): boolean;
 }
 
-export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
   path: ['enterprise_search', 'app_search', 'app_logic'],
   actions: {
     initializeAppData: (props) => props,

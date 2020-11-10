@@ -13,18 +13,18 @@ import {
   IAccount,
 } from '../../../common/types/workplace_search';
 
-export interface IAppValues extends IWorkplaceSearchInitialData {
+interface AppValues extends IWorkplaceSearchInitialData {
   hasInitialized: boolean;
   isFederatedAuth: boolean;
 }
-export interface IAppActions {
+interface AppActions {
   initializeAppData(props: IInitialAppData): IInitialAppData;
 }
 
 const emptyOrg = {} as IOrganization;
 const emptyAccount = {} as IAccount;
 
-export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
+export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
   path: ['enterprise_search', 'workplace_search', 'app_logic'],
   actions: {
     initializeAppData: ({ workplaceSearch, isFederatedAuth }) => ({

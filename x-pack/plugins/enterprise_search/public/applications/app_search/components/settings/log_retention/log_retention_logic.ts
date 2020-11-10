@@ -11,7 +11,7 @@ import { HttpLogic } from '../../../../shared/http';
 import { flashAPIErrors } from '../../../../shared/flash_messages';
 import { convertLogRetentionFromServerToClient } from './utils/convert_log_retention';
 
-interface ILogRetentionActions {
+interface LogRetentionActions {
   clearLogRetentionUpdating(): { value: boolean };
   closeModals(): { value: boolean };
   fetchLogRetention(): { value: boolean };
@@ -24,13 +24,13 @@ interface ILogRetentionActions {
   updateLogRetention(logRetention: ILogRetention): { logRetention: ILogRetention };
 }
 
-interface ILogRetentionValues {
+interface LogRetentionValues {
   logRetention: ILogRetention | null;
   isLogRetentionUpdating: boolean;
   openedModal: ELogRetentionOptions | null;
 }
 
-export const LogRetentionLogic = kea<MakeLogicType<ILogRetentionValues, ILogRetentionActions>>({
+export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetentionActions>>({
   path: ['enterprise_search', 'app_search', 'log_retention_logic'],
   actions: () => ({
     clearLogRetentionUpdating: true,

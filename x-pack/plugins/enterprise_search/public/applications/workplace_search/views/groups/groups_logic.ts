@@ -23,19 +23,19 @@ import { IMeta } from '../../../../../common/types';
 
 export const MAX_NAME_LENGTH = 40;
 
-interface IGroupsServerData {
+interface GroupsServerData {
   contentSources: IContentSource[];
   users: IUser[];
 }
 
-interface IGroupsSearchResponse {
+interface GroupsSearchResponse {
   results: IGroup[];
   meta: IMeta;
 }
 
-export interface IGroupsActions {
-  onInitializeGroups(data: IGroupsServerData): IGroupsServerData;
-  setSearchResults(data: IGroupsSearchResponse): IGroupsSearchResponse;
+interface GroupsActions {
+  onInitializeGroups(data: GroupsServerData): GroupsServerData;
+  setSearchResults(data: GroupsSearchResponse): GroupsSearchResponse;
   addFilteredSource(sourceId: string): string;
   removeFilteredSource(sourceId: string): string;
   addFilteredUser(userId: string): string;
@@ -62,7 +62,7 @@ export interface IGroupsActions {
   saveNewGroup(): void;
 }
 
-export interface IGroupsValues {
+interface GroupsValues {
   groups: IGroup[];
   contentSources: IContentSource[];
   users: IUser[];
@@ -83,7 +83,7 @@ export interface IGroupsValues {
   hasFiltersSet: boolean;
 }
 
-export const GroupsLogic = kea<MakeLogicType<IGroupsValues, IGroupsActions>>({
+export const GroupsLogic = kea<MakeLogicType<GroupsValues, GroupsActions>>({
   path: ['enterprise_search', 'workplace_search', 'groups'],
   actions: {
     onInitializeGroups: (data: IGroupsServerData) => data,
