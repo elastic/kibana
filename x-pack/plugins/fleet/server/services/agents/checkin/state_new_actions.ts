@@ -140,10 +140,6 @@ export async function createAgentActionFromPolicyAction(
       // A prerelease tag is added here so that agent versions with prerelease tags can be compared
       // correctly using `semvar`
       '7.10.0-SNAPSHOT',
-      // `@types/semvar` is out of date with the version of `semvar` we use and doesn't have a
-      // corresponding release version we can update the typing to :( so, the typing error is
-      // suppressed here even though it is supported by `semvar`
-      // @ts-expect-error
       { includePrerelease: true }
     )
       ? {
