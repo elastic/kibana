@@ -92,6 +92,8 @@ import {
   ThreatMappingOrUndefined,
   ThreatFiltersOrUndefined,
   ThreatLanguageOrUndefined,
+  ConcurrentSearchesOrUndefined,
+  ItemsPerSearchOrUndefined,
 } from '../../../../common/detection_engine/schemas/types/threat_mapping';
 
 import { AlertsClient, PartialAlert } from '../../../../../alerts/server';
@@ -234,6 +236,8 @@ export interface CreateRulesOptions {
   threatIndex: ThreatIndexOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
@@ -284,6 +288,8 @@ export interface UpdateRulesOptions {
   threatIndex: ThreatIndexOrUndefined;
   threatQuery: ThreatQueryOrUndefined;
   threatMapping: ThreatMappingOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
   threatLanguage: ThreatLanguageOrUndefined;
   timestampOverride: TimestampOverrideOrUndefined;
   to: To;
@@ -327,6 +333,8 @@ export interface PatchRulesOptions {
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
   threat: ThreatOrUndefined;
+  itemsPerSearch: ItemsPerSearchOrUndefined;
+  concurrentSearches: ConcurrentSearchesOrUndefined;
   threshold: ThresholdOrUndefined;
   threatFilters: ThreatFiltersOrUndefined;
   threatIndex: ThreatIndexOrUndefined;

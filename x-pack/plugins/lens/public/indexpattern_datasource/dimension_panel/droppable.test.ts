@@ -15,8 +15,45 @@ import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { IndexPatternColumn } from '../operations';
+import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../state_helpers');
+
+const fields = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  documentField,
+];
 
 const expectedIndexPatterns = {
   1: {
@@ -25,41 +62,8 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     hasExistence: true,
     hasRestrictions: false,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'memory',
-        displayName: 'memory',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      documentField,
-    ],
+    fields,
+    getFieldByName: getFieldByNameFactory(fields),
   },
 };
 
@@ -146,6 +150,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         } as unknown) as DataPublicPluginStart['fieldFormats'],
       } as unknown) as DataPublicPluginStart,
       core: {} as CoreSetup,
+      dimensionGroups: [],
     };
 
     jest.clearAllMocks();
@@ -176,6 +181,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
               type: 'string',
             },
           ],
+
+          getFieldByName: getFieldByNameFactory([
+            {
+              aggregatable: true,
+              name: 'bar',
+              displayName: 'bar',
+              searchable: true,
+              type: 'number',
+            },
+            {
+              aggregatable: true,
+              name: 'mystring',
+              displayName: 'mystring',
+              searchable: true,
+              type: 'string',
+            },
+          ]),
         },
       },
       currentIndexPatternId: '1',

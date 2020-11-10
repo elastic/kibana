@@ -11,11 +11,11 @@ import { takeUntil } from 'rxjs/operators';
 import * as i18n from '../translations';
 import { useKibana } from '../../../common/lib/kibana';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
   isPartialResponse,
 } from '../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../src/plugins/kibana_utils/common';
 import {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,

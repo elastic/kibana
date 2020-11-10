@@ -23,7 +23,7 @@ import {
   CustomConfigurePackagePolicyContent,
   CustomConfigurePackagePolicyProps,
   pagePathGetters,
-} from '../../../../../../../ingest_manager/public';
+} from '../../../../../../../fleet/public';
 import { getPolicyDetailPath, getTrustedAppsListPath } from '../../../../common/routing';
 import { MANAGEMENT_APP_ID } from '../../../../common/constants';
 import {

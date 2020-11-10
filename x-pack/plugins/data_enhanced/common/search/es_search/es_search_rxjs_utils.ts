@@ -9,11 +9,11 @@ import { map, takeWhile, switchMap, expand, mergeMap, tap } from 'rxjs/operators
 import { ApiResponse } from '@elastic/elasticsearch';
 
 import {
-  AbortError,
   doSearch,
   IKibanaSearchResponse,
   isErrorResponse,
 } from '../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../src/plugins/kibana_utils/common';
 import type { IKibanaSearchRequest } from '../../../../../../src/plugins/data/common';
 import type { IAsyncSearchOptions } from '../../../common/search/types';
 
