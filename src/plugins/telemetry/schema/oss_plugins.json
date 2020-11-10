@@ -1581,6 +1581,23 @@
         }
       }
     },
+    "localization": {
+      "properties": {
+        "locale": {
+          "type": "keyword"
+        },
+        "integrities": {
+          "properties": {
+            "DYNAMIC_KEY": {
+              "type": "text"
+            }
+          }
+        },
+        "labelsCount": {
+          "type": "long"
+        }
+      }
+    },
     "stack_management": {
       "properties": {
         "visualize:enableLabs": {

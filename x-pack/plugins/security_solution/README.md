@@ -97,7 +97,7 @@ PACKAGE_REGISTRY_URL_OVERRIDE=<url to your package registry like http://localhos
 
 ### Using the default public registry
 
-If you don't have docker installed and don't want to run your own registry, you can run the tests using the ingest manager's default public package registry. The actual package registry used is [here](../../plugins/ingest_manager/common/constants/epm.ts#L9)
+If you don't have docker installed and don't want to run your own registry, you can run the tests using the ingest manager's default public package registry. The actual package registry used is [here](../../plugins/fleet/common/constants/epm.ts#L9)
 
 Make sure you're in the Kibana root directory.
 

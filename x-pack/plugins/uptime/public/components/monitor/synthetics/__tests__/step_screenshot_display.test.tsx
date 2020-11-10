@@ -6,13 +6,9 @@
 
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import React from 'react';
-import useIntersection from 'react-use/lib/useIntersection';
 import { StepScreenshotDisplay } from '../step_screenshot_display';
 
-jest.mock('react-use/lib/useIntersection');
-
-const useIntersectionMock = useIntersection as jest.Mock;
-useIntersectionMock.mockImplementation(() => ({
+jest.mock('react-use/lib/useIntersection', () => () => ({
   isIntersecting: true,
 }));
 
