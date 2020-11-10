@@ -20,17 +20,13 @@
 import { i18nLoader } from '@kbn/i18n';
 import { size } from 'lodash';
 import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import { I18nServiceSetup } from '../../../../../core/server';
 import { getIntegrityHashes, Integrities } from './file_integrity';
 
 export interface UsageStats {
   locale: string;
   integrities: Integrities;
   labelsCount?: number;
-}
-
-export interface LocalizationUsageCollectorHelpers {
-  getLocale: () => string;
-  getTranslationsFilePaths: () => string[];
 }
 
 export async function getTranslationCount(
@@ -41,13 +37,10 @@ export async function getTranslationCount(
   return size(translations.messages);
 }
 
-export function createCollectorFetch({
-  getLocale,
-  getTranslationsFilePaths,
-}: LocalizationUsageCollectorHelpers) {
+export function createCollectorFetch({ getLocale, getTranslationFiles }: I18nServiceSetup) {
   return async function fetchUsageStats(): Promise<UsageStats> {
     const locale = getLocale();
-    const translationFilePaths: string[] = getTranslationsFilePaths();
+    const translationFilePaths: string[] = getTranslationFiles();
 
     const [labelsCount, integrities] = await Promise.all([
       getTranslationCount(i18nLoader, locale),
@@ -62,15 +55,14 @@ export function createCollectorFetch({
   };
 }
 
-// TODO: Migrate out of the Legacy dir
 export function registerLocalizationUsageCollector(
   usageCollection: UsageCollectionSetup,
-  helpers: LocalizationUsageCollectorHelpers
+  i18n: I18nServiceSetup
 ) {
   const collector = usageCollection.makeUsageCollector<UsageStats>({
     type: 'localization',
     isReady: () => true,
-    fetch: createCollectorFetch(helpers),
+    fetch: createCollectorFetch(i18n),
     schema: {
       locale: { type: 'keyword' },
       integrities: { DYNAMIC_KEY: { type: 'text' } },

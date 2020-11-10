@@ -128,7 +128,7 @@ export function getDatasourceSuggestionsForVisualizeField(
   const layerIds = layers.filter((id) => state.layers[id].indexPatternId === indexPatternId);
   // Identify the field by the indexPatternId and the fieldName
   const indexPattern = state.indexPatterns[indexPatternId];
-  const field = indexPattern.fields.find((fld) => fld.name === fieldName);
+  const field = indexPattern.getFieldByName(fieldName);
 
   if (layerIds.length !== 0 || !field) return [];
   const newId = generateId();
@@ -371,7 +371,7 @@ function createNewLayerWithMetricAggregation(
   indexPattern: IndexPattern,
   field: IndexPatternField
 ): IndexPatternLayer {
-  const dateField = indexPattern.fields.find((f) => f.name === indexPattern.timeFieldName)!;
+  const dateField = indexPattern.getFieldByName(indexPattern.timeFieldName!);
 
   const column = getMetricColumn(indexPattern, layerId, field);
 
@@ -451,9 +451,8 @@ export function getDatasourceSuggestionsFromCurrentState(
           (columnId) =>
             layer.columns[columnId].isBucketed && layer.columns[columnId].dataType === 'date'
         );
-        const timeField = indexPattern.fields.find(
-          ({ name }) => name === indexPattern.timeFieldName
-        );
+        const timeField =
+          indexPattern.timeFieldName && indexPattern.getFieldByName(indexPattern.timeFieldName);
 
         const hasNumericDimension =
           buckets.length === 1 &&
@@ -507,17 +506,17 @@ function createChangedNestingSuggestion(state: IndexPatternPrivateState, layerId
   const layer = state.layers[layerId];
   const [firstBucket, secondBucket, ...rest] = layer.columnOrder;
   const updatedLayer = { ...layer, columnOrder: [secondBucket, firstBucket, ...rest] };
-  const currentFields = state.indexPatterns[state.currentIndexPatternId].fields;
+  const indexPattern = state.indexPatterns[state.currentIndexPatternId];
+  const firstBucketColumn = layer.columns[firstBucket];
   const firstBucketLabel =
-    currentFields.find((field) => {
-      const column = layer.columns[firstBucket];
-      return hasField(column) && column.sourceField === field.name;
-    })?.displayName || '';
+    (hasField(firstBucketColumn) &&
+      indexPattern.getFieldByName(firstBucketColumn.sourceField)?.displayName) ||
+    '';
+  const secondBucketColumn = layer.columns[secondBucket];
   const secondBucketLabel =
-    currentFields.find((field) => {
-      const column = layer.columns[secondBucket];
-      return hasField(column) && column.sourceField === field.name;
-    })?.displayName || '';
+    (hasField(secondBucketColumn) &&
+      indexPattern.getFieldByName(secondBucketColumn.sourceField)?.displayName) ||
+    '';
 
   return buildSuggestion({
     state,
@@ -604,7 +603,10 @@ function createAlternativeMetricSuggestions(
     if (!hasField(column)) {
       return;
     }
-    const field = indexPattern.fields.find(({ name }) => column.sourceField === name)!;
+    const field = indexPattern.getFieldByName(column.sourceField);
+    if (!field) {
+      return;
+    }
     const alternativeMetricOperations = getOperationTypesForField(field)
       .map((op) =>
         buildColumn({
