@@ -1,0 +1,19 @@
+- name: install rpm package
+  hosts: all
+  tasks:
+    - name: upgrade all packages
+      become: yes
+      yum:
+        name: '*'
+        state: latest
+    - name: install kibana from local file
+      become: yes
+      yum:
+        name: /packages/kibana-8.0.0-SNAPSHOT-x86_64.rpm
+        state: present
+    - name: start kibana
+      become: yes
+      systemd:
+        state: started
+        name: kibana
+    - wait_for: host=localhost port=5601 timeout=60
