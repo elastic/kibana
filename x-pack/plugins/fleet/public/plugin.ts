@@ -30,7 +30,7 @@ import {
   TutorialDirectoryHeaderLink,
   TutorialModuleNotice,
 } from './applications/fleet/components/home_integration';
-import { createExtensionRegistrationCallback } from './applications/fleet/services';
+import { createExtensionRegistrationCallback } from './applications/fleet/services/ui_extensions';
 import {
   UIExtensionRegistrationCallback,
   UIExtensionsStorage,
