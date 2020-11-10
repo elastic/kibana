@@ -19,7 +19,7 @@ import { IContentSource, IGroup, IUser } from '../../types';
 
 import { JSON_HEADER as headers } from '../../../../../common/constants';
 import { DEFAULT_META } from '../../../shared/constants';
-import { IMeta } from '../../../../../common/types';
+import { Meta } from '../../../../../common/types';
 
 export const MAX_NAME_LENGTH = 40;
 
@@ -30,7 +30,7 @@ interface GroupsServerData {
 
 interface GroupsSearchResponse {
   results: IGroup[];
-  meta: IMeta;
+  meta: Meta;
 }
 
 interface GroupsActions {
@@ -79,7 +79,7 @@ interface GroupsValues {
   allGroupUsersLoading: boolean;
   allGroupUsers: IUser[];
   filterValue: string;
-  groupsMeta: IMeta;
+  groupsMeta: Meta;
   hasFiltersSet: boolean;
 }
 

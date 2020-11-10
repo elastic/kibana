@@ -31,13 +31,13 @@ export interface IConfiguredLimits {
   workplaceSearch: IWorkplaceSearchConfiguredLimits;
 }
 
-export interface IMetaPage {
+export interface MetaPage {
   current: number;
   size: number;
   total_pages: number;
   total_results: number;
 }
 
-export interface IMeta {
-  page: IMetaPage;
+export interface Meta {
+  page: MetaPage;
 }
