@@ -141,7 +141,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 
       warmPhase.actions = serializeAllocateAction(
         _meta.warm,
-        updatedPolicy.phases.warm!.actions,
+        warmPhase.actions,
         originalPolicy?.phases.warm?.actions
       );
 
@@ -174,7 +174,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
 
       coldPhase.actions = serializeAllocateAction(
         _meta.cold,
-        updatedPolicy.phases.cold!.actions,
+        coldPhase.actions,
         originalPolicy?.phases.cold?.actions
       );
 
