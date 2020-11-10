@@ -231,7 +231,7 @@ export class TaskRunner {
       alertInstances,
       executionHandler,
       originalAlertInstanceIds,
-      currentAlertInstanceIds
+      instancesWithScheduledActions
     );
 
     generateNewAndResolvedInstanceEvents({
@@ -464,8 +464,9 @@ function scheduleActionsForResolvedInstances(
   },
   executionHandler: ReturnType<typeof createExecutionHandler>,
   originalAlertInstanceIds: string[],
-  currentAlertInstanceIds: string[]
+  currentAlertInstances: Dictionary<AlertInstance>
 ) {
+  const currentAlertInstanceIds = Object.keys(currentAlertInstances);
   const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
   for (const id of resolvedIds) {
     alertInstancesMap[id].updateLastScheduledActions(ResolvedActionGroup.id);
