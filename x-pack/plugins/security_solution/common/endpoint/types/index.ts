@@ -1103,7 +1103,7 @@ export interface GetHostPolicyResponse {
 export interface GetAgentSummaryResponse {
   summary_response: {
     package: string;
-    policy_name?: string;
+    policy_id?: string;
     versions_count: JsonObject;
   };
 }
