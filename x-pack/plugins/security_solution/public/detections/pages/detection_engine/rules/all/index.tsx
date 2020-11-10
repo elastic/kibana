@@ -13,6 +13,7 @@ import {
   EuiProgress,
   EuiOverlayMask,
   EuiConfirmModal,
+  EuiWindowEvent,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
@@ -406,18 +407,6 @@ export const AllRules = React.memo<AllRulesProps>(
       [setAutoRefreshOn, handleRefreshData]
     );
 
-    useEffect(() => {
-      debounceResetIdleTimer();
-
-      window.addEventListener('mousemove', debounceResetIdleTimer, { passive: true });
-      window.addEventListener('keydown', debounceResetIdleTimer);
-
-      return () => {
-        window.removeEventListener('mousemove', debounceResetIdleTimer);
-        window.removeEventListener('keydown', debounceResetIdleTimer);
-      };
-    }, [handleResetIdleTimer, debounceResetIdleTimer]);
-
     const shouldShowRulesTable = useMemo(
       (): boolean => showRulesTable({ rulesCustomInstalled, rulesInstalled }) && !initLoading,
       [initLoading, rulesCustomInstalled, rulesInstalled]
@@ -470,6 +459,12 @@ export const AllRules = React.memo<AllRulesProps>(
 
     return (
       <>
+        <EuiWindowEvent event="mousemove" handler={debounceResetIdleTimer} />
+        <EuiWindowEvent event="mousedown" handler={debounceResetIdleTimer} />
+        <EuiWindowEvent event="click" handler={debounceResetIdleTimer} />
+        <EuiWindowEvent event="keydown" handler={debounceResetIdleTimer} />
+        <EuiWindowEvent event="scroll" handler={debounceResetIdleTimer} />
+        <EuiWindowEvent event="load" handler={debounceResetIdleTimer} />
         <GenericDownloader
           filename={`${i18n.EXPORT_FILENAME}.ndjson`}
           ids={exportRuleIds}

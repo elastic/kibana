@@ -103,7 +103,7 @@ describe('terms', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newNumberField = indexPattern.fields.find((i) => i.name === 'bytes')!;
+      const newNumberField = indexPattern.getFieldByName('bytes')!;
 
       const column = termsOperation.onFieldChange(oldColumn, indexPattern, newNumberField);
       expect(column).toHaveProperty('dataType', 'number');
