@@ -35,6 +35,9 @@ export class KibanaFramework {
     return this.license.isActive;
   }
 
+  /**
+   * @deprecated Rather use {@link IRouter} directly.
+   */
   public registerRoute<Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
     config: GrokDebuggerRouteConfig<Params, Query, Body, Method>,
     handler: RequestHandler<Params, Query, Body>
