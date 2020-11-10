@@ -19,7 +19,7 @@ import {
   AlertInstanceContext,
   ActionGroup,
 } from './types';
-import { ResolvedActionGroup } from '../common';
+import { getBuiltinActionGroups } from '../common';
 
 interface ConstructorOptions {
   taskManager: TaskManagerSetupContract;
@@ -160,8 +160,4 @@ function validateActionGroups(alertTypeId: string, actionGroups: ActionGroup[]) 
       })
     );
   }
-}
-
-function getBuiltinActionGroups(): ActionGroup[] {
-  return [ResolvedActionGroup];
 }

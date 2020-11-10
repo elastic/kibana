@@ -12,3 +12,7 @@ export const ResolvedActionGroup: ActionGroup = {
     defaultMessage: 'Resolved',
   }),
 };
+
+export function getBuiltinActionGroups(): ActionGroup[] {
+  return [ResolvedActionGroup];
+}

@@ -184,9 +184,6 @@ export async function createAlert({
     'createdBy' | 'updatedBy' | 'muteAll' | 'mutedInstanceIds' | 'executionStatus'
   >;
 }): Promise<Alert> {
-  if (alert.actions.length === 2) {
-    alert.actions[1].group = 'resolved';
-  }
   return await http.post(`${BASE_ALERT_API_PATH}/alert`, {
     body: JSON.stringify(alert),
   });
