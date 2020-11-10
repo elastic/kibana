@@ -53,12 +53,9 @@ interface FilterObject {
 
 const injectFirstMatch = (
   hit: SignalSourceHit,
-  match: string | object | Record<string, string>
+  match: object | Record<string, string>
 ): Record<string, string> | undefined => {
   if (match != null) {
-    if (typeof match === 'string') {
-      return { exists: get(match, hit._source) } as Record<string, string>;
-    }
     for (const key of Object.keys(match)) {
       return { [key]: get(key, hit._source) } as Record<string, string>;
     }
@@ -88,8 +85,7 @@ const getNestedQueryFilters = (
       (filtersObj.bool?.should &&
         filtersObj.bool?.should[0] &&
         (injectFirstMatch(hit, filtersObj.bool.should[0].match) ||
-          injectFirstMatch(hit, filtersObj.bool.should[0].match_phrase) ||
-          injectFirstMatch(hit, filtersObj.bool.should[0].exists.field))) ??
+          injectFirstMatch(hit, filtersObj.bool.should[0].match_phrase))) ??
       {}
     );
   }
@@ -104,17 +100,11 @@ export const getThresholdSignalQueryFields = (hit: SignalSourceHit, filter: unkn
         return { ...acc, ...injectFirstMatch(hit, item.match_phrase) };
       }
 
-      if (
-        item.bool?.should &&
-        (item.bool.should[0].match ||
-          item.bool.should[0].match_phrase ||
-          item.bool.should[0].exists)
-      ) {
+      if (item.bool?.should && (item.bool.should[0].match || item.bool.should[0].match_phrase)) {
         return {
           ...acc,
           ...(injectFirstMatch(hit, item.bool.should[0].match) ||
-            injectFirstMatch(hit, item.bool.should[0].match_phrase) ||
-            injectFirstMatch(hit, item.bool.should[0].exists.field)),
+            injectFirstMatch(hit, item.bool.should[0].match_phrase)),
         };
       }
 
