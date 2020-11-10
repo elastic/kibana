@@ -200,12 +200,11 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         deletePhase.min_age = `${updatedPolicy.phases.delete!.min_age}${_meta.delete.minAgeUnit}`;
       }
 
-      if (originalPolicy?.phases.delete?.actions) {
-        const { wait_for_snapshot: __, ...rest } = originalPolicy.phases.delete.actions;
-        deletePhase.actions = {
-          ...deletePhase.actions,
-          ...rest,
-        };
+      if (
+        !updatedPolicy.phases.delete!.actions?.wait_for_snapshot &&
+        deletePhase.actions.wait_for_snapshot
+      ) {
+        delete deletePhase.actions.wait_for_snapshot;
       }
     } else {
       delete draft.phases.delete;
