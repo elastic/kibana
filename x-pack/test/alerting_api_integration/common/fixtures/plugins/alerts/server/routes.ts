@@ -188,7 +188,7 @@ export function defineRoutes(
 
   router.get(
     {
-      path: '/api/alerts_fixture/alerting_invalidate_apiKeys',
+      path: '/api/alerts_fixture/api_keys_pending_invalidation',
       validate: {},
     },
     async (

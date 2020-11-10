@@ -114,7 +114,7 @@ function taskRunner(
           const repository = savedObjects.createInternalRepository([
             'api_key_pending_invalidation',
           ]);
-          const configuredDelay = await configResult.invalidateApiKeysTask.removalDelay;
+          const configuredDelay = configResult.invalidateApiKeysTask.removalDelay;
           const delay = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
 
           let hasApiKeysPendingInvalidation = true;
@@ -128,14 +128,14 @@ function taskRunner(
               sortOrder: 'asc',
               perPage: PAGE_SIZE,
             });
-            totalInvalidated += await manageToInvalidateApiKeys(
+            totalInvalidated += await invalidateApiKeys(
               logger,
               repository,
               apiKeysToInvalidate,
               securityPluginSetup
             );
 
-            hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > 0;
+            hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > PAGE_SIZE;
           } while (hasApiKeysPendingInvalidation);
 
           return {
@@ -147,8 +147,8 @@ function taskRunner(
               interval: configResult.invalidateApiKeysTask.interval,
             },
           };
-        } catch (errMsg) {
-          logger.warn(`Error executing alerting apiKey invalidation task: ${errMsg}`);
+        } catch (e) {
+          logger.warn(`Error executing alerting apiKey invalidation task: ${e.message}`);
           return {
             state: {
               runs: (state.runs || 0) + 1,
@@ -164,30 +164,32 @@ function taskRunner(
   };
 }
 
-async function manageToInvalidateApiKeys(
+async function invalidateApiKeys(
   logger: Logger,
   repository: ISavedObjectsRepository,
   apiKeysToInvalidate: SavedObjectsFindResponse<InvalidatePendingApiKey>,
   securityPluginSetup?: SecurityPluginSetup
 ) {
   let totalInvalidated = 0;
-  for (const apiKeyObj of apiKeysToInvalidate.saved_objects) {
-    const response = await invalidateAPIKey(
-      { id: apiKeyObj.attributes.apiKeyId },
-      securityPluginSetup
-    );
-    if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-      logger.error(`Failed to invalidate API Key [id="${apiKeyObj.attributes.apiKeyId}"]`);
-    } else {
-      try {
-        await repository.delete('api_key_pending_invalidation', apiKeyObj.id);
-        totalInvalidated++;
-      } catch (err) {
-        logger.error(
-          `Failed to cleanup api key "${apiKeyObj.attributes.apiKeyId}". Error: ${err.message}`
-        );
+  await Promise.all(
+    apiKeysToInvalidate.saved_objects.map(async (apiKeyObj) => {
+      const response = await invalidateAPIKey(
+        { id: apiKeyObj.attributes.apiKeyId },
+        securityPluginSetup
+      );
+      if (response.apiKeysEnabled === true && response.result.error_count > 0) {
+        logger.error(`Failed to invalidate API Key [id="${apiKeyObj.attributes.apiKeyId}"]`);
+      } else {
+        try {
+          await repository.delete('api_key_pending_invalidation', apiKeyObj.id);
+          totalInvalidated++;
+        } catch (err) {
+          logger.error(
+            `Failed to cleanup api key "${apiKeyObj.attributes.apiKeyId}". Error: ${err.message}`
+          );
+        }
       }
-    }
-  }
+    })
+  );
   return totalInvalidated;
 }
