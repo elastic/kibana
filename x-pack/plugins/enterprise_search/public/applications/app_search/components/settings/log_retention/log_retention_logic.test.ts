@@ -1,0 +1,368 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+import { resetContext } from 'kea';
+
+import { mockHttpValues } from '../../../../__mocks__';
+jest.mock('../../../../shared/http', () => ({
+  HttpLogic: { values: mockHttpValues },
+}));
+const { http } = mockHttpValues;
+
+jest.mock('../../../../shared/flash_messages', () => ({
+  flashAPIErrors: jest.fn(),
+}));
+import { flashAPIErrors } from '../../../../shared/flash_messages';
+
+import { ELogRetentionOptions } from './types';
+import { LogRetentionLogic } from './log_retention_logic';
+
+describe('LogRetentionLogic', () => {
+  const TYPICAL_SERVER_LOG_RETENTION = {
+    analytics: {
+      disabled_at: null,
+      enabled: true,
+      retention_policy: { is_default: true, min_age_days: 180 },
+    },
+    api: {
+      disabled_at: null,
+      enabled: true,
+      retention_policy: { is_default: true, min_age_days: 180 },
+    },
+  };
+
+  const TYPICAL_CLIENT_LOG_RETENTION = {
+    analytics: {
+      disabledAt: null,
+      enabled: true,
+      retentionPolicy: { isDefault: true, minAgeDays: 180 },
+    },
+    api: {
+      disabledAt: null,
+      enabled: true,
+      retentionPolicy: { isDefault: true, minAgeDays: 180 },
+    },
+  };
+
+  const DEFAULT_VALUES = {
+    logRetention: null,
+    openedModal: null,
+    isLogRetentionUpdating: false,
+  };
+
+  const mount = (defaults?: object) => {
+    if (!defaults) {
+      resetContext({});
+    } else {
+      resetContext({
+        defaults: {
+          enterprise_search: {
+            app_search: {
+              log_retention_logic: {
+                ...defaults,
+              },
+            },
+          },
+        },
+      });
+    }
+    LogRetentionLogic.mount();
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('has expected default values', () => {
+    mount();
+    expect(LogRetentionLogic.values).toEqual(DEFAULT_VALUES);
+  });
+
+  describe('actions', () => {
+    describe('setOpenedModal', () => {
+      describe('openedModal', () => {
+        it('should be set to the provided value', () => {
+          mount();
+
+          LogRetentionLogic.actions.setOpenedModal(ELogRetentionOptions.Analytics);
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            openedModal: ELogRetentionOptions.Analytics,
+          });
+        });
+      });
+    });
+
+    describe('closeModals', () => {
+      describe('openedModal', () => {
+        it('resets openedModal to null', () => {
+          mount({
+            openedModal: 'analytics',
+          });
+
+          LogRetentionLogic.actions.closeModals();
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            openedModal: null,
+          });
+        });
+      });
+
+      describe('isLogRetentionUpdating', () => {
+        it('resets isLogRetentionUpdating to false', () => {
+          mount({
+            isLogRetentionUpdating: true,
+          });
+
+          LogRetentionLogic.actions.closeModals();
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            isLogRetentionUpdating: false,
+          });
+        });
+      });
+    });
+
+    describe('clearLogRetentionUpdating', () => {
+      describe('isLogRetentionUpdating', () => {
+        it('resets isLogRetentionUpdating to false', () => {
+          mount({
+            isLogRetentionUpdating: true,
+          });
+
+          LogRetentionLogic.actions.clearLogRetentionUpdating();
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            isLogRetentionUpdating: false,
+          });
+        });
+      });
+    });
+
+    describe('updateLogRetention', () => {
+      describe('logRetention', () => {
+        it('updates the logRetention values that are passed', () => {
+          mount({
+            logRetention: {},
+          });
+
+          LogRetentionLogic.actions.updateLogRetention({
+            api: {
+              disabledAt: null,
+              enabled: true,
+              retentionPolicy: null,
+            },
+            analytics: {
+              disabledAt: null,
+              enabled: true,
+              retentionPolicy: null,
+            },
+          });
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            logRetention: {
+              api: {
+                disabledAt: null,
+                enabled: true,
+                retentionPolicy: null,
+              },
+              analytics: {
+                disabledAt: null,
+                enabled: true,
+                retentionPolicy: null,
+              },
+            },
+          });
+        });
+      });
+    });
+
+    describe('saveLogRetention', () => {
+      beforeEach(() => {
+        mount();
+        jest.spyOn(LogRetentionLogic.actions, 'clearLogRetentionUpdating');
+      });
+
+      describe('openedModal', () => {
+        it('should be reset to null', () => {
+          mount({
+            openedModal: ELogRetentionOptions.Analytics,
+          });
+
+          LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            openedModal: null,
+          });
+        });
+      });
+
+      it('will call an API endpoint and update log retention', async () => {
+        jest.spyOn(LogRetentionLogic.actions, 'updateLogRetention');
+        const promise = Promise.resolve(TYPICAL_SERVER_LOG_RETENTION);
+        http.put.mockReturnValue(promise);
+
+        LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
+
+        expect(http.put).toHaveBeenCalledWith('/api/app_search/log_settings', {
+          body: JSON.stringify({
+            analytics: {
+              enabled: true,
+            },
+          }),
+        });
+
+        await promise;
+        expect(LogRetentionLogic.actions.updateLogRetention).toHaveBeenCalledWith(
+          TYPICAL_CLIENT_LOG_RETENTION
+        );
+
+        expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
+      });
+
+      it('handles errors', async () => {
+        const promise = Promise.reject('An error occured');
+        http.put.mockReturnValue(promise);
+
+        LogRetentionLogic.actions.saveLogRetention(ELogRetentionOptions.Analytics, true);
+
+        try {
+          await promise;
+        } catch {
+          // Do nothing
+        }
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
+        expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
+      });
+    });
+
+    describe('toggleLogRetention', () => {
+      describe('isLogRetentionUpdating', () => {
+        it('sets isLogRetentionUpdating to true', () => {
+          mount({
+            isLogRetentionUpdating: false,
+          });
+
+          LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            isLogRetentionUpdating: true,
+          });
+        });
+      });
+
+      it('will call setOpenedModal if already enabled', () => {
+        mount({
+          logRetention: {
+            [ELogRetentionOptions.Analytics]: {
+              enabled: true,
+            },
+          },
+        });
+        jest.spyOn(LogRetentionLogic.actions, 'setOpenedModal');
+
+        LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
+
+        expect(LogRetentionLogic.actions.setOpenedModal).toHaveBeenCalledWith(
+          ELogRetentionOptions.Analytics
+        );
+      });
+    });
+
+    describe('fetchLogRetention', () => {
+      describe('isLogRetentionUpdating', () => {
+        it('sets isLogRetentionUpdating to true', () => {
+          mount({
+            isLogRetentionUpdating: false,
+          });
+
+          LogRetentionLogic.actions.fetchLogRetention();
+
+          expect(LogRetentionLogic.values).toEqual({
+            ...DEFAULT_VALUES,
+            isLogRetentionUpdating: true,
+          });
+        });
+      });
+
+      it('will call an API endpoint and update log retention', async () => {
+        mount();
+        jest.spyOn(LogRetentionLogic.actions, 'clearLogRetentionUpdating');
+        jest
+          .spyOn(LogRetentionLogic.actions, 'updateLogRetention')
+          .mockImplementationOnce(() => {});
+
+        const promise = Promise.resolve(TYPICAL_SERVER_LOG_RETENTION);
+        http.get.mockReturnValue(promise);
+
+        LogRetentionLogic.actions.fetchLogRetention();
+
+        expect(http.get).toHaveBeenCalledWith('/api/app_search/log_settings');
+        await promise;
+        expect(LogRetentionLogic.actions.updateLogRetention).toHaveBeenCalledWith(
+          TYPICAL_CLIENT_LOG_RETENTION
+        );
+
+        expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
+      });
+
+      it('handles errors', async () => {
+        mount();
+        jest.spyOn(LogRetentionLogic.actions, 'clearLogRetentionUpdating');
+        const promise = Promise.reject('An error occured');
+        http.get.mockReturnValue(promise);
+
+        LogRetentionLogic.actions.fetchLogRetention();
+
+        try {
+          await promise;
+        } catch {
+          // Do nothing
+        }
+        expect(flashAPIErrors).toHaveBeenCalledWith('An error occured');
+        expect(LogRetentionLogic.actions.clearLogRetentionUpdating).toHaveBeenCalled();
+      });
+    });
+
+    it('will call saveLogRetention if NOT already enabled', () => {
+      mount({
+        logRetention: {
+          [ELogRetentionOptions.Analytics]: {
+            enabled: false,
+          },
+        },
+      });
+      jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
+
+      LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.Analytics);
+
+      expect(LogRetentionLogic.actions.saveLogRetention).toHaveBeenCalledWith(
+        ELogRetentionOptions.Analytics,
+        true
+      );
+    });
+
+    it('will do nothing if logRetention option is not yet set', () => {
+      mount({
+        logRetention: {},
+      });
+      jest.spyOn(LogRetentionLogic.actions, 'saveLogRetention');
+      jest.spyOn(LogRetentionLogic.actions, 'setOpenedModal');
+
+      LogRetentionLogic.actions.toggleLogRetention(ELogRetentionOptions.API);
+
+      expect(LogRetentionLogic.actions.saveLogRetention).not.toHaveBeenCalled();
+      expect(LogRetentionLogic.actions.setOpenedModal).not.toHaveBeenCalled();
+    });
+  });
+});

@@ -55,6 +55,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await nameInput.click();
   }
 
+  async function defineAlwaysFiringAlert(alertName: string) {
+    await pageObjects.triggersActionsUI.clickCreateAlertButton();
+    await testSubjects.setValue('alertNameInput', alertName);
+    await testSubjects.click('test.always-firing-SelectOption');
+  }
+
   describe('create alert', function () {
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
@@ -73,10 +79,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
+      const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
+      expect(await messageTextArea.getAttribute('value')).to.eql(
+        'alert {{alertName}} group {{context.group}} value {{context.value}} exceeded threshold {{context.function}} over {{params.timeWindowSize}}{{params.timeWindowUnit}} on {{context.date}}'
+      );
       await testSubjects.setValue('messageTextArea', 'test message ');
       await testSubjects.click('messageAddVariableButton');
       await testSubjects.click('variableMenuButton-0');
-      const messageTextArea = await find.byCssSelector('[data-test-subj="messageTextArea"]');
       expect(await messageTextArea.getAttribute('value')).to.eql('test message {{alertId}}');
       await messageTextArea.type(' some additional text ');
 
@@ -97,6 +106,57 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           name: alertName,
           tagsText: '',
           alertType: 'Index threshold',
+          interval: '1m',
+        },
+      ]);
+
+      // clean up created alert
+      const alertsToDelete = await getAlertsByName(alertName);
+      await deleteAlerts(alertsToDelete.map((alertItem: { id: string }) => alertItem.id));
+    });
+
+    it('should create an alert with actions in multiple groups', async () => {
+      const alertName = generateUniqueKey();
+      await defineAlwaysFiringAlert(alertName);
+
+      // create Slack connector and attach an action using it
+      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.click('addNewActionConnectorButton-.slack');
+      const slackConnectorName = generateUniqueKey();
+      await testSubjects.setValue('nameInput', slackConnectorName);
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
+      const createdConnectorToastTitle = await pageObjects.common.closeToast();
+      expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
+      await testSubjects.setValue('messageTextArea', 'test message ');
+      await (
+        await find.byCssSelector(
+          '[data-test-subj="alertActionAccordion-0"] [data-test-subj="messageTextArea"]'
+        )
+      ).type('some text ');
+
+      await testSubjects.click('addAlertActionButton');
+      await testSubjects.click('.slack-ActionTypeSelectOption');
+      await testSubjects.setValue('messageTextArea', 'test message ');
+      await (
+        await find.byCssSelector(
+          '[data-test-subj="alertActionAccordion-1"] [data-test-subj="messageTextArea"]'
+        )
+      ).type('some text ');
+
+      await testSubjects.click('addNewActionConnectorActionGroup-1');
+      await testSubjects.click('addNewActionConnectorActionGroup-1-option-other');
+
+      await testSubjects.click('saveAlertButton');
+      const toastTitle = await pageObjects.common.closeToast();
+      expect(toastTitle).to.eql(`Created alert "${alertName}"`);
+      await pageObjects.triggersActionsUI.searchAlerts(alertName);
+      const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
+      expect(searchResultsAfterSave).to.eql([
+        {
+          name: alertName,
+          tagsText: '',
+          alertType: 'Always Firing',
           interval: '1m',
         },
       ]);
