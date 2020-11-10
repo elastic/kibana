@@ -75,34 +75,41 @@ function getClauseForType(
   if (namespaces.length === 0) {
     throw new Error('cannot specify empty namespaces array');
   }
+  const searchAcrossAllNamespaces = namespaces.includes(ALL_NAMESPACES_STRING);
+
   if (registry.isMultiNamespace(type)) {
+    const namespacesFilterClause = searchAcrossAllNamespaces
+      ? {}
+      : { terms: { namespaces: [...namespaces, ALL_NAMESPACES_STRING] } };
+
     return {
       bool: {
-        must: [
-          { term: { type } },
-          { terms: { namespaces: [...namespaces, ALL_NAMESPACES_STRING] } },
-        ],
+        must: [{ term: { type } }, namespacesFilterClause],
         must_not: [{ exists: { field: 'namespace' } }],
       },
     };
   } else if (registry.isSingleNamespace(type)) {
     const should: Array<Record<string, any>> = [];
     const eligibleNamespaces = namespaces.filter((x) => x !== DEFAULT_NAMESPACE_STRING);
-    if (eligibleNamespaces.length > 0) {
+    if (eligibleNamespaces.length > 0 && !searchAcrossAllNamespaces) {
       should.push({ terms: { namespace: eligibleNamespaces } });
     }
     if (namespaces.includes(DEFAULT_NAMESPACE_STRING)) {
       should.push({ bool: { must_not: [{ exists: { field: 'namespace' } }] } });
     }
-    if (should.length === 0) {
-      // This is indicitive of a bug, and not user error.
-      throw new Error('unhandled search condition: expected at least 1 `should` clause.');
-    }
+
+    const shouldClauseProps =
+      should.length > 0
+        ? {
+            should,
+            minimum_should_match: 1,
+          }
+        : {};
+
     return {
       bool: {
         must: [{ term: { type } }],
-        should,
-        minimum_should_match: 1,
+        ...shouldClauseProps,
         must_not: [{ exists: { field: 'namespaces' } }],
       },
     };
@@ -181,21 +188,9 @@ export function getClauseForReference(reference: HasReferenceQueryParams) {
   };
 }
 
-// A de-duplicated set of namespaces makes for a more efficient query.
-//
-// Additionally, we treat the `*` namespace as the `default` namespace.
-// In the Default Distribution, the `*` is automatically expanded to include all available namespaces.
-// However, the OSS distribution (and certain configurations of the Default Distribution) can allow the `*`
-// to pass through to the SO Repository, and eventually to this module. When this happens, we translate to `default`,
-// since that is consistent with how a single-namespace search behaves in the OSS distribution. Leaving the wildcard in place
-// would result in no results being returned, as the wildcard is treated as a literal, and not _actually_ as a wildcard.
-// We had a good discussion around the tradeoffs here: https://github.com/elastic/kibana/pull/67644#discussion_r441055716
-const normalizeNamespaces = (namespacesToNormalize?: string[]) =>
-  namespacesToNormalize
-    ? Array.from(
-        new Set(namespacesToNormalize.map((x) => (x === '*' ? DEFAULT_NAMESPACE_STRING : x)))
-      )
-    : undefined;
+// A de-duplicated set of namespaces makes for a more effecient query.
+const uniqNamespaces = (namespacesToNormalize?: string[]) =>
+  namespacesToNormalize ? Array.from(new Set(namespacesToNormalize)) : undefined;
 
 /**
  *  Get the "query" related keys for the search body
@@ -229,10 +224,10 @@ export function getQueryParams({
       {
         bool: {
           should: types.map((shouldType) => {
-            const normalizedNamespaces = normalizeNamespaces(
+            const deduplicatedNamespaces = uniqNamespaces(
               typeToNamespacesMap ? typeToNamespacesMap.get(shouldType) : namespaces
             );
-            return getClauseForType(registry, normalizedNamespaces, shouldType);
+            return getClauseForType(registry, deduplicatedNamespaces, shouldType);
           }),
           minimum_should_match: 1,
         },
