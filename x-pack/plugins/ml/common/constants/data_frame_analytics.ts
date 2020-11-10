@@ -14,7 +14,7 @@ export const DEFAULT_RESULTS_FIELD = 'ml';
 export const JOB_MAP_NODE_TYPES = {
   ANALYTICS: 'analytics',
   TRANSFORM: 'transform',
-  INDEX_PATTERN: 'index-pattern',
+  INDEX: 'index',
   INFERENCE_MODEL: 'inferenceModel',
 } as const;
 

@@ -30,7 +30,7 @@ function shapeForNode(el: cytoscape.NodeSingular): MapShapes {
       return MAP_SHAPES.ELLIPSE;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
       return MAP_SHAPES.RECTANGLE;
-    case JOB_MAP_NODE_TYPES.INDEX_PATTERN:
+    case JOB_MAP_NODE_TYPES.INDEX:
       return MAP_SHAPES.DIAMOND;
     default:
       return MAP_SHAPES.ELLIPSE;
@@ -64,7 +64,7 @@ function borderColorForNode(el: cytoscape.NodeSingular) {
       return theme.euiColorSecondary;
     case JOB_MAP_NODE_TYPES.TRANSFORM:
       return theme.euiColorVis1;
-    case JOB_MAP_NODE_TYPES.INDEX_PATTERN:
+    case JOB_MAP_NODE_TYPES.INDEX:
       return theme.euiColorVis2;
     default:
       return theme.euiColorMediumShade;

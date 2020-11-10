@@ -17,7 +17,7 @@ export const JobMapLegend: FC = () => (
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {JOB_MAP_NODE_TYPES.INDEX_PATTERN}
+            {JOB_MAP_NODE_TYPES.INDEX}
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

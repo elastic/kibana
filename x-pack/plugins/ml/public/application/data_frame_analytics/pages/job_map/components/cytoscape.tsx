@@ -14,6 +14,7 @@ import React, {
   useCallback,
 } from 'react';
 import cytoscape from 'cytoscape';
+// @ts-ignore no declaration file
 import dagre from 'cytoscape-dagre';
 import { cytoscapeOptions } from './cytoscape_options';
 
