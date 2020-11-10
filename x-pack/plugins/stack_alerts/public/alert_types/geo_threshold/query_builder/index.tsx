@@ -54,13 +54,13 @@ const conditionOptions = Object.keys(TrackingEvent).map((key) => ({
 const labelForDelayOffset = (
   <>
     <FormattedMessage
-      id="xpack.triggersActionsUI.geoThreshold.delayOffset"
+      id="xpack.stackAlerts.geoThreshold.delayOffset"
       defaultMessage="Delayed evaluation offset"
     />{' '}
     <EuiIconTip
       position="right"
       type="questionInCircle"
-      content={i18n.translate('xpack.triggersActionsUI.geoThreshold.delayOffsetTooltip', {
+      content={i18n.translate('xpack.stackAlerts.geoThreshold.delayOffsetTooltip', {
         defaultMessage: 'Evaluate alerts on a delayed cycle to adjust for data latency',
       })}
     />
@@ -127,7 +127,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
 
   const hasExpressionErrors = false;
   const expressionErrorMessage = i18n.translate(
-    'xpack.triggersActionsUI.geoThreshold.fixErrorInExpressionBelowValidationMessage',
+    'xpack.stackAlerts.geoThreshold.fixErrorInExpressionBelowValidationMessage',
     {
       defaultMessage: 'Expression contains errors.',
     }
@@ -182,7 +182,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.geoThreshold.selectOffset"
+            id="xpack.stackAlerts.geoThreshold.selectOffset"
             defaultMessage="Select offset (optional)"
           />
         </h5>
@@ -223,7 +223,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.geoThreshold.selectEntity"
+            id="xpack.stackAlerts.geoThreshold.selectEntity"
             defaultMessage="Select entity"
           />
         </h5>
@@ -253,7 +253,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.geoThreshold.selectIndex"
+            id="xpack.stackAlerts.geoThreshold.selectIndex"
             defaultMessage="Define the condition"
           />
         </h5>
@@ -282,19 +282,16 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
             </div>
           </EuiFormRow>
         }
-        expressionDescription={i18n.translate(
-          'xpack.triggersActionsUI.geoThreshold.whenEntityLabel',
-          {
-            defaultMessage: 'when entity',
-          }
-        )}
+        expressionDescription={i18n.translate('xpack.stackAlerts.geoThreshold.whenEntityLabel', {
+          defaultMessage: 'when entity',
+        })}
       />
 
       <EuiSpacer size="l" />
       <EuiTitle size="xs">
         <h5>
           <FormattedMessage
-            id="xpack.triggersActionsUI.geoThreshold.selectBoundaryIndex"
+            id="xpack.stackAlerts.geoThreshold.selectBoundaryIndex"
             defaultMessage="Select boundary:"
           />
         </h5>

@@ -104,13 +104,13 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
         fullWidth
         label={
           <FormattedMessage
-            id="xpack.triggersActionsUI.geoThreshold.timeFieldLabel"
+            id="xpack.stackAlerts.geoThreshold.timeFieldLabel"
             defaultMessage="Time field"
           />
         }
       >
         <SingleFieldSelect
-          placeholder={i18n.translate('xpack.triggersActionsUI.geoThreshold.selectTimeLabel', {
+          placeholder={i18n.translate('xpack.stackAlerts.geoThreshold.selectTimeLabel', {
             defaultMessage: 'Select time field',
           })}
           value={timeField}
@@ -123,12 +123,12 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
       <EuiFormRow
         id="geoField"
         fullWidth
-        label={i18n.translate('xpack.triggersActionsUI.geoThreshold.geofieldLabel', {
+        label={i18n.translate('xpack.stackAlerts.geoThreshold.geofieldLabel', {
           defaultMessage: 'Geospatial field',
         })}
       >
         <SingleFieldSelect
-          placeholder={i18n.translate('xpack.triggersActionsUI.geoThreshold.selectGeoLabel', {
+          placeholder={i18n.translate('xpack.stackAlerts.geoThreshold.selectGeoLabel', {
             defaultMessage: 'Select geo field',
           })}
           value={geoField}
@@ -147,12 +147,9 @@ export const EntityIndexExpression: FunctionComponent<Props> = ({
       value={indexPattern.title}
       defaultValue={'Select an index pattern and geo shape/point field'}
       popoverContent={indexPopover}
-      expressionDescription={i18n.translate(
-        'xpack.triggersActionsUI.geoThreshold.entityIndexLabel',
-        {
-          defaultMessage: 'index',
-        }
-      )}
+      expressionDescription={i18n.translate('xpack.stackAlerts.geoThreshold.entityIndexLabel', {
+        defaultMessage: 'index',
+      })}
     />
   );
 };

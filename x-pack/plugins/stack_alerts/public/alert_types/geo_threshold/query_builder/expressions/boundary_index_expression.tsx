@@ -116,12 +116,12 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
       <EuiFormRow
         id="geoField"
         fullWidth
-        label={i18n.translate('xpack.triggersActionsUI.geoThreshold.geofieldLabel', {
+        label={i18n.translate('xpack.stackAlerts.geoThreshold.geofieldLabel', {
           defaultMessage: 'Geospatial field',
         })}
       >
         <SingleFieldSelect
-          placeholder={i18n.translate('xpack.triggersActionsUI.geoThreshold.selectLabel', {
+          placeholder={i18n.translate('xpack.stackAlerts.geoThreshold.selectLabel', {
             defaultMessage: 'Select geo field',
           })}
           value={boundaryGeoField}
@@ -132,12 +132,12 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
       <EuiFormRow
         id="boundaryNameFieldSelect"
         fullWidth
-        label={i18n.translate('xpack.triggersActionsUI.geoThreshold.boundaryNameSelectLabel', {
+        label={i18n.translate('xpack.stackAlerts.geoThreshold.boundaryNameSelectLabel', {
           defaultMessage: 'Human-readable boundary name (optional)',
         })}
       >
         <SingleFieldSelect
-          placeholder={i18n.translate('xpack.triggersActionsUI.geoThreshold.boundaryNameSelect', {
+          placeholder={i18n.translate('xpack.stackAlerts.geoThreshold.boundaryNameSelect', {
             defaultMessage: 'Select boundary name',
           })}
           value={boundaryNameField || null}
@@ -155,7 +155,7 @@ export const BoundaryIndexExpression: FunctionComponent<Props> = ({
       defaultValue={'Select an index pattern and geo shape field'}
       value={boundaryIndexPattern.title}
       popoverContent={indexPopover}
-      expressionDescription={i18n.translate('xpack.triggersActionsUI.geoThreshold.indexLabel', {
+      expressionDescription={i18n.translate('xpack.stackAlerts.geoThreshold.indexLabel', {
         defaultMessage: 'index',
       })}
     />

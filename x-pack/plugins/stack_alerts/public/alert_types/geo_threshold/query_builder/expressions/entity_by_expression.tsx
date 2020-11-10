@@ -59,7 +59,7 @@ export const EntityByExpression: FunctionComponent<Props> = ({
     <EuiFormRow id="entitySelect" fullWidth error={errors.index}>
       <SingleFieldSelect
         placeholder={i18n.translate(
-          'xpack.triggersActionsUI.geoThreshold.topHitsSplitFieldSelectPlaceholder',
+          'xpack.stackAlerts.geoThreshold.topHitsSplitFieldSelectPlaceholder',
           {
             defaultMessage: 'Select entity field',
           }
@@ -77,7 +77,7 @@ export const EntityByExpression: FunctionComponent<Props> = ({
       value={entity}
       defaultValue={'Select entity field'}
       popoverContent={indexPopover}
-      expressionDescription={i18n.translate('xpack.triggersActionsUI.geoThreshold.entityByLabel', {
+      expressionDescription={i18n.translate('xpack.stackAlerts.geoThreshold.entityByLabel', {
         defaultMessage: 'by',
       })}
     />

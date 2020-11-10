@@ -71,42 +71,39 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
     return (
       <>
         <EuiCallOut
-          title={i18n.translate(
-            'xpack.triggersActionsUI.geoThreshold.noIndexPattern.messageTitle',
-            {
-              defaultMessage: `Couldn't find any index patterns with geospatial fields`,
-            }
-          )}
+          title={i18n.translate('xpack.stackAlerts.geoThreshold.noIndexPattern.messageTitle', {
+            defaultMessage: `Couldn't find any index patterns with geospatial fields`,
+          })}
           color="warning"
         >
           <p>
             <FormattedMessage
-              id="xpack.triggersActionsUI.geoThreshold.noIndexPattern.doThisPrefixDescription"
+              id="xpack.stackAlerts.geoThreshold.noIndexPattern.doThisPrefixDescription"
               defaultMessage="You'll need to "
             />
             <EuiLink
               href={this.props.http.basePath.prepend(`/app/management/kibana/indexPatterns`)}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.geoThreshold.noIndexPattern.doThisLinkTextDescription"
+                id="xpack.stackAlerts.geoThreshold.noIndexPattern.doThisLinkTextDescription"
                 defaultMessage="create an index pattern"
               />
             </EuiLink>
             <FormattedMessage
-              id="xpack.triggersActionsUI.geoThreshold.noIndexPattern.doThisSuffixDescription"
+              id="xpack.stackAlerts.geoThreshold.noIndexPattern.doThisSuffixDescription"
               defaultMessage=" with geospatial fields."
             />
           </p>
           <p>
             <FormattedMessage
-              id="xpack.triggersActionsUI.geoThreshold.noIndexPattern.hintDescription"
+              id="xpack.stackAlerts.geoThreshold.noIndexPattern.hintDescription"
               defaultMessage="Don't have any geospatial data sets? "
             />
             <EuiLink
               href={this.props.http.basePath.prepend('/app/home#/tutorial_directory/sampleData')}
             >
               <FormattedMessage
-                id="xpack.triggersActionsUI.geoThreshold.noIndexPattern.getStartedLinkText"
+                id="xpack.stackAlerts.geoThreshold.noIndexPattern.getStartedLinkText"
                 defaultMessage="Get started with some sample data sets."
               />
             </EuiLink>
@@ -124,7 +121,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
         {this._renderNoIndexPatternWarning()}
 
         <EuiFormRow
-          label={i18n.translate('xpack.triggersActionsUI.geoThreshold.indexPatternSelectLabel', {
+          label={i18n.translate('xpack.stackAlerts.geoThreshold.indexPatternSelectLabel', {
             defaultMessage: 'Index pattern',
           })}
         >
@@ -134,7 +131,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               indexPatternId={this.props.value}
               onChange={this._onIndexPatternSelect}
               placeholder={i18n.translate(
-                'xpack.triggersActionsUI.geoThreshold.indexPatternSelectPlaceholder',
+                'xpack.stackAlerts.geoThreshold.indexPatternSelectPlaceholder',
                 {
                   defaultMessage: 'Select index pattern',
                 }

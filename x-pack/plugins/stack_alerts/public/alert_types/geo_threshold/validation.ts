@@ -35,7 +35,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
 
   if (!index) {
     errors.index.push(
-      i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredIndexTitleText', {
+      i18n.translate('xpack.stackAlerts.geoThreshold.error.requiredIndexTitleText', {
         defaultMessage: 'Index pattern is required.',
       })
     );
@@ -43,7 +43,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
 
   if (!geoField) {
     errors.geoField.push(
-      i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredGeoFieldText', {
+      i18n.translate('xpack.stackAlerts.geoThreshold.error.requiredGeoFieldText', {
         defaultMessage: 'Geo field is required.',
       })
     );
@@ -51,7 +51,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
 
   if (!entity) {
     errors.entity.push(
-      i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredEntityText', {
+      i18n.translate('xpack.stackAlerts.geoThreshold.error.requiredEntityText', {
         defaultMessage: 'Entity is required.',
       })
     );
@@ -59,7 +59,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
 
   if (!dateField) {
     errors.dateField.push(
-      i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredDateFieldText', {
+      i18n.translate('xpack.stackAlerts.geoThreshold.error.requiredDateFieldText', {
         defaultMessage: 'Date field is required.',
       })
     );
@@ -67,7 +67,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
 
   if (!trackingEvent) {
     errors.trackingEvent.push(
-      i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredTrackingEventText', {
+      i18n.translate('xpack.stackAlerts.geoThreshold.error.requiredTrackingEventText', {
         defaultMessage: 'Tracking event is required.',
       })
     );
@@ -75,7 +75,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
 
   if (!boundaryType) {
     errors.boundaryType.push(
-      i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredBoundaryTypeText', {
+      i18n.translate('xpack.stackAlerts.geoThreshold.error.requiredBoundaryTypeText', {
         defaultMessage: 'Boundary type is required.',
       })
     );
@@ -83,7 +83,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
 
   if (!boundaryIndexTitle) {
     errors.boundaryIndexTitle.push(
-      i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredBoundaryIndexTitleText', {
+      i18n.translate('xpack.stackAlerts.geoThreshold.error.requiredBoundaryIndexTitleText', {
         defaultMessage: 'Boundary index pattern title is required.',
       })
     );
@@ -91,7 +91,7 @@ export const validateExpression = (alertParams: GeoThresholdAlertParams): Valida
 
   if (!boundaryGeoField) {
     errors.boundaryGeoField.push(
-      i18n.translate('xpack.triggersActionsUI.geoThreshold.error.requiredBoundaryGeoFieldText', {
+      i18n.translate('xpack.stackAlerts.geoThreshold.error.requiredBoundaryGeoFieldText', {
         defaultMessage: 'Boundary geo field is required.',
       })
     );
