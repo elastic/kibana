@@ -9,6 +9,7 @@ import { CoreStart } from 'kibana/public';
 import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
 import { MapsConfigType } from '../config';
 import { MapsPluginStartDependencies } from './plugin';
+import { EMSSettings } from '../common/ems_settings';
 
 let kibanaVersion: string;
 export const setKibanaVersion = (version: string) => (kibanaVersion = version);
@@ -62,14 +63,16 @@ let kibanaCommonConfig: MapsLegacyConfig;
 export const setKibanaCommonConfig = (config: MapsLegacyConfig) => (kibanaCommonConfig = config);
 export const getKibanaCommonConfig = () => kibanaCommonConfig;
 
-export const getIsEmsEnabled = () => getKibanaCommonConfig().includeElasticMapsService;
-export const getEmsFontLibraryUrl = () => getKibanaCommonConfig().emsFontLibraryUrl;
+let emsSettings: EMSSettings;
+export const setEMSSettings = (value: EMSSettings) => {
+  emsSettings = value;
+};
+export const getEMSSettings = () => {
+  return emsSettings;
+};
+
 export const getEmsTileLayerId = () => getKibanaCommonConfig().emsTileLayerId;
-export const getEmsFileApiUrl = () => getKibanaCommonConfig().emsFileApiUrl;
-export const getEmsTileApiUrl = () => getKibanaCommonConfig().emsTileApiUrl;
-export const getEmsLandingPageUrl = () => getKibanaCommonConfig().emsLandingPageUrl;
-export const getProxyElasticMapsServiceInMaps = () =>
-  getKibanaCommonConfig().proxyElasticMapsServiceInMaps;
+
 export const getRegionmapLayers = () => _.get(getKibanaCommonConfig(), 'regionmap.layers', []);
 export const getTilemap = () => _.get(getKibanaCommonConfig(), 'tilemap', []);
 
