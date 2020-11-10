@@ -6,7 +6,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/public';
-import { getBucketIdentifier, buildResultColumns } from '../../../../../../src/plugins/expressions';
+import {
+  getBucketIdentifier,
+  buildResultColumns,
+} from '../../../../../../src/plugins/expressions/common';
 
 export interface CounterRateArgs {
   by?: string[];
