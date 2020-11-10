@@ -30,11 +30,12 @@ const MyComponent = () => {
   // Access the plugin through context
   const { runtimeFields } = useAppPlugins();
 
-  // Ref for handler to close the editor
+  // Ref of the handler to close the editor
   const closeRuntimeFieldEditor = useRef(() => {});
 
   const saveRuntimeField = (field: RuntimeField) => {
     // Do something with the field
+    console.log(field); // { name: 'myField', type: 'boolean', script: "return 'hello'" }
   };
 
   const openRuntimeFieldsEditor = async() => {
