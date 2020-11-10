@@ -182,6 +182,14 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
+      for (const testData of testDataList) {
+        await esArchiver.loadIfNeeded(testData.archive);
+        await ml.testResources.createIndexPatternIfNeeded(
+          testData.indexPattern.name,
+          testData.indexPattern.timeField
+        );
+        await ml.api.createAndRunDFAJob(testData.job as DataFrameAnalyticsConfig);
+      }
     });
 
     after(async () => {
@@ -191,13 +199,6 @@ export default function ({ getService }: FtrProviderContext) {
     for (const testData of testDataList) {
       describe(`${testData.suiteTitle}`, function () {
         before(async () => {
-          await esArchiver.loadIfNeeded(testData.archive);
-          await ml.testResources.createIndexPatternIfNeeded(
-            testData.indexPattern.name,
-            testData.indexPattern.timeField
-          );
-          await ml.api.createAndRunDFAJob(testData.job as DataFrameAnalyticsConfig);
-
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
