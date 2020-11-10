@@ -17,6 +17,8 @@
  * under the License.
  */
 
+const reservedWords = ['valueOf', 'toString'];
+
 // Making an assumption that a method will not have >5 parameters
 const parameterIndexToLetterMap = {
   0: 'a',
@@ -76,9 +78,9 @@ const getPrimitives = (contextData) => {
  * @param {string} returnValue
  * @returns {string}
  */
-const getMethodDescription = (methodName, parameters, returnValue) => {
+const getMethodDescription = (methodName, parameters, returnValues) => {
   const parametersDescription = parameters.reduce((paramsDescription, paramsArray, index) => {
-    const isNotLast = parameters.length - 1 !== index;
+    const isNotLastParameterSet = parameters.length - 1 !== index;
 
     const parameterSetDescription = paramsArray.reduce(
       (description, parameterType, paramsArrayIndex) => {
@@ -87,7 +89,7 @@ const getMethodDescription = (methodName, parameters, returnValue) => {
 
         description = `${description}${newParameterDescription}${isLastParameter ? '' : ', '}`;
 
-        return isNotLast && isLastParameter ? `${description} | ` : description;
+        return isNotLastParameterSet && isLastParameter ? `${description} | ` : description;
       },
       ''
     );
@@ -97,7 +99,9 @@ const getMethodDescription = (methodName, parameters, returnValue) => {
     return paramsDescription;
   }, '');
 
-  return `${methodName}(${parametersDescription}): ${returnValue}`;
+  const uniqueReturnValues = [...new Set(returnValues)].join(' | ');
+
+  return `${methodName}(${parametersDescription}): ${uniqueReturnValues}`;
 };
 
 /**
@@ -109,35 +113,43 @@ const getMethodDescription = (methodName, parameters, returnValue) => {
  * @returns {Array}
  */
 const removeDuplicateMethods = (methods) => {
-  let previousMethod;
-
   if (methods.length === 0) {
     return [];
   }
 
-  const filteredMethods = methods.reduce((acc, currentVal) => {
-    const { name } = currentVal;
-
-    if (previousMethod === undefined || previousMethod !== name) {
-      previousMethod = name;
-
-      acc.push(currentVal);
-    }
-    return acc;
-  }, []);
+  const filteredMethods = methods.filter(
+    (method, index, methodsArray) => index === methodsArray.findIndex((m) => m.name === method.name)
+  );
 
   const paramsToMethodMap = methods.reduce((acc, currentVal) => {
-    const { name, parameters } = currentVal;
+    const { name, parameters, return: returnValue } = currentVal;
     const hasParameters = parameters.length > 0;
-    const hasIncomingParameters = acc[name] && acc[name].length > 0;
 
-    if (acc[name] === undefined) {
-      acc[name] = hasParameters ? [parameters] : undefined;
+    let methodName = name;
+
+    if (reservedWords.includes(name)) {
+      methodName = `${name}MethodName`;
+    }
+
+    if (acc[methodName] === undefined) {
+      acc[methodName] = {
+        parameters: hasParameters ? [parameters] : [],
+        returnValues: returnValue ? [returnValue] : [],
+      };
     } else {
+      const hasIncomingParameters = acc[methodName].parameters.length > 0;
+      const hasIncomingReturnValue = acc[methodName].returnValues.length > 0;
+
       if (hasParameters && hasIncomingParameters) {
-        acc[name] = [parameters, ...acc[name]];
+        acc[methodName].parameters = [parameters, ...acc[methodName].parameters];
       } else {
-        acc[name] = [parameters];
+        acc[methodName].parameters = [parameters];
+      }
+
+      if (returnValue && hasIncomingReturnValue) {
+        acc[methodName].returnValues = [returnValue, ...acc[methodName].returnValues];
+      } else {
+        acc[methodName].returnValues = [returnValue];
       }
     }
 
@@ -145,9 +157,15 @@ const removeDuplicateMethods = (methods) => {
   }, {});
 
   return filteredMethods.map((method) => {
+    const methodName = reservedWords.includes(method.name)
+      ? `${method.name}MethodName`
+      : method.name;
+
     return {
-      ...method,
-      parameters: paramsToMethodMap[method.name] || [],
+      name: method.name,
+      type: method.type,
+      parameters: paramsToMethodMap[methodName].parameters || [],
+      returnValues: paramsToMethodMap[methodName].returnValues || [],
     };
   });
 };
@@ -180,22 +198,22 @@ const getPainlessClassToAutocomplete = (painlessClass) => {
   });
 
   const staticMethodsAutocomplete = removeDuplicateMethods(staticMethods).map(
-    ({ name, parameters, return: returnValue }) => {
+    ({ name, parameters, returnValues }) => {
       return {
         label: name,
         kind: 'method',
-        documentation: getMethodDescription(name, parameters, returnValue),
+        documentation: getMethodDescription(name, parameters, returnValues),
         insertText: name,
       };
     }
   );
 
   const methodsAutocomplete = removeDuplicateMethods(methods).map(
-    ({ name, parameters, return: returnValue }) => {
+    ({ name, parameters, returnValues }) => {
       return {
         label: name,
         kind: 'method',
-        documentation: getMethodDescription(name, parameters, returnValue),
+        documentation: getMethodDescription(name, parameters, returnValues),
         insertText: name,
       };
     }

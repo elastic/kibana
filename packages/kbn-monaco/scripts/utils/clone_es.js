@@ -125,7 +125,7 @@ const cloneAndCheckout = (opts, callback) => {
     git.checkout(branch || tag, (err) => {
       if (err) {
         if (retry++ > 0) {
-          callback(new Error(`Cannot checkout tag '${tag}'`), { esPainlessContextFolder });
+          callback(new Error(`Cannot checkout '${branch || tag}'`), { esPainlessContextFolder });
           return;
         }
         return pull(checkout);

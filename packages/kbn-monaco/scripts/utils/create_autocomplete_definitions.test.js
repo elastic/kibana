@@ -111,7 +111,7 @@ describe('Autocomplete utils', () => {
 
   describe('getMethodDescription()', () => {
     test('returns a string describing the method', () => {
-      expect(getMethodDescription('pow', [['double', 'double']], 'double')).toEqual(
+      expect(getMethodDescription('pow', [['double', 'double']], ['double'])).toEqual(
         'pow(double a, double b): double'
       );
     });
@@ -120,7 +120,7 @@ describe('Autocomplete utils', () => {
         getMethodDescription(
           'myMethod',
           [['string', 'string', 'string', 'string', 'string']],
-          'string'
+          ['string']
         )
       ).toEqual('myMethod(string a, string b, string c, string d, string e): string');
     });
@@ -195,6 +195,54 @@ describe('Autocomplete utils', () => {
           kind: 'method',
           documentation: 'parseLong(java.lang.String a, int b | java.lang.String a): long',
           insertText: 'parseLong',
+        },
+      ]);
+    });
+
+    test('returns all possible return values in description', () => {
+      const charClass = {
+        name: 'java.lang.Character',
+        imported: true,
+        constructors: [],
+        static_methods: [
+          {
+            declaring: 'java.lang.Character',
+            name: 'toChars',
+            return: '[C',
+            parameters: ['int'],
+          },
+          {
+            declaring: 'java.lang.Character',
+            name: 'toChars',
+            return: 'int',
+            parameters: ['int', '[C', 'int'],
+          },
+        ],
+        fields: [],
+        methods: [],
+        static_fields: [],
+      };
+
+      const {
+        static_fields: staticFields,
+        fields,
+        static_methods: staticMethods,
+        methods,
+      } = charClass;
+
+      expect(
+        getPainlessClassToAutocomplete({
+          staticFields,
+          fields,
+          staticMethods,
+          methods,
+        })
+      ).toEqual([
+        {
+          label: 'toChars',
+          kind: 'method',
+          documentation: 'toChars(int a, [C b, int c | int a): int | [C',
+          insertText: 'toChars',
         },
       ]);
     });

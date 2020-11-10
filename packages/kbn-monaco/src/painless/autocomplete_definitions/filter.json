@@ -1163,7 +1163,7 @@
         {
           "label": "toChars",
           "kind": "method",
-          "documentation": "toChars(int a, [C b, int c | int a): [C",
+          "documentation": "toChars(int a, [C b, int c | int a): int | [C",
           "insertText": "toChars"
         },
         {
@@ -7743,7 +7743,7 @@
         {
           "label": "toString",
           "kind": "method",
-          "documentation": "toString(int a | ): java.lang.String",
+          "documentation": "toString(int a): java.lang.String",
           "insertText": "toString"
         },
         {
@@ -8579,7 +8579,7 @@
         {
           "label": "format",
           "kind": "method",
-          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.String",
+          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.StringBuffer | java.lang.String",
           "insertText": "format"
         },
         {
@@ -9217,7 +9217,7 @@
         {
           "label": "format",
           "kind": "method",
-          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.String",
+          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.StringBuffer | java.lang.String",
           "insertText": "format"
         },
         {
@@ -9625,7 +9625,7 @@
         {
           "label": "format",
           "kind": "method",
-          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.String",
+          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.StringBuffer | java.lang.String",
           "insertText": "format"
         },
         {
@@ -10201,7 +10201,7 @@
         {
           "label": "format",
           "kind": "method",
-          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.String",
+          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.StringBuffer | java.lang.String",
           "insertText": "format"
         },
         {
@@ -10289,7 +10289,7 @@
         {
           "label": "format",
           "kind": "method",
-          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.String",
+          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.StringBuffer | java.lang.String",
           "insertText": "format"
         },
         {
@@ -10597,7 +10597,7 @@
         {
           "label": "format",
           "kind": "method",
-          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.String",
+          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.StringBuffer | java.lang.String",
           "insertText": "format"
         },
         {
@@ -11081,7 +11081,7 @@
         {
           "label": "format",
           "kind": "method",
-          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.String",
+          "documentation": "format(java.lang.Object a, java.lang.StringBuffer b, java.text.FieldPosition c | java.lang.Object a): java.lang.StringBuffer | java.lang.String",
           "insertText": "format"
         },
         {
@@ -12163,7 +12163,7 @@
         {
           "label": "atStartOfDay",
           "kind": "method",
-          "documentation": "atStartOfDay(java.time.ZoneId a): java.time.LocalDateTime",
+          "documentation": "atStartOfDay(java.time.ZoneId a): java.time.ZonedDateTime | java.time.LocalDateTime",
           "insertText": "atStartOfDay"
         },
         {
@@ -12391,7 +12391,7 @@
         {
           "label": "until",
           "kind": "method",
-          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): java.time.Period",
+          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): long | java.time.Period",
           "insertText": "until"
         },
         {
@@ -15887,7 +15887,7 @@
         {
           "label": "until",
           "kind": "method",
-          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): java.time.chrono.ChronoPeriod",
+          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): long | java.time.chrono.ChronoPeriod",
           "insertText": "until"
         },
         {
@@ -16891,7 +16891,7 @@
         {
           "label": "until",
           "kind": "method",
-          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): java.time.chrono.ChronoPeriod",
+          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): long | java.time.chrono.ChronoPeriod",
           "insertText": "until"
         },
         {
@@ -17579,7 +17579,7 @@
         {
           "label": "until",
           "kind": "method",
-          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): java.time.chrono.ChronoPeriod",
+          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): long | java.time.chrono.ChronoPeriod",
           "insertText": "until"
         },
         {
@@ -18005,7 +18005,7 @@
         {
           "label": "until",
           "kind": "method",
-          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): java.time.chrono.ChronoPeriod",
+          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): long | java.time.chrono.ChronoPeriod",
           "insertText": "until"
         },
         {
@@ -18437,7 +18437,7 @@
         {
           "label": "until",
           "kind": "method",
-          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): java.time.chrono.ChronoPeriod",
+          "documentation": "until(java.time.temporal.Temporal a, java.time.temporal.TemporalUnit b | java.time.chrono.ChronoLocalDate a): long | java.time.chrono.ChronoPeriod",
           "insertText": "until"
         },
         {
@@ -18771,7 +18771,7 @@
         {
           "label": "parse",
           "kind": "method",
-          "documentation": "parse(java.lang.CharSequence a, java.time.temporal.TemporalQuery b | java.lang.CharSequence a): java.time.temporal.TemporalAccessor",
+          "documentation": "parse(java.lang.CharSequence a, java.time.temporal.TemporalQuery b | java.lang.CharSequence a): org.elasticsearch.painless.lookup.def | java.time.temporal.TemporalAccessor",
           "insertText": "parse"
         },
         {
@@ -21513,7 +21513,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -21683,7 +21683,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -21719,7 +21719,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -21961,7 +21961,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -22123,13 +22123,13 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
           "label": "replace",
           "kind": "method",
-          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): org.elasticsearch.painless.lookup.def",
+          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "replace"
         },
         {
@@ -22303,7 +22303,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -22503,7 +22503,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -22539,7 +22539,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -22811,7 +22811,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -23041,7 +23041,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -23233,7 +23233,7 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
@@ -23337,7 +23337,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -23379,7 +23379,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -23739,7 +23739,7 @@
         {
           "label": "decode",
           "kind": "method",
-          "documentation": "decode([B a, [B b | java.lang.String a): [B",
+          "documentation": "decode([B a, [B b | java.lang.String a): int | [B",
           "insertText": "decode"
         },
         {
@@ -24667,7 +24667,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -25489,7 +25489,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -25681,7 +25681,7 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
@@ -26763,7 +26763,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -26925,13 +26925,13 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
           "label": "replace",
           "kind": "method",
-          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): org.elasticsearch.painless.lookup.def",
+          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "replace"
         },
         {
@@ -27017,7 +27017,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -27211,7 +27211,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -27385,13 +27385,13 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
           "label": "replace",
           "kind": "method",
-          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): org.elasticsearch.painless.lookup.def",
+          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "replace"
         },
         {
@@ -27447,7 +27447,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -27609,13 +27609,13 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
           "label": "replace",
           "kind": "method",
-          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): org.elasticsearch.painless.lookup.def",
+          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "replace"
         },
         {
@@ -28225,7 +28225,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -28387,13 +28387,13 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
           "label": "replace",
           "kind": "method",
-          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): org.elasticsearch.painless.lookup.def",
+          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "replace"
         },
         {
@@ -28479,7 +28479,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -28661,7 +28661,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -28715,7 +28715,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -29071,7 +29071,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -29107,7 +29107,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -30191,7 +30191,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -30353,13 +30353,13 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
           "label": "replace",
           "kind": "method",
-          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): org.elasticsearch.painless.lookup.def",
+          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "replace"
         },
         {
@@ -30645,7 +30645,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -30813,7 +30813,7 @@
         {
           "label": "headMap",
           "kind": "method",
-          "documentation": "headMap(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.SortedMap",
+          "documentation": "headMap(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.NavigableMap | java.util.SortedMap",
           "insertText": "headMap"
         },
         {
@@ -30903,13 +30903,13 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
           "label": "replace",
           "kind": "method",
-          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): org.elasticsearch.painless.lookup.def",
+          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "replace"
         },
         {
@@ -30927,13 +30927,13 @@
         {
           "label": "subMap",
           "kind": "method",
-          "documentation": "subMap(org.elasticsearch.painless.lookup.def a, boolean b, org.elasticsearch.painless.lookup.def c, boolean d | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): java.util.SortedMap",
+          "documentation": "subMap(org.elasticsearch.painless.lookup.def a, boolean b, org.elasticsearch.painless.lookup.def c, boolean d | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): java.util.NavigableMap | java.util.SortedMap",
           "insertText": "subMap"
         },
         {
           "label": "tailMap",
           "kind": "method",
-          "documentation": "tailMap(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.SortedMap",
+          "documentation": "tailMap(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.NavigableMap | java.util.SortedMap",
           "insertText": "tailMap"
         },
         {
@@ -31001,7 +31001,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -31115,7 +31115,7 @@
         {
           "label": "headSet",
           "kind": "method",
-          "documentation": "headSet(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.SortedSet",
+          "documentation": "headSet(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.NavigableSet | java.util.SortedSet",
           "insertText": "headSet"
         },
         {
@@ -31217,7 +31217,7 @@
         {
           "label": "subSet",
           "kind": "method",
-          "documentation": "subSet(org.elasticsearch.painless.lookup.def a, boolean b, org.elasticsearch.painless.lookup.def c, boolean d | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): java.util.SortedSet",
+          "documentation": "subSet(org.elasticsearch.painless.lookup.def a, boolean b, org.elasticsearch.painless.lookup.def c, boolean d | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): java.util.NavigableSet | java.util.SortedSet",
           "insertText": "subSet"
         },
         {
@@ -31229,7 +31229,7 @@
         {
           "label": "tailSet",
           "kind": "method",
-          "documentation": "tailSet(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.SortedSet",
+          "documentation": "tailSet(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.NavigableSet | java.util.SortedSet",
           "insertText": "tailSet"
         },
         {
@@ -32059,7 +32059,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -32301,7 +32301,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -32661,7 +32661,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -32989,7 +32989,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -33175,13 +33175,13 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
           "label": "replace",
           "kind": "method",
-          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): org.elasticsearch.painless.lookup.def",
+          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "replace"
         },
         {
@@ -33267,7 +33267,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -33965,7 +33965,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -34013,7 +34013,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -34665,7 +34665,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.BiFunction b | java.util.function.BiFunction a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -34833,7 +34833,7 @@
         {
           "label": "headMap",
           "kind": "method",
-          "documentation": "headMap(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.SortedMap",
+          "documentation": "headMap(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.NavigableMap | java.util.SortedMap",
           "insertText": "headMap"
         },
         {
@@ -34923,13 +34923,13 @@
         {
           "label": "remove",
           "kind": "method",
-          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): org.elasticsearch.painless.lookup.def",
+          "documentation": "remove(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "remove"
         },
         {
           "label": "replace",
           "kind": "method",
-          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): org.elasticsearch.painless.lookup.def",
+          "documentation": "replace(org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b, org.elasticsearch.painless.lookup.def c | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): boolean | org.elasticsearch.painless.lookup.def",
           "insertText": "replace"
         },
         {
@@ -34947,13 +34947,13 @@
         {
           "label": "subMap",
           "kind": "method",
-          "documentation": "subMap(org.elasticsearch.painless.lookup.def a, boolean b, org.elasticsearch.painless.lookup.def c, boolean d | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): java.util.SortedMap",
+          "documentation": "subMap(org.elasticsearch.painless.lookup.def a, boolean b, org.elasticsearch.painless.lookup.def c, boolean d | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): java.util.NavigableMap | java.util.SortedMap",
           "insertText": "subMap"
         },
         {
           "label": "tailMap",
           "kind": "method",
-          "documentation": "tailMap(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.SortedMap",
+          "documentation": "tailMap(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.NavigableMap | java.util.SortedMap",
           "insertText": "tailMap"
         },
         {
@@ -35033,7 +35033,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -35147,7 +35147,7 @@
         {
           "label": "headSet",
           "kind": "method",
-          "documentation": "headSet(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.SortedSet",
+          "documentation": "headSet(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.NavigableSet | java.util.SortedSet",
           "insertText": "headSet"
         },
         {
@@ -35249,7 +35249,7 @@
         {
           "label": "subSet",
           "kind": "method",
-          "documentation": "subSet(org.elasticsearch.painless.lookup.def a, boolean b, org.elasticsearch.painless.lookup.def c, boolean d | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): java.util.SortedSet",
+          "documentation": "subSet(org.elasticsearch.painless.lookup.def a, boolean b, org.elasticsearch.painless.lookup.def c, boolean d | org.elasticsearch.painless.lookup.def a, org.elasticsearch.painless.lookup.def b): java.util.NavigableSet | java.util.SortedSet",
           "insertText": "subSet"
         },
         {
@@ -35261,7 +35261,7 @@
         {
           "label": "tailSet",
           "kind": "method",
-          "documentation": "tailSet(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.SortedSet",
+          "documentation": "tailSet(org.elasticsearch.painless.lookup.def a, boolean b | org.elasticsearch.painless.lookup.def a): java.util.NavigableSet | java.util.SortedSet",
           "insertText": "tailSet"
         },
         {
@@ -35503,7 +35503,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -35551,7 +35551,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -38243,7 +38243,7 @@
         {
           "label": "reduce",
           "kind": "method",
-          "documentation": "reduce(double a, java.util.function.DoubleBinaryOperator b | java.util.function.DoubleBinaryOperator a): java.util.OptionalDouble",
+          "documentation": "reduce(double a, java.util.function.DoubleBinaryOperator b | java.util.function.DoubleBinaryOperator a): double | java.util.OptionalDouble",
           "insertText": "reduce"
         },
         {
@@ -38571,7 +38571,7 @@
         {
           "label": "reduce",
           "kind": "method",
-          "documentation": "reduce(int a, java.util.function.IntBinaryOperator b | java.util.function.IntBinaryOperator a): java.util.OptionalInt",
+          "documentation": "reduce(int a, java.util.function.IntBinaryOperator b | java.util.function.IntBinaryOperator a): int | java.util.OptionalInt",
           "insertText": "reduce"
         },
         {
@@ -38893,7 +38893,7 @@
         {
           "label": "reduce",
           "kind": "method",
-          "documentation": "reduce(long a, java.util.function.LongBinaryOperator b | java.util.function.LongBinaryOperator a): java.util.OptionalLong",
+          "documentation": "reduce(long a, java.util.function.LongBinaryOperator b | java.util.function.LongBinaryOperator a): long | java.util.OptionalLong",
           "insertText": "reduce"
         },
         {
@@ -39203,7 +39203,7 @@
         {
           "label": "reduce",
           "kind": "method",
-          "documentation": "reduce(org.elasticsearch.painless.lookup.def a, java.util.function.BiFunction b, java.util.function.BinaryOperator c | org.elasticsearch.painless.lookup.def a, java.util.function.BinaryOperator b | java.util.function.BinaryOperator a): java.util.Optional",
+          "documentation": "reduce(org.elasticsearch.painless.lookup.def a, java.util.function.BiFunction b, java.util.function.BinaryOperator c | org.elasticsearch.painless.lookup.def a, java.util.function.BinaryOperator b | java.util.function.BinaryOperator a): org.elasticsearch.painless.lookup.def | java.util.Optional",
           "insertText": "reduce"
         },
         {
@@ -39415,7 +39415,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -39451,7 +39451,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -39693,7 +39693,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -39729,7 +39729,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -39971,7 +39971,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -40007,7 +40007,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -40249,7 +40249,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -40285,7 +40285,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -40527,7 +40527,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -40575,7 +40575,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -40865,7 +40865,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -40901,7 +40901,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -41143,7 +41143,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -41179,7 +41179,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -41421,7 +41421,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -41457,7 +41457,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -42323,7 +42323,7 @@
         {
           "label": "toString",
           "kind": "method",
-          "documentation": "toString(java.lang.String a, java.util.Locale b | java.lang.String a | ): java.lang.String",
+          "documentation": "toString(java.lang.String a, java.util.Locale b | java.lang.String a): java.lang.String",
           "insertText": "toString"
         },
         {
@@ -43415,7 +43415,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -43451,7 +43451,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
@@ -43693,7 +43693,7 @@
         {
           "label": "add",
           "kind": "method",
-          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): boolean",
+          "documentation": "add(int a, org.elasticsearch.painless.lookup.def b | org.elasticsearch.painless.lookup.def a): void | boolean",
           "insertText": "add"
         },
         {
@@ -43729,7 +43729,7 @@
         {
           "label": "collect",
           "kind": "method",
-          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): java.util.List",
+          "documentation": "collect(java.util.Collection a, java.util.function.Function b | java.util.function.Function a): org.elasticsearch.painless.lookup.def | java.util.List",
           "insertText": "collect"
         },
         {
