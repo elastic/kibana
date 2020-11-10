@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Account {
+export interface IAccount {
   accountId: string;
   onboardingComplete: boolean;
   role: {
@@ -21,7 +21,7 @@ export interface Account {
   };
 }
 
-export interface ConfiguredLimits {
+export interface IConfiguredLimits {
   engine: {
     maxDocumentByteSize: number;
     maxEnginesPerMetaEngine: number;

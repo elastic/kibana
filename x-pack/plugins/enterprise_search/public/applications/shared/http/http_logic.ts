@@ -10,20 +10,20 @@ import { HttpSetup, HttpInterceptorResponseError, HttpResponse } from 'src/core/
 
 import { READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 
-interface HttpValues {
+export interface IHttpValues {
   http: HttpSetup;
   httpInterceptors: Function[];
   errorConnecting: boolean;
   readOnlyMode: boolean;
 }
-interface HttpActions {
+export interface IHttpActions {
   initializeHttpInterceptors(): void;
   setHttpInterceptors(httpInterceptors: Function[]): { httpInterceptors: Function[] };
   setErrorConnecting(errorConnecting: boolean): { errorConnecting: boolean };
   setReadOnlyMode(readOnlyMode: boolean): { readOnlyMode: boolean };
 }
 
-export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
+export const HttpLogic = kea<MakeLogicType<IHttpValues, IHttpActions>>({
   path: ['enterprise_search', 'http_logic'],
   actions: {
     initializeHttpInterceptors: () => null,
@@ -108,12 +108,12 @@ export const HttpLogic = kea<MakeLogicType<HttpValues, HttpActions>>({
 /**
  * Mount/props helper
  */
-interface HttpLogicProps {
+interface IHttpLogicProps {
   http: HttpSetup;
   errorConnecting?: boolean;
   readOnlyMode?: boolean;
 }
-export const mountHttpLogic = (props: HttpLogicProps) => {
+export const mountHttpLogic = (props: IHttpLogicProps) => {
   HttpLogic(props);
   const unmount = HttpLogic.mount();
   return unmount;

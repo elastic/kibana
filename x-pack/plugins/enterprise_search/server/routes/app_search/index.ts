@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RouteDependencies } from '../../plugin';
+import { IRouteDependencies } from '../../plugin';
 
 import { registerEnginesRoute } from './engines';
 import { registerCredentialsRoutes } from './credentials';
 import { registerSettingsRoutes } from './settings';
 
-export const registerAppSearchRoutes = (dependencies: RouteDependencies) => {
+export const registerAppSearchRoutes = (dependencies: IRouteDependencies) => {
   registerEnginesRoute(dependencies);
   registerCredentialsRoutes(dependencies);
   registerSettingsRoutes(dependencies);

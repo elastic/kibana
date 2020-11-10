@@ -12,7 +12,7 @@ import { groups } from '../../../__mocks__/groups.mock';
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { User } from '../../../types';
+import { IUser } from '../../../types';
 
 import { GroupUsersTable } from './group_users_table';
 import { TableHeader } from '../../../../shared/table_header';
@@ -38,7 +38,7 @@ describe('GroupUsersTable', () => {
   });
 
   it('renders pagination', () => {
-    const users = [] as User[];
+    const users = [] as IUser[];
     const NUM_TOTAL_USERS = 20;
 
     [...Array(NUM_TOTAL_USERS)].forEach((_, i) => {

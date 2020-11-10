@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IOverviewValues } from '../overview_logic';
+
 import { setMockValues as setMockKeaValues, setMockActions } from '../../../../__mocks__/kea.mock';
 import { DEFAULT_INITIAL_APP_DATA } from '../../../../../../common/__mocks__';
 
@@ -20,7 +22,7 @@ export const mockOverviewValues = {
   personalSourcesCount: 0,
   sourcesCount: 0,
   dataLoading: true,
-};
+} as IOverviewValues;
 
 export const mockActions = {
   initializeOverview: jest.fn(() => ({})),

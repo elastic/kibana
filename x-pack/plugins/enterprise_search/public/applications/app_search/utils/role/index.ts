@@ -4,18 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Account } from '../../types';
+import { IAccount } from '../../types';
 
-export type RoleTypes = 'owner' | 'admin' | 'dev' | 'editor' | 'analyst';
-export type AbilityTypes = 'manage' | 'edit' | 'view';
+export type TRole = 'owner' | 'admin' | 'dev' | 'editor' | 'analyst';
+export type TAbility = 'manage' | 'edit' | 'view';
 
-export interface Role {
+export interface IRole {
   id: string;
-  roleType: RoleTypes;
-  availableRoleTypes: RoleTypes[];
+  roleType: TRole;
+  availableRoleTypes: TRole[];
   credentialTypes: string[];
   canAccessAllEngines: boolean;
-  can(action: AbilityTypes, subject: string): boolean;
+  can(action: TAbility, subject: string): boolean;
   canViewMetaEngines: boolean;
   canViewAccountCredentials: boolean;
   canViewEngineAnalytics: boolean;
@@ -48,10 +48,10 @@ export interface Role {
  * Transforms the `role` data we receive from the Enterprise Search
  * server into a more convenient format for front-end use
  */
-export const getRoleAbilities = (role: Account['role']): Role => {
+export const getRoleAbilities = (role: IAccount['role']): IRole => {
   // Role ability function helpers
   const myRole = {
-    can: (action: AbilityTypes, subject: string): boolean => {
+    can: (action: TAbility, subject: string): boolean => {
       return (
         role?.ability?.manage?.includes(subject) ||
         (Array.isArray(role.ability[action]) && role.ability[action].includes(subject))
@@ -63,8 +63,8 @@ export const getRoleAbilities = (role: Account['role']): Role => {
   // Clone top-level role props, and move some props out of `ability` and into the top-level for convenience
   const topLevelProps = {
     id: role.id,
-    roleType: role.roleType as RoleTypes,
-    availableRoleTypes: role.ability.availableRoleTypes as RoleTypes[],
+    roleType: role.roleType as TRole,
+    availableRoleTypes: role.ability.availableRoleTypes as TRole[],
     credentialTypes: role.ability.credentialTypes,
   };
 

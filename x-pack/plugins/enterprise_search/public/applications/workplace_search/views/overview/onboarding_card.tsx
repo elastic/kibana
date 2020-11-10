@@ -22,7 +22,7 @@ import {
 import { TelemetryLogic } from '../../../shared/telemetry';
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 
-interface OnboardingCardProps {
+interface IOnboardingCardProps {
   title: React.ReactNode;
   icon: React.ReactNode;
   description: React.ReactNode;
@@ -32,7 +32,7 @@ interface OnboardingCardProps {
   complete?: boolean;
 }
 
-export const OnboardingCard: React.FC<OnboardingCardProps> = ({
+export const OnboardingCard: React.FC<IOnboardingCardProps> = ({
   title,
   icon,
   description,

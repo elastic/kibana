@@ -4,39 +4,39 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export enum LogRetentionOptions {
+export enum ELogRetentionOptions {
   Analytics = 'analytics',
   API = 'api',
 }
 
-export interface LogRetention {
-  [LogRetentionOptions.Analytics]: LogRetentionSettings;
-  [LogRetentionOptions.API]: LogRetentionSettings;
+export interface ILogRetention {
+  [ELogRetentionOptions.Analytics]: ILogRetentionSettings;
+  [ELogRetentionOptions.API]: ILogRetentionSettings;
 }
 
-export interface LogRetentionPolicy {
+export interface ILogRetentionPolicy {
   isDefault: boolean;
   minAgeDays: number | null;
 }
 
-export interface LogRetentionSettings {
+export interface ILogRetentionSettings {
   disabledAt?: string | null;
   enabled?: boolean;
-  retentionPolicy?: LogRetentionPolicy | null;
+  retentionPolicy?: ILogRetentionPolicy | null;
 }
 
-export interface LogRetentionServer {
-  [LogRetentionOptions.Analytics]: LogRetentionServerSettings;
-  [LogRetentionOptions.API]: LogRetentionServerSettings;
+export interface ILogRetentionServer {
+  [ELogRetentionOptions.Analytics]: ILogRetentionServerSettings;
+  [ELogRetentionOptions.API]: ILogRetentionServerSettings;
 }
 
-export interface LogRetentionServerPolicy {
+export interface ILogRetentionServerPolicy {
   is_default: boolean;
   min_age_days: number | null;
 }
 
-export interface LogRetentionServerSettings {
+export interface ILogRetentionServerSettings {
   disabled_at: string | null;
   enabled: boolean;
-  retention_policy: LogRetentionServerPolicy | null;
+  retention_policy: ILogRetentionServerPolicy | null;
 }

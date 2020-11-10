@@ -11,15 +11,15 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TruncatedContent } from '../../../../shared/truncate';
 
 import { SourceIcon } from '../../../components/shared/source_icon';
-import { ContentSource } from '../../../types';
+import { IContentSource } from '../../../types';
 
 const MAX_LENGTH = 28;
 
-interface SourceOptionItemProps {
-  source: ContentSource;
+interface ISourceOptionItemProps {
+  source: IContentSource;
 }
 
-export const SourceOptionItem: React.FC<SourceOptionItemProps> = ({ source }) => (
+export const SourceOptionItem: React.FC<ISourceOptionItemProps> = ({ source }) => (
   <EuiFlexGroup gutterSize="xs" justifyContent="flexStart" alignItems="center">
     <EuiFlexItem grow={false}>
       <SourceIcon wrapped {...source} />

@@ -6,10 +6,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
+import { IRouteDependencies } from '../../plugin';
 import { ENGINES_PAGE_SIZE } from '../../../common/constants';
 
-interface EnginesResponse {
+interface IEnginesResponse {
   results: object[];
   meta: { page: { total_results: number } };
 }
@@ -17,7 +17,7 @@ interface EnginesResponse {
 export function registerEnginesRoute({
   router,
   enterpriseSearchRequestHandler,
-}: RouteDependencies) {
+}: IRouteDependencies) {
   router.get(
     {
       path: '/api/app_search/engines',
@@ -38,7 +38,7 @@ export function registerEnginesRoute({
           'page[current]': pageIndex,
           'page[size]': ENGINES_PAGE_SIZE,
         },
-        hasValidData: (body?: EnginesResponse) =>
+        hasValidData: (body?: IEnginesResponse) =>
           Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number',
       })(context, request, response);
     }

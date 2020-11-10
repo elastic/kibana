@@ -11,20 +11,20 @@ import { MouseEvent } from 'react';
  * let browsers handle natively, e.g. new tabs/windows
  */
 
-type HandleEvent = (event: MouseEvent) => boolean;
+type THandleEvent = (event: MouseEvent) => boolean;
 
-export const letBrowserHandleEvent: HandleEvent = (event) =>
+export const letBrowserHandleEvent: THandleEvent = (event) =>
   event.defaultPrevented ||
   isModifiedEvent(event) ||
   !isLeftClickEvent(event) ||
   isTargetBlank(event);
 
-const isModifiedEvent: HandleEvent = (event) =>
+const isModifiedEvent: THandleEvent = (event) =>
   !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
-const isLeftClickEvent: HandleEvent = (event) => event.button === 0;
+const isLeftClickEvent: THandleEvent = (event) => event.button === 0;
 
-const isTargetBlank: HandleEvent = (event) => {
+const isTargetBlank: THandleEvent = (event) => {
   const element = event.target as HTMLElement;
   const target = element.getAttribute('target');
   return !!target && target !== '_self';

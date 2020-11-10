@@ -4,10 +4,10 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RouteDependencies } from '../../plugin';
+import { IRouteDependencies } from '../../plugin';
 import { callEnterpriseSearchConfigAPI } from '../../lib/enterprise_search_config_api';
 
-export function registerConfigDataRoute({ router, config, log }: RouteDependencies) {
+export function registerConfigDataRoute({ router, config, log }: IRouteDependencies) {
   router.get(
     {
       path: '/api/enterprise_search/config_data',

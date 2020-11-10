@@ -5,9 +5,9 @@
  */
 
 import { ApiTokenTypes, READ_ONLY, READ_WRITE, SEARCH_DISPLAY, WRITE_ONLY } from '../constants';
-import { ApiToken } from '../types';
+import { IApiToken } from '../types';
 
-export const getModeDisplayText = (apiToken: ApiToken): string => {
+export const getModeDisplayText = (apiToken: IApiToken): string => {
   const { read = false, write = false, type } = apiToken;
 
   switch (type) {

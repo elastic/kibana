@@ -9,17 +9,17 @@ import React, { useState } from 'react';
 import { UserIcon } from '../../../components/shared/user_icon';
 import { MAX_TABLE_ROW_ICONS } from '../../../constants';
 
-import { User } from '../../../types';
+import { IUser } from '../../../types';
 
 import { GroupRowUsersDropdown } from './group_row_users_dropdown';
 
-interface GroupUsersProps {
-  groupUsers: User[];
+interface IGroupUsersProps {
+  groupUsers: IUser[];
   usersCount: number;
   groupId: string;
 }
 
-export const GroupUsers: React.FC<GroupUsersProps> = ({ groupUsers, usersCount, groupId }) => {
+export const GroupUsers: React.FC<IGroupUsersProps> = ({ groupUsers, usersCount, groupId }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const closePopover = () => setPopoverOpen(false);
   const togglePopover = () => setPopoverOpen(!popoverOpen);

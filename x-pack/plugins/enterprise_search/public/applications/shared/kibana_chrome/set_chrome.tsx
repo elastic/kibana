@@ -14,7 +14,7 @@ import {
   useEnterpriseSearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
-  BreadcrumbTrail,
+  TBreadcrumbTrail,
 } from './generate_breadcrumbs';
 import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
@@ -33,11 +33,11 @@ import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './g
  * Title output: Workplace Search - Elastic
  */
 
-interface SetChromeProps {
-  trail?: BreadcrumbTrail;
+interface ISetChromeProps {
+  trail?: TBreadcrumbTrail;
 }
 
-export const SetEnterpriseSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+export const SetEnterpriseSearchChrome: React.FC<ISetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -54,7 +54,7 @@ export const SetEnterpriseSearchChrome: React.FC<SetChromeProps> = ({ trail = []
   return null;
 };
 
-export const SetAppSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+export const SetAppSearchChrome: React.FC<ISetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);
@@ -71,7 +71,7 @@ export const SetAppSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => 
   return null;
 };
 
-export const SetWorkplaceSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
+export const SetWorkplaceSearchChrome: React.FC<ISetChromeProps> = ({ trail = [] }) => {
   const { setBreadcrumbs, setDocTitle } = useValues(KibanaLogic);
 
   const title = reverseArray(trail);

@@ -19,7 +19,7 @@ import {
 type MethodType = 'get' | 'post' | 'put' | 'patch' | 'delete';
 type PayloadType = 'params' | 'query' | 'body';
 
-interface IMockRouter {
+interface IMockRouterProps {
   method: MethodType;
   path: string;
   payload?: PayloadType;
@@ -29,7 +29,7 @@ interface IMockRouterRequest {
   query?: object;
   params?: object;
 }
-type MockRouterRequest = KibanaRequest | IMockRouterRequest;
+type TMockRouterRequest = KibanaRequest | IMockRouterRequest;
 
 export class MockRouter {
   public router!: jest.Mocked<IRouter>;
@@ -38,7 +38,7 @@ export class MockRouter {
   public payload?: PayloadType;
   public response = httpServerMock.createResponseFactory();
 
-  constructor({ method, path, payload }: IMockRouter) {
+  constructor({ method, path, payload }: IMockRouterProps) {
     this.createRouter();
     this.method = method;
     this.path = path;
@@ -49,7 +49,7 @@ export class MockRouter {
     this.router = httpServiceMock.createRouter();
   };
 
-  public callRoute = async (request: MockRouterRequest) => {
+  public callRoute = async (request: TMockRouterRequest) => {
     const routerCalls = this.router[this.method].mock.calls as any[];
     if (!routerCalls.length) throw new Error('No routes registered.');
 
@@ -65,7 +65,7 @@ export class MockRouter {
    * Schema validation helpers
    */
 
-  public validateRoute = (request: MockRouterRequest) => {
+  public validateRoute = (request: TMockRouterRequest) => {
     if (!this.payload) throw new Error('Cannot validate wihout a payload type specified.');
 
     const [config] = this.router[this.method].mock.calls[0];
@@ -77,11 +77,11 @@ export class MockRouter {
     payloadValidation.validate(payloadRequest);
   };
 
-  public shouldValidate = (request: MockRouterRequest) => {
+  public shouldValidate = (request: TMockRouterRequest) => {
     expect(() => this.validateRoute(request)).not.toThrow();
   };
 
-  public shouldThrow = (request: MockRouterRequest) => {
+  public shouldThrow = (request: TMockRouterRequest) => {
     expect(() => this.validateRoute(request)).toThrow();
   };
 }

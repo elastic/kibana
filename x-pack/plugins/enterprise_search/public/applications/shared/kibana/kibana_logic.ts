@@ -11,9 +11,9 @@ import { History } from 'history';
 import { ApplicationStart, ChromeBreadcrumb } from 'src/core/public';
 
 import { HttpLogic } from '../http';
-import { createHref, CreateHrefOptions } from '../react_router_helpers';
+import { createHref, ICreateHrefOptions } from '../react_router_helpers';
 
-interface KibanaLogicProps {
+interface IKibanaLogicProps {
   config: { host?: string };
   history: History;
   navigateToUrl: ApplicationStart['navigateToUrl'];
@@ -21,17 +21,17 @@ interface KibanaLogicProps {
   setDocTitle(title: string): void;
   renderHeaderActions(HeaderActions: FC): void;
 }
-export interface KibanaValues extends KibanaLogicProps {
-  navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
+export interface IKibanaValues extends IKibanaLogicProps {
+  navigateToUrl(path: string, options?: ICreateHrefOptions): Promise<void>;
 }
 
-export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
+export const KibanaLogic = kea<MakeLogicType<IKibanaValues>>({
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
     config: [props.config || {}, {}],
     history: [props.history, {}],
     navigateToUrl: [
-      (url: string, options?: CreateHrefOptions) => {
+      (url: string, options?: ICreateHrefOptions) => {
         const deps = { history: props.history, http: HttpLogic.values.http };
         const href = createHref(url, deps, options);
         return props.navigateToUrl(href);
@@ -44,7 +44,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   }),
 });
 
-export const mountKibanaLogic = (props: KibanaLogicProps) => {
+export const mountKibanaLogic = (props: IKibanaLogicProps) => {
   KibanaLogic(props);
   const unmount = KibanaLogic.mount();
   return unmount;

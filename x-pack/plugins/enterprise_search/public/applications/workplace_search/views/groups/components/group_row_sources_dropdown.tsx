@@ -10,19 +10,19 @@ import { i18n } from '@kbn/i18n';
 
 import { EuiFilterGroup, EuiPopover, EuiPopoverTitle, EuiButtonEmpty } from '@elastic/eui';
 
-import { ContentSource } from '../../../types';
+import { IContentSource } from '../../../types';
 
 import { SourceOptionItem } from './source_option_item';
 
-interface GroupRowSourcesDropdownProps {
+interface IGroupRowSourcesDropdownProps {
   isPopoverOpen: boolean;
   numOptions: number;
-  groupSources: ContentSource[];
+  groupSources: IContentSource[];
   onButtonClick(): void;
   closePopover(): void;
 }
 
-export const GroupRowSourcesDropdown: React.FC<GroupRowSourcesDropdownProps> = ({
+export const GroupRowSourcesDropdown: React.FC<IGroupRowSourcesDropdownProps> = ({
   isPopoverOpen,
   numOptions,
   groupSources,

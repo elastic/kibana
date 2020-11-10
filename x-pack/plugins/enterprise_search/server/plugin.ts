@@ -45,13 +45,13 @@ import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/t
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
-interface PluginsSetup {
+export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
   security?: SecurityPluginSetup;
   features: FeaturesPluginSetup;
 }
 
-export interface RouteDependencies {
+export interface IRouteDependencies {
   router: IRouter;
   config: ConfigType;
   log: Logger;

@@ -6,24 +6,24 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { InitialAppData } from '../../../common/types';
-import { ConfiguredLimits, Account, Role } from './types';
+import { IInitialAppData } from '../../../common/types';
+import { IConfiguredLimits, IAccount, IRole } from './types';
 
 import { getRoleAbilities } from './utils/role';
 
-interface AppValues {
+export interface IAppValues {
   hasInitialized: boolean;
   ilmEnabled: boolean;
-  configuredLimits: Partial<ConfiguredLimits>;
-  account: Partial<Account>;
-  myRole: Partial<Role>;
+  configuredLimits: Partial<IConfiguredLimits>;
+  account: Partial<IAccount>;
+  myRole: Partial<IRole>;
 }
-interface AppActions {
-  initializeAppData(props: InitialAppData): Required<InitialAppData>;
+export interface IAppActions {
+  initializeAppData(props: IInitialAppData): Required<IInitialAppData>;
   setOnboardingComplete(): boolean;
 }
 
-export const AppLogic = kea<MakeLogicType<AppValues, AppActions>>({
+export const AppLogic = kea<MakeLogicType<IAppValues, IAppActions>>({
   path: ['enterprise_search', 'app_search', 'app_logic'],
   actions: {
     initializeAppData: (props) => props,

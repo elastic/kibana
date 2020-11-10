@@ -10,7 +10,7 @@ import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
 
 import { getSavedObjectAttributesFromRepo } from '../lib/telemetry';
 
-interface Telemetry {
+interface ITelemetry {
   ui_viewed: {
     setup_guide: number;
     overview: number;
@@ -38,7 +38,7 @@ export const registerTelemetryUsageCollector = (
   savedObjects: SavedObjectsServiceStart,
   log: Logger
 ) => {
-  const telemetryUsageCollector = usageCollection.makeUsageCollector<Telemetry>({
+  const telemetryUsageCollector = usageCollection.makeUsageCollector<ITelemetry>({
     type: 'workplace_search',
     fetch: async () => fetchTelemetryMetrics(savedObjects, log),
     isReady: () => true,
@@ -74,7 +74,7 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
     log
   );
 
-  const defaultTelemetrySavedObject: Telemetry = {
+  const defaultTelemetrySavedObject: ITelemetry = {
     ui_viewed: {
       setup_guide: 0,
       overview: 0,
@@ -115,5 +115,5 @@ const fetchTelemetryMetrics = async (savedObjects: SavedObjectsServiceStart, log
         0
       ),
     },
-  } as Telemetry;
+  } as ITelemetry;
 };

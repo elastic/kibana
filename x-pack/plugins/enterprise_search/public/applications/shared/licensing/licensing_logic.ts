@@ -9,18 +9,18 @@ import { Observable, Subscription } from 'rxjs';
 
 import { ILicense } from '../../../../../licensing/public';
 
-interface LicensingValues {
+export interface ILicensingValues {
   license: ILicense | null;
   licenseSubscription: Subscription | null;
   hasPlatinumLicense: boolean;
   hasGoldLicense: boolean;
 }
-interface LicensingActions {
+export interface ILicensingActions {
   setLicense(license: ILicense): ILicense;
   setLicenseSubscription(licenseSubscription: Subscription): Subscription;
 }
 
-export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingActions>>({
+export const LicensingLogic = kea<MakeLogicType<ILicensingValues, ILicensingActions>>({
   path: ['enterprise_search', 'licensing_logic'],
   actions: {
     setLicense: (license) => license,
@@ -72,10 +72,10 @@ export const LicensingLogic = kea<MakeLogicType<LicensingValues, LicensingAction
 /**
  * Mount/props helper
  */
-interface LicensingLogicProps {
+interface ILicensingLogicProps {
   license$: Observable<ILicense>;
 }
-export const mountLicensingLogic = (props: LicensingLogicProps) => {
+export const mountLicensingLogic = (props: ILicensingLogicProps) => {
   LicensingLogic(props);
   const unmount = LicensingLogic.mount();
   return unmount;

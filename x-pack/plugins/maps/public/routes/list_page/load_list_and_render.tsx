@@ -7,9 +7,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Redirect } from 'react-router-dom';
-import { getMapsSavedObjectLoader } from '../../bootstrap/services/gis_map_saved_object_loader';
-import { getToasts } from '../../../kibana_services';
+import { getSavedObjectsClient, getToasts } from '../../kibana_services';
 import { MapsListView } from './maps_list_view';
+import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 
 export class LoadListAndRender extends React.Component {
   _isMounted: boolean = false;
@@ -29,9 +29,13 @@ export class LoadListAndRender extends React.Component {
 
   async _loadMapsList() {
     try {
-      const { hits = [] } = await getMapsSavedObjectLoader().find('', 1);
+      const results = await getSavedObjectsClient().find({
+        type: MAP_SAVED_OBJECT_TYPE,
+        perPage: 1,
+        fields: ['title'],
+      });
       if (this._isMounted) {
-        this.setState({ mapsLoaded: true, hasSavedMaps: !!hits.length });
+        this.setState({ mapsLoaded: true, hasSavedMaps: !!results.savedObjects.length });
       }
     } catch (err) {
       if (this._isMounted) {

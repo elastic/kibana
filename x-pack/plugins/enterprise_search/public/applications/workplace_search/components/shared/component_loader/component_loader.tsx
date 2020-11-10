@@ -8,13 +8,11 @@ import React from 'react';
 
 import { EuiLoadingSpinner, EuiTextColor } from '@elastic/eui';
 
-interface ComponentLoaderProps {
-  text?: string;
-}
+import { IComponentLoader } from '../../../types';
 
 import './component_loader.scss';
 
-export const ComponentLoader: React.FC<ComponentLoaderProps> = ({ text = 'Loading...' }) => (
+export const ComponentLoader: React.FC<IComponentLoader> = ({ text = 'Loading...' }) => (
   <div className="componentLoader">
     <EuiLoadingSpinner size="l" />
     <EuiTextColor className="componentLoaderText" color="subdued">

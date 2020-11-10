@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import './layout.scss';
 
-interface LayoutProps {
+interface ILayoutProps {
   navigation: React.ReactNode;
   restrictWidth?: boolean;
   readOnlyMode?: boolean;
@@ -23,7 +23,7 @@ export interface INavContext {
 }
 export const NavContext = React.createContext({});
 
-export const Layout: React.FC<LayoutProps> = ({
+export const Layout: React.FC<ILayoutProps> = ({
   children,
   navigation,
   restrictWidth,

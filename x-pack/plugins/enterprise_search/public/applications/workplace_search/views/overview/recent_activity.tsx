@@ -22,7 +22,7 @@ import { OverviewLogic } from './overview_logic';
 
 import './recent_activity.scss';
 
-export interface FeedActivity {
+export interface IFeedActivity {
   status?: string;
   id: string;
   message: string;
@@ -50,7 +50,7 @@ export const RecentActivity: React.FC = () => {
       <EuiPanel>
         {activityFeed.length > 0 ? (
           <>
-            {activityFeed.map((props: FeedActivity, index) => (
+            {activityFeed.map((props: IFeedActivity, index) => (
               <RecentActivityItem {...props} key={index} />
             ))}
           </>
@@ -86,7 +86,7 @@ export const RecentActivity: React.FC = () => {
   );
 };
 
-export const RecentActivityItem: React.FC<FeedActivity> = ({
+export const RecentActivityItem: React.FC<IFeedActivity> = ({
   id,
   status,
   message,

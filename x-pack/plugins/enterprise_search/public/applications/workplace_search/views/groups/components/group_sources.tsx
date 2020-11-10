@@ -9,15 +9,15 @@ import React, { useState } from 'react';
 import { SourceIcon } from '../../../components/shared/source_icon';
 import { MAX_TABLE_ROW_ICONS } from '../../../constants';
 
-import { ContentSource } from '../../../types';
+import { IContentSource } from '../../../types';
 
 import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
 
-interface GroupSourcesProps {
-  groupSources: ContentSource[];
+interface IGroupSourcesProps {
+  groupSources: IContentSource[];
 }
 
-export const GroupSources: React.FC<GroupSourcesProps> = ({ groupSources }) => {
+export const GroupSources: React.FC<IGroupSourcesProps> = ({ groupSources }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const closePopover = () => setPopoverOpen(false);
   const togglePopover = () => setPopoverOpen(!popoverOpen);

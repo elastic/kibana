@@ -9,7 +9,7 @@ import { Route, Switch } from 'react-router-dom';
 import { useValues } from 'kea';
 
 import { KibanaLogic } from '../shared/kibana';
-import { InitialAppData } from '../../../common/types';
+import { IInitialAppData } from '../../../common/types';
 
 import { HttpLogic } from '../shared/http';
 
@@ -21,7 +21,7 @@ import { SetupGuide } from './components/setup_guide';
 
 import './index.scss';
 
-export const EnterpriseSearch: React.FC<InitialAppData> = ({ access = {} }) => {
+export const EnterpriseSearch: React.FC<IInitialAppData> = ({ access = {} }) => {
   const { errorConnecting } = useValues(HttpLogic);
   const { config } = useValues(KibanaLogic);
 

@@ -6,9 +6,12 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
+import { IRouteDependencies } from '../../plugin';
 
-export function registerGroupsRoute({ router, enterpriseSearchRequestHandler }: RouteDependencies) {
+export function registerGroupsRoute({
+  router,
+  enterpriseSearchRequestHandler,
+}: IRouteDependencies) {
   router.get(
     {
       path: '/api/workplace_search/groups',
@@ -40,7 +43,7 @@ export function registerGroupsRoute({ router, enterpriseSearchRequestHandler }: 
 export function registerSearchGroupsRoute({
   router,
   enterpriseSearchRequestHandler,
-}: RouteDependencies) {
+}: IRouteDependencies) {
   router.post(
     {
       path: '/api/workplace_search/groups/search',
@@ -67,7 +70,7 @@ export function registerSearchGroupsRoute({
   );
 }
 
-export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: RouteDependencies) {
+export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: IRouteDependencies) {
   router.get(
     {
       path: '/api/workplace_search/groups/{id}',
@@ -126,7 +129,7 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: R
 export function registerGroupUsersRoute({
   router,
   enterpriseSearchRequestHandler,
-}: RouteDependencies) {
+}: IRouteDependencies) {
   router.get(
     {
       path: '/api/workplace_search/groups/{id}/group_users',
@@ -147,7 +150,7 @@ export function registerGroupUsersRoute({
 export function registerShareGroupRoute({
   router,
   enterpriseSearchRequestHandler,
-}: RouteDependencies) {
+}: IRouteDependencies) {
   router.post(
     {
       path: '/api/workplace_search/groups/{id}/share',
@@ -172,7 +175,7 @@ export function registerShareGroupRoute({
 export function registerAssignGroupRoute({
   router,
   enterpriseSearchRequestHandler,
-}: RouteDependencies) {
+}: IRouteDependencies) {
   router.post(
     {
       path: '/api/workplace_search/groups/{id}/assign',
@@ -197,7 +200,7 @@ export function registerAssignGroupRoute({
 export function registerBoostsGroupRoute({
   router,
   enterpriseSearchRequestHandler,
-}: RouteDependencies) {
+}: IRouteDependencies) {
   router.put(
     {
       path: '/api/workplace_search/groups/{id}/boosts',

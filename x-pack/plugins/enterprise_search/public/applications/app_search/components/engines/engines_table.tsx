@@ -16,28 +16,28 @@ import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
 
-interface EnginesTableData {
+interface IEnginesTableData {
   name: string;
   created_at: string;
   document_count: number;
   field_count: number;
 }
-interface EnginesTablePagination {
+interface IEnginesTablePagination {
   totalEngines: number;
   pageIndex: number;
   onPaginate(pageIndex: number): void;
 }
-interface EnginesTableProps {
-  data: EnginesTableData[];
-  pagination: EnginesTablePagination;
+interface IEnginesTableProps {
+  data: IEnginesTableData[];
+  pagination: IEnginesTablePagination;
 }
-interface OnChange {
+interface IOnChange {
   page: {
     index: number;
   };
 }
 
-export const EnginesTable: React.FC<EnginesTableProps> = ({
+export const EnginesTable: React.FC<IEnginesTableProps> = ({
   data,
   pagination: { totalEngines, pageIndex, onPaginate },
 }) => {
@@ -52,7 +52,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
       }),
   });
 
-  const columns: Array<EuiBasicTableColumn<EnginesTableData>> = [
+  const columns: Array<EuiBasicTableColumn<IEnginesTableData>> = [
     {
       field: 'name',
       name: i18n.translate('xpack.enterpriseSearch.appSearch.enginesOverview.table.column.name', {
@@ -144,7 +144,7 @@ export const EnginesTable: React.FC<EnginesTableProps> = ({
         totalItemCount: totalEngines,
         hidePerPageOptions: true,
       }}
-      onChange={({ page }: OnChange) => {
+      onChange={({ page }: IOnChange) => {
         const { index } = page;
         onPaginate(index + 1); // Note on paging - App Search's API pages start at 1, EuiBasicTables' pages start at 0
       }}
