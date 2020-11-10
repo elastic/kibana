@@ -6,7 +6,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { IInitialAppData } from '../../../common/types';
+import { InitialAppData } from '../../../common/types';
 import { IConfiguredLimits, IAccount, IRole } from './types';
 
 import { getRoleAbilities } from './utils/role';
@@ -19,7 +19,7 @@ interface AppValues {
   myRole: Partial<IRole>;
 }
 interface AppActions {
-  initializeAppData(props: IInitialAppData): Required<IInitialAppData>;
+  initializeAppData(props: InitialAppData): Required<InitialAppData>;
   setOnboardingComplete(): boolean;
 }
 

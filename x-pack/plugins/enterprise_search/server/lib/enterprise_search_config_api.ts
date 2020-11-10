@@ -11,7 +11,7 @@ import { KibanaRequest, Logger } from 'src/core/server';
 import { ConfigType } from '../';
 import { Access } from './check_access';
 
-import { IInitialAppData } from '../../common/types';
+import { InitialAppData } from '../../common/types';
 import { stripTrailingSlash } from '../../common/strip_slashes';
 
 interface Params {
@@ -19,7 +19,7 @@ interface Params {
   config: ConfigType;
   log: Logger;
 }
-interface Return extends IInitialAppData {
+interface Return extends InitialAppData {
   access?: Access;
   publicUrl?: string;
 }
