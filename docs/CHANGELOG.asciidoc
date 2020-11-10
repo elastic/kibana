@@ -145,7 +145,7 @@ Machine Learning::
 * Adds initial file analysis overrides {kibana-pull}74376[#74376]
 * Add ability to pass a group ID filter to job management page {kibana-pull}74533[#74533]
 * Adds memory status to data frame analytics job list {kibana-pull}74570[#74570]
-* Switching to new es client {kibana-pull}74965[#74965]
+* Switching to new {es} client {kibana-pull}74965[#74965]
 * Inference models management {kibana-pull}74978[#74978]
 * Adds indicator if there are stopped partitions in categorization job wizard {kibana-pull}75709[#75709]
 * Adds Metadata and Discovery Analysis Jobs to Security Integration {kibana-pull}76023[#76023]
@@ -386,11 +386,10 @@ Machine Learning::
 * Datagrid: Ensures column content with 'boolean' schema is not capitalized {kibana-pull}80041[#80041]
 * Fixes Anomaly Explorer charts time range to obey time picker range {kibana-pull}80317[#80317]
 * Data frame analytics results: Ensures boolean values in confusion matrix are not capitalized {kibana-pull}80350[#80350]
-* Fixes values for decision path not showing correctly for regression due to rounding #80448 {kibana-pull}80555[#80555]
+* Fixes values for decision path not showing correctly for regression due to rounding {kibana-pull}80555[#80555]
 * Fixes regression with some links not opening in new tab {kibana-pull}80785[#80785]
 * Fixes callout message for total feature importance {kibana-pull}80881[#80881]
 * Fixes exclude frequent in advanced wizard {kibana-pull}81121[#81121]
-* Fixes exclude frequent in advanced wizard (#81121) {kibana-pull}81155[#81155]
 
 Management::
 * Fixes the copy of the success notification that displays after creating or saving a watch {kibana-pull}73982[#73982]
