@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { IRouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 import { ENGINES_PAGE_SIZE } from '../../../common/constants';
 
 interface EnginesResponse {
@@ -17,7 +17,7 @@ interface EnginesResponse {
 export function registerEnginesRoute({
   router,
   enterpriseSearchRequestHandler,
-}: IRouteDependencies) {
+}: RouteDependencies) {
   router.get(
     {
       path: '/api/app_search/engines',

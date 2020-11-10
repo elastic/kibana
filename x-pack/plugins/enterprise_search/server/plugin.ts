@@ -51,7 +51,7 @@ export interface PluginsSetup {
   features: FeaturesPluginSetup;
 }
 
-export interface IRouteDependencies {
+export interface RouteDependencies {
   router: IRouter;
   config: ConfigType;
   log: Logger;
