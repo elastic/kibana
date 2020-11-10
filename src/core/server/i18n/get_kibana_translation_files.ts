@@ -16,22 +16,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RenderingService as Service } from '../rendering_service';
-import type { InternalRenderingServiceSetup } from '../types';
-import { mockRenderingServiceParams } from './params';
 
-type IRenderingService = PublicMethodsOf<Service>;
+import { basename } from 'path';
+import { fromRoot } from '../utils';
+import { getTranslationPaths } from './get_translation_paths';
 
-export const setupMock: jest.Mocked<InternalRenderingServiceSetup> = {
-  render: jest.fn(),
+export const getKibanaTranslationFiles = async (
+  locale: string,
+  pluginPaths: string[]
+): Promise<string[]> => {
+  const translationPaths = await Promise.all([
+    getTranslationPaths({
+      cwd: fromRoot('.'),
+      nested: true,
+    }),
+    ...pluginPaths.map((pluginPath) => getTranslationPaths({ cwd: pluginPath, nested: false })),
+    getTranslationPaths({
+      cwd: fromRoot('../kibana-extra'),
+      nested: true,
+    }),
+  ]);
+
+  return ([] as string[])
+    .concat(...translationPaths)
+    .filter((translationPath) => basename(translationPath, '.json') === locale);
 };
-export const mockSetup = jest.fn().mockResolvedValue(setupMock);
-export const mockStop = jest.fn();
-export const mockRenderingService: jest.Mocked<IRenderingService> = {
-  setup: mockSetup,
-  stop: mockStop,
-};
-export const RenderingService = jest.fn<IRenderingService, [typeof mockRenderingServiceParams]>(
-  () => mockRenderingService
-);
