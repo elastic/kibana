@@ -110,16 +110,22 @@ export const validateThreshold = (rule: CreateRulesSchema): string[] => {
 export const validateThreatMapping = (rule: CreateRulesSchema): string[] => {
   let errors: string[] = [];
   if (isThreatMatchRule(rule.type)) {
-    if (!rule.threat_mapping) {
+    if (rule.threat_mapping == null) {
       errors = ['when "type" is "threat_match", "threat_mapping" is required', ...errors];
     } else if (rule.threat_mapping.length === 0) {
       errors = ['threat_mapping" must have at least one element', ...errors];
     }
-    if (!rule.threat_query) {
+    if (rule.threat_query == null) {
       errors = ['when "type" is "threat_match", "threat_query" is required', ...errors];
     }
-    if (!rule.threat_index) {
+    if (rule.threat_index == null) {
       errors = ['when "type" is "threat_match", "threat_index" is required', ...errors];
+    }
+    if (rule.concurrent_searches == null && rule.items_per_search != null) {
+      errors = ['when "items_per_search" exists, "concurrent_searches" must also exist', ...errors];
+    }
+    if (rule.concurrent_searches != null && rule.items_per_search == null) {
+      errors = ['when "concurrent_searches" exists, "items_per_search" must also exist', ...errors];
     }
   }
   return errors;

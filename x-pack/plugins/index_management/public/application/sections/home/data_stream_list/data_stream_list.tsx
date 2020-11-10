@@ -28,7 +28,6 @@ import {
 import { useAppContext } from '../../../app_context';
 import { SectionError, SectionLoading, Error } from '../../../components';
 import { useLoadDataStreams } from '../../../services/api';
-import { getIndexListUri } from '../../../services/routing';
 import { documentationService } from '../../../services/documentation';
 import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
@@ -232,11 +231,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       */}
       {dataStreamName && (
         <DataStreamDetailPanel
-          dataStreamName={attemptToURIDecode(dataStreamName)}
-          backingIndicesLink={reactRouterNavigate(
-            history,
-            getIndexListUri(`data_stream="${attemptToURIDecode(dataStreamName)}"`, true)
-          )}
+          dataStreamName={attemptToURIDecode(dataStreamName)!}
           onClose={(shouldReload?: boolean) => {
             history.push(`/${Section.DataStreams}`);
 
