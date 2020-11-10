@@ -14,7 +14,7 @@ import {
   useEnterpriseSearchBreadcrumbs,
   useAppSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
-  TBreadcrumbTrail,
+  BreadcrumbTrail,
 } from './generate_breadcrumbs';
 import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
 
@@ -34,7 +34,7 @@ import { enterpriseSearchTitle, appSearchTitle, workplaceSearchTitle } from './g
  */
 
 interface SetChromeProps {
-  trail?: TBreadcrumbTrail;
+  trail?: BreadcrumbTrail;
 }
 
 export const SetEnterpriseSearchChrome: React.FC<SetChromeProps> = ({ trail = [] }) => {
