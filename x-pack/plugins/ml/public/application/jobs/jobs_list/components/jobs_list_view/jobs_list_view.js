@@ -370,6 +370,8 @@ export class JobsListView extends Component {
             loading={loading}
             isManagementTable={true}
             isMlEnabledInSpace={this.props.isMlEnabledInSpace}
+            jobsViewState={this.props.jobsViewState}
+            onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
           />
         </div>
       </div>

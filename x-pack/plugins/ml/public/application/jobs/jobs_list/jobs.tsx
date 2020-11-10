@@ -29,19 +29,19 @@ interface AnomalyDetectionJobsListState {
   searchBar?: string;
 }
 
+export const getDefaultAnomalyDetectionJobsListState = (): AnomalyDetectionJobsListState => ({
+  pageIndex: 0,
+  pageSize: 10,
+  sortField: 'id',
+  sortDirection: 'asc',
+});
+
 export const JobsPage: FC<JobsPageProps> = (props) => {
   const [appState, setAppState] = useUrlState('_a');
 
-  const defaultState: AnomalyDetectionJobsListState = {
-    pageIndex: 0,
-    pageSize: 10,
-    sortField: 'id',
-    sortDirection: 'asc',
-  };
-
   const jobListState: AnomalyDetectionJobsListState = useMemo(() => {
     return {
-      ...defaultState,
+      ...getDefaultAnomalyDetectionJobsListState(),
       ...(appState?.[ANOMALY_DETECTION_JOBS_LIST_STATE_KEY] ?? {}),
     };
   }, [appState]);
