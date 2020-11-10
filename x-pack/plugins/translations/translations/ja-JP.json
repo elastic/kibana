@@ -19560,7 +19560,7 @@
     "xpack.triggersActionsUI.data.coreQueryParams.intervalRequiredErrorMessage": "[interval]: [dateStart]が[dateEnd]と等しくない場合に指定する必要があります",
     "xpack.triggersActionsUI.data.coreQueryParams.invalidAggTypeErrorMessage": "無効な aggType:「{aggType}」",
     "xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage": "無効なthresholdComparatorが指定されました: {comparator}",
-    "xpack.stackAlerts.indexThreshold.invalidDateErrorMessage": "無効な日付{date}",
+    "xpack.triggersActionsUI.data.coreQueryParams.invalidDateErrorMessage": "無効な日付{date}",
     "xpack.triggersActionsUI.data.coreQueryParams.invalidDurationErrorMessage": "無効な期間:「{duration}」",
     "xpack.triggersActionsUI.data.coreQueryParams.invalidGroupByErrorMessage": "無効なgroupBy:「{groupBy}」",
     "xpack.triggersActionsUI.data.coreQueryParams.invalidTermSizeMaximumErrorMessage": "[termSize]: {maxGroups}以下でなければなりません。",

@@ -19579,7 +19579,7 @@
     "xpack.triggersActionsUI.data.coreQueryParams.intervalRequiredErrorMessage": "[interval]：如果 [dateStart] 不等于 [dateEnd]，则必须指定",
     "xpack.triggersActionsUI.data.coreQueryParams.invalidAggTypeErrorMessage": "aggType 无效：“{aggType}”",
     "xpack.stackAlerts.indexThreshold.invalidComparatorErrorMessage": "指定的 thresholdComparator 无效：{comparator}",
-    "xpack.stackAlerts.indexThreshold.invalidDateErrorMessage": "日期 {date} 无效",
+    "xpack.triggersActionsUI.data.coreQueryParams.invalidDateErrorMessage": "日期 {date} 无效",
     "xpack.triggersActionsUI.data.coreQueryParams.invalidDurationErrorMessage": "持续时间无效：“{duration}”",
     "xpack.triggersActionsUI.data.coreQueryParams.invalidGroupByErrorMessage": "groupBy 无效：“{groupBy}”",
     "xpack.triggersActionsUI.data.coreQueryParams.invalidTermSizeMaximumErrorMessage": "[termSize]：必须小于或等于 {maxGroups}",
