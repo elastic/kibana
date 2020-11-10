@@ -600,17 +600,6 @@ export class IndexPatternsService {
     indexPatternCache.clear(indexPatternId);
     return this.savedObjectsClient.delete('index-pattern', indexPatternId);
   }
-  
-    /**
-   * Get formatter for a given field name. Return undefined if none exists
-   * @param field
-   */
-  getFormatterForFieldNoDefault(fieldname: string) {
-    const formatSpec = this.fieldFormatMap[fieldname];
-    if (formatSpec?.id) {
-      return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
-    }
-  }
 }
 
 export type IndexPatternsContract = PublicMethodsOf<IndexPatternsService>;
