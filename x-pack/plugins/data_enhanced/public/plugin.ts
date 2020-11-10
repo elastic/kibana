@@ -12,7 +12,7 @@ import { setAutocompleteService } from './services';
 import { setupKqlQuerySuggestionProvider, KUERY_LANGUAGE_NAME } from './autocomplete';
 import { EnhancedSearchInterceptor } from './search/search_interceptor';
 import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
-import { createConnectedBackgroundSessionIndicator } from './ui/connected_background_session_indicator';
+import { createConnectedBackgroundSessionIndicator } from './search';
 import { ConfigSchema } from '../config';
 
 export interface DataEnhancedSetupDependencies {
