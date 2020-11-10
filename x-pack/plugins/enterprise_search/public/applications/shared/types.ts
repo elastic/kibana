@@ -4,4 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { HttpLogic, IHttpValues, IHttpActions, mountHttpLogic } from './http_logic';
+export { IFlashMessage } from './flash_messages';

@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ApiToken } from '../types';
+import { IApiToken } from '../types';
 
-export const apiTokenSort = (apiTokenA: ApiToken, apiTokenB: ApiToken): number => {
+export const apiTokenSort = (apiTokenA: IApiToken, apiTokenB: IApiToken): number => {
   if (!apiTokenA.id) {
     return -1;
   }

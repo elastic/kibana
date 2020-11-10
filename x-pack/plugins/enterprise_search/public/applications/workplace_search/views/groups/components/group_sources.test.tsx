@@ -16,7 +16,7 @@ import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
 
 import { SourceIcon } from '../../../components/shared/source_icon';
 
-import { ContentSourceDetails } from '../../../types';
+import { IContentSourceDetails } from '../../../types';
 
 describe('GroupSources', () => {
   it('renders', () => {
@@ -26,7 +26,7 @@ describe('GroupSources', () => {
   });
 
   it('handles hidden sources when count is higer than 10', () => {
-    const sources = [] as ContentSourceDetails[];
+    const sources = [] as IContentSourceDetails[];
     const NUM_TOTAL_SOURCES = 10;
 
     [...Array(NUM_TOTAL_SOURCES)].forEach((_, i) => {

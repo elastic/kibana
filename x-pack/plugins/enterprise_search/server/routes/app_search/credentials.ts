@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../plugin';
+import { IRouteDependencies } from '../../plugin';
 
 const tokenSchema = schema.oneOf([
   schema.object({
@@ -32,7 +32,7 @@ const tokenSchema = schema.oneOf([
 export function registerCredentialsRoutes({
   router,
   enterpriseSearchRequestHandler,
-}: RouteDependencies) {
+}: IRouteDependencies) {
   // Credentials API
   router.get(
     {

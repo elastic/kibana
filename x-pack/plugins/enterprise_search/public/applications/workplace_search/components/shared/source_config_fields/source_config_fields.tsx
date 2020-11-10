@@ -11,7 +11,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { ApiKey } from '../api_key';
 import { CredentialItem } from '../credential_item';
 
-interface SourceConfigFieldsProps {
+interface ISourceConfigFieldsProps {
   clientId?: string;
   clientSecret?: string;
   publicKey?: string;
@@ -19,7 +19,7 @@ interface SourceConfigFieldsProps {
   baseUrl?: string;
 }
 
-export const SourceConfigFields: React.FC<SourceConfigFieldsProps> = ({
+export const SourceConfigFields: React.FC<ISourceConfigFieldsProps> = ({
   clientId,
   clientSecret,
   publicKey,

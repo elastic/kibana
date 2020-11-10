@@ -9,13 +9,13 @@ import { EuiCard, EuiFlexItem, EuiTitle, EuiTextColor } from '@elastic/eui';
 
 import { getWorkplaceSearchUrl } from '../../../shared/enterprise_search_url';
 
-interface StatisticCardProps {
+interface IStatisticCardProps {
   title: string;
   count?: number;
   actionPath?: string;
 }
 
-export const StatisticCard: React.FC<StatisticCardProps> = ({ title, count = 0, actionPath }) => {
+export const StatisticCard: React.FC<IStatisticCardProps> = ({ title, count = 0, actionPath }) => {
   const linkProps = actionPath
     ? {
         href: getWorkplaceSearchUrl(actionPath),

@@ -17,7 +17,7 @@ import { FlashMessagesLogic, IFlashMessage } from './';
  * `errors` property in the response's data, which will contain messages we can
  * display to the user.
  */
-interface ErrorResponse {
+interface IErrorResponse {
   statusCode: number;
   error: string;
   message: string;
@@ -25,14 +25,17 @@ interface ErrorResponse {
     errors: string[];
   };
 }
-interface Options {
+interface IOptions {
   isQueued?: boolean;
 }
 
 /**
  * Converts API/HTTP errors into user-facing Flash Messages
  */
-export const flashAPIErrors = (error: HttpResponse<ErrorResponse>, { isQueued }: Options = {}) => {
+export const flashAPIErrors = (
+  error: HttpResponse<IErrorResponse>,
+  { isQueued }: IOptions = {}
+) => {
   const defaultErrorMessage = 'An unexpected error occurred';
 
   const errorFlashMessages: IFlashMessage[] = Array.isArray(error?.body?.attributes?.errors)

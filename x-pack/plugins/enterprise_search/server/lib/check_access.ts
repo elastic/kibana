@@ -10,13 +10,13 @@ import { ConfigType } from '../';
 
 import { callEnterpriseSearchConfigAPI } from './enterprise_search_config_api';
 
-interface CheckAccess {
+interface ICheckAccess {
   request: KibanaRequest;
   security?: SecurityPluginSetup;
   config: ConfigType;
   log: Logger;
 }
-export interface Access {
+export interface IAccess {
   hasAppSearchAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
 }
@@ -40,7 +40,7 @@ export const checkAccess = async ({
   security,
   request,
   log,
-}: CheckAccess): Promise<Access> => {
+}: ICheckAccess): Promise<IAccess> => {
   // If security has been disabled, always show the plugin
   if (!security?.authz.mode.useRbacForRequest(request)) {
     return ALLOW_ALL_PLUGINS;

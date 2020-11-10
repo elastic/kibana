@@ -7,9 +7,9 @@
 import { kea, MakeLogicType } from 'kea';
 import { HttpLogic } from '../../../shared/http';
 
-import { FeedActivity } from './recent_activity';
+import { IFeedActivity } from './recent_activity';
 
-interface OverviewServerData {
+export interface IOverviewServerData {
   hasUsers: boolean;
   hasOrgSources: boolean;
   canCreateContentSources: boolean;
@@ -18,19 +18,19 @@ interface OverviewServerData {
   pendingInvitationsCount: number;
   accountsCount: number;
   personalSourcesCount: number;
-  activityFeed: FeedActivity[];
+  activityFeed: IFeedActivity[];
 }
 
-interface OverviewActions {
-  setServerData(serverData: OverviewServerData): OverviewServerData;
+export interface IOverviewActions {
+  setServerData(serverData: IOverviewServerData): IOverviewServerData;
   initializeOverview(): void;
 }
 
-interface OverviewValues extends OverviewServerData {
+export interface IOverviewValues extends IOverviewServerData {
   dataLoading: boolean;
 }
 
-export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>({
+export const OverviewLogic = kea<MakeLogicType<IOverviewValues, IOverviewActions>>({
   path: ['enterprise_search', 'workplace_search', 'overview_logic'],
   actions: {
     setServerData: (serverData) => serverData,

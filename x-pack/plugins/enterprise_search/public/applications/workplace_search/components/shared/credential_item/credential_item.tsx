@@ -19,7 +19,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-interface CredentialItemProps {
+interface ICredentialItemProps {
   label: string;
   value: string;
   testSubj: string;
@@ -28,7 +28,7 @@ interface CredentialItemProps {
 
 const inputSelectAll = (e: React.MouseEvent<HTMLInputElement>) => e.currentTarget.select();
 
-export const CredentialItem: React.FC<CredentialItemProps> = ({
+export const CredentialItem: React.FC<ICredentialItemProps> = ({
   label,
   value,
   testSubj,

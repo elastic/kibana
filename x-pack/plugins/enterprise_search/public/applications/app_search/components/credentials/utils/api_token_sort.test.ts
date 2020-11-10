@@ -7,10 +7,10 @@
 import { apiTokenSort } from '.';
 import { ApiTokenTypes } from '../constants';
 
-import { ApiToken } from '../types';
+import { IApiToken } from '../types';
 
 describe('apiTokenSort', () => {
-  const apiToken: ApiToken = {
+  const apiToken: IApiToken = {
     name: '',
     type: ApiTokenTypes.Private,
     read: true,

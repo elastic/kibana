@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export interface Account {
+export interface IAccount {
   id: string;
   groups: string[];
   isAdmin: boolean;
@@ -14,19 +14,65 @@ export interface Account {
   viewedOnboardingPage: boolean;
 }
 
-export interface Organization {
+export interface IOrganization {
   name: string;
   defaultOrgName: string;
 }
 
-export interface WorkplaceSearchInitialData {
-  organization: Organization;
-  account: Account;
+export interface IWorkplaceSearchInitialData {
+  organization: IOrganization;
+  account: IAccount;
 }
 
-export interface ConfiguredLimits {
+export interface IConfiguredLimits {
   customApiSource: {
     maxDocumentByteSize: number;
     totalFields: number;
   };
+}
+
+export interface IGroup {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  contentSources: IContentSource[];
+  users: IUser[];
+  usersCount: number;
+  color?: string;
+}
+
+export interface IGroupDetails extends IGroup {
+  contentSources: IContentSourceDetails[];
+  canEditGroup: boolean;
+  canDeleteGroup: boolean;
+}
+
+export interface IUser {
+  id: string;
+  name: string | null;
+  initials: string;
+  pictureUrl: string | null;
+  color: string;
+  email: string;
+  role?: string;
+  groupIds: string[];
+}
+
+export interface IContentSource {
+  id: string;
+  serviceType: string;
+  name: string;
+}
+
+export interface IContentSourceDetails extends IContentSource {
+  status: string;
+  statusMessage: string;
+  documentCount: string;
+  isFederatedSource: boolean;
+  searchable: boolean;
+  supportedByLicense: boolean;
+  errorReason: number;
+  allowsReauth: boolean;
+  boost: number;
 }

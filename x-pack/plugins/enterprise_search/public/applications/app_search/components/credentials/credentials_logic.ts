@@ -17,11 +17,11 @@ import {
 } from '../../../shared/flash_messages';
 import { AppLogic } from '../../app_logic';
 
-import { Meta } from '../../../../../common/types';
-import { Engine } from '../../types';
-import { ApiToken, CredentialsDetails, TokenReadWrite } from './types';
+import { IMeta } from '../../../../../common/types';
+import { IEngine } from '../../types';
+import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
 
-export const defaultApiToken: ApiToken = {
+export const defaultApiToken: IApiToken = {
   name: '',
   type: ApiTokenTypes.Private,
   read: true,
@@ -29,21 +29,21 @@ export const defaultApiToken: ApiToken = {
   access_all_engines: true,
 };
 
-interface CredentialsLogicActions {
+interface ICredentialsLogicActions {
   addEngineName(engineName: string): string;
   onApiKeyDelete(tokenName: string): string;
-  onApiTokenCreateSuccess(apiToken: ApiToken): ApiToken;
+  onApiTokenCreateSuccess(apiToken: IApiToken): IApiToken;
   onApiTokenError(formErrors: string[]): string[];
-  onApiTokenUpdateSuccess(apiToken: ApiToken): ApiToken;
+  onApiTokenUpdateSuccess(apiToken: IApiToken): IApiToken;
   removeEngineName(engineName: string): string;
   setAccessAllEngines(accessAll: boolean): boolean;
-  setCredentialsData(meta: Meta, apiTokens: ApiToken[]): { meta: Meta; apiTokens: ApiToken[] };
-  setCredentialsDetails(details: CredentialsDetails): CredentialsDetails;
+  setCredentialsData(meta: IMeta, apiTokens: IApiToken[]): { meta: IMeta; apiTokens: IApiToken[] };
+  setCredentialsDetails(details: ICredentialsDetails): ICredentialsDetails;
   setNameInputBlurred(isBlurred: boolean): boolean;
-  setTokenReadWrite(tokenReadWrite: TokenReadWrite): TokenReadWrite;
+  setTokenReadWrite(tokenReadWrite: ITokenReadWrite): ITokenReadWrite;
   setTokenName(name: string): string;
   setTokenType(tokenType: string): string;
-  showCredentialsForm(apiToken?: ApiToken): ApiToken;
+  showCredentialsForm(apiToken?: IApiToken): IApiToken;
   hideCredentialsForm(): { value: boolean };
   resetCredentials(): { value: boolean };
   initializeCredentialsData(): { value: boolean };
@@ -54,25 +54,25 @@ interface CredentialsLogicActions {
   onEngineSelect(engineName: string): string;
 }
 
-interface CredentialsLogicValues {
-  activeApiToken: ApiToken;
+interface ICredentialsLogicValues {
+  activeApiToken: IApiToken;
   activeApiTokenExists: boolean;
   activeApiTokenRawName: string;
-  apiTokens: ApiToken[];
+  apiTokens: IApiToken[];
   dataLoading: boolean;
-  engines: Engine[];
+  engines: IEngine[];
   formErrors: string[];
   isCredentialsDataComplete: boolean;
   isCredentialsDetailsComplete: boolean;
   fullEngineAccessChecked: boolean;
-  meta: Partial<Meta>;
+  meta: Partial<IMeta>;
   nameInputBlurred: boolean;
   shouldShowCredentialsForm: boolean;
 }
 
-type CredentialsLogicType = MakeLogicType<CredentialsLogicValues, CredentialsLogicActions>; // If we leave this inline, Prettier does some horrifying indenting nonsense :/
-
-export const CredentialsLogic = kea<CredentialsLogicType>({
+export const CredentialsLogic = kea<
+  MakeLogicType<ICredentialsLogicValues, ICredentialsLogicActions>
+>({
   path: ['enterprise_search', 'app_search', 'credentials_logic'],
   actions: () => ({
     addEngineName: (engineName) => engineName,
@@ -267,7 +267,7 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
     onApiTokenChange: async () => {
       const { id, name, engines, type, read, write } = values.activeApiToken;
 
-      const data: ApiToken = {
+      const data: IApiToken = {
         name,
         type,
       };

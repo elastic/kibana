@@ -7,16 +7,13 @@
 import React, { useEffect } from 'react';
 import { useActions } from 'kea';
 
-import { TelemetryLogic, SendTelemetryHelper } from './telemetry_logic';
+import { TelemetryLogic, TSendTelemetry } from './telemetry_logic';
 
 /**
  * React component helpers - useful for on-page-load/views
  */
 
-export const SendEnterpriseSearchTelemetry: React.FC<SendTelemetryHelper> = ({
-  action,
-  metric,
-}) => {
+export const SendEnterpriseSearchTelemetry: React.FC<TSendTelemetry> = ({ action, metric }) => {
   const { sendTelemetry } = useActions(TelemetryLogic);
 
   useEffect(() => {
@@ -26,7 +23,7 @@ export const SendEnterpriseSearchTelemetry: React.FC<SendTelemetryHelper> = ({
   return null;
 };
 
-export const SendAppSearchTelemetry: React.FC<SendTelemetryHelper> = ({ action, metric }) => {
+export const SendAppSearchTelemetry: React.FC<TSendTelemetry> = ({ action, metric }) => {
   const { sendTelemetry } = useActions(TelemetryLogic);
 
   useEffect(() => {
@@ -36,7 +33,7 @@ export const SendAppSearchTelemetry: React.FC<SendTelemetryHelper> = ({ action, 
   return null;
 };
 
-export const SendWorkplaceSearchTelemetry: React.FC<SendTelemetryHelper> = ({ action, metric }) => {
+export const SendWorkplaceSearchTelemetry: React.FC<TSendTelemetry> = ({ action, metric }) => {
   const { sendTelemetry } = useActions(TelemetryLogic);
 
   useEffect(() => {

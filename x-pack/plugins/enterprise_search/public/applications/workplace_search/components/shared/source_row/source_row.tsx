@@ -25,7 +25,7 @@ import {
 
 import { EuiLink } from '../../../../shared/react_router_helpers';
 import { SOURCE_STATUSES as statuses } from '../../../constants';
-import { ContentSourceDetails } from '../../../types';
+import { IContentSourceDetails } from '../../../types';
 import { ADD_SOURCE_PATH, SOURCE_DETAILS_PATH, getContentSourcePath } from '../../../routes';
 
 import { SourceIcon } from '../source_icon';
@@ -40,11 +40,11 @@ export interface ISourceRow {
   onSearchableToggle?(sourceId: string, isSearchable: boolean): void;
 }
 
-interface SourceRowProps extends ISourceRow {
-  source: ContentSourceDetails;
+interface ISourceRowProps extends ISourceRow {
+  source: IContentSourceDetails;
 }
 
-export const SourceRow: React.FC<SourceRowProps> = ({
+export const SourceRow: React.FC<ISourceRowProps> = ({
   source: {
     id,
     serviceType,

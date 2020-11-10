@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { RouteDependencies } from '../../plugin';
+import { IRouteDependencies } from '../../plugin';
 
 export function registerOverviewRoute({
   router,
   enterpriseSearchRequestHandler,
-}: RouteDependencies) {
+}: IRouteDependencies) {
   router.get(
     {
       path: '/api/workplace_search/overview',

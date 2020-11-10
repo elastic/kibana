@@ -20,13 +20,13 @@ import { mountWithIntl } from './';
  * const wrapper = mountAsync(<Component />);
  */
 
-interface Options {
+interface IOptions {
   i18n?: boolean;
 }
 
 export const mountAsync = async (
   children: React.ReactElement,
-  options: Options
+  options: IOptions
 ): Promise<ReactWrapper> => {
   let wrapper: ReactWrapper | undefined;
 

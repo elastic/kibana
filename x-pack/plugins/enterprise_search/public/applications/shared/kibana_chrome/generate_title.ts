@@ -15,24 +15,24 @@ import {
  * https://github.com/elastic/kibana/blob/master/docs/development/core/public/kibana-plugin-core-public.chromedoctitle.md
  */
 
-type Title = string[];
+export type TTitle = string[];
 
 /**
  * Given an array of page titles, return a final formatted document title
  * @param pages - e.g., ['Curations', 'some Engine', 'App Search']
  * @returns - e.g., 'Curations - some Engine - App Search'
  */
-export const generateTitle = (pages: Title) => pages.join(' - ');
+export const generateTitle = (pages: TTitle) => pages.join(' - ');
 
 /**
  * Product-specific helpers
  */
 
-export const enterpriseSearchTitle = (page: Title = []) =>
+export const enterpriseSearchTitle = (page: TTitle = []) =>
   generateTitle([...page, ENTERPRISE_SEARCH_PLUGIN.NAME]);
 
-export const appSearchTitle = (page: Title = []) =>
+export const appSearchTitle = (page: TTitle = []) =>
   generateTitle([...page, APP_SEARCH_PLUGIN.NAME]);
 
-export const workplaceSearchTitle = (page: Title = []) =>
+export const workplaceSearchTitle = (page: TTitle = []) =>
   generateTitle([...page, WORKPLACE_SEARCH_PLUGIN.NAME]);

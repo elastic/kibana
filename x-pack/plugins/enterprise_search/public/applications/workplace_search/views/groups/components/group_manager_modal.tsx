@@ -28,7 +28,7 @@ import {
 
 import { EuiButton as EuiLinkButton } from '../../../../shared/react_router_helpers';
 
-import { Group } from '../../../types';
+import { IGroup } from '../../../types';
 import { ORG_SOURCES_PATH } from '../../../routes';
 
 import noSharedSourcesIcon from '../../../assets/share_circle.svg';
@@ -67,17 +67,17 @@ const EMPTY_STATE_BODY = i18n.translate(
   }
 );
 
-interface GroupManagerModalProps {
+interface IGroupManagerModalProps {
   children: React.ReactElement;
   label: string;
   allItems: object[];
   numSelected: number;
-  hideModal(group: Group): void;
+  hideModal(group: IGroup): void;
   selectAll(allItems: object[]): void;
   saveItems(): void;
 }
 
-export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
+export const GroupManagerModal: React.FC<IGroupManagerModalProps> = ({
   children,
   label,
   allItems,

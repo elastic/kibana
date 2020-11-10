@@ -30,14 +30,14 @@ import { SetupGuideCta } from '../setup_guide';
 import AppSearchImage from '../../assets/app_search.png';
 import WorkplaceSearchImage from '../../assets/workplace_search.png';
 
-interface ProductSelectorProps {
+interface IProductSelectorProps {
   access: {
     hasAppSearchAccess?: boolean;
     hasWorkplaceSearchAccess?: boolean;
   };
 }
 
-export const ProductSelector: React.FC<ProductSelectorProps> = ({ access }) => {
+export const ProductSelector: React.FC<IProductSelectorProps> = ({ access }) => {
   const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
   const { config } = useValues(KibanaLogic);
 

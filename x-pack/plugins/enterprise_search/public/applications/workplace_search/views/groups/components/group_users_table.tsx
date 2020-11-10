@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiTable, EuiTableBody, EuiTablePagination } from '@elastic/eui';
 import { Pager } from '@elastic/eui';
 
-import { User } from '../../../types';
+import { IUser } from '../../../types';
 
 import { TableHeader } from '../../../../shared/table_header';
 import { UserRow } from '../../../components/shared/user_row';
@@ -74,7 +74,7 @@ export const GroupUsersTable: React.FC = () => {
       <EuiTable className="table table--emphasized">
         <TableHeader extraCell={isFederatedAuth} headerItems={headerItems} />
         <EuiTableBody>
-          {users.slice(firstItem, lastItem + 1).map((user: User) => (
+          {users.slice(firstItem, lastItem + 1).map((user: IUser) => (
             <UserRow key={user.id} showEmail={!isFederatedAuth} user={user} />
           ))}
         </EuiTableBody>

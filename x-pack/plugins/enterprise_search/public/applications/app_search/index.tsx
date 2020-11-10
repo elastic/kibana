@@ -12,7 +12,7 @@ import { getAppSearchUrl } from '../shared/enterprise_search_url';
 import { KibanaLogic } from '../shared/kibana';
 import { HttpLogic } from '../shared/http';
 import { AppLogic } from './app_logic';
-import { InitialAppData } from '../../../common/types';
+import { IInitialAppData } from '../../../common/types';
 
 import { APP_SEARCH_PLUGIN } from '../../../common/constants';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
@@ -36,7 +36,7 @@ import { Settings, SETTINGS_TITLE } from './components/settings';
 import { Credentials, CREDENTIALS_TITLE } from './components/credentials';
 import { ROLE_MAPPINGS_TITLE } from './components/role_mappings';
 
-export const AppSearch: React.FC<InitialAppData> = (props) => {
+export const AppSearch: React.FC<IInitialAppData> = (props) => {
   const { config } = useValues(KibanaLogic);
   return !config.host ? <AppSearchUnconfigured /> : <AppSearchConfigured {...props} />;
 };
@@ -52,7 +52,7 @@ export const AppSearchUnconfigured: React.FC = () => (
   </Switch>
 );
 
-export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
+export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
   const { initializeAppData } = useActions(AppLogic);
   const { hasInitialized } = useValues(AppLogic);
   const { errorConnecting, readOnlyMode } = useValues(HttpLogic);
@@ -100,11 +100,11 @@ export const AppSearchConfigured: React.FC<InitialAppData> = (props) => {
   );
 };
 
-interface AppSearchNavProps {
+interface IAppSearchNavProps {
   subNav?: React.ReactNode;
 }
 
-export const AppSearchNav: React.FC<AppSearchNavProps> = ({ subNav }) => {
+export const AppSearchNav: React.FC<IAppSearchNavProps> = ({ subNav }) => {
   const {
     myRole: { canViewSettings, canViewAccountCredentials, canViewRoleMappings },
   } = useValues(AppLogic);

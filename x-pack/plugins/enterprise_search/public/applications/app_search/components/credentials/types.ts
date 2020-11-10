@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Engine } from '../../types';
+import { IEngine } from '../../types';
 import { ApiTokenTypes } from './constants';
 
-export interface CredentialsDetails {
-  engines: Engine[];
+export interface ICredentialsDetails {
+  engines: IEngine[];
 }
 
-export interface ApiToken {
+export interface IApiToken {
   access_all_engines?: boolean;
   key?: string;
   engines?: string[];
@@ -22,7 +22,7 @@ export interface ApiToken {
   write?: boolean;
 }
 
-export interface TokenReadWrite {
+export interface ITokenReadWrite {
   name: 'read' | 'write';
   checked: boolean;
 }

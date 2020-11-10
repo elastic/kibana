@@ -9,18 +9,18 @@ import fetch from 'node-fetch';
 
 import { KibanaRequest, Logger } from 'src/core/server';
 import { ConfigType } from '../';
-import { Access } from './check_access';
+import { IAccess } from './check_access';
 
-import { InitialAppData } from '../../common/types';
+import { IInitialAppData } from '../../common/types';
 import { stripTrailingSlash } from '../../common/strip_slashes';
 
-interface Params {
+interface IParams {
   request: KibanaRequest;
   config: ConfigType;
   log: Logger;
 }
-interface Return extends InitialAppData {
-  access?: Access;
+interface IReturn extends IInitialAppData {
+  access?: IAccess;
   publicUrl?: string;
 }
 
@@ -35,7 +35,7 @@ export const callEnterpriseSearchConfigAPI = async ({
   config,
   log,
   request,
-}: Params): Promise<Return> => {
+}: IParams): Promise<IReturn> => {
   if (!config.host) return {};
 
   const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.`;

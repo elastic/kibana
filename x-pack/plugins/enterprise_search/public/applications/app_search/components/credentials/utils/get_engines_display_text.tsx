@@ -6,9 +6,9 @@
 
 import React from 'react';
 import { ApiTokenTypes, ALL } from '../constants';
-import { ApiToken } from '../types';
+import { IApiToken } from '../types';
 
-export const getEnginesDisplayText = (apiToken: ApiToken): JSX.Element | string => {
+export const getEnginesDisplayText = (apiToken: IApiToken): JSX.Element | string => {
   const { type, access_all_engines: accessAll, engines = [] } = apiToken;
   if (type === ApiTokenTypes.Admin) {
     return '--';

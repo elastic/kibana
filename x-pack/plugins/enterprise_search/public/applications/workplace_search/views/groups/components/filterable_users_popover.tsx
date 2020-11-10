@@ -10,13 +10,13 @@ import { useActions } from 'kea';
 
 import { EuiFilterGroup, EuiPopover } from '@elastic/eui';
 
-import { User } from '../../../types';
+import { IUser } from '../../../types';
 
 import { GroupsLogic } from '../groups_logic';
 import { FilterableUsersList } from './filterable_users_list';
 
-interface FilterableUsersPopoverProps {
-  users: User[];
+interface IIFilterableUsersPopoverProps {
+  users: IUser[];
   selectedOptions?: string[];
   itemsClickable?: boolean;
   isPopoverOpen: boolean;
@@ -26,7 +26,7 @@ interface FilterableUsersPopoverProps {
   closePopover(): void;
 }
 
-export const FilterableUsersPopover: React.FC<FilterableUsersPopoverProps> = ({
+export const FilterableUsersPopover: React.FC<IIFilterableUsersPopoverProps> = ({
   users,
   selectedOptions = [],
   itemsClickable,
