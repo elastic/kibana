@@ -43,11 +43,11 @@ dependency list!
 [discrete]
 === Test coverage
 
-Testing UI code is hard. We strive for [total automated test coverage](https://github.com/elastic/engineering/blob/master/kibana_dev_principles.md#automate-tests-through-ci) of our code and UX, but this is difficult to
-measure and we're constrained by time. During development, test coverage measurement is subjective
-and manual, based on our understanding of the feature. Code coverage reports indicate possible gaps,
-but it ultimately comes down to a judgment call. Here are some guidelines to help you ensure
-sufficient automated test coverage.
+Testing UI code is hard. We strive for https://github.com/elastic/engineering/blob/master/kibana_dev_principles.md#automate-tests-through-ci[total automated test coverage] of our code and UX,
+but this is difficult to measure and we're constrained by time. During development, test coverage
+measurement is subjective and manual, based on our understanding of the feature. Code coverage
+reports indicate possible gaps, but it ultimately comes down to a judgment call. Here are some
+guidelines to help you ensure sufficient automated test coverage.
 
 * Every PR should be accompanied by tests.
 * Check the before and after automated test coverage metrics. If coverage has gone down you might
