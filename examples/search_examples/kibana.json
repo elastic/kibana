@@ -3,7 +3,7 @@
   "version": "8.0.0",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["navigation", "data", "developerExamples"],
+  "requiredPlugins": ["navigation", "data", "developerExamples", "kibanaUtils"],
   "optionalPlugins": [],
   "requiredBundles": []
 }

@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, from, Observable } from 'rxjs';
 import { pick } from 'lodash';
 import {
   CoreSetup,
@@ -29,7 +29,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from 'src/core/server';
-import { first } from 'rxjs/operators';
+import { first, switchMap } from 'rxjs/operators';
 import {
   ISearchSetup,
   ISearchStart,
@@ -246,9 +246,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       options.strategy
     );
 
-    return strategy.search(searchRequest, options, deps).pipe(
+    const getSearchRequest = async () =>
+      !options.isRestore || searchRequest.id
+        ? searchRequest
+        : {
+            ...searchRequest,
+            id: await this.sessionService.getId(searchRequest, options.sessionId, deps),
+          };
+
+    return from(getSearchRequest()).pipe(
+      switchMap((request) => strategy.search(request, options, deps)),
       tapFirst((response) => {
-        if (!options.sessionId || !response.id) return;
+        if (!options.sessionId || !response.id || options.isRestore) return;
         this.sessionService.trackId(searchRequest, response.id, options, {
           savedObjectsClient: deps.savedObjectsClient,
         });
@@ -278,7 +287,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private asScopedProvider = ({ elasticsearch, savedObjects, uiSettings }: CoreStart) => {
     return (request: KibanaRequest): ISearchClient => {
-      savedObjects.createInternalRepository
       const savedObjectsClient = savedObjects.getScopedClient(request, {
         includedHiddenTypes: [BACKGROUND_SESSION_TYPE],
       });

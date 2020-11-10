@@ -31,7 +31,17 @@ export class SessionService implements ISessionService {
   private appChangeSubscription$?: Subscription;
   private curApp?: string;
   private http?: HttpStart;
+
+  /**
+   * Has the session already been stored (i.e. "sent to background")?
+   */
   private _isStored: boolean = false;
+
+  /**
+   * Is this session a restored session (have these requests already been made, and we're just
+   * looking to re-use the previous search IDs)?
+   */
+  private _isRestore: boolean = false;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
@@ -77,19 +87,27 @@ export class SessionService implements ISessionService {
     return this._isStored;
   }
 
+  public isRestore() {
+    return this._isRestore;
+  }
+
   public start() {
     this._isStored = false;
+    this._isRestore = false;
     this.session$.next(uuid.v4());
     return this.sessionId!;
   }
 
   public restore(sessionId: string) {
+    this._isStored = true;
+    this._isRestore = true;
     this.session$.next(sessionId);
     return this.http!.get(`/internal/session/${encodeURIComponent(sessionId)}`);
   }
 
   public clear() {
     this._isStored = false;
+    this._isRestore = true;
     this.session$.next(undefined);
   }
 

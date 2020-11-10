@@ -137,6 +137,7 @@ export class SearchInterceptor {
     const body = JSON.stringify({
       sessionId: options?.sessionId,
       isStored: options?.isStored,
+      isRestore: options?.isRestore,
       ...searchRequest,
     });
 

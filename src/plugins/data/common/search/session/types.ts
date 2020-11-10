@@ -36,9 +36,14 @@ export interface ISessionService {
   start: () => string;
 
   /**
+   * Saves a session
+   */
+  save: (name: string, url: string, sessionId?: string) => Promise<any>;
+
+  /**
    * Restores existing session
    */
-  restore: (sessionId: string) => void;
+  restore: (sessionId: string) => Promise<any>;
 
   /**
    * Clears the active session.
@@ -49,6 +54,11 @@ export interface ISessionService {
    * Whether the active session is already saved (i.e. sent to background)
    */
   isStored: () => boolean;
+
+  /**
+   * Whether the active session is restored (i.e. reusing previous search IDs)
+   */
+  isRestore: () => boolean;
 }
 
 export interface SearchSessionFindOptions {

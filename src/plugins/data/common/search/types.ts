@@ -97,4 +97,10 @@ export interface ISearchOptions {
    * Whether the session is already saved (i.e. sent to background)
    */
   isStored?: boolean;
+
+  /**
+   * Whether the session is restored (i.e. search requests should re-use the stored search IDs,
+   * rather than starting from scratch)
+   */
+  isRestore?: boolean;
 }

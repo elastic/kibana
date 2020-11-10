@@ -39,11 +39,14 @@ import {
   EuiCode,
   EuiComboBox,
   EuiFormLabel,
+  EuiLink,
 } from '@elastic/eui';
 
+import { Location } from 'history';
 import { CoreStart } from '../../../../src/core/public';
 import { mountReactNode } from '../../../../src/core/public/utils';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
+import { getQueryParams } from '../../../../src/plugins/kibana_utils/public';
 
 import {
   PLUGIN_ID,
@@ -120,7 +123,13 @@ export const SearchExamplesApp = ({
   }, [indexPattern]);
 
   useEffect(() => {
-    setSearchSessionId(data.search.session.start());
+    const { sessionId } = getQueryParams(window.location as Location);
+    if (sessionId) {
+      data.search.session.restore(sessionId as string);
+      setSearchSessionId(sessionId as string);
+    } else {
+      setSearchSessionId(data.search.session.start());
+    }
   }, [data]);
 
   const doAsyncSearch = async (strategy?: string) => {
@@ -137,7 +146,14 @@ export const SearchExamplesApp = ({
       params: {
         index: indexPattern.title,
         body: {
-          aggs: aggsDsl,
+          aggs: {
+            ...aggsDsl,
+            delayed: {
+              shard_delay: {
+                value: '5s',
+              },
+            },
+          },
           query,
         },
       },
@@ -151,6 +167,7 @@ export const SearchExamplesApp = ({
         strategy,
         sessionId: searchSessionId,
         isStored: data.search.session.isStored(),
+        isRestore: data.search.session.isRestore(),
       })
       .subscribe({
         next: (response) => {
@@ -289,16 +306,26 @@ export const SearchExamplesApp = ({
                     >
                       Generate new search session ID
                     </EuiButtonEmpty>
-                    <EuiButton
-                      onClick={() =>
-                        data.search.session.save(
-                          `Search example ${searchSessionId}`,
-                          `/app/searchExamples?sessionId=${searchSessionId}`
-                        )
-                      }
-                    >
-                      Save session
-                    </EuiButton>
+                    {data.search.session.isStored() ? (
+                      data.search.session.isRestore() ? (
+                        ''
+                      ) : (
+                        <EuiLink href={`/app/searchExamples?sessionId=${searchSessionId}`}>
+                          Visit restored session
+                        </EuiLink>
+                      )
+                    ) : (
+                      <EuiButton
+                        onClick={() =>
+                          data.search.session.save(
+                            `Search example ${searchSessionId}`,
+                            `/app/searchExamples?sessionId=${searchSessionId}`
+                          )
+                        }
+                      >
+                        Save session
+                      </EuiButton>
+                    )}
                   </EuiText>
                   <EuiSpacer />
                   <EuiSpacer />

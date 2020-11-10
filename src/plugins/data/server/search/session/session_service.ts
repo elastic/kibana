@@ -163,6 +163,21 @@ export class BackgroundSessionService {
     }
   };
 
+  public getId = async (
+    searchRequest: IKibanaSearchRequest,
+    sessionId: string,
+    deps: BackgroundSessionDependencies
+  ) => {
+    const session = await this.get(sessionId, deps);
+    const requestHash = createRequestHash(searchRequest.params);
+    if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
+      throw new Error(
+        `Search request is not associated with session. Are you sure you searched with the same parameters?`
+      );
+    }
+    return session.attributes.idMapping[requestHash];
+  };
+
   // TODO: When should we call this? Should we call `deleteId` or something instead?
   public clear = () => {
     this.sessionSearchMap.clear();
