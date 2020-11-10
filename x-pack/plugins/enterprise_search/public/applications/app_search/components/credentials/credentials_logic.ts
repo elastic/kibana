@@ -17,7 +17,7 @@ import {
 } from '../../../shared/flash_messages';
 import { AppLogic } from '../../app_logic';
 
-import { IMeta } from '../../../../../common/types';
+import { Meta } from '../../../../../common/types';
 import { IEngine } from '../../types';
 import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
 
@@ -37,7 +37,7 @@ interface CredentialsLogicActions {
   onApiTokenUpdateSuccess(apiToken: IApiToken): IApiToken;
   removeEngineName(engineName: string): string;
   setAccessAllEngines(accessAll: boolean): boolean;
-  setCredentialsData(meta: IMeta, apiTokens: IApiToken[]): { meta: IMeta; apiTokens: IApiToken[] };
+  setCredentialsData(meta: Meta, apiTokens: IApiToken[]): { meta: Meta; apiTokens: IApiToken[] };
   setCredentialsDetails(details: ICredentialsDetails): ICredentialsDetails;
   setNameInputBlurred(isBlurred: boolean): boolean;
   setTokenReadWrite(tokenReadWrite: ITokenReadWrite): ITokenReadWrite;
@@ -65,7 +65,7 @@ interface CredentialsLogicValues {
   isCredentialsDataComplete: boolean;
   isCredentialsDetailsComplete: boolean;
   fullEngineAccessChecked: boolean;
-  meta: Partial<IMeta>;
+  meta: Partial<Meta>;
   nameInputBlurred: boolean;
   shouldShowCredentialsForm: boolean;
 }
