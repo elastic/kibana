@@ -40,23 +40,14 @@ export const findPreviousThresholdSignals = async ({
   searchErrors: string[];
 }> => {
   const aggregations = {
-    rule: {
-      filter: {
-        term: {
-          'signal.rule.rule_id': ruleId,
-        },
+    threshold: {
+      terms: {
+        field: bucketByField,
       },
       aggs: {
-        threshold: {
-          terms: {
-            field: bucketByField,
-          },
-          aggs: {
-            lastSignalTimestamp: {
-              max: {
-                field: 'signal.original_time', // timestamp of last event captured by bucket
-              },
-            },
+        lastSignalTimestamp: {
+          max: {
+            field: 'signal.original_time', // timestamp of last event captured by bucket
           },
         },
       },
@@ -64,10 +55,11 @@ export const findPreviousThresholdSignals = async ({
   };
 
   const filter = {
-    match_all: {},
+    term: {
+      'signal.rule.rule_id': ruleId,
+    },
   };
 
-  // TODO: paginate
   return singleSearchAfter({
     aggregations,
     searchAfterSortId: undefined,
