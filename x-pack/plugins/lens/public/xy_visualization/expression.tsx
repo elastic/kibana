@@ -452,7 +452,7 @@ export function XYChart({
             ...valueLabelsStyling,
           },
           background: {
-            color: undefined, // removes the background for embeddables
+            color: undefined, // removes background for embeddables
           },
         }}
         baseTheme={chartBaseTheme}
