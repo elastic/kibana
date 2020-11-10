@@ -77,13 +77,13 @@ image:images/url_drilldown_github.png[Github]
 Some panels support multiple user interactions (called triggers) for which you can configure a URL drilldown. The list of supported variables in the URL template depends on the trigger you selected.
 In the preceding example, you configured a URL drilldown on a pie chart. The only trigger that pie chart supports is clicking on a pie slice, so you didn’t have to pick a trigger.
 
-However, the sample *[Logs] Unique Visitors vs. Average Bytes* chart supports both clicking on a data point and selecting a range. When you create a URL drilldown for this  chart, you have the following choices:
+However, the sample *[Logs] Unique Visitors vs. Average Bytes* chart supports both clicking on a data point and selecting a range. When you create a URL drilldown for this chart, you have the following choices:
 
 [role="screenshot"]
-image:images/url_drilldown_trigger_picker.png[Trigger picker: Single click and Range selection]
+image:images/url_drilldown_trigger_picker.png[Trigger picker: Single click, Range selection, and Context menu click]
 
 Variables in the URL template differ per trigger. 
-For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`. 
+For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`, but *Context menu click* has no `{{event.*}}` variables.
 You can create multiple URL drilldowns per panel and attach them to different triggers.
 
 [float]
