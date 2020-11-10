@@ -225,16 +225,15 @@ describe('url state', () => {
     openTimelineUsingToggle();
     populateTimeline();
 
-    cy.server();
-    cy.route('PATCH', '**/api/timeline').as('timeline');
+    cy.route2('PATCH', '/api/timeline').as('timeline');
 
     addNameToTimeline(timeline.title);
     waitForTimelineChanges();
 
-    cy.wait('@timeline').then((response) => {
+    cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
-      cy.wrap(response.status).should('eql', 200);
-      const JsonResponse = JSON.parse(response.xhr.responseText);
+      cy.wrap(response.statusCode).should('eql', 200);
+      const JsonResponse = JSON.parse(response.body as string);
       const timelineId = JsonResponse.data.persistTimeline.timeline.savedObjectId;
       cy.visit('/app/home');
       cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);

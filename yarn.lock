@@ -1324,10 +1324,10 @@
     snap-shot-compare "2.8.3"
     snap-shot-store "1.2.3"
 
-"@cypress/webpack-preprocessor@^5.4.10":
-  version "5.4.10"
-  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.10.tgz#ed0a3ed495f5455899f7c567830b37477c3f26f5"
-  integrity sha512-6j809mAQcZsAbpIaQFlKwFQPKv1Y+ZyLr9bpW7d2utMGVll0W8Up4RPhIuAf4q9Tx+DOBQoiCpy/n0cRPxporw==
+"@cypress/webpack-preprocessor@^5.4.11":
+  version "5.4.11"
+  resolved "https://registry.yarnpkg.com/@cypress/webpack-preprocessor/-/webpack-preprocessor-5.4.11.tgz#77f86e399f04969d5d8692ada96c794c52d38f87"
+  integrity sha512-6kj0HsaWf1s0UT4qkABuwl676sW8S8lSTai3NUcF3BWj9BqhN4JPd2DdGcHNkNmYRkjpklPeGUHqAOyqMDj5+A==
   dependencies:
     bluebird "^3.7.1"
     debug "^4.1.1"
@@ -9870,6 +9870,11 @@ commander@^5.0.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-5.0.0.tgz#dbf1909b49e5044f8fdaf0adc809f0c0722bdfd0"
   integrity sha512-JrDGPAKjMGSP1G0DUoaceEJ3DZgAfr/q6X7FVk4+U5KxUSKviYGM2k6zWkfyyBHy5rAtzgYJFa1ro2O9PtoxwQ==
 
+commander@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/commander/-/commander-5.1.0.tgz#46abbd1652f8e059bddaef99bbdcb2ad9cf179ae"
+  integrity sha512-P0CysNDQ7rtVw4QIQtm+MRxV66vKFSvlsQvGYXZWR3qFU0jlMKHZZZgw8e+8DSah4UDKMqnknRDQz+xuQXQ/Zg==
+
 common-tags@1.8.0, common-tags@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/common-tags/-/common-tags-1.8.0.tgz#8e3153e542d4a39e9b10554434afaaf98956a937"
@@ -10719,10 +10724,10 @@ cypress-promise@^1.1.0:
   resolved "https://registry.yarnpkg.com/cypress-promise/-/cypress-promise-1.1.0.tgz#f2d66965945fe198431aaf692d5157cea9d47b25"
   integrity sha512-DhIf5PJ/a0iY+Yii6n7Rbwq+9TJxU4pupXYzf9mZd8nPG0AzQrj9i+pqINv4xbI2EV1p+PKW3maCkR7oPG4GrA==
 
-cypress@^5.5.0:
-  version "5.5.0"
-  resolved "https://registry.yarnpkg.com/cypress/-/cypress-5.5.0.tgz#1da0355794a43247f8a80cb7f505e83e1cf847cb"
-  integrity sha512-UHEiTca8AUTevbT2pWkHQlxoHtXmbq+h6Eiu/Mz8DqpNkF98zjTBLv/HFiKJUU5rQzp9EwSWtms33p5TWCJ8tQ==
+cypress@^5.6.0:
+  version "5.6.0"
+  resolved "https://registry.yarnpkg.com/cypress/-/cypress-5.6.0.tgz#6781755c3ddfd644ce3179fcd7389176c0c82280"
+  integrity sha512-cs5vG3E2JLldAc16+5yQxaVRLLqMVya5RlrfPWkC72S5xrlHFdw7ovxPb61s4wYweROKTyH01WQc2PFzwwVvyQ==
   dependencies:
     "@cypress/listr-verbose-renderer" "^0.4.1"
     "@cypress/request" "^2.88.5"
@@ -10736,7 +10741,7 @@ cypress@^5.5.0:
     chalk "^4.1.0"
     check-more-types "^2.24.0"
     cli-table3 "~0.6.0"
-    commander "^4.1.1"
+    commander "^5.1.0"
     common-tags "^1.8.0"
     debug "^4.1.1"
     eventemitter2 "^6.4.2"

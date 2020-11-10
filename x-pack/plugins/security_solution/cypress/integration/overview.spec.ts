@@ -13,7 +13,7 @@ import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Overview Page', () => {
   it('Host stats render with correct values', () => {
-    cy.stubSearchStrategyApi('overview_search_strategy');
+    cy.stubSearchStrategyApi('overview_search_strategy.json');
     loginAndWaitForPage(OVERVIEW_URL);
     expandHostStats();
 
@@ -23,7 +23,7 @@ describe('Overview Page', () => {
   });
 
   it('Network stats render with correct values', () => {
-    cy.stubSearchStrategyApi('overview_search_strategy');
+    cy.stubSearchStrategyApi('overview_search_strategy.json');
     loginAndWaitForPage(OVERVIEW_URL);
     expandNetworkStats();
 
@@ -34,10 +34,8 @@ describe('Overview Page', () => {
 
   describe('with no data', () => {
     before(() => {
-      cy.server();
-      cy.fixture('empty_instance').as('emptyInstance');
+      cy.stubSearchStrategyApi('empty_instance.json', 'securitySolutionIndexFields');
       loginAndWaitForPage(OVERVIEW_URL);
-      cy.route('POST', '**/internal/search/securitySolutionIndexFields', '@emptyInstance');
     });
 
     it('Splash screen should be here', () => {

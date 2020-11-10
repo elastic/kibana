@@ -5,7 +5,7 @@
  */
 
 import { exportTimeline } from '../tasks/timelines';
-import { esArchiverLoad } from '../tasks/es_archiver';
+import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { loginAndWaitForPageWithoutDateRange } from '../tasks/login';
 import { timeline as timelineTemplate } from '../objects/timeline';
 
@@ -16,32 +16,34 @@ import { addNameToTimeline, closeTimeline, createNewTimelineTemplate } from '../
 describe('Export timelines', () => {
   before(() => {
     esArchiverLoad('timeline');
-    cy.server();
-    cy.route('PATCH', '**/api/timeline').as('timeline');
-    cy.route('POST', '**api/timeline/_export?file_name=timelines_export.ndjson*').as('export');
+    cy.route2('PATCH', '/api/timeline').as('timeline');
+    cy.route2('POST', '/api/timeline/_export?file_name=timelines_export.ndjson').as('export');
   });
 
-  it('Exports a custom timeline template', async () => {
+  after(() => {
+    esArchiverUnload('timeline');
+  });
+
+  it('Exports a custom timeline template', () => {
     loginAndWaitForPageWithoutDateRange(TIMELINE_TEMPLATES_URL);
     openTimelineUsingToggle();
     createNewTimelineTemplate();
     addNameToTimeline(timelineTemplate.title);
     closeTimeline();
 
-    const result = await cy.wait('@timeline').promisify();
+    cy.wait('@timeline').then(({ response }) => {
+      const { savedObjectId: timelineId, templateTimelineId } = JSON.parse(
+        response.body as string
+      ).data.persistTimeline.timeline;
 
-    const timelineId = JSON.parse(result.xhr.responseText).data.persistTimeline.timeline
-      .savedObjectId;
-    const templateTimelineId = JSON.parse(result.xhr.responseText).data.persistTimeline.timeline
-      .templateTimelineId;
+      exportTimeline(timelineId);
 
-    await exportTimeline(timelineId);
-
-    cy.wait('@export').then((response) => {
-      cy.wrap(JSON.parse(response.xhr.responseText).templateTimelineId).should(
-        'eql',
-        templateTimelineId
-      );
+      cy.wait('@export').then(({ response: exportResponse }) => {
+        cy.wrap(JSON.parse(exportResponse.body as string).templateTimelineId).should(
+          'eql',
+          templateTimelineId
+        );
+      });
     });
   });
 });

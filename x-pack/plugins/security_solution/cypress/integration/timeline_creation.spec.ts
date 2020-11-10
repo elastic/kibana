@@ -47,8 +47,7 @@ import { OVERVIEW_URL } from '../urls/navigation';
 
 describe('Timelines', () => {
   before(() => {
-    cy.server();
-    cy.route('PATCH', '**/api/timeline').as('timeline');
+    cy.route2('PATCH', '/api/timeline').as('timeline');
   });
 
   it('Creates a timeline', async () => {
