@@ -64,6 +64,7 @@ describe('Exceptions', () => {
       deactivatesRule();
       refreshPage();
 
+      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
@@ -84,6 +85,7 @@ describe('Exceptions', () => {
       refreshPage();
       goToAlertsTab();
 
+      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
@@ -94,6 +96,7 @@ describe('Exceptions', () => {
       goToClosedAlerts();
       refreshPage();
 
+      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
@@ -107,6 +110,7 @@ describe('Exceptions', () => {
       goToOpenedAlerts();
       refreshPage();
 
+      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
@@ -124,6 +128,7 @@ describe('Exceptions', () => {
       waitForTheRuleToBeExecuted();
       refreshPage();
 
+      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
@@ -164,6 +169,7 @@ describe('Exceptions', () => {
       deactivatesRule();
       refreshPage();
 
+      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
@@ -179,6 +185,7 @@ describe('Exceptions', () => {
       activatesRule();
       esArchiverLoad('auditbeat_for_exceptions_from_alert2');
 
+      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
@@ -189,6 +196,7 @@ describe('Exceptions', () => {
       goToClosedAlerts();
       refreshPage();
 
+      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
@@ -202,6 +210,7 @@ describe('Exceptions', () => {
       goToOpenedAlerts();
       refreshPage();
 
+      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
@@ -219,6 +228,7 @@ describe('Exceptions', () => {
       waitForAlertsToPopulate();
       refreshPage();
 
+      cy.scrollTo('bottom');
       cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
