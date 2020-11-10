@@ -58,8 +58,7 @@ export const findThresholdSignals = async ({
                 top_hits: {
                   sort: [
                     {
-                      '@timestamp': {
-                        // TODO: custom timestamp fields???
+                      [timestampOverride ?? '@timestamp']: {
                         order: 'desc',
                       },
                     },

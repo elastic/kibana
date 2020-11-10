@@ -17,4 +17,4 @@
  * under the License.
  */
 
-export const I18N_RC = '.i18nrc.json';
+export * from './ems_defaults';
