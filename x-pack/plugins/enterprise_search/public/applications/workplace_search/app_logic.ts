@@ -6,7 +6,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { IInitialAppData } from '../../../common/types';
+import { InitialAppData } from '../../../common/types';
 import {
   IOrganization,
   IWorkplaceSearchInitialData,
@@ -18,7 +18,7 @@ interface AppValues extends IWorkplaceSearchInitialData {
   isFederatedAuth: boolean;
 }
 interface AppActions {
-  initializeAppData(props: IInitialAppData): IInitialAppData;
+  initializeAppData(props: InitialAppData): InitialAppData;
 }
 
 const emptyOrg = {} as IOrganization;

@@ -13,7 +13,7 @@ import {
   IConfiguredLimits as IWorkplaceSearchConfiguredLimits,
 } from './workplace_search';
 
-export interface IInitialAppData {
+export interface InitialAppData {
   readOnlyMode?: boolean;
   ilmEnabled?: boolean;
   isFederatedAuth?: boolean;
