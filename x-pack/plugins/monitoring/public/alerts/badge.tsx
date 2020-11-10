@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenu, EuiPopover, EuiBadge } from '@elastic/eui';
+import { EuiContextMenu, EuiPopover, EuiBadge, EuiSwitch } from '@elastic/eui';
 import { CommonAlertStatus } from '../../common/types/alerts';
 import { AlertSeverity } from '../../common/enums';
 // @ts-ignore
@@ -18,10 +18,32 @@ import { AlertsContext } from './context';
 import { getAlertPanelsByCategory } from './lib/get_alert_panels_by_category';
 import { getAlertPanelsByNode } from './lib/get_alert_panels_by_node';
 import { getFiringAlertCount } from './lib/get_firing_alert_count';
+import {
+  BEATS_SYSTEM_ID,
+  ELASTICSEARCH_SYSTEM_ID,
+  KIBANA_SYSTEM_ID,
+  LOGSTASH_SYSTEM_ID,
+} from '../../common/constants';
 
 export const numberOfAlertsLabel = (count: number) => `${count} alert${count > 1 ? 's' : ''}`;
 
 const MAX_TO_SHOW_IN_LIST = 8;
+
+const PANEL_TITLE = i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
+  defaultMessage: 'Alerts',
+});
+
+const GROUP_BY_NODE = i18n.translate('xpack.monitoring.alerts.badge.groupByNode', {
+  defaultMessage: 'Group by node',
+});
+
+const GROUP_BY_INSTANCE = i18n.translate('xpack.monitoring.alerts.badge.groupByInstace', {
+  defaultMessage: 'Group by instance',
+});
+
+const GROUP_BY_TYPE = i18n.translate('xpack.monitoring.alerts.badge.groupByType', {
+  defaultMessage: 'Group by alert type',
+});
 
 interface Props {
   alerts: CommonAlertStatus[];
@@ -40,35 +62,57 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
     !inSetupMode && alertCount > MAX_TO_SHOW_IN_LIST
   );
 
-  // React.useEffect(() => {
-  //   console.log('showByNode changed', { showByNode });
-  //   setShowPopover(false);
-  //   setTimeout(() => {
-  //     setShowPopover(true);
-  //   })
-  // }, [showByNode])
-
   if (alerts.length === 0) {
     return null;
   }
 
-  const panelTitle = showByNode
-    ? i18n.translate('xpack.monitoring.alerts.badge.panelTitle', {
-        defaultMessage: 'Alerts (by node)',
-      })
-    : 'Alerts (by type)';
+  let groupByType = GROUP_BY_NODE;
+  for (const alert of alerts) {
+    for (const { state } of alert.states.filter(
+      ({ firing, state: _state }) => firing && stateFilter(_state)
+    )) {
+      switch (state.stackProduct) {
+        case ELASTICSEARCH_SYSTEM_ID:
+        case LOGSTASH_SYSTEM_ID:
+          groupByType = GROUP_BY_NODE;
+          break;
+        case KIBANA_SYSTEM_ID:
+        case BEATS_SYSTEM_ID:
+          groupByType = GROUP_BY_INSTANCE;
+          break;
+      }
+    }
+  }
 
   const panels = showByNode
-    ? getAlertPanelsByNode(panelTitle, alerts, setShowByNode, stateFilter, nextStepsFilter)
+    ? getAlertPanelsByNode(PANEL_TITLE, alerts, stateFilter, nextStepsFilter)
     : getAlertPanelsByCategory(
-        panelTitle,
+        PANEL_TITLE,
         inSetupMode,
         alerts,
         alertsContext,
-        setShowByNode,
         stateFilter,
         nextStepsFilter
       );
+
+  if (panels.length) {
+    panels[0].items?.push(
+      ...[
+        {
+          isSeparator: true as const,
+        },
+        {
+          name: (
+            <EuiSwitch
+              checked={false}
+              onChange={() => setShowByNode(!showByNode)}
+              label={showByNode ? GROUP_BY_TYPE : groupByType}
+            />
+          ),
+        },
+      ]
+    );
+  }
 
   const button = (
     <EuiBadge
@@ -77,7 +121,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
       onClickAriaLabel={numberOfAlertsLabel(alertCount)}
       onClick={() => setShowPopover(true)}
     >
-      {numberOfAlertsLabel(alertCount)} ({showByNode ? 'byNode' : 'byType'})
+      {numberOfAlertsLabel(alertCount)}
     </EuiBadge>
   );
 
@@ -90,7 +134,11 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiContextMenu
+        key={`${showByNode ? 'byNode' : 'byType'}_${panels.length}`}
+        initialPanelId={0}
+        panels={panels}
+      />
     </EuiPopover>
   );
 };

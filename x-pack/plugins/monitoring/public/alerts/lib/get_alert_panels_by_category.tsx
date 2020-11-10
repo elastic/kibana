@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import React, { Fragment } from 'react';
-import { EuiText, EuiSwitch } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import { AlertPanel } from '../panel';
 import { ALERT_PANEL_MENU } from '../../../common/constants';
 import { IAlertsContext } from '../context';
 import { AlertMessage, AlertState, CommonAlertStatus } from '../../../common/types/alerts';
-import { ContextMenuItem, PanelItem } from '../types';
+import { PanelItem } from '../types';
 import { getFormattedDateForAlertState } from './get_formatted_date_for_alert_state';
 
 export function getAlertPanelsByCategory(
@@ -17,7 +17,6 @@ export function getAlertPanelsByCategory(
   inSetupMode: boolean,
   alerts: CommonAlertStatus[],
   alertsContext: IAlertsContext,
-  setShowByNode: (value: boolean) => void,
   stateFilter: (state: AlertState) => boolean,
   nextStepsFilter: (nextStep: AlertMessage) => boolean
 ) {
@@ -76,19 +75,6 @@ export function getAlertPanelsByCategory(
     }
   }
 
-  const switchPanelItems = inSetupMode
-    ? []
-    : [
-        {
-          isSeparator: true,
-        },
-        {
-          name: (
-            <EuiSwitch checked={false} onChange={() => setShowByNode(true)} label="Group by node" />
-          ),
-        },
-      ];
-
   const panels: PanelItem[] = [
     {
       id: 0,
@@ -109,14 +95,13 @@ export function getAlertPanelsByCategory(
             panel: index + 1,
           };
         }),
-        ...switchPanelItems,
       ],
     },
     ...menu.map((category, index) => {
       return {
         id: index + 1,
-        title: category.label,
-        items: category.alerts.map(({ alertName, panelIndex }) => {
+        title: `${category.label}`,
+        items: category.alerts.map(({ alertName }, panelIndex) => {
           const alertStatus = alertsContext.allAlerts[alertName];
           const name = inSetupMode ? (
             <EuiText>{alertStatus.alert.label}</EuiText>
@@ -127,7 +112,7 @@ export function getAlertPanelsByCategory(
           );
           return {
             name,
-            panel: menu.length + panelIndex,
+            panel: menu.length + panelIndex + 1,
           };
         }),
       };
@@ -150,52 +135,50 @@ export function getAlertPanelsByCategory(
       }, [])
     );
   } else {
-    panels.push(
-      ...menu.reduce((accum: PanelItem[], category) => {
-        for (const { alert, firingStates, panelIndex } of category.alerts) {
-          const items = firingStates.reduce((allItems: ContextMenuItem[], alertState, index) => {
-            allItems.push({
-              name: (
-                <Fragment>
-                  <EuiText size="s">{getFormattedDateForAlertState(alertState)}</EuiText>
-                  <EuiText size="s">{alert.label}</EuiText>
-                  <EuiText size="s">{alertState.state.stackProductName}</EuiText>
-                </Fragment>
-              ),
-              panel: menu.length + 1 + panelIndex + index,
-            });
-            allItems.push({
-              isSeparator: true,
-            });
-            return allItems;
-          }, []);
-
-          accum.push({
-            id: menu.length + panelIndex,
-            title: `${alert.label}`,
-            items,
+    for (const category of menu) {
+      let panelIndex = 1;
+      let secondaryPanelIndex = menu.length + category.alerts.length;
+      for (const { alert, firingStates } of category.alerts) {
+        const items = [];
+        for (const alertState of firingStates) {
+          items.push({
+            name: (
+              <Fragment>
+                <EuiText size="s">{getFormattedDateForAlertState(alertState)}</EuiText>
+                <EuiText size="s">{alert.label}</EuiText>
+                <EuiText size="s">{alertState.state.stackProductName}</EuiText>
+              </Fragment>
+            ),
+            panel: ++secondaryPanelIndex,
+          });
+          items.push({
+            isSeparator: true as const,
           });
         }
-        return accum;
-      }, []),
-      ...menu.reduce((accum: PanelItem[], category) => {
-        let index = 0;
-        for (const { alert, firingStates, panelIndex } of category.alerts) {
-          for (const state of firingStates) {
-            accum.push({
-              id: menu.length + 1 + panelIndex + index,
-              title: `${alert.label}`,
-              width: 400,
-              content: (
-                <AlertPanel alert={alert} alertState={state} nextStepsFilter={nextStepsFilter} />
-              ),
-            });
-            index++;
-          }
+
+        panels.push({
+          id: menu.length + panelIndex++,
+          title: `${alert.label}`,
+          items,
+        });
+      }
+    }
+
+    for (const category of menu) {
+      let tertiaryPanelIndex = menu.length + category.alerts.length;
+      for (const { alert, firingStates } of category.alerts) {
+        for (const state of firingStates) {
+          panels.push({
+            id: ++tertiaryPanelIndex,
+            title: `${alert.label}`,
+            width: 400,
+            content: (
+              <AlertPanel alert={alert} alertState={state} nextStepsFilter={nextStepsFilter} />
+            ),
+          });
         }
-        return accum;
-      }, [])
-    );
+      }
+    }
   }
 
   return panels;
