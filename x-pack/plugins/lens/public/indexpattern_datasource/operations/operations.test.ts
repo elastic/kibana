@@ -8,8 +8,33 @@ import { getOperationTypesForField, getAvailableOperationsByMetadata, buildColum
 import { AvgIndexPatternColumn } from './definitions/metrics';
 import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
+import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../loader');
+
+const fields = [
+  {
+    name: 'timestamp',
+    displayName: 'timestamp',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+];
 
 const expectedIndexPatterns = {
   1: {
@@ -17,29 +42,8 @@ const expectedIndexPatterns = {
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     hasRestrictions: false,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestamp',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-      },
-    ],
+    fields,
+    getFieldByName: getFieldByNameFactory(fields),
   },
 };
 
