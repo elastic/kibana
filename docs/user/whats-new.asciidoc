@@ -87,7 +87,7 @@ custom navigation paths between dashboards, carrying over the filter and
 time context. Now you can also create a navigation path from a dashboard to an internal or external
 URL.
 This functionality is available with a https://www.elastic.co/subscriptions[Gold subscription] or higher.
-For more information, refer to the {kibana-ref}/url-drilldown.html[URL drilldown documentation].
+For more information, refer to the {kibana-ref}/drilldowns.html#url-drilldown[URL drilldown documentation].
 
 [role="screenshot"]
 image::user/images/drilldown-to-url.png[Drilldown to Url on dashboard panel]
@@ -97,7 +97,7 @@ image::user/images/drilldown-to-url.png[Drilldown to Url on dashboard panel]
 === New ways to act on geospatial data
 
 Maps and dashboards now work better together.
-First, you can use maps with {kibana-ref}/dashboard-drilldown.html[dashboard drilldowns].
+First, you can use maps with {kibana-ref}/drilldowns.html#dashboard-drilldown[dashboard drilldowns].
 Second, when authoring a dashboard, you can create a map, save the map,
 and then return to the dashboard in your workflow.
 
