@@ -13,7 +13,6 @@ import {
   getUrlPrefix,
   isUserAuthorizedAtSpace,
   getRedactedNamespaces,
-  expectResponses,
 } from '../lib/saved_object_test_utils';
 import { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
 
