@@ -14,7 +14,7 @@ import {
   deleteArchiveFilelist,
 } from './cache';
 import { ArchiveEntry, getBufferExtractor } from '../registry/extract';
-import { parseAndVerifyArchive } from './validation';
+import { parseAndVerifyArchiveEntries } from './validation';
 
 export * from './cache';
 
@@ -25,8 +25,10 @@ export async function getArchivePackage({
   archiveBuffer: Buffer;
   contentType: string;
 }): Promise<{ paths: string[]; archivePackageInfo: ArchivePackage }> {
-  const paths = await unpackArchiveToCache(archiveBuffer, contentType);
-  const archivePackageInfo = parseAndVerifyArchive(paths);
+  const entries = await unpackArchiveEntries(archiveBuffer, contentType);
+  const { archivePackageInfo } = await parseAndVerifyArchiveEntries(entries);
+  const paths = addEntriesToMemoryStore(entries);
+
   setArchiveFilelist(archivePackageInfo.name, archivePackageInfo.version, paths);
 
   return {
@@ -40,6 +42,10 @@ export async function unpackArchiveToCache(
   contentType: string
 ): Promise<string[]> {
   const entries = await unpackArchiveEntries(archiveBuffer, contentType);
+  return addEntriesToMemoryStore(entries);
+}
+
+function addEntriesToMemoryStore(entries: ArchiveEntry[]) {
   const paths: string[] = [];
   entries.forEach((entry) => {
     const { path, buffer } = entry;
