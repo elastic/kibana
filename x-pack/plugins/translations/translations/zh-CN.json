@@ -13729,8 +13729,6 @@
     "xpack.monitoring.alerts.actionVariables.internalShortMessage": "Elastic 生成的简短内部消息。",
     "xpack.monitoring.alerts.actionVariables.state": "告警的当前状态。",
     "xpack.monitoring.alerts.badge.panelTitle": "告警",
-    "xpack.monitoring.alerts.callout.dangerLabel": "危险告警",
-    "xpack.monitoring.alerts.callout.warningLabel": "警告告警",
     "xpack.monitoring.alerts.clusterHealth.action.danger": "分配缺失的主分片和副本分片。",
     "xpack.monitoring.alerts.clusterHealth.action.warning": "分配缺失的副本分片。",
     "xpack.monitoring.alerts.clusterHealth.actionVariables.clusterHealth": "集群的运行状况。",

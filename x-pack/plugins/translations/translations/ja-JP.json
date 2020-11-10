@@ -13712,8 +13712,6 @@
     "xpack.monitoring.alerts.actionVariables.internalShortMessage": "内部メッセージ（省略あり）はElasticで生成されました。",
     "xpack.monitoring.alerts.actionVariables.state": "現在のアラートの状態。",
     "xpack.monitoring.alerts.badge.panelTitle": "アラート",
-    "xpack.monitoring.alerts.callout.dangerLabel": "危険アラート",
-    "xpack.monitoring.alerts.callout.warningLabel": "警告アラート",
     "xpack.monitoring.alerts.clusterHealth.action.danger": "見つからないプライマリおよびレプリカシャードを割り当てます。",
     "xpack.monitoring.alerts.clusterHealth.action.warning": "見つからないレプリカシャードを割り当てます。",
     "xpack.monitoring.alerts.clusterHealth.actionVariables.clusterHealth": "クラスターの正常性。",

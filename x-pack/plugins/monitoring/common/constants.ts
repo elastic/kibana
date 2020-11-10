@@ -459,10 +459,10 @@ export const ALERT_PANEL_MENU = [
       defaultMessage: 'Cluster health',
     }),
     alerts: [
-      { alertName: ALERT_NODES_CHANGED, panelIndex: 1 },
-      { alertName: ALERT_ELASTICSEARCH_VERSION_MISMATCH, panelIndex: 2 },
-      { alertName: ALERT_KIBANA_VERSION_MISMATCH, panelIndex: 3 },
-      { alertName: ALERT_LOGSTASH_VERSION_MISMATCH, panelIndex: 4 },
+      { alertName: ALERT_NODES_CHANGED },
+      { alertName: ALERT_ELASTICSEARCH_VERSION_MISMATCH },
+      { alertName: ALERT_KIBANA_VERSION_MISMATCH },
+      { alertName: ALERT_LOGSTASH_VERSION_MISMATCH },
     ],
   },
   {
@@ -470,9 +470,9 @@ export const ALERT_PANEL_MENU = [
       defaultMessage: 'Resource utilization',
     }),
     alerts: [
-      { alertName: ALERT_CPU_USAGE, panelIndex: 5 },
-      { alertName: ALERT_DISK_USAGE, panelIndex: 6 },
-      { alertName: ALERT_MEMORY_USAGE, panelIndex: 7 },
+      { alertName: ALERT_CPU_USAGE },
+      { alertName: ALERT_DISK_USAGE },
+      { alertName: ALERT_MEMORY_USAGE },
     ],
   },
   {
@@ -480,10 +480,10 @@ export const ALERT_PANEL_MENU = [
       defaultMessage: 'Errors and exceptions',
     }),
     alerts: [
-      { alertName: ALERT_MISSING_MONITORING_DATA, panelIndex: 8 },
-      { alertName: ALERT_LICENSE_EXPIRATION, panelIndex: 9 },
-      { alertName: ALERT_THREAD_POOL_SEARCH_REJECTIONS, panelIndex: 10 },
-      { alertName: ALERT_THREAD_POOL_WRITE_REJECTIONS, panelIndex: 11 },
+      { alertName: ALERT_MISSING_MONITORING_DATA },
+      { alertName: ALERT_LICENSE_EXPIRATION },
+      { alertName: ALERT_THREAD_POOL_SEARCH_REJECTIONS },
+      { alertName: ALERT_THREAD_POOL_WRITE_REJECTIONS },
     ],
   },
 ];

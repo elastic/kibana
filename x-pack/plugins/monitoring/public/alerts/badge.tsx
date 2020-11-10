@@ -95,7 +95,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
         nextStepsFilter
       );
 
-  if (panels.length) {
+  if (panels.length && !inSetupMode) {
     panels[0].items?.push(
       ...[
         {
