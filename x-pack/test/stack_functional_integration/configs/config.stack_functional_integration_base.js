@@ -25,7 +25,6 @@ export default async ({ readConfigFile }) => {
   const xpackFunctionalConfig = await readConfigFile(require.resolve('../../functional/config'));
   const { tests, ...provisionedConfigs } = buildState(resolve(__dirname, stateFilePath));
   process.env.stack_functional_integration = true;
-  log.info(tests); // TODO: Removed
   logAll(log);
 
   const settings = {
@@ -48,8 +47,8 @@ export default async ({ readConfigFile }) => {
       ...xpackFunctionalConfig.get('kbnTestServer'),
       serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
     },
-    // testFiles: tests.map(prepend).map(logTest),
-    testFiles: ['alerts'].map(prepend).map(logTest),
+    testFiles: tests.map(prepend).map(logTest),
+    // testFiles: ['alerts'].map(prepend).map(logTest),
     // If we need to do things like disable animations, we can do it in configure_start_kibana.sh, in the provisioner...which lives in the integration-test private repo
     uiSettings: {},
     security: { disableTestUser: true },
