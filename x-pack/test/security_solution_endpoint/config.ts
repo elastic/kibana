@@ -30,7 +30,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ['securitySolutionManagement']: {
         pathname: '/app/security/administration',
       },
-      ...xpackFunctionalConfig.get('apps'),
       ['security']: {
         pathname: '/app/security',
       },
