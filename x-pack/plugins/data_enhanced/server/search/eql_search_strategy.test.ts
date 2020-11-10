@@ -197,7 +197,7 @@ describe('EQL search strategy', () => {
     });
 
     describe('response', () => {
-      it('contains a rawResponse with body and meta', async () => {
+      it('contains a rawResponse field containing the full search response', async () => {
         const eqlSearch = await eqlSearchStrategyProvider(mockLogger);
         const response = await eqlSearch
           .search({ id: 'my-search-id', options: { ignore: [400] } }, {}, mockDeps)
@@ -206,9 +206,9 @@ describe('EQL search strategy', () => {
         expect(response).toEqual(
           expect.objectContaining({
             rawResponse: expect.objectContaining({
-              body: expect.any(Object),
-              meta: expect.any(Object),
-              statusCode: 200,
+              body: getMockEqlResponse().body,
+              meta: getMockEqlResponse().meta,
+              statusCode: getMockEqlResponse().statusCode,
             }),
           })
         );
