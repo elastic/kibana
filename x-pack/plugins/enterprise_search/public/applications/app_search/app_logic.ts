@@ -7,7 +7,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { InitialAppData } from '../../../common/types';
-import { ConfiguredLimits, IAccount, IRole } from './types';
+import { ConfiguredLimits, Account, Role } from './types';
 
 import { getRoleAbilities } from './utils/role';
 
@@ -15,8 +15,8 @@ interface AppValues {
   hasInitialized: boolean;
   ilmEnabled: boolean;
   configuredLimits: Partial<ConfiguredLimits>;
-  account: Partial<IAccount>;
-  myRole: Partial<IRole>;
+  account: Partial<Account>;
+  myRole: Partial<Role>;
 }
 interface AppActions {
   initializeAppData(props: InitialAppData): Required<InitialAppData>;

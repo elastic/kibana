@@ -5,7 +5,7 @@
  */
 
 import {
-  IAccount as IAppSearchAccount,
+  Account as AppSearchAccount,
   ConfiguredLimits as AppSearchConfiguredLimits,
 } from './app_search';
 import {
@@ -22,7 +22,7 @@ export interface InitialAppData {
     hasAppSearchAccess: boolean;
     hasWorkplaceSearchAccess: boolean;
   };
-  appSearch?: IAppSearchAccount;
+  appSearch?: AppSearchAccount;
   workplaceSearch?: IWorkplaceSearchInitialData;
 }
 
