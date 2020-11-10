@@ -216,7 +216,7 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
             onClose={onCloseEditFlyout}
           />
         )}
-        {mappingsFlyoutVisible && connector != null && (
+        {mappingsFlyoutVisible && editedConnectorItem != null && (
           <FieldMappingFlyout onClose={onCloseUpdateMappings} connector={editedConnectorItem} />
         )}
       </ActionsConnectorsContextProvider>

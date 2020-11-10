@@ -25,6 +25,7 @@ import { initPostCommentApi } from './cases/comments/post_comment';
 
 import { initCaseConfigureGetActionConnector } from './cases/configure/get_connectors';
 import { initGetCaseConfigure } from './cases/configure/get_configure';
+import { initCaseConfigureGetFields } from './cases/configure/get_fields';
 import { initPatchCaseConfigure } from './cases/configure/patch_configure';
 import { initPostCaseConfigure } from './cases/configure/post_configure';
 
@@ -52,6 +53,7 @@ export function initCaseApi(deps: RouteDeps) {
   initGetCaseConfigure(deps);
   initPatchCaseConfigure(deps);
   initPostCaseConfigure(deps);
+  initCaseConfigureGetFields(deps);
   // Reporters
   initGetReportersApi(deps);
   // Status

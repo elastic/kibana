@@ -20,12 +20,15 @@ import { ActionConnector } from '../../../../../triggers_actions_ui/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { useActionsConnectorsContext } from '../../../../../triggers_actions_ui/public/common';
 import * as i18n from './translations';
+import { useGetFields } from '../../containers/use_get_fields';
 interface Props {
   connector: ActionConnector;
   onClose: () => void;
 }
 export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
   const { actionTypeRegistry } = useActionsConnectorsContext();
+  const { data, isLoading: isFieldsLoading } = useGetFields(connector.id, connector.actionTypeId);
+  console.log('data', data);
   const closeFlyout = useCallback(() => {
     onClose();
   }, [onClose]);
@@ -68,6 +71,7 @@ export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
                 <EuiButton
                   color="secondary"
                   data-test-subj="saveMappingsActionButton"
+                  isDisabled={isFieldsLoading}
                   isLoading={isSaving}
                   onClick={() => onSaveClicked(false)}
                 >
@@ -76,9 +80,10 @@ export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  fill
                   color="secondary"
                   data-test-subj="saveAndCloseMappingsActionButton"
+                  fill
+                  isDisabled={isFieldsLoading}
                   isLoading={isSaving}
                   onClick={() => onSaveClicked()}
                 >

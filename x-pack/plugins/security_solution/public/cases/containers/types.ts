@@ -129,3 +129,8 @@ export interface DeleteCase {
   id: string;
   title?: string;
 }
+
+export interface FieldMappings {
+  id: string;
+  title?: string;
+}

@@ -27,6 +27,7 @@ import {
   CASE_REPORTERS_URL,
   ACTION_TYPES_URL,
   ACTION_URL,
+  CASE_CONFIGURE_CONNECTORS_URL,
 } from '../../../../case/common/constants';
 
 import {
@@ -265,4 +266,21 @@ export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicen
     signal,
   });
   return response;
+};
+export const getFields = async (
+  connectorId: string,
+  connectorType: string,
+  signal: AbortSignal
+): Promise<ServiceConnectorCaseResponse> => {
+  const response = await KibanaServices.get().http.fetch<CaseResponse>(
+    `${CASE_CONFIGURE_CONNECTORS_URL}/${connectorId}/comments`,
+    {
+      query: {
+        connectorType,
+      },
+      method: 'GET',
+      signal,
+    }
+  );
+  return response; // convertToCamelCase<CaseResponse, Case>(decodeCaseResponse(response));
 };
