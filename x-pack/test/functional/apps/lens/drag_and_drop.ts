@@ -15,7 +15,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.dragFieldToWorkspace('@timestamp');
 
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_xDimensionPanel')).to.eql(
