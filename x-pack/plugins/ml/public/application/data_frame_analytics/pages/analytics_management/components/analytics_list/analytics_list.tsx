@@ -35,7 +35,7 @@ import {
   getGroupQueryText,
 } from '../../../../../jobs/jobs_list/components/utils';
 import { SourceSelection } from '../source_selection';
-import { filterAnalytics } from '../analytics_search_bar';
+import { filterAnalytics } from '../../../../common/search_bar_filters';
 import { AnalyticsEmptyPrompt } from './empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { RefreshAnalyticsListButton } from '../refresh_analytics_list_button';

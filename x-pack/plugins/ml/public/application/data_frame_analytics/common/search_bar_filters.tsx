@@ -4,14 +4,14 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { stringMatch } from '../../../../../util/string_utils';
+import { stringMatch } from '../../util/string_utils';
 import {
   TermClause,
   FieldClause,
   Value,
   DataFrameAnalyticsListRow,
-} from '../analytics_list/common';
-import { ModelItem } from '../models_management/models_list';
+} from '../pages/analytics_management/components/analytics_list/common';
+import { ModelItem } from '../pages/analytics_management/components/models_management/models_list';
 
 export function filterAnalyticsModels(
   items: ModelItem[],

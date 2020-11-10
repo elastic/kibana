@@ -42,7 +42,7 @@ import {
   useRefreshAnalyticsList,
 } from '../../../../common';
 import { useTableSettings } from '../analytics_list/use_table_settings';
-import { filterAnalyticsModels } from '../analytics_search_bar';
+import { filterAnalyticsModels } from '../../../../common/search_bar_filters';
 import { ML_PAGES } from '../../../../../../../common/constants/ml_url_generator';
 import { DataFrameAnalysisConfigType } from '../../../../../../../common/types/data_frame_analytics';
 import { timeFormatter } from '../../../../../../../common/util/date_utils';
