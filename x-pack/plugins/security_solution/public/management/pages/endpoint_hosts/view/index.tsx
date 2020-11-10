@@ -147,16 +147,18 @@ export const EndpointList = () => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.administration);
 
   const dispatch = useDispatch<(a: EndpointAction) => void>();
+  // cap ability to page at 10k records. (max_result_window)
+  const maxPageCount = totalItemCount > MAX_PAGINATED_ITEM ? MAX_PAGINATED_ITEM : totalItemCount;
 
   const paginationSetup = useMemo(() => {
     return {
       pageIndex,
       pageSize,
-      totalItemCount,
+      totalItemCount: maxPageCount,
       pageSizeOptions: [...MANAGEMENT_PAGE_SIZE_OPTIONS],
       hidePerPageOptions: false,
     };
-  }, [pageIndex, pageSize, totalItemCount]);
+  }, [pageIndex, pageSize, maxPageCount]);
 
   const onTableChange = useCallback(
     ({ page }: { page: { index: number; size: number } }) => {
