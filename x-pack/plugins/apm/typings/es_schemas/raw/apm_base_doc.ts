@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Observer } from './fields/observer';
+
 // all documents types extend APMBaseDoc and inherit all properties
 export interface APMBaseDoc {
   '@timestamp': string;
@@ -17,4 +19,5 @@ export interface APMBaseDoc {
   labels?: {
     [key: string]: string | number | boolean;
   };
+  observer?: Observer;
 }
