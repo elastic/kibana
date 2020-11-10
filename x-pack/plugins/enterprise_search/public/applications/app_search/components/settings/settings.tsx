@@ -5,8 +5,6 @@
  */
 
 import React from 'react';
-
-import { i18n } from '@kbn/i18n';
 import {
   EuiPageHeader,
   EuiPageHeaderSection,
@@ -19,24 +17,16 @@ import { SetAppSearchChrome as SetPageChrome } from '../../../shared/kibana_chro
 import { FlashMessages } from '../../../shared/flash_messages';
 import { LogRetentionPanel } from './log_retention/log_retention_panel';
 
+import { SETTINGS_TITLE } from './';
+
 export const Settings: React.FC = () => {
   return (
     <>
-      <SetPageChrome
-        trail={[
-          i18n.translate('xpack.enterpriseSearch.appSearch.settings.title', {
-            defaultMessage: 'Settings',
-          }),
-        ]}
-      />
+      <SetPageChrome trail={[SETTINGS_TITLE]} />
       <EuiPageHeader>
         <EuiPageHeaderSection>
           <EuiTitle size="l">
-            <h1>
-              {i18n.translate('xpack.enterpriseSearch.appSearch.settings.title', {
-                defaultMessage: 'Settings',
-              })}
-            </h1>
+            <h1>{SETTINGS_TITLE}</h1>
           </EuiTitle>
         </EuiPageHeaderSection>
       </EuiPageHeader>

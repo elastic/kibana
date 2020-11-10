@@ -19,6 +19,7 @@ import {
   POLICY_WITH_INCLUDE_EXCLUDE,
   POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,
   POLICY_WITH_NODE_ROLE_ALLOCATION,
+  getDefaultHotPhasePolicy,
 } from './constants';
 
 window.scrollTo = jest.fn();
@@ -33,7 +34,7 @@ describe('<EditPolicy />', () => {
   describe('hot phase', () => {
     describe('serialization', () => {
       beforeEach(async () => {
-        httpRequestsMockHelpers.setLoadPolicies([DEFAULT_POLICY]);
+        httpRequestsMockHelpers.setLoadPolicies([getDefaultHotPhasePolicy('my_policy')]);
         httpRequestsMockHelpers.setLoadSnapshotPolicies([]);
 
         await act(async () => {

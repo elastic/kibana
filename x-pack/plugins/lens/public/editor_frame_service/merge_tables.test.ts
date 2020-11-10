@@ -6,6 +6,7 @@
 
 import moment from 'moment';
 import { mergeTables } from './merge_tables';
+import { ExpressionValueSearchContext } from 'src/plugins/data/public';
 import { Datatable, ExecutionContext } from 'src/plugins/expressions';
 import { LensInspectorAdapters } from './types';
 
@@ -52,7 +53,7 @@ describe('lens_merge_tables', () => {
     const adapters: LensInspectorAdapters = { tables: {} };
     mergeTables.fn(null, { layerIds: ['first', 'second'], tables: [sampleTable1, sampleTable2] }, {
       inspectorAdapters: adapters,
-    } as ExecutionContext<LensInspectorAdapters>);
+    } as ExecutionContext<LensInspectorAdapters, ExpressionValueSearchContext>);
     expect(adapters.tables!.first).toBe(sampleTable1);
     expect(adapters.tables!.second).toBe(sampleTable2);
   });
