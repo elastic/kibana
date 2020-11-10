@@ -18,7 +18,6 @@ import { Sort } from './sort';
 import { waitFor } from '@testing-library/react';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { SELECTOR_TIMELINE_BODY_CLASS_NAME, TimelineBody } from '../styles';
-import { TimelineType } from '../../../../../common/types/timeline';
 
 const mockGetNotesByIds = (eventId: string[]) => [];
 const mockSort: Sort = {
@@ -80,7 +79,6 @@ describe('Body', () => {
     sort: mockSort,
     showCheckboxes: false,
     timelineId: 'timeline-test',
-    timelineType: TimelineType.default,
     toggleColumn: jest.fn(),
     updateNote: jest.fn(),
   };

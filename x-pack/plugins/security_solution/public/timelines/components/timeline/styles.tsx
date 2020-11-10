@@ -180,7 +180,6 @@ export const EventsTrGroup = styled.div.attrs(({ className = '' }) => ({
   isBuildingBlockType: boolean;
   showLeftBorder: boolean;
 }>`
-  cursor: pointer;
   border-bottom: ${({ theme }) => theme.eui.euiBorderWidthThin} solid
     ${({ theme }) => theme.eui.euiColorLightShade};
   ${({ theme, eventType, showLeftBorder }) =>

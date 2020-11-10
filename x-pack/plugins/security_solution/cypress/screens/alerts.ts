@@ -28,7 +28,7 @@ export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closeSelectedAlertsBu
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
-export const EXPAND_ALERT_BTN = '[data-test-subj="event-actions-container"]';
+export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
 export const IN_PROGRESS_ALERTS_FILTER_BTN = '[data-test-subj="inProgressAlerts"]';
 

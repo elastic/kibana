@@ -4,7 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutHeader,
+  EuiTitle,
+} from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -97,6 +105,10 @@ const HeaderFilterGroupWrapper = styled.header<{ show: boolean }>`
   ${({ show }) => (show ? '' : 'visibility: hidden;')}
 `;
 
+const EventDetailsFlyout = styled(EuiFlyout)`
+  z-index: 9999;
+`;
+
 interface Props {
   browserFields: BrowserFields;
   columns: ColumnHeaderOptions[];
@@ -156,7 +168,6 @@ const EventsViewerComponent: React.FC<Props> = ({
   const columnsHeader = isEmpty(columns) ? defaultHeaders : columns;
   const kibana = useKibana();
   const [isQueryLoading, setIsQueryLoading] = useState(false);
-
   const [expanded, setExpanded] = useState<ActiveTimelineExpandedEvent>({});
 
   const onEventToggled = useCallback((event: TimelineItem) => {
@@ -170,6 +181,8 @@ const EventsViewerComponent: React.FC<Props> = ({
       return { eventId, indexName: event._index! };
     });
   }, []);
+
+  const handleClearSelection = useCallback(() => setExpanded({}), []);
 
   const { getManageTimelineById, setIsTimelineLoading } = useManageTimeline();
 
@@ -280,87 +293,98 @@ const EventsViewerComponent: React.FC<Props> = ({
   }, [loading]);
 
   return (
-    <StyledEuiPanel
-      data-test-subj="events-viewer-panel"
-      $isFullScreen={globalFullScreen && id !== TimelineId.active}
-    >
-      {canQueryTimeline ? (
-        <EventDetailsWidthProvider>
-          <>
-            <HeaderSection
-              id={!resolverIsShowing(graphEventId) ? id : undefined}
-              height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
-              subtitle={utilityBar ? undefined : subtitle}
-              title={inspect ? justTitle : titleWithExitFullScreen}
-            >
-              {HeaderSectionContent}
-            </HeaderSection>
-            {utilityBar && !resolverIsShowing(graphEventId) && (
-              <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
-            )}
-            <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
-              <TimelineRefetch
-                id={id}
-                inputId="global"
-                inspect={inspect}
-                loading={loading}
-                refetch={refetch}
-              />
-
-              {graphEventId && (
-                <GraphOverlay
-                  graphEventId={graphEventId}
-                  isEventViewer={true}
-                  timelineId={id}
-                  timelineType={TimelineType.default}
-                />
+    <>
+      <StyledEuiPanel
+        data-test-subj="events-viewer-panel"
+        $isFullScreen={globalFullScreen && id !== TimelineId.active}
+      >
+        {canQueryTimeline ? (
+          <EventDetailsWidthProvider>
+            <>
+              <HeaderSection
+                id={!resolverIsShowing(graphEventId) ? id : undefined}
+                height={headerFilterGroup ? COMPACT_HEADER_HEIGHT : EVENTS_VIEWER_HEADER_HEIGHT}
+                subtitle={utilityBar ? undefined : subtitle}
+                title={inspect ? justTitle : titleWithExitFullScreen}
+              >
+                {HeaderSectionContent}
+              </HeaderSection>
+              {utilityBar && !resolverIsShowing(graphEventId) && (
+                <UtilityBar>{utilityBar?.(refetch, totalCountMinusDeleted)}</UtilityBar>
               )}
-              <FullWidthFlexGroup $visible={!graphEventId}>
-                <ScrollableFlexItem grow={2}>
-                  <StatefulBody
-                    browserFields={browserFields}
-                    data={nonDeletedEvents}
-                    docValueFields={docValueFields}
-                    expanded={expanded}
-                    id={id}
+              <EventsContainerLoading data-test-subj={`events-container-loading-${loading}`}>
+                <TimelineRefetch
+                  id={id}
+                  inputId="global"
+                  inspect={inspect}
+                  loading={loading}
+                  refetch={refetch}
+                />
+
+                {graphEventId && (
+                  <GraphOverlay
+                    graphEventId={graphEventId}
                     isEventViewer={true}
-                    onEventToggled={onEventToggled}
-                    onRuleChange={onRuleChange}
-                    refetch={refetch}
-                    sort={sort}
-                    toggleColumn={toggleColumn}
-                  />
-                  <Footer
-                    activePage={pageInfo.activePage}
-                    data-test-subj="events-viewer-footer"
-                    updatedAt={updatedAt}
-                    height={footerHeight}
-                    id={id}
-                    isLive={isLive}
-                    isLoading={loading}
-                    itemsCount={nonDeletedEvents.length}
-                    itemsPerPage={itemsPerPage}
-                    itemsPerPageOptions={itemsPerPageOptions}
-                    onChangeItemsPerPage={onChangeItemsPerPage}
-                    onChangePage={loadPage}
-                    totalCount={totalCountMinusDeleted}
-                  />
-                </ScrollableFlexItem>
-                <ScrollableFlexItem grow={1}>
-                  <ExpandableEvent
-                    browserFields={browserFields}
-                    docValueFields={docValueFields}
-                    event={expanded}
                     timelineId={id}
-                    toggleColumn={toggleColumn}
+                    timelineType={TimelineType.default}
                   />
-                </ScrollableFlexItem>
-              </FullWidthFlexGroup>
-            </EventsContainerLoading>
-          </>
-        </EventDetailsWidthProvider>
-      ) : null}
-    </StyledEuiPanel>
+                )}
+                <FullWidthFlexGroup $visible={!graphEventId}>
+                  <ScrollableFlexItem grow={1}>
+                    <StatefulBody
+                      browserFields={browserFields}
+                      data={nonDeletedEvents}
+                      docValueFields={docValueFields}
+                      expanded={expanded}
+                      id={id}
+                      isEventViewer={true}
+                      onEventToggled={onEventToggled}
+                      onRuleChange={onRuleChange}
+                      refetch={refetch}
+                      sort={sort}
+                      toggleColumn={toggleColumn}
+                    />
+                    <Footer
+                      activePage={pageInfo.activePage}
+                      data-test-subj="events-viewer-footer"
+                      updatedAt={updatedAt}
+                      height={footerHeight}
+                      id={id}
+                      isLive={isLive}
+                      isLoading={loading}
+                      itemsCount={nonDeletedEvents.length}
+                      itemsPerPage={itemsPerPage}
+                      itemsPerPageOptions={itemsPerPageOptions}
+                      onChangeItemsPerPage={onChangeItemsPerPage}
+                      onChangePage={loadPage}
+                      totalCount={totalCountMinusDeleted}
+                    />
+                  </ScrollableFlexItem>
+                </FullWidthFlexGroup>
+              </EventsContainerLoading>
+            </>
+          </EventDetailsWidthProvider>
+        ) : null}
+      </StyledEuiPanel>
+      {expanded.eventId && (
+        <EventDetailsFlyout size="s" onClose={handleClearSelection}>
+          <EuiFlyoutHeader hasBorder>
+            <EuiTitle size="s">
+              <h2>{i18n.EVENT_DETAILS}</h2>
+            </EuiTitle>
+          </EuiFlyoutHeader>
+          <EuiFlyoutBody>
+            <ExpandableEvent
+              browserFields={browserFields}
+              docValueFields={docValueFields}
+              event={expanded}
+              timelineId={id}
+              toggleColumn={toggleColumn}
+            />
+          </EuiFlyoutBody>
+        </EventDetailsFlyout>
+      )}
+    </>
   );
 };
 

@@ -122,7 +122,6 @@ const StatefulEventComponent: React.FC<Props> = ({
       isExpanded={isExpanded}
       showLeftBorder={!isEventViewer}
       ref={divElement}
-      onClick={onEventToggled}
     >
       <EventColumnView
         id={event._id}
@@ -133,11 +132,13 @@ const StatefulEventComponent: React.FC<Props> = ({
         data={event.data}
         ecsData={event.ecs}
         eventIdToNoteIds={eventIdToNoteIds}
+        expanded={isExpanded}
         getNotesByIds={getNotesByIds}
         isEventPinned={isEventPinned}
         isEventViewer={isEventViewer}
         loadingEventIds={loadingEventIds}
         onColumnResized={onColumnResized}
+        onEventToggled={onEventToggled}
         onPinEvent={onPinEvent}
         onRowSelected={onRowSelected}
         onUnPinEvent={onUnPinEvent}

@@ -21,6 +21,13 @@ export const EVENTS = i18n.translate('xpack.securitySolution.eventsViewer.events
   defaultMessage: 'Events',
 });
 
+export const EVENT_DETAILS = i18n.translate(
+  'xpack.securitySolution.eventDetailsFlyout.headerTitle',
+  {
+    defaultMessage: 'Event details',
+  }
+);
+
 export const LOADING_EVENTS = i18n.translate(
   'xpack.securitySolution.eventsViewer.footer.loadingEventsDataLabel',
   {

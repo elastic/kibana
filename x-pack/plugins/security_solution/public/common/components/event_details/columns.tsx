@@ -201,7 +201,6 @@ export const getColumns = ({
       </EuiFlexGroup>
     ),
   },
-
   {
     field: 'valuesConcatenated',
     name: i18n.BLANK,

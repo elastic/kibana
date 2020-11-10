@@ -26,8 +26,10 @@ describe('Actions', () => {
         <Actions
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           checked={false}
+          expanded={false}
           eventId="abc"
           loadingEventIds={[]}
+          onEventToggled={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={true}
         />
@@ -44,7 +46,9 @@ describe('Actions', () => {
           actionsColumnWidth={DEFAULT_ACTIONS_COLUMN_WIDTH}
           checked={false}
           eventId="abc"
+          expanded={false}
           loadingEventIds={[]}
+          onEventToggled={jest.fn()}
           onRowSelected={jest.fn()}
           showCheckboxes={false}
         />

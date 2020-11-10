@@ -127,4 +127,4 @@ export const TIMESTAMP_HEADER_FIELD = '[data-test-subj="header-text-@timestamp"]
 
 export const TIMESTAMP_TOGGLE_FIELD = '[data-test-subj="toggle-field-@timestamp"]';
 
-export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="event-actions-container"]';
+export const TOGGLE_TIMELINE_EXPAND_EVENT = '[data-test-subj="expand-event"]';

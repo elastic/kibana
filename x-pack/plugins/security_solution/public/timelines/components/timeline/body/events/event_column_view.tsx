@@ -42,11 +42,13 @@ interface Props {
   data: TimelineNonEcsData[];
   ecsData: Ecs;
   eventIdToNoteIds: Readonly<Record<string, string[]>>;
+  expanded: boolean;
   getNotesByIds: (noteIds: string[]) => Note[];
   isEventPinned: boolean;
   isEventViewer?: boolean;
   loadingEventIds: Readonly<string[]>;
   onColumnResized: OnColumnResized;
+  onEventToggled: () => void;
   onPinEvent: OnPinEvent;
   onRowSelected: OnRowSelected;
   onUnPinEvent: OnUnPinEvent;
@@ -74,11 +76,13 @@ export const EventColumnView = React.memo<Props>(
     data,
     ecsData,
     eventIdToNoteIds,
+    expanded,
     getNotesByIds,
     isEventPinned = false,
     isEventViewer = false,
     loadingEventIds,
     onColumnResized,
+    onEventToggled,
     onPinEvent,
     onRowSelected,
     onUnPinEvent,
@@ -185,9 +189,11 @@ export const EventColumnView = React.memo<Props>(
           additionalActions={additionalActions}
           checked={Object.keys(selectedEventIds).includes(id)}
           onRowSelected={onRowSelected}
+          expanded={expanded}
           data-test-subj="actions"
           eventId={id}
           loadingEventIds={loadingEventIds}
+          onEventToggled={onEventToggled}
           showCheckboxes={showCheckboxes}
         />
 
