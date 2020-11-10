@@ -5,14 +5,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AlertType, ActionVariable } from '../../types';
+import { ActionVariable, ActionVariables } from '../../types';
 
 // return a "flattened" list of action variables for an alertType
-export function actionVariablesFromAlertType(alertType: AlertType): ActionVariable[] {
+export function actionVariablesFromAlertType(actionVariables: ActionVariables): ActionVariable[] {
   const alwaysProvidedVars = getAlwaysProvidedActionVariables();
-  const contextVars = prefixKeys(alertType.actionVariables.context, 'context.');
-  const paramsVars = prefixKeys(alertType.actionVariables.params, 'params.');
-  const stateVars = prefixKeys(alertType.actionVariables.state, 'state.');
+  const contextVars = actionVariables.context
+    ? prefixKeys(actionVariables.context, 'context.')
+    : [];
+  const paramsVars = prefixKeys(actionVariables.params, 'params.');
+  const stateVars = prefixKeys(actionVariables.state, 'state.');
 
   return alwaysProvidedVars.concat(contextVars, paramsVars, stateVars);
 }
