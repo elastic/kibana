@@ -6,10 +6,10 @@
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { dataPluginMock } from '../../../../../../src/plugins/data/public/mocks';
+import { dataPluginMock } from '../../../../../../../src/plugins/data/public/mocks';
 import { createConnectedBackgroundSessionIndicator } from './connected_background_session_indicator';
 import { BehaviorSubject } from 'rxjs';
-import { ISessionService } from '../../../../../../src/plugins/data/public';
+import { ISessionService } from '../../../../../../../src/plugins/data/public';
 
 const sessionService = dataPluginMock.createStartContract().search.session as jest.Mocked<
   ISessionService

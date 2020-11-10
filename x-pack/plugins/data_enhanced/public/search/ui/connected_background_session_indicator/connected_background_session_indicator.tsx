@@ -8,7 +8,7 @@ import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { BackgroundSessionIndicator } from '../background_session_indicator';
-import { ISessionService } from '../../../../../../src/plugins/data/public/';
+import { ISessionService } from '../../../../../../../src/plugins/data/public/';
 import { BackgroundSessionViewState } from './background_session_view_state';
 
 export interface BackgroundSessionIndicatorDeps {
