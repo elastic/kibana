@@ -18,7 +18,7 @@ import {
 import { AppLogic } from '../../app_logic';
 
 import { Meta } from '../../../../../common/types';
-import { IEngine } from '../../types';
+import { Engine } from '../../types';
 import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
 
 export const defaultApiToken: IApiToken = {
@@ -60,7 +60,7 @@ interface CredentialsLogicValues {
   activeApiTokenRawName: string;
   apiTokens: IApiToken[];
   dataLoading: boolean;
-  engines: IEngine[];
+  engines: Engine[];
   formErrors: string[];
   isCredentialsDataComplete: boolean;
   isCredentialsDetailsComplete: boolean;
