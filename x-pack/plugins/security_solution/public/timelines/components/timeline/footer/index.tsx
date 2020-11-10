@@ -25,10 +25,10 @@ import styled from 'styled-components';
 import { LoadingPanel } from '../../loading';
 import { OnChangeItemsPerPage, OnChangePage } from '../events';
 
-import { LastUpdatedAt } from './last_updated';
 import * as i18n from './translations';
 import { useEventDetailsWidthContext } from '../../../../common/components/events_viewer/event_details_width_context';
 import { useManageTimeline } from '../../manage_timeline';
+import { LastUpdatedAt } from '../../../../common/components/last_updated';
 
 export const isCompactFooter = (width: number): boolean => width < 600;
 

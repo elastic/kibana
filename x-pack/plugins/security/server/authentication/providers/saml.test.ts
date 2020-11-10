@@ -28,7 +28,7 @@ describe('SAMLAuthenticationProvider', () => {
     mockOptions = mockAuthenticationProviderOptions({ name: 'saml' });
 
     mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-    mockUser = mockAuthenticatedUser({ authentication_provider: 'saml' });
+    mockUser = mockAuthenticatedUser({ authentication_provider: { type: 'saml', name: 'saml' } });
     mockScopedClusterClient.callAsCurrentUser.mockImplementation(async (method) => {
       if (method === 'shield.authenticate') {
         return mockUser;
@@ -490,7 +490,9 @@ describe('SAMLAuthenticationProvider', () => {
       for (const [description, response] of [
         [
           'current session is valid',
-          Promise.resolve(mockAuthenticatedUser({ authentication_provider: 'saml' })),
+          Promise.resolve(
+            mockAuthenticatedUser({ authentication_provider: { type: 'saml', name: 'saml' } })
+          ),
         ],
         [
           'current session is is expired',

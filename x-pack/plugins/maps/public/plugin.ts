@@ -28,8 +28,12 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 // @ts-ignore
 import { getMapsVisTypeAlias } from './maps_vis_type_alias';
 import { HomePublicPluginSetup } from '../../../../src/plugins/home/public';
-import { VisualizationsSetup } from '../../../../src/plugins/visualizations/public';
+import {
+  VisualizationsSetup,
+  VisualizationsStart,
+} from '../../../../src/plugins/visualizations/public';
 import { APP_ICON_SOLUTION, APP_ID, MAP_SAVED_OBJECT_TYPE } from '../common/constants';
+import { PLUGIN_ID_OSS } from '../../../../src/plugins/maps_oss/common/constants';
 import { VISUALIZE_GEO_FIELD_TRIGGER } from '../../../../src/plugins/ui_actions/public';
 import {
   createMapsUrlGenerator,
@@ -72,6 +76,7 @@ export interface MapsPluginStartDependencies {
   navigation: NavigationPublicPluginStart;
   uiActions: UiActionsStart;
   share: SharePluginStart;
+  visualizations: VisualizationsStart;
   savedObjects: SavedObjectsStart;
 }
 
@@ -145,6 +150,8 @@ export class MapsPlugin
     setLicensingPluginStart(plugins.licensing);
     plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     setStartServices(core, plugins);
+    // unregisters the OSS alias
+    plugins.visualizations.unRegisterAlias(PLUGIN_ID_OSS);
 
     return {
       createSecurityLayerDescriptors,
