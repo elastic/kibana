@@ -38,9 +38,9 @@ export interface IRole {
   canManageEngineCredentials: boolean;
   canManageEngineCurations: boolean;
   canManageEngineRelevanceTuning: boolean;
-  canManageEngineReferenceUi: boolean;
   canManageEngineResultSettings: boolean;
   canManageEngineSchema: boolean;
+  canManageEngineSearchUi: boolean;
   canManageMetaEngineSourceEngines: boolean;
 }
 
@@ -94,9 +94,9 @@ export const getRoleAbilities = (role: IAccount['role']): IRole => {
     canManageEngineCredentials: myRole.can('manage', 'engine_credentials'),
     canManageEngineCurations: myRole.can('manage', 'engine_curations'),
     canManageEngineRelevanceTuning: myRole.can('manage', 'engine_relevance_tuning'),
-    canManageEngineReferenceUi: myRole.can('manage', 'engine_reference_ui'),
     canManageEngineResultSettings: myRole.can('manage', 'engine_result_settings'),
     canManageEngineSchema: myRole.can('manage', 'engine_schema'),
+    canManageEngineSearchUi: myRole.can('manage', 'engine_reference_ui'),
     canManageMetaEngineSourceEngines: myRole.can('manage', 'meta_engine_source_engines'),
   };
 

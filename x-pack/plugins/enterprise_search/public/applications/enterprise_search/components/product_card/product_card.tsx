@@ -5,14 +5,13 @@
  */
 
 import React from 'react';
-import { useValues } from 'kea';
+import { useValues, useActions } from 'kea';
 import { snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiCard, EuiTextColor } from '@elastic/eui';
 
 import { EuiButton } from '../../../shared/react_router_helpers';
-import { sendTelemetry } from '../../../shared/telemetry';
-import { HttpLogic } from '../../../shared/http';
+import { TelemetryLogic } from '../../../shared/telemetry';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import './product_card.scss';
@@ -29,7 +28,7 @@ interface IProductCard {
 }
 
 export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
-  const { http } = useValues(HttpLogic);
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { config } = useValues(KibanaLogic);
 
   const LAUNCH_BUTTON_TEXT = i18n.translate(
@@ -69,9 +68,7 @@ export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
           to={product.URL}
           shouldNotCreateHref={true}
           onClick={() =>
-            sendTelemetry({
-              http,
-              product: 'enterprise_search',
+            sendEnterpriseSearchTelemetry({
               action: 'clicked',
               metric: snakeCase(product.ID),
             })
