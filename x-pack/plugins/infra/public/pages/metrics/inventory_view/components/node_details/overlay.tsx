@@ -54,7 +54,7 @@ export const NodeContextPopover = ({
 
   return (
     <EuiPanel hasShadow={true} paddingSize={'none'} style={panelStyle}>
-      <OverflayHeader>
+      <OverlayHeader>
         <EuiFlexGroup alignItems={'center'}>
           <EuiFlexItem grow={true}>
             <EuiText>
@@ -67,13 +67,13 @@ export const NodeContextPopover = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </OverflayHeader>
+      </OverlayHeader>
       <EuiTabbedContent tabs={tabs} />
     </EuiPanel>
   );
 };
 
-const OverflayHeader = euiStyled.div`
+const OverlayHeader = euiStyled.div`
   border-color: ${(props) => props.theme.eui.euiBorderColor};
   border-bottom-width: ${(props) => props.theme.eui.euiBorderWidthThick};
   padding: ${(props) => props.theme.eui.euiSizeS};
