@@ -16,7 +16,7 @@ export default ({ getPageObjects, getService }) => {
   const retry = getService('retry');
 
   const address = (name) => (emails) => emails.split(',').find((x) => x.includes(name));
-  const toWayne = address('wayne')(process.env.REPORTING_TEST_EMAILS);
+  const toWayne = address('wayne');
 
   describe('encryption key rotation with', function () {
     before(async () => {
@@ -67,7 +67,7 @@ export default ({ getPageObjects, getService }) => {
   async function testConnector(name) {
     await pageObjects.triggersActionsUI.searchConnectors(name);
     await testSubjects.click('runConnector');
-    await testSubjects.setValue('comboBoxInput', toWayne);
+    await testSubjects.setValue('comboBoxInput', toWayne(process.env.REPORTING_TEST_EMAILS));
     await testSubjects.setValue('subjectInput', name);
     await testSubjects.setValue('messageTextArea', name);
     await find.clickByCssSelector('[data-test-subj="executeActionButton"]:not(disabled)');
