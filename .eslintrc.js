@@ -644,6 +644,10 @@ module.exports = {
                 name: 'lodash/fp/assocPath',
                 message: 'Please use @elastic/safer-lodash-set instead',
               },
+              {
+                name: 'react-use',
+                message: 'Please use react-use/lib/{method} instead.',
+              },
             ],
           },
         ],
