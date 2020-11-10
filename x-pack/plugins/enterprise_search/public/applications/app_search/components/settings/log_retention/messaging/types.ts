@@ -4,13 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ILogRetentionSettings } from '../types';
+import { LogRetentionSettings } from '../types';
 
 export type TMessageStringOrFunction =
   | string
-  | ((ilmEnabled: boolean, logRetentionSettings: ILogRetentionSettings) => string);
+  | ((ilmEnabled: boolean, logRetentionSettings: LogRetentionSettings) => string);
 
-export interface ILogRetentionMessages {
+export interface LogRetentionMessages {
   noLogging: TMessageStringOrFunction;
   ilmDisabled: TMessageStringOrFunction;
   customPolicy: TMessageStringOrFunction;
