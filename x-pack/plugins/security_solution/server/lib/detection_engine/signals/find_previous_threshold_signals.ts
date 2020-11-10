@@ -42,7 +42,7 @@ export const findPreviousThresholdSignals = async ({
   const aggregations = {
     threshold: {
       terms: {
-        field: bucketByField,
+        field: bucketByField ?? 'signal.rule.rule_id',
       },
       aggs: {
         lastSignalTimestamp: {

@@ -324,7 +324,7 @@ export const signalRulesAlertType = ({
                     must: [
                       {
                         term: {
-                          [threshold.field]: bucket.key,
+                          [threshold.field ?? 'signal.rule.rule_id']: bucket.key,
                         },
                       },
                       {
