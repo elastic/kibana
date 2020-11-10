@@ -41,6 +41,7 @@ import {
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
+import { IndexPattern } from '../../../data/public';
 
 export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDeps) => async (
   vis: Vis,
@@ -69,12 +70,12 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
       return new DisabledLabEmbeddable(vis.title, input);
     }
 
-    let indexPatterns = [];
+    let indexPatterns: IndexPattern[] = [];
 
     if (vis.type.getUsedIndexPattern) {
       indexPatterns = await vis.type.getUsedIndexPattern(vis.params);
     } else if (vis.data.indexPattern) {
-      indexPatterns = [vis.data.indexPatter];
+      indexPatterns = [vis.data.indexPattern];
     }
 
     const editable = getCapabilities().visualize.save as boolean;

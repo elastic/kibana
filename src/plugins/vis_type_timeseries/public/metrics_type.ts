@@ -26,7 +26,7 @@ import { EditorController } from './application';
 import { PANEL_TYPES } from '../common/panel_types';
 import { VisEditor } from './application/components/vis_editor_lazy';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
-import { getSavedObjectsClient, getDataStart } from './services';
+import { getDataStart } from './services';
 import { INDEXES_SEPARATOR } from '../common/constants';
 
 export const metricsVisDefinition = {
@@ -88,16 +88,18 @@ export const metricsVisDefinition = {
   inspectorAdapters: {},
   getUsedIndexPattern: async (params: VisParams) => {
     const { indexPatterns } = getDataStart();
+    const indexes: string = params.index_pattern;
 
-    if (params.index_pattern) {
+    if (indexes) {
       const cachedIndexes = await indexPatterns.getIdsWithTitle();
-      const ids = params.index_pattern
+      const ids = indexes
         .split(INDEXES_SEPARATOR)
         .map((title) => cachedIndexes.find((i) => i.title === title)?.id)
         .filter((id) => id);
 
-      return Promise.all(ids.map((is) => indexPatterns.get(is)));
+      return Promise.all(ids.map((id) => indexPatterns.get(id!)));
     }
+
     return [];
   },
   responseHandler: 'none',

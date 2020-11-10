@@ -44,7 +44,7 @@ interface CommonBaseVisTypeOptions<TVisParams>
       | 'editorConfig'
       | 'hidden'
       | 'stage'
-      | 'useCustomSearchSource'
+      | 'getUsedIndexPattern'
       | 'useCustomNoDataScreen'
       | 'visConfig'
       | 'group'

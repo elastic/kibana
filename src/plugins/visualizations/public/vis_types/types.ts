@@ -20,7 +20,7 @@
 import { IconType } from '@elastic/eui';
 import React from 'react';
 import { Adapters } from 'src/plugins/inspector';
-import { IIndexPattern } from 'src/plugins/data/public';
+import { IndexPattern } from 'src/plugins/data/public';
 import { VisEditorConstructor } from 'src/plugins/visualize/public';
 import { ISchemas } from 'src/plugins/vis_default_editor/public';
 import { TriggerContextMapping } from '../../../ui_actions/public';
@@ -70,7 +70,7 @@ export interface VisType<TVisParams = unknown> {
    * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.
    * Using this method we can rewrite the standard mechanism for getting used indexes
    */
-  readonly getUsedIndexPattern?: (visParams: VisParams) => IIndexPattern[];
+  readonly getUsedIndexPattern?: (visParams: VisParams) => IndexPattern[] | Promise<IndexPattern[]>;
 
   readonly isAccessible?: boolean;
   readonly requestHandler?: string | unknown;
