@@ -2514,7 +2514,6 @@
     "indexPatternManagement.editIndexPattern.list.defaultIndexPatternListName": "默认值",
     "indexPatternManagement.editIndexPattern.mappingConflictHeader": "映射冲突",
     "indexPatternManagement.editIndexPattern.mappingConflictLabel": "{conflictFieldsLength, plural, one {一个字段} other {# 个字段}}已在匹配此模式的各个索引中定义为多个类型（字符串、整数等）。您也许仍能够在 Kibana 的各个部分中使用这些冲突类型，但它们将无法用于需要 Kibana 知道其类型的函数。要解决此问题，需要重新索引您的数据。",
-    "indexPatternManagement.editIndexPattern.refreshHeader": "刷新字段列表？",
     "indexPatternManagement.editIndexPattern.removeAria": "移除索引模式。",
     "indexPatternManagement.editIndexPattern.removeTooltip": "移除索引模式。",
     "indexPatternManagement.editIndexPattern.scripted.addFieldButton": "添加脚本字段",
