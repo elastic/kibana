@@ -6,7 +6,7 @@
 
 import { KibanaReactContextValue } from '../../../../../../src/plugins/kibana_react/public';
 import { StartServices } from '../../types';
-import { DataAccessLayer } from '../types';
+import { DataAccessLayer, Timerange } from '../types';
 import {
   ResolverRelatedEvents,
   ResolverTree,
@@ -26,13 +26,30 @@ export function dataAccessLayerFactory(
      * Used to get non-process related events for a node.
      * @deprecated use the new API (eventsWithEntityIDAndCategory & event) instead
      */
-    async relatedEvents(entityID: string): Promise<ResolverRelatedEvents> {
+    async relatedEvents({
+      entityID,
+      timerange,
+      indexPatterns,
+    }: {
+      entityID: string;
+      timerange: Timerange;
+      indexPatterns: string[];
+    }): Promise<ResolverRelatedEvents> {
       const response: ResolverPaginatedEvents = await context.services.http.post(
         '/api/endpoint/resolver/events',
         {
           query: {},
           body: JSON.stringify({
-            filter: `process.entity_id:"${entityID}" and not event.category:"process"`,
+            indexPatterns,
+            timerange,
+            filter: {
+              bool: {
+                filter: [
+                  { term: { 'process.entity_id': entityID } },
+                  { bool: { must_not: { term: { 'event.category': 'process' } } } },
+                ],
+              },
+            },
           }),
         }
       );
@@ -44,15 +61,32 @@ export function dataAccessLayerFactory(
      * Return events that have `process.entity_id` that includes `entityID` and that have
      * a `event.category` that includes `category`.
      */
-    eventsWithEntityIDAndCategory(
-      entityID: string,
-      category: string,
-      after?: string
-    ): Promise<ResolverPaginatedEvents> {
+    eventsWithEntityIDAndCategory({
+      entityID,
+      category,
+      after,
+      timerange,
+      indexPatterns,
+    }: {
+      entityID: string;
+      category: string;
+      after?: string;
+      timerange: Timerange;
+      indexPatterns: string[];
+    }): Promise<ResolverPaginatedEvents> {
       return context.services.http.post('/api/endpoint/resolver/events', {
         query: { afterEvent: after, limit: 25 },
         body: JSON.stringify({
-          filter: `process.entity_id:"${entityID}" and event.category:"${category}"`,
+          timerange,
+          indexPatterns,
+          filter: {
+            bool: {
+              filter: [
+                { term: { 'process.entity_id': entityID } },
+                { term: { 'event.category': category } },
+              ],
+            },
+          },
         }),
       });
     },
@@ -60,12 +94,28 @@ export function dataAccessLayerFactory(
     /**
      * Return up to one event that has an `event.id` that includes `eventID`.
      */
-    async event(eventID: string): Promise<SafeResolverEvent | null> {
+    async event({
+      eventID,
+      timerange,
+      indexPatterns,
+    }: {
+      eventID: string;
+      timerange: Timerange;
+      indexPatterns: string[];
+    }): Promise<SafeResolverEvent | null> {
       const response: ResolverPaginatedEvents = await context.services.http.post(
         '/api/endpoint/resolver/events',
         {
           query: { limit: 1 },
-          body: JSON.stringify({ filter: `event.id:"${eventID}"` }),
+          body: JSON.stringify({
+            indexPatterns,
+            timerange,
+            filter: {
+              bool: {
+                filter: [{ term: { 'event.id': eventID } }],
+              },
+            },
+          }),
         }
       );
       const [oneEvent] = response.events;

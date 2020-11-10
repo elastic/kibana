@@ -580,6 +580,14 @@ export interface IsometricTaxiLayout {
 }
 
 /**
+ * Defines the type for bounding a search by a time box.
+ */
+export interface Timerange {
+  from: Date;
+  to: Date;
+}
+
+/**
  * An object with methods that can be used to access data from the Kibana server.
  * This is injected into Resolver.
  * This allows tests to provide a mock data access layer.
@@ -589,22 +597,46 @@ export interface DataAccessLayer {
   /**
    * Fetch related events for an entity ID
    */
-  relatedEvents: (entityID: string) => Promise<ResolverRelatedEvents>;
+  relatedEvents: ({
+    entityID,
+    timerange,
+    indexPatterns,
+  }: {
+    entityID: string;
+    timerange: Timerange;
+    indexPatterns: string[];
+  }) => Promise<ResolverRelatedEvents>;
 
   /**
    * Return events that have `process.entity_id` that includes `entityID` and that have
    * a `event.category` that includes `category`.
    */
-  eventsWithEntityIDAndCategory: (
-    entityID: string,
-    category: string,
-    after?: string
-  ) => Promise<ResolverPaginatedEvents>;
+  eventsWithEntityIDAndCategory: ({
+    entityID,
+    category,
+    after,
+    timerange,
+    indexPatterns,
+  }: {
+    entityID: string;
+    category: string;
+    after?: string;
+    timerange: Timerange;
+    indexPatterns: string[];
+  }) => Promise<ResolverPaginatedEvents>;
 
   /**
    * Return up to one event that has an `event.id` that includes `eventID`.
    */
-  event: (eventID: string) => Promise<SafeResolverEvent | null>;
+  event: ({
+    eventID,
+    timerange,
+    indexPatterns,
+  }: {
+    eventID: string;
+    timerange: Timerange;
+    indexPatterns: string[];
+  }) => Promise<SafeResolverEvent | null>;
 
   /**
    * Fetch a ResolverTree for a entityID
