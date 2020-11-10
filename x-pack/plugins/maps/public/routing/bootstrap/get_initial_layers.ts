@@ -23,7 +23,7 @@ import { TileLayer } from '../../classes/layers/tile_layer/tile_layer';
 import { EMSTMSSource } from '../../classes/sources/ems_tms_source';
 // @ts-expect-error
 import { VectorTileLayer } from '../../classes/layers/vector_tile_layer/vector_tile_layer';
-import { getIsEmsEnabled, getToasts } from '../../kibana_services';
+import { getEMSSettings, getToasts } from '../../kibana_services';
 import { INITIAL_LAYERS_KEY } from '../../../common/constants';
 import { getKibanaTileMap } from '../../meta';
 
@@ -39,7 +39,7 @@ export function getInitialLayers(layerListJSON?: string, initialLayers: LayerDes
     return [layerDescriptor, ...initialLayers];
   }
 
-  const isEmsEnabled = getIsEmsEnabled();
+  const isEmsEnabled = getEMSSettings()!.isEMSEnabled();
   if (isEmsEnabled) {
     const layerDescriptor = VectorTileLayer.createDescriptor({
       sourceDescriptor: EMSTMSSource.createDescriptor({ isAutoSelect: true }),
