@@ -222,8 +222,14 @@ export class JobsListView extends Component {
     this.setState({ selectedJobs });
   }
 
-  setFilters = (filterClauses) => {
+  setFilters = (query) => {
+    const filterClauses = (query && query.ast && query.ast.clauses) || [];
     const filteredJobsSummaryList = filterJobs(this.state.jobsSummaryList, filterClauses);
+
+    this.props.onJobsViewStateUpdate({
+      queryText: query?.text,
+    });
+
     this.setState({ filteredJobsSummaryList, filterClauses }, () => {
       this.refreshSelectedJobs();
     });
@@ -436,7 +442,10 @@ export class JobsListView extends Component {
                   showDeleteJobModal={this.showDeleteJobModal}
                   refreshJobs={() => this.refreshJobSummaryList(true)}
                 />
-                <JobFilterBar setFilters={this.setFilters} />
+                <JobFilterBar
+                  setFilters={this.setFilters}
+                  queryText={this.props.jobsViewState.queryText}
+                />
               </div>
               <JobsList
                 jobsSummaryList={this.state.filteredJobsSummaryList}

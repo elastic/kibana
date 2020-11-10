@@ -5,9 +5,7 @@
  */
 
 import React, { FC, useCallback, useMemo } from 'react';
-
 import { NavigationMenu } from '../../components/navigation_menu';
-
 // @ts-ignore
 import { JobsListView } from './components/jobs_list_view/index';
 import { useUrlState } from '../../util/url_state';
@@ -19,14 +17,12 @@ interface JobsPageProps {
   lastRefresh?: number;
 }
 
-const ANOMALY_DETECTION_JOBS_LIST_STATE_KEY = 'anomalyDetectionJobsList';
-
-interface AnomalyDetectionJobsListState {
+export interface AnomalyDetectionJobsListState {
   pageSize: number;
   pageIndex: number;
   sortField: string;
   sortDirection: string;
-  searchBar?: string;
+  queryText?: string;
 }
 
 export const getDefaultAnomalyDetectionJobsListState = (): AnomalyDetectionJobsListState => ({
@@ -42,13 +38,13 @@ export const JobsPage: FC<JobsPageProps> = (props) => {
   const jobListState: AnomalyDetectionJobsListState = useMemo(() => {
     return {
       ...getDefaultAnomalyDetectionJobsListState(),
-      ...(appState?.[ANOMALY_DETECTION_JOBS_LIST_STATE_KEY] ?? {}),
+      ...(appState ?? {}),
     };
   }, [appState]);
 
   const onJobsViewStateUpdate = useCallback(
     (update: Partial<AnomalyDetectionJobsListState>) => {
-      setAppState(ANOMALY_DETECTION_JOBS_LIST_STATE_KEY, {
+      setAppState({
         ...jobListState,
         ...update,
       });
