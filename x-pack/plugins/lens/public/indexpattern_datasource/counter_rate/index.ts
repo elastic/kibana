@@ -119,10 +119,11 @@ export const counterRate: ExpressionFunctionCounterRate = {
         const previousValue = previousValues[bucketIdentifier];
         const currentValue = newRow[inputColumnId];
         if (currentValue != null && previousValue != null) {
-          if (Number(currentValue) >= previousValue) {
-            newRow[outputColumnId] = Number(currentValue) - previousValue;
+          const currentValueAsNumber = Number(currentValue);
+          if (currentValueAsNumber >= previousValue) {
+            newRow[outputColumnId] = currentValueAsNumber - previousValue;
           } else {
-            newRow[outputColumnId] = Number(currentValue);
+            newRow[outputColumnId] = currentValueAsNumber;
           }
         } else {
           newRow[outputColumnId] = undefined;
