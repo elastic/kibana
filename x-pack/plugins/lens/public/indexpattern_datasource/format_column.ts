@@ -115,13 +115,24 @@ export const formatColumn: ExpressionFunctionDefinition<
               },
             });
           }
-          if (parentFormatParams) {
+          if (parentFormatParams && isNestedFormat(col.meta.params)) {
             const innerParams = (col.meta.params?.params as Record<string, unknown>) ?? {};
             return withParams(col, {
               ...col.meta.params,
-              id: parentFormatId || col.meta.params?.id,
               params: {
                 ...innerParams,
+                ...parentFormatParams,
+              },
+            });
+          }
+          if (parentFormatParams && !isNestedFormat(col.meta.params)) {
+            const innerParams = (col.meta.params?.params as Record<string, unknown>) ?? {};
+            return withParams(col, {
+              ...col.meta.params,
+              id: parentFormatId,
+              params: {
+                id: col.meta.params?.id,
+                params: innerParams,
                 ...parentFormatParams,
               },
             });
@@ -132,6 +143,11 @@ export const formatColumn: ExpressionFunctionDefinition<
     };
   },
 };
+
+function isNestedFormat(params: DatatableColumn['meta']['params']) {
+  // if there is a nested params object with an id, it's a nested format
+  return !!params?.params?.id;
+}
 
 function withParams(col: DatatableColumn, params: Record<string, unknown>) {
   return { ...col, meta: { ...col.meta, params } };
