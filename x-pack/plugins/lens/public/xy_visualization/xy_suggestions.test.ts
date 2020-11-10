@@ -137,6 +137,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: [],
       state: {
         legend: { isVisible: true, position: 'bottom' },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -249,6 +250,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: ['first'],
       state: {
         legend: { isVisible: true, position: 'bottom' },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -289,6 +291,7 @@ describe('xy_suggestions', () => {
       keptLayerIds: ['first', 'second'],
       state: {
         legend: { isVisible: true, position: 'bottom' },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -523,6 +526,7 @@ describe('xy_suggestions', () => {
       },
       state: {
         legend: { isVisible: true, position: 'bottom' },
+        valueLabels: 'hide',
         preferredSeriesType: 'bar',
         layers: [
           {
@@ -575,6 +579,7 @@ describe('xy_suggestions', () => {
   test('keeps existing seriesType for initial tables', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       fittingFunction: 'None',
       preferredSeriesType: 'line',
       layers: [
@@ -608,6 +613,7 @@ describe('xy_suggestions', () => {
   test('makes a visible seriesType suggestion for unchanged table without split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       fittingFunction: 'None',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -648,6 +654,7 @@ describe('xy_suggestions', () => {
   test('suggests seriesType and stacking when there is a split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -693,6 +700,7 @@ describe('xy_suggestions', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       fittingFunction: 'None',
       preferredSeriesType: 'bar',
       layers: [
@@ -725,6 +733,7 @@ describe('xy_suggestions', () => {
   test('suggests stacking for unchanged table that has a split', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
       layers: [
@@ -760,6 +769,7 @@ describe('xy_suggestions', () => {
   test('keeps column to dimension mappings on extended tables', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -802,6 +812,7 @@ describe('xy_suggestions', () => {
   test('changes column mappings when suggestion is reorder', () => {
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
@@ -845,6 +856,7 @@ describe('xy_suggestions', () => {
     (generateId as jest.Mock).mockReturnValueOnce('dummyCol');
     const currentState: XYState = {
       legend: { isVisible: true, position: 'bottom' },
+      valueLabels: 'hide',
       preferredSeriesType: 'bar',
       fittingFunction: 'None',
       axisTitlesVisibilitySettings: { x: true, yLeft: true, yRight: true },
