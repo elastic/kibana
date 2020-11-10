@@ -12,14 +12,14 @@ import { IContentSource } from '../../../types';
 
 import { SourceOptionItem } from './source_option_item';
 
-interface ISourcesListProps {
+interface SourcesListProps {
   contentSources: IContentSource[];
   filteredSources: string[];
   addFilteredSource(sourceId: string): void;
   removeFilteredSource(sourceId: string): void;
 }
 
-export const SourcesList: React.FC<ISourcesListProps> = ({
+export const SourcesList: React.FC<SourcesListProps> = ({
   contentSources,
   filteredSources,
   addFilteredSource,

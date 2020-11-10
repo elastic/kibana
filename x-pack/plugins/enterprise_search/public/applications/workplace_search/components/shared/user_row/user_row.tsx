@@ -10,12 +10,12 @@ import { EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 
 import { IUser } from '../../../types';
 
-interface IUserRowProps {
+interface UserRowProps {
   user: IUser;
   showEmail?: boolean;
 }
 
-export const UserRow: React.FC<IUserRowProps> = ({ user: { name, email }, showEmail }) => (
+export const UserRow: React.FC<UserRowProps> = ({ user: { name, email }, showEmail }) => (
   <EuiTableRow>
     <EuiTableRowCell>{name}</EuiTableRowCell>
     <EuiTableRowCell>{showEmail && <span>{email}</span>}</EuiTableRowCell>

@@ -14,7 +14,7 @@ import { IContentSource } from '../../../types';
 
 import { SourceOptionItem } from './source_option_item';
 
-interface IGroupRowSourcesDropdownProps {
+interface GroupRowSourcesDropdownProps {
   isPopoverOpen: boolean;
   numOptions: number;
   groupSources: IContentSource[];
@@ -22,7 +22,7 @@ interface IGroupRowSourcesDropdownProps {
   closePopover(): void;
 }
 
-export const GroupRowSourcesDropdown: React.FC<IGroupRowSourcesDropdownProps> = ({
+export const GroupRowSourcesDropdown: React.FC<GroupRowSourcesDropdownProps> = ({
   isPopoverOpen,
   numOptions,
   groupSources,

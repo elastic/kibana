@@ -12,11 +12,11 @@ import { TableHeader } from '../../../../shared/table_header/table_header';
 import { SourceRow, ISourceRow } from '../source_row';
 import { IContentSourceDetails } from '../../../types';
 
-interface ISourcesTableProps extends ISourceRow {
+interface SourcesTableProps extends ISourceRow {
   sources: IContentSourceDetails[];
 }
 
-export const SourcesTable: React.FC<ISourcesTableProps> = ({
+export const SourcesTable: React.FC<SourcesTableProps> = ({
   sources,
   showDetails,
   isOrganization,

@@ -100,11 +100,11 @@ export const AppSearchConfigured: React.FC<IInitialAppData> = (props) => {
   );
 };
 
-interface IAppSearchNavProps {
+interface AppSearchNavProps {
   subNav?: React.ReactNode;
 }
 
-export const AppSearchNav: React.FC<IAppSearchNavProps> = ({ subNav }) => {
+export const AppSearchNav: React.FC<AppSearchNavProps> = ({ subNav }) => {
   const {
     myRole: { canViewSettings, canViewAccountCredentials, canViewRoleMappings },
   } = useValues(AppLogic);

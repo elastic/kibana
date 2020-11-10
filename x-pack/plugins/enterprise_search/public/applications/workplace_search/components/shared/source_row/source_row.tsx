@@ -40,11 +40,11 @@ export interface ISourceRow {
   onSearchableToggle?(sourceId: string, isSearchable: boolean): void;
 }
 
-interface ISourceRowProps extends ISourceRow {
+interface SourceRowProps extends ISourceRow {
   source: IContentSourceDetails;
 }
 
-export const SourceRow: React.FC<ISourceRowProps> = ({
+export const SourceRow: React.FC<SourceRowProps> = ({
   source: {
     id,
     serviceType,

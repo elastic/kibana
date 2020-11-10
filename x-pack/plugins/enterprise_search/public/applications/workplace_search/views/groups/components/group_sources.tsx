@@ -13,11 +13,11 @@ import { IContentSource } from '../../../types';
 
 import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
 
-interface IGroupSourcesProps {
+interface GroupSourcesProps {
   groupSources: IContentSource[];
 }
 
-export const GroupSources: React.FC<IGroupSourcesProps> = ({ groupSources }) => {
+export const GroupSources: React.FC<GroupSourcesProps> = ({ groupSources }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const closePopover = () => setPopoverOpen(false);
   const togglePopover = () => setPopoverOpen(!popoverOpen);

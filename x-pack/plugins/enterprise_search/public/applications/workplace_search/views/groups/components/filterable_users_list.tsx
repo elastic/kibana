@@ -36,7 +36,7 @@ const NO_USERS_FOUND = i18n.translate(
   }
 );
 
-interface IFilterableUsersListProps {
+interface FilterableUsersListProps {
   users: IUser[];
   selectedOptions?: string[];
   itemsClickable?: boolean;
@@ -46,7 +46,7 @@ interface IFilterableUsersListProps {
   removeFilteredUser(userId: string): void;
 }
 
-export const FilterableUsersList: React.FC<IFilterableUsersListProps> = ({
+export const FilterableUsersList: React.FC<FilterableUsersListProps> = ({
   users,
   selectedOptions = [],
   itemsClickable,
