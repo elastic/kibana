@@ -65,7 +65,6 @@ export const useNetworkKpiUniqueFlows = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkKpiQueries.uniqueFlows,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -157,7 +156,6 @@ export const useNetworkKpiUniqueFlows = ({
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.uniqueFlows,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

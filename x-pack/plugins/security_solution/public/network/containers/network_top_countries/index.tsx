@@ -86,7 +86,6 @@ export const useNetworkTopCountries = ({
           factoryQueryType: NetworkQueries.topCountries,
           filterQuery: createFilter(filterQuery),
           flowTarget,
-          id: queryId,
           ip,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
@@ -204,7 +203,6 @@ export const useNetworkTopCountries = ({
         factoryQueryType: NetworkQueries.topCountries,
         filterQuery: createFilter(filterQuery),
         flowTarget,
-        id: queryId,
         ip,
         pagination: generateTablePaginationOptions(activePage, limit),
         sort,
@@ -219,19 +217,7 @@ export const useNetworkTopCountries = ({
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    indexNames,
-    endDate,
-    filterQuery,
-    ip,
-    limit,
-    startDate,
-    sort,
-    skip,
-    flowTarget,
-    queryId,
-  ]);
+  }, [activePage, indexNames, endDate, filterQuery, ip, limit, startDate, sort, skip, flowTarget]);
 
   useEffect(() => {
     networkTopCountriesSearch(networkTopCountriesRequest);

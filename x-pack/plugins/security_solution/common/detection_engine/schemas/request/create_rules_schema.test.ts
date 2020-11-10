@@ -1702,5 +1702,23 @@ describe('create rules schema', () => {
       expect(getPaths(left(message.errors))).toEqual([]);
       expect(message.schema).toEqual(expected);
     });
+
+    test('You can set a threat query, index, mapping, filters, concurrent_searches, items_per_search with a when creating a rule', () => {
+      const payload: CreateRulesSchema = {
+        ...getCreateThreatMatchRulesSchemaMock(),
+        concurrent_searches: 10,
+        items_per_search: 10,
+      };
+      const decoded = createRulesSchema.decode(payload);
+      const checked = exactCheck(payload, decoded);
+      const message = pipe(checked, foldLeftRight);
+      const expected: CreateRulesSchemaDecoded = {
+        ...getCreateThreatMatchRulesSchemaDecodedMock(),
+        concurrent_searches: 10,
+        items_per_search: 10,
+      };
+      expect(getPaths(left(message.errors))).toEqual([]);
+      expect(message.schema).toEqual(expected);
+    });
   });
 });

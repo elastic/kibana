@@ -85,7 +85,6 @@ export const useUncommonProcesses = ({
           docValueFields: docValueFields ?? [],
           factoryQueryType: HostsQueries.uncommonProcesses,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           pagination: generateTablePaginationOptions(activePage, limit),
           timerange: {
             interval: '12h',
@@ -204,7 +203,6 @@ export const useUncommonProcesses = ({
         docValueFields: docValueFields ?? [],
         factoryQueryType: HostsQueries.uncommonProcesses,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         pagination: generateTablePaginationOptions(activePage, limit),
         timerange: {
           interval: '12h',

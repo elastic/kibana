@@ -17,6 +17,7 @@ const getTestAlertType = (id?: string, name?: string, iconClass?: string) => {
     name: name || 'Test alert type',
     description: 'Test description',
     iconClass: iconClass || 'icon',
+    documentationUrl: null,
     validate: (): ValidationResult => {
       return { errors: {} };
     },

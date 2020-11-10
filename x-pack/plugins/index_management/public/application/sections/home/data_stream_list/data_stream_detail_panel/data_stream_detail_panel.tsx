@@ -28,6 +28,10 @@ import { SectionLoading, SectionError, Error, DataHealth } from '../../../../com
 import { useLoadDataStream } from '../../../../services/api';
 import { DeleteDataStreamConfirmationModal } from '../delete_data_stream_confirmation_modal';
 import { humanizeTimeStamp } from '../humanize_time_stamp';
+import { useUrlGenerator } from '../../../../services/use_url_generator';
+import { ILM_PAGES_POLICY_EDIT, ILM_URL_GENERATOR_ID } from '../../../../constants';
+import { useAppContext } from '../../../../app_context';
+import { getIndexListUri } from '../../../../..';
 
 interface DetailsListProps {
   details: Array<{
@@ -72,18 +76,25 @@ const DetailsList: React.FunctionComponent<DetailsListProps> = ({ details }) => 
 
 interface Props {
   dataStreamName: string;
-  backingIndicesLink: ReturnType<typeof reactRouterNavigate>;
   onClose: (shouldReload?: boolean) => void;
 }
 
 export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   dataStreamName,
-  backingIndicesLink,
   onClose,
 }) => {
   const { error, data: dataStream, isLoading } = useLoadDataStream(dataStreamName);
 
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
+
+  const ilmPolicyLink = useUrlGenerator({
+    urlGeneratorId: ILM_URL_GENERATOR_ID,
+    urlGeneratorState: {
+      page: ILM_PAGES_POLICY_EDIT,
+      policyName: dataStream?.ilmPolicyName,
+    },
+  });
+  const { history } = useAppContext();
 
   let content;
 
@@ -159,7 +170,16 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.indicesToolTip', {
           defaultMessage: `The data stream's current backing indices`,
         }),
-        content: <EuiLink {...backingIndicesLink}>{indices.length}</EuiLink>,
+        content: (
+          <EuiLink
+            {...reactRouterNavigate(
+              history,
+              getIndexListUri(`data_stream="${dataStreamName}"`, true)
+            )}
+          >
+            {indices.length}
+          </EuiLink>
+        ),
       },
       {
         name: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.timestampFieldTitle', {
@@ -196,13 +216,23 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         toolTip: i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyToolTip', {
           defaultMessage: `The index lifecycle policy that manages the data stream's data`,
         }),
-        content: ilmPolicyName ?? (
-          <em>
-            {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage', {
-              defaultMessage: `None`,
-            })}
-          </em>
-        ),
+        content:
+          ilmPolicyName && ilmPolicyLink ? (
+            <EuiLink
+              data-test-subj={'ilmPolicyLink'}
+              {...reactRouterNavigate(history, ilmPolicyLink)}
+            >
+              {ilmPolicyName}
+            </EuiLink>
+          ) : (
+            ilmPolicyName || (
+              <em>
+                {i18n.translate('xpack.idxMgmt.dataStreamDetailPanel.ilmPolicyContentNoneMessage', {
+                  defaultMessage: `None`,
+                })}
+              </em>
+            )
+          ),
       },
     ];
 
