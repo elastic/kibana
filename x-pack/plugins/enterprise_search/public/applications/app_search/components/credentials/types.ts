@@ -4,11 +4,11 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IEngine } from '../../types';
+import { Engine } from '../../types';
 import { ApiTokenTypes } from './constants';
 
 export interface ICredentialsDetails {
-  engines: IEngine[];
+  engines: Engine[];
 }
 
 export interface IApiToken {
