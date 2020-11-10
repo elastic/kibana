@@ -54,7 +54,7 @@ export const findPreviousThresholdSignals = async ({
           aggs: {
             lastSignalTimestamp: {
               max: {
-                field: '@timestamp', // TODO: or timestampOverride? Or signal.original_time?
+                field: 'signal.original_time', // timestamp of last event captured by bucket
               },
             },
           },
