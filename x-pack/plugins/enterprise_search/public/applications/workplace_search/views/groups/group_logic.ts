@@ -24,7 +24,7 @@ import { IContentSourceDetails, IGroupDetails, IUser, ISourcePriority } from '..
 
 export const MAX_NAME_LENGTH = 40;
 
-export interface IGroupActions {
+interface GroupActions {
   onInitializeGroup(group: IGroupDetails): IGroupDetails;
   onGroupNameChanged(group: IGroupDetails): IGroupDetails;
   onGroupPrioritiesChanged(group: IGroupDetails): IGroupDetails;
@@ -55,7 +55,7 @@ export interface IGroupActions {
   saveGroupSourcePrioritization(): void;
 }
 
-export interface IGroupValues {
+interface GroupValues {
   group: IGroupDetails;
   dataLoading: boolean;
   manageUsersModalVisible: boolean;
@@ -70,7 +70,7 @@ export interface IGroupValues {
   cachedSourcePriorities: ISourcePriority;
 }
 
-export const GroupLogic = kea<MakeLogicType<IGroupValues, IGroupActions>>({
+export const GroupLogic = kea<MakeLogicType<GroupValues, GroupActions>>({
   path: ['enterprise_search', 'workplace_search', 'group'],
   actions: {
     onInitializeGroup: (group: IGroupDetails) => group,

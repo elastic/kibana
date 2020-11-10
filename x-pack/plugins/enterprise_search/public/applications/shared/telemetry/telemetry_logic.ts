@@ -16,14 +16,14 @@ export interface ISendTelemetry {
 }
 export type TSendTelemetry = Omit<ISendTelemetry, 'product'>;
 
-interface ITelemetryActions {
+interface TelemetryActions {
   sendTelemetry(args: ISendTelemetry): ISendTelemetry;
   sendEnterpriseSearchTelemetry(args: TSendTelemetry): TSendTelemetry;
   sendAppSearchTelemetry(args: TSendTelemetry): TSendTelemetry;
   sendWorkplaceSearchTelemetry(args: TSendTelemetry): TSendTelemetry;
 }
 
-export const TelemetryLogic = kea<MakeLogicType<ITelemetryActions>>({
+export const TelemetryLogic = kea<MakeLogicType<TelemetryActions>>({
   path: ['enterprise_search', 'telemetry_logic'],
   actions: {
     sendTelemetry: ({ action, metric, product }) => ({ action, metric, product }),

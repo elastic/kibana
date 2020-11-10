@@ -4,8 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IGroupValues } from '../group_logic';
-
 import { IGroupDetails, ISourcePriority } from '../../../types';
 
 export const mockGroupValues = {
@@ -21,4 +19,4 @@ export const mockGroupValues = {
   groupPrioritiesUnchanged: true,
   activeSourcePriorities: {} as ISourcePriority,
   cachedSourcePriorities: {} as ISourcePriority,
-} as IGroupValues;
+};

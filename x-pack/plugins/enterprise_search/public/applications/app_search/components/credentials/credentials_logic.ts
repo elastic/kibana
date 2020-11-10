@@ -29,7 +29,7 @@ export const defaultApiToken: IApiToken = {
   access_all_engines: true,
 };
 
-interface ICredentialsLogicActions {
+interface CredentialsLogicActions {
   addEngineName(engineName: string): string;
   onApiKeyDelete(tokenName: string): string;
   onApiTokenCreateSuccess(apiToken: IApiToken): IApiToken;
@@ -54,7 +54,7 @@ interface ICredentialsLogicActions {
   onEngineSelect(engineName: string): string;
 }
 
-interface ICredentialsLogicValues {
+interface CredentialsLogicValues {
   activeApiToken: IApiToken;
   activeApiTokenExists: boolean;
   activeApiTokenRawName: string;
@@ -70,9 +70,9 @@ interface ICredentialsLogicValues {
   shouldShowCredentialsForm: boolean;
 }
 
-export const CredentialsLogic = kea<
-  MakeLogicType<ICredentialsLogicValues, ICredentialsLogicActions>
->({
+type CredentialsLogicType = MakeLogicType<CredentialsLogicValues, CredentialsLogicActions>; // If we leave this inline, Prettier does some horrifying indenting nonsense :/
+
+export const CredentialsLogic = kea<CredentialsLogicType>({
   path: ['enterprise_search', 'app_search', 'credentials_logic'],
   actions: () => ({
     addEngineName: (engineName) => engineName,

@@ -9,7 +9,7 @@ import { HttpLogic } from '../../../shared/http';
 
 import { IFeedActivity } from './recent_activity';
 
-export interface IOverviewServerData {
+interface OverviewServerData {
   hasUsers: boolean;
   hasOrgSources: boolean;
   canCreateContentSources: boolean;
@@ -21,16 +21,16 @@ export interface IOverviewServerData {
   activityFeed: IFeedActivity[];
 }
 
-export interface IOverviewActions {
-  setServerData(serverData: IOverviewServerData): IOverviewServerData;
+interface OverviewActions {
+  setServerData(serverData: OverviewServerData): OverviewServerData;
   initializeOverview(): void;
 }
 
-export interface IOverviewValues extends IOverviewServerData {
+interface OverviewValues extends OverviewServerData {
   dataLoading: boolean;
 }
 
-export const OverviewLogic = kea<MakeLogicType<IOverviewValues, IOverviewActions>>({
+export const OverviewLogic = kea<MakeLogicType<OverviewValues, OverviewActions>>({
   path: ['enterprise_search', 'workplace_search', 'overview_logic'],
   actions: {
     setServerData: (serverData) => serverData,
