@@ -5,6 +5,8 @@
  */
 
 import { APMBaseDoc } from './apm_base_doc';
+import { Container } from './fields/container';
+import { Kubernetes } from './fields/kubernetes';
 
 type BaseMetric = APMBaseDoc & {
   processor: {
@@ -63,10 +65,35 @@ type JVMMetric = SystemMetric & {
   jvm: unknown;
 };
 
+type TransactionDurationMetric = BaseMetric & {
+  transaction: {
+    name: string;
+    type: string;
+    result?: string;
+    duration: {
+      histogram: {
+        values: number[];
+        counts: number[];
+      };
+    };
+  };
+  service: {
+    name: string;
+    node?: {
+      name: string;
+    };
+    environment?: string;
+    version?: string;
+  };
+  container?: Container;
+  kubernetes?: Kubernetes;
+};
+
 export type MetricRaw =
   | BaseMetric
   | TransactionBreakdownMetric
   | SpanBreakdownMetric
+  | TransactionDurationMetric
   | SystemMetric
   | CGroupMetric
   | JVMMetric;
