@@ -30,7 +30,6 @@ import {
 } from './constants';
 import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '../shared_components';
-import { FormatSelector } from '../../../dimension_panel/format_selector';
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
