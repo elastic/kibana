@@ -25,20 +25,20 @@ image::maps/images/sample_data_web_logs.png[]
 === Prerequisites
 
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
-- This tutorial uses the <<get-started, web logs sample data set>>. The sample data includes a [Logs] Total Requests and Bytes map, which you’ll create in this tutorial.
+- This tutorial requires the <<get-started, web logs sample data set>>. The sample data includes a [Logs] Total Requests and Bytes map, which you’ll re-create in this tutorial.
 - You must have the correct privileges for creating a map.
 If you don't have sufficient privileges to create or save maps,
-a read-only icon appears in the application header. For more information,
+a read-only icon appears in the toolbar. For more information,
 refer to <<xpack-security-authorization,Granting access to {kib}>>.
 
 [float]
 [[maps-create]]
-=== Step 1. Create a basic map
+=== Step 1. Create a map
 
 . Open the main menu, and then click *Dashboard*.
 . Click **Create dashboard**.
 . Set the time range to *Last 7 days*.
-. Click **Create new**
+. Click **Create new**.
 . Click **Maps**.
 
 [float]
@@ -154,7 +154,7 @@ image::maps/images/sample_data_web_logs.png[]
 [float]
 [[maps-save]]
 === Step 4. Save the map
-Now that your map is complete, you'll want to save it and return to the dashboard.
+Now that your map is complete, save it and return to the dashboard.
 
 . In the toolbar, click *Save*.
 . Enter `Tutorial web logs map` for the title.
@@ -166,6 +166,7 @@ Now that your map is complete, you'll want to save it and return to the dashboar
 === Step 5. Explore your data from the dashboard
 
 View your geospatial data alongside a heat map and pie chart, and then filter the data.
+When you apply a filter in one panel, it is applied to all panels on the dashboard.
 
 . In the toolbar, click **Add** to open a list of objects that you can add to the dashboard.
 . Set the **Types** select to **Visualization**.
@@ -176,8 +177,6 @@ image::maps/images/gs_dashboard_with_map.png[]
 
 . To filter for documents where **machine.os.keyword** is **osx**, click
 the **osx** slice in the pie chart.
-+
-When you apply a filter in one panel, it is applied to all panels on the dashboard.
 
 . Remove the filter by clicking **x** next to its name in the filter bar.
 
@@ -195,4 +194,4 @@ image::maps/images/gs_dashboard_with_terms_filter.png[]
 
 * Check out <<vector-layer, additional types of layers>> that you can add to your map.
 * Learn more ways <<maps-vector-style-properties, customize your map>>.
-* Learn more ways to work with <<vector-tooltip,vector tooltips>>.
+* Learn more about <<vector-tooltip,vector tooltips>>.
