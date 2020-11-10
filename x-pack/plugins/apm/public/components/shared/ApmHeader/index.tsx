@@ -6,15 +6,21 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { ReactNode } from 'react';
+import { HeaderMenuPortal } from '../../../../../observability/public';
 import { ActionMenu } from '../../../application/action_menu';
+import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { DatePicker } from '../DatePicker';
 import { EnvironmentFilter } from '../EnvironmentFilter';
 import { KueryBar } from '../KueryBar';
 
 export function ApmHeader({ children }: { children: ReactNode }) {
+  const { setHeaderActionMenu } = useApmPluginContext().appMountParameters;
+
   return (
     <>
-      <ActionMenu />
+      <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+        <ActionMenu />
+      </HeaderMenuPortal>
       <EuiFlexGroup alignItems="center" gutterSize="s" wrap={true}>
         <EuiFlexItem>{children}</EuiFlexItem>
         <EuiFlexItem grow={false}>

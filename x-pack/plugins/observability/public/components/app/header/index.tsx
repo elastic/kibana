@@ -4,10 +4,20 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHeaderLink,
+  EuiHeaderLinks,
+  EuiIcon,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import styled from 'styled-components';
+import { usePluginContext } from '../../../hooks/use_plugin_context';
+import { HeaderMenuPortal } from '../../shared/header_menu_portal';
 
 const Container = styled.div<{ color: string }>`
   background: ${(props) => props.color};
@@ -29,8 +39,23 @@ interface Props {
 }
 
 export function Header({ color, datePicker = null, restrictWidth }: Props) {
+  const { appMountParameters, core } = usePluginContext();
+  const { setHeaderActionMenu } = appMountParameters;
+  const { prepend } = core.http.basePath;
+
   return (
     <Container color={color}>
+      <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu}>
+        <EuiHeaderLinks>
+          <EuiHeaderLink
+            color="primary"
+            href={prepend('/app/home#/tutorial_directory/logging')}
+            iconType="indexOpen"
+          >
+            {i18n.translate('xpack.observability.home.addData', { defaultMessage: 'Add data' })}
+          </EuiHeaderLink>
+        </EuiHeaderLinks>
+      </HeaderMenuPortal>
       <Wrapper restrictWidth={restrictWidth}>
         <EuiSpacer size="l" />
         <EuiFlexGroup justifyContent="spaceBetween">

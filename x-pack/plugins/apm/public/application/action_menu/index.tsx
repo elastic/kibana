@@ -6,11 +6,8 @@
 
 import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo } from 'react';
-import { unmountComponentAtNode } from 'react-dom';
-import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import { toMountPoint } from '../../../../../../src/plugins/kibana_react/public';
 import { getAlertingCapabilities } from '../../components/alerting/get_alert_capabilities';
 import { getAPMHref } from '../../components/shared/Links/apm/APMLink';
 import { useApmPluginContext } from '../../hooks/useApmPluginContext';
@@ -18,8 +15,7 @@ import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 
 export function ActionMenu() {
-  const { appMountParameters, core, plugins } = useApmPluginContext();
-  const { setHeaderActionMenu } = appMountParameters;
+  const { core, plugins } = useApmPluginContext();
   const { serviceName } = useParams<{ serviceName?: string }>();
   const { search } = window.location;
   const { application, http } = core;
@@ -32,7 +28,6 @@ export function ActionMenu() {
     canSaveAlerts,
     canReadAnomalies,
   } = getAlertingCapabilities(plugins, capabilities);
-  const portalNode = useMemo(() => createPortalNode(), []);
 
   function apmHref(path: string) {
     return getAPMHref({ basePath, path, search });
@@ -42,52 +37,36 @@ export function ActionMenu() {
     return basePath.prepend(path);
   }
 
-  useEffect(() => {
-    let unmount = () => {};
-
-    setHeaderActionMenu((element) => {
-      const mount = toMountPoint(<OutPortal node={portalNode} />);
-      unmount = mount(element);
-    });
-
-    return () => {
-      portalNode.unmount();
-      unmount();
-    };
-  }, [portalNode, setHeaderActionMenu]);
-
   return (
-    <InPortal node={portalNode}>
-      <EuiHeaderLinks>
-        <EuiHeaderLink
-          color="primary"
-          href={apmHref('/settings')}
-          iconType="gear"
-        >
-          {i18n.translate('xpack.apm.settingsLinkLabel', {
-            defaultMessage: 'Settings',
-          })}
-        </EuiHeaderLink>
-        {isAlertingAvailable && (
-          <AlertingPopoverAndFlyout
-            basePath={basePath}
-            canReadAlerts={canReadAlerts}
-            canSaveAlerts={canSaveAlerts}
-            canReadAnomalies={canReadAnomalies}
-            includeTransactionDuration={serviceName !== undefined}
-          />
-        )}
-        {canAccessML && <AnomalyDetectionSetupLink />}
-        <EuiHeaderLink
-          color="primary"
-          href={kibanaHref('/app/home#/tutorial/apm')}
-          iconType="indexOpen"
-        >
-          {i18n.translate('xpack.apm.addDataButtonLabel', {
-            defaultMessage: 'Add data',
-          })}
-        </EuiHeaderLink>
-      </EuiHeaderLinks>
-    </InPortal>
+    <EuiHeaderLinks>
+      <EuiHeaderLink
+        color="primary"
+        href={apmHref('/settings')}
+        iconType="gear"
+      >
+        {i18n.translate('xpack.apm.settingsLinkLabel', {
+          defaultMessage: 'Settings',
+        })}
+      </EuiHeaderLink>
+      {isAlertingAvailable && (
+        <AlertingPopoverAndFlyout
+          basePath={basePath}
+          canReadAlerts={canReadAlerts}
+          canSaveAlerts={canSaveAlerts}
+          canReadAnomalies={canReadAnomalies}
+          includeTransactionDuration={serviceName !== undefined}
+        />
+      )}
+      {canAccessML && <AnomalyDetectionSetupLink />}
+      <EuiHeaderLink
+        color="primary"
+        href={kibanaHref('/app/home#/tutorial/apm')}
+        iconType="indexOpen"
+      >
+        {i18n.translate('xpack.apm.addDataButtonLabel', {
+          defaultMessage: 'Add data',
+        })}
+      </EuiHeaderLink>
+    </EuiHeaderLinks>
   );
 }
