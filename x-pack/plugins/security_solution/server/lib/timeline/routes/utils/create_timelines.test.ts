@@ -10,7 +10,7 @@ import { persistPinnedEventOnTimeline } from '../../../pinned_event/saved_object
 import { persistNote, getNote } from '../../../note/saved_object';
 import { FrameworkRequest } from '../../../framework';
 import { SavedTimeline } from '../../../../../common/types/timeline';
-import { mockTemplate, mockTimeline } from './__mocks__/create_timelines';
+import { mockTemplate, mockTimeline } from '../__mocks__/create_timelines';
 
 const frameworkRequest = {} as FrameworkRequest;
 const template = { ...mockTemplate } as SavedTimeline;
