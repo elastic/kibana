@@ -4,7 +4,7 @@ Just some helpers for kibana plugin devs.
 
 ## Installation
 
-To install the plugin helpers just create the needed npm scripts on your plugin's `package.json` (as exemplified below) which 
+You don't actually need to install the plugin helpers, they are automatically inherited from the Kibana project by building your plugin within the Kibana repo. To use the plugin helpers just create the needed npm scripts on your plugin's `package.json` (as exemplified below) which 
 is already the case if you use the new `node scripts/generate_plugin` script.
 
 ```json
