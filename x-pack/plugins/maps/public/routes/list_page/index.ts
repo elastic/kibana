@@ -4,8 +4,4 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { createMapStore } from '../reducers/store';
-
-const store = createMapStore();
-
-export const getStore = () => store;
+export { LoadListAndRender as ListPage } from './load_list_and_render';
