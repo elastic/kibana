@@ -28,8 +28,7 @@ export default function ({ getService, getPageObjects }) {
   const browser = getService('browser');
   const toasts = getService('toasts');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/80104
-  describe.skip('shared links', function describeIndexTests() {
+  describe('shared links', function describeIndexTests() {
     let baseUrl;
 
     async function setup({ storeStateInSessionStorage }) {
