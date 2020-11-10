@@ -134,7 +134,7 @@ export const getParent = (node: ResolverNode | undefined, schema: Schema): NodeI
  * @param nodes the response from the tree api
  * @param schema the schema used when calling the tree api
  */
-export const createTreeFromResponse = (
+const createTreeFromResponse = (
   treeExpectations: TreeExpectation[],
   nodes: ResolverNode[],
   schema: Schema
@@ -173,6 +173,8 @@ export const createTreeFromResponse = (
     const originNode = nodesByID.get(expectation.origin);
     if (originNode) {
       let currentID: NodeID | undefined = getParentInternal(originNode, schema);
+      // construct an array with all the ancestors from the response. We'll use this to verify that
+      // all the expected ancestors were returned in the response.
       while (currentID !== undefined) {
         const parentNode = nodesByID.get(currentID);
         if (parentNode) {
@@ -218,6 +220,7 @@ const verifyAncestry = ({
     }
 
     if (tree.origin !== undefined) {
+      // make sure the origin node from the request exists in the generated data and has the same fields
       const originID = getID(tree.origin, schema);
       const originParentID = getParent(tree.origin, schema);
       expect(allGenNodes.get(String(originID))?.id).to.be(String(originID));
@@ -246,6 +249,7 @@ const verifyAncestry = ({
       expect(ts).to.be(timestampSafeVersion(originLifecycleSorted[0]));
     }
 
+    // check the constructed ancestors array to see if we're missing any nodes in the ancestry
     for (let i = 0; i < tree.ancestors.length; i++) {
       const id = getID(tree.ancestors[i], schema);
       const parent = getParentInternal(tree.ancestors[i], schema);

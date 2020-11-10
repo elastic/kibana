@@ -43,6 +43,9 @@ export const validateTree = {
       id: schema.string({ minLength: 1 }),
       parent: schema.string({ minLength: 1 }),
     }),
+    // only allowing strings and numbers for node IDs because Elasticsearch only allows those types for collapsing:
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/collapse-search-results.html
+    // We use collapsing in our Elasticsearch queries for the tree api
     nodes: schema.arrayOf(schema.oneOf([schema.string({ minLength: 1 }), schema.number()]), {
       minSize: 1,
     }),

@@ -174,6 +174,7 @@ export class Fetcher {
     let nodes: NodeID[] = options.nodes;
     let numNodesLeftToRequest: number = options.descendants;
     let levelsLeftToRequest: number = options.descendantLevels;
+    // if the ancestry was specified then ignore the levels
     while (
       numNodesLeftToRequest > 0 &&
       (options.schema.ancestry !== undefined || levelsLeftToRequest > 0)
@@ -196,6 +197,8 @@ export class Fetcher {
 
 /**
  * This functions finds the leaf nodes for a given response from an Elasticsearch query.
+ *
+ * Exporting so it can be tested.
  *
  * @param results the doc values portion of the documents returned from an Elasticsearch query
  * @param nodes an array of unique IDs that were used to find the returned documents
