@@ -69,8 +69,14 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
       return new DisabledLabEmbeddable(vis.title, input);
     }
 
-    const indexPattern = vis.data.indexPattern;
-    const indexPatterns = indexPattern ? [indexPattern] : [];
+    let indexPatterns = [];
+
+    if (vis.type.getUsedIndexPattern) {
+      indexPatterns = await vis.type.getUsedIndexPattern(vis.params);
+    } else if (vis.data.indexPattern) {
+      indexPatterns = [vis.data.indexPatter];
+    }
+
     const editable = getCapabilities().visualize.save as boolean;
 
     return new VisualizeEmbeddable(

@@ -20,7 +20,7 @@
 import { IconType } from '@elastic/eui';
 import React from 'react';
 import { Adapters } from 'src/plugins/inspector';
-import { SearchSourceFields } from 'src/plugins/data/public';
+import { IIndexPattern } from 'src/plugins/data/public';
 import { VisEditorConstructor } from 'src/plugins/visualize/public';
 import { ISchemas } from 'src/plugins/vis_default_editor/public';
 import { TriggerContextMapping } from '../../../ui_actions/public';
@@ -67,12 +67,10 @@ export interface VisType<TVisParams = unknown> {
   readonly getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
 
   /**
-   * Some visualizations are created without SearchSource and may change the index during the visualization configuration.
-   * Using this method we can rewrite the standard mechanism for getting SearchSource and set it directly from the visualization
+   * Some visualizations are created without SearchSource and may change the used indexes during the visualization configuration.
+   * Using this method we can rewrite the standard mechanism for getting used indexes
    */
-  readonly useCustomSearchSource?: (
-    visParams: VisParams
-  ) => SearchSourceFields | Promise<SearchSourceFields>;
+  readonly getUsedIndexPattern?: (visParams: VisParams) => IIndexPattern[];
 
   readonly isAccessible?: boolean;
   readonly requestHandler?: string | unknown;

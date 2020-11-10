@@ -27,6 +27,7 @@ import { PANEL_TYPES } from '../common/panel_types';
 import { VisEditor } from './application/components/vis_editor_lazy';
 import { VIS_EVENT_TO_TRIGGER, VisGroups, VisParams } from '../../visualizations/public';
 import { getSavedObjectsClient, getDataStart } from './services';
+import { INDEXES_SEPARATOR } from '../common/constants';
 
 export const metricsVisDefinition = {
   name: 'metrics',
@@ -85,19 +86,19 @@ export const metricsVisDefinition = {
     return [VIS_EVENT_TO_TRIGGER.applyFilter];
   },
   inspectorAdapters: {},
-  useCustomSearchSource: async (params: VisParams) => {
-    if (params.index_pattern) {
-      const savedObjects = await getSavedObjectsClient().client.find({
-        type: 'index-pattern',
-        fields: ['title'],
-        search: params.index_pattern,
-      });
+  getUsedIndexPattern: async (params: VisParams) => {
+    const { indexPatterns } = getDataStart();
 
-      if (savedObjects.total) {
-        return { index: await getDataStart().indexPatterns.get(savedObjects.savedObjects[0].id) };
-      }
+    if (params.index_pattern) {
+      const cachedIndexes = await indexPatterns.getIdsWithTitle();
+      const ids = params.index_pattern
+        .split(INDEXES_SEPARATOR)
+        .map((title) => cachedIndexes.find((i) => i.title === title)?.id)
+        .filter((id) => id);
+
+      return Promise.all(ids.map((is) => indexPatterns.get(is)));
     }
-    return {};
+    return [];
   },
   responseHandler: 'none',
 };

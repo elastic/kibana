@@ -137,9 +137,6 @@ export class Vis<TVisParams = VisParams> {
     if (state.params || typeChanged) {
       this.params = this.getParams(state.params);
     }
-    if (this.type.useCustomSearchSource) {
-      state.data.searchSource = await this.type.useCustomSearchSource(this.params);
-    }
     if (state.data && state.data.searchSource) {
       this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
       this.data.indexPattern = this.data.searchSource.getField('index');
