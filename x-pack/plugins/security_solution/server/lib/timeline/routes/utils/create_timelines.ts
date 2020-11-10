@@ -130,7 +130,7 @@ export const createTimelines = async ({
   overrideNotesOwner = true,
 }: CreateTimelineProps): Promise<ResponseTimeline> => {
   const timerangeStart = isImmutable
-    ? moment().subtract(7, 'days').toISOString()
+    ? moment().subtract(24, 'hours').toISOString()
     : timeline.dateRange?.start;
   const timerangeEnd = isImmutable ? moment().toISOString() : timeline.dateRange?.end;
   const responseTimeline = await saveTimelines(
