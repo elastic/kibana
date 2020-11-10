@@ -6,7 +6,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import createContainer from 'constate';
-import { useSetState } from 'react-use';
+import useSetState from 'react-use/lib/useSetState';
 import { TimeKey } from '../../../../common/time';
 import { datemathToEpochMillis, isValidDatemath } from '../../../utils/datemath';
 import { useKibanaTimefilterTime } from '../../../hooks/use_kibana_timefilter_time';
