@@ -75,3 +75,6 @@ report.asciidoc
 
 # TS incremental build cache
 *.tsbuildinfo
+
+# Ignore code owners on non master branches
+.github/CODEOWNERS
