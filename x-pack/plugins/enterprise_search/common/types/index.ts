@@ -6,18 +6,18 @@
 
 import {
   IAccount as IAppSearchAccount,
-  IConfiguredLimits as IAppSearchConfiguredLimits,
+  ConfiguredLimits as AppSearchConfiguredLimits,
 } from './app_search';
 import {
   IWorkplaceSearchInitialData,
-  IConfiguredLimits as IWorkplaceSearchConfiguredLimits,
+  ConfiguredLimits as WorkplaceSearchConfiguredLimits,
 } from './workplace_search';
 
 export interface InitialAppData {
   readOnlyMode?: boolean;
   ilmEnabled?: boolean;
   isFederatedAuth?: boolean;
-  configuredLimits?: IConfiguredLimits;
+  configuredLimits?: ConfiguredLimits;
   access?: {
     hasAppSearchAccess: boolean;
     hasWorkplaceSearchAccess: boolean;
@@ -26,9 +26,9 @@ export interface InitialAppData {
   workplaceSearch?: IWorkplaceSearchInitialData;
 }
 
-export interface IConfiguredLimits {
-  appSearch: IAppSearchConfiguredLimits;
-  workplaceSearch: IWorkplaceSearchConfiguredLimits;
+export interface ConfiguredLimits {
+  appSearch: AppSearchConfiguredLimits;
+  workplaceSearch: WorkplaceSearchConfiguredLimits;
 }
 
 export interface MetaPage {

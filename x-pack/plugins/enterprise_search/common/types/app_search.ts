@@ -21,7 +21,7 @@ export interface IAccount {
   };
 }
 
-export interface IConfiguredLimits {
+export interface ConfiguredLimits {
   engine: {
     maxDocumentByteSize: number;
     maxEnginesPerMetaEngine: number;
