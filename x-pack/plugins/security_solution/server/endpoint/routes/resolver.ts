@@ -18,7 +18,7 @@ import {
 import { handleChildren } from './resolver/children';
 import { handleAncestry } from './resolver/ancestry';
 import { handleTree as handleTreeEntityID } from './resolver/tree';
-import { handleTree } from './resolver/new_tree/tree_route';
+import { handleTree } from './resolver/tree/handler';
 import { handleAlerts } from './resolver/alerts';
 import { handleEntities } from './resolver/entity';
 import { handleEvents } from './resolver/events';
@@ -44,6 +44,9 @@ export function registerResolverRoutes(router: IRouter, endpointAppContext: Endp
     handleEvents(log)
   );
 
+  /**
+   * @deprecated will be removed because it is not used
+   */
   router.post(
     {
       path: '/api/endpoint/resolver/{id}/alerts',

@@ -6,12 +6,12 @@
 
 import React from 'react';
 import { useActions } from 'kea';
-import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage, FormattedDate, FormattedNumber } from '@kbn/i18n/react';
 import { i18n } from '@kbn/i18n';
 
 import { TelemetryLogic } from '../../../shared/telemetry';
-import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
+import { EuiLink } from '../../../shared/react_router_helpers';
 import { getEngineRoute } from '../../routes';
 
 import { ENGINES_PAGE_SIZE } from '../../../../../common/constants';
@@ -44,8 +44,7 @@ export const EngineTable: React.FC<IEngineTableProps> = ({
   const { sendAppSearchTelemetry } = useActions(TelemetryLogic);
 
   const engineLinkProps = (name: string) => ({
-    href: getAppSearchUrl(getEngineRoute(name)),
-    target: '_blank',
+    to: getEngineRoute(name),
     onClick: () =>
       sendAppSearchTelemetry({
         action: 'clicked',

@@ -27,12 +27,9 @@ import {
 import {
   GetAgentPoliciesResponseItem,
   GetPackagesResponse,
-} from '../../../ingest_manager/common/types/rest_spec';
-import {
-  EsAssetReference,
-  KibanaAssetReference,
-} from '../../../ingest_manager/common/types/models';
-import { agentPolicyStatuses } from '../../../ingest_manager/common/constants';
+} from '../../../fleet/common/types/rest_spec';
+import { EsAssetReference, KibanaAssetReference } from '../../../fleet/common/types/models';
+import { agentPolicyStatuses } from '../../../fleet/common/constants';
 import { firstNonNullValue } from './models/ecs_safety_helpers';
 
 export type Event = AlertEvent | SafeEndpointEvent;

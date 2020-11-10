@@ -65,7 +65,6 @@ export const useNetworkKpiDns = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkKpiQueries.dns,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -152,7 +151,6 @@ export const useNetworkKpiDns = ({
         defaultIndex: indexNames,
         factoryQueryType: NetworkKpiQueries.dns,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

@@ -19,11 +19,11 @@ import {
 import { Options, GeneratedTrees } from '../../services/resolver';
 import {
   compareArrays,
-  verifyAncestry,
+  checkAncestryFromEntityTreeAPI,
   retrieveDistantAncestor,
-  verifyChildren,
+  verifyChildrenFromEntityTreeAPI,
   verifyLifecycleStats,
-  verifyStats,
+  verifyEntityTreeStats,
 } from './common';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  describe('Resolver tree', () => {
+  describe('Resolver entity tree api', () => {
     before(async () => {
       await esArchiver.load('endpoint/resolver/api_feature');
       resolverTrees = await resolver.createTrees(treeOptions);
@@ -123,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
           // the tree we generated had 5 ancestors + 1 origin node
           expect(body.ancestors.length).to.eql(6);
           expect(body.ancestors[0].entityID).to.eql(tree.origin.id);
-          verifyAncestry(body.ancestors, tree, true);
+          checkAncestryFromEntityTreeAPI(body.ancestors, tree, true);
           expect(body.nextAncestor).to.eql(null);
         });
 
@@ -141,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
           // it should have 2 ancestors + 1 origin
           expect(body.ancestors.length).to.eql(3);
-          verifyAncestry(body.ancestors, tree, false);
+          checkAncestryFromEntityTreeAPI(body.ancestors, tree, false);
           const distantGrandparent = retrieveDistantAncestor(body.ancestors);
           expect(body.nextAncestor).to.eql(
             parentEntityIDSafeVersion(distantGrandparent.lifecycle[0])
@@ -159,7 +159,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get(`/api/endpoint/resolver/${next}/ancestry?ancestors=1`)
             .expect(200));
           expect(body.ancestors.length).to.eql(2);
-          verifyAncestry(body.ancestors, tree, true);
+          checkAncestryFromEntityTreeAPI(body.ancestors, tree, true);
           // the highest node in the generated tree will not have a parent ID which causes the server to return
           // without setting the pagination so nextAncestor will be null
           expect(body.nextAncestor).to.eql(null);
@@ -263,7 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
           // 3 children for the origin + 3 children for each of the origin's children = 12
           expect(body.childNodes.length).to.eql(12);
           // there will be 4 parents, the origin of the tree, and it's 3 children
-          verifyChildren(body.childNodes, tree, 4, 3);
+          verifyChildrenFromEntityTreeAPI(body.childNodes, tree, 4, 3);
           expect(body.nextChild).to.eql(null);
         });
 
@@ -275,7 +275,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=3`)
             .expect(200);
           expect(body.childNodes.length).to.eql(3);
-          verifyChildren(body.childNodes, tree, 1, 3);
+          verifyChildrenFromEntityTreeAPI(body.childNodes, tree, 1, 3);
           expect(body.nextChild).to.not.eql(null);
         });
 
@@ -287,7 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get(`/api/endpoint/resolver/${distantChildEntityID}/children?children=1`)
             .expect(200);
           expect(body.childNodes.length).to.eql(1);
-          verifyChildren(body.childNodes, tree, 1, 1);
+          verifyChildrenFromEntityTreeAPI(body.childNodes, tree, 1, 1);
           expect(body.nextChild).to.not.be(null);
 
           ({ body } = await supertest
@@ -296,7 +296,7 @@ export default function ({ getService }: FtrProviderContext) {
             )
             .expect(200));
           expect(body.childNodes.length).to.eql(2);
-          verifyChildren(body.childNodes, tree, 1, 2);
+          verifyChildrenFromEntityTreeAPI(body.childNodes, tree, 1, 2);
           expect(body.nextChild).to.not.be(null);
 
           ({ body } = await supertest
@@ -314,7 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
             .get(`/api/endpoint/resolver/${tree.origin.id}/children?children=3`)
             .expect(200);
           expect(body.childNodes.length).to.eql(3);
-          verifyChildren(body.childNodes, tree);
+          verifyChildrenFromEntityTreeAPI(body.childNodes, tree);
           expect(body.nextChild).to.not.be(null);
           const firstNodes = [...body.childNodes];
 
@@ -325,7 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200));
           expect(body.childNodes.length).to.eql(9);
           // put all the results together and we should have all the children
-          verifyChildren([...firstNodes, ...body.childNodes], tree, 4, 3);
+          verifyChildrenFromEntityTreeAPI([...firstNodes, ...body.childNodes], tree, 4, 3);
           expect(body.nextChild).to.be(null);
         });
       });
@@ -356,18 +356,18 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(body.children.nextChild).to.equal(null);
           expect(body.children.childNodes.length).to.equal(12);
-          verifyChildren(body.children.childNodes, tree, 4, 3);
+          verifyChildrenFromEntityTreeAPI(body.children.childNodes, tree, 4, 3);
           verifyLifecycleStats(body.children.childNodes, relatedEventsToGen, relatedAlerts);
 
           expect(body.ancestry.nextAncestor).to.equal(null);
-          verifyAncestry(body.ancestry.ancestors, tree, true);
+          checkAncestryFromEntityTreeAPI(body.ancestry.ancestors, tree, true);
           verifyLifecycleStats(body.ancestry.ancestors, relatedEventsToGen, relatedAlerts);
 
           expect(body.relatedAlerts.nextAlert).to.equal(null);
           compareArrays(tree.origin.relatedAlerts, body.relatedAlerts.alerts, true);
 
           compareArrays(tree.origin.lifecycle, body.lifecycle, true);
-          verifyStats(body.stats, relatedEventsToGen, relatedAlerts);
+          verifyEntityTreeStats(body.stats, relatedEventsToGen, relatedAlerts);
         });
       });
     });

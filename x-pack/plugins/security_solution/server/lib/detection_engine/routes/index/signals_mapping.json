@@ -257,6 +257,11 @@
           "original_time": {
             "type": "date"
           },
+          "original_signal": {
+            "type": "object",
+            "dynamic": false,
+            "enabled": false
+          },
           "original_event": {
             "properties": {
               "action": {

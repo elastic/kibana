@@ -64,7 +64,6 @@ export const useNetworkOverview = ({
           defaultIndex: indexNames,
           factoryQueryType: NetworkQueries.overview,
           filterQuery: createFilter(filterQuery),
-          id: ID,
           timerange: {
             interval: '12h',
             from: startDate,
@@ -151,7 +150,6 @@ export const useNetworkOverview = ({
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.overview,
         filterQuery: createFilter(filterQuery),
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

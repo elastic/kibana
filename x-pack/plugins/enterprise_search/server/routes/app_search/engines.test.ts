@@ -25,7 +25,11 @@ describe('engine routes', () => {
 
     beforeEach(() => {
       jest.clearAllMocks();
-      mockRouter = new MockRouter({ method: 'get', payload: 'query' });
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines',
+        payload: 'query',
+      });
 
       registerEnginesRoute({
         ...mockDependencies,

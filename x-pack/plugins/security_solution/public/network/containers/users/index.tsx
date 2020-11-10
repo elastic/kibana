@@ -80,7 +80,6 @@ export const useNetworkUsers = ({
           factoryQueryType: NetworkQueries.users,
           filterQuery: createFilter(filterQuery),
           flowTarget,
-          id,
           ip,
           pagination: generateTablePaginationOptions(activePage, limit),
           sort,
@@ -192,7 +191,6 @@ export const useNetworkUsers = ({
     setNetworkUsersRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
-        id,
         ip,
         defaultIndex,
         factoryQueryType: NetworkQueries.users,
@@ -222,7 +220,6 @@ export const useNetworkUsers = ({
     skip,
     ip,
     flowTarget,
-    id,
   ]);
 
   useEffect(() => {
