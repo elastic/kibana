@@ -30,6 +30,7 @@ import {
   EuiIcon,
   EuiPortal,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import { ElasticSearchHit } from '../../doc_views/doc_views_types';
 import { JsonCodeBlock } from '../json_code_block/json_code_block';
@@ -103,9 +104,9 @@ export function DiscoverGridSelection({
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup alignItems="baseline" justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiTitle className="dscTable__flyoutHeader">
+              <EuiTitle size="s" className="dscTable__flyoutHeader">
                 <h2>
-                  <EuiIcon type="folderOpen" size="l" />{' '}
+                  <EuiIcon type="folderOpen" size="m" />{' '}
                   {i18n.translate('discover.grid.tableRow.selectedDocuments', {
                     defaultMessage: 'Selected records',
                   })}
@@ -125,7 +126,7 @@ export function DiscoverGridSelection({
               <div key={row._id}>
                 <EuiAccordion
                   id={String(row._id)}
-                  buttonContent={`#id ${row._id}`}
+                  buttonContent={`_id: ${row._id}`}
                   initialIsOpen={true}
                 >
                   <div
@@ -139,6 +140,7 @@ export function DiscoverGridSelection({
                     <JsonCodeBlock hit={row} />
                   </div>
                 </EuiAccordion>
+                <EuiSpacer size="m" />
               </div>
             ))}
         </EuiFlyoutBody>
