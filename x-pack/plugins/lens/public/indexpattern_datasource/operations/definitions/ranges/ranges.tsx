@@ -225,7 +225,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
               type: newMode,
               ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
               maxBars: maxBarsDefaultValue,
-              format: undefined,
+              format: currentColumn.params.format,
               parentFormat,
             },
           },
