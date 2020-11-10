@@ -17,7 +17,7 @@ is already the case if you use the new `node scripts/generate_plugin` script.
 }
 ```
 
-This will make it possible to use the package from the repository into your plugin, but the `plugin-helpers` executable won't be available until you make sure you have run bootstrap at least once.
+This will make it easier to execute the `plugin-helpers` script from within your plugin repository.
 
 ```sh
 yarn kbn bootstrap
