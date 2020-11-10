@@ -116,13 +116,23 @@ export function jobSavedObjectServiceFactory(
   }
 
   async function getAllJobObjectsForAllSpaces(jobType?: JobType) {
-    return (
-      await internalSavedObjectsClient.find<JobObject>({
-        type: ML_SAVED_OBJECT_TYPE,
-        perPage: 10000,
-        namespaces: ['*'],
-      })
-    ).saved_objects;
+    await isMlReady();
+    const filterObject: JobObjectFilter = {};
+
+    if (jobType !== undefined) {
+      filterObject.type = jobType;
+    }
+
+    const { filter, searchFields } = createSavedObjectFilter(filterObject);
+    const options: SavedObjectsFindOptions = {
+      type: ML_SAVED_OBJECT_TYPE,
+      perPage: 10000,
+      namespaces: ['*'],
+      searchFields,
+      filter,
+    };
+
+    return (await internalSavedObjectsClient.find<JobObject>(options)).saved_objects;
   }
 
   async function addDatafeed(datafeedId: string, jobId: string) {
