@@ -12,13 +12,8 @@ import styled from 'styled-components';
 // `href`s, we need to override the color of the links inside or they will all
 // be the primary color.
 const StyledTabs = styled(EuiTabs)`
-  padding: ${({ theme }) =>
-    `${theme.eui.gutterTypes.gutterMedium} ${theme.eui.gutterTypes.gutterLarge}`};
+  padding: ${({ theme }) => `${theme.eui.gutterTypes.gutterMedium}`};
   border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-
-  .euiLink {
-    color: inherit;
-  }
 `;
 
 export function MainTabs({ children }: { children: ReactNode }) {

@@ -5,7 +5,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import React, { PropsWithChildren, ReactNode } from 'react';
 import styled from 'styled-components';
 import { useTrackPageview } from '../../../../../observability/public';
 import {
@@ -66,7 +66,9 @@ function LoadingSpinner() {
   );
 }
 
-export function ServiceMap({ serviceName }: ServiceMapProps) {
+export function ServiceMap({
+  serviceName,
+}: PropsWithChildren<ServiceMapProps>) {
   const theme = useTheme();
   const license = useLicense();
   const { urlParams } = useUrlParams();

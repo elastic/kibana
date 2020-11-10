@@ -12,16 +12,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { ComponentType } from 'react';
 import { $ElementType } from 'utility-types';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { getAlertingCapabilities } from '../../alerting/get_alert_capabilities';
 import { ApmHeader } from '../../shared/ApmHeader';
 import { AnomalyDetectionSetupLink } from '../../shared/Links/apm/AnomalyDetectionSetupLink';
-import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
-import { ServiceInventoryLink } from '../../shared/Links/apm/service_inventory_link';
+import { useServiceMapHref } from '../../shared/Links/apm/ServiceMapLink';
+import { useServiceInventoryHref } from '../../shared/Links/apm/service_inventory_link';
 import { SettingsLink } from '../../shared/Links/apm/SettingsLink';
-import { TraceOverviewLink } from '../../shared/Links/apm/TraceOverviewLink';
+import { useTraceOverviewHref } from '../../shared/Links/apm/TraceOverviewLink';
 import { SetupInstructionsLink } from '../../shared/Links/SetupInstructionsLink';
 import { MainTabs } from '../../shared/main_tabs';
 import { ServiceMap } from '../ServiceMap';
@@ -29,51 +29,11 @@ import { ServiceInventory } from '../service_inventory';
 import { TraceOverview } from '../TraceOverview';
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 
-function getHomeTabs({
-  serviceMapEnabled = true,
-}: {
-  serviceMapEnabled: boolean;
-}) {
-  const homeTabs = [
-    {
-      link: (
-        <ServiceInventoryLink>
-          {i18n.translate('xpack.apm.home.servicesTabLabel', {
-            defaultMessage: 'Services',
-          })}
-        </ServiceInventoryLink>
-      ),
-      render: () => <ServiceInventory />,
-      name: 'services',
-    },
-    {
-      link: (
-        <TraceOverviewLink>
-          {i18n.translate('xpack.apm.home.tracesTabLabel', {
-            defaultMessage: 'Traces',
-          })}
-        </TraceOverviewLink>
-      ),
-      render: () => <TraceOverview />,
-      name: 'traces',
-    },
-  ];
-
-  if (serviceMapEnabled) {
-    homeTabs.push({
-      link: (
-        <ServiceMapLink>
-          {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-            defaultMessage: 'Service Map',
-          })}
-        </ServiceMapLink>
-      ),
-      render: () => <ServiceMap />,
-      name: 'service-map',
-    });
-  }
-
-  return homeTabs;
+interface Tab {
+  key: string;
+  href: string;
+  text: string;
+  Component: ComponentType;
 }
 
 const SETTINGS_LINK_LABEL = i18n.translate('xpack.apm.settingsLinkLabel', {
@@ -85,12 +45,38 @@ interface Props {
 }
 
 export function Home({ tab }: Props) {
-  const { config, core, plugins } = useApmPluginContext();
+  const { core, plugins } = useApmPluginContext();
+
+  const homeTabs: Tab[] = [
+    {
+      key: 'services',
+      href: useServiceInventoryHref(),
+      text: i18n.translate('xpack.apm.home.servicesTabLabel', {
+        defaultMessage: 'Services',
+      }),
+      Component: ServiceInventory,
+    },
+    {
+      key: 'traces',
+      href: useTraceOverviewHref(),
+      text: i18n.translate('xpack.apm.home.tracesTabLabel', {
+        defaultMessage: 'Traces',
+      }),
+      Component: TraceOverview,
+    },
+    {
+      key: 'service-map',
+      href: useServiceMapHref(),
+      text: i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+        defaultMessage: 'Service Map',
+      }),
+      Component: ServiceMap,
+    },
+  ];
   const capabilities = core.application.capabilities;
   const canAccessML = !!capabilities.ml?.canAccessML;
-  const homeTabs = getHomeTabs(config);
   const selectedTab = homeTabs.find(
-    (homeTab) => homeTab.name === tab
+    (homeTab) => homeTab.key === tab
   ) as $ElementType<typeof homeTabs, number>;
 
   const {
@@ -136,13 +122,13 @@ export function Home({ tab }: Props) {
         </EuiFlexGroup>
       </ApmHeader>
       <MainTabs>
-        {homeTabs.map((homeTab) => (
-          <EuiTab isSelected={homeTab === selectedTab} key={homeTab.name}>
-            {homeTab.link}
+        {homeTabs.map(({ href, key, text }) => (
+          <EuiTab href={href} isSelected={key === selectedTab.key} key={key}>
+            {text}
           </EuiTab>
         ))}
       </MainTabs>
-      {selectedTab.render()}
+      <selectedTab.Component />
     </>
   );
 }
