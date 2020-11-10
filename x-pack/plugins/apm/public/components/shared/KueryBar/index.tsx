@@ -104,6 +104,7 @@ export function KueryBar() {
           query: inputValue,
           selectionStart,
           selectionEnd: selectionStart,
+          useTimeRange: true,
         })) || []
       )
         .filter((suggestion) => !startsWith(suggestion.text, 'span.'))

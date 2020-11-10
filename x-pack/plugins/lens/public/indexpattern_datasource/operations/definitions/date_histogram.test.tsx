@@ -189,8 +189,6 @@ describe('date_histogram', () => {
     it('should create column object with auto interval for primary time field', () => {
       const column = dateHistogramOperation.buildColumn({
         columns: {},
-        suggestedPriority: 0,
-        layerId: 'first',
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'timestamp',
@@ -207,8 +205,6 @@ describe('date_histogram', () => {
     it('should create column object with auto interval for non-primary time fields', () => {
       const column = dateHistogramOperation.buildColumn({
         columns: {},
-        suggestedPriority: 0,
-        layerId: 'first',
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'start_date',
@@ -225,8 +221,6 @@ describe('date_histogram', () => {
     it('should create column object with restrictions', () => {
       const column = dateHistogramOperation.buildColumn({
         columns: {},
-        suggestedPriority: 0,
-        layerId: 'first',
         indexPattern: createMockedIndexPattern(),
         field: {
           name: 'timestamp',
@@ -334,7 +328,7 @@ describe('date_histogram', () => {
       const indexPattern = createMockedIndexPattern();
       const newDateField = indexPattern.getFieldByName('start_date')!;
 
-      const column = dateHistogramOperation.onFieldChange(oldColumn, indexPattern, newDateField);
+      const column = dateHistogramOperation.onFieldChange(oldColumn, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');
       expect(column).toHaveProperty('params.interval', 'd');
       expect(column.label).toContain('start_date');
@@ -354,7 +348,7 @@ describe('date_histogram', () => {
       const indexPattern = createMockedIndexPattern();
       const newDateField = indexPattern.getFieldByName('start_date')!;
 
-      const column = dateHistogramOperation.onFieldChange(oldColumn, indexPattern, newDateField);
+      const column = dateHistogramOperation.onFieldChange(oldColumn, newDateField);
       expect(column).toHaveProperty('sourceField', 'start_date');
       expect(column).toHaveProperty('params.interval', 'auto');
       expect(column.label).toContain('start_date');
