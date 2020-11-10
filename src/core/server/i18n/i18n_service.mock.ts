@@ -16,22 +16,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RenderingService as Service } from '../rendering_service';
-import type { InternalRenderingServiceSetup } from '../types';
-import { mockRenderingServiceParams } from './params';
 
-type IRenderingService = PublicMethodsOf<Service>;
+import { PublicMethodsOf } from '@kbn/utility-types';
+import type { I18nServiceSetup, I18nService } from './i18n_service';
 
-export const setupMock: jest.Mocked<InternalRenderingServiceSetup> = {
-  render: jest.fn(),
+const createSetupContractMock = () => {
+  const mock: jest.Mocked<I18nServiceSetup> = {
+    getLocale: jest.fn(),
+    getTranslationFiles: jest.fn(),
+  };
+
+  mock.getLocale.mockReturnValue('en');
+  mock.getTranslationFiles.mockReturnValue([]);
+
+  return mock;
 };
-export const mockSetup = jest.fn().mockResolvedValue(setupMock);
-export const mockStop = jest.fn();
-export const mockRenderingService: jest.Mocked<IRenderingService> = {
-  setup: mockSetup,
-  stop: mockStop,
+
+type I18nServiceContract = PublicMethodsOf<I18nService>;
+
+const createMock = () => {
+  const mock: jest.Mocked<I18nServiceContract> = {
+    setup: jest.fn(),
+  };
+
+  mock.setup.mockResolvedValue(createSetupContractMock());
+
+  return mock;
 };
-export const RenderingService = jest.fn<IRenderingService, [typeof mockRenderingServiceParams]>(
-  () => mockRenderingService
-);
+
+export const i18nServiceMock = {
+  create: createMock,
+  createSetupContract: createSetupContractMock,
+};

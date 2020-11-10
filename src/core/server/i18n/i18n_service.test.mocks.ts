@@ -17,4 +17,12 @@
  * under the License.
  */
 
-export { i18nMixin } from './i18n_mixin';
+export const getKibanaTranslationFilesMock = jest.fn();
+jest.doMock('./get_kibana_translation_files', () => ({
+  getKibanaTranslationFiles: getKibanaTranslationFilesMock,
+}));
+
+export const initTranslationsMock = jest.fn();
+jest.doMock('./init_translations', () => ({
+  initTranslations: initTranslationsMock,
+}));

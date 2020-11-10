@@ -16,22 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { RenderingService as Service } from '../rendering_service';
-import type { InternalRenderingServiceSetup } from '../types';
-import { mockRenderingServiceParams } from './params';
 
-type IRenderingService = PublicMethodsOf<Service>;
+import { i18n, i18nLoader } from '@kbn/i18n';
 
-export const setupMock: jest.Mocked<InternalRenderingServiceSetup> = {
-  render: jest.fn(),
+export const initTranslations = async (locale: string, translationFiles: string[]) => {
+  i18nLoader.registerTranslationFiles(translationFiles);
+  const translations = await i18nLoader.getTranslationsByLocale(locale);
+  i18n.init(
+    Object.freeze({
+      locale,
+      ...translations,
+    })
+  );
 };
-export const mockSetup = jest.fn().mockResolvedValue(setupMock);
-export const mockStop = jest.fn();
-export const mockRenderingService: jest.Mocked<IRenderingService> = {
-  setup: mockSetup,
-  stop: mockStop,
-};
-export const RenderingService = jest.fn<IRenderingService, [typeof mockRenderingServiceParams]>(
-  () => mockRenderingService
-);
