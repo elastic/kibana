@@ -109,16 +109,16 @@ def withFunctionalTestEnv(List additionalEnvs = [], Closure closure) {
 
 def functionalTestProcess(String name, Closure closure) {
   return {
-    withFunctionalTestEnv(["JOB=${name}"], closure)
+    notifyOnError {
+      withFunctionalTestEnv(["JOB=${name}"], closure)
+    }
   }
 }
 
 def functionalTestProcess(String name, String script) {
   return functionalTestProcess(name) {
-    notifyOnError {
-      retryable(name) {
-        runbld(script, "Execute ${name}")
-      }
+    retryable(name) {
+      runbld(script, "Execute ${name}")
     }
   }
 }

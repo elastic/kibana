@@ -38,7 +38,7 @@ export const callEnterpriseSearchConfigAPI = async ({
 }: IParams): Promise<IReturn> => {
   if (!config.host) return {};
 
-  const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is respondingly normally and not adversely impacting Kibana load speeds.`;
+  const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.`;
   const TIMEOUT_MESSAGE = `Exceeded ${config.accessCheckTimeout}ms timeout while checking ${config.host}. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses.`;
   const CONNECTION_ERROR = 'Could not perform access check to Enterprise Search';
 

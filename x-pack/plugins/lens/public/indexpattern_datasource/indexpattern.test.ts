@@ -614,4 +614,178 @@ describe('IndexPattern Data Source', () => {
       });
     });
   });
+
+  describe('#getErrorMessages', () => {
+    it('should detect a missing reference in a layer', () => {
+      const state = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
+      expect(messages).toHaveLength(1);
+      expect(messages![0]).toEqual({
+        shortMessage: 'Invalid reference.',
+        longMessage: 'Field "bytes" has an invalid reference.',
+      });
+    });
+
+    it('should detect and batch missing references in a layer', () => {
+      const state = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'bytes',
+              },
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'memory',
+              },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
+      expect(messages).toHaveLength(1);
+      expect(messages![0]).toEqual({
+        shortMessage: 'Invalid references.',
+        longMessage: 'Fields "bytes", "memory" have invalid reference.',
+      });
+    });
+
+    it('should detect and batch missing references in multiple layers', () => {
+      const state = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'bytes',
+              },
+              col2: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'memory',
+              },
+            },
+          },
+          second: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                dataType: 'string',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'count', // <= invalid
+                sourceField: 'source',
+              },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      const messages = indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState);
+      expect(messages).toHaveLength(2);
+      expect(messages).toEqual([
+        {
+          shortMessage: 'Invalid references on Layer 1.',
+          longMessage: 'Layer 1 has invalid references in fields "bytes", "memory".',
+        },
+        {
+          shortMessage: 'Invalid reference on Layer 2.',
+          longMessage: 'Layer 2 has an invalid reference in field "source".',
+        },
+      ]);
+    });
+
+    it('should return no errors if all references are satified', () => {
+      const state = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                dataType: 'number',
+                isBucketed: false,
+                label: 'Foo',
+                operationType: 'document',
+                sourceField: 'bytes',
+              },
+            },
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(
+        indexPatternDatasource.getErrorMessages(state as IndexPatternPrivateState)
+      ).not.toBeDefined();
+    });
+
+    it('should return no errors with layers with no columns', () => {
+      const state: IndexPatternPrivateState = {
+        indexPatternRefs: [],
+        existingFields: {},
+        isFirstExistenceFetch: false,
+        indexPatterns: expectedIndexPatterns,
+        layers: {
+          first: {
+            indexPatternId: '1',
+            columnOrder: [],
+            columns: {},
+          },
+        },
+        currentIndexPatternId: '1',
+      };
+      expect(indexPatternDatasource.getErrorMessages(state)).not.toBeDefined();
+    });
+  });
 });

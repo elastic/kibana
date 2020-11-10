@@ -6,12 +6,9 @@
 
 import { Ast } from '@kbn/interpreter/common';
 import { ScaleType } from '@elastic/charts';
-import { State, LayerConfig } from './types';
+import { PaletteRegistry } from 'src/plugins/charts/public';
+import { State, ValidLayer, LayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI } from '../types';
-
-interface ValidLayer extends LayerConfig {
-  xAccessor: NonNullable<LayerConfig['xAccessor']>;
-}
 
 export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: LayerConfig) => {
   const originalOrder = datasource
@@ -25,6 +22,7 @@ export const getSortedAccessors = (datasource: DatasourcePublicAPI, layer: Layer
 export const toExpression = (
   state: State,
   datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
   if (!state || !state.layers.length) {
@@ -41,12 +39,13 @@ export const toExpression = (
     });
   });
 
-  return buildExpression(state, metadata, datasourceLayers, attributes);
+  return buildExpression(state, metadata, datasourceLayers, paletteService, attributes);
 };
 
 export function toPreviewExpression(
   state: State,
-  datasourceLayers: Record<string, DatasourcePublicAPI>
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry
 ) {
   return toExpression(
     {
@@ -57,8 +56,11 @@ export function toPreviewExpression(
         ...state.legend,
         isVisible: false,
       },
+      valueLabels: 'hide',
     },
-    datasourceLayers
+    datasourceLayers,
+    paletteService,
+    {}
   );
 }
 
@@ -91,7 +93,8 @@ export function getScaleType(metadata: OperationMetadata | null, defaultScale: S
 export const buildExpression = (
   state: State,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
-  datasourceLayers?: Record<string, DatasourcePublicAPI>,
+  datasourceLayers: Record<string, DatasourcePublicAPI>,
+  paletteService: PaletteRegistry,
   attributes: Partial<{ title: string; description: string }> = {}
 ): Ast | null => {
   const validLayers = state.layers
@@ -191,20 +194,19 @@ export const buildExpression = (
               ],
             },
           ],
+          valueLabels: [state?.valueLabels || 'hide'],
           layers: validLayers.map((layer) => {
             const columnToLabel: Record<string, string> = {};
 
-            if (datasourceLayers) {
-              const datasource = datasourceLayers[layer.layerId];
-              layer.accessors
-                .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
-                .forEach((accessor) => {
-                  const operation = datasource.getOperationForColumnId(accessor);
-                  if (operation?.label) {
-                    columnToLabel[accessor] = operation.label;
-                  }
-                });
-            }
+            const datasource = datasourceLayers[layer.layerId];
+            layer.accessors
+              .concat(layer.splitAccessor ? [layer.splitAccessor] : [])
+              .forEach((accessor) => {
+                const operation = datasource.getOperationForColumnId(accessor);
+                if (operation?.label) {
+                  columnToLabel[accessor] = operation.label;
+                }
+              });
 
             const xAxisOperation =
               datasourceLayers &&
@@ -256,6 +258,29 @@ export const buildExpression = (
                     seriesType: [layer.seriesType],
                     accessors: layer.accessors,
                     columnToLabel: [JSON.stringify(columnToLabel)],
+                    ...(layer.palette
+                      ? {
+                          palette: [
+                            {
+                              type: 'expression',
+                              chain: [
+                                {
+                                  type: 'function',
+                                  function: 'theme',
+                                  arguments: {
+                                    variable: ['palette'],
+                                    default: [
+                                      paletteService
+                                        .get(layer.palette.name)
+                                        .toExpression(layer.palette.params),
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          ],
+                        }
+                      : {}),
                   },
                 },
               ],

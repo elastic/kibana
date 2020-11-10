@@ -9,6 +9,7 @@
     { "path": "./src/plugins/kibana_usage_collection/tsconfig.json" },
     { "path": "./src/plugins/kibana_utils/tsconfig.json" },
     { "path": "./src/plugins/newsfeed/tsconfig.json" },
+    { "path": "./src/plugins/security_oss/tsconfig.json" },
     { "path": "./src/plugins/share/tsconfig.json" },
     { "path": "./src/plugins/telemetry/tsconfig.json" },
     { "path": "./src/plugins/telemetry_collection_manager/tsconfig.json" },

@@ -28,6 +28,7 @@ describe('AbstractSearchStrategy', () => {
   beforeEach(() => {
     mockedFields = {};
     req = {
+      payload: {},
       pre: {
         indexPatternsService: {
           getFieldsForWildcard: jest.fn().mockReturnValue(mockedFields),
@@ -60,22 +61,11 @@ describe('AbstractSearchStrategy', () => {
 
     const responses = await abstractSearchStrategy.search(
       {
-        requestContext: {},
-        framework: {
-          core: {
-            getStartServices: jest.fn().mockReturnValue(
-              Promise.resolve([
-                {},
-                {
-                  data: {
-                    search: {
-                      search: searchFn,
-                    },
-                  },
-                },
-              ])
-            ),
-          },
+        payload: {
+          sessionId: 1,
+        },
+        requestContext: {
+          search: { search: searchFn },
         },
       },
       searches
@@ -90,8 +80,9 @@ describe('AbstractSearchStrategy', () => {
         },
         indexType: undefined,
       },
-      {},
-      {}
+      {
+        sessionId: 1,
+      }
     );
   });
 });

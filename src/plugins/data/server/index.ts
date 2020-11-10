@@ -208,6 +208,12 @@ export {
   OptionedParamType,
   OptionedValueProp,
   ParsedInterval,
+  // expressions
+  ExecutionContextSearch,
+  ExpressionFunctionKibana,
+  ExpressionFunctionKibanaContext,
+  ExpressionValueSearchContext,
+  KibanaContext,
   // search
   ISearchOptions,
   IEsSearchRequest,
@@ -223,6 +229,7 @@ export {
   ISearchStrategy,
   ISearchSetup,
   ISearchStart,
+  SearchStrategyDependencies,
   getDefaultSearchParams,
   getShardTimeout,
   shimHitsTotal,

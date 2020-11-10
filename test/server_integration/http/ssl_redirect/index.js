@@ -28,7 +28,7 @@ export default function ({ getService }) {
 
       await supertest.get('/').expect('location', url).expect(302);
 
-      await supertest.get('/').redirects(1).expect('location', '/app/kibana').expect(302);
+      await supertest.get('/').redirects(1).expect('location', '/app/home').expect(302);
     });
   });
 }

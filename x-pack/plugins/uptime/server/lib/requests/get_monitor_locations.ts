@@ -88,7 +88,7 @@ export const getMonitorLocations: UMElasticsearchQueryFn<
     },
   };
 
-  const result = await callES('search', params);
+  const { body: result } = await callES.search(params);
   const locations = result?.aggregations?.location?.buckets ?? [];
 
   const getGeo = (locGeo: { name: string; location?: string }) => {
