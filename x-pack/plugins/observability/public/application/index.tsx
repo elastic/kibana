@@ -64,11 +64,6 @@ export const renderApp = (
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
 
-  // setHeaderActionMenu((el) =>
-  //   toMountPoint(
-  //     <ActionMenu application={core.application} prepend={core.http.basePath.prepend} />
-  //   )(el)
-  // );
   core.chrome.setHelpExtension({
     appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
       defaultMessage: 'Observability',
