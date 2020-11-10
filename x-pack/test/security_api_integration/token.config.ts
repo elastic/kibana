@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export default async function ({ readConfigFile }) {
+import { FtrConfigProviderContext } from '@kbn/test/types/ftr';
+
+export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   return {
-    testFiles: [require.resolve('./auth')],
+    testFiles: [require.resolve('./tests/token')],
     servers: xPackAPITestsConfig.get('servers'),
     security: { disableTestUser: true },
     services: {
@@ -16,7 +18,7 @@ export default async function ({ readConfigFile }) {
       supertestWithoutAuth: xPackAPITestsConfig.get('services.supertestWithoutAuth'),
     },
     junit: {
-      reportName: 'Token-auth API Integration Tests',
+      reportName: 'X-Pack Security API Integration Tests (Token)',
     },
 
     esTestCluster: {
