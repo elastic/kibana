@@ -46,11 +46,7 @@ export default async ({ readConfigFile }) => {
     servers: servers(),
     kbnTestServer: {
       ...xpackFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        '--xpack.encryptedSavedObjects.encryptionKey="456XazszSCYexXqz4YktBGHCRkV6hyNK"',
-        '--xpack.encryptedSavedObjects.keyRotation.decryptionOnlyKeys=["decrypt123XazszSCYexXqz4YktBGHCR"]',
-      ],
+      serverArgs: [...xpackFunctionalConfig.get('kbnTestServer.serverArgs')],
     },
     // testFiles: tests.map(prepend).map(logTest),
     testFiles: ['alerts'].map(prepend).map(logTest),
