@@ -8,10 +8,10 @@ import React from 'react';
 
 import { EuiTableRow, EuiTableRowCell } from '@elastic/eui';
 
-import { IUser } from '../../../types';
+import { User } from '../../../types';
 
 interface UserRowProps {
-  user: IUser;
+  user: User;
   showEmail?: boolean;
 }
 
