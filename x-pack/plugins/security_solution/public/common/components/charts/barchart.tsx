@@ -73,6 +73,9 @@ export const BarChartBaseComponent = ({
     ...deepmerge(get('configs.settings', chartConfigs), { theme }),
   };
 
+  const yAccessors = useMemo(() => ['y'], []);
+  const splitSeriesAccessors = useMemo(() => ['g'], []);
+
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
       <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
@@ -86,15 +89,25 @@ export const BarChartBaseComponent = ({
             xScaleType={getOr(ScaleType.Linear, 'configs.series.xScaleType', chartConfigs)}
             yScaleType={getOr(ScaleType.Linear, 'configs.series.yScaleType', chartConfigs)}
             xAccessor="x"
-            yAccessors={['y']}
+            yAccessors={yAccessors}
             timeZone={timeZone}
-            splitSeriesAccessors={['g']}
+            splitSeriesAccessors={splitSeriesAccessors}
             data={series.value!}
             stackAccessors={get('configs.series.stackAccessors', chartConfigs)}
             color={series.color ? series.color : undefined}
           />
         ) : null;
       })}
+
+      {/* <HistogramBarSeries
+        id={'xxxx'}
+        xScaleType="time"
+        yScaleType="linear"
+        xAccessor="x"
+        yAccessors={yAccessors}
+        splitSeriesAccessors={splitSeriesAccessors}
+        data={data}
+      /> */}
 
       <Axis
         id={xAxisId}
