@@ -30,7 +30,7 @@ import { RuleAlertType } from '../../rules/types';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { getCreateRulesSchemaMock } from '../../../../../common/detection_engine/schemas/request/create_rules_schema.mock';
 import { ThreatMapping } from '../../../../../common/detection_engine/schemas/types/threat_mapping';
-import { CreateRulesBulkSchema } from 'x-pack/plugins/security_solution/common/detection_engine/schemas/request';
+import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request';
 
 type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
 
