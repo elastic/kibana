@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { readdir, stat, Stats } from 'fs';
+import { readdir, stat } from 'fs';
 import { resolve } from 'path';
 import { bindNodeCallback, from, merge, Observable } from 'rxjs';
 import { catchError, filter, map, mergeMap, shareReplay } from 'rxjs/operators';
@@ -138,7 +138,7 @@ function findManifestInFolder(
   return fsStat$(resolve(dir, 'kibana.json')).pipe(
     mergeMap((stats) => {
       // `kibana.json` exists in given directory, we got a plugin
-      if ((stats as Stats).isFile()) {
+      if (stats.isFile()) {
         return [dir];
       }
       return [];
@@ -167,7 +167,7 @@ function mapSubdirectories(
     mergeMap((subDirs: string[]) => subDirs.map((subDir) => resolve(dir, subDir))),
     mergeMap((subDir) =>
       fsStat$(subDir).pipe(
-        mergeMap((pathStat) => ((pathStat as Stats).isDirectory() ? mapFunc(subDir) : [])),
+        mergeMap((pathStat) => (pathStat.isDirectory() ? mapFunc(subDir) : [])),
         catchError((subDirStatError) => [
           PluginDiscoveryError.invalidPluginPath(subDir, subDirStatError),
         ])

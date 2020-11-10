@@ -239,7 +239,7 @@ export const createKbnUrlControls = (
  */
 export function getRelativeToHistoryPath(absoluteUrl: string, history: History): History.Path {
   function stripBasename(path: string | null) {
-    if (path == null) path = '';
+    if (path === null) path = '';
     const stripLeadingHash = (_: string) => (_.charAt(0) === '#' ? _.substr(1) : _);
     const stripTrailingSlash = (_: string) =>
       _.charAt(_.length - 1) === '/' ? _.substr(0, _.length - 1) : _;
