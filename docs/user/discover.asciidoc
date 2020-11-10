@@ -8,13 +8,13 @@
 You’ve added your data, and now you’re ready to dig in. You have questions about your data.
 What events were logged most recently? What pages on your website contain a
 specific word or phrase? What processes on your server take longer than 500 milliseconds to respond?
-This tutorial shows you how to use {kib} *Discover* to quickly search large amounts of
+This tutorial shows you how to use *Discover* to quickly search large amounts of
 data and understand what’s going on at any given time.
 
 You’ll learn to:
 
-- **Select** data for your exploration, including setting a time range,
-searching with the {kib} query language, and limiting results with filtering options.
+- **Select** data for your exploration, and then set a time range for that data,
+search it with the {kib} Query Language, and filter the results.
 - **Explore** the details of your data, view individual documents, and create tables
 that summarize the contents of the data.
 - **Present** your findings in reports and visualizations.
@@ -30,7 +30,7 @@ image::images/Discover-Start.png[Discover]
 === Prerequisites
 
 - If you don’t already have {kib}, set it up with https://www.elastic.co/cloud/elasticsearch-service/signup?baymax=docs-body&elektra=docs[our free trial].
-- You must have data in {es}.  This guide uses the
+- You must have data in {es}.  This tutorial uses the
 <<gs-get-data-into-kibana,ecommerce sample data set>>, but you can use your own data.
 - You should have an understanding of {ref}/documents-indices.html[{es} documents and indices].
 
@@ -39,131 +39,122 @@ image::images/Discover-Start.png[Discover]
 [[whats-you-goal-in-discover]]
 === What’s your goal?
 
-Most users have one of two goals in mind when exploring their data:
+When you start exploring your data in **Discover**, it's common to start with one or two goals:
 
 - **Get an overview of what is happening.**
-For example, you might want to look at the logs captured in your {es} cluster to
-get information on the health and performance of your cloud-deployed software over time.
-You can save your findings for later use when making decisions about maintenance and improvements.
+For example, you might look for
+information on the overall health and performance of your ecommerce business.
+You want to periodically gather the data and then generate a report that you can share.
 
-- **Find an answer to a specific question.** Consider if you are looking at
-Github statistics and are interested in the number of pull requests that went
-into a patch release and who contributed to the release. You want to visualize
-this data and present it to your coworkers.
-
-What is your goal?  The answer to this question will lead your explorations.
-
+- **Find an answer to a specific question.** You want
+to dig into your ecommerce data to
+determine which products, in what locations, and what day of the week to target your ads. You want to visualize
+this data and present it to your marketing team.
 
 [float]
 [[find-the-data-you-want-to-use]]
 === Step 1. Find the data you want to use
 
-Tell {kib} where to find your data, then set a time range for your exploration.
+Tell {kib} where to find your data, then specify the time range in which to view that data.
 
 . Open the main menu, and select **Discover**.
-+
-With **Discover**, you can perform ad-hoc analysis of your data in real-time.
-It’s where you’ll find hidden insights and relationships and emerging trends in your data.
 
-. Select the data you want to work with by choosing an <<index-patterns,index pattern>>.
+. Select the data you want to work with by choosing an index pattern.
 +
-{kib} requires an index pattern to tell it which Elasticsearch indices you want to work with.
+{kib} requires an <<index-patterns,index pattern>> to tell it which {es} indices you want to work with.
 To view the ecommerce sample data, make sure the index pattern is set to **kibana_sample_data_ecommerce**.
 +
 [role="screenshot"]
 image::images/discover-index-pattern.png[How to set the index pattern in Discover]
 
-. Adjust the time range to *Last 7 days*.
+. Adjust the time range to view data for the *Last 7 days*.
 +
 NOTE: The range selection is based on the default time field in your data.
 If you are using the sample data, this value was set when you added the data.
 If you  are using your own data, and it does not have a time field, the range selection is not available.
 
-. Optional. To view the count of documents for a given time,
+. To view the count of documents for a given time in the specified range,
 click and drag the mouse over the histogram, and then click *Refresh*.
 
 [float]
 [[explore-fields-in-your-data]]
 === Step 2. Explore the fields in your data
 
-The sortable documents table lists the documents that match your search.
+**Discover** includes a table that shows all the documents that match your search.
 By default, the table includes columns for the time field and the document `_source`.
-You’ll modify this table to display your fields of interest.  For this guide,
-the goal is to dig into the ecommerce data and find fields that
-help determine when and where to target your ads.
+You’ll modify this table to display only your fields of interest.
 
-. In the side navigation, scan through the list of **Available fields** to see
-what’s in your data. You can also search for a field by name using the
-**Search** field at the top of the list.
+. Scan through the list of **Available fields** to see
+what’s in your data. You can also search for a field by name.
 
-. Find the `manufacturer` field, and then click it to view its top five values.
+. Find the `manufacturer` field, and then click it to view the five most popular values for that field.
 +
 [role="screenshot"]
 image:images/filter-field.png[Fields list that displays the top five search results]
 
-. Click the add icon to toggle the field into the document table.
+. Click image:images/add-icon.png[Add icon] to toggle the field into the document table.
 
 . Add `geoip.country_iso_code` and `day of week` so your document table looks like this:
 +
 [role="screenshot"]
 image:images/document-table.png[Document table with fields for manufacturer, geo.country_iso_code, and day_of_week]
 
-. To rearrange the table columns to suit your needs, hover the mouse over a
+. To rearrange the table columns, hover the mouse over a
 column header, and then use the move and sort controls.
 
 [float]
-[[search-and-filter-in-discover]]
-=== Step 3. Search and filter your data
+[[search-in-discover]]
+=== Step 3. Search your data
 
-One of the unique capabilities of **Discover** is the ability to combine free text search with filtering based on structured data.
-
-. Enter your terms in the **Search** field.
-+
-To search all fields, enter a simple string. To search particular fields and
+One of the unique capabilities of **Discover** is the ability to combine
+free text search with filtering based on structured data.
+To search all fields, enter a simple string in the **Search** field. To search particular fields and
 build more complex queries, use the <<kuery-query,Kibana Query language>>.
 As you type, KQL prompts you with the fields you can search and the operators
 you can use to build a structured query.
-+
-To search the ecommerce data for documents where the country matches US.
-+
-.. Type `g` and then select `geoip.country_iso_code`.
-.. Select *equals some value* and *US*, and then click *Update*.
-.. For a more complex search, try:
+
+To search the ecommerce data for documents where the country matches US:
+
+. Enter `g`, and then select *geoip.country_iso_code*.
+. Select *equals some value* and *US*, and then click *Update*.
+. For a more complex search, try:
 +
 `geoip.country_iso_code : US and products.taxless_price >= 75`
 
-. To zero in on a subset of documents, add filters.
-+
+[float]
+[[filter-in-discover]]
+=== Step 4. Filter your data
+
 Whereas the query defines the set of documents you are interested in,
 filters enable you to zero in on different subsets of those documents.
 You can filter results to include or exclude specific fields,
 filter by data type, filter for a value in a range, and more.
 
-.. Click **Add filter**.
-.. Set Field to `day_of_week`, Operator to `is not`, and value to `Wednesday`.
-.. Save the filter.
+To exclude documents when day of week is Wednesday:
 
-. Continue your exploration by adding and removing filters.
-+
-To remove a filter,
+. Click **Add filter**.
+. Set **Field** to *day_of_week*, **Operator** to *is not*, and **Value** to *Wednesday*.
+. Save the filter.
+. Continue your exploration by adding more filters.
+. To remove a filter,
 click the close icon (x) next to its name in the filter bar.
 
 [float]
 [[look-inside-a-document]]
-=== Step 4.  Look inside a document
+=== Step 5.  Look inside a document
 
-Now dive into an individual document and view the details of that event.
+Dive into an individual document and view the documents
+that occurred before and after it.
 
 . In the document table, expand any document.
 +
 [role="screenshot"]
 image:images/document-table-expanded.png[Table view with document expanded]
 
-. Scan through the fields and their values.
-+
-To apply filters and toggle a field into the table, hover over a field name for the controls.
+. Scan through the fields and their values. If you find a field of interest,
+hover of its name for filters and other controls.
 
-. To view documents that occurred before or after the event, click **View surrounding documents**.
+. To view documents that occurred before or after the event you are looking at, click **View surrounding documents**.
 
 . To view document data as a separate page, click **View single document**.
 +
@@ -171,10 +162,10 @@ For direct access to a particular document, you can bookmark and share the docum
 
 [float]
 [[save-your-search]]
-=== Step 5.  Save your search for later use
+=== Step 6.  Save your search for later use
 
-Save your search so you can repeat it later or use it in visualizations and dashboards.
-Saving a search saves both the query you created and the additional filters you added.
+Save your search so you can repeat it later, generate a CSV report, or use it in visualizations, dashboards, and Canvas workpads.
+Saving a search saves the query and the filters.
 
 . In the toolbar, click **Save**.
 
@@ -182,9 +173,9 @@ Saving a search saves both the query you created and the additional filters you 
 
 [float]
 [[share-findings-in-a-report]]
-=== Step 6. Share your findings in a report
+=== Step 7. Share your findings in a report
 
-Want to share your findings with your peers? Export your data into a spreadsheet.
+Export your data into a spreadsheet.
 
 . In the toolbar, click **Share**, then **CSV Reports**.
 
@@ -193,7 +184,7 @@ Want to share your findings with your peers? Export your data into a spreadsheet
 Your report is available in **Stack Management > Reporting**.
 
 [float]
-=== Step 7. Visualize your findings
+=== Step 8. Visualize your findings
 If a field can be {ref}/search-aggregations.html[aggregated], you can quickly
 visualize it from **Discover**.
 
@@ -212,10 +203,11 @@ image:images/visualize-from-discover.png[Visualization that opens from Discover 
 There’s much more you can do with your data.
 
 
-* <<kuery-query,Learn more about KQL>>.  This page has examples for you to follow.
+* <<kuery-query, Get examples of KQL queries>> that you can try.
 
 * <<kibana-discover-settings, Configure Discover>> to better meet your needs.
-In **Advanced Settings**, you can configure the number of documents to show, configure the context view, and more.
+In **Advanced Settings**, you can configure the number of documents to show,
+the columns that display by default, and more.
 
 * <<dashboard,Create a dashboard>> with even more awesome visualizations, like treemaps, metrics, and tables.
 
