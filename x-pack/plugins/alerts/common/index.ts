@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AlertsHealth } from './alert';
+
 export * from './alert';
 export * from './alert_type';
 export * from './alert_instance';
@@ -15,6 +17,7 @@ export * from './builtin_action_groups';
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;
+  alertingFrameworkHeath: AlertsHealth;
 }
 
 export const BASE_ALERT_API_PATH = '/api/alerts';

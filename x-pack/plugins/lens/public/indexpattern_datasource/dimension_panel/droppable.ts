@@ -137,9 +137,9 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
     hasField(selectedColumn) &&
     selectedColumn.sourceField !== droppedItem.field.name &&
     operationsForNewField &&
-    operationsForNewField.includes(selectedColumn.operationType);
+    operationsForNewField.has(selectedColumn.operationType);
 
-  if (!operationsForNewField || operationsForNewField.length === 0) {
+  if (!operationsForNewField || operationsForNewField.size === 0) {
     return false;
   }
 
@@ -148,7 +148,7 @@ export function onDrop(props: DatasourceDimensionDropHandlerProps<IndexPatternPr
   const newColumn = hasFieldChanged
     ? changeField(selectedColumn, currentIndexPattern, droppedItem.field)
     : buildColumn({
-        op: operationsForNewField[0],
+        op: operationsForNewField.values().next().value,
         columns: state.layers[layerId].columns,
         indexPattern: currentIndexPattern,
         layerId,

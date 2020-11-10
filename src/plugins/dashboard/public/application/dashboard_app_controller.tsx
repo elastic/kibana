@@ -26,7 +26,7 @@ import ReactDOM from 'react-dom';
 import angular from 'angular';
 import deepEqual from 'fast-deep-equal';
 
-import { Observable, pipe, Subscription, merge } from 'rxjs';
+import { Observable, pipe, Subscription, merge, EMPTY } from 'rxjs';
 import {
   filter,
   map,
@@ -35,6 +35,7 @@ import {
   startWith,
   switchMap,
   distinctUntilChanged,
+  catchError,
 } from 'rxjs/operators';
 import { History } from 'history';
 import { SavedObjectSaveOpts, SavedObject } from 'src/plugins/saved_objects/public';
@@ -464,7 +465,10 @@ export class DashboardAppController {
                 switchMap((newChildIds: string[]) =>
                   merge(
                     ...newChildIds.map((childId) =>
-                      dashboardContainer!.getChild(childId).getOutput$()
+                      dashboardContainer!
+                        .getChild(childId)
+                        .getOutput$()
+                        .pipe(catchError(() => EMPTY))
                     )
                   )
                 )

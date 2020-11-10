@@ -415,7 +415,7 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.query ? this._descriptor.query : null;
   }
 
-  async getImmutableSourceProperties() {
+  async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
     const source = this.getSource();
     return await source.getImmutableProperties();
   }

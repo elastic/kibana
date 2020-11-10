@@ -6,7 +6,7 @@
 
 import { IRouteDependencies } from '../../plugin';
 
-export function registerWSOverviewRoute({
+export function registerOverviewRoute({
   router,
   enterpriseSearchRequestHandler,
 }: IRouteDependencies) {

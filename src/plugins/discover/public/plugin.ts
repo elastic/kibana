@@ -69,6 +69,7 @@ import {
   DiscoverUrlGenerator,
 } from './url_generator';
 import { SearchEmbeddableFactory } from './application/embeddable';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 declare module '../../share/public' {
   export interface UrlGeneratorStateMapping {
@@ -139,6 +140,7 @@ export interface DiscoverStartPlugins {
   urlForwarding: UrlForwardingStart;
   inspector: InspectorPublicPluginStart;
   savedObjects: SavedObjectsStart;
+  usageCollection?: UsageCollectionSetup;
 }
 
 const innerAngularName = 'app/discover';

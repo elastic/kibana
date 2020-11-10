@@ -300,6 +300,7 @@ describe('Task Runner', () => {
       kibana: {
         alerting: {
           instance_id: '1',
+          action_group_id: 'default',
         },
         saved_objects: [
           {
@@ -310,7 +311,7 @@ describe('Task Runner', () => {
           },
         ],
       },
-      message: "test:1: 'alert-name' active instance: '1'",
+      message: "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
     });
     expect(eventLogger.logEvent).toHaveBeenCalledWith({
       event: {
@@ -432,6 +433,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "action_group_id": undefined,
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -453,6 +455,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "action_group_id": "default",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -464,7 +467,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '1'",
+            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
           },
         ],
         Array [
@@ -646,6 +649,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "action_group_id": undefined,
                 "instance_id": "2",
               },
               "saved_objects": Array [
@@ -667,6 +671,7 @@ describe('Task Runner', () => {
             },
             "kibana": Object {
               "alerting": Object {
+                "action_group_id": "default",
                 "instance_id": "1",
               },
               "saved_objects": Array [
@@ -678,7 +683,7 @@ describe('Task Runner', () => {
                 },
               ],
             },
-            "message": "test:1: 'alert-name' active instance: '1'",
+            "message": "test:1: 'alert-name' active instance: '1' in actionGroup: 'default'",
           },
         ],
       ]

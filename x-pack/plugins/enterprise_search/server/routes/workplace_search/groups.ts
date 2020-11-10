@@ -8,9 +8,6 @@ import { schema } from '@kbn/config-schema';
 
 import { IRouteDependencies } from '../../plugin';
 
-import { IMeta } from '../../../common/types';
-import { IUser, IContentSource, IGroup } from '../../../common/types/workplace_search';
-
 export function registerGroupsRoute({
   router,
   enterpriseSearchRequestHandler,
@@ -22,8 +19,6 @@ export function registerGroupsRoute({
     },
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/org/groups',
-      hasValidData: (body: { users: IUser[]; contentSources: IContentSource[] }) =>
-        typeof Array.isArray(body?.users) && typeof Array.isArray(body?.contentSources),
     })
   );
 
@@ -40,7 +35,6 @@ export function registerGroupsRoute({
       return enterpriseSearchRequestHandler.createRequest({
         path: '/ws/org/groups',
         body: request.body,
-        hasValidData: (body: { created_at: string }) => typeof body?.created_at === 'string',
       })(context, request, response);
     }
   );
@@ -71,9 +65,6 @@ export function registerSearchGroupsRoute({
       return enterpriseSearchRequestHandler.createRequest({
         path: '/ws/org/groups/search',
         body: request.body,
-        hasValidData: (body: { results: IGroup[]; meta: IMeta }) =>
-          typeof Array.isArray(body?.results) &&
-          typeof body?.meta?.page?.total_results === 'number',
       })(context, request, response);
     }
   );
@@ -92,8 +83,6 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: I
     async (context, request, response) => {
       return enterpriseSearchRequestHandler.createRequest({
         path: `/ws/org/groups/${request.params.id}`,
-        hasValidData: (body: IGroup) =>
-          typeof body?.createdAt === 'string' && typeof body?.usersCount === 'number',
       })(context, request, response);
     }
   );
@@ -116,8 +105,6 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: I
       return enterpriseSearchRequestHandler.createRequest({
         path: `/ws/org/groups/${request.params.id}`,
         body: request.body,
-        hasValidData: (body: IGroup) =>
-          typeof body?.createdAt === 'string' && typeof body?.usersCount === 'number',
       })(context, request, response);
     }
   );
@@ -134,7 +121,6 @@ export function registerGroupRoute({ router, enterpriseSearchRequestHandler }: I
     async (context, request, response) => {
       return enterpriseSearchRequestHandler.createRequest({
         path: `/ws/org/groups/${request.params.id}`,
-        hasValidData: (body: { deleted: boolean }) => body?.deleted === true,
       })(context, request, response);
     }
   );
@@ -156,7 +142,6 @@ export function registerGroupUsersRoute({
     async (context, request, response) => {
       return enterpriseSearchRequestHandler.createRequest({
         path: `/ws/org/groups/${request.params.id}/group_users`,
-        hasValidData: (body: IUser[]) => typeof Array.isArray(body),
       })(context, request, response);
     }
   );
@@ -182,8 +167,6 @@ export function registerShareGroupRoute({
       return enterpriseSearchRequestHandler.createRequest({
         path: `/ws/org/groups/${request.params.id}/share`,
         body: request.body,
-        hasValidData: (body: IGroup) =>
-          typeof body?.createdAt === 'string' && typeof body?.usersCount === 'number',
       })(context, request, response);
     }
   );
@@ -209,8 +192,6 @@ export function registerAssignGroupRoute({
       return enterpriseSearchRequestHandler.createRequest({
         path: `/ws/org/groups/${request.params.id}/assign`,
         body: request.body,
-        hasValidData: (body: IGroup) =>
-          typeof body?.createdAt === 'string' && typeof body?.usersCount === 'number',
       })(context, request, response);
     }
   );
@@ -238,19 +219,7 @@ export function registerBoostsGroupRoute({
       return enterpriseSearchRequestHandler.createRequest({
         path: `/ws/org/groups/${request.params.id}/update_source_boosts`,
         body: request.body,
-        hasValidData: (body: IGroup) =>
-          typeof body?.createdAt === 'string' && typeof body?.usersCount === 'number',
       })(context, request, response);
     }
   );
-}
-
-export function registerWSGroupRoutes(dependencies: IRouteDependencies) {
-  registerGroupsRoute(dependencies);
-  registerSearchGroupsRoute(dependencies);
-  registerGroupRoute(dependencies);
-  registerGroupUsersRoute(dependencies);
-  registerShareGroupRoute(dependencies);
-  registerAssignGroupRoute(dependencies);
-  registerBoostsGroupRoute(dependencies);
 }
