@@ -33,12 +33,12 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
   function getAlertingApiKeysToInvalidate() {
     return supertest
-      .get(`/api/alerting_tasks/alerting_invalidate_apiKeys`)
+      .get(`/api/alerts_fixture/api_keys_pending_invalidation`)
       .expect(200)
       .then((response: SupertestResponse) => response.body);
   }
 
-  describe.skip('update', () => {
+  describe('update', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
@@ -876,7 +876,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             .auth(user.username, user.password)
             .send(updatedData);
 
-          const apiKeyIds = (await getAlertingApiKeysToInvalidate()).docs[0];
+          const apiKeyIds = await getAlertingApiKeysToInvalidate();
           expect(apiKeyIds.apiKeysToInvalidate.length > 1).to.be(true);
 
           const statusUpdates: string[] = [];
@@ -888,11 +888,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
 
           expect(statusUpdates.find((status) => status === 'failed')).to.be(undefined);
 
-          await retry.try(async () => {
-            const apiKeyIdsRes = (await getAlertingApiKeysToInvalidate()).docs[0];
-            expect(apiKeyIdsRes.apiKeysToInvalidate.length).to.be(1);
-          });
-
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
             case 'space_1_all at space2':
@@ -902,7 +897,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
                   'update',
-                  'test.noop',
+                  'test.longRunning',
                   'alertsFixture'
                 ),
                 statusCode: 403,
@@ -968,7 +963,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 error: 'Forbidden',
                 message: getConsumerUnauthorizedErrorMessage(
                   'update',
-                  'test.noop',
+                  'test.longRunning',
                   'alertsFixture'
                 ),
                 statusCode: 403,

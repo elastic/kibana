@@ -191,5 +191,6 @@ async function invalidateApiKeys(
       }
     })
   );
+  logger.debug(`Total invalidated api keys "${totalInvalidated}"`);
   return totalInvalidated;
 }

@@ -435,7 +435,7 @@ export function defineAlertTypes(
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     async executor() {
-      await new Promise((resolve) => setTimeout(resolve, 10000));
+      await new Promise((resolve) => setTimeout(resolve, 5000));
     },
   };
 

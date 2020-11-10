@@ -198,12 +198,16 @@ export function defineRoutes(
     ): Promise<IKibanaResponse<any>> => {
       try {
         const [{ savedObjects }] = await core.getStartServices();
-        const repository = savedObjects.createInternalRepository(['api_key_pending_invalidation']);
-        const apiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
+        const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
+          includedHiddenTypes: ['api_key_pending_invalidation'],
+        });
+        const findResult = await savedObjectsWithTasksAndAlerts.find<InvalidatePendingApiKey>({
           type: 'api_key_pending_invalidation',
         });
+        // eslint-disable-next-line no-console
+        console.log(findResult);
         return res.ok({
-          body: { apiKeysToInvalidate },
+          body: { apiKeysToInvalidate: findResult.saved_objects },
         });
       } catch (err) {
         return res.badRequest({ body: err });
