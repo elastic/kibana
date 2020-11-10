@@ -5,9 +5,9 @@
  */
 
 export * from '../../../common/types/app_search';
-export { IRole, TRole, TAbility } from './utils/role';
+export { Role, RoleTypes, AbilityTypes } from './utils/role';
 
-export interface IEngine {
+export interface Engine {
   name: string;
   type: string;
   language: string;
