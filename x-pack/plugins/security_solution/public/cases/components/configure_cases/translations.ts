@@ -80,15 +80,26 @@ export const CASE_CLOSURE_OPTIONS_CLOSED_INCIDENT = i18n.translate(
     defaultMessage: 'Automatically close Security cases when incident is closed in external system',
   }
 );
+export const FIELD_MAPPING_TITLE = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingTitle', {
+    values: { thirdPartyName },
+    defaultMessage: '{ thirdPartyName } field mappings',
+  });
+};
 
-export const FIELD_MAPPING_TITLE = (thirdPartyName: string) =>
-  i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingTitle', {
-    defaultMessage: `${thirdPartyName} field mappings`,
+export const FIELD_MAPPING_DESC = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingDesc', {
+    values: { thirdPartyName },
+    defaultMessage:
+      'Map Security Case fields to { thirdPartyName } fields when pushing data to { thirdPartyName }. Field mappings require an established connection to { thirdPartyName }.',
   });
-export const FIELD_MAPPING_DESC = (thirdPartyName: string) =>
-  i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingDesc', {
-    defaultMessage: `Map Security Case fields to ${thirdPartyName} fields when pushing data to ${thirdPartyName}. Field mappings require an established connection to ${thirdPartyName}.`,
+};
+export const EDIT_FIELD_MAPPING_TITLE = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.case.configureCases.editFieldMappingTitle', {
+    values: { thirdPartyName },
+    defaultMessage: 'Edit { thirdPartyName } field mappings',
   });
+};
 
 export const FIELD_MAPPING_FIRST_COL = i18n.translate(
   'xpack.securitySolution.case.configureCases.fieldMappingFirstCol',
@@ -97,10 +108,12 @@ export const FIELD_MAPPING_FIRST_COL = i18n.translate(
   }
 );
 
-export const FIELD_MAPPING_SECOND_COL = (thirdPartyName: string) =>
-  i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingSecondCol', {
-    defaultMessage: `${thirdPartyName} field`,
+export const FIELD_MAPPING_SECOND_COL = (thirdPartyName: string): string => {
+  return i18n.translate('xpack.securitySolution.case.configureCases.fieldMappingSecondCol', {
+    values: { thirdPartyName },
+    defaultMessage: '{ thirdPartyName } field',
   });
+};
 
 export const FIELD_MAPPING_THIRD_COL = i18n.translate(
   'xpack.securitySolution.case.configureCases.fieldMappingThirdCol',
@@ -133,6 +146,17 @@ export const FIELD_MAPPING_EDIT_APPEND = i18n.translate(
 export const CANCEL = i18n.translate('xpack.securitySolution.case.configureCases.cancelButton', {
   defaultMessage: 'Cancel',
 });
+
+export const SAVE = i18n.translate('xpack.securitySolution.case.configureCases.saveButton', {
+  defaultMessage: 'Save',
+});
+
+export const SAVE_CLOSE = i18n.translate(
+  'xpack.securitySolution.case.configureCases.saveAndCloseButton',
+  {
+    defaultMessage: 'Save & Close',
+  }
+);
 
 export const WARNING_NO_CONNECTOR_TITLE = i18n.translate(
   'xpack.securitySolution.case.configureCases.warningTitle',

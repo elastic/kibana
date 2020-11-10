@@ -36,6 +36,7 @@ export interface Props {
   handleShowEditFlyout: () => void;
   isLoading: boolean;
   onChangeConnector: (id: string) => void;
+  onClickUpdateMappings: () => void;
   selectedConnector: { id: string; type: string };
   updateConnectorDisabled: boolean;
 }
@@ -45,6 +46,7 @@ const ConnectorsComponent: React.FC<Props> = ({
   handleShowEditFlyout,
   isLoading,
   onChangeConnector,
+  onClickUpdateMappings,
   selectedConnector,
   updateConnectorDisabled,
 }) => {
@@ -104,7 +106,7 @@ const ConnectorsComponent: React.FC<Props> = ({
                   connectorActionTypeId={selectedConnector.type}
                   mapping={null}
                   updateFieldMappingsDisabled={updateConnectorDisabled}
-                  setEditFlyoutVisibility={() => console.log('setEditFlyoutVisibility')}
+                  setEditFlyoutVisibility={onClickUpdateMappings}
                 />
               </EuiFlexItem>
             ) : null}
