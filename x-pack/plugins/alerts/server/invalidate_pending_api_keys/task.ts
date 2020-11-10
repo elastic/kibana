@@ -134,6 +134,7 @@ function taskRunner(
               apiKeysToInvalidate,
               securityPluginSetup
             );
+
             hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > 0;
           } while (hasApiKeysPendingInvalidation);
 
@@ -170,20 +171,23 @@ async function manageToInvalidateApiKeys(
   securityPluginSetup?: SecurityPluginSetup
 ) {
   let totalInvalidated = 0;
-  apiKeysToInvalidate.saved_objects.forEach(async (obj) => {
-    const response = await invalidateAPIKey({ id: obj.attributes.apiKeyId }, securityPluginSetup);
+  for (const apiKeyObj of apiKeysToInvalidate.saved_objects) {
+    const response = await invalidateAPIKey(
+      { id: apiKeyObj.attributes.apiKeyId },
+      securityPluginSetup
+    );
     if (response.apiKeysEnabled === true && response.result.error_count > 0) {
-      logger.error(`Failed to invalidate API Key [id="${obj.attributes.apiKeyId}"]`);
+      logger.error(`Failed to invalidate API Key [id="${apiKeyObj.attributes.apiKeyId}"]`);
     } else {
       try {
-        await repository.delete('api_key_pending_invalidation', obj.id);
+        await repository.delete('api_key_pending_invalidation', apiKeyObj.id);
         totalInvalidated++;
       } catch (err) {
         logger.error(
-          `Failed to cleanup api key "${obj.attributes.apiKeyId}". Error: ${err.message}`
+          `Failed to cleanup api key "${apiKeyObj.attributes.apiKeyId}". Error: ${err.message}`
         );
       }
     }
-  });
+  }
   return totalInvalidated;
 }

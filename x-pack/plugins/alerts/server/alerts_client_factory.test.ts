@@ -92,7 +92,7 @@ test('creates an alerts client with proper constructor arguments when security i
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedWrappers: ['security'],
-    includedHiddenTypes: ['alert'],
+    includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
   const { AlertsAuthorization } = jest.requireMock('./authorization/alerts_authorization');
@@ -141,7 +141,7 @@ test('creates an alerts client with proper constructor arguments', async () => {
 
   expect(savedObjectsService.getScopedClient).toHaveBeenCalledWith(request, {
     excludedWrappers: ['security'],
-    includedHiddenTypes: ['alert'],
+    includedHiddenTypes: ['alert', 'api_key_pending_invalidation'],
   });
 
   const { AlertsAuthorization } = jest.requireMock('./authorization/alerts_authorization');
