@@ -82,7 +82,6 @@ export class EventsQuery {
    *
    * @param client a client for searching ES
    * @param filter an optional string representation of a raw Elasticsearch clause for filtering the results
-   * @param timerange a time range bound for the ES query
    */
   async search(
     client: IScopedClusterClient,
