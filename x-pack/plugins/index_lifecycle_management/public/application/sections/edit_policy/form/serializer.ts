@@ -97,28 +97,26 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
     }
 
     if (draft.phases.hot?.actions) {
-      if (draft.phases.hot.actions?.rollover && _meta.hot.useRollover) {
-        if (draft.phases.hot.actions.rollover.max_age) {
-          draft.phases.hot.actions.rollover.max_age = `${draft.phases.hot.actions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
+      const hotPhaseActions = draft.phases.hot.actions;
+      if (hotPhaseActions.rollover && _meta.hot.useRollover) {
+        if (hotPhaseActions.rollover.max_age) {
+          hotPhaseActions.rollover.max_age = `${hotPhaseActions.rollover.max_age}${_meta.hot.maxAgeUnit}`;
         }
 
-        if (draft.phases.hot.actions.rollover.max_size) {
-          draft.phases.hot.actions.rollover.max_size = `${draft.phases.hot.actions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
+        if (hotPhaseActions.rollover.max_size) {
+          hotPhaseActions.rollover.max_size = `${hotPhaseActions.rollover.max_size}${_meta.hot.maxStorageSizeUnit}`;
         }
 
-        if (_meta.hot.bestCompression && draft.phases.hot.actions?.forcemerge) {
-          draft.phases.hot.actions.forcemerge.index_codec = 'best_compression';
+        if (_meta.hot.bestCompression && hotPhaseActions.forcemerge) {
+          hotPhaseActions.forcemerge.index_codec = 'best_compression';
         }
       } else {
-        delete draft.phases.hot.actions.rollover;
-        delete draft.phases.hot.actions.forcemerge;
+        delete hotPhaseActions.rollover;
+        delete hotPhaseActions.forcemerge;
       }
 
-      if (
-        !updatedPolicy.phases.hot!.actions?.set_priority &&
-        draft.phases.hot.actions.set_priority
-      ) {
-        delete draft.phases.hot.actions.set_priority;
+      if (!updatedPolicy.phases.hot!.actions?.set_priority && hotPhaseActions.set_priority) {
+        delete hotPhaseActions.set_priority;
       }
     }
 
