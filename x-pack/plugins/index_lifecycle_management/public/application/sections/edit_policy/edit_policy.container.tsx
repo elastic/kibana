@@ -12,8 +12,11 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { useKibana } from '../../../shared_imports';
 
 import { useLoadPoliciesList } from '../../services/api';
+import { getPolicyByName } from '../../lib/policies';
+import { defaultPolicy } from '../../constants';
 
 import { EditPolicy as PresentationComponent } from './edit_policy';
+import { EditPolicyContextProvider } from './edit_policy_context';
 
 interface RouterProps {
   policyName: string;
@@ -44,6 +47,7 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
   useEffect(() => {
     breadcrumbService.setBreadcrumbs('editPolicy');
   }, [breadcrumbService]);
+
   if (isLoading) {
     return (
       <EuiEmptyPrompt
@@ -86,12 +90,19 @@ export const EditPolicy: React.FunctionComponent<Props & RouteComponentProps<Rou
     );
   }
 
+  const existingPolicy = getPolicyByName(policies, policyName);
+
   return (
-    <PresentationComponent
-      policies={policies}
-      history={history}
-      getUrlForApp={getUrlForApp}
-      policyName={policyName}
-    />
+    <EditPolicyContextProvider
+      value={{
+        isNewPolicy: !existingPolicy?.policy,
+        policyName,
+        policy: existingPolicy?.policy ?? defaultPolicy,
+        existingPolicies: policies,
+        getUrlForApp,
+      }}
+    >
+      <PresentationComponent history={history} />
+    </EditPolicyContextProvider>
   );
 };
