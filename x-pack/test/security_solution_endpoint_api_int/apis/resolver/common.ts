@@ -22,6 +22,7 @@ import {
   entityIDSafeVersion,
   eventIDSafeVersion,
   timestampSafeVersion,
+  timestampAsDateSafeVersion,
 } from '../../../../plugins/security_solution/common/endpoint/models/event';
 import {
   Event,
@@ -244,9 +245,9 @@ const verifyAncestry = ({
         }
       );
 
-      const ts = timestampSafeVersion(tree.origin?.data);
+      const ts = timestampAsDateSafeVersion(tree.origin?.data);
       expect(ts).to.not.be(undefined);
-      expect(ts).to.be(timestampSafeVersion(originLifecycleSorted[0]));
+      expect(ts).to.eql(timestampAsDateSafeVersion(originLifecycleSorted[0]));
     }
 
     // check the constructed ancestors array to see if we're missing any nodes in the ancestry
