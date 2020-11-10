@@ -1,0 +1,51 @@
+---
+- name: Install Docker
+  hosts: all
+  vars:
+    DOCKER_PACKAGES:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - gnupg-agent
+      - software-properties-common
+
+  tasks:
+  - name: Update apt packages
+    become: yes
+    apt:
+      update_cache: "yes"
+
+  - name: Install packages needed for Docker
+    become: yes
+    apt:
+      name: "{{ DOCKER_PACKAGES }}"
+      state: present
+      force_apt_get: "yes"
+
+  - name: Add Docker GPG apt Key
+    become: yes
+    apt_key:
+      url: https://download.docker.com/linux/ubuntu/gpg
+      state: present
+
+  - name: Save the current Ubuntu release version into a variable
+    shell: lsb_release -cs
+    register: ubuntu_version
+
+  - name: Add Docker Repository
+    become: yes
+    apt_repository:
+      repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ubuntu_version.stdout }} stable"
+      state: present
+
+  - name: Update apt packages
+    become: yes
+    apt:
+      update_cache: "yes"
+
+  - name: Install Docker
+    become: yes
+    apt:
+      name: "docker-ce"
+      state: present
+      force_apt_get: "yes"

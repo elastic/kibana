@@ -2,7 +2,7 @@ Vagrant.configure("2") do |config|
   config.vm.synced_folder 'target/', '/packages'
 
   config.vm.define "tar" do |tar|
-    tar.vm.box = 'generic/ubuntu2004'
+    tar.vm.box = 'generic/centos/8'
   end
 
   config.vm.define "deb" do |deb|
@@ -11,12 +11,15 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "rpm" do |rpm|
     rpm.vm.box = 'generic/rhel8'
-    config.vm.provision "ansible" do |ansible|
+    rpm.vm.provision "ansible" do |ansible|
       ansible.playbook = "test/package/rpm/playbook.yml"
     end
   end
 
   config.vm.define "docker" do |docker|
-    docker.vm.box = 'generic/centos/8'
+    docker.vm.box = 'generic/ubuntu2004'
+    docker.vm.provision "ansible" do |ansible|
+      ansible.playbook = "test/package/docker/playbook.yml"
+    end
   end
 end
