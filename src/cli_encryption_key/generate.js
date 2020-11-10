@@ -18,37 +18,21 @@
  */
 
 import { safeDump } from 'js-yaml';
-import { appendFileSync } from 'fs';
 import { isEmpty } from 'lodash';
-import { join } from 'path';
-
-import { getConfigDirectory } from '@kbn/utils';
-
-import { confirm } from '../cli_keystore/utils';
+import { interactive } from './interactive';
 import { Logger } from '../cli_plugin/lib/logger';
 
 export async function generate(encryptionConfig, command) {
   const logger = new Logger();
   const keys = encryptionConfig.generate({ force: command.force });
-  if (!command.quiet) {
-    if (command.force) {
-      logger.log('Regenerating all encryption keys.  Add these to kibana.yml:');
-    } else {
-      logger.log('Generating missing encryption keys.  Add these to kibana.yml:');
-    }
-  }
   if (isEmpty(keys)) {
     logger.log('No keys to write.  Use the --force flag to generate new keys.');
   } else {
-    logger.log(safeDump(keys));
-
     if (command.interactive) {
-      const write = await confirm('Write to kibana.yml?');
-      if (write) {
-        const kibanaYML = join(getConfigDirectory(), 'kibana.yml');
-        appendFileSync(kibanaYML, safeDump(keys));
-        logger.log(`Wrote ${Object.keys(keys).length} settings to kibana.yml.`);
-      }
+      await interactive(keys, logger);
+    } else {
+      if (!command.quiet) logger.log('Generating encryption keys.');
+      logger.log(safeDump(keys));
     }
   }
   if (command.force && !command.quiet) {
