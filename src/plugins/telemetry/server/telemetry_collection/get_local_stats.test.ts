@@ -87,8 +87,7 @@ function mockStatsCollectionConfig(clusterInfo: any, clusterStats: any, kibana: 
     ...createCollectorFetchContextMock(),
     esClient: mockGetLocalStats(clusterInfo, clusterStats),
     usageCollection: mockUsageCollection(kibana),
-    start: '',
-    end: '',
+    timestamp: Date.now(),
   };
 }
 

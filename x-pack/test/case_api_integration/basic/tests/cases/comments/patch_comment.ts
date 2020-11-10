@@ -33,7 +33,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
+
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
       const { body } = await supertest
         .patch(`${CASES_URL}/${postedCase.id}/comments`)
@@ -42,7 +44,9 @@ export default ({ getService }: FtrProviderContext): void => {
           id: patchedCase.comments[0].id,
           version: patchedCase.comments[0].version,
           comment: newComment,
-        });
+        })
+        .expect(200);
+
       expect(body.comments[0].comment).to.eql(newComment);
       expect(body.updated_by).to.eql(defaultUser);
     });
@@ -51,7 +55,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: postedCase } = await supertest
         .post(CASES_URL)
         .set('kbn-xsrf', 'true')
-        .send(postCaseReq);
+        .send(postCaseReq)
+        .expect(200);
+
       await supertest
         .patch(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
@@ -85,7 +91,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
+
       await supertest
         .patch(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
@@ -107,7 +115,9 @@ export default ({ getService }: FtrProviderContext): void => {
       const { body: patchedCase } = await supertest
         .post(`${CASES_URL}/${postedCase.id}/comments`)
         .set('kbn-xsrf', 'true')
-        .send(postCommentReq);
+        .send(postCommentReq)
+        .expect(200);
+
       const newComment = 'Well I decided to update my comment. So what? Deal with it.';
       await supertest
         .patch(`${CASES_URL}/${postedCase.id}/comments`)

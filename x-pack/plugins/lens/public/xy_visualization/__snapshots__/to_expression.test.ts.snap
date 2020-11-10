@@ -145,6 +145,9 @@ Object {
         "title": Array [
           "",
         ],
+        "valueLabels": Array [
+          "hide",
+        ],
         "xTitle": Array [
           "",
         ],

@@ -26,12 +26,14 @@ import {
   TimelineTypeLiteral,
   TimelineType,
   RowRendererId,
+  TimelineId,
 } from '../../../../common/types/timeline';
 import { normalizeTimeRange } from '../../../common/components/url_state/normalize_time_range';
 
 import { timelineDefaults } from './defaults';
 import { ColumnHeaderOptions, KqlMode, TimelineModel } from './model';
 import { TimelineById } from './types';
+import { activeTimeline } from '../../containers/active_timeline_context';
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
@@ -113,6 +115,17 @@ interface AddTimelineParams {
   timelineById: TimelineById;
 }
 
+export const shouldResetActiveTimelineContext = (
+  id: string,
+  oldTimeline: TimelineModel,
+  newTimeline: TimelineModel
+) => {
+  if (id === TimelineId.active && oldTimeline.savedObjectId !== newTimeline.savedObjectId) {
+    return true;
+  }
+  return false;
+};
+
 /**
  * Add a saved object timeline to the store
  * and default the value to what need to be if values are null
@@ -121,13 +134,19 @@ export const addTimelineToStore = ({
   id,
   timeline,
   timelineById,
-}: AddTimelineParams): TimelineById => ({
-  ...timelineById,
-  [id]: {
-    ...timeline,
-    isLoading: timelineById[id].isLoading,
-  },
-});
+}: AddTimelineParams): TimelineById => {
+  if (shouldResetActiveTimelineContext(id, timelineById[id], timeline)) {
+    activeTimeline.setActivePage(0);
+    activeTimeline.setExpandedEventIds({});
+  }
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      isLoading: timelineById[id].isLoading,
+    },
+  };
+};
 
 interface AddNewTimelineParams {
   columns: ColumnHeaderOptions[];

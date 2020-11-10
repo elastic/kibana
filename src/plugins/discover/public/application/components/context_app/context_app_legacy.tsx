@@ -16,9 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import './context_app_legacy.scss';
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
-import { EuiPanel, EuiText } from '@elastic/eui';
+import { EuiPanel, EuiText, EuiPageContent, EuiPage } from '@elastic/eui';
+import { ContextErrorMessage } from '../context_error_message';
 import {
   DocTableLegacy,
   DocTableLegacyProps,
@@ -35,6 +37,7 @@ export interface ContextAppProps {
   minimumVisibleRows: number;
   sorting: string[];
   status: string;
+  reason: string;
   defaultStepSize: number;
   predecessorCount: number;
   successorCount: number;
@@ -56,6 +59,7 @@ function isLoading(status: string) {
 export function ContextAppLegacy(renderProps: ContextAppProps) {
   const status = renderProps.status;
   const isLoaded = status === LOADING_STATUS.LOADED;
+  const isFailed = status === LOADING_STATUS.FAILED;
 
   const actionBarProps = (type: string) => {
     const {
@@ -111,18 +115,24 @@ export function ContextAppLegacy(renderProps: ContextAppProps) {
 
   return (
     <I18nProvider>
-      <React.Fragment>
-        <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
-        {loadingFeedback()}
-        {isLoaded ? (
-          <EuiPanel paddingSize="none">
-            <div className="discover-table">
-              <DocTableLegacy {...docTableProps()} />
-            </div>
-          </EuiPanel>
-        ) : null}
-        <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
-      </React.Fragment>
+      {isFailed ? (
+        <ContextErrorMessage status={status} reason={renderProps.reason} />
+      ) : (
+        <EuiPage>
+          <EuiPageContent paddingSize="s" className="dscCxtAppContent">
+            <ActionBar {...actionBarProps(PREDECESSOR_TYPE)} />
+            {loadingFeedback()}
+            {isLoaded ? (
+              <EuiPanel paddingSize="none">
+                <div className="discover-table">
+                  <DocTableLegacy {...docTableProps()} />
+                </div>
+              </EuiPanel>
+            ) : null}
+            <ActionBar {...actionBarProps(SUCCESSOR_TYPE)} />
+          </EuiPageContent>
+        </EuiPage>
+      )}
     </I18nProvider>
   );
 }

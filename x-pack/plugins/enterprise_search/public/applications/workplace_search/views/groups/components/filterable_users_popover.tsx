@@ -45,7 +45,6 @@ export const FilterableUsersPopover: React.FC<IIFilterableUsersPopoverProps> = (
         isOpen={isPopoverOpen}
         closePopover={closePopover}
         panelPaddingSize="none"
-        withTitle={true}
       >
         <FilterableUsersList
           users={users}

@@ -69,7 +69,7 @@ exports[`UptimeDatePicker component renders properly with mock data 1`] = `
       class="euiToolTipAnchor"
     >
       <button
-        class="euiButton euiButton--primary euiSuperUpdateButton euiButton--fill"
+        class="euiButton euiButton--primary euiButton--fill euiSuperUpdateButton"
         data-test-subj="superDatePickerApplyTimeButton"
         type="button"
       >

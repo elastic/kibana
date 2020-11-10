@@ -125,7 +125,7 @@ function DateRangesParamEditor({
     );
 
   return (
-    <EuiFormRow compressed fullWidth>
+    <EuiFormRow display="rowCompressed" fullWidth>
       <>
         <EuiText size="xs">
           <EuiLink href={services.docLinks.links.date.dateMath} target="_blank">

@@ -88,7 +88,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           catalogue: ['visualize'],
           savedObject: {
             all: ['visualization', 'query', 'lens'],
-            read: ['index-pattern', 'search'],
+            read: ['index-pattern', 'search', 'tag'],
           },
           ui: ['show', 'delete', 'save', 'saveQuery'],
         },
@@ -97,7 +97,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
           catalogue: ['visualize'],
           savedObject: {
             all: [],
-            read: ['index-pattern', 'search', 'visualization', 'query', 'lens'],
+            read: ['index-pattern', 'search', 'visualization', 'query', 'lens', 'tag'],
           },
           ui: ['show'],
         },
@@ -155,6 +155,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'canvas-workpad',
               'lens',
               'map',
+              'tag',
             ],
           },
           ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
@@ -174,6 +175,7 @@ export const buildOSSFeatures = ({ savedObjectTypes, includeTimelion }: BuildOSS
               'map',
               'dashboard',
               'query',
+              'tag',
             ],
           },
           ui: ['show'],

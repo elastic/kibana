@@ -116,7 +116,8 @@ export const DataFrameAnalyticsList: FC<Props> = ({
     setAnalyticsStats,
     setErrorMessage,
     setIsInitialized,
-    blockRefresh
+    blockRefresh,
+    isManagementTable
   );
 
   const updateFilteredItems = (queryClauses: any) => {

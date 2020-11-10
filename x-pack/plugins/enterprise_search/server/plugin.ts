@@ -39,13 +39,11 @@ import { registerConfigDataRoute } from './routes/enterprise_search/config_data'
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
-import { registerEnginesRoute } from './routes/app_search/engines';
-import { registerCredentialsRoutes } from './routes/app_search/credentials';
+import { registerAppSearchRoutes } from './routes/app_search';
 
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
-import { registerWSOverviewRoute } from './routes/workplace_search/overview';
-import { registerWSGroupRoutes } from './routes/workplace_search/groups';
+import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
 export interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -126,10 +124,8 @@ export class EnterpriseSearchPlugin implements Plugin {
     const dependencies = { router, config, log, enterpriseSearchRequestHandler };
 
     registerConfigDataRoute(dependencies);
-    registerEnginesRoute(dependencies);
-    registerCredentialsRoutes(dependencies);
-    registerWSOverviewRoute(dependencies);
-    registerWSGroupRoutes(dependencies);
+    registerAppSearchRoutes(dependencies);
+    registerWorkplaceSearchRoutes(dependencies);
 
     /**
      * Bootstrap the routes, saved objects, and collector for telemetry

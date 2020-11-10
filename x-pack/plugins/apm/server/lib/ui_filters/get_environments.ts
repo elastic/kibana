@@ -24,7 +24,7 @@ export async function getEnvironments({
   serviceName?: string;
   searchAggregatedTransactions: boolean;
 }) {
-  const { start, end, apmEventClient } = setup;
+  const { start, end, apmEventClient, config } = setup;
 
   const filter: ESFilter[] = [{ range: rangeFilter(start, end) }];
 
@@ -33,6 +33,8 @@ export async function getEnvironments({
       term: { [SERVICE_NAME]: serviceName },
     });
   }
+
+  const maxServiceEnvironments = config['xpack.apm.maxServiceEnvironments'];
 
   const params = {
     apm: {
@@ -56,6 +58,7 @@ export async function getEnvironments({
           terms: {
             field: SERVICE_ENVIRONMENT,
             missing: ENVIRONMENT_NOT_DEFINED.value,
+            size: maxServiceEnvironments,
           },
         },
       },

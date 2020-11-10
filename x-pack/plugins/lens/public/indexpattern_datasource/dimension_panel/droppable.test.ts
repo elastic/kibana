@@ -14,8 +14,46 @@ import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
+import { IndexPatternColumn } from '../operations';
+import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../state_helpers');
+
+const fields = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    exists: true,
+  },
+  documentField,
+];
 
 const expectedIndexPatterns = {
   1: {
@@ -24,41 +62,8 @@ const expectedIndexPatterns = {
     timeFieldName: 'timestamp',
     hasExistence: true,
     hasRestrictions: false,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'memory',
-        displayName: 'memory',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-        exists: true,
-      },
-      documentField,
-    ],
+    fields,
+    getFieldByName: getFieldByNameFactory(fields),
   },
 };
 
@@ -145,6 +150,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         } as unknown) as DataPublicPluginStart['fieldFormats'],
       } as unknown) as DataPublicPluginStart,
       core: {} as CoreSetup,
+      dimensionGroups: [],
     };
 
     jest.clearAllMocks();
@@ -175,6 +181,23 @@ describe('IndexPatternDimensionEditorPanel', () => {
               type: 'string',
             },
           ],
+
+          getFieldByName: getFieldByNameFactory([
+            {
+              aggregatable: true,
+              name: 'bar',
+              displayName: 'bar',
+              searchable: true,
+              type: 'number',
+            },
+            {
+              aggregatable: true,
+              name: 'mystring',
+              displayName: 'mystring',
+              searchable: true,
+              type: 'string',
+            },
+          ]),
         },
       },
       currentIndexPatternId: '1',
@@ -219,7 +242,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
         ...defaultProps,
         dragDropContext: {
           ...dragDropContext,
-          dragging: { name: 'bar' },
+          dragging: { name: 'bar', id: 'bar' },
         },
       })
     ).toBe(false);
@@ -234,6 +257,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           dragging: {
             indexPatternId: 'foo',
             field: { type: 'string', name: 'mystring', aggregatable: true },
+            id: 'mystring',
           },
         },
         state: dragDropState(),
@@ -252,6 +276,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           dragging: {
             field: { type: 'number', name: 'bar', aggregatable: true },
             indexPatternId: 'foo',
+            id: 'bar',
           },
         },
         state: dragDropState(),
@@ -270,6 +295,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           dragging: {
             field: { type: 'number', name: 'bar', aggregatable: true },
             indexPatternId: 'foo2',
+            id: 'bar',
           },
         },
         state: dragDropState(),
@@ -289,6 +315,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnId: 'col1',
             groupId: 'a',
             layerId: 'myLayer',
+            id: 'col1',
           },
         },
         state: dragDropState(),
@@ -309,6 +336,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnId: 'col1',
             groupId: 'a',
             layerId: 'myLayer',
+            id: 'bar',
           },
         },
         state: dragDropState(),
@@ -329,6 +357,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             columnId: 'col1',
             groupId: 'a',
             layerId: 'myLayer',
+            id: 'bar',
           },
         },
         state: dragDropState(),
@@ -343,6 +372,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     const dragging = {
       field: { type: 'number', name: 'bar', aggregatable: true },
       indexPatternId: 'foo',
+      id: 'bar',
     };
     const testState = dragDropState();
 
@@ -382,6 +412,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     const dragging = {
       field: { type: 'string', name: 'mystring', aggregatable: true },
       indexPatternId: 'foo',
+      id: 'bar',
     };
     const testState = dragDropState();
     onDrop({
@@ -420,6 +451,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     const dragging = {
       field: { type: 'number', name: 'bar', aggregatable: true },
       indexPatternId: 'foo',
+      id: 'bar',
     };
     const testState = dragDropState();
     onDrop({
@@ -454,6 +486,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
     const dragging = {
       field: { type: 'string', name: 'mystring', aggregatable: true },
       indexPatternId: 'foo',
+      id: 'bar',
     };
     const testState = dragDropState();
     onDrop({
@@ -493,6 +526,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       columnId: 'col1',
       groupId: 'a',
       layerId: 'myLayer',
+      id: 'bar',
     };
     const testState = dragDropState();
 
@@ -529,6 +563,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       columnId: 'col2',
       groupId: 'a',
       layerId: 'myLayer',
+      id: 'col2',
     };
     const testState = dragDropState();
     testState.layers.myLayer = {
@@ -590,5 +625,118 @@ describe('IndexPatternDimensionEditorPanel', () => {
         },
       },
     });
+  });
+
+  it('if dnd is reorder, it correctly reorders columns', () => {
+    const dragging = {
+      columnId: 'col1',
+      groupId: 'a',
+      layerId: 'myLayer',
+      id: 'col1',
+    };
+    const testState = {
+      ...dragDropState(),
+      layers: {
+        myLayer: {
+          indexPatternId: 'foo',
+          columnOrder: ['col1', 'col2', 'col3'],
+          columns: {
+            col1: {
+              label: 'Date histogram of timestamp',
+              dataType: 'date',
+              isBucketed: true,
+            } as IndexPatternColumn,
+            col2: {
+              label: 'Top values of bar',
+              dataType: 'number',
+              isBucketed: true,
+            } as IndexPatternColumn,
+            col3: {
+              label: 'Top values of memory',
+              dataType: 'number',
+              isBucketed: true,
+            } as IndexPatternColumn,
+          },
+        },
+      },
+    };
+
+    const defaultReorderDropParams = {
+      ...defaultProps,
+      isReorder: true,
+      dragDropContext: {
+        ...dragDropContext,
+        dragging,
+      },
+      droppedItem: dragging,
+      state: testState,
+      filterOperations: (op: OperationMetadata) => op.dataType === 'number',
+      layerId: 'myLayer',
+    };
+
+    const stateWithColumnOrder = (columnOrder: string[]) => {
+      return {
+        ...testState,
+        layers: {
+          myLayer: {
+            ...testState.layers.myLayer,
+            columnOrder,
+            columns: {
+              ...testState.layers.myLayer.columns,
+            },
+          },
+        },
+      };
+    };
+
+    // first element to last
+    onDrop({
+      ...defaultReorderDropParams,
+      columnId: 'col3',
+    });
+    expect(setState).toBeCalledTimes(1);
+    expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col2', 'col3', 'col1']));
+
+    // last element to first
+    onDrop({
+      ...defaultReorderDropParams,
+      columnId: 'col1',
+      droppedItem: {
+        columnId: 'col3',
+        groupId: 'a',
+        layerId: 'myLayer',
+        id: 'col3',
+      },
+    });
+    expect(setState).toBeCalledTimes(2);
+    expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col3', 'col1', 'col2']));
+
+    // middle column to first
+    onDrop({
+      ...defaultReorderDropParams,
+      columnId: 'col1',
+      droppedItem: {
+        columnId: 'col2',
+        groupId: 'a',
+        layerId: 'myLayer',
+        id: 'col2',
+      },
+    });
+    expect(setState).toBeCalledTimes(3);
+    expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col2', 'col1', 'col3']));
+
+    // middle column to last
+    onDrop({
+      ...defaultReorderDropParams,
+      columnId: 'col3',
+      droppedItem: {
+        columnId: 'col2',
+        groupId: 'a',
+        layerId: 'myLayer',
+        id: 'col2',
+      },
+    });
+    expect(setState).toBeCalledTimes(4);
+    expect(setState).toHaveBeenCalledWith(stateWithColumnOrder(['col1', 'col3', 'col2']));
   });
 });

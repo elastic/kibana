@@ -144,7 +144,7 @@ export class TelemetryCollectionManagerPlugin
     collectionSoService: SavedObjectsServiceStart,
     usageCollection: UsageCollectionSetup
   ): StatsCollectionConfig {
-    const { start, end, request } = config;
+    const { timestamp, request } = config;
 
     const callCluster = config.unencrypted
       ? collection.esCluster.asScoped(request).callAsCurrentUser
@@ -157,7 +157,7 @@ export class TelemetryCollectionManagerPlugin
     const soClient = config.unencrypted
       ? collectionSoService.getScopedClient(config.request)
       : collectionSoService.createInternalRepository();
-    return { callCluster, start, end, usageCollection, esClient, soClient };
+    return { callCluster, timestamp, usageCollection, esClient, soClient };
   }
 
   private async getOptInStats(optInStatus: boolean, config: StatsGetterConfig) {

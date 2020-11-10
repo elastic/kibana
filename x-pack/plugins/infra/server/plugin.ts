@@ -4,9 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { Server } from '@hapi/hapi';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
-import { Server } from 'hapi';
 import { Observable } from 'rxjs';
 import { CoreSetup, PluginInitializerContext } from 'src/core/server';
 import { InfraStaticSourceConfiguration } from '../common/http_api/source_api';
@@ -149,8 +149,11 @@ export class InfraServerPlugin {
     core.http.registerRouteHandlerContext(
       'infra',
       (context, request): InfraRequestHandlerContext => {
-        const mlSystem = plugins.ml?.mlSystemProvider(request);
-        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request);
+        const mlSystem = plugins.ml?.mlSystemProvider(request, context.core.savedObjects.client);
+        const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(
+          request,
+          context.core.savedObjects.client
+        );
         const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
 
         return {

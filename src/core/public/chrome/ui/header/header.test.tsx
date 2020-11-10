@@ -40,6 +40,7 @@ function mockProps() {
     appTitle$: new BehaviorSubject('test'),
     badge$: new BehaviorSubject(undefined),
     breadcrumbs$: new BehaviorSubject([]),
+    breadcrumbsAppendExtension$: new BehaviorSubject(undefined),
     homeHref: '/',
     isVisible$: new BehaviorSubject(true),
     kibanaDocLink: '/docs',

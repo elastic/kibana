@@ -92,6 +92,7 @@ const defaultProps = {
   description: '',
   getNotesByIds: jest.fn(),
   noteIds: [],
+  saveTimeline: jest.fn(),
   status: TimelineStatus.active,
   timelineId: 'abc',
   toggleLock: jest.fn(),

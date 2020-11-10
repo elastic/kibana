@@ -34,7 +34,7 @@ describe('connector_add_flyout', () => {
           show: true,
         },
       },
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
     };
   });
@@ -58,8 +58,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,
@@ -100,8 +99,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,
@@ -160,8 +158,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,
@@ -208,8 +205,7 @@ describe('connector_add_flyout', () => {
         }}
       >
         <ConnectorAddFlyout
-          addFlyoutVisible={true}
-          setAddFlyoutVisibility={() => {}}
+          onClose={() => {}}
           actionTypes={[
             {
               id: actionType.id,

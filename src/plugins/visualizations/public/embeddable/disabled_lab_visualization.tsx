@@ -17,29 +17,42 @@
  * under the License.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage, I18nProvider } from '@kbn/i18n/react';
+import { EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { getDocLinks } from '../services';
 
 export function DisabledLabVisualization({ title }: { title: string }) {
+  const advancedSettingsLink = getDocLinks().links.management.visualizationSettings;
   return (
-    <div className="visDisabledLabVisualization">
-      <div
-        className="kuiVerticalRhythm visDisabledLabVisualization__icon kuiIcon fa-flask"
-        aria-hidden="true"
+    <I18nProvider>
+      <EuiEmptyPrompt
+        titleSize="xs"
+        title={
+          <h6>
+            <FormattedMessage
+              id="visualizations.disabledLabVisualizationTitle"
+              defaultMessage="{title} is a lab visualization."
+              values={{ title }}
+            />
+          </h6>
+        }
+        iconType="beaker"
+        body={
+          <FormattedMessage
+            id="visualizations.disabledLabVisualizationMessage"
+            defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
+          />
+        }
+        actions={
+          <EuiLink target="_blank" external href={advancedSettingsLink}>
+            <FormattedMessage
+              id="visualizations.disabledLabVisualizationLink"
+              defaultMessage="Read documentation"
+            />
+          </EuiLink>
+        }
       />
-      <div className="kuiVerticalRhythm">
-        <FormattedMessage
-          id="visualizations.disabledLabVisualizationTitle"
-          defaultMessage="{title} is a lab visualization."
-          values={{ title: <em className="visDisabledLabVisualization__title">{title}</em> }}
-        />
-      </div>
-      <div className="kuiVerticalRhythm">
-        <FormattedMessage
-          id="visualizations.disabledLabVisualizationMessage"
-          defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
-        />
-      </div>
-    </div>
+    </I18nProvider>
   );
 }

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { ServerExtType } from 'hapi';
-import Podium from 'podium';
+import { ServerExtType } from '@hapi/hapi';
+import Podium from '@hapi/podium';
 // @ts-expect-error: implicit any for JS file
 import { Config } from '../../../../legacy/server/config';
 // @ts-expect-error: implicit any for JS file

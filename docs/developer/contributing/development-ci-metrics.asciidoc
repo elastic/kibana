@@ -3,6 +3,10 @@
 
 In addition to running our tests, CI collects metrics about the Kibana build. These metrics are sent to an external service to track changes over time, and to provide PR authors insights into the impact of their changes.
 
+* <<ci-metric-types>>
+* <<ci-metric-resolving-overages>>
+* <<ci-metric-validating-limits>>
+
 
 [[ci-metric-types]]
 === Metric types
@@ -16,7 +20,7 @@ These metrics help contributors know how they are impacting the size of the bund
 [[ci-metric-page-load-bundle-size]] `page load bundle size` ::
 The size of the entry file produced for each bundle/plugin. This file is always loaded on every page load, so it should be as small as possible. To reduce this metric you can put any code that isn't necessary on every page load behind an https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports[`async import()`].
 +
-Code that is shared statically with other plugins will contribute to the `page load bundle size` of that plugin. This includes exports from the `public/index.ts` file and any file referenced by the `extraPublicDirs` manifest property. 
+Code that is shared statically with other plugins will contribute to the `page load bundle size` of that plugin. This includes exports from the `public/index.ts` file and any file referenced by the `extraPublicDirs` manifest property.
 
 [[ci-metric-async-chunks-size]] `async chunks size` ::
 An "async chunk" is created for the files imported by each https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import#Dynamic_Imports[`async import()`] statement. This metric tracks the sum size of these chunks, in bytes, broken down by plugin/bundle id. You can think of this as the amount of code users will have to download if they access all the components/applications within a bundle.
@@ -44,7 +48,7 @@ The number of files included in the default distributable.
 The number of files included in the OSS distributable.
 
 [[ci-metric-distributable-size]] `distributable size` ::
-The size, in bytes, of the default distributable. _(not reported on PRs)_ 
+The size, in bytes, of the default distributable. _(not reported on PRs)_
 
 [[ci-metric-oss-distributable-size]] `oss distributable size` ::
 The size, in bytes, of the OSS distributable. _(not reported on PRs)_
@@ -63,3 +67,73 @@ The number of saved object fields broken down by saved object type.
 === Adding new metrics
 
 You can report new metrics by using the `CiStatsReporter` class provided by the `@kbn/dev-utils` package. This class is automatically configured on CI and its methods noop when running outside of CI. For more details checkout the {kib-repo}blob/{branch}/packages/kbn-dev-utils/src/ci_stats_reporter[`CiStatsReporter` readme].
+
+[[ci-metric-resolving-overages]]
+=== Resolving `page load bundle size` overages
+
+In order to prevent the page load bundles from growing unexpectedly large we limit the `page load asset size` metric for each plugin. When a PR increases this metric beyond the limit defined for that plugin in {kib-repo}blob/{branch}/packages/kbn-optimizer/limits.yml[`limits.yml`] a failed commit status is set and the PR author needs to decide how to resolve this issue before the PR can be merged.
+
+In most cases the limit should be high enough that PRs shouldn't trigger overages, but when they do make sure it's clear what is cuasing the overage by trying the following:
+
+1. Run the optimizer locally with the `--profile` flag to produce webpack `stats.json` files for bundles which can be inspected using a number of different online tools. Focus on the chunk named `{pluginId}.plugin.js`; the `*.chunk.js` chunks make up the `async chunks size` metric which is currently unlimited and is the main way that we {kib-repo}blob/{branch}/src/core/MIGRATION.md#keep-kibana-fast[reduce the size of page load chunks].
++
+[source,shell]
+-----------
+node scripts/build_kibana_platform_plugins --focus {pluginid} --profile
+# builds and creates {pluginDir}target/public/stats.json files for {pluginId} and any plugin it depends on
+-----------
+
+  - Official Webpack tool: http://webpack.github.io/analyse/
+  - Webpack visualizer: https://chrisbateman.github.io/webpack-visualizer/
+
+2. You might want to create stats for the upstream branch of your PR as well and then compare them side by side in Webpack visualizer to spot where the size difference is (using two browser tabs).
+
+3. For relatively small changes you might be able to better understand the problem by sticking stats.json files from two different branches into https://www.scootersoftware.com/download.php[Beyond Compare]
+
+4. If the number of changes in https://www.scootersoftware.com/download.php[Beyond Compare] are too large, you can reduce the stats.json file down to just a sorted list of module ids using https://github.com/stedolan/jq[jq]:
++
+[source,shell]
+-----------
+jq -r .modules[].id {pluginDir}/target/public/stats.json | sort - > moduleids.txt
+-----------
++
+Produce a moduleids.txt file for both your branch and master and then pop them into Beyond Compare to get a very specific view of what's new.
+
+5. As a last resort you might want to try comparing the bundle source directly. It's usually best to do this using the production source so that you're inspecting the actual change in bytes that CI is seeing. After building the distributable version of your bundle run it through prettier and then dropping it into Beyond Compare along with the chunk from upstream:
++
+[source,shell]
+-----------
+node scripts/build_kibana_platform_plugins --focus {pluginId} --dist
+npm install -g prettier
+prettier -w {pluginDir}/target/public/{pluginId}.plugin.js
+# repeat these steps for upstream and then compare the two {pluginId}.plugin.js files in Beyond Compare
+-----------
+
+6. If all else fails reach out to Operations for help.
+
+Once you've identified the files which were added to the build you likely just need to stick them behind an async import as described in {kib-repo}blob/{branch}/src/core/MIGRATION.md#keep-kibana-fast[the MIGRATION.md docs].
+
+In the case that the bundle size is not being bloated by anything obvious, but it's still larger than the limit, you can raise the limit in your PR. Do this either by editting the {kib-repo}blob/{branch}/packages/kbn-optimizer/limits.yml[`limits.yml` file] manually or by running the following to have the limit updated to the current size + 15kb
+
+[source,shell]
+-----------
+node scripts/build_kibana_platform_plugins --focus {pluginId} --update-limits
+-----------
+
+This command has to run the optimizer in distributable mode so it will take a lot longer and spawn one worker for each CPU on your machine.
+
+Changes to the {kib-repo}blob/{branch}/packages/kbn-optimizer/limits.yml[`limits.yml` file] will trigger review from the Operations team, who will attempt to verify that the size increase is justified. If you have findings you can share from the steps above that would be very helpful!
+
+[[ci-metric-validating-limits]]
+=== Validating `page load bundle size` limits
+
+Once you've fixed any issues discovered while diagnosing overages you probably should just push the changes to your PR and let CI validate them.
+
+If you have a pretty powerful dev machine, or the necessary patience/determination, you can validate the limits locally by running the following command:
+
+[source,shell]
+-----------
+node scripts/build_kibana_platform_plugins --validate-limits
+-----------
+
+This command needs to apply production optimizations to get the right sizes, which means that the optimizer will take significantly longer to run and on most developmer machines will consume all of your machines resources for 20 minutes or more. If you'd like to multi-task while this is running you might need to limit the number of workers using the `--max-workers` flag.

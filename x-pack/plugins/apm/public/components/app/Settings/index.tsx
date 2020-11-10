@@ -36,8 +36,8 @@ export function Settings({ children, location }: SettingsProps) {
     <>
       <HomeLink>
         <EuiButtonEmpty size="s" color="primary" iconType="arrowLeft">
-          {i18n.translate('xpack.apm.settings.returnToOverviewLinkLabel', {
-            defaultMessage: 'Return to overview',
+          {i18n.translate('xpack.apm.settings.returnLinkLabel', {
+            defaultMessage: 'Return to inventory',
           })}
         </EuiButtonEmpty>
       </HomeLink>

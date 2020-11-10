@@ -19,7 +19,7 @@
 
 import { i18n, i18nLoader } from '@kbn/i18n';
 import { basename } from 'path';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import type { UsageCollectionSetup } from '../../../plugins/usage_collection/server';
 import { getKibanaTranslationPaths } from './get_kibana_translation_paths';
 import KbnServer, { KibanaConfig } from '../kbn_server';

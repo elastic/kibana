@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IClusterClient, IScopedClusterClient } from 'kibana/server';
+import { IClusterClient, IScopedClusterClient, SavedObjectsClientContract } from 'kibana/server';
 // including KibanaRequest from 'kibana/server' causes an error
 // when being used with instanceof
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { KibanaRequest } from '../../.././../../src/core/server/http';
-import { MlServerLicense } from '../lib/license';
+import { MlLicense } from '../../common/license';
 
 import { SpacesPluginSetup } from '../../../spaces/server';
 import { CloudSetup } from '../../../cloud/server';
@@ -25,6 +25,8 @@ import {
 import { ResolveMlCapabilities, MlCapabilitiesKey } from '../../common/types/capabilities';
 import { hasMlCapabilitiesProvider, HasMlCapabilities } from '../lib/capabilities';
 import { MLClusterClientUninitialized } from './errors';
+import { MlClient, getMlClient } from '../lib/ml_client';
+import { jobSavedObjectServiceFactory } from '../saved_objects';
 
 export type SharedServices = JobServiceProvider &
   AnomalyDetectorsProvider &
@@ -39,7 +41,10 @@ interface Guards {
   ok(callback: OkCallback): any;
 }
 
-export type GetGuards = (request: KibanaRequest) => Guards;
+export type GetGuards = (
+  request: KibanaRequest,
+  savedObjectsClient: SavedObjectsClientContract
+) => Guards;
 
 export interface SharedServicesChecks {
   getGuards(request: KibanaRequest): Guards;
@@ -47,22 +52,30 @@ export interface SharedServicesChecks {
 
 interface OkParams {
   scopedClient: IScopedClusterClient;
+  mlClient: MlClient;
 }
 
 type OkCallback = (okParams: OkParams) => any;
 
 export function createSharedServices(
-  mlLicense: MlServerLicense,
+  mlLicense: MlLicense,
   spaces: SpacesPluginSetup | undefined,
   cloud: CloudSetup,
   resolveMlCapabilities: ResolveMlCapabilities,
   getClusterClient: () => IClusterClient | null
 ): SharedServices {
-  const getRequestItems = getRequestItemsProvider(resolveMlCapabilities, getClusterClient);
   const { isFullLicense, isMinimumLicense } = licenseChecks(mlLicense);
 
-  function getGuards(request: KibanaRequest): Guards {
-    const { hasMlCapabilities, scopedClient } = getRequestItems(request);
+  function getGuards(
+    request: KibanaRequest,
+    savedObjectsClient: SavedObjectsClientContract
+  ): Guards {
+    const getRequestItems = getRequestItemsProvider(
+      resolveMlCapabilities,
+      getClusterClient,
+      savedObjectsClient
+    );
+    const { hasMlCapabilities, scopedClient, mlClient } = getRequestItems(request);
     const asyncGuards: Array<Promise<void>> = [];
 
     const guards: Guards = {
@@ -80,7 +93,7 @@ export function createSharedServices(
       },
       async ok(callback: OkCallback) {
         await Promise.all(asyncGuards);
-        return callback({ scopedClient });
+        return callback({ scopedClient, mlClient });
       },
     };
     return guards;
@@ -97,16 +110,19 @@ export function createSharedServices(
 
 function getRequestItemsProvider(
   resolveMlCapabilities: ResolveMlCapabilities,
-  getClusterClient: () => IClusterClient | null
+  getClusterClient: () => IClusterClient | null,
+  savedObjectsClient: SavedObjectsClientContract
 ) {
   return (request: KibanaRequest) => {
     const getHasMlCapabilities = hasMlCapabilitiesProvider(resolveMlCapabilities);
     let hasMlCapabilities: HasMlCapabilities;
     let scopedClient: IScopedClusterClient;
+    let mlClient: MlClient;
     // While https://github.com/elastic/kibana/issues/64588 exists we
     // will not receive a real request object when being called from an alert.
     // instead a dummy request object will be supplied
     const clusterClient = getClusterClient();
+    const jobSavedObjectService = jobSavedObjectServiceFactory(savedObjectsClient);
 
     if (clusterClient === null) {
       throw new MLClusterClientUninitialized(`ML's cluster client has not been initialized`);
@@ -115,6 +131,7 @@ function getRequestItemsProvider(
     if (request instanceof KibanaRequest) {
       hasMlCapabilities = getHasMlCapabilities(request);
       scopedClient = clusterClient.asScoped(request);
+      mlClient = getMlClient(scopedClient, jobSavedObjectService);
     } else {
       hasMlCapabilities = () => Promise.resolve();
       const { asInternalUser } = clusterClient;
@@ -122,7 +139,8 @@ function getRequestItemsProvider(
         asInternalUser,
         asCurrentUser: asInternalUser,
       };
+      mlClient = getMlClient(scopedClient, jobSavedObjectService);
     }
-    return { hasMlCapabilities, scopedClient };
+    return { hasMlCapabilities, scopedClient, mlClient };
   };
 }

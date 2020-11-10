@@ -97,7 +97,6 @@ export const ThresholdExpression = ({
         setAlertThresholdPopoverOpen(false);
       }}
       ownFocus
-      withTitle
       display={display === 'fullWidth' ? 'block' : 'inlineBlock'}
       anchorPosition={popupPosition ?? 'downLeft'}
     >

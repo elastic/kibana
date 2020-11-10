@@ -21,10 +21,10 @@ import {
 
 import * as i18n from './translations';
 import {
-  AbortError,
   isCompleteResponse,
   isErrorResponse,
 } from '../../../../../../../../src/plugins/data/common';
+import { AbortError } from '../../../../../../../../src/plugins/kibana_utils/common';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
@@ -65,7 +65,6 @@ export const useHostDetails = ({
       ? {
           defaultIndex: indexNames,
           hostName,
-          id,
           factoryQueryType: HostsQueries.details,
           timerange: {
             interval: '12h',
@@ -79,7 +78,7 @@ export const useHostDetails = ({
   const [hostDetailsResponse, setHostDetailsResponse] = useState<HostDetailsArgs>({
     endDate,
     hostDetails: {},
-    id: ID,
+    id,
     inspect: {
       dsl: [],
       response: [],
@@ -154,7 +153,6 @@ export const useHostDetails = ({
         defaultIndex: indexNames,
         factoryQueryType: HostsQueries.details,
         hostName,
-        id: ID,
         timerange: {
           interval: '12h',
           from: startDate,

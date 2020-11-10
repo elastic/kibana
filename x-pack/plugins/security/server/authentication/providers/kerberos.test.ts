@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import Boom from 'boom';
+import Boom from '@hapi/boom';
 import { errors } from 'elasticsearch';
 
 import { elasticsearchServiceMock, httpServerMock } from '../../../../../../src/core/server/mocks';
@@ -128,7 +128,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       await expect(operation(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'kerberos' },
+          { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           {
             authHeaders: { authorization: 'Bearer some-token' },
             state: { accessToken: 'some-token', refreshToken: 'some-refresh-token' },
@@ -164,7 +164,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       await expect(operation(request)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'kerberos' },
+          { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           {
             authHeaders: { authorization: 'Bearer some-token' },
             authResponseHeaders: { 'WWW-Authenticate': 'Negotiate response-token' },
@@ -346,6 +346,16 @@ describe('KerberosAuthenticationProvider', () => {
       expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
     });
 
+    it('does not start SPNEGO for Ajax requests.', async () => {
+      const request = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+      await expect(provider.authenticate(request)).resolves.toEqual(
+        AuthenticationResult.notHandled()
+      );
+
+      expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
+      expect(mockOptions.client.callAsInternalUser).not.toHaveBeenCalled();
+    });
+
     it('succeeds if state contains a valid token.', async () => {
       const user = mockAuthenticatedUser();
       const request = httpServerMock.createKibanaRequest({ headers: {} });
@@ -361,7 +371,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'kerberos' },
+          { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           { authHeaders: { authorization } }
         )
       );
@@ -401,7 +411,7 @@ describe('KerberosAuthenticationProvider', () => {
 
       await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
         AuthenticationResult.succeeded(
-          { ...user, authentication_provider: 'kerberos' },
+          { ...user, authentication_provider: { type: 'kerberos', name: 'kerberos' } },
           {
             authHeaders: { authorization: 'Bearer newfoo' },
             state: { accessToken: 'newfoo', refreshToken: 'newbar' },
@@ -442,9 +452,6 @@ describe('KerberosAuthenticationProvider', () => {
     });
 
     it('fails with `Negotiate` challenge if both access and refresh tokens from the state are expired and backend supports Kerberos.', async () => {
-      const request = httpServerMock.createKibanaRequest();
-      const tokenPair = { accessToken: 'expired-token', refreshToken: 'some-valid-refresh-token' };
-
       const failureReason = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(
         new (errors.AuthenticationException as any)('Unauthorized', {
           body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
@@ -456,37 +463,45 @@ describe('KerberosAuthenticationProvider', () => {
 
       mockOptions.tokens.refresh.mockResolvedValue(null);
 
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
+      const nonAjaxRequest = httpServerMock.createKibanaRequest();
+      const nonAjaxTokenPair = {
+        accessToken: 'expired-token',
+        refreshToken: 'some-valid-refresh-token',
+      };
+      await expect(provider.authenticate(nonAjaxRequest, nonAjaxTokenPair)).resolves.toEqual(
         AuthenticationResult.failed(failureReason, {
           authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
         })
       );
 
-      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
-      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
-    });
-
-    it('does not re-start SPNEGO if both access and refresh tokens from the state are expired.', async () => {
-      const request = httpServerMock.createKibanaRequest({ routeAuthRequired: false });
-      const tokenPair = { accessToken: 'expired-token', refreshToken: 'some-valid-refresh-token' };
-
-      const failureReason = LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(
-        new (errors.AuthenticationException as any)('Unauthorized', {
-          body: { error: { header: { 'WWW-Authenticate': 'Negotiate' } } },
+      const ajaxRequest = httpServerMock.createKibanaRequest({ headers: { 'kbn-xsrf': 'xsrf' } });
+      const ajaxTokenPair = {
+        accessToken: 'expired-token',
+        refreshToken: 'ajax-some-valid-refresh-token',
+      };
+      await expect(provider.authenticate(ajaxRequest, ajaxTokenPair)).resolves.toEqual(
+        AuthenticationResult.failed(failureReason, {
+          authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
         })
       );
-      const mockScopedClusterClient = elasticsearchServiceMock.createLegacyScopedClusterClient();
-      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(failureReason);
-      mockOptions.client.asScoped.mockReturnValue(mockScopedClusterClient);
 
-      mockOptions.tokens.refresh.mockResolvedValue(null);
-
-      await expect(provider.authenticate(request, tokenPair)).resolves.toEqual(
-        AuthenticationResult.notHandled()
+      const optionalAuthRequest = httpServerMock.createKibanaRequest({ routeAuthRequired: false });
+      const optionalAuthTokenPair = {
+        accessToken: 'expired-token',
+        refreshToken: 'optional-some-valid-refresh-token',
+      };
+      await expect(
+        provider.authenticate(optionalAuthRequest, optionalAuthTokenPair)
+      ).resolves.toEqual(
+        AuthenticationResult.failed(failureReason, {
+          authResponseHeaders: { 'WWW-Authenticate': 'Negotiate' },
+        })
       );
 
-      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
-      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(3);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(nonAjaxTokenPair.refreshToken);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(ajaxTokenPair.refreshToken);
+      expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(optionalAuthTokenPair.refreshToken);
     });
   });
 

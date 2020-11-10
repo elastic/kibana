@@ -16,6 +16,7 @@ import template from './index.html';
 import { Legacy } from '../../legacy_shims';
 import { CODE_PATH_ELASTICSEARCH } from '../../../common/constants';
 import { PageLoading } from '../../components';
+import { ajaxErrorHandlersProvider } from '../../lib/ajax_error_handler';
 
 const CODE_PATHS = [CODE_PATH_ELASTICSEARCH];
 uiRoutes.when('/loading', {
@@ -49,8 +50,8 @@ uiRoutes.when('/loading', {
       };
 
       const routeInit = Private(routeInitProvider);
-      routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true, unsetGlobalState: true }).then(
-        (clusters) => {
+      routeInit({ codePaths: CODE_PATHS, fetchAllClusters: true, unsetGlobalState: true })
+        .then((clusters) => {
           if (!clusters || !clusters.length) {
             window.location.hash = '#/no-data';
             $scope.$apply();
@@ -65,8 +66,12 @@ uiRoutes.when('/loading', {
 
           window.history.replaceState(null, null, '#/home');
           $scope.$apply();
-        }
-      );
+        })
+        .catch((err) => {
+          const Private = $injector.get('Private');
+          const ajaxErrorHandlers = Private(ajaxErrorHandlersProvider);
+          return $scope.$apply(() => ajaxErrorHandlers(err));
+        });
     }
   },
 });

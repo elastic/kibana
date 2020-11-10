@@ -14,7 +14,7 @@ import { ConcreteTaskInstance, TaskStatus } from '../task';
 import { asTaskRunEvent, asTaskPollingCycleEvent, TaskTiming } from '../task_events';
 import { asOk } from '../lib/result_type';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
-import { TaskRunResult } from '../task_runner';
+import { TaskRunResult } from '../task_running';
 import {
   createTaskRunAggregator,
   summarizeTaskRunStat,

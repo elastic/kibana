@@ -31,7 +31,7 @@ export const InstallDependencies: Task = {
       extraArgs: [
         '--production',
         '--ignore-optional',
-        '--frozen-lockfile',
+        '--pure-lockfile',
         '--prefer-offline',
 
         // We're using --no-bin-links to support systems that don't have symlinks.

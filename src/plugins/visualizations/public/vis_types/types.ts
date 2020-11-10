@@ -33,21 +33,63 @@ export interface VisTypeOptions {
   hierarchicalData: boolean;
 }
 
+export enum VisGroups {
+  PROMOTED = 'promoted',
+  TOOLS = 'tools',
+  AGGBASED = 'aggbased',
+}
+
 /**
  * A visualization type representing one specific type of "classical"
  * visualizations (i.e. not Lens visualizations).
  */
 export interface VisType<TVisParams = unknown> {
+  /**
+   * Visualization unique name
+   */
   readonly name: string;
+  /**
+   * It is the displayed text on the wizard and the vis listing
+   */
   readonly title: string;
+  /**
+   * If given, it will be diplayed on the wizard vis card as the main description.
+   */
   readonly description?: string;
+  /**
+   * If given, it will be diplayed on the wizard vis card as a note in italic.
+   */
+  readonly note: string;
+  /**
+   * If given, it will return the supported triggers for this vis.
+   */
   readonly getSupportedTriggers?: () => Array<keyof TriggerContextMapping>;
   readonly isAccessible?: boolean;
   readonly requestHandler?: string | unknown;
   readonly responseHandler?: string | unknown;
+  /**
+   * It is the visualization icon, displayed on the wizard.
+   */
   readonly icon?: IconType;
+  /**
+   * Except from an icon, an image can be passed
+   */
   readonly image?: string;
+  /**
+   * Describes the visualization stage
+   */
   readonly stage: 'experimental' | 'beta' | 'production';
+  /**
+   * Describes the experience group that the visualization belongs.
+   * It can be on tools, aggregation based or promoted group.
+   */
+  readonly group: VisGroups;
+  /**
+   * If given, it will be displayed on the wizard instead of the title.
+   * We use it because we want to differentiate the vis title from the
+   * way it is presented on the wizard
+   */
+  readonly titleInWizard: string;
   readonly requiresSearch: boolean;
   readonly useCustomNoDataScreen: boolean;
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);

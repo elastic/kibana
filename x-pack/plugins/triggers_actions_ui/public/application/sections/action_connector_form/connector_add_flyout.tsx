@@ -32,15 +32,13 @@ import { useActionsConnectorsContext } from '../../context/actions_connectors_co
 import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 
 export interface ConnectorAddFlyoutProps {
-  addFlyoutVisible: boolean;
-  setAddFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  onClose: () => void;
   actionTypes?: ActionType[];
   onTestConnector?: (connector: ActionConnector) => void;
 }
 
 export const ConnectorAddFlyout = ({
-  addFlyoutVisible,
-  setAddFlyoutVisibility,
+  onClose,
   actionTypes,
   onTestConnector,
 }: ConnectorAddFlyoutProps) => {
@@ -74,16 +72,12 @@ export const ConnectorAddFlyout = ({
   const [isSaving, setIsSaving] = useState<boolean>(false);
 
   const closeFlyout = useCallback(() => {
-    setAddFlyoutVisibility(false);
     setActionType(undefined);
     setConnector(initialConnector);
-  }, [setAddFlyoutVisibility, initialConnector]);
+    onClose();
+  }, [onClose, initialConnector]);
 
   const canSave = hasSaveActionsCapability(capabilities);
-
-  if (!addFlyoutVisible) {
-    return null;
-  }
 
   function onActionTypeChange(newActionType: ActionType) {
     setActionType(newActionType);
