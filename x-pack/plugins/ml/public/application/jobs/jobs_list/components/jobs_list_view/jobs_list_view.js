@@ -446,6 +446,8 @@ export class JobsListView extends Component {
                 showDeleteJobModal={this.showDeleteJobModal}
                 showStartDatafeedModal={this.showStartDatafeedModal}
                 refreshJobs={() => this.refreshJobSummaryList(true)}
+                jobsViewState={this.props.jobsViewState}
+                onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
                 selectedJobsCount={this.state.selectedJobs.length}
                 loading={loading}
               />
