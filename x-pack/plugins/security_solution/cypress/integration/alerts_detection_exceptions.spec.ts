@@ -58,14 +58,12 @@ describe('Exceptions', () => {
 
       esArchiverLoad('auditbeat_for_exceptions');
       activatesRule();
-      waitForAlertsToPopulate();
       waitForTheRuleToBeExecuted();
-      refreshPage();
+      waitForAlertsToPopulate();
       deactivatesRule();
       refreshPage();
 
       cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfInitialAlertsText) => {
@@ -82,11 +80,9 @@ describe('Exceptions', () => {
       esArchiverLoad('auditbeat_for_exceptions2');
       refreshPage();
       waitForTheRuleToBeExecuted();
-      refreshPage();
       goToAlertsTab();
 
       cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfAlertsAfterCreatingExceptionText) => {
@@ -97,7 +93,6 @@ describe('Exceptions', () => {
       refreshPage();
 
       cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
@@ -111,7 +106,6 @@ describe('Exceptions', () => {
       refreshPage();
 
       cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfOpenedAlertsAfterCreatingExceptionText) => {
@@ -123,13 +117,11 @@ describe('Exceptions', () => {
       esArchiverLoad('auditbeat_for_exceptions3');
       refreshPage();
       goToAlertsTab();
-      waitForAlertsToPopulate();
-      refreshPage();
       waitForTheRuleToBeExecuted();
+      waitForAlertsToPopulate();
       refreshPage();
 
       cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfAlertsAfterRemovingExceptionsText) => {
@@ -165,12 +157,10 @@ describe('Exceptions', () => {
       activatesRule();
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
-      refreshPage();
       deactivatesRule();
       refreshPage();
 
       cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfInitialAlertsText) => {
@@ -186,7 +176,6 @@ describe('Exceptions', () => {
       esArchiverLoad('auditbeat_for_exceptions_from_alert2');
 
       cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfAlertsAfterCreatingExceptionText) => {
@@ -197,7 +186,6 @@ describe('Exceptions', () => {
       refreshPage();
 
       cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfClosedAlertsAfterCreatingExceptionText) => {
@@ -211,7 +199,6 @@ describe('Exceptions', () => {
       refreshPage();
 
       cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfOpenedAlertsAfterCreatingExceptionText) => {
@@ -221,15 +208,12 @@ describe('Exceptions', () => {
       goToExceptionsTab();
       removeException();
       esArchiverLoad('auditbeat_for_exceptions_from_alert3');
-      refreshPage();
       goToAlertsTab();
       waitForTheRuleToBeExecuted();
-      refreshPage();
       waitForAlertsToPopulate();
       refreshPage();
 
       cy.scrollTo('bottom');
-      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
       cy.get(SERVER_SIDE_EVENT_COUNT)
         .invoke('text')
         .then((numberOfAlertsAfterRemovingExceptionsText) => {
