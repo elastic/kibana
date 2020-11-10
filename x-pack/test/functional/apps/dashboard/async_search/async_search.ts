@@ -15,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
   const queryBar = getService('queryBar');
+  const browser = getService('browser');
 
   describe('dashboard with async search', () => {
     before(async function () {
@@ -61,17 +62,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // but only single error toast because searches are grouped
       expect((await testSubjects.findAll('searchTimeoutError')).length).to.be(1);
 
-      // check that session ids are the same
-      const getSearchSessionIdByPanel = async (panelTitle: string) => {
-        await dashboardPanelActions.openInspectorByTitle(panelTitle);
-        await inspector.openInspectorRequestsView();
-        const searchSessionId = await (
-          await testSubjects.find('inspectorRequestSearchSessionId')
-        ).getAttribute('data-search-session-id');
-        await inspector.close();
-        return searchSessionId;
-      };
-
       const panel1SessionId1 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
       const panel2SessionId1 = await getSearchSessionIdByPanel(
         'Sum of Bytes by Extension (Delayed 5s)'
@@ -87,5 +77,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(panel1SessionId2).to.be(panel2SessionId2);
       expect(panel1SessionId1).not.to.be(panel1SessionId2);
     });
+
+    // NOTE: this test will be revised when session functionality is really working
+    it('Opens a dashboard with existing session', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
+      const url = await browser.getCurrentUrl();
+      const fakeSessionId = '__fake__';
+      const savedSessionURL = `${url}&searchSessionId=${fakeSessionId}`;
+      await browser.navigateTo(savedSessionURL);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const session1 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
+      expect(session1).to.be(fakeSessionId);
+      await queryBar.clickQuerySubmitButton();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const session2 = await getSearchSessionIdByPanel('Sum of Bytes by Extension');
+      expect(session2).not.to.be(fakeSessionId);
+    });
   });
+
+  // HELPERS
+  async function getSearchSessionIdByPanel(panelTitle: string) {
+    await dashboardPanelActions.openInspectorByTitle(panelTitle);
+    await inspector.openInspectorRequestsView();
+    const searchSessionId = await (
+      await testSubjects.find('inspectorRequestSearchSessionId')
+    ).getAttribute('data-search-session-id');
+    await inspector.close();
+    return searchSessionId;
+  }
 }

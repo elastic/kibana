@@ -11,7 +11,7 @@
   "language": "eql",
   "license": "Elastic License",
   "name": "Unusual Child Processes of RunDLL32",
-  "query": "sequence with maxspan=1h\n  [process where event.type in (\"start\", \"process_started\") and\n                                    /* uncomment once in winlogbeat */\n     (process.name : \"rundll32.exe\" /* or process.pe.original_file_name == \"RUNDLL32.EXE\" */ ) and\n     process.args_count < 2\n  ] by process.entity_id\n  [process where event.type in (\"start\", \"process_started\") and\n                                    /* uncomment once in winlogbeat */\n     (process.name : \"rundll32.exe\" /* or process.pe.original_file_name == \"RUNDLL32.EXE\" */ )\n  ] by process.parent.entity_id\n",
+  "query": "sequence with maxspan=1h\n  [process where event.type in (\"start\", \"process_started\") and\n                                    /* uncomment once in winlogbeat */\n     (process.name : \"rundll32.exe\" /* or process.pe.original_file_name == \"RUNDLL32.EXE\" */ ) and\n     process.args_count < 2\n  ] by process.entity_id\n  [process where event.type in (\"start\", \"process_started\") and process.parent.name : \"rundll32.exe\"\n  ] by process.parent.entity_id\n",
   "risk_score": 21,
   "rule_id": "f036953a-4615-4707-a1ca-dc53bf69dcd5",
   "severity": "high",

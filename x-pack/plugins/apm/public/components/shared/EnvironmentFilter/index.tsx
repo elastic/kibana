@@ -76,7 +76,7 @@ export function EnvironmentFilter() {
   return (
     <EuiSelect
       prepend={i18n.translate('xpack.apm.filter.environment.label', {
-        defaultMessage: 'environment',
+        defaultMessage: 'Environment',
       })}
       options={getOptions(environments)}
       value={environment || ENVIRONMENT_ALL.value}

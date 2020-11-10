@@ -1,0 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
+ */
+
+.componentLoader {
+  display: flex;
+  justify-content: center;
+  margin: auto;
+  align-items: center;
+  min-height: 200px;
+  border-radius: 4px;
+  background-color: #FAFBFD;
+
+  .componentLoaderText {
+    margin-left: 10px;
+  }
+}
