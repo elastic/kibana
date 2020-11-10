@@ -2,6 +2,11 @@
   display: none;
 }
 
+.tagMgt__actionBarDivider {
+  height: $euiSize;
+  border-right: $euiBorderThin;
+}
+
 .tagMgt__actionBar {
   border-bottom: $euiBorderThin;
   padding-bottom: $euiSizeS;

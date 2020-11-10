@@ -70,7 +70,7 @@ export const ActionBar: FC<ActionBarProps> = ({
 
   return (
     <div className="tagMgt__actionBar">
-      <EuiFlexGroup justifyContent="flexStart" alignItems="baseline" gutterSize="m">
+      <EuiFlexGroup justifyContent="flexStart" alignItems="center" gutterSize="m">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
             <FormattedMessage
@@ -83,33 +83,38 @@ export const ActionBar: FC<ActionBarProps> = ({
           </EuiText>
         </EuiFlexItem>
         {selectedCount > 0 && (
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              isOpen={isPopoverOpened}
-              closePopover={closePopover}
-              panelPaddingSize="none"
-              button={
-                <EuiText size="xs">
-                  <EuiLink onClick={togglePopover} data-test-subj="actionBar-contextMenuButton">
-                    <FormattedMessage
-                      id="xpack.savedObjectsTagging.management.actionBar.selectedTagsLabel"
-                      defaultMessage="{count, plural, one {1 selected tag} other {# selected tags}}"
-                      values={{
-                        count: selectedCount,
-                      }}
-                    />
-                    <EuiIcon className="tagMgt__actionBarIcon" type="arrowDown" size="s" />
-                  </EuiLink>
-                </EuiText>
-              }
-            >
-              <EuiContextMenu
-                initialPanelId={0}
-                panels={contextMenuPanels}
-                data-test-subj="actionBar-contextMenu"
-              />
-            </EuiPopover>
-          </EuiFlexItem>
+          <>
+            <EuiFlexItem grow={false}>
+              <div className="tagMgt__actionBarDivider" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                isOpen={isPopoverOpened}
+                closePopover={closePopover}
+                panelPaddingSize="none"
+                button={
+                  <EuiText size="xs">
+                    <EuiLink onClick={togglePopover} data-test-subj="actionBar-contextMenuButton">
+                      <FormattedMessage
+                        id="xpack.savedObjectsTagging.management.actionBar.selectedTagsLabel"
+                        defaultMessage="{count, plural, one {1 selected tag} other {# selected tags}}"
+                        values={{
+                          count: selectedCount,
+                        }}
+                      />
+                      <EuiIcon className="tagMgt__actionBarIcon" type="arrowDown" size="s" />
+                    </EuiLink>
+                  </EuiText>
+                }
+              >
+                <EuiContextMenu
+                  initialPanelId={0}
+                  panels={contextMenuPanels}
+                  data-test-subj="actionBar-contextMenu"
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+          </>
         )}
       </EuiFlexGroup>
     </div>
