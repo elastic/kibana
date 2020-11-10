@@ -25,8 +25,8 @@ interface EngineValues {
 interface EngineActions {
   setEngineData(engine: EngineDetails): { engine: EngineDetails };
   setEngineName(engineName: string): { engineName: string };
-  setIndexingStatus(activeReindexJob: IndexingStatus): IndexingStatus;
-  setEngineNotFound(notFound: boolean): boolean;
+  setIndexingStatus(activeReindexJob: IndexingStatus): { activeReindexJob: IndexingStatus };
+  setEngineNotFound(notFound: boolean): { notFound: boolean };
   clearEngine(): void;
   initializeEngine(): void;
 }
@@ -36,10 +36,10 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
   actions: {
     setEngineData: (engine) => ({ engine }),
     setEngineName: (engineName) => ({ engineName }),
-    setIndexingStatus: (activeReindexJob) => activeReindexJob,
-    setEngineNotFound: (notFound) => notFound,
-    clearEngine: () => ({}),
-    initializeEngine: () => null,
+    setIndexingStatus: (activeReindexJob) => ({ activeReindexJob }),
+    setEngineNotFound: (notFound) => ({ notFound }),
+    clearEngine: true,
+    initializeEngine: true,
   },
   reducers: {
     dataLoading: [
@@ -54,7 +54,7 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
       {
         setEngineData: (_, { engine }) => engine,
         clearEngine: () => ({}),
-        setIndexingStatus: (state, activeReindexJob) => ({
+        setIndexingStatus: (state, { activeReindexJob }) => ({
           ...state,
           activeReindexJob,
         }),
@@ -69,7 +69,7 @@ export const EngineLogic = kea<MakeLogicType<EngineValues, EngineActions>>({
     engineNotFound: [
       false,
       {
-        setEngineNotFound: (_, notFound) => notFound,
+        setEngineNotFound: (_, { notFound }) => notFound,
       },
     ],
   },
