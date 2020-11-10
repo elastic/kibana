@@ -4,5 +4,5 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { Credentials } from './credentials';
-export { CREDENTIALS_TITLE } from './constants';
+export { EnginesOverview } from './engines_overview';
+export { ENGINES_TITLE, META_ENGINES_TITLE } from './constants';
