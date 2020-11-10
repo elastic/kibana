@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { noop } from 'lodash';
 import { useMount } from 'react-use';
 import { euiStyled } from '../../../../observability/public';
@@ -97,13 +97,33 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
     [entries]
   );
 
+  const parsedHeight = typeof height === 'number' ? `${height}px` : height;
+
   // Component lifetime
   useMount(() => {
     loadSourceConfiguration();
     fetchEntries();
   });
 
-  const parsedHeight = typeof height === 'number' ? `${height}px` : height;
+  // Pagination handler
+  const handlePagination = useCallback(
+    ({ fromScroll, pagesBeforeStart, pagesAfterEnd }) => {
+      if (!fromScroll) {
+        return;
+      }
+
+      if (isLoadingMore) {
+        return;
+      }
+
+      if (pagesBeforeStart < PAGE_THRESHOLD) {
+        fetchPreviousEntries();
+      } else if (pagesAfterEnd < PAGE_THRESHOLD) {
+        fetchNextEntries();
+      }
+    },
+    [isLoadingMore, fetchPreviousEntries, fetchNextEntries]
+  );
 
   return (
     <LogStreamContent height={parsedHeight}>
@@ -120,21 +140,7 @@ Read more at https://github.com/elastic/kibana/blob/master/src/plugins/kibana_re
         isStreaming={false}
         lastLoadedTime={null}
         jumpToTarget={noop}
-        reportVisibleInterval={({ fromScroll, pagesBeforeStart, pagesAfterEnd }) => {
-          if (!fromScroll) {
-            return;
-          }
-
-          if (isLoadingMore) {
-            return;
-          }
-
-          if (pagesBeforeStart < PAGE_THRESHOLD) {
-            fetchPreviousEntries();
-          } else if (pagesAfterEnd < PAGE_THRESHOLD) {
-            fetchNextEntries();
-          }
-        }}
+        reportVisibleInterval={handlePagination}
         loadNewerItems={noop}
         reloadItems={fetchEntries}
         highlightedItem={highlight ?? null}
