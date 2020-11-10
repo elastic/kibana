@@ -18,35 +18,32 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import { FormattedData } from '../../../../../plugins/inspector/public';
-import { TabbedTable } from '../../../common';
-import { FormatFactory } from '../../../common/field_formats/utils';
-import { createFilter } from './create_filter';
+import {
+  FormattedData,
+  TabularData,
+  TabularDataValue,
+} from '../../../../../../plugins/inspector/common';
+import { TabbedTable } from '../../../../common';
+import { FormatFactory } from '../../../../common/field_formats/utils';
+import { FilterManager } from '../../../query';
+import { createFilter } from '../create_filter';
 
 /**
- * @deprecated
- *
- * Do not use this function.
- *
- * @todo This function is used only by Courier. Courier will
- *   soon be removed, and this function will be deleted, too. If Courier is not removed,
- *   move this function inside Courier.
- *
- * ---
- *
  * This function builds tabular data from the response and attaches it to the
  * inspector. It will only be called when the data view in the inspector is opened.
+ *
+ * @internal
  */
 export async function buildTabularInspectorData(
   table: TabbedTable,
   {
-    queryFilter,
     deserializeFieldFormat,
+    queryFilter,
   }: {
-    queryFilter: { addFilters: (filter: any) => void };
     deserializeFieldFormat: FormatFactory;
+    queryFilter?: Pick<FilterManager, 'addFilters'>;
   }
-) {
+): Promise<TabularData> {
   const aggConfigs = table.columns.map((column) => column.aggConfig);
   const rows = table.rows.map((row) => {
     return table.columns.reduce<Record<string, FormattedData>>((prev, cur, colIndex) => {
@@ -74,8 +71,9 @@ export async function buildTabularInspectorData(
       name: col.name,
       field: `col-${colIndex}-${col.aggConfig.id}`,
       filter:
+        queryFilter &&
         isCellContentFilterable &&
-        ((value: { raw: unknown }) => {
+        ((value: TabularDataValue) => {
           const rowIndex = rows.findIndex(
             (row) => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );
@@ -86,8 +84,9 @@ export async function buildTabularInspectorData(
           }
         }),
       filterOut:
+        queryFilter &&
         isCellContentFilterable &&
-        ((value: { raw: unknown }) => {
+        ((value: TabularDataValue) => {
           const rowIndex = rows.findIndex(
             (row) => row[`col-${colIndex}-${col.aggConfig.id}`].raw === value.raw
           );

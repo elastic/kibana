@@ -24,7 +24,12 @@ import { Datatable, DatatableColumn } from 'src/plugins/expressions/common';
 import { Adapters } from 'src/plugins/inspector/common';
 
 import { calculateBounds, EsaggsExpressionFunctionDefinition } from '../../../../common';
-import { getIndexPatterns, getQueryService, getSearchService } from '../../../services';
+import {
+  getFieldFormats,
+  getIndexPatterns,
+  getQueryService,
+  getSearchService,
+} from '../../../services';
 import { handleRequest } from './request_handler';
 
 const name = 'esaggs';

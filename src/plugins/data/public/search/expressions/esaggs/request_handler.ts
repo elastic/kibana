@@ -17,9 +17,7 @@
  * under the License.
  */
 
-import { hasIn } from 'lodash';
 import { i18n } from '@kbn/i18n';
-
 import { Adapters } from 'src/plugins/inspector/common';
 
 import {
@@ -38,42 +36,43 @@ import {
   ISearchSource,
   tabifyAggResponse,
 } from '../../../../common/search';
+import { FormatFactory } from '../../../../common/field_formats/utils';
 
 import { FilterManager } from '../../../query';
-import { getFieldFormats } from '../../../services';
-import { buildTabularInspectorData } from '../build_tabular_inspector_data';
+import { buildTabularInspectorData } from './build_tabular_inspector_data';
 
 interface RequestHandlerParams {
-  searchSource: ISearchSource;
+  abortSignal?: AbortSignal;
   aggs: IAggConfigs;
-  timeRange?: TimeRange;
-  timeFields?: string[];
-  indexPattern?: IIndexPattern;
-  query?: Query;
+  deserializeFieldFormat: FormatFactory;
   filters?: Filter[];
-  filterManager: FilterManager;
-  partialRows?: boolean;
+  indexPattern?: IIndexPattern;
   inspectorAdapters: Adapters;
   metricsAtAllLevels?: boolean;
-  visParams?: any;
-  abortSignal?: AbortSignal;
+  partialRows?: boolean;
+  query?: Query;
+  queryFilter?: Pick<FilterManager, 'addFilters'>;
   searchSessionId?: string;
+  searchSource: ISearchSource;
+  timeFields?: string[];
+  timeRange?: TimeRange;
 }
 
 export const handleRequest = async ({
-  searchSource,
-  aggs,
-  timeRange,
-  timeFields,
-  indexPattern,
-  query,
-  filters,
-  partialRows,
-  metricsAtAllLevels,
-  inspectorAdapters,
-  filterManager,
   abortSignal,
+  aggs,
+  deserializeFieldFormat,
+  filters,
+  indexPattern,
+  inspectorAdapters,
+  metricsAtAllLevels,
+  partialRows,
+  query,
+  queryFilter,
   searchSessionId,
+  searchSource,
+  timeFields,
+  timeRange,
 }: RequestHandlerParams) => {
   // Create a new search source that inherits the original search source
   // but has the appropriate timeRange applied via a filter.
@@ -155,19 +154,17 @@ export const handleRequest = async ({
     throw e;
   } finally {
     // Add the request body no matter if things went fine or not
-    requestSearchSource.getSearchRequestBody().then((req: unknown) => {
-      request.json(req);
-    });
+    request.json(await requestSearchSource.getSearchRequestBody());
   }
 
   // Note that rawResponse is not deeply cloned here, so downstream applications using courier
   // must take care not to mutate it, or it could have unintended side effects, e.g. displaying
   // response data incorrectly in the inspector.
-  let resp = (searchSource as any).rawResponse;
+  let response = (searchSource as any).rawResponse;
   for (const agg of aggs.aggs) {
-    if (hasIn(agg, 'type.postFlightRequest')) {
-      resp = await agg.type.postFlightRequest(
-        resp,
+    if (typeof agg.type.postFlightRequest === 'function') {
+      response = await agg.type.postFlightRequest(
+        response,
         aggs,
         agg,
         requestSearchSource,
@@ -176,8 +173,6 @@ export const handleRequest = async ({
       );
     }
   }
-
-  (searchSource as any).finalResponse = resp;
 
   const parsedTimeRange = timeRange ? calculateBounds(timeRange) : null;
   const tabifyParams = {
@@ -188,18 +183,16 @@ export const handleRequest = async ({
       : undefined,
   };
 
-  const response = tabifyAggResponse(aggs, (searchSource as any).finalResponse, tabifyParams);
-
-  (searchSource as any).tabifiedResponse = response;
+  const tabifiedResponse = tabifyAggResponse(aggs, response, tabifyParams);
 
   inspectorAdapters.data.setTabularLoader(
     () =>
-      buildTabularInspectorData((searchSource as any).tabifiedResponse, {
-        queryFilter: filterManager,
-        deserializeFieldFormat: getFieldFormats().deserialize,
+      buildTabularInspectorData(tabifiedResponse, {
+        queryFilter,
+        deserializeFieldFormat,
       }),
     { returnsFormattedValues: true }
   );
 
-  return response;
+  return tabifiedResponse;
 };
