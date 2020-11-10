@@ -333,25 +333,4 @@ export class IndexPattern implements IIndexPattern {
       return this.fieldFormats.getInstance(formatSpec.id, formatSpec.params);
     }
   }
-  /**
-   * Helper function to extend field specs with e.g. customName
-   */
-  /*
-  I think this is the attribute builder
-  private getFieldSpecs(specs: IndexPatternFieldMap | undefined) {
-    if (!specs) {
-      return {};
-    }
-    if (!this.attributes?.fields) {
-      return specs;
-    }
-
-    for (const key of Object.keys(this.attributes?.fields)) {
-      if (specs[key] && this.attributes.fields[key].customName) {
-        specs[key].customName = this.attributes.fields[key].customName;
-      }
-    }
-    return specs;
-  }
-  */
 }
