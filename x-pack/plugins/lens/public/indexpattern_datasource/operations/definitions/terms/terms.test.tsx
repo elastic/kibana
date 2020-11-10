@@ -103,14 +103,40 @@ describe('terms', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newDateField = indexPattern.fields.find((i) => i.name === 'dest')!;
+      const newNumberField = indexPattern.fields.find((i) => i.name === 'bytes')!;
 
-      const column = termsOperation.onFieldChange(oldColumn, indexPattern, newDateField);
-      expect(column).toHaveProperty('sourceField', 'dest');
+      const column = termsOperation.onFieldChange(oldColumn, indexPattern, newNumberField);
+      expect(column).toHaveProperty('dataType', 'number');
+      expect(column).toHaveProperty('sourceField', 'bytes');
       expect(column).toHaveProperty('params.size', 5);
       expect(column).toHaveProperty('params.orderBy.type', 'alphabetical');
       expect(column).toHaveProperty('params.orderDirection', 'asc');
-      expect(column.label).toContain('dest');
+      expect(column.label).toContain('bytes');
+    });
+
+    it('should remove numeric parameters when changing away from number', () => {
+      const oldColumn: TermsIndexPatternColumn = {
+        operationType: 'terms',
+        sourceField: 'bytes',
+        label: 'Top values of bytes',
+        isBucketed: true,
+        dataType: 'number',
+        params: {
+          size: 5,
+          orderBy: {
+            type: 'alphabetical',
+          },
+          orderDirection: 'asc',
+          format: { id: 'number', params: { decimals: 0 } },
+        },
+      };
+      const indexPattern = createMockedIndexPattern();
+      const newStringField = indexPattern.fields.find((i) => i.name === 'source')!;
+
+      const column = termsOperation.onFieldChange(oldColumn, indexPattern, newStringField);
+      expect(column).toHaveProperty('dataType', 'string');
+      expect(column).toHaveProperty('sourceField', 'source');
+      expect(column.params.format).toBeUndefined();
     });
   });
 

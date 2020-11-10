@@ -364,6 +364,8 @@ export type SeriesType =
 
 export type YAxisMode = 'auto' | 'left' | 'right';
 
+export type ValueLabelConfig = 'hide' | 'inside' | 'outside';
+
 export interface YConfig {
   forAccessor: string;
   axisMode?: YAxisMode;
@@ -379,6 +381,10 @@ export interface LayerConfig {
   seriesType: SeriesType;
   splitAccessor?: string;
   palette?: PaletteOutput;
+}
+
+export interface ValidLayer extends LayerConfig {
+  xAccessor: NonNullable<LayerConfig['xAccessor']>;
 }
 
 export type LayerArgs = LayerConfig & {
@@ -398,6 +404,7 @@ export interface XYArgs {
   yTitle: string;
   yRightTitle: string;
   legend: LegendConfig & { type: 'lens_xy_legendConfig' };
+  valueLabels: ValueLabelConfig;
   layers: LayerArgs[];
   fittingFunction?: FittingFunction;
   axisTitlesVisibilitySettings?: AxesSettingsConfig & {
@@ -411,6 +418,7 @@ export interface XYArgs {
 export interface XYState {
   preferredSeriesType: SeriesType;
   legend: LegendConfig;
+  valueLabels?: ValueLabelConfig;
   fittingFunction?: FittingFunction;
   layers: LayerConfig[];
   xTitle?: string;

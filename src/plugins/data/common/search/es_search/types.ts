@@ -22,22 +22,6 @@ import { IKibanaSearchRequest, IKibanaSearchResponse } from '../types';
 
 export const ES_SEARCH_STRATEGY = 'es';
 
-export interface ISearchOptions {
-  /**
-   * An `AbortSignal` that allows the caller of `search` to abort a search request.
-   */
-  abortSignal?: AbortSignal;
-  /**
-   * Use this option to force using a specific server side search strategy. Leave empty to use the default strategy.
-   */
-  strategy?: string;
-
-  /**
-   * A session ID, grouping multiple search requests into a single session.
-   */
-  sessionId?: string;
-}
-
 export type ISearchRequestParams<T = Record<string, any>> = {
   trackTotalHits?: boolean;
 } & Search<T>;

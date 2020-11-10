@@ -21,6 +21,7 @@ import { Ping, HttpResponseBody } from '../../../../common/runtime_types';
 import { DocLinkForBody } from './doc_link_body';
 import { PingRedirects } from './ping_redirects';
 import { BrowserExpandedRow } from '../synthetics/browser_expanded_row';
+import { PingHeaders } from './headers';
 
 interface Props {
   ping: Ping;
@@ -103,6 +104,11 @@ export const PingListExpandedRowComponent = ({ ping }: Props) => {
       {ping?.http?.response?.redirects && (
         <EuiFlexItem>
           <PingRedirects monitorStatus={ping} showTitle={true} />
+        </EuiFlexItem>
+      )}
+      {ping?.http?.response?.headers && (
+        <EuiFlexItem>
+          <PingHeaders headers={ping?.http?.response?.headers} />
         </EuiFlexItem>
       )}
       <EuiFlexItem>

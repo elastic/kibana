@@ -14,6 +14,9 @@ import { DataTierAllocationType } from '../../../public/application/sections/edi
 
 import { Phases as PolicyPhases } from '../../../common/types';
 
+import { KibanaContextProvider } from '../../../public/shared_imports';
+import { createBreadcrumbsMock } from '../../../public/application/services/breadcrumbs.mock';
+
 type Phases = keyof PolicyPhases;
 
 import { POLICY_NAME } from './constants';
@@ -48,7 +51,17 @@ const testBedConfig: TestBedConfig = {
   },
 };
 
-const initTestBed = registerTestBed<TestSubjects>(EditPolicy, testBedConfig);
+const breadcrumbService = createBreadcrumbsMock();
+
+const MyComponent = (props: any) => {
+  return (
+    <KibanaContextProvider services={{ breadcrumbService }}>
+      <EditPolicy {...props} />
+    </KibanaContextProvider>
+  );
+};
+
+const initTestBed = registerTestBed<TestSubjects>(MyComponent, testBedConfig);
 
 type SetupReturn = ReturnType<typeof setup>;
 
@@ -207,6 +220,11 @@ export const setup = async () => {
         setReplicas: setReplicas('cold'),
         setFreeze,
         setIndexPriority: setIndexPriority('cold'),
+      },
+      delete: {
+        enable: enable('delete'),
+        setMinAgeValue: setMinAgeValue('delete'),
+        setMinAgeUnits: setMinAgeUnits('delete'),
       },
     },
   };

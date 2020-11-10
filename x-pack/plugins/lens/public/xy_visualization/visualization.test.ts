@@ -15,6 +15,7 @@ import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks'
 function exampleState(): State {
   return {
     legend: { position: Position.Bottom, isVisible: true },
+    valueLabels: 'hide',
     preferredSeriesType: 'bar',
     layers: [
       {
@@ -150,6 +151,7 @@ describe('xy_visualization', () => {
           },
           "preferredSeriesType": "bar_stacked",
           "title": "Empty XY chart",
+          "valueLabels": "hide",
         }
       `);
     });
@@ -405,6 +407,221 @@ describe('xy_visualization', () => {
         { ...exampleOperation, dataType: 'date' },
       ];
       expect(ops.filter(filterOperations).map((x) => x.dataType)).toEqual(['number']);
+    });
+  });
+
+  describe('#getErrorMessages', () => {
+    it("should not return an error when there's only one dimension (X or Y)", () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).not.toBeDefined();
+    });
+    it("should not return an error when there's only one dimension on multiple layers (same axis everywhere)", () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).not.toBeDefined();
+    });
+    it('should not return an error when mixing different valid configurations in multiple layers', () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: ['a'],
+                splitAccessor: 'a',
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).not.toBeDefined();
+    });
+    it("should not return an error when there's only one splitAccessor dimension configured", () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).not.toBeDefined();
+
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).not.toBeDefined();
+    });
+    it('should return an error when there are multiple layers, one axis configured for each layer (but different axis from each other)', () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: ['a'],
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).toEqual([
+        {
+          shortMessage: 'Missing Vertical axis.',
+          longMessage: 'Layer 1 requires a field for the Vertical axis.',
+        },
+      ]);
+    });
+    it('should return an error with batched messages for the same error with multiple layers', () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+              {
+                layerId: 'third',
+                seriesType: 'area',
+                xAccessor: undefined,
+                accessors: [],
+                splitAccessor: 'a',
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).toEqual([
+        {
+          shortMessage: 'Missing Vertical axis.',
+          longMessage: 'Layers 2, 3 require a field for the Vertical axis.',
+        },
+      ]);
+    });
+    it("should return an error when some layers are complete but other layers aren't", () => {
+      expect(
+        xyVisualization.getErrorMessages(
+          {
+            ...exampleState(),
+            layers: [
+              {
+                layerId: 'first',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: [],
+              },
+              {
+                layerId: 'second',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+              {
+                layerId: 'third',
+                seriesType: 'area',
+                xAccessor: 'a',
+                accessors: ['a'],
+              },
+            ],
+          },
+          createMockFramePublicAPI()
+        )
+      ).toEqual([
+        {
+          shortMessage: 'Missing Vertical axis.',
+          longMessage: 'Layer 1 requires a field for the Vertical axis.',
+        },
+      ]);
     });
   });
 });
