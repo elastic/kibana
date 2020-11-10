@@ -19,7 +19,7 @@ interface FindPreviousThresholdSignalsParams {
   services: AlertServices;
   logger: Logger;
   ruleId: string;
-  queryFields: string[];
+  bucketByField: string;
   timestampOverride: TimestampOverrideOrUndefined;
   buildRuleMessage: BuildRuleMessage;
 }
@@ -31,7 +31,7 @@ export const findPreviousThresholdSignals = async ({
   services,
   logger,
   ruleId,
-  queryFields,
+  bucketByField,
   timestampOverride,
   buildRuleMessage,
 }: FindPreviousThresholdSignalsParams): Promise<{
@@ -49,17 +49,12 @@ export const findPreviousThresholdSignals = async ({
       aggs: {
         threshold: {
           terms: {
-            field: queryFields[0], // FIXME
+            field: bucketByField,
           },
           aggs: {
             lastSignalTimestamp: {
               max: {
                 field: '@timestamp', // TODO: or timestampOverride? Or signal.original_time?
-              },
-            },
-            previousSignalCount: {
-              sum: {
-                field: 'signal.threshold_count',
               },
             },
           },

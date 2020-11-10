@@ -48,10 +48,7 @@ import { findMlSignals } from './find_ml_signals';
 import { findThresholdSignals } from './find_threshold_signals';
 import { findPreviousThresholdSignals } from './find_previous_threshold_signals';
 import { bulkCreateMlSignals } from './bulk_create_ml_signals';
-import {
-  bulkCreateThresholdSignals,
-  getThresholdSignalQueryFields,
-} from './bulk_create_threshold_signals';
+import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
 import {
   scheduleNotificationActions,
   NotificationRuleTypeParams,
@@ -304,17 +301,6 @@ export const signalRulesAlertType = ({
             lists: exceptionItems ?? [],
           });
 
-          const fakeHit = {
-            _index: '',
-            _id: '',
-            _score: 1.0,
-            _source: {
-              '@timestamp': '',
-            },
-            _type: '',
-          };
-          const queryFields = getThresholdSignalQueryFields(fakeHit, esFilter);
-
           const {
             searchResult: previousSignals,
             searchErrors: previousSearchErrors,
@@ -325,7 +311,7 @@ export const signalRulesAlertType = ({
             services,
             logger,
             ruleId,
-            queryFields: Object.keys(queryFields),
+            bucketByField: threshold.field,
             timestampOverride,
             buildRuleMessage,
           });
@@ -338,13 +324,13 @@ export const signalRulesAlertType = ({
                     must: [
                       {
                         term: {
-                          [Object.keys(queryFields)[0]]: bucket.key,
+                          [threshold.field]: bucket.key,
                         },
                       },
                       {
                         range: {
                           '@timestamp': {
-                            lt: bucket.lastSignalTimestamp.value_as_string,
+                            lte: bucket.lastSignalTimestamp.value_as_string,
                           },
                         },
                       },
@@ -354,8 +340,6 @@ export const signalRulesAlertType = ({
               },
             });
           });
-
-          // console.log(JSON.stringify(esFilter));
 
           const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
             inputIndexPattern: inputIndex,
