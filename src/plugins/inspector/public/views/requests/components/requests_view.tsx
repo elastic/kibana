@@ -31,7 +31,7 @@ import { RequestDetails } from './request_details';
 
 interface RequestSelectorState {
   requests: Request[];
-  request: Request;
+  request: Request | null;
 }
 
 export class RequestsViewComponent extends Component<InspectorViewProps, RequestSelectorState> {

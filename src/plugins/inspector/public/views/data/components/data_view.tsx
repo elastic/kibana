@@ -35,7 +35,7 @@ import { Adapters } from '../../../../common';
 import {
   TabularLoaderOptions,
   TabularData,
-  TabularCallback,
+  TabularHolder,
 } from '../../../../common/adapters/data/types';
 import { IUiSettingsClient } from '../../../../../../core/public';
 import { withKibana, KibanaReactContextValue } from '../../../../../kibana_react/public';
@@ -44,7 +44,7 @@ interface DataViewComponentState {
   tabularData: TabularData | null;
   tabularOptions: TabularLoaderOptions;
   adapters: Adapters;
-  tabularPromise: TabularCallback | null;
+  tabularPromise: Promise<TabularHolder> | null;
 }
 
 interface DataViewComponentProps extends InspectorViewProps {
@@ -91,7 +91,7 @@ class DataViewComponent extends Component<DataViewComponentProps, DataViewCompon
     const { tabularPromise } = this.state;
 
     if (tabularPromise) {
-      const tabularData: TabularData = await tabularPromise;
+      const tabularData: TabularHolder = await tabularPromise;
 
       if (this._isMounted) {
         this.setState({
