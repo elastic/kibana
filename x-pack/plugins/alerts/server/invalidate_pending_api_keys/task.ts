@@ -118,23 +118,23 @@ function taskRunner(
           const delay = timePeriodBeforeDate(new Date(), configuredDelay).toISOString();
 
           let hasApiKeysPendingInvalidation = true;
-          let pageNumber = 1;
           const PAGE_SIZE = 100;
           do {
             const apiKeysToInvalidate = await repository.find<InvalidatePendingApiKey>({
               type: 'api_key_pending_invalidation',
-              filter: `api_key_pending_invalidation.attributes.createdAt <= ${delay}`,
-              page: pageNumber,
+              filter: `api_key_pending_invalidation.attributes.createdAt <= "${delay}"`,
+              page: 1,
+              sortField: 'createdAt',
+              sortOrder: 'asc',
               perPage: PAGE_SIZE,
             });
-            totalInvalidated += manageToInvalidateApiKeys(
+            totalInvalidated += await manageToInvalidateApiKeys(
               logger,
               repository,
               apiKeysToInvalidate,
               securityPluginSetup
             );
-            hasApiKeysPendingInvalidation = pageNumber * PAGE_SIZE < apiKeysToInvalidate.total;
-            pageNumber++;
+            hasApiKeysPendingInvalidation = apiKeysToInvalidate.total > 0;
           } while (hasApiKeysPendingInvalidation);
 
           return {
@@ -163,7 +163,7 @@ function taskRunner(
   };
 }
 
-function manageToInvalidateApiKeys(
+async function manageToInvalidateApiKeys(
   logger: Logger,
   repository: ISavedObjectsRepository,
   apiKeysToInvalidate: SavedObjectsFindResponse<InvalidatePendingApiKey>,
