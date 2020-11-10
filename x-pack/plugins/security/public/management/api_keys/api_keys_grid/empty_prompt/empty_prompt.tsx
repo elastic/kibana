@@ -7,7 +7,7 @@
 import React, { Fragment } from 'react';
 import { ApplicationStart } from 'kibana/public';
 
-import { EuiEmptyPrompt, EuiButton, EuiLink } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { DocumentationLinksService } from '../../documentation_links';
 
@@ -56,7 +56,7 @@ export const EmptyPrompt: React.FunctionComponent<Props> = ({
         data-test-subj="goToAccountButton"
       >
         <FormattedMessage
-          id="xpack.security.management.apiKeys.table.emptyPromptConsoleButtonMessage"
+          id="xpack.security.management.apiKeys.table.emptyPromptAccountButtonMessage"
           defaultMessage="Go to your account"
         />
       </EuiButton>
