@@ -19,9 +19,9 @@ import { AppLogic } from '../../app_logic';
 
 import { Meta } from '../../../../../common/types';
 import { Engine } from '../../types';
-import { IApiToken, ICredentialsDetails, ITokenReadWrite } from './types';
+import { ApiToken, CredentialsDetails, TokenReadWrite } from './types';
 
-export const defaultApiToken: IApiToken = {
+export const defaultApiToken: ApiToken = {
   name: '',
   type: ApiTokenTypes.Private,
   read: true,
@@ -32,18 +32,18 @@ export const defaultApiToken: IApiToken = {
 interface CredentialsLogicActions {
   addEngineName(engineName: string): string;
   onApiKeyDelete(tokenName: string): string;
-  onApiTokenCreateSuccess(apiToken: IApiToken): IApiToken;
+  onApiTokenCreateSuccess(apiToken: ApiToken): ApiToken;
   onApiTokenError(formErrors: string[]): string[];
-  onApiTokenUpdateSuccess(apiToken: IApiToken): IApiToken;
+  onApiTokenUpdateSuccess(apiToken: ApiToken): ApiToken;
   removeEngineName(engineName: string): string;
   setAccessAllEngines(accessAll: boolean): boolean;
-  setCredentialsData(meta: Meta, apiTokens: IApiToken[]): { meta: Meta; apiTokens: IApiToken[] };
-  setCredentialsDetails(details: ICredentialsDetails): ICredentialsDetails;
+  setCredentialsData(meta: Meta, apiTokens: ApiToken[]): { meta: Meta; apiTokens: ApiToken[] };
+  setCredentialsDetails(details: CredentialsDetails): CredentialsDetails;
   setNameInputBlurred(isBlurred: boolean): boolean;
-  setTokenReadWrite(tokenReadWrite: ITokenReadWrite): ITokenReadWrite;
+  setTokenReadWrite(tokenReadWrite: TokenReadWrite): TokenReadWrite;
   setTokenName(name: string): string;
   setTokenType(tokenType: string): string;
-  showCredentialsForm(apiToken?: IApiToken): IApiToken;
+  showCredentialsForm(apiToken?: ApiToken): ApiToken;
   hideCredentialsForm(): { value: boolean };
   resetCredentials(): { value: boolean };
   initializeCredentialsData(): { value: boolean };
@@ -55,10 +55,10 @@ interface CredentialsLogicActions {
 }
 
 interface CredentialsLogicValues {
-  activeApiToken: IApiToken;
+  activeApiToken: ApiToken;
   activeApiTokenExists: boolean;
   activeApiTokenRawName: string;
-  apiTokens: IApiToken[];
+  apiTokens: ApiToken[];
   dataLoading: boolean;
   engines: Engine[];
   formErrors: string[];
@@ -267,7 +267,7 @@ export const CredentialsLogic = kea<CredentialsLogicType>({
     onApiTokenChange: async () => {
       const { id, name, engines, type, read, write } = values.activeApiToken;
 
-      const data: IApiToken = {
+      const data: ApiToken = {
         name,
         type,
       };

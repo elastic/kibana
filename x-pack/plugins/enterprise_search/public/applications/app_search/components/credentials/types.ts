@@ -7,11 +7,11 @@
 import { Engine } from '../../types';
 import { ApiTokenTypes } from './constants';
 
-export interface ICredentialsDetails {
+export interface CredentialsDetails {
   engines: Engine[];
 }
 
-export interface IApiToken {
+export interface ApiToken {
   access_all_engines?: boolean;
   key?: string;
   engines?: string[];
@@ -22,7 +22,7 @@ export interface IApiToken {
   write?: boolean;
 }
 
-export interface ITokenReadWrite {
+export interface TokenReadWrite {
   name: 'read' | 'write';
   checked: boolean;
 }
