@@ -36,60 +36,48 @@
  */
 
 import { EncryptionConfig } from './encryption_config';
+import crypto from 'crypto';
+import fs from 'fs';
 
 describe('encryption key configuration', () => {
   let encryptionConfig = null;
 
   beforeEach(() => {
+    jest.spyOn(fs, 'readFileSync').mockReturnValue('xpack.security.encryptionKey: foo');
+    jest.spyOn(crypto, 'randomBytes').mockReturnValue('random-key');
     encryptionConfig = new EncryptionConfig();
   });
-  it('should load the current configuration', () => {
-    expect(encryptionConfig._hasEncryptionKey('xpack.reporting.encryptionKey')).toEqual(false);
-    expect(encryptionConfig._config).toBeDefined();
-  });
-
   it('should be able to check for encryption keys', () => {
     expect(encryptionConfig._hasEncryptionKey('xpack.reporting.encryptionKey')).toEqual(false);
-    encryptionConfig._config = {
-      'xpack.reporting.encryptionKey': 'foo',
-    };
-    expect(encryptionConfig._hasEncryptionKey('xpack.reporting.encryptionKey')).toEqual(true);
+    expect(encryptionConfig._hasEncryptionKey('xpack.security.encryptionKey')).toEqual(true);
   });
 
   it('should be able to get encryption keys', () => {
-    encryptionConfig._config = {
-      foo: 'bar',
-    };
-
-    expect(encryptionConfig._getEncryptionKey('foo')).toEqual('bar');
+    expect(encryptionConfig._getEncryptionKey('xpack.reporting.encryptionKey')).toBeUndefined();
+    expect(encryptionConfig._getEncryptionKey('xpack.security.encryptionKey')).toEqual('foo');
   });
 
-  it('should generate a 32 length key', () => {
-    expect(encryptionConfig._generateEncryptionKey().length).toEqual(32);
+  it('should generate a key', () => {
+    expect(encryptionConfig._generateEncryptionKey()).toEqual('random-key');
   });
 
   it('should only generate unset keys', () => {
-    encryptionConfig._config = {
-      'xpack.security.encryptionKey': 'foo',
-    };
     const output = encryptionConfig.generate({ force: false });
     expect(output['xpack.security.encryptionKey']).toEqual(undefined);
-    expect(output['xpack.reporting.encryptionKey'].length).toEqual(32);
+    expect(output['xpack.reporting.encryptionKey']).toEqual('random-key');
   });
 
   it('should regenerate all keys if the force flag is set', () => {
-    encryptionConfig._config = {
-      'xpack.security.encryptionKey': 'foo',
-    };
     const output = encryptionConfig.generate({ force: true });
-    expect(output['xpack.security.encryptionKey'].length).toEqual(32);
-    expect(output['xpack.reporting.encryptionKey'].length).toEqual(32);
+    expect(output['xpack.security.encryptionKey']).toEqual('random-key');
+    expect(output['xpack.reporting.encryptionKey']).toEqual('random-key');
+    expect(output['xpack.encryptedSavedObjects.encryptionKey']).toEqual('random-key');
   });
 
-  it('should set encryptedObjects, reporting, and security with a default configuration', () => {
+  it('should set encryptedObjects and reporting with a default configuration', () => {
     const output = encryptionConfig.generate({});
-    expect(output['xpack.security.encryptionKey'].length).toEqual(32);
-    expect(output['xpack.encryptedSavedObjects.encryptionKey'].length).toEqual(32);
-    expect(output['xpack.reporting.encryptionKey'].length).toEqual(32);
+    expect(output['xpack.security.encryptionKey']).toBeUndefined();
+    expect(output['xpack.encryptedSavedObjects.encryptionKey']).toEqual('random-key');
+    expect(output['xpack.reporting.encryptionKey']).toEqual('random-key');
   });
 });
