@@ -157,6 +157,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
             }
           ),
           buttonColor: 'danger',
+          maxWidth: 560,
         }
       );
       if (confirmed) {
