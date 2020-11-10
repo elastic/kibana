@@ -1,15 +1,7 @@
-.tagMgt__actionBar {
-  .euiButtonEmpty {
-    height: 18px;
-    font-size: 0.75rem;
-
-    .euiIcon {
-      height: 12px;
-      width: 12px;
-    }
-  }
-}
-
 .tagMgt__actionBar + .euiSpacer {
   display: none;
+}
+
+.tagMgt__actionBarIcon {
+  margin-left: $euiSizeXS;
 }

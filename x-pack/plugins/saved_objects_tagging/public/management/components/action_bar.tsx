@@ -6,15 +6,16 @@
 
 import React, { useState, useCallback, useMemo, FC } from 'react';
 import {
-  EuiButtonEmpty,
   EuiPopover,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiText,
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiText,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { TagBulkAction } from '../types';
@@ -90,21 +91,18 @@ export const ActionBar: FC<ActionBarProps> = ({
               closePopover={closePopover}
               panelPaddingSize="none"
               button={
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="arrowDown"
-                  iconSide="right"
-                  onClick={togglePopover}
-                  data-test-subj="actionBar-contextMenuButton"
-                >
-                  <FormattedMessage
-                    id="xpack.savedObjectsTagging.management.actionBar.selectedTagsLabel"
-                    defaultMessage="{count, plural, one {1 selected tag} other {# selected tags}}"
-                    values={{
-                      count: selectedCount,
-                    }}
-                  />
-                </EuiButtonEmpty>
+                <EuiText size="xs">
+                  <EuiLink onClick={togglePopover} data-test-subj="actionBar-contextMenuButton">
+                    <FormattedMessage
+                      id="xpack.savedObjectsTagging.management.actionBar.selectedTagsLabel"
+                      defaultMessage="{count, plural, one {1 selected tag} other {# selected tags}}"
+                      values={{
+                        count: selectedCount,
+                      }}
+                    />
+                    <EuiIcon className="tagMgt__actionBarIcon" type="arrowDown" size="s" />
+                  </EuiLink>
+                </EuiText>
               }
             >
               <EuiContextMenu
