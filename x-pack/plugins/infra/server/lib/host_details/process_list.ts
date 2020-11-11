@@ -17,7 +17,7 @@ export const getProcessList = async (
     timerange,
     modules: ['system.cpu', 'system.memory'],
     groupBy: ['system.process.cmdline'],
-    filter: [{ term: hostTerm }],
+    filters: [{ term: hostTerm }],
     indexPattern,
     limit: 9,
     metrics: [
