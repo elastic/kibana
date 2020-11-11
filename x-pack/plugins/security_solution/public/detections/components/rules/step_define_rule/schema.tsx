@@ -82,6 +82,7 @@ export const schema: FormSchema<DefineStepRule> = {
           if (!needsValidation) {
             return;
           }
+
           return isEmpty(query.query as string) && isEmpty(filters)
             ? {
                 code: 'ERR_FIELD_MISSING',
