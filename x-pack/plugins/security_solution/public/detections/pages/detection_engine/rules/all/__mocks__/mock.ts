@@ -7,9 +7,10 @@
 import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
 import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
+import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
 import { fillEmptySeverityMappings } from '../../helpers';
 
-export const mockQueryBar: DefineStepRule['queryBar'] = {
+export const mockQueryBar: FieldValueQueryBar = {
   query: {
     query: 'test query',
     language: 'kuery',

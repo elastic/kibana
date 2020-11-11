@@ -77,7 +77,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path, formData }] = args;
-          const { query, filters } = value as DefineStepRule['queryBar'];
+          const { query, filters } = value as FieldValueQueryBar;
           const needsValidation = !isMlRule(formData.ruleType);
           if (!needsValidation) {
             return;
@@ -96,7 +96,7 @@ export const schema: FormSchema<DefineStepRule> = {
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ value, path, formData }] = args;
-          const { query } = value as DefineStepRule['queryBar'];
+          const { query } = value as FieldValueQueryBar;
           const needsValidation = !isMlRule(formData.ruleType);
           if (!needsValidation) {
             return;
