@@ -15,18 +15,19 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiIcon,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
-import styled from 'styled-components';
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiSuperSelectOption } from '@elastic/eui/src/components/form/super_select';
-import { ActionType, CaseField, CasesConfigurationMapping } from '../../containers/configure/types';
-import { ActionConnector } from '../../../../../triggers_actions_ui/public';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { useActionsConnectorsContext } from '../../../../../triggers_actions_ui/public/common';
+import styled from 'styled-components';
 import * as i18n from './translations';
+import { FieldResponse } from '../../../../../case/common/api/cases';
+import {
+  ActionConnector,
+  useActionsConnectorsContext,
+} from '../../../../../triggers_actions_ui/public';
+import { ActionType, CaseField, CasesConfigurationMapping } from '../../containers/configure/types';
 import { useGetFields } from '../../containers/use_get_fields';
 import { FieldMappingRow } from './field_mapping_row_new';
-import { FieldResponse } from '../../../../../case/common/api/cases';
 import { setActionTypeToMapping } from './utils';
 interface Props {
   connector: ActionConnector;
@@ -140,12 +141,54 @@ const CallOut = styled(EuiCallOut)`
   margin-top: 10px;
 `;
 export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [newMapping, setNewMapping] = useState<CasesConfigurationMapping[]>([]);
   const { actionTypeRegistry } = useActionsConnectorsContext();
   const { fields, isLoading: isFieldsLoading } = useGetFields(connector.id, connector.actionTypeId);
+  const actionTypeModel = useMemo(() => actionTypeRegistry.get(connector.actionTypeId), [
+    actionTypeRegistry,
+    connector.actionTypeId,
+  ]);
+  const thirdPartyOptions = useMemo(() => (fields.length ? getThirdPartyOptions(fields) : []), [
+    fields,
+  ]);
+
+  const defaultMapping = useMemo(
+    () => (fields.length ? createDefaultMapping(fields) : loadingFieldsDefault),
+    [fields]
+  );
+
+  const activeMapping = useMemo(() => (newMapping.length ? newMapping : defaultMapping), [
+    defaultMapping,
+    newMapping,
+  ]);
+
+  const requiredFields = useMemo(
+    () => fields.reduce((acc: string[], f) => (f.required ? [...acc, f.id] : acc), []),
+    [fields]
+  );
+
+  const validateFields: string | null = useMemo(() => {
+    if (isFieldsLoading) {
+      return null;
+    }
+    // strictly typed, but these will definitely be strings. see createDefaultMapping.. Blerg typescript
+    const titleMapping = activeMapping.find((m) => m.source === 'title')?.target as string;
+    const descMapping = activeMapping.find((m) => m.source === 'description')?.target as string;
+    if (titleMapping === 'not_mapped' && descMapping === 'not_mapped') {
+      return i18n.BLANK_MAPPINGS(connector.name);
+    } else if (!requiredFields.includes(titleMapping) && !requiredFields.includes(descMapping)) {
+      return i18n.REQUIRED_MAPPINGS(connector.name, JSON.stringify(requiredFields));
+    }
+    return null;
+  }, [activeMapping, connector.name, isFieldsLoading, requiredFields]);
+  const isSaveDisabled = useMemo(() => isFieldsLoading || validateFields != null, [
+    isFieldsLoading,
+    validateFields,
+  ]);
   const closeFlyout = useCallback(() => {
     onClose();
   }, [onClose]);
-  const [isSaving, setIsSaving] = useState<boolean>(false);
   const onSaveClicked = useCallback(
     (closeAfterSave: boolean = true) => {
       setIsSaving(true);
@@ -157,24 +200,6 @@ export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
     },
     [closeFlyout]
   );
-  const actionTypeModel = useMemo(() => actionTypeRegistry.get(connector.actionTypeId), [
-    actionTypeRegistry,
-    connector.actionTypeId,
-  ]);
-  const thirdPartyOptions = useMemo(() => (fields.length ? getThirdPartyOptions(fields) : []), [
-    fields,
-  ]);
-  const [newMapping, setNewMapping] = useState<CasesConfigurationMapping[]>([]);
-
-  const defaultMapping = useMemo(
-    () => (fields.length ? createDefaultMapping(fields) : loadingFieldsDefault),
-    [fields]
-  );
-
-  const activeMapping = useMemo(() => (newMapping.length ? newMapping : defaultMapping), [
-    defaultMapping,
-    newMapping,
-  ]);
   const onChangeActionType = useCallback(
     (caseField: CaseField, newActionType: ActionType) => {
       setNewMapping(setActionTypeToMapping(caseField, newActionType, activeMapping));
@@ -217,30 +242,6 @@ export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
       }),
     [activeMapping, isFieldsLoading, onChangeActionType, onChangeThirdParty, thirdPartyOptions]
   );
-
-  const requiredFields = useMemo(
-    () => fields.reduce((acc: string[], f) => (f.required ? [...acc, f.id] : acc), []),
-    [fields]
-  );
-
-  const validateFields = useMemo(() => {
-    if (isFieldsLoading) {
-      return null;
-    }
-    // strictly typed, but these will definitely be strings. see createDefaultMapping.. Blerg typescript
-    const titleMapping = activeMapping.find((m) => m.source === 'title')?.target as string;
-    const descMapping = activeMapping.find((m) => m.source === 'description')?.target as string;
-    if (titleMapping === 'not_mapped' && descMapping === 'not_mapped') {
-      return i18n.BLANK_MAPPINGS(connector.name);
-    } else if (!requiredFields.includes(titleMapping) && !requiredFields.includes(descMapping)) {
-      return i18n.REQUIRED_MAPPINGS(connector.name, JSON.stringify(requiredFields));
-    }
-    return null;
-  }, [activeMapping, connector.name, isFieldsLoading, requiredFields]);
-  const isSaveDisabled = useMemo(() => isFieldsLoading || validateFields != null, [
-    isFieldsLoading,
-    validateFields,
-  ]);
   return (
     <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionEditTitle" size="m">
       <EuiFlyoutHeader hasBorder>
@@ -269,7 +270,7 @@ export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="secondary"
-                  data-test-subj="saveMappingsActionButton"
+                  data-test-subj="saveMappingsButton"
                   isDisabled={isSaveDisabled}
                   isLoading={isSaving}
                   onClick={() => onSaveClicked(false)}
@@ -280,7 +281,7 @@ export const FieldMappingFlyout = ({ connector, onClose }: Props) => {
               <EuiFlexItem grow={false}>
                 <EuiButton
                   color="secondary"
-                  data-test-subj="saveAndCloseMappingsActionButton"
+                  data-test-subj="saveAndCloseMappingsButton"
                   fill
                   isDisabled={isSaveDisabled}
                   isLoading={isSaving}
