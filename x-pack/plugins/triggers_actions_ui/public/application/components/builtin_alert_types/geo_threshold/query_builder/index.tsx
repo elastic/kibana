@@ -120,7 +120,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       }
     }
   };
-  const [tempIndexQuery, setTempIndexQuery] = useState<Query>(
+  const [indexQueryInput, setIndexQueryInput] = useState<Query>(
     indexQuery || {
       query: '',
       language: 'kuery',
@@ -142,7 +142,7 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
       }
     }
   };
-  const [tempBoundaryIndexQuery, setTempBoundaryIndexQuery] = useState<Query>(
+  const [boundaryIndexQueryInput, setBoundaryIndexQueryInput] = useState<Query>(
     boundaryIndexQuery || {
       query: '',
       language: 'kuery',
@@ -284,13 +284,13 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
           disableAutoFocus
           bubbleSubmitEvent
           indexPatterns={indexPattern ? [indexPattern] : []}
-          query={tempIndexQuery}
+          query={indexQueryInput}
           onChange={(query) => {
             if (query.language) {
               if (validateQuery(query)) {
                 setAlertParams('indexQuery', query);
               }
-              setTempIndexQuery(query);
+              setIndexQueryInput(query);
             }
           }}
         />
@@ -369,13 +369,13 @@ export const GeoThresholdAlertTypeExpression: React.FunctionComponent<AlertTypeP
           disableAutoFocus
           bubbleSubmitEvent
           indexPatterns={boundaryIndexPattern ? [boundaryIndexPattern] : []}
-          query={tempBoundaryIndexQuery}
+          query={boundaryIndexQueryInput}
           onChange={(query) => {
             if (query.language) {
               if (validateQuery(query)) {
                 setAlertParams('boundaryIndexQuery', query);
               }
-              setTempBoundaryIndexQuery(query);
+              setBoundaryIndexQueryInput(query);
             }
           }}
         />
