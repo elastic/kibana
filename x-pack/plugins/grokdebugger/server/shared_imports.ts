@@ -3,11 +3,5 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React from 'react';
-import { APMLink, APMLinkExtendProps } from './APMLink';
 
-function SettingsLink(props: APMLinkExtendProps) {
-  return <APMLink path="/settings" {...props} />;
-}
-
-export { SettingsLink };
+export { handleEsError } from '../../../../src/plugins/es_ui_shared/server';
