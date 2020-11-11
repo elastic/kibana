@@ -34,8 +34,8 @@ import {
   createMockEndpointAppContextServiceStartContract,
   createMockPackageService,
 } from '../../endpoint/mocks';
-import { PackageService } from '../../../../ingest_manager/server/services';
-import { ElasticsearchAssetType } from '../../../../ingest_manager/common/types/models';
+import { PackageService } from '../../../../fleet/server/services';
+import { ElasticsearchAssetType } from '../../../../fleet/common/types/models';
 
 jest.mock('./query.hosts.dsl', () => {
   return {
