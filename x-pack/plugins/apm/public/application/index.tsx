@@ -22,7 +22,10 @@ import {
 import { AlertsContextProvider } from '../../../triggers_actions_ui/public';
 import { routes } from '../components/app/Main/route_config';
 import { ScrollToTopOnPathChange } from '../components/app/Main/ScrollToTopOnPathChange';
-import { ApmPluginContext } from '../context/ApmPluginContext';
+import {
+  ApmPluginContext,
+  ApmPluginContextValue,
+} from '../context/ApmPluginContext';
 import { LicenseProvider } from '../context/LicenseContext';
 import { UrlParamsProvider } from '../context/UrlParamsContext';
 import { useBreadcrumbs } from '../hooks/use_breadcrumbs';
@@ -64,23 +67,14 @@ function App() {
 }
 
 export function ApmAppRoot({
-  core,
-  deps,
-  history,
-  config,
+  apmPluginContextValue,
 }: {
-  core: CoreStart;
-  deps: ApmPluginSetupDeps;
-  history: AppMountParameters['history'];
-  config: ConfigSchema;
+  apmPluginContextValue: ApmPluginContextValue;
 }) {
+  const { appMountParameters, core, plugins } = apmPluginContextValue;
+  const { history } = appMountParameters;
   const i18nCore = core.i18n;
-  const plugins = deps;
-  const apmPluginContextValue = {
-    config,
-    core,
-    plugins,
-  };
+
   return (
     <RedirectAppLinks application={core.application}>
       <ApmPluginContext.Provider value={apmPluginContextValue}>
@@ -117,14 +111,21 @@ export function ApmAppRoot({
 
 export const renderApp = (
   core: CoreStart,
-  deps: ApmPluginSetupDeps,
-  { element, history }: AppMountParameters,
+  setupDeps: ApmPluginSetupDeps,
+  appMountParameters: AppMountParameters,
   config: ConfigSchema
 ) => {
+  const { element } = appMountParameters;
+  const apmPluginContextValue = {
+    appMountParameters,
+    config,
+    core,
+    plugins: setupDeps,
+  };
+
   // render APM feedback link in global help menu
   setHelpExtension(core);
   setReadonlyBadge(core);
-
   createCallApmApi(core.http);
 
   // Automatically creates static index pattern and stores as saved object
@@ -134,7 +135,7 @@ export const renderApp = (
   });
 
   ReactDOM.render(
-    <ApmAppRoot core={core} deps={deps} history={history} config={config} />,
+    <ApmAppRoot apmPluginContextValue={apmPluginContextValue} />,
     element
   );
   return () => {

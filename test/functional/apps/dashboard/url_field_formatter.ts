@@ -46,7 +46,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(currentUrl).to.equal(fieldUrl);
   };
 
-  describe('Changing field formatter to Url', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/79463
+  describe.skip('Changing field formatter to Url', () => {
     before(async function () {
       await esArchiver.load('dashboard/current/kibana');
       await kibanaServer.uiSettings.replace({

@@ -10,13 +10,13 @@ import { EuiTable, EuiTableBody } from '@elastic/eui';
 
 import { TableHeader } from '../../../../shared/table_header/table_header';
 import { SourceRow, ISourceRow } from '../source_row';
-import { IContentSourceDetails } from '../../../types';
+import { ContentSourceDetails } from '../../../types';
 
-interface ISourcesTableProps extends ISourceRow {
-  sources: IContentSourceDetails[];
+interface SourcesTableProps extends ISourceRow {
+  sources: ContentSourceDetails[];
 }
 
-export const SourcesTable: React.FC<ISourcesTableProps> = ({
+export const SourcesTable: React.FC<SourcesTableProps> = ({
   sources,
   showDetails,
   isOrganization,

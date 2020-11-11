@@ -21,6 +21,7 @@ import { installPipelines, deletePreviousPipelines } from '../elasticsearch/inge
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
+import { isRequiredPackage } from './index';
 import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
@@ -32,28 +33,22 @@ import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './insta
 export async function _installPackage({
   savedObjectsClient,
   callCluster,
-  pkgName,
-  pkgVersion,
   installedPkg,
   paths,
-  removable,
-  internal,
   packageInfo,
   installType,
   installSource,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallESAsCurrentUser;
-  pkgName: string;
-  pkgVersion: string;
   installedPkg?: SavedObject<Installation>;
   paths: string[];
-  removable: boolean;
-  internal: boolean;
   packageInfo: InstallablePackage;
   installType: InstallType;
   installSource: InstallSource;
 }): Promise<AssetReference[]> {
+  const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
+  const removable = !isRequiredPackage(pkgName);
   const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
   // add the package installation to the saved object.
   // if some installation already exists, just update install info

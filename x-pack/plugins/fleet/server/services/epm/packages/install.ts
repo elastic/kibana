@@ -24,7 +24,6 @@ import * as Registry from '../registry';
 import {
   getInstallation,
   getInstallationObject,
-  isRequiredPackage,
   bulkInstallPackages,
   isBulkInstallError,
 } from './index';
@@ -37,7 +36,7 @@ import {
 } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { appContextService } from '../../app_context';
-import { loadArchivePackage } from '../archive';
+import { getArchivePackage } from '../archive';
 import { _installPackage } from './_install_package';
 
 export async function installLatestPackage(options: {
@@ -52,7 +51,7 @@ export async function installLatestPackage(options: {
       name: latestPackage.name,
       version: latestPackage.version,
     });
-    return installPackageFromRegistry({ savedObjectsClient, pkgkey, callCluster });
+    return installPackage({ installSource: 'registry', savedObjectsClient, pkgkey, callCluster });
   } catch (err) {
     throw err;
   }
@@ -148,7 +147,8 @@ export async function handleInstallPackageFailure({
       }
       const prevVersion = `${pkgName}-${installedPkg.attributes.version}`;
       logger.error(`rolling back to ${prevVersion} after error installing ${pkgkey}`);
-      await installPackageFromRegistry({
+      await installPackage({
+        installSource: 'registry',
         savedObjectsClient,
         pkgkey: prevVersion,
         callCluster,
@@ -186,7 +186,12 @@ export async function upgradePackage({
     });
 
     try {
-      const assets = await installPackageFromRegistry({ savedObjectsClient, pkgkey, callCluster });
+      const assets = await installPackage({
+        installSource: 'registry',
+        savedObjectsClient,
+        pkgkey,
+        callCluster,
+      });
       return {
         name: pkgToUpgrade,
         newVersion: latestPkg.version,
@@ -218,19 +223,19 @@ export async function upgradePackage({
   }
 }
 
-interface InstallPackageParams {
+interface InstallRegistryPackageParams {
   savedObjectsClient: SavedObjectsClientContract;
   pkgkey: string;
   callCluster: CallESAsCurrentUser;
   force?: boolean;
 }
 
-export async function installPackageFromRegistry({
+async function installPackageFromRegistry({
   savedObjectsClient,
   pkgkey,
   callCluster,
   force = false,
-}: InstallPackageParams): Promise<AssetReference[]> {
+}: InstallRegistryPackageParams): Promise<AssetReference[]> {
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
   // TODO: calls to getInstallationObject, Registry.fetchInfo, and Registry.fetchFindLatestPackge
@@ -248,39 +253,38 @@ export async function installPackageFromRegistry({
     throw new PackageOutdatedError(`${pkgkey} is out-of-date and cannot be installed or updated`);
   }
 
-  const { paths, registryPackageInfo } = await Registry.loadRegistryPackage(pkgName, pkgVersion);
-
-  const removable = !isRequiredPackage(pkgName);
-  const { internal = false } = registryPackageInfo;
-  const installSource = 'registry';
+  const { paths, registryPackageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
 
   return _installPackage({
     savedObjectsClient,
     callCluster,
-    pkgName,
-    pkgVersion,
     installedPkg,
     paths,
-    removable,
-    internal,
     packageInfo: registryPackageInfo,
     installType,
-    installSource,
+    installSource: 'registry',
   });
 }
 
-export async function installPackageByUpload({
-  savedObjectsClient,
-  callCluster,
-  archiveBuffer,
-  contentType,
-}: {
+interface InstallUploadedArchiveParams {
   savedObjectsClient: SavedObjectsClientContract;
   callCluster: CallESAsCurrentUser;
   archiveBuffer: Buffer;
   contentType: string;
-}): Promise<AssetReference[]> {
-  const { paths, archivePackageInfo } = await loadArchivePackage({ archiveBuffer, contentType });
+}
+
+export type InstallPackageParams =
+  | ({ installSource: Extract<InstallSource, 'registry'> } & InstallRegistryPackageParams)
+  | ({ installSource: Extract<InstallSource, 'upload'> } & InstallUploadedArchiveParams);
+
+async function installPackageByUpload({
+  savedObjectsClient,
+  callCluster,
+  archiveBuffer,
+  contentType,
+}: InstallUploadedArchiveParams): Promise<AssetReference[]> {
+  const { paths, archivePackageInfo } = await getArchivePackage({ archiveBuffer, contentType });
+
   const installedPkg = await getInstallationObject({
     savedObjectsClient,
     pkgName: archivePackageInfo.name,
@@ -292,23 +296,43 @@ export async function installPackageByUpload({
     );
   }
 
-  const removable = !isRequiredPackage(archivePackageInfo.name);
-  const { internal = false } = archivePackageInfo;
-  const installSource = 'upload';
-
   return _installPackage({
     savedObjectsClient,
     callCluster,
-    pkgName: archivePackageInfo.name,
-    pkgVersion: archivePackageInfo.version,
     installedPkg,
     paths,
-    removable,
-    internal,
     packageInfo: archivePackageInfo,
     installType,
-    installSource,
+    installSource: 'upload',
   });
+}
+
+export async function installPackage(args: InstallPackageParams) {
+  if (!('installSource' in args)) {
+    throw new Error('installSource is required');
+  }
+
+  if (args.installSource === 'registry') {
+    const { savedObjectsClient, pkgkey, callCluster, force } = args;
+
+    return installPackageFromRegistry({
+      savedObjectsClient,
+      pkgkey,
+      callCluster,
+      force,
+    });
+  } else if (args.installSource === 'upload') {
+    const { savedObjectsClient, callCluster, archiveBuffer, contentType } = args;
+
+    return installPackageByUpload({
+      savedObjectsClient,
+      callCluster,
+      archiveBuffer,
+      contentType,
+    });
+  }
+  // @ts-expect-error s/b impossibe b/c `never` by this point, but just in case
+  throw new Error(`Unknown installSource: ${args.installSource}`);
 }
 
 export const updateVersion = async (
@@ -421,7 +445,9 @@ export async function ensurePackagesCompletedInstall(
     const pkgkey = `${pkg.attributes.name}-${pkg.attributes.install_version}`;
     // reinstall package
     if (elapsedTime > MAX_TIME_COMPLETE_INSTALL) {
-      acc.push(installPackageFromRegistry({ savedObjectsClient, pkgkey, callCluster }));
+      acc.push(
+        installPackage({ installSource: 'registry', savedObjectsClient, pkgkey, callCluster })
+      );
     }
     return acc;
   }, []);
