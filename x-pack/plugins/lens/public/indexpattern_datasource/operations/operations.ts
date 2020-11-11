@@ -4,16 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { DimensionPriority, OperationMetadata } from '../../types';
+import _ from 'lodash';
+import { OperationMetadata } from '../../types';
 import {
   operationDefinitionMap,
   operationDefinitions,
   GenericOperationDefinition,
   OperationType,
-  IndexPatternColumn,
 } from './definitions';
 import { IndexPattern, IndexPatternField } from '../types';
 import { documentField } from '../document_field';
+
+export { operationDefinitionMap } from './definitions';
 
 /**
  * Returns all available operation types as a list at runtime.
@@ -22,13 +24,6 @@ import { documentField } from '../document_field';
  */
 export function getOperations(): OperationType[] {
   return Object.keys(operationDefinitionMap) as OperationType[];
-}
-
-/**
- * Returns true if the given column can be applied to the given index pattern
- */
-export function isColumnTransferable(column: IndexPatternColumn, newIndexPattern: IndexPattern) {
-  return operationDefinitionMap[column.operationType].isTransferable(column, newIndexPattern);
 }
 
 /**
@@ -51,7 +46,10 @@ export function getOperationDisplay() {
   return display;
 }
 
-function getSortScoreByPriority(a: GenericOperationDefinition, b: GenericOperationDefinition) {
+export function getSortScoreByPriority(
+  a: GenericOperationDefinition,
+  b: GenericOperationDefinition
+) {
   return (b.priority || Number.NEGATIVE_INFINITY) - (a.priority || Number.NEGATIVE_INFINITY);
 }
 
@@ -169,82 +167,3 @@ export function getAvailableOperationsByMetadata(indexPattern: IndexPattern) {
 
   return Object.values(operationByMetadata);
 }
-
-/**
- * Changes the field of the passed in colum. To do so, this method uses the `onFieldChange` function of
- * the operation definition of the column. Returns a new column object with the field changed.
- * @param column The column object with the old field configured
- * @param indexPattern The index pattern associated to the layer of the column
- * @param newField The new field the column should be switched to
- */
-export function changeField(
-  column: IndexPatternColumn,
-  indexPattern: IndexPattern,
-  newField: IndexPatternField
-) {
-  const operationDefinition = operationDefinitionMap[column.operationType];
-
-  if (operationDefinition.input === 'field' && 'sourceField' in column) {
-    return operationDefinition.onFieldChange(column, indexPattern, newField);
-  } else {
-    throw new Error(
-      "Invariant error: Cannot change field if operation isn't a field based operaiton"
-    );
-  }
-}
-
-/**
- * Builds a column object based on the context passed in. It tries
- * to find the applicable operation definition and then calls the `buildColumn`
- * function of that definition. It passes in the given `field` (if available),
- * `suggestedPriority`, `layerId` and the currently existing `columns`.
- * * If `op` is specified, the specified operation definition is used directly.
- * * If `asDocumentOperation` is true, the first matching document-operation is used.
- * * If `field` is specified, the first matching field based operation applicable to the field is used.
- */
-export function buildColumn({
-  op,
-  columns,
-  field,
-  layerId,
-  indexPattern,
-  suggestedPriority,
-  previousColumn,
-}: {
-  op: OperationType;
-  columns: Partial<Record<string, IndexPatternColumn>>;
-  suggestedPriority: DimensionPriority | undefined;
-  layerId: string;
-  indexPattern: IndexPattern;
-  field?: IndexPatternField;
-  previousColumn?: IndexPatternColumn;
-}): IndexPatternColumn {
-  const operationDefinition = operationDefinitionMap[op];
-
-  if (!operationDefinition) {
-    throw new Error('No suitable operation found for given parameters');
-  }
-
-  const baseOptions = {
-    columns,
-    suggestedPriority,
-    layerId,
-    indexPattern,
-    previousColumn,
-  };
-
-  if (operationDefinition.input === 'none') {
-    return operationDefinition.buildColumn(baseOptions);
-  }
-
-  if (!field) {
-    throw new Error(`Invariant error: ${operationDefinition.type} operation requires field`);
-  }
-
-  return operationDefinition.buildColumn({
-    ...baseOptions,
-    field,
-  });
-}
-
-export { operationDefinitionMap } from './definitions';
