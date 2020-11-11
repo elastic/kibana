@@ -62,12 +62,14 @@ export function getAlertPanelsByNode(
       title: panelTitle,
       items: [
         ...Object.keys(statesByNodes).map((nodeUuid, index) => {
-          const states = statesByNodes[nodeUuid] as CommonAlertState[];
+          const firingStates = (statesByNodes[nodeUuid] as CommonAlertState[]).filter(
+            ({ state, firing }) => firing && stateFilter(state)
+          );
 
           return {
             name: (
               <EuiText>
-                {states[0].state.stackProductName} ({states.length})
+                {firingStates[0].state.stackProductName} ({firingStates.length})
               </EuiText>
             ),
             panel: index + 1,

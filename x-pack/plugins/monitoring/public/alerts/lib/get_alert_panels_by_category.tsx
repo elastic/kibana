@@ -107,15 +107,8 @@ export function getAlertPanelsByCategory(
         title: `${category.label}`,
         items: category.alerts.map(({ alertName }) => {
           const alertStatus = alertsContext.allAlerts[alertName];
-          const name = inSetupMode ? (
-            <EuiText>{alertStatus.alert.label}</EuiText>
-          ) : (
-            <EuiText>
-              {alertStatus.alert.label} ({category.alertCount})
-            </EuiText>
-          );
           return {
-            name,
+            name: <EuiText>{alertStatus.alert.label}</EuiText>,
             panel: ++secondaryPanelIndex,
           };
         }),
@@ -141,13 +134,13 @@ export function getAlertPanelsByCategory(
       panels.push({
         id: nodeIndex + 1,
         title: `${category.label}`,
-        items: category.alerts.map(({ alertName }) => {
+        items: category.alerts.map(({ alertName, firingStates }) => {
           const alertStatus = alertsContext.allAlerts[alertName];
           const name = inSetupMode ? (
             <EuiText>{alertStatus.alert.label}</EuiText>
           ) : (
             <EuiText>
-              {alertStatus.alert.label} ({category.alertCount})
+              {alertStatus.alert.label} ({firingStates.length})
             </EuiText>
           );
           return {
