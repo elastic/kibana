@@ -15,12 +15,12 @@ export interface IFlashMessage {
   description?: ReactNode;
 }
 
-export interface IFlashMessagesValues {
+interface FlashMessagesValues {
   messages: IFlashMessage[];
   queuedMessages: IFlashMessage[];
   historyListener: Function | null;
 }
-export interface IFlashMessagesActions {
+interface FlashMessagesActions {
   setFlashMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
   clearFlashMessages(): void;
   setQueuedMessages(messages: IFlashMessage | IFlashMessage[]): { messages: IFlashMessage[] };
@@ -31,7 +31,7 @@ export interface IFlashMessagesActions {
 const convertToArray = (messages: IFlashMessage | IFlashMessage[]) =>
   !Array.isArray(messages) ? [messages] : messages;
 
-export const FlashMessagesLogic = kea<MakeLogicType<IFlashMessagesValues, IFlashMessagesActions>>({
+export const FlashMessagesLogic = kea<MakeLogicType<FlashMessagesValues, FlashMessagesActions>>({
   path: ['enterprise_search', 'flash_messages_logic'],
   actions: {
     setFlashMessages: (messages) => ({ messages: convertToArray(messages) }),

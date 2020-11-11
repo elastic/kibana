@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 import { Layout, SideNav, SideNavLink } from '../shared/layout';
 import { SetupGuide } from './components/setup_guide';
 import { ErrorConnecting } from './components/error_connecting';
-import { EngineOverview } from './components/engine_overview';
+import { EnginesOverview } from './components/engines';
 import { EngineRouter } from './components/engine';
 import { AppSearch, AppSearchUnconfigured, AppSearchConfigured, AppSearchNav } from './';
 
@@ -57,7 +57,7 @@ describe('AppSearchConfigured', () => {
 
     expect(wrapper.find(Layout)).toHaveLength(2);
     expect(wrapper.find(Layout).last().prop('readOnlyMode')).toBeFalsy();
-    expect(wrapper.find(EngineOverview)).toHaveLength(1);
+    expect(wrapper.find(EnginesOverview)).toHaveLength(1);
     expect(wrapper.find(EngineRouter)).toHaveLength(1);
   });
 

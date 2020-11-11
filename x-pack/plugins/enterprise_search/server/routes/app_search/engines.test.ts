@@ -6,7 +6,7 @@
 
 import { MockRouter, mockRequestHandler, mockDependencies } from '../../__mocks__';
 
-import { registerEnginesRoute } from './engines';
+import { registerEnginesRoutes } from './engines';
 
 describe('engine routes', () => {
   describe('GET /api/app_search/engines', () => {
@@ -31,7 +31,7 @@ describe('engine routes', () => {
         payload: 'query',
       });
 
-      registerEnginesRoute({
+      registerEnginesRoutes({
         ...mockDependencies,
         router: mockRouter.router,
       });
@@ -104,6 +104,32 @@ describe('engine routes', () => {
       it('missing type', () => {
         const request = { query: { pageIndex: 1 } };
         mockRouter.shouldThrow(request);
+      });
+    });
+  });
+
+  describe('GET /api/app_search/engines/{name}', () => {
+    let mockRouter: MockRouter;
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockRouter = new MockRouter({
+        method: 'get',
+        path: '/api/app_search/engines/{name}',
+        payload: 'params',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('creates a request to enterprise search', () => {
+      mockRouter.callRoute({ params: { name: 'some-engine' } });
+
+      expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
+        path: '/as/engines/some-engine/details',
       });
     });
   });

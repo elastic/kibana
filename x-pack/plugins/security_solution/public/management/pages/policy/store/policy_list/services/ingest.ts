@@ -15,7 +15,7 @@ import {
   GetPackagesResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
-} from '../../../../../../../../ingest_manager/common';
+} from '../../../../../../../../fleet/common';
 import { GetPolicyListResponse, GetPolicyResponse, UpdatePolicyResponse } from '../../../types';
 import { NewPolicyData } from '../../../../../../../common/endpoint/types';
 
