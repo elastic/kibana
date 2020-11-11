@@ -8,7 +8,6 @@ import '../../../../__mocks__/kea.mock';
 import { setMockActions, setMockValues } from '../../../../__mocks__';
 
 import React from 'react';
-import ReactDOM from 'react-dom';
 import { shallow } from 'enzyme';
 
 import { LogRetentionConfirmationModal } from './log_retention_confirmation_modal';
@@ -16,16 +15,6 @@ import { ELogRetentionOptions } from './types';
 import { GenericConfirmationModal } from './generic_confirmation_modal';
 
 describe('<LogRetentionConfirmationModal />', () => {
-  beforeAll(() => {
-    // LogRetentionConfirmationModal contains EuiModals, which utilize React Portals,
-    // so we must mock `createPortal` to get the rendered element directly,
-    // instead of letting it be placed normally elsewhere in DOM (outside of jest's domain)
-    // @ts-ignore
-    ReactDOM.createPortal = jest.fn((element) => {
-      return element;
-    });
-  });
-
   const actions = {
     closeModals: jest.fn(),
     saveLogRetention: jest.fn(),
@@ -55,12 +44,6 @@ describe('<LogRetentionConfirmationModal />', () => {
     jest.clearAllMocks();
     setMockActions(actions);
     setMockValues(values);
-  });
-
-  afterEach(() => {
-    // Remove the jest mock on createPortal
-    // @ts-ignore
-    ReactDOM.createPortal.mockClear();
   });
 
   it('renders nothing by default', () => {
