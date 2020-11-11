@@ -110,7 +110,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
           })}
         </EuiFlexGroup>
       </>
-    ) : !hasUiExtension ? (
+    ) : hasUiExtension ? null : (
       <EuiEmptyPrompt
         iconType="checkInCircleFilled"
         iconColor="secondary"
@@ -125,7 +125,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
           </EuiText>
         }
       />
-    ) : null;
+    );
 
   return validationResults ? renderConfigureInputs() : <Loading />;
 };
