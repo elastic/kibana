@@ -4,23 +4,15 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Dispatch, SetStateAction, FC, Fragment, useState } from 'react';
-import {
-  EuiBadge,
-  EuiSearchBar,
-  EuiSearchBarProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  SearchFilterConfig,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiBadge, SearchFilterConfig } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TermClause, FieldClause, Value } from './common';
 import { TRANSFORM_MODE, TRANSFORM_STATE } from '../../../../../../common/constants';
 import { TransformListRow } from '../../../../common';
 import { getTaskStateBadge } from './use_columns';
 
-const filters: SearchFilterConfig[] = [
+export const transformFilters: SearchFilterConfig[] = [
   {
     type: 'field_value_selection',
     field: 'state.state',
@@ -113,69 +105,4 @@ export const filterTransforms = (
     .map((m) => m.transform);
 
   return filtered;
-};
-
-function getError(errorMessage: string | null) {
-  if (errorMessage) {
-    return i18n.translate('xpack.transform.transformList.searchBar.invalidSearchErrorMessage', {
-      defaultMessage: 'Invalid search: {errorMessage}',
-      values: { errorMessage },
-    });
-  }
-
-  return '';
-}
-
-interface Props {
-  searchQueryText: string;
-  setSearchQueryText: Dispatch<SetStateAction<string>>;
-}
-
-export const TransformSearchBar: FC<Props> = ({ searchQueryText, setSearchQueryText }) => {
-  const [errorMessage, setErrorMessage] = useState<null | string>(null);
-
-  const onChange: EuiSearchBarProps['onChange'] = ({ query, error }) => {
-    if (error) {
-      setErrorMessage(error.message);
-    } else if (query !== null && query.text !== undefined) {
-      setSearchQueryText(query.text);
-      setErrorMessage(null);
-    }
-  };
-
-  return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem data-test-subj="transformSearchBar" grow={false}>
-        {searchQueryText === undefined && (
-          <EuiSearchBar
-            box={{
-              incremental: true,
-            }}
-            filters={filters}
-            onChange={onChange}
-            className="transformSearchBar"
-          />
-        )}
-        {searchQueryText !== undefined && (
-          <EuiSearchBar
-            box={{
-              incremental: true,
-            }}
-            defaultQuery={searchQueryText}
-            filters={filters}
-            onChange={onChange}
-            className="transformSearchBar"
-          />
-        )}
-        <EuiFormRow
-          fullWidth
-          isInvalid={errorMessage !== null}
-          error={getError(errorMessage)}
-          style={{ maxHeight: '0px' }}
-        >
-          <Fragment />
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
 };
