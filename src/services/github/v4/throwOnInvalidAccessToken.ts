@@ -1,4 +1,6 @@
 import { AxiosError } from 'axios';
+import difference from 'lodash.difference';
+import isEmpty from 'lodash.isempty';
 import { HandledError } from '../../HandledError';
 import { getGlobalConfigPath } from '../../env';
 import { GithubV4Response } from './apiRequestV4';
@@ -29,25 +31,26 @@ export function throwOnInvalidAccessToken({
         (error) => error.type === 'NOT_FOUND'
       );
 
-      const grantedScopes: MaybeString =
-        error.response?.headers['x-oauth-scopes'];
-
-      const requiredScopes: MaybeString =
-        error.response?.headers['x-accepted-oauth-scopes'];
-
+      const grantedScopes = error.response?.headers['x-oauth-scopes'] || '';
+      const requiredScopes =
+        error.response?.headers['x-accepted-oauth-scopes'] || '';
       const ssoHeader: MaybeString = error.response?.headers['x-github-sso'];
 
       if (repoNotFound) {
-        // repo does not exist
-        if (grantedScopes === requiredScopes) {
+        const hasRequiredScopes = isEmpty(
+          difference(requiredScopes.split(','), grantedScopes.split(','))
+        );
+
+        // user does not have permission to the repo
+        if (!hasRequiredScopes) {
           throw new HandledError(
-            `The repository "${repoOwner}/${repoName}" doesn't exist`
+            `You do not have access to the repository "${repoOwner}/${repoName}". Please make sure your access token has the required scopes.\n\nRequired scopes: ${requiredScopes}\nAccess token scopes: ${grantedScopes}`
           );
         }
 
-        // user does not have permissions
+        // repo does not exist
         throw new HandledError(
-          `You do not have access to the repository "${repoOwner}/${repoName}". Please make sure your access token has the required scopes.\n\nRequired scopes: ${requiredScopes}\nAccess token scopes: ${grantedScopes}`
+          `The repository "${repoOwner}/${repoName}" doesn't exist`
         );
       }
 

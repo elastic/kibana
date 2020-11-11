@@ -80,6 +80,34 @@ describe('getOptionsFromCliArgs', () => {
     expect('api-hostname' in res).toEqual(false);
   });
 
+  it('should support all variations of --source-pr-labels', () => {
+    const configOptions: ConfigOptions = {};
+    const argv = [
+      '--sourcePRLabels',
+      'label a',
+      '--sourcePrLabels',
+      'label b',
+      '--source-pr-labels',
+      'label c',
+      '--sourcePRLabel',
+      'label d',
+      '--sourcePrLabel',
+      'label e',
+      '--source-pr-label',
+      'label f',
+    ];
+
+    const res = getOptionsFromCliArgs(configOptions, argv);
+    expect(res.sourcePRLabels).toEqual([
+      'label a',
+      'label b',
+      'label c',
+      'label d',
+      'label e',
+      'label f',
+    ]);
+  });
+
   describe('pullNumber', () => {
     it('should accept `--pr` alias but only return the full representation (`pullNumber`)', () => {
       const configOptions: ConfigOptions = {};

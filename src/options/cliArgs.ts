@@ -210,7 +210,7 @@ export function getOptionsFromCliArgs(
     .option('sourcePRLabels', {
       default: configOptions.sourcePRLabels ?? [],
       description: 'Add labels to the source (original) PR',
-      alias: 'sourcePRLabel',
+      alias: ['sourcePRLabel', 'sourcePrLabel', 'sourcePrLabels'],
       type: 'array',
     })
 
