@@ -20,7 +20,7 @@ export const useUIExtension = <
   T extends UIExtensionPoint['type'] = UIExtensionPoint['type'],
   V extends NarrowViews<T>['view'] = never
 >(
-  integration: UIExtensionPoint['integration'],
+  integration: UIExtensionPoint['package'],
   type: T,
   view: V
 ): SpecificExtensionPoint<UIExtensionPoint, T, V>['component'] | undefined => {

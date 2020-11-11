@@ -44,7 +44,7 @@ export interface PackagePolicyEditExtensionComponentProps {
 
 /** Extension point registration contract for Integration Policy Edit views */
 export interface PackagePolicyEditExtension {
-  integration: string;
+  package: string;
   type: 'integration-policy';
   view: 'edit';
   component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
@@ -75,7 +75,7 @@ export interface PackagePolicyCreateExtensionComponentProps {
 
 /** Extension point registration contract for Integration Policy Create views */
 export interface PackagePolicyCreateExtension {
-  integration: string;
+  package: string;
   type: 'integration-policy';
   view: 'create';
   component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
@@ -88,7 +88,7 @@ export type PackageCustomExtensionComponent = ComponentType;
 
 /** Extension point registration contract for Integration details Custom view */
 export interface PackageCustomExtension {
-  integration: string;
+  package: string;
   type: 'integration';
   view: 'custom';
   component: LazyExoticComponent<PackageCustomExtensionComponent>;

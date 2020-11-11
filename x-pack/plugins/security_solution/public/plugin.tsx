@@ -334,14 +334,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       const { registerExtension } = plugins.ingestManager;
 
       registerExtension({
-        integration: 'endpoint',
+        package: 'endpoint',
         type: 'integration-policy',
         view: 'edit',
         component: LazyEndpointPolicyEditExtension,
       });
 
       registerExtension({
-        integration: 'endpoint',
+        package: 'endpoint',
         type: 'integration-policy',
         view: 'create',
         component: LazyEndpointPolicyCreateExtension,
