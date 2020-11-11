@@ -9,15 +9,16 @@ import { useCallback, useEffect, useState } from 'react';
 import { errorToToaster, useStateToaster } from '../../common/components/toasters';
 import { getFields } from './api';
 import * as i18n from './translations';
+import { FieldResponse } from '../../../../case/common/api/cases';
 
 interface FieldsState {
-  data: any;
+  fields: FieldResponse;
   isLoading: boolean;
   isError: boolean;
 }
 
 const initialData: FieldsState = {
-  data: {},
+  fields: [],
   isLoading: false,
   isError: false,
 };
@@ -40,10 +41,9 @@ export const useGetFields = (connectorId: string, connectorType: string): UseGet
       });
       try {
         const response = await getFields(connectorId, connectorType, abortCtrl.signal);
-        console.log('response', response);
         if (!didCancel) {
           setFieldsState({
-            data: response,
+            fields: response,
             isLoading: false,
             isError: false,
           });
@@ -56,7 +56,7 @@ export const useGetFields = (connectorId: string, connectorType: string): UseGet
             dispatchToaster,
           });
           setFieldsState({
-            data: {},
+            fields: [],
             isLoading: false,
             isError: true,
           });

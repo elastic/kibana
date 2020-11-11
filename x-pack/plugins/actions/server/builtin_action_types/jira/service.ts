@@ -388,7 +388,6 @@ export const createExternalService = (
         });
 
         const fields = res.data.projects[0]?.issuetypes[0]?.fields || {};
-
         return normalizeFields(fields);
       } else {
         const res = await request({

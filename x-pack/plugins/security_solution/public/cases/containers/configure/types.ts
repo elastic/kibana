@@ -28,7 +28,7 @@ export {
 
 export interface CasesConfigurationMapping {
   source: CaseField;
-  target: ThirdPartyField;
+  target: string;
   actionType: ActionType;
 }
 

@@ -12,6 +12,8 @@ import { JiraCaseFieldsRt } from '../connectors/jira';
 import { ServiceNowCaseFieldsRT } from '../connectors/servicenow';
 import { ResilientCaseFieldsRT } from '../connectors/resilient';
 import { CaseConnectorRt, ESCaseConnector } from '../connectors';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Field } from '../../../server/routes/api/cases/configure/get_fields';
 
 /*
  * This types below are related to the service now configuration
@@ -106,3 +108,14 @@ export type CasesConfigureResponse = rt.TypeOf<typeof CaseConfigureResponseRt>;
 export type ESCasesConfigureAttributes = Omit<CasesConfigureAttributes, 'connector'> & {
   connector: ESCaseConnector;
 };
+const FieldTypeRT = rt.union([rt.literal('text'), rt.literal('textarea')]);
+
+const FieldRt = rt.type({
+  id: rt.string,
+  name: rt.string,
+  required: rt.boolean,
+  type: FieldTypeRT,
+});
+
+export const FieldResponseRt = rt.array(FieldRt);
+export type FieldResponse = rt.TypeOf<typeof FieldResponseRt>;

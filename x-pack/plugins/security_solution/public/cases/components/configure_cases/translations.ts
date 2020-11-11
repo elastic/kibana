@@ -180,6 +180,24 @@ export const MAPPING_FIELD_NOT_MAPPED = i18n.translate(
   }
 );
 
+export const COMMENT = i18n.translate('xpack.securitySolution.case.configureCases.commentMapping', {
+  defaultMessage: 'Comments',
+});
+
+export const BLANK_MAPPINGS = (connectorName: string): string => {
+  return i18n.translate('xpack.securitySolution.case.configureCases.blankMappings', {
+    values: { connectorName },
+    defaultMessage: 'At least one field needs to be mapped to { connectorName }',
+  });
+};
+
+export const REQUIRED_MAPPINGS = (connectorName: string, fields: string): string => {
+  return i18n.translate('xpack.securitySolution.case.configureCases.blankMappings', {
+    values: { connectorName, fields },
+    defaultMessage:
+      'At least one Case field needs to be mapped to the following required { connectorName } fields: { fields }',
+  });
+};
 export const UPDATE_FIELD_MAPPINGS = i18n.translate(
   'xpack.securitySolution.case.configureCases.updateConnector',
   {

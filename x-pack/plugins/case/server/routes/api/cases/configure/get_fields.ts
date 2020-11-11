@@ -107,7 +107,7 @@ type ThirdPartyFields =
       theType: '.resilient';
     };
 type ConnectorType = '.jira' | '.resilient' | '.servicenow';
-interface Field {
+export interface Field {
   id: string;
   name: string;
   required: boolean;
