@@ -31,7 +31,10 @@ export function ErrorOverviewLink({ serviceName, query, ...rest }: Props) {
   return (
     <APMLink
       path={`/services/${serviceName}/errors`}
-      query={pickKeys(urlParams as APMQueryParams, ...persistedFilters)}
+      query={{
+        ...pickKeys(urlParams as APMQueryParams, ...persistedFilters),
+        ...query,
+      }}
       {...rest}
     />
   );
