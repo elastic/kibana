@@ -54,8 +54,8 @@ const mlClusterClient = ({
   asInternalUser: callAs,
 } as unknown) as IScopedClusterClient;
 
-describe('ML - data recognizer', () => {
-  describe('jobOverrides', () => {
+describe('ML - job initialization', () => {
+  describe('createJobSpaceOverrides', () => {
     it('should apply job overrides correctly', async () => {
       const overrides = await createJobSpaceOverrides(mlClusterClient);
       expect(overrides).toEqual(result);
