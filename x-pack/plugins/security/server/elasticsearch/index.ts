@@ -4,6 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { AuthenticatedUser } from '../../common/model';
+
+export type AuthenticationInfo = Omit<AuthenticatedUser, 'authentication_provider'>;
 export {
   ElasticsearchService,
   ElasticsearchServiceSetup,

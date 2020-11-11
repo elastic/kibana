@@ -28,7 +28,7 @@ import { ILicense } from '../../licensing/common/types';
 import { LicensingPluginSetup } from '../../licensing/server';
 import { HomeServerPluginSetup } from '../../../../src/plugins/home/server';
 import { MapsLegacyPluginSetup } from '../../../../src/plugins/maps_legacy/server';
-import { MapsLegacyConfig } from '../../../../src/plugins/maps_legacy/config';
+import { EMSSettings } from '../common/ems_settings';
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;
@@ -52,7 +52,7 @@ export class MapsPlugin implements Plugin {
   _initHomeData(
     home: HomeServerPluginSetup,
     prependBasePath: (path: string) => string,
-    mapsLegacyConfig: MapsLegacyConfig
+    emsSettings: EMSSettings
   ) {
     const sampleDataLinkLabel = i18n.translate('xpack.maps.sampleDataLinkLabel', {
       defaultMessage: 'Map',
@@ -125,7 +125,7 @@ export class MapsPlugin implements Plugin {
       home.tutorials.registerTutorial(
         emsBoundariesSpecProvider({
           prependBasePath,
-          emsLandingPageUrl: mapsLegacyConfig.emsLandingPageUrl,
+          emsLandingPageUrl: emsSettings.getEMSLandingPageUrl(),
         })
       );
     }
@@ -148,21 +148,27 @@ export class MapsPlugin implements Plugin {
     }
 
     let routesInitialized = false;
+    let isEnterprisePlus = false;
+    const emsSettings = new EMSSettings(mapsLegacyConfig, () => isEnterprisePlus);
     licensing.license$.subscribe((license: ILicense) => {
-      const { state } = license.check('maps', 'basic');
-      if (state === 'valid' && !routesInitialized) {
+      const basic = license.check(APP_ID, 'basic');
+
+      const enterprise = license.check(APP_ID, 'enterprise');
+      isEnterprisePlus = enterprise.state === 'valid';
+
+      if (basic.state === 'valid' && !routesInitialized) {
         routesInitialized = true;
         initRoutes(
           core.http.createRouter(),
           license.uid,
-          mapsLegacyConfig,
+          emsSettings,
           this.kibanaVersion,
           this._logger
         );
       }
     });
 
-    this._initHomeData(home, core.http.basePath.prepend, mapsLegacyConfig);
+    this._initHomeData(home, core.http.basePath.prepend, emsSettings);
 
     features.registerKibanaFeature({
       id: APP_ID,

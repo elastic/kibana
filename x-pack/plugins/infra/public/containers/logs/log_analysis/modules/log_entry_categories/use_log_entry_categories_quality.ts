@@ -5,7 +5,7 @@
  */
 
 import { useMemo, useState } from 'react';
-import { useDeepCompareEffect } from 'react-use';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import {
   CategoryQualityWarningReason,
   QualityWarning,
