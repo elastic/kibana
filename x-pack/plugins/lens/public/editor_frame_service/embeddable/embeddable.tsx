@@ -8,6 +8,7 @@ import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import {
+  ExecutionContextSearch,
   Filter,
   IIndexPattern,
   Query,
@@ -15,7 +16,6 @@ import {
   TimeRange,
   IndexPattern,
 } from 'src/plugins/data/public';
-import { ExecutionContextSearch } from 'src/plugins/expressions';
 import { PaletteOutput } from 'src/plugins/charts/public';
 
 import { Subscription } from 'rxjs';

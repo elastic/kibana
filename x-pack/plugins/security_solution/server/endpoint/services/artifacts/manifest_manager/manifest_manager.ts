@@ -6,7 +6,7 @@
 import semver from 'semver';
 import { Logger, SavedObjectsClientContract } from 'src/core/server';
 import LRU from 'lru-cache';
-import { PackagePolicyServiceInterface } from '../../../../../../ingest_manager/server';
+import { PackagePolicyServiceInterface } from '../../../../../../fleet/server';
 import { ExceptionListClient } from '../../../../../../lists/server';
 import { ManifestSchemaVersion } from '../../../../../common/endpoint/schema/common';
 import { manifestDispatchSchema } from '../../../../../common/endpoint/schema/manifest';

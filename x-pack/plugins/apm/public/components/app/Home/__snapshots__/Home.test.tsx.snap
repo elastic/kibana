@@ -4,6 +4,9 @@ exports[`Home component should render services 1`] = `
 <ContextProvider
   value={
     Object {
+      "appMountParameters": Object {
+        "setHeaderActionMenu": [Function],
+      },
       "config": Object {
         "serviceMapEnabled": true,
         "ui": Object {
@@ -14,6 +17,7 @@ exports[`Home component should render services 1`] = `
         "application": Object {
           "capabilities": Object {
             "apm": Object {},
+            "ml": Object {},
           },
           "currentAppId$": Observable {
             "_isScalar": false,
@@ -87,6 +91,9 @@ exports[`Home component should render traces 1`] = `
 <ContextProvider
   value={
     Object {
+      "appMountParameters": Object {
+        "setHeaderActionMenu": [Function],
+      },
       "config": Object {
         "serviceMapEnabled": true,
         "ui": Object {
@@ -97,6 +104,7 @@ exports[`Home component should render traces 1`] = `
         "application": Object {
           "capabilities": Object {
             "apm": Object {},
+            "ml": Object {},
           },
           "currentAppId$": Observable {
             "_isScalar": false,
