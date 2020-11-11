@@ -7,6 +7,14 @@
 import React from 'react';
 import { shallowWithIntl } from 'test_utils/enzyme_helpers';
 
+jest.mock('../../../../../kibana_services', () => {
+  return {
+    getMapsCapabilities() {
+      return { save: true };
+    },
+  };
+});
+
 import { TOCEntry } from './view';
 
 const LAYER_ID = '1';
