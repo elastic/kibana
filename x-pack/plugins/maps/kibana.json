@@ -12,6 +12,7 @@
     "uiActions",
     "navigation",
     "visualizations",
+    "dashboard",
     "embeddable",
     "mapsLegacy",
     "usageCollection",

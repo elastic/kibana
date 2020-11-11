@@ -42,6 +42,10 @@ export class PluginsSystem {
     this.plugins.set(plugin.name, plugin);
   }
 
+  public getPlugins() {
+    return [...this.plugins.values()];
+  }
+
   /**
    * @returns a ReadonlyMap of each plugin and an Array of its available dependencies
    * @internal
