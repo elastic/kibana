@@ -179,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
           authentication_realm: { name: 'pki1', type: 'pki' },
           lookup_realm: { name: 'pki1', type: 'pki' },
           authentication_provider: { name: 'pki', type: 'pki' },
-          authentication_type: 'token',
+          authentication_type: 'realm',
         });
 
       checkCookieIsSet(request.cookie(response.headers['set-cookie'][0])!);
