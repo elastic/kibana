@@ -30,7 +30,7 @@ describe('MlUrlGenerator', () => {
             jobId: 'fq_single_1',
           },
         });
-        expect(url).toBe('/app/ml/jobs?_a=(jobId:fq_single_1)');
+        expect(url).toBe('/app/ml/jobs?_a=(queryText:fq_single_1)');
       });
 
       it('should generate valid URL for the Anomaly Detection job management page for groupIds', async () => {
@@ -40,7 +40,7 @@ describe('MlUrlGenerator', () => {
             groupIds: ['farequote', 'categorization'],
           },
         });
-        expect(url).toBe('/app/ml/jobs?_a=(groupIds:!(farequote,categorization))');
+        expect(url).toBe("/app/ml/jobs?_a=(queryText:'groups:(farequote%20or%20categorization)')");
       });
 
       it('should generate valid URL for the page for selecting the type of anomaly detection job to create', async () => {
