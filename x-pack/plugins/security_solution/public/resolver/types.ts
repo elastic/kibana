@@ -240,6 +240,12 @@ export interface NodeEventsInCategoryState {
   error?: boolean;
 }
 
+export interface NodeDataState {
+  time: number;
+
+  nodeData: Map<string, SafeResolverEvent[]>;
+}
+
 /**
  * State for `data` reducer which handles receiving Resolver data from the back-end.
  */
@@ -313,6 +319,12 @@ export interface DataState {
    * The `search` part of the URL.
    */
   readonly locationSearch?: string;
+
+  /**
+   * Lifecycle events panning state
+   * TODO:
+   */
+  readonly nodeDataState?: NodeDataState;
 }
 
 /**
@@ -624,6 +636,20 @@ export interface DataAccessLayer {
     timerange: Timerange;
     indexPatterns: string[];
   }) => Promise<ResolverPaginatedEvents>;
+
+  /**
+   * TODO:
+   * @param param0
+   */
+  eventsNodeData({
+    ids,
+    timerange,
+    indexPatterns,
+  }: {
+    ids: string[];
+    timerange: Timerange;
+    indexPatterns: string[];
+  }): Promise<SafeResolverEvent[]>;
 
   /**
    * Return up to one event that has an `event.id` that includes `eventID`.

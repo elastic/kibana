@@ -8,7 +8,7 @@ import { createSelector, defaultMemoize } from 'reselect';
 import * as cameraSelectors from './camera/selectors';
 import * as dataSelectors from './data/selectors';
 import * as uiSelectors from './ui/selectors';
-import { ResolverState, IsometricTaxiLayout } from '../types';
+import { ResolverState, IsometricTaxiLayout, ProcessPositions, Vector2, DataState } from '../types';
 import { ResolverNodeStats, SafeResolverEvent } from '../../../common/endpoint/types';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 
@@ -394,6 +394,13 @@ export const isLoadingMoreNodeEventsInCategory = composeSelectors(
   dataStateSelector,
   dataSelectors.isLoadingMoreNodeEventsInCategory
 );
+
+export const nodeDataState = composeSelectors(
+  dataStateSelector,
+  (dataState: DataState) => dataState.nodeDataState
+);
+
+export const nodeData = composeSelectors(dataStateSelector, dataSelectors.nodeData);
 
 /**
  * Calls the `secondSelector` with the result of the `selector`. Use this when re-exporting a

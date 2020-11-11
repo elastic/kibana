@@ -101,6 +101,21 @@ interface ServerReturnedNodeEventsInCategory {
     eventCategory: string;
   };
 }
+
+interface ServerReturnedNodeData {
+  readonly type: 'serverReturnedNodeData';
+  readonly payload: {
+    nodeData: Map<string, SafeResolverEvent[]>;
+  };
+}
+
+interface ServerFailedToReturnNodeData {
+  readonly type: 'serverFailedToReturnNodeData';
+  readonly payload: {
+    ids: string[];
+  };
+}
+
 interface AppRequestedCurrentRelatedEventData {
   type: 'appRequestedCurrentRelatedEventData';
 }
@@ -125,4 +140,6 @@ export type DataAction =
   | AppRequestedResolverData
   | UserRequestedAdditionalRelatedEvents
   | ServerFailedToReturnNodeEventsInCategory
-  | AppAbortedResolverDataRequest;
+  | AppAbortedResolverDataRequest
+  | ServerReturnedNodeData
+  | ServerFailedToReturnNodeData;

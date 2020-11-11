@@ -113,6 +113,13 @@ export const isProcessTerminated = createSelector(terminatedProcesses, function 
 });
 
 /**
+ * TODO:
+ */
+export const nodeData = (state: DataState): Map<string, SafeResolverEvent[]> | undefined => {
+  return state.nodeDataState?.nodeData;
+};
+
+/**
  * Process events that will be graphed.
  */
 export const graphableProcesses = createSelector(resolverTreeResponse, function (tree?) {

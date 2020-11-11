@@ -45,14 +45,14 @@ export function dataAccessLayerFactory(
               from: timerange.from.toISOString(),
               to: timerange.to.toISOString(),
             },
-            filter: {
+            filter: JSON.stringify({
               bool: {
                 filter: [
                   { term: { 'process.entity_id': entityID } },
                   { bool: { must_not: { term: { 'event.category': 'process' } } } },
                 ],
               },
-            },
+            }),
           }),
         }
       );
@@ -85,14 +85,46 @@ export function dataAccessLayerFactory(
             to: timerange.to.toISOString(),
           },
           indexPatterns,
-          filter: {
+          filter: JSON.stringify({
             bool: {
               filter: [
                 { term: { 'process.entity_id': entityID } },
                 { term: { 'event.category': category } },
               ],
             },
+          }),
+        }),
+      });
+    },
+
+    /**
+     * TODO:
+     */
+    eventsNodeData({
+      ids,
+      timerange,
+      indexPatterns,
+    }: {
+      ids: string[];
+      timerange: Timerange;
+      indexPatterns: string[];
+    }): Promise<SafeResolverEvent[]> {
+      return context.services.http.post('/api/endpoint/resolver/events', {
+        query: { limit: 5000 },
+        body: JSON.stringify({
+          timerange: {
+            from: timerange.from.toISOString(),
+            to: timerange.to.toISOString(),
           },
+          indexPatterns,
+          filter: JSON.stringify({
+            bool: {
+              filter: [
+                { terms: { 'process.entity_id': ids } },
+                { term: { 'event.category': 'process' } },
+              ],
+            },
+          }),
         }),
       });
     },
@@ -119,11 +151,11 @@ export function dataAccessLayerFactory(
               from: timerange.from.toISOString(),
               to: timerange.to.toISOString(),
             },
-            filter: {
+            filter: JSON.stringify({
               bool: {
                 filter: [{ term: { 'event.id': eventID } }],
               },
-            },
+            }),
           }),
         }
       );
