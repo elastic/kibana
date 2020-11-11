@@ -16,7 +16,7 @@ import { KibanaLogic } from '../../../shared/kibana';
 
 import './product_card.scss';
 
-interface IProductCard {
+interface ProductCardProps {
   // Expects product plugin constants (@see common/constants.ts)
   product: {
     ID: string;
@@ -27,7 +27,7 @@ interface IProductCard {
   image: string;
 }
 
-export const ProductCard: React.FC<IProductCard> = ({ product, image }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({ product, image }) => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
   const { config } = useValues(KibanaLogic);
 

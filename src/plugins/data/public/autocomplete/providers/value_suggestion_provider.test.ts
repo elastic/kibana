@@ -21,6 +21,26 @@ import { stubIndexPattern, stubFields } from '../../stubs';
 import { setupValueSuggestionProvider, ValueSuggestionsGetFn } from './value_suggestion_provider';
 import { IUiSettingsClient, CoreSetup } from 'kibana/public';
 
+jest.mock('../../services', () => ({
+  getQueryService: () => ({
+    timefilter: {
+      timefilter: {
+        createFilter: () => {
+          return {
+            time: 'fake',
+          };
+        },
+        getTime: () => {
+          return {
+            to: 'now',
+            from: 'now-15m',
+          };
+        },
+      },
+    },
+  }),
+}));
+
 describe('FieldSuggestions', () => {
   let getValueSuggestions: ValueSuggestionsGetFn;
   let http: any;
@@ -94,6 +114,7 @@ describe('FieldSuggestions', () => {
         indexPattern: stubIndexPattern,
         field,
         query: '',
+        useTimeRange: false,
       });
 
       expect(http.fetch).toHaveBeenCalled();
@@ -107,6 +128,7 @@ describe('FieldSuggestions', () => {
         indexPattern: stubIndexPattern,
         field,
         query: '',
+        useTimeRange: false,
       };
 
       await getValueSuggestions(args);
@@ -123,6 +145,7 @@ describe('FieldSuggestions', () => {
         indexPattern: stubIndexPattern,
         field,
         query: '',
+        useTimeRange: false,
       };
 
       const { now } = Date;
@@ -146,50 +169,76 @@ describe('FieldSuggestions', () => {
         indexPattern: stubIndexPattern,
         field: fields[0],
         query: '',
+        useTimeRange: false,
       });
       await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field: fields[0],
         query: 'query',
+        useTimeRange: false,
       });
       await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field: fields[1],
         query: '',
+        useTimeRange: false,
       });
       await getValueSuggestions({
         indexPattern: stubIndexPattern,
         field: fields[1],
         query: 'query',
+        useTimeRange: false,
       });
 
       const customIndexPattern = {
         ...stubIndexPattern,
         title: 'customIndexPattern',
+        useTimeRange: false,
       };
 
       await getValueSuggestions({
         indexPattern: customIndexPattern,
         field: fields[0],
         query: '',
+        useTimeRange: false,
       });
       await getValueSuggestions({
         indexPattern: customIndexPattern,
         field: fields[0],
         query: 'query',
+        useTimeRange: false,
       });
       await getValueSuggestions({
         indexPattern: customIndexPattern,
         field: fields[1],
         query: '',
+        useTimeRange: false,
       });
       await getValueSuggestions({
         indexPattern: customIndexPattern,
         field: fields[1],
         query: 'query',
+        useTimeRange: false,
       });
 
       expect(http.fetch).toHaveBeenCalledTimes(8);
+    });
+
+    it('should apply timefilter', async () => {
+      const [field] = stubFields.filter(
+        ({ type, aggregatable }) => type === 'string' && aggregatable
+      );
+
+      await getValueSuggestions({
+        indexPattern: stubIndexPattern,
+        field,
+        query: '',
+        useTimeRange: true,
+      });
+      const callParams = http.fetch.mock.calls[0][1];
+
+      expect(JSON.parse(callParams.body).filters).toHaveLength(1);
+      expect(http.fetch).toHaveBeenCalled();
     });
   });
 });
