@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { getFunctionalTestGroupRunConfigs } from '../function_test_groups';
-
 const { version } = require('../../package.json');
 const KIBANA_INSTALL_DIR =
   process.env.KIBANA_INSTALL_DIR ||
@@ -64,17 +62,6 @@ module.exports = function () {
       cmd: NODE,
       args: [
         'scripts/check_file_casing',
-        '--quiet', // only log errors, not warnings
-      ],
-    }),
-
-    // used by the test tasks
-    //    runs the check_lockfile_symlinks script to ensure manifests with non-dev dependencies have adjacent lockfile symlinks
-    checkLockfileSymlinks: scriptWithGithubChecks({
-      title: 'Check lockfile symlinks',
-      cmd: NODE,
-      args: [
-        'scripts/check_lockfile_symlinks',
         '--quiet', // only log errors, not warnings
       ],
     }),
@@ -249,9 +236,5 @@ module.exports = function () {
       'test:jest_integration'
     ),
     test_projects: gruntTaskWithGithubChecks('Project tests', 'test:projects'),
-
-    ...getFunctionalTestGroupRunConfigs({
-      kibanaInstallDir: KIBANA_INSTALL_DIR,
-    }),
   };
 };

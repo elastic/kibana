@@ -98,6 +98,8 @@ describe('alert_add', () => {
       id: 'my-alert-type',
       iconClass: 'test',
       name: 'test-alert',
+      description: 'test',
+      documentationUrl: null,
       validate: (): ValidationResult => {
         return { errors: {} };
       },
@@ -179,8 +181,6 @@ describe('alert_add', () => {
     expect(wrapper.find('[data-test-subj="saveAlertButton"]').exists()).toBeTruthy();
 
     wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
-
-    expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
 
     expect(wrapper.find('input#alertName').props().value).toBe('');
 

@@ -104,7 +104,7 @@ export async function getServiceAnomalies({
     },
   };
 
-  const response = await ml.mlSystem.mlAnomalySearch(params);
+  const response = await ml.mlSystem.mlAnomalySearch(params, mlJobIds);
 
   return {
     mlJobIds,

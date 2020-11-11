@@ -88,7 +88,8 @@ export async function setupRequest<TParams extends SetupRequestParams>(
   const coreSetupRequest = {
     indices,
     apmEventClient: createApmEventClient({
-      context,
+      esClient: context.core.elasticsearch.legacy.client,
+      debug: context.params.query._debug,
       request,
       indices,
       options: { includeFrozen },
@@ -123,8 +124,8 @@ function getMlSetup(
   request: KibanaRequest
 ) {
   return {
-    mlSystem: ml.mlSystemProvider(request),
-    anomalyDetectors: ml.anomalyDetectorsProvider(request),
+    mlSystem: ml.mlSystemProvider(request, savedObjectsClient),
+    anomalyDetectors: ml.anomalyDetectorsProvider(request, savedObjectsClient),
     modules: ml.modulesProvider(request, savedObjectsClient),
   };
 }

@@ -26,9 +26,7 @@ NOTE:
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/apm_oss[apmOss]
-|WARNING: Missing README.
-
+|{kib-repo}blob/{branch}/src/plugins/apm_oss/README.asciidoc[apmOss]
 
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
@@ -126,8 +124,13 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Utilities for building Kibana plugins.
 
 
-|{kib-repo}blob/{branch}/src/plugins/legacy_export[legacyExport]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/legacy_export/README.md[legacyExport]
+|The legacyExport plugin adds support for the legacy saved objects export format.
+
+
+|{kib-repo}blob/{branch}/src/plugins/lens_oss/README.md[lensOss]
+|The lens_oss plugin registers the lens visualization on OSS.
+It is registered as disabled. The x-pack plugin should unregister this.
 
 
 |{kib-repo}blob/{branch}/src/plugins/management[management]
@@ -138,25 +141,36 @@ in Kibana, e.g. visualizations. It has the form of a flyout panel.
 |Internal objects used by the Coordinate, Region, and Vega visualizations.
 
 
+|{kib-repo}blob/{branch}/src/plugins/maps_oss/README.md[mapsOss]
+|The maps_oss plugin registers the maps visualization on OSS.
+It is registered as disabled. The x-pack plugin should unregister this.
+
+
 |{kib-repo}blob/{branch}/src/plugins/navigation/README.md[navigation]
 |The navigation plugins exports the TopNavMenu component.
 It also provides a stateful version of it on the start contract.
 
 
-|{kib-repo}blob/{branch}/src/plugins/newsfeed[newsfeed]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/newsfeed/README.md[newsfeed]
+|The newsfeed plugin adds a NewsfeedNavButton to the top navigation bar and renders the content in the flyout.
+Content is fetched from the remote (https://feeds.elastic.co and https://feeds-staging.elastic.co in dev mode) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely.
 
 
 |{kib-repo}blob/{branch}/src/plugins/region_map/README.md[regionMap]
 |Create choropleth maps. Display the results of a term-aggregation as e.g. countries, zip-codes, states.
 
 
-|{kib-repo}blob/{branch}/src/plugins/saved_objects[savedObjects]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/saved_objects/README.md[savedObjects]
+|The savedObjects plugin exposes utilities to manipulate saved objects on the client side.
 
 
-|{kib-repo}blob/{branch}/src/plugins/saved_objects_management[savedObjectsManagement]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/src/plugins/saved_objects_management/README.md[savedObjectsManagement]
+|The savedObjectsManagement plugin manages the Saved Objects management section.
+
+
+|{kib-repo}blob/{branch}/src/plugins/saved_objects_tagging_oss/README.md[savedObjectsTaggingOss]
+|Bridge plugin for consumption of the saved object tagging feature from
+oss plugins.
 
 
 |{kib-repo}blob/{branch}/src/plugins/security_oss/README.md[securityOss]
@@ -299,8 +313,8 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 |Experimental Feature
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud[cloud]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/cloud/README.md[cloud]
+|The cloud plugin adds cloud specific features to Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/code[code]
@@ -323,8 +337,8 @@ Failure to have auth enabled in Kibana will make for a broken UI. UI-based error
 |The deprecated dashboard only mode.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced[dataEnhanced]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/data_enhanced/README.md[dataEnhanced]
+|The data_enhanced plugin is the x-pack counterpart to the OSS data plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/discover_enhanced/README.md[discoverEnhanced]
@@ -351,8 +365,8 @@ occuring in Kibana, initially just for the Make It Action project - alerts
 and actions.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/features[features]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/features/README.md[features]
+|The features plugin enhance Kibana with a per-feature privilege system.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/file_upload/README.md[fileUpload]
@@ -368,8 +382,8 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 |The GlobalSearchBar plugin provides a search interface for navigating Kibana. (It is the UI to the GlobalSearch plugin.)
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/global_search_providers[globalSearchProviders]
-|WARNING: Missing README.
+|{kib-repo}blob/{branch}/x-pack/plugins/global_search_providers/README.md[globalSearchProviders]
+|The globalSearchProviders plugin provides Kibana default search providers for the GlobalSearch plugin.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/graph/README.md[graph]
@@ -395,7 +409,7 @@ Index Management by running this series of requests in Console:
 the infrastructure monitoring use-case within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ingest_manager/README.md[ingestManager]
+|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[ingestManager]
 |Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
 
@@ -461,6 +475,10 @@ Elastic.
 |Welcome to the Kibana rollup plugin! This plugin provides Kibana support for Elasticsearch's rollup feature. Please refer to the Elasticsearch documentation to understand rollup indices and how to create rollup jobs.
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/saved_objects_tagging/README.md[savedObjectsTagging]
+|Add tagging capability to saved objects
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/searchprofiler/README.md[searchprofiler]
 |The search profiler consumes the Profile API
 by sending a search API with profile: true enabled in the request body. The response contains
@@ -504,8 +522,9 @@ routes, etc.
 |This plugin provides access to the transforms features provided by Elastic.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/translations[translations]
-|WARNING: Missing README.
+|<<translations-plugin>>
+|Contains Elastic-supported translations. Owned by the Localizations team.
+For adding localizations and instrument a ui to support translated content, see https://github.com/elastic/kibana/tree/master/packages/kbn-i18n
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/triggers_actions_ui/README.md[triggersActionsUi]
@@ -547,3 +566,4 @@ include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/plugins/ui_actions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/plugins/embeddable_enhanced/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/x-pack/plugins/translations/README.asciidoc[leveloffset=+1]

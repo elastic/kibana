@@ -76,6 +76,9 @@ export async function inspectSearchParams(
 
             case 'xpack.apm.metricsInterval':
               return 30;
+
+            case 'xpack.apm.maxServiceEnvironments':
+              return 100;
           }
         },
       }

@@ -42,7 +42,7 @@ const genBucketItem = ({
 
 describe('getMonitorStatus', () => {
   it('applies bool filters to params', async () => {
-    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [],
       genBucketItem
     );
@@ -78,7 +78,7 @@ describe('getMonitorStatus', () => {
       },
     };
     await getMonitorStatus({
-      callES,
+      callES: esMock,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       filters: exampleFilter,
       locations: [],
@@ -88,9 +88,8 @@ describe('getMonitorStatus', () => {
         to: 'now-1m',
       },
     });
-    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-    expect(method).toEqual('search');
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -190,12 +189,12 @@ describe('getMonitorStatus', () => {
   });
 
   it('applies locations to params', async () => {
-    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [],
       genBucketItem
     );
     await getMonitorStatus({
-      callES,
+      callES: esMock,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       locations: ['fairbanks', 'harrisburg'],
       numTimes: 1,
@@ -204,9 +203,8 @@ describe('getMonitorStatus', () => {
         to: 'now',
       },
     });
-    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-    expect(method).toEqual('search');
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -291,7 +289,7 @@ describe('getMonitorStatus', () => {
   });
 
   it('properly assigns filters for complex kuery filters', async () => {
-    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [{ bucketCriteria: [] }],
       genBucketItem
     );
@@ -353,12 +351,12 @@ describe('getMonitorStatus', () => {
       },
     };
     await getMonitorStatus({
-      callES,
+      callES: esMock,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       ...clientParameters,
     });
-    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    const [, params] = esMock.callAsCurrentUser.mock.calls[0];
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -476,7 +474,7 @@ describe('getMonitorStatus', () => {
   });
 
   it('properly assigns filters for complex kuery filters object', async () => {
-    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [{ bucketCriteria: [] }],
       genBucketItem
     );
@@ -498,12 +496,12 @@ describe('getMonitorStatus', () => {
       },
     };
     await getMonitorStatus({
-      callES,
+      callES: esMock,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       ...clientParameters,
     });
-    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    const [, params] = esMock.callAsCurrentUser.mock.calls[0];
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -581,7 +579,7 @@ describe('getMonitorStatus', () => {
   });
 
   it('fetches single page of results', async () => {
-    const [callES, esMock] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       [
         {
           bucketCriteria: [
@@ -618,13 +616,12 @@ describe('getMonitorStatus', () => {
       },
     };
     const result = await getMonitorStatus({
-      callES,
+      callES: esMock,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       ...clientParameters,
     });
-    expect(esMock.callAsCurrentUser).toHaveBeenCalledTimes(1);
-    const [method, params] = esMock.callAsCurrentUser.mock.calls[0];
-    expect(method).toEqual('search');
+    expect(esMock.search).toHaveBeenCalledTimes(1);
+    const [params] = esMock.search.mock.calls[0];
     expect(params).toMatchInlineSnapshot(`
       Object {
         "body": Object {
@@ -792,12 +789,12 @@ describe('getMonitorStatus', () => {
         ],
       },
     ];
-    const [callES] = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
+    const esMock = setupMockEsCompositeQuery<BucketKey, BucketItemCriteria, BucketItem>(
       criteria,
       genBucketItem
     );
     const result = await getMonitorStatus({
-      callES,
+      callES: esMock,
       dynamicSettings: DYNAMIC_SETTINGS_DEFAULTS,
       locations: [],
       numTimes: 5,

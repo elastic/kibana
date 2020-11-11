@@ -16,6 +16,7 @@
     "GetDataFrameAnalyticsMessages",
     "UpdateDataFrameAnalytics",
     "DeleteDataFrameAnalytics",
+    "JobsExist",
 
     "DataVisualizer",
     "GetOverallStats",
@@ -84,6 +85,7 @@
     "UpdateGroups",
     "DeletingJobTasks",
     "DeleteJobs",
+    "RevertModelSnapshot",
 
     "Calendars",
     "PutCalendars",
@@ -138,6 +140,14 @@
 
     "FieldsService",
     "GetCardinalityOfFields",
-    "GetTimeFieldRange"
+    "GetTimeFieldRange",
+
+    "JobSavedObjects",
+    "SavedObjectsStatus",
+    "RepairJobSavedObjects",
+    "InitializeJobSavedObjects",
+    "AssignJobsToSpaces",
+    "RemoveJobsFromSpaces",
+    "JobsSpaces"
   ]
 }

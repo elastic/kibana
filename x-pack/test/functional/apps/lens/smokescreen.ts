@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
   const find = getService('find');
   const listingTable = getService('listingTable');
   const testSubjects = getService('testSubjects');
@@ -169,6 +169,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
         'Test of label'
       );
+      await PageObjects.lens.closeDimensionEditor();
+    });
+
+    it('should be able to add very long labels and still be able to remove a dimension', async () => {
+      await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
+      const longLabel =
+        'Veryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvery long label wrapping multiple lines';
+      await PageObjects.lens.editDimensionLabel(longLabel);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.lens.closeDimensionEditor();
+
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsXY_yDimensionPanel')).to.eql(
+        longLabel
+      );
+      expect(
+        await testSubjects.isDisplayed('lnsXY_yDimensionPanel >  indexPattern-dimension-remove')
+      ).to.equal(true);
+      await PageObjects.lens.removeDimension('lnsXY_yDimensionPanel');
+      await testSubjects.missingOrFail('lnsXY_yDimensionPanel > lns-dimensionTrigger');
     });
 
     it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
@@ -273,11 +292,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('treemap')).to.eql(false);
       await PageObjects.lens.switchToVisualization('treemap');
       expect(
-        await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel', 0)
-      ).to.eql('Top values of geo.dest');
-      expect(
-        await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel', 1)
-      ).to.eql('Top values of geo.src');
+        await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
+      ).to.eql(['Top values of geo.dest', 'Top values of geo.src']);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
       );

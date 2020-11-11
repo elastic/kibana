@@ -120,10 +120,6 @@ export const AREAS: Area[] = [
     labels: ['Team:Geo'],
   },
   {
-    title: 'Canvas',
-    labels: ['Team:Canvas'],
-  },
-  {
     title: 'QA',
     labels: ['Team:QA'],
   },
@@ -137,6 +133,10 @@ export const AREAS: Area[] = [
       'Feature:Security/Authorization',
       'Feature:Security/Feature Controls',
     ],
+  },
+  {
+    title: 'Canvas',
+    labels: ['Feature:Canvas'],
   },
   {
     title: 'Dashboard',

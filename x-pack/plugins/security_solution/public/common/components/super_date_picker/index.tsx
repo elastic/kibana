@@ -91,12 +91,12 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
     toStr,
     updateReduxTime,
   }) => {
-    const [isQuickSelection, setIsQuickSelection] = useState(true);
     const [recentlyUsedRanges, setRecentlyUsedRanges] = useState<EuiSuperDatePickerRecentRange[]>(
       []
     );
     const onRefresh = useCallback(
       ({ start: newStart, end: newEnd }: OnRefreshProps): void => {
+        const isQuickSelection = newStart.includes('now') || newEnd.includes('now');
         const { kqlHaveBeenUpdated } = updateReduxTime({
           end: newEnd,
           id,
@@ -117,12 +117,13 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           refetchQuery(queries);
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [end, id, isQuickSelection, kqlQuery, start, timelineId]
+      [end, id, kqlQuery, queries, start, timelineId, updateReduxTime]
     );
 
     const onRefreshChange = useCallback(
       ({ isPaused, refreshInterval }: OnRefreshChangeProps): void => {
+        const isQuickSelection =
+          (fromStr != null && fromStr.includes('now')) || (toStr != null && toStr.includes('now'));
         if (duration !== refreshInterval) {
           setDuration({ id, duration: refreshInterval });
         }
@@ -137,27 +138,22 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           refetchQuery(queries);
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [id, isQuickSelection, duration, policy, toStr]
+      [fromStr, toStr, duration, policy, setDuration, id, stopAutoReload, startAutoReload, queries]
     );
 
-    const refetchQuery = (newQueries: inputsModel.GlobalGraphqlQuery[]) => {
+    const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
       newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
     };
 
     const onTimeChange = useCallback(
-      ({
-        start: newStart,
-        end: newEnd,
-        isQuickSelection: newIsQuickSelection,
-        isInvalid,
-      }: OnTimeChangeProps) => {
+      ({ start: newStart, end: newEnd, isInvalid }: OnTimeChangeProps) => {
+        const isQuickSelection = newStart.includes('now') || newEnd.includes('now');
         if (!isInvalid) {
           updateReduxTime({
             end: newEnd,
             id,
             isInvalid,
-            isQuickSelection: newIsQuickSelection,
+            isQuickSelection,
             kql: kqlQuery,
             start: newStart,
             timelineId,
@@ -174,15 +170,13 @@ export const SuperDatePickerComponent = React.memo<SuperDatePickerProps>(
           ];
 
           setRecentlyUsedRanges(newRecentlyUsedRanges);
-          setIsQuickSelection(newIsQuickSelection);
         }
       },
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-      [recentlyUsedRanges, kqlQuery]
+      [updateReduxTime, id, kqlQuery, timelineId, recentlyUsedRanges]
     );
 
-    const endDate = kind === 'relative' ? toStr : new Date(end).toISOString();
-    const startDate = kind === 'relative' ? fromStr : new Date(start).toISOString();
+    const endDate = toStr != null ? toStr : new Date(end).toISOString();
+    const startDate = fromStr != null ? fromStr : new Date(start).toISOString();
 
     const [quickRanges] = useUiSetting$<Range[]>(DEFAULT_TIMEPICKER_QUICK_RANGES);
     const commonlyUsedRanges = isEmpty(quickRanges)
@@ -232,15 +226,27 @@ export const dispatchUpdateReduxTime = (dispatch: Dispatch) => ({
   const fromDate = formatDate(start);
   let toDate = formatDate(end, { roundUp: true });
   if (isQuickSelection) {
-    dispatch(
-      inputsActions.setRelativeRangeDatePicker({
-        id,
-        fromStr: start,
-        toStr: end,
-        from: fromDate,
-        to: toDate,
-      })
-    );
+    if (end === start) {
+      dispatch(
+        inputsActions.setAbsoluteRangeDatePicker({
+          id,
+          fromStr: start,
+          toStr: end,
+          from: fromDate,
+          to: toDate,
+        })
+      );
+    } else {
+      dispatch(
+        inputsActions.setRelativeRangeDatePicker({
+          id,
+          fromStr: start,
+          toStr: end,
+          from: fromDate,
+          to: toDate,
+        })
+      );
+    }
   } else {
     toDate = formatDate(end);
     dispatch(
@@ -284,6 +290,7 @@ export const makeMapStateToProps = () => {
   const getToStrSelector = toStrSelector();
   return (state: State, { id }: OwnProps) => {
     const inputsRange: InputsRange = getOr({}, `inputs.${id}`, state);
+
     return {
       duration: getDurationSelector(inputsRange),
       end: getEndSelector(inputsRange),
@@ -292,7 +299,7 @@ export const makeMapStateToProps = () => {
       kind: getKindSelector(inputsRange),
       kqlQuery: getKqlQuerySelector(inputsRange) as inputsModel.GlobalKqlQuery,
       policy: getPolicySelector(inputsRange),
-      queries: getQueriesSelector(inputsRange) as inputsModel.GlobalGraphqlQuery[],
+      queries: getQueriesSelector(state, id),
       start: getStartSelector(inputsRange),
       toStr: getToStrSelector(inputsRange),
     };

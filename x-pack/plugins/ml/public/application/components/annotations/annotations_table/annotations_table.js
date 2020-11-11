@@ -98,7 +98,7 @@ class AnnotationsTableUI extends Component {
     if (dataCounts.processed_record_count > 0) {
       // Load annotations for the selected job.
       ml.annotations
-        .getAnnotations({
+        .getAnnotations$({
           jobIds: [job.job_id],
           earliestMs: null,
           latestMs: null,

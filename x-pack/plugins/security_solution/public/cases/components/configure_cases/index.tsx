@@ -93,19 +93,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
     setEditFlyoutVisibility(true);
   }, []);
 
-  const handleSetAddFlyoutVisibility = useCallback(
-    (isVisible: boolean) => {
-      setAddFlyoutVisibility(isVisible);
-    },
-    [setAddFlyoutVisibility]
-  );
+  const onCloseAddFlyout = useCallback(() => setAddFlyoutVisibility(false), [
+    setAddFlyoutVisibility,
+  ]);
 
-  const handleSetEditFlyoutVisibility = useCallback(
-    (isVisible: boolean) => {
-      setEditFlyoutVisibility(isVisible);
-    },
-    [setEditFlyoutVisibility]
-  );
+  const onCloseEditFlyout = useCallback(() => setEditFlyoutVisibility(false), [
+    setEditFlyoutVisibility,
+  ]);
 
   const onChangeConnector = useCallback(
     (id: string) => {
@@ -205,16 +199,13 @@ const ConfigureCasesComponent: React.FC<ConfigureCasesComponentProps> = ({ userC
         }}
       >
         {addFlyoutVisible && (
-          <ConnectorAddFlyout
-            onClose={() => handleSetAddFlyoutVisibility(false)}
-            actionTypes={actionTypes}
-          />
+          <ConnectorAddFlyout onClose={onCloseAddFlyout} actionTypes={actionTypes} />
         )}
         {editedConnectorItem && editFlyoutVisible && (
           <ConnectorEditFlyout
             key={editedConnectorItem.id}
             initialConnector={editedConnectorItem}
-            onClose={() => handleSetEditFlyoutVisibility(false)}
+            onClose={onCloseEditFlyout}
           />
         )}
       </ActionsConnectorsContextProvider>

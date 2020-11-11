@@ -7,6 +7,7 @@
 import { SavedObjectsClientContract, KibanaRequest, IScopedClusterClient } from 'kibana/server';
 import { Module } from '../../../common/types/modules';
 import { DataRecognizer } from '../data_recognizer';
+import type { MlClient } from '../../lib/ml_client';
 
 const callAs = () => Promise.resolve({ body: {} });
 
@@ -15,9 +16,12 @@ const mlClusterClient = ({
   asInternalUser: callAs,
 } as unknown) as IScopedClusterClient;
 
+const mlClient = (callAs as unknown) as MlClient;
+
 describe('ML - data recognizer', () => {
   const dr = new DataRecognizer(
     mlClusterClient,
+    mlClient,
     ({
       find: jest.fn(),
       bulkCreate: jest.fn(),

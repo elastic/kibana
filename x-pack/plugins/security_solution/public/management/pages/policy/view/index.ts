@@ -6,3 +6,4 @@
 
 export * from './policy_list';
 export * from './policy_details';
+export * from './policy_advanced';

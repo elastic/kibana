@@ -344,12 +344,11 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith({
         http,
-        allowedTypes,
-        undefined,
-        true
-      );
+        types: allowedTypes,
+        includeReferencesDeep: true,
+      });
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',
@@ -374,12 +373,12 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onExportAll();
 
-      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith({
         http,
-        allowedTypes,
-        'test*',
-        true
-      );
+        types: allowedTypes,
+        search: 'test*',
+        includeReferencesDeep: true,
+      });
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
         title: 'Your file is downloading in the background',

@@ -24,7 +24,6 @@ import { keys } from '@elastic/eui';
 import { httpServiceMock } from '../../../../../../core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
 import { columnServiceMock } from '../../../services/column_service.mock';
-import { SavedObjectsManagementAction } from '../../..';
 import { Table, TableProps } from './table';
 
 const defaultProps: TableProps = {
@@ -82,7 +81,7 @@ const defaultProps: TableProps = {
   onTableChange: () => {},
   isSearching: false,
   onShowRelationships: () => {},
-  canDelete: true,
+  capabilities: { savedObjectsManagement: { delete: true } } as any,
 };
 
 describe('Table', () => {
@@ -121,7 +120,11 @@ describe('Table', () => {
       { type: 'search' },
       { type: 'index-pattern' },
     ] as any;
-    const customizedProps = { ...defaultProps, selectedSavedObjects, canDelete: false };
+    const customizedProps = {
+      ...defaultProps,
+      selectedSavedObjects,
+      capabilities: { savedObjectsManagement: { delete: false } } as any,
+    };
     const component = shallowWithI18nProvider(<Table {...customizedProps} />);
 
     expect(component).toMatchSnapshot();
@@ -137,7 +140,8 @@ describe('Table', () => {
         refreshOnFinish: () => true,
         euiAction: { name: 'foo', description: 'bar', icon: 'beaker', type: 'icon' },
         registerOnFinishCallback: (callback: Function) => callback(), // call the callback immediately for this test
-      } as SavedObjectsManagementAction,
+        setActionContext: () => null,
+      } as any,
     ]);
     const onActionRefresh = jest.fn();
     const customizedProps = { ...defaultProps, actionRegistry, onActionRefresh };

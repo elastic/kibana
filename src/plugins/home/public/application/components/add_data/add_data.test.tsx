@@ -27,6 +27,12 @@ jest.mock('../app_navigation_handler', () => {
   };
 });
 
+jest.mock('../../kibana_services', () => ({
+  getServices: () => ({
+    trackUiMetric: jest.fn(),
+  }),
+}));
+
 beforeEach(() => {
   jest.clearAllMocks();
 });

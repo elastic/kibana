@@ -187,10 +187,7 @@ export class VisualizeEmbeddableFactory
     }
   }
 
-  private async saveMethod(
-    type: string,
-    attributes: VisualizeSavedObjectAttributes
-  ): Promise<{ id: string }> {
+  private async saveMethod(attributes: VisualizeSavedObjectAttributes): Promise<{ id: string }> {
     try {
       const { title, savedVis } = attributes;
       const visObj = attributes.vis;

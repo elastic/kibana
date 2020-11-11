@@ -4,11 +4,10 @@
 
 ## SavedObjectsFindOptions.hasReference property
 
+Search for documents having a reference to the specified objects. Use `hasReferenceOperator` to specify the operator to use when searching for multiple references.
+
 <b>Signature:</b>
 
 ```typescript
-hasReference?: {
-        type: string;
-        id: string;
-    };
+hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
 ```

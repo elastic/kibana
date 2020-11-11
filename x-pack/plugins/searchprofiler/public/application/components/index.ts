@@ -8,3 +8,6 @@ export { SearchProfilerTabs } from './searchprofiler_tabs';
 export { LicenseWarningNotice } from './license_warning_notice';
 export { ProfileTree, OnHighlightChangeArgs } from './profile_tree';
 export { HighlightDetailsFlyout } from './highlight_details_flyout';
+export { ProfileLoadingPlaceholder } from './profile_loading_placeholder';
+export { EmptyTreePlaceHolder } from './empty_tree_placeholder';
+export { ProfileQueryEditor } from './profile_query_editor';

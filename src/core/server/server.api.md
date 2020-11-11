@@ -480,6 +480,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
         resources: HttpResources;
     };
     // (undocumented)
+    i18n: I18nServiceSetup;
+    // (undocumented)
     logging: LoggingServiceSetup;
     // (undocumented)
     metrics: MetricsServiceSetup;
@@ -728,7 +730,7 @@ export interface Explanation {
 }
 
 // @public
-export function exportSavedObjectsToStream({ types, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
+export function exportSavedObjectsToStream({ types, hasReference, objects, search, savedObjectsClient, exportSizeLimit, includeReferencesDeep, excludeExportDetails, namespace, }: SavedObjectsExportOptions): Promise<import("stream").Readable>;
 
 // @public
 export interface FakeRequest {
@@ -851,6 +853,12 @@ export interface HttpServiceStart {
     auth: HttpAuth;
     basePath: IBasePath;
     getServerInfo: () => HttpServerInfo;
+}
+
+// @public (undocumented)
+export interface I18nServiceSetup {
+    getLocale(): string;
+    getTranslationFiles(): string[];
 }
 
 // @public
@@ -1987,6 +1995,7 @@ export class SavedObjectsClient {
     errors: typeof SavedObjectsErrorHelpers;
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
+    removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 
@@ -2094,7 +2103,7 @@ export class SavedObjectsErrorHelpers {
     // (undocumented)
     static createBadRequestError(reason?: string): DecoratedError;
     // (undocumented)
-    static createConflictError(type: string, id: string): DecoratedError;
+    static createConflictError(type: string, id: string, reason?: string): DecoratedError;
     // (undocumented)
     static createGenericNotFoundError(type?: string | null, id?: string | null): DecoratedError;
     // (undocumented)
@@ -2151,6 +2160,7 @@ export class SavedObjectsErrorHelpers {
 export interface SavedObjectsExportOptions {
     excludeExportDetails?: boolean;
     exportSizeLimit: number;
+    hasReference?: SavedObjectsFindOptionsReference[];
     includeReferencesDeep?: boolean;
     namespace?: string;
     objects?: Array<{
@@ -2177,18 +2187,14 @@ export type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjec
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
-    // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     filter?: string | KueryNode;
-    // (undocumented)
-    hasReference?: {
-        type: string;
-        id: string;
-    };
+    hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+    hasReferenceOperator?: 'AND' | 'OR';
     // (undocumented)
     namespaces?: string[];
     // (undocumented)
@@ -2206,6 +2212,14 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindOptionsReference {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
 }
 
 // @public
@@ -2402,6 +2416,16 @@ export interface SavedObjectsRawDoc {
 }
 
 // @public (undocumented)
+export interface SavedObjectsRemoveReferencesToOptions extends SavedObjectsBaseOptions {
+    refresh?: boolean;
+}
+
+// @public (undocumented)
+export interface SavedObjectsRemoveReferencesToResponse extends SavedObjectsBaseOptions {
+    updated: number;
+}
+
+// @public (undocumented)
 export class SavedObjectsRepository {
     addToNamespaces(type: string, id: string, namespaces: string[], options?: SavedObjectsAddToNamespacesOptions): Promise<SavedObjectsAddToNamespacesResponse>;
     bulkCreate<T = unknown>(objects: Array<SavedObjectsBulkCreateObject<T>>, options?: SavedObjectsCreateOptions): Promise<SavedObjectsBulkResponse<T>>;
@@ -2420,6 +2444,7 @@ export class SavedObjectsRepository {
     find<T = unknown>(options: SavedObjectsFindOptions): Promise<SavedObjectsFindResponse<T>>;
     get<T = unknown>(type: string, id: string, options?: SavedObjectsBaseOptions): Promise<SavedObject<T>>;
     incrementCounter(type: string, id: string, counterFieldName: string, options?: SavedObjectsIncrementCounterOptions): Promise<SavedObject>;
+    removeReferencesTo(type: string, id: string, options?: SavedObjectsRemoveReferencesToOptions): Promise<SavedObjectsRemoveReferencesToResponse>;
     update<T = unknown>(type: string, id: string, attributes: Partial<T>, options?: SavedObjectsUpdateOptions): Promise<SavedObjectsUpdateResponse<T>>;
 }
 

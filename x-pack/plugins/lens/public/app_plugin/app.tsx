@@ -19,7 +19,6 @@ import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import {
   OnSaveProps,
   checkForDuplicateTitle,
-  SavedObjectSaveModalOrigin,
 } from '../../../../../src/plugins/saved_objects/public';
 import { injectFilterReferences } from '../persistence';
 import { NativeRenderer } from '../native_renderer';
@@ -33,6 +32,7 @@ import {
 import { LENS_EMBEDDABLE_TYPE, getFullPath } from '../../common';
 import { LensAppProps, LensAppServices, LensAppState } from './types';
 import { getLensTopNavConfig } from './lens_top_nav';
+import { TagEnhancedSavedObjectSaveModalOrigin } from './tags_saved_object_save_modal_origin_wrapper';
 import {
   LensByReferenceInput,
   LensEmbeddableInput,
@@ -59,6 +59,7 @@ export function App({
     notifications,
     attributeService,
     savedObjectsClient,
+    savedObjectsTagging,
     getOriginatingAppName,
 
     // Temporarily required until the 'by value' paradigm is default.
@@ -350,17 +351,24 @@ export function App({
       returnToOrigin: boolean;
       onTitleDuplicate?: OnSaveProps['onTitleDuplicate'];
       newDescription?: string;
+      newTags?: string[];
     },
     options: { saveToLibrary: boolean }
   ) => {
     if (!lastKnownDoc) {
       return;
     }
+
+    let references = lastKnownDoc.references;
+    if (savedObjectsTagging && saveProps.newTags) {
+      references = savedObjectsTagging.ui.updateTagsReferences(references, saveProps.newTags);
+    }
+
     const docToSave = {
       ...getLastKnownDocWithoutPinnedFilters()!,
       description: saveProps.newDescription,
-      savedObjectId: saveProps.newCopyOnSave ? undefined : lastKnownDoc.savedObjectId,
       title: saveProps.newTitle,
+      references,
     };
 
     // Required to serialize filters in by value mode until
@@ -375,25 +383,31 @@ export function App({
 
     const originalInput = saveProps.newCopyOnSave ? undefined : initialInput;
     const originalSavedObjectId = (originalInput as LensByReferenceInput)?.savedObjectId;
-    if (options.saveToLibrary && !originalInput) {
-      await checkForDuplicateTitle(
-        {
-          ...docToSave,
-          copyOnSave: saveProps.newCopyOnSave,
-          lastSavedTitle: lastKnownDoc.title,
-          getEsType: () => 'lens',
-          getDisplayName: () =>
-            i18n.translate('xpack.lens.app.saveModalType', {
-              defaultMessage: 'Lens visualization',
-            }),
-        },
-        saveProps.isTitleDuplicateConfirmed,
-        saveProps.onTitleDuplicate,
-        {
-          savedObjectsClient,
-          overlays,
-        }
-      );
+    if (options.saveToLibrary) {
+      try {
+        await checkForDuplicateTitle(
+          {
+            id: originalSavedObjectId,
+            title: docToSave.title,
+            copyOnSave: saveProps.newCopyOnSave,
+            lastSavedTitle: lastKnownDoc.title,
+            getEsType: () => 'lens',
+            getDisplayName: () =>
+              i18n.translate('xpack.lens.app.saveModalType', {
+                defaultMessage: 'Lens visualization',
+              }),
+          },
+          saveProps.isTitleDuplicateConfirmed,
+          saveProps.onTitleDuplicate,
+          {
+            savedObjectsClient,
+            overlays,
+          }
+        );
+      } catch (e) {
+        // ignore duplicate title failure, user notified in save modal
+        return;
+      }
     }
     try {
       const newInput = (await attributeService.wrapAttributes(
@@ -453,11 +467,6 @@ export function App({
       // eslint-disable-next-line no-console
       console.dir(e);
       trackUiEvent('save_failed');
-      notifications.toasts.addDanger(
-        i18n.translate('xpack.lens.app.docSavingError', {
-          defaultMessage: 'Error saving document',
-        })
-      );
       setState((s) => ({ ...s, isSaveModalVisible: false }));
     }
   };
@@ -507,6 +516,11 @@ export function App({
       },
     },
   });
+
+  const tagsIds =
+    state.persistedDoc && savedObjectsTagging
+      ? savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
+      : [];
 
   return (
     <>
@@ -623,7 +637,9 @@ export function App({
         )}
       </div>
       {lastKnownDoc && state.isSaveModalVisible && (
-        <SavedObjectSaveModalOrigin
+        <TagEnhancedSavedObjectSaveModalOrigin
+          savedObjectsTagging={savedObjectsTagging}
+          initialTags={tagsIds}
           originatingApp={incomingState?.originatingApp}
           onSave={(props) => runSave(props, { saveToLibrary: true })}
           onClose={() => {

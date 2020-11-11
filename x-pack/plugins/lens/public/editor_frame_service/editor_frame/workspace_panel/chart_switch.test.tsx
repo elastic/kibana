@@ -16,6 +16,7 @@ import { mountWithIntl as mount } from 'test_utils/enzyme_helpers';
 import { Visualization, FramePublicAPI, DatasourcePublicAPI } from '../../../types';
 import { Action } from '../state_management';
 import { ChartSwitch } from './chart_switch';
+import { PaletteOutput } from 'src/plugins/charts/public';
 
 describe('chart_switch', () => {
   function generateVisualization(id: string): jest.Mocked<Visualization> {
@@ -445,6 +446,39 @@ describe('chart_switch', () => {
       expect.objectContaining({
         type: 'SWITCH_VISUALIZATION',
         initialState: 'visB initial state',
+      })
+    );
+  });
+
+  it('should query main palette from active chart and pass into suggestions', () => {
+    const dispatch = jest.fn();
+    const visualizations = mockVisualizations();
+    const mockPalette: PaletteOutput = { type: 'palette', name: 'mock' };
+    visualizations.visA.getMainPalette = jest.fn(() => mockPalette);
+    visualizations.visB.getSuggestions.mockReturnValueOnce([]);
+    const frame = mockFrame(['a', 'b', 'c']);
+    const currentVisState = {};
+
+    const component = mount(
+      <ChartSwitch
+        visualizationId="visA"
+        visualizationState={currentVisState}
+        visualizationMap={visualizations}
+        dispatch={dispatch}
+        framePublicAPI={frame}
+        datasourceMap={mockDatasourceMap()}
+        datasourceStates={mockDatasourceStates()}
+      />
+    );
+
+    switchTo('visB', component);
+
+    expect(visualizations.visA.getMainPalette).toHaveBeenCalledWith(currentVisState);
+
+    expect(visualizations.visB.getSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        keptLayerIds: ['a'],
+        mainPalette: mockPalette,
       })
     );
   });

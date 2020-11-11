@@ -29,39 +29,6 @@ const TEST_TAGS = safeLoad(JOBS_YAML)
   .JOB.filter((id) => id.startsWith('kibana-ciGroup'))
   .map((id) => id.replace(/^kibana-/, ''));
 
-export function getFunctionalTestGroupRunConfigs({ kibanaInstallDir } = {}) {
-  return {
-    // include a run task for each test group
-    ...TEST_TAGS.reduce(
-      (acc, tag) => ({
-        ...acc,
-        [`functionalTests_${tag}`]: {
-          cmd: process.execPath,
-          args: [
-            'scripts/functional_tests',
-            '--include-tag',
-            tag,
-            '--config',
-            'test/functional/config.js',
-            '--config',
-            'test/ui_capabilities/newsfeed_err/config.ts',
-            '--config',
-            'test/new_visualize_flow/config.js',
-            '--config',
-            'test/security_functional/config.ts',
-            // '--config', 'test/functional/config.firefox.js',
-            '--bail',
-            '--debug',
-            '--kibana-install-dir',
-            kibanaInstallDir,
-          ],
-        },
-      }),
-      {}
-    ),
-  };
-}
-
 grunt.registerTask(
   'functionalTests:ensureAllTestsInCiGroup',
   'Check that all of the functional tests are in a CI group',

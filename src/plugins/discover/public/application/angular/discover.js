@@ -65,7 +65,7 @@ const {
   timefilter,
   toastNotifications,
   uiSettings: config,
-  visualizations,
+  trackUiMetric,
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
@@ -82,6 +82,7 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
+import { METRIC_TYPE } from '@kbn/analytics';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -874,11 +875,11 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
     inspectorRequest.stats(getResponseInspectorStats(resp, $scope.searchSource)).ok({ json: resp });
 
     if (getTimeField()) {
-      const tabifiedData = tabifyAggResponse($scope.vis.data.aggs, resp);
+      const tabifiedData = tabifyAggResponse($scope.opts.chartAggConfigs, resp);
       $scope.searchSource.rawResponse = resp;
       $scope.histogramData = discoverResponseHandler(
         tabifiedData,
-        getDimensions($scope.vis.data.aggs.aggs, $scope.timeRange)
+        getDimensions($scope.opts.chartAggConfigs.aggs, $scope.timeRange)
       );
       $scope.updateTime();
     }
@@ -991,6 +992,9 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
       operation,
       $scope.indexPattern.id
     );
+    if (trackUiMetric) {
+      trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
+    }
     return filterManager.addFilters(newFilters);
   };
 
@@ -1045,27 +1049,19 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         },
       },
     ];
-
-    $scope.vis = await visualizations.createVis('histogram', {
-      title: savedSearch.title,
-      params: {
-        addLegend: false,
-        addTimeMarker: true,
-      },
-      data: {
-        aggs: visStateAggs,
-        searchSource: $scope.searchSource.getSerializedFields(),
-      },
-    });
+    $scope.opts.chartAggConfigs = data.search.aggs.createAggConfigs(
+      $scope.indexPattern,
+      visStateAggs
+    );
 
     $scope.searchSource.onRequestStart((searchSource, options) => {
-      if (!$scope.vis) return;
-      return $scope.vis.data.aggs.onSearchRequestStart(searchSource, options);
+      if (!$scope.opts.chartAggConfigs) return;
+      return $scope.opts.chartAggConfigs.onSearchRequestStart(searchSource, options);
     });
 
     $scope.searchSource.setField('aggs', function () {
-      if (!$scope.vis) return;
-      return $scope.vis.data.aggs.toDsl();
+      if (!$scope.opts.chartAggConfigs) return;
+      return $scope.opts.chartAggConfigs.toDsl();
     });
   }
 

@@ -1,0 +1,756 @@
+[[breaking-changes-7.10]]
+== Breaking changes in 7.10
+++++
+<titleabbrev>7.10</titleabbrev>
+++++
+
+coming[7.10.0]
+
+This page discusses the breaking changes that you need to be aware of when migrating
+your application to {kib} 7.10.
+
+* <<user-facing-changes-7-10, Breaking changes for users>>
+* <<general-plugin-API-changes-7-10, Breaking changes for plugin developers>>
+
+[discrete]
+[[user-facing-changes-7-10]]
+=== Breaking changes for users
+
+// The following section is re-used in the Installation and Upgrade Guide
+
+// tag::notable-breaking-changes[]
+
+
+[discrete]
+[[breaking_kibana_legacy_plugins]]
+==== Legacy plugins support removed
+
+The legacy plugin system and the legacy plugin API have been removed.
+Legacy plugin owners should migrate their plugins to the {kib} Platform plugin API.
+
+*via https://github.com/elastic/kibana/pull/77599[#77599]*
+
+[discrete]
+[[breaking_kibana_plugins]]
+==== Support added for Kibana Platform plugins
+
+The `bin/kibana-plugin` CLI has been updated to work with the new {kib}
+Platform plugin format instead of the legacy plugin format.
+
+*via https://github.com/elastic/kibana/pull/74604[#74604]*
+
+[discrete]
+[[breaking_vega_visualizations]]
+==== Vega visualizations without $schema property no longer supported
+
+Previously, if you did not provide the $schema property,
+the default value was set and hardcoded in the Vega code.
+The visualization was then rendered with a warning message.
+This introduced difficulties when updating the version of the Vega library.
+
+Now all Vega specs must contain the $schema param. In no $schema
+param exists, an error message is returned.
+Refer to the https://vega.github.io/vega/docs/specification/[Vega docs] for
+more information about this property.
+
+*via https://github.com/elastic/kibana/pull/73805[#73805]*
+
+// end::notable-breaking-changes[]
+
+[discrete]
+[[general-plugin-API-changes-7-10]]
+=== Breaking changes for plugin developers
+
+[[breaking_plugin_v7.10.0_79406]]
+.Config moved from `xpack.ingestManager` to `xpack.fleet`
+[%collapsible]
+====
+
+To rename the Ingest Manger plugin to Fleet:
+
+* The {kib} config for Ingest Manager moved from `xpack.ingestManager.*` to `xpack.fleet.*`.
+* The config options specific to agents moved to `xpack.ingestManager.fleet.*` and `xpack.fleet.agents.*`.
+
+*via https://github.com/elastic/kibana/pull/79406[#79406]*
+
+====
+
+[[breaking_plugin_v7.10.0_79379]]
+.Plugins server code no longer transpiled with Babel
+[%collapsible]
+====
+
+Kibana plugins can no longer rely on their server code being automatically transpiled with Babel.
+The https://github.com/elastic/kibana/tree/master/packages/kbn-plugin-helpers[`@kbn/plugin-helpers`]
+provide a build task that will transform a plugin's server code to plain JS via Babel,
+but plugin authors can use a tool of their choosing to accomplish the same result.
+
+*via https://github.com/elastic/kibana/pull/79176[#79176]* and https://github.com/elastic/kibana/pull/79379[#79379]*
+
+====
+
+[[breaking_plugin_v7.10.0_79193]]
+.Ingest Manager APIs moved to Fleet
+[%collapsible]
+====
+
+The following Ingest Manager API routes changed:
+
+* All API routes moved from `/api/ingest_manager/*`  to `/api/fleet/*`
+* All previous Fleet routes moved from `/api/ingest_manager/fleet/*`  to `/api/fleet/*`. This includes:
+** `/api/ingest_manager/fleet/agents` => `/api/fleet/agents`
+** `/api/ingest_manager/fleet/enrollment-api-keys` => `/api/fleet/enrollment-api-keys`
+* The Fleet setup API moved from `/api/ingest_manager/fleet/setup` to `/api/fleet/agents/setup`
+
+*via https://github.com/elastic/kibana/pull/79193[#79193]*
+
+====
+
+[[breaking_plugin_v7.10.0_78383]]
+.`SearchSource` is now exposed on the server
+[%collapsible]
+====
+
+The high-level search API `SearchSource` is now available on the server:
+```js
+function async myRouteHandler(context, request, response) {
+  const searchSource = await data.search.searchSource.asScoped(request);
+  searchSource.createEmpty(); // API after calling `asScoped` matches the client-side service
+}
+```
+
+*via https://github.com/elastic/kibana/pull/78383[#78383]*
+
+====
+
+[[breaking_plugin_v7.10.0_78006]]
+.Response status helpers added
+[%collapsible]
+====
+
+This release introduces the following `search` helpers:
+
+* `isCompleteResponse`
+* `isErrorResponse`
+* `isPartialResponse`
+
+
+*via https://github.com/elastic/kibana/pull/78006[#78006]*
+
+====
+
+[[breaking_plugin_v7.10.0_77791]]
+.The index pattern `factory` and `crud` methods refactored
+[%collapsible]
+====
+The refactoring includes the following changes:
+
+* Create new indexPattern instance (unsaved) -
+`indexPatternService.make() =>  indexPatternService.create(indexPatternSpec, skipFetchFields)`
+
+* Save new index pattern -
+`indexPattern.create() => indexPatternService.createSavedObject(indexPattern)`
+
+* Setting the default index pattern is done as part of `indexPatternService.createSavedObject`,
+ but can also be called individually-
+`uiSettings.set('defaultIndex', id) => indexPatternService.setDefault(indexPatternId, force)`
+
+* Update index pattern -
+`indexPattern.save() => indexPatternService.updateSavedObject(indexPattern)`
+
+* Additional changes:
+** `indexPatternService.get();` no longer returns a new IndexPattern instance
+** `indexPattern.fieldsFetcher` is replaced by `indexPatternService.getFieldsForWildcard` and `indexPatternService.getFieldsForIndexPattern`
+** `indexPattern.originalBody` => `indexPattern.originalSavedObjectBody` updates via `indexPattern.resetOriginalSavedObjectBody`
+** `indexPattern.refreshFields => indexPatternService.refreshFields(indexPattern)`
+** `indexPatternService.createAndSave(indexPatternSpec)` convenience method added
+** `indexPatternService.getFieldsForWildcard` can be called directly. Previously a temp index pattern had to be created.
+
+*via https://github.com/elastic/kibana/pull/77791[#77791]*
+
+====
+
+[[breaking_plugin_v7.10.0_77788]]
+.Error notifications now aligned
+[%collapsible]
+====
+
+The `data.search` service now includes these explicit error types:
+
+- `AbortError` if the request was canceled by the application or by calling `cancelPending`.
+- `SearchTimeoutError` if the request has timed out on the client **or** on the server.
+- `PainlessError` if there's an painless script error inside the response
+- If the error is unidentified, it throws the error as is.
+
+The new `showError` function can be used with these errors to show customized toast messages.
+Applications may choose to handle errors differently. However, the `SearchTimeoutError`
+error notification is shown regardless.
+
+
+```.ts
+data.search.search(...)
+   .catchError((e: Error) => {
+       data.search.showError(e);
+   }
+```
+
+*via https://github.com/elastic/kibana/pull/77788[#77788]*
+
+====
+
+[[breaking_plugin_v7.10.0_76848]]
+.`className` prop added to QueryStringInput component
+[%collapsible]
+====
+
+A `className` prop was added to the main container of the QueryStringInput component.
+
+*via https://github.com/elastic/kibana/pull/76848[#76848]*
+
+====
+
+[[breaking_plugin_v7.10.0_76822]]
+.KibanaRequest now has a `uuid` property
+[%collapsible]
+====
+
+`KibanaRequest` now has a `uuid` property, which is a UUID that uniquely identifies the request.
+
+*via https://github.com/elastic/kibana/pull/76822[#76822]*
+
+====
+
+[[breaking_plugin_v7.10.0_76706]]
+.Index pattern save moved to index pattern service
+[%collapsible]
+====
+
+`IndexPattern.save` has been replaced with `IndexPatternsService.save`.
+
+*via https://github.com/elastic/kibana/pull/76706[#76706]*
+
+====
+
+[[breaking_plugin_v7.10.0_76538]]
+.`FetchOptions` replaced with `ISearchOptions`
+[%collapsible]
+====
+
+The `FetchOptions` type was removed&mdash;use the `ISearchOptions` type instead.
+The `ISearchOptions` `signal` option was renamed to `abortSignal`.
+
+*via https://github.com/elastic/kibana/pull/76538[#76538]*
+
+====
+
+[[breaking_plugin_v7.10.0_75943]]
+.Legacy {es} client APIs removed
+[%collapsible]
+====
+
+The `__LEGACY` APIs have been removed from the `data` plugin's client-side search service.
+Specifically, `data.search.__LEGACY.esClient` is no longer exposed,
+ and the legacy `elasticsearch-browser` package has been removed from the repo.
+ If you rely on this client in your plugin, we recommend migrating to
+ the new https://github.com/elastic/elasticsearch-js[`elasticsearch-js` client].
+
+*via https://github.com/elastic/kibana/pull/75943[#75943]*
+
+====
+
+[[breaking_plugin_v7.10.0_75819]]
+.Plugin status API added
+[%collapsible]
+====
+
+Kibana Platform plugins can now read the status of their dependencies,
+their plugin's default status, and manually override that status as
+reported to the end user and on the `/api/status` endpoint.
+
+```ts
+class MyPlugin {
+  setup(core) {
+    // Override default behavior and only elevate severity when elasticsearch is not available
+    core.status.set(
+      core.status.core$.pipe(core => core.elasticsearch);
+    );
+  }
+}
+```
+
+*via https://github.com/elastic/kibana/pull/75819[#75819]*
+
+====
+
+[[breaking_plugin_v7.10.0_75728]]
+.New advanced setting `searchTimeout` added
+[%collapsible]
+====
+
+The behavior of how search requests timeout changed:
+
+ * The {kib} server uses the new {es} client. The client already uses all timeout configurations
+ such as `requestTimeout`, `shardTimeout`, and `maxRetries`.
+ Because the client can't override those settings, in OSS,
+ we removed the code governing the {es} timeout on the client. Instead, this change adds handling for a timeout error response.
+  A nice side effect is being able to remove `injectDefaultVars` from the legacy core plugin.
+* With Basic+ licenses, users can control the maximum time for a search session
+ (for example, a single re-load of a dashboard), per space. Aa new Advanced Setting
+ can be set to a positive value, or to 0, allowing queries to run without a timeout, as long as a user stays on screen.
+
+
+*via https://github.com/elastic/kibana/pull/75728[#75728]*
+
+====
+
+[[breaking_plugin_v7.10.0_75717]]
+.`IndexPattern` class no longer uses `getConfig` or `uiSettingsValues`
+[%collapsible]
+====
+
+The `IndexPattern` class now takes `shortDotsEnable` (boolean) and `metaFields` (string[]) as arguments.
+These were formerly provided by `uiSettings`
+
+*via https://github.com/elastic/kibana/pull/75717[#75717]*
+
+====
+
+[[breaking_plugin_v7.10.0_75517]]
+.The `expressions` plugin has removed its `__LEGACY` APIs
+[%collapsible]
+====
+
+The `expressions` plugin has removed its `__LEGACY` APIs,
+which were designed for internal use in Canvas.
+In the unlikely event that you rely on the `expressions.__LEGACY` namespace,
+you will need to copy the relevant code into your plugin before updating.
+
+Also removed is the `createKibanaUtilsCore` helper from the `kibana_utils` plugin,
+which was only used in the legacy Expressions APIs.
+
+*via https://github.com/elastic/kibana/pull/75517[#75517]*
+
+====
+
+[[breaking_plugin_v7.10.0_75368]]
+.The search service's `getParamsFromSearchRequest` helper changed
+[%collapsible]
+====
+
+The `getParamsFromSearchRequest` helper changed to
+prepare for exposing `SearchSource` on the server. If your plugin relies on this
+helper, update the dependencies passed to it as follows:
+
+```diff
+       import { getSearchParamsFromRequest } from '../../../src/plugins/data/public';
+
+       const params = getSearchParamsFromRequest(request, {
+-          injectedMetadata: core.injectedMetadata,
+-          uiSettings: core.uiSettings,
++          esShardTimeout: core.injectedMetadata.getInjectedVar('esShardTimeout') as number,
++          getConfig: core.uiSettings.get.bind(core.uiSettings),
+       });
+```
+
+*via https://github.com/elastic/kibana/pull/75368[#75368]*
+
+====
+
+[[breaking_plugin_v7.10.0_75185]]
+.Dependencies removed from index pattern list and field list
+[%collapsible]
+====
+
+The index pattern `fields` class has the following changes:
+
+- The class is no longer created using a constructor. This produced odd side effects
+when array methods were used. In particular, removing the `IndexPattern` argument revealed that the
+`FieldList` constructor was being called when `filter` and similar were called, producing an error.
+Now, it's only created once by `IndexPattern`.
+- The `IndexPattern` object and `onNotification` are no longer provided to the creation function.
+
+The index pattern `field` class has the following changes:
+
+- The `IndexPattern` object and `onNotification` are no longer provided to the constructor.
+- The `format` attribute no longer exists. Use `IndexPattern.getFormatterForField` instead.
+- A callback is no longer used when an unknown field type is encountered.
+Instead it throws `FieldTypeUnknownError`.
+- `toSpec` now takes an optional argument, `{ getFormatterForField }`. This argument takes
+the field as an argument and returns a formatter.
+
+*via https://github.com/elastic/kibana/pull/75185[#75185]*
+
+====
+
+[[breaking_plugin_v7.10.0_74914]]
+.Agent and package configs renamed to agent and package policies
+[%collapsible]
+====
+
+The following Fleet (previously Ingest Manager) API routes changed:
+
+- `/api/ingest_manager/agent_configs/*` renamed to `/api/fleet/agent_policies/*`
+- `/api/ingest_manager/package_configs/*` renamed to `/api/fleet/package_policies/*`
+
+All Ingest Manager routes with payload fields that were previously in
+reference to agent configs or package configs have been renamed to agent policies
+and package policies. For example `configId` -> `policyId`, `package_configs` -> `package_policies`.
+
+The following Ingest Manager app routes changed:
+
+- `/app/ingestManager#/configs` renamed to `/app/ingestManager#/policies`
+
+The following Ingest Manager settings changed:
+
+- `xpack.ingestManager.fleet.agentConfigRolloutRateLimitIntervalMs` renamed to `xpack.fleet.agents.agentPolicyRolloutRateLimitIntervalMs`
+- `xpack.fleet.agents.agentConfigRolloutRateLimitRequestPerInterval` renamed to `xpack.fleet.agents.agentPolicyRolloutRateLimitRequestPerInterval`
+
+*via https://github.com/elastic/kibana/pull/74914[#74914]*
+
+====
+
+[[breaking_plugin_v7.10.0_74607]]
+.SearchSource dependencies moved to the server
+[%collapsible]
+====
+
+The `getSearchErrorType` and the `SearchError` class have been
+removed from the static exports of the `data` plugin's contract.
+If you rely on these, copy the code directly into your plugin.
+The `SearchError` interface is still exposed.
+
+*via https://github.com/elastic/kibana/pull/74607[#74607]*
+
+====
+
+[[breaking_plugin_v7.10.0_74472]]
+.`data.search.aggs` available on the server
+[%collapsible]
+====
+
+The `search.aggs` service in the `data` plugin is now available on the server.
+The usage is the same as on the client, except that a scoped saved objects client
+must be provided on the server to retrieve the `start` contract:
+
+```ts
+const savedObjectsClient = savedObjects.getScopedClient(kibanaRequest);
+// `aggs.asScopedToClient` will return the same contract as is available in the browser
+const aggs = await data.search.aggs.asScopedToClient(savedObjectsClient);
+const allAggTypes = aggs.types.getAll();
+```
+
+The `calculateAutoTimeExpression` method was removed from the `setup` contract,
+and now only exists on the `data` plugin's `start` contract. The method was
+was not used in `setup` elsewhere in {kib}, so it was removed for simplicity.
+
+In addition, the agg types registry changed and now accepts a provider
+function, which is used to inject dependencies. This might be needed in the agg type definition,
+specifically a `getConfig` function used to retrieve uiSettings:
+
+```ts
+const getMyAgg = ({ getConfig }) =>
+  new MetricAggType({
+    name: 'myAgg',
+    expressionName: 'myAggFunction',
+    getSerializedFormat: (agg) => ({ id: 'number' }),
+    params: [
+      {
+        name: 'someParam',
+        write: (agg, output, aggs) => ({
+          const queryLanguage = getConfig('search:queryLanguage');
+          ...etc
+        })
+      }
+    ],
+  });
+
+// register the agg type provider
+dataSetup.search.aggs.registerMetric('myAgg', getMyAgg);
+```
+
+*via https://github.com/elastic/kibana/pull/74472[#74472]*
+
+====
+
+[[breaking_plugin_v7.10.0_73730]]
+.Routes can specify the idle socket timeout
+[%collapsible]
+====
+
+Route definitions can now specify the `idleSocket` timeout in addition to the `payload` timeout.
+
+Resolves https://github.com/elastic/kibana/issues/73557[#73557].
+
+*via https://github.com/elastic/kibana/pull/73730[#73730]*
+
+====
+
+[[breaking_plugin_v7.10.0_73651]]
+.New {es} client exposed
+[%collapsible]
+====
+
+{kib} provides the new {es} client
+as a part of the {es} service on the server-side.
+The legacy client is deprecated on and subject for removal in `7.x`. Reference
+the https://github.com/elastic/kibana/blob/master/src/core/MIGRATION_EXAMPLES.md#elasticsearch-client[migration guide] to refactor your code
+
+*via https://github.com/elastic/kibana/pull/73651[#73651]*
+
+====
+
+[[breaking_plugin_v7.10.0_72093]]
+.Query input string manager added
+[%collapsible]
+====
+
+This PR allows gracefully extracting of the query string state, to be consumed by other services.
+You can now use the `data.query.state$` observable and receive all state updates in one place.
+
+```TypeScript
+data.query.state$.subscribe((queryState: QueryState) => {...})
+```
+
+This PR also adds the `data.query.queryString` service, allowing to you set the
+query string https://github.com/elastic/kibana/issues/52522[programmatically].
+```TypeScript
+data.query.queryString.setQuery({query: 'abc', language: 'kuery'});
+```
+
+
+*via https://github.com/elastic/kibana/pull/72093[#72093]*
+
+====
+
+[[breaking_plugin_v7.10.0_67157]]
+.Role-based access control added to the Alerting & Action plugins
+[%collapsible]
+====
+
+This PR allows you to assign privileges to the Alerting framework when
+defining your feature in *Kibana*. When registering your feature, you can add
+a list of AlertTypes under your `read` and `all` keys of the `privileges` object, as such:
+
+```ts
+features.registerFeature({
+      id: 'alertsExample',
+      name: 'alertsExample',
+      app: [],
+      privileges: {
+        all: {
+          alerting: {
+            all: ['example.always-firing', 'example.people-in-space'],
+          },
+        },
+        read: {
+          alerting: {
+            read: ['example.always-firing', 'example.people-in-space'],
+          },
+        },
+      },
+    });
+```
+
+This specifies:
+
+* If users AbortError granted the `all` privilege to the `alertsExample` feature,
+then they are also granted `all` privileges to the `example.always-firing` and `example.people-in-space` AlertTypes
+under the `alertsExample` consumer.
+* If users are granted the `read` privilege to the `alertsExample` feature,
+then they are also granted `read` privileges to the `example.always-firing` and `example.people-in-space`
+AlertTypes under the `alertsExample` consumer.
+
+For example, an `all` user will be able to create an `example.always-firing` alert
+with the `alertsExample` as consumer. This will also automatically grant the user the right to
+create an `example.always-firing` alert from within Alerts management, where `alerts` is the consumer.
+This **does not** grant the user the ability to create an `example.always-firing` alert under any other consumer.
+For that, the specific consumer will have to grant the user explicit rights through their privilege system.
+
+For example, if Uptime wanted to allow users to create an `example.people-in-space`
+alert inside of the Uptime solution, then they will have to do the following:
+
+```ts
+features.registerFeature({
+      id: 'uptime',
+      name: 'Uptime',
+      app: [],
+      privileges: {
+        all: {
+          alerting: {
+            all: ['xpack.uptime.alerts.actionGroups.tls', 'example.people-in-space'],
+          },
+        },
+        read: {
+          alerting: {
+            read: ['xpack.uptime.alerts.actionGroups.tls', 'example.people-in-space'],
+          },
+        },
+      },
+    });
+```
+
+This, assuming it's added by Uptime, would grant uptime users the privilege
+to create both their own `xpack.uptime.alerts.actionGroups.tls` alert and
+the `example.people-in-space` alert with `uptime` as the consumer.
+
+This does not allow any Uptime user with `all` privileges to create an `example.people-in-space` alert.
+To create an `example.people-in-space` alert, the Uptime user needs both `all` in Uptime **and** in
+AlertsExample, as we always check whether the user is privileged to execute
+an operation (create/enable/delete etc.) in both the alert's _consumer_ and its _producer_.
+
+The one exception to this is when the _producer_ is `alerts`, which represents a `built-in` AlertType,
+in which case we only check for _consumer_ privileges as all users are privileged to create built-in types by definition.
+
+
+*via https://github.com/elastic/kibana/pull/67157[#67157]*
+
+====
+
+[[breaking_plugin_v7.10.0_73257]]
+.The EventLog Setup contract now exposes a `registerSavedObjectProvider`
+[%collapsible]
+====
+
+The EventLog Setup contract now exposes a registerSavedObjectProvider method
+which can be used to register a Saved Object provider.
+
+```ts
+export interface IEventLogService {
+   isEnabled(): boolean;
+   isLoggingEntries(): boolean;
+   isIndexingEntries(): boolean;
+   registerProviderActions(provider: string, actions: string[]): void;
+   isProviderActionRegistered(provider: string, action: string): boolean;
+   getProviderActions(): Map<string, Set<string>>;
+   registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
+   getLogger(properties: IEvent): IEventLogger;
+ }
+```
+
+This API specifies the Saved Object type and a "provider"
+callback that is called whenever a new request asks for that type of Saved Object.
+
+This example shows a provider for the alert SavedObject type,
+which creates a new AlertsClient for the request and returns a getter
+that attempts to get the SavedObject by its id.
+
+*via https://github.com/elastic/kibana/pull/73257[#73257]*
+
+```ts
+eventLogService.registerSavedObjectProvider('alert', (request: KibanaRequest) => {
+    const client = getAlertsClientWithRequest(request);
+    return (type: string, id: string) => client.get({ id });
+});
+```
+
+The EventLog maintains a registry of each provider,
+and creates a getter on demand when the user actually requests an object of a
+certain type. An AlertsClient is only instantiated if
+the user requests to the events reference an Alert.
+Once a getter is created for a specific request,
+it is cached for the remainder of the lifecycle of that request.
+This means a single provider is used for multiple gets made by the request.
+
+====
+
+[[breaking_plugin_v7.10.0_72289]]
+.New {es} client in SO service
+[%collapsible]
+====
+
+The SO service was refactored to use https://github.com/elastic/elasticsearch-js[elasticsearch-js]
+under the hood. This change might affect plugins reading the response status field
+from the SO error bubbled to the Solutions code because the {es} error no longer
+provides the status field (statusCode is still provided).
+
+Several plugins were adjusted to check SO errors with `SavedObjectsErrorHelpers`.
+Plugins must use this because we are going to stop wrapping errors in the Boom object.
+
+*via https://github.com/elastic/kibana/pull/72289[#72289]*
+
+====
+
+[[breaking_plugin_v7.10.0_72029]]
+.Alerts Management now controlled via Feature Controls and privileges
+[%collapsible]
+====
+
+If you want your plugin to grant a user access to Alerts Management,
+you must specify it under Management in your feature configuration:
+
+```ts
+management: {
+    insightsAndAlerting: ['triggersActions'],
+},
+```
+You can specify it in three places:
+
+* Directly on the feature. When security is disabled, this grants access
+to every role granted access to the Feature via Feature Controls.
+When security is enabled, this specifies that the feature has access to
+this management section and is required before you can grant this to a specific role.
+
+* Under the `all` privilege. When security is enabled, this grants access
+to every role granted the `all` privilege to the Feature via Feature Controls.
+
+* Under the `read` privilege. When security is enabled, this grants access
+to every role granted the `read` privilege to the Feature via Feature Controls.
+
+You're likely to have to specify this in 3 places in your plugin
+to cover all 3 scenarios. Although this is more verbose than before,
+it aligns with the rest of {kib}.
+It also means that the Triggers and Actions plugin no longer needs to
+know about each plugin that wants to gain access
+(which means {kib} can more easily support future alerting usage).
+
+
+*via https://github.com/elastic/kibana/pull/72029[#72029]*
+
+====
+
+[discrete]
+[[breaking_plugin_v7.10.0_73778]]
+.API changed for creating a Jira connector
+[%collapsible]
+====
+
+`casesConfiguration` was renamed to `incidentConfiguration`. Added optional `attributeisCaseOwned`.
+
+*via https://github.com/elastic/kibana/pull/73778[#73778]*
+
+====
+
+[discrete]
+[[breaking_plugin_v7.10.0_74357]]
+.API changed for creating an IBM Resilient connector
+[%collapsible]
+====
+
+`casesConfiguration` was renamed to `incidentConfiguration`. Added optional `attributeisCaseOwned`.
+
+*via https://github.com/elastic/kibana/pull/74357[#74357]*
+
+====
+
+[discrete]
+[[breaking_plugin_v7.10.0_77327]]
+.Settings per case per connector
+[%collapsible]
+====
+
+- To create a case (`POST <kibana host>:<port>/api/cases`), you must provide a `connector`.
+Requests without a `connector` get a `400 Bad Request`.
+- To update the connector of a case (`PATCH <kibana host>:<port>/api/cases`),
+you must provide the `connector`. The `connector_id` attribute has been
+removed in favor of the `connector` attribute.
+- To set the default connector (`POST <kibana host>:<port>/api/cases/configure`),
+you must provide a `connector`. The `connector_id` and `connector_name`
+attributes have been removed in favor of the `connector` attribute.
+- To update the connector’s case closure settings
+(`PATCH <kibana host>:<port>/api/cases/configure`), you must provide a `connector`.
+The `connector_id` and `connector_name` attributes have been removed in
+favor of the `connector` attribute.
+
+*via https://github.com/elastic/kibana/pull/77327[#77327]*
+
+====

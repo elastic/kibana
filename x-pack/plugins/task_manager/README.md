@@ -142,18 +142,34 @@ When Kibana attempts to claim and run a task instance, it looks its definition u
 ## Task result
 
 The task runner's `run` method is expected to return a promise that resolves to undefined or to an object that looks like the following:
+
+|Property|Description|Type|
+|---|---|---|
+|runAt| Optional. If specified, this is used as the tasks' next `runAt`, overriding the default system scheduler. | Date ISO String | 
+|schedule| Optional. If specified, this is used as the tasks' new recurring schedule, overriding the default system scheduler and any existing schedule.  | { interval: string } | 
+|error| Optional, an error object, logged out as a warning. The pressence of this property indicates that the task did not succeed.| Error |
+|state| Optional, this will be passed into the next run of the task, if this is a recurring task. |Record<string, unknown>|
+
+### Examples
+
 ```js
 {
   // Optional, if specified, this is used as the tasks' nextRun, overriding
   // the default system scheduler.
   runAt: "2020-07-24T17:34:35.272Z",
 
-  // Optional, an error object, logged out as a warning. The pressence of this
-  // property indicates that the task did not succeed.
   error: { message: 'Hrumph!' },
 
-  // Optional, this will be passed into the next run of the task, if
-  // this is a recurring task.
+  state: {
+    anything: 'goes here',
+  },
+}
+```
+
+```js
+{
+  schedule: { interval: '30s' },
+  
   state: {
     anything: 'goes here',
   },
@@ -161,6 +177,39 @@ The task runner's `run` method is expected to return a promise that resolves to 
 ```
 
 Other return values will result in a warning, but the system should continue to work.
+
+### Task retries when the Task Runner fails
+If a task runner throws an error, task manager will try to rerun the task shortly after (up to the task definition's `maxAttempts`).
+Normal tasks will wait a default amount of 5m before trying again and every subsequent attempt will add an additonal 5m cool off period to avoid a stampeding herd of failed tasks from storming Elasticsearch.
+
+Recurring tasks will also get retried, but instead of using the 5m interval for the retry, they will be retried on their next scheduled run.
+
+### Force failing a task
+If you wish to purposfully fail a task, you can throw an error of any kind and the retry logic will apply.
+If, on the other hand, you wish not only to fail the task, but you'd also like to indicate the Task Manager that it shouldn't retry the task, you can throw an Unrecoverable Error, using the `throwUnrecoverableError` helper function.
+
+For example:
+```js
+  taskManager.registerTaskDefinitions({
+    myTask: {
+      /// ...
+      createTaskRunner(context) {
+        return {
+          async run() {
+            const result = ... // Do some work
+
+            if(!result) {
+              // No point retrying?
+              throwUnrecoverableError(new Error("No point retrying, this is unrecoverable"));
+            }
+
+            return result;
+          }
+        };
+      },
+    },
+  });
+```
 
 ## Task instances
 
@@ -178,8 +227,8 @@ The data stored for a task instance looks something like this:
   // this.
   runAt: "2020-07-24T17:34:35.272Z",
 
-  // Indicates that this is a recurring task. We currently only support
-  // interval syntax with either minutes such as `5m` or seconds `10s`.
+  // Indicates that this is a recurring task. We support interval syntax
+  // with days such as '1d', hours '3h', minutes such as `5m`, seconds `10s`.
   schedule: { interval: '5m' },
 
   // How many times this task has been unsuccesfully attempted,

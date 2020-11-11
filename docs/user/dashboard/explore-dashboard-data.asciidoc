@@ -1,7 +1,7 @@
 [[explore-dashboard-data]]
 == Explore dashboard data
 
-Get a closer look at your data by inspecting elements and using drilldown actions.
+To get a closer look at your data, inspect data elements and explore the underlying data in *Discover*.
 
 [float]
 [[viewing-detailed-information]]

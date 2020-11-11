@@ -50,6 +50,7 @@ import { SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
 import { UiActionsSetup, VISUALIZE_FIELD_TRIGGER } from '../../ui_actions/public';
+import type { SavedObjectTaggingOssPluginStart } from '../../saved_objects_tagging_oss/public';
 import {
   setUISettings,
   setApplication,
@@ -69,6 +70,7 @@ export interface VisualizePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   savedObjects: SavedObjectsStart;
   dashboard: DashboardStart;
+  savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;
 }
 
 export interface VisualizePluginSetupDependencies {
@@ -140,7 +142,7 @@ export class VisualizePlugin
     core.application.register({
       id: 'visualize',
       title: 'Visualize',
-      order: -1002,
+      order: 8000,
       euiIconType: 'logoKibana',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.kibana,
@@ -198,6 +200,7 @@ export class VisualizePlugin
           restorePreviousUrl,
           dashboard: pluginsStart.dashboard,
           setHeaderActionMenu: params.setHeaderActionMenu,
+          savedObjectsTagging: pluginsStart.savedObjectsTaggingOss?.getTaggingApi(),
         };
 
         params.element.classList.add('visAppWrapper');

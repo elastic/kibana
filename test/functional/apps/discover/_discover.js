@@ -32,7 +32,8 @@ export default function ({ getService, getPageObjects }) {
     defaultIndex: 'logstash-*',
   };
 
-  describe('discover app', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/82915
+  describe.skip('discover app', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and update configDoc
       await kibanaServer.uiSettings.replace(defaultSettings);
