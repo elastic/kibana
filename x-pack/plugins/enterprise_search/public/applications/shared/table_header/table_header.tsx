@@ -8,12 +8,12 @@ import React from 'react';
 
 import { EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
 
-interface ITableHeaderProps {
+interface TableHeaderProps {
   headerItems: string[];
   extraCell?: boolean;
 }
 
-export const TableHeader: React.FC<ITableHeaderProps> = ({ headerItems, extraCell }) => (
+export const TableHeader: React.FC<TableHeaderProps> = ({ headerItems, extraCell }) => (
   <EuiTableHeader>
     {headerItems.map((item, i) => (
       <EuiTableHeaderCell key={i}>{item}</EuiTableHeaderCell>

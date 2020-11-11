@@ -52,20 +52,20 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.cardinality)
     );
   },
-  buildColumn({ suggestedPriority, field, previousColumn }) {
+  buildColumn({ field, previousColumn }) {
     return {
       label: ofName(field.displayName),
       dataType: 'number',
       operationType: OPERATION_TYPE,
       scale: SCALE,
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: IS_BUCKETED,
       params:
         previousColumn?.dataType === 'number' &&
         previousColumn.params &&
-        'format' in previousColumn.params
-          ? previousColumn.params
+        'format' in previousColumn.params &&
+        previousColumn.params.format
+          ? { format: previousColumn.params.format }
           : undefined,
     };
   },
@@ -79,7 +79,7 @@ export const cardinalityOperation: OperationDefinition<CardinalityIndexPatternCo
       missing: 0,
     },
   }),
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
       label: ofName(field.displayName),
