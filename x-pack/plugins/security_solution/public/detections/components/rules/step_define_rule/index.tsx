@@ -194,7 +194,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
    *   * queryBar.value === defaultQueryBar (Has the user changed the input of '' yet?)
    *   * queryBar.value === threatQueryBarDefaultValue (Has the user changed the input of '*:*' yet?)
    * This is a stronger guarantee than "isPristine" off of the forms as that value can be reset
-   * if you go to step 2) and then back to step 2) or the form is reset in another way. Using
+   * if you go to step 2) and then back to step 1) or the form is reset in another way. Using
    * the reference compare we know factually if the data is changed as the references must change
    * in the form libraries form the initial defaults.
    */
