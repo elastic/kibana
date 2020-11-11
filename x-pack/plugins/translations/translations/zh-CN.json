@@ -540,7 +540,6 @@
     "core.ui.errorUrlOverflow.optionsToFixError.enableOptionText.advancedSettingsLinkText": "高级设置",
     "core.ui.errorUrlOverflow.optionsToFixError.removeStuffFromDashboardText": "通过删除内容或筛选来简化正在编辑的对象。",
     "core.ui.errorUrlOverflow.optionsToFixErrorDescription": "试用一下：",
-    "core.ui.kibanaNavList.label": "Kibana",
     "core.ui.legacyBrowserMessage": "此 Elastic 安装启用了当前浏览器未满足的严格安全要求。",
     "core.ui.legacyBrowserTitle": "请升级您的浏览器",
     "core.ui.loadingIndicatorAriaLabel": "正在加载内容",

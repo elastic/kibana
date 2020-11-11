@@ -540,7 +540,6 @@
     "core.ui.errorUrlOverflow.optionsToFixError.enableOptionText.advancedSettingsLinkText": "高度な設定",
     "core.ui.errorUrlOverflow.optionsToFixError.removeStuffFromDashboardText": "コンテンツまたはフィルターを削除すると、編集しているオブジェクトがシンプルになります。",
     "core.ui.errorUrlOverflow.optionsToFixErrorDescription": "次を試してください。",
-    "core.ui.kibanaNavList.label": "Kibana",
     "core.ui.legacyBrowserMessage": "このElasticインストレーションは、現在ご使用のブラウザが満たしていない厳格なセキュリティ要件が有効になっています。",
     "core.ui.legacyBrowserTitle": "ブラウザをアップグレードしてください",
     "core.ui.loadingIndicatorAriaLabel": "コンテンツを読み込んでいます",
