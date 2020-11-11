@@ -48,8 +48,6 @@ This section summarizes the changes in each release.
 [[release-notes-7.10.0]]
 == {kib} 7.10.0
 
-coming[7.10.0]
-
 For detailed information about the 7.10.0 release, review the following sections.
 
 <<enhancement-v7.10.0,Enhancements>> | <<bug-v7.10.0,Bug fixes>> | <<deprecation-v7.10.0,Deprecations>> | <<breaking-v7.10.0,Breaking changes>>
