@@ -61,6 +61,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('vega chart', () => {
       describe('initial render', () => {
+        before(async () => {
+          log.debug('setAbsoluteRange');
+          await PageObjects.timePicker.setDefaultAbsoluteRange();
+        });
+
         it('should have some initial vega spec text', async function () {
           const vegaSpec = await PageObjects.vegaChart.getSpec();
           expect(vegaSpec).to.contain('{');

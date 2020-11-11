@@ -113,8 +113,8 @@ describe('EsQueryParser.populateData', () => {
 
   test('should set the timeout for each request', async () => {
     data = [
-      { id: 0, rawResponse: {} },
-      { id: 1, rawResponse: {} },
+      { id: 0, rawResponse: { hits: { total: 1 } } },
+      { id: 1, rawResponse: { hits: { total: 1 } } },
     ];
     await parser.populateData([
       { url: { body: {} }, dataObject: {} },
@@ -125,7 +125,7 @@ describe('EsQueryParser.populateData', () => {
   });
 
   test('should remove possible timeout parameters on a request', async () => {
-    data = [{ id: 0, rawResponse: {} }];
+    data = [{ id: 0, rawResponse: { hits: { total: 1 } } }];
     await parser.populateData([{ url: { body: { timeout: '500h' } }, dataObject: {} }]);
     expect(searchApiStub.search.mock.calls[0][0][0].body.timeout).toBeDefined();
   });
