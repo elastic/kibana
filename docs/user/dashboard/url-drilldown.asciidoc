@@ -3,7 +3,7 @@
 
 beta[]
 
-The URL template input uses https://handlebarsjs.com/guide/expressions.html#expressions[Handlebars] — a simple templating language. Handlebars templates look like regular text with embedded Handlebars expressions.
+The URL template input uses https://ela.st/handlebars-docs#expressions[Handlebars] — a simple templating language. Handlebars templates look like regular text with embedded Handlebars expressions.
 
 [source, bash]
 ----
