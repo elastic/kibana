@@ -46,20 +46,27 @@ run(
   async ({ flags, log }) => {
     const { debug = false } = flags as Options;
     const foundList: CircularDepList = {};
-    const depTree = await parseDependencyTree(['{src,x-pack}/plugins/**/*'], {
-      include: /(src|x-pack)\/plugins\/.*/,
-    });
+    const depTree = await parseDependencyTree(
+      ['{src,x-pack}/plugins/**/*', '{x-pack/examples,examples}/**/*'],
+      {
+        include: /((src|x-pack)\/plugins|examples|x-pack\/examples)\/.*/,
+      }
+    );
 
     // Build list of circular dependencies as well as the circular dependencies full paths
     const circularDependenciesFullPaths = parseCircular(depTree).filter((circularDeps) => {
       const first = circularDeps[0];
       const last = circularDeps[circularDeps.length - 1];
-      const firstMatch = first.match(/(src|x-pack)\/plugins\/([^\/]*)\/.*/);
-      const lastMatch = last.match(/(src|x-pack)\/plugins\/([^\/]*)\/.*/);
+      const firstMatch = first.match(
+        /((src|x-pack)\/plugins|examples|x-pack\/examples)\/([^\/]*)\/.*/
+      );
+      const lastMatch = last.match(
+        /((src|x-pack)\/plugins|examples|x-pack\/examples)\/([^\/]*)\/.*/
+      );
 
       if (firstMatch && lastMatch && firstMatch.length === 3 && lastMatch.length === 3) {
-        const firstPlugin = `${firstMatch[1]}/plugins/${firstMatch[2]}`;
-        const lastPlugin = `${lastMatch[1]}/plugins/${lastMatch[2]}`;
+        const firstPlugin = `${firstMatch[0]}/${firstMatch[2]}`;
+        const lastPlugin = `${lastMatch[0]}/${lastMatch[2]}`;
 
         if (firstPlugin !== lastPlugin) {
           foundList[firstPlugin] = lastPlugin;
@@ -117,9 +124,7 @@ run(
       ${printList(foundDifferences)}
       `)
       );
-
-      // Exit with code 1 so we can fail the CI
-      process.exit(1);
+      return;
     }
 
     log.success('None non allowed circular dependencies were found');
