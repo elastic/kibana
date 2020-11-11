@@ -14,9 +14,9 @@ same technologies they use today, at least from a technical perspective.
 Plugins are defined as classes and expose themselves to {kib} 
 through a simple wrapper function. A plugin can have browser-side code,
 server-side code, or both. There is no architectural difference between
-a plugin in the browser and a plugin on the server, which is to say that
-in both places you describe your plugin similarly, and you interact with
-Core and/or other plugins in the same way.
+a plugin in the browser and a plugin on the server.
+In both places, you describe your plugin similarly, and you interact with
+Core and other plugins in the same way.
 
 The basic file structure of a {kib} plugin named `demo` that
 has both client-side and server-side code would be:
@@ -35,7 +35,7 @@ plugins/
 ----
 
 *[1] `kibana.json`* is a static manifest file that is used to identify the
-plugin and to specify if this plugin has server-side code, browser-side code or both:
+plugin and to specify if this plugin has server-side code, browser-side code, or both:
 
 [source,json]
 ----
@@ -47,10 +47,10 @@ plugin and to specify if this plugin has server-side code, browser-side code or 
 }
 ----
 
-More details about {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[manifest
-file format]
+Learn about the {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[manifest
+file format].
 
-Note:: `package.json` files are irrelevant to and ignored by {kib} for discovering and loading plugins.
+NOTE: `package.json` files are irrelevant to and ignored by {kib} for discovering and loading plugins.
 
 *[2] `public/index.ts`* is the entry point into the client-side code of
 this plugin. It must export a function named `plugin`, which will
@@ -69,10 +69,10 @@ export function plugin(initializerContext: PluginInitializerContext) {
 ----
 
 *[3] `public/plugin.ts`* is the client-side plugin definition itself.
-Technically speaking it does not need to be a class or even a separate
+Technically speaking, it does not need to be a class or even a separate
 file from the entry point, but _all plugins at Elastic_ should be
-consistent in this way. _See all {kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions
-for first-party Elastic plugins]_.
+consistent in this way. See all {kib-repo}blob/{branch}/src/core/CONVENTIONS.md[conventions
+for first-party Elastic plugins].
 
 [source,typescript]
 ----
@@ -111,7 +111,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 ----
 
 *[5] `server/plugin.ts`* is the server-side plugin definition. The
-_shape_ of this plugin is the same as it’s client-side counter-part:
+shape of this plugin is the same as it’s client-side counter-part:
 
 [source,typescript]
 ----
@@ -136,8 +136,8 @@ export class MyPlugin implements Plugin {
 
 {kib} does not impose any technical restrictions on how the
 the internals of a plugin are architected, though there are certain
-considerations related to how plugins integrate with core API's 
-and API's exposed by other plugins that may greatly impact how 
+considerations related to how plugins integrate with core APIs 
+and APIs exposed by other plugins that may greatly impact how 
 they are built.
 [[plugin-lifecycles]]
 === Lifecycles & Core Services
@@ -154,7 +154,7 @@ service definition.
 while Kibana is setting up on the server or when it is being loaded in
 the browser. The `start` functions are invoked sequentially after setup
 has been completed for all plugins. The `stop` functions are invoked
-sequentially while Kibana is gracefully shutting down on the server or
+sequentially while Kibana is gracefully shutting down the server or
 when the browser tab or window is being closed.
 
 The table below explains how each lifecycle relates to the state
@@ -176,7 +176,7 @@ of Kibana.
 |_stop_
 |cleanup runtime
 |dispose of active handles before the server shutdown.
-|store session data in the LocalStorage when user navigating from Kibana away, etc.
+|store session data in the LocalStorage when the user navigates away from {kib}, etc.
 |===
 
 There is no equivalent behavior to `start` or `stop` in legacy plugins.
@@ -286,8 +286,8 @@ export class MyPlugin implements Plugin<FoobarPluginSetup, FoobarPluginStart> {
 
 Unlike core, capabilities exposed by plugins are _not_ automatically
 injected into all plugins. Instead, if a plugin wishes to use the public
-interface provided by another plugin, they must first declare that
-plugin as a dependency in their {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`kibana.json`] manifest file.
+interface provided by another plugin, it must first declare that
+plugin as a dependency in it's {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`kibana.json`] manifest file.
 
 *demo kibana.json:*
 

@@ -2,9 +2,9 @@
 == Keep Kibana fast
 
 *tl;dr*: Load as much code lazily as possible. Everyone loves snappy
-applications with responsive UI and hates spinners. Users deserve the
-best user experiences regardless of whether they run Kibana locally or
-in the cloud, regardless of their hardware & environment.
+applications with a responsive UI and hates spinners. Users deserve the
+best experience whether they run Kibana locally or
+in the cloud, regardless of their hardware and environment.
 
 There are 2 main aspects of the perceived speed of an application: loading time
 and responsiveness to user actions. Kibana loads and bootstraps *all*
@@ -15,7 +15,7 @@ plugins.
 
 However, it’s usually not necessary that the whole plugin code should be loaded
 and initialized at once. The plugin could keep on loading code covering API functionality
-on Kibana bootstrap but load UI related code lazily on-demand, when an
+on Kibana bootstrap, but load UI related code lazily on-demand, when an
 application page or management section is mounted.
 Always prefer to
 require UI root components lazily when possible (such as in `mount`
@@ -62,14 +62,14 @@ plugin dependencies required to run the plugin, except some
 stateful dependencies shared across plugin bundles via 
 `@kbn/ui-shared-deps`. This means that plugin artifacts _tend to
 be larger_ than they were in the legacy platform. To understand the
-current size of your plugin artifact, run `@kbn/optimizer` with
+current size of your plugin artifact, run `@kbn/optimizer` with:
 
 [source,bash]
 ----
 node scripts/build_kibana_platform_plugins.js --dist --profile --focus=my_plugin
 ----
 
-and check the output in the `target` sub-folder of your plugin folder
+and check the output in the `target` sub-folder of your plugin folder:
 
 [source,bash]
 ----
@@ -86,7 +86,7 @@ the _only_ artifact loaded by {kib} during bootstrap in the
 browser. The rule of thumb is to keep its size as small as possible.
 Other lazily loaded parts of your plugin will be present in the same folder as
 separate chunks under `{number}.myplugin.js` names. If you want to
-investigate what your plugin bundle consists of you need to run
+investigate what your plugin bundle consists of, you need to run
 `@kbn/optimizer` with `--profile` flag to generate a
 https://webpack.js.org/api/stats/[webpack stats file].
 
@@ -95,8 +95,8 @@ https://webpack.js.org/api/stats/[webpack stats file].
 node scripts/build_kibana_platform_plugins.js --dist --no-examples --profile
 ----
 
-Many OSS tools are allowing you to analyze generated stats file
+Many OSS tools allow you to analyze the generated stats file:
 
-* http://webpack.github.io/analyse/#modules[an official tool] from
-webpack authors
+* http://webpack.github.io/analyse/#modules[An official tool] from
+Webpack authors
 * https://chrisbateman.github.io/webpack-visualizer/[webpack-visualizer]
