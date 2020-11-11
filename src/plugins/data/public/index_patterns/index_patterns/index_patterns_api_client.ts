@@ -36,6 +36,11 @@ export class IndexPatternsApiClient implements IIndexPatternsApiClient {
         query,
       })
       .catch((resp: any) => {
+        // eslint-disable-next-line no-console
+        console.error('IndexPatternsApiClient ERROR');
+        // eslint-disable-next-line no-console
+        console.error('IndexPatternsApiClient ERROR DEBUG', JSON.stringify(resp));
+
         if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
           throw new IndexPatternMissingIndices(resp.body.message);
         }
