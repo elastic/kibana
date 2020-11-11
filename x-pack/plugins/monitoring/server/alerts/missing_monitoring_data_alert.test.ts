@@ -284,7 +284,9 @@ describe('MissingMonitoringDataAlert', () => {
             ui: {
               isFiring: false,
               lastCheckedMS: 0,
-              message: null,
+              message: {
+                text: '',
+              },
               resolvedMS: 0,
               severity: 'danger',
               triggeredMS: 0,

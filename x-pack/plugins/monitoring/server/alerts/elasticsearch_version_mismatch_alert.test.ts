@@ -133,6 +133,9 @@ describe('ElasticsearchVersionMismatchAlert', () => {
           {
             cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
             ccs: undefined,
+            stackProduct: 'elasticsearch',
+            stackProductName: '',
+            stackProductUuid: '',
             ui: {
               isFiring: true,
               message: {
@@ -201,6 +204,9 @@ describe('ElasticsearchVersionMismatchAlert', () => {
                 clusterName,
               },
               ccs: undefined,
+              stackProduct: 'elasticsearch',
+              stackProductName: '',
+              stackProductUuid: '',
               ui: {
                 isFiring: true,
                 message: null,
@@ -233,6 +239,9 @@ describe('ElasticsearchVersionMismatchAlert', () => {
           {
             cluster: { clusterUuid, clusterName },
             ccs: undefined,
+            stackProduct: 'elasticsearch',
+            stackProductName: '',
+            stackProductUuid: '',
             ui: {
               isFiring: false,
               message: {

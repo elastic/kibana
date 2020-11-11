@@ -17,7 +17,12 @@ import {
   CommonAlertParams,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { INDEX_ALERTS, ALERT_NODES_CHANGED, LEGACY_ALERT_DETAILS } from '../../common/constants';
+import {
+  INDEX_ALERTS,
+  ALERT_NODES_CHANGED,
+  LEGACY_ALERT_DETAILS,
+  ELASTICSEARCH_SYSTEM_ID,
+} from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
 import { mapLegacySeverity } from '../lib/alerts/map_legacy_severity';
@@ -146,6 +151,16 @@ export class NodesChangedAlert extends BaseAlert {
 
     return {
       text: [addedText, removedText, restartedText].filter(Boolean).join(' '),
+    };
+  }
+
+  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
+    const defaultState = super.getDefaultAlertState(cluster, item);
+    return {
+      ...defaultState,
+      stackProduct: ELASTICSEARCH_SYSTEM_ID,
+      stackProductName: '',
+      stackProductUuid: '',
     };
   }
 

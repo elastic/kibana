@@ -130,6 +130,9 @@ describe('ClusterHealthAlert', () => {
           {
             cluster: { clusterUuid: 'abc123', clusterName: 'testCluster' },
             ccs: undefined,
+            stackProduct: 'elasticsearch',
+            stackProductName: '',
+            stackProductUuid: '',
             ui: {
               isFiring: true,
               message: {
@@ -210,6 +213,9 @@ describe('ClusterHealthAlert', () => {
                 clusterName,
               },
               ccs: undefined,
+              stackProduct: 'elasticsearch',
+              stackProductName: '',
+              stackProductUuid: '',
               ui: {
                 isFiring: true,
                 message: null,
@@ -242,6 +248,9 @@ describe('ClusterHealthAlert', () => {
           {
             cluster: { clusterUuid, clusterName },
             ccs: undefined,
+            stackProduct: 'elasticsearch',
+            stackProductName: '',
+            stackProductUuid: '',
             ui: {
               isFiring: false,
               message: {

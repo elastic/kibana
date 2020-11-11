@@ -20,6 +20,7 @@ import {
   INDEX_ALERTS,
   ALERT_LOGSTASH_VERSION_MISMATCH,
   LEGACY_ALERT_DETAILS,
+  LOGSTASH_SYSTEM_ID,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertSeverity } from '../../common/enums';
@@ -78,6 +79,16 @@ export class LogstashVersionMismatchAlert extends BaseAlert {
       });
       return accum;
     }, []);
+  }
+
+  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
+    const defaultState = super.getDefaultAlertState(cluster, item);
+    return {
+      ...defaultState,
+      stackProduct: LOGSTASH_SYSTEM_ID,
+      stackProductName: '',
+      stackProductUuid: '',
+    };
   }
 
   private getVersions(legacyAlert: LegacyAlert) {

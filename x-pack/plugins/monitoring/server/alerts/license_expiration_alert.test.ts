@@ -139,6 +139,9 @@ describe('LicenseExpirationAlert', () => {
           {
             cluster: { clusterUuid, clusterName },
             ccs: undefined,
+            stackProduct: 'elasticsearch',
+            stackProductName: '',
+            stackProductUuid: '',
             ui: {
               isFiring: true,
               message: {

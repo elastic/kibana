@@ -17,7 +17,12 @@ import {
   CommonAlertParams,
 } from '../../common/types/alerts';
 import { AlertInstance } from '../../../alerts/server';
-import { INDEX_ALERTS, ALERT_CLUSTER_HEALTH, LEGACY_ALERT_DETAILS } from '../../common/constants';
+import {
+  INDEX_ALERTS,
+  ALERT_CLUSTER_HEALTH,
+  LEGACY_ALERT_DETAILS,
+  ELASTICSEARCH_SYSTEM_ID,
+} from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType, AlertClusterHealthType } from '../../common/enums';
 import { fetchLegacyAlerts } from '../lib/alerts/fetch_legacy_alerts';
@@ -131,6 +136,16 @@ export class ClusterHealthAlert extends BaseAlert {
           ],
         },
       ],
+    };
+  }
+
+  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
+    const defaultState = super.getDefaultAlertState(cluster, item);
+    return {
+      ...defaultState,
+      stackProduct: ELASTICSEARCH_SYSTEM_ID,
+      stackProductName: '',
+      stackProductUuid: '',
     };
   }
 

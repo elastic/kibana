@@ -24,6 +24,7 @@ import {
   ALERT_LICENSE_EXPIRATION,
   FORMAT_DURATION_TEMPLATE_SHORT,
   LEGACY_ALERT_DETAILS,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertMessageTokenType } from '../../common/enums';
@@ -129,6 +130,16 @@ export class LicenseExpirationAlert extends BaseAlert {
           url: 'license',
         } as AlertMessageLinkToken,
       ],
+    };
+  }
+
+  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
+    const defaultState = super.getDefaultAlertState(cluster, item);
+    return {
+      ...defaultState,
+      stackProduct: ELASTICSEARCH_SYSTEM_ID,
+      stackProductName: '',
+      stackProductUuid: '',
     };
   }
 

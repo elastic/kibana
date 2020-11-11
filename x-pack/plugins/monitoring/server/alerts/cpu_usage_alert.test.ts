@@ -136,8 +136,9 @@ describe('CpuUsageAlert', () => {
             ccs: undefined,
             cluster: { clusterUuid, clusterName },
             cpuUsage,
-            nodeId,
-            nodeName,
+            stackProduct: 'elasticsearch',
+            stackProductName: nodeName,
+            stackProductUuid: nodeId,
             ui: {
               isFiring: true,
               message: {
@@ -238,12 +239,15 @@ describe('CpuUsageAlert', () => {
               clusterName,
             },
             cpuUsage: 1,
-            nodeId,
-            nodeName,
+            stackProduct: 'elasticsearch',
+            stackProductName: nodeName,
+            stackProductUuid: nodeId,
             ui: {
               isFiring: false,
               lastCheckedMS: 0,
-              message: null,
+              message: {
+                text: '',
+              },
               resolvedMS: 0,
               severity: 'danger',
               triggeredMS: 0,
@@ -273,8 +277,9 @@ describe('CpuUsageAlert', () => {
               },
               ccs: null,
               cpuUsage: 91,
-              nodeId,
-              nodeName,
+              stackProduct: 'elasticsearch',
+              stackProductName: nodeName,
+              stackProductUuid: nodeId,
               ui: {
                 isFiring: true,
                 message: null,
@@ -309,8 +314,9 @@ describe('CpuUsageAlert', () => {
             cluster: { clusterUuid, clusterName },
             ccs: null,
             cpuUsage: 1,
-            nodeId,
-            nodeName,
+            stackProduct: 'elasticsearch',
+            stackProductName: nodeName,
+            stackProductUuid: nodeId,
             ui: {
               isFiring: false,
               message: {
@@ -407,8 +413,9 @@ describe('CpuUsageAlert', () => {
               },
               ccs: null,
               cpuUsage: 91,
-              nodeId,
-              nodeName,
+              stackProduct: 'elasticsearch',
+              stackProductName: nodeName,
+              stackProductUuid: nodeId,
               ui: {
                 isFiring: true,
                 message: null,
@@ -425,8 +432,9 @@ describe('CpuUsageAlert', () => {
               },
               ccs: null,
               cpuUsage: 100,
-              nodeId: 'anotherNode',
-              nodeName: 'anotherNode',
+              stackProduct: 'elasticsearch',
+              stackProductUuid: 'anotherNode',
+              stackProductName: 'anotherNode',
               ui: {
                 isFiring: true,
                 message: null,
@@ -461,8 +469,9 @@ describe('CpuUsageAlert', () => {
             cluster: { clusterUuid, clusterName },
             ccs: null,
             cpuUsage: 1,
-            nodeId,
-            nodeName,
+            stackProduct: 'elasticsearch',
+            stackProductName: nodeName,
+            stackProductUuid: nodeId,
             ui: {
               isFiring: false,
               message: {
@@ -488,8 +497,9 @@ describe('CpuUsageAlert', () => {
             ccs: null,
             cluster: { clusterUuid, clusterName },
             cpuUsage: 99,
-            nodeId: 'anotherNode',
-            nodeName: 'anotherNode',
+            stackProduct: 'elasticsearch',
+            stackProductName: 'anotherNode',
+            stackProductUuid: 'anotherNode',
             ui: {
               isFiring: true,
               message: {

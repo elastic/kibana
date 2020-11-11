@@ -20,6 +20,7 @@ import {
   INDEX_ALERTS,
   ALERT_KIBANA_VERSION_MISMATCH,
   LEGACY_ALERT_DETAILS,
+  KIBANA_SYSTEM_ID,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertSeverity } from '../../common/enums';
@@ -120,6 +121,16 @@ export class KibanaVersionMismatchAlert extends BaseAlert {
 
     return {
       text,
+    };
+  }
+
+  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
+    const defaultState = super.getDefaultAlertState(cluster, item);
+    return {
+      ...defaultState,
+      stackProduct: KIBANA_SYSTEM_ID,
+      stackProductName: '',
+      stackProductUuid: '',
     };
   }
 

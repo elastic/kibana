@@ -20,6 +20,7 @@ import {
   INDEX_ALERTS,
   ALERT_ELASTICSEARCH_VERSION_MISMATCH,
   LEGACY_ALERT_DETAILS,
+  ELASTICSEARCH_SYSTEM_ID,
 } from '../../common/constants';
 import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
 import { AlertSeverity } from '../../common/enums';
@@ -115,6 +116,16 @@ export class ElasticsearchVersionMismatchAlert extends BaseAlert {
 
     return {
       text,
+    };
+  }
+
+  protected getDefaultAlertState(cluster: AlertCluster, item: AlertData): AlertState {
+    const defaultState = super.getDefaultAlertState(cluster, item);
+    return {
+      ...defaultState,
+      stackProduct: ELASTICSEARCH_SYSTEM_ID,
+      stackProductName: '',
+      stackProductUuid: '',
     };
   }
 
