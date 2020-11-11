@@ -87,15 +87,15 @@ export function fieldIsInvalid(
   indexPattern: IndexPattern
 ) {
   const operationDefinition = operationType && operationDefinitionMap[operationType];
+  const field = sourceField ? indexPattern.getFieldByName(sourceField) : undefined;
 
   return Boolean(
     sourceField &&
       operationDefinition &&
-      !indexPattern.fields.some(
-        (field) =>
-          field.name === sourceField &&
-          operationDefinition?.input === 'field' &&
-          operationDefinition.getPossibleOperationForField(field) !== undefined
+      !(
+        field &&
+        operationDefinition?.input === 'field' &&
+        operationDefinition.getPossibleOperationForField(field) !== undefined
       )
   );
 }

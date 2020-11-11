@@ -6,7 +6,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { IRouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 import { incrementUICounter } from '../../collectors/lib/telemetry';
 
 import { ES_TELEMETRY_NAME } from '../../collectors/enterprise_search/telemetry';
@@ -18,11 +18,7 @@ const productToTelemetryMap = {
   workplace_search: WS_TELEMETRY_NAME,
 };
 
-export function registerTelemetryRoute({
-  router,
-  getSavedObjectsService,
-  log,
-}: IRouteDependencies) {
+export function registerTelemetryRoute({ router, getSavedObjectsService, log }: RouteDependencies) {
   router.put(
     {
       path: '/api/enterprise_search/stats',
