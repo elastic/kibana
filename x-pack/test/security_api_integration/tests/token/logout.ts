@@ -5,11 +5,12 @@
  */
 
 import request from 'request';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default function ({ getService }) {
+export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertestWithoutAuth');
 
-  function extractSessionCookie(response) {
+  function extractSessionCookie(response: { headers: Record<string, string[]> }) {
     const cookie = (response.headers['set-cookie'] || []).find((header) =>
       header.startsWith('sid=')
     );
