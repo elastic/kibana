@@ -6,7 +6,6 @@
 
 import * as rt from 'io-ts';
 import { decodeOrThrow } from '../runtime_types';
-import { JsonArray } from '../typed_json';
 
 export const logEntryCursorRT = rt.type({
   time: rt.number,
@@ -15,10 +14,8 @@ export const logEntryCursorRT = rt.type({
 
 export type LogEntryCursor = rt.TypeOf<typeof logEntryCursorRT>;
 
-export const getLogEntryCursorFromFields = (timestampField: string, tiebreakerField: string) => (
-  fields: Record<string, JsonArray>
-) =>
+export const getLogEntryCursorFromHit = (hit: { sort: [number, number] }) =>
   decodeOrThrow(logEntryCursorRT)({
-    time: fields?.[timestampField]?.[0],
-    tiebreaker: fields?.[tiebreakerField]?.[0],
+    time: hit.sort[0],
+    tiebreaker: hit.sort[1],
   });

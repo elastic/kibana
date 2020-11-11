@@ -16,7 +16,7 @@ import {
   ISearchStrategy,
   PluginStart as DataPluginStart,
 } from '../../../../../../src/plugins/data/server';
-import { getLogEntryCursorFromFields } from '../../../common/log_entry';
+import { getLogEntryCursorFromHit } from '../../../common/log_entry';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   LogEntrySearchRequestParams,
@@ -31,7 +31,7 @@ import { createGetLogEntryQuery, getLogEntryResponseRT } from './queries/log_ent
 type LogEntrySearchRequest = IKibanaSearchRequest<LogEntrySearchRequestParams>;
 type LogEntrySearchResponse = IKibanaSearchResponse<LogEntrySearchResponsePayload>;
 
-const logEntrySearchRequestStateRT = rt.string.pipe(jsonFromBase64StringRT).pipe(
+export const logEntrySearchRequestStateRT = rt.string.pipe(jsonFromBase64StringRT).pipe(
   rt.type({
     esRequestId: rt.string,
   })
@@ -96,28 +96,21 @@ export const logEntrySearchStrategyProvider = ({
             ...esResponse,
             rawResponse: decodeOrThrow(getLogEntryResponseRT)(esResponse.rawResponse),
           })),
-          concatMap((esResponse) =>
-            sourceConfiguration$.pipe(
-              map(({ configuration }) => ({
-                ...esResponse,
-                ...(esResponse.id
-                  ? { id: logEntrySearchRequestStateRT.encode({ esRequestId: esResponse.id }) }
-                  : {}),
-                rawResponse: logEntrySearchResponsePayloadRT.encode({
-                  data:
-                    esResponse.rawResponse.hits.hits.map((hit) => ({
-                      id: hit._id,
-                      index: hit._index,
-                      key: getLogEntryCursorFromFields(
-                        configuration.fields.timestamp,
-                        configuration.fields.tiebreaker
-                      )(hit.fields),
-                      fields: [],
-                    }))[0] ?? null,
-                }),
-              }))
-            )
-          )
+          map((esResponse) => ({
+            ...esResponse,
+            ...(esResponse.id
+              ? { id: logEntrySearchRequestStateRT.encode({ esRequestId: esResponse.id }) }
+              : {}),
+            rawResponse: logEntrySearchResponsePayloadRT.encode({
+              data:
+                esResponse.rawResponse.hits.hits.map((hit) => ({
+                  id: hit._id,
+                  index: hit._index,
+                  key: getLogEntryCursorFromHit(hit),
+                  fields: Object.entries(hit.fields).map(([field, value]) => ({ field, value })),
+                }))[0] ?? null,
+            }),
+          }))
         );
       }),
     cancel: async (id, options, dependencies) => {

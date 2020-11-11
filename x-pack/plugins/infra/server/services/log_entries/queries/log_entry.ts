@@ -29,14 +29,8 @@ export const createGetLogEntryQuery = (
         values: [logEntryId],
       },
     },
-    fields: [
-      '*',
-      {
-        field: timestampField,
-        format: 'epoch_millis',
-      },
-      tiebreakerField,
-    ],
+    fields: ['*'],
+    sort: [{ [timestampField]: 'desc' }, { [tiebreakerField]: 'desc' }],
     _source: false,
   },
 });
@@ -45,6 +39,7 @@ export const logEntryHitRT = rt.intersection([
   commonHitFieldsRT,
   rt.type({
     fields: rt.record(rt.string, jsonArrayRT),
+    sort: rt.tuple([rt.number, rt.number]),
   }),
 ]);
 
