@@ -53,6 +53,7 @@ describe('renderApp', () => {
     const params = {
       element: document.createElement('div'),
       history: createMemoryHistory(),
+      setHeaderActionMenu: () => {},
     };
     jest.spyOn(window, 'scrollTo').mockReturnValueOnce(undefined);
     createCallApmApi((core.http as unknown) as HttpSetup);
