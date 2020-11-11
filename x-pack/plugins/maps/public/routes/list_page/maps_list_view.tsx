@@ -14,7 +14,6 @@ import { goToSpecifiedPath } from '../../render_app';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import {
   getMapsCapabilities,
-  getUiSettings,
   getToasts,
   getCoreChrome,
   getNavigateToApp,
