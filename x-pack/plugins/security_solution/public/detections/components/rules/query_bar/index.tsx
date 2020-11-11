@@ -171,10 +171,7 @@ export const QueryBarDefineRule = ({
     (newQuery: Query) => {
       const { query } = field.value as FieldValueQueryBar;
       if (!deepEqual(query, newQuery)) {
-        field.setValue({
-          ...(field.value as FieldValueQueryBar),
-          query: newQuery,
-        });
+        field.setValue({ ...(field.value as FieldValueQueryBar), query: newQuery });
       }
     },
     [field]
