@@ -251,8 +251,10 @@ export class IndexPatternsService {
       const fields = await this.getFieldsForIndexPattern(indexPattern);
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       const fieldAttrs = indexPattern.getFieldAttrs();
-      const fieldsWithSavedAttrs = Object.values(this.fieldArrayToMap(fields, fieldAttrs));
-      indexPattern.fields.replaceAll([...fieldsWithSavedAttrs, ...scripted]);
+      const fieldsWithSavedAttrs = Object.values(
+        this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
+      );
+      indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
