@@ -103,9 +103,9 @@ describe('terms', () => {
         },
       };
       const indexPattern = createMockedIndexPattern();
-      const newNumberField = indexPattern.fields.find((i) => i.name === 'bytes')!;
+      const newNumberField = indexPattern.getFieldByName('bytes')!;
 
-      const column = termsOperation.onFieldChange(oldColumn, indexPattern, newNumberField);
+      const column = termsOperation.onFieldChange(oldColumn, newNumberField);
       expect(column).toHaveProperty('dataType', 'number');
       expect(column).toHaveProperty('sourceField', 'bytes');
       expect(column).toHaveProperty('params.size', 5);
@@ -133,7 +133,7 @@ describe('terms', () => {
       const indexPattern = createMockedIndexPattern();
       const newStringField = indexPattern.fields.find((i) => i.name === 'source')!;
 
-      const column = termsOperation.onFieldChange(oldColumn, indexPattern, newStringField);
+      const column = termsOperation.onFieldChange(oldColumn, newStringField);
       expect(column).toHaveProperty('dataType', 'string');
       expect(column).toHaveProperty('sourceField', 'source');
       expect(column.params.format).toBeUndefined();
@@ -236,8 +236,6 @@ describe('terms', () => {
   describe('buildColumn', () => {
     it('should use type from the passed field', () => {
       const termsColumn = termsOperation.buildColumn({
-        layerId: 'first',
-        suggestedPriority: undefined,
         indexPattern: createMockedIndexPattern(),
         field: {
           aggregatable: true,
@@ -253,8 +251,6 @@ describe('terms', () => {
 
     it('should use existing metric column as order column', () => {
       const termsColumn = termsOperation.buildColumn({
-        layerId: 'first',
-        suggestedPriority: undefined,
         indexPattern: createMockedIndexPattern(),
         columns: {
           col1: {
@@ -278,6 +274,36 @@ describe('terms', () => {
           orderBy: { type: 'column', columnId: 'col1' },
         })
       );
+    });
+
+    it('should use the default size when there is an existing bucket', () => {
+      const termsColumn = termsOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        columns: state.layers.first.columns,
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+      });
+      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 3 }));
+    });
+
+    it('should use a size of 5 when there are no other buckets', () => {
+      const termsColumn = termsOperation.buildColumn({
+        indexPattern: createMockedIndexPattern(),
+        columns: {},
+        field: {
+          aggregatable: true,
+          searchable: true,
+          type: 'boolean',
+          name: 'test',
+          displayName: 'test',
+        },
+      });
+      expect(termsColumn.params).toEqual(expect.objectContaining({ size: 5 }));
     });
   });
 
