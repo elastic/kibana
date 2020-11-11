@@ -131,7 +131,7 @@ describe('update_rules', () => {
         path: DETECTION_ENGINE_RULES_URL,
         body: {
           ...getUpdateRulesSchemaMock(),
-          rule_id: undefined,
+          id: undefined,
         },
       });
       const response = await server.inject(noIdRequest, context);
