@@ -372,13 +372,25 @@ export const getUniqueIndexPatternIds = createSelector(getLayerList, (layerList)
 });
 
 // Get list of unique index patterns, excluding index patterns from layers that disable applyGlobalQuery
-export const getQueryableUniqueIndexPatternIds = createSelector(getLayerList, (layerList) => {
-  const indexPatternIds: string[] = [];
-  layerList.forEach((layer) => {
-    indexPatternIds.push(...layer.getQueryableIndexPatternIds());
-  });
-  return _.uniq(indexPatternIds);
-});
+export const getQueryableUniqueIndexPatternIds = createSelector(
+  getLayerList,
+  getWaitingForMapReadyLayerListRaw,
+  (layerList, waitingForMapReadyLayerList) => {
+    const indexPatternIds: string[] = [];
+
+    if (waitingForMapReadyLayerList.length) {
+      waitingForMapReadyLayerList.forEach((layerDescriptor) => {
+        const layer = createLayerInstance(layerDescriptor);
+        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+      });
+    } else {
+      layerList.forEach((layer) => {
+        indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+      });
+    }
+    return _.uniq(indexPatternIds);
+  }
+);
 
 export const hasDirtyState = createSelector(getLayerListRaw, (layerListRaw) => {
   return layerListRaw.some((layerDescriptor) => {
