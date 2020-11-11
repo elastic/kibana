@@ -58,13 +58,20 @@ export const FilterPopover = ({
       isOpen={isOpenByCreation || isPopoverOpen}
       ownFocus
       closePopover={() => {
-        setPopoverOpen(false);
+        if (isOpenByCreation) {
+          setIsOpenByCreation(false);
+        }
+        if (isPopoverOpen) {
+          setIsPopoverOpen(false);
+        }
       }}
       button={
         <Button
           onClick={() => {
+            if (isOpenByCreation) {
+              setIsOpenByCreation(false);
+            }
             setIsPopoverOpen((open) => !open);
-            setIsOpenByCreation(false);
           }}
         />
       }
@@ -84,7 +91,12 @@ export const FilterPopover = ({
         onChange={setFilterLabel}
         placeholder={getPlaceholder(filter.input.query)}
         inputRef={inputRef}
-        onSubmit={() => setPopoverOpen(false)}
+        onSubmit={() => {
+          if (isOpenByCreation) {
+            setIsOpenByCreation(false);
+          }
+          setIsPopoverOpen(false);
+        }}
         dataTestSubj="indexPattern-filters-label"
       />
     </EuiPopover>
