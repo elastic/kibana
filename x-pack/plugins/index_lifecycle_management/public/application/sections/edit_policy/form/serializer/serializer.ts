@@ -6,71 +6,15 @@
 
 import { produce } from 'immer';
 
-import { isEmpty, merge } from 'lodash';
+import { merge } from 'lodash';
 
-import { SerializedPolicy, SerializedActionWithAllocation } from '../../../../../common/types';
+import { SerializedPolicy } from '../../../../../../common/types';
 
-import { defaultPolicy } from '../../../constants';
+import { defaultPolicy } from '../../../../constants';
 
-import { FormInternal, DataAllocationMetaFields } from '../types';
+import { FormInternal } from '../../types';
 
-const serializeAllocateAction = (
-  { dataTierAllocationType, allocationNodeAttribute }: DataAllocationMetaFields,
-  newActions: SerializedActionWithAllocation = {},
-  originalActions: SerializedActionWithAllocation = {}
-): SerializedActionWithAllocation => {
-  const { allocate, migrate, ...rest } = newActions;
-  // First copy over all non-require|include|exclude and migrate actions.
-  const actions: SerializedActionWithAllocation = { ...rest };
-
-  // We only set include, exclude and require here, so copy over all other values
-  if (allocate) {
-    const { include, exclude, require, ...restAllocate } = allocate;
-    if (!isEmpty(restAllocate)) {
-      actions.allocate = { ...restAllocate };
-    }
-  }
-
-  switch (dataTierAllocationType) {
-    case 'node_attrs':
-      if (allocationNodeAttribute) {
-        const [name, value] = allocationNodeAttribute.split(':');
-        actions.allocate = {
-          // copy over any other allocate details like "number_of_replicas"
-          ...actions.allocate,
-          require: {
-            [name]: value,
-          },
-        };
-      } else {
-        // The form has been configured to use node attribute based allocation but no node attribute
-        // was selected. We fall back to what was originally selected in this case. This might be
-        // migrate.enabled: "false"
-        actions.migrate = originalActions.migrate;
-      }
-
-      // copy over the original include and exclude values until we can set them in the form.
-      if (!isEmpty(originalActions?.allocate?.include)) {
-        actions.allocate = {
-          ...actions.allocate,
-          include: { ...originalActions?.allocate?.include },
-        };
-      }
-
-      if (!isEmpty(originalActions?.allocate?.exclude)) {
-        actions.allocate = {
-          ...actions.allocate,
-          exclude: { ...originalActions?.allocate?.exclude },
-        };
-      }
-      break;
-    case 'none':
-      actions.migrate = { enabled: false };
-      break;
-    default:
-  }
-  return actions;
-};
+import { serializeMigrateAndAllocateActions } from './serialize_migrate_and_allocate_actions';
 
 export const createSerializer = (originalPolicy?: SerializedPolicy) => (
   data: FormInternal
@@ -115,7 +59,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete hotPhaseActions.forcemerge;
       }
 
-      if (!updatedPolicy.phases.hot!.actions?.set_priority && hotPhaseActions.set_priority) {
+      if (!updatedPolicy.phases.hot!.actions?.set_priority) {
         delete hotPhaseActions.set_priority;
       }
     }
@@ -137,7 +81,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         delete warmPhase.min_age;
       }
 
-      warmPhase.actions = serializeAllocateAction(
+      warmPhase.actions = serializeMigrateAndAllocateActions(
         _meta.warm,
         warmPhase.actions,
         originalPolicy?.phases.warm?.actions
@@ -170,7 +114,7 @@ export const createSerializer = (originalPolicy?: SerializedPolicy) => (
         coldPhase.min_age = `${updatedPolicy.phases.cold!.min_age}${_meta.cold.minAgeUnit}`;
       }
 
-      coldPhase.actions = serializeAllocateAction(
+      coldPhase.actions = serializeMigrateAndAllocateActions(
         _meta.cold,
         coldPhase.actions,
         originalPolicy?.phases.cold?.actions
