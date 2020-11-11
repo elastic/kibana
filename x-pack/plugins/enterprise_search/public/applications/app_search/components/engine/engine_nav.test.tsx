@@ -5,6 +5,7 @@
  */
 
 import { setMockValues } from '../../../__mocks__/kea.mock';
+import { rerender } from '../../../__mocks__';
 
 import React from 'react';
 import { shallow } from 'enzyme';
@@ -40,11 +41,11 @@ describe('EngineNav', () => {
     expect(wrapper.find(EuiBadge)).toHaveLength(0);
 
     setMockValues({ ...values, isSampleEngine: true });
-    wrapper.setProps({}); // Re-render
+    rerender(wrapper);
     expect(wrapper.find(EuiBadge).prop('children')).toEqual('SAMPLE ENGINE');
 
     setMockValues({ ...values, isMetaEngine: true });
-    wrapper.setProps({}); // Re-render
+    rerender(wrapper);
     expect(wrapper.find(EuiBadge).prop('children')).toEqual('META ENGINE');
   });
 
