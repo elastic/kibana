@@ -122,19 +122,15 @@ export function KbnAggTable(config, RecursionHelper) {
 
           if (typeof $scope.dimensions === 'undefined') return;
 
-          const { buckets, metrics, splitColumn, splitRow } = $scope.dimensions;
+          const { buckets, metrics, splitRow } = $scope.dimensions;
 
           $scope.formattedColumns = table.columns
             .map(function (col, i) {
               const isBucket = buckets.find((bucket) => bucket.accessor === i);
-              const isSplitColumn = splitColumn
-                ? splitColumn.find((splitColumn) => splitColumn.accessor === i)
-                : undefined;
               const isSplitRow = splitRow
                 ? splitRow.find((splitRow) => splitRow.accessor === i)
                 : undefined;
-              const dimension =
-                isBucket || isSplitColumn || metrics.find((metric) => metric.accessor === i);
+              const dimension = isBucket || metrics.find((metric) => metric.accessor === i);
 
               const formatter = dimension
                 ? getFormatService().deserialize(dimension.format)
