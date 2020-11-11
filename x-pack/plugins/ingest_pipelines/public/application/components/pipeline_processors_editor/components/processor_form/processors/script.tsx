@@ -4,12 +4,19 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { PainlessLang, PainlessContext } from '@kbn/monaco';
 import { FormattedMessage } from '@kbn/i18n/react';
 import { EuiCode, EuiSwitch, EuiFormRow } from '@elastic/eui';
 
-import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../../shared_imports';
+import {
+  FIELD_TYPES,
+  fieldValidators,
+  UseField,
+  Field,
+  useFormData,
+} from '../../../../../../shared_imports';
 
 import { XJsonEditor, TextEditor } from '../field_components';
 
@@ -122,6 +129,17 @@ const fieldsConfig: FieldsConfig = {
 
 export const Script: FormFieldsComponent = ({ initialFieldValues }) => {
   const [showId, setShowId] = useState(() => !!initialFieldValues?.id);
+  const [scriptLanguage, setScriptLanguage] = useState<string>('plaintext');
+
+  const [{ fields }] = useFormData();
+
+  const suggestionProvider = PainlessLang.getSuggestionProvider('processor_conditional');
+
+  useEffect(() => {
+    const isPainlessLang = fields?.lang === 'painless' || fields?.lang === '';
+    setScriptLanguage(isPainlessLang ? PainlessLang.ID : 'plaintext');
+  }, [fields?.lang]);
+
   return (
     <>
       <EuiFormRow>
@@ -147,6 +165,9 @@ export const Script: FormFieldsComponent = ({ initialFieldValues }) => {
             component={TextEditor}
             componentProps={{
               editorProps: {
+                languageId: scriptLanguage,
+                suggestionProvider:
+                  scriptLanguage === PainlessLang.ID ? suggestionProvider : undefined,
                 height: EDITOR_PX_HEIGHT.medium,
                 'aria-label': i18n.translate(
                   'xpack.ingestPipelines.pipelineEditor.scriptForm.sourceFieldAriaLabel',
