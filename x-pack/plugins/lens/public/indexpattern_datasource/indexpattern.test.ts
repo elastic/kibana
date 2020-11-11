@@ -12,9 +12,111 @@ import { IndexPatternPersistedState, IndexPatternPrivateState } from './types';
 import { dataPluginMock } from '../../../../../src/plugins/data/public/mocks';
 import { Ast } from '@kbn/interpreter/common';
 import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { getFieldByNameFactory } from './pure_helpers';
 
 jest.mock('./loader');
 jest.mock('../id_generator');
+
+const fieldsOne = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'start_date',
+    displayName: 'start_date',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'memory',
+    displayName: 'memory',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+  {
+    name: 'dest',
+    displayName: 'dest',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+  },
+];
+
+const fieldsTwo = [
+  {
+    name: 'timestamp',
+    displayName: 'timestampLabel',
+    type: 'date',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      date_histogram: {
+        agg: 'date_histogram',
+        fixed_interval: '1d',
+        delay: '7d',
+        time_zone: 'UTC',
+      },
+    },
+  },
+  {
+    name: 'bytes',
+    displayName: 'bytes',
+    type: 'number',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      // Ignored in the UI
+      histogram: {
+        agg: 'histogram',
+        interval: 1000,
+      },
+      avg: {
+        agg: 'avg',
+      },
+      max: {
+        agg: 'max',
+      },
+      min: {
+        agg: 'min',
+      },
+      sum: {
+        agg: 'sum',
+      },
+    },
+  },
+  {
+    name: 'source',
+    displayName: 'source',
+    type: 'string',
+    aggregatable: true,
+    searchable: true,
+    aggregationRestrictions: {
+      terms: {
+        agg: 'terms',
+      },
+    },
+  },
+];
 
 const expectedIndexPatterns = {
   1: {
@@ -22,111 +124,16 @@ const expectedIndexPatterns = {
     title: 'my-fake-index-pattern',
     timeFieldName: 'timestamp',
     hasRestrictions: false,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'start_date',
-        displayName: 'start_date',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'memory',
-        displayName: 'memory',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-      },
-      {
-        name: 'dest',
-        displayName: 'dest',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-      },
-    ],
+    fields: fieldsOne,
+    getFieldByName: getFieldByNameFactory(fieldsOne),
   },
   2: {
     id: '2',
     title: 'my-fake-restricted-pattern',
     timeFieldName: 'timestamp',
     hasRestrictions: true,
-    fields: [
-      {
-        name: 'timestamp',
-        displayName: 'timestampLabel',
-        type: 'date',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          date_histogram: {
-            agg: 'date_histogram',
-            fixed_interval: '1d',
-            delay: '7d',
-            time_zone: 'UTC',
-          },
-        },
-      },
-      {
-        name: 'bytes',
-        displayName: 'bytes',
-        type: 'number',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          // Ignored in the UI
-          histogram: {
-            agg: 'histogram',
-            interval: 1000,
-          },
-          avg: {
-            agg: 'avg',
-          },
-          max: {
-            agg: 'max',
-          },
-          min: {
-            agg: 'min',
-          },
-          sum: {
-            agg: 'sum',
-          },
-        },
-      },
-      {
-        name: 'source',
-        displayName: 'source',
-        type: 'string',
-        aggregatable: true,
-        searchable: true,
-        aggregationRestrictions: {
-          terms: {
-            agg: 'terms',
-          },
-        },
-      },
-    ],
+    fields: fieldsTwo,
+    getFieldByName: getFieldByNameFactory(fieldsTwo),
   },
 };
 

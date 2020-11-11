@@ -9,7 +9,7 @@ import React, { MouseEventHandler, useState } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
-import { updateColumnParam } from '../../../state_helpers';
+import { updateColumnParam } from '../../layer_helpers';
 import { OperationDefinition } from '../index';
 import { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
@@ -75,7 +75,7 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
   input: 'none',
   isTransferable: () => true,
 
-  buildColumn({ suggestedPriority, previousColumn }) {
+  buildColumn({ previousColumn }) {
     let params = { filters: [defaultFilter] };
     if (previousColumn?.operationType === 'terms') {
       params = {
@@ -96,7 +96,6 @@ export const filtersOperation: OperationDefinition<FiltersIndexPatternColumn, 'n
       dataType: 'string',
       operationType: 'filters',
       scale: 'ordinal',
-      suggestedPriority,
       isBucketed: true,
       params,
     };
