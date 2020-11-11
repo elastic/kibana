@@ -36,7 +36,7 @@ import {
 } from '../../../errors';
 import { getPackageSavedObjects } from './get';
 import { appContextService } from '../../app_context';
-import { loadArchivePackage } from '../archive';
+import { getArchivePackage } from '../archive';
 import { _installPackage } from './_install_package';
 
 export async function installLatestPackage(options: {
@@ -283,7 +283,7 @@ async function installPackageByUpload({
   archiveBuffer,
   contentType,
 }: InstallUploadedArchiveParams): Promise<AssetReference[]> {
-  const { paths, archivePackageInfo } = await loadArchivePackage({ archiveBuffer, contentType });
+  const { paths, archivePackageInfo } = await getArchivePackage({ archiveBuffer, contentType });
 
   const installedPkg = await getInstallationObject({
     savedObjectsClient,

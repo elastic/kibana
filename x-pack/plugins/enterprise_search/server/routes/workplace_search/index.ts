@@ -4,12 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IRouteDependencies } from '../../plugin';
+import { RouteDependencies } from '../../plugin';
 
 import { registerOverviewRoute } from './overview';
 import { registerGroupsRoutes } from './groups';
 
-export const registerWorkplaceSearchRoutes = (dependencies: IRouteDependencies) => {
+export const registerWorkplaceSearchRoutes = (dependencies: RouteDependencies) => {
   registerOverviewRoute(dependencies);
   registerGroupsRoutes(dependencies);
 };

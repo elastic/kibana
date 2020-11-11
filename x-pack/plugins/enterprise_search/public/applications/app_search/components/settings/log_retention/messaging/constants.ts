@@ -6,7 +6,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ILogRetentionMessages } from './types';
+import { LogRetentionMessages } from './types';
 import { renderLogRetentionDate } from '.';
 
 const ANALYTICS_NO_LOGGING = i18n.translate(
@@ -92,7 +92,7 @@ const API_STORED = (minAgeDays: number | null | undefined) =>
     values: { minAgeDays },
   });
 
-export const ANALYTICS_MESSAGES: ILogRetentionMessages = {
+export const ANALYTICS_MESSAGES: LogRetentionMessages = {
   noLogging: (_, logRetentionSettings) =>
     `${ANALYTICS_NO_LOGGING} ${
       logRetentionSettings.disabledAt
@@ -105,7 +105,7 @@ export const ANALYTICS_MESSAGES: ILogRetentionMessages = {
     ANALYTICS_STORED(logRetentionSettings.retentionPolicy?.minAgeDays),
 };
 
-export const API_MESSAGES: ILogRetentionMessages = {
+export const API_MESSAGES: LogRetentionMessages = {
   noLogging: (_, logRetentionSettings) =>
     `${API_NO_LOGGING} ${
       logRetentionSettings.disabledAt
