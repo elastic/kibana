@@ -52,7 +52,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
 }) => {
   const { api } = useComponentTemplatesContext();
 
-  const decodedComponentTemplateName = attemptToURIDecode(componentTemplateName);
+  const decodedComponentTemplateName = attemptToURIDecode(componentTemplateName)!;
 
   const { data: componentTemplateDetails, isLoading, error } = api.useLoadComponentTemplate(
     decodedComponentTemplateName

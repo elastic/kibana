@@ -481,6 +481,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
         resources: HttpResources;
     };
     // (undocumented)
+    i18n: I18nServiceSetup;
+    // (undocumented)
     logging: LoggingServiceSetup;
     // (undocumented)
     metrics: MetricsServiceSetup;
@@ -852,6 +854,12 @@ export interface HttpServiceStart {
     auth: HttpAuth;
     basePath: IBasePath;
     getServerInfo: () => HttpServerInfo;
+}
+
+// @public (undocumented)
+export interface I18nServiceSetup {
+    getLocale(): string;
+    getTranslationFiles(): string[];
 }
 
 // @public
