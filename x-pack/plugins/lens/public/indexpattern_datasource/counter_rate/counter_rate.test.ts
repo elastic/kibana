@@ -18,7 +18,7 @@ describe('lens_counter_rate', () => {
       {
         type: 'datatable',
         columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
-        rows: [{ val: 5 }, { val: 7 }, { val: 3 }, { val: 2 }],
+        rows: [{ val: 5 }, { val: 5 }, { val: 7 }, { val: 3 }, { val: 2 }],
       },
       { inputColumnId: 'val', outputColumnId: 'output' }
     );
@@ -27,9 +27,43 @@ describe('lens_counter_rate', () => {
       name: 'output',
       meta: { type: 'number' },
     });
-    expect(result.rows.map((row) => row.output)).toEqual([undefined, 2, 3, 2]);
+    expect(result.rows.map((row) => row.output)).toEqual([undefined, 0, 2, 3, 2]);
   });
 
+  it('calculates counter rate with decreasing values in input', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{ val: 7 }, { val: 6 }, { val: 5 }, { val: 4 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: { type: 'number' },
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([undefined, 6, 5, 4]);
+  });
+
+  it('calculates counter rate with decreasing values in input', () => {
+    const result = runFn(
+      {
+        type: 'datatable',
+        columns: [{ id: 'val', name: 'val', meta: { type: 'number' } }],
+        rows: [{ val: 7 }, { val: 6 }, { val: 5 }, { val: 4 }],
+      },
+      { inputColumnId: 'val', outputColumnId: 'output' }
+    );
+    expect(result.columns).toContainEqual({
+      id: 'output',
+      name: 'output',
+      meta: { type: 'number' },
+    });
+    expect(result.rows.map((row) => row.output)).toEqual([undefined, 6, 5, 4]);
+  });
+  
   it('skips null or undefined values until there is real data', () => {
     const result = runFn(
       {
