@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SavedObjectReference } from 'src/core/types';
 import { AttributeService } from '../../../../src/plugins/embeddable/public';
 import { MapSavedObjectAttributes } from '../common/map_saved_object_type';
 import { MAP_SAVED_OBJECT_TYPE } from '../common/constants';
@@ -14,11 +15,9 @@ import { getCoreOverlays, getEmbeddableService, getSavedObjectsClient } from './
 import { extractReferences, injectReferences } from '../common/migrations/references';
 import { MapByValueInput, MapByReferenceInput } from './embeddable/types';
 
-export type MapAttributeService = AttributeService<
-  MapSavedObjectAttributes,
-  MapByValueInput,
-  MapByReferenceInput
->;
+type MapDoc = MapSavedObjectAttributes & { references?: SavedObjectReference[] };
+
+export type MapAttributeService = AttributeService<MapDoc, MapByValueInput, MapByReferenceInput>;
 
 let mapAttributeService: MapAttributeService | null = null;
 
@@ -28,11 +27,11 @@ export function getMapAttributeService(): MapAttributeService {
   }
 
   mapAttributeService = getEmbeddableService().getAttributeService<
-    MapSavedObjectAttributes,
+    MapDoc,
     MapByValueInput,
     MapByReferenceInput
   >(MAP_SAVED_OBJECT_TYPE, {
-    saveMethod: async (attributes: MapSavedObjectAttributes, savedObjectId?: string) => {
+    saveMethod: async (attributes: MapDoc, savedObjectId?: string) => {
       // AttributeService "attributes" contains "references" as a child.
       // SavedObjectClient "attributes" uses "references" as a sibling.
       // https://github.com/elastic/kibana/issues/83133
@@ -58,7 +57,7 @@ export function getMapAttributeService(): MapAttributeService {
           ));
       return { id: savedObject.id };
     },
-    unwrapMethod: async (savedObjectId: string): Promise<MapSavedObjectAttributes> => {
+    unwrapMethod: async (savedObjectId: string): Promise<MapDoc> => {
       const savedObject = await getSavedObjectsClient().get<MapSavedObjectAttributes>(
         MAP_SAVED_OBJECT_TYPE,
         savedObjectId
