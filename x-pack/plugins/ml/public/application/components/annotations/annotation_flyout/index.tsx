@@ -356,16 +356,16 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
           </EuiFormRow>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={this.cancelEditingHandler} flush="left">
+              <EuiButtonEmpty onClick={this.cancelEditingHandler} flush="left">
                 <FormattedMessage
                   id="xpack.ml.timeSeriesExplorer.annotationFlyout.cancelButtonLabel"
                   defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
               {isExistingAnnotation && (
                 <EuiButtonEmpty color="danger" onClick={this.deleteConfirmHandler}>
                   <FormattedMessage
@@ -380,7 +380,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
                 {isExistingAnnotation ? (
                   <FormattedMessage
                     id="xpack.ml.timeSeriesExplorer.annotationFlyout.updateButtonLabel"
-                    defaultMessage="Update"
+                    defaultMessage="Save & close"
                   />
                 ) : (
                   <FormattedMessage
