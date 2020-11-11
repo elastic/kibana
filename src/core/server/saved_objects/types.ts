@@ -109,6 +109,11 @@ export interface SavedObjectsFindOptions {
    */
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string | KueryNode;
+  /**
+    * Specify an Elasticsearch aggregation to perform. This alpha API only supports a limited set of aggregation types: metrics, bucket. Additional aggregation types can be contributed to Core.
+    * @alpha
+    * @example // Can you add an code example of how to use the API that shows an aggregation on a root property and an type attribute
+    */
   aggs?: SavedObjectAggs;
   namespaces?: string[];
   /**
