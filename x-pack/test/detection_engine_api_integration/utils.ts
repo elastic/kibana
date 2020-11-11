@@ -11,9 +11,10 @@ import { Context } from '@elastic/elasticsearch/lib/Transport';
 import { SearchResponse } from 'elasticsearch';
 import {
   CreateRulesSchema,
+  UpdateRulesSchema,
   FullResponseSchema,
   QueryCreateSchema,
-} from '../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
+} from '../../plugins/security_solution/common/detection_engine/schemas/request';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '../../plugins/lists/common/constants';
 import {
   CreateExceptionListItemSchema,
@@ -26,7 +27,6 @@ import {
   Status,
   SignalIds,
 } from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
-import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
 import {
   DETECTION_ENGINE_INDEX_URL,

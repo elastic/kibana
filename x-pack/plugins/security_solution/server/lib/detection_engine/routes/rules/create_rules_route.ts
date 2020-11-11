@@ -26,7 +26,7 @@ import { updateRulesNotifications } from '../../rules/update_rules_notifications
 import { ruleStatusSavedObjectsClientFactory } from '../../signals/rule_status_saved_objects_client';
 import { addTags } from '../../rules/add_tags';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
-import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { createRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 import { newTransformValidate } from './validate';
 import { InternalRuleCreate } from '../../schemas/rule_schemas';
 import { typeSpecificSnakeToCamel } from '../../schemas/rule_converters';

@@ -10,7 +10,7 @@ import {
   CreateTypeSpecific,
   FullResponseSchema,
   ResponseTypeSpecific,
-} from '../../../../common/detection_engine/schemas/request/rule_schemas';
+} from '../../../../common/detection_engine/schemas/request';
 import { RuleActions } from '../rule_actions/types';
 
 // These functions provide conversions from the request API schema to the internal rule schema and from the internal rule schema

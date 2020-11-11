@@ -6,7 +6,6 @@
 
 import * as t from 'io-ts';
 
-import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
 import {
   SortOrder,
   author,
@@ -28,6 +27,7 @@ import {
   threat_filters,
 } from '../../../../../common/detection_engine/schemas/types';
 import {
+  CreateRulesSchema,
   PatchRulesSchema,
   UpdateRulesSchema,
 } from '../../../../../common/detection_engine/schemas/request';

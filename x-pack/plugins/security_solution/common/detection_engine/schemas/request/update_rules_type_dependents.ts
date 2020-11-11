@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { UpdateRulesSchema } from './rule_schemas';
+import { UpdateRulesSchema } from './';
 
 export const validateTimelineId = (rule: UpdateRulesSchema): string[] => {
   if (rule.timeline_id != null) {

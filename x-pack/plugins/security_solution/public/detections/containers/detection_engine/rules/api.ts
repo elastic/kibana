@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { FullResponseSchema } from '../../../../../common/detection_engine/schemas/request';
 import { HttpStart } from '../../../../../../../../src/core/public';
 import {
   DETECTION_ENGINE_RULES_URL,

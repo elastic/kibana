@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 
-import { QueryCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
+import { QueryCreateSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { DEFAULT_SIGNALS_INDEX } from '../../../../plugins/security_solution/common/constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {

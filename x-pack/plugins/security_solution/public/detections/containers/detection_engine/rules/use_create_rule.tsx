@@ -6,8 +6,8 @@
 
 import { useEffect, useState, Dispatch } from 'react';
 
-import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
 import { errorToToaster, useStateToaster } from '../../../../common/components/toasters';
+import { CreateRulesSchema } from '../../../../../common/detection_engine/schemas/request';
 
 import { createRule } from './api';
 import * as i18n from './translations';

@@ -5,7 +5,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 
 import {
   DETECTION_ENGINE_RULES_URL,

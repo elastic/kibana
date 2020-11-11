@@ -7,7 +7,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import expect from '@kbn/expect';
-import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
+import { CreateRulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/request';
 import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { RulesSchema } from '../../../../plugins/security_solution/common/detection_engine/schemas/response';

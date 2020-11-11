@@ -12,7 +12,7 @@ import * as t from 'io-ts';
 import {
   FullResponseSchema,
   fullResponseSchema,
-} from '../../../../../common/detection_engine/schemas/request/rule_schemas';
+} from '../../../../../common/detection_engine/schemas/request';
 import { validate } from '../../../../../common/validate';
 import { findRulesSchema } from '../../../../../common/detection_engine/schemas/response/find_rules_schema';
 import {
