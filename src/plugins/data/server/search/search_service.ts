@@ -30,6 +30,7 @@ import {
   StartServicesAccessor,
 } from 'src/core/server';
 import { first, switchMap } from 'rxjs/operators';
+import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
 import {
   ISearchSetup,
   ISearchStart,
@@ -38,7 +39,7 @@ import {
   SearchStrategyDependencies,
 } from './types';
 
-import { AggsService, AggsSetupDependencies } from './aggs';
+import { AggsService } from './aggs';
 
 import { FieldFormatsStart } from '../field_formats';
 import { IndexPatternsServiceStart } from '../index_patterns';
@@ -50,15 +51,18 @@ import { registerUsageCollector } from './collectors/register';
 import { usageProvider } from './collectors/usage';
 import { BACKGROUND_SESSION_TYPE, searchTelemetry } from '../saved_objects';
 import {
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
   IEsSearchRequest,
   IEsSearchResponse,
-  SearchSourceDependencies,
-  SearchSourceService,
-  searchSourceRequiredUiSettings,
-  ISearchOptions,
+  IKibanaSearchRequest,
+  IKibanaSearchResponse,
   ISearchClient,
+  ISearchOptions,
+  kibana,
+  kibanaContext,
+  kibanaContextFunction,
+  SearchSourceDependencies,
+  searchSourceRequiredUiSettings,
+  SearchSourceService,
 } from '../../common/search';
 import {
   getShardDelayBucketAgg,
@@ -81,7 +85,7 @@ type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
-  registerFunction: AggsSetupDependencies['registerFunction'];
+  expressions: ExpressionsServerSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -111,7 +115,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public setup(
     core: CoreSetup<{}, DataPluginStart>,
-    { registerFunction, usageCollection }: SearchServiceSetupDependencies
+    { expressions, usageCollection }: SearchServiceSetupDependencies
   ): ISearchSetup {
     const usage = usageCollection ? usageProvider(core) : undefined;
 
@@ -147,7 +151,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       registerUsageCollector(usageCollection, this.initializerContext);
     }
 
-    const aggs = this.aggsService.setup({ registerFunction });
+    expressions.registerFunction(kibana);
+    expressions.registerFunction(kibanaContextFunction);
+    expressions.registerType(kibanaContext);
+
+    const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
 
     this.initializerContext.config
       .create<ConfigSchema>()
@@ -156,7 +164,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       .then((value) => {
         if (value.search.aggs.shardDelay.enabled) {
           aggs.types.registerBucket(SHARD_DELAY_AGG_NAME, getShardDelayBucketAgg);
-          registerFunction(aggShardDelay);
+          expressions.registerFunction(aggShardDelay);
         }
       });
 
@@ -179,7 +187,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const { elasticsearch, savedObjects, uiSettings } = core;
     const asScoped = this.asScopedProvider(core);
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
+      aggs: this.aggsService.start({
+        fieldFormats,
+        uiSettings,
+        indexPatterns,
+      }),
       getSearchStrategy: this.getSearchStrategy,
       asScoped,
       searchSource: {
@@ -187,7 +199,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           const esClient = elasticsearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
           const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(
-            savedObjectsClient
+            savedObjectsClient,
+            esClient.asCurrentUser
           );
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
 

@@ -24,13 +24,11 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { CoreStart, CoreSetup, ToastsSetup } from 'kibana/public';
 import { i18n } from '@kbn/i18n';
 import {
-  AbortError,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
   ES_SEARCH_STRATEGY,
   ISessionService,
-  getCombinedSignal,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import {
@@ -43,6 +41,7 @@ import {
   getHttpError,
 } from './errors';
 import { toMountPoint } from '../../../kibana_react/public';
+import { AbortError, getCombinedAbortSignal } from '../../../kibana_utils/public';
 
 export interface SearchInterceptorDeps {
   http: CoreSetup['http'];
@@ -177,7 +176,9 @@ export class SearchInterceptor {
       ...(abortSignal ? [abortSignal] : []),
     ];
 
-    const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedSignal(signals);
+    const { signal: combinedSignal, cleanup: cleanupCombinedSignal } = getCombinedAbortSignal(
+      signals
+    );
     const cleanup = () => {
       subscription.unsubscribe();
       combinedSignal.removeEventListener('abort', cleanup);
