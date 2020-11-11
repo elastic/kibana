@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+# source the default env file
+if [ -f "<%= envFile %>" ]; then
+    . "<%= envFile %>"
+fi
+
 export KBN_PATH_CONF=${KBN_PATH_CONF:-<%= configDir %>}
 
 set_chmod() {
@@ -73,6 +78,14 @@ esac
 if [ "$IS_UPGRADE" = "true" ]; then
   if command -v systemctl >/dev/null; then
       systemctl daemon-reload
+  fi
+
+  if [ "$RESTART_ON_UPGRADE" = "true" ]; then
+    echo -n "Restarting kibana service..."
+    if command -v systemctl >/dev/null; then
+        systemctl restart kibana.service || true
+    fi
+    echo " OK"
   fi
 fi
 
