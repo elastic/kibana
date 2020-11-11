@@ -17,7 +17,7 @@ export interface IndexManagementPluginSetup {
 }
 
 export interface SetupDependencies {
-  ingestManager?: IngestManagerSetup;
+  fleet?: IngestManagerSetup;
   usageCollection: UsageCollectionSetup;
   management: ManagementSetup;
 }

@@ -32,7 +32,7 @@ export async function mountManagementSection(
   usageCollection: UsageCollectionSetup,
   services: InternalServices,
   params: ManagementAppMountParams,
-  ingestManager?: IngestManagerSetup
+  fleet?: IngestManagerSetup
 ) {
   const { element, setBreadcrumbs, history } = params;
   const [core, startDependencies] = await coreSetup.getStartServices();
@@ -57,7 +57,7 @@ export async function mountManagementSection(
     },
     plugins: {
       usageCollection,
-      ingestManager,
+      fleet,
     },
     services,
     history,

@@ -9,10 +9,9 @@ import {
   Plugin,
   PluginInitializerContext,
   CoreStart,
-  AppNavLinkStatus,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
+import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '../../../../src/core/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import {
   HomePublicPluginSetup,

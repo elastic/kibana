@@ -25,7 +25,7 @@ export interface AppDependencies {
   };
   plugins: {
     usageCollection: UsageCollectionSetup;
-    ingestManager?: IngestManagerSetup;
+    fleet?: IngestManagerSetup;
   };
   services: {
     uiMetricService: UiMetricService<IndexMgmtMetricsType>;

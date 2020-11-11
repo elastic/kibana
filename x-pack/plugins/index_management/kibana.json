@@ -3,21 +3,8 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": [
-    "home",
-    "licensing",
-    "management",
-    "features",
-    "share"
-  ],
-  "optionalPlugins": [
-    "security",
-    "usageCollection",
-    "ingestManager"
-  ],
+  "requiredPlugins": ["home", "licensing", "management", "features", "share"],
+  "optionalPlugins": ["security", "usageCollection", "fleet"],
   "configPath": ["xpack", "index_management"],
-  "requiredBundles": [
-    "kibanaReact",
-    "esUiShared"
-  ]
+  "requiredBundles": ["kibanaReact", "esUiShared"]
 }
