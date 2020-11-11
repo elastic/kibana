@@ -5,7 +5,7 @@
 [[automatic-plugin-generator]]
 === Automatic plugin generator
 
-We recommend that you kick-start your plugin by generating it with the {kib-repo}tree/{branch}/packages/kbn-plugin-generator[Kibana Plugin Generator]. Run the following in the {kib} repo, and you will be asked a couple of questions, see some progress bars, and have a freshly generated plugin ready for you to play within {kib}'s `plugins` folder.
+We recommend that you kick-start your plugin by generating it with the {kib-repo}tree/{branch}/packages/kbn-plugin-generator[Kibana Plugin Generator]. Run the following in the {kib} repo, and you will be asked a couple of questions, see some progress bars, and have a freshly generated plugin ready for you to play with in {kib}'s `plugins` folder.
 
 ["source","shell"]
 -----------
@@ -36,7 +36,7 @@ To build your plugin run within your plugin folder:
 -----------
 yarn build
 -----------
-it will emit `zip` archive in `kibana/plugins/my_plugin_name/build/` folder.
+It will output a`zip` archive in `kibana/plugins/my_plugin_name/build/` folder.
 
 === Install a plugin from archive
 See <<install-plugin, How to install a plugin>>.
