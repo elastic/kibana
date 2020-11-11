@@ -19,6 +19,7 @@
 
 import uuid from 'uuid';
 import { merge, Subscription } from 'rxjs';
+import { startWith, pairwise } from 'rxjs/operators';
 import {
   Embeddable,
   EmbeddableInput,
@@ -55,7 +56,12 @@ export abstract class Container<
     parent?: Container
   ) {
     super(input, output, parent);
-    this.subscription = this.getInput$().subscribe(() => this.maybeUpdateChildren());
+    this.subscription = this.getInput$()
+      // At each update event, get both the previous and current state
+      .pipe(startWith(input), pairwise())
+      .subscribe(([{ panels: prevPanels }, { panels: currentPanels }]) => {
+        this.maybeUpdateChildren(currentPanels, prevPanels);
+      });
   }
 
   public updateInputForChild<EEI extends EmbeddableInput = EmbeddableInput>(
@@ -329,16 +335,30 @@ export abstract class Container<
     return embeddable;
   }
 
-  private maybeUpdateChildren() {
-    const allIds = Object.keys({ ...this.input.panels, ...this.output.embeddableLoaded });
+  private panelHasChanged(currentPanel: PanelState, prevPanel: PanelState) {
+    if (currentPanel.type !== prevPanel.type) {
+      return true;
+    }
+  }
+
+  private maybeUpdateChildren(
+    currentPanels: TContainerInput['panels'],
+    prevPanels: TContainerInput['panels']
+  ) {
+    const allIds = Object.keys({ ...currentPanels, ...this.output.embeddableLoaded });
     allIds.forEach((id) => {
-      if (this.input.panels[id] !== undefined && this.output.embeddableLoaded[id] === undefined) {
-        this.onPanelAdded(this.input.panels[id]);
-      } else if (
-        this.input.panels[id] === undefined &&
-        this.output.embeddableLoaded[id] !== undefined
-      ) {
-        this.onPanelRemoved(id);
+      if (currentPanels[id] !== undefined && this.output.embeddableLoaded[id] === undefined) {
+        return this.onPanelAdded(currentPanels[id]);
+      }
+      if (currentPanels[id] === undefined && this.output.embeddableLoaded[id] !== undefined) {
+        return this.onPanelRemoved(id);
+      }
+      // In case of type change, remove and add a panel with the same id
+      if (currentPanels[id] && prevPanels[id]) {
+        if (this.panelHasChanged(currentPanels[id], prevPanels[id])) {
+          this.onPanelRemoved(id);
+          this.onPanelAdded(currentPanels[id]);
+        }
       }
     });
   }

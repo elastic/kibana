@@ -301,6 +301,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
                   <AlertInstancesRouteWithApi
                     requestRefresh={requestRefresh}
                     alert={alert}
+                    alertType={alertType}
                     readOnly={!canSaveAlert}
                   />
                 ) : (
