@@ -4,26 +4,31 @@ There are several steps required to set up geo threshold alerts for testing in a
 that allows you to view triggered alerts as they happen. These instructions outline
 how to load test data, but really these steps can be used to load any data for geo
 threshold alerts so long as you have the following data:
+- An index containing a`geo_point` field and a `date` field. This data is presumed to
+be dynamic (updated).
 - An index containing `geo_shape` data, such as boundary data, bounding box data, etc.
 This data is presumed to be static (not updated). Shape data matching the query is
 harvested once when the alert is created and anytime after when alert is re-enabled
 after disablement
-- An index containing a`geo_point` field and a `date` field. This data is presumed to
-be dynamic (updated).
 The ability for threshold alerts to monitor data requires there be somewhat "real time"
 data streaming in as indicated by the `date` field. Older locations determined by `date`
 are compared with newer locations to determine if a boundary has been crossed in the
 current monitoring interval.
 
 ### 1. Set experimental flag to enable threshold alerts
+- Your `kibana.yml` config file is located in the `config/` dir in the base of your kibana
+project. To edit it, open this file in your editor of choice, add the line described in
+the next step to the bottom of the file (or really anywhere) and save. For more details
+on different config modifications or on how to make production config modifications,
+see [the current docs](https://www.elastic.co/guide/en/kibana/current/settings.html)
 - Set the following configuration settings in your `config/kibana.yml`:
 `xpack.trigger_actions_ui.enableGeoTrackingThresholdAlert: true`
 
 ### 2. Run ES/Kibana dev env with ssl enabled
 - In two terminals, run the normal commands to launch both elasticsearch and kibana but 
 append `--ssl` to the end of each as an arg, i.e.:
-  - `yarn es snapshot --ssl  // Runs Elasticsearch`
-  - `yarn start --ssl // Runs Kibana`
+  - `yarn es snapshot --ssl  # Runs Elasticsearch`
+  - `yarn start --ssl # Runs Kibana`
   
 ### 3. Get an MTA data api key
 - You'll need to obtain an NYC MTA api key, you can request this
