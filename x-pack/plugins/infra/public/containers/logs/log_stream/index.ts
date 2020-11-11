@@ -4,8 +4,9 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import useSetState from 'react-use/lib/useSetState';
+import usePrevious from 'react-use/lib/usePrevious';
 import { esKuery } from '../../../../../../../src/plugins/data/public';
 import { fetchLogEntries } from '../log_entries/api/fetch_log_entries';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
@@ -62,6 +63,22 @@ export function useLogStream({
 }: LogStreamProps): LogStreamReturn {
   const { services } = useKibanaContextForPlugin();
   const [state, setState] = useSetState<LogStreamState>(INITIAL_STATE);
+
+  // Ensure the pagination keeps working when the timerange gets extended
+  const prevStartTimestamp = usePrevious(startTimestamp);
+  const prevEndTimestamp = usePrevious(endTimestamp);
+
+  useEffect(() => {
+    if (prevStartTimestamp && prevStartTimestamp > startTimestamp) {
+      setState({ hasMoreBefore: true });
+    }
+  }, [prevStartTimestamp, startTimestamp, setState]);
+
+  useEffect(() => {
+    if (prevEndTimestamp && prevEndTimestamp < endTimestamp) {
+      setState({ hasMoreAfter: true });
+    }
+  }, [prevEndTimestamp, endTimestamp, setState]);
 
   const parsedQuery = useMemo(() => {
     return query
