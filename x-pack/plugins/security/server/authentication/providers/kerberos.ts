@@ -10,10 +10,12 @@ import {
   LegacyElasticsearchErrorHelpers,
   KibanaRequest,
 } from '../../../../../../src/core/server';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
-import { Tokens, TokenPair } from '../tokens';
+import { canRedirectRequest } from '../can_redirect_request';
+import { Tokens, TokenPair, RefreshTokenResult } from '../tokens';
 import { BaseAuthenticationProvider } from './base';
 
 /**
@@ -32,8 +34,9 @@ const WWWAuthenticateHeaderName = 'WWW-Authenticate';
  * @param request Request instance.
  */
 function canStartNewSession(request: KibanaRequest) {
-  // We should try to establish new session only if request requires authentication.
-  return request.route.options.authRequired === true;
+  // We should try to establish new session only if request requires authentication and it's not an XHR request.
+  // Technically we can authenticate XHR requests too, but we don't want these to create a new session unintentionally.
+  return canRedirectRequest(request) && request.route.options.authRequired === true;
 }
 
 /**
@@ -75,11 +78,8 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.notHandled();
     }
 
-    let authenticationResult = authorizationHeader
-      ? await this.authenticateWithNegotiateScheme(request)
-      : AuthenticationResult.notHandled();
-
-    if (state && authenticationResult.notHandled()) {
+    let authenticationResult = AuthenticationResult.notHandled();
+    if (state) {
       authenticationResult = await this.authenticateViaState(request, state);
       if (
         authenticationResult.failed() &&
@@ -89,11 +89,15 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       }
     }
 
-    // If we couldn't authenticate by means of all methods above, let's try to check if Elasticsearch can
-    // start authentication mechanism negotiation, otherwise just return authentication result we have.
-    return authenticationResult.notHandled() && canStartNewSession(request)
-      ? await this.authenticateViaSPNEGO(request, state)
-      : authenticationResult;
+    if (!authenticationResult.notHandled() || !canStartNewSession(request)) {
+      return authenticationResult;
+    }
+
+    // If we couldn't authenticate by means of all methods above, let's check if we're already at the authentication
+    // mechanism negotiation stage, otherwise check with Elasticsearch if we can start it.
+    return authorizationHeader
+      ? await this.authenticateWithNegotiateScheme(request)
+      : await this.authenticateViaSPNEGO(request, state);
   }
 
   /**
@@ -146,6 +150,7 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       access_token: string;
       refresh_token: string;
       kerberos_authentication_response_token?: string;
+      authentication: AuthenticationInfo;
     };
     try {
       tokens = await this.options.client.callAsInternalUser('shield.getAccessToken', {
@@ -200,23 +205,16 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
       };
     }
 
-    try {
-      // Then attempt to query for the user details using the new token
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', tokens.access_token).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
-
-      this.logger.debug('User has been authenticated with new access token');
-      return AuthenticationResult.succeeded(user, {
-        authHeaders,
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(tokens.authentication),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', tokens.access_token).toString(),
+        },
         authResponseHeaders,
         state: { accessToken: tokens.access_token, refreshToken: tokens.refresh_token },
-      });
-    } catch (err) {
-      this.logger.debug(`Failed to authenticate request via access token: ${err.message}`);
-      return AuthenticationResult.failed(err);
-    }
+      }
+    );
   }
 
   /**
@@ -257,38 +255,32 @@ export class KerberosAuthenticationProvider extends BaseAuthenticationProvider {
   private async authenticateViaRefreshToken(request: KibanaRequest, state: ProviderState) {
     this.logger.debug('Trying to refresh access token.');
 
-    let refreshedTokenPair: TokenPair | null;
+    let refreshTokenResult: RefreshTokenResult | null;
     try {
-      refreshedTokenPair = await this.options.tokens.refresh(state.refreshToken);
+      refreshTokenResult = await this.options.tokens.refresh(state.refreshToken);
     } catch (err) {
       return AuthenticationResult.failed(err);
     }
 
-    // If refresh token is no longer valid, then we should clear session and renegotiate using SPNEGO.
-    if (refreshedTokenPair === null) {
-      this.logger.debug('Both access and refresh tokens are expired.');
-      return canStartNewSession(request)
-        ? this.authenticateViaSPNEGO(request, state)
-        : AuthenticationResult.notHandled();
+    // If refresh token is no longer valid, let's try to renegotiate new tokens using SPNEGO. We
+    // allow this because expired underlying token is an implementation detail and Kibana user
+    // facing session is still valid.
+    if (refreshTokenResult === null) {
+      this.logger.debug('Both access and refresh tokens are expired. Re-authenticating...');
+      return this.authenticateViaSPNEGO(request, state);
     }
 
-    try {
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader(
-          'Bearer',
-          refreshedTokenPair.accessToken
-        ).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
-
-      this.logger.debug('Request has been authenticated via refreshed token.');
-      return AuthenticationResult.succeeded(user, { authHeaders, state: refreshedTokenPair });
-    } catch (err) {
-      this.logger.debug(
-        `Failed to authenticate user using newly refreshed access token: ${err.message}`
-      );
-      return AuthenticationResult.failed(err);
-    }
+    this.logger.debug('Request has been authenticated via refreshed token.');
+    const { accessToken, refreshToken, authenticationInfo } = refreshTokenResult;
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(authenticationInfo),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
+        },
+        state: { accessToken, refreshToken },
+      }
+    );
   }
 
   /**
