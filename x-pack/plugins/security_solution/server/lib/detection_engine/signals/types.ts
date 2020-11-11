@@ -239,3 +239,9 @@ export interface SearchAfterAndBulkCreateReturnType {
 export interface ThresholdAggregationBucket extends TermAggregationBucket {
   top_threshold_hits: BaseSearchResponse<SignalSource>;
 }
+
+export interface ThresholdQueryBucket extends TermAggregationBucket {
+  lastSignalTimestamp: {
+    value_as_string: string;
+  };
+}

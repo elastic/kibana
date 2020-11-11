@@ -8,6 +8,7 @@
 
 import { Logger, KibanaRequest } from 'src/core/server';
 
+import { Filter } from 'src/plugins/data/common';
 import {
   SIGNALS_ID,
   DEFAULT_SEARCH_AFTER_PAGE_SIZE,
@@ -29,6 +30,7 @@ import {
   RuleAlertAttributes,
   EqlSignalSearchResponse,
   BaseSignalHit,
+  ThresholdQueryBucket,
 } from './types';
 import {
   getGapBetweenRuns,
@@ -316,30 +318,32 @@ export const signalRulesAlertType = ({
             buildRuleMessage,
           });
 
-          previousSignals.aggregations.rule.threshold.buckets.forEach((bucket: object) => {
-            esFilter.bool.filter.push({
-              bool: {
-                must_not: {
-                  bool: {
-                    must: [
-                      {
-                        term: {
-                          [threshold.field ?? 'signal.rule.rule_id']: bucket.key,
-                        },
-                      },
-                      {
-                        range: {
-                          '@timestamp': {
-                            lte: bucket.lastSignalTimestamp.value_as_string,
+          previousSignals.aggregations.rule.threshold.buckets.forEach(
+            (bucket: ThresholdQueryBucket) => {
+              esFilter.bool.filter.push(({
+                bool: {
+                  must_not: {
+                    bool: {
+                      must: [
+                        {
+                          term: {
+                            [threshold.field ?? 'signal.rule.rule_id']: bucket.key,
                           },
                         },
-                      },
-                    ],
+                        {
+                          range: {
+                            '@timestamp': {
+                              lte: bucket.lastSignalTimestamp.value_as_string,
+                            },
+                          },
+                        },
+                      ],
+                    },
                   },
                 },
-              },
-            });
-          });
+              } as unknown) as Filter);
+            }
+          );
 
           const { searchResult: thresholdResults, searchErrors } = await findThresholdSignals({
             inputIndexPattern: inputIndex,
