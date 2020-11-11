@@ -40,7 +40,8 @@ export class JoinTooltipProperty implements ITooltipProperty {
   async getESFilters(): Promise<Filter[]> {
     const esFilters = [];
     if (this._tooltipProperty.isFilterable()) {
-      esFilters.push(...(await this._tooltipProperty.getESFilters()));
+      const filters = await this._tooltipProperty.getESFilters();
+      esFilters.push(...filters);
     }
 
     for (let i = 0; i < this._leftInnerJoins.length; i++) {
@@ -51,7 +52,8 @@ export class JoinTooltipProperty implements ITooltipProperty {
           this._tooltipProperty.getRawValue()
         );
         if (esTooltipProperty) {
-          esFilters.push(...(await esTooltipProperty.getESFilters()));
+          const filters = await esTooltipProperty.getESFilters();
+          esFilters.push(...filters);
         }
       } catch (e) {
         // eslint-disable-next-line no-console

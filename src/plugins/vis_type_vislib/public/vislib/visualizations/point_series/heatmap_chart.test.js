@@ -71,7 +71,7 @@ describe('Vislib Heatmap Chart Test Suite', function () {
     describe('for ' + name + ' Data', function () {
       let vis;
       let mockUiState;
-      const visLibParams = {
+      const vislibParams = {
         type: 'heatmap',
         addLegend: true,
         addTooltip: true,
@@ -84,7 +84,7 @@ describe('Vislib Heatmap Chart Test Suite', function () {
       };
 
       function generateVis(opts = {}) {
-        const config = _.defaultsDeep({}, opts, visLibParams);
+        const config = _.defaultsDeep({}, opts, vislibParams);
         vis = getVis(config);
         mockUiState = getMockUiState();
         vis.on('brush', _.noop);

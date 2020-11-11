@@ -12,6 +12,7 @@ import {
 } from 'src/core/public';
 
 import { i18n } from '@kbn/i18n';
+import { FeaturesPluginStart } from '../../features/public';
 import { registerBuiltInActionTypes } from './application/components/builtin_action_types';
 import { registerBuiltInAlertTypes } from './application/components/builtin_alert_types';
 import { ActionTypeModel, AlertTypeModel } from './types';
@@ -20,6 +21,10 @@ import {
   ManagementAppMountParams,
   ManagementSetup,
 } from '../../../../src/plugins/management/public';
+import {
+  FeatureCatalogueCategory,
+  HomePublicPluginSetup,
+} from '../../../../src/plugins/home/public';
 import { ChartsPluginStart } from '../../../../src/plugins/charts/public';
 import { PluginStartContract as AlertingStart } from '../../alerts/public';
 import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
@@ -40,6 +45,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
 
 interface PluginsSetup {
   management: ManagementSetup;
+  home?: HomePublicPluginSetup;
 }
 
 interface PluginsStart {
@@ -47,6 +53,7 @@ interface PluginsStart {
   charts: ChartsPluginStart;
   alerts?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
+  features: FeaturesPluginStart;
 }
 
 export class Plugin
@@ -73,11 +80,31 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const alertTypeRegistry = this.alertTypeRegistry;
 
+    const featureTitle = i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
+      defaultMessage: 'Alerts and Actions',
+    });
+    const featureDescription = i18n.translate(
+      'xpack.triggersActionsUI.managementSection.displayDescription',
+      {
+        defaultMessage: 'Detect conditions using alerts, and take actions using connectors.',
+      }
+    );
+
+    if (plugins.home) {
+      plugins.home.featureCatalogue.register({
+        id: 'triggersActions',
+        title: featureTitle,
+        description: featureDescription,
+        icon: 'watchesApp',
+        path: '/app/management/insightsAndAlerting/triggersActions',
+        showOnHomePage: false,
+        category: FeatureCatalogueCategory.ADMIN,
+      });
+    }
+
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: 'triggersActions',
-      title: i18n.translate('xpack.triggersActionsUI.managementSection.displayName', {
-        defaultMessage: 'Alerts and Actions',
-      }),
+      title: featureTitle,
       order: 0,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
@@ -87,7 +114,7 @@ export class Plugin
         ];
 
         const { boot } = await import('./application/boot');
-
+        const kibanaFeatures = await pluginsStart.features.getFeatures();
         return boot({
           dataPlugin: pluginsStart.data,
           charts: pluginsStart.charts,
@@ -106,6 +133,7 @@ export class Plugin
           history: params.history,
           actionTypeRegistry,
           alertTypeRegistry,
+          kibanaFeatures,
         });
       },
     });

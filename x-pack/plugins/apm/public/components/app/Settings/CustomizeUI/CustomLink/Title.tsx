@@ -3,7 +3,8 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
+
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -11,28 +12,14 @@ export function Title() {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
+        <EuiTitle>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
-              <h1>
+              <h2>
                 {i18n.translate('xpack.apm.settings.customizeUI.customLink', {
                   defaultMessage: 'Custom Links',
                 })}
-              </h1>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <EuiIconTip
-                type="iInCircle"
-                position="top"
-                content={i18n.translate(
-                  'xpack.apm.settings.customizeUI.customLink.info',
-                  {
-                    defaultMessage:
-                      'These links will be shown in the Actions context menu for transactions.',
-                  }
-                )}
-              />
+              </h2>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiTitle>

@@ -673,6 +673,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
             >
               <EuiButtonDisplay
                 aria-label="Create new visualization button"
+                baseClassName="euiButton"
                 data-test-subj="addVisualizationButton"
                 element="button"
                 iconSide="left"
@@ -684,6 +685,11 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                   aria-label="Create new visualization button"
                   className="euiButton euiButton--primary euiButton--small"
                   data-test-subj="addVisualizationButton"
+                  style={
+                    Object {
+                      "minWidth": undefined,
+                    }
+                  }
                   type="button"
                 >
                   <EuiButtonContent

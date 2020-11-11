@@ -19,7 +19,7 @@
 
 import { Observable, Subscription, combineLatest } from 'rxjs';
 import { first, map } from 'rxjs/operators';
-import { Server } from 'hapi';
+import { Server } from '@hapi/hapi';
 import { pick } from '@kbn/std';
 
 import { CoreService } from '../../types';

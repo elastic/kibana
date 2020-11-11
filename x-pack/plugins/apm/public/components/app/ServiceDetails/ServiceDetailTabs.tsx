@@ -8,6 +8,7 @@ import { EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { isJavaAgentName, isRumAgentName } from '../../../../common/agent_name';
+import { enableServiceOverview } from '../../../../common/ui_settings_keys';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { useApmPluginContext } from '../../../hooks/useApmPluginContext';
 import { EuiTabLink } from '../../shared/EuiTabLink';
@@ -15,21 +16,43 @@ import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { MetricOverviewLink } from '../../shared/Links/apm/MetricOverviewLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { ServiceNodeOverviewLink } from '../../shared/Links/apm/ServiceNodeOverviewLink';
+import { ServiceOverviewLink } from '../../shared/Links/apm/service_overview_link';
 import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
 import { ErrorGroupOverview } from '../ErrorGroupOverview';
 import { ServiceMap } from '../ServiceMap';
 import { ServiceMetrics } from '../ServiceMetrics';
 import { ServiceNodeOverview } from '../ServiceNodeOverview';
+import { ServiceOverview } from '../service_overview';
 import { TransactionOverview } from '../TransactionOverview';
 
 interface Props {
   serviceName: string;
-  tab: 'transactions' | 'errors' | 'metrics' | 'nodes' | 'service-map';
+  tab:
+    | 'errors'
+    | 'metrics'
+    | 'nodes'
+    | 'overview'
+    | 'service-map'
+    | 'transactions';
 }
 
 export function ServiceDetailTabs({ serviceName, tab }: Props) {
   const { agentName } = useAgentName();
-  const { serviceMapEnabled } = useApmPluginContext().config;
+  const { uiSettings } = useApmPluginContext().core;
+
+  const overviewTab = {
+    link: (
+      <ServiceOverviewLink serviceName={serviceName}>
+        {i18n.translate('xpack.apm.serviceDetails.overviewTabLabel', {
+          defaultMessage: 'Overview',
+        })}
+      </ServiceOverviewLink>
+    ),
+    render: () => (
+      <ServiceOverview agentName={agentName} serviceName={serviceName} />
+    ),
+    name: 'overview',
+  };
 
   const transactionsTab = {
     link: (
@@ -57,7 +80,23 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
     name: 'errors',
   };
 
-  const tabs = [transactionsTab, errorsTab];
+  const serviceMapTab = {
+    link: (
+      <ServiceMapLink serviceName={serviceName}>
+        {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
+          defaultMessage: 'Service Map',
+        })}
+      </ServiceMapLink>
+    ),
+    render: () => <ServiceMap serviceName={serviceName} />,
+    name: 'service-map',
+  };
+
+  const tabs = [transactionsTab, errorsTab, serviceMapTab];
+
+  if (uiSettings.get(enableServiceOverview)) {
+    tabs.unshift(overviewTab);
+  }
 
   if (isJavaAgentName(agentName)) {
     const nodesListTab = {
@@ -87,22 +126,6 @@ export function ServiceDetailTabs({ serviceName, tab }: Props) {
       name: 'metrics',
     };
     tabs.push(metricsTab);
-  }
-
-  const serviceMapTab = {
-    link: (
-      <ServiceMapLink serviceName={serviceName}>
-        {i18n.translate('xpack.apm.home.serviceMapTabLabel', {
-          defaultMessage: 'Service Map',
-        })}
-      </ServiceMapLink>
-    ),
-    render: () => <ServiceMap serviceName={serviceName} />,
-    name: 'service-map',
-  };
-
-  if (serviceMapEnabled) {
-    tabs.push(serviceMapTab);
   }
 
   const selectedTab = tabs.find((serviceTab) => serviceTab.name === tab);

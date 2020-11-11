@@ -40,10 +40,10 @@ const touchdownTmpl = _.template(touchdownTmplHtml);
  * @param chartData {Object} Elasticsearch query results for this specific chart
  */
 export class PointSeries extends Chart {
-  constructor(handler, chartEl, chartData, deps) {
-    super(handler, chartEl, chartData, deps);
+  constructor(handler, chartEl, chartData, uiSettings) {
+    super(handler, chartEl, chartData, uiSettings);
 
-    this.deps = deps;
+    this.uiSettings = uiSettings;
     this.handler = handler;
     this.chartData = chartData;
     this.chartEl = chartEl;
@@ -246,7 +246,13 @@ export class PointSeries extends Chart {
           if (!seriArgs.show) return;
           const SeriClass =
             seriTypes[seriArgs.type || self.handler.visConfig.get('chart.type')] || seriTypes.line;
-          const series = new SeriClass(self.handler, svg, data.series[i], seriArgs, self.deps);
+          const series = new SeriClass(
+            self.handler,
+            svg,
+            data.series[i],
+            seriArgs,
+            self.uiSettings
+          );
           series.events = self.events;
           svg.call(series.draw());
           self.series.push(series);

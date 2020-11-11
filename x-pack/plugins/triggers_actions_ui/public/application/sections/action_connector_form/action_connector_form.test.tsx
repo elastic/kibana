@@ -22,7 +22,7 @@ describe('action_connector_form', () => {
     ] = await mocks.getStartServices();
     deps = {
       http: mocks.http,
-      actionTypeRegistry: actionTypeRegistry as any,
+      actionTypeRegistry,
       docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
       capabilities,
     };

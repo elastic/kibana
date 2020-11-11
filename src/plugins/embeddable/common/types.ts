@@ -67,4 +67,16 @@ export type EmbeddableInput = {
    * Visualization filters used to narrow down results.
    */
   filters?: Filter[];
+
+  /**
+   * Search session id to group searches
+   */
+  searchSessionId?: string;
 };
+
+export type EmbeddableStateWithType = EmbeddableInput & { type: string };
+
+export interface CommonEmbeddableStartContract {
+  getEmbeddableFactory: (embeddableFactoryId: string) => any;
+  getEnhancement: (enhancementId: string) => any;
+}

@@ -5,11 +5,18 @@
  */
 
 import { act } from 'react-dom/test-utils';
+import { createMemoryHistory } from 'history';
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
-import { DataStreamsTabTestBed, setup, createDataStreamPayload } from './data_streams_tab.helpers';
+import {
+  DataStreamsTabTestBed,
+  setup,
+  createDataStreamPayload,
+  createDataStreamBackingIndex,
+  createNonDataStreamIndex,
+} from './data_streams_tab.helpers';
 
 describe('Data Streams tab', () => {
   const { server, httpRequestsMockHelpers } = setupEnvironment();
@@ -85,29 +92,8 @@ describe('Data Streams tab', () => {
       } = httpRequestsMockHelpers;
 
       setLoadIndicesResponse([
-        {
-          health: '',
-          status: '',
-          primary: '',
-          replica: '',
-          documents: '',
-          documents_deleted: '',
-          size: '',
-          primary_size: '',
-          name: 'data-stream-index',
-          data_stream: 'dataStream1',
-        },
-        {
-          health: 'green',
-          status: 'open',
-          primary: 1,
-          replica: 1,
-          documents: 10000,
-          documents_deleted: 100,
-          size: '156kb',
-          primary_size: '156kb',
-          name: 'non-data-stream-index',
-        },
+        createDataStreamBackingIndex('data-stream-index', 'dataStream1'),
+        createNonDataStreamIndex('non-data-stream-index'),
       ]);
 
       const dataStreamForDetailPanel = createDataStreamPayload('dataStream1');
@@ -117,7 +103,7 @@ describe('Data Streams tab', () => {
       ]);
       setLoadDataStreamResponse(dataStreamForDetailPanel);
 
-      testBed = await setup();
+      testBed = await setup({ history: createMemoryHistory() });
       await act(async () => {
         testBed.actions.goToDataStreamsList();
       });
@@ -191,19 +177,19 @@ describe('Data Streams tab', () => {
     describe('deleting a data stream', () => {
       test('shows a confirmation modal', async () => {
         const {
-          actions: { clickDeletActionAt },
+          actions: { clickDeleteActionAt },
           findDeleteConfirmationModal,
         } = testBed;
-        clickDeletActionAt(0);
+        clickDeleteActionAt(0);
         const confirmationModal = findDeleteConfirmationModal();
         expect(confirmationModal).toBeDefined();
       });
 
       test('sends a request to the Delete API', async () => {
         const {
-          actions: { clickDeletActionAt, clickConfirmDelete },
+          actions: { clickDeleteActionAt, clickConfirmDelete },
         } = testBed;
-        clickDeletActionAt(0);
+        clickDeleteActionAt(0);
 
         httpRequestsMockHelpers.setDeleteDataStreamResponse({
           results: {
@@ -234,12 +220,12 @@ describe('Data Streams tab', () => {
 
       test('deletes the data stream when delete button is clicked', async () => {
         const {
-          actions: { clickNameAt, clickDeletDataStreamButton, clickConfirmDelete },
+          actions: { clickNameAt, clickDeleteDataStreamButton, clickConfirmDelete },
         } = testBed;
 
         await clickNameAt(0);
 
-        clickDeletDataStreamButton();
+        clickDeleteDataStreamButton();
 
         httpRequestsMockHelpers.setDeleteDataStreamResponse({
           results: {
@@ -258,6 +244,128 @@ describe('Data Streams tab', () => {
           dataStreams: ['dataStream1'],
         });
       });
+    });
+  });
+
+  describe('when there are special characters', () => {
+    beforeEach(async () => {
+      const {
+        setLoadIndicesResponse,
+        setLoadDataStreamsResponse,
+        setLoadDataStreamResponse,
+      } = httpRequestsMockHelpers;
+
+      setLoadIndicesResponse([
+        createDataStreamBackingIndex('data-stream-index', '%dataStream'),
+        createDataStreamBackingIndex('data-stream-index2', 'dataStream2'),
+      ]);
+
+      const dataStreamDollarSign = createDataStreamPayload('%dataStream');
+      setLoadDataStreamsResponse([dataStreamDollarSign]);
+      setLoadDataStreamResponse(dataStreamDollarSign);
+
+      testBed = await setup({
+        history: createMemoryHistory(),
+      });
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+    });
+
+    describe('detail panel', () => {
+      test('opens when the data stream name in the table is clicked', async () => {
+        const { actions, findDetailPanel, findDetailPanelTitle } = testBed;
+        await actions.clickNameAt(0);
+        expect(findDetailPanel().length).toBe(1);
+        expect(findDetailPanelTitle()).toBe('%dataStream');
+      });
+
+      test('clicking the indices count navigates to the backing indices', async () => {
+        const { table, actions } = testBed;
+        await actions.clickIndicesAt(0);
+        expect(table.getMetaData('indexTable').tableCellsValues).toEqual([
+          ['', '', '', '', '', '', '', '%dataStream'],
+        ]);
+      });
+    });
+  });
+
+  describe('url generators', () => {
+    const mockIlmUrlGenerator = {
+      getUrlGenerator: () => ({
+        createUrl: ({ policyName }: { policyName: string }) => `/test/${policyName}`,
+      }),
+    };
+    test('with an ILM url generator and an ILM policy', async () => {
+      const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+      const dataStreamForDetailPanel = {
+        ...createDataStreamPayload('dataStream1'),
+        ilmPolicyName: 'my_ilm_policy',
+      };
+      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
+      setLoadDataStreamResponse(dataStreamForDetailPanel);
+
+      testBed = await setup({
+        history: createMemoryHistory(),
+        urlGenerators: mockIlmUrlGenerator,
+      });
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+
+      const { actions, findDetailPanelIlmPolicyLink } = testBed;
+      await actions.clickNameAt(0);
+      expect(findDetailPanelIlmPolicyLink().prop('href')).toBe('/test/my_ilm_policy');
+    });
+
+    test('with an ILM url generator and no ILM policy', async () => {
+      const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+      const dataStreamForDetailPanel = createDataStreamPayload('dataStream1');
+      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
+      setLoadDataStreamResponse(dataStreamForDetailPanel);
+
+      testBed = await setup({
+        history: createMemoryHistory(),
+        urlGenerators: mockIlmUrlGenerator,
+      });
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+
+      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyName } = testBed;
+      await actions.clickNameAt(0);
+      expect(findDetailPanelIlmPolicyLink().exists()).toBeFalsy();
+      expect(findDetailPanelIlmPolicyName().contains('None')).toBeTruthy();
+    });
+
+    test('without an ILM url generator and with an ILM policy', async () => {
+      const { setLoadDataStreamsResponse, setLoadDataStreamResponse } = httpRequestsMockHelpers;
+
+      const dataStreamForDetailPanel = {
+        ...createDataStreamPayload('dataStream1'),
+        ilmPolicyName: 'my_ilm_policy',
+      };
+      setLoadDataStreamsResponse([dataStreamForDetailPanel]);
+      setLoadDataStreamResponse(dataStreamForDetailPanel);
+
+      testBed = await setup({
+        history: createMemoryHistory(),
+        urlGenerators: { getUrlGenerator: () => {} },
+      });
+      await act(async () => {
+        testBed.actions.goToDataStreamsList();
+      });
+      testBed.component.update();
+
+      const { actions, findDetailPanelIlmPolicyLink, findDetailPanelIlmPolicyName } = testBed;
+      await actions.clickNameAt(0);
+      expect(findDetailPanelIlmPolicyLink().exists()).toBeFalsy();
+      expect(findDetailPanelIlmPolicyName().contains('my_ilm_policy')).toBeTruthy();
     });
   });
 });

@@ -27,6 +27,7 @@ import {
   ContactCardEmbeddableInput,
   ContactCardEmbeddable,
   ContactCardEmbeddableOutput,
+  EMPTY_EMBEDDABLE,
 } from '../../embeddable_plugin_test_samples';
 import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
 
@@ -100,6 +101,48 @@ test('DashboardContainer.addNewEmbeddable', async () => {
   expect(embeddableInContainer.id).toBe(embeddable.id);
 });
 
+test('DashboardContainer.replacePanel', async (done) => {
+  const ID = '123';
+  const initialInput = getSampleDashboardInput({
+    panels: {
+      [ID]: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+        explicitInput: { firstName: 'Sam', id: ID },
+        type: CONTACT_CARD_EMBEDDABLE,
+      }),
+    },
+  });
+
+  const container = new DashboardContainer(initialInput, options);
+  let counter = 0;
+
+  const subscriptionHandler = jest.fn(({ panels }) => {
+    counter++;
+    expect(panels[ID]).toBeDefined();
+    // It should be called exactly 2 times and exit the second time
+    switch (counter) {
+      case 1:
+        return expect(panels[ID].type).toBe(CONTACT_CARD_EMBEDDABLE);
+
+      case 2: {
+        expect(panels[ID].type).toBe(EMPTY_EMBEDDABLE);
+        subscription.unsubscribe();
+        done();
+      }
+
+      default:
+        throw Error('Called too many times!');
+    }
+  });
+
+  const subscription = container.getInput$().subscribe(subscriptionHandler);
+
+  // replace the panel now
+  container.replacePanel(container.getInput().panels[ID], {
+    type: EMPTY_EMBEDDABLE,
+    explicitInput: { id: ID },
+  });
+});
+
 test('Container view mode change propagates to existing children', async () => {
   const initialInput = getSampleDashboardInput({
     panels: {
@@ -133,4 +176,26 @@ test('Container view mode change propagates to new children', async () => {
   container.updateInput({ viewMode: ViewMode.EDIT });
 
   expect(embeddable.getInput().viewMode).toBe(ViewMode.EDIT);
+});
+
+test('searchSessionId propagates to children', async () => {
+  const searchSessionId1 = 'searchSessionId1';
+  const container = new DashboardContainer(
+    getSampleDashboardInput({ searchSessionId: searchSessionId1 }),
+    options
+  );
+  const embeddable = await container.addNewEmbeddable<
+    ContactCardEmbeddableInput,
+    ContactCardEmbeddableOutput,
+    ContactCardEmbeddable
+  >(CONTACT_CARD_EMBEDDABLE, {
+    firstName: 'Bob',
+  });
+
+  expect(embeddable.getInput().searchSessionId).toBe(searchSessionId1);
+
+  const searchSessionId2 = 'searchSessionId2';
+  container.updateInput({ searchSessionId: searchSessionId2 });
+
+  expect(embeddable.getInput().searchSessionId).toBe(searchSessionId2);
 });

@@ -415,41 +415,6 @@ describe('TaskStore', () => {
                             ],
                           },
                         },
-                        {
-                          bool: {
-                            should: [
-                              { exists: { field: 'task.schedule' } },
-                              {
-                                bool: {
-                                  must: [
-                                    { term: { 'task.taskType': 'foo' } },
-                                    {
-                                      range: {
-                                        'task.attempts': {
-                                          lt: maxAttempts,
-                                        },
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                              {
-                                bool: {
-                                  must: [
-                                    { term: { 'task.taskType': 'bar' } },
-                                    {
-                                      range: {
-                                        'task.attempts': {
-                                          lt: customMaxAttempts,
-                                        },
-                                      },
-                                    },
-                                  ],
-                                },
-                              },
-                            ],
-                          },
-                        },
                       ],
                     },
                   },
@@ -501,6 +466,11 @@ if (doc['task.runAt'].size()!=0) {
       const maxAttempts = _.random(2, 43);
       const customMaxAttempts = _.random(44, 100);
       const definitions = new TaskTypeDictionary(mockLogger());
+      const taskManagerId = uuid.v1();
+      const fieldUpdates = {
+        ownerId: taskManagerId,
+        retryAt: new Date(Date.now()),
+      };
       definitions.registerTaskDefinitions({
         foo: {
           title: 'foo',
@@ -514,10 +484,11 @@ if (doc['task.runAt'].size()!=0) {
       });
       const {
         args: {
-          updateByQuery: { body: { query, sort } = {} },
+          updateByQuery: { body: { query, script, sort } = {} },
         },
       } = await testClaimAvailableTasks({
         opts: {
+          taskManagerId,
           maxAttempts,
           definitions,
         },
@@ -576,41 +547,6 @@ if (doc['task.runAt'].size()!=0) {
                                 ],
                               },
                             },
-                            {
-                              bool: {
-                                should: [
-                                  { exists: { field: 'task.schedule' } },
-                                  {
-                                    bool: {
-                                      must: [
-                                        { term: { 'task.taskType': 'foo' } },
-                                        {
-                                          range: {
-                                            'task.attempts': {
-                                              lt: maxAttempts,
-                                            },
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                  {
-                                    bool: {
-                                      must: [
-                                        { term: { 'task.taskType': 'bar' } },
-                                        {
-                                          range: {
-                                            'task.attempts': {
-                                              lt: customMaxAttempts,
-                                            },
-                                          },
-                                        },
-                                      ],
-                                    },
-                                  },
-                                ],
-                              },
-                            },
                           ],
                         },
                       },
@@ -640,6 +576,30 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
 
+      expect(script).toMatchObject({
+        source: `
+  if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+      .join(' ')}
+  } else {
+    ctx._source.task.status = "failed";
+  }
+  `,
+        lang: 'painless',
+        params: {
+          fieldUpdates,
+          claimTasksById: [
+            'task:33c6977a-ed6d-43bd-98d9-3f827f7b7cd8',
+            'task:a208b22c-14ec-4fb4-995f-d2ff7a3b03b8',
+          ],
+          taskMaxAttempts: {
+            bar: customMaxAttempts,
+            foo: maxAttempts,
+          },
+        },
+      });
+
       expect(sort).toMatchObject([
         '_score',
         {
@@ -665,6 +625,10 @@ if (doc['task.runAt'].size()!=0) {
     test('it claims tasks by setting their ownerId, status and retryAt', async () => {
       const taskManagerId = uuid.v1();
       const claimOwnershipUntil = new Date(Date.now());
+      const fieldUpdates = {
+        ownerId: taskManagerId,
+        retryAt: claimOwnershipUntil,
+      };
       const {
         args: {
           updateByQuery: { body: { script } = {} },
@@ -679,12 +643,24 @@ if (doc['task.runAt'].size()!=0) {
         },
       });
       expect(script).toMatchObject({
-        source: `ctx._source.task.ownerId=params.ownerId; ctx._source.task.status=params.status; ctx._source.task.retryAt=params.retryAt;`,
+        source: `
+  if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType] || params.claimTasksById.contains(ctx._id)) {
+    ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
+      .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
+      .join(' ')}
+  } else {
+    ctx._source.task.status = "failed";
+  }
+  `,
         lang: 'painless',
         params: {
-          ownerId: taskManagerId,
-          retryAt: claimOwnershipUntil,
-          status: 'claiming',
+          fieldUpdates,
+          claimTasksById: [],
+          taskMaxAttempts: {
+            dernstraight: 2,
+            report: 2,
+            yawn: 2,
+          },
         },
       });
     });

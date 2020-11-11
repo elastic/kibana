@@ -133,16 +133,12 @@ export class BookEmbeddableFactoryDefinition
     return { ...savedObject.attributes };
   }
 
-  private async saveMethod(
-    type: string,
-    attributes: BookSavedObjectAttributes,
-    savedObjectId?: string
-  ) {
+  private async saveMethod(attributes: BookSavedObjectAttributes, savedObjectId?: string) {
     const { savedObjectsClient } = await this.getStartServices();
     if (savedObjectId) {
-      return savedObjectsClient.update(type, savedObjectId, attributes);
+      return savedObjectsClient.update(this.type, savedObjectId, attributes);
     }
-    return savedObjectsClient.create(type, attributes);
+    return savedObjectsClient.create(this.type, attributes);
   }
 
   private async checkForDuplicateTitleMethod(props: OnSaveProps): Promise<true> {

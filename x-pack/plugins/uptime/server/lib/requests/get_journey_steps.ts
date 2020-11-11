@@ -35,13 +35,14 @@ export const getJourneySteps: UMElasticsearchQueryFn<GetJourneyStepsParams, Ping
           ],
         },
       },
+      sort: [{ 'synthetics.step.index': { order: 'asc' } }, { '@timestamp': { order: 'asc' } }],
       _source: {
         excludes: ['synthetics.blob'],
       },
     },
     size: 500,
   };
-  const result = await callES('search', params);
+  const { body: result } = await callES.search(params);
   const screenshotIndexes: number[] = result.hits.hits
     .filter((h: any) => h?._source?.synthetics?.type === 'step/screenshot')
     .map((h: any) => h?._source?.synthetics?.step?.index);

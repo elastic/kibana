@@ -11,6 +11,13 @@ values.
 . Enter a new value for the setting.
 . Click *Save changes*.
 
+[float]
+=== Required permissions
+
+The `Advanced Settings` {kib} privilege is required to access *Advanced Settings*.
+
+To add the privilege, open the menu, then click *Stack Management > Roles*.
+
 
 [float]
 [[settings-read-only-access]]

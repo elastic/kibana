@@ -56,7 +56,7 @@ export const applyDeltaToColumnWidth = actionCreator<{
   delta: number;
 }>('APPLY_DELTA_TO_COLUMN_WIDTH');
 
-export const createTimeline = actionCreator<{
+export interface TimelineInput {
   id: string;
   dataProviders?: DataProvider[];
   dateRange?: {
@@ -76,9 +76,13 @@ export const createTimeline = actionCreator<{
   sort?: Sort;
   showCheckboxes?: boolean;
   timelineType?: TimelineTypeLiteral;
-  templateTimelineId?: string;
-  templateTimelineVersion?: number;
-}>('CREATE_TIMELINE');
+  templateTimelineId?: string | null;
+  templateTimelineVersion?: number | null;
+}
+
+export const saveTimeline = actionCreator<TimelineInput>('SAVE_TIMELINE');
+
+export const createTimeline = actionCreator<TimelineInput>('CREATE_TIMELINE');
 
 export const pinEvent = actionCreator<{ id: string; eventId: string }>('PIN_EVENT');
 
@@ -174,9 +178,11 @@ export const updateHighlightedDropAndProviderId = actionCreator<{
   providerId: string;
 }>('UPDATE_DROP_AND_PROVIDER');
 
-export const updateDescription = actionCreator<{ id: string; description: string }>(
-  'UPDATE_DESCRIPTION'
-);
+export const updateDescription = actionCreator<{
+  id: string;
+  description: string;
+  disableAutoSave?: boolean;
+}>('UPDATE_DESCRIPTION');
 
 export const updateKqlMode = actionCreator<{ id: string; kqlMode: KqlMode }>('UPDATE_KQL_MODE');
 
@@ -205,7 +211,9 @@ export const updateItemsPerPageOptions = actionCreator<{
   itemsPerPageOptions: number[];
 }>('UPDATE_ITEMS_PER_PAGE_OPTIONS');
 
-export const updateTitle = actionCreator<{ id: string; title: string }>('UPDATE_TITLE');
+export const updateTitle = actionCreator<{ id: string; title: string; disableAutoSave?: boolean }>(
+  'UPDATE_TITLE'
+);
 
 export const updatePageIndex = actionCreator<{ id: string; activePage: number }>(
   'UPDATE_PAGE_INDEX'

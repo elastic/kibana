@@ -18,11 +18,21 @@ target
 .idea
 *.iml
 *.log
+
+# Ignore certain functional test runner artifacts
 /test/*/failure_debug
 /test/*/screenshots/diff
 /test/*/screenshots/failure
 /test/*/screenshots/session
 /test/*/screenshots/visual_regression_gallery.html
+
+# Ignore the same artifacts in x-pack
+/x-pack/test/*/failure_debug
+/x-pack/test/*/screenshots/diff
+/x-pack/test/*/screenshots/failure
+/x-pack/test/*/screenshots/session
+/x-pack/test/*/screenshots/visual_regression_gallery.html
+
 /html_docs
 .eslintcache
 /plugins/
@@ -56,6 +66,8 @@ npm-debug.log*
 # apm plugin
 /x-pack/plugins/apm/tsconfig.json
 apm.tsconfig.json
+## @cypress/snapshot from apm plugin
+snapshots.js
 
 # release notes script output
 report.csv

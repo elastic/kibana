@@ -7,6 +7,7 @@
 import { ParamsSchema, Params } from './alert_type_params';
 import { runTests } from './lib/core_query_types.test';
 import { TypeOf } from '@kbn/config-schema';
+import type { Writable } from '@kbn/utility-types';
 
 const DefaultParams: Writable<Partial<Params>> = {
   index: 'index-name',

@@ -20,10 +20,11 @@
   "rule_id": "809b70d3-e2c3-455e-af1b-2626a5a1a276",
   "severity": "low",
   "tags": [
-    "AWS",
     "Elastic",
+    "Cloud",
+    "AWS",
     "ML"
   ],
   "type": "machine_learning",
-  "version": 1
+  "version": 2
 }

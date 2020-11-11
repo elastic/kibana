@@ -3,17 +3,20 @@
 exports[`view_type_toggle ViewTypeToggle should render grid selection correctly 1`] = `
 <EuiButtonGroup
   color="primary"
-  data-test-subj="viewTypeToggleButton"
+  data-test-subj="viewTypeToggleButtonGroup"
   idSelected="grid"
+  legend="View type"
   onChange={[Function]}
   options={
     Array [
       Object {
+        "data-test-subj": "viewTypeToggleButton",
         "iconType": "grid",
         "id": "grid",
         "label": "Grid view",
       },
       Object {
+        "data-test-subj": "viewTypeToggleButton",
         "iconType": "list",
         "id": "list",
         "label": "List view",
@@ -26,17 +29,20 @@ exports[`view_type_toggle ViewTypeToggle should render grid selection correctly 
 exports[`view_type_toggle ViewTypeToggle should render list selection correctly 1`] = `
 <EuiButtonGroup
   color="primary"
-  data-test-subj="viewTypeToggleButton"
+  data-test-subj="viewTypeToggleButtonGroup"
   idSelected="list"
+  legend="View type"
   onChange={[Function]}
   options={
     Array [
       Object {
+        "data-test-subj": "viewTypeToggleButton",
         "iconType": "grid",
         "id": "grid",
         "label": "Grid view",
       },
       Object {
+        "data-test-subj": "viewTypeToggleButton",
         "iconType": "list",
         "id": "list",
         "label": "List view",

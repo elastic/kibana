@@ -11,9 +11,10 @@ import { EuiPageBody, EuiPageContent, EuiTitle } from '@elastic/eui';
 import { TemplateDeserialized } from '../../../../common';
 import { TemplateForm, SectionLoading, SectionError, Error } from '../../components';
 import { breadcrumbService } from '../../services/breadcrumbs';
-import { decodePathFromReactRouter, getTemplateDetailsLink } from '../../services/routing';
+import { getTemplateDetailsLink } from '../../services/routing';
 import { saveTemplate, useLoadIndexTemplate } from '../../services/api';
 import { getIsLegacyFromQueryParams } from '../../lib/index_templates';
+import { attemptToURIDecode } from '../../../shared_imports';
 
 interface MatchParams {
   name: string;
@@ -26,7 +27,7 @@ export const TemplateClone: React.FunctionComponent<RouteComponentProps<MatchPar
   location,
   history,
 }) => {
-  const decodedTemplateName = decodePathFromReactRouter(name);
+  const decodedTemplateName = attemptToURIDecode(name)!;
   const isLegacy = getIsLegacyFromQueryParams(location);
 
   const [isSaving, setIsSaving] = useState<boolean>(false);

@@ -47,7 +47,6 @@ export const ExpressionWithPopover: ({
       isOpen={popoverOpen}
       closePopover={() => setPopoverOpen(false)}
       ownFocus
-      withTitle
       anchorPosition="downLeft"
       zIndex={8000}
       display="block"

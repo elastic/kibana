@@ -8,6 +8,7 @@ import React from 'react';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { EuiComboBox } from '@elastic/eui';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { RoleSelector } from './role_selector';
 import { Role, RoleMapping } from '../../../../../common/model';
 import { RoleTemplateEditor } from './role_template_editor';

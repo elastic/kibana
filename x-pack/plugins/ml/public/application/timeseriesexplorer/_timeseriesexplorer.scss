@@ -37,25 +37,6 @@
     }
   }
 
-  .series-controls {
-    div.entity-controls {
-      display: inline-block;
-      padding-left: $euiSize;
-
-      input.entity-input-blank {
-        border-color: $euiColorDanger;
-      }
-
-      .entity-input {
-        width: 300px;
-      }
-    }
-
-    button {
-      margin-left: $euiSizeXS;
-    }
-  }
-
   .forecast-controls {
     float: right;
   }

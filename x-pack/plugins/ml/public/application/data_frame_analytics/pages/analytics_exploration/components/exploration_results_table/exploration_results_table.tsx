@@ -29,7 +29,7 @@ interface Props {
 }
 
 export const ExplorationResultsTable: FC<Props> = React.memo(
-  ({ indexPattern, jobConfig, jobStatus, needsDestIndexPattern, searchQuery }) => {
+  ({ indexPattern, jobConfig, needsDestIndexPattern, searchQuery }) => {
     const {
       services: {
         mlServices: { mlApiServices },

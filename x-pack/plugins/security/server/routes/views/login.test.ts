@@ -100,7 +100,7 @@ describe('Login view routes', () => {
           auth: { isAuthenticated: true },
         });
         (request as any).url = new URL(
-          `${request.url.path}${request.url.search}`,
+          `${request.url.pathname}${request.url.search}`,
           'https://kibana.co'
         );
         license.getFeatures.mockReturnValue({ showLogin: true } as any);
@@ -114,7 +114,7 @@ describe('Login view routes', () => {
         // Redirect if `showLogin` is `false` even if user is not authenticated.
         request = httpServerMock.createKibanaRequest({ query, auth: { isAuthenticated: false } });
         (request as any).url = new URL(
-          `${request.url.path}${request.url.search}`,
+          `${request.url.pathname}${request.url.search}`,
           'https://kibana.co'
         );
         license.getFeatures.mockReturnValue({ showLogin: false } as any);

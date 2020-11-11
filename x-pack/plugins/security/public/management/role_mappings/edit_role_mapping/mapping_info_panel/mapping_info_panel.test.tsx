@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { findTestSubject } from 'test_utils/find_test_subject';
 import { Role, RoleMapping } from '../../../../../common/model';

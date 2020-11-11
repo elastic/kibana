@@ -21,16 +21,17 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
   public setup(core: CoreSetup, { alerts, features }: AlertingExampleDeps) {
     createNoopAlertType(alerts);
     createAlwaysFiringAlertType(alerts);
+    createFailingAlertType(alerts);
     features.registerKibanaFeature({
       id: 'alerting_fixture',
       name: 'alerting_fixture',
       app: [],
       category: { id: 'foo', label: 'foo' },
-      alerting: ['test.always-firing', 'test.noop'],
+      alerting: ['test.always-firing', 'test.noop', 'test.failing'],
       privileges: {
         all: {
           alerting: {
-            all: ['test.always-firing', 'test.noop'],
+            all: ['test.always-firing', 'test.noop', 'test.failing'],
           },
           savedObject: {
             all: [],
@@ -40,7 +41,7 @@ export class AlertingFixturePlugin implements Plugin<void, void, AlertingExample
         },
         read: {
           alerting: {
-            all: ['test.always-firing', 'test.noop'],
+            all: ['test.always-firing', 'test.noop', 'test.failing'],
           },
           savedObject: {
             all: [],
@@ -77,6 +78,7 @@ function createAlwaysFiringAlertType(alerts: AlertingSetup) {
       { id: 'default', name: 'Default' },
       { id: 'other', name: 'Other' },
     ],
+    defaultActionGroupId: 'default',
     producer: 'alerts',
     async executor(alertExecutorOptions: any) {
       const { services, state, params } = alertExecutorOptions;
@@ -95,4 +97,23 @@ function createAlwaysFiringAlertType(alerts: AlertingSetup) {
     },
   };
   alerts.registerType(alwaysFiringAlertType);
+}
+
+function createFailingAlertType(alerts: AlertingSetup) {
+  const failingAlertType: any = {
+    id: 'test.failing',
+    name: 'Test: Failing',
+    actionGroups: [
+      {
+        id: 'default',
+        name: 'Default',
+      },
+    ],
+    producer: 'alerts',
+    defaultActionGroupId: 'default',
+    async executor() {
+      throw new Error('Failed to execute alert type');
+    },
+  };
+  alerts.registerType(failingAlertType);
 }

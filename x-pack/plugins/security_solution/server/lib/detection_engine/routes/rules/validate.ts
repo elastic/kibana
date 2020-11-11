@@ -22,6 +22,7 @@ import {
   isAlertType,
   IRuleSavedAttributesSavedObjectAttributes,
   isRuleStatusFindType,
+  IRuleStatusSOAttributes,
 } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
 import { transformFindAlerts, transform, transformAlertToRule } from './utils';
@@ -74,7 +75,7 @@ export const transformValidateBulkError = (
   ruleId: string,
   alert: PartialAlert,
   ruleActions?: RuleActions | null,
-  ruleStatus?: unknown
+  ruleStatus?: SavedObjectsFindResponse<IRuleStatusSOAttributes>
 ): RulesSchema | BulkError => {
   if (isAlertType(alert)) {
     if (isRuleStatusFindType(ruleStatus) && ruleStatus?.saved_objects.length > 0) {
