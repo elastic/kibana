@@ -30,6 +30,9 @@ import { pipe } from 'fp-ts/lib/pipeable';
 // import { retrying } from 'retry-ts/lib/TaskEither';
 import * as Actions from './actions';
 import { IndexMapping } from '../mappings';
+import { Logger } from '../../logging';
+import { SavedObjectsMigrationVersion } from '../types';
+import { SavedObjectsRawDoc, SavedObjectsSerializer } from '..';
 
 export interface BaseState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
@@ -44,6 +47,7 @@ export interface BaseState {
   targetMappings: IndexMapping;
   /** Script to apply to a legacy index before it can be used as a migration source */
   preMigrationScript?: string;
+  migrationVersionPerType: SavedObjectsMigrationVersion;
   retryCount: number;
   retryDelay: number;
   aliases: Record<string, string>;
@@ -92,6 +96,31 @@ export type UpdateTargetMappingsWaitForTaskState = BaseState & {
   updateTargetMappingsTaskId: string;
 };
 
+export type TargetDocumentsSearch = BaseState & {
+  /** Start a scroll search for outdated documents in the target index */
+  controlState: 'TARGET_DOCUMENTS_SEARCH';
+  outdatedDocumentsQuery: Record<string, unknown>;
+};
+
+export type TargetDocumentsScroll = BaseState & {
+  /** Retrieve the next batch of results from the scroll search for outdated documents in the target index */
+  controlState: 'TARGET_DOCUMENTS_SCROLL';
+  transformDocumentsScrollId: string;
+};
+
+export type TargetDocumentsTransform = BaseState & {
+  /** Transform a batch of outdated documents to their latest version and write them to the target index */
+  controlState: 'TARGET_DOCUMENTS_TRANSFORM';
+  outdatedDocuments: SavedObjectsRawDoc[];
+  transformDocumentsScrollId: string;
+};
+
+export type TargetDocumentsClearScroll = BaseState & {
+  /** When there are no more results, clear the scroll */
+  controlState: 'TARGET_DOCUMENTS_CLEAR_SCROLL';
+  transformDocumentsScrollId: string;
+};
+
 /**
  * If there's a legacy index prepare it for migration.
  */
@@ -134,6 +163,10 @@ export type State =
   | CloneSourceState
   | UpdateTargetMappingsState
   | UpdateTargetMappingsWaitForTaskState
+  | TargetDocumentsSearch
+  | TargetDocumentsScroll
+  | TargetDocumentsTransform
+  | TargetDocumentsClearScroll
   | CloneLegacyState
   | SetLegacyWriteBlockState
   | PreMigrateLegacyState
@@ -143,6 +176,7 @@ export type State =
 type Model = (currentState: State, result: Actions.ActionResponse) => State;
 type NextAction = (
   client: ElasticsearchClient,
+  transformRawDocs: () => Promise<SavedObjectsRawDoc[]>,
   state: State
 ) => TaskEither.TaskEither<Actions.ExpectedErrors, Actions.AllResponses> | null;
 
@@ -178,8 +212,10 @@ function mergeMappings(targetMappings: IndexMapping, indexMappings: IndexMapping
   return {
     ...targetMappings,
     _meta: {
-      ...indexMappings._meta,
-      ...targetMappings._meta,
+      migrationMappingPropertyHashes: {
+        ...indexMappings._meta?.migrationMappingPropertyHashes,
+        ...targetMappings._meta?.migrationMappingPropertyHashes,
+      },
     },
   };
 }
@@ -368,6 +404,50 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
     if ('waitForTask' in res.right && Option.isSome(res.right.waitForTask.failures)) {
       return { ...stateP, controlState: 'FATAL' };
     }
+    const outdatedDocumentsQuery = {
+      bool: {
+        should: Object.entries(stateP.migrationVersionPerType).map(([type, latestVersion]) => ({
+          bool: {
+            must: [
+              { exists: { field: type } },
+              {
+                bool: {
+                  must_not: { term: { [`migrationVersion.${type}`]: latestVersion } },
+                },
+              },
+            ],
+          },
+        })),
+      },
+    };
+    return {
+      ...stateP,
+      controlState: 'TARGET_DOCUMENTS_SEARCH',
+      outdatedDocumentsQuery,
+    };
+  } else if (stateP.controlState === 'TARGET_DOCUMENTS_SEARCH') {
+    // If there are no migrations defined, we're done
+    if (Object.keys(stateP.migrationVersionPerType).length <= 0) {
+      return { ...stateP, controlState: 'DONE' };
+    }
+    return {
+      ...stateP,
+      controlState: 'TARGET_DOCUMENTS_SCROLL',
+      transformDocumentsScrollId: '',
+    };
+  } else if (stateP.controlState === 'TARGET_DOCUMENTS_SCROLL') {
+    // TODO: if no results: TARGET_DOCUMENTS_CLEAR_SCROLL
+    return {
+      ...stateP,
+      controlState: 'TARGET_DOCUMENTS_TRANSFORM',
+      outdatedDocuments: [], // TODO
+    };
+  } else if (stateP.controlState === 'TARGET_DOCUMENTS_TRANSFORM') {
+    return {
+      ...stateP,
+      controlState: 'TARGET_DOCUMENTS_SCROLL',
+    };
+  } else if (stateP.controlState === 'TARGET_DOCUMENTS_CLEAR_SCROLL') {
     return { ...stateP, controlState: 'DONE' };
   } else if (stateP.controlState === 'INIT_NEW_INDICES') {
     return { ...stateP, controlState: 'DONE' };
@@ -378,7 +458,7 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
   }
 };
 
-export const next: NextAction = (client, state) => {
+export const next: NextAction = (client, transformRawDocs, state) => {
   // If for every state there is only one action (deterministic) we can define
   // next as a state -> action set.
   const delay = <F extends () => any>(fn: F): (() => ReturnType<F>) => {
@@ -435,6 +515,14 @@ export const next: NextAction = (client, state) => {
   } else if (state.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
     // Wait for the updateTargetMappingsTaskId task to complete
     return Actions.waitForTask(client, state.updateTargetMappingsTaskId, '60s');
+  } else if (state.controlState === 'TARGET_DOCUMENTS_SEARCH') {
+    return delay(Actions.search(client, state.target, state.outdatedDocumentsQuery));
+  } else if (state.controlState === 'TARGET_DOCUMENTS_SCROLL') {
+    // return delay(Actions.updateAndPickupMappings(client, state.target, state.targetMappings));
+  } else if (state.controlState === 'TARGET_DOCUMENTS_TRANSFORM') {
+    // return delay(Actions.updateAndPickupMappings(client, state.target, state.targetMappings));
+  } else if (state.controlState === 'TARGET_DOCUMENTS_CLEAR_SCROLL') {
+    // return delay(Actions.updateAndPickupMappings(client, state.target, state.targetMappings));
   } else if (state.controlState === 'PRE_MIGRATE_LEGACY') {
     // Start an update by query to pre-migrate the source index using the
     // supplied script.
@@ -489,19 +577,36 @@ export const next: NextAction = (client, state) => {
  * When there are no more actions returned by `next` the state-action machine
  * terminates.
  */
-export async function migrationStateMachine(client: ElasticsearchClient, kibanaVersion: string) {
+export async function migrationStateMachine({
+  client,
+  kibanaVersion,
+  targetMappings,
+  logger,
+  preMigrationScript,
+  transformRawDocs,
+  migrationVersionPerType,
+  indexPrefix,
+}: {
+  client: ElasticsearchClient;
+  kibanaVersion: string;
+  targetMappings: IndexMapping;
+  preMigrationScript?: string;
+  logger: Logger;
+  serializer: SavedObjectsSerializer;
+  transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>;
+  migrationVersionPerType: SavedObjectsMigrationVersion;
+  indexPrefix: string;
+}) {
   let state: State = {
-    indexPrefix: '.kibana',
+    indexPrefix,
     controlState: 'INIT',
     kibanaVersion,
     aliases: {},
     source: '',
+    preMigrationScript,
     target: '',
-    targetMappings: {
-      dynamic: 'strict',
-      properties: {},
-      _meta: { migrationMappingPropertyHashes: { test: 'migration' } },
-    },
+    targetMappings,
+    migrationVersionPerType,
     retryCount: 0,
     retryDelay: 0,
     log: [],
@@ -527,9 +632,9 @@ export async function migrationStateMachine(client: ElasticsearchClient, kibanaV
       throw new Error("Control state didn't change after 10 steps aborting.");
     }
     state = newState;
-    console.log(chalk.magentaBright('STATE\n'), state);
+    console.log(chalk.magentaBright('STATE\n'), state.controlState);
 
-    nextTask = next(client, state);
+    nextTask = next(client, transformRawDocs, state);
   }
 
   console.log(chalk.greenBright('DONE\n'), state);

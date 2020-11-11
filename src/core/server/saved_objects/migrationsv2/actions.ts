@@ -23,8 +23,13 @@ import * as Option from 'fp-ts/lib/Option';
 import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '../../elasticsearch';
+import {
+  ElasticsearchClient,
+  SearchResponse as ElasticSearchResponse,
+  ShardsResponse,
+} from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
+import { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../serialization';
 
 export type AllResponses =
   | CloneIndexResponse
@@ -310,9 +315,9 @@ export const updateByQuery = (
       // Return an error when targeting missing or closed indices
       allow_no_indices: false,
       index,
-      // Set batch size to 100 (this is what we used for v1 migrations)
-      // TODO: profile batch size to see how much of an impact it makes
-      size: 100,
+      // For v1 migrations we reindexed using a batch size of 100 documents
+      // TODO: profile performance to see how much difference `scroll_size` makes
+      scroll_size: 100,
       body: {
         script:
           script != null
@@ -570,6 +575,76 @@ export const updateAndPickupMappings = (
       return { updateAndPickupMappings: { taskId: res.updateByQuery.taskId } };
     })
   );
+};
+
+interface ElasticSearchResponse {
+  took: number;
+  timed_out: boolean;
+  _scroll_id: string;
+  _shards: ShardsResponse;
+  hits: {
+    total: number;
+    max_score: number;
+    hits: SavedObjectsRawDoc[];
+  };
+}
+
+export interface SearchResponse {
+  scrollId: string;
+  docs: SavedObjectsRawDoc[];
+}
+
+export const search = (
+  client: ElasticsearchClient,
+  index: string,
+  query: Record<string, unknown>
+): TaskEither.TaskEither<ExpectedErrors | Error, SearchResponse> => () => {
+  return client
+    .search<ElasticSearchResponse>({
+      index,
+      // How long to keep the scroll context alive. This only needs to be long
+      // enough to process a single batch since every new scroll request will
+      // reset this scroll's expiry.
+      // Because we transform and write each batch before reading the next
+      // batch this needs to be long enough to complete the bulk update and
+      // potentially retry transient failures.
+      // TODO (profile/tune this parameter):
+      //  - Can we make it smaller? How do migrations behave when the scroll expires
+      //  - Is it too large? How do migrations behave when we go into a bootloop and
+      // continuously open new scroll requests?
+      scroll: '5m',
+      // Disable total hits so ES doesn't need to visit every match just to
+      // return a page
+      track_total_hits: false,
+      // Scroll searches have optimizations that make them faster when the
+      // sort order is _doc (the "natural" index order).
+      sort: ['_doc'],
+      // Return the _seq_no and _primary_term so we can use optimistic
+      // concurrency control for updates
+      seq_no_primary_term: true,
+      // Return batches of 100 documents
+      // TODO (profile/tune): Although smaller batches might be less efficient
+      // it reduces the time to process a single batch thus reducing the
+      // likelihood that our scroll expires.
+      size: 100,
+      body: {
+        query,
+      },
+      // Reduce the response payload size by only returning the data we care about
+      filter_path: 'hits.hits._id,hits.hits._source,hits.hits._version',
+    })
+    .then((res) => {
+      // Check that all shards successfully executed the query
+      // Kibana uses a single shard by default but users can override this
+      if (res.body._shards.successful < res.body._shards.total) {
+        return Either.left(new Error('Search request did not successfully execute on all shards'));
+      }
+      if (res.body.timed_out) {
+        return Either.left(new Error('Search request timeout'));
+      }
+      return Either.right({ scrollId: res.body._scroll_id, docs: res.body.hits.hits });
+    })
+    .catch(catchRetryableEsClientErrors);
 };
 
 /**

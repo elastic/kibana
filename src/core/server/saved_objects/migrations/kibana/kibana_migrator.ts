@@ -25,24 +25,38 @@
 import { KibanaConfigType } from 'src/core/server/kibana_config';
 import { BehaviorSubject } from 'rxjs';
 
+import { ElasticsearchClient, IClusterClient } from 'src/core/server/elasticsearch';
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
-import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
-import { buildActiveMappings, IndexMigrator, MigrationResult, MigrationStatus } from '../core';
+import {
+  SavedObjectUnsanitizedDoc,
+  SavedObjectsSerializer,
+  SavedObjectsRawDoc,
+} from '../../serialization';
+import {
+  buildActiveMappings,
+  createMigrationEsClient,
+  IndexMigrator,
+  MigrationResult,
+  MigrationStatus,
+} from '../core';
 import { DocumentMigrator, VersionedTransformer } from '../core/document_migrator';
-import { MigrationEsClient } from '../core/';
 import { createIndexMap } from '../core/build_index_map';
 import { SavedObjectsMigrationConfigType } from '../../saved_objects_config';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { SavedObjectsType } from '../../types';
+import { migrationStateMachine } from '../../migrationsv2';
+import { migrateRawDocs } from '../core/migrate_raw_docs';
+import { MigrationLogger } from '../core/migration_logger';
 
 export interface KibanaMigratorOptions {
-  client: MigrationEsClient;
+  client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
   savedObjectsConfig: SavedObjectsMigrationConfigType;
   kibanaConfig: KibanaConfigType;
   kibanaVersion: string;
   logger: Logger;
+  migrationsRetryDelay?: number;
 }
 
 export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
@@ -56,7 +70,7 @@ export interface KibanaMigratorStatus {
  * Manages the shape of mappings and documents in the Kibana index.
  */
 export class KibanaMigrator {
-  private readonly client: MigrationEsClient;
+  private readonly client: ElasticsearchClient;
   private readonly savedObjectsConfig: SavedObjectsMigrationConfigType;
   private readonly documentMigrator: VersionedTransformer;
   private readonly kibanaConfig: KibanaConfigType;
@@ -69,6 +83,8 @@ export class KibanaMigrator {
     status: 'waiting',
   });
   private readonly activeMappings: IndexMapping;
+  private migrationsRetryDelay?: number;
+  private kibanaVersion: string;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -80,6 +96,7 @@ export class KibanaMigrator {
     savedObjectsConfig,
     kibanaVersion,
     logger,
+    migrationsRetryDelay,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaConfig = kibanaConfig;
@@ -88,6 +105,7 @@ export class KibanaMigrator {
     this.serializer = new SavedObjectsSerializer(this.typeRegistry);
     this.mappingProperties = mergeTypes(this.typeRegistry.getAllTypes());
     this.log = logger;
+    this.kibanaVersion = kibanaVersion;
     this.documentMigrator = new DocumentMigrator({
       kibanaVersion,
       typeRegistry,
@@ -96,6 +114,7 @@ export class KibanaMigrator {
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
+    this.migrationsRetryDelay = migrationsRetryDelay;
   }
 
   /**
@@ -151,21 +170,50 @@ export class KibanaMigrator {
     });
 
     const migrators = Object.keys(indexMap).map((index) => {
-      return new IndexMigrator({
-        batchSize: this.savedObjectsConfig.batchSize,
-        client: this.client,
-        documentMigrator: this.documentMigrator,
-        index,
-        log: this.log,
-        mappingProperties: indexMap[index].typeMappings,
-        pollInterval: this.savedObjectsConfig.pollInterval,
-        scrollDuration: this.savedObjectsConfig.scrollDuration,
-        serializer: this.serializer,
-        // Only necessary for the migrator of the kibana index.
-        obsoleteIndexTemplatePattern:
-          index === kibanaIndexName ? 'kibana_index_template*' : undefined,
-        convertToAliasScript: indexMap[index].script,
-      });
+      if (true) {
+        return {
+          migrate: (): Promise<MigrationResult> => {
+            return migrationStateMachine({
+              client: this.client,
+              kibanaVersion: this.kibanaVersion,
+              targetMappings: buildActiveMappings(indexMap[index].typeMappings),
+              logger: this.log,
+              preMigrationScript: indexMap[index].script,
+              serializer: this.serializer,
+              transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
+                migrateRawDocs(
+                  this.serializer,
+                  this.documentMigrator.migrate,
+                  rawDocs,
+                  new MigrationLogger(this.log)
+                ),
+              migrationVersionPerType: this.documentMigrator.migrationVersion,
+              indexPrefix: index,
+            }).then((res) => ({
+              status: 'migrated' as 'migrated',
+              destIndex: 'target',
+              sourceIndex: 'source',
+              elapsedMs: 0,
+            }));
+          },
+        };
+      } else {
+        return new IndexMigrator({
+          batchSize: this.savedObjectsConfig.batchSize,
+          client: createMigrationEsClient(this.client, this.log, this.migrationsRetryDelay),
+          documentMigrator: this.documentMigrator,
+          index,
+          log: this.log,
+          mappingProperties: indexMap[index].typeMappings,
+          pollInterval: this.savedObjectsConfig.pollInterval,
+          scrollDuration: this.savedObjectsConfig.scrollDuration,
+          serializer: this.serializer,
+          // Only necessary for the migrator of the kibana index.
+          obsoleteIndexTemplatePattern:
+            index === kibanaIndexName ? 'kibana_index_template*' : undefined,
+          convertToAliasScript: indexMap[index].script,
+        });
+      }
     });
 
     return Promise.all(migrators.map((migrator) => migrator.migrate()));

@@ -27,7 +27,6 @@ import { SavedObjectsMigrationVersion, SavedObjectReference } from '../types';
 export interface SavedObjectsRawDoc {
   _id: string;
   _source: SavedObjectsRawDocSource;
-  _type?: string;
   _seq_no?: number;
   _primary_term?: number;
 }
