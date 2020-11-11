@@ -29,7 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
           job: {
             id: `bm_fi_binary_${timestamp}`,
             description:
-              "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '50'",
+              "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '35'",
             source: {
               index: ['ft_bank_marketing'],
               query: {
@@ -46,7 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
               classification: {
                 prediction_field_name: 'test',
                 dependent_variable: 'y',
-                training_percent: 50,
+                training_percent: 35,
                 num_top_feature_importance_values: 5,
               },
             },
@@ -75,7 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
           job: {
             id: `bm_fi_multi_${timestamp}`,
             description:
-              "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '50'",
+              "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '35'",
             source: {
               index: ['ft_bank_marketing'],
               query: {
@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
               classification: {
                 prediction_field_name: 'test',
                 dependent_variable: 'y',
-                training_percent: 50,
+                training_percent: 35,
                 num_top_feature_importance_values: 5,
                 num_top_classes: 5,
               },
@@ -152,7 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
                 prediction_field_name: 'test',
                 dependent_variable: 'stab',
                 num_top_feature_importance_values: 5,
-                training_percent: 50,
+                training_percent: 35,
               },
             },
             analyzed_fields: {
