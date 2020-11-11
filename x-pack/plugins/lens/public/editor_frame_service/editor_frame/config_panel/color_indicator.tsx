@@ -17,19 +17,17 @@ export function ColorIndicator({
 }) {
   return (
     <EuiFlexGroup gutterSize="none" alignItems="center">
-      {typeof accessorConfig !== 'string' &&
-        accessorConfig.triggerIcon === 'color' &&
-        accessorConfig.color && (
-          <EuiFlexItem grow={false}>
-            <div
-              className="lnsLayerPanel__colorIndicator lnsLayerPanel__colorIndicator--solidColor"
-              style={{
-                backgroundColor: accessorConfig.color,
-              }}
-            />
-          </EuiFlexItem>
-        )}
-      {typeof accessorConfig !== 'string' && accessorConfig.triggerIcon === 'disabled' && (
+      {accessorConfig.triggerIcon === 'color' && accessorConfig.color && (
+        <EuiFlexItem grow={false}>
+          <div
+            className="lnsLayerPanel__colorIndicator lnsLayerPanel__colorIndicator--solidColor"
+            style={{
+              backgroundColor: accessorConfig.color,
+            }}
+          />
+        </EuiFlexItem>
+      )}
+      {accessorConfig.triggerIcon === 'disabled' && (
         <EuiFlexItem grow={false}>
           <EuiIcon
             type="stopSlash"
@@ -39,7 +37,7 @@ export function ColorIndicator({
           />
         </EuiFlexItem>
       )}
-      {typeof accessorConfig !== 'string' && accessorConfig.triggerIcon === 'colorBy' && (
+      {accessorConfig.triggerIcon === 'colorBy' && (
         <EuiFlexItem grow={false}>
           <EuiIcon type="brush" color="text" size="s" className="lnsLayerPanel__colorIndicator" />
         </EuiFlexItem>

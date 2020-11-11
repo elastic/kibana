@@ -9,12 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AccessorConfig } from '../../../types';
 
 export function PaletteIndicator({ accessorConfig }: { accessorConfig: AccessorConfig }) {
-  if (
-    typeof accessorConfig === 'string' ||
-    accessorConfig.triggerIcon !== 'colorBy' ||
-    !accessorConfig.palette
-  )
-    return null;
+  if (accessorConfig.triggerIcon !== 'colorBy' || !accessorConfig.palette) return null;
   return (
     <EuiFlexGroup className="lnsLayerPanel__paletteContainer" gutterSize="none" alignItems="center">
       {accessorConfig.palette.map((color) => (
