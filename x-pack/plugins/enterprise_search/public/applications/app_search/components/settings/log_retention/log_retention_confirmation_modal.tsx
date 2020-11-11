@@ -16,10 +16,10 @@ import { LogRetentionLogic } from './log_retention_logic';
 import { ELogRetentionOptions } from './types';
 
 export const LogRetentionConfirmationModal: React.FC = () => {
-  const CANNOT_BE_RECOVERED = i18n.translate(
+  const CANNOT_BE_RECOVERED_TEXT = i18n.translate(
     'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.recovery',
     {
-      defaultMessage: 'cannot be recovered',
+      defaultMessage: 'Once your data has been removed, it cannot be recovered.',
     }
   );
 
@@ -66,17 +66,20 @@ export const LogRetentionConfirmationModal: React.FC = () => {
           }
           description={
             <>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.analytics.description',
-                {
-                  defaultMessage:
-                    'When disabling Analytics Logs, all your engines will immediately stop indexing Analytics Logs. Your existing data will be deleted in accordance with the storage timeframes outlined above. Once your data has been removed, it',
-                }
-              )}{' '}
-              <strong>
-                <EuiTextColor color="danger">{CANNOT_BE_RECOVERED}</EuiTextColor>
-              </strong>
-              .
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.analytics.description',
+                  {
+                    defaultMessage:
+                      'When disabling Analytics Logs, all your engines will immediately stop indexing Analytics Logs. Your existing data will be deleted in accordance with the storage timeframes outlined above.',
+                  }
+                )}
+              </p>
+              <p>
+                <strong>
+                  <EuiTextColor color="danger">{CANNOT_BE_RECOVERED_TEXT}</EuiTextColor>
+                </strong>
+              </p>
             </>
           }
           target={DISABLE_TEXT}
@@ -108,17 +111,20 @@ export const LogRetentionConfirmationModal: React.FC = () => {
           }
           description={
             <>
-              {i18n.translate(
-                'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.api.description',
-                {
-                  defaultMessage:
-                    'When disabling API Logs, all your engines will immediately stop indexing API Logs. Your existing data will be deleted in accordance with the storage timeframes outlined above. Once your data has been removed, it',
-                }
-              )}{' '}
-              <strong>
-                <EuiTextColor color="danger">{CANNOT_BE_RECOVERED}</EuiTextColor>
-              </strong>
-              .
+              <p>
+                {i18n.translate(
+                  'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.api.description',
+                  {
+                    defaultMessage:
+                      'When disabling API Logs, all your engines will immediately stop indexing API Logs. Your existing data will be deleted in accordance with the storage timeframes outlined above.',
+                  }
+                )}
+              </p>
+              <p>
+                <strong>
+                  <EuiTextColor color="danger">{CANNOT_BE_RECOVERED_TEXT}</EuiTextColor>
+                </strong>
+              </p>
             </>
           }
           target={DISABLE_TEXT}
