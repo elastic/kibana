@@ -1,96 +1,9 @@
-[[url-drilldown]]
-=== URL drilldown
+[[url_templating]]
+=== URL templating
 
 beta[]
 
-The URL drilldown allows you to navigate from a dashboard to an internal or external URL.
-The destination URL can be dynamic, depending on the dashboard context or user’s interaction with a visualization.
-
-For example, you might have a dashboard that shows data from a Github repository.
-You can create a drilldown that navigates from this dashboard to Github.
-
-[role="screenshot"]
-image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigates to Github]
-
-NOTE: URL drilldown is available with the https://www.elastic.co/subscriptions[Gold subscription] and higher.
-
-[float]
-[[url-drilldown-supported-panels]]
-==== Supported panels
-
-The following panels support URL drilldowns:
-
-* Lens
-* Area
-* Data table
-* Heat map
-* Horizontal bar
-* Line
-* Pie
-* Tag cloud
-* Vertical bar
-
-[float]
-[[try-it]]
-==== Try it: Create a URL drilldown
-
-This example shows how to create the "Show on Github" drilldown shown above.
-
-. Add the sample web logs data set.
-. Open the *[Logs] Web traffic* dashboard. This isn’t data from Github, but it should work for demonstration purposes.
-. In the dashboard menu bar, click *Edit*.
-. In *[Logs] Visitors by OS*, open the panel menu, and then select *Create drilldown*.
-. Give the drilldown a name: *Show on Github*.
-. Select a drilldown action: *Go to URL*.
-+
-[role="screenshot"]
-image:images/url_drilldown_pick_an_action.png[Action picker]
-. Enter a URL template: 
-+
-[source, bash]
-----
-https://github.com/elastic/kibana/issues?q=is:issue+is:open+{{event.value}}
-----
-+
-This example URL navigates to {kib} issues on Github. `{{event.value}}` will be substituted with a value associated with a clicked pie slice. In _preview_ `{{event.value}}` is substituted with a <<values-in-preview, dummy>> value.
-[role="screenshot"]
-image:images/url_drilldown_url_template.png[URL template input]
-. Click *Create drilldown*.
-. Save the dashboard.
-+
-If you don’t save the drilldown, and then navigate away, the drilldown is lost.
-
-. In *[Logs] Visitors by OS*, click any slice of the pie, and then select the drilldown *Show on Github*.
-+
-[role="screenshot"]
-image:images/url_drilldown_popup.png[URL drilldown popup]
-+
-You are navigated to the issue list in the {kib} repository. Verify that value from a pie slice you’ve clicked on is carried over to Github.
-+
-[role="screenshot"]
-image:images/url_drilldown_github.png[Github]
-
-[float]
-[[trigger-picker]]
-==== Picking a trigger for a URL drilldown
-
-Some panels support multiple user interactions (called triggers) for which you can configure a URL drilldown. The list of supported variables in the URL template depends on the trigger you selected.
-In the preceding example, you configured a URL drilldown on a pie chart. The only trigger that pie chart supports is clicking on a pie slice, so you didn’t have to pick a trigger.
-
-However, the sample *[Logs] Unique Visitors vs. Average Bytes* chart supports both clicking on a data point and selecting a range. When you create a URL drilldown for this  chart, you have the following choices:
-
-[role="screenshot"]
-image:images/url_drilldown_trigger_picker.png[Trigger picker: Single click and Range selection]
-
-Variables in the URL template differ per trigger. 
-For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`. 
-You can create multiple URL drilldowns per panel and attach them to different triggers.
-
-[float]
-[[templating]]
-==== URL templating language
-
-The URL template input uses Handlebars — a simple templating language. Handlebars templates look like regular text with embedded Handlebars expressions.
+The URL template input uses https://handlebarsjs.com/guide/expressions.html#expressions[Handlebars] — a simple templating language. Handlebars templates look like regular text with embedded Handlebars expressions.
 
 [source, bash]
 ----
@@ -99,14 +12,13 @@ https://github.com/elastic/kibana/issues?q={{event.value}}
 
 A Handlebars expression is a `{{`, some contents, followed by a `}}`. When the drilldown is executed, these expressions are replaced by values from the dashboard and interaction context.
 
-Refer to Handlebars https://handlebarsjs.com/guide/expressions.html#expressions[documentation] to learn about advanced use cases.
-
 [[helpers]]
-In addition to https://handlebarsjs.com/guide/builtin-helpers.html[built-in] Handlebars helpers, you can use the following custom helpers:
+In addition to https://handlebarsjs.com/guide/builtin-helpers.html[built-in] Handlebars helpers, you can use custom helpers.
 
+Refer to Handlebars https://ela.st/handlebars-docs#expressions[documentation] to learn about advanced use cases.
 
 |===
-|Helper |Use case
+|Custom helper |Use case
 
 |json
 a|Serialize variables in JSON format.
@@ -133,7 +45,7 @@ a|Format dates. Supports relative dates expressions (for example,  "now-15d"). R
 
 Example:
 
-`{{ date event.from “YYYY MM DD”}}` +
+`{{date event.from “YYYY MM DD”}}` +
 `{{date “now-15”}}`
 |===
 
@@ -154,7 +66,7 @@ For example, `{{context.panel.filters}}` are previewed with the current filters 
 *Event* variables are extracted during drilldown execution from a user interaction with a panel (for example, from a pie slice that the user clicked on).
 
 Because there is no user interaction with a panel in preview, there is no interaction context to use in a preview.
-To work around this, {kib} provides a sample interaction that relies on a picked <<trigger-picker, trigger>>.
+To work around this, {kib} provides a sample interaction that relies on a trigger.
 So in a preview, you might notice that `{{event.value}}` is replaced with `{{event.value}}` instead of with a sample from your data.
 Such previews can help you make sure that the structure of your URL template is valid.
 However, to ensure that the configured URL drilldown works as expected with your data, you have to save the dashboard and test in the panel.
@@ -254,14 +166,3 @@ Tip: Consider using <<helpers, date>> helper for date formatting.
 | Aggregation field behind the selected range, if available.
 
 |===
-
-[float]
-[[disable]]
-==== Disable URL drilldown
-
-You can disable URL drilldown feature on your {kib} instance by disabling the plugin:
-
-["source","yml"]
------------
-url_drilldown.enabled: false
------------
