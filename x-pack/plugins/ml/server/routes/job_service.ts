@@ -18,6 +18,7 @@ import {
   topCategoriesSchema,
   updateGroupsSchema,
   revertModelSnapshotSchema,
+  jobsExistSchema,
 } from './schemas/job_service_schema';
 
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
@@ -400,17 +401,18 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
   /**
    * @apiGroup JobService
    *
-   * @api {post} /api/ml/jobs/jobs_exist Check if jobs exist
+   * @api {post} /api/ml/jobs/jobs_exist Check whether jobs exists in current or any space
    * @apiName JobsExist
-   * @apiDescription Checks if each of the jobs in the specified list of IDs exist
+   * @apiDescription Checks if each of the jobs in the specified list of IDs exist.
+   *                 If allSpaces is true, the check will look across all spaces.
    *
-   * @apiSchema (body) jobIdsSchema
+   * @apiSchema (body) jobsExistSchema
    */
   router.post(
     {
       path: '/api/ml/jobs/jobs_exist',
       validate: {
-        body: jobIdsSchema,
+        body: jobsExistSchema,
       },
       options: {
         tags: ['access:ml:canGetJobs'],
@@ -419,8 +421,8 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
       try {
         const { jobsExist } = jobServiceProvider(client, mlClient);
-        const { jobIds } = request.body;
-        const resp = await jobsExist(jobIds);
+        const { jobIds, allSpaces } = request.body;
+        const resp = await jobsExist(jobIds, allSpaces);
 
         return response.ok({
           body: resp,

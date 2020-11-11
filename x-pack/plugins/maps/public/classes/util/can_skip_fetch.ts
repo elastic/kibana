@@ -84,9 +84,13 @@ export async function canSkipSourceUpdate({
     return false;
   }
 
+  let updateDueToApplyGlobalTime = false;
   let updateDueToTime = false;
   if (timeAware) {
-    updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
+    updateDueToApplyGlobalTime = prevMeta.applyGlobalTime !== nextMeta.applyGlobalTime;
+    if (nextMeta.applyGlobalTime) {
+      updateDueToTime = !_.isEqual(prevMeta.timeFilters, nextMeta.timeFilters);
+    }
   }
 
   let updateDueToRefreshTimer = false;
@@ -132,6 +136,7 @@ export async function canSkipSourceUpdate({
   const updateDueToSourceMetaChange = !_.isEqual(prevMeta.sourceMeta, nextMeta.sourceMeta);
 
   return (
+    !updateDueToApplyGlobalTime &&
     !updateDueToTime &&
     !updateDueToRefreshTimer &&
     !updateDueToExtentChange &&
