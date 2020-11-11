@@ -246,10 +246,13 @@ export class Embeddable
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: event.data,
-        embeddable: this,
-      });
+      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+        {
+          data: event.data,
+          embeddable: this,
+        },
+        true
+      );
     }
   };
 
