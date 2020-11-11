@@ -1,0 +1,60 @@
+[role="xpack"]
+[[teams-action-type]]
+=== Microsoft Teams action
+
+The Microsoft Teams action type uses https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook[Incoming Webhooks].
+
+[float]
+[[teams-connector-configuration]]
+==== Connector configuration
+
+Microsoft Teams connectors have the following configuration properties:
+
+Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
+Webhook URL::   The URL of the incoming webhook. See https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook#add-an-incoming-webhook-to-a-teams-channel[Add Incoming Webhooks] for instructions on generating this URL. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
+
+[float]
+[[Preconfigured-teams-configuration]]
+==== Preconfigured action type
+
+[source,text]
+--
+ my-teams:
+   name: preconfigured-teams-action-type
+   actionTypeId: .teams
+   config:
+     webhookUrl: 'https://outlook.office.com/webhook/abcd@0123456/IncomingWebhook/abcdefgh/ijklmnopqrstuvwxyz'
+--
+
+`config` defines the action type specific to the configuration.
+`config` contains
+`webhookUrl`, a string that corresponds to *Webhook URL*.
+
+
+[float]
+[[teams-action-configuration]]
+==== Action configuration
+
+Microsoft Teams actions have the following properties:
+
+Message::   The message	text, converted to the `text` field in the Webhook JSON payload. Currently only the text field is supported. Markdown, images, and other advanced formatting are not yet supported.
+
+[[configuring-teams]]
+==== Configuring Microsoft Teams Accounts
+
+You configure the accounts that the Microsoft Teams action type can use to communicate with Teams in the
+connector form.
+
+You need a https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook[Microsoft Teams webhook URL] to 
+configure a Microsoft Teams account. To create a webhook
+URL, add the **Incoming Webhook App** through the Microsoft Teams console:
+
+. Log in to http://slack.com[slack.com] as a team administrator.
+. Go to https://my.slack.com/services/new/incoming-webhook.
+. Select a default channel for the integration.
++
+image::images/slack-add-webhook-integration.png[]
+. Click *Add Incoming Webhook Integration*.
+. Copy the generated webhook URL so you can paste it into your Slack connector form.
++
+image::images/slack-copy-webhook-url.png[]

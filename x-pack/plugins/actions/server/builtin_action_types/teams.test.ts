@@ -7,12 +7,12 @@
 import { Logger } from '../../../../../src/core/server';
 import { Services, ActionTypeExecutorResult } from '../types';
 import { validateParams, validateSecrets } from '../lib';
-import { getActionType, SlackActionType, SlackActionTypeExecutorOptions } from './slack';
+import { getActionType, TeamsActionType, TeamsActionTypeExecutorOptions } from './teams';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { createActionTypeRegistry } from './index.test';
 
-jest.mock('@slack/webhook', () => {
+jest.mock('@teams/webhook', () => {
   return {
     IncomingWebhook: jest.fn().mockImplementation(() => {
       return { send: (message: string) => {} };
@@ -20,11 +20,11 @@ jest.mock('@slack/webhook', () => {
   };
 });
 
-const ACTION_TYPE_ID = '.slack';
+const ACTION_TYPE_ID = '.teams';
 
 const services: Services = actionsMock.createServices();
 
-let actionType: SlackActionType;
+let actionType: TeamsActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
@@ -40,10 +40,10 @@ beforeAll(() => {
   expect(actionType).toBeTruthy();
 });
 
-describe('action registeration', () => {
+describe('action registration', () => {
   test('returns action type', () => {
     expect(actionType.id).toEqual(ACTION_TYPE_ID);
-    expect(actionType.name).toEqual('Slack');
+    expect(actionType.name).toEqual('Microsoft Teams');
   });
 });
 
@@ -92,23 +92,23 @@ describe('validateActionTypeSecrets()', () => {
     expect(() => {
       validateSecrets(actionType, { webhookUrl: 'fee-fi-fo-fum' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: unable to parse host name from webhookUrl"`
+      `"error validating action type secrets: error configuring teams action: unable to parse host name from webhookUrl"`
     );
   });
 
-  test('should validate and pass when the slack webhookUrl is added to allowedHosts', () => {
+  test('should validate and pass when the teams webhookUrl is added to allowedHosts', () => {
     actionType = getActionType({
       logger: mockedLogger,
       configurationUtilities: {
         ...actionsConfigMock.create(),
         ensureUriAllowed: (url) => {
-          expect(url).toEqual('https://api.slack.com/');
+          expect(url).toEqual('https://api.teams.com/');
         },
       },
     });
 
-    expect(validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' })).toEqual({
-      webhookUrl: 'https://api.slack.com/',
+    expect(validateSecrets(actionType, { webhookUrl: 'https://api.teams.com/' })).toEqual({
+      webhookUrl: 'https://api.teams.com/',
     });
   });
 
@@ -124,16 +124,16 @@ describe('validateActionTypeSecrets()', () => {
     });
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 'https://api.slack.com/' });
+      validateSecrets(actionType, { webhookUrl: 'https://api.teams.com/' });
     }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
+      `"error validating action type secrets: error configuring teams action: target hostname is not added to allowedHosts"`
     );
   });
 });
 
 describe('execute()', () => {
   beforeAll(() => {
-    async function mockSlackExecutor(options: SlackActionTypeExecutorOptions) {
+    async function mockTeamsExecutor(options: TeamsActionTypeExecutorOptions) {
       const { params } = options;
       const { message } = params;
       if (message == null) throw new Error('message property required in parameter');
@@ -141,18 +141,18 @@ describe('execute()', () => {
       const failureMatch = message.match(/^failure: (.*)$/);
       if (failureMatch != null) {
         const failMessage = failureMatch[1];
-        throw new Error(`slack mockExecutor failure: ${failMessage}`);
+        throw new Error(`teams mockExecutor failure: ${failMessage}`);
       }
 
       return {
-        text: `slack mockExecutor success: ${message}`,
+        text: `teams mockExecutor success: ${message}`,
         actionId: '',
         status: 'ok',
       } as ActionTypeExecutorResult<void>;
     }
 
     actionType = getActionType({
-      executor: mockSlackExecutor,
+      executor: mockTeamsExecutor,
       logger: mockedLogger,
       configurationUtilities: actionsConfigMock.create(),
     });
@@ -174,7 +174,7 @@ describe('execute()', () => {
       Object {
         "actionId": "",
         "status": "ok",
-        "text": "slack mockExecutor success: this invocation should succeed",
+        "text": "teams mockExecutor success: this invocation should succeed",
       }
     `);
   });
@@ -189,7 +189,7 @@ describe('execute()', () => {
         params: { message: 'failure: this invocation should fail' },
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"slack mockExecutor failure: this invocation should fail"`
+      `"teams mockExecutor failure: this invocation should fail"`
     );
   });
 

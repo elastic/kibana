@@ -5,25 +5,18 @@
  */
 
 import { URL } from 'url';
-import { curry } from 'lodash';
-import { HttpsProxyAgent } from 'https-proxy-agent';
-import HttpProxyAgent from 'http-proxy-agent';
+import { curry, isString } from 'lodash';
+import axios, { AxiosError, AxiosResponse } from 'axios';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { IncomingWebhook, IncomingWebhookResult } from '@slack/webhook';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { Logger } from '../../../../../src/core/server';
 import { getRetryAfterIntervalFromHeaders } from './lib/http_rersponse_retry_header';
-
-import {
-  ActionType,
-  ActionTypeExecutorOptions,
-  ActionTypeExecutorResult,
-  ExecutorType,
-} from '../types';
+import { isOk, promiseResult, Result } from './lib/result_type';
+import { request } from './lib/axios_utils';
+import { ActionType, ActionTypeExecutorOptions, ActionTypeExecutorResult } from '../types';
 import { ActionsConfigurationUtilities } from '../actions_config';
-import { getProxyAgent } from './lib/get_proxy_agent';
 
 export type TeamsActionType = ActionType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 export type TeamsActionTypeExecutorOptions = ActionTypeExecutorOptions<
@@ -50,16 +43,12 @@ const ParamsSchema = schema.object({
 });
 
 // action type definition
-
-// customizing executor is only used for tests
 export function getActionType({
   logger,
   configurationUtilities,
-  executor = curry(teamsExecutor)({ logger }),
 }: {
   logger: Logger;
   configurationUtilities: ActionsConfigurationUtilities;
-  executor?: ExecutorType<{}, ActionTypeSecretsType, ActionParamsType, unknown>;
 }): TeamsActionType {
   return {
     id: '.teams',
@@ -73,7 +62,7 @@ export function getActionType({
       }),
       params: ParamsSchema,
     },
-    executor,
+    executor: curry(teamsExecutor)({ logger }),
   };
 }
 
@@ -111,95 +100,84 @@ async function teamsExecutor(
   const actionId = execOptions.actionId;
   const secrets = execOptions.secrets;
   const params = execOptions.params;
-
-  let result: IncomingWebhookResult;
   const { webhookUrl } = secrets;
   const { message } = params;
+  const data = { text: message };
 
-  let proxyAgent: HttpsProxyAgent | HttpProxyAgent | undefined;
-  if (execOptions.proxySettings) {
-    proxyAgent = getProxyAgent(execOptions.proxySettings, logger);
-    logger.debug(`IncomingWebhook was called with proxyUrl ${execOptions.proxySettings.proxyUrl}`);
-  }
+  const axiosInstance = axios.create();
 
-  try {
-    // https://slack.dev/node-slack-sdk/webhook
-    // node-slack-sdk use Axios inside :)
-    const webhook = new IncomingWebhook(webhookUrl, {
-      agent: proxyAgent,
-    });
-    result = await webhook.send(message);
-  } catch (err) {
-    if (err.original == null || err.original.response == null) {
-      return serviceErrorResult(actionId, err.message);
-    }
+  const result: Result<AxiosResponse, AxiosError> = await promiseResult(
+    request({
+      axios: axiosInstance,
+      method: 'post',
+      url: webhookUrl,
+      logger,
+      data,
+      proxySettings: execOptions.proxySettings,
+    })
+  );
 
-    const { status, statusText, headers } = err.original.response;
+  if (isOk(result)) {
+    const {
+      value: { status, statusText, data: responseData, headers: responseHeaders },
+    } = result;
 
-    // special handling for 5xx
-    if (status >= 500) {
-      return retryResult(actionId, err.message);
-    }
-
-    // special handling for rate limiting
-    if (status === 429) {
+    // Microsoft Teams connectors do not throw 429s. Rather they will return a 200 response
+    // with a 429 message in the response body when the rate limit is hit
+    // https://docs.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/connectors-using#rate-limiting-for-connectors
+    if (isString(responseData) && responseData.includes('ErrorCode:ApplicationThrottled')) {
       return pipe(
-        getRetryAfterIntervalFromHeaders(headers),
-        map((retry) => retryResultSeconds(actionId, err.message, retry)),
-        getOrElse(() => retryResult(actionId, err.message))
+        getRetryAfterIntervalFromHeaders(responseHeaders),
+        map((retry) => retryResultSeconds(actionId, message, retry)),
+        getOrElse(() => retryResult(actionId, message))
       );
     }
 
-    const errMessage = i18n.translate(
-      'xpack.actions.builtin.teams.unexpectedHttpResponseErrorMessage',
-      {
-        defaultMessage:
-          'unexpected http response from Microsoft Teams: {httpStatus} {httpStatusText}',
-        values: {
-          httpStatus: status,
-          httpStatusText: statusText,
-        },
+    logger.debug(`response from teams action "${actionId}": [HTTP ${status}] ${statusText}`);
+
+    return successResult(actionId, data);
+  } else {
+    const { error } = result;
+
+    if (error.response) {
+      const { status, statusText } = error.response;
+      const serviceMessage = `[${status}] ${statusText}`;
+      logger.error(`error on ${actionId} Microsoft Teams event: ${serviceMessage}`);
+
+      // special handling for 5xx
+      if (status >= 500) {
+        return retryResult(actionId, serviceMessage);
       }
-    );
-    logger.error(`error on ${actionId} teams action: ${errMessage}`);
 
-    return errorResult(actionId, errMessage);
+      return errorResultInvalid(actionId, serviceMessage);
+    }
+
+    logger.error(`error on ${actionId} Microsoft Teams action: unexpected error`);
+    return errorResultUnexpectedError(actionId);
   }
-
-  if (result == null) {
-    const errMessage = i18n.translate(
-      'xpack.actions.builtin.teams.unexpectedNullResponseErrorMessage',
-      {
-        defaultMessage: 'unexpected null response from Microsoft Teams',
-      }
-    );
-    return errorResult(actionId, errMessage);
-  }
-
-  if (result.text !== 'ok') {
-    return serviceErrorResult(actionId, result.text);
-  }
-
-  return successResult(actionId, result);
 }
 
 function successResult(actionId: string, data: unknown): ActionTypeExecutorResult<unknown> {
   return { status: 'ok', data, actionId };
 }
 
-function errorResult(actionId: string, message: string): ActionTypeExecutorResult<void> {
+function errorResultUnexpectedError(actionId: string): ActionTypeExecutorResult<void> {
+  const errMessage = i18n.translate('xpack.actions.builtin.teams.unreachableErrorMessage', {
+    defaultMessage: 'error posting to Microsoft Teams, unexpected error',
+  });
   return {
     status: 'error',
-    message,
+    message: errMessage,
     actionId,
   };
 }
-function serviceErrorResult(
+
+function errorResultInvalid(
   actionId: string,
   serviceMessage: string
 ): ActionTypeExecutorResult<void> {
-  const errMessage = i18n.translate('xpack.actions.builtin.teams.errorPostingErrorMessage', {
-    defaultMessage: 'error posting Microsoft Teams message',
+  const errMessage = i18n.translate('xpack.actions.builtin.teams.invalidResponseErrorMessage', {
+    defaultMessage: 'error posting to Microsoft Teams, invalid response',
   });
   return {
     status: 'error',
