@@ -8,6 +8,7 @@ import { Setup as InspectorSetupContract } from 'src/plugins/inspector/public';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
 import { Start as InspectorStartContract } from 'src/plugins/inspector/public';
+import { DashboardStart } from 'src/plugins/dashboard/public';
 import {
   AppMountParameters,
   CoreSetup,
@@ -19,6 +20,7 @@ import {
 // @ts-ignore
 import { MapView } from './inspector/views/map_view';
 import {
+  setEMSSettings,
   setKibanaCommonConfig,
   setKibanaVersion,
   setMapAppConfig,
@@ -55,7 +57,12 @@ import { DataPublicPluginStart } from '../../../../src/plugins/data/public';
 import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
 import { StartContract as FileUploadStartContract } from '../../file_upload/public';
 import { SavedObjectsStart } from '../../../../src/plugins/saved_objects/public';
-import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
+import {
+  getIsEnterprisePlus,
+  registerLicensedFeatures,
+  setLicensingPluginStart,
+} from './licensed_features';
+import { EMSSettings } from '../common/ems_settings';
 
 export interface MapsPluginSetupDependencies {
   inspector: InspectorSetupContract;
@@ -78,6 +85,7 @@ export interface MapsPluginStartDependencies {
   share: SharePluginStart;
   visualizations: VisualizationsStart;
   savedObjects: SavedObjectsStart;
+  dashboard: DashboardStart;
 }
 
 /**
@@ -110,6 +118,9 @@ export class MapsPlugin
     setKibanaCommonConfig(plugins.mapsLegacy.config);
     setMapAppConfig(config);
     setKibanaVersion(this._initializerContext.env.packageInfo.version);
+
+    const emsSettings = new EMSSettings(plugins.mapsLegacy.config, getIsEnterprisePlus);
+    setEMSSettings(emsSettings);
 
     // register url generators
     const getStartServices = async () => {

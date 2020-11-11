@@ -177,6 +177,8 @@ export function createLayerDescriptor({
             term: 'client.geo.country_iso_code',
             metrics: [metricsDescriptor],
             whereQuery: apmSourceQuery,
+            applyGlobalQuery: true,
+            applyGlobalTime: true,
           },
         },
       ],
