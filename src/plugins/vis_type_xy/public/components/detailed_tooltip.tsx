@@ -99,6 +99,7 @@ export const getDetailedTooltip = (aspects: Aspects) => (
 ): CustomTooltip => {
   return function DetailedTooltip({ header, values }) {
     // Note: first value is not necessarily the closest value
+    // To be fixed with https://github.com/elastic/elastic-charts/issues/835
     // TODO: Allow multiple values to be displayed in tooltip
     const highlightedValue = values.find(({ isHighlighted }) => isHighlighted);
 

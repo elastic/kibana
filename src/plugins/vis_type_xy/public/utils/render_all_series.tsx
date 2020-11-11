@@ -44,7 +44,7 @@ import { SeriesParam, VisConfig, FakeParams, Aspect } from '../types';
 const getCurveType = (type?: 'linear' | 'cardinal' | 'step-after'): CurveType => {
   switch (type) {
     case 'cardinal':
-      return CurveType.CURVE_NATURAL;
+      return CurveType.CURVE_MONOTONE_X;
     case 'step-after':
       return CurveType.CURVE_STEP_AFTER;
     case 'linear':
@@ -134,7 +134,6 @@ export const renderAllSeries = (
               yScaleType={yAxisScale?.type}
               xAccessor={xAccessor}
               yAccessors={[yAspect.accessor]}
-              markSizeAccessor={aspects.z?.accessor ?? undefined}
               splitSeriesAccessors={splitSeriesAccessors}
               data={data}
               timeZone={timeZone}

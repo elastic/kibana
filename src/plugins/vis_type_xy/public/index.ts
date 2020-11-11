@@ -43,6 +43,7 @@ export {
   ValidationVisOptionsProps,
 } from './editor';
 export { xyVisTypes } from './vis_types';
+export { getAggId } from './config';
 
 // Export common types
 export * from '../common';

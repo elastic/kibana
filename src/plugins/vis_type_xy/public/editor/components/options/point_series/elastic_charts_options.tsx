@@ -40,8 +40,12 @@ export function ElasticChartsOptions(props: ValidationVisOptionsProps<VisParams>
     <>
       <SwitchOption
         data-test-subj="detailedTooltip"
-        label={i18n.translate('visTypeXy.editors.elasticChartsOptions.detailedTooltip', {
+        label={i18n.translate('visTypeXy.editors.elasticChartsOptions.detailedTooltip.label', {
           defaultMessage: 'Show detailed tooltip',
+        })}
+        tooltip={i18n.translate('visTypeXy.editors.elasticChartsOptions.detailedTooltip.tooltip', {
+          defaultMessage:
+            'Enables the legacy detailed tooltip for displaying a single value. When disabled, a new summarized tooltip will be used to display multiple values.',
         })}
         paramName="detailedTooltip"
         value={stateParams.detailedTooltip}

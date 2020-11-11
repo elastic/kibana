@@ -18,3 +18,4 @@
  */
 
 export { getConfig } from './get_config';
+export { getAggId } from './get_aspects';

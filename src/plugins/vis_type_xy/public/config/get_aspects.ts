@@ -79,6 +79,13 @@ function getAspectsFromDimension(
   return column && getAspect(column, dimensions);
 }
 
+/**
+ * Get agg id from accessor
+ *
+ * For now this is determined by the esaggs column name. Could be cleaned up in the future.
+ */
+export const getAggId = (accessor: string) => (accessor ?? '').split('-').pop() ?? '';
+
 const getAspect = (
   { id: accessor, name: title }: DatatableColumn,
   { accessor: column, format, params, aggType }: Dimension
@@ -88,9 +95,7 @@ const getAspect = (
   title,
   format,
   aggType,
-  // TODO: Change this to be more clear. Now it's based on how _add_to_siri creates id for params
-  // src/legacy/ui/public/agg_response/point_series/_add_to_siri.js
-  aggId: (accessor ?? '').split('-').pop() ?? null,
+  aggId: getAggId(accessor),
   formatter: (value: any) => getFormatService().deserialize(format).convert(value),
   params,
 });
