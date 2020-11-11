@@ -83,6 +83,8 @@ export interface UiSettingsParams<T = unknown> {
   schema: Type<T>;
   /**
    * Metric to track once this property changes
+   * @deprecated
+   * Temporary measure until https://github.com/elastic/kibana/issues/83084 is in place
    */
   metric?: {
     type: UiStatsMetricType;
