@@ -263,7 +263,7 @@ describe('<TemplateCreate />', () => {
         expect(find('stepTitle').text()).toEqual('Index settings (optional)');
       });
 
-      it.skip('should not allow invalid json', async () => {
+      it('should not allow invalid json', async () => {
         const { form, actions } = testBed;
 
         await actions.completeStepThree('{ invalidJsonString ');
