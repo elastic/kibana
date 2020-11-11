@@ -8,6 +8,17 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ML_JOB_FIELD_TYPES } from '../../../../../plugins/ml/common/constants/field_types';
 import { FieldVisConfig } from '../../../../../plugins/ml/public/application/datavisualizer/index_based/common';
 
+interface MetricFieldVisConfig extends FieldVisConfig {
+  statsMaxDecimalPlaces: number;
+  docCountFormatted: string;
+  selectedDetailsMode: 'distribution' | 'top_values';
+  topValuesCount: number;
+}
+
+interface NonMetricFieldVisConfig extends FieldVisConfig {
+  exampleCount?: number;
+}
+
 interface TestData {
   suiteTitle: string;
   sourceIndexOrSavedSearch: string;
@@ -15,10 +26,11 @@ interface TestData {
   nonMetricFieldsFilter: string;
   nonMetricFieldsTypeFilter: string;
   expected: {
-    totalDocCount: number;
+    totalDocCountFormatted: string;
     fieldsPanelCount: number;
-    metricCards?: FieldVisConfig[];
-    nonMetricCards?: FieldVisConfig[];
+    documentCountCard: FieldVisConfig;
+    metricCards?: MetricFieldVisConfig[];
+    nonMetricCards?: NonMetricFieldVisConfig[];
     nonMetricFieldsTypeFilterCardCount: number;
     metricFieldsFilterCardCount: number;
     nonMetricFieldsFilterCardCount: number;
@@ -48,21 +60,25 @@ export default function ({ getService }: FtrProviderContext) {
     nonMetricFieldsFilter: 'airline',
     nonMetricFieldsTypeFilter: 'keyword',
     expected: {
-      totalDocCount: 86274,
+      totalDocCountFormatted: '86,274',
       fieldsPanelCount: 2, // Metrics panel and Fields panel
+      documentCountCard: {
+        type: ML_JOB_FIELD_TYPES.NUMBER,
+        existsInDocs: true,
+        aggregatable: true,
+        loading: false,
+      },
       metricCards: [
-        {
-          type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-        },
         {
           fieldName: 'responsetime',
           type: ML_JOB_FIELD_TYPES.NUMBER,
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          docCountFormatted: '5,000',
+          statsMaxDecimalPlaces: 3,
+          selectedDetailsMode: 'distribution',
+          topValuesCount: 10,
         },
       ],
       nonMetricCards: [
@@ -79,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
         },
         {
           fieldName: '@version.keyword',
@@ -86,6 +103,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
         },
         {
           fieldName: 'airline',
@@ -93,6 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 10,
         },
         {
           fieldName: 'type',
@@ -100,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
         },
         {
           fieldName: 'type.keyword',
@@ -107,6 +127,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
         },
       ],
       nonMetricFieldsTypeFilterCardCount: 3,
@@ -122,21 +143,25 @@ export default function ({ getService }: FtrProviderContext) {
     nonMetricFieldsFilter: 'airline',
     nonMetricFieldsTypeFilter: 'keyword',
     expected: {
-      totalDocCount: 34415,
+      totalDocCountFormatted: '34,415',
       fieldsPanelCount: 2, // Metrics panel and Fields panel
+      documentCountCard: {
+        type: ML_JOB_FIELD_TYPES.NUMBER,
+        existsInDocs: true,
+        aggregatable: true,
+        loading: false,
+      },
       metricCards: [
-        {
-          type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-        },
         {
           fieldName: 'responsetime',
           type: ML_JOB_FIELD_TYPES.NUMBER,
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          docCountFormatted: '5,000',
+          statsMaxDecimalPlaces: 3,
+          selectedDetailsMode: 'distribution',
+          topValuesCount: 10,
         },
       ],
       nonMetricCards: [
@@ -153,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
         },
         {
           fieldName: '@version.keyword',
@@ -160,6 +186,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
         },
         {
           fieldName: 'airline',
@@ -167,6 +194,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 5,
         },
         {
           fieldName: 'type',
@@ -174,6 +202,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
         },
         {
           fieldName: 'type.keyword',
@@ -181,6 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
         },
       ],
       nonMetricFieldsTypeFilterCardCount: 3,
@@ -196,21 +226,25 @@ export default function ({ getService }: FtrProviderContext) {
     nonMetricFieldsFilter: 'version',
     nonMetricFieldsTypeFilter: 'keyword',
     expected: {
-      totalDocCount: 34416,
+      totalDocCountFormatted: '34,416',
       fieldsPanelCount: 2, // Metrics panel and Fields panel
+      documentCountCard: {
+        type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
+        existsInDocs: true,
+        aggregatable: true,
+        loading: false,
+      },
       metricCards: [
-        {
-          type: ML_JOB_FIELD_TYPES.NUMBER, // document count card
-          existsInDocs: true,
-          aggregatable: true,
-          loading: false,
-        },
         {
           fieldName: 'responsetime',
           type: ML_JOB_FIELD_TYPES.NUMBER,
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          docCountFormatted: '5,000',
+          statsMaxDecimalPlaces: 3,
+          selectedDetailsMode: 'distribution',
+          topValuesCount: 10,
         },
       ],
       nonMetricCards: [
@@ -227,6 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
         },
         {
           fieldName: '@version.keyword',
@@ -234,6 +269,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
         },
         {
           fieldName: 'airline',
@@ -241,6 +277,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 5,
         },
         {
           fieldName: 'type',
@@ -248,6 +285,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: false,
           loading: false,
+          exampleCount: 1,
         },
         {
           fieldName: 'type.keyword',
@@ -255,6 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
           existsInDocs: true,
           aggregatable: true,
           loading: false,
+          exampleCount: 1,
         },
       ],
       nonMetricFieldsTypeFilterCardCount: 3,
@@ -283,22 +322,47 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.dataVisualizerIndexBased.assertTimeRangeSelectorSectionExists();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads data for full time range`);
-      await ml.dataVisualizerIndexBased.clickUseFullDataButton(testData.expected.totalDocCount);
+      await ml.dataVisualizerIndexBased.clickUseFullDataButton(
+        testData.expected.totalDocCountFormatted
+      );
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the panels of fields`);
       await ml.dataVisualizerIndexBased.assertFieldsPanelsExist(testData.expected.fieldsPanelCount);
+
+      await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the Metrics panel`);
+      await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist([ML_JOB_FIELD_TYPES.NUMBER]);
+
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} displays the expected document count card`
+      );
+      await ml.dataVisualizerIndexBased.assertCardExists(
+        testData.expected.documentCountCard.type,
+        testData.expected.documentCountCard.fieldName
+      );
+      await ml.dataVisualizerIndexBased.assertDocumentCountCardContents();
+
+      await ml.testExecution.logTestStep(
+        `${testData.suiteTitle} displays the expected metric field cards and contents`
+      );
 
       if (testData.expected.metricCards !== undefined && testData.expected.metricCards.length > 0) {
         await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the Metrics panel`);
         await ml.dataVisualizerIndexBased.assertFieldsPanelForTypesExist([
           ML_JOB_FIELD_TYPES.NUMBER,
-        ]); // document_count not exposed as a type in the panel
+        ]);
 
         await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} displays the expected metric field cards`
+          `${testData.suiteTitle} displays the expected metric field cards and contents`
         );
-        for (const fieldCard of testData.expected.metricCards as FieldVisConfig[]) {
+        for (const fieldCard of testData.expected.metricCards as MetricFieldVisConfig[]) {
           await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
+          await ml.dataVisualizerIndexBased.assertNumberCardContents(
+            fieldCard.fieldName!,
+            fieldCard.docCountFormatted,
+            fieldCard.statsMaxDecimalPlaces,
+            fieldCard.selectedDetailsMode,
+            fieldCard.topValuesCount
+          );
         }
 
         await ml.testExecution.logTestStep(
@@ -323,10 +387,15 @@ export default function ({ getService }: FtrProviderContext) {
         );
 
         await ml.testExecution.logTestStep(
-          `${testData.suiteTitle} displays the expected non-metric field cards`
+          `${testData.suiteTitle} displays the expected non-metric field cards and contents`
         );
         for (const fieldCard of testData.expected.nonMetricCards!) {
           await ml.dataVisualizerIndexBased.assertCardExists(fieldCard.type, fieldCard.fieldName);
+          await ml.dataVisualizerIndexBased.assertNonMetricCardContents(
+            fieldCard.type,
+            fieldCard.fieldName!,
+            fieldCard.exampleCount
+          );
         }
 
         await ml.testExecution.logTestStep(
@@ -346,9 +415,21 @@ export default function ({ getService }: FtrProviderContext) {
           `${testData.suiteTitle} filters non-metric fields cards with search`
         );
         await ml.dataVisualizerIndexBased.filterFieldsPanelWithSearchString(
-          getFieldTypes(testData.expected.nonMetricCards as FieldVisConfig[]),
+          fieldTypes,
           testData.nonMetricFieldsFilter,
           testData.expected.nonMetricFieldsFilterCardCount
+        );
+
+        await ml.testExecution.logTestStep(
+          `${testData.suiteTitle} sample size control changes non-metric field cards doc count`
+        );
+        await ml.dataVisualizerIndexBased.clearFieldsPanelSearchInput(fieldTypes);
+        await ml.dataVisualizerIndexBased.assertSampleSizeInputExists();
+        await ml.dataVisualizerIndexBased.setSampleSizeInputValue(
+          1000,
+          ML_JOB_FIELD_TYPES.KEYWORD,
+          'airline',
+          '1,000'
         );
       }
     });
@@ -365,10 +446,6 @@ export default function ({ getService }: FtrProviderContext) {
 
       await ml.securityUI.loginAsMlPowerUser();
     });
-
-    // TODO - add tests for
-    //  - validating metrics displayed inside the cards
-    //  - selecting a document sample size
 
     describe('with farequote', function () {
       // Run tests on full farequote index.
