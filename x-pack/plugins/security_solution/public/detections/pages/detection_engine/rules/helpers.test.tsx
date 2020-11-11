@@ -54,7 +54,6 @@ describe('rule helpers', () => {
             query: 'user.name: root or user.name: admin',
             language: 'kuery',
           },
-          edited: false,
           filters: [
             {
               $state: {
@@ -221,7 +220,6 @@ describe('rule helpers', () => {
             query: '',
             language: 'kuery',
           },
-          edited: false,
           filters: [],
           saved_id: "Garrett's IP",
         },
@@ -264,7 +262,6 @@ describe('rule helpers', () => {
             query: '',
             language: 'kuery',
           },
-          edited: false,
           filters: [],
           saved_id: undefined,
         },

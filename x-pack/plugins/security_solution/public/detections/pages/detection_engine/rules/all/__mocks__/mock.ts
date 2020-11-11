@@ -37,7 +37,6 @@ export const mockQueryBar: DefineStepRule['queryBar'] = {
     },
   ],
   saved_id: 'test123',
-  edited: false,
 };
 
 export const mockRule = (id: string): Rule => ({

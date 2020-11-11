@@ -92,7 +92,6 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     query: { query: rule.query ?? '', language: rule.language ?? '' },
     filters: (rule.filters ?? []) as Filter[],
     saved_id: rule.saved_id,
-    edited: false,
   },
   timeline: {
     id: rule.timeline_id ?? null,
