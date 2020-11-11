@@ -198,8 +198,7 @@ export function populateValidationMessages(
     basicValidations.summaryCountField.message = i18n.translate(
       'xpack.ml.newJob.wizard.validateJob.summaryCountFieldMissing',
       {
-        defaultMessage:
-          'A job configured with a datafeed with aggregations must set summary_count_field_name; use doc_count or suitable alternative.',
+        defaultMessage: 'Required field as the datafeed uses aggregations.',
       }
     );
   }
