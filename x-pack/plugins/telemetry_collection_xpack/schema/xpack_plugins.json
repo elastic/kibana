@@ -3138,9 +3138,6 @@
     },
     "saved_objects_tagging": {
       "properties": {
-        "totalTags": {
-          "type": "integer"
-        },
         "usedTags": {
           "type": "integer"
         },

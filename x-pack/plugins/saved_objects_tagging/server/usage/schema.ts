@@ -13,7 +13,6 @@ const perTypeSchema: MakeSchemaFrom<ByTypeTaggingUsageData> = {
 };
 
 export const tagUsageCollectorSchema: MakeSchemaFrom<TaggingUsageData> = {
-  totalTags: { type: 'integer' },
   usedTags: { type: 'integer' },
   taggedObjects: { type: 'integer' },
 
