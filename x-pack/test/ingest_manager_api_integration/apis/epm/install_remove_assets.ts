@@ -6,7 +6,7 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { AssetReference } from '../../../../plugins/ingest_manager/common';
+import { AssetReference } from '../../../../plugins/fleet/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 

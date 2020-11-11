@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { cloneDeep } from 'lodash';
-import { useUpdateEffect } from 'react-use';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { AggName } from '../../../../../../common/types/aggregations';
 import { dictionaryToArray } from '../../../../../../common/types/common';
 import {

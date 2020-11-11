@@ -235,6 +235,17 @@ export function LayerPanel(
                       dragging.groupId === group.groupId &&
                       dragging.columnId !== accessor &&
                       dragging.groupId !== 'y'; // TODO: remove this line when https://github.com/elastic/elastic-charts/issues/868 is fixed
+
+                    const isDroppable = isDraggedOperation(dragging)
+                      ? dragType === 'reorder'
+                        ? isFromTheSameGroup
+                        : isFromCompatibleGroup
+                      : layerDatasource.canHandleDrop({
+                          ...layerDatasourceDropProps,
+                          columnId: accessor,
+                          filterOperations: group.filterOperations,
+                        });
+
                     return (
                       <DragDrop
                         key={accessor}
@@ -252,11 +263,7 @@ export function LayerPanel(
                         }}
                         isValueEqual={isSameConfiguration}
                         label={columnLabelMap[accessor]}
-                        droppable={
-                          (dragging && !isDraggedOperation(dragging)) ||
-                          isFromCompatibleGroup ||
-                          isFromTheSameGroup
-                        }
+                        droppable={dragging && isDroppable}
                         dropTo={(dropTargetId: string) => {
                           layerDatasource.onDrop({
                             isReorder: true,
@@ -303,7 +310,6 @@ export function LayerPanel(
                               ...layerDatasourceConfigProps,
                               columnId: accessor,
                               filterOperations: group.filterOperations,
-                              suggestedPriority: group.suggestedPriority,
                               onClick: () => {
                                 if (activeId) {
                                   setActiveDimension(initialActiveDimensionState);
@@ -450,7 +456,7 @@ export function LayerPanel(
                     core: props.core,
                     columnId: activeId,
                     filterOperations: activeGroup.filterOperations,
-                    suggestedPriority: activeGroup?.suggestedPriority,
+                    dimensionGroups: groups,
                     setState: (newState: unknown) => {
                       props.updateAll(
                         datasourceId,
