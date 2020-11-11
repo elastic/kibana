@@ -44,6 +44,7 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  */
 const LOGIN_API_ENDPOINT = '/internal/security/login';
 
+// these roles are derived from https://docs.google.com/spreadsheets/d/1SGjXVS3gQyRxCN1MF2Pq3pgos3vtfpROqTvi4z-0WiU/edit#gid=0
 export const ROLES = {
   t1_analyst: 't1_analyst',
   t2_analyst: 't2_analyst',
@@ -54,31 +55,52 @@ export const ROLES = {
   platform_engineer: 'platform_engineer',
 };
 
+/**
+ * cy.visit will default to the baseUrl which uses the default kibana test user
+ * This function will override that functionality in cy.visit by building the baseUrl
+ * directly from the environment variables set up in x-pack/test/security_solution_cypress/runner.ts
+ *
+ * @param role string role/user to log in with
+ * @param route string route to visit
+ */
+export const getUrlWithRoute = (role: string, route: string) => {
+  const theUrl = `${Url.format({
+    auth: `${role}:changeme`,
+    username: role,
+    password: 'changeme',
+    protocol: Cypress.env('protocol'),
+    hostname: Cypress.env('hostname'),
+    port: Cypress.env('configport'),
+  } as UrlObject)}${route.startsWith('/') ? '' : '/'}${route}`;
+  cy.log(`origin: ${theUrl}`);
+  return theUrl;
+};
+
+export const postRoleAndUser = (role: string) => {
+  const env = {
+    ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
+    ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
+    ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
+    KIBANA_URL: Cypress.env('KIBANA_URL'),
+  };
+  const detectionsRoleScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh`;
+  const detectionsRoleJsonPath = `./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`;
+  const detectionsUserScriptPath = `./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_user.sh`;
+  const detectionsUserJsonPath = `./server/lib/detection_engine/scripts/roles_users/${role}/detections_user.json`;
+
+  // post the role
+  cy.exec(`bash ${detectionsRoleScriptPath} ${detectionsRoleJsonPath}`, {
+    env,
+  });
+
+  // post the user associated with the role to elasticsearch
+  cy.exec(`bash ${detectionsUserScriptPath} ${detectionsUserJsonPath}`, {
+    env,
+  });
+};
+
 export const loginWithRole = async (role: string) => {
-  // post the role to elasticsearch
-  cy.exec(
-    `bash ./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_role.sh ./server/lib/detection_engine/scripts/roles_users/${role}/detections_role.json`,
-    {
-      env: {
-        ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
-        ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
-        ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
-        KIBANA_URL: Cypress.env('KIBANA_URL'),
-      },
-    }
-  );
-  // post the user with the associated role to elasticsearch
-  cy.exec(
-    `bash ./server/lib/detection_engine/scripts/roles_users/${role}/post_detections_user.sh ./server/lib/detection_engine/scripts/roles_users/${role}/detections_user.json`,
-    {
-      env: {
-        ELASTICSEARCH_URL: Cypress.env('ELASTICSEARCH_URL'),
-        ELASTICSEARCH_USERNAME: Cypress.env('ELASTICSEARCH_USERNAME'),
-        ELASTICSEARCH_PASSWORD: Cypress.env('ELASTICSEARCH_PASSWORD'),
-        KIBANA_URL: Cypress.env('KIBANA_URL'),
-      },
-    }
-  );
+  postRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
     username: role,
@@ -100,7 +122,7 @@ export const loginWithRole = async (role: string) => {
     },
     headers: { 'kbn-xsrf': 'cypress-creds-via-config' },
     method: 'POST',
-    url: `${theUrl}${LOGIN_API_ENDPOINT}`,
+    url: getUrlWithRoute(role, LOGIN_API_ENDPOINT),
   });
 };
 
@@ -112,8 +134,10 @@ export const loginWithRole = async (role: string) => {
  * To speed the execution of tests, prefer this non-interactive authentication,
  * which is faster than authentication via Kibana's interactive login page.
  */
-export const login = () => {
-  if (credentialsProvidedByEnvironment()) {
+export const login = (role: string | undefined) => {
+  if (role != null) {
+    loginWithRole(role);
+  } else if (credentialsProvidedByEnvironment()) {
     loginViaEnvironmentCredentials();
   } else {
     loginViaConfig();
@@ -191,8 +215,8 @@ const loginViaConfig = () => {
  * Authenticates with Kibana, visits the specified `url`, and waits for the
  * Kibana global nav to be displayed before continuing
  */
-export const loginAndWaitForPage = (url: string) => {
-  login();
+export const loginAndWaitForPage = (url: string, role: string | undefined) => {
+  login(role);
   cy.viewport('macbook-15');
   cy.visit(
     `${url}?timerange=(global:(linkTo:!(timeline),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)),timeline:(linkTo:!(global),timerange:(from:1547914976217,fromStr:'2019-01-19T16:22:56.217Z',kind:relative,to:1579537385745,toStr:now)))`
@@ -200,32 +224,19 @@ export const loginAndWaitForPage = (url: string) => {
   cy.get('[data-test-subj="headerGlobalNav"]');
 };
 
-export const loginAndWaitForPageWithoutDateRange = (url: string) => {
-  login();
+export const loginAndWaitForPageWithoutDateRange = (url: string, role: string | undefined) => {
+  login(role);
   cy.viewport('macbook-15');
-  cy.visit(url);
+  cy.visit(role ? getUrlWithRoute(role, url) : url);
   cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
 };
 
-export const loginWithRoleAndWaitForPageWithoutDateRange = async (role: string, url: string) => {
-  loginWithRole(role);
-  cy.viewport('macbook-15');
-  const theUrl = Url.format({
-    auth: `${role}:changeme`,
-    username: role,
-    password: 'changeme',
-    protocol: Cypress.env('protocol'),
-    hostname: Cypress.env('hostname'),
-    port: Cypress.env('configport'),
-  } as UrlObject);
-  cy.visit(`${theUrl}/${url}`);
-  cy.get('[data-test-subj="headerGlobalNav"]', { timeout: 120000 });
-};
+export const loginAndWaitForTimeline = (timelineId: string, role: string | undefined) => {
+  const route = `/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`;
 
-export const loginAndWaitForTimeline = (timelineId: string) => {
-  login();
+  login(role);
   cy.viewport('macbook-15');
-  cy.visit(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
+  cy.visit(role ? getUrlWithRoute(role, route) : route);
   cy.get('[data-test-subj="headerGlobalNav"]');
   cy.get(TIMELINE_FLYOUT_BODY).should('be.visible');
 };

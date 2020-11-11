@@ -4,11 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  loginAndWaitForPageWithoutDateRange,
-  loginWithRoleAndWaitForPageWithoutDateRange,
-  ROLES,
-} from '../tasks/login';
+import { loginAndWaitForPageWithoutDateRange, ROLES } from '../tasks/login';
 import { DETECTIONS_URL } from '../urls/navigation';
 import {
   waitForAlertsPanelToBeLoaded,
@@ -227,8 +223,7 @@ describe('value lists', () => {
 
   describe('user with restricted access role', () => {
     beforeEach(() => {
-      // log in with t1 analyst
-      loginWithRoleAndWaitForPageWithoutDateRange(ROLES.t1_analyst, DETECTIONS_URL);
+      loginAndWaitForPageWithoutDateRange(DETECTIONS_URL, ROLES.t1_analyst);
       goToManageAlertsDetectionRules();
     });
 
