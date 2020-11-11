@@ -28,7 +28,7 @@
     "xpack.idxMgmt": "plugins/index_management",
     "xpack.indexLifecycleMgmt": "plugins/index_lifecycle_management",
     "xpack.infra": "plugins/infra",
-    "xpack.fleet": "plugins/ingest_manager",
+    "xpack.fleet": "plugins/fleet",
     "xpack.ingestPipelines": "plugins/ingest_pipelines",
     "xpack.lens": "plugins/lens",
     "xpack.licenseMgmt": "plugins/license_management",
