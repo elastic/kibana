@@ -174,7 +174,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
     }
 
     async expectMissingCreateNewButton() {
-      await testSubjects.missingOrFail('newMapLink');
+      await testSubjects.missingOrFail('newItemButton');
     }
 
     async expectMissingAddLayerButton() {
