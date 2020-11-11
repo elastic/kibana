@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { useEffect, useState, Fragment, FC, useMemo } from 'react';
+import React, { useEffect, useState, Fragment, FC, useMemo, useCallback } from 'react';
 import { Router } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from 'kibana/public';
@@ -35,7 +35,11 @@ import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_vi
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
 import { AccessDeniedPage } from '../access_denied_page';
 import { SharePluginStart } from '../../../../../../../../../src/plugins/share/public';
-import { getDefaultAnomalyDetectionJobsListState } from '../../../../jobs/jobs_list/jobs';
+import {
+  AnomalyDetectionJobsListState,
+  getDefaultAnomalyDetectionJobsListState,
+} from '../../../../jobs/jobs_list/jobs';
+import { getMlGlobalServices } from '../../../../app';
 
 interface Tab {
   'data-test-subj': string;
@@ -45,7 +49,19 @@ interface Tab {
 }
 
 function useTabs(isMlEnabledInSpace: boolean): Tab[] {
-  const [jobsViewState, setJobsViewState] = useState(getDefaultAnomalyDetectionJobsListState());
+  const [jobsViewState, setJobsViewState] = useState<AnomalyDetectionJobsListState>(
+    getDefaultAnomalyDetectionJobsListState()
+  );
+
+  const updateState = useCallback(
+    (update: Partial<AnomalyDetectionJobsListState>) => {
+      setJobsViewState({
+        ...jobsViewState,
+        ...update,
+      });
+    },
+    [jobsViewState]
+  );
 
   return useMemo(
     () => [
@@ -60,7 +76,7 @@ function useTabs(isMlEnabledInSpace: boolean): Tab[] {
             <EuiSpacer size="m" />
             <JobsListView
               jobsViewState={jobsViewState}
-              onJobsViewStateUpdate={setJobsViewState}
+              onJobsViewStateUpdate={updateState}
               isManagementTable={true}
               isMlEnabledInSpace={isMlEnabledInSpace}
             />
@@ -84,7 +100,7 @@ function useTabs(isMlEnabledInSpace: boolean): Tab[] {
         ),
       },
     ],
-    [isMlEnabledInSpace, jobsViewState]
+    [isMlEnabledInSpace, jobsViewState, updateState]
   );
 }
 
@@ -153,7 +169,9 @@ export const JobsListPage: FC<{
   return (
     <RedirectAppLinks application={coreStart.application}>
       <I18nContext>
-        <KibanaContextProvider services={{ ...coreStart, share }}>
+        <KibanaContextProvider
+          services={{ ...coreStart, share, mlServices: getMlGlobalServices(coreStart.http) }}
+        >
           <Router history={history}>
             <EuiPageContent
               id="kibanaManagementMLSection"

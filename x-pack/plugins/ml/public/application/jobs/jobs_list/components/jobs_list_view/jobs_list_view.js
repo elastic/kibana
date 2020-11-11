@@ -364,7 +364,10 @@ export class JobsListView extends Component {
         <EuiSpacer size="s" />
         <div className="managementJobsList">
           <div>
-            <JobFilterBar setFilters={this.setFilters} />
+            <JobFilterBar
+              setFilters={this.setFilters}
+              queryText={this.props.jobsViewState.queryText}
+            />
           </div>
           <JobsList
             jobsSummaryList={filteredJobsSummaryList}
