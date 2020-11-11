@@ -2747,6 +2747,7 @@ export interface UiSettingsParams<T = unknown> {
     category?: string[];
     deprecation?: DeprecationSettings;
     description?: string;
+    // @deprecated
     metric?: {
         type: UiStatsMetricType;
         name: string;

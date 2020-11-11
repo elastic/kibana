@@ -4,6 +4,11 @@
 
 ## UiSettingsParams.metric property
 
+> Warning: This API is now obsolete.
+> 
+> Temporary measure until https://github.com/elastic/kibana/issues/83084 is in place
+> 
+
 Metric to track once this property changes
 
 <b>Signature:</b>

@@ -1363,6 +1363,7 @@ export interface UiSettingsParams<T = unknown> {
     // Warning: (ae-forgotten-export) The symbol "DeprecationSettings" needs to be exported by the entry point index.d.ts
     deprecation?: DeprecationSettings;
     description?: string;
+    // @deprecated
     metric?: {
         type: UiStatsMetricType;
         name: string;
