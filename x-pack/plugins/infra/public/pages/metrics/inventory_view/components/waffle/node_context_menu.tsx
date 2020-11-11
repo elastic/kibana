@@ -37,6 +37,7 @@ interface Props {
   isPopoverOpen: boolean;
   closePopover: () => void;
   popoverPosition: EuiPopoverProps['anchorPosition'];
+  openNewOverlay?: () => void;
 }
 
 export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme(
@@ -50,6 +51,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     nodeType,
     popoverPosition,
     theme,
+    openNewOverlay,
   }) => {
     const [flyoutVisible, setFlyoutVisible] = useState(false);
     const inventoryModel = findInventoryModel(nodeType);
@@ -159,6 +161,14 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
       },
     };
 
+    const openNewOverlayMenuItem: SectionLinkProps = {
+      label: i18n.translate('xpack.infra.nodeContextMenu.openNewOverlay', {
+        defaultMessage: '**** [NEW] Overlay ***',
+      }),
+      style: { color: theme?.eui.euiLinkColor || '#006BB4', fontWeight: 500, padding: 0 },
+      onClick: openNewOverlay,
+    };
+
     return (
       <>
         <ActionMenu
@@ -194,6 +204,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
                 <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
                 <SectionLink {...uptimeMenuItem} />
                 <SectionLink {...createAlertMenuItem} />
+                <SectionLink {...openNewOverlayMenuItem} />
               </SectionLinks>
             </Section>
           </div>

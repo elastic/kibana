@@ -5,7 +5,7 @@
  */
 import React, { memo, useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { HashRouter as Router, Redirect, Switch, Route, RouteProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';

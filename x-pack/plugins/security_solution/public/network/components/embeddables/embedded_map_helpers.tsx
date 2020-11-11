@@ -68,6 +68,7 @@ export const createEmbeddable = async (
 
   const input: MapEmbeddableInput = {
     title: i18n.MAP_TITLE,
+    attributes: { title: '' },
     id: uuid.v4(),
     filters,
     hidePanelTitles: true,
@@ -115,7 +116,7 @@ export const createEmbeddable = async (
   if (!isErrorEmbeddable(embeddableObject)) {
     embeddableObject.setRenderTooltipContent(renderTooltipContent);
     // @ts-expect-error
-    await embeddableObject.setLayerList(getLayerList(indexPatterns));
+    embeddableObject.setLayerList(getLayerList(indexPatterns));
   }
 
   // Wire up to app refresh action

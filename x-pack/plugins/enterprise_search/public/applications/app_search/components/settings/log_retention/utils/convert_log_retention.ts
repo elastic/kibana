@@ -5,23 +5,23 @@
  */
 
 import {
-  ELogRetentionOptions,
-  ILogRetention,
-  ILogRetentionPolicy,
-  ILogRetentionServer,
-  ILogRetentionServerPolicy,
-  ILogRetentionServerSettings,
-  ILogRetentionSettings,
+  LogRetentionOptions,
+  LogRetention,
+  LogRetentionPolicy,
+  LogRetentionServer,
+  LogRetentionServerPolicy,
+  LogRetentionServerSettings,
+  LogRetentionSettings,
 } from '../types';
 
 export const convertLogRetentionFromServerToClient = (
-  logRetention: ILogRetentionServer
-): ILogRetention => ({
-  [ELogRetentionOptions.Analytics]: convertLogRetentionSettingsFromServerToClient(
-    logRetention[ELogRetentionOptions.Analytics]
+  logRetention: LogRetentionServer
+): LogRetention => ({
+  [LogRetentionOptions.Analytics]: convertLogRetentionSettingsFromServerToClient(
+    logRetention[LogRetentionOptions.Analytics]
   ),
-  [ELogRetentionOptions.API]: convertLogRetentionSettingsFromServerToClient(
-    logRetention[ELogRetentionOptions.API]
+  [LogRetentionOptions.API]: convertLogRetentionSettingsFromServerToClient(
+    logRetention[LogRetentionOptions.API]
   ),
 });
 
@@ -29,7 +29,7 @@ const convertLogRetentionSettingsFromServerToClient = ({
   disabled_at: disabledAt,
   enabled,
   retention_policy: retentionPolicy,
-}: ILogRetentionServerSettings): ILogRetentionSettings => ({
+}: LogRetentionServerSettings): LogRetentionSettings => ({
   disabledAt,
   enabled,
   retentionPolicy:
@@ -39,7 +39,7 @@ const convertLogRetentionSettingsFromServerToClient = ({
 const convertLogRetentionPolicyFromServerToClient = ({
   min_age_days: minAgeDays,
   is_default: isDefault,
-}: ILogRetentionServerPolicy): ILogRetentionPolicy => ({
+}: LogRetentionServerPolicy): LogRetentionPolicy => ({
   isDefault,
   minAgeDays,
 });
