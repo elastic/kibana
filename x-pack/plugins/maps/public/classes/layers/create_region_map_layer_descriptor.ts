@@ -87,6 +87,8 @@ export function createRegionMapLayerDescriptor({
           indexPatternTitle: indexPatternTitle ? indexPatternTitle : indexPatternId,
           term: termsFieldName,
           metrics: [metricsDescriptor],
+          applyGlobalQuery: true,
+          applyGlobalTime: true,
         },
       },
     ],
