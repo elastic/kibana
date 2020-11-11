@@ -116,28 +116,23 @@ export const formatColumn: ExpressionFunctionDefinition<
             });
           }
           if (parentFormatParams) {
-            const innerParams = (col.meta.params?.params as Record<string, unknown>) ?? {};
-            if (isNestedFormat(col.meta.params)) {
-              // original format is already a nested one, we are just replacing the wrapper params
-              return withParams(col, {
-                ...col.meta.params,
-                params: {
-                  ...innerParams,
-                  ...parentFormatParams,
-                },
-              });
-            } else {
-              // original format is not nested, wrapping it insifr parentFormatId/parentFormatParams
-              return withParams(col, {
-                ...col.meta.params,
-                id: parentFormatId,
-                params: {
-                  id: col.meta.params?.id,
-                  params: innerParams,
-                  ...parentFormatParams,
-                },
-              });
-            }
+            // if original format is already a nested one, we are just replacing the wrapper params
+            // otherwise wrapping it inside parentFormatId/parentFormatParams
+            const isNested = isNestedFormat(col.meta.params);
+            const innerParams = isNested
+              ? col.meta.params?.params
+              : { id: col.meta.params?.id, params: col.meta.params?.params };
+
+            const formatId = isNested ? col.meta.params?.id : parentFormatId;
+
+            return withParams(col, {
+              ...col.meta.params,
+              id: formatId,
+              params: {
+                ...innerParams,
+                ...parentFormatParams,
+              },
+            });
           }
         }
         return col;
