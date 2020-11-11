@@ -71,7 +71,9 @@ describe('JobsTableComponent', () => {
       ),
       '[data-test-subj="jobs-table-link"]'
     );
-    await waitFor(() => expect(href).toEqual("/app/ml/jobs?_a=(jobId:'job%20id%20with%20spaces')"));
+    await waitFor(() =>
+      expect(href).toEqual("/app/ml/jobs?_a=(queryText:'job%20id%20with%20spaces')")
+    );
   });
 
   test('should call onJobStateChange when the switch is clicked to be true/open', async () => {
