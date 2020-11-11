@@ -33,7 +33,7 @@ type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
  */
 export interface DepsStartMock {
   data: DataMock;
-  ingestManager: IngestManagerStart;
+  fleet: IngestManagerStart;
 }
 
 /**
@@ -56,7 +56,7 @@ export const depsStartMock: () => DepsStartMock = () => {
 
   return {
     data: dataMock,
-    ingestManager: {
+    fleet: {
       isInitialized: () => Promise.resolve(true),
       registerPackagePolicyComponent,
     },

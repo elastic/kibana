@@ -9,9 +9,9 @@ import { NotificationsStart } from 'kibana/public';
 import { IngestManagerStart } from '../../../../fleet/public';
 
 export const Setup: React.FunctionComponent<{
-  ingestManager: IngestManagerStart;
+  fleet: IngestManagerStart;
   notifications: NotificationsStart;
-}> = ({ ingestManager, notifications }) => {
+}> = ({ fleet, notifications }) => {
   React.useEffect(() => {
     const defaultText = i18n.translate('xpack.securitySolution.endpoint.ingestToastMessage', {
       defaultMessage: 'Ingest Manager failed during its setup.',
@@ -32,8 +32,8 @@ export const Setup: React.FunctionComponent<{
       });
     };
 
-    ingestManager.isInitialized().catch((error: Error) => displayToastWithModal(error.message));
-  }, [ingestManager, notifications.toasts]);
+    fleet.isInitialized().catch((error: Error) => displayToastWithModal(error.message));
+  }, [fleet, notifications.toasts]);
 
   return null;
 };

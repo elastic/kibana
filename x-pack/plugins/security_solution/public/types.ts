@@ -47,7 +47,7 @@ export interface StartPlugins {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
-  ingestManager?: IngestManagerStart;
+  fleet?: IngestManagerStart;
   lists?: ListsPluginStart;
   newsfeed?: NewsfeedPublicPluginStart;
   triggersActionsUi: TriggersActionsStart;
