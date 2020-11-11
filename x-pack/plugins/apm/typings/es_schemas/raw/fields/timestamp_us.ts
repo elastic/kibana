@@ -4,4 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-export { fetchAllFromScroll } from './fetch_all_from_scroll';
+export interface TimestampUs {
+  us: number;
+}

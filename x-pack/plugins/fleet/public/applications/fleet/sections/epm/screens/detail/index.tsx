@@ -20,7 +20,7 @@ import {
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
 } from '@elastic/eui';
-import { DetailViewPanelName, InstallStatus, PackageInfo } from '../../../../types';
+import { DetailViewPanelName, entries, InstallStatus, PackageInfo } from '../../../../types';
 import { Loading, Error } from '../../../../components';
 import {
   useGetPackageInfoByKey,
@@ -34,6 +34,7 @@ import { IconPanel, LoadingIconPanel } from '../../components/icon_panel';
 import { RELEASE_BADGE_LABEL, RELEASE_BADGE_DESCRIPTION } from '../../components/release_badge';
 import { UpdateIcon } from '../../components/icons';
 import { Content } from './content';
+import { WithHeaderLayoutProps } from '../../../../layouts/with_header';
 
 export const DEFAULT_PANEL: DetailViewPanelName = 'overview';
 
@@ -41,6 +42,28 @@ export interface DetailParams {
   pkgkey: string;
   panel?: DetailViewPanelName;
 }
+
+const PanelDisplayNames: Record<DetailViewPanelName, string> = {
+  overview: i18n.translate('xpack.fleet.epm.packageDetailsNav.overviewLinkText', {
+    defaultMessage: 'Overview',
+  }),
+  policies: i18n.translate('xpack.fleet.epm.packageDetailsNav.packagePoliciesLinkText', {
+    defaultMessage: 'Policies',
+  }),
+  settings: i18n.translate('xpack.fleet.epm.packageDetailsNav.settingsLinkText', {
+    defaultMessage: 'Settings',
+  }),
+};
+
+const DetailWrapper = styled.div`
+  // Class name here is in sync with 'PanelWrapper' in 'IconPanel' component
+  .shiftNavTabs {
+    margin-left: ${(props) =>
+      parseFloat(props.theme.eui.euiSize) * 6 +
+      parseFloat(props.theme.eui.spacerSizes.xl) * 2 +
+      parseFloat(props.theme.eui.spacerSizes.l)}px;
+  }
+`;
 
 const Divider = styled.div`
   width: 0;
@@ -216,28 +239,57 @@ export function Detail() {
     [getHref, hasWriteCapabilites, packageInfo, pkgkey, updateAvailable]
   );
 
+  const tabs = useMemo<WithHeaderLayoutProps['tabs']>(() => {
+    if (!packageInfo) {
+      return [];
+    }
+
+    return (entries(PanelDisplayNames)
+      .filter(([panelId]) => {
+        return (
+          panelId !== 'policies' ||
+          (packageInfoData?.response.status === InstallStatus.installed && false) // Remove `false` when ready to implement policies tab
+        );
+      })
+      .map(([panelId, display]) => {
+        return {
+          id: panelId,
+          name: display,
+          isSelected: panelId === panel,
+          href: getHref('integration_details', {
+            pkgkey: `${packageInfo?.name}-${packageInfo?.version}`,
+            panel: panelId,
+          }),
+        };
+      }) as unknown) as WithHeaderLayoutProps['tabs'];
+  }, [getHref, packageInfo, packageInfoData?.response?.status, panel]);
+
   return (
-    <WithHeaderLayout
-      leftColumn={headerLeftContent}
-      rightColumn={headerRightContent}
-      rightColumnGrow={false}
-    >
-      {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
-      {packageInfoError ? (
-        <Error
-          title={
-            <FormattedMessage
-              id="xpack.fleet.epm.loadingIntegrationErrorTitle"
-              defaultMessage="Error loading integration details"
-            />
-          }
-          error={packageInfoError}
-        />
-      ) : isLoading || !packageInfo ? (
-        <Loading />
-      ) : (
-        <Content {...packageInfo} panel={panel} />
-      )}
-    </WithHeaderLayout>
+    <DetailWrapper>
+      <WithHeaderLayout
+        leftColumn={headerLeftContent}
+        rightColumn={headerRightContent}
+        rightColumnGrow={false}
+        tabs={tabs}
+        tabsClassName={'shiftNavTabs'}
+      >
+        {packageInfo ? <Breadcrumbs packageTitle={packageInfo.title} /> : null}
+        {packageInfoError ? (
+          <Error
+            title={
+              <FormattedMessage
+                id="xpack.fleet.epm.loadingIntegrationErrorTitle"
+                defaultMessage="Error loading integration details"
+              />
+            }
+            error={packageInfoError}
+          />
+        ) : isLoading || !packageInfo ? (
+          <Loading />
+        ) : (
+          <Content {...packageInfo} panel={panel} />
+        )}
+      </WithHeaderLayout>
+    </DetailWrapper>
   );
 }
