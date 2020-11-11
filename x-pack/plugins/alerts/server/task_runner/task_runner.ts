@@ -227,12 +227,15 @@ export class TaskRunner {
       alertInstance.hasScheduledActions()
     );
 
-    scheduleActionsForResolvedInstances(
-      alertInstances,
-      executionHandler,
-      originalAlertInstanceIds,
-      instancesWithScheduledActions
-    );
+    if (!alert.muteAll) {
+      scheduleActionsForResolvedInstances(
+        alertInstances,
+        executionHandler,
+        originalAlertInstanceIds,
+        instancesWithScheduledActions,
+        alert.mutedInstanceIds
+      );
+    }
 
     generateNewAndResolvedInstanceEvents({
       eventLogger,
@@ -464,20 +467,25 @@ function scheduleActionsForResolvedInstances(
   },
   executionHandler: ReturnType<typeof createExecutionHandler>,
   originalAlertInstanceIds: string[],
-  currentAlertInstances: Dictionary<AlertInstance>
+  currentAlertInstances: Dictionary<AlertInstance>,
+  mutedInstanceIds: string[]
 ) {
   const currentAlertInstanceIds = Object.keys(currentAlertInstances);
-  const resolvedIds = without(originalAlertInstanceIds, ...currentAlertInstanceIds);
+  const resolvedIds = without(
+    originalAlertInstanceIds,
+    ...[...currentAlertInstanceIds, ...mutedInstanceIds]
+  );
   for (const id of resolvedIds) {
-    alertInstancesMap[id].updateLastScheduledActions(ResolvedActionGroup.id);
-    alertInstancesMap[id].unscheduleActions();
+    const instance = alertInstancesMap[id];
+    instance.updateLastScheduledActions(ResolvedActionGroup.id);
+    instance.unscheduleActions();
     executionHandler({
       actionGroup: ResolvedActionGroup.id,
       context: {},
       state: {},
       alertInstanceId: id,
     });
-    alertInstancesMap[id].scheduleActions(ResolvedActionGroup.id);
+    instance.scheduleActions(ResolvedActionGroup.id);
   }
 }
 

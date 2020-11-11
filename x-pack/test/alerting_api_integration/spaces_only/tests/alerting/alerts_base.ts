@@ -150,7 +150,7 @@ instanceStateValue: true
         })
         .expect(200);
 
-      // pattern of when the alert should fire
+      // pattern of when the alert should fire.
       const pattern = {
         instance: [false, true, true],
       };
@@ -188,18 +188,6 @@ instanceStateValue: true
       expect(createdAlert.status).to.eql(200);
       const alertId = createdAlert.body.id;
       objectRemover.add(space.id, alertId, 'alert', 'alerts');
-
-      const instancesSummary = await supertestWithoutAuth.post(
-        `${getUrlPrefix(space.id)}/api/alerts/alert/${createdAlert.id}/_instance_summary`
-      );
-
-      expect(instancesSummary.status).to.eql(200);
-      expect(instancesSummary.body.instances).to.eql({
-        '1': {
-          status: 'OK',
-          muted: true,
-        },
-      });
 
       const actionTestRecord = (
         await esTestIndexTool.waitForDocs('action:test.index-record', reference)
