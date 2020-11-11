@@ -4,18 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
 import semver from 'semver';
 import Boom from '@hapi/boom';
 import { UnwrapPromise } from '@kbn/utility-types';
-import { BulkInstallPackageInfo, InstallSource, defaultPackages } from '../../../../common';
+import { SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import { generateESIndexPatterns } from '../elasticsearch/template/template';
+import { isRequiredPackage } from './index';
+import {
+  BulkInstallPackageInfo,
+  InstallablePackage,
+  InstallSource,
+  defaultPackages,
+} from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import {
   AssetReference,
   Installation,
   CallESAsCurrentUser,
   AssetType,
-  KibanaAssetReference,
   EsAssetReference,
   InstallType,
   KibanaAssetType,
@@ -346,31 +352,19 @@ export const updateVersion = async (
 };
 export async function createInstallation(options: {
   savedObjectsClient: SavedObjectsClientContract;
-  pkgName: string;
-  pkgVersion: string;
-  internal: boolean;
-  removable: boolean;
-  installed_kibana: KibanaAssetReference[];
-  installed_es: EsAssetReference[];
-  toSaveESIndexPatterns: Record<string, string>;
+  packageInfo: InstallablePackage;
   installSource: InstallSource;
 }) {
-  const {
-    savedObjectsClient,
-    pkgName,
-    pkgVersion,
-    internal,
-    removable,
-    installed_kibana: installedKibana,
-    installed_es: installedEs,
-    toSaveESIndexPatterns,
-    installSource,
-  } = options;
-  await savedObjectsClient.create<Installation>(
+  const { savedObjectsClient, packageInfo, installSource } = options;
+  const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
+  const removable = !isRequiredPackage(pkgName);
+  const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
+
+  const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
-      installed_kibana: installedKibana,
-      installed_es: installedEs,
+      installed_kibana: [],
+      installed_es: [],
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
@@ -383,7 +377,8 @@ export async function createInstallation(options: {
     },
     { id: pkgName, overwrite: true }
   );
-  return [...installedKibana, ...installedEs];
+
+  return created;
 }
 
 export const saveKibanaAssetsRefs = async (
