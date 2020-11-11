@@ -3,7 +3,7 @@
 3. I gave the Hunter role "all" privileges for saved objects management and builtInAlerts so that they can create rules.
 4. Rule Author has the ability to create rules and create value lists
 
-|                     Role                     | Data Sources | SIEM ML Jobs/Results |    Lists    | Rules/Exceptions | Action Connectors |          Signals/Alerts          |
+|                     Role                     | Data Sources | Security Solution ML Jobs/Results |    Lists    | Rules/Exceptions | Action Connectors |          Signals/Alerts          |
 | :------------------------------------------: | :----------: | :------------------: | :---------: | :--------------: | :----------------: | :------------------------------: |
 |                  T1 Analyst                  |     read     |         read         |    none     |       read       |        read        |           read, write            |
 |                  T2 Analyst                  |     read     |         read         |    read     |       read       |        read        |           read, write            |
