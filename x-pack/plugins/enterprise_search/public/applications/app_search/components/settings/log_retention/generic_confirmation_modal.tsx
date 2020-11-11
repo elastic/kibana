@@ -83,7 +83,7 @@ export const GenericConfirmationModal: React.FC<GenericConfirmationModalProps> =
         <EuiButton
           data-test-subj="GenericConfirmationModalSave"
           onClick={onConfirm}
-          disabled={inputValue !== target}
+          disabled={inputValue.toLowerCase() !== target.toLowerCase()}
         >
           {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.modal.save', {
             defaultMessage: 'Save setting',

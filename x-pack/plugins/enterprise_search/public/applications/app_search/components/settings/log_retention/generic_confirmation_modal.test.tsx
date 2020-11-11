@@ -67,4 +67,15 @@ describe('GenericConfirmationModal', () => {
     const button = wrapper.find('[data-test-subj="GenericConfirmationModalSave"]');
     expect(button.prop('disabled')).toEqual(false);
   });
+
+  it('is not case sensitive', () => {
+    const input = wrapper.find('[data-test-subj="GenericConfirmationModalInput"]');
+    input.prop('onChange')({
+      target: {
+        value: 'diSable',
+      },
+    });
+    const button = wrapper.find('[data-test-subj="GenericConfirmationModalSave"]');
+    expect(button.prop('disabled')).toEqual(false);
+  });
 });
