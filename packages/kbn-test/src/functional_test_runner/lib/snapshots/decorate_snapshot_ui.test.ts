@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { Test } from './mocha_types';
+import { Test } from '../../fake_mocha_types';
 import { Lifecycle } from '../lifecycle';
 import { decorateSnapshotUi, expectSnapshot } from './decorate_snapshot_ui';
 import path from 'path';
