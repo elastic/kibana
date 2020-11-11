@@ -8,7 +8,7 @@ import { UpdateRulesOptions } from './types';
 import { alertsClientMock } from '../../../../../alerts/server/mocks';
 import { savedObjectsClientMock } from '../../../../../../../src/core/server/mocks';
 import {
-  getFullUpdateSchemaMock,
+  getUpdateRulesSchemaMock,
   getUpdateMachineLearningSchemaMock,
 } from '../../../../common/detection_engine/schemas/request/rule_schemas.mock';
 
@@ -16,7 +16,7 @@ export const getUpdateRulesOptionsMock = (): UpdateRulesOptions => ({
   alertsClient: alertsClientMock.create(),
   savedObjectsClient: savedObjectsClientMock.create(),
   defaultOutputIndex: '.siem-signals-default',
-  ruleUpdate: getFullUpdateSchemaMock(),
+  ruleUpdate: getUpdateRulesSchemaMock(),
 });
 
 export const getUpdateMlRulesOptionsMock = (): UpdateRulesOptions => ({

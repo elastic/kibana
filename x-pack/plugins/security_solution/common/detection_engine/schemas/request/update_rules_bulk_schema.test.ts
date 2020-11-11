@@ -8,8 +8,8 @@ import { updateRulesBulkSchema, UpdateRulesBulkSchema } from './update_rules_bul
 import { exactCheck } from '../../../exact_check';
 import { foldLeftRight } from '../../../test_utils';
 import { formatErrors } from '../../../format_errors';
-import { getFullUpdateSchemaMock } from './rule_schemas.mock';
-import { FullUpdateSchema } from './rule_schemas';
+import { getUpdateRulesSchemaMock } from './rule_schemas.mock';
+import { UpdateRulesSchema } from './rule_schemas';
 
 // only the basics of testing are here.
 // see: update_rules_schema.test.ts for the bulk of the validation tests
@@ -45,7 +45,7 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('single array element does validate', () => {
-    const payload: UpdateRulesBulkSchema = [getFullUpdateSchemaMock()];
+    const payload: UpdateRulesBulkSchema = [getUpdateRulesSchemaMock()];
 
     const decoded = updateRulesBulkSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -55,7 +55,7 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('two array elements do validate', () => {
-    const payload: UpdateRulesBulkSchema = [getFullUpdateSchemaMock(), getFullUpdateSchemaMock()];
+    const payload: UpdateRulesBulkSchema = [getUpdateRulesSchemaMock(), getUpdateRulesSchemaMock()];
 
     const decoded = updateRulesBulkSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -65,7 +65,7 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('single array element with a missing value (risk_score) will not validate', () => {
-    const singleItem = getFullUpdateSchemaMock();
+    const singleItem = getUpdateRulesSchemaMock();
     // @ts-expect-error
     delete singleItem.risk_score;
     const payload: UpdateRulesBulkSchema = [singleItem];
@@ -80,8 +80,8 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('two array elements where the first is valid but the second is invalid (risk_score) will not validate', () => {
-    const singleItem = getFullUpdateSchemaMock();
-    const secondItem = getFullUpdateSchemaMock();
+    const singleItem = getUpdateRulesSchemaMock();
+    const secondItem = getUpdateRulesSchemaMock();
     // @ts-expect-error
     delete secondItem.risk_score;
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
@@ -96,8 +96,8 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('two array elements where the first is invalid (risk_score) but the second is valid will not validate', () => {
-    const singleItem = getFullUpdateSchemaMock();
-    const secondItem = getFullUpdateSchemaMock();
+    const singleItem = getUpdateRulesSchemaMock();
+    const secondItem = getUpdateRulesSchemaMock();
     // @ts-expect-error
     delete singleItem.risk_score;
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
@@ -112,8 +112,8 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('two array elements where both are invalid (risk_score) will not validate', () => {
-    const singleItem = getFullUpdateSchemaMock();
-    const secondItem = getFullUpdateSchemaMock();
+    const singleItem = getUpdateRulesSchemaMock();
+    const secondItem = getUpdateRulesSchemaMock();
     // @ts-expect-error
     delete singleItem.risk_score;
     // @ts-expect-error
@@ -130,11 +130,11 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('two array elements where the first is invalid (extra key and value) but the second is valid will not validate', () => {
-    const singleItem: FullUpdateSchema & { madeUpValue: string } = {
-      ...getFullUpdateSchemaMock(),
+    const singleItem: UpdateRulesSchema & { madeUpValue: string } = {
+      ...getUpdateRulesSchemaMock(),
       madeUpValue: 'something',
     };
-    const secondItem = getFullUpdateSchemaMock();
+    const secondItem = getUpdateRulesSchemaMock();
     const payload = [singleItem, secondItem];
 
     const decoded = updateRulesBulkSchema.decode(payload);
@@ -145,9 +145,9 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('two array elements where the second is invalid (extra key and value) but the first is valid will not validate', () => {
-    const singleItem: FullUpdateSchema = getFullUpdateSchemaMock();
-    const secondItem: FullUpdateSchema & { madeUpValue: string } = {
-      ...getFullUpdateSchemaMock(),
+    const singleItem: UpdateRulesSchema = getUpdateRulesSchemaMock();
+    const secondItem: UpdateRulesSchema & { madeUpValue: string } = {
+      ...getUpdateRulesSchemaMock(),
       madeUpValue: 'something',
     };
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
@@ -160,12 +160,12 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('two array elements where both are invalid (extra key and value) will not validate', () => {
-    const singleItem: FullUpdateSchema & { madeUpValue: string } = {
-      ...getFullUpdateSchemaMock(),
+    const singleItem: UpdateRulesSchema & { madeUpValue: string } = {
+      ...getUpdateRulesSchemaMock(),
       madeUpValue: 'something',
     };
-    const secondItem: FullUpdateSchema & { madeUpValue: string } = {
-      ...getFullUpdateSchemaMock(),
+    const secondItem: UpdateRulesSchema & { madeUpValue: string } = {
+      ...getUpdateRulesSchemaMock(),
       madeUpValue: 'something',
     };
     const payload: UpdateRulesBulkSchema = [singleItem, secondItem];
@@ -178,7 +178,7 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('You cannot set the severity to a value other than low, medium, high, or critical', () => {
-    const badSeverity = { ...getFullUpdateSchemaMock(), severity: 'madeup' };
+    const badSeverity = { ...getUpdateRulesSchemaMock(), severity: 'madeup' };
     const payload = [badSeverity];
 
     const decoded = updateRulesBulkSchema.decode(payload);
@@ -190,7 +190,7 @@ describe('update_rules_bulk_schema', () => {
 
   test('You can set "note" to a string', () => {
     const payload: UpdateRulesBulkSchema = [
-      { ...getFullUpdateSchemaMock(), note: '# test markdown' },
+      { ...getUpdateRulesSchemaMock(), note: '# test markdown' },
     ];
 
     const decoded = updateRulesBulkSchema.decode(payload);
@@ -201,7 +201,7 @@ describe('update_rules_bulk_schema', () => {
   });
 
   test('You can set "note" to an empty string', () => {
-    const payload: UpdateRulesBulkSchema = [{ ...getFullUpdateSchemaMock(), note: '' }];
+    const payload: UpdateRulesBulkSchema = [{ ...getUpdateRulesSchemaMock(), note: '' }];
 
     const decoded = updateRulesBulkSchema.decode(payload);
     const checked = exactCheck(payload, decoded);
@@ -213,7 +213,7 @@ describe('update_rules_bulk_schema', () => {
   test('You cant set "note" to anything other than string', () => {
     const payload = [
       {
-        ...getFullUpdateSchemaMock(),
+        ...getUpdateRulesSchemaMock(),
         note: {
           something: 'some object',
         },

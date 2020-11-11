@@ -26,7 +26,7 @@ import {
   Status,
   SignalIds,
 } from '../../plugins/security_solution/common/detection_engine/schemas/common/schemas';
-import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/update_rules_schema';
+import { UpdateRulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/request/rule_schemas';
 import { RulesSchema } from '../../plugins/security_solution/common/detection_engine/schemas/response/rules_schema';
 import {
   DETECTION_ENGINE_INDEX_URL,

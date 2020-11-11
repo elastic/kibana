@@ -403,12 +403,12 @@ const responseTypeSpecific = t.union([
 ]);
 export type ResponseTypeSpecific = t.TypeOf<typeof responseTypeSpecific>;
 
-export const fullUpdateSchema = t.intersection([
+export const updateRulesSchema = t.intersection([
   commonCreateParams,
   createTypeSpecific,
   t.exact(t.partial({ id })),
 ]);
-export type FullUpdateSchema = t.TypeOf<typeof fullUpdateSchema>;
+export type UpdateRulesSchema = t.TypeOf<typeof updateRulesSchema>;
 
 export const fullPatchSchema = t.intersection([
   commonPatchParams,

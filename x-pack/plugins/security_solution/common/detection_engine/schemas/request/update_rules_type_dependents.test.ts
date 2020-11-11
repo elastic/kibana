@@ -4,8 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getUpdateRulesSchemaMock } from './update_rules_schema.mock';
-import { UpdateRulesSchema } from './update_rules_schema';
+import { getUpdateRulesSchemaMock } from './rule_schemas.mock';
+import { UpdateRulesSchema } from './rule_schemas';
 import { updateRuleValidateTypeDependents } from './update_rules_type_dependents';
 
 describe('update_rules_type_dependents', () => {

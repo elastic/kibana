@@ -14,4 +14,4 @@ export * from './query_rules_schema';
 export * from './query_signals_index_schema';
 export * from './set_signal_status_schema';
 export * from './update_rules_bulk_schema';
-export * from './update_rules_schema';
+export * from './rule_schemas';

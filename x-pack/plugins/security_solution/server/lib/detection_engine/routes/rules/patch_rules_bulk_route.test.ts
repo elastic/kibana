@@ -60,6 +60,7 @@ describe('patch_rules_bulk', () => {
         path: `${DETECTION_ENGINE_RULES_URL}/bulk_update`,
         body: [
           {
+            type: 'machine_learning',
             rule_id: 'my-rule-id',
             anomaly_threshold: 4,
             machine_learning_job_id: 'some_job_id',

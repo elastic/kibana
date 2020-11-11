@@ -13,7 +13,7 @@ import {
   SavedObjectsFindResponse,
   SavedObjectsClientContract,
 } from 'kibana/server';
-import { FullUpdateSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
+import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request/rule_schemas';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
   FalsePositives,
@@ -254,7 +254,7 @@ export interface UpdateRulesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   alertsClient: AlertsClient;
   defaultOutputIndex: string;
-  ruleUpdate: FullUpdateSchema;
+  ruleUpdate: UpdateRulesSchema;
 }
 
 export interface PatchRulesOptions {

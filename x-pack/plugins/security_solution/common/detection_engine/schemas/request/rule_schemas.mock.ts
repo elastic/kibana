@@ -95,7 +95,7 @@ export const getCreateMachineLearningRulesSchemaMock = (
   machine_learning_job_id: 'typical-ml-job-id',
 });
 
-export const getFullUpdateSchemaMock = (
+export const getUpdateRulesSchemaMock = (
   id = '04128c15-0d1b-4716-a4c5-46997ac7f3bd'
 ): QueryUpdateSchema => ({
   description: 'Detecting root and admin users',

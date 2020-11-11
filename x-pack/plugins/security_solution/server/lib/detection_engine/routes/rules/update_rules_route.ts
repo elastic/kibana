@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { fullUpdateSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
+import { updateRulesSchema } from '../../../../../common/detection_engine/schemas/request/rule_schemas';
 import { updateRuleValidateTypeDependents } from '../../../../../common/detection_engine/schemas/request/update_rules_type_dependents';
 import { IRouter } from '../../../../../../../../src/core/server';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
@@ -24,7 +24,7 @@ export const updateRulesRoute = (router: IRouter, ml: SetupPlugins['ml']) => {
     {
       path: DETECTION_ENGINE_RULES_URL,
       validate: {
-        body: buildRouteValidation(fullUpdateSchema),
+        body: buildRouteValidation(updateRulesSchema),
       },
       options: {
         tags: ['access:securitySolution'],
