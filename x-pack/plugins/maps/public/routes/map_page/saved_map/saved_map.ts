@@ -56,6 +56,7 @@ export class SavedMap {
   private _originatingApp?: string;
   private readonly _stateTransfer?: EmbeddableStateTransfer;
   private readonly _store: MapStore;
+  private _tags: string[] = [];
 
   constructor({
     defaultLayers = [],
@@ -92,7 +93,14 @@ export class SavedMap {
         description: '',
       };
     } else {
-      this._attributes = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
+      const doc = await getMapAttributeService().unwrapAttributes(this._mapEmbeddableInput);
+      const references = doc.references;
+      delete doc.references;
+      this._attributes = doc;
+      const savedObjectsTagging = getSavedObjectsTagging();
+      if (savedObjectsTagging && references && references.length) {
+        this._tags = savedObjectsTagging.ui.getTagIdsFromReferences(references);
+      }
     }
 
     if (this._attributes?.mapStateJSON) {
@@ -222,8 +230,7 @@ export class SavedMap {
   };
 
   public getTags(): string[] {
-    // TODO call something like savedObjectsTagging.ui.getTagIdsFromReferences(state.persistedDoc.references)
-    return [];
+    return this._tags;
   }
 
   public hasSaveAndReturnConfig() {

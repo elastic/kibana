@@ -134,7 +134,7 @@ export function getTopNavConfig({
         const savedObjectsTagging = getSavedObjectsTagging();
         const tagSelector = savedObjectsTagging ? (
           <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-            initialSelection={savedMap.getTags()}
+            initialSelection={selectedTags}
             onTagsSelected={onTagsSelected}
           />
         ) : undefined;

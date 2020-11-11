@@ -69,7 +69,7 @@ export function getMapAttributeService(): MapAttributeService {
       }
 
       const { attributes } = injectReferences(savedObject);
-      return attributes;
+      return { ...attributes, references: savedObject.references };
     },
     checkForDuplicateTitle: (props: OnSaveProps) => {
       return checkForDuplicateTitle(
