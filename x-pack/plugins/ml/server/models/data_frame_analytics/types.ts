@@ -5,6 +5,7 @@
  */
 
 export interface IndexPatternLinkReturnType {
+  isWildcardIndexPattern: boolean;
   isIndexPattern: boolean;
   indexData: any;
   meta: any;

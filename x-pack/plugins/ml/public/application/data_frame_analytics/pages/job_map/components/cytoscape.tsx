@@ -58,7 +58,7 @@ function getLayoutOptions(width: number, height: number) {
     rankDir: 'LR',
     fit: true,
     padding: 30,
-    spacingFactor: 0.65,
+    spacingFactor: 0.85,
     boundingBox: { x1: 0, y1: 0, w: width, h: height },
   };
 }

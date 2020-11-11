@@ -121,8 +121,13 @@ export class AnalyticsManager {
       if (type === JOB_MAP_NODE_TYPES.INDEX) {
         // fetch index data
         const indexData = await this.getIndexData(id);
-        const meta = indexData[id].mappings._meta;
-        return { isIndexPattern: true, indexData, meta };
+        let isWildcardIndexPattern = false;
+
+        if (id.includes('*')) {
+          isWildcardIndexPattern = true;
+        }
+        const meta = indexData[id]?.mappings?._meta;
+        return { isWildcardIndexPattern, isIndexPattern: true, indexData, meta };
       } else if (type.includes(JOB_MAP_NODE_TYPES.ANALYTICS)) {
         // fetch job associated with this index
         const jobData = await this.getAnalyticsJobData(id);
@@ -171,6 +176,30 @@ export class AnalyticsManager {
     return { modelElement, modelDetails: analyticsModel, edgeElement };
   }
 
+  private getIndexPatternElements(indexData: Record<string, object>, previousNodeId: string) {
+    const result: any = { elements: [], details: {} };
+
+    Object.keys(indexData).forEach((indexId) => {
+      // Create index node
+      const nodeId = `${indexId}-${JOB_MAP_NODE_TYPES.INDEX}`;
+      result.elements.push({
+        data: { id: nodeId, label: indexId, type: JOB_MAP_NODE_TYPES.INDEX },
+      });
+      result.details[nodeId] = indexData[indexId];
+
+      // create edge node
+      result.elements.push({
+        data: {
+          id: `${previousNodeId}~${nodeId}`,
+          source: nodeId,
+          target: previousNodeId,
+        },
+      });
+    });
+
+    return result;
+  }
+
   /**
    * Works backward from jobId to return related jobs from source indices
    * @param jobId
@@ -178,6 +207,7 @@ export class AnalyticsManager {
   async getAnalyticsMap(analyticsId: string): Promise<AnalyticsMapReturnType> {
     const result: any = { elements: [], details: {}, error: null };
     const modelElements: MapElements[] = [];
+    const indexPatternElements: MapElements[] = [];
 
     try {
       await this.setInferenceModels();
@@ -191,17 +221,17 @@ export class AnalyticsManager {
       let rootTransform;
       let rootIndexPattern;
 
-      const firstNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+      let previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
       result.elements.push({
         data: {
-          id: firstNodeId,
+          id: previousNodeId,
           label: data.id,
           type: JOB_MAP_NODE_TYPES.ANALYTICS,
           analysisType: getAnalysisType(data?.analysis),
         },
       });
-      result.details[firstNodeId] = data;
+      result.details[previousNodeId] = data;
 
       let { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(analyticsId);
       if (isAnalyticsMapNodeElement(modelElement)) {
@@ -229,11 +259,33 @@ export class AnalyticsManager {
         }
         // If it's index pattern, check meta data to see what to fetch next
         if (isIndexPatternLinkReturnType(link) && link.isIndexPattern === true) {
-          const nodeId = `${nextLinkId}-${JOB_MAP_NODE_TYPES.INDEX}`;
-          result.elements.unshift({
-            data: { id: nodeId, label: nextLinkId, type: JOB_MAP_NODE_TYPES.INDEX },
-          });
-          result.details[nodeId] = link.indexData;
+          if (link.isWildcardIndexPattern === true) {
+            // Create index nodes for each of the indices included in the index pattern then break
+            const { details, elements } = this.getIndexPatternElements(
+              link.indexData,
+              previousNodeId
+            );
+
+            indexPatternElements.push(...elements);
+            result.details = { ...result.details, ...details };
+            complete = true;
+          } else {
+            const nodeId = `${nextLinkId}-${JOB_MAP_NODE_TYPES.INDEX}`;
+            result.elements.unshift({
+              data: { id: nodeId, label: nextLinkId, type: JOB_MAP_NODE_TYPES.INDEX },
+            });
+            result.details[nodeId] = link.indexData;
+          }
+
+          // Check meta data
+          if (
+            link.isWildcardIndexPattern === false &&
+            (link.meta === undefined || link.meta?.created_by === INDEX_META_DATA_CREATED_BY)
+          ) {
+            rootIndexPattern = nextLinkId;
+            complete = true;
+            break;
+          }
 
           if (link.meta?.created_by === 'data-frame-analytics') {
             nextLinkId = link.meta.analytics;
@@ -244,16 +296,10 @@ export class AnalyticsManager {
             nextLinkId = link.meta._transform?.transform;
             nextType = JOB_MAP_NODE_TYPES.TRANSFORM;
           }
-
-          // Check meta data
-          if (link.meta === undefined || link.meta?.created_by === INDEX_META_DATA_CREATED_BY) {
-            rootIndexPattern = nextLinkId;
-            complete = true;
-            break;
-          }
         } else if (isJobDataLinkReturnType(link) && link.isJob === true) {
           data = link.jobData;
           const nodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+          previousNodeId = nodeId;
 
           result.elements.unshift({
             data: {
@@ -280,6 +326,7 @@ export class AnalyticsManager {
           data = link.transformData;
 
           const nodeId = `${data.id}-${JOB_MAP_NODE_TYPES.TRANSFORM}`;
+          previousNodeId = nodeId;
           rootTransform = data.dest.index;
 
           result.elements.unshift({
@@ -296,7 +343,12 @@ export class AnalyticsManager {
       for (let i = 0; i < elemLength; i++) {
         const currentElem = result.elements[i];
         const nextElem = result.elements[i + 1];
-        if (currentElem !== undefined && nextElem !== undefined) {
+        if (
+          currentElem !== undefined &&
+          nextElem !== undefined &&
+          currentElem?.data?.id.includes('*') === false &&
+          nextElem?.data?.id.includes('*') === false
+        ) {
           result.elements.push({
             data: {
               id: `${currentElem.data.id}~${nextElem.data.id}`,
@@ -350,8 +402,8 @@ export class AnalyticsManager {
           }
         }
       }
-      // Include model nodes in result elements now that all other nodes have been created
-      result.elements.push(...modelElements);
+      // Include model and index pattern nodes in result elements now that all other nodes have been created
+      result.elements.push(...modelElements, ...indexPatternElements);
 
       return result;
     } catch (error) {
