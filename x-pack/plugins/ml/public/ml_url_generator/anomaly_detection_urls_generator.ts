@@ -19,8 +19,8 @@ import type {
 import { ML_PAGES } from '../../common/constants/ml_url_generator';
 import { createGenericMlUrl } from './common';
 import { setStateToKbnUrl } from '../../../../../src/plugins/kibana_utils/public';
-import { getGroupQueryText, getJobQueryText } from '../application/jobs/jobs_list/components/utils';
 import type { AnomalyDetectionJobsListState } from '../application/jobs/jobs_list/jobs';
+import { getGroupQueryText, getJobQueryText } from '../../common/util/string_utils';
 /**
  * Creates URL to the Anomaly Detection Job management page
  */
