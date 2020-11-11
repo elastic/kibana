@@ -96,6 +96,7 @@ export class VegaBaseView {
         this._parser.error === NO_HITS_RETURNED_ERROR_MESSAGE
           ? render(<VisualizationNoResults />, vegaVisDiv)
           : this._addMessage('err', this._parser.error);
+        this._addDestroyHandler(() => unmountComponentAtNode(vegaVisDiv));
         return;
       }
 

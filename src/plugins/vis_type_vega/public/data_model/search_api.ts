@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import { combineLatest, of, throwError } from 'rxjs';
-import { map, switchMap, tap } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 import { CoreStart, IUiSettingsClient } from 'kibana/public';
 import {
   getSearchParamsFromRequest,
@@ -29,7 +29,6 @@ import {
 import { search as dataPluginSearch } from '../../../data/public';
 import { VegaInspectorAdapters } from '../vega_inspector';
 import { RequestResponder } from '../../../inspector/public';
-import { NoHitsReturnedError } from './no_hits_returned_error';
 
 export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
@@ -70,10 +69,7 @@ export class SearchAPI {
             map((data) => ({
               name: requestId,
               rawResponse: data.rawResponse,
-            })),
-            switchMap((data) =>
-              data.rawResponse.hits.total > 0 ? of(data) : throwError(new NoHitsReturnedError())
-            )
+            }))
           );
       })
     );

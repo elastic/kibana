@@ -33,6 +33,7 @@ import {
   Query,
   ContextVarsObject,
 } from './types';
+import { NoHitsReturnedError } from './no_hits_returned_error';
 
 const TIMEFILTER: string = '%timefilter%';
 const AUTOINTERVAL: string = '%autointerval%';
@@ -222,13 +223,22 @@ export class EsQueryParser {
 
     const results = await data$.toPromise();
 
+    let hasHits = false;
     results.forEach((data, index) => {
       const requestObject = requests.find((item) => getRequestName(item, index) === data.name);
 
       if (requestObject) {
         requestObject.dataObject.values = data.rawResponse;
       }
+
+      if (data.rawResponse.hits.total) {
+        hasHits = true;
+      }
     });
+
+    if (!hasHits) {
+      throw new NoHitsReturnedError();
+    }
   }
 
   /**
