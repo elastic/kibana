@@ -52,6 +52,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
     it('should reorder the elements for the table', async () => {
       await PageObjects.lens.reorderDimensions('lnsDatatable_column', 2, 0);
+      await PageObjects.header.waitUntilLoadingHasFinished();
       expect(await PageObjects.lens.getDimensionTriggersTexts('lnsDatatable_column')).to.eql([
         'Top values of @message.raw',
         'Top values of clientip',
