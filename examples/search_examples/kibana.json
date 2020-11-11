@@ -1,6 +1,6 @@
 {
   "id": "searchExamples",
-  "version": "7.10.0",
+  "version": "7.10.1",
   "server": true,
   "ui": true,
   "requiredPlugins": ["navigation", "data", "developerExamples"],
