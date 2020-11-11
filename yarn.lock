@@ -29546,6 +29546,13 @@ wrap-ansi@^7.0.0:
     string-width "^4.1.0"
     strip-ansi "^6.0.0"
 
+wrapper-webpack-plugin@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/wrapper-webpack-plugin/-/wrapper-webpack-plugin-2.1.0.tgz#2b5d80f46af84c9eeb707d08796a115e233adeac"
+  integrity sha512-e+2FhSYGCxhDq3PcUw5mRhH+8vcYa+9d9AuLChJUZ9ZbUPhQOHZ/O2dnN98iTqeUuvrzSSOv13+x/NhrAm5JEg==
+  dependencies:
+    webpack-sources "^1.1.0"
+
 wrappy@1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/wrappy/-/wrappy-1.0.2.tgz#b5243d8f3ec1aa35f1364605bc0d1036e30ab69f"

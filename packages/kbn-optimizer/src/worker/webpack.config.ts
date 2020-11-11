@@ -24,6 +24,7 @@ import webpack from 'webpack';
 // @ts-expect-error
 import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
+import WrapperPlugin from 'wrapper-webpack-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import CompressionPlugin from 'compression-webpack-plugin';
 import * as UiSharedDeps from '@kbn/ui-shared-deps';
@@ -283,5 +284,25 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
     },
   };
 
-  return webpackMerge(commonConfig, worker.dist ? distributableConfig : nonDistributableConfig);
+  const coverageConfig = {
+    plugins: [
+      new WrapperPlugin({
+        test: /\.js$/, // only wrap output of bundle files with '.js' extension
+        header: `
+          window.flushCoverageToLog = function () {
+            if (window.__coverage__) {
+              console.log('coveragejson:' + btoa(JSON.stringify(window.__coverage__)));
+            }
+          };
+          window.addEventListener('beforeunload', window.flushCoverageToLog);
+        `,
+      }),
+    ],
+  };
+
+  return webpackMerge(
+    IS_CODE_COVERAGE ? coverageConfig : {},
+    commonConfig,
+    worker.dist ? distributableConfig : nonDistributableConfig
+  );
 }

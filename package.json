@@ -322,6 +322,7 @@
     "webpack": "^4.41.5",
     "wellknown": "^0.5.0",
     "whatwg-fetch": "^3.0.0",
+    "wrapper-webpack-plugin": "^2.1.0",
     "xml2js": "^0.4.22",
     "xregexp": "4.2.4",
     "yauzl": "^2.10.0"
