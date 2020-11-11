@@ -133,12 +133,14 @@ const getDashboardContainerInput = ({
   searchSessionId,
   incomingEmbeddable,
   isEmbeddedExternally,
+  lastReloadRequestTime,
   dashboardStateManager,
   dashboardCapabilities,
 }: {
   dashboardCapabilities: DashboardCapabilities;
   dashboardStateManager: DashboardStateManager;
   incomingEmbeddable?: EmbeddablePackageState;
+  lastReloadRequestTime?: number;
   isEmbeddedExternally: boolean;
   searchSessionId: string;
   query: QueryStart;
@@ -179,7 +181,7 @@ const getDashboardContainerInput = ({
     isFullScreenMode: dashboardStateManager.getFullScreenMode(),
     isEmbeddedExternally,
     useMargins: dashboardStateManager.getUseMargins(),
-    lastReloadRequestTime: 0,
+    lastReloadRequestTime,
     dashboardCapabilities,
     title: dashboardStateManager.getTitle(),
     description: dashboardStateManager.getDescription(),
@@ -345,9 +347,10 @@ export function DashboardApp({
       const changes = getChangesFromAppStateForContainerState({
         dashboardContainer: state.dashboardContainer,
         appStateDashboardInput: getDashboardContainerInput({
-          isEmbeddedExternally: Boolean(embedSettings),
           dashboardStateManager: state.dashboardStateManager,
+          isEmbeddedExternally: Boolean(embedSettings),
           searchSessionId: data.search.session.start(),
+          lastReloadRequestTime,
           dashboardCapabilities,
           query: data.query,
         }),
@@ -358,15 +361,10 @@ export function DashboardApp({
           removeQueryParam(history, DashboardConstants.SEARCH_SESSION_ID, true);
         }
 
-        if (lastReloadRequestTime) {
-          changes.lastReloadRequestTime = lastReloadRequestTime;
-        }
-
         state.dashboardContainer.updateInput({
           ...changes,
           searchSessionId: data.search.session.start(),
         });
-        state.dashboardContainer.updateInput(changes);
       }
     },
     [
@@ -435,12 +433,9 @@ export function DashboardApp({
             savedDashboardId
           );
         }
-        setState((s) => ({
-          ...s,
+        setState({
           savedDashboard,
-          dashboardContainer: undefined,
-          dashboardStateManager: undefined,
-        }));
+        });
       })
       .catch((error) => {
         // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
@@ -796,8 +791,13 @@ export function DashboardApp({
           timefilter={data.query.timefilter.timefilter}
           dashboardContainer={state.dashboardContainer}
           dashboardStateManager={state.dashboardStateManager}
-          refreshDashboardContainer={() => {
-            refreshDashboardContainer(new Date().getTime());
+          onQuerySubmit={(_payload, isUpdate) => {
+            if (isUpdate === false) {
+              // The user can still request a reload in the query bar, even if the
+              // query is the same, and in that case, we have to explicitly ask for
+              // a reload, since no state changes will cause it.
+              refreshDashboardContainer(new Date().getTime());
+            }
           }}
         />
       )}

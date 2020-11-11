@@ -23,7 +23,6 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { createDashboardEditUrl } from '../..';
 
 import { ViewMode } from '../../../../embeddable/public';
 import { useKibana } from '../../../../kibana_react/public';
@@ -52,13 +51,13 @@ interface UrlParamValues extends Omit<UrlParamsSelectedMap, UrlParams.SHOW_FILTE
 }
 
 export function DashboardTopNav({
-  refreshDashboardContainer,
   dashboardStateManager,
   redirectToDashboard,
   lastDashboardId,
   updateViewMode,
   addFromLibrary,
   savedDashboard,
+  onQuerySubmit,
   embedSettings,
   indexPatterns,
   timefilter,
@@ -473,7 +472,7 @@ export function DashboardTopNav({
       // onSavedQueryIdChange,
       savedQueryId: dashboardStateManager.getSavedQueryId(),
       useDefaultBehaviors: true,
-      onQuerySubmit: refreshDashboardContainer,
+      onQuerySubmit,
     };
   };
 

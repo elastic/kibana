@@ -90,7 +90,7 @@ export type DashboardTopNavProps = Omit<DashboardAppComponentActiveState, 'initi
   redirectToDashboard: RedirectToDashboard;
   addFromLibrary: () => void;
   updateViewMode: (newViewMode: ViewMode) => void;
-  refreshDashboardContainer: () => void;
+  onQuerySubmit: (_payload: unknown, isUpdate: boolean | undefined) => void;
   createNew: () => void;
   lastDashboardId?: string;
   embedSettings?: DashboardEmbedSettings;
