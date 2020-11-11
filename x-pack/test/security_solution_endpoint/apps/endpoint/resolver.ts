@@ -279,6 +279,29 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
         await pageObjects.hosts.runNodeEvents(expectedLibraryData);
       });
+
+      it('Check Related Events for event.alert Node', async () => {
+        await esArchiver.load('empty_kibana');
+        await esArchiver.load('endpoint/resolver_tree/alert_events', { useCreate: true });
+        await queryBar.setQuery('');
+        await queryBar.submitQuery();
+        const expectedAlertData = [
+          '1 library',
+          '157 file',
+          '520 registry',
+          '3 file',
+          '5 library',
+          '5 library',
+        ];
+        await pageObjects.hosts.navigateToEventsPanel();
+        await pageObjects.hosts.executeQueryAndOpenResolver('event.dataset : endpoint.alerts');
+        await (await testSubjects.find('resolver:graph-controls:zoom-out')).click();
+        await browser.setWindowSize(2100, 1500);
+        for (let i = 0; i < 2; i++) {
+          await (await testSubjects.find('resolver:graph-controls:east-button')).click();
+        }
+        await pageObjects.hosts.runNodeEvents(expectedAlertData);
+      });
     });
   });
 }
