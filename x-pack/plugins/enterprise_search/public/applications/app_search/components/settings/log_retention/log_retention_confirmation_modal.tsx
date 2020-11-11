@@ -13,7 +13,7 @@ import { useActions, useValues } from 'kea';
 import { GenericConfirmationModal } from './generic_confirmation_modal';
 import { LogRetentionLogic } from './log_retention_logic';
 
-import { ELogRetentionOptions } from './types';
+import { LogRetentionOptions } from './types';
 
 export const LogRetentionConfirmationModal: React.FC = () => {
   const CANNOT_BE_RECOVERED_TEXT = i18n.translate(
@@ -40,7 +40,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
 
   return (
     <EuiOverlayMask>
-      {openedModal === ELogRetentionOptions.Analytics && (
+      {openedModal === LogRetentionOptions.Analytics && (
         <GenericConfirmationModal
           data-test-subj="AnalyticsLogRetentionConfirmationModal"
           title={i18n.translate(
@@ -51,7 +51,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
           )}
           subheading={
             logRetention &&
-            logRetention[ELogRetentionOptions.Analytics].retentionPolicy?.minAgeDays &&
+            logRetention[LogRetentionOptions.Analytics].retentionPolicy?.minAgeDays &&
             i18n.translate(
               'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.analytics.subheading',
               {
@@ -59,7 +59,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
                   'Your Analytics Logs are currently being stored for {minAgeDays} days.',
                 values: {
                   minAgeDays:
-                    logRetention[ELogRetentionOptions.Analytics].retentionPolicy?.minAgeDays,
+                    logRetention[LogRetentionOptions.Analytics].retentionPolicy?.minAgeDays,
                 },
               }
             )
@@ -84,10 +84,10 @@ export const LogRetentionConfirmationModal: React.FC = () => {
           }
           target={DISABLE_TEXT}
           onClose={closeModals}
-          onSave={() => saveLogRetention(ELogRetentionOptions.Analytics, false)}
+          onSave={() => saveLogRetention(LogRetentionOptions.Analytics, false)}
         />
       )}
-      {openedModal === ELogRetentionOptions.API && (
+      {openedModal === LogRetentionOptions.API && (
         <GenericConfirmationModal
           data-test-subj="APILogRetentionConfirmationModal"
           title={i18n.translate(
@@ -98,13 +98,13 @@ export const LogRetentionConfirmationModal: React.FC = () => {
           )}
           subheading={
             logRetention &&
-            logRetention?.[ELogRetentionOptions.API].retentionPolicy?.minAgeDays &&
+            logRetention?.[LogRetentionOptions.API].retentionPolicy?.minAgeDays &&
             i18n.translate(
               'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.api.subheading',
               {
                 defaultMessage: 'Your API Logs are currently being stored for {minAgeDays} days.',
                 values: {
-                  minAgeDays: logRetention?.[ELogRetentionOptions.API].retentionPolicy?.minAgeDays,
+                  minAgeDays: logRetention?.[LogRetentionOptions.API].retentionPolicy?.minAgeDays,
                 },
               }
             )
@@ -129,7 +129,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
           }
           target={DISABLE_TEXT}
           onClose={closeModals}
-          onSave={() => saveLogRetention(ELogRetentionOptions.API, false)}
+          onSave={() => saveLogRetention(LogRetentionOptions.API, false)}
         />
       )}
     </EuiOverlayMask>

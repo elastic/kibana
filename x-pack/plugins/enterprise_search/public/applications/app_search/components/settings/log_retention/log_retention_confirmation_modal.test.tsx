@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { LogRetentionConfirmationModal } from './log_retention_confirmation_modal';
-import { ELogRetentionOptions } from './types';
+import { LogRetentionOptions } from './types';
 import { GenericConfirmationModal } from './generic_confirmation_modal';
 
 describe('<LogRetentionConfirmationModal />', () => {
@@ -55,7 +55,7 @@ describe('<LogRetentionConfirmationModal />', () => {
     it('renders the Analytics panel when openedModal is set to Analytics', () => {
       setMockValues({
         ...values,
-        openedModal: ELogRetentionOptions.Analytics,
+        openedModal: LogRetentionOptions.Analytics,
       });
 
       const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
@@ -67,19 +67,19 @@ describe('<LogRetentionConfirmationModal />', () => {
     it('calls saveLogRetention on save when showing analytics', () => {
       setMockValues({
         ...values,
-        openedModal: ELogRetentionOptions.Analytics,
+        openedModal: LogRetentionOptions.Analytics,
       });
 
       const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
       const genericConfirmationModal = logRetentionPanel.find(GenericConfirmationModal);
       genericConfirmationModal.prop('onSave')();
-      expect(actions.saveLogRetention).toHaveBeenCalledWith(ELogRetentionOptions.Analytics, false);
+      expect(actions.saveLogRetention).toHaveBeenCalledWith(LogRetentionOptions.Analytics, false);
     });
 
     it('calls closeModals on close', () => {
       setMockValues({
         ...values,
-        openedModal: ELogRetentionOptions.Analytics,
+        openedModal: LogRetentionOptions.Analytics,
       });
 
       const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
@@ -93,7 +93,7 @@ describe('<LogRetentionConfirmationModal />', () => {
     it('renders the API panel when openedModal is set to API', () => {
       setMockValues({
         ...values,
-        openedModal: ELogRetentionOptions.API,
+        openedModal: LogRetentionOptions.API,
       });
 
       const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
@@ -105,19 +105,19 @@ describe('<LogRetentionConfirmationModal />', () => {
     it('calls saveLogRetention on save when showing api', () => {
       setMockValues({
         ...values,
-        openedModal: ELogRetentionOptions.API,
+        openedModal: LogRetentionOptions.API,
       });
 
       const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);
       const genericConfirmationModal = logRetentionPanel.find(GenericConfirmationModal);
       genericConfirmationModal.prop('onSave')();
-      expect(actions.saveLogRetention).toHaveBeenCalledWith(ELogRetentionOptions.API, false);
+      expect(actions.saveLogRetention).toHaveBeenCalledWith(LogRetentionOptions.API, false);
     });
 
     it('calls closeModals on close', () => {
       setMockValues({
         ...values,
-        openedModal: ELogRetentionOptions.API,
+        openedModal: LogRetentionOptions.API,
       });
 
       const logRetentionPanel = shallow(<LogRetentionConfirmationModal />);

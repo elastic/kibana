@@ -8,12 +8,12 @@ import React from 'react';
 
 import { EuiCodeBlock, EuiFormLabel, EuiSpacer } from '@elastic/eui';
 
-interface IApiKeyProps {
+interface ApiKeyProps {
   apiKey: string;
   label?: string;
 }
 
-export const ApiKey: React.FC<IApiKeyProps> = ({ apiKey, label }) => (
+export const ApiKey: React.FC<ApiKeyProps> = ({ apiKey, label }) => (
   <>
     {label && (
       <>

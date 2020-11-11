@@ -16,7 +16,7 @@ import {
   IndexPatternField,
   IndexPatternLayer,
 } from './types';
-import { updateLayerIndexPattern } from './state_helpers';
+import { updateLayerIndexPattern } from './operations';
 import { DateRange, ExistingFields } from '../../common/types';
 import { BASE_API_URL } from '../../common';
 import {
