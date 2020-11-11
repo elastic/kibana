@@ -25,7 +25,7 @@ interface GenericConfirmationModalProps {
   description: ReactNode;
   subheading: ReactNode;
   target: string;
-  title: ReactNode;
+  title: string;
   onClose(): void;
   onSave(): void;
 }
@@ -46,7 +46,7 @@ export const GenericConfirmationModal: React.FC<GenericConfirmationModalProps> =
   };
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={onClose} initialFocus=".euiFieldText" aria-label={title}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
       </EuiModalHeader>
