@@ -284,7 +284,7 @@ export function renderApp(
   };
 }
 
-export const teardownIngestManager = (coreStart: CoreStart) => {
+export const teardownFleet = (coreStart: CoreStart) => {
   coreStart.chrome.docTitle.reset();
   coreStart.chrome.setBreadcrumbs([]);
   licenseService.stop();

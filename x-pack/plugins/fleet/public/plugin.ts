@@ -34,13 +34,13 @@ import { registerPackagePolicyComponent } from './applications/fleet/sections/ag
 
 export { FleetConfigType } from '../common/types';
 
-// We need to provide an object instead of void so that dependent plugins know when Ingest Manager
+// We need to provide an object instead of void so that dependent plugins know when Fleet
 // is disabled.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface FleetSetup {}
 
 /**
- * Describes public IngestManager plugin contract returned at the `start` stage.
+ * Describes public Fleet plugin contract returned at the `start` stage.
  */
 export interface FleetStart {
   registerPackagePolicyComponent: typeof registerPackagePolicyComponent;
@@ -76,7 +76,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
     // Set up license service
     licenseService.start(deps.licensing.license$);
 
-    // Register main Ingest Manager app
+    // Register main Fleet app
     core.application.register({
       id: PLUGIN_ID,
       category: DEFAULT_APP_CATEGORIES.management,
@@ -89,12 +89,12 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
           FleetStartDeps,
           FleetStart
         ];
-        const { renderApp, teardownIngestManager } = await import('./applications/fleet/');
+        const { renderApp, teardownFleet } = await import('./applications/fleet/');
         const unmount = renderApp(coreStart, params, deps, startDeps, config, kibanaVersion);
 
         return () => {
           unmount();
-          teardownIngestManager(coreStart);
+          teardownFleet(coreStart);
         };
       },
     });
@@ -104,7 +104,7 @@ export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDep
       id: 'ingestManager',
       category: DEFAULT_APP_CATEGORIES.management,
       navLinkStatus: AppNavLinkStatus.hidden,
-      title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Ingest Manager' }),
+      title: i18n.translate('xpack.fleet.oldAppTitle', { defaultMessage: 'Ingest Manager' }),
       async mount(params: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
         coreStart.application.navigateToApp('fleet', {
