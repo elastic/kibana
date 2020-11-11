@@ -26,10 +26,12 @@ import { VISUALIZE_EMBEDDABLE_TYPE, VisualizeInput } from '../../../../visualiza
 import {
   showSaveModal,
   SavedObjectSaveModalOrigin,
+  SavedObjectSaveModalDashboard,
   SavedObjectSaveOpts,
   OnSaveProps,
 } from '../../../../saved_objects/public';
 import { unhashUrl } from '../../../../kibana_utils/public';
+import { SavedObjectsClientContract } from '../../../../../core/public';
 
 import {
   VisualizeServices,
@@ -51,6 +53,7 @@ interface TopNavConfigParams {
   stateContainer: VisualizeAppStateContainer;
   visualizationIdFromUrl?: string;
   stateTransfer: EmbeddableStateTransfer;
+  savedObjectsClient: SavedObjectsClientContract;
   embeddableId?: string;
   onAppLeave: AppMountParameters['onAppLeave'];
 }
@@ -65,6 +68,7 @@ export const getTopNavConfig = (
     hasUnappliedChanges,
     visInstance,
     stateContainer,
+    savedObjectsClient,
     visualizationIdFromUrl,
     stateTransfer,
     embeddableId,
@@ -168,6 +172,7 @@ export const getTopNavConfig = (
     if (!originatingApp) {
       return;
     }
+
     const state = {
       input: {
         savedVis: vis.serialize(),
@@ -298,10 +303,12 @@ export const getTopNavConfig = (
                 onTitleDuplicate,
                 newDescription,
                 returnToOrigin,
-              }: OnSaveProps & { returnToOrigin: boolean }) => {
+                dashboardId,
+              }: OnSaveProps & { returnToOrigin?: boolean } & { dashboardId?: string | null }) => {
                 if (!savedVis) {
                   return;
                 }
+
                 const currentTitle = savedVis.title;
                 savedVis.title = newTitle;
                 embeddableHandler.updateInput({ title: newTitle });
@@ -318,11 +325,46 @@ export const getTopNavConfig = (
                   onTitleDuplicate,
                   returnToOrigin,
                 };
+
+                if (dashboardId) {
+                  // TODO: this should be an edit by value path
+                  // const appPath = `${VisualizeConstants.EDIT_PATH}/${encodeURIComponent(id)}`;
+                  const appPath = `${VisualizeConstants.LANDING_PAGE_PATH}`;
+
+                  // Manually insert a new url so the back button will open the saved visualization.
+                  history.replace(appPath);
+                  setActiveUrl(appPath);
+
+                  const state = {
+                    input: {
+                      savedVis: {
+                        ...vis.serialize(),
+                        title: newTitle,
+                        description: newDescription,
+                      },
+                    } as VisualizeInput,
+                    embeddableId,
+                    type: VISUALIZE_EMBEDDABLE_TYPE,
+                  };
+
+                  const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+
+                  stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+                    state,
+                    path,
+                  });
+
+                  // TODO: this is just to get past the Saved object modal validation
+                  // we can do better probably
+                  return { id: true };
+                }
+
                 const response = await doSave(saveOptions);
                 // If the save wasn't successful, put the original values back.
                 if (!response.id || response.error) {
                   savedVis.title = currentTitle;
                 }
+
                 return response;
               };
 
@@ -345,17 +387,29 @@ export const getTopNavConfig = (
                 );
               }
 
-              const saveModal = (
-                <SavedObjectSaveModalOrigin
-                  documentInfo={savedVis || { title: '' }}
-                  onSave={onSave}
-                  options={options}
-                  getAppNameFromId={stateTransfer.getAppNameFromId}
-                  objectType={'visualization'}
-                  onClose={() => {}}
-                  originatingApp={originatingApp}
-                />
-              );
+              const saveModal =
+                !!originatingApp ||
+                !dashboard.dashboardFeatureFlagConfig.allowByValueEmbeddables ? (
+                  <SavedObjectSaveModalOrigin
+                    documentInfo={savedVis || { title: '' }}
+                    onSave={onSave}
+                    options={options}
+                    getAppNameFromId={stateTransfer.getAppNameFromId}
+                    objectType={'visualization'}
+                    onClose={() => {}}
+                    originatingApp={originatingApp}
+                  />
+                ) : (
+                  <SavedObjectSaveModalDashboard
+                    documentInfo={savedVis || { title: '' }}
+                    onSave={onSave}
+                    // options={options} TODO: add this
+                    objectType={'visualization'}
+                    onClose={() => {}}
+                    savedObjectsClient={savedObjectsClient}
+                  />
+                );
+
               const isSaveAsButton = anchorElement.classList.contains('saveAsButton');
               onAppLeave((actions) => {
                 return actions.default();

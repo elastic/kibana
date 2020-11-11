@@ -22,6 +22,8 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiModal,
@@ -53,10 +55,12 @@ interface Props {
   onClose: () => void;
   title: string;
   showCopyOnSave: boolean;
+  onCopyOnSaveChange?: (copyOnChange: boolean) => void;
   initialCopyOnSave?: boolean;
   objectType: string;
   confirmButtonLabel?: React.ReactNode;
   options?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
+  rightOptions?: React.ReactNode | ((state: SaveModalState) => React.ReactNode);
   description?: string;
   showDescription: boolean;
 }
@@ -87,12 +91,52 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     const { isTitleDuplicateConfirmed, hasTitleDuplicate, title } = this.state;
     const duplicateWarningId = generateId();
 
+    const hasColumns = !!this.props.rightOptions;
+
+    const formBodyContent = (
+      <>
+        <EuiFormRow
+          fullWidth
+          label={<FormattedMessage id="savedObjects.saveModal.titleLabel" defaultMessage="Title" />}
+        >
+          <EuiFieldText
+            fullWidth
+            autoFocus
+            data-test-subj="savedObjectTitle"
+            value={title}
+            onChange={this.onTitleChange}
+            isInvalid={(!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0}
+            aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
+          />
+        </EuiFormRow>
+
+        {this.renderViewDescription()}
+
+        {typeof this.props.options === 'function'
+          ? this.props.options(this.state)
+          : this.props.options}
+      </>
+    );
+
+    const formBody = hasColumns ? (
+      <EuiFlexGroup>
+        <EuiFlexItem>{formBodyContent}</EuiFlexItem>
+        <EuiFlexItem>
+          {typeof this.props.rightOptions === 'function'
+            ? this.props.rightOptions(this.state)
+            : this.props.rightOptions}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      formBodyContent
+    );
+
     return (
       <EuiOverlayMask>
         <form onSubmit={this.onFormSubmit}>
           <EuiModal
             data-test-subj="savedObjectSaveModal"
-            className="kbnSavedObjectSaveModal"
+            className={`kbnSavedObjectSaveModal ${hasColumns && 'kbnSavedObjectsSaveModal--wide'}`}
             onClose={this.props.onClose}
           >
             <EuiModalHeader>
@@ -119,33 +163,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
                 {this.renderCopyOnSave()}
 
-                <EuiFormRow
-                  fullWidth
-                  label={
-                    <FormattedMessage
-                      id="savedObjects.saveModal.titleLabel"
-                      defaultMessage="Title"
-                    />
-                  }
-                >
-                  <EuiFieldText
-                    fullWidth
-                    autoFocus
-                    data-test-subj="savedObjectTitle"
-                    value={title}
-                    onChange={this.onTitleChange}
-                    isInvalid={
-                      (!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0
-                    }
-                    aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
-                  />
-                </EuiFormRow>
-
-                {this.renderViewDescription()}
-
-                {typeof this.props.options === 'function'
-                  ? this.props.options(this.state)
-                  : this.props.options}
+                {formBody}
               </EuiForm>
             </EuiModalBody>
 
@@ -238,6 +256,10 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     this.setState({
       copyOnSave: event.target.checked,
     });
+
+    if (this.props.onCopyOnSaveChange) {
+      this.props.onCopyOnSaveChange(event.target.checked);
+    }
   };
 
   private onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {

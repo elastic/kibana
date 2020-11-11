@@ -19,4 +19,5 @@
 
 export { SavedObjectSaveModal, OnSaveProps, SaveModalState } from './saved_object_save_modal';
 export { SavedObjectSaveModalOrigin, OriginSaveModalProps } from './saved_object_save_modal_origin';
+export { SavedObjectSaveModalDashboard } from './saved_object_save_modal_dashboard';
 export { showSaveModal, SaveResult } from './show_saved_object_save_modal';
