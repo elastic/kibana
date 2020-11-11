@@ -32,8 +32,11 @@ export function DimensionContainer({
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
 
   const closeFlyout = () => {
-    handleClose();
-    setFocusTrapIsEnabled(false);
+    // some internal popovers are pretty slow to unmount, so give it some time
+    setTimeout(() => {
+      handleClose();
+      setFocusTrapIsEnabled(false);
+    }, 150); // <= 150 has been chosen from empirical testing
   };
 
   useEffect(() => {
