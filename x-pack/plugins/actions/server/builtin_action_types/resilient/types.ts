@@ -71,6 +71,7 @@ export interface ExternalServiceFields {
   name: string;
   read_only: boolean;
   required?: string;
+  text: string;
 }
 export type GetCommonFieldsResponse = ExternalServiceFields[];
 

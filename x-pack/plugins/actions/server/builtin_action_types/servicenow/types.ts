@@ -111,11 +111,7 @@ export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
 }
 export interface ExternalServiceFields {
   column_label: string;
-  name: string;
-  internal_type: {
-    link: string;
-    value: string;
-  };
+  mandatory: string;
   max_length: string;
   element: string;
 }

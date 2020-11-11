@@ -273,7 +273,7 @@ export const getFields = async (
   signal: AbortSignal
 ): Promise<ServiceConnectorCaseResponse> => {
   const response = await KibanaServices.get().http.fetch<CaseResponse>(
-    `${CASE_CONFIGURE_CONNECTORS_URL}/${connectorId}/comments`,
+    `${CASE_CONFIGURE_CONNECTORS_URL}/${connectorId}`,
     {
       query: {
         connectorType,

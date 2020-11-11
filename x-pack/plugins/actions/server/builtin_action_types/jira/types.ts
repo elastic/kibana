@@ -104,7 +104,13 @@ export interface FieldSchema {
 }
 export type GetFieldsByIssueTypeResponse = Record<
   string,
-  { allowedValues: Array<{}>; defaultValue: {}; required: boolean; schema: FieldSchema }
+  {
+    allowedValues: Array<{}>;
+    defaultValue: {};
+    required: boolean;
+    schema: FieldSchema;
+    name: string;
+  }
 >;
 export type GetCommonFieldsResponse = GetFieldsByIssueTypeResponse;
 

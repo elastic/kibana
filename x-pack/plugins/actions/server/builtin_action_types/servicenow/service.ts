@@ -34,7 +34,7 @@ export const createExternalService = (
   }
 
   const incidentUrl = `${url}/${INCIDENT_URL}`;
-  const fieldsUrl = `${url}/${SYS_DICTIONARY}?sysparm_query=name=task^internal_type=string&active=true&read_only=false&sysparm_fields=max_length,element,column_label`;
+  const fieldsUrl = `${url}/${SYS_DICTIONARY}?sysparm_query=name=task^internal_type=string&active=true&array=false&read_only=false&sysparm_fields=max_length,element,column_label,mandatory`;
   const axiosInstance = axios.create({
     auth: { username, password },
   });

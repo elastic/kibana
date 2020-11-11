@@ -40,6 +40,7 @@ export const useGetFields = (connectorId: string, connectorType: string): UseGet
       });
       try {
         const response = await getFields(connectorId, connectorType, abortCtrl.signal);
+        console.log('response', response);
         if (!didCancel) {
           setFieldsState({
             data: response,
