@@ -5,9 +5,9 @@
  */
 
 import { lazy } from 'react';
-import { IntegrationPolicyCreateExtensionComponent } from '../../../../../../../fleet/public';
+import { PackagePolicyCreateExtensionComponent } from '../../../../../../../fleet/public';
 
-export const LazyEndpointPolicyCreateExtension = lazy<IntegrationPolicyCreateExtensionComponent>(
+export const LazyEndpointPolicyCreateExtension = lazy<PackagePolicyCreateExtensionComponent>(
   async () => {
     const { EndpointPolicyCreateExtension } = await import('./endpoint_policy_create_extension');
     return {

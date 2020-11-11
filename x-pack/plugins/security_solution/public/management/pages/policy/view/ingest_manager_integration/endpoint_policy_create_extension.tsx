@@ -7,13 +7,13 @@
 import React, { memo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IntegrationPolicyCreateExtensionComponentProps } from '../../../../../../../fleet/public';
+import { PackagePolicyCreateExtensionComponentProps } from '../../../../../../../fleet/public';
 
 /**
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
  */
-export const EndpointPolicyCreateExtension = memo<IntegrationPolicyCreateExtensionComponentProps>(
+export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionComponentProps>(
   () => {
     return (
       <>

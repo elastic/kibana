@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   pagePathGetters,
-  IntegrationPolicyEditExtensionComponentProps,
+  PackagePolicyEditExtensionComponentProps,
 } from '../../../../../../../fleet/public';
 import { getPolicyDetailPath, getTrustedAppsListPath } from '../../../../common/routing';
 import { MANAGEMENT_APP_ID } from '../../../../common/constants';
@@ -36,7 +36,7 @@ import { useNavigateToAppEventHandler } from '../../../../../common/hooks/endpoi
  * Exports Endpoint-specific package policy instructions
  * for use in the Ingest app create / edit package policy
  */
-export const EndpointPolicyEditExtension = memo<IntegrationPolicyEditExtensionComponentProps>(
+export const EndpointPolicyEditExtension = memo<PackagePolicyEditExtensionComponentProps>(
   ({ policy }) => {
     return (
       <>

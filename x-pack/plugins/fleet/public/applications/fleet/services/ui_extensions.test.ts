@@ -7,7 +7,7 @@
 import { lazy } from 'react';
 
 import {
-  IntegrationPolicyEditExtensionComponent,
+  PackagePolicyEditExtensionComponent,
   UIExtensionRegistrationCallback,
   UIExtensionsStorage,
 } from '../types';
@@ -28,8 +28,8 @@ describe('UI Extension services', () => {
     });
 
     it('should store an extension points', () => {
-      const LazyCustomView = lazy<IntegrationPolicyEditExtensionComponent>(async () => {
-        return { default: ((() => {}) as unknown) as IntegrationPolicyEditExtensionComponent };
+      const LazyCustomView = lazy<PackagePolicyEditExtensionComponent>(async () => {
+        return { default: ((() => {}) as unknown) as PackagePolicyEditExtensionComponent };
       });
       register({
         type: 'integration-policy',
@@ -47,11 +47,11 @@ describe('UI Extension services', () => {
     });
 
     it('should throw if extension point has already registered', () => {
-      const LazyCustomView = lazy<IntegrationPolicyEditExtensionComponent>(async () => {
-        return { default: ((() => {}) as unknown) as IntegrationPolicyEditExtensionComponent };
+      const LazyCustomView = lazy<PackagePolicyEditExtensionComponent>(async () => {
+        return { default: ((() => {}) as unknown) as PackagePolicyEditExtensionComponent };
       });
-      const LazyCustomView2 = lazy<IntegrationPolicyEditExtensionComponent>(async () => {
-        return { default: ((() => {}) as unknown) as IntegrationPolicyEditExtensionComponent };
+      const LazyCustomView2 = lazy<PackagePolicyEditExtensionComponent>(async () => {
+        return { default: ((() => {}) as unknown) as PackagePolicyEditExtensionComponent };
       });
 
       register({

@@ -21,11 +21,11 @@ export interface UIExtensionsStorage {
  * UI Component Extension is used on the pages displaying the ability to edit an
  * Integration Policy
  */
-export type IntegrationPolicyEditExtensionComponent = ComponentType<
-  IntegrationPolicyEditExtensionComponentProps
+export type PackagePolicyEditExtensionComponent = ComponentType<
+  PackagePolicyEditExtensionComponentProps
 >;
 
-export interface IntegrationPolicyEditExtensionComponentProps {
+export interface PackagePolicyEditExtensionComponentProps {
   /** The current integration policy being edited */
   policy: PackagePolicy;
   /** The new (updated) integration policy that will be saved */
@@ -43,22 +43,22 @@ export interface IntegrationPolicyEditExtensionComponentProps {
 }
 
 /** Extension point registration contract for Integration Policy Edit views */
-export interface IntegrationPolicyEditExtension {
+export interface PackagePolicyEditExtension {
   integration: string;
   type: 'integration-policy';
   view: 'edit';
-  component: LazyExoticComponent<IntegrationPolicyEditExtensionComponent>;
+  component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
 }
 
 /**
  * UI Component Extension is used on the pages displaying the ability to Create an
  * Integration Policy
  */
-export type IntegrationPolicyCreateExtensionComponent = ComponentType<
-  IntegrationPolicyCreateExtensionComponentProps
+export type PackagePolicyCreateExtensionComponent = ComponentType<
+  PackagePolicyCreateExtensionComponentProps
 >;
 
-export interface IntegrationPolicyCreateExtensionComponentProps {
+export interface PackagePolicyCreateExtensionComponentProps {
   /** The integration policy being created */
   newPolicy: NewPackagePolicy;
   /**
@@ -74,28 +74,28 @@ export interface IntegrationPolicyCreateExtensionComponentProps {
 }
 
 /** Extension point registration contract for Integration Policy Create views */
-export interface IntegrationPolicyCreateExtension {
+export interface PackagePolicyCreateExtension {
   integration: string;
   type: 'integration-policy';
   view: 'create';
-  component: LazyExoticComponent<IntegrationPolicyCreateExtensionComponent>;
+  component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
 }
 
 /**
  * UI Component Extension is used to display a Custom tab (and view) under a given Integration
  */
-export type IntegrationCustomExtensionComponent = ComponentType;
+export type PackageCustomExtensionComponent = ComponentType;
 
 /** Extension point registration contract for Integration details Custom view */
-export interface IntegrationCustomExtension {
+export interface PackageCustomExtension {
   integration: string;
   type: 'integration';
   view: 'custom';
-  component: LazyExoticComponent<IntegrationCustomExtensionComponent>;
+  component: LazyExoticComponent<PackageCustomExtensionComponent>;
 }
 
 /** Fleet UI Extension Point */
 export type UIExtensionPoint =
-  | IntegrationPolicyEditExtension
-  | IntegrationCustomExtension
-  | IntegrationPolicyCreateExtension;
+  | PackagePolicyEditExtension
+  | PackageCustomExtension
+  | PackagePolicyCreateExtension;

@@ -5,14 +5,14 @@
  */
 
 import { lazy } from 'react';
-import { IntegrationPolicyEditExtensionComponent } from '../../../../../../../fleet/public';
+import { PackagePolicyEditExtensionComponent } from '../../../../../../../fleet/public';
 
-export const LazyEndpointPolicyEditExtension = lazy<IntegrationPolicyEditExtensionComponent>(
+export const LazyEndpointPolicyEditExtension = lazy<PackagePolicyEditExtensionComponent>(
   async () => {
     const { EndpointPolicyEditExtension } = await import('./endpoint_policy_edit_extension');
     return {
       // FIXME: remove casting once old UI component registration is removed
-      default: (EndpointPolicyEditExtension as unknown) as IntegrationPolicyEditExtensionComponent,
+      default: (EndpointPolicyEditExtension as unknown) as PackagePolicyEditExtensionComponent,
     };
   }
 );

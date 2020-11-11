@@ -44,7 +44,7 @@ import { StepDefinePackagePolicy } from '../create_package_policy_page/step_defi
 import { useUIExtension } from '../../../hooks/use_ui_extension';
 import { ExtensionWrapper } from '../../../components/extension_wrapper';
 import { GetOnePackagePolicyResponse } from '../../../../../../common/types/rest_spec';
-import { IntegrationPolicyEditExtensionComponentProps } from '../../../types';
+import { PackagePolicyEditExtensionComponentProps } from '../../../types';
 
 export const EditPackagePolicyPage: React.FunctionComponent = () => {
   const { notifications } = useCore();
@@ -199,7 +199,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
   );
 
   const handleExtensionViewOnChange = useCallback<
-    IntegrationPolicyEditExtensionComponentProps['onChange']
+    PackagePolicyEditExtensionComponentProps['onChange']
   >(
     ({ isValid, updatedPolicy }) => {
       updatePackagePolicy(updatedPolicy);
