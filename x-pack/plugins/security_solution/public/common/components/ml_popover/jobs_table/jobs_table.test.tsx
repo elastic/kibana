@@ -55,7 +55,7 @@ describe('JobsTableComponent', () => {
       '[data-test-subj="jobs-table-link"]'
     );
     await waitFor(() =>
-      expect(href).toEqual('/app/ml/jobs?_a=(jobId:linux_anomalous_network_activity_ecs)')
+      expect(href).toEqual('/app/ml/jobs?_a=(queryText:linux_anomalous_network_activity_ecs)')
     );
   });
 
