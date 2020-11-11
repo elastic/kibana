@@ -219,6 +219,10 @@ const backgroundSessionIndicatorViewStateToProps: {
   },
 };
 
+const VerticalDivider: React.FC = () => (
+  <div className="backgroundSessionIndicator__verticalDivider" />
+);
+
 export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProps> = (props) => {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
@@ -233,6 +237,7 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
       closePopover={closePopover}
       anchorPosition={'rightCenter'}
       panelPaddingSize={'s'}
+      className="backgroundSessionIndicator"
       data-test-subj={'backgroundSessionIndicator'}
       button={
         <EuiToolTip content={button.tooltipText}>
@@ -245,33 +250,32 @@ export const BackgroundSessionIndicator: React.FC<BackgroundSessionIndicatorProp
         </EuiToolTip>
       }
     >
-      <EuiFlexGroup responsive={false} alignItems={'center'} gutterSize={'s'}>
+      <EuiFlexGroup
+        responsive={true}
+        alignItems={'center'}
+        gutterSize={'s'}
+        className="backgroundSessionIndicator__popoverContainer"
+      >
         <EuiFlexItem grow={true}>
-          <EuiFlexGroup responsive={false} alignItems={'center'} gutterSize={'xs'}>
-            <EuiFlexItem grow={true}>
-              <EuiText size="s" color={'subdued'}>
-                <p>{popover.text}</p>
-              </EuiText>
-            </EuiFlexItem>
+          <EuiText size="s" color={'subdued'}>
+            <p>{popover.text}</p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup wrap={true} responsive={false} alignItems={'center'} gutterSize={'s'}>
             {popover.primaryAction && (
               <EuiFlexItem grow={false}>
-                <popover.primaryAction {...props} buttonProps={{ size: 'xs' }} />
+                <popover.primaryAction {...props} buttonProps={{ size: 'xs', flush: 'both' }} />
+              </EuiFlexItem>
+            )}
+            {popover.primaryAction && popover.secondaryAction && <VerticalDivider />}
+            {popover.secondaryAction && (
+              <EuiFlexItem grow={false}>
+                <popover.secondaryAction {...props} buttonProps={{ size: 'xs', flush: 'both' }} />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {popover.secondaryAction && (
-          <EuiFlexItem
-            grow={false}
-            className={'backgroundSessionIndicator__secondaryActionContainer'}
-          >
-            <popover.secondaryAction
-              {...props}
-              // marginLeft: 10 to make borderLeft look like a separator
-              buttonProps={{ size: 'xs', style: { marginLeft: 10 } }}
-            />
-          </EuiFlexItem>
-        )}
       </EuiFlexGroup>
     </EuiPopover>
   );
