@@ -30,8 +30,8 @@ import {
   ENGINE_API_LOGS_PATH,
 } from '../../routes';
 import { getAppSearchUrl } from '../../../shared/enterprise_search_url';
+import { ENGINES_TITLE } from '../engines';
 import {
-  ENGINES_TITLE,
   OVERVIEW_TITLE,
   ANALYTICS_TITLE,
   DOCUMENTS_TITLE,
