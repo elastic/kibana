@@ -103,12 +103,11 @@ describe('#getQueryParams', () => {
     if (registry.isMultiNamespace(type)) {
       const array = [...(namespaces ?? [DEFAULT_NAMESPACE_STRING]), ALL_NAMESPACES_STRING];
 
-      const namespacesClause = { terms: { namespaces: array } };
       return {
         bool: {
           must: namespaces?.includes(ALL_NAMESPACES_STRING)
-            ? expect.not.arrayContaining([namespacesClause])
-            : expect.arrayContaining([namespacesClause]),
+            ? [{ term: { type } }]
+            : [{ term: { type } }, { terms: { namespaces: array } }],
           must_not: [{ exists: { field: 'namespace' } }],
         },
       };

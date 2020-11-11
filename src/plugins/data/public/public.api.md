@@ -1367,9 +1367,9 @@ export class IndexPatternsService {
     // (undocumented)
     getCache: () => Promise<SavedObject<IndexPatternSavedObjectAttrs>[] | null | undefined>;
     getDefault: () => Promise<IndexPattern | null>;
-    getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions) => Promise<any>;
+    getFieldsForIndexPattern: (indexPattern: IndexPattern | IndexPatternSpec, options?: GetFieldsOptions | undefined) => Promise<any>;
     // Warning: (ae-forgotten-export) The symbol "GetFieldsOptions" needs to be exported by the entry point index.d.ts
-    getFieldsForWildcard: (options?: GetFieldsOptions) => Promise<any>;
+    getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
     getIds: (refresh?: boolean) => Promise<string[]>;
     getIdsWithTitle: (refresh?: boolean) => Promise<Array<{
         id: string;
@@ -1840,6 +1840,8 @@ export interface QuerySuggestionGetFnArgs {
     selectionStart: number;
     // (undocumented)
     signal?: AbortSignal;
+    // (undocumented)
+    useTimeRange?: boolean;
 }
 
 // Warning: (ae-missing-release-tag) "QuerySuggestionTypes" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
@@ -2309,6 +2311,7 @@ export const UI_SETTINGS: {
     readonly INDEXPATTERN_PLACEHOLDER: "indexPattern:placeholder";
     readonly FILTERS_PINNED_BY_DEFAULT: "filters:pinnedByDefault";
     readonly FILTERS_EDITOR_SUGGEST_VALUES: "filterEditor:suggestValues";
+    readonly AUTOCOMPLETE_USE_TIMERANGE: "autocomplete:useTimeRange";
 };
 
 
