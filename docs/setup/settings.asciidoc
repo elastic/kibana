@@ -571,7 +571,7 @@ all http requests to https over the port configured as <<server-port, `server.po
 
 | `server.ssl.supportedProtocols:`
  | An array of supported protocols with versions.
-Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`. *Default: TLSv1.1, TLSv1.2*
+Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.1, TLSv1.2, TLSv1.3*
 
 | [[settings-xsrf-whitelist]] `server.xsrf.whitelist:`
  | It is not recommended to disable protections for
