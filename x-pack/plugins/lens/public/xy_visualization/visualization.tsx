@@ -228,7 +228,6 @@ export const getXyVisualization = ({
           groupLabel: getAxisName('x', { isHorizontal }),
           accessors: layer.xAccessor ? [layer.xAccessor] : [],
           filterOperations: isBucketed,
-          suggestedPriority: 1,
           supportsMoreColumns: !layer.xAccessor,
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
@@ -259,7 +258,6 @@ export const getXyVisualization = ({
               ]
             : [],
           filterOperations: isBucketed,
-          suggestedPriority: 0,
           supportsMoreColumns: !layer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
           required: layer.seriesType.includes('percentage'),

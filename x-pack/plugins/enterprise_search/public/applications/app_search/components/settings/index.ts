@@ -5,3 +5,4 @@
  */
 
 export { Settings } from './settings';
+export { SETTINGS_TITLE } from './constants';
