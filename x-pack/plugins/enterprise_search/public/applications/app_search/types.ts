@@ -6,10 +6,4 @@
 
 export * from '../../../common/types/app_search';
 export { Role, RoleTypes, AbilityTypes } from './utils/role';
-
-export interface Engine {
-  name: string;
-  type: string;
-  language: string;
-  result_fields: object[];
-}
+export { Engine } from './components/engine/types';
