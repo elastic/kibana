@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import {
-  UIExtensionRegistrationCallback,
-  UIExtensionsStorage,
-} from '../../../../common/types/ui_extensions';
+import { UIExtensionRegistrationCallback, UIExtensionsStorage } from '../types';
 
 /** Factory that returns a callback that can be used to register UI extensions */
 export const createExtensionRegistrationCallback = (

@@ -10,7 +10,7 @@ import {
   IntegrationPolicyEditExtensionComponent,
   UIExtensionRegistrationCallback,
   UIExtensionsStorage,
-} from '../../../../common/types/ui_extensions';
+} from '../types';
 import { createExtensionRegistrationCallback } from './ui_extensions';
 
 describe('UI Extension services', () => {

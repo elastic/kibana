@@ -14,5 +14,6 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 
 export type { NewPackagePolicy } from './applications/fleet/types';
 export * from './applications/fleet/types/intra_app_route_state';
+export * from './applications/fleet/types/ui_extensions';
 
 export { pagePathGetters } from './applications/fleet/constants';

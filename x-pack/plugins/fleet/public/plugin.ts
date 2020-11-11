@@ -31,10 +31,7 @@ import {
   TutorialModuleNotice,
 } from './applications/fleet/components/home_integration';
 import { createExtensionRegistrationCallback } from './applications/fleet/services/ui_extensions';
-import {
-  UIExtensionRegistrationCallback,
-  UIExtensionsStorage,
-} from '../common/types/ui_extensions';
+import { UIExtensionRegistrationCallback, UIExtensionsStorage } from './applications/fleet/types';
 
 export { IngestManagerConfigType } from '../common/types';
 

@@ -5,7 +5,7 @@
  */
 
 import { lazy } from 'react';
-import { IntegrationPolicyCreateExtensionComponent } from '../../../../../../../fleet/common/types/ui_extensions';
+import { IntegrationPolicyCreateExtensionComponent } from '../../../../../../../fleet/public';
 
 export const LazyEndpointPolicyCreateExtension = lazy<IntegrationPolicyCreateExtensionComponent>(
   async () => {

@@ -7,7 +7,7 @@
 import React, { memo } from 'react';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { IntegrationPolicyCreateExtensionComponentProps } from '../../../../../../../fleet/common/types/ui_extensions';
+import { IntegrationPolicyCreateExtensionComponentProps } from '../../../../../../../fleet/public';
 
 /**
  * Exports Endpoint-specific package policy instructions

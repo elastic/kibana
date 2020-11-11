@@ -48,7 +48,7 @@ import { StepDefinePackagePolicy } from './step_define_package_policy';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { useUIExtension } from '../../../hooks/use_ui_extension';
 import { ExtensionWrapper } from '../../../components/extension_wrapper';
-import { IntegrationPolicyEditExtensionComponentProps } from '../../../../../../common/types/ui_extensions';
+import { IntegrationPolicyEditExtensionComponentProps } from '../../../types';
 
 const StepsWithLessPadding = styled(EuiSteps)`
   .euiStep__content {

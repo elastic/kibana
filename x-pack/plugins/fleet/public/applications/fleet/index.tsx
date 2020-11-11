@@ -36,7 +36,7 @@ import {
 import { PackageInstallProvider } from './sections/epm/hooks';
 import { FleetStatusProvider, useBreadcrumbs } from './hooks';
 import { IntraAppStateProvider } from './hooks/use_intra_app_state';
-import { UIExtensionsStorage } from '../../../common/types/ui_extensions';
+import { UIExtensionsStorage } from './types';
 import { UIExtensionsContext } from './hooks/use_ui_extension';
 
 export interface ProtectedRouteProps extends RouteProps {
