@@ -445,6 +445,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
       defaultQuery: this.state.filter,
       box: {
         incremental: true,
+        'data-test-subj': 'tableListSearchBox',
       },
       filters: searchFilters ?? [],
     };
