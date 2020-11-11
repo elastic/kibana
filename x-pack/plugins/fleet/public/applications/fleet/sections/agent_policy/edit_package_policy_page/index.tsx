@@ -291,11 +291,7 @@ export const EditPackagePolicyPage: React.FunctionComponent = () => {
     packageInfo,
   };
 
-  const ExtensionView = useUIExtension(
-    packagePolicy.package?.name ?? '',
-    'integration-policy',
-    'edit'
-  );
+  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-edit');
 
   const configurePackage = useMemo(
     () =>

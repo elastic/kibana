@@ -305,11 +305,7 @@ export const CreatePackagePolicyPage: React.FunctionComponent = () => {
     [pkgkey, updatePackageInfo, agentPolicy, updateAgentPolicy]
   );
 
-  const ExtensionView = useUIExtension(
-    packagePolicy.package?.name ?? '',
-    'integration-policy',
-    'create'
-  );
+  const ExtensionView = useUIExtension(packagePolicy.package?.name ?? '', 'package-policy-create');
 
   const stepSelectPackage = useMemo(
     () => (

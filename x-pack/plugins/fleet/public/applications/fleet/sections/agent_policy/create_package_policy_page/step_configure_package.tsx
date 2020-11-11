@@ -64,8 +64,10 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   submitAttempted,
 }) => {
   const hasUiExtension =
-    useUIExtension(packageInfo.name, 'integration-policy', from === 'edit' ? 'edit' : 'create') !==
-    undefined;
+    useUIExtension(
+      packageInfo.name,
+      from === 'edit' ? 'package-policy-edit' : 'package-policy-create'
+    ) !== undefined;
 
   // Configure inputs (and their streams)
   // Assume packages only export one config template for now

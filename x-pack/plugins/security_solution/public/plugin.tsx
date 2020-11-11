@@ -335,15 +335,13 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
       registerExtension({
         package: 'endpoint',
-        type: 'integration-policy',
-        view: 'edit',
+        view: 'package-policy-edit',
         component: LazyEndpointPolicyEditExtension,
       });
 
       registerExtension({
         package: 'endpoint',
-        type: 'integration-policy',
-        view: 'create',
+        view: 'package-policy-create',
         component: LazyEndpointPolicyCreateExtension,
       });
     }

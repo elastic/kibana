@@ -12,9 +12,7 @@ export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint)
 
 /** Internal storage for registered UI Extension Points */
 export interface UIExtensionsStorage {
-  [key: string]: Partial<
-    Record<UIExtensionPoint['type'], Partial<Record<UIExtensionPoint['view'], UIExtensionPoint>>>
-  >;
+  [key: string]: Partial<Record<UIExtensionPoint['view'], UIExtensionPoint>>;
 }
 
 /**
@@ -45,8 +43,7 @@ export interface PackagePolicyEditExtensionComponentProps {
 /** Extension point registration contract for Integration Policy Edit views */
 export interface PackagePolicyEditExtension {
   package: string;
-  type: 'integration-policy';
-  view: 'edit';
+  view: 'package-policy-edit';
   component: LazyExoticComponent<PackagePolicyEditExtensionComponent>;
 }
 
@@ -76,8 +73,7 @@ export interface PackagePolicyCreateExtensionComponentProps {
 /** Extension point registration contract for Integration Policy Create views */
 export interface PackagePolicyCreateExtension {
   package: string;
-  type: 'integration-policy';
-  view: 'create';
+  view: 'package-policy-create';
   component: LazyExoticComponent<PackagePolicyCreateExtensionComponent>;
 }
 
@@ -89,8 +85,7 @@ export type PackageCustomExtensionComponent = ComponentType;
 /** Extension point registration contract for Integration details Custom view */
 export interface PackageCustomExtension {
   package: string;
-  type: 'integration';
-  view: 'custom';
+  view: 'package-detail-custom';
   component: LazyExoticComponent<PackageCustomExtensionComponent>;
 }
 

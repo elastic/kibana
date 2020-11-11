@@ -9,28 +9,23 @@ import { UIExtensionPoint, UIExtensionsStorage } from '../types';
 
 export const UIExtensionsContext = React.createContext<UIExtensionsStorage>({});
 
-type SpecificExtensionPoint<A, T, V> = A extends { type: T; view: V } ? A : never;
-type NarrowViews<T = UIExtensionPoint['type'], A = UIExtensionPoint> = A extends {
-  type: T;
+type NarrowExtensionPoint<V extends UIExtensionPoint['view'], A = UIExtensionPoint> = A extends {
+  view: V;
 }
   ? A
   : never;
 
-export const useUIExtension = <
-  T extends UIExtensionPoint['type'] = UIExtensionPoint['type'],
-  V extends NarrowViews<T>['view'] = never
->(
-  integration: UIExtensionPoint['package'],
-  type: T,
+export const useUIExtension = <V extends UIExtensionPoint['view'] = UIExtensionPoint['view']>(
+  packageName: UIExtensionPoint['package'],
   view: V
-): SpecificExtensionPoint<UIExtensionPoint, T, V>['component'] | undefined => {
+): NarrowExtensionPoint<V>['component'] | undefined => {
   const registeredExtensions = useContext(UIExtensionsContext);
 
   if (!registeredExtensions) {
     throw new Error('useUIExtension called outside of UIExtensionsContext');
   }
 
-  const extension = registeredExtensions?.[integration]?.[type]?.[view];
+  const extension = registeredExtensions?.[packageName]?.[view];
 
   if (extension) {
     // FIXME:PT Revisit ignore below and see if TS error can be addressed

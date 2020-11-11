@@ -11,18 +11,16 @@ export const createExtensionRegistrationCallback = (
   storage: UIExtensionsStorage
 ): UIExtensionRegistrationCallback => {
   return (extensionPoint) => {
-    if (!storage[extensionPoint.package]) {
-      storage[extensionPoint.package] = {};
-    }
-    if (storage[extensionPoint.package][extensionPoint.type]?.[extensionPoint.view]) {
-      throw new Error(
-        `Extension point has already been registered: [${extensionPoint.package}][${extensionPoint.type}][${extensionPoint.view}]`
-      );
-    }
-    if (!storage[extensionPoint.package][extensionPoint.type]) {
-      storage[extensionPoint.package][extensionPoint.type] = {};
+    const { package: packageName, view } = extensionPoint;
+
+    if (!storage[packageName]) {
+      storage[packageName] = {};
     }
 
-    storage[extensionPoint.package][extensionPoint.type]![extensionPoint.view] = extensionPoint;
+    if (storage[packageName]?.[view]) {
+      throw new Error(`Extension point has already been registered: [${packageName}][${view}]`);
+    }
+
+    storage[packageName][view] = extensionPoint;
   };
 };
