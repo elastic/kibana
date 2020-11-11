@@ -24,7 +24,7 @@ import {
   calculateBounds,
   Filter,
   getTime,
-  IIndexPattern,
+  IndexPattern,
   isRangeFilter,
   Query,
   TimeRange,
@@ -33,27 +33,26 @@ import {
   getRequestInspectorStats,
   getResponseInspectorStats,
   IAggConfigs,
-  ISearchSource,
+  ISearchStartSearchSource,
   tabifyAggResponse,
 } from '../../../../common/search';
 import { FormatFactory } from '../../../../common/field_formats/utils';
 
-import { FilterManager } from '../../../query';
-import { buildTabularInspectorData } from './build_tabular_inspector_data';
+import { AddFilters, buildTabularInspectorData } from './build_tabular_inspector_data';
 
 interface RequestHandlerParams {
   abortSignal?: AbortSignal;
-  addFilters?: FilterManager['addFilters'];
+  addFilters?: AddFilters;
   aggs: IAggConfigs;
   deserializeFieldFormat: FormatFactory;
   filters?: Filter[];
-  indexPattern?: IIndexPattern;
+  indexPattern?: IndexPattern;
   inspectorAdapters: Adapters;
   metricsAtAllLevels?: boolean;
   partialRows?: boolean;
   query?: Query;
   searchSessionId?: string;
-  searchSource: ISearchSource;
+  searchSourceService: ISearchStartSearchSource;
   timeFields?: string[];
   timeRange?: TimeRange;
 }
@@ -70,10 +69,15 @@ export const handleRequest = async ({
   partialRows,
   query,
   searchSessionId,
-  searchSource,
+  searchSourceService,
   timeFields,
   timeRange,
 }: RequestHandlerParams) => {
+  const searchSource = await searchSourceService.create();
+
+  searchSource.setField('index', indexPattern);
+  searchSource.setField('size', 0);
+
   // Create a new search source that inherits the original search source
   // but has the appropriate timeRange applied via a filter.
   // This is a temporary solution until we properly pass down all required

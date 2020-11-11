@@ -23,10 +23,19 @@ import {
   TabularData,
   TabularDataValue,
 } from '../../../../../../plugins/inspector/common';
-import { TabbedTable } from '../../../../common';
+import { Filter, TabbedTable } from '../../../../common';
 import { FormatFactory } from '../../../../common/field_formats/utils';
-import { FilterManager } from '../../../query';
 import { createFilter } from '../create_filter';
+
+/**
+ * Type borrowed from the client-side FilterManager['addFilters'].
+ *
+ * We need to use a custom type to make this isomorphic since FilterManager
+ * doesn't exist on the server.
+ *
+ * @internal
+ */
+export type AddFilters = (filters: Filter[] | Filter, pinFilterStatus?: boolean) => void;
 
 /**
  * This function builds tabular data from the response and attaches it to the
@@ -40,7 +49,7 @@ export async function buildTabularInspectorData(
     addFilters,
     deserializeFieldFormat,
   }: {
-    addFilters?: FilterManager['addFilters'];
+    addFilters?: AddFilters;
     deserializeFieldFormat: FormatFactory;
   }
 ): Promise<TabularData> {

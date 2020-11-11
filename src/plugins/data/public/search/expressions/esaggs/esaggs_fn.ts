@@ -24,121 +24,132 @@ import { Datatable, DatatableColumn } from 'src/plugins/expressions/common';
 import { Adapters } from 'src/plugins/inspector/common';
 
 import { calculateBounds, EsaggsExpressionFunctionDefinition } from '../../../../common';
-import {
-  getFieldFormats,
-  getIndexPatterns,
-  getQueryService,
-  getSearchService,
-} from '../../../services';
+import { FormatFactory } from '../../../../common/field_formats/utils';
+import { IndexPatternsContract } from '../../../../common/index_patterns/index_patterns';
+import { ISearchStartSearchSource, AggsStart } from '../../../../common/search';
+
+import { AddFilters } from './build_tabular_inspector_data';
 import { handleRequest } from './request_handler';
 
 const name = 'esaggs';
 
-export const esaggs = (): EsaggsExpressionFunctionDefinition => ({
-  name,
-  type: 'datatable',
-  inputTypes: ['kibana_context', 'null'],
-  help: i18n.translate('data.functions.esaggs.help', {
-    defaultMessage: 'Run AggConfig aggregation',
-  }),
-  args: {
-    index: {
-      types: ['string'],
-      help: '',
-    },
-    metricsAtAllLevels: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    partialRows: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    includeFormatHints: {
-      types: ['boolean'],
-      default: false,
-      help: '',
-    },
-    aggConfigs: {
-      types: ['string'],
-      default: '""',
-      help: '',
-    },
-    timeFields: {
-      types: ['string'],
-      help: '',
-      multi: true,
-    },
-  },
-  async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
-    const indexPatterns = getIndexPatterns();
-    const { filterManager } = getQueryService();
-    const searchService = getSearchService();
+interface StartDependencies {
+  addFilters: AddFilters;
+  aggs: AggsStart;
+  deserializeFieldFormat: FormatFactory;
+  indexPatterns: IndexPatternsContract;
+  searchSource: ISearchStartSearchSource;
+}
 
-    const aggConfigsState = JSON.parse(args.aggConfigs);
-    const indexPattern = await indexPatterns.get(args.index);
-    const aggs = searchService.aggs.createAggConfigs(indexPattern, aggConfigsState);
+export function getEsaggs({
+  getStartDependencies,
+}: {
+  getStartDependencies: () => Promise<StartDependencies>;
+}) {
+  return (): EsaggsExpressionFunctionDefinition => ({
+    name,
+    type: 'datatable',
+    inputTypes: ['kibana_context', 'null'],
+    help: i18n.translate('data.functions.esaggs.help', {
+      defaultMessage: 'Run AggConfig aggregation',
+    }),
+    args: {
+      index: {
+        types: ['string'],
+        help: '',
+      },
+      metricsAtAllLevels: {
+        types: ['boolean'],
+        default: false,
+        help: '',
+      },
+      partialRows: {
+        types: ['boolean'],
+        default: false,
+        help: '',
+      },
+      includeFormatHints: {
+        types: ['boolean'],
+        default: false,
+        help: '',
+      },
+      aggConfigs: {
+        types: ['string'],
+        default: '""',
+        help: '',
+      },
+      timeFields: {
+        types: ['string'],
+        help: '',
+        multi: true,
+      },
+    },
+    async fn(input, args, { inspectorAdapters, abortSignal, getSearchSessionId }) {
+      const {
+        addFilters,
+        aggs,
+        deserializeFieldFormat,
+        indexPatterns,
+        searchSource,
+      } = await getStartDependencies();
 
-    // we should move searchSource creation inside request handler
-    const searchSource = await searchService.searchSource.create();
+      const aggConfigsState = JSON.parse(args.aggConfigs);
+      const indexPattern = await indexPatterns.get(args.index);
+      const aggConfigs = aggs.createAggConfigs(indexPattern, aggConfigsState);
 
-    searchSource.setField('index', indexPattern);
-    searchSource.setField('size', 0);
+      const resolvedTimeRange = input?.timeRange && calculateBounds(input.timeRange);
 
-    const resolvedTimeRange = input?.timeRange && calculateBounds(input.timeRange);
+      const response = await handleRequest({
+        abortSignal: (abortSignal as unknown) as AbortSignal,
+        addFilters,
+        aggs: aggConfigs,
+        deserializeFieldFormat,
+        filters: get(input, 'filters', undefined),
+        indexPattern,
+        inspectorAdapters: inspectorAdapters as Adapters,
+        metricsAtAllLevels: args.metricsAtAllLevels,
+        partialRows: args.partialRows,
+        query: get(input, 'query', undefined) as any,
+        searchSessionId: getSearchSessionId(),
+        searchSourceService: searchSource,
+        timeFields: args.timeFields,
+        timeRange: get(input, 'timeRange', undefined),
+      });
 
-    const response = await handleRequest({
-      abortSignal: (abortSignal as unknown) as AbortSignal,
-      addFilters: filterManager.addFilters,
-      aggs,
-      deserializeFieldFormat: getFieldFormats().deserialize,
-      filters: get(input, 'filters', undefined),
-      indexPattern,
-      inspectorAdapters: inspectorAdapters as Adapters,
-      metricsAtAllLevels: args.metricsAtAllLevels,
-      partialRows: args.partialRows,
-      query: get(input, 'query', undefined) as any,
-      searchSessionId: getSearchSessionId(),
-      searchSource,
-      timeFields: args.timeFields,
-      timeRange: get(input, 'timeRange', undefined),
-    });
-
-    const table: Datatable = {
-      type: 'datatable',
-      rows: response.rows,
-      columns: response.columns.map((column) => {
-        const cleanedColumn: DatatableColumn = {
-          id: column.id,
-          name: column.name,
-          meta: {
-            type: column.aggConfig.params.field?.type || 'number',
-            field: column.aggConfig.params.field?.name,
-            index: indexPattern.title,
-            params: column.aggConfig.toSerializedFieldFormat(),
-            source: 'esaggs',
-            sourceParams: {
-              indexPatternId: indexPattern.id,
-              appliedTimeRange:
-                column.aggConfig.params.field?.name &&
-                input?.timeRange &&
-                args.timeFields &&
-                args.timeFields.includes(column.aggConfig.params.field?.name)
-                  ? {
-                      from: resolvedTimeRange?.min?.toISOString(),
-                      to: resolvedTimeRange?.max?.toISOString(),
-                    }
-                  : undefined,
-              ...column.aggConfig.serialize(),
+      const table: Datatable = {
+        type: 'datatable',
+        rows: response.rows,
+        columns: response.columns.map((column) => {
+          const cleanedColumn: DatatableColumn = {
+            id: column.id,
+            name: column.name,
+            meta: {
+              type: column.aggConfig.params.field?.type || 'number',
+              field: column.aggConfig.params.field?.name,
+              index: indexPattern.title,
+              params: column.aggConfig.toSerializedFieldFormat(),
+              source: name,
+              sourceParams: {
+                indexPatternId: indexPattern.id,
+                appliedTimeRange:
+                  column.aggConfig.params.field?.name &&
+                  input?.timeRange &&
+                  args.timeFields &&
+                  args.timeFields.includes(column.aggConfig.params.field?.name)
+                    ? {
+                        from: resolvedTimeRange?.min?.toISOString(),
+                        to: resolvedTimeRange?.max?.toISOString(),
+                      }
+                    : undefined,
+                ...column.aggConfig.serialize(),
+              },
             },
-          },
-        };
-        return cleanedColumn;
-      }),
-    };
+          };
+          return cleanedColumn;
+        }),
+      };
 
-    return table;
-  },
-});
+      return table;
+    },
+  });
+}
