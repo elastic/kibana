@@ -20,5 +20,6 @@
 import { createHash } from 'crypto';
 
 export function createRequestHash(keys: Record<any, any>) {
-  return createHash(`sha256`).update(JSON.stringify(keys)).digest('hex');
+  const { preference, ...params } = keys;
+  return createHash(`sha256`).update(JSON.stringify(params)).digest('hex');
 }

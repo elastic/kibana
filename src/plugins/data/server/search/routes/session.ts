@@ -36,7 +36,7 @@ export function registerSessionRoutes(router: IRouter): void {
       const { sessionId, name, url } = request.body;
 
       try {
-        const response = await context.search!.session.save(sessionId, name, 'username', url);
+        const response = await context.search!.session.save(sessionId, name, url, 'username');
 
         return res.ok({
           body: response,
