@@ -151,7 +151,7 @@ export const validatePackagePolicy = (
           );
         }
 
-        inputValidationResults.streams![stream.id] = streamValidationResults;
+        inputValidationResults.streams![stream.data_stream.dataset] = streamValidationResults;
       });
     } else {
       delete inputValidationResults.streams;

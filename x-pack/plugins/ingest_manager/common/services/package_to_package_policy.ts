@@ -8,11 +8,10 @@ import {
   RegistryPolicyTemplate,
   RegistryVarsEntry,
   RegistryStream,
-  PackagePolicy,
   PackagePolicyConfigRecord,
   PackagePolicyConfigRecordEntry,
-  PackagePolicyInput,
-  PackagePolicyInputStream,
+  NewPackagePolicyInput,
+  NewPackagePolicyInputStream,
   NewPackagePolicy,
 } from '../types';
 
@@ -42,8 +41,10 @@ const getStreamsForInputType = (
 /*
  * This service creates a package policy inputs definition from defaults provided in package info
  */
-export const packageToPackagePolicyInputs = (packageInfo: PackageInfo): PackagePolicy['inputs'] => {
-  const inputs: PackagePolicy['inputs'] = [];
+export const packageToPackagePolicyInputs = (
+  packageInfo: PackageInfo
+): NewPackagePolicy['inputs'] => {
+  const inputs: NewPackagePolicy['inputs'] = [];
 
   // Assume package will only ever ship one package policy template for now
   const packagePolicyTemplate: RegistryPolicyTemplate | null =
@@ -71,12 +72,11 @@ export const packageToPackagePolicyInputs = (packageInfo: PackageInfo): PackageP
       };
 
       // Map each package input stream into package policy input stream
-      const streams: PackagePolicyInputStream[] = getStreamsForInputType(
+      const streams: NewPackagePolicyInputStream[] = getStreamsForInputType(
         packageInput.type,
         packageInfo
       ).map((packageStream) => {
-        const stream: PackagePolicyInputStream = {
-          id: `${packageInput.type}-${packageStream.data_stream.dataset}`,
+        const stream: NewPackagePolicyInputStream = {
           enabled: packageStream.enabled === false ? false : true,
           data_stream: packageStream.data_stream,
         };
@@ -86,7 +86,7 @@ export const packageToPackagePolicyInputs = (packageInfo: PackageInfo): PackageP
         return stream;
       });
 
-      const input: PackagePolicyInput = {
+      const input: NewPackagePolicyInput = {
         type: packageInput.type,
         enabled: streams.length ? !!streams.find((stream) => stream.enabled) : true,
         streams,

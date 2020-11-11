@@ -54,7 +54,7 @@ const PackagePolicyBaseSchema = {
       ),
       streams: schema.arrayOf(
         schema.object({
-          id: schema.string(),
+          id: schema.maybe(schema.string()), // BWC < 7.11
           enabled: schema.boolean(),
           data_stream: schema.object({ dataset: schema.string(), type: schema.string() }),
           vars: schema.maybe(ConfigRecordSchema),

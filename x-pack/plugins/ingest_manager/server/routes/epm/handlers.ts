@@ -35,8 +35,7 @@ import {
   getPackageInfo,
   handleInstallPackageFailure,
   isBulkInstallError,
-  installPackageFromRegistry,
-  installPackageByUpload,
+  installPackage,
   removeInstallation,
   getLimitedPackages,
   getInstallationObject,
@@ -149,7 +148,8 @@ export const installPackageFromRegistryHandler: RequestHandler<
   const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
   const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
   try {
-    const res = await installPackageFromRegistry({
+    const res = await installPackage({
+      installSource: 'registry',
       savedObjectsClient,
       pkgkey,
       callCluster,
@@ -224,7 +224,8 @@ export const installPackageByUploadHandler: RequestHandler<
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
   try {
-    const res = await installPackageByUpload({
+    const res = await installPackage({
+      installSource: 'upload',
       savedObjectsClient,
       callCluster,
       archiveBuffer,

@@ -61,11 +61,7 @@ describe('_installPackage', () => {
     const installationPromise = _installPackage({
       savedObjectsClient: soClient,
       callCluster,
-      pkgName: 'abc',
-      pkgVersion: '1.2.3',
       paths: [],
-      removable: false,
-      internal: false,
       packageInfo: {
         name: 'xyz',
         version: '4.5.6',

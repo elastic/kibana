@@ -16,7 +16,7 @@ import {
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
 import { pkgToPkgKey } from '../registry';
-import { cacheGet } from '../registry/cache';
+import { cacheGet } from './cache';
 
 // TODO: everything below performs verification of manifest.yml files, and hence duplicates functionality already implemented in the
 // package registry. At some point this should probably be replaced (or enhanced) with verification based on

@@ -3,7 +3,7 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
-import React, { Fragment, useState, useEffect, Suspense } from 'react';
+import React, { Fragment, useState, useEffect, Suspense, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n/react';
 import {
@@ -153,9 +153,17 @@ export const AlertForm = ({
     setAlertTypeModel(alert.alertTypeId ? alertTypeRegistry.get(alert.alertTypeId) : null);
   }, [alert, alertTypeRegistry]);
 
-  const setAlertProperty = (key: string, value: any) => {
-    dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
-  };
+  const setAlertProperty = useCallback(
+    (key: string, value: any) => {
+      dispatch({ command: { type: 'setProperty' }, payload: { key, value } });
+    },
+    [dispatch]
+  );
+
+  const setActions = useCallback(
+    (updatedActions: AlertAction[]) => setAlertProperty('actions', updatedActions),
+    [setAlertProperty]
+  );
 
   const setAlertParams = (key: string, value: any) => {
     dispatch({ command: { type: 'setAlertParams' }, payload: { key, value } });
@@ -169,9 +177,12 @@ export const AlertForm = ({
     dispatch({ command: { type: 'setAlertActionProperty' }, payload: { key, value, index } });
   };
 
-  const setActionParamsProperty = (key: string, value: any, index: number) => {
-    dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
-  };
+  const setActionParamsProperty = useCallback(
+    (key: string, value: any, index: number) => {
+      dispatch({ command: { type: 'setAlertActionParams' }, payload: { key, value, index } });
+    },
+    [dispatch]
+  );
 
   const tagsOptions = alert.tags ? alert.tags.map((label: string) => ({ label })) : [];
 
@@ -202,6 +213,7 @@ export const AlertForm = ({
         label={item.name}
         onClick={() => {
           setAlertProperty('alertTypeId', item.id);
+          setActions([]);
           setAlertTypeModel(item);
           setAlertProperty('params', {});
           if (alertTypesIndex && alertTypesIndex.has(item.id)) {
@@ -289,26 +301,25 @@ export const AlertForm = ({
           />
         </Suspense>
       ) : null}
-      {canShowActions && defaultActionGroupId ? (
+      {canShowActions &&
+      defaultActionGroupId &&
+      alertTypeModel &&
+      alertTypesIndex?.has(alert.alertTypeId) ? (
         <ActionForm
           actions={alert.actions}
           setHasActionsDisabled={setHasActionsDisabled}
           setHasActionsWithBrokenConnector={setHasActionsWithBrokenConnector}
-          messageVariables={
-            alertTypesIndex && alertTypesIndex.has(alert.alertTypeId)
-              ? actionVariablesFromAlertType(alertTypesIndex.get(alert.alertTypeId)!).sort((a, b) =>
-                  a.name.toUpperCase().localeCompare(b.name.toUpperCase())
-                )
-              : undefined
-          }
+          messageVariables={actionVariablesFromAlertType(
+            alertTypesIndex.get(alert.alertTypeId)!
+          ).sort((a, b) => a.name.toUpperCase().localeCompare(b.name.toUpperCase()))}
           defaultActionGroupId={defaultActionGroupId}
+          actionGroups={alertTypesIndex.get(alert.alertTypeId)!.actionGroups}
           setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
-          setAlertProperty={(updatedActions: AlertAction[]) =>
-            setAlertProperty('actions', updatedActions)
+          setActionGroupIdByIndex={(group: string, index: number) =>
+            setActionProperty('group', group, index)
           }
-          setActionParamsProperty={(key: string, value: any, index: number) =>
-            setActionParamsProperty(key, value, index)
-          }
+          setAlertProperty={setActions}
+          setActionParamsProperty={setActionParamsProperty}
           http={http}
           actionTypeRegistry={actionTypeRegistry}
           defaultActionMessage={alertTypeModel?.defaultActionMessage}

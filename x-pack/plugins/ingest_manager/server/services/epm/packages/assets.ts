@@ -6,7 +6,7 @@
 
 import { InstallablePackage } from '../../../types';
 import * as Registry from '../registry';
-import { getArchiveFilelist } from '../registry/cache';
+import { getArchiveFilelist } from '../archive/cache';
 
 // paths from RegistryPackage are routes to the assets on EPR
 // e.g. `/package/nginx/1.2.0/data_stream/access/fields/fields.yml`

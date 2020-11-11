@@ -17,7 +17,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import {
-  PackagePolicyInput,
+  NewPackagePolicyInput,
   PackagePolicyInputStream,
   RegistryInput,
   RegistryStream,
@@ -40,7 +40,7 @@ const ShortenedHorizontalRule = styled(EuiHorizontalRule)`
 const shouldShowStreamsByDefault = (
   packageInput: RegistryInput,
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>,
-  packagePolicyInput: PackagePolicyInput
+  packagePolicyInput: NewPackagePolicyInput
 ): boolean => {
   return (
     packagePolicyInput.enabled &&
@@ -63,8 +63,8 @@ const shouldShowStreamsByDefault = (
 export const PackagePolicyInputPanel: React.FunctionComponent<{
   packageInput: RegistryInput;
   packageInputStreams: Array<RegistryStream & { data_stream: { dataset: string } }>;
-  packagePolicyInput: PackagePolicyInput;
-  updatePackagePolicyInput: (updatedInput: Partial<PackagePolicyInput>) => void;
+  packagePolicyInput: NewPackagePolicyInput;
+  updatePackagePolicyInput: (updatedInput: Partial<NewPackagePolicyInput>) => void;
   inputValidationResults: PackagePolicyInputValidationResults;
   forceShowErrors?: boolean;
 }> = memo(
@@ -210,7 +210,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                       ...updatedStream,
                     };
 
-                    const updatedInput: Partial<PackagePolicyInput> = {
+                    const updatedInput: Partial<NewPackagePolicyInput> = {
                       streams: newStreams,
                     };
 
@@ -227,7 +227,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
                     updatePackagePolicyInput(updatedInput);
                   }}
                   inputStreamValidationResults={
-                    inputValidationResults.streams![packagePolicyInputStream!.id]
+                    inputValidationResults.streams![packagePolicyInputStream!.data_stream!.dataset]
                   }
                   forceShowErrors={forceShowErrors}
                 />

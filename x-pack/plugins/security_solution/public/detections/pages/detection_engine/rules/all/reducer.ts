@@ -20,6 +20,9 @@ export interface State {
   pagination: PaginationOptions;
   rules: Rule[];
   selectedRuleIds: string[];
+  lastUpdated: number;
+  showIdleModal: boolean;
+  isRefreshOn: boolean;
 }
 
 export type Action =
@@ -33,7 +36,10 @@ export type Action =
       filterOptions: Partial<FilterOptions>;
       pagination: Partial<PaginationOptions>;
     }
-  | { type: 'failure' };
+  | { type: 'failure' }
+  | { type: 'setLastRefreshDate' }
+  | { type: 'setShowIdleModal'; show: boolean }
+  | { type: 'setAutoRefreshOn'; on: boolean };
 
 export const allRulesReducer = (
   tableRef: React.MutableRefObject<EuiBasicTable<unknown> | undefined>
@@ -85,27 +91,24 @@ export const allRulesReducer = (
       };
     }
     case 'updateRules': {
-      if (state.rules != null) {
-        const ruleIds = state.rules.map((r) => r.id);
-        const updatedRules = action.rules.reduce((rules, updatedRule) => {
-          let newRules = rules;
-          if (ruleIds.includes(updatedRule.id)) {
-            newRules = newRules.map((r) => (updatedRule.id === r.id ? updatedRule : r));
-          } else {
-            newRules = [...newRules, updatedRule];
-          }
-          return newRules;
-        }, state.rules);
-        const updatedRuleIds = action.rules.map((r) => r.id);
-        const newLoadingRuleIds = state.loadingRuleIds.filter((id) => !updatedRuleIds.includes(id));
-        return {
-          ...state,
-          rules: updatedRules,
-          loadingRuleIds: newLoadingRuleIds,
-          loadingRulesAction: newLoadingRuleIds.length === 0 ? null : state.loadingRulesAction,
-        };
-      }
-      return state;
+      const ruleIds = state.rules.map((r) => r.id);
+      const updatedRules = action.rules.reduce((rules, updatedRule) => {
+        let newRules = rules;
+        if (ruleIds.includes(updatedRule.id)) {
+          newRules = newRules.map((r) => (updatedRule.id === r.id ? updatedRule : r));
+        } else {
+          newRules = [...newRules, updatedRule];
+        }
+        return newRules;
+      }, state.rules);
+      const updatedRuleIds = action.rules.map((r) => r.id);
+      const newLoadingRuleIds = state.loadingRuleIds.filter((id) => !updatedRuleIds.includes(id));
+      return {
+        ...state,
+        rules: updatedRules,
+        loadingRuleIds: newLoadingRuleIds,
+        loadingRulesAction: newLoadingRuleIds.length === 0 ? null : state.loadingRulesAction,
+      };
     }
     case 'updateFilterOptions': {
       return {
@@ -124,6 +127,25 @@ export const allRulesReducer = (
       return {
         ...state,
         rules: [],
+      };
+    }
+    case 'setLastRefreshDate': {
+      return {
+        ...state,
+        lastUpdated: Date.now(),
+      };
+    }
+    case 'setShowIdleModal': {
+      return {
+        ...state,
+        showIdleModal: action.show,
+        isRefreshOn: !action.show,
+      };
+    }
+    case 'setAutoRefreshOn': {
+      return {
+        ...state,
+        isRefreshOn: action.on,
       };
     }
     default:

@@ -334,6 +334,70 @@ export default function ({ getService }) {
       });
     });
 
+    describe('searching for special characters', () => {
+      before(() => esArchiver.load('saved_objects/find_edgecases'));
+      after(() => esArchiver.unload('saved_objects/find_edgecases'));
+
+      it('can search for objects with dashes', async () =>
+        await supertest
+          .get('/api/saved_objects/_find')
+          .query({
+            type: 'visualization',
+            search_fields: 'title',
+            search: 'my-vis*',
+          })
+          .expect(200)
+          .then((resp) => {
+            const savedObjects = resp.body.saved_objects;
+            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['my-visualization']);
+          }));
+
+      it('can search with the prefix search character just after a special one', async () =>
+        await supertest
+          .get('/api/saved_objects/_find')
+          .query({
+            type: 'visualization',
+            search_fields: 'title',
+            search: 'my-*',
+          })
+          .expect(200)
+          .then((resp) => {
+            const savedObjects = resp.body.saved_objects;
+            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['my-visualization']);
+          }));
+
+      it('can search for objects with asterisk', async () =>
+        await supertest
+          .get('/api/saved_objects/_find')
+          .query({
+            type: 'visualization',
+            search_fields: 'title',
+            search: 'some*vi*',
+          })
+          .expect(200)
+          .then((resp) => {
+            const savedObjects = resp.body.saved_objects;
+            expect(savedObjects.map((so) => so.attributes.title)).to.eql(['some*visualization']);
+          }));
+
+      it('can still search tokens by prefix', async () =>
+        await supertest
+          .get('/api/saved_objects/_find')
+          .query({
+            type: 'visualization',
+            search_fields: 'title',
+            search: 'visuali*',
+          })
+          .expect(200)
+          .then((resp) => {
+            const savedObjects = resp.body.saved_objects;
+            expect(savedObjects.map((so) => so.attributes.title)).to.eql([
+              'my-visualization',
+              'some*visualization',
+            ]);
+          }));
+    });
+
     describe('without kibana index', () => {
       before(
         async () =>

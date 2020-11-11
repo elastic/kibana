@@ -4,10 +4,12 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { SavedObjectsClientContract } from 'src/core/server';
+import uuid from 'uuid';
 import { AuthenticatedUser } from '../../../security/server';
 import {
   DeletePackagePoliciesResponse,
   PackagePolicyInput,
+  NewPackagePolicyInput,
   PackagePolicyInputStream,
   PackageInfo,
   ListWithKuery,
@@ -58,6 +60,11 @@ class PackagePolicyService {
         throw new Error('There is already a package with the same name on this agent policy');
       }
     }
+    // Add ids to stream
+    const packagePolicyId = options?.id || uuid.v4();
+    let inputs: PackagePolicyInput[] = packagePolicy.inputs.map((input) =>
+      assignStreamIdToInput(packagePolicyId, input)
+    );
 
     // Make sure the associated package is installed
     if (packagePolicy.package?.name) {
@@ -85,7 +92,7 @@ class PackagePolicyService {
         }
       }
 
-      packagePolicy.inputs = await this.assignPackageStream(pkgInfo, packagePolicy.inputs);
+      inputs = await this.assignPackageStream(pkgInfo, inputs);
     }
 
     const isoDate = new Date().toISOString();
@@ -93,13 +100,15 @@ class PackagePolicyService {
       SAVED_OBJECT_TYPE,
       {
         ...packagePolicy,
+        inputs,
         revision: 1,
         created_at: isoDate,
         created_by: options?.user?.username ?? 'system',
         updated_at: isoDate,
         updated_by: options?.user?.username ?? 'system',
       },
-      options
+
+      { ...options, id: packagePolicyId }
     );
 
     // Assign it to the given agent policy
@@ -124,18 +133,28 @@ class PackagePolicyService {
     const isoDate = new Date().toISOString();
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const { saved_objects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
-      packagePolicies.map((packagePolicy) => ({
-        type: SAVED_OBJECT_TYPE,
-        attributes: {
-          ...packagePolicy,
-          policy_id: agentPolicyId,
-          revision: 1,
-          created_at: isoDate,
-          created_by: options?.user?.username ?? 'system',
-          updated_at: isoDate,
-          updated_by: options?.user?.username ?? 'system',
-        },
-      }))
+      packagePolicies.map((packagePolicy) => {
+        const packagePolicyId = uuid.v4();
+
+        const inputs = packagePolicy.inputs.map((input) =>
+          assignStreamIdToInput(packagePolicyId, input)
+        );
+
+        return {
+          type: SAVED_OBJECT_TYPE,
+          id: packagePolicyId,
+          attributes: {
+            ...packagePolicy,
+            inputs,
+            policy_id: agentPolicyId,
+            revision: 1,
+            created_at: isoDate,
+            created_by: options?.user?.username ?? 'system',
+            updated_at: isoDate,
+            updated_by: options?.user?.username ?? 'system',
+          },
+        };
+      })
     );
 
     // Filter out invalid SOs
@@ -255,11 +274,26 @@ class PackagePolicyService {
       }
     }
 
+    let inputs = await restOfPackagePolicy.inputs.map((input) =>
+      assignStreamIdToInput(oldPackagePolicy.id, input)
+    );
+
+    if (packagePolicy.package?.name) {
+      const pkgInfo = await getPackageInfo({
+        savedObjectsClient: soClient,
+        pkgName: packagePolicy.package.name,
+        pkgVersion: packagePolicy.package.version,
+      });
+
+      inputs = await this.assignPackageStream(pkgInfo, inputs);
+    }
+
     await soClient.update<PackagePolicySOAttributes>(
       SAVED_OBJECT_TYPE,
       id,
       {
         ...restOfPackagePolicy,
+        inputs,
         revision: oldPackagePolicy.revision + 1,
         updated_at: new Date().toISOString(),
         updated_by: options?.user?.username ?? 'system',
@@ -351,6 +385,15 @@ class PackagePolicyService {
 
     return Promise.all(inputsPromises);
   }
+}
+
+function assignStreamIdToInput(packagePolicyId: string, input: NewPackagePolicyInput) {
+  return {
+    ...input,
+    streams: input.streams.map((stream) => {
+      return { ...stream, id: `${input.type}-${stream.data_stream.dataset}-${packagePolicyId}` };
+    }),
+  };
 }
 
 async function _assignPackageStreamToInput(
