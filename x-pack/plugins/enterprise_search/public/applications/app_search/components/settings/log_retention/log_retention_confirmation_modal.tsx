@@ -23,6 +23,13 @@ export const LogRetentionConfirmationModal: React.FC = () => {
     }
   );
 
+  const DISABLE_TEXT = i18n.translate(
+    'xpack.enterpriseSearch.appSearch.settings.logRetention.modal.disable',
+    {
+      defaultMessage: 'DISABLE',
+    }
+  );
+
   const { closeModals, saveLogRetention } = useActions(LogRetentionLogic);
 
   const { logRetention, openedModal } = useValues(LogRetentionLogic);
@@ -72,7 +79,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
               .
             </>
           }
-          target="DISABLE"
+          target={DISABLE_TEXT}
           onClose={closeModals}
           onSave={() => saveLogRetention(ELogRetentionOptions.Analytics, false)}
         />
@@ -114,7 +121,7 @@ export const LogRetentionConfirmationModal: React.FC = () => {
               .
             </>
           }
-          target="DISABLE"
+          target={DISABLE_TEXT}
           onClose={closeModals}
           onSave={() => saveLogRetention(ELogRetentionOptions.API, false)}
         />
