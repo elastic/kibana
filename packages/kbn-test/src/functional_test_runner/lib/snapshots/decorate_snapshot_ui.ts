@@ -29,7 +29,7 @@ import prettier from 'prettier';
 import babelTraverse from '@babel/traverse';
 import { flatten, once } from 'lodash';
 import { Lifecycle } from 'packages/kbn-test/types/ftr';
-import { Suite, Test } from './mocha_types';
+import { Mocha, Suite, Test } from '../../fake_mocha_types';
 
 type ISnapshotState = InstanceType<typeof SnapshotState>;
 
