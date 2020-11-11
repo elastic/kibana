@@ -539,7 +539,7 @@ Platform.
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
 
 |`search`
-|{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.search.md
+|{kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.search.md[`data.search`]
 
 |`shareContextMenuExtensions`
 |{kib-repo}blob/{branch}/src/plugins/share/README.md[`plugins.share`]
