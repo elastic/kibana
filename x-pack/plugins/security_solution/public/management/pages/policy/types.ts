@@ -18,7 +18,7 @@ import {
   GetPackagePoliciesResponse,
   GetPackagesResponse,
   UpdatePackagePolicyResponse,
-} from '../../../../../ingest_manager/common';
+} from '../../../../../fleet/common';
 
 /**
  * Policy list store state

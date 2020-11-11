@@ -409,7 +409,7 @@ Index Management by running this series of requests in Console:
 the infrastructure monitoring use-case within Kibana.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/ingest_manager/README.md[ingestManager]
+|{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[ingestManager]
 |Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
 
 

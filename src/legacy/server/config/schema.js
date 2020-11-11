@@ -129,21 +129,12 @@ export default () =>
       cGroupOverrides: HANDLED_IN_NEW_PLATFORM,
     }).default(),
 
-    // still used by the legacy i18n mixin
-    plugins: Joi.object({
-      paths: Joi.array().items(Joi.string()).default([]),
-      scanDirs: Joi.array().items(Joi.string()).default([]),
-      initialize: Joi.boolean().default(true),
-    }).default(),
-
+    plugins: HANDLED_IN_NEW_PLATFORM,
     path: HANDLED_IN_NEW_PLATFORM,
     stats: HANDLED_IN_NEW_PLATFORM,
     status: HANDLED_IN_NEW_PLATFORM,
     map: HANDLED_IN_NEW_PLATFORM,
-
-    i18n: Joi.object({
-      locale: Joi.string().default('en'),
-    }).default(),
+    i18n: HANDLED_IN_NEW_PLATFORM,
 
     // temporarily moved here from the (now deleted) kibana legacy plugin
     kibana: Joi.object({

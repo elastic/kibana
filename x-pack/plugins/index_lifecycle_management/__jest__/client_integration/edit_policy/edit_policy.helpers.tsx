@@ -221,6 +221,11 @@ export const setup = async () => {
         setFreeze,
         setIndexPriority: setIndexPriority('cold'),
       },
+      delete: {
+        enable: enable('delete'),
+        setMinAgeValue: setMinAgeValue('delete'),
+        setMinAgeUnits: setMinAgeUnits('delete'),
+      },
     },
   };
 };

@@ -49,6 +49,7 @@ describe('SAMLAuthenticationProvider', () => {
         access_token: 'some-token',
         refresh_token: 'some-refresh-token',
         realm: 'test-realm',
+        authentication: mockUser,
       });
 
       await expect(
@@ -85,6 +86,7 @@ describe('SAMLAuthenticationProvider', () => {
         access_token: 'some-token',
         refresh_token: 'some-refresh-token',
         realm: 'test-realm',
+        authentication: mockUser,
       });
 
       provider = new SAMLAuthenticationProvider(mockOptions, {
@@ -170,6 +172,7 @@ describe('SAMLAuthenticationProvider', () => {
         access_token: 'user-initiated-login-token',
         refresh_token: 'user-initiated-login-refresh-token',
         realm: 'test-realm',
+        authentication: mockUser,
       });
 
       await expect(
@@ -202,6 +205,7 @@ describe('SAMLAuthenticationProvider', () => {
         access_token: 'user-initiated-login-token',
         refresh_token: 'user-initiated-login-refresh-token',
         realm: 'test-realm',
+        authentication: mockUser,
       });
 
       provider = new SAMLAuthenticationProvider(mockOptions, {
@@ -241,6 +245,7 @@ describe('SAMLAuthenticationProvider', () => {
         realm: 'test-realm',
         access_token: 'idp-initiated-login-token',
         refresh_token: 'idp-initiated-login-refresh-token',
+        authentication: mockUser,
       });
 
       await expect(
@@ -298,6 +303,7 @@ describe('SAMLAuthenticationProvider', () => {
           access_token: 'valid-token',
           refresh_token: 'valid-refresh-token',
           realm: 'test-realm',
+          authentication: mockUser,
         });
 
         provider = new SAMLAuthenticationProvider(mockOptions, {
@@ -511,6 +517,7 @@ describe('SAMLAuthenticationProvider', () => {
           username: 'user',
           access_token: 'new-valid-token',
           refresh_token: 'new-valid-refresh-token',
+          authentication: mockUser,
         });
 
         const failureReason = new Error('Failed to invalidate token!');
@@ -572,6 +579,7 @@ describe('SAMLAuthenticationProvider', () => {
             access_token: 'new-valid-token',
             refresh_token: 'new-valid-refresh-token',
             realm: 'test-realm',
+            authentication: mockUser,
           });
 
           mockOptions.tokens.invalidate.mockResolvedValue(undefined);
@@ -619,16 +627,12 @@ describe('SAMLAuthenticationProvider', () => {
 
           // The first call is made using tokens from existing session.
           mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(() => response);
-          // The second call is made using new tokens.
-          mockScopedClusterClient.callAsCurrentUser.mockImplementationOnce(() =>
-            Promise.resolve(mockUser)
-          );
-
           mockOptions.client.callAsInternalUser.mockResolvedValue({
             username: 'user',
             access_token: 'new-valid-token',
             refresh_token: 'new-valid-refresh-token',
             realm: 'test-realm',
+            authentication: mockUser,
           });
 
           mockOptions.tokens.invalidate.mockResolvedValue(undefined);
@@ -944,25 +948,14 @@ describe('SAMLAuthenticationProvider', () => {
         realm: 'test-realm',
       };
 
-      mockOptions.client.asScoped.mockImplementation((scopeableRequest) => {
-        if (scopeableRequest?.headers.authorization === `Bearer ${state.accessToken}`) {
-          const mockScopedClusterClientToFail = elasticsearchServiceMock.createLegacyScopedClusterClient();
-          mockScopedClusterClientToFail.callAsCurrentUser.mockRejectedValue(
-            LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
-          );
-          return mockScopedClusterClientToFail;
-        }
-
-        if (scopeableRequest?.headers.authorization === 'Bearer new-access-token') {
-          return mockScopedClusterClient;
-        }
-
-        throw new Error('Unexpected call');
-      });
+      mockScopedClusterClient.callAsCurrentUser.mockRejectedValue(
+        LegacyElasticsearchErrorHelpers.decorateNotAuthorizedError(new Error())
+      );
 
       mockOptions.tokens.refresh.mockResolvedValue({
         accessToken: 'new-access-token',
         refreshToken: 'new-refresh-token',
+        authenticationInfo: mockUser,
       });
 
       await expect(provider.authenticate(request, state)).resolves.toEqual(
