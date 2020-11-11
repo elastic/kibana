@@ -8,7 +8,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { IndexPatternColumn } from '../../../indexpattern';
-import { updateColumnParam } from '../../../state_helpers';
+import { updateColumnParam } from '../../layer_helpers';
 import { DataType } from '../../../../types';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
@@ -70,21 +70,23 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.terms)
     );
   },
-  buildColumn({ suggestedPriority, columns, field }) {
+  buildColumn({ columns, field }) {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];
+
+    const previousBucketsLength = Object.values(columns).filter((col) => col && col.isBucketed)
+      .length;
 
     return {
       label: ofName(field.displayName),
       dataType: field.type as DataType,
       operationType: 'terms',
       scale: 'ordinal',
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       params: {
-        size: DEFAULT_SIZE,
+        size: previousBucketsLength === 0 ? 5 : DEFAULT_SIZE,
         orderBy: existingMetricColumn
           ? { type: 'column', columnId: existingMetricColumn }
           : { type: 'alphabetical' },
@@ -111,7 +113,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       },
     };
   },
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  onFieldChange: (oldColumn, field) => {
     const newParams = { ...oldColumn.params };
     if ('format' in newParams && field.type !== 'number') {
       delete newParams.format;

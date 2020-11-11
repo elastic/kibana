@@ -9,7 +9,6 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { EuiComboBox, EuiListGroupItemProps, EuiListGroup, EuiRange } from '@elastic/eui';
 import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
-import { changeColumn } from '../state_helpers';
 import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
@@ -18,14 +17,14 @@ import { mountWithIntl as mount, shallowWithIntl as shallow } from 'test_utils/e
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
 import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
 import { IndexPatternPrivateState } from '../types';
-import { IndexPatternColumn } from '../operations';
+import { IndexPatternColumn, replaceColumn } from '../operations';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
 import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../loader');
-jest.mock('../state_helpers');
+jest.mock('../operations');
 jest.mock('lodash', () => {
   const original = jest.requireActual('lodash');
 
@@ -682,7 +681,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 // Other parts of this don't matter for this test
               }),
             },
-            columnOrder: ['col1', 'col2'],
+            columnOrder: ['col2', 'col1'],
           },
         },
       });
@@ -1029,15 +1028,13 @@ describe('IndexPatternDimensionEditorPanel', () => {
       );
     });
 
-    expect(changeColumn).toHaveBeenCalledWith({
-      state: initialState,
-      columnId: 'col1',
-      layerId: 'first',
-      newColumn: expect.objectContaining({
-        sourceField: 'bytes',
-        operationType: 'min',
-      }),
-    });
+    expect(replaceColumn).toHaveBeenCalledWith(
+      expect.objectContaining({
+        columnId: 'col1',
+        op: 'min',
+        field: expect.objectContaining({ name: 'bytes' }),
+      })
+    );
   });
 
   it('should clear the dimension when removing the selection in field combobox', () => {
