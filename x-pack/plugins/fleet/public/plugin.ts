@@ -9,6 +9,7 @@ import {
   Plugin,
   PluginInitializerContext,
   CoreStart,
+  AppNavLinkStatus,
 } from 'src/core/public';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
@@ -101,6 +102,21 @@ export class IngestManagerPlugin
       },
     });
 
+    // BWC < 7.11 redirect /app/ingestManager to /app/fleet
+    core.application.register({
+      id: 'ingestManager',
+      category: DEFAULT_APP_CATEGORIES.management,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      title: i18n.translate('xpack.ingestManager.appTitle', { defaultMessage: 'Ingest Manager' }),
+      async mount(params: AppMountParameters) {
+        const [coreStart] = await core.getStartServices();
+        coreStart.application.navigateToApp('fleet', {
+          path: params.history.location.hash,
+        });
+        return () => {};
+      },
+    });
+
     // Register components for home/add data integration
     if (deps.home) {
       deps.home.tutorials.registerDirectoryNotice(PLUGIN_ID, TutorialDirectoryNotice);
@@ -108,7 +124,7 @@ export class IngestManagerPlugin
       deps.home.tutorials.registerModuleNotice(PLUGIN_ID, TutorialModuleNotice);
 
       deps.home.featureCatalogue.register({
-        id: 'ingestManager',
+        id: 'fleet',
         title: i18n.translate('xpack.fleet.featureCatalogueTitle', {
           defaultMessage: 'Add Elastic Agent',
         }),
