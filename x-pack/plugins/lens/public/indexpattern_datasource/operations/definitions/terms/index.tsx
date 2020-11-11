@@ -82,7 +82,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         (!column.params.otherBucket || !newIndexPattern.hasRestrictions)
     );
   },
-  buildColumn({ columns, field }) {
+  buildColumn({ columns, field, indexPattern }) {
     const existingMetricColumn = Object.entries(columns)
       .filter(([_columnId, column]) => column && isSortableByColumn(column))
       .map(([id]) => id)[0];

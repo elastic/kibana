@@ -277,8 +277,6 @@ describe('terms', () => {
 
     it('should set other bucket to true by default', () => {
       const termsColumn = termsOperation.buildColumn({
-        layerId: 'first',
-        suggestedPriority: undefined,
         indexPattern: createMockedIndexPattern(),
         field: {
           aggregatable: true,
@@ -294,8 +292,6 @@ describe('terms', () => {
 
     it('should set other bucket to false if index pattern has restrictions', () => {
       const termsColumn = termsOperation.buildColumn({
-        layerId: 'first',
-        suggestedPriority: undefined,
         indexPattern: { ...createMockedIndexPattern(), hasRestrictions: true },
         field: {
           aggregatable: true,
