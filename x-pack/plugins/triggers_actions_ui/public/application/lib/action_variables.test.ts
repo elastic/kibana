@@ -13,7 +13,7 @@ beforeEach(() => jest.resetAllMocks());
 describe('actionVariablesFromAlertType', () => {
   test('should return correct variables when no state or context provided', async () => {
     const alertType = getAlertType({ context: [], state: [], params: [] });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(actionVariablesFromAlertType(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -48,7 +48,7 @@ describe('actionVariablesFromAlertType', () => {
       state: [],
       params: [],
     });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(actionVariablesFromAlertType(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -91,7 +91,7 @@ describe('actionVariablesFromAlertType', () => {
       ],
       params: [],
     });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(actionVariablesFromAlertType(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -137,7 +137,7 @@ describe('actionVariablesFromAlertType', () => {
       ],
       params: [{ name: 'fooP', description: 'fooP-description' }],
     });
-    expect(actionVariablesFromAlertType(alertType)).toMatchInlineSnapshot(`
+    expect(actionVariablesFromAlertType(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
