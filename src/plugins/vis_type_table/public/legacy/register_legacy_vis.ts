@@ -17,6 +17,7 @@
  * under the License.
  */
 
+import { METRIC_TYPE } from '@kbn/analytics';
 import { PluginInitializerContext, CoreSetup } from 'kibana/public';
 
 import { TablePluginSetupDependencies, TablePluginStartDependencies } from '../plugin';
@@ -26,9 +27,10 @@ import { tableVisLegacyTypeDefinition } from './table_vis_legacy_type';
 
 export const registerLegacyVis = (
   core: CoreSetup<TablePluginStartDependencies>,
-  { expressions, visualizations }: TablePluginSetupDependencies,
+  { expressions, visualizations, usageCollection }: TablePluginSetupDependencies,
   context: PluginInitializerContext
 ) => {
+  usageCollection?.reportUiStats('vis_type_table', METRIC_TYPE.LOADED, 'legacyVisEnabled');
   expressions.registerFunction(createTableVisLegacyFn);
   expressions.registerRenderer(getTableVisLegacyRenderer(core, context));
   visualizations.createBaseVisualization(tableVisLegacyTypeDefinition);

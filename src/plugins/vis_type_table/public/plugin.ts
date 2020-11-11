@@ -19,6 +19,7 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'kibana/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
+import { UsageCollectionSetup } from '../../usage_collection/public';
 
 import { DataPublicPluginStart } from '../../data/public';
 import { setFormatService } from './services';
@@ -32,6 +33,7 @@ interface ClientConfigType {
 export interface TablePluginSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+  usageCollection?: UsageCollectionSetup;
 }
 
 /** @internal */

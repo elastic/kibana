@@ -15,5 +15,6 @@
     "share",
     "charts",
     "visDefaultEditor"
-  ]
+  ],
+  "optionalPlugins": ["usageCollection"]
 }
