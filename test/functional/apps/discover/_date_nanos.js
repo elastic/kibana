@@ -39,7 +39,6 @@ export default function ({ getService, getPageObjects }) {
 
     after(async function unloadMakelogs() {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('date_nanos');
     });
 
     it('should show a timestamp with nanoseconds in the first result row', async function () {

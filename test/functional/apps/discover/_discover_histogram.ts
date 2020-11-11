@@ -42,8 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
     after(async () => {
-      await esArchiver.unload('long_window_logstash');
-      await esArchiver.unload('long_window_logstash_index_pattern');
       await security.testUser.restoreDefaults();
     });
 

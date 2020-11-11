@@ -20,10 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
 
-    after(async () => {
-      await esArchiver.unload('dashboard/drilldowns');
-    });
-
     it('show up', async () => {
       await queryBar.setQuery('extension.raw : ');
       const suggestions = await queryBar.getSuggestions();

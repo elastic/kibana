@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('index_pattern_without_timefield');
     });
 
     it('should not display a timepicker', async () => {

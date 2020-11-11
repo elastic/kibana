@@ -17,10 +17,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load('spaces/multi_space');
     });
 
-    after(function () {
-      return esArchiver.unload('spaces/multi_space');
-    });
-
     it('goes back to last opened url', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.saveSearch('A Search');

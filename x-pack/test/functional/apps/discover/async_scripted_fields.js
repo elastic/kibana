@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }) {
     after(async function afterAll() {
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.uiSettings.update({});
-      await esArchiver.unload('logstash_functional');
       await esArchiver.load('empty_kibana');
       await security.testUser.restoreDefaults();
     });

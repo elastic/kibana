@@ -22,7 +22,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.setWindowSize(1600, 850);
     });
     after('clean up archives', async () => {
-      await esArchiver.unload('reporting/ecommerce');
       await es.deleteByQuery({
         index: '.reporting-*',
         refresh: true,

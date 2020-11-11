@@ -20,10 +20,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
 
-    after(async function () {
-      await esArchiver.unload('invalid_scripted_field');
-    });
-
     // this is the same test as in OSS but it catches different error message issue in different licences
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {

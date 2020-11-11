@@ -33,10 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
     });
 
-    after(async function () {
-      await esArchiver.unload('invalid_scripted_field');
-    });
-
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
         const toast = await toasts.getToastElement(1);

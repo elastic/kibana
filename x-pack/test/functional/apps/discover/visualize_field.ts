@@ -34,10 +34,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await setDiscoverTimeRange();
     });
 
-    after(async () => {
-      await esArchiver.unload('lens/basic');
-    });
-
     it('shows "visualize" field button', async () => {
       await PageObjects.discover.clickFieldListItem('bytes');
       await PageObjects.discover.expectFieldListItemVisualize('bytes');
