@@ -19,6 +19,8 @@ export { SpacesPluginSetup } from './plugin';
 export { SpacesServiceSetup } from './spaces_service';
 export { Space } from '../common/model/space';
 
+console.log('Hello everybody');
+
 export const config = { schema: ConfigSchema };
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new Plugin(initializerContext);
