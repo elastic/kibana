@@ -1,40 +1,40 @@
 [[migrating-legacy-plugins]]
-== Migrating legacy plugins to the Kibana Platform
+== Migrating legacy plugins to the {kib} Platform
 
 [IMPORTANT]
 ==============================================
-In Kibana 7.10, support for legacy-style Kibana plugins was completely removed.
-Moving forward, all plugins must be built on the new Kibana Platform Plugin API.
+In {kib} 7.10, support for legacy-style {kib} plugins was completely removed.
+Moving forward, all plugins must be built on the new {kib} Platform Plugin API.
 This guide is intended to assist plugin authors in migrating their legacy plugin
-to the Kibana Platform Plugin API.
+to the {kib} Platform Plugin API.
 ==============================================
 
 Make no mistake, it is going to take a lot of work to move certain
-plugins to the Kibana Platform.
+plugins to the {kib} Platform.
 
 The goal of this document is to guide developers through the recommended
 process of migrating at a high level. Every plugin is different, so
 developers should tweak this plan based on their unique requirements.
 
 First, we recommend you read <<kibana-platform-plugin-api>> to get an overview
-of how plugins work in the Kibana Platform. Then continue here to follow our
+of how plugins work in the {kib} Platform. Then continue here to follow our
 generic plan of action that can be applied to any legacy plugin.
 
 === Challenges to overcome with legacy plugins
 
-Kibana Platform plugins have an identical architecture in the browser and on
+{kib} Platform plugins have an identical architecture in the browser and on
 the server. Legacy plugins have one architecture that they use in the
 browser and an entirely different architecture that they use on the
 server.
 
 This means that there are unique sets of challenges for migrating to the
-Kibana Platform depending on whether the legacy plugin code is on the
+{kib} Platform depending on whether the legacy plugin code is on the
 server or in the browser.
 
 ==== Challenges on the server
 
 The general shape/architecture of legacy server-side code is similar to
-the Kibana Platform architecture in one important way: most legacy
+the {kib} Platform architecture in one important way: most legacy
 server-side plugins define an `init` function where the bulk of their
 business logic begins, and they access both `core` and
 `plugin-provided` functionality through the arguments given to `init`.
@@ -42,7 +42,7 @@ Rarely does legacy server-side code share stateful services via import
 statements.
 
 While not exactly the same, legacy plugin `init` functions behave
-similarly today as Kibana Platform `setup` functions. `KbnServer` also
+similarly today as {kib} Platform `setup` functions. `KbnServer` also
 exposes an `afterPluginsInit` method which behaves similarly to `start`.
 There is no corresponding legacy concept of `stop`, however.
 
@@ -59,7 +59,7 @@ decoupling from hapi.
 ==== Challenges in the browser
 
 The legacy plugin system in the browser is fundamentally incompatible
-with the Kibana Platform. There is no client-side plugin definition. There
+with the {kib} Platform. There is no client-side plugin definition. There
 are no services that get passed to plugins at runtime. There really
 isn’t even a concrete notion of `core`.
 
@@ -70,13 +70,13 @@ some sort of state mutation. Sometimes this module exists inside the
 plugin itself, and it gets imported via the `plugin/` webpack alias.
 Sometimes this module exists outside the context of plugins entirely and
 gets imported via the `ui/` webpack alias. Neither of these concepts
-exists in the Kibana Platform.
+exists in the {kib} Platform.
 
 Legacy browser plugins rely on the feature known as `uiExports/`, which
 integrates directly with our build system to ensure that plugin code is
 bundled together in such a way to enable that global singleton module
-state. There is no corresponding feature in the Kibana Platform, and in
-the fact we intend down the line to build Kibana Platform plugins as immutable
+state. There is no corresponding feature in the {kib} Platform, and in
+the fact we intend down the line to build {kib} Platform plugins as immutable
 bundles that can not share state in this way.
 
 The key challenge to overcome with legacy browser-side plugins will be
@@ -94,10 +94,10 @@ The approach and level of effort varies significantly between server and
 browser plugins, but at a high level, the approach is the same.
 
 First, decouple your plugin’s business logic from the dependencies that
-are not exposed through the Kibana Platform, hapi.js, and Angular.js. Then
+are not exposed through the {kib} Platform, hapi.js, and Angular.js. Then
 introduce plugin definitions that more accurately reflect how plugins
-are defined in the Kibana Platform. Finally, replace the functionality you
-consume from the core and other plugins with their Kibana Platform equivalents.
+are defined in the {kib} Platform. Finally, replace the functionality you
+consume from the core and other plugins with their {kib} Platform equivalents.
 
 Once those things are finished for any given plugin, it can officially
 be switched to the new plugin system.
@@ -115,17 +115,17 @@ For migration examples see <<migrating-legacy-plugins-examples>>.
 === Browser-side plan of action
 
 It is generally a much greater challenge preparing legacy browser-side
-code for the Kibana Platform than it is server-side, and as such there are
+code for the {kib} Platform than it is server-side, and as such there are
 a few more steps. The level of effort here is proportional to the extent
 to which a plugin is dependent on Angular.js.
 
 To complicate matters further, a significant amount of the business
-logic in Kibana’s client-side code exists inside the `ui/public`
+logic in {kib} client-side code exists inside the `ui/public`
 directory (aka ui modules), and all of that must be migrated as well.
 
 Because the usage of angular and `ui/public` modules varies widely between
 legacy plugins, there is no `one size fits all` solution to migrating
-your browser-side code to the Kibana Platform.
+your browser-side code to the {kib} Platform.
 
 For migration examples see <<migrating-legacy-plugins-examples>>.
 
@@ -211,11 +211,11 @@ A plugin author that decides some set of code should diverge from having
 a single `common` definition can now safely change the implementation
 details without impacting downstream consumers.
 
-==== How do I find Kibana Platform services?
+==== How do I find {kib} Platform services?
 
 Most of the utilities you used to build legacy plugins are available
-in the Kibana Platform or Kibana Platform plugins. To help you find the new
-home for new services, use the tables below to find where the Kibana
+in the {kib} Platform or {kib} Platform plugins. To help you find the new
+home for new services, use the tables below to find where the {kib}
 Platform equivalent lives.
 
 ===== Client-side
@@ -227,7 +227,7 @@ In client code, `core` can be imported in legacy plugins via the
 [[client-side-core-migration-table]]
 [width="100%",cols="15%,48%,37%",options="header",]
 |===
-|Legacy Platform |Kibana Platform |Notes
+|Legacy Platform |{kib} Platform |Notes
 |`chrome.addBasePath`
 |{kib-repo}/tree/{branch}/docs/development/core/public/kibana-plugin-core-public.ibasepath.md[`core.http.basePath.prepend`]
 |
@@ -309,14 +309,14 @@ CoreStart API Docs]_
 
 In client code, we have a series of plugins which house shared
 application services which are not technically part of `core`, but are
-often used in Kibana plugins.
+often used in {kib} plugins.
 
-This table maps some of the most commonly used legacy items to their Kibana
-Platform locations. For the API provided by Kibana Plugins see <<plugin-list, the plugin list>>.
+This table maps some of the most commonly used legacy items to their {kib}
+Platform locations. For the API provided by {kib} Plugins see <<plugin-list, the plugin list>>.
 
 [width="100%",cols="15%,24%,61%",options="header",]
 |===
-|Legacy Platform |Kibana Platform |Notes
+|Legacy Platform |{kib} Platform |Notes
 |`import 'ui/apply_filters'` |N/A. Replaced by triggering an
 {kib-repo}blob/{branch}/docs/development/plugins/data/public/kibana-plugin-plugins-data-public.action_global_apply_filter.md[APPLY_FILTER_TRIGGER trigger] |Directive is deprecated.
 
@@ -389,7 +389,7 @@ available on the server-side:
 
 [width="100%",cols="17, 67, 16",options="header",]
 |===
-|Legacy Platform |Kibana Platform |Notes
+|Legacy Platform |{kib} Platform |Notes
 |`server.config()`
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.plugininitializercontext.config.md[`initializerContext.config.create()`]
 |Must also define schema. See <<config-migration>>
@@ -452,7 +452,7 @@ plugin]_
 |<<handle-plugin-configuration-deprecations, Handle plugin configuration
 deprecations>> and
 {kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginconfigdescriptor.md[`PluginConfigDescriptor.deprecations`]
-|Deprecations from Kibana Platform are not applied to legacy configuration
+|Deprecations from {kib} Platform are not applied to legacy configuration
 
 |`kibana.Plugin.savedObjectSchemas`
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.savedobjectsservicesetup.registertype.md[`core.savedObjects.registerType`]
@@ -479,7 +479,7 @@ CoreSetup API Docs]_
 
 [width="100%",cols="50%,47%,3%",options="header",]
 |===
-|Legacy Platform |Kibana Platform |Notes
+|Legacy Platform |{kib} Platform |Notes
 |`xpack_main.registerFeature`
 |{kib-repo}blob/{branch}/x-pack/plugins/features/server/plugin.ts[`plugins.features.registerKibanaFeature`]
 |
@@ -492,15 +492,15 @@ CoreSetup API Docs]_
 
 The legacy platform used a set of `uiExports` to inject modules from
 one plugin into other plugins. This mechanism is not necessary for the
-Kibana Platform because _all plugins are executed on the page at once_,
+{kib} Platform because _all plugins are executed on the page at once_,
 though only one application is rendered at a time.
 
-This table shows where these uiExports have moved to in the Kibana
+This table shows where these uiExports have moved to in the {kib}
 Platform.
 
 [width="100%",cols="11%,59%,30%",options="header",]
 |===
-|Legacy Platform |Kibana Platform |Notes
+|Legacy Platform |{kib} Platform |Notes
 |`aliases` |N/A|
 
 |`app`
@@ -632,7 +632,7 @@ Platform.
 
 [width="100%",cols="22%,78%",options="header",]
 |===
-|Legacy Platform |Kibana Platform
+|Legacy Platform |{kib} Platform
 |`id`
 |{kib-repo}blob/{branch}/docs/development/core/server/kibana-plugin-core-server.pluginmanifest.md[`manifest.id`]
 
@@ -654,10 +654,10 @@ Platform.
 
 |`uiExports` |`N/A`. Use platform & plugin public contracts
 
-|`publicDir` |`N/A`. Kibana Platform serves static assets from `/public/assets`
+|`publicDir` |`N/A`. {kib} Platform serves static assets from `/public/assets`
 folder under `/plugins/{id}/assets/{path*}` URL.
 
-|`preInit`, `init`, `postInit` |`N/A`. Use Kibana Platform <<plugin-lifecycles,plugin-lifecycles>>
+|`preInit`, `init`, `postInit` |`N/A`. Use {kib} Platform <<plugin-lifecycles,plugin-lifecycles>>
 |===
 
 === See also

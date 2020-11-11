@@ -2,7 +2,7 @@
 == Migration Examples
 
 This document is a list of examples of how to migrate plugin code from
-legacy APIs to their Kibana Platform equivalents.
+legacy APIs to their {kib} Platform equivalents.
 
 [[config-migration]]
 === Configuration
@@ -30,7 +30,7 @@ new kibana.Plugin({
 });
 ----
 
-*Kibana Platform equivalent*
+*{kib} Platform equivalent*
 [source,typescript]
 ----
 import { schema, TypeOf } from '@kbn/config-schema';
@@ -101,10 +101,10 @@ export class MyPlugin implements Plugin {
   }
 ----
 
-=== Create a Kibana Platform plugin
+=== Create a {kib} Platform plugin
 
 For example, if wanted to move the legacy `demoplugin` plugin's
-configuration to the Kibana Platform, we could create Kibana Platform plugin with the
+configuration to the {kib} Platform, we could create {kib} Platform plugin with the
 same name in `plugins/demoplugin` with the following files:
 
 *plugins/demoplugin/kibana.json*
@@ -202,7 +202,7 @@ new kibana.Plugin({
   }
 });
 ----
-to the Kibana platform format:
+to the {kib} platform format:
 *plugins/demoplugin/server/plugin.ts*
 [source,typescript]
 ----
@@ -257,7 +257,7 @@ export class DemoPlugin {
         }
       },
       router.handleLegacyErrors((context, req, res) => {
-        throw Boom.notFound('not there'); // will be converted into proper Kibana Platform error
+        throw Boom.notFound('not there'); // will be converted into proper Platform error
       })
     )
   }
@@ -267,7 +267,7 @@ export class DemoPlugin {
 === Accessing Services
 
 Services in the Legacy Platform were typically available via methods on
-either `server.plugins.*`, `server.*`, or `req.*`. In the Kibana Platform,
+either `server.plugins.*`, `server.*`, or `req.*`. In the {kib} Platform,
 all services are available via the `context` argument to the route
 handler. The type of this argument is the
 {kib-repo}/tree/{branch}/docs/development/core/server/kibana-plugin-core-server.requesthandlercontext.md[RequestHandlerContext].
@@ -318,10 +318,10 @@ export class DemoPlugin {
 In the Legacy Platform, routes could provide a `pre` option in their
 config to register a function that should be run before the route
 handler. These `pre` handlers allow routes to share some business
-logic that may do some pre-work or validation. In Kibana, these are
+logic that may do some pre-work or validation. In {kib}, these are
 often used for license checks.
 
-The Kibana Platform’s HTTP interface does not provide this
+The {kib} Platform’s HTTP interface does not provide this
 functionality, however, it is simple enough to port overusing a
 a higher-order function that can wrap the route handler.
 
@@ -353,7 +353,7 @@ server.route({
 })
 ----
 
-In the Kibana Platform, the same functionality can be achieved by
+In the {kib} Platform, the same functionality can be achieved by
 creating a function that takes a route handler (or factory for a route
 handler) as an argument and either invoke it in the successful case or
 returns an error response in the failure case.
@@ -458,7 +458,7 @@ router.get(
 === Chrome
 
 In the Legacy Platform, the `ui/chrome` import contained APIs for a very
-wide range of features. In the Kibana Platform, some of these APIs have
+wide range of features. In the {kib} Platform, some of these APIs have
 changed or moved elsewhere. See <<client-side-core-migration-table>>
 
 ==== Updating an application navlink
@@ -482,7 +482,7 @@ uiModules.get('xpack/ml').run(() => {
 });
 ----
 
-In the Kibana Platform, navlinks should not be updated directly. Instead,
+In the {kib} Platform, navlinks should not be updated directly. Instead,
 it is now possible to add an `updater` when registering an application
 to change the application or the navlink state at runtime.
 
@@ -518,10 +518,10 @@ export class MyPlugin implements Plugin {
 
 === Chromeless Applications
 
-In Kibana, a `chromeless` application is one where the primary Kibana
+In {kib}, a `chromeless` application is one where the primary {kib}
 UI components such as header or navigation can be hidden. In the legacy
 platform, these were referred to as `hidden` applications and were set
-via the `hidden` property in a Kibana plugin. Chromeless applications
+via the `hidden` property in a {kib} plugin. Chromeless applications
 are also not displayed in the left navbar.
 
 To mark an application as chromeless, specify `chromeless: false` when
@@ -598,11 +598,11 @@ httpResources.register(
 In the legacy platform, saved object types were registered using static
 definitions in the `uiExports` part of the plugin manifest.
 
-In the Kibana Platform, all these registrations are to be performed
+In the {kib} Platform, all these registrations are to be performed
 programmatically during your plugin’s `setup` phase, using the core
 `savedObjects`’s `registerType` setup API.
 
-The most notable difference is that in the Kibana Platform, the type
+The most notable difference is that in the {kib} Platform, the type
 registration is performed in a single call to `registerType`, passing a
 new `SavedObjectsType` structure that is a superset of the legacy
 `schema`, `migrations` `mappings` and `savedObjectsManagement`.
@@ -798,7 +798,7 @@ export class DemoPlugin implements Plugin {
 
 ==== Changes in structure compared to legacy
 
-The Kibana Platform `registerType` expected input is very close to the legacy format.
+The {kib} Platform `registerType` expected input is very close to the legacy format.
 However, there are some minor changes:
 
 * The `schema.isNamespaceAgnostic` property has been renamed:
@@ -816,7 +816,7 @@ been renamed: `SavedObjectsType.management.importableAndExportable`
 ----
 `(doc: SavedObjectUnsanitizedDoc, log: SavedObjectsMigrationLogger) => SavedObjectUnsanitizedDoc;`
 ----
-In Kibana Platform, it is 
+In {kib} Platform, it is 
 [source,typescript]
 ----
 `(doc: SavedObjectUnsanitizedDoc, context: SavedObjectMigrationContext) => SavedObjectUnsanitizedDoc;`
@@ -885,7 +885,7 @@ setup(core: CoreSetup){
 
 The new elasticsearch client is a thin wrapper around
 `@elastic/elasticsearch`’s `Client` class. Even if the API is quite
-close to the legacy client Kibana was previously using, there are some
+close to the legacy client {kib} was previously using, there are some
 subtle changes to take into account during migration.
 
 https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/index.html[Official

@@ -30,7 +30,7 @@ export class MyPlugin {
 === Server-side
 [[configuration-service]]
 ==== Configuration service
-Kibana provides `ConfigService` if a plugin developer may want to support
+{kib} provides `ConfigService` if a plugin developer may want to support
 adjustable runtime behavior for their plugins.
 Plugins can only read their own configuration values, it is not possible to access the configuration values from {kib} Core or other plugins directly.
 
@@ -119,7 +119,7 @@ export class MyPlugin implements Plugin<PluginSetup, PluginStart> {
 
 All plugins are considered enabled by default. If you want to disable
 your plugin, you could declare the `enabled` flag in the plugin
-config. This is a special Kibana Platform key. Kibana reads its
+config. This is a special {kib} Platform key. {kib} reads its
 value and won’t create a plugin instance if `enabled: false`.
 
 [source,js]
@@ -224,13 +224,12 @@ export class MyPlugin implements Plugin {
 
 For advanced use-cases, such as a search, use {kib-repo}blob/{branch}/docs/development/plugins/data/server/kibana-plugin-plugins-data-server.md[Data plugin]
 
-==== SavedObjects service
 include::saved-objects-service.asciidoc[leveloffset=+1]
 
 ==== HTTP service
 Allows plugins:
 
-* to extend the Kibana server with custom REST API.
+* to extend the {kib} server with custom REST API.
 * to execute custom logic on an incoming request or server response.
 * implement custom authentication and authorization strategy.
 

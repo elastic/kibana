@@ -1,6 +1,9 @@
 [[testing-kibana-plugin]]
-== Testing Kibana Plugins
-=== Mock Kibana Core services in tests
+== Testing {kib} Plugins
+=== Writing tests
+Learn about <<development-tests, recommended testing approaches >>.
+
+=== Mock {kib} Core services in tests
 
 Core services already provide mocks to simplify testing and make sure
 plugins always rely on valid public contracts:
@@ -19,7 +22,7 @@ const plugin = new MyPlugin({ configService }, …);
 Or if you need to get the whole core `setup` or `start` contracts:
 
 *my_plugin/server/plugin.test.ts*
-[source,typescript]
+[source,typescript] 
 ----
 import { coreMock } from 'kibana/public/mocks';
 
@@ -58,5 +61,3 @@ export const myPluginMocks = {
 Plugin mocks should consist of mocks for _public APIs only_:
 `setup`, `start` & `stop` contracts. Mocks aren’t necessary for pure functions as
 other plugins can call the original implementation in tests.
-
-<<development-tests, Writing tests>>

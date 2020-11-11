@@ -3,15 +3,12 @@
 
 experimental[]
 
-{kib} plugins are not especially novel or complicated to
-describe. Our intention wasn’t to build some clever system that
-magically solved problems through abstractions and layers of obscurity,
-and we wanted to make sure plugins could continue to use most of the
-same technologies they use today, at least from a technical perspective.
+{kib} platform plugins introduction is a significant step towards stabilizing {kib} architecture for all the developers.
+We made sure plugins could continue to use most of the same technologies they use today, at least from a technical perspective.
 
 === Anatomy of a plugin
 
-Plugins are defined as classes and expose themselves to {kib} 
+Plugins are defined as classes and present themselves to {kib} 
 through a simple wrapper function. A plugin can have browser-side code,
 server-side code, or both. There is no architectural difference between
 a plugin in the browser and a plugin on the server.
@@ -144,16 +141,16 @@ they are built.
 
 The various independent domains that makeup `core` are represented by a
 series of services and many of those services expose public interfaces
-that are provided to _all_ plugins. Services expose different features
-at different parts of their _lifecycle_. We describe the lifecycle of
+that are provided to all plugins. Services expose different features
+at different parts of their lifecycle. We describe the lifecycle of
 core services and plugins with specifically-named functions on the
 service definition.
 
 {kib} has three lifecycles: `setup`,
-`start`, and `stop`. Each plugin's `setup` functions is invoked sequentially
+`start`, and `stop`. Each plugin's `setup` functions is called sequentially
 while Kibana is setting up on the server or when it is being loaded in
-the browser. The `start` functions are invoked sequentially after setup
-has been completed for all plugins. The `stop` functions are invoked
+the browser. The `start` functions are called sequentially after `setup`
+has been completed for all plugins. The `stop` functions are called
 sequentially while Kibana is gracefully shutting down the server or
 when the browser tab or window is being closed.
 
