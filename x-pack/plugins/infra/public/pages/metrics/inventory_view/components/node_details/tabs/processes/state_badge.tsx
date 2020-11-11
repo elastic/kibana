@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiBadge } from '@elastic/eui';
 import { STATE_NAMES } from './states';
 
-export const StateBadge = ({ state }) => {
+export const StateBadge = ({ state }: { state: string }) => {
   switch (state) {
     case 'running':
       return <EuiBadge color="secondary">{STATE_NAMES.running}</EuiBadge>;

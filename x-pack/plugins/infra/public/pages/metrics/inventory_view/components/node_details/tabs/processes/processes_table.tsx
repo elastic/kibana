@@ -74,7 +74,7 @@ export const ProcessesTable = ({
 }: TableProps) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [itemsPerPage, setItemsPerPage] = useState(10);
-  useEffect(() => setCurrentPage(0), [processList, itemsPerPage]);
+  useEffect(() => setCurrentPage(0), [processList, searchFilter, itemsPerPage]);
 
   const { sortedColumn, sortItems, setSortedColumn } = useSortableProperties<
     ProcessListAPIResponse
@@ -93,17 +93,17 @@ export const ProcessesTable = ({
       {
         name: 'startTime',
         getValue: (item: any) => Date.parse(item.startTime),
-        isAscending: true,
+        isAscending: false,
       },
       {
         name: 'cpu',
         getValue: (item: any) => item.cpu,
-        isAscending: true,
+        isAscending: false,
       },
       {
         name: 'memory',
         getValue: (item: any) => item.memory,
-        isAscending: true,
+        isAscending: false,
       },
     ],
     'state'
@@ -130,11 +130,8 @@ export const ProcessesTable = ({
     [pageStartIdx, currentItems, itemsPerPage]
   );
 
-  const body = !isLoading ? (
-    <ProcessesTableBody processList={currentItemsPage} currentTime={currentTime} />
-  ) : (
-    <LoadingTableBody />
-  );
+  if (isLoading) return <LoadingPlaceholder />;
+
   return (
     <>
       <EuiTable>
@@ -153,7 +150,9 @@ export const ProcessesTable = ({
             </EuiTableHeaderCell>
           ))}
         </EuiTableHeader>
-        <StyledTableBody>{body}</StyledTableBody>
+        <StyledTableBody>
+          <ProcessesTableBody processList={currentItemsPage} currentTime={currentTime} />
+        </StyledTableBody>
       </EuiTable>
       <EuiSpacer size="m" />
       <EuiTablePagination
@@ -168,11 +167,12 @@ export const ProcessesTable = ({
   );
 };
 
-const LoadingTableBody = () => {
+const LoadingPlaceholder = () => {
   return (
     <div
       style={{
         width: '100%',
+        height: '200px',
         padding: '16px',
         display: 'flex',
         alignItems: 'center',

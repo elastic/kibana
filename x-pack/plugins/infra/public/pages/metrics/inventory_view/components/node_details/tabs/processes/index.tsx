@@ -31,7 +31,7 @@ const TabComponent = ({ currentTime, node, nodeType, options }: TabProps) => {
 
   return (
     <ProcessListTabContent>
-      <SummaryTable processList={response ?? []} />
+      <SummaryTable isLoading={loading} processList={response ?? []} />
       <EuiSpacer size="m" />
       <EuiSearchBar
         query={searchFilter}
