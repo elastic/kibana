@@ -356,7 +356,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
           </EuiFormRow>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiFlexGroup responsive={false}>
+          <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={this.cancelEditingHandler} flush="left">
                 <FormattedMessage
@@ -380,7 +380,7 @@ export class AnnotationFlyoutUI extends Component<CommonProps & Props> {
                 {isExistingAnnotation ? (
                   <FormattedMessage
                     id="xpack.ml.timeSeriesExplorer.annotationFlyout.updateButtonLabel"
-                    defaultMessage="Save & close"
+                    defaultMessage="Update"
                   />
                 ) : (
                   <FormattedMessage
