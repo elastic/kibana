@@ -261,6 +261,7 @@ x-pack/plugins/telemetry_collection_xpack/schema/xpack_plugins.json @elastic/kib
 # Elasticsearch UI
 /src/plugins/dev_tools/ @elastic/es-ui
 /src/plugins/console/  @elastic/es-ui
+/src/plugins/es_ui_shared/  @elastic/es-ui
 /x-pack/plugins/cross_cluster_replication/  @elastic/es-ui
 /x-pack/plugins/index_lifecycle_management/  @elastic/es-ui
 /x-pack/plugins/console_extensions/  @elastic/es-ui
