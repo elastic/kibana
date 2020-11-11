@@ -293,11 +293,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.lens.hasChartSwitchWarning('treemap')).to.eql(false);
       await PageObjects.lens.switchToVisualization('treemap');
       expect(
-        await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel', 0)
-      ).to.eql('Top values of geo.dest');
-      expect(
-        await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel', 1)
-      ).to.eql('Top values of geo.src');
+        await PageObjects.lens.getDimensionTriggersTexts('lnsPie_groupByDimensionPanel')
+      ).to.eql(['Top values of geo.dest', 'Top values of geo.src']);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(
         'Average of bytes'
       );
