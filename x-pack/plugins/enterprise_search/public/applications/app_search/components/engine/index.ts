@@ -5,3 +5,4 @@
  */
 
 export { EngineRouter, EngineNav } from './engine_nav';
+export { EngineLogic } from './engine_logic';

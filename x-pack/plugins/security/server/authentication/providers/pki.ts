@@ -7,6 +7,7 @@
 import Boom from '@hapi/boom';
 import { DetailedPeerCertificate } from 'tls';
 import { KibanaRequest } from '../../../../../../src/core/server';
+import type { AuthenticationInfo } from '../../elasticsearch';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
 import { HTTPAuthorizationHeader } from '../http_authentication';
@@ -218,13 +219,11 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
 
     // We should collect entire certificate chain as an ordered array of certificates encoded as base64 strings.
     const certificateChain = this.getCertificateChain(peerCertificate);
-    let accessToken: string;
+    let result: { access_token: string; authentication: AuthenticationInfo };
     try {
-      accessToken = (
-        await this.options.client.callAsInternalUser('shield.delegatePKI', {
-          body: { x509_certificate_chain: certificateChain },
-        })
-      ).access_token;
+      result = await this.options.client.callAsInternalUser('shield.delegatePKI', {
+        body: { x509_certificate_chain: certificateChain },
+      });
     } catch (err) {
       this.logger.debug(
         `Failed to exchange peer certificate chain to an access token: ${err.message}`
@@ -233,27 +232,18 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider {
     }
 
     this.logger.debug('Successfully retrieved access token in exchange to peer certificate chain.');
-
-    try {
-      // Then attempt to query for the user details using the new token
-      const authHeaders = {
-        authorization: new HTTPAuthorizationHeader('Bearer', accessToken).toString(),
-      };
-      const user = await this.getUser(request, authHeaders);
-
-      this.logger.debug('User has been authenticated with new access token');
-      return AuthenticationResult.succeeded(user, {
-        authHeaders,
-        state: {
-          accessToken,
-          // NodeJS typings don't include `fingerprint256` yet.
-          peerCertificateFingerprint256: (peerCertificate as any).fingerprint256,
+    return AuthenticationResult.succeeded(
+      this.authenticationInfoToAuthenticatedUser(result.authentication),
+      {
+        authHeaders: {
+          authorization: new HTTPAuthorizationHeader('Bearer', result.access_token).toString(),
         },
-      });
-    } catch (err) {
-      this.logger.debug(`Failed to authenticate request via access token: ${err.message}`);
-      return AuthenticationResult.failed(err);
-    }
+        state: {
+          accessToken: result.access_token,
+          peerCertificateFingerprint256: peerCertificate.fingerprint256,
+        },
+      }
+    );
   }
 
   /**
