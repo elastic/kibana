@@ -182,8 +182,6 @@ describe('alert_add', () => {
 
     wrapper.find('[data-test-subj="my-alert-type-SelectOption"]').first().simulate('click');
 
-    expect(wrapper.contains('Metadata: some value. Fields: test.')).toBeTruthy();
-
     expect(wrapper.find('input#alertName').props().value).toBe('');
 
     expect(wrapper.find('[data-test-subj="tagsComboBox"]').first().text()).toBe('');

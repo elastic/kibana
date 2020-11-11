@@ -30,6 +30,7 @@ import {
 } from './constants';
 import { RangePopover } from './advanced_editor';
 import { DragDropBuckets } from '../shared_components';
+import { getFieldByNameFactory } from '../../../pure_helpers';
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 // need to overwrite the formatter field first
@@ -96,6 +97,9 @@ describe('ranges', () => {
           title: 'my_index_pattern',
           hasRestrictions: false,
           fields: [{ name: sourceField, type: 'number', displayName: sourceField }],
+          getFieldByName: getFieldByNameFactory([
+            { name: sourceField, type: 'number', displayName: sourceField },
+          ]),
         },
       },
       existingFields: {},
@@ -769,8 +773,37 @@ describe('ranges', () => {
             layerId="first"
           />
         );
-
         expect(setStateSpy.mock.calls.length).toBe(0);
+      });
+
+      it('should not reset formatters when switching between custom ranges and auto histogram', () => {
+        const setStateSpy = jest.fn();
+        // now set a format on the range operation
+        (state.layers.first.columns.col1 as RangeIndexPatternColumn).params.format = {
+          id: 'custom',
+          params: { decimals: 3 },
+        };
+
+        const instance = mount(
+          <InlineOptions
+            {...defaultOptions}
+            state={state}
+            setState={setStateSpy}
+            columnId="col1"
+            currentColumn={state.layers.first.columns.col1 as RangeIndexPatternColumn}
+            layerId="first"
+          />
+        );
+
+        // This series of act closures are made to make it work properly the update flush
+        act(() => {
+          instance.find(EuiLink).first().prop('onClick')!({} as ReactMouseEvent);
+        });
+
+        expect(setStateSpy.mock.calls[1][0].layers.first.columns.col1.params.format).toEqual({
+          id: 'custom',
+          params: { decimals: 3 },
+        });
       });
     });
   });

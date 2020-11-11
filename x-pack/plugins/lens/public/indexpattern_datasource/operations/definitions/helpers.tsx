@@ -5,7 +5,7 @@
  */
 
 import { useRef } from 'react';
-import { useDebounce } from 'react-use';
+import useDebounce from 'react-use/lib/useDebounce';
 
 export const useDebounceWithOptions = (
   fn: Function,
