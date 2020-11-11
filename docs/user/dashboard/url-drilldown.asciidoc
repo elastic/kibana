@@ -13,7 +13,7 @@ https://github.com/elastic/kibana/issues?q={{event.value}}
 A Handlebars expression is a `{{`, some contents, followed by a `}}`. When the drilldown is executed, these expressions are replaced by values from the dashboard and interaction context.
 
 [[helpers]]
-In addition to https://handlebarsjs.com/guide/builtin-helpers.html[built-in] Handlebars helpers, you can use custom helpers.
+In addition to  https://ela.st/handlebars-helpers[built-in] Handlebars helpers, you can use custom helpers.
 
 Refer to Handlebars https://ela.st/handlebars-docs#expressions[documentation] to learn about advanced use cases.
 
