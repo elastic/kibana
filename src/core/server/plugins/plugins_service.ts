@@ -118,6 +118,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     return {
       // Return dependency tree
       pluginTree: this.pluginsSystem.getPluginDependencies(),
+      pluginPaths: this.pluginsSystem.getPlugins().map((plugin) => plugin.path),
       uiPlugins: {
         internal: this.uiPluginInternalInfo,
         public: uiPlugins,
