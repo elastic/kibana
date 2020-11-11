@@ -1,55 +1,46 @@
 /*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License;
+ * you may not use this file except in compliance with the Elastic License.
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../types';
-import { Datatable } from '../../expression_types';
-import { buildResultColumns, getBucketIdentifier } from '../series_calculation_helpers';
+import { ExpressionFunctionDefinition, Datatable } from 'src/plugins/expressions/public';
+import {
+  getBucketIdentifier,
+  buildResultColumns,
+} from '../../../../../../src/plugins/expressions/common';
 
-export interface DerivativeArgs {
+export interface CounterRateArgs {
   by?: string[];
   inputColumnId: string;
   outputColumnId: string;
   outputColumnName?: string;
 }
 
-export type ExpressionFunctionDerivative = ExpressionFunctionDefinition<
-  'derivative',
+export type ExpressionFunctionCounterRate = ExpressionFunctionDefinition<
+  'lens_counter_rate',
   Datatable,
-  DerivativeArgs,
+  CounterRateArgs,
   Datatable
 >;
 
 /**
- * Calculates the derivative of a specified column in the data table.
+ * Calculates the counter rate of a specified column in the data table.
  *
  * Also supports multiple series in a single data table - use the `by` argument
  * to specify the columns to split the calculation by.
- * For each unique combination of all `by` columns a separate derivative will be calculated.
+ * For each unique combination of all `by` columns a separate counter rate will be calculated.
  * The order of rows won't be changed - this function is not modifying any existing columns, it's only
  * adding the specified `outputColumnId` column to every row of the table without adding or removing rows.
  *
  * Behavior:
- * * Will write the derivative of `inputColumnId` into `outputColumnId`
+ * * Will write the counter rate of `inputColumnId` into `outputColumnId`
  * * If provided will use `outputColumnName` as name for the newly created column. Otherwise falls back to `outputColumnId`
- * * Derivative always start with an undefined value for the first row of a series, a cell will contain its own value minus the
- *   value of the previous cell of the same series.
+ * * Counter rate always start with an undefined value for the first row of a series.
+ * * If the value of the current cell is not smaller than the previous one, an output cell will contain
+ * * its own value minus the value of the previous cell of the same series. If the value is smaller,
+ * * an output cell will contain its own value
  *
  * Edge cases:
  * * Will return the input table if `inputColumnId` does not exist
@@ -64,42 +55,42 @@ export type ExpressionFunctionDerivative = ExpressionFunctionDefinition<
  *   before comparison. If the values are objects, the return value of their `toString` method will be used for comparison.
  *   Missing values (`null` and `undefined`) will be treated as empty strings.
  */
-export const derivative: ExpressionFunctionDerivative = {
-  name: 'derivative',
+export const counterRate: ExpressionFunctionCounterRate = {
+  name: 'lens_counter_rate',
   type: 'datatable',
 
   inputTypes: ['datatable'],
 
-  help: i18n.translate('expressions.functions.derivative.help', {
-    defaultMessage: 'Calculates the derivative of a column in a data table',
+  help: i18n.translate('xpack.lens.functions.counterRate.help', {
+    defaultMessage: 'Calculates the counter rate of a column in a data table',
   }),
 
   args: {
     by: {
-      help: i18n.translate('expressions.functions.derivative.args.byHelpText', {
-        defaultMessage: 'Column to split the derivative calculation by',
+      help: i18n.translate('xpack.lens.functions.counterRate.args.byHelpText', {
+        defaultMessage: 'Column to split the counter rate calculation by',
       }),
       multi: true,
       types: ['string'],
       required: false,
     },
     inputColumnId: {
-      help: i18n.translate('expressions.functions.derivative.args.inputColumnIdHelpText', {
-        defaultMessage: 'Column to calculate the derivative of',
+      help: i18n.translate('xpack.lens.functions.counterRate.args.inputColumnIdHelpText', {
+        defaultMessage: 'Column to calculate the counter rate of',
       }),
       types: ['string'],
       required: true,
     },
     outputColumnId: {
-      help: i18n.translate('expressions.functions.derivative.args.outputColumnIdHelpText', {
-        defaultMessage: 'Column to store the resulting derivative in',
+      help: i18n.translate('xpack.lens.functions.counterRate.args.outputColumnIdHelpText', {
+        defaultMessage: 'Column to store the resulting counter rate in',
       }),
       types: ['string'],
       required: true,
     },
     outputColumnName: {
-      help: i18n.translate('expressions.functions.derivative.args.outputColumnNameHelpText', {
-        defaultMessage: 'Name of the column to store the resulting derivative in',
+      help: i18n.translate('xpack.lens.functions.counterRate.args.outputColumnNameHelpText', {
+        defaultMessage: 'Name of the column to store the resulting counter rate in',
       }),
       types: ['string'],
       required: false,
@@ -117,7 +108,6 @@ export const derivative: ExpressionFunctionDerivative = {
     if (!resultColumns) {
       return input;
     }
-
     const previousValues: Partial<Record<string, number>> = {};
     return {
       ...input,
@@ -128,9 +118,13 @@ export const derivative: ExpressionFunctionDerivative = {
         const bucketIdentifier = getBucketIdentifier(row, by);
         const previousValue = previousValues[bucketIdentifier];
         const currentValue = newRow[inputColumnId];
-
         if (currentValue != null && previousValue != null) {
-          newRow[outputColumnId] = Number(currentValue) - previousValue;
+          const currentValueAsNumber = Number(currentValue);
+          if (currentValueAsNumber >= previousValue) {
+            newRow[outputColumnId] = currentValueAsNumber - previousValue;
+          } else {
+            newRow[outputColumnId] = currentValueAsNumber;
+          }
         } else {
           newRow[outputColumnId] = undefined;
         }
