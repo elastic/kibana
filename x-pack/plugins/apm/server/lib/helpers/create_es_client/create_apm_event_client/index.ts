@@ -15,7 +15,7 @@ import { ProcessorEvent } from '../../../../../common/processor_event';
 import {
   ESSearchRequest,
   ESSearchResponse,
-} from '../../../../../typings/elasticsearch';
+} from '../../../../../../../typings/elasticsearch';
 import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
 import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_data';
 import { callClientWithDebug } from '../call_client_with_debug';
