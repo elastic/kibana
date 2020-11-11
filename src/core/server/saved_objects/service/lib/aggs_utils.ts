@@ -21,13 +21,13 @@ import { IndexMapping } from '../../mappings';
 
 import { SavedObjectsErrorHelpers } from './errors';
 import { hasFilterKeyError } from './filter_utils';
-import { SavedObjectAggs, validateSavedObjectTypeAggs } from './saved_object_aggs_types';
+import { SavedObjectsAggs, validateSavedObjectTypeAggs } from './saved_objects_aggs_types';
 
-export const validateGetSavedObjectAggs = (
+export const validateGetSavedObjectsAggs = (
   allowedTypes: string[],
-  aggs: SavedObjectAggs,
+  aggs: SavedObjectsAggs,
   indexMapping: IndexMapping
-): SavedObjectAggs => {
+): SavedObjectsAggs => {
   validateSavedObjectTypeAggs(aggs);
   return validateGetAggFieldValue(allowedTypes, aggs, indexMapping);
 };
@@ -36,7 +36,7 @@ const validateGetAggFieldValue = (
   allowedTypes: string[],
   aggs: any,
   indexMapping: IndexMapping
-): SavedObjectAggs => {
+): SavedObjectsAggs => {
   return Object.keys(aggs).reduce((acc, key) => {
     if (key === 'field') {
       const error = hasFilterKeyError(aggs[key], allowedTypes, indexMapping);

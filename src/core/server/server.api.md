@@ -1884,6 +1884,12 @@ export interface SavedObjectsAddToNamespacesResponse {
     namespaces: string[];
 }
 
+// Warning: (ae-forgotten-export) The symbol "SavedObjectsAggsRt" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "SavedObjectsAggs" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type SavedObjectsAggs = rt.TypeOf<typeof SavedObjectsAggsRt>;
+
 // Warning: (ae-forgotten-export) The symbol "SavedObjectDoc" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "Referencable" needs to be exported by the entry point index.d.ts
 //
@@ -2180,10 +2186,8 @@ export type SavedObjectsFieldMapping = SavedObjectsCoreFieldMapping | SavedObjec
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectAggs" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    aggs?: SavedObjectAggs;
+    aggs?: SavedObjectsAggs;
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts

@@ -115,6 +115,7 @@ export {
 } from './application';
 
 export {
+  SavedObjectsAggs,
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,

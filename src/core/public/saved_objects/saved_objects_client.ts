@@ -24,6 +24,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   SavedObject,
   SavedObjectReference,
+  SavedObjectsAggs,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
@@ -40,6 +41,8 @@ type SavedObjectsFindOptions = Omit<
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
 
 /** @public */
+export { SavedObjectsAggs };
+
 export interface SavedObjectsCreateOptions {
   /**
    * (Not recommended) Specify an id instead of having the saved objects service generate one for you.

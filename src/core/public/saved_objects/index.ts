@@ -18,6 +18,7 @@
  */
 
 export {
+  SavedObjectsAggs,
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,

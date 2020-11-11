@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { ISavedObjectsRepository, SavedObjectAggs } from './lib';
+import { ISavedObjectsRepository, SavedObjectsAggs } from './lib';
 import {
   SavedObject,
   SavedObjectError,
@@ -289,7 +289,7 @@ export interface SavedObjectsUpdateResponse<T = unknown>
  *
  * @public
  */
-export { SavedObjectAggs };
+export { SavedObjectsAggs };
 
 /**
  *

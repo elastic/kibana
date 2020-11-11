@@ -15,7 +15,7 @@ export interface SavedObjectsFindOptions
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [aggs](./kibana-plugin-core-public.savedobjectsfindoptions.aggs.md) | <code>SavedObjectAggs</code> |  |
+|  [aggs](./kibana-plugin-core-public.savedobjectsfindoptions.aggs.md) | <code>SavedObjectsAggs</code> |  |
 |  [defaultSearchOperator](./kibana-plugin-core-public.savedobjectsfindoptions.defaultsearchoperator.md) | <code>'AND' &#124; 'OR'</code> | The search operator to use with the provided filter. Defaults to <code>OR</code> |
 |  [fields](./kibana-plugin-core-public.savedobjectsfindoptions.fields.md) | <code>string[]</code> | An array of fields to include in the results |
 |  [filter](./kibana-plugin-core-public.savedobjectsfindoptions.filter.md) | <code>string &#124; KueryNode</code> |  |

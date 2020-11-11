@@ -17,15 +17,15 @@
  * under the License.
  */
 
-import { validateGetSavedObjectAggs } from './aggs_utils';
+import { validateGetSavedObjectsAggs } from './aggs_utils';
 import { mockMappings } from './filter_utils.test';
-import { SavedObjectAggs } from './saved_object_aggs_types';
+import { SavedObjectsAggs } from './saved_objects_aggs_types';
 
 describe('Filter Utils', () => {
-  describe('#validateGetSavedObjectAggs', () => {
+  describe('#validateGetSavedObjectsAggs', () => {
     test('Validate a simple aggregations', () => {
       expect(
-        validateGetSavedObjectAggs(
+        validateGetSavedObjectsAggs(
           ['foo'],
           { aggName: { max: { field: 'foo.attributes.bytes' } } },
           mockMappings
@@ -40,7 +40,7 @@ describe('Filter Utils', () => {
     });
     test('Validate a nested simple aggregations', () => {
       expect(
-        validateGetSavedObjectAggs(
+        validateGetSavedObjectsAggs(
           ['alert'],
           { aggName: { cardinality: { field: 'alert.attributes.actions.group' } } },
           mockMappings
@@ -56,7 +56,7 @@ describe('Filter Utils', () => {
 
     test('Throw an error when types is not allowed', () => {
       expect(() => {
-        validateGetSavedObjectAggs(
+        validateGetSavedObjectsAggs(
           ['alert'],
           {
             aggName: {
@@ -68,15 +68,15 @@ describe('Filter Utils', () => {
       }).toThrowErrorMatchingInlineSnapshot(`"This type foo is not allowed: Bad Request"`);
     });
 
-    test('Throw an error when aggregation is not defined in  SavedObjectAggs', () => {
+    test('Throw an error when aggregation is not defined in  SavedObjectsAggs', () => {
       expect(() => {
-        validateGetSavedObjectAggs(
+        validateGetSavedObjectsAggs(
           ['foo'],
           {
             aggName: {
               MySuperAgg: { field: 'foo.attributes.bytes' },
             },
-          } as SavedObjectAggs,
+          } as SavedObjectsAggs,
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(
@@ -84,16 +84,16 @@ describe('Filter Utils', () => {
       );
     });
 
-    test('Throw an error when you add attributes who are not defined in SavedObjectAggs', () => {
+    test('Throw an error when you add attributes who are not defined in SavedObjectsAggs', () => {
       expect(() => {
-        validateGetSavedObjectAggs(
+        validateGetSavedObjectsAggs(
           ['alert'],
           {
             aggName: {
               cardinality: { field: 'alert.attributes.actions.group' },
               script: 'I want to access that I should not',
             },
-          } as SavedObjectAggs,
+          } as SavedObjectsAggs,
           mockMappings
         );
       }).toThrowErrorMatchingInlineSnapshot(

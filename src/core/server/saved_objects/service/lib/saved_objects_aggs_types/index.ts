@@ -31,16 +31,16 @@ import { excess, throwErrors } from './helpers';
 
 const AllAggsRt = rt.intersection([BucketAggsTypeRt, MetricsAggsTypeRt]);
 
-const SavedObjectAggsRt = rt.record(
+const SavedObjectsAggsRt = rt.record(
   rt.string,
   rt.intersection([AllAggsRt, rt.partial({ aggs: AllAggsRt })])
 );
 
-export type SavedObjectAggs = rt.TypeOf<typeof SavedObjectAggsRt>;
+export type SavedObjectsAggs = rt.TypeOf<typeof SavedObjectsAggsRt>;
 
-export const validateSavedObjectTypeAggs = (aggObjects: SavedObjectAggs) => {
+export const validateSavedObjectTypeAggs = (aggObjects: SavedObjectsAggs) => {
   pipe(
-    excess(SavedObjectAggsRt).decode(aggObjects),
+    excess(SavedObjectsAggsRt).decode(aggObjects),
     fold(throwErrors(SavedObjectsErrorHelpers.createBadRequestError), identity)
   );
 };

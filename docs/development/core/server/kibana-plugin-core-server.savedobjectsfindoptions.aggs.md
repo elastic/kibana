@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-aggs?: SavedObjectAggs;
+aggs?: SavedObjectsAggs;
 ```

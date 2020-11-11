@@ -980,6 +980,12 @@ export interface SavedObjectReference {
     type: string;
 }
 
+// Warning: (ae-forgotten-export) The symbol "SavedObjectsAggsRt" needs to be exported by the entry point index.d.ts
+// Warning: (ae-missing-release-tag) "SavedObjectsAggs" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
+// @public (undocumented)
+export type SavedObjectsAggs = rt.TypeOf<typeof SavedObjectsAggsRt>;
+
 // @public (undocumented)
 export interface SavedObjectsBaseOptions {
     namespace?: string;
@@ -1047,6 +1053,8 @@ export class SavedObjectsClient {
 // @public
 export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
+// Warning: (ae-missing-release-tag) "SavedObjectsCreateOptions" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)
+//
 // @public (undocumented)
 export interface SavedObjectsCreateOptions {
     id?: string;
@@ -1058,10 +1066,8 @@ export interface SavedObjectsCreateOptions {
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectAggs" needs to be exported by the entry point index.d.ts
-    //
     // (undocumented)
-    aggs?: SavedObjectAggs;
+    aggs?: SavedObjectsAggs;
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts

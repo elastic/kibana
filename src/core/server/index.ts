@@ -240,6 +240,7 @@ export {
 } from './plugins';
 
 export {
+  SavedObjectsAggs,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsBulkUpdateObject,

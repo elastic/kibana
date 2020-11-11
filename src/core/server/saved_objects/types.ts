@@ -17,7 +17,7 @@
  * under the License.
  */
 
-import { SavedObjectsClient, SavedObjectAggs } from './service/saved_objects_client';
+import { SavedObjectsClient, SavedObjectsAggs } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
 import { SavedObjectMigrationMap } from './migrations';
 
@@ -109,7 +109,7 @@ export interface SavedObjectsFindOptions {
    */
   defaultSearchOperator?: 'AND' | 'OR';
   filter?: string | KueryNode;
-  aggs?: SavedObjectAggs;
+  aggs?: SavedObjectsAggs;
   namespaces?: string[];
   /**
    * This map defines each type to search for, and the namespace(s) to search for the type in; this is only intended to be used by a saved
