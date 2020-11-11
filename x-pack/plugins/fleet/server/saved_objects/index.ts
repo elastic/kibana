@@ -5,8 +5,9 @@
  */
 
 import { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
+import { flowRight } from 'lodash';
 import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
-import { migratePackagePolicyToV7110 } from '../../../security_solution/common';
+import { migratePackagePolicyToV7110 as endpointMigratePackagePolicyToV7110 } from '../../../security_solution/common';
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -27,6 +28,7 @@ import {
   migrateSettingsToV7100,
   migrateAgentActionToV7100,
 } from './migrations/to_v7_10_0';
+import { migratePackagePolicyToV7110 } from './migrations/to_v7_11_0';
 
 /*
  * Saved object types and mappings
@@ -270,7 +272,7 @@ const getSavedObjectTypes = (
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
-      '7.11.0': migratePackagePolicyToV7110,
+      '7.11.0': flowRight(migratePackagePolicyToV7110, endpointMigratePackagePolicyToV7110),
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
