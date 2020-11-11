@@ -12,7 +12,7 @@ import { useActions, useValues } from 'kea';
 
 import { LogRetentionLogic } from './log_retention_logic';
 import { AnalyticsLogRetentionMessage, ApiLogRetentionMessage } from './messaging';
-import { ELogRetentionOptions } from './types';
+import { LogRetentionOptions } from './types';
 
 export const LogRetentionPanel: React.FC = () => {
   const { toggleLogRetention, fetchLogRetention } = useActions(LogRetentionLogic);
@@ -20,8 +20,8 @@ export const LogRetentionPanel: React.FC = () => {
   const { logRetention, isLogRetentionUpdating } = useValues(LogRetentionLogic);
 
   const hasILM = logRetention !== null;
-  const analyticsLogRetentionSettings = logRetention?.[ELogRetentionOptions.Analytics];
-  const apiLogRetentionSettings = logRetention?.[ELogRetentionOptions.API];
+  const analyticsLogRetentionSettings = logRetention?.[LogRetentionOptions.Analytics];
+  const apiLogRetentionSettings = logRetention?.[LogRetentionOptions.API];
 
   useEffect(() => {
     fetchLogRetention();
@@ -73,7 +73,7 @@ export const LogRetentionPanel: React.FC = () => {
             </>
           }
           checked={!!analyticsLogRetentionSettings?.enabled}
-          onChange={() => toggleLogRetention(ELogRetentionOptions.Analytics)}
+          onChange={() => toggleLogRetention(LogRetentionOptions.Analytics)}
           disabled={isLogRetentionUpdating}
           data-test-subj="LogRetentionPanelAnalyticsSwitch"
         />
@@ -100,7 +100,7 @@ export const LogRetentionPanel: React.FC = () => {
             </>
           }
           checked={!!apiLogRetentionSettings?.enabled}
-          onChange={() => toggleLogRetention(ELogRetentionOptions.API)}
+          onChange={() => toggleLogRetention(LogRetentionOptions.API)}
           disabled={isLogRetentionUpdating}
           data-test-subj="LogRetentionPanelAPISwitch"
         />
