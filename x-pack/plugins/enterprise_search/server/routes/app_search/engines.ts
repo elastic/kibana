@@ -14,7 +14,7 @@ interface EnginesResponse {
   meta: { page: { total_results: number } };
 }
 
-export function registerEnginesRoute({
+export function registerEnginesRoutes({
   router,
   enterpriseSearchRequestHandler,
 }: RouteDependencies) {
@@ -40,6 +40,23 @@ export function registerEnginesRoute({
         },
         hasValidData: (body?: EnginesResponse) =>
           Array.isArray(body?.results) && typeof body?.meta?.page?.total_results === 'number',
+      })(context, request, response);
+    }
+  );
+
+  // Single engine endpoints
+  router.get(
+    {
+      path: '/api/app_search/engines/{name}',
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      return enterpriseSearchRequestHandler.createRequest({
+        path: `/as/engines/${request.params.name}/details`,
       })(context, request, response);
     }
   );
