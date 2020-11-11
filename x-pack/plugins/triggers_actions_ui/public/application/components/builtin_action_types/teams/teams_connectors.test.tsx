@@ -14,7 +14,7 @@ describe('TeamsActionFields renders', () => {
   test('all connector fields are rendered', async () => {
     const actionConnector = {
       secrets: {
-        webhookUrl: 'http:\\test',
+        webhookUrl: 'https:\\test',
       },
       id: 'test',
       actionTypeId: '.teams',
@@ -41,7 +41,7 @@ describe('TeamsActionFields renders', () => {
     });
     expect(wrapper.find('[data-test-subj="teamsWebhookUrlInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="teamsWebhookUrlInput"]').first().prop('value')).toBe(
-      'http:\\test'
+      'https:\\test'
     );
   });
 

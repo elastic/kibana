@@ -5,20 +5,27 @@
  */
 
 import { Logger } from '../../../../../src/core/server';
-import { Services, ActionTypeExecutorResult } from '../types';
+import { Services } from '../types';
 import { validateParams, validateSecrets } from '../lib';
-import { getActionType, TeamsActionType, TeamsActionTypeExecutorOptions } from './teams';
+import axios from 'axios';
+import { ActionParamsType, ActionTypeSecretsType, getActionType, TeamsActionType } from './teams';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionsMock } from '../mocks';
 import { createActionTypeRegistry } from './index.test';
+import * as utils from './lib/axios_utils';
 
-jest.mock('@teams/webhook', () => {
+jest.mock('axios');
+jest.mock('./lib/axios_utils', () => {
+  const originalUtils = jest.requireActual('./lib/axios_utils');
   return {
-    IncomingWebhook: jest.fn().mockImplementation(() => {
-      return { send: (message: string) => {} };
-    }),
+    ...originalUtils,
+    request: jest.fn(),
+    patch: jest.fn(),
   };
 });
+
+axios.create = jest.fn(() => axios);
+const requestMock = utils.request as jest.Mock;
 
 const ACTION_TYPE_ID = '.teams';
 
@@ -28,16 +35,9 @@ let actionType: TeamsActionType;
 let mockedLogger: jest.Mocked<Logger>;
 
 beforeAll(() => {
-  const { logger } = createActionTypeRegistry();
-  actionType = getActionType({
-    async executor(options) {
-      return { status: 'ok', actionId: options.actionId };
-    },
-    configurationUtilities: actionsConfigMock.create(),
-    logger,
-  });
+  const { logger, actionTypeRegistry } = createActionTypeRegistry();
+  actionType = actionTypeRegistry.get<{}, ActionTypeSecretsType, ActionParamsType>(ACTION_TYPE_ID);
   mockedLogger = logger;
-  expect(actionType).toBeTruthy();
 });
 
 describe('action registration', () => {
@@ -102,13 +102,13 @@ describe('validateActionTypeSecrets()', () => {
       configurationUtilities: {
         ...actionsConfigMock.create(),
         ensureUriAllowed: (url) => {
-          expect(url).toEqual('https://api.teams.com/');
+          expect(url).toEqual('https://outlook.office.com/');
         },
       },
     });
 
-    expect(validateSecrets(actionType, { webhookUrl: 'https://api.teams.com/' })).toEqual({
-      webhookUrl: 'https://api.teams.com/',
+    expect(validateSecrets(actionType, { webhookUrl: 'https://outlook.office.com/' })).toEqual({
+      webhookUrl: 'https://outlook.office.com/',
     });
   });
 
@@ -124,7 +124,7 @@ describe('validateActionTypeSecrets()', () => {
     });
 
     expect(() => {
-      validateSecrets(actionType, { webhookUrl: 'https://api.teams.com/' });
+      validateSecrets(actionType, { webhookUrl: 'https://outlook.office.com/' });
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action type secrets: error configuring teams action: target hostname is not added to allowedHosts"`
     );
@@ -133,32 +133,78 @@ describe('validateActionTypeSecrets()', () => {
 
 describe('execute()', () => {
   beforeAll(() => {
-    async function mockTeamsExecutor(options: TeamsActionTypeExecutorOptions) {
-      const { params } = options;
-      const { message } = params;
-      if (message == null) throw new Error('message property required in parameter');
-
-      const failureMatch = message.match(/^failure: (.*)$/);
-      if (failureMatch != null) {
-        const failMessage = failureMatch[1];
-        throw new Error(`teams mockExecutor failure: ${failMessage}`);
-      }
-
-      return {
-        text: `teams mockExecutor success: ${message}`,
-        actionId: '',
-        status: 'ok',
-      } as ActionTypeExecutorResult<void>;
-    }
-
+    requestMock.mockReset();
     actionType = getActionType({
-      executor: mockTeamsExecutor,
       logger: mockedLogger,
       configurationUtilities: actionsConfigMock.create(),
     });
   });
 
+  beforeEach(() => {
+    requestMock.mockReset();
+    requestMock.mockResolvedValue({
+      status: 200,
+      statusText: '',
+      data: '',
+      headers: [],
+      config: {},
+    });
+  });
+
   test('calls the mock executor with success', async () => {
+    const response = await actionType.executor({
+      actionId: 'some-id',
+      services,
+      config: {},
+      secrets: { webhookUrl: 'http://example.com' },
+      params: { message: 'this invocation should succeed' },
+    });
+    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+          Object {
+            "axios": undefined,
+            "data": Object {
+              "text": "this invocation should succeed",
+            },
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "response from teams action \\"some-id\\": [HTTP 200] ",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
+            "method": "post",
+            "proxySettings": undefined,
+            "url": "http://example.com",
+          }
+    `);
+    expect(response).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "data": Object {
+          "text": "this invocation should succeed",
+        },
+        "status": "ok",
+      }
+    `);
+  });
+
+  test('calls the mock executor with success proxy', async () => {
     const response = await actionType.executor({
       actionId: 'some-id',
       services,
@@ -170,47 +216,51 @@ describe('execute()', () => {
         proxyRejectUnauthorizedCertificates: false,
       },
     });
+    expect(requestMock.mock.calls[0][0]).toMatchInlineSnapshot(`
+          Object {
+            "axios": undefined,
+            "data": Object {
+              "text": "this invocation should succeed",
+            },
+            "logger": Object {
+              "context": Array [],
+              "debug": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    "response from teams action \\"some-id\\": [HTTP 200] ",
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": undefined,
+                  },
+                ],
+              },
+              "error": [MockFunction],
+              "fatal": [MockFunction],
+              "get": [MockFunction],
+              "info": [MockFunction],
+              "log": [MockFunction],
+              "trace": [MockFunction],
+              "warn": [MockFunction],
+            },
+            "method": "post",
+            "proxySettings": Object {
+              "proxyRejectUnauthorizedCertificates": false,
+              "proxyUrl": "https://someproxyhost",
+            },
+            "url": "http://example.com",
+          }
+    `);
     expect(response).toMatchInlineSnapshot(`
       Object {
-        "actionId": "",
+        "actionId": "some-id",
+        "data": Object {
+          "text": "this invocation should succeed",
+        },
         "status": "ok",
-        "text": "teams mockExecutor success: this invocation should succeed",
       }
     `);
-  });
-
-  test('calls the mock executor with failure', async () => {
-    await expect(
-      actionType.executor({
-        actionId: 'some-id',
-        services,
-        config: {},
-        secrets: { webhookUrl: 'http://example.com' },
-        params: { message: 'failure: this invocation should fail' },
-      })
-    ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"teams mockExecutor failure: this invocation should fail"`
-    );
-  });
-
-  test('calls the mock executor with success proxy', async () => {
-    const actionTypeProxy = getActionType({
-      logger: mockedLogger,
-      configurationUtilities: actionsConfigMock.create(),
-    });
-    await actionTypeProxy.executor({
-      actionId: 'some-id',
-      services,
-      config: {},
-      secrets: { webhookUrl: 'http://example.com' },
-      params: { message: 'this invocation should succeed' },
-      proxySettings: {
-        proxyUrl: 'https://someproxyhost',
-        proxyRejectUnauthorizedCertificates: false,
-      },
-    });
-    expect(mockedLogger.debug).toHaveBeenCalledWith(
-      'IncomingWebhook was called with proxyUrl https://someproxyhost'
-    );
   });
 });

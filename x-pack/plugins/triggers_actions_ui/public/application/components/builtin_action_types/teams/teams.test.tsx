@@ -23,7 +23,7 @@ beforeAll(async () => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('logoMicrosoft');
+    expect(actionTypeModel.iconClass).toEqual('logoWindows');
   });
 });
 
@@ -31,7 +31,7 @@ describe('teams connector validation', () => {
   test('connector validation succeeds when connector config is valid', () => {
     const actionConnector = {
       secrets: {
-        webhookUrl: 'http:\\test',
+        webhookUrl: 'https:\\test',
       },
       id: 'test',
       actionTypeId: '.teams',
@@ -46,7 +46,7 @@ describe('teams connector validation', () => {
     });
   });
 
-  test('connector validation fails when connector config is not valid', () => {
+  test('connector validation fails when connector config is not valid - empty webhook url', () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
@@ -58,6 +58,42 @@ describe('teams connector validation', () => {
     expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
       errors: {
         webhookUrl: ['Webhook URL is required.'],
+      },
+    });
+  });
+
+  test('connector validation fails when connector config is not valid - invalid webhook url', () => {
+    const actionConnector = {
+      secrets: {
+        webhookUrl: 'h',
+      },
+      id: 'test',
+      actionTypeId: '.teams',
+      name: 'team',
+      config: {},
+    } as TeamsActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        webhookUrl: ['Webhook URL is invalid.'],
+      },
+    });
+  });
+
+  test('connector validation fails when connector config is not valid - invalid webhook url protocol', () => {
+    const actionConnector = {
+      secrets: {
+        webhookUrl: 'http://insecure',
+      },
+      id: 'test',
+      actionTypeId: '.teams',
+      name: 'team',
+      config: {},
+    } as TeamsActionConnector;
+
+    expect(actionTypeModel.validateConnector(actionConnector)).toEqual({
+      errors: {
+        webhookUrl: ['Webhook URL must start with https://.'],
       },
     });
   });
