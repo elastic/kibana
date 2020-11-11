@@ -17,6 +17,7 @@ import {
   AlertInstanceState,
   CommonAlertFilter,
   CommonAlertParams,
+  AlertDiskUsageNodeStats,
 } from '../../common/types/alerts';
 import { AlertInstance, AlertServices } from '../../../alerts/server';
 import {
@@ -98,7 +99,9 @@ export class DiskUsageAlert extends BaseAlert {
       return true;
     }
 
-    const nodeAlerts = alertInstanceStates.filter(({ nodeId }) => nodeId === nodeFilter.nodeUuid);
+    const nodeAlerts = alertInstanceStates.filter(
+      ({ stackProductUuid }) => stackProductUuid === nodeFilter.nodeUuid
+    );
     return Boolean(nodeAlerts.length);
   }
 
@@ -109,7 +112,7 @@ export class DiskUsageAlert extends BaseAlert {
   }
 
   protected getUiMessage(alertState: AlertState, item: AlertData): AlertMessage {
-    const stat = item.meta as AlertDiskUsageState;
+    const stat = item.meta as AlertDiskUsageNodeStats;
     if (!alertState.ui.isFiring) {
       return {
         text: i18n.translate('xpack.monitoring.alerts.diskUsage.ui.resolvedMessage', {
@@ -237,7 +240,7 @@ export class DiskUsageAlert extends BaseAlert {
         internalFullMessage: this.isCloud ? internalShortMessage : internalFullMessage,
         state: AlertingDefaults.ALERT_STATE.firing,
         nodes: firingNodes
-          .map((state) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`)
+          .map((state) => `${state.stackProductName}:${state.diskUsage.toFixed(2)}`)
           .join(','),
         count: firingCount,
         clusterName: cluster.clusterName,
@@ -247,7 +250,7 @@ export class DiskUsageAlert extends BaseAlert {
     } else {
       const resolvedNodes = (alertStates as AlertDiskUsageState[])
         .filter((state) => !state.ui.isFiring)
-        .map((state) => `${state.nodeName}:${state.diskUsage.toFixed(2)}`);
+        .map((state) => `${state.stackProductName}:${state.diskUsage.toFixed(2)}`);
       const resolvedCount = resolvedNodes.length;
 
       if (resolvedCount > 0) {
@@ -297,11 +300,11 @@ export class DiskUsageAlert extends BaseAlert {
       const newAlertStates: AlertDiskUsageState[] = [];
 
       for (const node of nodes) {
-        const stat = node.meta as AlertDiskUsageState;
+        const stat = node.meta as AlertDiskUsageNodeStats;
         const nodeState = this.getDefaultAlertState(cluster, node) as AlertDiskUsageState;
         nodeState.diskUsage = stat.diskUsage;
-        nodeState.nodeId = stat.nodeId;
-        nodeState.nodeName = stat.nodeName;
+        nodeState.stackProductUuid = stat.nodeId;
+        nodeState.stackProductName = stat.nodeName || stat.nodeId;
 
         if (node.shouldFire) {
           nodeState.ui.triggeredMS = currentUTC;
