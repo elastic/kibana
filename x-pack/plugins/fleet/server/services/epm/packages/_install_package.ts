@@ -16,12 +16,10 @@ import {
 } from '../../../types';
 import { installIndexPatterns } from '../kibana/index_pattern/install';
 import { installTemplates } from '../elasticsearch/template/install';
-import { generateESIndexPatterns } from '../elasticsearch/template/template';
 import { installPipelines, deletePreviousPipelines } from '../elasticsearch/ingest_pipeline/';
 import { installILMPolicy } from '../elasticsearch/ilm/install';
 import { installKibanaAssets, getKibanaAssets } from '../kibana/assets/install';
 import { updateCurrentWriteIndices } from '../elasticsearch/template/template';
-import { isRequiredPackage } from './index';
 import { deleteKibanaSavedObjectsAssets } from './remove';
 import { installTransform } from '../elasticsearch/transform/install';
 import { createInstallation, saveKibanaAssetsRefs, updateVersion } from './install';
@@ -47,29 +45,21 @@ export async function _installPackage({
   installType: InstallType;
   installSource: InstallSource;
 }): Promise<AssetReference[]> {
-  const { internal = false, name: pkgName, version: pkgVersion } = packageInfo;
-  const removable = !isRequiredPackage(pkgName);
-  const toSaveESIndexPatterns = generateESIndexPatterns(packageInfo.data_streams);
+  const { name: pkgName, version: pkgVersion } = packageInfo;
   // add the package installation to the saved object.
   // if some installation already exists, just update install info
-  if (!installedPkg) {
-    await createInstallation({
-      savedObjectsClient,
-      pkgName,
-      pkgVersion,
-      internal,
-      removable,
-      installed_kibana: [],
-      installed_es: [],
-      toSaveESIndexPatterns,
-      installSource,
-    });
-  } else {
+  if (installedPkg) {
     await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       install_version: pkgVersion,
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
       install_source: installSource,
+    });
+  } else {
+    await createInstallation({
+      savedObjectsClient,
+      packageInfo,
+      installSource,
     });
   }
 
