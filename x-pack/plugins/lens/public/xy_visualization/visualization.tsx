@@ -14,14 +14,20 @@ import { PaletteOutput, PaletteRegistry } from 'src/plugins/charts/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { getSuggestions } from './xy_suggestions';
 import { LayerContextMenu, XyToolbar, DimensionEditor } from './xy_config_panel';
-import { Visualization, OperationMetadata, VisualizationType, AccessorConfig } from '../types';
+import {
+  Visualization,
+  OperationMetadata,
+  VisualizationType,
+  AccessorConfig,
+  FramePublicAPI,
+} from '../types';
 import { State, SeriesType, visualizationTypes, LayerConfig } from './types';
 import { getColumnToLabelMap, isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { LensIconChartBarStacked } from '../assets/chart_bar_stacked';
 import { LensIconChartMixedXy } from '../assets/chart_mixed_xy';
 import { LensIconChartBarHorizontal } from '../assets/chart_bar_horizontal';
-import { getColorAssignments } from './color_assignment';
+import { ColorAssignments, getColorAssignments } from './color_assignment';
 
 const defaultIcon = LensIconChartBarStacked;
 const defaultSeriesType = 'bar_stacked';
@@ -170,12 +176,12 @@ export const getXyVisualization = ({
       return { groups: [] };
     }
 
-    const layerContainsSplits = Boolean(layer.splitAccessor);
-
     const datasource = frame.datasourceLayers[layer.layerId];
 
     const sortedAccessors: string[] = getSortedAccessors(datasource, layer);
-    let mappedAccessors: AccessorConfig[] = sortedAccessors;
+    let mappedAccessors: AccessorConfig[] = sortedAccessors.map((accessor) => ({
+      columnId: accessor,
+    }));
 
     if (frame.activeData) {
       const colorAssignments = getColorAssignments(
@@ -183,41 +189,13 @@ export const getXyVisualization = ({
         { tables: frame.activeData },
         data.fieldFormats.deserialize
       );
-      const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
-      const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
-      mappedAccessors = sortedAccessors.map((accessor) => {
-        const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
-        if (layerContainsSplits) {
-          return {
-            columnId: accessor as string,
-            triggerIcon: 'disabled',
-          };
-        }
-        const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
-        const rank = colorAssignments[currentPalette.name].getRank(
-          layer,
-          columnToLabel[accessor] || accessor,
-          accessor
-        );
-        const customColor =
-          currentYConfig?.color ||
-          paletteService.get(currentPalette.name).getColor(
-            [
-              {
-                name: columnToLabel[accessor] || accessor,
-                rankAtDepth: rank,
-                totalSeriesAtDepth: totalSeriesCount,
-              },
-            ],
-            { maxDepth: 1, totalSeries: totalSeriesCount },
-            currentPalette.params
-          );
-        return {
-          columnId: accessor as string,
-          triggerIcon: customColor ? 'color' : 'disabled',
-          color: customColor ? customColor : undefined,
-        };
-      });
+      mappedAccessors = getAccessorColorConfig(
+        colorAssignments,
+        frame,
+        layer,
+        sortedAccessors,
+        paletteService
+      );
     }
 
     const isHorizontal = isHorizontalChart(state.layers);
@@ -226,7 +204,7 @@ export const getXyVisualization = ({
         {
           groupId: 'x',
           groupLabel: getAxisName('x', { isHorizontal }),
-          accessors: layer.xAccessor ? [layer.xAccessor] : [],
+          accessors: layer.xAccessor ? [{ columnId: layer.xAccessor }] : [],
           filterOperations: isBucketed,
           supportsMoreColumns: !layer.xAccessor,
           dataTestSubj: 'lnsXY_xDimensionPanel',
@@ -392,6 +370,51 @@ export const getXyVisualization = ({
     return errors.length ? errors : undefined;
   },
 });
+
+function getAccessorColorConfig(
+  colorAssignments: ColorAssignments,
+  frame: FramePublicAPI,
+  layer: LayerConfig,
+  sortedAccessors: string[],
+  paletteService: PaletteRegistry
+): AccessorConfig[] {
+  const layerContainsSplits = Boolean(layer.splitAccessor);
+  const currentPalette: PaletteOutput = layer.palette || { type: 'palette', name: 'default' };
+  const totalSeriesCount = colorAssignments[currentPalette.name].totalSeriesCount;
+  return sortedAccessors.map((accessor) => {
+    const currentYConfig = layer.yConfig?.find((yConfig) => yConfig.forAccessor === accessor);
+    if (layerContainsSplits) {
+      return {
+        columnId: accessor as string,
+        triggerIcon: 'disabled',
+      };
+    }
+    const columnToLabel = getColumnToLabelMap(layer, frame.datasourceLayers[layer.layerId]);
+    const rank = colorAssignments[currentPalette.name].getRank(
+      layer,
+      columnToLabel[accessor] || accessor,
+      accessor
+    );
+    const customColor =
+      currentYConfig?.color ||
+      paletteService.get(currentPalette.name).getColor(
+        [
+          {
+            name: columnToLabel[accessor] || accessor,
+            rankAtDepth: rank,
+            totalSeriesAtDepth: totalSeriesCount,
+          },
+        ],
+        { maxDepth: 1, totalSeries: totalSeriesCount },
+        currentPalette.params
+      );
+    return {
+      columnId: accessor as string,
+      triggerIcon: customColor ? 'color' : 'disabled',
+      color: customColor ? customColor : undefined,
+    };
+  });
+}
 
 function validateLayersForDimension(
   dimension: string,

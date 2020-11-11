@@ -135,4 +135,9 @@
 
 .lnsLayerPanel__dimensionLink {
   width: 100%;
+
+  &:focus {
+    background-color: transparent !important; // sass-lint:disable-line no-important
+    outline: none !important; // sass-lint:disable-line no-important
+  }
 }

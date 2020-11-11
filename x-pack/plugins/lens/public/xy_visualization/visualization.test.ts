@@ -533,7 +533,7 @@ describe('xy_visualization', () => {
         const yConfigs = callConfigForYConfigs({});
         expect(yConfigs!.accessors.length).toEqual(2);
         yConfigs!.accessors.forEach((accessor) => {
-          expect(typeof accessor).toBe('string');
+          expect(accessor.triggerIcon).toBeUndefined();
         });
       });
 

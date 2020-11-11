@@ -18,11 +18,19 @@ interface LayerColorConfig {
   layerId: string;
 }
 
+export type ColorAssignments = Record<
+  string,
+  {
+    totalSeriesCount: number;
+    getRank(layer: LayerColorConfig, seriesKey: string, yAccessor: string): number;
+  }
+>;
+
 export function getColorAssignments(
   layers: LayerColorConfig[],
   data: { tables: Record<string, Datatable> },
   formatFactory: FormatFactory
-) {
+): ColorAssignments {
   const layersPerPalette: Record<string, LayerColorConfig[]> = {};
 
   layers.forEach((layer) => {
