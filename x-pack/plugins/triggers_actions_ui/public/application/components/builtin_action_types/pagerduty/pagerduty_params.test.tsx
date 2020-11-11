@@ -40,6 +40,10 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="severitySelect"]').first().prop('value')).toStrictEqual(
       'critical'
     );
+    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').first().prop('value')).toStrictEqual(
+      'test'
+    );
     expect(wrapper.find('[data-test-subj="eventActionSelect"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="timestampInput"]').length > 0).toBeTruthy();
@@ -48,5 +52,30 @@ describe('PagerDutyParamsFields renders', () => {
     expect(wrapper.find('[data-test-subj="sourceInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="dedupKeyAddVariableButton"]').length > 0).toBeTruthy();
+  });
+
+  test('dedupKey field is set default as {{alertInstanceId}} if not defined', async () => {
+    const mocks = coreMock.createSetup();
+    const actionParams = {
+      eventAction: EventActionOptions.TRIGGER,
+      summary: '2323',
+    };
+
+    const wrapper = mountWithIntl(
+      <PagerDutyParamsFields
+        actionParams={actionParams}
+        errors={{ summary: [], timestamp: [], dedupKey: [] }}
+        editAction={() => {}}
+        index={0}
+        docLinks={{ ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' } as DocLinksStart}
+        toastNotifications={mocks.notifications.toasts}
+        http={mocks.http}
+      />
+    );
+
+    expect(wrapper.find('[data-test-subj="dedupKeyInput"]').length > 0).toBeTruthy();
+    expect(
+      wrapper.find('[data-test-subj="dedupKeyInput"]').first().props().defaultValue
+    ).toStrictEqual('{{alertInstanceId}}');
   });
 });

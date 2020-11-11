@@ -22,6 +22,7 @@ import { ServiceNowActionParams } from './types';
 import { TextAreaWithMessageVariables } from '../../text_area_with_message_variables';
 import { TextFieldWithMessageVariables } from '../../text_field_with_message_variables';
 import { extractActionVariable } from '../extract_action_variable';
+import { AlertProvidedActionVariables } from '../../../lib/action_variables';
 
 const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
   ServiceNowActionParams
@@ -30,7 +31,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
     actionParams.subActionParams || {};
 
   const isActionBeingConfiguredByAnAlert = messageVariables
-    ? isSome(extractActionVariable(messageVariables, 'alertId'))
+    ? isSome(extractActionVariable(messageVariables, AlertProvidedActionVariables.alertInstanceId))
     : false;
 
   const selectOptions = [
@@ -73,7 +74,7 @@ const ServiceNowParamsFields: React.FunctionComponent<ActionParamsProps<
       editAction('subAction', 'pushToService', index);
     }
     if (!savedObjectId && isActionBeingConfiguredByAnAlert) {
-      editSubActionProperty('savedObjectId', '{{alertId}}');
+      editSubActionProperty('savedObjectId', '{{alertInstanceId}}');
     }
     if (!urgency) {
       editSubActionProperty('urgency', '3');
