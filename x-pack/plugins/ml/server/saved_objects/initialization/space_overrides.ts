@@ -46,7 +46,8 @@ async function logJobsSpaces({
 
 function findLogJobSpaceFactory() {
   const sources = ['default', 'internal-stack-monitoring'];
-  const reg = new RE2(`kibana-logs-ui-(.+)-(${sources.join('|')})-log-entry-rate`);
+  const jobIds = ['log-entry-rate', 'log-entry-categories-count'];
+  const reg = new RE2(`kibana-logs-ui-(.+)-(${sources.join('|')})-(${jobIds.join('|')})`);
 
   return (jobId: string) => {
     const result = reg.exec(jobId);
