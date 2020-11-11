@@ -60,8 +60,8 @@ export function runFtrCli() {
             include: toArray(flags['include-tag'] as string | string[]),
             exclude: toArray(flags['exclude-tag'] as string | string[]),
           },
-          updateBaselines: flags.updateBaselines,
-          updateSnapshots: flags.updateSnapshots,
+          updateBaselines: flags.updateBaselines || flags.u,
+          updateSnapshots: flags.updateSnapshots || flags.u,
         }
       );
 
@@ -132,9 +132,10 @@ export function runFtrCli() {
           'invert',
           'test-stats',
           'updateBaselines',
+          'updateSnapshots',
+          'u',
           'throttle',
           'headless',
-          'updateSnapshots',
         ],
         default: {
           config: 'test/functional/config.js',
@@ -151,6 +152,7 @@ export function runFtrCli() {
         --test-stats       print the number of tests (included and excluded) to STDERR
         --updateBaselines  replace baseline screenshots with whatever is generated from the test
         --updateSnapshots  replace inline and file snapshots with whatever is generated from the test
+        -u                 replace both baseline screenshots and snapshots
         --kibana-install-dir  directory where the Kibana install being tested resides
         --throttle         enable network throttling in Chrome browser
         --headless         run browser in headless mode

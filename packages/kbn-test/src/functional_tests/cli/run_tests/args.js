@@ -47,7 +47,10 @@ const options = {
     desc: 'Replace baseline screenshots with whatever is generated from the test.',
   },
   updateSnapshots: {
-    desc: 'replace inline and file snapshots with whatever is generated from the test.',
+    desc: 'Replace inline and file snapshots with whatever is generated from the test.',
+  },
+  u: {
+    desc: 'Replace both baseline screenshots and snapshots',
   },
   include: {
     arg: '<file>',
