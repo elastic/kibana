@@ -55,9 +55,7 @@ export const AlertsBadge: React.FC<Props> = (props: Props) => {
   const [showPopover, setShowPopover] = React.useState<AlertSeverity | boolean | null>(null);
   const inSetupMode = isInSetupMode(React.useContext(SetupModeContext));
   const alertsContext = React.useContext(AlertsContext);
-  const alertCount = inSetupMode
-    ? Object.keys(alertsContext.allAlerts).length
-    : getFiringAlertCount(alerts, stateFilter);
+  const alertCount = inSetupMode ? alerts.length : getFiringAlertCount(alerts, stateFilter);
   const [showByNode, setShowByNode] = React.useState(
     !inSetupMode && alertCount > MAX_TO_SHOW_IN_LIST
   );

@@ -26,7 +26,7 @@ export function getAlertPanelsByCategory(
     if (inSetupMode) {
       const alertsInCategory = [];
       for (const categoryAlert of category.alerts) {
-        if (alertsContext.allAlerts[categoryAlert.alertName]) {
+        if (Boolean(alerts.find(({ alert }) => alert.type === categoryAlert.alertName))) {
           alertsInCategory.push(categoryAlert);
         }
       }
