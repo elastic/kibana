@@ -8,7 +8,6 @@ import semver from 'semver';
 import { Response } from 'node-fetch';
 import { URL } from 'url';
 import {
-  AssetParts,
   AssetsGroupedByServiceByType,
   CategoryId,
   CategorySummaryList,
@@ -18,8 +17,12 @@ import {
   RegistrySearchResults,
   RegistrySearchResult,
 } from '../../../types';
-import { unpackArchiveToCache } from '../archive';
-import { getArchiveFilelist, setArchiveFilelist } from '../archive';
+import {
+  getArchiveFilelist,
+  getPathParts,
+  setArchiveFilelist,
+  unpackArchiveToCache,
+} from '../archive';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
@@ -146,36 +149,6 @@ export async function getRegistryPackage(
   return { paths, registryPackageInfo };
 }
 
-export function pathParts(path: string): AssetParts {
-  let dataset;
-
-  let [pkgkey, service, type, file] = path.split('/');
-
-  // if it's a data stream
-  if (service === 'data_stream') {
-    // save the dataset name
-    dataset = type;
-    // drop the `data_stream/dataset-name` portion & re-parse
-    [pkgkey, service, type, file] = path.replace(`data_stream/${dataset}/`, '').split('/');
-  }
-
-  // This is to cover for the fields.yml files inside the "fields" directory
-  if (file === undefined) {
-    file = type;
-    type = 'fields';
-    service = '';
-  }
-
-  return {
-    pkgkey,
-    service,
-    type,
-    file,
-    dataset,
-    path,
-  } as AssetParts;
-}
-
 export async function ensureCachedArchiveInfo(
   name: string,
   version: string,
@@ -209,7 +182,7 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
 
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
-    const parts = pathParts(path.replace(/^\/package\//, ''));
+    const parts = getPathParts(path.replace(/^\/package\//, ''));
     if (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) {
       if (!map[parts.service]) map[parts.service] = {};
       if (!map[parts.service][parts.type]) map[parts.service][parts.type] = [];

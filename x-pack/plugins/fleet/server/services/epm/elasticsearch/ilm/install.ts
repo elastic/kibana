@@ -5,8 +5,7 @@
  */
 
 import { CallESAsCurrentUser, ElasticsearchAssetType } from '../../../../types';
-import * as Registry from '../../registry';
-import { getAsset } from '../../archive';
+import { getAsset, getPathParts } from '../../archive';
 
 export async function installILMPolicy(paths: string[], callCluster: CallESAsCurrentUser) {
   const ilmPaths = paths.filter((path) => isILMPolicy(path));
@@ -14,7 +13,7 @@ export async function installILMPolicy(paths: string[], callCluster: CallESAsCur
   await Promise.all(
     ilmPaths.map(async (path) => {
       const body = getAsset(path).toString('utf-8');
-      const { file } = Registry.pathParts(path);
+      const { file } = getPathParts(path);
       const name = file.substr(0, file.lastIndexOf('.'));
       try {
         await callCluster('transport.request', {
@@ -29,7 +28,7 @@ export async function installILMPolicy(paths: string[], callCluster: CallESAsCur
   );
 }
 const isILMPolicy = (path: string) => {
-  const pathParts = Registry.pathParts(path);
+  const pathParts = getPathParts(path);
   return pathParts.type === ElasticsearchAssetType.ilmPolicy;
 };
 export async function policyExists(
