@@ -49,4 +49,5 @@ export const UI_SETTINGS = {
   INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
+  AUTOCOMPLETE_USE_TIMERANGE: 'autocomplete:useTimeRange',
 } as const;

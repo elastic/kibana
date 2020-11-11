@@ -5,7 +5,6 @@
  */
 
 import { ValuesType } from 'utility-types';
-import { APMBaseDoc } from '../../../../../typings/es_schemas/raw/apm_base_doc';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import {
   KibanaRequest,
@@ -21,6 +20,7 @@ import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_dat
 import { callClientWithDebug } from '../call_client_with_debug';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
+import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { unpackProcessorEvents } from './unpack_processor_events';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
@@ -33,7 +33,7 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   [ProcessorEvent.error]: APMError;
   [ProcessorEvent.transaction]: Transaction;
   [ProcessorEvent.span]: Span;
-  [ProcessorEvent.metric]: APMBaseDoc;
+  [ProcessorEvent.metric]: Metric;
   [ProcessorEvent.onboarding]: unknown;
   [ProcessorEvent.sourcemap]: unknown;
 }[T];
