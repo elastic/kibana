@@ -98,13 +98,12 @@ export class UiActionsExecutionService {
             }
           }
           if (alwaysShowPopup) {
-            this.executeMultipleActions(tasks);
+            this.showActionPopupMenu(tasks);
           } else {
             if (tasks.length === 1) {
               this.executeSingleTask(tasks[0]);
-            }
-            if (tasks.length > 1) {
-              this.executeMultipleActions(tasks);
+            } else if (tasks.length > 1) {
+              this.showActionPopupMenu(tasks);
             }
           }
         }
@@ -126,7 +125,7 @@ export class UiActionsExecutionService {
     }
   }
 
-  private async executeMultipleActions(tasks: ExecuteActionTask[]) {
+  private async showActionPopupMenu(tasks: ExecuteActionTask[]) {
     const panels = await buildContextMenuForActions({
       actions: tasks.map(({ action, context, trigger }) => ({
         action,
