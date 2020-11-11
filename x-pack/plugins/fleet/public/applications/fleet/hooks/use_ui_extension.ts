@@ -24,7 +24,14 @@ export const useUIExtension = <
   type: T,
   view: V
 ): SpecificExtensionPoint<UIExtensionPoint, T, V>['component'] | undefined => {
-  const extension = useContext(UIExtensionsContext)?.[integration]?.[type]?.[view];
+  const registeredExtensions = useContext(UIExtensionsContext);
+
+  if (!registeredExtensions) {
+    throw new Error('useUIExtension called outside of UIExtensionsContext');
+  }
+
+  const extension = registeredExtensions?.[integration]?.[type]?.[view];
+
   if (extension) {
     // FIXME:PT Revisit ignore below and see if TS error can be addressed
     // @ts-ignore
