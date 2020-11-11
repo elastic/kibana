@@ -69,7 +69,6 @@ export const GenericConfirmationModal: React.FC<GenericConfirmationModalProps> =
         >
           <EuiFieldText
             data-test-subj="GenericConfirmationModalInput"
-            name="engineName"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
           />
