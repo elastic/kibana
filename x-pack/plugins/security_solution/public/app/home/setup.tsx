@@ -6,10 +6,10 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { NotificationsStart } from 'kibana/public';
-import { IngestManagerStart } from '../../../../fleet/public';
+import { FleetStart } from '../../../../fleet/public';
 
 export const Setup: React.FunctionComponent<{
-  fleet: IngestManagerStart;
+  fleet: FleetStart;
   notifications: NotificationsStart;
 }> = ({ fleet, notifications }) => {
   React.useEffect(() => {

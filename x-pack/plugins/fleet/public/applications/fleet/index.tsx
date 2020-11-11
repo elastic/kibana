@@ -14,11 +14,7 @@ import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eu
 import { CoreStart, AppMountParameters } from 'src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../xpack_legacy/common';
-import {
-  IngestManagerSetupDeps,
-  IngestManagerConfigType,
-  IngestManagerStartDeps,
-} from '../../plugin';
+import { FleetSetupDeps, FleetConfigType, FleetStartDeps } from '../../plugin';
 import { PAGE_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
@@ -238,9 +234,9 @@ const IngestManagerApp = ({
 }: {
   basepath: string;
   coreStart: CoreStart;
-  setupDeps: IngestManagerSetupDeps;
-  startDeps: IngestManagerStartDeps;
-  config: IngestManagerConfigType;
+  setupDeps: FleetSetupDeps;
+  startDeps: FleetStartDeps;
+  config: FleetConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
 }) => {
@@ -265,9 +261,9 @@ const IngestManagerApp = ({
 export function renderApp(
   coreStart: CoreStart,
   { element, appBasePath, history }: AppMountParameters,
-  setupDeps: IngestManagerSetupDeps,
-  startDeps: IngestManagerStartDeps,
-  config: IngestManagerConfigType,
+  setupDeps: FleetSetupDeps,
+  startDeps: FleetStartDeps,
+  config: FleetConfigType,
   kibanaVersion: string
 ) {
   ReactDOM.render(

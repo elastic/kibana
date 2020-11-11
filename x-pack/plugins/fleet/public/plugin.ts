@@ -21,7 +21,7 @@ import { LicensingPluginSetup } from '../../licensing/public';
 import { PLUGIN_ID, CheckPermissionsResponse, PostIngestSetupResponse } from '../common';
 import { BASE_PATH } from './applications/fleet/constants';
 
-import { IngestManagerConfigType } from '../common/types';
+import { FleetConfigType } from '../common/types';
 import { setupRouteService, appRoutesService } from '../common';
 import { licenseService } from './applications/fleet/hooks/use_license';
 import { setHttpClient } from './applications/fleet/hooks/use_request/use_request';
@@ -32,43 +32,41 @@ import {
 } from './applications/fleet/components/home_integration';
 import { registerPackagePolicyComponent } from './applications/fleet/sections/agent_policy/create_package_policy_page/components/custom_package_policy';
 
-export { IngestManagerConfigType } from '../common/types';
+export { FleetConfigType } from '../common/types';
 
 // We need to provide an object instead of void so that dependent plugins know when Ingest Manager
 // is disabled.
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IngestManagerSetup {}
+export interface FleetSetup {}
 
 /**
  * Describes public IngestManager plugin contract returned at the `start` stage.
  */
-export interface IngestManagerStart {
+export interface FleetStart {
   registerPackagePolicyComponent: typeof registerPackagePolicyComponent;
   isInitialized: () => Promise<true>;
 }
 
-export interface IngestManagerSetupDeps {
+export interface FleetSetupDeps {
   licensing: LicensingPluginSetup;
   data: DataPublicPluginSetup;
   home?: HomePublicPluginSetup;
 }
 
-export interface IngestManagerStartDeps {
+export interface FleetStartDeps {
   data: DataPublicPluginStart;
 }
 
-export class IngestManagerPlugin
-  implements
-    Plugin<IngestManagerSetup, IngestManagerStart, IngestManagerSetupDeps, IngestManagerStartDeps> {
-  private config: IngestManagerConfigType;
+export class FleetPlugin implements Plugin<FleetSetup, FleetStart, FleetSetupDeps, FleetStartDeps> {
+  private config: FleetConfigType;
   private kibanaVersion: string;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
-    this.config = this.initializerContext.config.get<IngestManagerConfigType>();
+    this.config = this.initializerContext.config.get<FleetConfigType>();
     this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
-  public setup(core: CoreSetup, deps: IngestManagerSetupDeps) {
+  public setup(core: CoreSetup, deps: FleetSetupDeps) {
     const config = this.config;
     const kibanaVersion = this.kibanaVersion;
 
@@ -88,8 +86,8 @@ export class IngestManagerPlugin
       async mount(params: AppMountParameters) {
         const [coreStart, startDeps] = (await core.getStartServices()) as [
           CoreStart,
-          IngestManagerStartDeps,
-          IngestManagerStart
+          FleetStartDeps,
+          FleetStart
         ];
         const { renderApp, teardownIngestManager } = await import('./applications/fleet/');
         const unmount = renderApp(coreStart, params, deps, startDeps, config, kibanaVersion);
@@ -141,8 +139,8 @@ export class IngestManagerPlugin
     return {};
   }
 
-  public async start(core: CoreStart): Promise<IngestManagerStart> {
-    let successPromise: ReturnType<IngestManagerStart['isInitialized']>;
+  public async start(core: CoreStart): Promise<FleetStart> {
+    let successPromise: ReturnType<FleetStart['isInitialized']>;
 
     return {
       isInitialized: () => {

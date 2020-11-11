@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { IngestManagerStart, registerPackagePolicyComponent } from '../../../../../fleet/public';
+import { FleetStart, registerPackagePolicyComponent } from '../../../../../fleet/public';
 import {
   dataPluginMock,
   Start as DataPublicStartMock,
@@ -33,7 +33,7 @@ type DataMock = Omit<DataPublicStartMock, 'indexPatterns' | 'query'> & {
  */
 export interface DepsStartMock {
   data: DataMock;
-  fleet: IngestManagerStart;
+  fleet: FleetStart;
 }
 
 /**
