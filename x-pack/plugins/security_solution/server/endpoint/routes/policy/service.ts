@@ -9,8 +9,8 @@ import { ILegacyScopedClusterClient, SavedObjectsClientContract } from 'kibana/s
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { INITIAL_POLICY_ID } from './index';
 import { Agent } from '../../../../../fleet/common/types/models';
-import { JsonObject } from '../../../../../../../src/plugins/kibana_utils/common';
 import { EndpointAppContext } from '../../types';
+import { AGENT_SAVED_OBJECT_TYPE } from '../../../../../fleet/common/constants';
 
 export function getESQueryPolicyResponseByAgentID(agentID: string, index: string) {
   return {
@@ -61,34 +61,34 @@ export async function getPolicyResponseByAgentId(
   };
 }
 
+const transformAgentVersionMap = (versionMap: Map<string, number>): { [key: string]: number } => {
+  const data: { [key: string]: number } = {};
+  versionMap.forEach((value, key) => {
+    data[key] = value;
+  });
+  return data;
+};
+
 export async function getAgentPolicySummary(
   endpointAppContext: EndpointAppContext,
   soClient: SavedObjectsClientContract,
   packageName: string,
   policyId?: string,
   pageSize: number = 1000
-): Promise<JsonObject> {
-  const agentVersionMapToJson = (versionMap: Map<string, number>): JsonObject => {
-    const jsonObject: { [key: string]: number } = {};
-    versionMap.forEach((value, key) => {
-      jsonObject[key] = value;
-    });
-    return jsonObject;
-  };
-
-  const agentQuery = `fleet-agents.packages:"${packageName}"`;
+): Promise<{ [key: string]: number }> {
+  const agentQuery = `${AGENT_SAVED_OBJECT_TYPE}.packages:"${packageName}"`;
   if (policyId) {
-    return agentVersionMapToJson(
+    return transformAgentVersionMap(
       await agentVersionsMap(
         endpointAppContext,
         soClient,
-        `${agentQuery} AND fleet-agents.policy_id:${policyId}`,
+        `${agentQuery} AND ${AGENT_SAVED_OBJECT_TYPE}.policy_id:${policyId}`,
         pageSize
       )
     );
   }
 
-  return agentVersionMapToJson(
+  return transformAgentVersionMap(
     await agentVersionsMap(endpointAppContext, soClient, agentQuery, pageSize)
   );
 }

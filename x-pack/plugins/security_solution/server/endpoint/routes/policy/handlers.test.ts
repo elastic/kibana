@@ -99,46 +99,18 @@ describe('test policy response handler', () => {
   describe('test agent policy summary handler', () => {
     let mockAgentService: jest.Mocked<AgentService>;
 
-    const agentListResult = {
-      agents: [
-        ({
-          local_metadata: {
-            elastic: {
-              agent: {
-                version: '8.0.0',
-              },
-            },
-          },
-        } as unknown) as Agent,
-        ({
-          local_metadata: {
-            elastic: {
-              agent: {
-                version: '8.0.0',
-              },
-            },
-          },
-        } as unknown) as Agent,
-        ({
-          local_metadata: {
-            elastic: {
-              agent: {
-                version: '8.1.0',
-              },
-            },
-          },
-        } as unknown) as Agent,
-      ],
-      total: 2,
-      page: 1,
-      perPage: 1,
+    let agentListResult: {
+      agents: Agent[];
+      total: number;
+      page: number;
+      perPage: number;
     };
 
-    const emptyAgentListResult = {
-      agents: [],
-      total: 2,
-      page: 1,
-      perPage: 1,
+    let emptyAgentListResult: {
+      agents: Agent[];
+      total: number;
+      page: number;
+      perPage: number;
     };
 
     beforeEach(() => {
@@ -147,6 +119,47 @@ describe('test policy response handler', () => {
       mockResponse = httpServerMock.createResponseFactory();
       endpointAppContextService = new EndpointAppContextService();
       mockAgentService = createMockAgentService();
+      emptyAgentListResult = {
+        agents: [],
+        total: 2,
+        page: 1,
+        perPage: 1,
+      };
+
+      agentListResult = {
+        agents: [
+          ({
+            local_metadata: {
+              elastic: {
+                agent: {
+                  version: '8.0.0',
+                },
+              },
+            },
+          } as unknown) as Agent,
+          ({
+            local_metadata: {
+              elastic: {
+                agent: {
+                  version: '8.0.0',
+                },
+              },
+            },
+          } as unknown) as Agent,
+          ({
+            local_metadata: {
+              elastic: {
+                agent: {
+                  version: '8.1.0',
+                },
+              },
+            },
+          } as unknown) as Agent,
+        ],
+        total: 2,
+        page: 1,
+        perPage: 1,
+      };
       endpointAppContextService.start({
         ...createMockEndpointAppContextServiceStartContract(),
         ...{ agentService: mockAgentService },
