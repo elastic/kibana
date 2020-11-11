@@ -51,7 +51,8 @@ export function validateUrl(url: string): { isValid: boolean; error?: string } {
 
 export function validateUrlTemplate(
   urlTemplate: UrlDrilldownConfig['url'],
-  scope: UrlDrilldownScope
+  scope: UrlDrilldownScope,
+  disableEncoding?: boolean
 ): { isValid: boolean; error?: string } {
   if (!urlTemplate.template)
     return {
@@ -60,7 +61,7 @@ export function validateUrlTemplate(
     };
 
   try {
-    const compiledUrl = compile(urlTemplate.template, scope);
+    const compiledUrl = compile(urlTemplate.template, scope, disableEncoding);
     return validateUrl(compiledUrl);
   } catch (e) {
     return {

@@ -97,14 +97,19 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
     config: Config,
     context: ActionFactoryContext
   ): config is Config => {
-    const { isValid } = urlDrilldownValidateUrlTemplate(config.url, this.buildEditorScope(context));
+    const { isValid } = urlDrilldownValidateUrlTemplate(
+      config.url,
+      this.buildEditorScope(context),
+      config.disableEncoding
+    );
     return isValid;
   };
 
   public readonly isCompatible = async (config: Config, context: ActionContext) => {
     const { isValid, error } = urlDrilldownValidateUrlTemplate(
       config.url,
-      await this.buildRuntimeScope(context)
+      await this.buildRuntimeScope(context),
+      config.disableEncoding
     );
 
     if (!isValid) {
@@ -118,10 +123,18 @@ export class UrlDrilldown implements Drilldown<Config, UrlTrigger, ActionFactory
   };
 
   public readonly getHref = async (config: Config, context: ActionContext) =>
-    urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
+    urlDrilldownCompileUrl(
+      config.url.template,
+      this.buildRuntimeScope(context),
+      config.disableEncoding
+    );
 
   public readonly execute = async (config: Config, context: ActionContext) => {
-    const url = urlDrilldownCompileUrl(config.url.template, this.buildRuntimeScope(context));
+    const url = urlDrilldownCompileUrl(
+      config.url.template,
+      this.buildRuntimeScope(context),
+      config.disableEncoding
+    );
     if (config.openInNewTab) {
       window.open(url, '_blank', 'noopener');
     } else {

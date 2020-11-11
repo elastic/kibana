@@ -7,6 +7,7 @@
 export type UrlDrilldownConfig = {
   url: { format?: 'handlebars_v1'; template: string };
   openInNewTab: boolean;
+  disableEncoding?: boolean;
 };
 
 /**

@@ -79,3 +79,10 @@ export const txtUrlTemplateOpenInNewTab = i18n.translate(
     defaultMessage: 'Open in new tab',
   }
 );
+
+export const txtDisableEncoding = i18n.translate(
+  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.disableEncoding',
+  {
+    defaultMessage: 'Disable encoding',
+  }
+);

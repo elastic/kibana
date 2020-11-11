@@ -34,6 +34,7 @@ import {
   txtUrlTemplatePlaceholder,
   txtUrlTemplatePreviewLabel,
   txtUrlTemplatePreviewLinkText,
+  txtDisableEncoding,
 } from './i18n';
 
 export interface UrlDrilldownCollectConfig {
@@ -55,11 +56,11 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
   const urlTemplate = config.url.template ?? '';
   const compiledUrl = React.useMemo(() => {
     try {
-      return compile(urlTemplate, scope);
+      return compile(urlTemplate, scope, config.disableEncoding);
     } catch {
       return urlTemplate;
     }
-  }, [urlTemplate, scope]);
+  }, [urlTemplate, scope, config.disableEncoding]);
   const scopeVariables = React.useMemo(() => buildScopeSuggestions(scope), [scope]);
 
   function updateUrlTemplate(newUrlTemplate: string) {
@@ -74,8 +75,8 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
     }
   }
   const { error, isValid } = React.useMemo(
-    () => validateUrlTemplate({ template: urlTemplate }, scope),
-    [urlTemplate, scope]
+    () => validateUrlTemplate({ template: urlTemplate }, scope, config.disableEncoding),
+    [urlTemplate, scope, config.disableEncoding]
   );
   const isEmpty = !urlTemplate;
   const isInvalid = !isValid && !isEmpty;
@@ -152,6 +153,15 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfig> = ({
           label={txtUrlTemplateOpenInNewTab}
           checked={config.openInNewTab}
           onChange={() => onConfig({ ...config, openInNewTab: !config.openInNewTab })}
+        />
+      </EuiFormRow>
+      <EuiFormRow hasChildLabel={false}>
+        <EuiCheckbox
+          id="disableEncoding"
+          name="disableEncoding"
+          label={txtDisableEncoding}
+          checked={config.disableEncoding}
+          onChange={() => onConfig({ ...config, disableEncoding: !config.disableEncoding })}
         />
       </EuiFormRow>
     </>

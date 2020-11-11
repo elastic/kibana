@@ -116,7 +116,9 @@ handlebars.registerHelper('replace', (...args) => {
   return String(str).split(searchString).join(valueString);
 });
 
-export function compile(url: string, context: object): string {
+export function compile(url: string, context: object, disableEncoding?: boolean): string {
   const template = handlebars.compile(url, { strict: true, noEscape: true });
-  return encodeURI(template(context));
+  let uri = template(context);
+  if (!disableEncoding) uri = encodeURI(uri);
+  return uri;
 }
