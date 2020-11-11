@@ -12,6 +12,7 @@ import {
   InstallablePackage,
 } from '../../../../types';
 import * as Registry from '../../registry';
+import { getAsset } from '../../archive';
 import { CallESAsCurrentUser } from '../../../../types';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
@@ -127,7 +128,7 @@ export async function installPipelinesForDataStream({
       dataStream,
       packageVersion: pkgVersion,
     });
-    const content = Registry.getAsset(path).toString('utf-8');
+    const content = getAsset(path).toString('utf-8');
     pipelines.push({
       name,
       nameForInstallation,

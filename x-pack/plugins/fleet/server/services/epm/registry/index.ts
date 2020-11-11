@@ -19,7 +19,7 @@ import {
   RegistrySearchResult,
 } from '../../../types';
 import { unpackArchiveToCache } from '../archive';
-import { cacheGet, getArchiveFilelist, setArchiveFilelist } from '../archive';
+import { getArchiveFilelist, setArchiveFilelist } from '../archive';
 import { fetchUrl, getResponse, getResponseStream } from './requests';
 import { streamToBuffer } from './streams';
 import { getRegistryUrl } from './registry_url';
@@ -202,13 +202,6 @@ async function fetchArchiveBuffer(
   const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
 
   return { archiveBuffer, archivePath };
-}
-
-export function getAsset(key: string) {
-  const buffer = cacheGet(key);
-  if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
-
-  return buffer;
 }
 
 export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByType {

@@ -7,6 +7,7 @@
 import { ArchivePackage } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 import {
+  cacheGet,
   cacheSet,
   cacheDelete,
   getArchiveFilelist,
@@ -100,3 +101,10 @@ export const deletePackageCache = (name: string, version: string) => {
   // this has been populated in unpackArchiveToCache()
   paths?.forEach((path) => cacheDelete(path));
 };
+
+export function getAsset(key: string) {
+  const buffer = cacheGet(key);
+  if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
+
+  return buffer;
+}
