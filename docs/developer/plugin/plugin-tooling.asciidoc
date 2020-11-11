@@ -31,6 +31,7 @@ WARNING: {kib} distributable is not shipped with `@kbn/optimizer` anymore. You n
 
 You can leverage {kib-repo}blob/{branch}/packages/kbn-plugin-helpers[@kbn/plugin-helpers] to build a distributable archive for your plugin.
 The package transpiles the plugin code, adds polyfills, and links necessary js modules in the runtime.
+You don't need to install the `plugin-helpers`: the `package.json` is already pre-configured if you created your plugin with `node scripts/generate_plugin` script.
 To build your plugin run within your plugin folder:
 ["source","shell"]
 -----------
