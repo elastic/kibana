@@ -5,8 +5,10 @@
  */
 
 import React, { MouseEvent } from 'react';
+import { SavedObjectReference } from 'src/core/types';
 import { i18n } from '@kbn/i18n';
 import { EuiLink } from '@elastic/eui';
+import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 import { TableListView } from '../../../../../../src/plugins/kibana_react/public';
 import { goToSpecifiedPath } from '../../render_app';
 import { APP_ID, MAP_PATH, MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
@@ -23,19 +25,26 @@ import {
 import { getAppTitle } from '../../../common/i18n_getters';
 import { MapSavedObjectAttributes } from '../../../common/map_saved_object_type';
 
+interface MapItem {
+  id: string;
+  title: string;
+  description?: string;
+  references?: SavedObjectReference[];
+}
+
 const savedObjectsTagging = getSavedObjectsTagging();
 const searchFilters = savedObjectsTagging
   ? [savedObjectsTagging.ui.getSearchBarFilter({ useName: true })]
   : [];
 
-const tableColumns = [
+const tableColumns: Array<EuiBasicTableColumn<any>> = [
   {
     field: 'title',
     name: i18n.translate('xpack.maps.mapListing.titleFieldTitle', {
       defaultMessage: 'Title',
     }),
     sortable: true,
-    render: (field, record) => (
+    render: (field: string, record: MapItem) => (
       <EuiLink
         onClick={(e: MouseEvent) => {
           e.preventDefault();
@@ -104,10 +113,11 @@ export function MapsListView() {
     };
   }
 
-  function deleteMaps(items) {
-    items.forEach((item) => {
-      getSavedObjectsClient().delete(MAP_SAVED_OBJECT_TYPE, item.id);
+  async function deleteMaps(items: object[]) {
+    const deletions = items.map((item) => {
+      return getSavedObjectsClient().delete(MAP_SAVED_OBJECT_TYPE, (item as MapItem).id);
     });
+    await Promise.all(deletions);
   }
 
   const isReadOnly = !getMapsCapabilities().save;
@@ -119,9 +129,9 @@ export function MapsListView() {
     <TableListView
       headingId="mapsListingPage"
       rowHeader="title"
-      createItem={isReadOnly ? null : navigateToNewMap}
+      createItem={isReadOnly ? undefined : navigateToNewMap}
       findItems={findMaps}
-      deleteItems={isReadOnly ? null : deleteMaps}
+      deleteItems={isReadOnly ? undefined : deleteMaps}
       tableColumns={tableColumns}
       listingLimit={getSavedObjects().settings.getListingLimit()}
       initialFilter={''}
@@ -134,7 +144,6 @@ export function MapsListView() {
       })}
       tableListTitle={getAppTitle()}
       toastNotifications={getToasts()}
-      uiSettings={getUiSettings()}
       searchFilters={searchFilters}
     />
   );
