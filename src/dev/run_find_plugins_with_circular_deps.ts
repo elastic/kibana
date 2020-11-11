@@ -130,6 +130,8 @@ run(
     log.success('None non allowed circular dependencies were found');
   },
   {
+    description:
+      'Searches circular dependencies between plugins located under src/plugins, x-pack/plugins, examples and x-pack/examples',
     flags: {
       boolean: ['debug'],
       default: {
