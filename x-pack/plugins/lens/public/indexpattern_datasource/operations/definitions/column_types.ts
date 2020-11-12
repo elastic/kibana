@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { Operation, DimensionPriority } from '../../../types';
+import { Operation } from '../../../types';
 
 /**
  * This is the root type of a column. If you are implementing a new
@@ -14,7 +14,6 @@ import { Operation, DimensionPriority } from '../../../types';
 export interface BaseIndexPatternColumn extends Operation {
   // Private
   operationType: string;
-  suggestedPriority?: DimensionPriority;
   customLabel?: boolean;
 }
 

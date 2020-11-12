@@ -6,7 +6,7 @@
 
 import { KibanaRequest } from 'kibana/server';
 import type { MlClient } from '../../lib/ml_client';
-import { mlLog } from '../../client/log';
+import { mlLog } from '../../lib/log';
 import {
   MlCapabilities,
   adminMlCapabilities,

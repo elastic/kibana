@@ -22,14 +22,16 @@ import { IndexPatternColumn, OperationType } from '../indexpattern';
 import {
   operationDefinitionMap,
   getOperationDisplay,
-  buildColumn,
-  changeField,
+  insertOrReplaceColumn,
+  replaceColumn,
+  deleteColumn,
+  updateColumnParam,
 } from '../operations';
-import { deleteColumn, changeColumn, updateColumnParam, mergeLayer } from '../state_helpers';
+import { mergeLayer } from '../state_helpers';
 import { FieldSelect } from './field_select';
 import { hasField, fieldIsInvalid } from '../utils';
 import { BucketNestingEditor } from './bucket_nesting_editor';
-import { IndexPattern } from '../types';
+import { IndexPattern, IndexPatternLayer } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
 import { FormatSelector } from './format_selector';
 
@@ -170,21 +172,13 @@ export function DimensionEditor(props: DimensionEditorProps) {
             if (selectedColumn?.operationType === operationType) {
               return;
             }
-            setState(
-              changeColumn({
-                state,
-                layerId,
-                columnId,
-                newColumn: buildColumn({
-                  columns: props.state.layers[props.layerId].columns,
-                  suggestedPriority: props.suggestedPriority,
-                  layerId: props.layerId,
-                  op: operationType,
-                  indexPattern: currentIndexPattern,
-                  previousColumn: selectedColumn,
-                }),
-              })
-            );
+            const newLayer = insertOrReplaceColumn({
+              layer: props.state.layers[props.layerId],
+              indexPattern: currentIndexPattern,
+              columnId,
+              op: operationType,
+            });
+            setState(mergeLayer({ state, layerId, newLayer }));
             trackUiEvent(`indexpattern_dimension_operation_${operationType}`);
             return;
           } else if (!selectedColumn || !compatibleWithCurrentField) {
@@ -192,18 +186,15 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
             if (possibleFields.size === 1) {
               setState(
-                changeColumn({
+                mergeLayer({
                   state,
                   layerId,
-                  columnId,
-                  newColumn: buildColumn({
-                    columns: props.state.layers[props.layerId].columns,
-                    suggestedPriority: props.suggestedPriority,
-                    layerId: props.layerId,
-                    op: operationType,
+                  newLayer: insertOrReplaceColumn({
+                    layer: props.state.layers[props.layerId],
                     indexPattern: currentIndexPattern,
+                    columnId,
+                    op: operationType,
                     field: currentIndexPattern.getFieldByName(possibleFields.values().next().value),
-                    previousColumn: selectedColumn,
                   }),
                 })
               );
@@ -216,30 +207,21 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
           setInvalidOperationType(null);
 
-          if (selectedColumn?.operationType === operationType) {
+          if (selectedColumn.operationType === operationType) {
             return;
           }
 
-          const newColumn: IndexPatternColumn = buildColumn({
-            columns: props.state.layers[props.layerId].columns,
-            suggestedPriority: props.suggestedPriority,
-            layerId: props.layerId,
-            op: operationType,
+          const newLayer = replaceColumn({
+            layer: props.state.layers[props.layerId],
             indexPattern: currentIndexPattern,
+            columnId,
+            op: operationType,
             field: hasField(selectedColumn)
               ? currentIndexPattern.getFieldByName(selectedColumn.sourceField)
               : undefined,
-            previousColumn: selectedColumn,
           });
 
-          setState(
-            changeColumn({
-              state,
-              layerId,
-              columnId,
-              newColumn,
-            })
-          );
+          setState(mergeLayer({ state, layerId, newLayer }));
         },
       };
     }
@@ -297,30 +279,31 @@ export function DimensionEditor(props: DimensionEditorProps) {
               incompatibleSelectedOperationType={incompatibleSelectedOperationType}
               onDeleteColumn={() => {
                 setState(
-                  deleteColumn({
+                  mergeLayer({
                     state,
                     layerId,
-                    columnId,
+                    newLayer: deleteColumn({ layer: state.layers[layerId], columnId }),
                   })
                 );
               }}
               onChoose={(choice) => {
-                let column: IndexPatternColumn;
+                let newLayer: IndexPatternLayer;
                 if (
                   !incompatibleSelectedOperationType &&
                   selectedColumn &&
                   'field' in choice &&
                   choice.operationType === selectedColumn.operationType
                 ) {
-                  // If we just changed the field are not in an error state and the operation didn't change,
-                  // we use the operations onFieldChange method to calculate the new column.
-                  column = changeField(
-                    selectedColumn,
-                    currentIndexPattern,
-                    currentIndexPattern.getFieldByName(choice.field)!
-                  );
+                  // Replaces just the field
+                  newLayer = replaceColumn({
+                    layer: state.layers[layerId],
+                    columnId,
+                    indexPattern: currentIndexPattern,
+                    op: choice.operationType,
+                    field: currentIndexPattern.getFieldByName(choice.field)!,
+                  });
                 } else {
-                  // Otherwise we'll use the buildColumn method to calculate a new column
+                  // Finds a new operation
                   const compatibleOperations =
                     ('field' in choice && operationSupportMatrix.operationByField[choice.field]) ||
                     new Set();
@@ -334,26 +317,16 @@ export function DimensionEditor(props: DimensionEditorProps) {
                   } else if ('field' in choice) {
                     operation = choice.operationType;
                   }
-                  column = buildColumn({
-                    columns: props.state.layers[props.layerId].columns,
+                  newLayer = insertOrReplaceColumn({
+                    layer: state.layers[layerId],
+                    columnId,
                     field: currentIndexPattern.getFieldByName(choice.field),
                     indexPattern: currentIndexPattern,
-                    layerId: props.layerId,
-                    suggestedPriority: props.suggestedPriority,
                     op: operation as OperationType,
-                    previousColumn: selectedColumn,
                   });
                 }
 
-                setState(
-                  changeColumn({
-                    state,
-                    layerId,
-                    columnId,
-                    newColumn: column,
-                    keepParams: false,
-                  })
-                );
+                setState(mergeLayer({ state, layerId, newLayer }));
                 setInvalidOperationType(null);
               }}
             />
