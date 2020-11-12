@@ -5,15 +5,15 @@
  */
 
 import { AlertType, ActionVariables } from '../../types';
-import { actionVariablesFromAlertType } from './action_variables';
+import { transformActionVariables } from './action_variables';
 import { ALERTS_FEATURE_ID } from '../../../../alerts/common';
 
 beforeEach(() => jest.resetAllMocks());
 
-describe('actionVariablesFromAlertType', () => {
+describe('transformActionVariables', () => {
   test('should return correct variables when no state or context provided', async () => {
     const alertType = getAlertType({ context: [], state: [], params: [] });
-    expect(actionVariablesFromAlertType(alertType.actionVariables)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -48,7 +48,7 @@ describe('actionVariablesFromAlertType', () => {
       state: [],
       params: [],
     });
-    expect(actionVariablesFromAlertType(alertType.actionVariables)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -91,7 +91,7 @@ describe('actionVariablesFromAlertType', () => {
       ],
       params: [],
     });
-    expect(actionVariablesFromAlertType(alertType.actionVariables)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",
@@ -137,7 +137,7 @@ describe('actionVariablesFromAlertType', () => {
       ],
       params: [{ name: 'fooP', description: 'fooP-description' }],
     });
-    expect(actionVariablesFromAlertType(alertType.actionVariables)).toMatchInlineSnapshot(`
+    expect(transformActionVariables(alertType.actionVariables)).toMatchInlineSnapshot(`
       Array [
         Object {
           "description": "The id of the alert.",

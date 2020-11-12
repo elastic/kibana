@@ -37,7 +37,7 @@ import {
 import { checkActionFormActionTypeEnabled } from '../../lib/check_action_type_enabled';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { ActionAccordionFormProps } from './action_form';
-import { actionVariablesFromAlertType } from '../../lib/action_variables';
+import { transformActionVariables } from '../../lib/action_variables';
 import { resolvedActionGroupMessage } from '../../constants';
 
 export type ActionTypeFormProps = {
@@ -110,7 +110,6 @@ export const ActionTypeForm = ({
         ? resolvedActionGroupMessage
         : defaultActionMessage;
     setAvailableDefaultActionMessage(res);
-    // setActionParamsProperty('message', res, index);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [actionItem.group]);
 
@@ -375,7 +374,7 @@ function getAvailableActionVariables(
       ? { params: actionVariables.params, state: actionVariables.state }
       : actionVariables;
 
-  return actionVariablesFromAlertType(filteredActionVariables).sort((a, b) =>
+  return transformActionVariables(filteredActionVariables).sort((a, b) =>
     a.name.toUpperCase().localeCompare(b.name.toUpperCase())
   );
 }
