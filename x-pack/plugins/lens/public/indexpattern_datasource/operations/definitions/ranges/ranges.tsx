@@ -12,7 +12,8 @@ import { Range } from '../../../../../../../../src/plugins/expressions/common/ex
 import { RangeEditor } from './range_editor';
 import { OperationDefinition } from '../index';
 import { FieldBasedIndexPatternColumn } from '../column_types';
-import { updateColumnParam, changeColumn } from '../../../state_helpers';
+import { updateColumnParam } from '../../layer_helpers';
+import { mergeLayer } from '../../../state_helpers';
 import { supportedFormats } from '../../../format_column';
 import { MODES, AUTO_BARS, DEFAULT_INTERVAL, MIN_HISTOGRAM_BARS, SLICES } from './constants';
 import { IndexPattern, IndexPatternField } from '../../../types';
@@ -121,12 +122,11 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       };
     }
   },
-  buildColumn({ suggestedPriority, indexPattern, field }) {
+  buildColumn({ field }) {
     return {
       label: field.name,
       dataType: 'number', // string for Range
       operationType: 'range',
-      suggestedPriority,
       sourceField: field.name,
       isBucketed: true,
       scale: 'interval', // ordinal for Range
@@ -149,7 +149,7 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
         (!newField.aggregationRestrictions || newField.aggregationRestrictions.range)
     );
   },
-  onFieldChange: (oldColumn, indexPattern, field) => {
+  onFieldChange: (oldColumn, field) => {
     return {
       ...oldColumn,
       label: field.name,
@@ -211,23 +211,26 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
           ? { id: 'range', params: { template: 'arrow_right', replaceInfinity: true } }
           : undefined;
       setState(
-        changeColumn({
+        mergeLayer({
           state,
           layerId,
-          columnId,
-          newColumn: {
-            ...currentColumn,
-            scale,
-            dataType,
-            params: {
-              type: newMode,
-              ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
-              maxBars: maxBarsDefaultValue,
-              format: currentColumn.params.format,
-              parentFormat,
+          newLayer: {
+            columns: {
+              ...state.layers[layerId].columns,
+              [columnId]: {
+                ...currentColumn,
+                scale,
+                dataType,
+                params: {
+                  type: newMode,
+                  ranges: [{ from: 0, to: DEFAULT_INTERVAL, label: '' }],
+                  maxBars: maxBarsDefaultValue,
+                  format: currentColumn.params.format,
+                  parentFormat,
+                },
+              },
             },
           },
-          keepParams: false,
         })
       );
     };

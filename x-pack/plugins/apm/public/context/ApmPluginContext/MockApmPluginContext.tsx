@@ -38,6 +38,7 @@ const mockCore = {
   application: {
     capabilities: {
       apm: {},
+      ml: {},
     },
     currentAppId$: new Observable(),
     navigateToUrl: (url: string) => {},
@@ -93,7 +94,13 @@ const mockPlugin = {
     },
   },
 };
+
+const mockAppMountParameters = {
+  setHeaderActionMenu: () => {},
+};
+
 export const mockApmPluginContextValue = {
+  appMountParameters: mockAppMountParameters,
   config: mockConfig,
   core: mockCore,
   plugins: mockPlugin,
