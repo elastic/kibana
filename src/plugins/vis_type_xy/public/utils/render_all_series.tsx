@@ -121,8 +121,7 @@ export const renderAllSeries = (
         ? (compact(aspects.series.map(({ accessor }) => accessor)) as string[])
         : [];
       const yAxisScale = yAxes.find(({ groupId: axisGroupId }) => axisGroupId === groupId)?.scale;
-      const stackAccessors =
-        mode === 'stacked' || yAxisScale?.mode === 'percentage' ? ['__any_value__'] : undefined;
+      const isStacked = mode === 'stacked' || yAxisScale?.mode === 'percentage';
       const stackMode = yAxisScale?.mode === 'normal' ? undefined : yAxisScale?.mode;
 
       switch (type) {
@@ -142,8 +141,8 @@ export const renderAllSeries = (
               splitSeriesAccessors={splitSeriesAccessors}
               data={data}
               timeZone={timeZone}
-              stackAccessors={stackAccessors}
-              enableHistogramMode={enableHistogramMode}
+              stackAccessors={isStacked ? ['__any_value__'] : undefined}
+              enableHistogramMode={!isStacked ? false : enableHistogramMode}
               stackMode={stackMode}
               minBarHeight={2}
               displayValueSettings={{
@@ -173,7 +172,7 @@ export const renderAllSeries = (
               markFormat={aspects.z?.formatter}
               splitSeriesAccessors={splitSeriesAccessors}
               data={data}
-              stackAccessors={stackAccessors}
+              stackAccessors={isStacked ? ['__any_value__'] : undefined}
               displayValueSettings={{
                 showValueLabel,
                 hideClippedValue: true,
