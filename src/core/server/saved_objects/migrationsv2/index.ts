@@ -22,12 +22,10 @@
 import { ElasticsearchClient } from 'src/core/server/elasticsearch';
 import { gt } from 'semver';
 import chalk from 'chalk';
-import { isLeft } from 'fp-ts/lib/Either';
+import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
 import * as Option from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-// import { constantDelay } from 'retry-ts';
-// import { retrying } from 'retry-ts/lib/TaskEither';
 import * as Actions from './actions';
 import { IndexMapping } from '../mappings';
 import { Logger } from '../../logging';
@@ -154,6 +152,11 @@ export type DeleteLegacyState = LegacyBaseState & {
   controlState: 'DELETE_LEGACY';
 };
 
+export type NewDeleteLegacyState = LegacyBaseState & {
+  /** Delete the legacy index */
+  controlState: 'NEW_DELETE_LEGACY';
+};
+
 export type State =
   | FatalState
   | InitState
@@ -172,13 +175,6 @@ export type State =
   | PreMigrateLegacyState
   | PreMigrateLegacyWaitForTaskState
   | DeleteLegacyState;
-
-type Model = (currentState: State, result: Actions.ActionResponse) => State;
-type NextAction = (
-  client: ElasticsearchClient,
-  transformRawDocs: () => Promise<SavedObjectsRawDoc[]>,
-  state: State
-) => TaskEither.TaskEither<Actions.ExpectedErrors, Actions.AllResponses> | null;
 
 /**
  * A helper function/type for ensuring that all control state's are handled.
@@ -220,26 +216,42 @@ function mergeMappings(targetMappings: IndexMapping, indexMappings: IndexMapping
   };
 }
 
-export const model: Model = (currentState: State, res: Actions.ActionResponse): State => {
-  let stateP: State = { ...currentState, ...{ log: [] } };
+type Await<T> = T extends PromiseLike<infer U> ? U : T;
 
-  if (isLeft(res)) {
-    if (stateP.retryCount === 5) {
-      stateP = {
-        ...stateP,
+type AllControlStates = State['controlState'];
+/**
+ * All control states that trigger an action (excludes the terminal states
+ * 'FATAL' and 'DONE').
+ */
+type AllActionStates = Exclude<AllControlStates, 'FATAL' | 'DONE'>;
+
+/**
+ * The response type of the provided control state's action.
+ *
+ * E.g. given 'INIT', provides the response type of the action triggered by
+ * `next` in the 'INIT' control state.
+ */
+type ResponseType<ControlState extends AllActionStates> = Await<
+  ReturnType<ReturnType<typeof nextActionMap>[ControlState]>
+>;
+
+const delayOrResetRetryState = (state: State, resW: ResponseType<AllActionStates>): State => {
+  const delayRetryState = (error: Error): State => {
+    if (state.retryCount === 5) {
+      return {
+        ...state,
         controlState: 'FATAL',
-        error: res.left,
+        error,
         log: [
           { level: 'error', message: 'Unable to complete action after 5 attempts, terminating.' },
         ],
       };
-      return stateP;
     } else {
-      const retryCount = stateP.retryCount + 1;
+      const retryCount = state.retryCount + 1;
       const retryDelay = 1000 * Math.pow(2, retryCount); // 2s, 4s, 8s, 16s, 32s, 64s
 
-      stateP = {
-        ...stateP,
+      return {
+        ...state,
         retryCount,
         retryDelay,
         log: [
@@ -247,28 +259,44 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
             level: 'error',
             message:
               chalk.red('ERROR: ') +
-              `Action failed with '${
-                res.left.message
-              }'. Retrying attempt ${retryCount} out of 5 in ${retryDelay / 1000} seconds.`,
+              `Action failed with '${error.message}'. Retrying attempt ${retryCount} out of 5 in ${
+                retryDelay / 1000
+              } seconds.`,
           },
-          ...stateP.log,
+          ...state.log,
         ],
       };
-      return stateP;
     }
-  } else {
-    // Reset retry count when an action succeeds
-    stateP = { ...stateP, ...{ retryCount: 0, retryDelay: 0 } };
+  };
+  const resetRetryState = (): State => {
+    return { ...state, ...{ retryCount: 0, retryDelay: 0 } };
+  };
+
+  return Either.fold(delayRetryState, resetRetryState)(resW);
+};
+
+export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
+  // The action response `resW` is weakly typed, it includes all action
+  // responses. Each control state only triggers one action so each control
+  // state only has one action response type. This allows us to narrow the
+  // response type to only the action response associated with this control
+  // state.
+
+  let stateP: State = { ...currentState, ...{ log: [] } };
+  stateP = delayOrResetRetryState(stateP, resW);
+  if (Either.isLeft(resW)) {
+    return stateP;
   }
 
   if (stateP.controlState === 'INIT') {
+    const res = resW as ResponseType<typeof stateP.controlState>;
     const CURRENT_ALIAS = stateP.indexPrefix + '_current';
-    const VERSION_ALIAS = stateP.indexPrefix + stateP.kibanaVersion;
+    const VERSION_ALIAS = stateP.indexPrefix + '_' + stateP.kibanaVersion;
     const V1_ALIAS = stateP.indexPrefix;
     const LEGACY_INDEX = stateP.indexPrefix;
 
-    if ('fetchIndices' in res.right) {
-      const indices = res.right.fetchIndices;
+    if (Either.isRight(res)) {
+      const indices = res.right;
       const aliases = Object.keys(indices).reduce((acc, index) => {
         Object.keys(indices[index].aliases || {}).forEach((alias) => {
           acc[alias] = index;
@@ -371,7 +399,8 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
       return { ...stateP, controlState: 'SET_SOURCE_WRITE_BLOCK' };
     }
   } else if (stateP.controlState === 'PRE_MIGRATE_LEGACY') {
-    if ('updateByQuery' in res.right) {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
       stateP = {
         ...stateP,
         controlState: 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK',
@@ -380,7 +409,8 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
     }
     return stateP;
   } else if (stateP.controlState === 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK') {
-    if ('waitForTask' in res.right && Option.isSome(res.right.waitForTask.failures)) {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res) && Option.isSome(res.right.waitForTask.failures)) {
       // TODO: ignore index closed error
       return { ...stateP, controlState: 'FATAL' };
     }
@@ -392,7 +422,8 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
   } else if (stateP.controlState === 'CLONE_SOURCE') {
     return { ...stateP, controlState: 'UPDATE_TARGET_MAPPINGS' };
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
-    if ('updateAndPickupMappings' in res.right) {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res)) {
       stateP = {
         ...stateP,
         controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
@@ -401,7 +432,8 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
     }
     return stateP;
   } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
-    if ('waitForTask' in res.right && Option.isSome(res.right.waitForTask.failures)) {
+    const res = resW as ResponseType<typeof stateP.controlState>;
+    if (Either.isRight(res) && Option.isSome(res.right.waitForTask.failures)) {
       return { ...stateP, controlState: 'FATAL' };
     }
     const outdatedDocumentsQuery = {
@@ -458,9 +490,111 @@ export const model: Model = (currentState: State, res: Actions.ActionResponse): 
   }
 };
 
-export const next: NextAction = (client, transformRawDocs, state) => {
-  // If for every state there is only one action (deterministic) we can define
-  // next as a state -> action set.
+export const nextActionMap = (
+  client: ElasticsearchClient,
+  transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>,
+  state: State
+) => {
+  return {
+    FATAL: null,
+    DONE: null,
+    INIT: Actions.fetchIndices(client, ['*', '.kibana', '.kibana_current', '.kibana_7.11.0']),
+    SET_SOURCE_WRITE_BLOCK: Actions.setIndexWriteBlock(client, state.source),
+    INIT_NEW_INDICES: Actions.createIndex(client, state.target, state.targetMappings),
+    CLONE_SOURCE: Actions.cloneIndex(client, state.source, state.target),
+    UPDATE_TARGET_MAPPINGS: Actions.updateAndPickupMappings(
+      client,
+      state.target,
+      (state as UpdateTargetMappingsState).targetMappings
+    ),
+    UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK:
+      // Wait for the updateTargetMappingsTaskId task to complete
+      Actions.waitForTask(
+        client,
+        (state as UpdateTargetMappingsWaitForTaskState).updateTargetMappingsTaskId,
+        '60s'
+      ),
+    TARGET_DOCUMENTS_SEARCH: Actions.search(
+      client,
+      state.target,
+      (state as TargetDocumentsSearch).outdatedDocumentsQuery
+    ),
+    TARGET_DOCUMENTS_SCROLL: Actions.updateAndPickupMappings(
+      client,
+      state.target,
+      state.targetMappings
+    ),
+    TARGET_DOCUMENTS_CLEAR_SCROLL: Actions.updateAndPickupMappings(
+      client,
+      state.target,
+      state.targetMappings
+    ),
+    TARGET_DOCUMENTS_TRANSFORM: Actions.updateAndPickupMappings(
+      client,
+      state.target,
+      state.targetMappings
+    ),
+    CLONE_LEGACY: pipe(
+      // Clone legacy index into a new source index, will ignore index exists error
+      Actions.cloneIndex(client, (state as CloneLegacyState).legacy, state.source),
+      TaskEither.orElse((error) => {
+        // Ignore if legacy index doesn't exist, this probably means another
+        // Kibana instance already completed the legacy pre-migration and
+        // deleted it
+        if (error.message === 'index_not_found_exception') {
+          return TaskEither.right({
+            cloneIndex: { acknowledged: true, shardsAcknowledged: true },
+          });
+        } else {
+          return TaskEither.left(error);
+        }
+      })
+    ),
+    SET_LEGACY_WRITE_BLOCK: pipe(
+      Actions.setIndexWriteBlock(client, (state as SetLegacyWriteBlockState).legacy),
+      TaskEither.orElse((error) => {
+        // Ignore if legacy index doesn't exist, this probably means another
+        // Kibana instance already completed the legacy pre-migration and
+        // deleted it
+        if (error.message === 'index_not_found_exception') {
+          return TaskEither.right({ setIndexWriteBlock: true });
+        } else {
+          return TaskEither.left(error);
+        }
+      })
+    ),
+    PRE_MIGRATE_LEGACY:
+      // Start an update by query to pre-migrate the source index using the
+      // supplied script.
+      Actions.updateByQuery(client, state.source, state.preMigrationScript),
+    PRE_MIGRATE_LEGACY_WAIT_FOR_TASK:
+      // Wait for the preMigrationUpdateTaskId task to complete
+      Actions.waitForTask(
+        client,
+        (state as PreMigrateLegacyWaitForTaskState).preMigrationUpdateTaskId,
+        '60s'
+      ),
+    DELETE_LEGACY: pipe(
+      Actions.deleteIndex(client, (state as DeleteLegacyState).legacy),
+      TaskEither.orElse((error) => {
+        // Ignore if legacy index doesn't exist, this probably means another
+        // Kibana instance already completed the legacy pre-migration and
+        // deleted it
+        if (error.message === 'index_not_found_exception') {
+          return TaskEither.right({});
+        } else {
+          return TaskEither.left(error);
+        }
+      })
+    ),
+  };
+};
+
+export const next = (
+  client: ElasticsearchClient,
+  transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) => Promise<SavedObjectsRawDoc[]>,
+  state: State
+) => {
   const delay = <F extends () => any>(fn: F): (() => ReturnType<F>) => {
     return () => {
       return state.retryDelay > 0
@@ -469,89 +603,13 @@ export const next: NextAction = (client, transformRawDocs, state) => {
     };
   };
 
-  if (state.controlState === 'INIT') {
-    return delay(Actions.fetchIndices(client, ['.kibana', '.kibana_current', '.kibana_7.11.0']));
-  } else if (state.controlState === 'SET_SOURCE_WRITE_BLOCK') {
-    return delay(Actions.setIndexWriteBlock(client, state.source));
-  } else if (state.controlState === 'CLONE_SOURCE') {
-    return delay(Actions.cloneIndex(client, state.source, state.target));
-  } else if (state.controlState === 'SET_LEGACY_WRITE_BLOCK') {
-    return delay(
-      pipe(
-        Actions.setIndexWriteBlock(client, state.legacy),
-        TaskEither.orElse((error) => {
-          // Ignore if legacy index doesn't exist, this probably means another
-          // Kibana instance already completed the legacy pre-migration and
-          // deleted it
-          if (error.message === 'index_not_found_exception') {
-            return TaskEither.right({ setIndexWriteBlock: true });
-          } else {
-            return TaskEither.left(error);
-          }
-        })
-      )
-    );
-  } else if (state.controlState === 'CLONE_LEGACY') {
-    return delay(
-      pipe(
-        // Clone legacy index into a new source index, will ignore index exists error
-        Actions.cloneIndex(client, state.legacy, state.source),
-        TaskEither.orElse((error) => {
-          // Ignore if legacy index doesn't exist, this probably means another
-          // Kibana instance already completed the legacy pre-migration and
-          // deleted it
-          if (error.message === 'index_not_found_exception') {
-            return TaskEither.right({
-              cloneIndex: { acknowledged: true, shardsAcknowledged: true },
-            });
-          } else {
-            return TaskEither.left(error);
-          }
-        })
-      )
-    );
-  } else if (state.controlState === 'UPDATE_TARGET_MAPPINGS') {
-    return delay(Actions.updateAndPickupMappings(client, state.target, state.targetMappings));
-  } else if (state.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
-    // Wait for the updateTargetMappingsTaskId task to complete
-    return Actions.waitForTask(client, state.updateTargetMappingsTaskId, '60s');
-  } else if (state.controlState === 'TARGET_DOCUMENTS_SEARCH') {
-    return delay(Actions.search(client, state.target, state.outdatedDocumentsQuery));
-  } else if (state.controlState === 'TARGET_DOCUMENTS_SCROLL') {
-    // return delay(Actions.updateAndPickupMappings(client, state.target, state.targetMappings));
-  } else if (state.controlState === 'TARGET_DOCUMENTS_TRANSFORM') {
-    // return delay(Actions.updateAndPickupMappings(client, state.target, state.targetMappings));
-  } else if (state.controlState === 'TARGET_DOCUMENTS_CLEAR_SCROLL') {
-    // return delay(Actions.updateAndPickupMappings(client, state.target, state.targetMappings));
-  } else if (state.controlState === 'PRE_MIGRATE_LEGACY') {
-    // Start an update by query to pre-migrate the source index using the
-    // supplied script.
-    return delay(Actions.updateByQuery(client, state.source, state.preMigrationScript));
-  } else if (state.controlState === 'PRE_MIGRATE_LEGACY_WAIT_FOR_TASK') {
-    // Wait for the preMigrationUpdateTaskId task to complete
-    return Actions.waitForTask(client, state.preMigrationUpdateTaskId, '60s');
-  } else if (state.controlState === 'DELETE_LEGACY') {
-    return delay(
-      pipe(
-        Actions.deleteIndex(client, state.legacy),
-        TaskEither.orElse((error) => {
-          // Ignore if legacy index doesn't exist, this probably means another
-          // Kibana instance already completed the legacy pre-migration and
-          // deleted it
-          if (error.message === 'index_not_found_exception') {
-            return TaskEither.right({});
-          } else {
-            return TaskEither.left(error);
-          }
-        })
-      )
-    );
-  } else if (state.controlState === 'INIT_NEW_INDICES') {
-    return delay(Actions.createIndex(client, state.target, state.targetMappings));
-  } else if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
-    return null; // Terminal state reached
+  const map = nextActionMap(client, transformRawDocs, state);
+
+  const nextAction = map[state.controlState];
+  if (nextAction != null) {
+    return delay(nextAction);
   } else {
-    return throwBadControlState(state);
+    return nextAction;
   }
 };
 
@@ -614,13 +672,17 @@ export async function migrationStateMachine({
 
   let controlStateStepCounter = 0;
 
-  console.log(chalk.magentaBright('INIT\n'), state);
-  let nextTask = next(client, state);
+  console.log(chalk.magentaBright('INIT\n'));
+  let nextAction = next(client, transformRawDocs, state);
 
-  while (nextTask != null) {
-    const actionResult = await nextTask();
+  while (nextAction != null) {
+    const actionResult = await nextAction();
 
-    console.log(chalk.cyanBright('ACTION RESPONSE\n'), actionResult);
+    console.log(
+      chalk.magentaBright(state.controlState),
+      chalk.cyanBright('RESPONSE\n'),
+      actionResult
+    );
 
     const newState = model(state, actionResult);
     if (newState.log.length > 0) {
@@ -632,9 +694,9 @@ export async function migrationStateMachine({
       throw new Error("Control state didn't change after 10 steps aborting.");
     }
     state = newState;
-    console.log(chalk.magentaBright('STATE\n'), state.controlState);
+    console.log(chalk.magentaBright(state.controlState + '\n'), state);
 
-    nextTask = next(client, transformRawDocs, state);
+    nextAction = next(client, transformRawDocs, state);
   }
 
   console.log(chalk.greenBright('DONE\n'), state);

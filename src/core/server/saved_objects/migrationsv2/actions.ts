@@ -23,11 +23,7 @@ import * as Option from 'fp-ts/lib/Option';
 import { ElasticsearchClientError } from '@elastic/elasticsearch/lib/errors';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { errors } from '@elastic/elasticsearch';
-import {
-  ElasticsearchClient,
-  SearchResponse as ElasticSearchResponse,
-  ShardsResponse,
-} from '../../elasticsearch';
+import { ElasticsearchClient, ShardsResponse } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '../serialization';
 
@@ -41,11 +37,10 @@ export type AllResponses =
   | UpdateByQueryResponse
   | UpdateAndPickupMappingsResponse;
 
-export type ExpectedErrors =
-  | errors.NoLivingConnectionsError
-  | errors.ConnectionError
-  | errors.TimeoutError
-  | errors.ResponseError;
+export type ExpectedErrors = errors.NoLivingConnectionsError;
+// | errors.ConnectionError
+// | errors.TimeoutError
+// | errors.ResponseError;
 export type ActionResponse<T = AllResponses> = Either.Either<ExpectedErrors, T>;
 
 const retryResponseStatuses = [
@@ -71,12 +66,10 @@ const catchRetryableEsClientErrors = (e: ElasticsearchClientError) => {
   }
 };
 
-export interface FetchIndexResponse {
-  fetchIndices: Record<
-    string,
-    { aliases: Record<string, unknown>; mappings: IndexMapping; settings: unknown }
-  >;
-}
+export type FetchIndexResponse = Record<
+  string,
+  { aliases: Record<string, unknown>; mappings: IndexMapping; settings: unknown }
+>;
 
 /**
  * Returns an `Option` wrapping the response of the `indices.get` API. The
@@ -99,9 +92,7 @@ export const fetchIndices = (
       { ignore: [404], maxRetries: 0 }
     )
     .then(({ body }) => {
-      return Either.right({
-        fetchIndices: body,
-      });
+      return Either.right(body);
     })
     .catch(catchRetryableEsClientErrors);
 };
@@ -144,7 +135,7 @@ const waitForStatus = (
   status: 'green' | 'yellow' | 'red'
 ): TaskEither.TaskEither<ExpectedErrors, {}> => () => {
   return client.cluster
-    .health({ index, wait_for_status: status, timeout: '60s' })
+    .health({ index, wait_for_status: status, timeout: '30s' })
     .then(() => {
       return Either.right({});
     })
@@ -177,7 +168,12 @@ export const cloneIndex = (
           index: source,
           target,
           wait_for_active_shards: 'all',
-          body: { settings: { 'index.blocks.write': false } },
+          body: {
+            settings: {
+              auto_expand_replicas: '0-1',
+              'index.blocks.write': false,
+            },
+          },
           timeout: '60s',
         },
         { maxRetries: 0 /** handle retry ourselves for now */ }
@@ -582,9 +578,8 @@ interface ElasticSearchResponse {
   timed_out: boolean;
   _scroll_id: string;
   _shards: ShardsResponse;
-  hits: {
+  hits?: {
     total: number;
-    max_score: number;
     hits: SavedObjectsRawDoc[];
   };
 }
@@ -613,9 +608,6 @@ export const search = (
       //  - Is it too large? How do migrations behave when we go into a bootloop and
       // continuously open new scroll requests?
       scroll: '5m',
-      // Disable total hits so ES doesn't need to visit every match just to
-      // return a page
-      track_total_hits: false,
       // Scroll searches have optimizations that make them faster when the
       // sort order is _doc (the "natural" index order).
       sort: ['_doc'],
@@ -631,18 +623,25 @@ export const search = (
         query,
       },
       // Reduce the response payload size by only returning the data we care about
-      filter_path: 'hits.hits._id,hits.hits._source,hits.hits._version',
+      filter_path: [
+        '_shards',
+        'hits.total',
+        'hits.hits._id',
+        'hits.hits._source',
+        'hits.hits._version',
+      ],
     })
     .then((res) => {
       // Check that all shards successfully executed the query
       // Kibana uses a single shard by default but users can override this
+      console.log(res);
       if (res.body._shards.successful < res.body._shards.total) {
         return Either.left(new Error('Search request did not successfully execute on all shards'));
       }
       if (res.body.timed_out) {
         return Either.left(new Error('Search request timeout'));
       }
-      return Either.right({ scrollId: res.body._scroll_id, docs: res.body.hits.hits });
+      return Either.right({ scrollId: res.body._scroll_id, docs: res.body.hits?.hits });
     })
     .catch(catchRetryableEsClientErrors);
 };

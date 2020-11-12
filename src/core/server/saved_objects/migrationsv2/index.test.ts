@@ -31,6 +31,9 @@ const initState: State = {
   log: [],
   retryCount: 0,
   retryDelay: 0,
+  indexPrefix: '.kibana',
+  migrationVersionPerType: {},
+  targetMappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
 };
 
 describe('migrations state machine', () => {
@@ -76,10 +79,8 @@ describe('migrations state machine', () => {
         const newState = model(
           { ...initState, ...{ retryCount: 5, retryDelay: 32000 } },
           right({
-            fetchAliases: {
-              '.kibana_current': '.kibana_7.11.0_001',
-              '.kibana_7.11.0': '.kibana_7.11.0_001',
-            },
+            '.kibana_current': '.kibana_7.11.0_001',
+            '.kibana_7.11.0': '.kibana_7.11.0_001',
           })
         );
 
@@ -97,28 +98,35 @@ describe('migrations state machine', () => {
       });
     });
 
-    describe('transitions from INIT', () => {
-      test('-> DONE if .kibana_current is already pointing to the target index', () => {
+    describe('transitions from', () => {
+      test('INIT -> UPDATE_TARGET_MAPPINGS if .kibana_current is already pointing to the target index', () => {
         const newState = model(
           initState,
           right({
-            fetchAliases: {
-              '.kibana_current': '.kibana_7.11.0_001',
-              '.kibana_7.11.0': '.kibana_7.11.0_001',
+            '.kibana_7.11.0_001': {
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              aliases: {
+                '.kibana_current': {},
+                '.kibana_7.11.0': {},
+              },
             },
           })
         );
 
-        expect(newState.controlState).toEqual('DONE');
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS');
       });
-      test("-> FATAL when .kibana_current points to newer version's index", () => {
+      test("INIT -> FATAL when .kibana_current points to newer version's index", () => {
         const newState = model(
           initState,
           right({
-            fetchAliases: {
-              '.kibana_current': '.kibana_7.12.0_001',
-              '.kibana_7.11.0': '.kibana_7.11.0_001',
-              '.kibana_7.12.0': '.kibana_7.12.0_001',
+            '.kibana_7.12.0_001': {
+              aliases: {
+                '.kibana_current': {},
+                '.kibana_7.12.0': {},
+              },
+            },
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_7.11.0': {} },
             },
           })
         ) as FatalState;
@@ -128,14 +136,15 @@ describe('migrations state machine', () => {
           `"The .kibana_current alias is pointing to a newer version of Kibana: v7.12.0"`
         );
       });
-      test('-> SET_SOURCE_WRITE_BLOCK when migrating from >= 7.11.0', () => {
+      test('INIT -> SET_SOURCE_WRITE_BLOCK when migrating from >= 7.11.0', () => {
         const newState = model(
           { ...initState, ...{ kibanaVersion: '7.12.0' } },
           right({
-            fetchAliases: {
-              '.kibana_current': '.kibana_7.11.0_001',
-              '.kibana': '.kibana_3',
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_current': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
             },
+            '.kibana_3': { aliases: { '.kibana': {} } },
           })
         );
 
@@ -145,12 +154,15 @@ describe('migrations state machine', () => {
           target: '.kibana_7.12.0_001',
         });
       });
-      test('-> SET_SOURCE_WRITE_BLOCK when migrating from >= 7.0.0 < 7.11.0', () => {
+      test('INIT -> SET_SOURCE_WRITE_BLOCK when migrating from >= 7.0.0 < 7.11.0', () => {
         const newState = model(
           initState,
           right({
-            fetchAliases: {
-              '.kibana': '.kibana_3',
+            '.kibana_3': {
+              aliases: {
+                '.kibana': {},
+              },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
             },
           })
         );
@@ -162,7 +174,7 @@ describe('migrations state machine', () => {
         });
       });
       test.todo(
-        '-> SET_SOURCE_WRITE_BLOCK when migrating from >= 6.0.0 < 7.0.0'
+        'INIT -> SET_SOURCE_WRITE_BLOCK when migrating from >= 6.0.0 < 7.0.0'
       ); /* , () => {
         const newState = model(state, right({
           fetchAliases: {
@@ -175,13 +187,8 @@ describe('migrations state machine', () => {
           target: '.kibana_7.11.0_001',
         });
       });*/
-      test('-> INIT_NEW_INDICES when no indices/aliases exist', () => {
-        const newState = model(
-          initState,
-          right({
-            fetchAliases: {},
-          })
-        );
+      test('INIT -> INIT_NEW_INDICES when no indices/aliases exist', () => {
+        const newState = model(initState, right({}));
 
         expect(newState).toMatchObject({
           controlState: 'INIT_NEW_INDICES',
@@ -199,12 +206,12 @@ describe('migrations state machine', () => {
     it.todo('CLONE_SOURCE returns cloneIndex thunk');
     it('DONE returns null', () => {
       const state: State = { ...initState, ...{ controlState: 'DONE' } };
-      const action = next({} as ElasticsearchClient, state);
+      const action = next({} as ElasticsearchClient, (() => {}) as any, state);
       expect(action).toEqual(null);
     });
     it('FATAL returns null', () => {
       const state: State = { ...initState, ...{ controlState: 'FATAL' } };
-      const action = next({} as ElasticsearchClient, state);
+      const action = next({} as ElasticsearchClient, (() => {}) as any, state);
       expect(action).toEqual(null);
     });
   });

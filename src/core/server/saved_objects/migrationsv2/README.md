@@ -14,7 +14,7 @@ We have the following potential legacy indices:
 
 Test plan:
 1. Ensure that all Kibana minors >= 6.0 and <= 7.4 can successfully upgrade to
-   7.11
+   7.11. Testing upgrades from 6.4 and 7.3 are particularly important.
 2. Ensure that multiple Kibana nodes can migrate a legacy index in parallel
    (choose a representative legacy version to test with e.g. v6.4). Add a lot
    of Saved Objects to Kibana to increase the time it takes for a migration to
