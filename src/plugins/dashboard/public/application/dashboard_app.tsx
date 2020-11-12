@@ -34,6 +34,7 @@ import {
 import { merge, Observable, pipe, Subscription } from 'rxjs';
 import { EUI_MODAL_CANCEL_BUTTON } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import ReactDOM from 'react-dom';
 import { getSavedObjectFinder, SavedObject } from '../../../saved_objects/public';
 import { DashboardStateManager } from './dashboard_state_manager';
 import {
@@ -423,7 +424,7 @@ export function DashboardApp({
     data.indexPatterns
       .ensureDefaultIndexPattern()
       ?.then(() => savedDashboards.get(savedDashboardId) as Promise<DashboardSavedObject>)
-      .then((savedDashboard) => {
+      .then(async (savedDashboard) => {
         // if you've loaded an existing dashboard, add it to the recently accessed and update doc title
         if (savedDashboardId) {
           chrome.docTitle.change(savedDashboard.title);
@@ -433,9 +434,9 @@ export function DashboardApp({
             savedDashboardId
           );
         }
-        setState({
+        setState((s) => ({
           savedDashboard,
-        });
+        }));
       })
       .catch((error) => {
         // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
@@ -459,6 +460,14 @@ export function DashboardApp({
           history.push(DashboardConstants.LANDING_PAGE_PATH);
         }
       });
+    return () => {
+      // clear state if it exists to prepare for new dashboard...
+      setState((s) => {
+        s.dashboardContainer?.destroy();
+        s.dashboardStateManager?.destroy();
+        return {};
+      });
+    };
   }, [
     chrome.recentlyAccessed,
     data.indexPatterns,
@@ -605,7 +614,6 @@ export function DashboardApp({
       });
 
     return () => {
-      dashboardStateManager.destroy();
       stopSyncingAppFilters();
       stopSyncingQueryServiceStateWithUrl();
     };
@@ -646,14 +654,8 @@ export function DashboardApp({
       getOutputSubscription({
         dashboardContainer,
         indexPatterns,
-        onUpdateIndexPatterns: (newIndexPatterns) => {
-          setState((s) => {
-            return {
-              ...s,
-              indexPatterns: newIndexPatterns,
-            };
-          });
-        },
+        onUpdateIndexPatterns: (newIndexPatterns) =>
+          setState((s) => ({ ...s, indexPatterns: newIndexPatterns })),
       })
     );
     subscriptions.add(
@@ -669,6 +671,8 @@ export function DashboardApp({
       refreshDashboardContainer();
     });
 
+    const dashboardViewport = document.getElementById('dashboardViewport');
+
     dashboardContainer.renderEmptyScreen = () => {
       const isEditMode = dashboardContainer.getInput().viewMode !== ViewMode.VIEW;
       return (
@@ -682,10 +686,14 @@ export function DashboardApp({
         />
       );
     };
-    dashboardContainer.render(document.getElementById('dashboardViewport')!);
+    if (dashboardViewport) {
+      dashboardContainer.render(dashboardViewport);
+    }
 
     return () => {
-      dashboardContainer?.destroy();
+      if (dashboardViewport) {
+        ReactDOM.unmountComponentAtNode(dashboardViewport);
+      }
       subscriptions.unsubscribe();
     };
   }, [
@@ -792,12 +800,11 @@ export function DashboardApp({
           dashboardContainer={state.dashboardContainer}
           dashboardStateManager={state.dashboardStateManager}
           onQuerySubmit={(_payload, isUpdate) => {
-            if (isUpdate === false) {
-              // The user can still request a reload in the query bar, even if the
-              // query is the same, and in that case, we have to explicitly ask for
-              // a reload, since no state changes will cause it.
-              refreshDashboardContainer(new Date().getTime());
-            }
+            // The user can still request a reload in the query bar, even if the
+            // query is the same, and in that case, we have to explicitly ask for
+            // a reload, since no state changes will cause it.
+            const reloadRequest = isUpdate ? undefined : new Date().getTime();
+            refreshDashboardContainer(reloadRequest);
           }}
         />
       )}

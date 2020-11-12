@@ -23,6 +23,7 @@ import { EuiCheckboxGroupIdToSelectedMap } from '@elastic/eui/src/components/for
 import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { createDashboardEditUrl, DashboardConstants } from '../..';
 
 import { ViewMode } from '../../../../embeddable/public';
 import { useKibana } from '../../../../kibana_react/public';
@@ -111,7 +112,12 @@ export function DashboardTopNav({
         // when calling kbnUrl.change() angular schedules url update and when angular finally starts to process it,
         // the update is considered outdated and angular skips it
         // so have to use implementation of dashboardStateManager.changeDashboardUrl, which workarounds those issues
-        redirectToDashboard({ id: savedDashboard.id });
+        // redirectToDashboard({ id: savedDashboard.id });
+        dashboardStateManager.changeDashboardUrl(
+          savedDashboard.id
+            ? createDashboardEditUrl(savedDashboard.id)
+            : DashboardConstants.CREATE_NEW_DASHBOARD_URL
+        );
       }
 
       core.overlays
@@ -132,8 +138,8 @@ export function DashboardTopNav({
       core.overlays,
       updateViewMode,
       savedDashboard.id,
-      redirectToDashboard,
       dashboardStateManager,
+      // redirectToDashboard,
     ]
   );
 
