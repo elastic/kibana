@@ -17,8 +17,6 @@
  * under the License.
  */
 
-import { PersistedState } from 'src/plugins/visualizations/public';
-
 export interface ExpressionRenderDefinition<Config = unknown> {
   /**
    * Technical name of the renderer, used as ID to identify renderer in
