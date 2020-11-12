@@ -5,16 +5,16 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { IField } from './field';
-import { AGG_TYPE } from '../../../common/constants';
+import { AGG_TYPE } from '../../../../common/constants';
 import { CountAggField } from './count_agg_field';
-import { isMetricCountable } from '../util/is_metric_countable';
-import { IESAggFieldParams } from './agg_field_types';
-import { addFieldToDSL, getField } from '../../../common/elasticsearch_util';
+import { isMetricCountable } from '../../util/is_metric_countable';
+import { CountAggFieldParams } from './agg_field_types';
+import { addFieldToDSL, getField } from '../../../../common/elasticsearch_util';
+import { IField } from '../field';
 
 const TERMS_AGG_SHARD_SIZE = 5;
 
-export interface IESFieldedAggParams extends IESAggFieldParams {
+export interface AggFieldParams extends CountAggFieldParams {
   esDocField?: IField;
   aggType: AGG_TYPE;
 }
@@ -23,14 +23,10 @@ export class AggField extends CountAggField {
   private readonly _esDocField?: IField;
   private readonly _aggType: AGG_TYPE;
 
-  constructor(params: IESFieldedAggParams) {
+  constructor(params: AggFieldParams) {
     super(params);
     this._esDocField = params.esDocField;
     this._aggType = params.aggType;
-  }
-
-  _getESDocFieldName(): string {
-    return this._esDocField ? this._esDocField.getName() : '';
   }
 
   isValid(): boolean {
@@ -57,6 +53,14 @@ export class AggField extends CountAggField {
     return {
       [aggType]: addFieldToDSL(aggBody, field),
     };
+  }
+
+  getRootName(): string {
+    return this._esDocField ? this._esDocField.getName() : '';
+  }
+
+  async getDataType(): Promise<string> {
+    return this._getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
   }
 
   getBucketCount(): number {

@@ -5,12 +5,12 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { IESAggSource } from '../sources/es_agg_source';
-import { IVectorSource } from '../sources/vector_source';
-import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
-import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
-import { ESAggTooltipProperty } from '../tooltips/es_agg_tooltip_property';
-import { IESAggField, IESAggFieldParams } from './agg_field_types';
+import { IESAggSource } from '../../sources/es_agg_source';
+import { IVectorSource } from '../../sources/vector_source';
+import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
+import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
+import { IESAggField, CountAggFieldParams } from './agg_field_types';
 
 // Agg without field. Essentially a count-aggregation.
 export class CountAggField implements IESAggField {
@@ -19,15 +19,11 @@ export class CountAggField implements IESAggField {
   private readonly _label?: string;
   private readonly _canReadFromGeoJson: boolean;
 
-  constructor({ label, source, origin, canReadFromGeoJson = true }: IESAggFieldParams) {
+  constructor({ label, source, origin, canReadFromGeoJson = true }: CountAggFieldParams) {
     this._source = source;
     this._origin = origin;
     this._label = label;
     this._canReadFromGeoJson = canReadFromGeoJson;
-  }
-
-  _getESDocFieldName(): string {
-    return '';
   }
 
   _getAggType(): AGG_TYPE {
@@ -47,7 +43,7 @@ export class CountAggField implements IESAggField {
   }
 
   getRootName(): string {
-    return this._getESDocFieldName();
+    return '';
   }
 
   async getLabel(): Promise<string> {
@@ -61,7 +57,7 @@ export class CountAggField implements IESAggField {
   }
 
   async getDataType(): Promise<string> {
-    return this._getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
+    return 'number';
   }
 
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {
