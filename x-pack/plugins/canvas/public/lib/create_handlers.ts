@@ -39,6 +39,7 @@ export const createHandlers = (): RendererHandlers => ({
   resize(_size: { height: number; width: number }) {},
   setFilter() {},
   update() {},
+  data: {},
 });
 
 export const assignHandlers = (handlers: Partial<RendererHandlers> = {}): RendererHandlers =>

@@ -95,7 +95,8 @@ export const createVislibVisController = (
 
       // @ts-expect-error
       const { Vis: Vislib } = await import('./vislib/vis');
-      const { uiState, event: fireEvent } = handlers;
+      const { data, event: fireEvent } = handlers;
+      const uiState = data as PersistedState;
 
       this.vislibVis = new Vislib(this.chartEl, visParams, core, charts);
       this.vislibVis.on('brush', fireEvent);

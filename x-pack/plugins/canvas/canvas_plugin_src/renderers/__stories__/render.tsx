@@ -22,6 +22,7 @@ export const defaultHandlers: RendererHandlers = {
   reload: action('reload'),
   update: action('update'),
   event: action('event'),
+  data: {},
 };
 
 /*
