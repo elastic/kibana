@@ -283,9 +283,13 @@ export class TimeBuckets {
 
     // append some TimeBuckets specific props to the interval
     const decorateInterval = (interval: moment.Duration): TimeBucketsInterval => {
-      const esInterval = useNormalizedEsInterval
-        ? convertDurationToNormalizedEsInterval(interval)
-        : convertIntervalToEsInterval(String(this._originalInterval));
+      // moment.duration transforms '24h' to '1d' and other simular cases
+      // to avoiding this behavior we should convert 'originalInterval' instead of using 'interval' (moment.duration object).
+      // But when 'originalInterval' is 'null' we should convert 'interval'
+      // which we got calculated as 'auto' interval
+      const esInterval = this._originalInterval
+        ? convertIntervalToEsInterval(String(this._originalInterval))
+        : convertDurationToNormalizedEsInterval(interval);
       const prettyUnits = moment.normalizeUnits(esInterval.unit);
 
       return Object.assign(interval, {
