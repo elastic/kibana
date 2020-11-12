@@ -11,11 +11,11 @@ import url from 'url';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
 import type { AuthenticationProvider } from '../../../../plugins/security/common/types';
-import { getStateAndNonce } from '../../../oidc_api_integration/fixtures/oidc_tools';
+import { getStateAndNonce } from '../../fixtures/oidc/oidc_tools';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
-} from '../../../kerberos_api_integration/fixtures/kerberos_tools';
+} from '../../fixtures/kerberos/kerberos_tools';
 import { getSAMLRequestId, getSAMLResponse } from '../../fixtures/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -29,9 +29,7 @@ export default function ({ getService }: FtrProviderContext) {
   const validPassword = kibanaServerConfig.password;
 
   const CA_CERT = readFileSync(CA_CERT_PATH);
-  const CLIENT_CERT = readFileSync(
-    resolve(__dirname, '../../../pki_api_integration/fixtures/first_client.p12')
-  );
+  const CLIENT_CERT = readFileSync(resolve(__dirname, '../../fixtures/pki/first_client.p12'));
 
   async function checkSessionCookie(
     sessionCookie: Cookie,
