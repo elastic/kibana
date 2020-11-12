@@ -4,11 +4,13 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { IndexPattern } from 'src/plugins/data/public';
 import { IField } from './field';
 import { AGG_TYPE } from '../../../common/constants';
 import { CountAggField } from './count_agg_field';
 import { isMetricCountable } from '../util/is_metric_countable';
 import { IESAggFieldParams } from './agg_field_types';
+import { addFieldToDSL, getField } from '../../../common/elasticsearch_util';
 
 export interface IESFieldedAggParams extends IESAggFieldParams {
   esDocField?: IField;
@@ -45,6 +47,15 @@ export class AggField extends CountAggField {
 
   getAggType(): AGG_TYPE {
     return this._aggType;
+  }
+
+  getValueAggDsl(indexPattern: IndexPattern): unknown {
+    const field = getField(indexPattern, this.getRootName());
+    const aggType = this.getAggType();
+    const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: TERMS_AGG_SHARD_SIZE } : {};
+    return {
+      [aggType]: addFieldToDSL(aggBody, field),
+    };
   }
 
   async getOrdinalFieldMetaRequest(): Promise<unknown> {

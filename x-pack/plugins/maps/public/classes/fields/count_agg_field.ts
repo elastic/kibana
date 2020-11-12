@@ -8,7 +8,6 @@ import { IndexPattern } from 'src/plugins/data/public';
 import { IESAggSource } from '../sources/es_agg_source';
 import { IVectorSource } from '../sources/vector_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
-import { addFieldToDSL, getField } from '../../../common/elasticsearch_util';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../tooltips/es_agg_tooltip_property';
 import { IESAggField, IESAggFieldParams } from './agg_field_types';
@@ -74,16 +73,7 @@ export class CountAggField implements IESAggField {
   }
 
   getValueAggDsl(indexPattern: IndexPattern): unknown | null {
-    if (this.getAggType() === AGG_TYPE.COUNT) {
-      return null;
-    }
-
-    const field = getField(indexPattern, this.getRootName());
-    const aggType = this.getAggType();
-    const aggBody = aggType === AGG_TYPE.TERMS ? { size: 1, shard_size: TERMS_AGG_SHARD_SIZE } : {};
-    return {
-      [aggType]: addFieldToDSL(aggBody, field),
-    };
+    return null;
   }
 
   getBucketCount(): number {
