@@ -149,6 +149,7 @@ export enum AGG_TYPE {
   MIN = 'min',
   SUM = 'sum',
   TERMS = 'terms',
+  PERCENTILE = 'percentile',
   UNIQUE_COUNT = 'cardinality',
 }
 

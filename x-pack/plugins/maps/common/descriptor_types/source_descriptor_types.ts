@@ -60,7 +60,13 @@ export type FieldedAggDescriptor = AbstractAggDescriptor & {
   field?: string;
 };
 
-export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor;
+export type PercentileAggDescriptor = AbstractAggDescriptor & {
+  type: AGG_TYPE.PERCENTILE;
+  field?: string;
+  percentile: number;
+};
+
+export type AggDescriptor = CountAggDescriptor | FieldedAggDescriptor | PercentileAggDescriptor;
 
 export type AbstractESAggSourceDescriptor = AbstractESSourceDescriptor & {
   metrics: AggDescriptor[];
