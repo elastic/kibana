@@ -3,13 +3,16 @@
  * or more contributor license agreements. Licensed under the Elastic License;
  * you may not use this file except in compliance with the Elastic License.
  */
+import { Unit } from '@elastic/datemath';
 import { RollupSearchCapabilities } from './rollup_search_capabilities';
+
+import { ReqFacade } from '../../../../../src/plugins/vis_type_timeseries/server';
 
 describe('Rollup Search Capabilities', () => {
   const testTimeZone = 'time_zone';
   const testInterval = '10s';
   const rollupIndex = 'rollupIndex';
-  const request = {};
+  const request = ({} as unknown) as ReqFacade;
 
   let fieldsCapabilities: Record<string, any>;
   let rollupSearchCaps: RollupSearchCapabilities;
@@ -45,9 +48,9 @@ describe('Rollup Search Capabilities', () => {
   });
 
   describe('getValidTimeInterval', () => {
-    let rollupJobInterval;
-    let userInterval;
-    let getSuitableUnit;
+    let rollupJobInterval: { value: number; unit: Unit };
+    let userInterval: { value: number; unit: Unit };
+    let getSuitableUnit: Unit;
 
     beforeEach(() => {
       rollupSearchCaps.parseInterval = jest
@@ -71,7 +74,7 @@ describe('Rollup Search Capabilities', () => {
 
       getSuitableUnit = 'd';
 
-      expect(rollupSearchCaps.getValidTimeInterval()).toBe('1d');
+      expect(rollupSearchCaps.getValidTimeInterval('')).toBe('1d');
     });
 
     test('should return 1w as common interval for 7d(user interval) and 1d(rollup interval) - calendar intervals', () => {
@@ -86,7 +89,7 @@ describe('Rollup Search Capabilities', () => {
 
       getSuitableUnit = 'w';
 
-      expect(rollupSearchCaps.getValidTimeInterval()).toBe('1w');
+      expect(rollupSearchCaps.getValidTimeInterval('')).toBe('1w');
     });
 
     test('should return 1w as common interval for 1d(user interval) and 1w(rollup interval) - calendar intervals', () => {
@@ -101,7 +104,7 @@ describe('Rollup Search Capabilities', () => {
 
       getSuitableUnit = 'w';
 
-      expect(rollupSearchCaps.getValidTimeInterval()).toBe('1w');
+      expect(rollupSearchCaps.getValidTimeInterval('')).toBe('1w');
     });
 
     test('should return 2y as common interval for 0.1y(user interval) and 2y(rollup interval) - fixed intervals', () => {
@@ -114,7 +117,7 @@ describe('Rollup Search Capabilities', () => {
         unit: 'y',
       };
 
-      expect(rollupSearchCaps.getValidTimeInterval()).toBe('2y');
+      expect(rollupSearchCaps.getValidTimeInterval('')).toBe('2y');
     });
 
     test('should return 3h as common interval for 2h(user interval) and 3h(rollup interval) - fixed intervals', () => {
@@ -127,7 +130,7 @@ describe('Rollup Search Capabilities', () => {
         unit: 'h',
       };
 
-      expect(rollupSearchCaps.getValidTimeInterval()).toBe('3h');
+      expect(rollupSearchCaps.getValidTimeInterval('')).toBe('3h');
     });
 
     test('should return 6m as common interval for 4m(user interval) and 3m(rollup interval) - fixed intervals', () => {
@@ -140,7 +143,7 @@ describe('Rollup Search Capabilities', () => {
         unit: 'm',
       };
 
-      expect(rollupSearchCaps.getValidTimeInterval()).toBe('6m');
+      expect(rollupSearchCaps.getValidTimeInterval('')).toBe('6m');
     });
   });
 });

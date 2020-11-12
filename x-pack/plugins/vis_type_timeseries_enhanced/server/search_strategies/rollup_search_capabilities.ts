@@ -12,6 +12,9 @@ import {
 } from '../../../../../src/plugins/vis_type_timeseries/server';
 
 export class RollupSearchCapabilities extends DefaultSearchCapabilities {
+  rollupIndex: string;
+  availableMetrics: Record<string, any>;
+
   constructor(req: ReqFacade, fieldsCapabilities: Record<string, any>, rollupIndex: string) {
     super(req, fieldsCapabilities);
 
@@ -82,16 +85,17 @@ export class RollupSearchCapabilities extends DefaultSearchCapabilities {
     const parsedRollupJobInterval = this.parseInterval(this.defaultTimeInterval);
     const inRollupJobUnit = this.convertIntervalToUnit(
       userIntervalString,
-      parsedRollupJobInterval.unit
+      parsedRollupJobInterval!.unit
     );
 
     const getValidCalendarInterval = () => {
-      let unit = parsedRollupJobInterval.unit;
+      let unit = parsedRollupJobInterval!.unit;
 
-      if (inRollupJobUnit.value > parsedRollupJobInterval.value) {
+      if (inRollupJobUnit!.value > parsedRollupJobInterval!.value) {
         const inSeconds = this.convertIntervalToUnit(userIntervalString, 's');
-
-        unit = this.getSuitableUnit(inSeconds.value);
+        if (inSeconds?.value) {
+          unit = this.getSuitableUnit(inSeconds.value);
+        }
       }
 
       return {
@@ -101,11 +105,11 @@ export class RollupSearchCapabilities extends DefaultSearchCapabilities {
     };
 
     const getValidFixedInterval = () => ({
-      value: leastCommonInterval(inRollupJobUnit.value, parsedRollupJobInterval.value),
-      unit: parsedRollupJobInterval.unit,
+      value: leastCommonInterval(inRollupJobUnit?.value, parsedRollupJobInterval?.value),
+      unit: parsedRollupJobInterval!.unit,
     });
 
-    const { value, unit } = (isCalendarInterval(parsedRollupJobInterval)
+    const { value, unit } = (isCalendarInterval(parsedRollupJobInterval!)
       ? getValidCalendarInterval
       : getValidFixedInterval)();
 

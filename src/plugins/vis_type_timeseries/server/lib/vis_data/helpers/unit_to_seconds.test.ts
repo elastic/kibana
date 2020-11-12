@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Unit } from '@elastic/datemath';
 
 import {
   getUnitValue,
@@ -51,22 +52,13 @@ describe('unit_to_seconds', () => {
       }));
 
     test('should not parse "gm" interval (negative)', () =>
-      expect(parseInterval('gm')).toEqual({
-        value: undefined,
-        unit: undefined,
-      }));
+      expect(parseInterval('gm')).toBeUndefined());
 
     test('should not parse "-1d" interval (negative)', () =>
-      expect(parseInterval('-1d')).toEqual({
-        value: undefined,
-        unit: undefined,
-      }));
+      expect(parseInterval('-1d')).toBeUndefined());
 
     test('should not parse "M" interval (negative)', () =>
-      expect(parseInterval('M')).toEqual({
-        value: undefined,
-        unit: undefined,
-      }));
+      expect(parseInterval('M')).toBeUndefined());
   });
 
   describe('convertIntervalToUnit()', () => {
@@ -95,16 +87,10 @@ describe('unit_to_seconds', () => {
       }));
 
     test('should not convert "30m" interval to "0" unit (positive)', () =>
-      expect(convertIntervalToUnit('30m', 'o')).toEqual({
-        value: undefined,
-        unit: undefined,
-      }));
+      expect(convertIntervalToUnit('30m', 'o' as Unit)).toBeUndefined());
 
     test('should not  convert "m" interval to "s" unit (positive)', () =>
-      expect(convertIntervalToUnit('m', 's')).toEqual({
-        value: undefined,
-        unit: undefined,
-      }));
+      expect(convertIntervalToUnit('m', 's')).toBeUndefined());
   });
 
   describe('getSuitableUnit()', () => {
@@ -155,8 +141,5 @@ describe('unit_to_seconds', () => {
 
       expect(getSuitableUnit(stringValue)).toBeUndefined();
     });
-
-    test('should return "undefined" in case of no input value(negative)', () =>
-      expect(getSuitableUnit()).toBeUndefined());
   });
 });

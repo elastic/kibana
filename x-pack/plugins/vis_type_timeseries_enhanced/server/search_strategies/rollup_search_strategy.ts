@@ -26,7 +26,7 @@ export class RollupSearchStrategy extends AbstractSearchStrategy {
   name = 'rollup';
 
   constructor(private getRollupService: (reg: ReqFacade) => Promise<ILegacyScopedClusterClient>) {
-    super('rollup', { rest_total_hits_as_int: true });
+    super();
   }
 
   async search(req: ReqFacade, bodies: any[], options = {}) {

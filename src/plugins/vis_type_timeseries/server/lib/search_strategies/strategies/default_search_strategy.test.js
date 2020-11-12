@@ -34,8 +34,8 @@ describe('DefaultSearchStrategy', () => {
     expect(defaultSearchStrategy.getFieldsForWildcard).toBeDefined();
   });
 
-  test('should check a strategy for viability', () => {
-    const value = defaultSearchStrategy.checkForViability(req);
+  test('should check a strategy for viability', async () => {
+    const value = await defaultSearchStrategy.checkForViability(req);
 
     expect(value.isViable).toBe(true);
     expect(value.capabilities).toEqual({

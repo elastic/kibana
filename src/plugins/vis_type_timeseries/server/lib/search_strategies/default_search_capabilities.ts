@@ -16,11 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+import { Unit } from '@elastic/datemath';
 import {
   convertIntervalToUnit,
   parseInterval,
   getSuitableUnit,
-  IntervalUnits,
 } from '../vis_data/helpers/unit_to_seconds';
 import { RESTRICTIONS_KEYS } from '../../../common/ui_restrictions';
 import { ReqFacade } from './strategies/abstract_search_strategy';
@@ -30,10 +30,7 @@ const getTimezoneFromRequest = (request: ReqFacade<any>) => {
 };
 
 export class DefaultSearchCapabilities {
-  constructor(
-    protected request: ReqFacade,
-    protected fieldsCapabilities: Record<string, any> = {}
-  ) {}
+  constructor(protected request: ReqFacade, public fieldsCapabilities: Record<string, any> = {}) {}
 
   public get defaultTimeInterval() {
     return null;
@@ -74,14 +71,14 @@ export class DefaultSearchCapabilities {
     return parseInterval(interval);
   }
 
-  getSuitableUnit(intervalInSeconds: string) {
+  getSuitableUnit(intervalInSeconds: string | number) {
     return getSuitableUnit(intervalInSeconds);
   }
 
-  convertIntervalToUnit(intervalString: string, unit: IntervalUnits) {
+  convertIntervalToUnit(intervalString: string, unit: Unit) {
     const parsedInterval = this.parseInterval(intervalString);
 
-    if (parsedInterval.unit !== unit) {
+    if (parsedInterval?.unit !== unit) {
       return convertIntervalToUnit(intervalString, unit);
     }
 
