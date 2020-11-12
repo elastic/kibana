@@ -5,7 +5,7 @@
  */
 
 import { ComponentType, LazyExoticComponent } from 'react';
-import { NewPackagePolicy, PackagePolicy } from '../../../../common/types/models';
+import { NewPackagePolicy, PackagePolicy } from './index';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
