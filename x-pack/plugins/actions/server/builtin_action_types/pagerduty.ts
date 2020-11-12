@@ -86,7 +86,7 @@ const ParamsSchema = schema.object(
 
 function validateParams(paramsObject: unknown): string | void {
   const { timestamp, eventAction, dedupKey } = paramsObject as ActionParamsType;
-  if (timestamp != null) {
+  if (timestamp != null && timestamp.length > 0) {
     try {
       const date = Date.parse(timestamp);
       if (isNaN(date)) {
