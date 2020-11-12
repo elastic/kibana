@@ -45,7 +45,14 @@ export function CurrentRelatedEventFetcher(
 
       let result: SafeResolverEvent | null = null;
       try {
-        result = await dataAccessLayer.event(currentEventID);
+        result = await dataAccessLayer.event({
+          eventID: currentEventID,
+          indexPatterns: ['logs-*'],
+          timerange: {
+            from: new Date(2020, 11, 1),
+            to: new Date(2020, 11, 30),
+          },
+        });
       } catch (error) {
         api.dispatch({
           type: 'serverFailedToReturnCurrentRelatedEventData',

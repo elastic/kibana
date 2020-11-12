@@ -4,6 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { isEqual } from 'lodash';
 import { Dispatch, MiddlewareAPI } from 'redux';
 import { entityIDSafeVersion } from '../../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
@@ -29,15 +30,12 @@ export function NodeDataFetcher(
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
     // TODO: is it possible that the new request is ever undefined when the previous was defined?
     last = newParams;
-    // TODO: will the times always be different?
-    if (!newParams || newParams.time === oldParams?.time) {
+    if (!newParams || isEqual(newParams.nodesInView, oldParams?.nodesInView)) {
       return;
     }
-    const { processNodePositions } = selectors.visibleNodesAndEdgeLines(state)(newParams.time);
 
     const nodesToFetch: string[] = [];
-    for (const node of processNodePositions.keys()) {
-      const id = entityIDSafeVersion(node);
+    for (const id of newParams.nodesInView.values()) {
       if (id && !newParams.nodeData.has(id)) {
         nodesToFetch.push(id);
       }
@@ -61,13 +59,15 @@ export function NodeDataFetcher(
       api.dispatch({
         type: 'serverFailedToReturnNodeData',
         payload: {
-          ids: nodesToFetch,
+          nodesInView: newParams.nodesInView,
+          nodeData: newParams.nodeData,
         },
       });
     }
 
     if (results) {
-      const newData = new Map<string, SafeResolverEvent[]>(newParams.nodeData);
+      // TODO: is it better to merge the nodeData here?
+      const newData = new Map<string, SafeResolverEvent[]>();
       for (const result of results) {
         const id = entityIDSafeVersion(result);
         if (id) {
@@ -82,6 +82,7 @@ export function NodeDataFetcher(
       api.dispatch({
         type: 'serverReturnedNodeData',
         payload: {
+          nodesInView: newParams.nodesInView,
           nodeData: newData,
         },
       });

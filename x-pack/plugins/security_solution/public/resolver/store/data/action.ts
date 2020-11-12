@@ -105,6 +105,7 @@ interface ServerReturnedNodeEventsInCategory {
 interface ServerReturnedNodeData {
   readonly type: 'serverReturnedNodeData';
   readonly payload: {
+    nodesInView: Set<string>;
     nodeData: Map<string, SafeResolverEvent[]>;
   };
 }
@@ -112,7 +113,9 @@ interface ServerReturnedNodeData {
 interface ServerFailedToReturnNodeData {
   readonly type: 'serverFailedToReturnNodeData';
   readonly payload: {
-    ids: string[];
+    nodesInView: Set<string>;
+    // TODO: is it necessary to include this?
+    nodeData: Map<string, SafeResolverEvent[]>;
   };
 }
 

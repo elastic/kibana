@@ -240,10 +240,14 @@ export interface NodeEventsInCategoryState {
   error?: boolean;
 }
 
-export interface NodeDataState {
-  time: number;
+export type IDToNodeEvents = Map<string, SafeResolverEvent[]>;
 
-  nodeData: Map<string, SafeResolverEvent[]>;
+export interface NodeDataState {
+  nodesInView: Set<string>;
+
+  nodeData: IDToNodeEvents;
+
+  error?: boolean;
 }
 
 /**

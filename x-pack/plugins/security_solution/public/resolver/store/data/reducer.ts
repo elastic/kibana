@@ -10,6 +10,7 @@ import { ResolverAction } from '../actions';
 import * as treeFetcherParameters from '../../models/tree_fetcher_parameters';
 import * as selectors from './selectors';
 import * as nodeEventsInCategoryModel from './node_events_in_category_model';
+import * as nodeDataModel from './node_data_model';
 
 const initialState: DataState = {
   currentRelatedEvent: {
@@ -175,6 +176,7 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       const nextState: DataState = {
         ...state,
         nodeEventsInCategory: {
+          // TODO: should this be using the fields in action?
           ...state.nodeEventsInCategory,
           error: true,
         },
@@ -183,6 +185,39 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
     } else {
       return state;
     }
+  } else if (action.type === 'serverReturnedNodeData') {
+    if (state.nodeDataState) {
+      const updatedNodeData = nodeDataModel.mergeMaps(
+        state.nodeDataState.nodeData,
+        action.payload.nodeData
+      );
+      return {
+        ...state,
+        nodeDataState: {
+          // TODO: is it necessary to update this?
+          nodesInView: action.payload.nodesInView,
+          nodeData: updatedNodeData,
+        },
+      };
+    }
+
+    return {
+      ...state,
+      nodeDataState: action.payload,
+    };
+  } else if (action.type === 'serverFailedToReturnNodeData') {
+    if (state.nodeDataState) {
+      return {
+        ...state,
+        nodeDataState: {
+          // TODO: should I just be using ...state.nodeDataState here?
+          ...action.payload,
+          error: true,
+        },
+      };
+    }
+
+    return state;
   } else if (action.type === 'appRequestedCurrentRelatedEventData') {
     const nextState: DataState = {
       ...state,
