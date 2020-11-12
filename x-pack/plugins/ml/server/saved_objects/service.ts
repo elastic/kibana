@@ -61,15 +61,15 @@ export function jobSavedObjectServiceFactory(
 
   async function _createJob(jobType: JobType, jobId: string, datafeedId?: string) {
     await isMlReady();
-    await savedObjectsClient.create<JobObject>(
-      ML_SAVED_OBJECT_TYPE,
-      {
-        job_id: jobId,
-        datafeed_id: datafeedId ?? null,
-        type: jobType,
-      },
-      { id: jobId, overwrite: true }
-    );
+    const job: JobObject = {
+      job_id: jobId,
+      datafeed_id: datafeedId ?? null,
+      type: jobType,
+    };
+    await savedObjectsClient.create<JobObject>(ML_SAVED_OBJECT_TYPE, job, {
+      id: savedObjectId(job),
+      overwrite: true,
+    });
   }
 
   async function _bulkCreateJobs(jobs: Array<{ job: JobObject; namespaces: string[] }>) {
@@ -77,11 +77,15 @@ export function jobSavedObjectServiceFactory(
     return await savedObjectsClient.bulkCreate<JobObject>(
       jobs.map((j) => ({
         type: ML_SAVED_OBJECT_TYPE,
-        id: j.job.job_id,
+        id: savedObjectId(j.job),
         attributes: j.job,
         initialNamespaces: j.namespaces,
       }))
     );
+  }
+
+  function savedObjectId(job: JobObject) {
+    return `${job.type}-${job.job_id}`;
   }
 
   async function _deleteJob(jobType: JobType, jobId: string) {
