@@ -6,12 +6,8 @@
 
 import tar from 'tar';
 import yauzl from 'yauzl';
-import { bufferToStream, streamToBuffer } from './streams';
-
-export interface ArchiveEntry {
-  path: string;
-  buffer?: Buffer;
-}
+import { bufferToStream, streamToBuffer } from '../streams';
+import { ArchiveEntry } from './index';
 
 export async function untarBuffer(
   buffer: Buffer,
