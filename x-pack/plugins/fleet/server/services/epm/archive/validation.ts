@@ -15,7 +15,8 @@ import {
   RegistryVarsEntry,
 } from '../../../../common/types';
 import { PackageInvalidArchiveError } from '../../../errors';
-import { ArchiveEntry, pkgToPkgKey } from '../registry';
+import { ArchiveEntry } from './index';
+import { pkgToPkgKey } from '../registry';
 
 const MANIFESTS: Record<string, Buffer> = {};
 const MANIFEST_NAME = 'manifest.yml';
