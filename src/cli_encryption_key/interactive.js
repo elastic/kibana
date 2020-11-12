@@ -16,17 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { appendFileSync } from 'fs';
+import { writeFileSync } from 'fs';
 import { join } from 'path';
-import { confirm } from '../cli_keystore/utils';
+import { confirm, question } from '../cli_keystore/utils';
 import { getConfigDirectory } from '@kbn/utils';
 import { safeDump } from 'js-yaml';
 
 export async function interactive(keys, logger) {
   const settings = Object.keys(keys);
-  logger.log('Generating settings for:');
+  logger.log('## Kibana Encryption Key Generation Utility\n');
+  logger.log(
+    `The 'generate' command guides you through the process of generating encryption keys for: `
+  );
   logger.log(settings.join('\n'));
   logger.log('');
+  logger.log(
+    'This tool will ask you a number of questions in order to generate the right set of keys for your needs.\n'
+  );
   const setKeys = {};
   for (let i = 0; i < settings.length; i++) {
     const setting = settings[i];
@@ -34,12 +40,23 @@ export async function interactive(keys, logger) {
     if (include) setKeys[setting] = keys[setting];
   }
   const count = Object.keys(setKeys).length;
-  const plural = count > 1 ? 's' : '';
-  const write = await confirm(
-    `Write ${Object.keys(setKeys).length} setting${plural} to kibana.yml?`
-  );
+  const plural = count > 1 ? 's were' : ' was';
+  logger.log('');
+  if (!count) return logger.log('No keys were generated');
+  logger.log(`The following key${plural} generated:`);
+  logger.log(Object.keys(setKeys).join('\n'));
+  logger.log('');
+  const write = await confirm('Save generated keys to a sample Kibana configuration file?');
   if (write) {
-    const kibanaYML = join(getConfigDirectory(), 'kibana.yml');
-    appendFileSync(kibanaYML, safeDump(setKeys));
+    const defaultSaveLocation = join(getConfigDirectory(), 'kibana.sample.yml');
+    const promptedSaveLocation = await question(
+      `What filename should be used for the sample Kibana config file? [${defaultSaveLocation}])`
+    );
+    const saveLocation = defaultSaveLocation || promptedSaveLocation;
+    writeFileSync(saveLocation, safeDump(setKeys));
+    logger.log(`Wrote configuration to ${saveLocation}`);
+  } else {
+    logger.log('\nSettings:');
+    logger.log(safeDump(setKeys));
   }
 }
