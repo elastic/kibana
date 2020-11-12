@@ -8,6 +8,7 @@ import { IScopedClusterClient } from 'kibana/server';
 import RE2 from 're2';
 import { Job } from '../../../common/types/anomaly_detection_jobs';
 import type { JobSpaceOverrides } from '../repair';
+import { mlLog } from '../../lib/log';
 
 // create a list of jobs and specific spaces to place them in
 // when the are being initialized.
@@ -32,16 +33,25 @@ export async function createJobSpaceOverrides(
 async function logJobsSpaces({
   asInternalUser,
 }: IScopedClusterClient): Promise<Array<{ id: string; space: string }>> {
-  const { body } = await asInternalUser.ml.getJobs<{ jobs: Job[] }>({
-    job_id: 'logs-ui',
-  });
-  if (body.jobs.length === 0) {
-    return [];
+  try {
+    const { body } = await asInternalUser.ml.getJobs<{ jobs: Job[] }>({
+      job_id: 'logs-ui',
+    });
+    if (body.jobs.length === 0) {
+      return [];
+    }
+
+    const findLogJobSpace = findLogJobSpaceFactory();
+    return body.jobs
+      .map((j) => ({ id: j.job_id, space: findLogJobSpace(j.job_id) }))
+      .filter((j) => j.space !== null) as Array<{ id: string; space: string }>;
+  } catch ({ body }) {
+    if (body.status !== 404) {
+      // 404s are expected if there are no logs-ui jobs
+      mlLog.error(`Error Initializing Logs job ${JSON.stringify(body)}`);
+    }
   }
-  const findLogJobSpace = findLogJobSpaceFactory();
-  return body.jobs
-    .map((j) => ({ id: j.job_id, space: findLogJobSpace(j.job_id) }))
-    .filter((j) => j.space !== null) as Array<{ id: string; space: string }>;
+  return [];
 }
 
 function findLogJobSpaceFactory() {
