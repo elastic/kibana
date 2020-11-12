@@ -15,7 +15,7 @@ import { EuiTableRow, EuiTableRowCell, EuiIcon } from '@elastic/eui';
 import { TruncatedContent } from '../../../../shared/truncate';
 import { EuiLink } from '../../../../shared/react_router_helpers';
 
-import { IGroup } from '../../../types';
+import { Group } from '../../../types';
 
 import { AppLogic } from '../../../app_logic';
 import { getGroupPath } from '../../../routes';
@@ -42,7 +42,7 @@ const dateDisplay = (date: string) =>
     ? moment(date).fromNow()
     : moment(date).format('MMMM D, YYYY');
 
-export const GroupRow: React.FC<IGroup> = ({
+export const GroupRow: React.FC<Group> = ({
   id,
   name,
   updatedAt,
