@@ -395,22 +395,3 @@ export function getSelectedIdFromUrl(url) {
   }
   return result;
 }
-
-export function getGroupQueryText(groupIds) {
-  return `groups:(${groupIds.join(' or ')})`;
-}
-
-export function getJobQueryText(jobIds) {
-  return Array.isArray(jobIds) ? `id:(${jobIds.join(' OR ')})` : jobIds;
-}
-
-export function clearSelectedJobIdFromUrl(url) {
-  if (typeof url === 'string') {
-    url = decodeURIComponent(url);
-    if (url.includes('mlManagement') && (url.includes('jobId') || url.includes('groupIds'))) {
-      const urlParams = getUrlVars(url);
-      const clearedParams = `jobs?_g=${urlParams._g}`;
-      window.history.replaceState({}, document.title, clearedParams);
-    }
-  }
-}
