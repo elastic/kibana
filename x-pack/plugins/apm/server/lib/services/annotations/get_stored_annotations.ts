@@ -5,13 +5,13 @@
  */
 
 import { LegacyAPICaller, Logger } from 'kibana/server';
-import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
-import { ESSearchResponse } from '../../../../typings/elasticsearch';
+import { ESSearchResponse } from '../../../../../../typings/elasticsearch';
+import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
 import { ScopedAnnotationsClient } from '../../../../../observability/server';
 import { Annotation, AnnotationType } from '../../../../common/annotations';
-import { Annotation as ESAnnotation } from '../../../../../observability/common/annotations';
-import { SetupTimeRange, Setup } from '../../helpers/setup_request';
+import { SERVICE_NAME } from '../../../../common/elasticsearch_fieldnames';
 import { getEnvironmentUiFilterES } from '../../helpers/convert_ui_filters/get_environment_ui_filter_es';
+import { Setup, SetupTimeRange } from '../../helpers/setup_request';
 
 export async function getStoredAnnotations({
   setup,

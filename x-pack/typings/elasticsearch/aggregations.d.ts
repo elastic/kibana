@@ -202,10 +202,7 @@ type SubAggregationResponseOf<
   ? AggregationResponseMap<TAggregationInputMap, TDocument>
   : {};
 
-interface AggregationResponsePart<
-  TAggregationOptionsMap extends AggregationOptionsMap,
-  TDocument
-> {
+interface AggregationResponsePart<TAggregationOptionsMap extends AggregationOptionsMap, TDocument> {
   terms: {
     buckets: Array<
       {
@@ -224,8 +221,7 @@ interface AggregationResponsePart<
   };
   date_histogram: {
     buckets: Array<
-      DateHistogramBucket &
-        SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
+      DateHistogramBucket & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
     >;
   };
   avg: MetricsAggregationResponsePart;
@@ -277,10 +273,7 @@ interface AggregationResponsePart<
   } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>;
   filters: TAggregationOptionsMap extends { filters: { filters: any[] } }
     ? Array<
-        { doc_count: number } & AggregationResponseMap<
-          TAggregationOptionsMap['aggs'],
-          TDocument
-        >
+        { doc_count: number } & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>
       >
     : TAggregationOptionsMap extends {
         filters: {
@@ -291,10 +284,7 @@ interface AggregationResponsePart<
         buckets: {
           [key in keyof TAggregationOptionsMap['filters']['filters']]: {
             doc_count: number;
-          } & SubAggregationResponseOf<
-            TAggregationOptionsMap['aggs'],
-            TDocument
-          >;
+          } & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>;
         };
       }
     : never;
@@ -337,18 +327,15 @@ interface AggregationResponsePart<
     buckets: TAggregationOptionsMap extends { range: { keyed: true } }
       ? Record<
           string,
-          DateRangeBucket &
-            SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
+          DateRangeBucket & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
         >
       : Array<
-          DateRangeBucket &
-            SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
+          DateRangeBucket & SubAggregationResponseOf<TAggregationOptionsMap['aggs'], TDocument>
         >;
   };
   auto_date_histogram: {
     buckets: Array<
-      DateHistogramBucket &
-        AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>
+      DateHistogramBucket & AggregationResponseMap<TAggregationOptionsMap['aggs'], TDocument>
     >;
     interval: string;
   };
@@ -389,9 +376,11 @@ interface AggregationResponsePart<
 // Union keys are not included in keyof. The type will fall back to keyof T if
 // UnionToIntersection fails, which happens when there are conflicts between the union
 // types, e.g. { foo: string; bar?: undefined } | { foo?: undefined; bar: string };
-export type ValidAggregationKeysOf<
-  T extends Record<string, any>
-> = keyof (UnionToIntersection<T> extends never ? T : UnionToIntersection<T>);
+export type ValidAggregationKeysOf<T extends Record<string, any>> = keyof (UnionToIntersection<
+  T
+> extends never
+  ? T
+  : UnionToIntersection<T>);
 
 export type AggregationResultOf<
   TAggregationOptionsMap extends AggregationOptionsMap,
