@@ -98,6 +98,42 @@ export const i18nTexts = {
           defaultMessage: 'Only non-negative numbers are allowed.',
         }
       ),
+      policyNameContainsInvalidChars: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.errors.policyNameContainsInvalidCharsError',
+        {
+          defaultMessage: 'A policy name cannot contain spaces or commas.',
+        }
+      ),
+      policyNameAlreadyUsedErrorMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.policyNameAlreadyUsedError',
+        {
+          defaultMessage: 'That policy name is already used.',
+        }
+      ),
+      policyNameMustBeDifferentErrorMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.differentPolicyNameRequiredError',
+        {
+          defaultMessage: 'The policy name must be different.',
+        }
+      ),
+      policyNameRequiredMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.policyNameRequiredError',
+        {
+          defaultMessage: 'A policy name is required.',
+        }
+      ),
+      policyNameStartsWithUnderscoreErrorMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.policyNameStartsWithUnderscoreError',
+        {
+          defaultMessage: 'A policy name cannot start with an underscore.',
+        }
+      ),
+      policyNameTooLongErrorMessage: i18n.translate(
+        'xpack.indexLifecycleMgmt.editPolicy.policyNameTooLongError',
+        {
+          defaultMessage: 'A policy name cannot be longer than 255 bytes.',
+        }
+      ),
     },
   },
 };
