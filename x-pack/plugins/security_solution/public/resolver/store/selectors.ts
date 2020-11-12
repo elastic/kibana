@@ -400,6 +400,35 @@ export const nodeDataState = composeSelectors(
   (dataState: DataState) => dataState.nodeDataState
 );
 
+export const renderTime = composeSelectors(
+  dataStateSelector,
+  (dataState: DataState) => dataState.renderTime
+);
+
+export const visibleNodes: (
+  state: ResolverState
+) => (time: number | undefined) => Set<string> | undefined = createSelector(
+  visibleNodesAndEdgeLines,
+  function (visibleNodesAndEdgeLinesAtTime) {
+    return defaultMemoize((time: number | undefined) => {
+      if (time === undefined) {
+        return undefined;
+      }
+
+      const { processNodePositions } = visibleNodesAndEdgeLinesAtTime(time);
+
+      const nodes: Set<string> = new Set();
+      for (const node of processNodePositions.keys()) {
+        const id = entityIDSafeVersion(node);
+        if (id !== undefined) {
+          nodes.add(id);
+        }
+      }
+      return nodes;
+    });
+  }
+);
+
 export const nodeData = composeSelectors(dataStateSelector, dataSelectors.nodeData);
 
 /**

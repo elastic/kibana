@@ -18,6 +18,7 @@ import { ProcessEventDot } from './process_event_dot';
 import { useCamera } from './use_camera';
 import { SymbolDefinitions } from './symbol_definitions';
 import { useStateSyncingActions } from './use_state_syncing_actions';
+import { useRenderTime } from './use_render_time';
 import { StyledMapContainer, GraphContainer } from './styles';
 import { entityIDSafeVersion } from '../../../common/endpoint/models/event';
 import { SideEffectContext } from './side_effect_context';
@@ -47,6 +48,8 @@ export const ResolverWithoutProviders = React.memo(
 
     // use this for the entire render in order to keep things in sync
     const timeAtRender = timestamp();
+
+    useRenderTime(timeAtRender);
 
     const {
       processNodePositions,

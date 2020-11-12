@@ -105,18 +105,13 @@ interface ServerReturnedNodeEventsInCategory {
 interface ServerReturnedNodeData {
   readonly type: 'serverReturnedNodeData';
   readonly payload: {
-    nodesInView: Set<string>;
+    renderTime: number;
     nodeData: Map<string, SafeResolverEvent[]>;
   };
 }
 
 interface ServerFailedToReturnNodeData {
   readonly type: 'serverFailedToReturnNodeData';
-  readonly payload: {
-    nodesInView: Set<string>;
-    // TODO: is it necessary to include this?
-    nodeData: Map<string, SafeResolverEvent[]>;
-  };
 }
 
 interface AppRequestedCurrentRelatedEventData {
@@ -132,6 +127,13 @@ interface ServerReturnedCurrentRelatedEventData {
   readonly payload: SafeResolverEvent;
 }
 
+interface AppReceivedNewDragTime {
+  readonly type: 'appReceivedNewDragTime';
+  readonly payload: {
+    timestamp: number;
+  };
+}
+
 export type DataAction =
   | ServerReturnedResolverData
   | ServerFailedToReturnResolverData
@@ -145,4 +147,5 @@ export type DataAction =
   | ServerFailedToReturnNodeEventsInCategory
   | AppAbortedResolverDataRequest
   | ServerReturnedNodeData
-  | ServerFailedToReturnNodeData;
+  | ServerFailedToReturnNodeData
+  | AppReceivedNewDragTime;

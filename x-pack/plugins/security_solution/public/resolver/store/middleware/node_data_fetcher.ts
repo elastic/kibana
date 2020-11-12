@@ -9,7 +9,7 @@ import { Dispatch, MiddlewareAPI } from 'redux';
 import { entityIDSafeVersion } from '../../../../common/endpoint/models/event';
 import { SafeResolverEvent } from '../../../../common/endpoint/types';
 
-import { ResolverState, DataAccessLayer, NodeDataState } from '../../types';
+import { ResolverState, DataAccessLayer, IDToNodeEvents } from '../../types';
 import * as selectors from '../selectors';
 import { ResolverAction } from '../actions';
 
@@ -17,7 +17,7 @@ export function NodeDataFetcher(
   dataAccessLayer: DataAccessLayer,
   api: MiddlewareAPI<Dispatch<ResolverAction>, ResolverState>
 ): () => void {
-  let last: NodeDataState | undefined;
+  let lastVisibleNodes: Set<string> | undefined;
 
   // Call this after each state change.
   // This fetches the ResolverTree for the current entityID
@@ -25,18 +25,29 @@ export function NodeDataFetcher(
   return async () => {
     const state = api.getState();
 
-    const newParams = selectors.nodeDataState(state);
-    const oldParams = last;
+    const nodeData: IDToNodeEvents | undefined = selectors.nodeData(state);
+    const renderTime: number | undefined = selectors.renderTime(state);
+    const newVisibleNodes: Set<string> | undefined = selectors.visibleNodes(state)(renderTime);
+
+    const oldVisibleNodes = lastVisibleNodes;
     // Update this each time before fetching data (or even if we don't fetch data) so that subsequent actions that call this (concurrently) will have up to date info.
-    // TODO: is it possible that the new request is ever undefined when the previous was defined?
-    last = newParams;
-    if (!newParams || isEqual(newParams.nodesInView, oldParams?.nodesInView)) {
+    lastVisibleNodes = newVisibleNodes;
+
+    // TODO: check if it is dragging as well
+    const isDragging = false;
+    if (
+      !newVisibleNodes ||
+      !nodeData ||
+      !renderTime ||
+      !isDragging ||
+      isEqual(newVisibleNodes, oldVisibleNodes)
+    ) {
       return;
     }
 
     const nodesToFetch: string[] = [];
-    for (const id of newParams.nodesInView.values()) {
-      if (id && !newParams.nodeData.has(id)) {
+    for (const id of newVisibleNodes.values()) {
+      if (id && !nodeData.has(id)) {
         nodesToFetch.push(id);
       }
     }
@@ -44,6 +55,8 @@ export function NodeDataFetcher(
     if (nodesToFetch.length <= 0) {
       return;
     }
+
+    // TODO: dispatch an action that contains the nodes that need to be fetched
 
     let results: SafeResolverEvent[] | undefined;
     try {
@@ -58,15 +71,10 @@ export function NodeDataFetcher(
     } catch (error) {
       api.dispatch({
         type: 'serverFailedToReturnNodeData',
-        payload: {
-          nodesInView: newParams.nodesInView,
-          nodeData: newParams.nodeData,
-        },
       });
     }
 
     if (results) {
-      // TODO: is it better to merge the nodeData here?
       const newData = new Map<string, SafeResolverEvent[]>();
       for (const result of results) {
         const id = entityIDSafeVersion(result);
@@ -82,7 +90,7 @@ export function NodeDataFetcher(
       api.dispatch({
         type: 'serverReturnedNodeData',
         payload: {
-          nodesInView: newParams.nodesInView,
+          renderTime,
           nodeData: newData,
         },
       });

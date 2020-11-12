@@ -243,8 +243,6 @@ export interface NodeEventsInCategoryState {
 export type IDToNodeEvents = Map<string, SafeResolverEvent[]>;
 
 export interface NodeDataState {
-  nodesInView: Set<string>;
-
   nodeData: IDToNodeEvents;
 
   error?: boolean;
@@ -329,6 +327,8 @@ export interface DataState {
    * TODO:
    */
   readonly nodeDataState?: NodeDataState;
+
+  readonly renderTime?: number;
 }
 
 /**

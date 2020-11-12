@@ -176,7 +176,6 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       const nextState: DataState = {
         ...state,
         nodeEventsInCategory: {
-          // TODO: should this be using the fields in action?
           ...state.nodeEventsInCategory,
           error: true,
         },
@@ -193,9 +192,8 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
       );
       return {
         ...state,
+        renderTime: action.payload.renderTime,
         nodeDataState: {
-          // TODO: is it necessary to update this?
-          nodesInView: action.payload.nodesInView,
           nodeData: updatedNodeData,
         },
       };
@@ -203,21 +201,28 @@ export const dataReducer: Reducer<DataState, ResolverAction> = (state = initialS
 
     return {
       ...state,
-      nodeDataState: action.payload,
+      renderTime: action.payload.renderTime,
+      nodeDataState: {
+        nodeData: action.payload.nodeData,
+      },
     };
   } else if (action.type === 'serverFailedToReturnNodeData') {
     if (state.nodeDataState) {
       return {
         ...state,
         nodeDataState: {
-          // TODO: should I just be using ...state.nodeDataState here?
-          ...action.payload,
+          ...state.nodeDataState,
           error: true,
         },
       };
     }
 
     return state;
+  } else if (action.type === 'appReceivedNewDragTime') {
+    return {
+      ...state,
+      renderTime: action.payload.timestamp,
+    };
   } else if (action.type === 'appRequestedCurrentRelatedEventData') {
     const nextState: DataState = {
       ...state,
