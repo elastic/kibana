@@ -24,45 +24,44 @@ export default function ({ getService }: FtrProviderContext) {
       return [
         {
           suiteTitle: 'binary classification job',
-          archive: 'ml/bm_classification',
-          indexPattern: { name: 'ft_bank_marketing', timeField: '@timestamp' },
+          archive: 'ml/ihp_outlier',
+          indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
-            id: `bm_fi_binary_${timestamp}`,
+            id: `ihp_fi_binary_${timestamp}`,
             description:
               "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '35'",
             source: {
-              index: ['ft_bank_marketing'],
+              index: ['ft_ihp_outlier'],
               query: {
                 match_all: {},
               },
             },
             dest: {
               get index(): string {
-                return `user-bm_fi_binary_${timestamp}`;
+                return `user-ihp_fi_binary_${timestamp}`;
               },
-              results_field: 'ml',
-            },
-            analysis: {
-              classification: {
-                prediction_field_name: 'test',
-                dependent_variable: 'y',
-                training_percent: 35,
-                num_top_feature_importance_values: 5,
-              },
+              results_field: 'ml_central_air',
             },
             analyzed_fields: {
               includes: [
-                'duration',
-                'day.keyword',
-                'age',
-                'campaign',
-                'job',
-                'marital',
-                'duration',
-                'education',
-                'y',
+                'CentralAir',
+                'GarageArea',
+                'GarageCars',
+                'YearBuilt',
+                'Electrical',
+                'Neighborhood',
+                'Heating',
+                '1stFlrSF',
               ],
-              excludes: [],
+            },
+            analysis: {
+              classification: {
+                dependent_variable: 'CentralAir',
+                num_top_feature_importance_values: 5,
+                training_percent: 35,
+                prediction_field_name: 'CentralAir_prediction',
+                num_top_classes: -1,
+              },
             },
             model_memory_limit: '60mb',
             allow_lazy_start: false,
@@ -70,59 +69,44 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'multi class classification job',
-          archive: 'ml/bm_classification',
-          indexPattern: { name: 'ft_bank_marketing', timeField: '@timestamp' },
+          archive: 'ml/ihp_outlier',
+          indexPattern: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
-            id: `bm_fi_multi_${timestamp}`,
+            id: `ihp_fi_multi_${timestamp}`,
             description:
               "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '35'",
             source: {
-              index: ['ft_bank_marketing'],
+              index: ['ft_ihp_outlier'],
               query: {
                 match_all: {},
               },
             },
             dest: {
               get index(): string {
-                return `user-bm_fi_multi_${timestamp}`;
+                return `user-ihp_fi_multi_${timestamp}`;
               },
-              results_field: 'ml',
-            },
-            analysis: {
-              classification: {
-                prediction_field_name: 'test',
-                dependent_variable: 'y',
-                training_percent: 35,
-                num_top_feature_importance_values: 5,
-                num_top_classes: 5,
-              },
+              results_field: 'ml_heating_qc',
             },
             analyzed_fields: {
               includes: [
-                'age',
-                'balance.keyword',
-                'campaign',
-                'cons_conf_idx',
-                'contact',
-                'day.keyword',
-                'day_of_week',
-                'default',
-                'duration',
-                'education',
-                'emp_var_rate',
-                'euribor3m',
-                'housing',
-                'job',
-                'loan',
-                'marital',
-                'month',
-                'nr_employed',
-                'pdays',
-                'poutcome',
-                'previous',
-                'y',
+                'CentralAir',
+                'GarageArea',
+                'GarageCars',
+                'Electrical',
+                'Neighborhood',
+                'Heating',
+                '1stFlrSF',
+                'HeatingQC',
               ],
-              excludes: [],
+            },
+            analysis: {
+              classification: {
+                dependent_variable: 'HeatingQC',
+                num_top_feature_importance_values: 5,
+                training_percent: 35,
+                prediction_field_name: 'heatingqc',
+                num_top_classes: -1,
+              },
             },
             model_memory_limit: '60mb',
             allow_lazy_start: false,
