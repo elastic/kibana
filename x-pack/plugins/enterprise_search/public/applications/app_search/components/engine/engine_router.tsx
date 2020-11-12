@@ -88,9 +88,7 @@ export const EngineRouter: React.FC = () => {
     return <Redirect to={ENGINES_PATH} />;
   }
 
-  if (dataLoading) {
-    return <Loading />;
-  }
+  if (dataLoading) return <Loading />;
 
   return (
     <Switch>
