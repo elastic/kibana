@@ -11,8 +11,7 @@ import {
   ElasticsearchAssetType,
   InstallablePackage,
 } from '../../../../types';
-import * as Registry from '../../registry';
-import { ArchiveEntry } from '../../archive';
+import { ArchiveEntry, getAsset, getPathParts } from '../../archive';
 import { CallESAsCurrentUser } from '../../../../types';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
@@ -128,7 +127,7 @@ export async function installPipelinesForDataStream({
       dataStream,
       packageVersion: pkgVersion,
     });
-    const content = Registry.getAsset(path).toString('utf-8');
+    const content = getAsset(path).toString('utf-8');
     pipelines.push({
       name,
       nameForInstallation,
@@ -196,7 +195,7 @@ async function installPipeline({
 const isDirectory = ({ path }: ArchiveEntry) => path.endsWith('/');
 
 const isDataStreamPipeline = (path: string, dataStreamDataset: string) => {
-  const pathParts = Registry.pathParts(path);
+  const pathParts = getPathParts(path);
   return (
     !isDirectory({ path }) &&
     pathParts.type === ElasticsearchAssetType.ingestPipeline &&
@@ -205,7 +204,7 @@ const isDataStreamPipeline = (path: string, dataStreamDataset: string) => {
   );
 };
 const isPipeline = (path: string) => {
-  const pathParts = Registry.pathParts(path);
+  const pathParts = getPathParts(path);
   return pathParts.type === ElasticsearchAssetType.ingestPipeline;
 };
 
