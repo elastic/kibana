@@ -26,10 +26,6 @@ export class CountAggField implements IESAggField {
     this._canReadFromGeoJson = canReadFromGeoJson;
   }
 
-  _getESDocFieldName(): string {
-    return '';
-  }
-
   _getAggType(): AGG_TYPE {
     return AGG_TYPE.COUNT;
   }
@@ -47,7 +43,7 @@ export class CountAggField implements IESAggField {
   }
 
   getRootName(): string {
-    return this._getESDocFieldName();
+    return '';
   }
 
   async getLabel(): Promise<string> {
@@ -61,7 +57,7 @@ export class CountAggField implements IESAggField {
   }
 
   async getDataType(): Promise<string> {
-    return this._getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
+    return 'number';
   }
 
   async createTooltipProperty(value: string | string[] | undefined): Promise<ITooltipProperty> {

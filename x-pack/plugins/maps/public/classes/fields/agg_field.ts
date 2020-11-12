@@ -29,10 +29,6 @@ export class AggField extends CountAggField {
     this._aggType = params.aggType;
   }
 
-  _getESDocFieldName(): string {
-    return this._esDocField ? this._esDocField.getName() : '';
-  }
-
   isValid(): boolean {
     return !!this._esDocField;
   }
@@ -57,6 +53,14 @@ export class AggField extends CountAggField {
     return {
       [aggType]: addFieldToDSL(aggBody, field),
     };
+  }
+
+  getRootName(): string {
+    return this._esDocField ? this._esDocField.getName() : '';
+  }
+
+  async getDataType(): Promise<string> {
+    return this._getAggType() === AGG_TYPE.TERMS ? 'string' : 'number';
   }
 
   getBucketCount(): number {
