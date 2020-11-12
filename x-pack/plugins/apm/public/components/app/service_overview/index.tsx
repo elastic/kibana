@@ -18,10 +18,11 @@ import { useTrackPageview } from '../../../../../observability/public';
 import { isRumAgentName } from '../../../../common/agent_name';
 import { ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { TransactionErrorRateChart } from '../../shared/charts/transaction_error_rate_chart';
-import { ErrorOverviewLink } from '../../shared/Links/apm/ErrorOverviewLink';
 import { ServiceMapLink } from '../../shared/Links/apm/ServiceMapLink';
 import { TransactionOverviewLink } from '../../shared/Links/apm/TransactionOverviewLink';
 import { SearchBar } from '../../shared/search_bar';
+import { ServiceOverviewErrorsTable } from './service_overview_errors_table';
+import { TableLinkFlexItem } from './table_link_flex_item';
 
 const rowHeight = 310;
 const latencyChartRowHeight = 230;
@@ -32,12 +33,6 @@ const Row = styled(EuiFlexItem)`
 
 const LatencyChartRow = styled(EuiFlexItem)`
   height: ${latencyChartRowHeight}px;
-`;
-
-const TableLinkFlexItem = styled(EuiFlexItem)`
-  & > a {
-    text-align: right;
-  }
 `;
 
 interface ServiceOverviewProps {
@@ -126,30 +121,7 @@ export function ServiceOverview({
               )}
               <EuiFlexItem grow={6}>
                 <EuiPanel>
-                  <EuiFlexGroup>
-                    <EuiFlexItem>
-                      <EuiTitle size="xs">
-                        <h2>
-                          {i18n.translate(
-                            'xpack.apm.serviceOverview.errorsTableTitle',
-                            {
-                              defaultMessage: 'Errors',
-                            }
-                          )}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <TableLinkFlexItem>
-                      <ErrorOverviewLink serviceName={serviceName}>
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.errorsTableLinkText',
-                          {
-                            defaultMessage: 'View errors',
-                          }
-                        )}
-                      </ErrorOverviewLink>
-                    </TableLinkFlexItem>
-                  </EuiFlexGroup>
+                  <ServiceOverviewErrorsTable serviceName={serviceName} />
                 </EuiPanel>
               </EuiFlexItem>
             </EuiFlexGroup>
