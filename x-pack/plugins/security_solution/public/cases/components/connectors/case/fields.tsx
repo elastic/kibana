@@ -8,6 +8,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { EuiCallOut } from '@elastic/eui';
 
 import {
   ActionParamsProps,
@@ -16,21 +17,12 @@ import {
 import { TextAreaWithMessageVariables } from '../../../../../../triggers_actions_ui/public/common';
 
 import { CaseActionParams } from './types';
-import * as i18n from './translations';
 import { ExistingCase } from './existing_case';
-import { CreateCase } from './create_case';
-import { CaseOptions } from './options';
+
+import * as i18n from './translations';
 
 const isSome = (messageVariables: ActionVariable[] | undefined, variableName: string) =>
   !!messageVariables?.find((variable) => variable.name === variableName);
-
-const radios = [
-  { id: 'case-connector-add-to-new-case', label: i18n.CASE_CONNECTOR_CASES_OPTION_NEW_CASE },
-  {
-    id: 'case-connector-add-to-existing-case',
-    label: i18n.CASE_CONNECTOR_CASES_OPTION_EXISTING_CASE,
-  },
-];
 
 const Container = styled.div`
   ${({ theme }) => `
@@ -64,7 +56,6 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
     },
   } = actionParams.subActionParams ?? {};
 
-  const [option, setOption] = useState(radios[0].id);
   const [selectedCase, setSelectedCase] = useState<string | null>(null);
 
   const editSubActionProperty = useCallback(
@@ -106,13 +97,9 @@ const CaseParamsFields: React.FunctionComponent<ActionParamsProps<CaseActionPara
 
   return (
     <>
-      <CaseOptions onOptionChanged={setOption} selectedOption={option} options={radios} />
+      <EuiCallOut size="s" title={i18n.CASE_CONNECTOR_CALL_OUT_INFO} iconType="iInCircle" />
       <Container>
-        {radios[0].id === option ? (
-          <CreateCase onCaseCreated={onCaseChanged} />
-        ) : (
-          <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
-        )}
+        <ExistingCase onCaseChanged={onCaseChanged} selectedCase={selectedCase} />
       </Container>
       <Container>
         <TextAreaWithMessageVariables
