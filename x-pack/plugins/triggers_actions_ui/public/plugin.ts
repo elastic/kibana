@@ -113,20 +113,15 @@ export class Plugin
           unknown
         ];
 
-        const { boot } = await import('./application/boot');
+        const { renderApp } = await import('./application/app');
         const kibanaFeatures = await pluginsStart.features.getFeatures();
-        return boot({
+        return renderApp({
           dataPlugin: pluginsStart.data,
           charts: pluginsStart.charts,
           alerts: pluginsStart.alerts,
           element: params.element,
           toastNotifications: coreStart.notifications.toasts,
-          http: coreStart.http,
-          uiSettings: coreStart.uiSettings,
-          docLinks: coreStart.docLinks,
-          chrome: coreStart.chrome,
-          savedObjects: coreStart.savedObjects.client,
-          I18nContext: coreStart.i18n.Context,
+          savedObjectsClient: coreStart.savedObjects.client,
           capabilities: coreStart.application.capabilities,
           navigateToApp: coreStart.application.navigateToApp,
           setBreadcrumbs: params.setBreadcrumbs,
@@ -134,6 +129,7 @@ export class Plugin
           actionTypeRegistry,
           alertTypeRegistry,
           kibanaFeatures,
+          ...coreStart,
         });
       },
     });

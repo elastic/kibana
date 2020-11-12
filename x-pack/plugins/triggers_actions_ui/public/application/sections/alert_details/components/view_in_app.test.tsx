@@ -7,31 +7,11 @@ import * as React from 'react';
 import uuid from 'uuid';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { TriggersAndActionsUiServices } from '../../../app';
 
 import { Alert } from '../../../../types';
 import { ViewInApp } from './view_in_app';
-import { useAppDependencies } from '../../../app_context';
-
-jest.mock('../../../app_context', () => {
-  const alerts = {
-    getNavigation: jest.fn(async (id) =>
-      id === 'alert-with-nav' ? { path: '/alert' } : undefined
-    ),
-  };
-  const navigateToApp = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({
-      http: jest.fn(),
-      navigateToApp,
-      alerts,
-      legacy: {
-        capabilities: {
-          get: jest.fn(() => ({})),
-        },
-      },
-    })),
-  };
-});
 
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveAlertsCapability: jest.fn(() => true),
@@ -41,8 +21,7 @@ describe('view in app', () => {
   describe('link to the app that created the alert', () => {
     it('is disabled when there is no navigation', async () => {
       const alert = mockAlert();
-      const { alerts } = useAppDependencies();
-
+      const { alerts } = useKibana<TriggersAndActionsUiServices>().services;
       let component: ReactWrapper;
       await act(async () => {
         // use mount as we need useEffect to run
@@ -59,7 +38,7 @@ describe('view in app', () => {
 
     it('enabled when there is navigation', async () => {
       const alert = mockAlert({ id: 'alert-with-nav', consumer: 'siem' });
-      const { navigateToApp } = useAppDependencies();
+      const { navigateToApp } = useKibana<TriggersAndActionsUiServices>().services;
 
       let component: ReactWrapper;
       act(async () => {

@@ -14,12 +14,6 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
 const fake2MinutesAgo = new Date('2020-02-09T23:13:41.941Z');
 
-jest.mock('../../../app_context', () => {
-  const toastNotifications = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({ toastNotifications })),
-  };
-});
 describe('alert_instance_summary_route', () => {
   it('render a loader while fetching data', () => {
     const alert = mockAlert();

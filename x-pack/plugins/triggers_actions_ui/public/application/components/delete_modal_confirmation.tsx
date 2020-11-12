@@ -7,7 +7,8 @@ import { EuiConfirmModal, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { HttpSetup } from 'kibana/public';
-import { useAppDependencies } from '../app_context';
+import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { TriggersAndActionsUiServices } from '../app';
 
 export const DeleteModalConfirmation = ({
   idsToDelete,
@@ -40,7 +41,7 @@ export const DeleteModalConfirmation = ({
     setDeleteModalVisibility(idsToDelete.length > 0);
   }, [idsToDelete]);
 
-  const { http, toastNotifications } = useAppDependencies();
+  const { http, toastNotifications } = useKibana<TriggersAndActionsUiServices>().services;
   const numIdsToDelete = idsToDelete.length;
   if (!deleteModalFlyoutVisible) {
     return null;

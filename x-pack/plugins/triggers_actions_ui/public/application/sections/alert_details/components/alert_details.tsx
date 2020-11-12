@@ -26,7 +26,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
-import { useAppDependencies } from '../../../app_context';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { hasAllPrivilege, hasExecuteActionsCapability } from '../../../lib/capabilities';
 import { getAlertingSectionBreadcrumb, getAlertDetailsBreadcrumb } from '../../../lib/breadcrumb';
 import { getCurrentDocTitle } from '../../../lib/doc_title';
@@ -41,6 +41,7 @@ import { AlertEdit } from '../../alert_form';
 import { AlertsContextProvider } from '../../../context/alerts_context';
 import { routeToAlertDetails } from '../../../constants';
 import { alertsErrorReasonTranslationsMapping } from '../../alerts_list/translations';
+import { TriggersAndActionsUiServices } from '../../../app';
 
 type AlertDetailsProps = {
   alert: Alert;
@@ -72,7 +73,7 @@ export const AlertDetails: React.FunctionComponent<AlertDetailsProps> = ({
     dataPlugin,
     setBreadcrumbs,
     chrome,
-  } = useAppDependencies();
+  } = useKibana<TriggersAndActionsUiServices>().services;
 
   // Set breadcrumb and page title
   useEffect(() => {

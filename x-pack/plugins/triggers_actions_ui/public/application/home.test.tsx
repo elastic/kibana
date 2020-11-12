@@ -8,9 +8,9 @@ import * as React from 'react';
 import { RouteComponentProps, Router } from 'react-router-dom';
 import { createMemoryHistory, createLocation } from 'history';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 
 import TriggersActionsUIHome, { MatchParams } from './home';
-import { AppContextProvider } from './app_context';
 import { getMockedAppDependencies } from './test_utils';
 
 describe('home', () => {
@@ -31,9 +31,9 @@ describe('home', () => {
     };
     const wrapper = mountWithIntl(
       <Router history={deps.history}>
-        <AppContextProvider appDeps={deps}>
+        <KibanaContextProvider services={deps}>
           <TriggersActionsUIHome {...props} />
-        </AppContextProvider>
+        </KibanaContextProvider>
       </Router>
     );
     const documentationLink = wrapper.find('[data-test-subj="documentationLink"]');

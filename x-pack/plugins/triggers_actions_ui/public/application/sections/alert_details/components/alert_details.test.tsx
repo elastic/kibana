@@ -18,35 +18,6 @@ import {
 
 const mockes = coreMock.createSetup();
 
-jest.mock('../../../app_context', () => ({
-  useAppDependencies: jest.fn(() => ({
-    http: jest.fn(),
-    capabilities: {
-      get: jest.fn(() => ({})),
-    },
-    actionTypeRegistry: jest.fn(),
-    alertTypeRegistry: {
-      has: jest.fn().mockReturnValue(true),
-      register: jest.fn(),
-      get: jest.fn().mockReturnValue({
-        id: 'my-alert-type',
-        iconClass: 'test',
-        name: 'test-alert',
-        validate: (): ValidationResult => {
-          return { errors: {} };
-        },
-        requiresAppContext: false,
-      }),
-      list: jest.fn(),
-    },
-    toastNotifications: mockes.notifications.toasts,
-    docLinks: { ELASTIC_WEBSITE_URL: '', DOC_LINK_VERSION: '' },
-    uiSettings: mockes.uiSettings,
-    dataPlugin: jest.fn(),
-    charts: jest.fn(),
-  })),
-}));
-
 jest.mock('react-router-dom', () => ({
   useHistory: () => ({
     push: jest.fn(),

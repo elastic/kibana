@@ -6,60 +6,67 @@
 import React, { lazy } from 'react';
 import { Switch, Route, Redirect, Router } from 'react-router-dom';
 import {
-  ChromeStart,
-  DocLinksStart,
   ToastsSetup,
-  HttpSetup,
-  IUiSettingsClient,
   ApplicationStart,
   ChromeBreadcrumb,
   CoreStart,
   ScopedHistory,
+  SavedObjectsClientContract,
 } from 'kibana/public';
+import { render, unmountComponentAtNode } from 'react-dom';
+import { I18nProvider } from '@kbn/i18n/react';
 import { KibanaFeature } from '../../../features/common';
 import { Section, routeToAlertDetails } from './constants';
-import { AppContextProvider } from './app_context';
 import { ActionTypeRegistryContract, AlertTypeRegistryContract } from '../types';
 import { ChartsPluginStart } from '../../../../../src/plugins/charts/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { PluginStartContract as AlertingStart } from '../../../alerts/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 
+import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
+import { setSavedObjectsClient } from '../common/lib/index_threshold_api';
+
 const TriggersActionsUIHome = lazy(async () => import('./home'));
 const AlertDetailsRoute = lazy(
   () => import('./sections/alert_details/components/alert_details_route')
 );
 
-export interface AppDeps {
+export interface TriggersAndActionsUiServices extends CoreStart {
   dataPlugin: DataPublicPluginStart;
   charts: ChartsPluginStart;
-  chrome: ChromeStart;
   alerts?: AlertingStart;
   navigateToApp: CoreStart['application']['navigateToApp'];
-  docLinks: DocLinksStart;
   toastNotifications: ToastsSetup;
-  http: HttpSetup;
-  uiSettings: IUiSettingsClient;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   capabilities: ApplicationStart['capabilities'];
   actionTypeRegistry: ActionTypeRegistryContract;
   alertTypeRegistry: AlertTypeRegistryContract;
   history: ScopedHistory;
   kibanaFeatures: KibanaFeature[];
+  element: HTMLElement;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
-export const App = (appDeps: AppDeps) => {
+export const renderApp = (deps: TriggersAndActionsUiServices) => {
+  const { element, savedObjectsClient } = deps;
   const sections: Section[] = ['alerts', 'connectors'];
 
   const sectionsRegex = sections.join('|');
+  setSavedObjectsClient(savedObjectsClient);
 
-  return (
-    <Router history={appDeps.history}>
-      <AppContextProvider appDeps={appDeps}>
-        <AppWithoutRouter sectionsRegex={sectionsRegex} />
-      </AppContextProvider>
-    </Router>
+  render(
+    <I18nProvider>
+      <KibanaContextProvider services={{ ...deps }}>
+        <Router history={deps.history}>
+          <AppWithoutRouter sectionsRegex={sectionsRegex} />
+        </Router>
+      </KibanaContextProvider>
+    </I18nProvider>,
+    element
   );
+  return () => {
+    unmountComponentAtNode(element);
+  };
 };
 
 export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) => {

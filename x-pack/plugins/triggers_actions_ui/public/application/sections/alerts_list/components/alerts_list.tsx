@@ -30,8 +30,8 @@ import {
 import { useHistory } from 'react-router-dom';
 
 import { isEmpty } from 'lodash';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { AlertsContextProvider } from '../../../context/alerts_context';
-import { useAppDependencies } from '../../../app_context';
 import { ActionType, Alert, AlertTableItem, AlertTypeIndex, Pagination } from '../../../../types';
 import { AlertAdd } from '../../alert_form';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
@@ -58,6 +58,7 @@ import {
 } from '../../../../../../alerts/common';
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { alertsStatusesTranslationsMapping } from '../translations';
+import { TriggersAndActionsUiServices } from '../../../app';
 
 const ENTER_KEY = 13;
 
@@ -85,7 +86,7 @@ export const AlertsList: React.FunctionComponent = () => {
     charts,
     dataPlugin,
     kibanaFeatures,
-  } = useAppDependencies();
+  } = useKibana<TriggersAndActionsUiServices>().services;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
 
   const [actionTypes, setActionTypes] = useState<ActionType[]>([]);

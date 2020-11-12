@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 
 import {
   Alert,
@@ -13,7 +14,6 @@ import {
   AlertInstanceSummary,
   AlertingFrameworkHealth,
 } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
 import {
   deleteAlerts,
   disableAlerts,
@@ -69,7 +69,10 @@ export function withBulkAlertOperations<T>(
   WrappedComponent: React.ComponentType<T & ComponentOpts>
 ): React.FunctionComponent<PropsWithOptionalApiHandlers<T>> {
   return (props: PropsWithOptionalApiHandlers<T>) => {
-    const { http } = useAppDependencies();
+    const { http } = useKibana().services;
+    if (!http) {
+      return null;
+    }
     return (
       <WrappedComponent
         {...(props as T)}

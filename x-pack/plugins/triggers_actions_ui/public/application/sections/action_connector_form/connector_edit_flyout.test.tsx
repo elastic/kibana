@@ -10,7 +10,7 @@ import { ActionsConnectorsContextProvider } from '../../context/actions_connecto
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ValidationResult } from '../../../types';
 import ConnectorEditFlyout from './connector_edit_flyout';
-import { AppContextProvider } from '../../app_context';
+import { KibanaContextProvider } from '../../../../../../../src/plugins/kibana_react/public';
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 let deps: any;
@@ -71,7 +71,7 @@ describe('connector_edit_flyout', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     const wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={deps}>
         <ActionsConnectorsContextProvider
           value={{
             http: deps.http,
@@ -86,7 +86,7 @@ describe('connector_edit_flyout', () => {
         >
           <ConnectorEditFlyout initialConnector={connector} onClose={() => {}} />
         </ActionsConnectorsContextProvider>
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     const connectorNameField = wrapper.find('[data-test-subj="nameInput"]');
@@ -124,7 +124,7 @@ describe('connector_edit_flyout', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     const wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={deps}>
         <ActionsConnectorsContextProvider
           value={{
             http: deps.http,
@@ -139,7 +139,7 @@ describe('connector_edit_flyout', () => {
         >
           <ConnectorEditFlyout initialConnector={connector} onClose={() => {}} />
         </ActionsConnectorsContextProvider>
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     const preconfiguredBadge = wrapper.find('[data-test-subj="preconfiguredBadge"]');

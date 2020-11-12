@@ -10,14 +10,15 @@ import { FormattedMessage } from '@kbn/i18n/react';
 import { CoreStart } from 'kibana/public';
 import { fromNullable, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useAppDependencies } from '../../../app_context';
 
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import {
   AlertNavigation,
   AlertStateNavigation,
   AlertUrlNavigation,
 } from '../../../../../../alerts/common';
 import { Alert } from '../../../../types';
+import { TriggersAndActionsUiServices } from '../../../app';
 
 export interface ViewInAppProps {
   alert: Alert;
@@ -28,7 +29,9 @@ const NO_NAVIGATION = false;
 type AlertNavigationLoadingState = AlertNavigation | false | null;
 
 export const ViewInApp: React.FunctionComponent<ViewInAppProps> = ({ alert }) => {
-  const { navigateToApp, alerts: maybeAlerting } = useAppDependencies();
+  const { navigateToApp, alerts: maybeAlerting } = useKibana<
+    TriggersAndActionsUiServices
+  >().services;
 
   const [alertNavigation, setAlertNavigation] = useState<AlertNavigationLoadingState>(null);
   useEffect(() => {

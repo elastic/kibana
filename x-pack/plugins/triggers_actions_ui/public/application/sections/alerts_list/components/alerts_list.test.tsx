@@ -13,7 +13,6 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { alertTypeRegistryMock } from '../../../alert_type_registry.mock';
 import { AlertsList } from './alerts_list';
 import { ValidationResult } from '../../../../types';
-import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
@@ -22,6 +21,7 @@ import {
   ALERTS_FEATURE_ID,
 } from '../../../../../../alerts/common';
 import { featuresPluginMock } from '../../../../../../features/public/mocks';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
@@ -124,9 +124,9 @@ describe('alerts_list component empty', () => {
     };
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={deps}>
         <AlertsList />
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     await act(async () => {
@@ -297,9 +297,9 @@ describe('alerts_list component with items', () => {
     alertTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={deps}>
         <AlertsList />
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     await act(async () => {
@@ -382,9 +382,9 @@ describe('alerts_list component empty with show only capability', () => {
     };
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={deps}>
         <AlertsList />
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     await act(async () => {
@@ -501,9 +501,9 @@ describe('alerts_list with show only capability', () => {
     alertTypeRegistry.has.mockReturnValue(false);
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={deps}>
         <AlertsList />
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     await act(async () => {

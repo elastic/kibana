@@ -8,13 +8,14 @@ import { i18n } from '@kbn/i18n';
 import { ToastsApi } from 'kibana/public';
 import React, { useState, useEffect } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
+import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { Alert, AlertInstanceSummary, AlertType } from '../../../../types';
-import { useAppDependencies } from '../../../app_context';
 import {
   ComponentOpts as AlertApis,
   withBulkAlertOperations,
 } from '../../common/components/with_bulk_alert_api_operations';
 import { AlertInstancesWithApi as AlertInstances } from './alert_instances';
+import { TriggersAndActionsUiServices } from '../../../app';
 
 type WithAlertInstanceSummaryProps = {
   alert: Alert;
@@ -30,7 +31,7 @@ export const AlertInstancesRoute: React.FunctionComponent<WithAlertInstanceSumma
   requestRefresh,
   loadAlertInstanceSummary: loadAlertInstanceSummary,
 }) => {
-  const { toastNotifications } = useAppDependencies();
+  const { toastNotifications } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [alertInstanceSummary, setAlertInstanceSummary] = useState<AlertInstanceSummary | null>(
     null

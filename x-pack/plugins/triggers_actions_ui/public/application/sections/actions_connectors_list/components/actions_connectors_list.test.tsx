@@ -11,11 +11,11 @@ import { coreMock, scopedHistoryMock } from '../../../../../../../../src/core/pu
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { AppContextProvider } from '../../../app_context';
 import { chartPluginMock } from '../../../../../../../../src/plugins/charts/public/mocks';
 import { dataPluginMock } from '../../../../../../../../src/plugins/data/public/mocks';
 import { alertingPluginMock } from '../../../../../../alerts/public/mocks';
 import { featuresPluginMock } from '../../../../../../features/public/mocks';
+import { KibanaContextProvider } from '../../../../../../../../src/plugins/kibana_react/public';
 
 jest.mock('../../../lib/action_connector_api', () => ({
   loadAllActions: jest.fn(),
@@ -79,9 +79,9 @@ describe('actions_connectors_list component empty', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={{ ...deps }}>
         <ActionsConnectorsList />
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -192,9 +192,9 @@ describe('actions_connectors_list component with items', () => {
     };
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={{ ...deps }}>
         <ActionsConnectorsList />
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -283,9 +283,9 @@ describe('actions_connectors_list component empty with show only capability', ()
     };
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={{ ...deps }}>
         <ActionsConnectorsList />
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -375,9 +375,9 @@ describe('actions_connectors_list with show only capability', () => {
     };
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={{ ...deps }}>
         <ActionsConnectorsList />
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update
@@ -479,9 +479,9 @@ describe('actions_connectors_list component with disabled items', () => {
     };
 
     wrapper = mountWithIntl(
-      <AppContextProvider appDeps={deps}>
+      <KibanaContextProvider services={{ ...deps }}>
         <ActionsConnectorsList />
-      </AppContextProvider>
+      </KibanaContextProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update

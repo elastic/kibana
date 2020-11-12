@@ -24,13 +24,6 @@ beforeAll(() => {
   global.Date.now = jest.fn(() => fakeNow.getTime());
 });
 
-jest.mock('../../../app_context', () => {
-  const toastNotifications = jest.fn();
-  return {
-    useAppDependencies: jest.fn(() => ({ toastNotifications })),
-  };
-});
-
 describe('alert_instances', () => {
   it('render a list of alert instances', () => {
     const alert = mockAlert();
