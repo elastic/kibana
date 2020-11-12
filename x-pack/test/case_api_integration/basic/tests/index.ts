@@ -10,7 +10,7 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('case api basic', function () {
     // Fastest ciGroup for the moment.
-    this.tags('ciGroup2');
+    this.tags('ciGroup1');
 
     loadTestFile(require.resolve('./cases/comments/delete_comment'));
     loadTestFile(require.resolve('./cases/comments/find_comments'));

@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function advancedSettingsApp({ loadTestFile }: FtrProviderContext) {
   describe('Index Patterns', function indexPatternsTestSuite() {
-    this.tags('ciGroup2');
+    this.tags('ciGroup1');
     loadTestFile(require.resolve('./feature_controls'));
   });
 }

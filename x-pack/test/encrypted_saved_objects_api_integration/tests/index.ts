@@ -8,7 +8,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('encryptedSavedObjects', function encryptedSavedObjectsSuite() {
-    this.tags('ciGroup2');
+    this.tags('ciGroup1');
     loadTestFile(require.resolve('./encrypted_saved_objects_api'));
   });
 }
