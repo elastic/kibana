@@ -31,6 +31,7 @@ import {
   mockMetricsService,
   mockStatusService,
   mockLoggingService,
+  mockI18nService,
 } from './server.test.mocks';
 
 import { BehaviorSubject } from 'rxjs';
@@ -49,6 +50,7 @@ beforeEach(() => {
   mockConfigService.atPath.mockReturnValue(new BehaviorSubject({ autoListen: true }));
   mockPluginsService.discover.mockResolvedValue({
     pluginTree: { asOpaqueIds: new Map(), asNames: new Map() },
+    pluginPaths: [],
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 });
@@ -70,6 +72,7 @@ test('sets up services on "setup"', async () => {
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 
   await server.setup();
 
@@ -83,6 +86,7 @@ test('sets up services on "setup"', async () => {
   expect(mockMetricsService.setup).toHaveBeenCalledTimes(1);
   expect(mockStatusService.setup).toHaveBeenCalledTimes(1);
   expect(mockLoggingService.setup).toHaveBeenCalledTimes(1);
+  expect(mockI18nService.setup).toHaveBeenCalledTimes(1);
 });
 
 test('injects legacy dependency to context#setup()', async () => {
@@ -96,6 +100,7 @@ test('injects legacy dependency to context#setup()', async () => {
   ]);
   mockPluginsService.discover.mockResolvedValue({
     pluginTree: { asOpaqueIds: pluginDependencies, asNames: new Map() },
+    pluginPaths: [],
     uiPlugins: { internal: new Map(), public: new Map(), browserConfigs: new Map() },
   });
 
@@ -185,6 +190,7 @@ test(`doesn't setup core services if config validation fails`, async () => {
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 });
 
 test(`doesn't setup core services if legacy config validation fails`, async () => {
@@ -207,6 +213,7 @@ test(`doesn't setup core services if legacy config validation fails`, async () =
   expect(mockMetricsService.setup).not.toHaveBeenCalled();
   expect(mockStatusService.setup).not.toHaveBeenCalled();
   expect(mockLoggingService.setup).not.toHaveBeenCalled();
+  expect(mockI18nService.setup).not.toHaveBeenCalled();
 });
 
 test(`doesn't validate config if env.isDevClusterMaster is true`, async () => {

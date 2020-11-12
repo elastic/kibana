@@ -39,6 +39,7 @@ export interface QuerySuggestionGetFnArgs {
   selectionStart: number;
   selectionEnd: number;
   signal?: AbortSignal;
+  useTimeRange?: boolean;
   boolFilter?: any;
 }
 

@@ -51,13 +51,14 @@ import { IndexPatternField, IndexPatternPrivateState, IndexPatternPersistedState
 import { KibanaContextProvider } from '../../../../../src/plugins/kibana_react/public';
 import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { VisualizeFieldContext } from '../../../../../src/plugins/ui_actions/public';
-import { deleteColumn } from './state_helpers';
+import { mergeLayer } from './state_helpers';
 import { Datasource, StateSetter } from '../index';
 import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
+import { deleteColumn } from './operations';
 import { FieldBasedIndexPatternColumn } from './operations/definitions/column_types';
 import { Dragging } from '../drag_drop/providers';
 
-export { OperationType, IndexPatternColumn } from './operations';
+export { OperationType, IndexPatternColumn, deleteColumn } from './operations';
 
 export type DraggedField = Dragging & {
   field: IndexPatternField;
@@ -77,6 +78,7 @@ export function columnToOperation(column: IndexPatternColumn, uniqueLabel?: stri
 export * from './rename_columns';
 export * from './format_column';
 export * from './time_scale';
+export * from './suffix_formatter';
 
 export function getIndexPatternDatasource({
   core,
@@ -159,10 +161,10 @@ export function getIndexPatternDatasource({
     },
 
     removeColumn({ prevState, layerId, columnId }) {
-      return deleteColumn({
+      return mergeLayer({
         state: prevState,
         layerId,
-        columnId,
+        newLayer: deleteColumn({ layer: prevState.layers[layerId], columnId }),
       });
     },
 
