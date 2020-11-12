@@ -13,8 +13,6 @@ import { EuiSelectable } from '@elastic/eui';
 import { ChangeIndexPattern } from './change_indexpattern';
 import { getFieldByNameFactory } from './pure_helpers';
 
-jest.mock('./state_helpers');
-
 interface IndexPatternPickerOption {
   label: string;
   checked?: 'on' | 'off';
