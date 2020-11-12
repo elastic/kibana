@@ -11,8 +11,7 @@ import {
   ElasticsearchAssetType,
   InstallablePackage,
 } from '../../../../types';
-import { ArchiveEntry } from '../../registry';
-import { getAsset, getPathParts } from '../../archive';
+import { ArchiveEntry, getAsset, getPathParts } from '../../archive';
 import { CallESAsCurrentUser } from '../../../../types';
 import { saveInstalledEsRefs } from '../../packages/install';
 import { getInstallationObject } from '../../packages';
