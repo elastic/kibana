@@ -45,7 +45,7 @@ import {
   // API_LOGS_TITLE,
 } from './constants';
 
-import { Loading } from '../loading';
+import { Loading } from '../../../shared/loading';
 
 import { EngineLogic } from './';
 

@@ -17,7 +17,7 @@ jest.mock('../../../shared/flash_messages', () => ({
 }));
 import { setQueuedErrorMessage } from '../../../shared/flash_messages';
 
-import { Loading } from '../loading';
+import { Loading } from '../../../shared/loading';
 
 import { EngineRouter } from './';
 
