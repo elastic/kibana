@@ -247,8 +247,7 @@ export function Detail() {
     return (entries(PanelDisplayNames)
       .filter(([panelId]) => {
         return (
-          panelId !== 'policies' ||
-          (packageInfoData?.response.status === InstallStatus.installed && false) // Remove `false` when ready to implement policies tab
+          panelId !== 'policies' || packageInfoData?.response.status === InstallStatus.installed
         );
       })
       .map(([panelId, display]) => {
