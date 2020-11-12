@@ -31,6 +31,7 @@ import {
   DataPublicPluginStart,
   IndexPattern,
   IndexPatternsContract,
+  SavedQuery,
   TimefilterContract,
 } from '../../../data/public';
 import { EmbeddableStart, ViewMode } from '../../../embeddable/public';
@@ -84,6 +85,11 @@ export interface DashboardAppComponentState {
 }
 
 export type DashboardAppComponentActiveState = Required<DashboardAppComponentState>;
+
+export interface DashboardTopNavState {
+  chromeIsVisible: boolean;
+  savedQuery?: SavedQuery;
+}
 
 export type DashboardTopNavProps = Omit<DashboardAppComponentActiveState, 'initialized'> & {
   timefilter: TimefilterContract;

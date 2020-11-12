@@ -180,8 +180,8 @@ export async function mountApp({
 
   const app = (
     <I18nProvider>
-      <HashRouter>
-        <KibanaContextProvider services={dashboardServices}>
+      <KibanaContextProvider services={dashboardServices}>
+        <HashRouter>
           <Switch>
             <Route
               path={[
@@ -193,8 +193,8 @@ export async function mountApp({
             <Route exact path={DashboardConstants.LANDING_PAGE_PATH} render={renderListingPage} />
             <Dashboard404 />
           </Switch>
-        </KibanaContextProvider>
-      </HashRouter>
+        </HashRouter>
+      </KibanaContextProvider>
     </I18nProvider>
   );
 

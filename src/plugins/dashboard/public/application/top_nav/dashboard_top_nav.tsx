@@ -24,6 +24,7 @@ import { i18n } from '@kbn/i18n';
 import angular from 'angular';
 import React, { ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { createDashboardEditUrl, DashboardConstants } from '../..';
+import { SavedQuery } from '../../../../data/public';
 
 import { ViewMode } from '../../../../embeddable/public';
 import { useKibana } from '../../../../kibana_react/public';
@@ -33,7 +34,12 @@ import { NavAction } from '../../types';
 import { UrlParams } from '../dashboard_router';
 import { leaveConfirmStrings } from '../dashboard_strings';
 import { saveDashboard } from '../lib';
-import { DashboardAppServices, DashboardSaveOptions, DashboardTopNavProps } from '../types';
+import {
+  DashboardAppServices,
+  DashboardSaveOptions,
+  DashboardTopNavProps,
+  DashboardTopNavState,
+} from '../types';
 import { getTopNavConfig } from './get_top_nav_config';
 import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
@@ -75,11 +81,11 @@ export function DashboardTopNav({
     dashboardCapabilities,
   } = useKibana<DashboardAppServices>().services;
 
-  const [chromeIsVisible, setChromeIsVisible] = useState(false);
+  const [state, setState] = useState<DashboardTopNavState>({ chromeIsVisible: false });
 
   useEffect(() => {
-    const visibleSubscription = chrome.getIsVisible$().subscribe((isVisible) => {
-      setChromeIsVisible(isVisible);
+    const visibleSubscription = chrome.getIsVisible$().subscribe((chromeIsVisible) => {
+      setState((s) => ({ ...s, chromeIsVisible }));
     });
     return () => visibleSubscription.unsubscribe();
   }, [chrome]);
@@ -438,7 +444,7 @@ export function DashboardTopNav({
 
   const getNavBarProps = () => {
     const shouldShowNavBarComponent = (forceShow: boolean): boolean =>
-      (forceShow || chromeIsVisible) && !dashboardStateManager.getFullScreenMode();
+      (forceShow || state.chromeIsVisible) && !dashboardStateManager.getFullScreenMode();
 
     const shouldShowFilterBar = (forceHide: boolean): boolean =>
       !forceHide &&
@@ -474,11 +480,27 @@ export function DashboardTopNav({
       setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
       indexPatterns,
       showSaveQuery: dashboardCapabilities.saveQuery,
-      // savedQuery: $scope.savedQuery,
-      // onSavedQueryIdChange,
-      savedQueryId: dashboardStateManager.getSavedQueryId(),
       useDefaultBehaviors: true,
       onQuerySubmit,
+      onSavedQueryUpdated: (savedQuery: SavedQuery) => {
+        const allFilters = data.query.filterManager.getFilters();
+        data.query.filterManager.setFilters(allFilters);
+        dashboardStateManager.applyFilters(savedQuery.attributes.query, allFilters);
+        if (savedQuery.attributes.timefilter) {
+          timefilter.setTime({
+            from: savedQuery.attributes.timefilter.from,
+            to: savedQuery.attributes.timefilter.to,
+          });
+          if (savedQuery.attributes.timefilter.refreshInterval) {
+            timefilter.setRefreshInterval(savedQuery.attributes.timefilter.refreshInterval);
+          }
+        }
+        setState((s) => ({ ...s, savedQuery }));
+      },
+      savedQuery: state.savedQuery,
+      savedQueryId: dashboardStateManager.getSavedQueryId(),
+      onSavedQueryIdChange: (newId: string | undefined) =>
+        dashboardStateManager.setSavedQueryId(newId),
     };
   };
 
