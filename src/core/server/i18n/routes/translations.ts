@@ -43,7 +43,7 @@ export const registerTranslationsRoute = (router: IRouter, locale: string) => {
       },
     },
     (ctx, req, res) => {
-      if (req.params.locale !== locale) {
+      if (req.params.locale.toLowerCase() !== locale.toLowerCase()) {
         return res.notFound({
           body: `Unknown locale: ${req.params.locale}`,
         });
