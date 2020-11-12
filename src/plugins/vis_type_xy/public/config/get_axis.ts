@@ -21,6 +21,9 @@ import { identity, isNil } from 'lodash';
 
 import { AxisSpec, TickFormatter, YDomainRange, ScaleType as ECScaleType } from '@elastic/charts';
 
+import { LabelRotation } from '../../../charts/public';
+import { BUCKET_TYPES } from '../../../data/public';
+
 import {
   Aspect,
   CategoryAxis,
@@ -34,7 +37,6 @@ import {
   XScaleType,
   YScaleType,
 } from '../types';
-import { LabelRotation } from '../../../charts/public';
 
 export function getAxis<S extends XScaleType | YScaleType>(
   { type, title: axisTitle, labels, scale: axisScale, ...axis }: CategoryAxis,
@@ -52,7 +54,8 @@ export function getAxis<S extends XScaleType | YScaleType>(
         show: valueAxis === axis.id,
       };
   // Date range formatter applied on xAccessor
-  const tickFormatter = aggType === 'date_range' ? identity : formatter;
+  const tickFormatter =
+    aggType === BUCKET_TYPES.DATE_RANGE || aggType === BUCKET_TYPES.RANGE ? identity : formatter;
   const ticks: TickOptions = {
     formatter: tickFormatter,
     labelFormatter: getLabelFormatter(labels.truncate, tickFormatter),

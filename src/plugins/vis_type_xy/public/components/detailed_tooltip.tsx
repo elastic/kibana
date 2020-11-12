@@ -27,6 +27,8 @@ import {
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 
+import { BUCKET_TYPES } from '../../../data/public';
+
 import { Aspects } from '../types';
 
 import './_detailed_tooltip.scss';
@@ -44,9 +46,13 @@ const getTooltipData = (
   const data: TooltipData[] = [];
 
   if (header) {
+    const xFormatter =
+      aspects.x.aggType === BUCKET_TYPES.DATE_RANGE || aspects.x.aggType === BUCKET_TYPES.RANGE
+        ? null
+        : aspects.x.formatter;
     data.push({
       label: aspects.x.title,
-      value: aspects.x.formatter ? aspects.x.formatter(header.value) : `${header.value}`,
+      value: xFormatter ? xFormatter(header.value) : `${header.value}`,
     });
   }
 

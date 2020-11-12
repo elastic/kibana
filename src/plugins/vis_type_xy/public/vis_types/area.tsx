@@ -189,7 +189,6 @@ export const getAreaVisTypeDefinition = (
         min: 0,
         max: 1,
         aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
-        tooltip: () => 'Hellllo',
         // TODO: Remove when split chart aggs are supported
         // https://github.com/elastic/kibana/issues/82496
         disabled: true,

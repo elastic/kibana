@@ -58,7 +58,12 @@ const getXAccessor = (xAspect: Aspect): Accessor | AccessorFn => {
     return () => (xAspect.params as FakeParams)?.defaultValue;
   }
 
-  if (!(xAspect.aggType === BUCKET_TYPES.DATE_RANGE && xAspect.formatter)) {
+  if (
+    !(
+      (xAspect.aggType === BUCKET_TYPES.DATE_RANGE || xAspect.aggType === BUCKET_TYPES.RANGE) &&
+      xAspect.formatter
+    )
+  ) {
     return xAspect.accessor;
   }
 
