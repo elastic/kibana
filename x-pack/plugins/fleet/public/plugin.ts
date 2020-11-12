@@ -101,15 +101,7 @@ export class IngestManagerPlugin
           ...startDepsServices,
         };
         const { renderApp, teardownIngestManager } = await import('./applications/fleet');
-        const unmount = renderApp(
-          startServices,
-          params,
-          deps,
-          startDepsServices,
-          config,
-          kibanaVersion,
-          extensions
-        );
+        const unmount = renderApp(startServices, params, config, kibanaVersion, extensions);
 
         return () => {
           unmount();

@@ -305,15 +305,15 @@ const AgentDetailsPageContent: React.FunctionComponent<{
   return (
     <Switch>
       <Route
-        path={PAGE_ROUTING_PATHS.fleet_agent_details_details}
-        render={() => {
-          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
-        }}
-      />
-      <Route
         path={PAGE_ROUTING_PATHS.fleet_agent_details_logs}
         render={() => {
           return <AgentLogs agent={agent} />;
+        }}
+      />
+      <Route
+        path={PAGE_ROUTING_PATHS.fleet_agent_details}
+        render={() => {
+          return <AgentDetailsContent agent={agent} agentPolicy={agentPolicy} />;
         }}
       />
     </Switch>

@@ -14,12 +14,7 @@ import { EuiErrorBoundary, EuiPanel, EuiEmptyPrompt, EuiCode } from '@elastic/eu
 import { CoreStart, AppMountParameters } from 'src/core/public';
 import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
 import { EuiThemeProvider } from '../../../../xpack_legacy/common';
-import {
-  IngestManagerSetupDeps,
-  IngestManagerConfigType,
-  IngestManagerStartDeps,
-  IngestManagerStartServices,
-} from '../../plugin';
+import { IngestManagerConfigType, IngestManagerStartServices } from '../../plugin';
 import { PAGE_ROUTING_PATHS } from './constants';
 import { DefaultLayout, WithoutHeaderLayout } from './layouts';
 import { Loading, Error } from './components';
@@ -232,8 +227,6 @@ const IngestManagerRoutes = memo<{ history: AppMountParameters['history']; basep
 const IngestManagerApp = ({
   basepath,
   startServices,
-  setupDeps,
-  startDeps,
   config,
   history,
   kibanaVersion,
@@ -241,8 +234,6 @@ const IngestManagerApp = ({
 }: {
   basepath: string;
   startServices: IngestManagerStartServices;
-  setupDeps: IngestManagerSetupDeps;
-  startDeps: IngestManagerStartDeps;
   config: IngestManagerConfigType;
   history: AppMountParameters['history'];
   kibanaVersion: string;
@@ -269,8 +260,6 @@ const IngestManagerApp = ({
 export function renderApp(
   startServices: IngestManagerStartServices,
   { element, appBasePath, history }: AppMountParameters,
-  setupDeps: IngestManagerSetupDeps,
-  startDeps: IngestManagerStartDeps,
   config: IngestManagerConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage
@@ -279,8 +268,6 @@ export function renderApp(
     <IngestManagerApp
       basepath={appBasePath}
       startServices={startServices}
-      setupDeps={setupDeps}
-      startDeps={startDeps}
       config={config}
       history={history}
       kibanaVersion={kibanaVersion}
