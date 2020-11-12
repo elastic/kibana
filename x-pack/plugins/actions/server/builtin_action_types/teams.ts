@@ -152,7 +152,7 @@ async function teamsExecutor(
       return errorResultInvalid(actionId, serviceMessage);
     }
 
-    logger.error(`error on ${actionId} Microsoft Teams action: unexpected error`);
+    logger.debug(`error on ${actionId} Microsoft Teams action: unexpected error`);
     return errorResultUnexpectedError(actionId);
   }
 }
