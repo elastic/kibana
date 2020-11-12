@@ -22,7 +22,7 @@ import React from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import styled from 'styled-components';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
-import { ChartsSyncContextProvider } from '../../../context/ChartsSyncContext';
+import { LegacyChartsSyncContextProvider as ChartsSyncContextProvider } from '../../../context/charts_sync_context';
 import { useAgentName } from '../../../hooks/useAgentName';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/useFetcher';
 import { useServiceMetricCharts } from '../../../hooks/useServiceMetricCharts';

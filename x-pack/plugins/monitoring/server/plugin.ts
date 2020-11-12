@@ -233,7 +233,8 @@ export class Plugin {
         legacyConfig,
         core.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
         this.licenseService,
-        this.cluster
+        this.cluster,
+        plugins
       );
 
       this.registerPluginInUI(plugins);
@@ -313,7 +314,8 @@ export class Plugin {
     legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     licenseService: MonitoringLicenseService,
-    cluster: ILegacyCustomClusterClient
+    cluster: ILegacyCustomClusterClient,
+    setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
     const legacyConfigWrapper = () => ({
@@ -372,7 +374,7 @@ export class Plugin {
               config: legacyConfigWrapper,
               newPlatform: {
                 setup: {
-                  plugins,
+                  plugins: setupPlugins,
                 },
               },
               plugins: {

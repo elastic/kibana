@@ -135,14 +135,11 @@ instanceStateValue: true
       await taskManagerUtils.waitForActionTaskParamsToBeCleanedUp(testStart);
     });
 
-    it('should reschedule failing alerts using the alerting interval and not the Task Manager retry logic', async () => {
+    it('should reschedule failing alerts using the Task Manager retry logic with alert schedule interval', async () => {
       /*
-        Alerting does not use the Task Manager schedule and instead implements its own due to a current limitation
-        in TaskManager's ability to update an existing Task.
-        For this reason we need to handle the retry when Alert executors fail, as TaskManager doesn't understand that
-        alerting tasks are recurring tasks.
+        Alerts should set the Task Manager schedule interval with initial value.
       */
-      const alertIntervalInSeconds = 30;
+      const alertIntervalInSeconds = 10;
       const reference = alertUtils.generateReference();
       const response = await alertUtils.createAlwaysFailingAction({
         reference,
@@ -157,7 +154,8 @@ instanceStateValue: true
       await retry.try(async () => {
         const alertTask = (await getAlertingTaskById(response.body.scheduledTaskId)).docs[0];
         expect(alertTask.status).to.eql('idle');
-        // ensure the alert is rescheduled to a minute from now
+        expect(alertTask.schedule.interval).to.eql('10s');
+        // ensure the alert is rescheduled correctly
         ensureDatetimeIsWithinRange(
           Date.parse(alertTask.runAt),
           alertIntervalInSeconds * 1000,

@@ -27,6 +27,7 @@ import {
   SanitizedAlert,
   AlertTaskState,
   AlertInstanceSummary,
+  AlertExecutionStatusValues,
 } from '../types';
 import { validateAlertTypeParams, alertExecutionStatusFromRaw } from '../lib';
 import {
@@ -98,8 +99,23 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
+export interface AggregateOptions extends IndexType {
+  search?: string;
+  defaultSearchOperator?: 'AND' | 'OR';
+  searchFields?: string[];
+  hasReference?: {
+    type: string;
+    id: string;
+  };
+  filter?: string;
+}
+
 interface IndexType {
   [key: string]: unknown;
+}
+
+interface AggregateResult {
+  alertExecutionStatus: { [status: string]: number };
 }
 
 export interface FindResult {
@@ -253,7 +269,11 @@ export class AlertsClient {
     if (data.enabled) {
       let scheduledTask;
       try {
-        scheduledTask = await this.scheduleAlert(createdAlert.id, rawAlert.alertTypeId);
+        scheduledTask = await this.scheduleAlert(
+          createdAlert.id,
+          rawAlert.alertTypeId,
+          data.schedule
+        );
       } catch (e) {
         // Cleanup data, something went wrong scheduling the task
         try {
@@ -393,6 +413,44 @@ export class AlertsClient {
       perPage,
       total,
       data: authorizedData,
+    };
+  }
+
+  public async aggregate({
+    options: { fields, ...options } = {},
+  }: { options?: AggregateOptions } = {}): Promise<AggregateResult> {
+    // Replace this when saved objects supports aggregations https://github.com/elastic/kibana/pull/64002
+    const alertExecutionStatus = await Promise.all(
+      AlertExecutionStatusValues.map(async (status: string) => {
+        const {
+          filter: authorizationFilter,
+          logSuccessfulAuthorization,
+        } = await this.authorization.getFindAuthorizationFilter();
+        const filter = options.filter
+          ? `${options.filter} and alert.attributes.executionStatus.status:(${status})`
+          : `alert.attributes.executionStatus.status:(${status})`;
+        const { total } = await this.unsecuredSavedObjectsClient.find<RawAlert>({
+          ...options,
+          filter:
+            (authorizationFilter && filter
+              ? and([esKuery.fromKueryExpression(filter), authorizationFilter])
+              : authorizationFilter) ?? filter,
+          page: 1,
+          perPage: 0,
+          type: 'alert',
+        });
+
+        logSuccessfulAuthorization();
+
+        return { [status]: total };
+      })
+    );
+
+    return {
+      alertExecutionStatus: alertExecutionStatus.reduce(
+        (acc, curr: { [status: string]: number }) => Object.assign(acc, curr),
+        {}
+      ),
     };
   }
 
@@ -697,7 +755,11 @@ export class AlertsClient {
         this.invalidateApiKey({ apiKey: updateAttributes.apiKey });
         throw e;
       }
-      const scheduledTask = await this.scheduleAlert(id, attributes.alertTypeId);
+      const scheduledTask = await this.scheduleAlert(
+        id,
+        attributes.alertTypeId,
+        attributes.schedule as IntervalSchedule
+      );
       await this.unsecuredSavedObjectsClient.update('alert', id, {
         scheduledTaskId: scheduledTask.id,
       });
@@ -933,9 +995,10 @@ export class AlertsClient {
     ]);
   }
 
-  private async scheduleAlert(id: string, alertTypeId: string) {
+  private async scheduleAlert(id: string, alertTypeId: string, schedule: IntervalSchedule) {
     return await this.taskManager.schedule({
       taskType: `alerting:${alertTypeId}`,
+      schedule,
       params: {
         alertId: id,
         spaceId: this.spaceId,

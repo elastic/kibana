@@ -147,9 +147,9 @@ export default function ({ getService }) {
         'authentication_type',
       ]);
       expect(apiResponse.body.username).to.be(validUsername);
-      expect(apiResponse.body.authentication_provider).to.eql('__http__');
+      expect(apiResponse.body.authentication_provider).to.eql({ type: 'http', name: '__http__' });
       expect(apiResponse.body.authentication_type).to.be('realm');
-      // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
+      // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
     });
 
     describe('with session cookie', () => {
@@ -193,9 +193,9 @@ export default function ({ getService }) {
           'authentication_type',
         ]);
         expect(apiResponse.body.username).to.be(validUsername);
-        expect(apiResponse.body.authentication_provider).to.eql('basic');
+        expect(apiResponse.body.authentication_provider).to.eql({ type: 'basic', name: 'basic' });
         expect(apiResponse.body.authentication_type).to.be('realm');
-        // Do not assert on the `authentication_realm`, as the value differes for on-prem vs cloud
+        // Do not assert on the `authentication_realm`, as the value differs for on-prem vs cloud
       });
 
       it('should extend cookie on every successful non-system API call', async () => {

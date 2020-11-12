@@ -22,15 +22,6 @@ import { Project } from './project';
 
 const YARN_EXEC = process.env.npm_execpath || 'yarn';
 
-interface WorkspaceInfo {
-  location: string;
-  workspaceDependencies: string[];
-}
-
-interface WorkspacesInfo {
-  [s: string]: WorkspaceInfo;
-}
-
 /**
  * Install all dependencies in the given directory
  */
@@ -77,17 +68,4 @@ export function runScriptInPackageStreaming({
     prefix: pkg.name,
     debug,
   });
-}
-
-export async function yarnWorkspacesInfo(directory: string): Promise<WorkspacesInfo> {
-  const { stdout } = await spawn(YARN_EXEC, ['--json', 'workspaces', 'info'], {
-    cwd: directory,
-    stdio: 'pipe',
-  });
-
-  try {
-    return JSON.parse(JSON.parse(stdout).data);
-  } catch (error) {
-    throw new Error(`'yarn workspaces info --json' produced unexpected output: \n${stdout}`);
-  }
 }

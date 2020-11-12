@@ -460,6 +460,7 @@ export interface DocLinksStart {
     // (undocumented)
     readonly links: {
         readonly dashboard: {
+            readonly guide: string;
             readonly drilldowns: string;
             readonly drilldownsTriggerPicker: string;
             readonly urlDrilldownTemplateSyntax: string;
@@ -1056,18 +1057,14 @@ export interface SavedObjectsCreateOptions {
 
 // @public (undocumented)
 export interface SavedObjectsFindOptions {
-    // (undocumented)
     defaultSearchOperator?: 'AND' | 'OR';
     fields?: string[];
     // Warning: (ae-forgotten-export) The symbol "KueryNode" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     filter?: string | KueryNode;
-    // (undocumented)
-    hasReference?: {
-        type: string;
-        id: string;
-    };
+    hasReference?: SavedObjectsFindOptionsReference | SavedObjectsFindOptionsReference[];
+    hasReferenceOperator?: 'AND' | 'OR';
     // (undocumented)
     namespaces?: string[];
     // (undocumented)
@@ -1085,6 +1082,14 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     type: string | string[];
     typeToNamespacesMap?: Map<string, string[] | undefined>;
+}
+
+// @public (undocumented)
+export interface SavedObjectsFindOptionsReference {
+    // (undocumented)
+    id: string;
+    // (undocumented)
+    type: string;
 }
 
 // @public

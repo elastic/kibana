@@ -47,9 +47,32 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.navigation.assertKibanaNavMLEntryExists();
           });
 
+          it('should display tabs in the ML app correctly', async () => {
+            await ml.testExecution.logTestStep('should load the ML app');
+            await ml.navigation.navigateToMl();
+
+            await ml.testExecution.logTestStep('should display the enabled "Overview" tab');
+            await ml.navigation.assertOverviewTabEnabled(true);
+
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Anomaly Detection" tab'
+            );
+            await ml.navigation.assertAnomalyDetectionTabEnabled(true);
+
+            await ml.testExecution.logTestStep(
+              'should display the enabled "Data Frame Analytics" tab'
+            );
+            await ml.navigation.assertDataFrameAnalyticsTabEnabled(true);
+
+            await ml.testExecution.logTestStep('should display the enabled "Data Visualizer" tab');
+            await ml.navigation.assertDataVisualizerTabEnabled(true);
+
+            await ml.testExecution.logTestStep('should display the enabled "Settings" tab');
+            await ml.navigation.assertSettingsTabEnabled(true);
+          });
+
           it('should display elements on ML Overview page correctly', async () => {
             await ml.testExecution.logTestStep('should load the ML overview page');
-            await ml.navigation.navigateToMl();
             await ml.navigation.navigateToOverview();
 
             await ml.testExecution.logTestStep('should display enabled AD create job button');
@@ -353,7 +376,7 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
 
             await ml.testExecution.logTestStep(
-              'should displays components of the file details page'
+              'should display components of the file details page'
             );
             await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle);
             await ml.dataVisualizerFileBased.assertFileContentPanelExists();

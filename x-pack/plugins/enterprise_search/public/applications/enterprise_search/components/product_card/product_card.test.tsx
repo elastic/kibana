@@ -5,6 +5,7 @@
  */
 
 import '../../../__mocks__/kea.mock';
+import { mockTelemetryActions } from '../../../__mocks__';
 
 import React from 'react';
 import { useValues } from 'kea';
@@ -13,11 +14,6 @@ import { shallow } from 'enzyme';
 import { EuiCard } from '@elastic/eui';
 import { EuiButton } from '../../../shared/react_router_helpers';
 import { APP_SEARCH_PLUGIN, WORKPLACE_SEARCH_PLUGIN } from '../../../../../common/constants';
-
-jest.mock('../../../shared/telemetry', () => ({
-  sendTelemetry: jest.fn(),
-}));
-import { sendTelemetry } from '../../../shared/telemetry';
 
 import { ProductCard } from './';
 
@@ -38,7 +34,10 @@ describe('ProductCard', () => {
     expect(button.prop('children')).toEqual('Launch App Search');
 
     button.simulate('click');
-    expect(sendTelemetry).toHaveBeenCalledWith(expect.objectContaining({ metric: 'app_search' }));
+    expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
+      action: 'clicked',
+      metric: 'app_search',
+    });
   });
 
   it('renders a Workplace Search card', () => {
@@ -53,9 +52,10 @@ describe('ProductCard', () => {
     expect(button.prop('children')).toEqual('Launch Workplace Search');
 
     button.simulate('click');
-    expect(sendTelemetry).toHaveBeenCalledWith(
-      expect.objectContaining({ metric: 'workplace_search' })
-    );
+    expect(mockTelemetryActions.sendEnterpriseSearchTelemetry).toHaveBeenCalledWith({
+      action: 'clicked',
+      metric: 'workplace_search',
+    });
   });
 
   it('renders correct button text when host not present', () => {

@@ -26,6 +26,7 @@ export const anomaliesTableDataSchema = schema.object({
   maxRecords: schema.number(),
   maxExamples: schema.maybe(schema.number()),
   influencersFilterQuery: schema.maybe(schema.any()),
+  functionDescription: schema.maybe(schema.nullable(schema.string())),
 });
 
 export const categoryDefinitionSchema = schema.object({
@@ -43,6 +44,11 @@ export const categoryExamplesSchema = schema.object({
   jobId: schema.string(),
   categoryIds: schema.arrayOf(schema.string()),
   maxExamples: schema.number(),
+});
+
+export const anomalySearchSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  query: schema.any(),
 });
 
 const fieldConfig = schema.maybe(

@@ -40,7 +40,6 @@ export class JobDetailsUI extends Component {
   }
 
   render() {
-    console.log('this.props', this.props);
     const { job } = this.state;
     const {
       services: {

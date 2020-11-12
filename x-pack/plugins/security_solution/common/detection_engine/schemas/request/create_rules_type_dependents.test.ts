@@ -125,4 +125,36 @@ describe('create_rules_type_dependents', () => {
     const errors = createRuleValidateTypeDependents(schema);
     expect(errors).toEqual([]);
   });
+
+  test('validates that both "items_per_search" and "concurrent_searches" works when together', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateThreatMatchRulesSchemaMock(),
+      concurrent_searches: 10,
+      items_per_search: 10,
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([]);
+  });
+
+  test('does NOT validate when only "items_per_search" is present', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateThreatMatchRulesSchemaMock(),
+      items_per_search: 10,
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "items_per_search" exists, "concurrent_searches" must also exist',
+    ]);
+  });
+
+  test('does NOT validate when only "concurrent_searches" is present', () => {
+    const schema: CreateRulesSchema = {
+      ...getCreateThreatMatchRulesSchemaMock(),
+      concurrent_searches: 10,
+    };
+    const errors = createRuleValidateTypeDependents(schema);
+    expect(errors).toEqual([
+      'when "concurrent_searches" exists, "items_per_search" must also exist',
+    ]);
+  });
 });

@@ -8,11 +8,9 @@ import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import {
   EuiPageContent,
   EuiPageContentBody,
-  EuiPageContentHeader,
   EuiFlexGroup,
   EuiFlexItem,
   EuiScreenReaderOnly,
@@ -27,7 +25,6 @@ export interface WorkspacePanelWrapperProps {
   framePublicAPI: FramePublicAPI;
   visualizationState: unknown;
   dispatch: (action: Action) => void;
-  emptyExpression: boolean;
   title?: string;
   visualizationMap: Record<string, Visualization>;
   visualizationId: string | null;
@@ -47,7 +44,6 @@ export function WorkspacePanelWrapper({
   visualizationState,
   dispatch,
   title,
-  emptyExpression,
   visualizationId,
   visualizationMap,
   datasourceMap,
@@ -105,26 +101,12 @@ export function WorkspacePanelWrapper({
         </EuiFlexGroup>
       </div>
       <EuiPageContent className="lnsWorkspacePanelWrapper">
-        {!emptyExpression || title ? (
-          <EuiPageContentHeader
-            className={classNames('lnsWorkspacePanelWrapper__pageContentHeader', {
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              'lnsWorkspacePanelWrapper__pageContentHeader--unsaved': !title,
-            })}
-          >
-            <h1 data-test-subj="lns_ChartTitle">
-              {title ||
-                i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
-            </h1>
-          </EuiPageContentHeader>
-        ) : (
-          <EuiScreenReaderOnly>
-            <h1 data-test-subj="lns_ChartTitle">
-              {title ||
-                i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
-            </h1>
-          </EuiScreenReaderOnly>
-        )}
+        <EuiScreenReaderOnly>
+          <h1 data-test-subj="lns_ChartTitle">
+            {title ||
+              i18n.translate('xpack.lens.chartTitle.unsaved', { defaultMessage: 'Unsaved' })}
+          </h1>
+        </EuiScreenReaderOnly>
         <EuiPageContentBody className="lnsWorkspacePanelWrapper__pageContentBody">
           {children}
         </EuiPageContentBody>

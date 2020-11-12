@@ -16,7 +16,12 @@ export function getAlertType(): AlertTypeModel<GeoThresholdAlertParams, AlertsCo
     name: i18n.translate('xpack.triggersActionsUI.geoThreshold.name.trackingThreshold', {
       defaultMessage: 'Tracking threshold',
     }),
+    description: i18n.translate('xpack.triggersActionsUI.geoThreshold.descriptionText', {
+      defaultMessage: 'Alert when an entity enters or leaves a geo boundary.',
+    }),
     iconClass: 'globe',
+    // TODO: Add documentation for geo threshold alert
+    documentationUrl: null,
     alertParamsExpression: lazy(() => import('./query_builder')),
     validate: validateExpression,
     requiresAppContext: false,

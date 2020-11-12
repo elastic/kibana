@@ -4,16 +4,24 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { render } from '@testing-library/react';
 import React, { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import { CoreStart } from 'src/core/public';
+import { createKibanaReactContext } from '../../../../../../../src/plugins/kibana_react/public';
 import { MockApmPluginContextWrapper } from '../../../context/ApmPluginContext/MockApmPluginContext';
+import { renderWithTheme } from '../../../utils/testHelpers';
 import { ServiceOverview } from './';
+
+const KibanaReactContext = createKibanaReactContext({
+  usageCollection: { reportUiStats: () => {} },
+} as Partial<CoreStart>);
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
     <MemoryRouter>
-      <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+      <KibanaReactContext.Provider>
+        <MockApmPluginContextWrapper>{children}</MockApmPluginContextWrapper>
+      </KibanaReactContext.Provider>
     </MemoryRouter>
   );
 }
@@ -21,7 +29,7 @@ function Wrapper({ children }: { children?: ReactNode }) {
 describe('ServiceOverview', () => {
   it('renders', () => {
     expect(() =>
-      render(<ServiceOverview serviceName="test service name" />, {
+      renderWithTheme(<ServiceOverview serviceName="test service name" />, {
         wrapper: Wrapper,
       })
     ).not.toThrowError();
