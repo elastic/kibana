@@ -4,36 +4,52 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { shallow } from 'enzyme';
 import { EntityIndexExpression } from './expressions/entity_index_expression';
-import { IFieldType } from '../../../../../../../../../src/plugins/data/common/index_patterns/fields';
-import { KBN_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/common';
 import { BoundaryIndexExpression } from './expressions/boundary_index_expression';
+import { ApplicationStart, DocLinksStart, HttpSetup, ToastsStart } from 'kibana/public';
+import {
+  ActionTypeRegistryContract,
+  AlertTypeRegistryContract,
+  IErrorObject,
+} from '../../../../../types';
+import { IIndexPattern } from '../../../../../../../../../src/plugins/data/common/index_patterns';
+
+const alertsContext = {
+  http: (null as unknown) as HttpSetup,
+  alertTypeRegistry: (null as unknown) as AlertTypeRegistryContract,
+  actionTypeRegistry: (null as unknown) as ActionTypeRegistryContract,
+  toastNotifications: (null as unknown) as ToastsStart,
+  docLinks: (null as unknown) as DocLinksStart,
+  capabilities: (null as unknown) as ApplicationStart['capabilities'],
+};
+
+const alertParams = {
+  index: '',
+  indexId: '',
+  geoField: '',
+  entity: '',
+  dateField: '',
+  trackingEvent: '',
+  boundaryType: '',
+  boundaryIndexTitle: '',
+  boundaryIndexId: '',
+  boundaryGeoField: '',
+};
 
 test('should render EntityIndexExpression', async () => {
-  const dateField: IFieldType = {
-    type: KBN_FIELD_TYPES.DATE,
-    name: KBN_FIELD_TYPES.STRING,
-    aggregatable: true,
-  };
-  const geoField: IFieldType = {
-    type: KBN_FIELD_TYPES.GEO_POINT,
-    name: KBN_FIELD_TYPES.STRING,
-    aggregatable: true,
-  };
-  const alertsContext = {};
   const component = shallow(
     <EntityIndexExpression
-      dateField={dateField}
-      geoField={geoField}
+      dateField={'testDateField'}
+      geoField={'testGeoField'}
       alertsContext={alertsContext}
-      errors={[]}
+      errors={{} as IErrorObject}
       setAlertParamsDate={() => {}}
       setAlertParamsGeoField={() => {}}
       setAlertProperty={() => {}}
       setIndexPattern={() => {}}
-      indexPattern={''}
+      indexPattern={('' as unknown) as IIndexPattern}
       isInvalid={false}
     />
   );
@@ -42,28 +58,17 @@ test('should render EntityIndexExpression', async () => {
 });
 
 test('should render EntityIndexExpression w/ invalid flag if invalid', async () => {
-  const dateField: IFieldType = {
-    type: KBN_FIELD_TYPES.DATE,
-    name: KBN_FIELD_TYPES.STRING,
-    aggregatable: true,
-  };
-  const geoField: IFieldType = {
-    type: KBN_FIELD_TYPES.GEO_POINT,
-    name: KBN_FIELD_TYPES.STRING,
-    aggregatable: true,
-  };
-  const alertsContext = {};
   const component = shallow(
     <EntityIndexExpression
-      dateField={dateField}
-      geoField={geoField}
+      dateField={'testDateField'}
+      geoField={'testGeoField'}
       alertsContext={alertsContext}
-      errors={[]}
+      errors={{} as IErrorObject}
       setAlertParamsDate={() => {}}
       setAlertParamsGeoField={() => {}}
       setAlertProperty={() => {}}
       setIndexPattern={() => {}}
-      indexPattern={''}
+      indexPattern={('' as unknown) as IIndexPattern}
       isInvalid={true}
     />
   );
@@ -72,17 +77,16 @@ test('should render EntityIndexExpression w/ invalid flag if invalid', async () 
 });
 
 test('should render BoundaryIndexExpression', async () => {
-  const alertsContext = {};
   const component = shallow(
     <BoundaryIndexExpression
-      alertParams={{}}
+      alertParams={alertParams}
       alertsContext={alertsContext}
-      errors={[]}
-      boundaryIndexPattern={''}
+      errors={{} as IErrorObject}
+      boundaryIndexPattern={('' as unknown) as IIndexPattern}
       setBoundaryIndexPattern={() => {}}
       setBoundaryGeoField={() => {}}
       setBoundaryNameField={() => {}}
-      boundaryNameField={''}
+      boundaryNameField={'testNameField'}
     />
   );
 
