@@ -8,6 +8,7 @@ import React, { memo, ReactNode, useMemo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { EuiBasicTable, EuiLink, EuiTableFieldDataColumnType } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedRelative } from '@kbn/i18n/react';
 import { useGetPackageInstallStatus } from '../../hooks';
 import { InstallStatus, PackagePolicy } from '../../../../types';
 import { useGetPackagePolicies, useLink } from '../../../../hooks';
@@ -100,7 +101,7 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
       {
         field: 'policy_id',
         name: i18n.translate('xpack.ingestManager.epm.packageDetails.integrationList.agentPolicy', {
-          defaultMessage: 'Agent Policy',
+          defaultMessage: 'Agent policy',
         }),
         truncateText: true,
         render(id) {
@@ -113,21 +114,15 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
           defaultMessage: 'Agents',
         }),
         truncateText: true,
-        align: 'center',
+        align: 'right',
+        width: '8ch',
         render(packagePolicy) {
           return (
             <PolicyAgentListLink agentPolicyId={packagePolicy.policy_id}>
-              <span>{Math.random().toString().substr(-2)}</span>
+              <span>{'??'}</span>
             </PolicyAgentListLink>
           );
         },
-      },
-      {
-        field: 'created_by',
-        name: i18n.translate('xpack.ingestManager.epm.packageDetails.integrationList.createdBy', {
-          defaultMessage: 'Created By',
-        }),
-        truncateText: true,
       },
       {
         field: 'updated_by',
@@ -142,6 +137,13 @@ export const PackagePoliciesPanel = ({ name, version }: PackagePoliciesPanelProp
           defaultMessage: 'Last Updated',
         }),
         truncateText: true,
+        render(updatedAt: PackagePolicy['updated_at']) {
+          return (
+            <span className="eui-textTruncate">
+              <FormattedRelative value={updatedAt} />
+            </span>
+          );
+        },
       },
     ],
     []
