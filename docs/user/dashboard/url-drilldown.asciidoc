@@ -1,4 +1,4 @@
-[[url_templating]]
+[[url_templating-language]]
 === URL templating
 
 beta[]
