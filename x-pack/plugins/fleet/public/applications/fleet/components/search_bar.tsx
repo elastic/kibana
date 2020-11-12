@@ -78,7 +78,7 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   );
 };
 
-function transformSuggestionType(type: string): { iconType: string; color: string } {
+export function transformSuggestionType(type: string): { iconType: string; color: string } {
   switch (type) {
     case 'field':
       return { iconType: 'kqlField', color: 'tint4' };
