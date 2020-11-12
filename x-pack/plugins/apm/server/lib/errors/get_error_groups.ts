@@ -4,6 +4,8 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
+import { SortOptions } from '../../../../../typings/elasticsearch/aggregations';
+import { PromiseReturnType } from '../../../../observability/typings/common';
 import {
   ERROR_CULPRIT,
   ERROR_EXC_HANDLED,
@@ -12,11 +14,9 @@ import {
   ERROR_GROUP_ID,
   ERROR_LOG_MESSAGE,
 } from '../../../common/elasticsearch_fieldnames';
-import { PromiseReturnType } from '../../../typings/common';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { getErrorGroupsProjection } from '../../projections/errors';
 import { mergeProjection } from '../../projections/util/merge_projection';
-import { SortOptions } from '../../../typings/elasticsearch/aggregations';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export type ErrorGroupListAPIResponse = PromiseReturnType<
   typeof getErrorGroups
