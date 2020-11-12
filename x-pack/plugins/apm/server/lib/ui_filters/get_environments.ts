@@ -4,16 +4,16 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { ProcessorEvent } from '../../../common/processor_event';
+import { ESFilter } from '../../../../../typings/elasticsearch';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../common/elasticsearch_fieldnames';
-import { rangeFilter } from '../../../common/utils/range_filter';
-import { Setup, SetupTimeRange } from '../helpers/setup_request';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../common/environment_filter_values';
-import { ESFilter } from '../../../typings/elasticsearch';
+import { ProcessorEvent } from '../../../common/processor_event';
+import { rangeFilter } from '../../../common/utils/range_filter';
 import { getProcessorEventForAggregatedTransactions } from '../helpers/aggregated_transactions';
+import { Setup, SetupTimeRange } from '../helpers/setup_request';
 
 export async function getEnvironments({
   setup,
