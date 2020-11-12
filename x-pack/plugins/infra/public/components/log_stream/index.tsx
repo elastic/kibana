@@ -6,7 +6,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { noop } from 'lodash';
-import { useMount } from 'react-use';
+import useMount from 'react-use/lib/useMount';
 import { euiStyled } from '../../../../observability/public';
 
 import { LogEntriesCursor } from '../../../common/http_api';
