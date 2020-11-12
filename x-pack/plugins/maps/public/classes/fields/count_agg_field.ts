@@ -5,27 +5,15 @@
  */
 
 import { IndexPattern } from 'src/plugins/data/public';
-import { IField } from './field';
 import { IESAggSource } from '../sources/es_agg_source';
 import { IVectorSource } from '../sources/vector_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { addFieldToDSL, getField } from '../../../common/elasticsearch_util';
 import { ITooltipProperty, TooltipProperty } from '../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../tooltips/es_agg_tooltip_property';
+import { IESAggField, IESAggFieldParams } from './agg_field_types';
 
 const TERMS_AGG_SHARD_SIZE = 5;
-
-export interface IESAggField extends IField {
-  getValueAggDsl(indexPattern: IndexPattern): unknown | null;
-  getBucketCount(): number;
-}
-
-export interface IESAggFieldParams {
-  label?: string;
-  source: IESAggSource;
-  origin: FIELD_ORIGIN;
-  canReadFromGeoJson?: boolean;
-}
 
 // Agg without field. Essentially a count-aggregation.
 export class CountAggField implements IESAggField {

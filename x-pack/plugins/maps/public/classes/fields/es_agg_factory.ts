@@ -9,7 +9,8 @@ import { IESAggSource } from '../sources/es_agg_source';
 import { AGG_TYPE, FIELD_ORIGIN } from '../../../common/constants';
 import { ESDocField } from './es_doc_field';
 import { TopTermPercentageField } from './top_term_percentage_field';
-import { CountAggField, IESAggField } from './count_agg_field';
+import { CountAggField } from './count_agg_field';
+import { IESAggField } from './agg_field_types';
 import { ESFieldedAggField } from './es_fielded_agg_field';
 
 export function esAggFieldsFactory(

@@ -11,7 +11,7 @@ import { IESSource } from '../es_source';
 import { AbstractESSource } from '../es_source';
 import { esAggFieldsFactory } from '../../fields/es_agg_factory';
 import { AGG_TYPE, COUNT_PROP_LABEL, FIELD_ORIGIN } from '../../../../common/constants';
-import { IESAggField } from '../../fields/count_agg_field';
+import { IESAggField } from '../../fields/agg_field_types';
 import { getSourceAggKey } from '../../../../common/get_agg_key';
 import { AbstractESAggSourceDescriptor, AggDescriptor } from '../../../../common/descriptor_types';
 import { IndexPattern } from '../../../../../../../src/plugins/data/public';
