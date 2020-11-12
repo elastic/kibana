@@ -29,6 +29,7 @@ export default {
   testPathIgnorePatterns: config.testPathIgnorePatterns.filter(
     (pattern) => !pattern.includes('integration_tests')
   ),
+  testRunner: 'jasmine2',
   reporters: [
     'default',
     [
