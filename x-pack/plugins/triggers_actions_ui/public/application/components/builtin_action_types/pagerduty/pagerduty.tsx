@@ -63,7 +63,6 @@ export function getActionType(): ActionTypeModel<
         dedupKey: new Array<string>(),
       };
       validationResult.errors = errors;
-
       if (
         !actionParams.dedupKey?.length &&
         (actionParams.eventAction === 'resolve' || actionParams.eventAction === 'acknowledge')

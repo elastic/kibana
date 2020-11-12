@@ -127,7 +127,6 @@ export function getActionType(): ActionTypeModel<EmailConfig, EmailSecrets, Emai
         subject: new Array<string>(),
       };
       validationResult.errors = errors;
-
       if (
         (!(actionParams.to instanceof Array) || actionParams.to.length === 0) &&
         (!(actionParams.cc instanceof Array) || actionParams.cc.length === 0) &&
