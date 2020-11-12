@@ -26,7 +26,7 @@
 /src/plugins/vis_type_vislib/ @elastic/kibana-app
 /src/plugins/vis_type_xy/ @elastic/kibana-app
 /src/plugins/visualize/ @elastic/kibana-app
-/src/plugins/visualizations/ @elastic/kibana-application
+/src/plugins/visualizations/ @elastic/kibana-app
 
 # Application Services
 /examples/bfetch_explorer/ @elastic/kibana-app-arch
