@@ -7,9 +7,9 @@
 import { ArchivePackage, AssetParts } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
 import {
-  cacheGet,
-  cacheSet,
-  cacheDelete,
+  getArchiveEntry,
+  setArchiveEntry,
+  deleteArchiveEntry,
   getArchiveFilelist,
   setArchiveFilelist,
   deleteArchiveFilelist,
@@ -57,7 +57,7 @@ function addEntriesToMemoryStore(entries: ArchiveEntry[]) {
   entries.forEach((entry) => {
     const { path, buffer } = entry;
     if (buffer) {
-      cacheSet(path, buffer);
+      setArchiveEntry(path, buffer);
       paths.push(path);
     }
   });
@@ -105,7 +105,7 @@ export const deletePackageCache = (name: string, version: string) => {
 
   // delete cached archive files
   // this has been populated in unpackArchiveToCache()
-  paths?.forEach((path) => cacheDelete(path));
+  paths?.forEach((path) => deleteArchiveEntry(path));
 };
 
 export function getPathParts(path: string): AssetParts {
@@ -139,7 +139,7 @@ export function getPathParts(path: string): AssetParts {
 }
 
 export function getAsset(key: string) {
-  const buffer = cacheGet(key);
+  const buffer = getArchiveEntry(key);
   if (buffer === undefined) throw new Error(`Cannot find asset ${key}`);
 
   return buffer;

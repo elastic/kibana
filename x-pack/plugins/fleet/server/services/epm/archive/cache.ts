@@ -4,15 +4,18 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 import { pkgToPkgKey } from '../registry/index';
+import { ArchiveEntry } from './index';
+import { ArchivePackage, RegistryPackage } from '../../../../common';
 
-const cache: Map<string, Buffer> = new Map();
-export const cacheGet = (key: string) => cache.get(key);
-export const cacheSet = (key: string, value: Buffer) => cache.set(key, value);
-export const cacheHas = (key: string) => cache.has(key);
-export const cacheClear = () => cache.clear();
-export const cacheDelete = (key: string) => cache.delete(key);
+const archiveEntryCache: Map<ArchiveEntry['path'], ArchiveEntry['buffer']> = new Map();
+export const getArchiveEntry = (key: string) => archiveEntryCache.get(key);
+export const setArchiveEntry = (key: string, value: Buffer) => archiveEntryCache.set(key, value);
+export const hasArchiveEntry = (key: string) => archiveEntryCache.has(key);
+export const clearArchiveEntries = () => archiveEntryCache.clear();
+export const deleteArchiveEntry = (key: string) => archiveEntryCache.delete(key);
 
-const archiveFilelistCache: Map<string, string[]> = new Map();
+type ArchiveFilelist = string[];
+const archiveFilelistCache: Map<string, ArchiveFilelist> = new Map();
 export const getArchiveFilelist = (name: string, version: string) =>
   archiveFilelistCache.get(pkgToPkgKey({ name, version }));
 
@@ -21,3 +24,8 @@ export const setArchiveFilelist = (name: string, version: string, paths: string[
 
 export const deleteArchiveFilelist = (name: string, version: string) =>
   archiveFilelistCache.delete(pkgToPkgKey({ name, version }));
+
+const packageInfoCache: Map<string, ArchivePackage | RegistryPackage> = new Map();
+export const getPackageInfo = (name: string, version: string) => {
+  return packageInfoCache.get(pkgToPkgKey({ name, version }));
+};
