@@ -65,6 +65,7 @@ const {
   timefilter,
   toastNotifications,
   uiSettings: config,
+  trackUiMetric,
 } = getServices();
 
 import { getRootBreadcrumbs, getSavedSearchBreadcrumbs } from '../helpers/breadcrumbs';
@@ -81,6 +82,9 @@ import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   MODIFY_COLUMNS_ON_SWITCH,
 } from '../../../common';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { SEARCH_SESSION_ID_QUERY_PARAM } from '../../url_generator';
+import { removeQueryParam, getQueryParams } from '../../../../kibana_utils/public';
 
 const fetchStatuses = {
   UNINITIALIZED: 'uninitialized',
@@ -88,6 +92,9 @@ const fetchStatuses = {
   COMPLETE: 'complete',
   ERROR: 'error',
 };
+
+const getSearchSessionIdFromURL = (history) =>
+  getQueryParams(history.location)[SEARCH_SESSION_ID_QUERY_PARAM];
 
 const app = getAngularModule();
 
@@ -208,6 +215,8 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
   };
 
   const history = getHistory();
+  // used for restoring background session
+  let isInitialSearch = true;
 
   const {
     appStateContainer,
@@ -823,17 +832,30 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     if (abortController) abortController.abort();
     abortController = new AbortController();
 
-    const sessionId = data.search.session.start();
+    const searchSessionId = (() => {
+      const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
+      if (searchSessionIdFromURL) {
+        if (isInitialSearch) {
+          data.search.session.restore(searchSessionIdFromURL);
+          isInitialSearch = false;
+          return searchSessionIdFromURL;
+        } else {
+          // navigating away from background search
+          removeQueryParam(history, SEARCH_SESSION_ID_QUERY_PARAM);
+        }
+      }
+      return data.search.session.start();
+    })();
 
     $scope
       .updateDataSource()
       .then(setupVisualization)
       .then(function () {
         $scope.fetchStatus = fetchStatuses.LOADING;
-        logInspectorRequest();
+        logInspectorRequest({ searchSessionId });
         return $scope.searchSource.fetch({
           abortSignal: abortController.signal,
-          sessionId,
+          sessionId: searchSessionId,
         });
       })
       .then(onResults)
@@ -925,7 +947,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     $scope.fetchStatus = fetchStatuses.COMPLETE;
   }
 
-  function logInspectorRequest() {
+  function logInspectorRequest({ searchSessionId = null } = { searchSessionId: null }) {
     inspectorAdapters.requests.reset();
     const title = i18n.translate('discover.inspectorRequestDataTitle', {
       defaultMessage: 'data',
@@ -933,7 +955,7 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
     const description = i18n.translate('discover.inspectorRequestDescription', {
       defaultMessage: 'This request queries Elasticsearch to fetch the data for the search.',
     });
-    inspectorRequest = inspectorAdapters.requests.start(title, { description });
+    inspectorRequest = inspectorAdapters.requests.start(title, { description, searchSessionId });
     inspectorRequest.stats(getRequestInspectorStats($scope.searchSource));
     $scope.searchSource.getSearchRequestBody().then((body) => {
       inspectorRequest.json(body);
@@ -1017,6 +1039,9 @@ function discoverController($element, $route, $scope, $timeout, Promise, uiCapab
       operation,
       $scope.indexPattern.id
     );
+    if (trackUiMetric) {
+      trackUiMetric(METRIC_TYPE.CLICK, 'filter_added');
+    }
     return filterManager.addFilters(newFilters);
   };
 

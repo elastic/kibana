@@ -13,8 +13,7 @@ import {
   estimateRecurringTaskScheduling,
 } from './workload_statistics';
 import { ConcreteTaskInstance } from '../task';
-import { ESSearchResponse } from '../../../apm/typings/elasticsearch';
-import { AggregationResultOf } from '../../../apm/typings/elasticsearch/aggregations';
+import { AggregationResultOf, ESSearchResponse } from '../../../../typings/elasticsearch';
 import { times } from 'lodash';
 import { taskStoreMock } from '../task_store.mock';
 import { of, Subject } from 'rxjs';

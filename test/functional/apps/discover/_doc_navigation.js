@@ -20,7 +20,6 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const log = getService('log');
   const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
@@ -29,16 +28,13 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/78373
-  describe.skip('doc link in discover', function contextSize() {
+  describe('doc link in discover', function contextSize() {
     beforeEach(async function () {
-      log.debug('load kibana index with default index pattern');
-      await esArchiver.loadIfNeeded('discover');
-
       await esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({ 'doc_table:legacy': true });
+      await esArchiver.loadIfNeeded('discover');
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });
 

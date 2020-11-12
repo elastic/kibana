@@ -33,7 +33,8 @@ export default function ({ getService, getPageObjects }) {
     'doc_table:legacy': true,
   };
 
-  describe('discover test', function describeIndexTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/82915
+  describe.skip('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await esArchiver.load('discover');
