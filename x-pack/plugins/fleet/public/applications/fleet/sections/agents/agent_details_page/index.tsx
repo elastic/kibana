@@ -34,12 +34,7 @@ import {
 import { WithHeaderLayout } from '../../../layouts';
 import { AgentHealth } from '../components';
 import { AgentRefreshContext } from './hooks';
-import {
-  AgentEventsTable,
-  AgentLogs,
-  AgentDetailsActionMenu,
-  AgentDetailsContent,
-} from './components';
+import { AgentLogs, AgentDetailsActionMenu, AgentDetailsContent } from './components';
 import { useIntraAppState } from '../../../hooks/use_intra_app_state';
 import { isAgentUpgradeable } from '../../../services';
 
@@ -229,28 +224,20 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
   const headerTabs = useMemo(() => {
     return [
       {
-        id: 'activity_log',
-        name: i18n.translate('xpack.fleet.agentDetails.subTabs.activityTab', {
-          defaultMessage: 'Activity',
-        }),
-        href: getHref('fleet_agent_details', { agentId, tabId: 'activity' }),
-        isSelected: !tabId || tabId === 'activity',
-      },
-      {
-        id: 'logs',
-        name: i18n.translate('xpack.fleet.agentDetails.subTabs.agentLogTab', {
-          defaultMessage: 'Agent logs',
-        }),
-        href: getHref('fleet_agent_details', { agentId, tabId: 'logs' }),
-        isSelected: tabId === 'logs',
-      },
-      {
         id: 'details',
         name: i18n.translate('xpack.fleet.agentDetails.subTabs.detailsTab', {
           defaultMessage: 'Agent details',
         }),
         href: getHref('fleet_agent_details', { agentId, tabId: 'details' }),
-        isSelected: tabId === 'details',
+        isSelected: !tabId || tabId === 'details',
+      },
+      {
+        id: 'logs',
+        name: i18n.translate('xpack.fleet.agentDetails.subTabs.logsTab', {
+          defaultMessage: 'Logs',
+        }),
+        href: getHref('fleet_agent_details', { agentId, tabId: 'logs' }),
+        isSelected: tabId === 'logs',
       },
     ];
   }, [getHref, agentId, tabId]);
@@ -327,12 +314,6 @@ const AgentDetailsPageContent: React.FunctionComponent<{
         path={PAGE_ROUTING_PATHS.fleet_agent_details_logs}
         render={() => {
           return <AgentLogs agent={agent} />;
-        }}
-      />
-      <Route
-        path={PAGE_ROUTING_PATHS.fleet_agent_details_events}
-        render={() => {
-          return <AgentEventsTable agent={agent} />;
         }}
       />
     </Switch>
