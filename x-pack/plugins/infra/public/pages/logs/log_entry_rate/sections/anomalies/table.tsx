@@ -17,7 +17,7 @@ import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
-import { useSet } from 'react-use';
+import useSet from 'react-use/lib/useSet';
 import { TimeRange } from '../../../../../../common/http_api/shared/time_range';
 import {
   formatAnomalyScore,
