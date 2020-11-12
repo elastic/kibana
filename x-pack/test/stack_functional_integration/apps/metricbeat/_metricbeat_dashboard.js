@@ -10,7 +10,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
   const screenshot = getService('screenshots');
   const browser = getService('browser');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'timePicker', 'visualize', 'header']);
 
   describe('check metricbeat Dashboard', function () {
     before(async function () {
@@ -44,15 +44,23 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     });
 
     it('[Metricbeat System] Overview ECS should match snapshot', async function () {
-      try {
-        const percentDifference = await screenshot.compareAgainstBaseline(
-          'metricbeat_dashboard',
-          updateBaselines
-        );
-        expect(percentDifference).to.be.lessThan(0.01);
-      } finally {
-        await PageObjects.dashboard.clickExitFullScreenLogoButton();
-      }
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const percentDifference = await screenshot.compareAgainstBaseline(
+        'metricbeat_dashboard',
+        updateBaselines
+      );
+
+      // following steps are to grap a screenshot of one of the tsvb gauge visualizations used in the dashboard
+      // to help debug why it intermittently renders in the dashboard
+      await PageObjects.common.navigateToActualUrl(
+        'visualize',
+        'edit/825fdb80-4d1d-11e7-b5f2-2b7c1895bf32-ecs?_g=(filters%3A!()%2CrefreshInterval%3A(pause%3A!t%2Cvalue%3A0)%2Ctime%3A(from%3Anow-15m%2Cto%3Anow))'
+      );
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await screenshot.take('diskUsedGauge');
+
+      // back to checking the dashboard
+      expect(percentDifference).to.be.lessThan(0.01);
     });
   });
 }
