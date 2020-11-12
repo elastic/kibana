@@ -20,8 +20,4 @@ export { querySavedObjectType } from './query';
 export { indexPatternSavedObjectType } from './index_patterns';
 export { kqlTelemetry } from './kql_telemetry';
 export { searchTelemetry } from './search_telemetry';
-export {
-  BACKGROUND_SESSION_TYPE,
-  backgroundSessionMapping,
-  BackgroundSessionSavedObjectAttributes,
-} from './background_session';
+export { BACKGROUND_SESSION_TYPE, backgroundSessionMapping } from './background_session';
