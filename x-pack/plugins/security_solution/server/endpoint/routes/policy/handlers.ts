@@ -62,6 +62,7 @@ export const getAgentPolicySummaryHandler = function (
         body,
       });
     } catch (err) {
+      endpointAppContext.logFactory.get('metadata').error(JSON.stringify(err, null, 2));
       return response.internalError({ body: err });
     }
   };

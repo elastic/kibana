@@ -11,12 +11,10 @@ import {
   GetAgentPolicySummaryRequestSchema,
 } from '../../../../common/endpoint/schema/policy';
 import { getHostPolicyResponseHandler, getAgentPolicySummaryHandler } from './handlers';
-
-export const BASE_POLICY_RESPONSE_ROUTE = `/api/endpoint/policy_response`;
-
-export const BASE_POLICY_ROUTE = `/api/endpoint/policy`;
-
-export const AGENT_POLICY_SUMMARY_ROUTE = `${BASE_POLICY_ROUTE}/summaries`;
+import {
+  AGENT_POLICY_SUMMARY_ROUTE,
+  BASE_POLICY_RESPONSE_ROUTE,
+} from '../../../../common/endpoint/constants';
 
 export const INITIAL_POLICY_ID = '00000000-0000-0000-0000-000000000000';
 
