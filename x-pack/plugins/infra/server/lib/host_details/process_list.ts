@@ -48,7 +48,12 @@ export const getProcessList = async (
             top_hits: {
               size: 1,
               sort: [{ [timerange.field]: { order: 'desc' } }],
-              _source: ['system.process.cpu.start_time', 'system.process.state'],
+              _source: [
+                'system.process.cpu.start_time',
+                'system.process.state',
+                'process.pid',
+                'user.name',
+              ],
             },
           },
         },

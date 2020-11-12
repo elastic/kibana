@@ -7,7 +7,6 @@
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSearchBar, EuiSpacer, Query } from '@elastic/eui';
-import { euiStyled } from '../../../../../../../../../observability/public';
 import { useProcessList } from '../../../../hooks/use_process_list';
 import { TabContent, TabProps } from '../shared';
 import { STATE_NAMES } from './states';

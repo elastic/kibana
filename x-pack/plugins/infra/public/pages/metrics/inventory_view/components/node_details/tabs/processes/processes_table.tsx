@@ -12,28 +12,22 @@ import {
   EuiTableHeader,
   EuiTableBody,
   EuiTableHeaderCell,
-  EuiTableRow,
   EuiTableRowCell,
   EuiSpacer,
   EuiTablePagination,
-  EuiButtonEmpty,
-  EuiCode,
   EuiLoadingChart,
   Query,
   SortableProperties,
-  SortableProperty,
   LEFT_ALIGNMENT,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { ProcessListAPIResponse } from '../../../../../../../../common/http_api';
 import { FORMATTERS } from '../../../../../../../../common/formatters';
 import { euiStyled } from '../../../../../../../../../observability/public';
+import { ProcessRow, CodeLine } from './process_row';
 import { parseProcessList } from './parse_process_list';
 import { StateBadge } from './state_badge';
 import { STATE_ORDER } from './states';
-
-const ONE_MINUTE = 60 * 1000;
-const ONE_HOUR = ONE_MINUTE * 60;
 
 interface TableBodyProps {
   processList: ProcessListAPIResponse;
@@ -43,7 +37,11 @@ interface TableBodyProps {
 type TableProps = TableBodyProps & { isLoading: boolean; searchFilter: Query };
 
 function useSortableProperties<T>(
-  sortablePropertyItems: SortableProperty[],
+  sortablePropertyItems: Array<{
+    name: string;
+    getValue: (obj: T) => any;
+    isAscending: boolean;
+  }>,
   defaultSortProperty: string
 ) {
   const [sortableProperties] = useState<SortableProperties<T>>(
@@ -192,22 +190,26 @@ const ProcessesTableBody = ({ processList, currentTime }: TableBodyProps) => (
           key={`${column.field}-${i}`}
           header={column.name}
           align={column.align ?? LEFT_ALIGNMENT}
+          textOnly={column.textOnly ?? true}
         >
           {column.render ? column.render(item[column.field], currentTime) : item[column.field]}
         </EuiTableRowCell>
       ));
-      return (
-        <EuiTableRow key={`row-${i}`}>
-          <EuiTableRowCell>
-            <EuiButtonEmpty iconType="arrowRight" />
-          </EuiTableRowCell>
-          {cells}
-        </EuiTableRow>
-      );
+      return <ProcessRow cells={cells} item={item} key={`row-${i}`} />;
     })}
   </>
 );
 
+const StyledTableBody = euiStyled(EuiTableBody)`
+  & .euiTableCellContent {
+    padding-top: 0;
+    padding-bottom: 0;
+    
+  }
+`;
+
+const ONE_MINUTE = 60 * 1000;
+const ONE_HOUR = ONE_MINUTE * 60;
 const RuntimeCell = ({ startTime, currentTime }: { startTime: string; currentTime: number }) => {
   const runtimeLength = currentTime - Date.parse(startTime);
   let remainingRuntimeMS = runtimeLength;
@@ -225,29 +227,13 @@ const RuntimeCell = ({ startTime, currentTime }: { startTime: string; currentTim
   return <>{`${runtimeDisplayHours}${runtimeDisplayMinutes}${runtimeDisplaySeconds}`}</>;
 };
 
-const StyledTableBody = euiStyled(EuiTableBody)`
-  & .euiTableCellContent {
-    padding-top: 0;
-    padding-bottom: 0;
-    
-  }
-`;
-
-const CodeLine = euiStyled(EuiCode).attrs({ transparentBackground: true })`
-  text-overflow: ellipsis;
-  overflow: hidden;
-  & code.euiCodeBlock__code {
-    white-space: nowrap !important;
-    vertical-align: middle;
-  }
-`;
-
 const columns: Array<{
   field: string;
   name: string;
   sortable: boolean;
   render?: Function;
   width?: string | number;
+  textOnly?: boolean;
   align?: typeof RIGHT_ALIGNMENT | typeof LEFT_ALIGNMENT;
 }> = [
   {
@@ -258,6 +244,7 @@ const columns: Array<{
     sortable: true,
     render: (state: string) => <StateBadge state={state} />,
     width: 84,
+    textOnly: false,
   },
   {
     field: 'command',

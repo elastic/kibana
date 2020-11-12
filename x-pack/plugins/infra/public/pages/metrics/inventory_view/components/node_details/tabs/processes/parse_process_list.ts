@@ -20,8 +20,35 @@ export const parseProcessList = (processList: ProcessListAPIResponse) =>
     if (!mostRecentPoint) return { command, cpu: null, memory: null, startTime: null, state: null };
 
     const { cpu, memory } = mostRecentPoint;
-    const { system } = (mostRecentPoint.meta as any[])[0];
+    const { system, process: processMeta, user } = (mostRecentPoint.meta as any[])[0];
     const startTime = system.process.cpu.start_time;
     const state = system.process.state;
-    return { command, cpu, memory, startTime, state };
+
+    const timeseries = {
+      cpu: pickTimeseries(process.rows, 'cpu'),
+      memory: pickTimeseries(process.rows, 'memory'),
+    };
+
+    return {
+      command,
+      cpu,
+      memory,
+      startTime,
+      state,
+      pid: processMeta.pid,
+      user: user.name,
+      timeseries,
+    };
   });
+
+const pickTimeseries = (rows: any[], metricID: string) => ({
+  rows: rows.map((row) => ({
+    timestamp: row.timestamp,
+    metric_0: row[metricID],
+  })),
+  columns: [
+    { name: 'timestamp', type: 'date' },
+    { name: 'metric_0', type: 'number' },
+  ],
+  id: metricID,
+});
