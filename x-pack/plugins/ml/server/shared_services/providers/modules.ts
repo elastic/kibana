@@ -75,8 +75,7 @@ export function getModulesProvider(getGuards: GetGuards): ModulesProvider {
                 payload.end,
                 payload.jobOverrides,
                 payload.datafeedOverrides,
-                payload.estimateModelMemory,
-                payload.applyToAllSpaces
+                payload.estimateModelMemory
               );
             });
         },
