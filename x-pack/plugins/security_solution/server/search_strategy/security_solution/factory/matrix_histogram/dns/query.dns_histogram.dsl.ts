@@ -5,36 +5,25 @@
  */
 
 import moment from 'moment';
-import {
-  createQueryFilterClauses,
-  calculateTimeSeriesInterval,
-} from '../../../../../utils/build_query';
+import { set } from '@elastic/safer-lodash-set';
+import { calculateTimeSeriesInterval } from '../../../../../utils/build_query';
 import { MatrixHistogramRequestOptions } from '../../../../../../common/search_strategy/security_solution/matrix_histogram';
+import { buildDnsQuery } from '../../network/dns/query.dns_network.dsl';
+import { Direction, NetworkDnsFields } from '../../../../../../common/search_strategy';
 
 export const buildDnsHistogramQuery = ({
   filterQuery,
-  timerange: { from, to },
+  timerange,
   defaultIndex,
   stackByField,
 }: MatrixHistogramRequestOptions) => {
-  const filter = [
-    ...createQueryFilterClauses(filterQuery),
-    {
-      range: {
-        '@timestamp': {
-          gte: from,
-          lte: to,
-          format: 'strict_date_optional_time',
-        },
-      },
-    },
-  ];
+  const { from, to } = timerange;
 
   const getHistogramAggregation = () => {
     const interval = calculateTimeSeriesInterval(from, to);
-
     const histogramTimestampField = '@timestamp';
-    const dateHistogram = {
+
+    return {
       date_histogram: {
         field: histogramTimestampField,
         fixed_interval: interval,
@@ -45,50 +34,23 @@ export const buildDnsHistogramQuery = ({
         },
       },
     };
-
-    return {
-      NetworkDns: {
-        cardinality: {
-          field: stackByField,
-        },
-      },
-      dns_name_query_count: {
-        terms: {
-          field: stackByField,
-          size: 10,
-          order: {
-            unique_domains: 'desc',
-          },
-        },
-        aggs: {
-          questionName: {
-            ...dateHistogram,
-          },
-          unique_domains: {
-            cardinality: {
-              field: 'dns.question.name',
-            },
-          },
-        },
-      },
-    };
   };
 
-  const dslQuery = {
-    index: defaultIndex,
-    allowNoIndices: true,
-    ignoreUnavailable: true,
-    body: {
-      aggregations: getHistogramAggregation(),
-      query: {
-        bool: {
-          filter,
-        },
-      },
-      size: 0,
-      track_total_hits: true,
+  const dnsHistogramQuery = buildDnsQuery({
+    defaultIndex,
+    filterQuery,
+    isPtrIncluded: false,
+    stackByField,
+    timerange,
+    pagination: {
+      cursorStart: 0,
     },
-  };
+    sort: { field: NetworkDnsFields.queryCount, direction: Direction.desc },
+  });
 
-  return dslQuery;
+  return set(
+    dnsHistogramQuery,
+    'body.aggregations.dns_name_query_count.aggs.dns_question_name',
+    getHistogramAggregation()
+  );
 };

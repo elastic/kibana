@@ -6,7 +6,6 @@
 
 import { isEmpty } from 'lodash/fp';
 
-import { assertUnreachable } from '../../../../../../common/utility_types';
 import {
   Direction,
   SortField,
@@ -37,7 +36,6 @@ const getQueryOrder = (sort: SortField<NetworkDnsFields>): QueryOrder => {
     case NetworkDnsFields.dnsBytesOut:
       return { dns_bytes_out: { order: sort.direction } };
   }
-  assertUnreachable(sort.field);
 };
 
 const getCountAgg = () => ({
@@ -67,9 +65,9 @@ export const buildDnsQuery = ({
   defaultIndex,
   docValueFields,
   filterQuery,
-  isPtrIncluded,
+  isPtrIncluded = false,
   sort,
-  pagination: { cursorStart, querySize },
+  pagination,
   stackByField = 'dns.question.registered_domain',
   timerange: { from, to },
 }: NetworkDnsRequestOptions) => {
@@ -85,6 +83,23 @@ export const buildDnsQuery = ({
       },
     },
   ];
+  const { cursorStart, querySize } = pagination ?? {};
+  const getBucketSort = () => {
+    let bucketSort = {};
+    if (sort != null) {
+      bucketSort = { ...bucketSort, sort: [getQueryOrder(sort), { _key: { order: 'asc' } }] };
+    }
+
+    if (cursorStart != null) {
+      bucketSort = { ...bucketSort, from: cursorStart };
+    }
+
+    if (querySize != null) {
+      bucketSort = { ...bucketSort, size: querySize };
+    }
+
+    return bucketSort;
+  };
 
   const dslQuery = {
     allowNoIndices: true,
@@ -101,11 +116,7 @@ export const buildDnsQuery = ({
           },
           aggs: {
             bucket_sort: {
-              bucket_sort: {
-                sort: [getQueryOrder(sort), { _key: { order: 'asc' } }],
-                from: cursorStart,
-                size: querySize,
-              },
+              bucket_sort: getBucketSort(),
             },
             unique_domains: {
               cardinality: {
