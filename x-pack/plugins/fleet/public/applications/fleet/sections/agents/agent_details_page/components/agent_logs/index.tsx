@@ -5,7 +5,9 @@
  */
 import React, { memo, useMemo, useState, useCallback } from 'react';
 import styled from 'styled-components';
+import url from 'url';
 import { encode } from 'rison-node';
+import { stringify } from 'query-string';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,8 +17,9 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n/react';
+import { RedirectAppLinks } from '../../../../../../../../../../../src/plugins/kibana_react/public';
 import { TimeRange, esKuery } from '../../../../../../../../../../../src/plugins/data/public';
-import { LogStream, useLinkProps } from '../../../../../../../../../infra/public';
+import { LogStream } from '../../../../../../../../../infra/public';
 import { Agent } from '../../../../../types';
 import { useStartServices } from '../../../../../hooks';
 import { DATASET_FIELD, AGENT_DATASET, LOG_LEVEL_FIELD, AGENT_ID_FIELD } from './constants';
@@ -38,7 +41,7 @@ const DatePickerFlexItem = styled(EuiFlexItem)`
 `;
 
 export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agent }) => {
-  const { data } = useStartServices();
+  const { data, application, http } = useStartServices();
 
   // Util to convert date expressions (returned by datepicker) to timestamps (used by LogStream)
   const getDateRangeTimestamps = useCallback(
@@ -124,21 +127,29 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
     query,
   ]);
 
-  const viewInLogsUrl = useLinkProps({
-    app: 'logs',
-    pathname: 'stream',
-    search: {
-      logPosition: encode({
-        start: dateRange.startExpression,
-        end: dateRange.endExpression,
-        streamLive: false,
-      }),
-      logFilter: encode({
-        expression: LOG_STREAM_QUERY,
-        kind: 'kuery',
-      }),
-    },
-  });
+  const viewInLogsUrl = useMemo(
+    () =>
+      http.basePath.prepend(
+        url.format({
+          pathname: '/app/logs/stream',
+          search: stringify(
+            {
+              logPosition: encode({
+                start: dateRange.startExpression,
+                end: dateRange.endExpression,
+                streamLive: false,
+              }),
+              logFilter: encode({
+                expression: LOG_STREAM_QUERY,
+                kind: 'kuery',
+              }),
+            },
+            { sort: false, encode: false }
+          ),
+        })
+      ),
+    [LOG_STREAM_QUERY, dateRange.endExpression, dateRange.startExpression, http.basePath]
+  );
 
   return (
     <WrapperFlexGroup direction="column" gutterSize="m">
@@ -195,12 +206,14 @@ export const AgentLogs: React.FunctionComponent<{ agent: Agent }> = memo(({ agen
             />
           </DatePickerFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty href={viewInLogsUrl.href} iconType="popout" flush="both">
-              <FormattedMessage
-                id="xpack.fleet.agentLogs.openInLogsUiLinkText"
-                defaultMessage="Open in Logs"
-              />
-            </EuiButtonEmpty>
+            <RedirectAppLinks application={application}>
+              <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
+                <FormattedMessage
+                  id="xpack.fleet.agentLogs.openInLogsUiLinkText"
+                  defaultMessage="Open in Logs"
+                />
+              </EuiButtonEmpty>
+            </RedirectAppLinks>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
