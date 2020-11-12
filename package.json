@@ -247,7 +247,7 @@
     "nock": "12.0.3",
     "node-fetch": "^2.6.1",
     "node-forge": "^0.10.0",
-    "nodemailer": "^4.7.0",
+    "nodemailer": "^6.4.16",
     "normalize-path": "^3.0.0",
     "object-hash": "^1.3.1",
     "object-path-immutable": "^3.1.1",
