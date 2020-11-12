@@ -87,7 +87,6 @@ export interface ISessionService {
 
 export interface BackgroundSessionSavedObjectAttributes {
   name: string;
-  userId: string;
   url: string;
   expires: string;
   idMapping: Record<string, string>;

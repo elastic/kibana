@@ -63,7 +63,6 @@ export class BackgroundSessionService {
     sessionId: string,
     name: string,
     url: string,
-    userId: string,
     expires: Date = new Date(Date.now() + DEFAULT_EXPIRATION),
     { savedObjectsClient }: BackgroundSessionDependencies
   ) => {
@@ -71,7 +70,7 @@ export class BackgroundSessionService {
     const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
 
     const idMapping = Object.fromEntries(searchMap.entries());
-    const attributes = { name, url, userId, expires: expires.toISOString(), idMapping };
+    const attributes = { name, url, expires: expires.toISOString(), idMapping };
     const session = await savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       attributes,
@@ -181,8 +180,8 @@ export class BackgroundSessionService {
       });
       const deps = { savedObjectsClient };
       return {
-        save: (sessionId: string, name: string, url: string, userId: string, expires?: Date) =>
-          this.save(sessionId, name, url, userId, expires, deps),
+        save: (sessionId: string, name: string, url: string, expires?: Date) =>
+          this.save(sessionId, name, url, expires, deps),
         get: (sessionId: string) => this.get(sessionId, deps),
         find: (options: SearchSessionFindOptions) => this.find(options, deps),
         update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
