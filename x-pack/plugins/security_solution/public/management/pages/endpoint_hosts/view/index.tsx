@@ -637,7 +637,7 @@ export const EndpointList = () => {
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             {totalItemCount > MAX_PAGINATED_ITEM + 1 ? (
               <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.totalCount"
+                id="xpack.securitySolution.endpoint.list.totalCount.limited"
                 defaultMessage="Showing {limit} of {totalItemCount, plural, one {# Host} other {# Hosts}}"
                 values={{ totalItemCount, limit: MAX_PAGINATED_ITEM + 1 }}
               />
