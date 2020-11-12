@@ -219,7 +219,7 @@ export function GisPageProvider({ getService, getPageObjects }: FtrProviderConte
       }
     }
 
-    async searchAndExpectItemsCount(name, count) {
+    async searchAndExpectItemsCount(name: string, count: number) {
       await this.gotoMapListingPage();
 
       log.debug(`searchAndExpectItemsCount: ${name}`);
