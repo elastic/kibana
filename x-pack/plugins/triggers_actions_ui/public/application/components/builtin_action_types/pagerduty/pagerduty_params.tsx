@@ -171,7 +171,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           <EuiFormRow
             fullWidth
             error={errors.dedupKey}
-            isInvalid={errors.dedupKey.length > 0 && dedupKey !== undefined}
+            isInvalid={errors.dedupKey.length > 0}
             label={
               isDedupeKeyRequired
                 ? i18n.translate(
