@@ -28,11 +28,11 @@ import { EnginesTable } from './engines_table';
 
 import './engines_overview.scss';
 
-interface IGetEnginesParams {
+interface GetEnginesParams {
   type: string;
   pageIndex: number;
 }
-interface ISetEnginesCallbacks {
+interface SetEnginesCallbacks {
   setResults: React.Dispatch<React.SetStateAction<never[]>>;
   setResultsTotal: React.Dispatch<React.SetStateAction<number>>;
 }
@@ -49,12 +49,12 @@ export const EnginesOverview: React.FC = () => {
   const [metaEnginesPage, setMetaEnginesPage] = useState(1);
   const [metaEnginesTotal, setMetaEnginesTotal] = useState(0);
 
-  const getEnginesData = async ({ type, pageIndex }: IGetEnginesParams) => {
+  const getEnginesData = async ({ type, pageIndex }: GetEnginesParams) => {
     return await http.get('/api/app_search/engines', {
       query: { type, pageIndex },
     });
   };
-  const setEnginesData = async (params: IGetEnginesParams, callbacks: ISetEnginesCallbacks) => {
+  const setEnginesData = async (params: GetEnginesParams, callbacks: SetEnginesCallbacks) => {
     const response = await getEnginesData(params);
 
     callbacks.setResults(response.results);
