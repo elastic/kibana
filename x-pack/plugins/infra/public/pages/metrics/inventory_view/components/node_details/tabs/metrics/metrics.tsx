@@ -4,13 +4,6 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License;
-import { NumberListProps } from '../../../../../../../../../../../src/plugins/vis_default_editor/public/components/controls/components/number_list/number_list';
- * you may not use this file except in compliance with the Elastic License.
- */
-
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { first, last } from 'lodash';
 import { i18n } from '@kbn/i18n';
