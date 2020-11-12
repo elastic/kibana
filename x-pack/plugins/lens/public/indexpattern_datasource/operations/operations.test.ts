@@ -4,10 +4,7 @@
  * you may not use this file except in compliance with the Elastic License.
  */
 
-import { getOperationTypesForField, getAvailableOperationsByMetadata, buildColumn } from './index';
-import { AvgIndexPatternColumn } from './definitions/metrics';
-import { IndexPatternPrivateState } from '../types';
-import { documentField } from '../document_field';
+import { getOperationTypesForField, getAvailableOperationsByMetadata } from './index';
 import { getFieldByNameFactory } from '../pure_helpers';
 
 jest.mock('../loader');
@@ -154,73 +151,6 @@ describe('getOperationTypesForField', () => {
           },
         })
       ).toEqual(expect.arrayContaining(['date_histogram']));
-    });
-  });
-
-  describe('buildColumn', () => {
-    const state: IndexPatternPrivateState = {
-      indexPatternRefs: [],
-      existingFields: {},
-      currentIndexPatternId: '1',
-      isFirstExistenceFetch: false,
-      indexPatterns: expectedIndexPatterns,
-      layers: {
-        first: {
-          indexPatternId: '1',
-          columnOrder: ['col1'],
-          columns: {
-            col1: {
-              label: 'Date histogram of timestamp',
-              dataType: 'date',
-              isBucketed: true,
-
-              // Private
-              operationType: 'date_histogram',
-              params: {
-                interval: '1d',
-              },
-              sourceField: 'timestamp',
-            },
-          },
-        },
-      },
-    };
-
-    it('should build a column for the given field-based operation type if it is passed in', () => {
-      const column = buildColumn({
-        layerId: 'first',
-        indexPattern: expectedIndexPatterns[1],
-        columns: state.layers.first.columns,
-        suggestedPriority: 0,
-        op: 'count',
-        field: documentField,
-      });
-      expect(column.operationType).toEqual('count');
-    });
-
-    it('should build a column for the given no-input operation type if it is passed in', () => {
-      const column = buildColumn({
-        layerId: 'first',
-        indexPattern: expectedIndexPatterns[1],
-        columns: state.layers.first.columns,
-        suggestedPriority: 0,
-        op: 'filters',
-      });
-      expect(column.operationType).toEqual('filters');
-    });
-
-    it('should build a column for the given operation type and field if it is passed in', () => {
-      const field = expectedIndexPatterns[1].fields[1];
-      const column = buildColumn({
-        layerId: 'first',
-        indexPattern: expectedIndexPatterns[1],
-        columns: state.layers.first.columns,
-        suggestedPriority: 0,
-        op: 'avg',
-        field,
-      }) as AvgIndexPatternColumn;
-      expect(column.operationType).toEqual('avg');
-      expect(column.sourceField).toEqual(field.name);
     });
   });
 
