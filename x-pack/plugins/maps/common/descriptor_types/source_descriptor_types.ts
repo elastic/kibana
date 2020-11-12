@@ -40,7 +40,7 @@ export type AbstractESSourceDescriptor = AbstractSourceDescriptor & {
   applyGlobalTime: boolean;
 };
 
-export type AbstractAggDescriptor = {
+type AbstractAggDescriptor = {
   type: AGG_TYPE;
   label?: string;
 };
