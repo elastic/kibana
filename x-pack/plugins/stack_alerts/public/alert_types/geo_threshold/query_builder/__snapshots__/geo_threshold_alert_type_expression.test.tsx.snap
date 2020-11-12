@@ -102,7 +102,7 @@ exports[`should render EntityIndexExpression 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Time field"
-            id="xpack.triggersActionsUI.geoThreshold.timeFieldLabel"
+            id="xpack.stackAlerts.geoThreshold.timeFieldLabel"
             values={Object {}}
           />
         }
@@ -174,7 +174,7 @@ exports[`should render EntityIndexExpression w/ invalid flag if invalid 1`] = `
         label={
           <FormattedMessage
             defaultMessage="Time field"
-            id="xpack.triggersActionsUI.geoThreshold.timeFieldLabel"
+            id="xpack.stackAlerts.geoThreshold.timeFieldLabel"
             values={Object {}}
           />
         }
