@@ -30,15 +30,21 @@ export interface ISessionService {
    * @returns `Observable`
    */
   getSession$: () => Observable<string | undefined>;
+
+  /**
+   * Whether the active session is already saved (i.e. sent to background)
+   */
+  isStored: () => boolean;
+
+  /**
+   * Whether the active session is restored (i.e. reusing previous search IDs)
+   */
+  isRestore: () => boolean;
+
   /**
    * Starts a new session
    */
   start: () => string;
-
-  /**
-   * Saves a session
-   */
-  save: (name: string, url: string, sessionId?: string) => Promise<any>;
 
   /**
    * Restores existing session
@@ -51,14 +57,40 @@ export interface ISessionService {
   clear: () => void;
 
   /**
-   * Whether the active session is already saved (i.e. sent to background)
+   * Saves a session
    */
-  isStored: () => boolean;
+  save: (name: string, url: string) => Promise<any>;
 
   /**
-   * Whether the active session is restored (i.e. reusing previous search IDs)
+   * Gets a saved session
    */
-  isRestore: () => boolean;
+  get: (sessionId: string) => Promise<any>;
+
+  /**
+   * Gets a list of saved sessions
+   */
+  find: (options: SearchSessionFindOptions) => Promise<any>;
+
+  /**
+   * Updates a session
+   */
+  update: (
+    sessionId: string,
+    attributes: Partial<BackgroundSessionSavedObjectAttributes>
+  ) => Promise<any>;
+
+  /**
+   * Deletes a session
+   */
+  delete: (sessionId: string) => Promise<any>;
+}
+
+export interface BackgroundSessionSavedObjectAttributes {
+  name: string;
+  userId: string;
+  url: string;
+  expires: string;
+  idMapping: Record<string, string>;
 }
 
 export interface SearchSessionFindOptions {

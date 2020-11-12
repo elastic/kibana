@@ -24,7 +24,6 @@ import { BrowserRouter as Router } from 'react-router-dom';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
   EuiPage,
   EuiPageBody,
   EuiPageContent,
@@ -39,14 +38,11 @@ import {
   EuiCode,
   EuiComboBox,
   EuiFormLabel,
-  EuiLink,
 } from '@elastic/eui';
 
-import { Location } from 'history';
 import { CoreStart } from '../../../../src/core/public';
 import { mountReactNode } from '../../../../src/core/public/utils';
 import { NavigationPublicPluginStart } from '../../../../src/plugins/navigation/public';
-import { getQueryParams } from '../../../../src/plugins/kibana_utils/public';
 
 import {
   PLUGIN_ID,
@@ -101,7 +97,6 @@ export const SearchExamplesApp = ({
   const [indexPattern, setIndexPattern] = useState<IndexPattern | null>();
   const [numericFields, setNumericFields] = useState<IndexPatternField[]>();
   const [selectedField, setSelectedField] = useState<IndexPatternField | null | undefined>();
-  const [searchSessionId, setSearchSessionId] = useState<string | undefined>();
 
   // Fetch the default index pattern using the `data.indexPatterns` service, as the component is mounted.
   useEffect(() => {
@@ -122,16 +117,6 @@ export const SearchExamplesApp = ({
     setSelectedField(fields?.length ? fields[0] : null);
   }, [indexPattern]);
 
-  useEffect(() => {
-    const { sessionId } = getQueryParams(window.location as Location);
-    if (sessionId) {
-      data.search.session.restore(sessionId as string);
-      setSearchSessionId(sessionId as string);
-    } else {
-      setSearchSessionId(data.search.session.start());
-    }
-  }, [data]);
-
   const doAsyncSearch = async (strategy?: string) => {
     if (!indexPattern || !selectedField) return;
 
@@ -146,14 +131,7 @@ export const SearchExamplesApp = ({
       params: {
         index: indexPattern.title,
         body: {
-          aggs: {
-            ...aggsDsl,
-            delayed: {
-              shard_delay: {
-                value: '5s',
-              },
-            },
-          },
+          aggs: aggsDsl,
           query,
         },
       },
@@ -165,9 +143,6 @@ export const SearchExamplesApp = ({
     const searchSubscription$ = data.search
       .search(request, {
         strategy,
-        sessionId: searchSessionId,
-        isStored: data.search.session.isStored(),
-        isRestore: data.search.session.isRestore(),
       })
       .subscribe({
         next: (response) => {
@@ -293,41 +268,6 @@ export const SearchExamplesApp = ({
                       values={{ time: timeTook || 'Unknown' }}
                     />
                   </EuiText>
-                  <EuiText>
-                    <FormattedMessage
-                      id="inspector.requests.searchSessionId"
-                      defaultMessage="Search session id: {searchSessionId}"
-                      values={{ searchSessionId }}
-                    />
-                    <br />
-                    <EuiButtonEmpty
-                      size="s"
-                      onClick={() => setSearchSessionId(data.search.session.start())}
-                    >
-                      Generate new search session ID
-                    </EuiButtonEmpty>
-                    {data.search.session.isStored() ? (
-                      data.search.session.isRestore() ? (
-                        ''
-                      ) : (
-                        <EuiLink href={`/app/searchExamples?sessionId=${searchSessionId}`}>
-                          Visit restored session
-                        </EuiLink>
-                      )
-                    ) : (
-                      <EuiButton
-                        onClick={() =>
-                          data.search.session.save(
-                            `Search example ${searchSessionId}`,
-                            `/app/searchExamples?sessionId=${searchSessionId}`
-                          )
-                        }
-                      >
-                        Save session
-                      </EuiButton>
-                    )}
-                  </EuiText>
-                  <EuiSpacer />
                   <EuiSpacer />
                   <EuiTitle size="s">
                     <h3>

@@ -259,18 +259,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       options.strategy
     );
 
+    // If this is a restored background search session, look up the ID using the provided sessionId
     const getSearchRequest = async () =>
       !options.isRestore || searchRequest.id
         ? searchRequest
         : {
             ...searchRequest,
-            id: await this.sessionService.getId(searchRequest, options.sessionId, deps),
+            id: await this.sessionService.getId(searchRequest, options, deps),
           };
 
     return from(getSearchRequest()).pipe(
       switchMap((request) => strategy.search(request, options, deps)),
       tapFirst((response) => {
-        if (!options.sessionId || !response.id || options.isRestore) return;
+        if (searchRequest.id || !options.sessionId || !response.id || options.isRestore) return;
         this.sessionService.trackId(searchRequest, response.id, options, {
           savedObjectsClient: deps.savedObjectsClient,
         });

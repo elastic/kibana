@@ -16,33 +16,3 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
-import { SavedObjectsType } from 'kibana/server';
-
-export const BACKGROUND_SESSION_TYPE = 'background-session';
-
-export const backgroundSessionMapping: SavedObjectsType = {
-  name: BACKGROUND_SESSION_TYPE,
-  namespaceType: 'single',
-  hidden: true,
-  mappings: {
-    properties: {
-      name: {
-        type: 'keyword',
-      },
-      url: {
-        type: 'keyword',
-      },
-      userId: {
-        type: 'keyword',
-      },
-      expires: {
-        type: 'date',
-      },
-      idMapping: {
-        type: 'object',
-        enabled: false,
-      },
-    },
-  },
-};

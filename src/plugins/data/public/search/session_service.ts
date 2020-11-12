@@ -21,7 +21,11 @@ import uuid from 'uuid';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { HttpStart, PluginInitializerContext, StartServicesAccessor } from 'kibana/public';
 import { ConfigSchema } from '../../config';
-import { ISessionService, SearchSessionFindOptions } from '../../common';
+import {
+  ISessionService,
+  BackgroundSessionSavedObjectAttributes,
+  SearchSessionFindOptions,
+} from '../../common';
 
 export class SessionService implements ISessionService {
   private session$ = new BehaviorSubject<string | undefined>(undefined);
@@ -111,20 +115,16 @@ export class SessionService implements ISessionService {
     this.session$.next(undefined);
   }
 
-  public async save(name, url, sessionId = this.sessionId) {
+  public async save(name: string, url: string) {
     const response = await this.http!.post(`/internal/session`, {
       body: JSON.stringify({
         name,
         url,
-        sessionId,
+        sessionId: this.sessionId,
       }),
     });
     this._isStored = true;
     return response;
-  }
-
-  public delete(sessionId: string) {
-    return this.http!.delete(`/internal/session/${encodeURIComponent(sessionId)}}`);
   }
 
   public get(sessionId: string) {
@@ -135,5 +135,15 @@ export class SessionService implements ISessionService {
     return this.http!.post(`/internal/session`, {
       body: JSON.stringify(options),
     });
+  }
+
+  public update(sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) {
+    return this.http!.put(`/internal/session/${encodeURIComponent(sessionId)}}`, {
+      body: JSON.stringify(attributes),
+    });
+  }
+
+  public delete(sessionId: string) {
+    return this.http!.delete(`/internal/session/${encodeURIComponent(sessionId)}}`);
   }
 }

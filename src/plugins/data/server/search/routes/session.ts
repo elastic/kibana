@@ -155,4 +155,41 @@ export function registerSessionRoutes(router: IRouter): void {
       }
     }
   );
+
+  router.put(
+    {
+      path: '/internal/session/{id}',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          name: schema.maybe(schema.string()),
+          url: schema.maybe(schema.string()),
+          expires: schema.maybe(schema.string()),
+        }),
+      },
+    },
+    async (context, request, res) => {
+      const { id } = request.params;
+      const { name, url, expires } = request.body;
+      try {
+        const response = await context.search!.session.update(id, { name, url, expires });
+
+        return res.ok({
+          body: response,
+        });
+      } catch (err) {
+        return res.customError({
+          statusCode: err.statusCode || 500,
+          body: {
+            message: err.message,
+            attributes: {
+              error: err.body?.error || err.message,
+            },
+          },
+        });
+      }
+    }
+  );
 }

@@ -17,22 +17,15 @@
  * under the License.
  */
 
+import { CoreStart, KibanaRequest, SavedObjectsClientContract } from 'kibana/server';
 import {
-  CoreStart,
-  ISavedObjectsRepository,
-  KibanaRequest,
-  SavedObjectsClientContract,
-} from 'kibana/server';
-import {
+  BackgroundSessionSavedObjectAttributes,
   createRequestHash,
   IKibanaSearchRequest,
   ISearchOptions,
   SearchSessionFindOptions,
-} from '../../../common/search';
-import {
-  BACKGROUND_SESSION_TYPE,
-  BackgroundSessionSavedObjectAttributes,
-} from '../../saved_objects';
+} from '../../../common';
+import { BACKGROUND_SESSION_TYPE } from '../../saved_objects';
 
 const DEFAULT_EXPIRATION = 7 * 24 * 60 * 60 * 1000;
 
@@ -51,31 +44,18 @@ export class BackgroundSessionService {
    */
   private sessionSearchMap = new Map<string, Map<string, string>>();
 
-  private internalSavedObjectsRepo?: ISavedObjectsRepository;
-
-  private timeout?: NodeJS.Timeout;
-
   constructor() {}
 
   public setup = () => {};
 
   public start = (core: CoreStart) => {
     return {
-      save: this.save,
-      trackId: this.trackId,
       asScoped: this.asScopedProvider(core),
     };
-
-    // this.internalSavedObjectsRepo = core.savedObjects.createInternalRepository([
-    //   BACKGROUND_SESSION_TYPE,
-    // ]);
-    //
-    // this.timeout = setTimeout(this.updateBackgroundSessions, 10000);
   };
 
   public stop = () => {
-    this.clear();
-    if (this.timeout) clearTimeout(this.timeout);
+    this.sessionSearchMap.clear();
   };
 
   // TODO: Generate the `userId` from the realm type/realm name/username
@@ -90,19 +70,21 @@ export class BackgroundSessionService {
     // Get the mapping of request hash/search ID for this session
     const searchMap = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
 
-    // Clear out the entries for this session ID so they don't get saved next time
-    this.sessionSearchMap.delete(sessionId);
-
     const idMapping = Object.fromEntries(searchMap.entries());
     const attributes = { name, url, userId, expires: expires.toISOString(), idMapping };
-    return savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
+    const session = savedObjectsClient.create<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
       attributes,
       { id: sessionId }
     );
+
+    // Clear out the entries for this session ID so they don't get saved next time
+    this.sessionSearchMap.delete(sessionId);
+
+    return session;
   };
 
-  // TODO: Send 404 if the given ID doesn't belong to this user
+  // TODO: Throw an error if this session doesn't belong to this user
   public get = (sessionId: string, { savedObjectsClient }: BackgroundSessionDependencies) => {
     return savedObjectsClient.get<BackgroundSessionSavedObjectAttributes>(
       BACKGROUND_SESSION_TYPE,
@@ -110,7 +92,7 @@ export class BackgroundSessionService {
     );
   };
 
-  // TODO: Send 404 if the given ID doesn't belong to this user
+  // TODO: Throw an error if this session doesn't belong to this user
   public find = (
     options: SearchSessionFindOptions,
     { savedObjectsClient }: BackgroundSessionDependencies
@@ -121,41 +103,43 @@ export class BackgroundSessionService {
     });
   };
 
-  // TODO: Send 404 if the given ID doesn't belong to this user
+  // TODO: Throw an error if this session doesn't belong to this user
+  public update = (
+    sessionId: string,
+    attributes: Partial<BackgroundSessionSavedObjectAttributes>,
+    { savedObjectsClient }: BackgroundSessionDependencies
+  ) => {
+    return savedObjectsClient.update<BackgroundSessionSavedObjectAttributes>(
+      BACKGROUND_SESSION_TYPE,
+      sessionId,
+      attributes
+    );
+  };
+
+  // TODO: Throw an error if this session doesn't belong to this user
   public delete = (sessionId: string, { savedObjectsClient }: BackgroundSessionDependencies) => {
     return savedObjectsClient.delete(BACKGROUND_SESSION_TYPE, sessionId);
   };
 
   /**
-   * Tracks the given search request / search ID in memory. Should only be called directly by the
-   * search service.
-   * @param savedObjectsClient
-   * @param searchRequest
-   * @param searchId
-   * @param sessionId
-   * @param isStored
+   * Tracks the given search request/search ID in the saved session (if it exists). Otherwise, just
+   * store it in memory until a saved session exists.
    * @internal
    */
   public trackId = async (
     searchRequest: IKibanaSearchRequest,
     searchId: string,
-    { sessionId, isStored = false }: ISearchOptions,
-    { savedObjectsClient }: BackgroundSessionDependencies
+    { sessionId, isStored }: ISearchOptions,
+    deps: BackgroundSessionDependencies
   ) => {
-    if (!sessionId) return;
+    if (!sessionId || !searchId) return;
     const requestHash = createRequestHash(searchRequest.params);
 
     // If there is already a saved object for this session, update it to include this request/ID.
-    // Otherwise, just update the in-memory mapping for this session.
+    // Otherwise, just update the in-memory mapping for this session for when the session is saved.
     if (isStored) {
-      const attributes = {
-        idMapping: { [requestHash]: searchId },
-      };
-      await savedObjectsClient.update<BackgroundSessionSavedObjectAttributes>(
-        BACKGROUND_SESSION_TYPE,
-        sessionId,
-        attributes
-      );
+      const attributes = { idMapping: { [requestHash]: searchId } };
+      await this.update(sessionId, attributes, deps);
     } else {
       const map = this.sessionSearchMap.get(sessionId) ?? new Map<string, string>();
       map.set(requestHash, searchId);
@@ -163,24 +147,31 @@ export class BackgroundSessionService {
     }
   };
 
+  /**
+   * Look up an existing search ID that matches the given request in the given session so that the
+   * request can continue rather than restart.
+   * @internal
+   */
   public getId = async (
     searchRequest: IKibanaSearchRequest,
-    sessionId: string,
+    { sessionId, isStored, isRestore }: ISearchOptions,
     deps: BackgroundSessionDependencies
   ) => {
+    if (!sessionId) {
+      throw new Error('Session ID is required');
+    } else if (!isStored) {
+      throw new Error('Cannot get search ID from a session that is not stored');
+    } else if (!isRestore) {
+      throw new Error('Get search ID is only supported when restoring a session');
+    }
+
     const session = await this.get(sessionId, deps);
     const requestHash = createRequestHash(searchRequest.params);
     if (!session.attributes.idMapping.hasOwnProperty(requestHash)) {
-      throw new Error(
-        `Search request is not associated with session. Are you sure you searched with the same parameters?`
-      );
+      throw new Error('No search ID in this session matching the given search request');
     }
-    return session.attributes.idMapping[requestHash];
-  };
 
-  // TODO: When should we call this? Should we call `deleteId` or something instead?
-  public clear = () => {
-    this.sessionSearchMap.clear();
+    return session.attributes.idMapping[requestHash];
   };
 
   public asScopedProvider = ({ savedObjects }: CoreStart) => {
@@ -194,18 +185,14 @@ export class BackgroundSessionService {
           this.save(sessionId, name, url, userId, expires, deps),
         get: (sessionId: string) => this.get(sessionId, deps),
         find: (options: SearchSessionFindOptions) => this.find(options, deps),
+        update: (sessionId: string, attributes: Partial<BackgroundSessionSavedObjectAttributes>) =>
+          this.update(sessionId, attributes, deps),
         delete: (sessionId: string) => this.delete(sessionId, deps),
+        trackId: (searchRequest: IKibanaSearchRequest, searchId: string, options: ISearchOptions) =>
+          this.trackId(searchRequest, searchId, options, deps),
+        getId: (searchRequest: IKibanaSearchRequest, options: ISearchOptions) =>
+          this.getId(searchRequest, options, deps),
       };
     };
   };
-
-  // private updateBackgroundSessions = async (): Promise<NodeJS.Timeout> => {
-  //   for (const [sessionId, searchMap] of this.sessionSearchMap.entries()) {
-  //     const idMapping = Object.fromEntries(searchMap.entries());
-  //     await this.internalSavedObjectsRepo!.update(BACKGROUND_SESSION_TYPE, sessionId, {
-  //       idMapping,
-  //     });
-  //   }
-  //   return (this.timeout = setTimeout(this.updateBackgroundSessions, 10000));
-  // };
 }

@@ -829,7 +829,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
         return $scope.searchSource.fetch({
           abortSignal: abortController.signal,
           sessionId: searchSessionId,
-          isStored: data.search.session.isStored(),
         });
       })
       .then(onResults)
@@ -842,14 +841,6 @@ function discoverController($element, $route, $scope, $timeout, $window, Promise
 
         data.search.showError(error);
       });
-  };
-
-  $scope.saveSession = async () => {
-    await data.search.session.save();
-  };
-
-  $scope.restoreSession = async (id) => {
-    return data.search.session.restore(id);
   };
 
   $scope.handleRefresh = function (_payload, isUpdate) {
