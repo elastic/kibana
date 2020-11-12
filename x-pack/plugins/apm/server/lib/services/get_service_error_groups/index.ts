@@ -7,7 +7,7 @@
 import { ValuesType } from 'utility-types';
 import { orderBy } from 'lodash';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
-import { PromiseReturnType } from '../../../../typings/common';
+import { PromiseReturnType } from '../../../../../observability/typings/common';
 import { rangeFilter } from '../../../../common/utils/range_filter';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import {
