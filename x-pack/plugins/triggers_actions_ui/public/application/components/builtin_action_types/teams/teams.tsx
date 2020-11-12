@@ -5,6 +5,7 @@
  */
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
+import teamsSvg from './teams.svg';
 import { ActionTypeModel, ValidationResult } from '../../../../types';
 import { TeamsActionParams, TeamsSecrets, TeamsActionConnector } from '../types';
 import { isValidUrl } from '../../../lib/value_validators';
@@ -12,17 +13,17 @@ import { isValidUrl } from '../../../lib/value_validators';
 export function getActionType(): ActionTypeModel<unknown, TeamsSecrets, TeamsActionParams> {
   return {
     id: '.teams',
-    iconClass: 'logoWindows',
+    iconClass: teamsSvg,
     selectMessage: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.selectMessageText',
       {
-        defaultMessage: 'Send a message to a Microsoft teams channel.',
+        defaultMessage: 'Send a message to a Microsoft Teams channel.',
       }
     ),
     actionTypeTitle: i18n.translate(
       'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.actionTypeTitle',
       {
-        defaultMessage: 'Send to Microsoft Teams',
+        defaultMessage: 'Send a message to a Microsoft Teams channel.',
       }
     ),
     validateConnector: (action: TeamsActionConnector): ValidationResult => {
